@@ -49,7 +49,7 @@ public class RDXDualBlackflySphericalProjection
         });
     }
 
-    public void create()
+    public void create() throws Exception
     {
         dualBlackflyReader.start();
         projectionSpheres.get(RobotSide.LEFT).create();
@@ -63,34 +63,37 @@ public class RDXDualBlackflySphericalProjection
 
     public void render()
     {
-        for (RobotSide side : RobotSide.values)
+        if (dualBlackflyReader.isRunning())
         {
-            DualBlackflyReader.SpinnakerBlackflyReaderThread readerThread = dualBlackflyReader.getSpinnakerBlackflyReaderThreads().get(side);
-
-            AtomicReference<BytePointer> latestImage = readerThread.getLatestImageDataPointer();
-            if (latestImage.get() != null)
+            for (RobotSide side : RobotSide.values)
             {
-                BytePointer latestImageData = latestImage.get();
+                DualBlackflyReader.SpinnakerBlackflyReaderThread readerThread = dualBlackflyReader.getSpinnakerBlackflyReaderThreads().get(side);
 
-                Mat mat = new Mat(readerThread.getHeight(), readerThread.getWidth(), opencv_core.CV_8UC1);
-                mat.data(latestImageData);
+                AtomicReference<BytePointer> latestImage = readerThread.getLatestImageDataPointer();
+                if (latestImage.get() != null)
+                {
+                    BytePointer latestImageData = latestImage.get();
 
-                Pixmap pixmap = new Pixmap(mat.cols(), mat.rows(), Pixmap.Format.RGBA8888);
-                BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
-                Mat rgba8Mat = new Mat(mat.rows(), mat.cols(), opencv_core.CV_8UC4, rgba8888BytePointer);
-                opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_BayerBG2RGBA);
-                Texture texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
+                    Mat mat = new Mat(readerThread.getHeight(), readerThread.getWidth(), opencv_core.CV_8UC1);
+                    mat.data(latestImageData);
 
-                projectionSpheres.get(side).updateTexture(texture);
+                    Pixmap pixmap = new Pixmap(mat.cols(), mat.rows(), Pixmap.Format.RGBA8888);
+                    BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
+                    Mat rgba8Mat = new Mat(mat.rows(), mat.cols(), opencv_core.CV_8UC4, rgba8888BytePointer);
+                    opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_BayerBG2RGBA);
+                    Texture texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
 
-                rgba8Mat.close();
-                pixmap.dispose();
-                mat.close();
+                    projectionSpheres.get(side).updateTexture(texture);
+
+                    rgba8Mat.close();
+                    pixmap.dispose();
+                    mat.close();
+                }
             }
-        }
 
-        leftEyePose.getTranslation().setY(pupillaryDistance.get());
-        LibGDXTools.toLibGDX(leftEyePose, projectionSpheres.get(RobotSide.LEFT).getModelInstance().transform);
+            leftEyePose.getTranslation().setY(pupillaryDistance.get());
+            LibGDXTools.toLibGDX(leftEyePose, projectionSpheres.get(RobotSide.LEFT).getModelInstance().transform);
+        }
     }
 
     public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)

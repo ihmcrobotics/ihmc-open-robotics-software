@@ -22,7 +22,7 @@ public class DualBlackflyReader
 
     private volatile boolean running;
 
-    public void start()
+    public void start() throws Exception
     {
         if (running)
         {
@@ -31,44 +31,51 @@ public class DualBlackflyReader
 
         running = true;
 
-        spinnakerBlackflyManager = new SpinnakerBlackflyManager();
-
-        SpinnakerBlackflyReaderThread leftSpinnakerBlackflyReaderThread = new SpinnakerBlackflyReaderThread(RobotSide.LEFT,
-                spinnakerBlackflyManager.createSpinnakerBlackfly(
-                        BLACKFLY_SERIAL_LEFT));
-        SpinnakerBlackflyReaderThread rightSpinnakerBlackflyReaderThread = new SpinnakerBlackflyReaderThread(RobotSide.RIGHT,
-                spinnakerBlackflyManager.createSpinnakerBlackfly(
-                        BLACKFLY_SERIAL_RIGHT));
-
-        spinnakerBlackflyReaderThreads.put(RobotSide.LEFT, leftSpinnakerBlackflyReaderThread);
-        spinnakerBlackflyReaderThreads.put(RobotSide.RIGHT, rightSpinnakerBlackflyReaderThread);
-
-        for (SpinnakerBlackflyReaderThread spinnakerBlackflyReaderThread : spinnakerBlackflyReaderThreads)
+        try
         {
-            spinnakerBlackflyReaderThread.start();
+            spinnakerBlackflyManager = new SpinnakerBlackflyManager();
+
+            SpinnakerBlackflyReaderThread leftSpinnakerBlackflyReaderThread = new SpinnakerBlackflyReaderThread(RobotSide.LEFT,
+                                                                                                                spinnakerBlackflyManager.createSpinnakerBlackfly(
+                                                                                                                      BLACKFLY_SERIAL_LEFT));
+            SpinnakerBlackflyReaderThread rightSpinnakerBlackflyReaderThread = new SpinnakerBlackflyReaderThread(RobotSide.RIGHT,
+                                                                                                                 spinnakerBlackflyManager.createSpinnakerBlackfly(
+                                                                                                                       BLACKFLY_SERIAL_RIGHT));
+
+            spinnakerBlackflyReaderThreads.put(RobotSide.LEFT, leftSpinnakerBlackflyReaderThread);
+            spinnakerBlackflyReaderThreads.put(RobotSide.RIGHT, rightSpinnakerBlackflyReaderThread);
+
+            for (SpinnakerBlackflyReaderThread spinnakerBlackflyReaderThread : spinnakerBlackflyReaderThreads)
+            {
+                spinnakerBlackflyReaderThread.start();
+            }
+        }
+        catch (Exception exception)
+        {
+            running = false;
+
+            throw exception;
         }
     }
 
     public void stop()
     {
-        if (!running)
+        if (running)
         {
-            throw new RuntimeException("Already stopped");
+            for (SpinnakerBlackflyReaderThread spinnakerBlackflyReaderThread : spinnakerBlackflyReaderThreads)
+            {
+                try
+                {
+                    spinnakerBlackflyReaderThread.join();
+                }
+                catch (InterruptedException e)
+                {
+                    LogTools.error(e);
+                }
+            }
         }
 
         running = false;
-
-        for (SpinnakerBlackflyReaderThread spinnakerBlackflyReaderThread : spinnakerBlackflyReaderThreads)
-        {
-            try
-            {
-                spinnakerBlackflyReaderThread.join();
-            }
-            catch (InterruptedException e)
-            {
-                LogTools.error(e);
-            }
-        }
 
         spinnakerBlackflyReaderThreads.clear();
         spinnakerBlackflyManager.destroy();
@@ -77,6 +84,11 @@ public class DualBlackflyReader
     public SideDependentList<SpinnakerBlackflyReaderThread> getSpinnakerBlackflyReaderThreads()
     {
         return spinnakerBlackflyReaderThreads;
+    }
+
+    public boolean isRunning()
+    {
+        return running;
     }
 
     public class SpinnakerBlackflyReaderThread extends Thread
@@ -161,7 +173,14 @@ public class DualBlackflyReader
     {
         DualBlackflyReader dualBlackflyReader = new DualBlackflyReader();
 
-        dualBlackflyReader.start();
+        try
+        {
+            dualBlackflyReader.start();
+        }
+        catch (Exception e)
+        {
+            return;
+        }
 
         Runtime.getRuntime().addShutdownHook(new Thread(dualBlackflyReader::stop));
 
