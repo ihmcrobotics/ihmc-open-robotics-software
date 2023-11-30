@@ -43,7 +43,16 @@ public class RDXDualBlackflySphericalProjectionDemo
          @Override
          public void create()
          {
-            dualBlackflyReader.start();
+            try
+            {
+               dualBlackflyReader.start();
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+               baseUI.dispose();
+               return;
+            }
 
             baseUI.create();
 
