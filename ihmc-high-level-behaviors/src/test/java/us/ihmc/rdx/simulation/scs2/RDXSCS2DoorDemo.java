@@ -24,9 +24,11 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDouble hingeTorque = new ImDouble();
+   private final ImDouble leverTorque = new ImDouble();
    private RDXSCS2RestartableSimulationSession rdxSimulationSession;
    private RDXSCS2BulletRobotMover doorRobotMover;
    private SimRevoluteJoint doorHingeJoint;
+   private SimRevoluteJoint doorLeverJoint;
    private BulletRobot bulletRobot;
 
    public RDXSCS2DoorDemo()
@@ -48,7 +50,8 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
          rdxSimulationSession.getSCS2SimulationSession().getAdditionalImGuiWidgets().add(() ->
          {
             doorRobotMover.renderMoveJointCheckbox();
-            ImGuiTools.sliderDouble(labels.get("Hinge effort"), hingeTorque, -100.0, 100.0);
+            ImGuiTools.sliderDouble(labels.get("Hinge torque"), hingeTorque, -100.0, 100.0);
+            ImGuiTools.sliderDouble(labels.get("Lever torque"), leverTorque, -2.0, 2.0);
          });
 
          hingeTorque.set(0.0);
@@ -104,8 +107,13 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
 
       doorRobotMover = new RDXSCS2BulletRobotMover(baseUI.getPrimary3DPanel(), bulletRobot);
       doorHingeJoint = (SimRevoluteJoint) doorRobot.getJoint("doorHingeJoint");
+      doorLeverJoint = (SimRevoluteJoint) doorRobot.getJoint("doorLeverJoint");
 
-      doorRobot.addController(() -> doorHingeJoint.setTau(hingeTorque.get()));
+      doorRobot.addController(() ->
+      {
+         doorHingeJoint.setTau(hingeTorque.get());
+         doorLeverJoint.setTau(doorLeverJoint.getTau() + leverTorque.get());
+      });
 
       simulationSession.addTerrainObject(new FlatGroundDefinition());
       simulationSession.addBeforePhysicsCallback(doorRobotMover::beforePhysics);
