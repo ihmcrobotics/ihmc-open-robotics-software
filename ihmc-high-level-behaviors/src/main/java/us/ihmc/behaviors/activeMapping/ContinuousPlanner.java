@@ -90,13 +90,12 @@ public class ContinuousPlanner
    public ContinuousPlanner(DRCRobotModel robotModel,
                             HumanoidReferenceFrames humanoidReferenceFrames,
                             ContinuousPlannerStatistics statistics,
-                            SwingPlannerParametersBasics swingPlannerParameters,
                             PlanningMode mode)
    {
       this.referenceFrames = humanoidReferenceFrames;
       this.mode = mode;
       this.statistics = statistics;
-      this.swingPlannerParameters = swingPlannerParameters;
+      this.swingPlannerParameters = robotModel.getSwingPlannerParameters();
 
       active = true;
 
