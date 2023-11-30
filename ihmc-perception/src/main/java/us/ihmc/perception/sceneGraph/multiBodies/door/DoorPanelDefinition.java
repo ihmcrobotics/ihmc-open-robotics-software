@@ -65,8 +65,12 @@ public class DoorPanelDefinition extends RigidBodyDefinition
          addVisualDefinition(fiducialModelVisualDefinition);
       }
 
-      Point3D collisionShapeOffset = new Point3D(DOOR_PANEL_THICKNESS / 2.0, panelCollisionSizeY / 2.0 + hingeAvoidanceOffset, sizeZ / 2.0);
-      addCollisionShape(sizeX, panelCollisionSizeY, sizeZ, collisionShapeOffset);
+      double bottomPartZ = DOOR_OPENER_FROM_BOTTOM_OF_PANEL - DOOR_BOLT_HOLE_HEIGHT / 2.0;
+      Point3D collisionShapeOffset = new Point3D(DOOR_PANEL_THICKNESS / 2.0, panelCollisionSizeY / 2.0 + hingeAvoidanceOffset, bottomPartZ / 2.0);
+      addCollisionShape(sizeX, panelCollisionSizeY, bottomPartZ, collisionShapeOffset);
+      double topPartZ = sizeZ / 2.0 - DOOR_BOLT_HOLE_HEIGHT / 2.0;
+      collisionShapeOffset.add(0.0, 0.0, bottomPartZ / 2.0 + DOOR_BOLT_HOLE_HEIGHT + topPartZ / 2.0);
+      addCollisionShape(sizeX, panelCollisionSizeY, topPartZ, collisionShapeOffset);
    }
 
    private void addCollisionShape(double sizeX, double sizeY, double sizeZ, Point3D offset)

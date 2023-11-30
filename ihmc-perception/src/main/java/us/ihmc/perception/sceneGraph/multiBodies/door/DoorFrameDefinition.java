@@ -64,11 +64,19 @@ public class DoorFrameDefinition extends RigidBodyDefinition
       hingeSideSupportWeightBaseOffset.add(0.0, -flatboardSizeY / 2.0, flatboardSizeZ / 2.0);
       addCollisionShape(flatboardSizeX, flatboardSizeY, 0.02, hingeSideSupportWeightBaseOffset);
 
+      double boltStopX = 0.02;
+
       Point3D latchSidePostOffset = new Point3D();
       double toLatchPillarY = 0.93415;
       latchSidePostOffset.add(0.0, toLatchPillarY, 0.0);
-      latchSidePostOffset.add(0.0, DOOR_FRAME_PILLAR_SIZE_X / 2.0, DOOR_FRAME_PILLAR_SIZE_Z / 2.0);
-      addCollisionShape(pillarSizeX, pillarSizeY, pillarSizeZ, latchSidePostOffset);
+      double bottomPartZ = DOOR_OPENER_FROM_BOTTOM_OF_PANEL + DOOR_PANEL_GROUND_GAP_HEIGHT - DOOR_BOLT_HOLE_HEIGHT / 2.0;
+      latchSidePostOffset.add(0.0, DOOR_FRAME_PILLAR_SIZE_X / 2.0, bottomPartZ / 2.0);
+      addCollisionShape(pillarSizeX, pillarSizeY, bottomPartZ, latchSidePostOffset);
+      latchSidePostOffset.add(-pillarSizeX / 2.0 + boltStopX / 2.0, 0.0, bottomPartZ / 2.0 + DOOR_BOLT_HOLE_HEIGHT / 2.0);
+      addCollisionShape(boltStopX, pillarSizeY, DOOR_BOLT_HOLE_HEIGHT, latchSidePostOffset);
+      double topPartZ = pillarSizeZ - bottomPartZ - DOOR_BOLT_HOLE_HEIGHT;
+      latchSidePostOffset.add(pillarSizeX / 2.0 - boltStopX / 2.0, 0.0, DOOR_BOLT_HOLE_HEIGHT / 2.0 + topPartZ / 2.0);
+      addCollisionShape(pillarSizeX, pillarSizeY, topPartZ, latchSidePostOffset);
 
       double stopColumnSizeX = 0.03;
       double stopColumnSizeY = 0.02;

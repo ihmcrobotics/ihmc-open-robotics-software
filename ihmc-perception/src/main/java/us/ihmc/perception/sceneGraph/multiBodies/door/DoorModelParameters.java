@@ -43,6 +43,8 @@ public class DoorModelParameters
    public static final double DOOR_FRAME_PILLAR_SIZE_X = 0.0889;
    /** Frame post Z size. */
    public static final double DOOR_FRAME_PILLAR_SIZE_Z = 2.159;
+   public static final double DOOR_BOLT_HEIGHT = 0.015;
+   public static final double DOOR_BOLT_HOLE_HEIGHT = DOOR_BOLT_HEIGHT + 0.01;
 
    /** This refers to the edges of the black parts with no margin. The margins included will be wider than this. */
    public static final double DOOR_ARUCO_MARKER_WIDTH = RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH;

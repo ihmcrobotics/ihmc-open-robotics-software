@@ -4,13 +4,11 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.scs2.definition.robot.RevoluteJointDefinition;
-import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
-import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.robot.SixDoFJointDefinition;
+import us.ihmc.scs2.definition.robot.*;
 import us.ihmc.scs2.definition.state.OneDoFJointState;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.SimPrismaticJoint;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
 
 import static us.ihmc.perception.sceneGraph.multiBodies.door.DoorModelParameters.*;
@@ -31,6 +29,7 @@ public class DoorDefinition extends RobotDefinition
    private SixDoFJointState initialSixDoFState;
    private OneDoFJointState initialHingeState;
    private OneDoFJointState initialLeverState;
+   private OneDoFJointState initialBoltState;
 
    private final DoorPanelDefinition doorPanelDefinition = new DoorPanelDefinition();
 
@@ -75,16 +74,27 @@ public class DoorDefinition extends RobotDefinition
       RevoluteJointDefinition doorLeverJoint = new RevoluteJointDefinition("doorLeverJoint");
       doorLeverJoint.setAxis(Axis3D.X);
       doorPanelDefinition.addChildJoint(doorLeverJoint);
-      doorLeverJoint.getTransformToParent()
-                    .getTranslation()
-                    .add(-DOOR_PANEL_THICKNESS / 2.0,
-                         DOOR_PANEL_WIDTH - DOOR_OPENER_INSET,
-                         DOOR_OPENER_FROM_BOTTOM_OF_PANEL);
+      doorLeverJoint.getTransformToParent().getTranslation().add(-DOOR_PANEL_THICKNESS / 2.0,
+                                                                 DOOR_PANEL_WIDTH - DOOR_OPENER_INSET,
+                                                                 DOOR_OPENER_FROM_BOTTOM_OF_PANEL);
       initialLeverState = new OneDoFJointState();
       doorLeverJoint.setInitialJointState(initialLeverState);
 
       DoorLeverHandleDefinition doorLeverHandleDefinition = new DoorLeverHandleDefinition();
       doorLeverJoint.setSuccessor(doorLeverHandleDefinition);
+
+      PrismaticJointDefinition doorBoltJoint = new PrismaticJointDefinition("doorBoltJoint");
+      doorBoltJoint.setAxis(Axis3D.Y);
+      doorBoltJoint.setPositionLimits(-0.015, 0.0);
+      doorPanelDefinition.addChildJoint(doorBoltJoint);
+      doorBoltJoint.getTransformToParent().getTranslation().add(0.01,
+                                                                DOOR_PANEL_WIDTH + 0.015 / 2.0,
+                                                                DOOR_OPENER_FROM_BOTTOM_OF_PANEL);
+      initialBoltState = new OneDoFJointState();
+      doorBoltJoint.setInitialJointState(initialBoltState);
+
+      DoorBoltDefinition doorBoltDefinition = new DoorBoltDefinition();
+      doorBoltJoint.setSuccessor(doorBoltDefinition);
 
       setRootBodyDefinition(rootBodyDefinition);
    }
@@ -92,6 +102,7 @@ public class DoorDefinition extends RobotDefinition
    public static void applyPDController(Robot robot)
    {
       SimRevoluteJoint doorLeverJoint = (SimRevoluteJoint) robot.getJoint("doorLeverJoint");
+      SimPrismaticJoint doorBoltJoint = (SimPrismaticJoint) robot.getJoint("doorBoltJoint");
       robot.getControllerManager().addController(() ->
       {
          double p = 2.0;
@@ -101,6 +112,13 @@ public class DoorDefinition extends RobotDefinition
          double errorQd = doorLeverJoint.getQd();
 
          doorLeverJoint.setTau(-p * errorQ - d * errorQd);
+
+         d = 0.5;
+
+         errorQ = 8.0 * doorBoltJoint.getQ() + 0.3 * Math.abs(doorLeverJoint.getQ());
+         errorQd = doorBoltJoint.getQd();
+
+         doorBoltJoint.setTau(-errorQ - d * errorQd);
       });
    }
 
