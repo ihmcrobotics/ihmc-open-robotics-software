@@ -74,7 +74,7 @@ public class DoorDefinition extends RobotDefinition
       RevoluteJointDefinition doorLeverJoint = new RevoluteJointDefinition("doorLeverJoint");
       doorLeverJoint.setAxis(Axis3D.X);
       doorPanelDefinition.addChildJoint(doorLeverJoint);
-      doorLeverJoint.getTransformToParent().getTranslation().add(-DOOR_PANEL_THICKNESS / 2.0,
+      doorLeverJoint.getTransformToParent().getTranslation().add(0.0,
                                                                  DOOR_PANEL_WIDTH - DOOR_OPENER_INSET,
                                                                  DOOR_OPENER_FROM_BOTTOM_OF_PANEL);
       initialLeverState = new OneDoFJointState();
