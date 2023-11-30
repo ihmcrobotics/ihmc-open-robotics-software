@@ -80,10 +80,11 @@ public class RapidHeightMapExtractor
    private BytedecoImage snapNormalZImage;
 
    private _cl_program rapidHeightMapUpdaterProgram;
+   private _cl_program snappingHeightProgram;
    private _cl_kernel heightMapUpdateKernel;
    private _cl_kernel heightMapRegistrationKernel;
-   private _cl_kernel terrainCostKernel;
-   private _cl_kernel contactMapKernel;
+//   private _cl_kernel terrainCostKernel;
+//   private _cl_kernel contactMapKernel;
 
    private _cl_kernel computeSnappedValuesKernel;
 
@@ -105,6 +106,7 @@ public class RapidHeightMapExtractor
       this.openCLManager = openCLManager;
 //      denoiser = new HeightMapAutoencoder();
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
+      snappingHeightProgram = openCLManager.loadProgram("SnappingHeightMap", "HeightMapUtils.cl");
    }
 
    public void initialize()
@@ -141,9 +143,9 @@ public class RapidHeightMapExtractor
 
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
       heightMapRegistrationKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapRegistrationKernel");
-      terrainCostKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "terrainCostKernel");
-      contactMapKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "contactMapKernel");
-      computeSnappedValuesKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "computeSnappedValuesKernel");
+//      terrainCostKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "terrainCostKernel");
+//      contactMapKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "contactMapKernel");
+      computeSnappedValuesKernel = openCLManager.createKernel(snappingHeightProgram, "computeSnappedValuesKernel");
    }
 
    public void create(BytedecoImage depthImage, int mode)
@@ -229,7 +231,7 @@ public class RapidHeightMapExtractor
          globalHeightMapImage.readOpenCLImage(openCLManager);
 
          // compute and read terrain cost and contact map images
-         computeContactMap();
+//         computeContactMap();
          readContactMapImage();
 
          // copmute the steppable height image
@@ -287,6 +289,7 @@ public class RapidHeightMapExtractor
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
+   /*
    public void computeContactMap()
    {
       // Set kernel arguments for the terrain cost kernel
@@ -303,6 +306,8 @@ public class RapidHeightMapExtractor
       openCLManager.execute2D(terrainCostKernel, globalCellsPerAxis, globalCellsPerAxis);
       openCLManager.execute2D(contactMapKernel, globalCellsPerAxis, globalCellsPerAxis);
    }
+
+    */
 
    public void computeSteppabilityImage()
    {
