@@ -1,13 +1,9 @@
 package us.ihmc.rdx.imgui;
 
 import imgui.ImGui;
-import imgui.flag.ImGuiCol;
 import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor.PathType;
 import us.ihmc.commons.nio.PathTools;
-import us.ihmc.log.LogTools;
-import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
