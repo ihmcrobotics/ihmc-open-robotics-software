@@ -23,6 +23,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
+import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.mesh.MeshDataGeneratorMissing;
@@ -37,8 +38,8 @@ public class RDXProjectionSphere
    private final ImInt sphereLatitudeVertices = new ImInt(100);
    private final ImInt sphereLongitudeVertices = new ImInt(100);
    private final ImBoolean syncProjectionScales = new ImBoolean(true);
-   private final ImDouble focalLengthX = new ImDouble(0.45);
-   private final ImDouble focalLengthY = new ImDouble(0.45);
+   private final ImDouble focalLengthX = new ImDouble(0.2878);
+   private final ImDouble focalLengthY = new ImDouble(0.2878);
    private final ImDouble principlePointX = new ImDouble(0.0);
    private final ImDouble principlePointY = new ImDouble(0.0);
    private Model model;
@@ -92,6 +93,7 @@ public class RDXProjectionSphere
 
          double angleOfIncidence = EuclidCoreMissingTools.angleFromFirstToSecondVector3D(Axis3D.X, vertexRay);
          double azimuthalAngle = Math.atan2(-vertex.getZ(), -vertex.getY());
+
 
          double imageX = principlePointX.get() + focalLengthX.get() * angleOfIncidence * Math.cos(azimuthalAngle);
          double imageY = principlePointY.get() + focalLengthY.get() * angleOfIncidence * Math.sin(azimuthalAngle);
