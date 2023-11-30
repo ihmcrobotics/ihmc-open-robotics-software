@@ -14,8 +14,6 @@ import static us.ihmc.perception.sceneGraph.multiBodies.door.DoorModelParameters
 
 public class DoorFrameDefinition extends RigidBodyDefinition
 {
-   private final boolean ENABLE_SUPPORT_BOARD_COLLISIONS = true;
-
    public DoorFrameDefinition()
    {
       super("frameBody");
@@ -46,6 +44,7 @@ public class DoorFrameDefinition extends RigidBodyDefinition
       Point3D hingeSidePostOffset = new Point3D();
       hingeSidePostOffset.add(0.0, -DOOR_FRAME_HINGE_OFFSET, 0.0);
       hingeSidePostOffset.add(0.0, -DOOR_FRAME_PILLAR_SIZE_X / 2.0, DOOR_FRAME_PILLAR_SIZE_Z / 2.0);
+      addCollisionShape(pillarSizeX, pillarSizeY, pillarSizeZ, hingeSidePostOffset);
 
       double flatboardSizeX = 0.63;
       double flatboardSizeY = 0.39;
@@ -56,17 +55,20 @@ public class DoorFrameDefinition extends RigidBodyDefinition
       hingeSideSupportBoardOffset.add(0.0, -DOOR_FRAME_PILLAR_SIZE_X, 0.0);
       hingeSideSupportBoardOffset.add(0.0, -twoX4Width / 2.0, DOOR_FRAME_PILLAR_SIZE_X / 2.0f);
       double twoX4Length = 1.016;
+      addCollisionShape(twoX4Length, twoX4Width, DOOR_FRAME_PILLAR_SIZE_X, hingeSideSupportBoardOffset);
 
       Point3D hingeSideSupportWeightBaseOffset = new Point3D();
       hingeSideSupportWeightBaseOffset.add(0.0, -DOOR_FRAME_HINGE_OFFSET, 0.0);
       hingeSideSupportWeightBaseOffset.add(0.0, -DOOR_FRAME_PILLAR_SIZE_X, 0.0);
       hingeSideSupportWeightBaseOffset.add(0.0, -twoX4Width, 0.0);
       hingeSideSupportWeightBaseOffset.add(0.0, -flatboardSizeY / 2.0, flatboardSizeZ / 2.0);
+      addCollisionShape(flatboardSizeX, flatboardSizeY, 0.02, hingeSideSupportWeightBaseOffset);
 
       Point3D latchSidePostOffset = new Point3D();
       double toLatchPillarY = 0.93415;
       latchSidePostOffset.add(0.0, toLatchPillarY, 0.0);
       latchSidePostOffset.add(0.0, DOOR_FRAME_PILLAR_SIZE_X / 2.0, DOOR_FRAME_PILLAR_SIZE_Z / 2.0);
+      addCollisionShape(pillarSizeX, pillarSizeY, pillarSizeZ, latchSidePostOffset);
 
       double stopColumnSizeX = 0.03;
       double stopColumnSizeY = 0.02;
@@ -75,6 +77,7 @@ public class DoorFrameDefinition extends RigidBodyDefinition
       Point3D stopColumnOffset = new Point3D();
       stopColumnOffset.add(0.0, toLatchPillarY, 0.0);
       stopColumnOffset.add((stopColumnSizeX / 2.0) + initialSpaceBetweenStopAndPanel, -stopColumnSizeY / 2.0, stopColumnSizeZ / 2.0);
+      addCollisionShape(stopColumnSizeX, stopColumnSizeY, stopColumnSizeZ, stopColumnOffset);
 
       // shortened: 0.881195 long
       // short edge 0.372505 from center
@@ -84,23 +87,14 @@ public class DoorFrameDefinition extends RigidBodyDefinition
       latchSideSupportBoardOffset.add(0.0, DOOR_FRAME_PILLAR_SIZE_X, 0.0);
       latchSideSupportBoardOffset.add(0.0680925, twoX4Width / 2.0, DOOR_FRAME_PILLAR_SIZE_X / 2.0f);
       double sideFloorBoardLength = 0.881195;
+      addCollisionShape(sideFloorBoardLength, twoX4Width, DOOR_FRAME_PILLAR_SIZE_X, latchSideSupportBoardOffset);
 
       Point3D latchSideSupportWeightBaseOffset = new Point3D();
       latchSideSupportWeightBaseOffset.add(0.0, toLatchPillarY, 0.0);
       latchSideSupportWeightBaseOffset.add(0.0, DOOR_FRAME_PILLAR_SIZE_X, 0.0);
       latchSideSupportWeightBaseOffset.add(0.0, twoX4Width, 0.0);
       latchSideSupportWeightBaseOffset.add(0.0, flatboardSizeY / 2.0, flatboardSizeZ / 2.0);
-
-      addCollisionShape(pillarSizeX, pillarSizeY, pillarSizeZ, hingeSidePostOffset);
-      addCollisionShape(pillarSizeX, pillarSizeY, pillarSizeZ, latchSidePostOffset);
-      addCollisionShape(stopColumnSizeX, stopColumnSizeY, stopColumnSizeZ, stopColumnOffset);
-      if (ENABLE_SUPPORT_BOARD_COLLISIONS)
-      {
-         addCollisionShape(flatboardSizeX, flatboardSizeY, 0.02, hingeSideSupportWeightBaseOffset);
-         addCollisionShape(flatboardSizeX, flatboardSizeY, 0.02, latchSideSupportWeightBaseOffset);
-         addCollisionShape(twoX4Length, twoX4Width, DOOR_FRAME_PILLAR_SIZE_X, hingeSideSupportBoardOffset);
-         addCollisionShape(sideFloorBoardLength, twoX4Width, DOOR_FRAME_PILLAR_SIZE_X, latchSideSupportBoardOffset);
-      }
+      addCollisionShape(flatboardSizeX, flatboardSizeY, 0.02, latchSideSupportWeightBaseOffset);
    }
 
    private void addCollisionShape(double sizeX, double sizeY, double sizeZ, Point3D offset)
