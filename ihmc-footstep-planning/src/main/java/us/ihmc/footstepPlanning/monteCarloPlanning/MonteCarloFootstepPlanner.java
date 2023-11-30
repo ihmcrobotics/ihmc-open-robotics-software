@@ -18,31 +18,19 @@ public class MonteCarloFootstepPlanner
    private MonteCarloFootstepPlannerStatistics statistics;
    private MonteCarloFootstepPlannerParameters parameters;
    private MonteCarloFootstepPlanningDebugger debugger;
-
-   private MonteCarloPlanningWorld world;
-   private MonteCarloWaypointAgent agent;
    private MonteCarloFootstepNode root;
 
-   private HashMap<MonteCarloFootstepNode, MonteCarloFootstepNode> visitedNodes = new HashMap<>();
-
-   Random random = new Random();
-
-   //private int searchIterations = 100;
-   //private int simulationIterations = 8;
-   //private int goalMargin = 5;
-
-   private int uniqueNodeId = 0;
-   private int worldHeight = 200;
-   private int worldWidth = 200;
+   private final HashMap<MonteCarloFootstepNode, MonteCarloFootstepNode> visitedNodes = new HashMap<>();
+   private final Random random = new Random();
 
    private boolean planning = false;
+   private int uniqueNodeId = 0;
 
    public MonteCarloFootstepPlanner(MonteCarloFootstepPlannerParameters parameters)
    {
       this.parameters = parameters;
       this.statistics = new MonteCarloFootstepPlannerStatistics();
       this.debugger = new MonteCarloFootstepPlanningDebugger(this);
-      this.world = new MonteCarloPlanningWorld(parameters.getGoalMargin(), worldHeight, worldWidth);
    }
 
    public FootstepPlan generateFootstepPlan(MonteCarloFootstepPlannerRequest request)
@@ -258,11 +246,6 @@ public class MonteCarloFootstepPlanner
 
       root = maxNode;
       return action;
-   }
-
-   public MonteCarloPlanningWorld getWorld()
-   {
-      return world;
    }
 
    public MonteCarloTreeNode getRoot()

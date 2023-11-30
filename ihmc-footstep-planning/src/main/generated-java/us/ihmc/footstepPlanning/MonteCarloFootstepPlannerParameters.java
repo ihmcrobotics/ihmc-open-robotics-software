@@ -27,10 +27,7 @@ public class MonteCarloFootstepPlannerParameters extends StoredPropertySet imple
    public static final IntegerStoredPropertyKey maxNumberOfChildNodes = keys.addIntegerKey("Max number of child nodes");
    public static final DoubleStoredPropertyKey maxTransferHeight = keys.addDoubleKey("Max transfer height");
    public static final DoubleStoredPropertyKey maxTransferDepth = keys.addDoubleKey("Max transfer depth");
-   public static final DoubleStoredPropertyKey maxTransferDistance = keys.addDoubleKey("Max transfer distance");
-   public static final DoubleStoredPropertyKey minTransferDistance = keys.addDoubleKey("Min transfer distance");
    public static final DoubleStoredPropertyKey maxTransferYaw = keys.addDoubleKey("Max transfer yaw");
-   public static final IntegerStoredPropertyKey goalMargin = keys.addIntegerKey("Goal margin");
    public static final DoubleStoredPropertyKey feasibleContactCutoff = keys.addDoubleKey("Feasible contact cutoff");
    public static final DoubleStoredPropertyKey explorationConstant = keys.addDoubleKey("Exploration constant");
    public static final IntegerStoredPropertyKey initialValueCutoff = keys.addIntegerKey("Initial value cutoff");
@@ -40,6 +37,9 @@ public class MonteCarloFootstepPlannerParameters extends StoredPropertySet imple
    public static final DoubleStoredPropertyKey searchInnerRadius = keys.addDoubleKey("Search inner radius");
    public static final DoubleStoredPropertyKey searchOuterRadius = keys.addDoubleKey("Search outer radius");
    public static final IntegerStoredPropertyKey searchSkipSize = keys.addIntegerKey("Search skip size");
+   public static final DoubleStoredPropertyKey transferYawCost = keys.addDoubleKey("Transfer yaw cost");
+   public static final IntegerStoredPropertyKey transferHeightCost = keys.addIntegerKey("Transfer height cost");
+   public static final DoubleStoredPropertyKey transferDistanceCost = keys.addDoubleKey("Transfer distance cost");
 
    /**
     * Loads this property set.

@@ -303,8 +303,12 @@ public class MonteCarloPlannerTools
          int rIndex = nodeX + request.getHeightMap().rows() / 2 - offsetX;
          int cIndex = nodeY + request.getHeightMap().cols() / 2 - offsetY;
 
+         // decode height from 16-bit scaled and offset height value stored in OpenCV Mat
          int height = ((int) request.getHeightMap().ptr(rIndex, cIndex).getShort() & 0xFFFF);
-         FramePose3D footstepPose = getFramePose3D(height, nodeX / 50.0f, nodeY / 50.0f, footstepNode.getState().getZ());
+         float cellHeight = (float) ((float) height / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
+                            - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
+
+         FramePose3D footstepPose = getFramePose3D(cellHeight, nodeX / 50.0f, nodeY / 50.0f, footstepNode.getState().getZ());
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
          LogTools.debug("Footstep Node: {}", footstepPose.getPosition());
@@ -312,11 +316,8 @@ public class MonteCarloPlannerTools
       return footstepPlan;
    }
 
-   private static FramePose3D getFramePose3D(int height, double xPosition, double yPosition, double yaw)
+   private static FramePose3D getFramePose3D(float cellHeight, double xPosition, double yPosition, double yaw)
    {
-      float cellHeight = (float) ((float) height / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
-                         - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
-
       Point3D position = new Point3D(xPosition, yPosition, cellHeight);
       Quaternion orientation = new Quaternion(yaw, 0, 0);
       return new FramePose3D(ReferenceFrame.getWorldFrame(), position, orientation);
@@ -406,9 +407,7 @@ public class MonteCarloPlannerTools
                                           MonteCarloFootstepPlannerRequest request,
                                           MonteCarloFootstepPlannerParameters plannerParameters)
    {
-      //(randomState.getPosition().distanceSquared(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition()) < world.getGoalMarginSquared())
-
-      double edgeCost = Math.abs(0.5f - oldNode.getState().distance(newNode.getState())) * 0.01f;
+      double score = 0.0;
 
       int offsetX = (int) (request.getSensorOrigin().getX() * 50);
       int offsetY = (int) (request.getSensorOrigin().getY() * 50);
@@ -416,27 +415,21 @@ public class MonteCarloPlannerTools
       int rIndex = (int) (newNode.getState().getX() + request.getContactMap().rows() / 2) - offsetX;
       int cIndex = (int) (newNode.getState().getY() + request.getContactMap().cols() / 2) - offsetY;
 
+      Point2D previousPosition = new Point2D(oldNode.getState());
+      Point2D currentPosition = new Point2D(newNode.getState());
       Point2D goalPosition = new Point2D(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition());
       goalPosition.scale(50.0f);
-      //goalPosition.add((double) request.getContactMap().rows() / 2, (double) request.getContactMap().cols() / 2);
 
-      double score = 0.0;
-
-      double contactScore = (((int) request.getContactMap().ptr(rIndex, cIndex).get() & 0xFF) / 255.0 - plannerParameters.getFeasibleContactCutoff())
+      double goalReward = plannerParameters.getGoalReward() / (currentPosition.distanceSquared(goalPosition));
+      double contactReward = (((int) request.getContactMap().ptr(rIndex, cIndex).get() & 0xFF) / 255.0 - plannerParameters.getFeasibleContactCutoff())
                             * plannerParameters.getFeasibleContactReward();
-      score += contactScore;
 
-      Point2D currentPosition = new Point2D(newNode.getState());
-      double distanceFromGoal = currentPosition.distanceSquared(goalPosition);
-      score += plannerParameters.getGoalReward() / (distanceFromGoal);
+      double stepYawCost = Math.abs(oldNode.getState().getZ() - newNode.getState().getZ()) * 0.01f;
+      double stepDistanceCost = Math.abs(previousPosition.distance(currentPosition)) * 0.01f;
+      double stepHeightCost = (getHeightAt(request.getHeightMap(), rIndex, cIndex) - getHeightAt(request.getHeightMap(), rIndex, cIndex)) * 0.01f;
+      double edgeCost = stepYawCost + stepDistanceCost + stepHeightCost;
 
-      //LogTools.info("Old Node: {}, New Node: {}, {}",
-      //              oldNode.getState(),
-      //              newNode.getState(),
-      //              String.format("Contact Score: %.2f, Distance Score: %.2f", contactScore, 10000.0f / (distanceFromGoal)));
-
-      //score -= edgeCost;
-
+      score = goalReward + contactReward - edgeCost;
       return score;
    }
 
@@ -450,5 +443,14 @@ public class MonteCarloPlannerTools
       {
          return getOptimalNode(root.getMaxQueueNode(), layer);
       }
+   }
+
+   public static double getHeightAt(Mat heightMap, int rIndex, int cIndex)
+   {
+      // decode height from 16-bit scaled and offset height value stored in OpenCV Mat
+      int height = ((int) heightMap.ptr(rIndex, cIndex).getShort() & 0xFFFF);
+      double cellHeight = (double) ((double) height / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
+                          - (double) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
+      return cellHeight;
    }
 }

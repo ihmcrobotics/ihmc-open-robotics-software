@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.monteCarloPlanning;
 
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -29,8 +30,7 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
    /**
     * Back propagates the given score to the root node.
     */
-   public ArrayList<MonteCarloFootstepNode> getAvailableStates(MonteCarloFootstepPlannerRequest request,
-                                                               MonteCarloFootstepPlannerParameters parameters)
+   public ArrayList<MonteCarloFootstepNode> getAvailableStates(MonteCarloFootstepPlannerRequest request, MonteCarloFootstepPlannerParameters parameters)
    {
       ArrayList<MonteCarloFootstepNode> availableStates = new ArrayList<>();
 
@@ -39,7 +39,7 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
 
       for (Vector3D action : actions)
       {
-         if (checkActionBoundaries(action, request.getHeightMap().rows()))
+         if (checkActionBoundaries(action, request.getHeightMap().rows()) && checkReachability(request, parameters, action))
          {
             MonteCarloFootstepNode nodeToInsert = computeActionResult(action);
             availableStates.add(nodeToInsert);
@@ -54,7 +54,31 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
       Point3D newPosition = new Point3D();
       newPosition.add(state, action);
       return true;
-      //return MonteCarloPlannerTools.isWithinGridBoundaries(new Point2D(newPosition.getX() + (double) gridWidth / 2, newPosition.getY() + (double) gridWidth / 2), gridWidth);
+      //      return MonteCarloPlannerTools.isWithinGridBoundaries(new Point2D(newPosition.getX() + (double) gridWidth / 2, newPosition.getY() + (double) gridWidth / 2), gridWidth);
+   }
+
+   public boolean checkReachability(MonteCarloFootstepPlannerRequest request, MonteCarloFootstepPlannerParameters parameters, Vector3DReadOnly action)
+   {
+      Point3D newPosition = new Point3D();
+      newPosition.add(state, action);
+
+      int offsetX = (int) (request.getSensorOrigin().getX() * 50);
+      int offsetY = (int) (request.getSensorOrigin().getY() * 50);
+
+      int rIndexPrevious = (int) (state.getX() + request.getContactMap().rows() / 2) - offsetX;
+      int cIndexPrevious = (int) (state.getY() + request.getContactMap().cols() / 2) - offsetY;
+
+      int rIndex = (int) (newPosition.getX() + request.getContactMap().rows() / 2) - offsetX;
+      int cIndex = (int) (newPosition.getY() + request.getContactMap().cols() / 2) - offsetY;
+
+      double previousHeight = MonteCarloPlannerTools.getHeightAt(request.getHeightMap(), rIndexPrevious, cIndexPrevious);
+      double currentHeight = MonteCarloPlannerTools.getHeightAt(request.getHeightMap(), rIndex, cIndex);
+
+      boolean valid = ((currentHeight - previousHeight) < parameters.getMaxTransferHeight());
+      valid = valid & ((currentHeight - previousHeight) > -parameters.getMaxTransferDepth());
+      valid = valid & (Math.abs(state.getZ() - newPosition.getZ()) < parameters.getMaxTransferYaw());
+
+      return valid;
    }
 
    private MonteCarloFootstepNode computeActionResult(Vector3DReadOnly action)
