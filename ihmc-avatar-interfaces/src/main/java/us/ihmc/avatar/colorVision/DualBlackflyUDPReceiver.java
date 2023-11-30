@@ -30,8 +30,8 @@ public class DualBlackflyUDPReceiver
          {
             SocketAddress socketAddress = new InetSocketAddress(side == RobotSide.LEFT ? "127.0.0.1" : "127.0.0.1",
                                                                 side == RobotSide.LEFT ?
-                                                                      DualBlackflyUDPSender.BLACKFLY_LEFT_UDP_PORT :
-                                                                      DualBlackflyUDPSender.BLACKFLY_RIGHT_UDP_PORT);
+                                                                      DualBlackflyUDPSender.LEFT_UDP_PORT :
+                                                                      DualBlackflyUDPSender.RIGHT_UDP_PORT);
             DatagramSocket socket;
 
             try
