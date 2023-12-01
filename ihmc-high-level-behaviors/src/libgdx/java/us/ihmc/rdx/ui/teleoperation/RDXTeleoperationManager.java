@@ -308,7 +308,11 @@ public class RDXTeleoperationManager extends RDXPanel
          baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
          interactablesEnabled.set(true);
 
-         scriptedPoses = new RDXTeleoperationScriptedPoses();
+         scriptedPoses = new RDXTeleoperationScriptedPoses(interactableHands,
+                                                           interactableFeet,
+                                                           interactableChest,
+                                                           interactablePelvis,
+                                                           this::clearInteractablesAndLocomotionGraphics);
          addChild(scriptedPoses);
       }
 

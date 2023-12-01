@@ -16,6 +16,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
@@ -251,12 +252,7 @@ public class RDXInteractableRobotLink
       ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Selected"), selectablePose3DGizmo.getSelected().get()))
       {
-         selectablePose3DGizmo.getSelected().set(true);
-         if (!modified)
-         {
-            becomesModified.set();
-            modified = true;
-         }
+         setSelected();
       }
    }
 
@@ -285,6 +281,11 @@ public class RDXInteractableRobotLink
       return !selectablePose3DGizmo.getSelected().get() && !modified;
    }
 
+   public boolean isModified()
+   {
+      return modified;
+   }
+
    public void destroy()
    {
       highlightModel.dispose();
@@ -293,6 +294,21 @@ public class RDXInteractableRobotLink
    public FramePose3DReadOnly getPose()
    {
       return selectablePose3DGizmo.getPoseGizmo().getPose();
+   }
+
+   public RDXPose3DGizmo getPose3DGizmo()
+   {
+      return selectablePose3DGizmo.getPoseGizmo();
+   }
+
+   public void setSelected()
+   {
+      selectablePose3DGizmo.setSelected(true);
+      if (!modified)
+      {
+         becomesModified.set();
+         modified = true;
+      }
    }
 
    public ReferenceFrame getControlReferenceFrame()
