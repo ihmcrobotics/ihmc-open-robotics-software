@@ -1,0 +1,21 @@
+{
+  "interactables" : [ {
+    "type" : "Foot",
+    "side" : "left",
+    "x" : 0.4825,
+    "y" : 0.0765,
+    "z" : 0.3625,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.14,
+    "yawInDegrees" : 0.0
+  }, {
+    "type" : "Hand",
+    "side" : "right",
+    "x" : 0.621,
+    "y" : -0.4415,
+    "z" : 1.7405,
+    "rollInDegrees" : 167.56,
+    "pitchInDegrees" : -3.38,
+    "yawInDegrees" : -158.3
+  } ]
+}

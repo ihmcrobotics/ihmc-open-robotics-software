@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import imgui.type.ImString;
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -16,12 +16,19 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.*;
 
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 public class RDXTeleoperationScriptedPoses extends RDXPanel
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString saveFileName = new ImString();
-   private final WorkspaceResourceDirectory posesDirectory = new WorkspaceResourceDirectory(getClass(), "/poses");
-   private final ImGuiDirectory imPosesDirectory;
+   private final WorkspaceDirectory posesDirectory = new WorkspaceResourceDirectory(getClass(), "/poses");
+   private final Comparator<Path> naturalOrderComparator = Comparator.comparing(path -> path.getFileName().toString());
+   private final SortedSet<Path> sortedPaths = new TreeSet<>(naturalOrderComparator.reversed());
    private final SideDependentList<RDXInteractableHand> interactableHands;
    private final SideDependentList<RDXInteractableFoot> interactableFeet;
    private final RDXInteractableRobotLink interactableChest;
@@ -43,15 +50,24 @@ public class RDXTeleoperationScriptedPoses extends RDXPanel
 
       setRenderMethod(this::renderImGuiWidgets);
 
-      imPosesDirectory = new ImGuiDirectory(posesDirectory.getFilesystemDirectory().toString(),
-                                            name -> true,
-                                            pathEntry -> true,
-                                            this::pathSelected);
+      reindexDirectory();
    }
 
    private void renderImGuiWidgets()
    {
-      imPosesDirectory.renderImGuiWidgets();
+      if (ImGui.button(labels.get("Reindex directory")))
+      {
+         reindexDirectory();
+      }
+
+      for (Path sortedPath : sortedPaths)
+      {
+         String fileName = sortedPath.getFileName().toString();
+         if (ImGui.button(labels.get(fileName)))
+         {
+            pathSelected(fileName);
+         }
+      }
 
       ImGui.text("Save current interactable poses as:");
       ImGuiTools.inputText(labels.getHidden("saveFileName"), saveFileName);
@@ -62,7 +78,7 @@ public class RDXTeleoperationScriptedPoses extends RDXPanel
          ImGui.sameLine();
          if (ImGui.button(labels.get("Save Pose")))
          {
-            JSONFileTools.save(new WorkspaceResourceFile(posesDirectory, saveFileName.get() + ".json"), jsonRootObjectNode ->
+            JSONFileTools.save(new WorkspaceFile(posesDirectory, saveFileName.get() + ".json"), jsonRootObjectNode ->
             {
                ArrayNode interactablesArrayNode = jsonRootObjectNode.putArray("interactables");
 
@@ -75,6 +91,8 @@ public class RDXTeleoperationScriptedPoses extends RDXPanel
                interactableToJSON("Chest", null, interactablesArrayNode, interactableChest);
                interactableToJSON("Pelvis", null, interactablesArrayNode, interactablePelvis);
             });
+
+            reindexDirectory();
          }
       }
    }
@@ -93,12 +111,12 @@ public class RDXTeleoperationScriptedPoses extends RDXPanel
 
    private void pathSelected(String pathName)
    {
-      WorkspaceResourceFile fileToLoad = new WorkspaceResourceFile(posesDirectory, pathName);
+      WorkspaceFile fileToLoad = new WorkspaceFile(posesDirectory, pathName);
       LogTools.info("Loading {}", fileToLoad.getFilesystemFile().toString());
 
       clearInteractables.run();
 
-      JSONFileTools.load(fileToLoad, jsonRootObjectNode ->
+      JSONFileTools.load(fileToLoad.getFilesystemFile(), jsonRootObjectNode ->
       {
          JSONTools.forEachArrayElement(jsonRootObjectNode, "interactables", objectNode ->
          {
@@ -129,6 +147,16 @@ public class RDXTeleoperationScriptedPoses extends RDXPanel
                interactableRobotLink.setSelected();
             }
          });
+      });
+   }
+
+   public void reindexDirectory()
+   {
+      sortedPaths.clear();
+      PathTools.walkFlat(posesDirectory.getFilesystemDirectory(), (path, type) ->
+      {
+         sortedPaths.add(path);
+         return FileVisitResult.CONTINUE;
       });
    }
 }
