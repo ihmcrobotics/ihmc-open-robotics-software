@@ -22,10 +22,15 @@ public class MonteCarloFootstepPlannerStatistics
    private int numberOfNodesPruned;
 
    private double totalTime = 0;
-   private double simulationTime = 0;
-   private double expansionTime = 0;
-   private double pruningTime = 0;
-   private double propagationTime = 0;
+   private double totalSimulationTime = 0;
+   private double totalExpansionTime = 0;
+   private double totalPruningTime = 0;
+   private double totalPropagationTime = 0;
+
+   private double lastSimulationTime = 0;
+   private double lastExpansionTime = 0;
+   private double lastPruningTime = 0;
+   private double lastPropagationTime = 0;
 
    private long totalStartTime = 0;
    private long simulationStartTime = 0;
@@ -69,10 +74,10 @@ public class MonteCarloFootstepPlannerStatistics
 
          log.append("{");
          log.append("TotalTime: ").append(totalTime).append(", ");
-         log.append("SimulationTime: ").append(simulationTime).append(", ");
-         log.append("ExpansionTime: ").append(expansionTime).append(", ");
-         log.append("PruningTime: ").append(pruningTime).append(", ");
-         log.append("PropagationTime: ").append(propagationTime).append(", ");
+         log.append("SimulationTime: ").append(lastSimulationTime).append(", ");
+         log.append("ExpansionTime: ").append(lastExpansionTime).append(", ");
+         log.append("PruningTime: ").append(lastPruningTime).append(", ");
+         log.append("PropagationTime: ").append(lastPropagationTime).append(", ");
          log.append("Visited: ").append(numberOfNodesVisited).append(", ");
          log.append("Pruned: ").append(numberOfNodesPruned).append(", ");
          log.append("TotalReward: ").append(totalReward).append(", ");
@@ -120,7 +125,8 @@ public class MonteCarloFootstepPlannerStatistics
    {
       if (simulationTimeStarted)
       {
-         simulationTime += (double) (System.nanoTime() - simulationStartTime) / 1000000;
+         lastSimulationTime = (double) (System.nanoTime() - simulationStartTime) / 1000000;
+         totalSimulationTime += lastSimulationTime;
          simulationTimeStarted = false;
       }
    }
@@ -138,7 +144,8 @@ public class MonteCarloFootstepPlannerStatistics
    {
       if (expansionTimeStarted)
       {
-         expansionTime += (double) (System.nanoTime() - expansionStartTime) / 1000000;
+         lastExpansionTime = (double) (System.nanoTime() - expansionStartTime) / 1000000;
+         totalExpansionTime += lastExpansionTime;
          expansionTimeStarted = false;
       }
    }
@@ -156,7 +163,8 @@ public class MonteCarloFootstepPlannerStatistics
    {
       if (pruningTimeStarted)
       {
-         pruningTime += (double) (System.nanoTime() - pruningStartTime) / 1000000;
+         lastPruningTime = (double) (System.nanoTime() - pruningStartTime) / 1000000;
+         totalPruningTime += lastPruningTime;
          pruningTimeStarted = false;
       }
    }
@@ -174,7 +182,8 @@ public class MonteCarloFootstepPlannerStatistics
    {
       if (propagationTimeStarted)
       {
-         propagationTime += (double) (System.nanoTime() - propagationStartTime) / 1000000;
+         lastPropagationTime = (double) (System.nanoTime() - propagationStartTime) / 1000000;
+         totalPropagationTime += lastPropagationTime;
          propagationTimeStarted = false;
       }
    }

@@ -58,7 +58,7 @@ public class MonteCarloFootstepPlanner
 
       statistics.stopTotalTime();
       statistics.setNodesPerLayerString(MonteCarloPlannerTools.getLayerCountsString(root));
-      statistics.logToFile(false, false);
+      statistics.logToFile(false, true);
 
       planning = false;
       return plan;
