@@ -40,7 +40,7 @@ public class RapidHeightMapExtractor
    private static final double footSize = 0.22;
    private static final double distanceFromCliffTops = 0.02;
    private static final double distanceFromCliffBottoms = 0.05;
-   private static final double cliffStartHeightToAvoid = 0.1;
+   private static final double cliffStartHeightToAvoid = 0.2;
    private static final double cliffEndHeightToAvoid = 1.2;
 
    private int mode = 1; // 0 -> Ouster, 1 -> Realsense
