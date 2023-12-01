@@ -68,10 +68,18 @@ mainDependencies {
    api("org.bytedeco:librealsense2:$librealsense2Version:windows-x86_64")
    // Spinnaker released under us.ihmc for arm64 support
    val spinnakerVersion = "3.0.0.118-1.5.9-ihmc1"
-   api("us.ihmc:spinnaker:$spinnakerVersion")
-   api("us.ihmc:spinnaker:$spinnakerVersion:linux-x86_64")
-   api("us.ihmc:spinnaker:$spinnakerVersion:linux-arm64")
-   api("us.ihmc:spinnaker:$spinnakerVersion:windows-x86_64")
+   api("us.ihmc:spinnaker:$spinnakerVersion") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
+   api("us.ihmc:spinnaker:$spinnakerVersion:linux-x86_64") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
+   api("us.ihmc:spinnaker:$spinnakerVersion:linux-arm64") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
+   api("us.ihmc:spinnaker:$spinnakerVersion:windows-x86_64") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
    val hdf5Version = "1.14.1-1.5.9"
    api("org.bytedeco:hdf5:$hdf5Version")
    api("org.bytedeco:hdf5:$hdf5Version:linux-x86_64")
