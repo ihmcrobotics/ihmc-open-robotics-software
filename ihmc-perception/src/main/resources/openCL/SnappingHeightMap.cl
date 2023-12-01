@@ -119,17 +119,7 @@ void kernel computeSnappedValuesKernel(global float* params,
 
     int2 key = (int2) (idx_x, idx_y);
     uint foot_height_int = read_imageui(height_map, key).x;
-    if (foot_height_int == 32768) // FIXME this is the placeholder for no data
-    {
-       write_imageui(steppable_map, key, (uint4)(SNAP_FAILED,0,0,0));
 
-       write_imageui(snapped_height_map, key, (uint4)(32768, 0, 0, 0));
-       write_imageui(snapped_normal_x_map, key, (uint4)(0, 0, 0, 0));
-       write_imageui(snapped_normal_y_map, key, (uint4)(0, 0, 0, 0));
-       write_imageui(snapped_normal_z_map, key, (uint4)(0, 0, 0, 0));
-
-       return;
-    }
     float foot_height = (float) foot_height_int / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
 
 
@@ -156,10 +146,9 @@ void kernel computeSnappedValuesKernel(global float* params,
     // TODO check these
     float cliff_search_offset = max_dimension / 2.0f + max(params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS], params[MIN_DISTANCE_FROM_CLIFF_TOPS]);
     int cliff_offset_indices = (int) ceil(cliff_search_offset / map_resolution);
+    float max_height_under_foot = -INFINITY;
 
     // search for a cliff base that's too close
-    float max_height = -INFINITY;
-
     for (int x_query = idx_x - cliff_offset_indices; x_query <= idx_x + cliff_offset_indices; x_query++)
     {
         // if we're outside of the search area in the x direction, skip to the end
@@ -179,23 +168,24 @@ void kernel computeSnappedValuesKernel(global float* params,
             // compute the relative height at this point, compared to the height contained in the current cell.
             float relative_height = query_height - foot_height;
 
-            float distance_to_foot;
+            float distance_to_foot_from_this_query;
             if (ASSUME_FOOT_IS_A_CIRCLE)
             {
-                distance_to_foot = signed_distance_to_foot_circle(center_index, map_resolution, params, key, query_key);
+                distance_to_foot_from_this_query = signed_distance_to_foot_circle(center_index, map_resolution, params, key, query_key);
             }
             else
             {
-                distance_to_foot = signed_distance_to_foot_polygon(center_index, map_resolution, params, key, foot_yaw, query_key);
+                distance_to_foot_from_this_query = signed_distance_to_foot_polygon(center_index, map_resolution, params, key, foot_yaw, query_key);
             }
 
+            // FIXME so this being a hard transition makes it a noisy signal. How can we smooth it?
             if (relative_height > params[CLIFF_START_HEIGHT_TO_AVOID])
             {
                 float height_alpha = (relative_height - params[CLIFF_START_HEIGHT_TO_AVOID]) / (params[CLIFF_END_HEIGHT_TO_AVOID] - params[CLIFF_START_HEIGHT_TO_AVOID]);
                 height_alpha = clamp(height_alpha, 0.0f, 1.0f);
-                float min_distance_from_this_point = height_alpha * params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS];
+                float min_distance_from_this_point_to_avoid_cliff = height_alpha * params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS];
 
-                if (min_distance_from_this_point > distance_to_foot)
+                if (distance_to_foot_from_this_query < min_distance_from_this_point_to_avoid_cliff)
                 {
                     // we're too close to the cliff bottom!
                     write_imageui(steppable_map, key, (uint4)(CLIFF_BOTTOM,0,0,0));
@@ -210,7 +200,7 @@ void kernel computeSnappedValuesKernel(global float* params,
             }
             else if (relative_height < -params[CLIFF_START_HEIGHT_TO_AVOID])
             {
-                if (params[MIN_DISTANCE_FROM_CLIFF_TOPS] > distance_to_foot)
+                if (distance_to_foot_from_this_query < params[MIN_DISTANCE_FROM_CLIFF_TOPS])
                 {
                     // we're too close to the cliff top!
                     write_imageui(steppable_map, key, (uint4)(CLIFF_TOP,0,0,0));
@@ -225,21 +215,22 @@ void kernel computeSnappedValuesKernel(global float* params,
             }
 
             //  TODO extract epsilon
-            if (distance_to_foot < 1e-3f)
+            if (distance_to_foot_from_this_query < 1e-3f)
             {
-                max_height = max(query_height, max_height);
+                max_height_under_foot = max(query_height, max_height_under_foot);
             }
         }
     }
 
     //////// Compute the local plane of the foot, as well as the area of support underneath it.
 
-    int points_inside_polygon = 0;
+    int points_detected_under_foot = 0;
     float running_height_total = 0.0f;
-    float min_height = max_height - 0.05f;
+    float min_height_under_foot_to_consider = max_height_under_foot - 0.05f;
     float resolution = 0.02f;
     float half_length = foot_length / 2.0f;
     float half_width = foot_width / 2.0f;
+    float foot_search_radius = length((float2) (half_length, half_width));
 
     // these are values that will be used for the plane calculation
     float n = 0.0f;
@@ -253,18 +244,18 @@ void kernel computeSnappedValuesKernel(global float* params,
     float yz = 0.0f;
     float zz = 0.0f;
 
+    int max_points_possible_under_support;
 
     if (ASSUME_FOOT_IS_A_CIRCLE)
     {
-        float radius = length((float2) (half_length, half_width));
-        for (float x_value = -radius; x_value <= radius; x_value += resolution)
+        for (float x_value = -foot_search_radius; x_value <= foot_search_radius; x_value += resolution)
         {
-            for (float y_value = -radius; y_value <= radius; y_value += resolution)
+            for (float y_value = -foot_search_radius; y_value <= foot_search_radius; y_value += resolution)
             {
                 float2 offset = (float2) (x_value, y_value);
 
                 // TODO replace with a squared operation
-                if (length(offset) > radius)
+                if (length(offset) > foot_search_radius)
                     continue;
 
                 float2 point_query = offset + foot_position;
@@ -284,10 +275,10 @@ void kernel computeSnappedValuesKernel(global float* params,
 
                 float query_height = (float) query_height_int / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
 
-                if (isnan(query_height) || query_height < min_height)
+                if (isnan(query_height) || query_height < min_height_under_foot_to_consider)
                    continue;
 
-                points_inside_polygon++;
+                points_detected_under_foot++;
                 running_height_total += query_height;
 
                 n += 1.0f;
@@ -302,6 +293,9 @@ void kernel computeSnappedValuesKernel(global float* params,
                 zz += query_height * query_height;
             }
         }
+
+        int diameter = (int) floor(foot_search_radius * 2.0f);
+        max_points_possible_under_support = (int) floor(M_PI_2_F * diameter * diameter); // the prefix here is the way of getting the area reduction of a circle from a square.
     }
     else
     {
@@ -327,10 +321,10 @@ void kernel computeSnappedValuesKernel(global float* params,
 
                 float query_height = (float) query_height_int / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
 
-                if (isnan(query_height) || query_height < min_height)
+                if (isnan(query_height) || query_height < min_height_under_foot_to_consider)
                    continue;
 
-                points_inside_polygon++;
+                points_detected_under_foot++;
                 running_height_total += query_height;
 
                 n += 1.0f;
@@ -345,18 +339,18 @@ void kernel computeSnappedValuesKernel(global float* params,
                 zz += query_height * query_height;
             }
         }
-    }
 
-    int lengths = (int) floor(foot_length / resolution);
-    int widths = (int) floor(foot_width / resolution);
-    int max_points = lengths * widths;
+        int lengths = (int) floor(foot_length / resolution);
+        int widths = (int) floor(foot_width / resolution);
+        max_points_possible_under_support = lengths * widths;
+    }
 
     // TODO extract area fraction
     float min_area_fraction = 0.75f;
-    int min_points = (int) (min_area_fraction * max_points);
-    if (points_inside_polygon > min_points)
+    int min_points_needed_for_support = (int) (min_area_fraction * max_points_possible_under_support);
+    if (points_detected_under_foot > min_points_needed_for_support)
     {
-       float snap_height = running_height_total / points_inside_polygon;
+       float snap_height = running_height_total / points_detected_under_foot;
 
        float covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
        float z_variance_vector[3] = {-xz, -yz, -z};

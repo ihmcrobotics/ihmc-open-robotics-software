@@ -241,8 +241,8 @@ public class RapidHeightMapExtractor
          // compute the steppable height image
          computeSteppabilityImage();
 
-         PerceptionDebugTools.printMat("Internal Original Height Map", globalHeightMapImage.getBytedecoOpenCVMat(), 600, 600, 900, 900, 10);
-         PerceptionDebugTools.printMat("Internal Snap Height Map", snapHeightImage.getBytedecoOpenCVMat(), 600, 600, 900, 900, 10);
+//         PerceptionDebugTools.printMat("Internal Original Height Map", globalHeightMapImage.getBytedecoOpenCVMat(), 600, 600, 900, 900, 10);
+//         PerceptionDebugTools.printMat("Internal Snap Height Map", snapHeightImage.getBytedecoOpenCVMat(), 600, 600, 900, 900, 10);
 
          croppedHeightMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
          croppedSnappedMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, snapHeightImage.getBytedecoOpenCVMat());
