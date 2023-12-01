@@ -5,6 +5,8 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
+import us.ihmc.communication.ros2.ROS2HeartbeatDependencyNode;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
@@ -56,8 +58,11 @@ public class ZEDColorDepthImagePublisher
       ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
 
       publishDepthThread = new RestartableThread("ZEDDepthImagePublisher", this::publishDepthThreadFunction);
+      publishDepthThread.start();
+
       publishColorThreads.put(RobotSide.LEFT, new RestartableThread("ZEDLeftColorImagePublisher", this::publishLeftColorThreadFunction));
       publishColorThreads.put(RobotSide.RIGHT, new RestartableThread("ZEDRightColorImagePublisher", this::publishRightColorThreadFunction));
+      publishColorThreads.forEach(RestartableThread::start);
    }
 
    private void publishDepthThreadFunction()
@@ -209,66 +214,11 @@ public class ZEDColorDepthImagePublisher
       }
    }
 
-   public void startDepth()
-   {
-      publishDepthThread.start();
-   }
-
-   public void startColor()
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         publishColorThreads.get(side).start();
-      }
-   }
-
-   public void startAll()
-   {
-      startDepth();
-      startColor();
-   }
-
-   public void stopDepth()
-   {
-      publishDepthThread.stop();
-      depthPublishLock.lock();
-      try
-      {
-         newDepthImageAvailable.signal();
-      }
-      finally
-      {
-         depthPublishLock.unlock();
-      }
-   }
-
-   public void stopColor()
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         publishColorThreads.get(side).stop();
-         colorPublishLocks.get(side).lock();
-         try
-         {
-            newColorImagesAvailable.get(side).signal();
-         }
-         finally
-         {
-            colorPublishLocks.get(side).unlock();
-         }
-      }
-   }
-
-   public void stopAll()
-   {
-      stopDepth();
-      stopColor();
-   }
-
    public void destroy()
    {
       System.out.println("Destroying " + this.getClass().getSimpleName());
-
+      publishDepthThread.stop();
+      publishColorThreads.forEach(RestartableThread::stop);
       depthPublishLock.lock();
       try
       {
@@ -278,7 +228,6 @@ public class ZEDColorDepthImagePublisher
       {
          depthPublishLock.unlock();
       }
-      publishDepthThread.blockingStop();
 
       if (nextGpuDepthImage != null)
          nextGpuDepthImage.release();

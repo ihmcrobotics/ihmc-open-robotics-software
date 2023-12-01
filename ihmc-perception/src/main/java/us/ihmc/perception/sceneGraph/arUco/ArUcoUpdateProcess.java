@@ -57,6 +57,7 @@ public class ArUcoUpdateProcess
       ros2Helper = new ROS2Helper(node);
 
       arUcoDetectionThread = new RestartableThread("ArUcoMarkerDetector", this::undistortAndUpdateArUco);
+      arUcoDetectionThread.start();
    }
 
    private void undistortAndUpdateArUco()

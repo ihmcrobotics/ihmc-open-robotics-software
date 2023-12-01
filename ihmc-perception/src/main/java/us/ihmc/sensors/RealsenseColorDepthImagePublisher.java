@@ -58,8 +58,10 @@ public class RealsenseColorDepthImagePublisher
       ros2ColorImagePublisher = ROS2Tools.createPublisher(ros2Node, colorTopic);
 
       publishDepthThread = new RestartableThread("RealsenseDepthImagePublisher", this::publishDepthThreadFunction);
-
       publishColorThread = new RestartableThread("RealsenseColorImagePublisher", this::publishColorThreadFunction);
+
+      publishDepthThread.start();
+      publishColorThread.start();
    }
 
    private void publishDepthThreadFunction()

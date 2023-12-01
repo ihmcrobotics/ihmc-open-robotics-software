@@ -9,6 +9,8 @@ import org.bytedeco.zed.SL_CalibrationParameters;
 import org.bytedeco.zed.SL_InitParameters;
 import org.bytedeco.zed.SL_RuntimeParameters;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
+import us.ihmc.communication.ros2.ROS2HeartbeatDependencyNode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -73,7 +75,11 @@ public class ZEDColorDepthImageRetriever
 
    private boolean initialized = false;
 
-   public ZEDColorDepthImageRetriever(int cameraID, Supplier<ReferenceFrame> sensorFrameSupplier)
+   public ZEDColorDepthImageRetriever(int cameraID,
+                                      Supplier<ReferenceFrame> sensorFrameSupplier,
+                                      ROS2HeartbeatDependencyNode pointCloudDesiredNode,
+                                      ROS2HeartbeatDependencyNode depthDesiredNode,
+                                      ROS2HeartbeatDependencyNode colorDesiredNode)
    {
       this.cameraID = cameraID;
 
@@ -81,33 +87,39 @@ public class ZEDColorDepthImageRetriever
 
       zedGrabThread = new RestartableThread("ZEDImageGrabber", () ->
       {
-         if (!initialized)
+         if (depthDesiredNode.checkIfDesired() || colorDesiredNode.checkIfDesired())
          {
-            if (startZED())
-               initialized = true;
+            if (!initialized)
+            {
+               if (startZED())
+                  initialized = true;
+               else
+                  ThreadTools.sleep(3000);
+            }
             else
-               ThreadTools.sleep(3000);
+            {
+
+               // sl_grab is blocking, and will wait for next frame available. No need to use throttler
+               checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
+
+               // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
+               for (RobotSide side : RobotSide.values)
+               {
+                  cameraFramePoses.get(side).setToZero(sensorFrameSupplier.get());
+                  cameraFramePoses.get(side).getPosition().addY(side.negateIfRightSide(zedModelData.getCenterToCameraDistance()));
+                  cameraFramePoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+               }
+
+               retrieveAndSaveDepthImage();
+               retrieveAndSaveColorImage(RobotSide.LEFT);
+               retrieveAndSaveColorImage(RobotSide.RIGHT);
+               grabSequenceNumber++;
+            }
          }
          else
-         {
-
-            // sl_grab is blocking, and will wait for next frame available. No need to use throttler
-            checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
-
-            // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
-            for (RobotSide side : RobotSide.values)
-            {
-               cameraFramePoses.get(side).setToZero(sensorFrameSupplier.get());
-               cameraFramePoses.get(side).getPosition().addY(side.negateIfRightSide(zedModelData.getCenterToCameraDistance()));
-               cameraFramePoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
-            }
-
-            retrieveAndSaveDepthImage();
-            retrieveAndSaveColorImage(RobotSide.LEFT);
-            retrieveAndSaveColorImage(RobotSide.RIGHT);
-            grabSequenceNumber++;
-         }
+            ThreadTools.sleep(500);
       });
+      zedGrabThread.start();
    }
 
    private void retrieveAndSaveColorImage(RobotSide side)

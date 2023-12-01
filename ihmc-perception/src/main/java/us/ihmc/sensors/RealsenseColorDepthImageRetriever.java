@@ -3,6 +3,7 @@ package us.ihmc.sensors;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.ros2.ROS2HeartbeatDependencyNode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -38,6 +39,7 @@ public class RealsenseColorDepthImageRetriever
    private final FramePose3D depthPose = new FramePose3D();
    private final FramePose3D colorPose = new FramePose3D();
    private final Supplier<ReferenceFrame> sensorFrameSupplier;
+   private final ROS2HeartbeatDependencyNode realsenseDesiredNode;
    private final RestartableThrottledThread realsenseGrabThread;
 
    private final Lock newDepthImageLock = new ReentrantLock();
@@ -50,104 +52,115 @@ public class RealsenseColorDepthImageRetriever
 
    private int numberOfFailedReads = 0;
 
-   public RealsenseColorDepthImageRetriever(RealsenseDeviceManager realsenseManager, String realsenseSerialNumber, RealsenseConfiguration realsenseConfiguration, Supplier<ReferenceFrame> sensorFrameSupplier)
+   public RealsenseColorDepthImageRetriever(RealsenseDeviceManager realsenseManager,
+                                            String realsenseSerialNumber,
+                                            RealsenseConfiguration realsenseConfiguration,
+                                            Supplier<ReferenceFrame> sensorFrameSupplier,
+                                            ROS2HeartbeatDependencyNode realsenseDesiredNode)
    {
       this.sensorFrameSupplier = sensorFrameSupplier;
       this.realsenseManager = realsenseManager;
       this.realsenseSerialNumber = realsenseSerialNumber;
       this.realsenseConfiguration = realsenseConfiguration;
+      this.realsenseDesiredNode = realsenseDesiredNode;
 
       realsenseGrabThread = new RestartableThrottledThread("RealsenseImageGrabber", OUTPUT_FREQUENCY, this::updateImages);
+      realsenseGrabThread.start();
    }
 
    private void updateImages()
    {
-      if (realsense == null || realsense.getDevice() == null || numberOfFailedReads > 30)
+      if (realsenseDesiredNode.checkIfDesired())
       {
-         if (!startRealsense())
-            ThreadTools.sleep(3000);
-      }
-      else if (realsense.readFrameData())
-      {
-         realsense.updateDataBytePointers();
-         Instant acquisitionTime = Instant.now();
-
-         ReferenceFrame cameraFrame = sensorFrameSupplier.get();
-         depthPose.setToZero(sensorFrameSupplier.get());
-         depthPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-         colorPose.setIncludingFrame(cameraFrame, realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
-         colorPose.invert();
-         colorPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-         if (depthMat16UC1 != null)
-            depthMat16UC1.close();
-         depthMat16UC1 = new Mat(realsense.getDepthHeight(), realsense.getDepthWidth(), opencv_core.CV_16UC1, realsense.getDepthFrameData());
-
-         newDepthImageLock.lock();
-         try
+         if (realsense == null || realsense.getDevice() == null || numberOfFailedReads > 30)
          {
-            if (depthImage != null)
-               depthImage.release();
-            depthImage = new RawImage(grabSequenceNumber,
-                                      acquisitionTime,
-                                      realsense.getDepthWidth(),
-                                      realsense.getDepthHeight(),
-                                      (float) realsense.getDepthDiscretization(),
-                                      depthMat16UC1.clone(),
-                                      null,
-                                      opencv_core.CV_16UC1,
-                                      (float) realsense.getDepthFocalLengthPixelsX(),
-                                      (float) realsense.getDepthFocalLengthPixelsY(),
-                                      (float) realsense.getDepthPrincipalOffsetXPixels(),
-                                      (float) realsense.getDepthPrincipalOffsetYPixels(),
-                                      depthPose.getPosition(),
-                                      depthPose.getOrientation());
-
-            newDepthImageAvailable.signal();
+            if (!startRealsense())
+               ThreadTools.sleep(3000);
          }
-         finally
+         else if (realsense.readFrameData())
          {
-            newDepthImageLock.unlock();
+            realsense.updateDataBytePointers();
+            Instant acquisitionTime = Instant.now();
+
+            ReferenceFrame cameraFrame = sensorFrameSupplier.get();
+            depthPose.setToZero(sensorFrameSupplier.get());
+            depthPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+            colorPose.setIncludingFrame(cameraFrame, realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
+            colorPose.invert();
+            colorPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+            if (depthMat16UC1 != null)
+               depthMat16UC1.close();
+            depthMat16UC1 = new Mat(realsense.getDepthHeight(), realsense.getDepthWidth(), opencv_core.CV_16UC1, realsense.getDepthFrameData());
+
+            newDepthImageLock.lock();
+            try
+            {
+               if (depthImage != null)
+                  depthImage.release();
+               depthImage = new RawImage(grabSequenceNumber,
+                                         acquisitionTime,
+                                         realsense.getDepthWidth(),
+                                         realsense.getDepthHeight(),
+                                         (float) realsense.getDepthDiscretization(),
+                                         depthMat16UC1.clone(),
+                                         null,
+                                         opencv_core.CV_16UC1,
+                                         (float) realsense.getDepthFocalLengthPixelsX(),
+                                         (float) realsense.getDepthFocalLengthPixelsY(),
+                                         (float) realsense.getDepthPrincipalOffsetXPixels(),
+                                         (float) realsense.getDepthPrincipalOffsetYPixels(),
+                                         depthPose.getPosition(),
+                                         depthPose.getOrientation());
+
+               newDepthImageAvailable.signal();
+            }
+            finally
+            {
+               newDepthImageLock.unlock();
+            }
+
+            if (colorMatRGB != null)
+               colorMatRGB.close();
+            colorMatRGB = new Mat(realsense.getColorHeight(), realsense.getColorWidth(), opencv_core.CV_8UC3, realsense.getColorFrameData());
+
+            newColorImageLock.lock();
+            try
+            {
+               if (colorImage != null)
+                  colorImage.release();
+               colorImage = new RawImage(grabSequenceNumber,
+                                         acquisitionTime,
+                                         realsense.getColorWidth(),
+                                         realsense.getColorHeight(),
+                                         (float) realsense.getDepthDiscretization(),
+                                         colorMatRGB.clone(),
+                                         null,
+                                         opencv_core.CV_8UC3,
+                                         (float) realsense.getColorFocalLengthPixelsX(),
+                                         (float) realsense.getColorFocalLengthPixelsY(),
+                                         (float) realsense.getColorPrincipalOffsetXPixels(),
+                                         (float) realsense.getColorPrincipalOffsetYPixels(),
+                                         colorPose.getPosition(),
+                                         colorPose.getOrientation());
+
+               newColorImageAvailable.signal();
+            }
+            finally
+            {
+               newColorImageLock.unlock();
+            }
+
+            grabSequenceNumber++;
          }
-
-         if (colorMatRGB != null)
-            colorMatRGB.close();
-         colorMatRGB = new Mat(realsense.getColorHeight(), realsense.getColorWidth(), opencv_core.CV_8UC3, realsense.getColorFrameData());
-
-         newColorImageLock.lock();
-         try
+         else
          {
-            if (colorImage != null)
-               colorImage.release();
-            colorImage = new RawImage(grabSequenceNumber,
-                                      acquisitionTime,
-                                      realsense.getColorWidth(),
-                                      realsense.getColorHeight(),
-                                      (float) realsense.getDepthDiscretization(),
-                                      colorMatRGB.clone(),
-                                      null,
-                                      opencv_core.CV_8UC3,
-                                      (float) realsense.getColorFocalLengthPixelsX(),
-                                      (float) realsense.getColorFocalLengthPixelsY(),
-                                      (float) realsense.getColorPrincipalOffsetXPixels(),
-                                      (float) realsense.getColorPrincipalOffsetYPixels(),
-                                      colorPose.getPosition(),
-                                      colorPose.getOrientation());
-
-            newColorImageAvailable.signal();
+            numberOfFailedReads++;
          }
-         finally
-         {
-            newColorImageLock.unlock();
-         }
-
-         grabSequenceNumber++;
       }
       else
-      {
-         numberOfFailedReads++;
-      }
+         ThreadTools.sleep(500);
    }
 
    public RawImage getLatestRawDepthImage()
@@ -209,7 +222,7 @@ public class RealsenseColorDepthImageRetriever
          depthImage.release();
       if (colorImage != null)
          colorImage.release();
-      if (realsense.getDevice() != null)
+      if (realsense != null && realsense.getDevice() != null)
          realsense.deleteDevice();
       realsenseManager.deleteContext();
       System.out.println("Destroyed " + this.getClass().getSimpleName());

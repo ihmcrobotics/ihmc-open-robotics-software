@@ -51,6 +51,7 @@ public class BlackflyImagePublisher
                                                                         ousterFisheyeColoringIntrinsics);
 
       publishDistoredColorThread = new RestartableThread("BlackflyDistortedImagePublisher", this::distortedImagePublisherThreadFunction);
+      publishDistoredColorThread.start();
    }
 
    private void distortedImagePublisherThreadFunction()
@@ -152,16 +153,17 @@ public class BlackflyImagePublisher
    public void destroy()
    {
       System.out.println("Destroying " + this.getClass().getSimpleName());
+      publishDistoredColorThread.stop();
       imagePublishLock.lock();
       try
       {
+         System.out.println("Signaling");
          newImageAvailable.signal();
       }
       finally
       {
          imagePublishLock.unlock();
       }
-      publishDistoredColorThread.blockingStop();
 
       if (nextGpuDistortedImage != null)
          nextGpuDistortedImage.release();
