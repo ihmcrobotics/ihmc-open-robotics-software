@@ -61,7 +61,7 @@ public class DoorPanelDefinition extends RigidBodyDefinition
          VisualDefinition fiducialModelVisualDefinition = new VisualDefinition();
          ModelFileGeometryDefinition fiducialGeometryDefinition = new ModelFileGeometryDefinition("environmentObjects/door/doorPanel/DoorPanelFiducials.g3dj");
          fiducialModelVisualDefinition.setGeometryDefinition(fiducialGeometryDefinition);
-         modelVisualDefinition.getOriginPose().getTranslation().setX(DOOR_PANEL_THICKNESS / 2.0);
+         fiducialModelVisualDefinition.getOriginPose().getTranslation().setX(DOOR_PANEL_THICKNESS / 2.0);
          addVisualDefinition(fiducialModelVisualDefinition);
       }
 
