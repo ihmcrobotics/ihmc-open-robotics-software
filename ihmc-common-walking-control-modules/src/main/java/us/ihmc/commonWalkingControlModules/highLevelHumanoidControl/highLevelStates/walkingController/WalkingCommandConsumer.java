@@ -51,8 +51,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3Trajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintRegionCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintsListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
@@ -530,15 +528,22 @@ public class WalkingCommandConsumer
          if (handManagers.get(robotSide) != null)
          {
             JointspaceTrajectoryCommand jointspaceTrajectory = null;
-            if (command.isUseJointspaceCommand())
+            SO3TrajectoryControllerCommand orientationTrajectory = null;
+
+            if (command.useJointspaceCommand())
             {
                jointspaceTrajectory = command.getJointspaceTrajectory();
                jointspaceTrajectory.setSequenceId(command.getSequenceId());
             }
+            else
+            {
+               orientationTrajectory = command.getOrientationTrajectory();
+               orientationTrajectory.setSequenceId(command.getSequenceId());
+            }
 
             LoadBearingCommand loadBearingCommand = command.getLoadBearingCommand();
             loadBearingCommand.setSequenceId(command.getSequenceId());
-            handManagers.get(robotSide).handleLoadBearingCommand(loadBearingCommand, jointspaceTrajectory);
+            handManagers.get(robotSide).handleLoadBearingCommand(loadBearingCommand, jointspaceTrajectory, orientationTrajectory);
          }
       }
    }

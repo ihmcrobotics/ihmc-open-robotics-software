@@ -23,14 +23,18 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
             */
    public byte robot_side_ = (byte) 255;
    /**
-            * Determines whether hybrid load bearing and jointspace control will be used.
+            * Determines the control mode used for the arm's nullspace. If true, jointspace is used, otherwise taskspace orientation is used.
             */
-   public boolean use_jointspace_command_;
+   public boolean use_jointspace_command_ = true;
    /**
-            * The arm desired jointspace trajectory that will be used for hybrid control if use_jointspace_command is true.
+            * The arm desired jointspace trajectory that will be used to control the arm's nullspace if use_jointspace_command is true.
             * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
             */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
+   /**
+            * The hand desired orientation trajectory that will be used to control the arm's nullspace if use_jointspace_command is false.
+            */
+   public ihmc_common_msgs.msg.dds.SO3TrajectoryMessage orientation_trajectory_;
    /**
             * The time to delay this message on the controller side before being executed.
             */
@@ -43,6 +47,7 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
    public HandLoadBearingMessage()
    {
       jointspace_trajectory_ = new controller_msgs.msg.dds.JointspaceTrajectoryMessage();
+      orientation_trajectory_ = new ihmc_common_msgs.msg.dds.SO3TrajectoryMessage();
       load_bearing_message_ = new controller_msgs.msg.dds.LoadBearingMessage();
    }
 
@@ -61,6 +66,7 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
       use_jointspace_command_ = other.use_jointspace_command_;
 
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.staticCopy(other.jointspace_trajectory_, jointspace_trajectory_);
+      ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.orientation_trajectory_, orientation_trajectory_);
       execution_delay_time_ = other.execution_delay_time_;
 
       controller_msgs.msg.dds.LoadBearingMessagePubSubType.staticCopy(other.load_bearing_message_, load_bearing_message_);
@@ -97,14 +103,14 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
    }
 
    /**
-            * Determines whether hybrid load bearing and jointspace control will be used.
+            * Determines the control mode used for the arm's nullspace. If true, jointspace is used, otherwise taskspace orientation is used.
             */
    public void setUseJointspaceCommand(boolean use_jointspace_command)
    {
       use_jointspace_command_ = use_jointspace_command;
    }
    /**
-            * Determines whether hybrid load bearing and jointspace control will be used.
+            * Determines the control mode used for the arm's nullspace. If true, jointspace is used, otherwise taskspace orientation is used.
             */
    public boolean getUseJointspaceCommand()
    {
@@ -113,12 +119,21 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
 
 
    /**
-            * The arm desired jointspace trajectory that will be used for hybrid control if use_jointspace_command is true.
+            * The arm desired jointspace trajectory that will be used to control the arm's nullspace if use_jointspace_command is true.
             * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
             */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage getJointspaceTrajectory()
    {
       return jointspace_trajectory_;
+   }
+
+
+   /**
+            * The hand desired orientation trajectory that will be used to control the arm's nullspace if use_jointspace_command is false.
+            */
+   public ihmc_common_msgs.msg.dds.SO3TrajectoryMessage getOrientationTrajectory()
+   {
+      return orientation_trajectory_;
    }
 
    /**
@@ -170,6 +185,7 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_jointspace_command_, other.use_jointspace_command_, epsilon)) return false;
 
       if (!this.jointspace_trajectory_.epsilonEquals(other.jointspace_trajectory_, epsilon)) return false;
+      if (!this.orientation_trajectory_.epsilonEquals(other.orientation_trajectory_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_delay_time_, other.execution_delay_time_, epsilon)) return false;
 
       if (!this.load_bearing_message_.epsilonEquals(other.load_bearing_message_, epsilon)) return false;
@@ -193,6 +209,7 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
       if(this.use_jointspace_command_ != otherMyClass.use_jointspace_command_) return false;
 
       if (!this.jointspace_trajectory_.equals(otherMyClass.jointspace_trajectory_)) return false;
+      if (!this.orientation_trajectory_.equals(otherMyClass.orientation_trajectory_)) return false;
       if(this.execution_delay_time_ != otherMyClass.execution_delay_time_) return false;
 
       if (!this.load_bearing_message_.equals(otherMyClass.load_bearing_message_)) return false;
@@ -214,6 +231,8 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
       builder.append(this.use_jointspace_command_);      builder.append(", ");
       builder.append("jointspace_trajectory=");
       builder.append(this.jointspace_trajectory_);      builder.append(", ");
+      builder.append("orientation_trajectory=");
+      builder.append(this.orientation_trajectory_);      builder.append(", ");
       builder.append("execution_delay_time=");
       builder.append(this.execution_delay_time_);      builder.append(", ");
       builder.append("load_bearing_message=");
