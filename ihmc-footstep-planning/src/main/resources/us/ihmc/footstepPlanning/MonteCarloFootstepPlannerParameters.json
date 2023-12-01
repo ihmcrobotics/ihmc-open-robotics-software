@@ -66,17 +66,17 @@
     "upperBound" : 1000
   },
   "Max tree depth" : {
-    "value" : 4,
+    "value" : 7,
     "lowerBound" : 2,
     "upperBound" : 12
   },
   "Sided yaw offset" : {
-    "value" : 0.498879,
+    "value" : 0.55757,
     "lowerBound" : 0.0,
     "upperBound" : 3.14
   },
   "Search yaw band" : {
-    "value" : 0.367114,
+    "value" : 0.209333,
     "lowerBound" : 0.0,
     "upperBound" : 3.14
   },
@@ -86,7 +86,7 @@
     "upperBound" : 0.3
   },
   "Search outer radius" : {
-    "value" : 0.72449,
+    "value" : 0.668367,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
