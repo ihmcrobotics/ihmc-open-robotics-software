@@ -106,13 +106,25 @@ void kernel computeSnappedValuesKernel(global float* params,
     int idx_yaw = (int) idx_yaw_singular_buffer[0]; // TODO not needed
 
     int2 key = (int2) (idx_x, idx_y);
-    float foot_height = (float) read_imageui(height_map, key).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+    uint foot_height_int = read_imageui(height_map, key).x;
+    if (foot_height_int == 32768) // FIXME this is the placeholder for no data
+    {
+       write_imageui(steppable_map, key, (uint4)(SNAP_FAILED,0,0,0));
+
+       write_imageui(snapped_height_map, key, (uint4)(0, 0, 0, 0));
+       write_imageui(snapped_normal_x_map, key, (uint4)(0, 0, 0, 0));
+       write_imageui(snapped_normal_y_map, key, (uint4)(0, 0, 0, 0));
+       write_imageui(snapped_normal_z_map, key, (uint4)(0, 0, 0, 0));
+
+       return;
+    }
+    float foot_height = (float) foot_height_int / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
 
     bool should_print = false;//idx_x == 0 && idx_y == 0;
 
-if (should_print)
+    if (should_print)
     {
-    printf("got to foot height\n");
+        printf("got to foot height\n");
     }
 
     // TODO yaw discretizations should get set
@@ -134,9 +146,9 @@ if (should_print)
     int2 map_key = (int2) (map_idx_x, map_idx_y);
     float2 foot_position = indices_to_coordinate(map_key, center, map_resolution, center_index);
 
-if (should_print)
+    if (should_print)
     {
-    printf("got foot position %f, %f\n", foot_position.x, foot_position.y);
+       printf("got foot position %f, %f\n", foot_position.x, foot_position.y);
     }
 
 
@@ -184,8 +196,12 @@ if (should_print)
                 if (min_distance_from_this_point > distance_to_foot)
                 {
                     // we're too close to the cliff bottom!
-                    // FIXME
                     write_imageui(steppable_map, key, (uint4)(CLIFF_BOTTOM,0,0,0));
+
+                    write_imageui(snapped_height_map, key, (uint4)(0, 0, 0, 0));
+                    write_imageui(snapped_normal_x_map, key, (uint4)(0, 0, 0, 0));
+                    write_imageui(snapped_normal_y_map, key, (uint4)(0, 0, 0, 0));
+                    write_imageui(snapped_normal_z_map, key, (uint4)(0, 0, 0, 0));
 
                     return;
                 }
@@ -195,8 +211,12 @@ if (should_print)
                 if (params[MIN_DISTANCE_FROM_CLIFF_TOPS] > distance_to_foot)
                 {
                     // we're too close to the cliff top!
-                    // FIXME
                     write_imageui(steppable_map, key, (uint4)(CLIFF_TOP,0,0,0));
+
+                    write_imageui(snapped_height_map, key, (uint4)(0, 0, 0, 0));
+                    write_imageui(snapped_normal_x_map, key, (uint4)(0, 0, 0, 0));
+                    write_imageui(snapped_normal_y_map, key, (uint4)(0, 0, 0, 0));
+                    write_imageui(snapped_normal_z_map, key, (uint4)(0, 0, 0, 0));
 
                     return;
                 }
@@ -344,13 +364,11 @@ if (should_print)
        float3 normal = (float3) (coefficients[0], coefficients[1], 1.0);
        normal = normalize(normal);
 
-       if (snap_height > 0.01f)
-       {
-          printf("got a height %f at %d, %d\n", snap_height, key.x, key.y);
-       }
+        // TODO potentially use the z solution.
+       snap_height += params[HEIGHT_OFFSET];
 
        write_imageui(steppable_map, key, (uint4)(VALID,0,0,0));
-       write_imageui(snapped_height_map, key, (uint4)((int)((snap_height + params[HEIGHT_OFFSET]) * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
+       write_imageui(snapped_height_map, key, (uint4)((int)(snap_height * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
        write_imageui(snapped_normal_x_map, key, (uint4)((int)(normal.x * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
        write_imageui(snapped_normal_y_map, key, (uint4)((int)(normal.y * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
        write_imageui(snapped_normal_z_map, key, (uint4)((int)(normal.z * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));

@@ -12,11 +12,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -94,6 +96,7 @@ public class RapidHeightMapExtractor
    private float[] sensorToGroundTransformArray = new float[16];
 
    private Mat croppedHeightMapImage;
+   private Mat croppedSnappedMapImage;
    private Mat denoisedHeightMap;
    private Rect cropWindowRectangle;
 
@@ -131,6 +134,7 @@ public class RapidHeightMapExtractor
       groundPlaneBuffer.createOpenCLBufferObject(openCLManager);
 
       croppedHeightMapImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
+      croppedSnappedMapImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
       denoisedHeightMap = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
 
       createLocalHeightMapImage(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
@@ -237,7 +241,11 @@ public class RapidHeightMapExtractor
          // compute the steppable height image
          computeSteppabilityImage();
 
+//         PerceptionDebugTools.printMat("Height map", snapHeightImage.getBytedecoOpenCVMat(), 30);
+
+
          croppedHeightMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
+         croppedSnappedMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, snapHeightImage.getBytedecoOpenCVMat());
          //denoisedHeightMap = denoiser.denoiseHeightMap(croppedHeightMapImage, 3.2768f);
 
          sequenceNumber++;
@@ -441,6 +449,11 @@ public class RapidHeightMapExtractor
    public Mat getCroppedGlobalHeightMapImage()
    {
       return croppedHeightMapImage;
+   }
+
+   public Mat getCroppedSnappedHeightMapImage()
+   {
+      return croppedSnappedMapImage;
    }
 
 //   public Mat getDenoisedHeightMap()
