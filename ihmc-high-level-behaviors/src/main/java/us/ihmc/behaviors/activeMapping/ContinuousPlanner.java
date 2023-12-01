@@ -89,12 +89,10 @@ public class ContinuousPlanner
 
    public ContinuousPlanner(DRCRobotModel robotModel,
                             HumanoidReferenceFrames humanoidReferenceFrames,
-                            ContinuousPlannerStatistics statistics,
                             PlanningMode mode)
    {
       this.referenceFrames = humanoidReferenceFrames;
       this.mode = mode;
-      this.statistics = statistics;
       this.swingPlannerParameters = robotModel.getSwingPlannerParameters();
 
       active = true;
@@ -208,7 +206,7 @@ public class ContinuousPlanner
 
    public void planToGoalWithHeightMap(HeightMapData heightMapData, Mat heightMap, Mat contactMap, boolean useReferencePlan)
    {
-      long startTime = System.currentTimeMillis();
+      long startTimeForStatistics = System.currentTimeMillis();
 
       switch (mode)
       {
@@ -216,7 +214,7 @@ public class ContinuousPlanner
          case INCREMENTAL_PLANNING -> planWithMonteCarloPlanner(heightMapData, heightMap, contactMap, false);
       }
 
-      statistics.setLastPlanningTime((float) (System.currentTimeMillis() - startTime) / 1000.0f);
+      statistics.setLastAndTotalPlanningTimes((float) (System.currentTimeMillis() - startTimeForStatistics) / 1000.0f);
    }
 
    public void planWithMonteCarloPlanner(HeightMapData heightMapData, Mat heightMapImage, Mat contactMapImage, boolean reset)
@@ -323,6 +321,9 @@ public class ContinuousPlanner
                                      planAvailable,
                                      imminentFootstepSide));
       }
+
+      assert plannerOutput != null;
+      statistics.setTotalStepsPlanned(plannerOutput.getFootstepPlan().getNumberOfSteps());
 
       if (LOG_FOOTSTEP_PLANS)
       {
@@ -636,6 +637,11 @@ public class ContinuousPlanner
    public SideDependentList<FramePose3D> getStartingStancePose()
    {
       return startingStancePose;
+   }
+
+   public void setContinuousPlannerStatistics(ContinuousPlannerStatistics continuousPlannerStatistics)
+   {
+      this.statistics = continuousPlannerStatistics;
    }
 
    public PlanningMode getMode()

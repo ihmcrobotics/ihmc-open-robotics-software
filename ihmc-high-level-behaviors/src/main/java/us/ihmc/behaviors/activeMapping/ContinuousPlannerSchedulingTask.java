@@ -52,10 +52,11 @@ public class ContinuousPlannerSchedulingTask
    private Mat heightMapImage;
    private Mat contactMapImage;
 
-   private final ContinuousPlannerStatistics continuousPlannerStatistics = new ContinuousPlannerStatistics();
+   private ContinuousPlannerStatistics continuousPlannerStatistics;
    private final ContinuousWalkingParameters continuousPlanningParameters;
 
    private final HumanoidReferenceFrames referenceFrames;
+
    private final ContinuousPlanner continuousPlanner;
 
    private int controllerQueueSize = 0;
@@ -86,7 +87,6 @@ public class ContinuousPlannerSchedulingTask
 
       continuousPlanner = new ContinuousPlanner(robotModel,
                                                 referenceFrames,
-                                                continuousPlannerStatistics,
                                                 ContinuousPlanner.PlanningMode.WALK_TO_GOAL);
 
       executorService.scheduleWithFixedDelay(this::tickStateMachine, 1500, CONTINUOUS_PLANNING_DELAY_MS, TimeUnit.MILLISECONDS);
@@ -103,6 +103,11 @@ public class ContinuousPlannerSchedulingTask
 
          state = ContinuousWalkingState.NOT_STARTED;
          return;
+      }
+      if (continuousPlannerStatistics == null)
+      {
+         continuousPlannerStatistics = new ContinuousPlannerStatistics();
+         continuousPlanner.setContinuousPlannerStatistics(continuousPlannerStatistics);
       }
 
       if (!continuousPlanner.isInitialized())
@@ -150,6 +155,7 @@ public class ContinuousPlannerSchedulingTask
       if (state == ContinuousWalkingState.READY_TO_PLAN)
       {
          LogTools.info("State: " + state);
+         continuousPlannerStatistics.setLastAndTotalWaitingTimes();
          continuousPlanner.getImminentStanceFromLatestStatus(footstepStatusMessage, controllerQueue);
          publishForVisualization();
          continuousPlanner.setGoalWaypointPoses(continuousPlanningParameters);
@@ -176,8 +182,7 @@ public class ContinuousPlannerSchedulingTask
          state = ContinuousWalkingState.WAITING_TO_LAND;
          continuousPlanner.setPlanAvailable(false);
          continuousPlanner.transitionCallback();
-
-         continuousPlannerStatistics.startWaitingTime();
+         continuousPlannerStatistics.setStartWaitingTime();
       }
    }
 
@@ -188,10 +193,10 @@ public class ContinuousPlannerSchedulingTask
       {
          state = ContinuousWalkingState.READY_TO_PLAN;
          continuousPlannerStatistics.startStepTime();
-         continuousPlannerStatistics.endWaitingTime();
       }
       else if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
       {
+         continuousPlannerStatistics.setLastFootstepQueueLength(controllerQueueSize);
          continuousPlannerStatistics.endStepTime();
          continuousPlannerStatistics.incrementTotalStepsCompleted();
 
@@ -200,7 +205,6 @@ public class ContinuousPlannerSchedulingTask
                                           .getTranslation()
                                           .norm();
          continuousPlannerStatistics.setLastLengthCompleted((float) distance);
-         continuousPlannerStatistics.setLastFootstepQueueLength(controllerQueueSize);
 
          continuousPlannerStatistics.logToFile(true, true);
       }

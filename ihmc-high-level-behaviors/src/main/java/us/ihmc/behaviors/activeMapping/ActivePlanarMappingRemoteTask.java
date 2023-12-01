@@ -50,8 +50,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
       this.continuousPlanningParameters = continuousPlanningParameters;
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
 
-      activeMappingModule = new ContinuousPlanner(robotModel, referenceFrames, new ContinuousPlannerStatistics(),
-                                                  ContinuousPlanner.PlanningMode.FRONTIER_EXPANSION);
+      activeMappingModule = new ContinuousPlanner(robotModel, referenceFrames, ContinuousPlanner.PlanningMode.FRONTIER_EXPANSION);
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);

@@ -3,7 +3,7 @@ import numpy as np
 import re
 
 # Open the log file and read the contents into a string variable
-with open('data/continuous_walking_log.txt', 'r') as f:
+with open('data/test.txt', 'r') as f:
     log_data = f.read()
 
 # Split the string into individual lines
@@ -20,7 +20,7 @@ last_planning_time = np.array([])
 last_waiting_time = np.array([])
 total_waiting_time = np.array([])
 total_steps_planned = np.array([])
-last_footstep_queue_length = np.array([])
+last_footstep_queue_size = np.array([])
 last_step_start_time = np.array([])
 last_continuous_walking_time = np.array([])
 
@@ -56,9 +56,9 @@ for line in lines:
     match = re.search(r'total_steps_planned:(\d+\.\d+)', line)
     if match:
         total_steps_planned = np.append(total_steps_planned, float(match.group(1)))
-    match = re.search(r'last_footstep_queue_length:(\d+\.\d+)', line)
+    match = re.search(r'last_footstep_queue_size:(\d+\.\d+)', line)
     if match:
-        last_footstep_queue_length = np.append(last_footstep_queue_length, float(match.group(1)))
+        last_footstep_queue_size = np.append(last_footstep_queue_size, float(match.group(1)))
     match = re.search(r'last_step_start_time:(\d+\.\d+)', line)
     if match:
         last_step_start_time = np.append(last_step_start_time, float(match.group(1)))
@@ -78,7 +78,7 @@ data_dict = {
     'last_waiting_time': last_waiting_time,
     'total_waiting_time': total_waiting_time,
     'total_steps_planned': total_steps_planned,
-    'last_footstep_queue_length': last_footstep_queue_length,
+    'last_footstep_queue_size': last_footstep_queue_size,
     'last_step_start_time': last_step_start_time,
     'last_continuous_walking_time': last_continuous_walking_time
 }
@@ -87,41 +87,79 @@ data_dict = {
 for key in data_dict:
     print(key, data_dict[key])
 
-
 import matplotlib.pyplot as plt
 plt.rcParams.update({'font.size': 8})
-
 
 # ... (code to read in data_dict from log file)
 
 # Create a figure with 3 rows and 4 columns of subplots
 fig, axs = plt.subplots(3, 4, figsize=(18, 12))
 
+# Adjust the layout to add some space between subplots
+plt.subplots_adjust(hspace=0.5)  # You can adjust the value as needed
+
 # Plot each data field in a separate subplot
 axs[0, 0].plot(data_dict['total_length_completed'])
-axs[0, 0].set_title('Total Length Completed')
+axs[0, 0].set_title('Continuous Walking Distance')
+axs[0, 0].set_xlabel('Time in seconds')
+axs[0, 0].set_ylabel('Distance in meters')
+
 axs[0, 1].plot(data_dict['total_steps_completed'])
 axs[0, 1].set_title('Total Steps Completed')
+axs[0, 1].set_xlabel('Time in seconds')
+axs[0, 1].set_ylabel('Steps completed')
+
 axs[0, 2].plot(data_dict['total_planning_time'])
 axs[0, 2].set_title('Total Planning Time')
-axs[0, 3].plot(data_dict['last_step_time'])
-axs[0, 3].set_title('Last Step Time')
-axs[1, 0].plot(data_dict['total_continuous_walking_time'])
-axs[1, 0].set_title('Total Continuous Walking Time')
+axs[0, 2].set_xlabel('Time in seconds')
+axs[0, 2].set_ylabel('Planning time')
+
+
+axs[0, 3].plot(data_dict['total_waiting_time'])
+axs[0, 3].set_title('Total Waiting Time')
+axs[0, 3].set_xlabel('Time in seconds')
+axs[0, 3].set_ylabel('Total waiting time')
+
+# axs[0, 3].plot(data_dict['last_step_time'])
+# axs[0, 3].set_title('Last Step Time')
+# axs[0, 3].set_xlabel('Time in seconds')
+# axs[0, 3].set_ylabel('Not sure yet')
+
+# axs[1, 0].plot(data_dict['total_continuous_walking_time'])
+# axs[1, 0].set_title('BAD CHART REMOVE')
+# axs[1, 0].set_xlabel('Time in seconds')
+# axs[1, 0].set_ylabel('Continuous Walking time')
+
 axs[1, 1].plot(data_dict['number_of_interventions'])
 axs[1, 1].set_title('Number of Interventions')
+axs[1, 1].set_xlabel('Time in seconds')
+axs[1, 1].set_ylabel('User interrupts')
+
 axs[1, 2].plot(data_dict['last_planning_time'])
 axs[1, 2].set_title('Last Planning Time')
+axs[1, 2].set_xlabel('Time in seconds')
+axs[1, 2].set_ylabel('Planning time')
+
 axs[1, 3].plot(data_dict['last_waiting_time'])
 axs[1, 3].set_title('Last Waiting Time')
-axs[2, 0].plot(data_dict['total_waiting_time'])
-axs[2, 0].set_title('Total Waiting Time')
+axs[1, 3].set_xlabel('Time in seconds')
+axs[1, 3].set_ylabel('Last waiting time')
+
 axs[2, 1].plot(data_dict['total_steps_planned'])
 axs[2, 1].set_title('Total Steps Planned')
-axs[2, 2].plot(data_dict['last_footstep_queue_length'])
-axs[2, 2].set_title('Last Footstep Queue Length')
+axs[2, 1].set_xlabel('Distance')
+axs[2, 1].set_ylabel('Time in seconds')
+
+last_footstep_queue_size
+axs[2, 2].plot(data_dict['last_footstep_queue_size'])
+axs[2, 2].set_title('Last Footstep Queue Size')
+axs[2, 2].set_xlabel('Time in seconds')
+axs[2, 2].set_ylabel('Size')
+
 axs[2, 3].plot(data_dict['last_continuous_walking_time'])
 axs[2, 3].set_title('Last Continuous Walking Time')
+axs[2, 3].set_xlabel('Distance')
+axs[2, 3].set_ylabel('Time in seconds')
 
 # Add a title to the entire figure
 fig.suptitle('Continuous Walking Log Data')
