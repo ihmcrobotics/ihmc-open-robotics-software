@@ -166,7 +166,7 @@ void kernel computeSnappedValuesKernel(global float* params,
             float query_height = (float) read_imageui(height_map, query_key).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
 
             // compute the relative height at this point, compared to the height contained in the current cell.
-            float relative_height = query_height - foot_height;
+            float relative_height_of_query = query_height - foot_height;
 
             float distance_to_foot_from_this_query;
             if (ASSUME_FOOT_IS_A_CIRCLE)
@@ -178,12 +178,15 @@ void kernel computeSnappedValuesKernel(global float* params,
                 distance_to_foot_from_this_query = signed_distance_to_foot_polygon(center_index, map_resolution, params, key, foot_yaw, query_key);
             }
 
-            // FIXME so this being a hard transition makes it a noisy signal. How can we smooth it?
-            if (relative_height > params[CLIFF_START_HEIGHT_TO_AVOID])
+
+           // FIXME so this being a hard transition makes it a noisy signal. How can we smooth it?
+
+            if (relative_height_of_query > params[CLIFF_START_HEIGHT_TO_AVOID])
             {
-                float height_alpha = (relative_height - params[CLIFF_START_HEIGHT_TO_AVOID]) / (params[CLIFF_END_HEIGHT_TO_AVOID] - params[CLIFF_START_HEIGHT_TO_AVOID]);
+                float height_alpha = (relative_height_of_query - params[CLIFF_START_HEIGHT_TO_AVOID]) / (params[CLIFF_END_HEIGHT_TO_AVOID] - params[CLIFF_START_HEIGHT_TO_AVOID]);
                 height_alpha = clamp(height_alpha, 0.0f, 1.0f);
                 float min_distance_from_this_point_to_avoid_cliff = height_alpha * params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS];
+
 
                 if (distance_to_foot_from_this_query < min_distance_from_this_point_to_avoid_cliff)
                 {
@@ -198,8 +201,10 @@ void kernel computeSnappedValuesKernel(global float* params,
                     return;
                 }
             }
-            else if (relative_height < -params[CLIFF_START_HEIGHT_TO_AVOID])
+            else if (relative_height_of_query < -params[CLIFF_START_HEIGHT_TO_AVOID])
             {
+
+                // FIXME so this being a hard transition makes it a noisy signal. How can we smooth it?
                 if (distance_to_foot_from_this_query < params[MIN_DISTANCE_FROM_CLIFF_TOPS])
                 {
                     // we're too close to the cliff top!
