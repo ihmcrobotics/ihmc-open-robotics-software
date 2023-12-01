@@ -241,12 +241,16 @@ public class RapidHeightMapExtractor
          // compute the steppable height image
          computeSteppabilityImage();
 
-//         PerceptionDebugTools.printMat("Height map", snapHeightImage.getBytedecoOpenCVMat(), 30);
-
+         PerceptionDebugTools.printMat("Internal Original Height Map", globalHeightMapImage.getBytedecoOpenCVMat(), 600, 600, 900, 900, 10);
+         PerceptionDebugTools.printMat("Internal Snap Height Map", snapHeightImage.getBytedecoOpenCVMat(), 600, 600, 900, 900, 10);
 
          croppedHeightMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
          croppedSnappedMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, snapHeightImage.getBytedecoOpenCVMat());
          //denoisedHeightMap = denoiser.denoiseHeightMap(croppedHeightMapImage, 3.2768f);
+
+         //PerceptionDebugTools.printMat("Cropped Height Map", croppedHeightMapImage, 4);
+         //PerceptionDebugTools.printMat("Cropped Snap Height Map", croppedSnappedMapImage, 4);
+
 
          sequenceNumber++;
       }
