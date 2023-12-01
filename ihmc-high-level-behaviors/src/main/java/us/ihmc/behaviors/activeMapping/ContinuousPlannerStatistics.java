@@ -3,6 +3,7 @@ package us.ihmc.behaviors.activeMapping;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
@@ -30,6 +31,7 @@ public class ContinuousPlannerStatistics
    private static final String LAST_PLANNING_TIME = "last_planning_time";
    private static final String LAST_WAITING_TIME = "last_waiting_time";
    private static final String LAST_FOOTSTEP_QUEUE_SIZE = "last_footstep_queue_size";
+   private static final String LAST_CONTINUOUS_WALKING_TIME = "last_continuous_walking_time";
 
    public ContinuousPlannerStatistics()
    {
@@ -53,15 +55,15 @@ public class ContinuousPlannerStatistics
       statistics.put(TOTAL_PLANNING_TIME, 0.0f);
       statistics.put(TOTAL_WAITING_TIME, 0.0f);
       statistics.put(TOTAL_STEPS_PLANNED, 0.0f);
+      statistics.put(TOTAL_CONTINUOUS_WALKING_TIME, 0.0f);
 
       statistics.put(LAST_PLANNING_TIME, 0.0f);
       statistics.put(LAST_WAITING_TIME, 0.0f);
       statistics.put(LAST_FOOTSTEP_QUEUE_SIZE, 0.0f);
+      statistics.put(LAST_CONTINUOUS_WALKING_TIME, 0.0f);
 
       // TODO fix the rest of these or change them
       statistics.put(NUMBER_OF_USER_INTERRUPTS, 0.0f);
-      statistics.put(TOTAL_CONTINUOUS_WALKING_TIME, 0.0f);
-      statistics.put("last_continuous_walking_time", 0.0f);
    }
 
    public void setLastAndTotalPlanningTimes(float lastPlanningTime)
@@ -71,8 +73,10 @@ public class ContinuousPlannerStatistics
    }
 
 
+   private boolean startedWalking = false;
    private boolean inWaitingTime = false;
    private long startWaitingTime;
+   private long startContinuousWalkingTime;
 
 
    public void setStartWaitingTime()
@@ -89,6 +93,23 @@ public class ContinuousPlannerStatistics
          statistics.put(LAST_WAITING_TIME, lastWaitingTime);
          statistics.put(TOTAL_WAITING_TIME, statistics.get(TOTAL_WAITING_TIME) + lastWaitingTime);
          inWaitingTime = false;
+      }
+   }
+
+   public void startStepTime()
+   {
+      startContinuousWalkingTime = System.currentTimeMillis();
+      startedWalking = true;
+   }
+
+   public void endStepTime()
+   {
+      if (startedWalking)
+      {
+         float lastStepTime = (System.currentTimeMillis() - startContinuousWalkingTime) / 1000.0f;
+         statistics.put(LAST_CONTINUOUS_WALKING_TIME, lastStepTime);
+         statistics.put(TOTAL_CONTINUOUS_WALKING_TIME, statistics.get(TOTAL_CONTINUOUS_WALKING_TIME) + lastStepTime);
+         startedWalking = false;
       }
    }
 
@@ -118,18 +139,6 @@ public class ContinuousPlannerStatistics
       statistics.put(TOTAL_STEPS_COMPLETED, statistics.get(TOTAL_STEPS_COMPLETED) + 1.0f);
    }
 
-   public void startStepTime()
-   {
-      statistics.put("last_continuous_walking_time", System.currentTimeMillis() / 1000.0f);
-   }
-
-   public void endStepTime()
-   {
-      float lastStepTime = System.currentTimeMillis() / 1000.0f - statistics.get("last_continuous_walking_time");
-      statistics.put("last_continuous_walking_time", lastStepTime);
-      statistics.put(TOTAL_CONTINUOUS_WALKING_TIME, statistics.get(TOTAL_CONTINUOUS_WALKING_TIME) + lastStepTime);
-   }
-
    public void logToFile(boolean logToFile, boolean printToConsole)
    {
       if (logToFile || printToConsole)
@@ -138,7 +147,10 @@ public class ContinuousPlannerStatistics
             System.out.println(this);
 
          if (logToFile)
+         {
+            LogTools.info("Logging Continuous Walking Statistics: {}", file.getAbsoluteFile().toPath());
             FileTools.write(file.getAbsoluteFile().toPath(), toString().getBytes(), WriteOption.APPEND, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         }
       }
    }
 

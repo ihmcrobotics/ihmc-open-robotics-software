@@ -89,6 +89,9 @@ public class ContinuousPlannerSchedulingTask
                                                 referenceFrames,
                                                 ContinuousPlanner.PlanningMode.WALK_TO_GOAL);
 
+      continuousPlannerStatistics = new ContinuousPlannerStatistics();
+      continuousPlanner.setContinuousPlannerStatistics(continuousPlannerStatistics);
+
       executorService.scheduleWithFixedDelay(this::tickStateMachine, 1500, CONTINUOUS_PLANNING_DELAY_MS, TimeUnit.MILLISECONDS);
    }
 
@@ -103,11 +106,6 @@ public class ContinuousPlannerSchedulingTask
 
          state = ContinuousWalkingState.NOT_STARTED;
          return;
-      }
-      if (continuousPlannerStatistics == null)
-      {
-         continuousPlannerStatistics = new ContinuousPlannerStatistics();
-         continuousPlanner.setContinuousPlannerStatistics(continuousPlannerStatistics);
       }
 
       if (!continuousPlanner.isInitialized())
@@ -189,15 +187,18 @@ public class ContinuousPlannerSchedulingTask
    // This receives a message each time there is a change in the FootstepStatusMessage
    private void footstepStatusReceived(FootstepStatusMessage footstepStatusMessage)
    {
+      if (!continuousPlanningParameters.getActiveMapping())
+         return;
+
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
       {
          state = ContinuousWalkingState.READY_TO_PLAN;
+         continuousPlannerStatistics.endStepTime();
          continuousPlannerStatistics.startStepTime();
       }
       else if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
       {
          continuousPlannerStatistics.setLastFootstepQueueLength(controllerQueueSize);
-         continuousPlannerStatistics.endStepTime();
          continuousPlannerStatistics.incrementTotalStepsCompleted();
 
          double distance = referenceFrames.getSoleFrame(RobotSide.LEFT)
@@ -214,6 +215,9 @@ public class ContinuousPlannerSchedulingTask
 
    private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
    {
+      if (!continuousPlanningParameters.getActiveMapping())
+         return;
+
       controllerQueue = footstepQueueStatusMessage.getQueuedFootstepList();
       if (controllerQueueSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
          LogTools.warn("Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());

@@ -3,7 +3,7 @@ import numpy as np
 import re
 
 # Open the log file and read the contents into a string variable
-with open('data/test.txt', 'r') as f:
+with open('/home/bmishra/.ihmc/logs/continuous-planning/20231201_141907_ContinuousPlannerLog.txt', 'r') as f:
     log_data = f.read()
 
 # Split the string into individual lines
@@ -23,6 +23,7 @@ total_steps_planned = np.array([])
 last_footstep_queue_size = np.array([])
 last_step_start_time = np.array([])
 last_continuous_walking_time = np.array([])
+continuous_walking_speed = np.array([])
 
 # Loop through each line of the log file and extract the relevant data
 for line in lines:
@@ -82,6 +83,9 @@ data_dict = {
     'last_step_start_time': last_step_start_time,
     'last_continuous_walking_time': last_continuous_walking_time
 }
+
+# set speed to be total length / total time using numpy
+continuous_walking_speed = np.divide(total_length_completed, total_continuous_walking_time)
 
 # Print the data dictionary
 for key in data_dict:
@@ -156,10 +160,10 @@ axs[2, 2].set_title('Last Footstep Queue Size')
 axs[2, 2].set_xlabel('Time in seconds')
 axs[2, 2].set_ylabel('Size')
 
-axs[2, 3].plot(data_dict['last_continuous_walking_time'])
-axs[2, 3].set_title('Last Continuous Walking Time')
-axs[2, 3].set_xlabel('Distance')
-axs[2, 3].set_ylabel('Time in seconds')
+axs[2, 3].plot(continuous_walking_speed)
+axs[2, 3].set_title('Continuous Walking Speed')
+axs[2, 3].set_xlabel('Speed (m/s)')
+axs[2, 3].set_ylabel('Time (seconds)')
 
 # Add a title to the entire figure
 fig.suptitle('Continuous Walking Log Data')
