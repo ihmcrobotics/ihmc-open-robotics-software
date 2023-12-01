@@ -405,13 +405,7 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    }
 
 //   finalHeight = clamp(finalHeight, params[MIN_HEIGHT_REGISTRATION], params[MAX_HEIGHT_REGISTRATION]);
-
-   if ( finalHeight > 0.01f)
-   {
-    // printf("Found a height at %d, %d = %f\n", yIndex, xIndex, finalHeight);
-   }
    finalHeight += params[HEIGHT_OFFSET];
-
 
    // Put the height value in the global map at the global cell index
    write_imageui(globalMap, (int2)(yIndex, xIndex), (uint4)((int)(finalHeight * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
