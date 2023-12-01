@@ -26,7 +26,9 @@ public class MonteCarloFootstepPlannerStatistics
    private double totalExpansionTime = 0;
    private double totalPruningTime = 0;
    private double totalPropagationTime = 0;
+   private double totalSearchTime = 0;
 
+   private double lastSearchTime = 0;
    private double lastSimulationTime = 0;
    private double lastExpansionTime = 0;
    private double lastPruningTime = 0;
@@ -37,6 +39,7 @@ public class MonteCarloFootstepPlannerStatistics
    private long expansionStartTime = 0;
    private long pruningStartTime = 0;
    private long propagationStartTime = 0;
+   private long searchStartTime = 0;
 
    private double totalReward = 0;
    private double contactReward = 0;
@@ -47,6 +50,7 @@ public class MonteCarloFootstepPlannerStatistics
    private boolean expansionTimeStarted = false;
    private boolean pruningTimeStarted = false;
    private boolean propagationTimeStarted = false;
+   private boolean searchTimeStarted = false;
 
    public MonteCarloFootstepPlannerStatistics()
    {
@@ -78,6 +82,7 @@ public class MonteCarloFootstepPlannerStatistics
          log.append("ExpansionTime: ").append(lastExpansionTime).append(", ");
          log.append("PruningTime: ").append(lastPruningTime).append(", ");
          log.append("PropagationTime: ").append(lastPropagationTime).append(", ");
+         log.append("SearchTime: ").append(lastSearchTime).append(", ");
          log.append("Visited: ").append(numberOfNodesVisited).append(", ");
          log.append("Pruned: ").append(numberOfNodesPruned).append(", ");
          log.append("TotalReward: ").append(totalReward).append(", ");
@@ -107,7 +112,7 @@ public class MonteCarloFootstepPlannerStatistics
    {
       if (totalTimeStarted)
       {
-         totalTime += (double) (System.nanoTime() - totalStartTime) / 1000000;
+         totalTime = (double) (System.nanoTime() - totalStartTime) / 1000000;
          totalTimeStarted = false;
       }
    }
@@ -185,6 +190,25 @@ public class MonteCarloFootstepPlannerStatistics
          lastPropagationTime = (double) (System.nanoTime() - propagationStartTime) / 1000000;
          totalPropagationTime += lastPropagationTime;
          propagationTimeStarted = false;
+      }
+   }
+
+   public void startSearchTime()
+   {
+      if (!searchTimeStarted)
+      {
+         searchStartTime = System.nanoTime();
+         searchTimeStarted = true;
+      }
+   }
+
+   public void stopSearchTime()
+   {
+      if (searchTimeStarted)
+      {
+         lastSearchTime = (double) (System.nanoTime() - searchStartTime) / 1000000;
+         totalSearchTime += lastSearchTime;
+         searchTimeStarted = false;
       }
    }
 
