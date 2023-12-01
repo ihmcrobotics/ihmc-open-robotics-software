@@ -220,16 +220,24 @@ void kernel computeSnappedValuesKernel(global float* params,
             }
 
             //  TODO extract epsilon
-            if (distance_to_foot_from_this_query < 1e-3f)
-            {
-                max_height_under_foot = max(query_height, max_height_under_foot);
-            }
+            // We want to find the max heigth under the foot. However, we don't want points that are very close to the foot edge to unduly affect
+            // this height, because that can some times be noise. So instead, we can use an activation function. Increasing the slope of the activation
+            // function will increase how quickly these get added, where a slope of infinity makes it an inequality condition.
+            float tanh_slope = 50000.0f;
+            float activation = 1.0f - 0.5f * (tanh(tanh_slope * distance_to_foot_from_this_query) + 1.0f);
+            max_height_under_foot += activation * max(max_height_under_foot - query_height, 0.0f);
+
+            // FIXME old code, where we're trying to smooth things
+            //if (distance_to_foot_from_this_query < 1e-3f)
+            //{
+            //    max_height_under_foot = max(query_height, max_height_under_foot);
+            //}
         }
     }
 
     //////// Compute the local plane of the foot, as well as the area of support underneath it.
 
-    int points_detected_under_foot = 0;
+    float points_detected_under_foot = 0.0f;
     float running_height_total = 0.0f;
     float min_height_under_foot_to_consider = max_height_under_foot - 0.05f;
     float resolution = 0.02f;
@@ -250,6 +258,8 @@ void kernel computeSnappedValuesKernel(global float* params,
     float zz = 0.0f;
 
     int max_points_possible_under_support;
+
+
 
     if (ASSUME_FOOT_IS_A_CIRCLE)
     {
@@ -280,11 +290,22 @@ void kernel computeSnappedValuesKernel(global float* params,
 
                 float query_height = (float) query_height_int / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
 
-                if (isnan(query_height) || query_height < min_height_under_foot_to_consider)
+                // FIXME old code
+                //if (isnan(query_height) || query_height < min_height_under_foot_to_consider)
+                //    continue;
+                //
+                //points_detected_under_foot++;
+                //running_height_total += query_height;
+
+
+                if (isnan(query_height))// || query_height < min_height_under_foot_to_consider)
                    continue;
 
-                points_detected_under_foot++;
-                running_height_total += query_height;
+            // fixme extract
+            float tanh_slope = 50000.0f;
+                float activation = 0.5f * (tanh(tanh_slope * (query_height - min_height_under_foot_to_consider)) + 1.0f);
+                points_detected_under_foot += activation;
+                running_height_total += activation * query_height;
 
                 n += 1.0f;
                 x += point_query.x;
@@ -353,7 +374,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     // TODO extract area fraction
     float min_area_fraction = 0.75f;
     int min_points_needed_for_support = (int) (min_area_fraction * max_points_possible_under_support);
-    if (points_detected_under_foot > min_points_needed_for_support)
+  //  if (points_detected_under_foot > min_points_needed_for_support)
     {
        float snap_height = running_height_total / points_detected_under_foot;
 
@@ -378,12 +399,12 @@ void kernel computeSnappedValuesKernel(global float* params,
        write_imageui(snapped_normal_y_map, key, (uint4)((int)(normal.y * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
        write_imageui(snapped_normal_z_map, key, (uint4)((int)(normal.z * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
     }
-    else
-    {
-       write_imageui(steppable_map, key, (uint4)(NOT_ENOUGH_AREA,0,0,0));
-       write_imageui(snapped_height_map, key, (uint4)(32768, 0, 0, 0));
-       write_imageui(snapped_normal_x_map, key, (uint4)(0, 0, 0, 0));
-       write_imageui(snapped_normal_y_map, key, (uint4)(0, 0, 0, 0));
-       write_imageui(snapped_normal_z_map, key, (uint4)(0, 0, 0, 0));
-    }
+  //  else
+  //  {
+  //     write_imageui(steppable_map, key, (uint4)(NOT_ENOUGH_AREA,0,0,0));
+  //     write_imageui(snapped_height_map, key, (uint4)(32768, 0, 0, 0));
+  //     write_imageui(snapped_normal_x_map, key, (uint4)(0, 0, 0, 0));
+  //     write_imageui(snapped_normal_y_map, key, (uint4)(0, 0, 0, 0));
+  //     write_imageui(snapped_normal_z_map, key, (uint4)(0, 0, 0, 0));
+  //  }
 }
