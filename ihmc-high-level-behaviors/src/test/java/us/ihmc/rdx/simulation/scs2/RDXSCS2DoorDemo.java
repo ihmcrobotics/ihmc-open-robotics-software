@@ -46,7 +46,7 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
       baseUI.getPrimary3DPanel().getCamera3D().changeCameraPosition(-3.0, -4.0, 4.0);
 
       rdxSimulationSession = new RDXSCS2RestartableSimulationSession(baseUI);
-      rdxSimulationSession.setSessionSupplier(this::buildSession);
+      rdxSimulationSession.setSessionBuilder(this::buildSession);
       rdxSimulationSession.getAdditionalImGuiWidgets().add(() ->
       {
          doorRobotMover.renderMoveJointCheckbox();

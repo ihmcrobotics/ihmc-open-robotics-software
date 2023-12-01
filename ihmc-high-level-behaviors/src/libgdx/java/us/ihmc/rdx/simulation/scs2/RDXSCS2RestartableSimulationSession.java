@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSession
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private Supplier<SimulationSession> sessionSupplier;
+   private Supplier<SimulationSession> sessionBuilder;
    private final ArrayList<String> robotsToHide = new ArrayList<>();
    private final ArrayList<String> variableWidgets = new ArrayList<>();
    private volatile boolean starting = false;
@@ -26,9 +26,9 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
       super(baseUI);
    }
 
-   public void setSessionSupplier(Supplier<SimulationSession> sessionSupplier)
+   public void setSessionBuilder(Supplier<SimulationSession> sessionBuilder)
    {
-      this.sessionSupplier = sessionSupplier;
+      this.sessionBuilder = sessionBuilder;
    }
 
    @Override
@@ -76,7 +76,7 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
       if (waitForDestroy)
          destroyedNotification.blockingWait();
 
-      startSession(sessionSupplier.get());
+      startSession(sessionBuilder.get());
 
       for (String yoVariableName : variableWidgets)
       {
