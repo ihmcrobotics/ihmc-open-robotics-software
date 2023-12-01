@@ -1,6 +1,8 @@
 package us.ihmc.perception.ouster;
 
 import org.bytedeco.opencv.global.opencv_core;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.ros2.ROS2HeartbeatDependencyNode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -8,6 +10,7 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencl.OpenCLManager;
 
 import java.nio.FloatBuffer;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -23,6 +26,7 @@ public class OusterDepthImageRetriever
    private final FramePose3D sensorFramePose = new FramePose3D();
 
    private final OusterNetServer ouster;
+   private final ROS2HeartbeatDependencyNode ousterDesiredNode;
 
    private OpenCLManager openCLManager;
    private OusterDepthExtractionKernel depthExtractionKernel;
@@ -38,60 +42,67 @@ public class OusterDepthImageRetriever
    public OusterDepthImageRetriever(OusterNetServer ouster,
                                     Supplier<ReferenceFrame> sensorFrameSupplier,
                                     Supplier<Boolean> computeLidarScan,
-                                    Supplier<Boolean> computeHeightMap)
+                                    Supplier<Boolean> computeHeightMap,
+                                    ROS2HeartbeatDependencyNode ousterDesiredNode)
    {
       this.ouster = ouster;
       this.sensorFrameSupplier = sensorFrameSupplier;
       this.computeLidarScan = computeLidarScan;
       this.computeHeightMap = computeHeightMap;
+      this.ousterDesiredNode = ousterDesiredNode;
 
       openCLManager = new OpenCLManager();
       this.ouster.setOnFrameReceived(this::retrieveDepth);
+      start();
    }
 
    private void retrieveDepth()
    {
-      if (depthExtractionKernel == null)
-         depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager, computeLidarScan, computeHeightMap);
-
-      if (ouster.isInitialized() && running)
+      if (ousterDesiredNode.checkIfDesired())
       {
-         sensorFramePose.setToZero(sensorFrameSupplier.get());
-         sensorFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         if (depthExtractionKernel == null)
+            depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager, computeLidarScan, computeHeightMap);
 
-         // grab the image
-         depthExtractionKernel.copyLidarFrameBuffer();
-         depthExtractionKernel.runKernel(sensorFramePose.getReferenceFrame().getTransformToWorldFrame());
-
-         newImageLock.lock();
-         try
+         if (ouster.isInitialized() && running)
          {
-            if (depthImage != null)
-               depthImage.release();
-            depthImage = new RawImage(depthSequenceNumber++,
-                                      ouster.getAquisitionInstant(),
-                                      ouster.getImageWidth(),
-                                      ouster.getImageHeight(),
-                                      1.0f,
-                                      depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat().clone(),
-                                      null,
-                                      opencv_core.CV_16UC1,
-                                      ouster.getImageWidth() / (2.0f * (float) Math.PI),
-                                      // These are nominal values approximated by Duncan & Tomasz
-                                      ouster.getImageHeight() / ((float) Math.PI / 2.0f),
-                                      0,
-                                      0,
-                                      sensorFramePose.getPosition(),
-                                      sensorFramePose.getOrientation());
+            sensorFramePose.setToZero(sensorFrameSupplier.get());
+            sensorFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-            newImageAvailable.signal();
-         }
-         finally
-         {
-            newImageLock.unlock();
-         }
+            // grab the image
+            depthExtractionKernel.copyLidarFrameBuffer();
+            depthExtractionKernel.runKernel(sensorFramePose.getReferenceFrame().getTransformToWorldFrame());
 
+            newImageLock.lock();
+            try
+            {
+               if (depthImage != null)
+                  depthImage.release();
+               depthImage = new RawImage(depthSequenceNumber++,
+                                         ouster.getAquisitionInstant(),
+                                         ouster.getImageWidth(),
+                                         ouster.getImageHeight(),
+                                         1.0f,
+                                         depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat().clone(),
+                                         null,
+                                         opencv_core.CV_16UC1,
+                                         ouster.getImageWidth() / (2.0f * (float) Math.PI),
+                                         // These are nominal values approximated by Duncan & Tomasz
+                                         ouster.getImageHeight() / ((float) Math.PI / 2.0f),
+                                         0,
+                                         0,
+                                         sensorFramePose.getPosition(),
+                                         sensorFramePose.getOrientation());
+
+               newImageAvailable.signal();
+            }
+            finally
+            {
+               newImageLock.unlock();
+            }
+         }
       }
+      else
+         ThreadTools.sleep(500);
    }
 
    public RawImage getLatestRawDepthImage()
@@ -101,7 +112,8 @@ public class OusterDepthImageRetriever
       {
          while (depthImage == null || depthImage.isEmpty() || depthImage.getSequenceNumber() == lastSequenceNumber)
          {
-            newImageAvailable.await();
+            if (!newImageAvailable.await(5, TimeUnit.SECONDS))
+               return null;
          }
 
          lastSequenceNumber = depthImage.getSequenceNumber();
@@ -112,14 +124,6 @@ public class OusterDepthImageRetriever
       }
 
       return depthImage.get();
-   }
-
-   public FloatBuffer getPointCloudInWorldFrame()
-   {
-      if (depthExtractionKernel != null)
-         return depthExtractionKernel.getPointCloudInWorldFrame();
-
-      return null;
    }
 
    public void start()

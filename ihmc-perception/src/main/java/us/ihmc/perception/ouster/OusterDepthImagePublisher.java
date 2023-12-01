@@ -44,6 +44,7 @@ public class OusterDepthImagePublisher
       ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic);
 
       publishDepthThread = new RestartableThread("OusterDepthImagePublisher", this::publishDepthThreadFunction);
+      publishDepthThread.start();
    }
 
    private void publishDepthThreadFunction()
@@ -128,16 +129,7 @@ public class OusterDepthImagePublisher
    public void destroy()
    {
       System.out.println("Destroying " + this.getClass().getSimpleName());
-      depthPublishLock.lock();
-      try
-      {
-         newDepthImageAvailable.signal();
-      }
-      finally
-      {
-         depthPublishLock.unlock();
-      }
-      publishDepthThread.blockingStop();
+      stopDepth();
 
       if (nextCpuDepthImage != null)
          nextCpuDepthImage.release();

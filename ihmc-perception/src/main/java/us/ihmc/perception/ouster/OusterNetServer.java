@@ -351,7 +351,8 @@ public class OusterNetServer
    {
       udpServerThread.blockingStop();
 
-      udpSocket.close();
+      if (udpSocket != null)
+         udpSocket.close();
    }
 
    public boolean isInitialized()

@@ -59,6 +59,7 @@ public class BlackflyImageRetriever
       this.cameraFrameSupplier = cameraFrameSupplier;
 
       imageGrabThread = new RestartableThrottledThread(side.getCamelCaseName() + "BlackflyImageGrabber", BLACKFLY_FPS, this::grabImage);
+      imageGrabThread.start();
    }
 
    private void grabImage()
