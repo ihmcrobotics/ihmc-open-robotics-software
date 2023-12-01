@@ -518,6 +518,7 @@ public class RigidBodyControlManagerTest
                                                                     taskspacePositionGains,
                                                                     contactableBody,
                                                                     null,
+                                                                    null,
                                                                     false,
                                                                     yoTime,
                                                                     null,

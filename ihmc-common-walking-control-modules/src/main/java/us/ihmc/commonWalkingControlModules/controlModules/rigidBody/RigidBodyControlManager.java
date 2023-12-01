@@ -72,6 +72,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   PID3DGainsReadOnly taskspaceOrientationGains,
                                   PID3DGainsReadOnly taskspacePositionGains,
                                   ContactablePlaneBody contactableBody,
+                                  Vector3DReadOnly handLoadedAccelerationWeight,
                                   RigidBodyControlMode defaultControlMode,
                                   boolean enableFunctionGenerators,
                                   YoDouble yoTime,
@@ -168,10 +169,10 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                         elevator,
                                                                         yoTime,
                                                                         jointControlHelper,
+                                                                        taskspaceControlState.getOrientationControlHelper(),
+                                                                        handLoadedAccelerationWeight,
                                                                         graphicsListRegistry,
                                                                         registry);
-         loadBearingControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
-         loadBearingControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
       }
       else
       {
@@ -492,7 +493,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       }
    }
 
-   public void handleLoadBearingCommand(LoadBearingCommand command, JointspaceTrajectoryCommand jointspaceCommand)
+   public void handleLoadBearingCommand(LoadBearingCommand loadBearingCommand, JointspaceTrajectoryCommand jointspaceCommand, SO3TrajectoryControllerCommand orientationTrajectory)
    {
       if (loadBearingControlState == null)
       {
@@ -500,7 +501,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          return;
       }
 
-      if (!command.getLoad())
+      if (!loadBearingCommand.getLoad())
       {
          hold();
          return;
@@ -512,8 +513,13 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          if (!loadBearingControlState.handleJointTrajectoryCommand(jointspaceCommand, initialJointPositions))
             return;
       }
+      else if (orientationTrajectory != null)
+      {
+         if (!loadBearingControlState.handleOrientationTrajectoryCommand(orientationTrajectory))
+            return;
+      }
 
-      if (loadBearingControlState.handleLoadbearingCommand(command))
+      if (loadBearingControlState.handleLoadbearingCommand(loadBearingCommand))
       {
          requestState(loadBearingControlState.getControlMode());
       }
@@ -548,6 +554,12 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       {
          for (int i = 0; i < jointsToControl.length; i++)
             desiredJointPositionsToPack[i] = jointspaceControlState.getJointDesiredPosition(i);
+      }
+      if (loadBearingControlState != null && stateMachine.getCurrentStateKey() == loadBearingControlState.getControlMode()
+          && loadBearingControlState.getControlMode() == RigidBodyControlMode.JOINTSPACE)
+      {
+         for (int i = 0; i < jointsToControl.length; i++)
+            desiredJointPositionsToPack[i] = loadBearingControlState.getJointDesiredPosition(i);
       }
       else
       {

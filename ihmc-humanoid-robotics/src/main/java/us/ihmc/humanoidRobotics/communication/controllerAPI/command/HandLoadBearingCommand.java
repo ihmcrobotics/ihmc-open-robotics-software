@@ -8,11 +8,11 @@ public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, H
 {
    private long sequenceId;
    private RobotSide robotSide;
+   private boolean useJointspaceCommand = true;
 
-   private boolean useJointspaceCommand = false;
+   private final JointspaceTrajectoryCommand jointspaceTrajectory = new JointspaceTrajectoryCommand();
+   private final SO3TrajectoryControllerCommand orientationTrajectory = new SO3TrajectoryControllerCommand();
 
-   private JointspaceTrajectoryCommand jointspaceTrajectory = new JointspaceTrajectoryCommand();
-   
    /** the time to delay this command on the controller side before being executed **/
    private double executionDelayTime;
    /** the execution time. This number is set if the execution delay is non zero**/
@@ -32,8 +32,9 @@ public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, H
       loadBearingCommand.set(other.loadBearingCommand);
       robotSide = other.robotSide;
       executionDelayTime = other.getExecutionDelayTime();
-      useJointspaceCommand = other.isUseJointspaceCommand();
+      useJointspaceCommand = other.useJointspaceCommand();
       jointspaceTrajectory.set(other.getJointspaceTrajectory());
+      orientationTrajectory.set(other.getOrientationTrajectory());
    }
 
    @Override
@@ -44,10 +45,8 @@ public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, H
       executionDelayTime = message.getExecutionDelayTime();
       robotSide = RobotSide.fromByte(message.getRobotSide());
       useJointspaceCommand = message.getUseJointspaceCommand();
-      if (message.getJointspaceTrajectory() != null)
-      {
-         jointspaceTrajectory.setFromMessage(message.getJointspaceTrajectory());
-      }
+      jointspaceTrajectory.setFromMessage(message.getJointspaceTrajectory());
+      orientationTrajectory.setFromMessage(message.getOrientationTrajectory());
    }
 
    public JointspaceTrajectoryCommand getJointspaceTrajectory()
@@ -55,7 +54,12 @@ public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, H
       return jointspaceTrajectory;
    }
 
-   public boolean isUseJointspaceCommand()
+   public SO3TrajectoryControllerCommand getOrientationTrajectory()
+   {
+      return orientationTrajectory;
+   }
+
+   public boolean useJointspaceCommand()
    {
       return useJointspaceCommand;
    }
@@ -71,8 +75,9 @@ public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, H
       sequenceId = 0;
       loadBearingCommand.clear();
       robotSide = null;
-      useJointspaceCommand = false;
+      useJointspaceCommand = true;
       jointspaceTrajectory.clear();
+      orientationTrajectory.clear();
    }
 
    @Override
@@ -84,14 +89,15 @@ public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, H
    @Override
    public boolean isCommandValid()
    {
-      boolean armTrajectoryValid = true;
-      if (useJointspaceCommand && jointspaceTrajectory == null)
+      boolean armTrajectoryValid;
+
+      if (useJointspaceCommand)
       {
-         armTrajectoryValid = false;
+         armTrajectoryValid = !jointspaceTrajectory.getTrajectoryPointLists().isEmpty() && jointspaceTrajectory.isCommandValid();
       }
-      else if (useJointspaceCommand)
+      else
       {
-         armTrajectoryValid = jointspaceTrajectory.isCommandValid();
+         armTrajectoryValid = orientationTrajectory.getTrajectoryPointList().getNumberOfTrajectoryPoints() > 0 && orientationTrajectory.isCommandValid();
       }
 
       return armTrajectoryValid && robotSide != null && loadBearingCommand.isCommandValid();

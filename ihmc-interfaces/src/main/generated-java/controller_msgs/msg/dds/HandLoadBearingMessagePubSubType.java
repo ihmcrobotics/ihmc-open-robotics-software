@@ -15,7 +15,7 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "01a6479612d8f89a0a0e56035c3795a1f17f9b38bc2d9644aee7c18009935433";
+   		return "36a3f4bd9b64ef48e6111781b02d06d789c01bb92885ad451155aaa91215182d";
    }
    
    @Override
@@ -60,6 +60,8 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += controller_msgs.msg.dds.LoadBearingMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -88,6 +90,8 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getCdrSerializedSize(data.getJointspaceTrajectory(), current_alignment);
 
+      current_alignment += ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getOrientationTrajectory(), current_alignment);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -106,6 +110,7 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
       cdr.write_type_7(data.getUseJointspaceCommand());
 
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.write(data.getJointspaceTrajectory(), cdr);
+      ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.write(data.getOrientationTrajectory(), cdr);
       cdr.write_type_6(data.getExecutionDelayTime());
 
       controller_msgs.msg.dds.LoadBearingMessagePubSubType.write(data.getLoadBearingMessage(), cdr);
@@ -120,6 +125,7 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
       data.setUseJointspaceCommand(cdr.read_type_7());
       	
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.read(data.getJointspaceTrajectory(), cdr);	
+      ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.read(data.getOrientationTrajectory(), cdr);	
       data.setExecutionDelayTime(cdr.read_type_6());
       	
       controller_msgs.msg.dds.LoadBearingMessagePubSubType.read(data.getLoadBearingMessage(), cdr);	
@@ -134,6 +140,8 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
       ser.write_type_7("use_jointspace_command", data.getUseJointspaceCommand());
       ser.write_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());
 
+      ser.write_type_a("orientation_trajectory", new ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getOrientationTrajectory());
+
       ser.write_type_6("execution_delay_time", data.getExecutionDelayTime());
       ser.write_type_a("load_bearing_message", new controller_msgs.msg.dds.LoadBearingMessagePubSubType(), data.getLoadBearingMessage());
 
@@ -146,6 +154,8 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setUseJointspaceCommand(ser.read_type_7("use_jointspace_command"));
       ser.read_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());
+
+      ser.read_type_a("orientation_trajectory", new ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getOrientationTrajectory());
 
       data.setExecutionDelayTime(ser.read_type_6("execution_delay_time"));
       ser.read_type_a("load_bearing_message", new controller_msgs.msg.dds.LoadBearingMessagePubSubType(), data.getLoadBearingMessage());
