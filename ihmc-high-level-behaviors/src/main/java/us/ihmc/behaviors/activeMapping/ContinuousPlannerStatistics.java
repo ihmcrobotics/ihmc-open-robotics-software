@@ -42,6 +42,7 @@ public class ContinuousPlannerStatistics
 
       try
       {
+         Files.createDirectory(IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY);
          Files.createFile(Paths.get(filePath));
          file = new File(filePath);
       }
