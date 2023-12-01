@@ -30,7 +30,6 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
    private final ArrayList<Function<ReferenceFrame, Robot>> secondaryRobots = new ArrayList<>();
    private final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
    private SCS2AvatarSimulation avatarSimulation;
-   private RealtimeROS2Node realtimeROS2Node;
    private Consumer<SCS2AvatarSimulationFactory> externalFactorySetup = null;
 
    public RDXSCS2HumanoidSimulationManager(RDXBaseUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
@@ -45,8 +44,11 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
       this.robotModel = robotModel;
       this.ros2CommunicationMode = ros2CommunicationMode;
 
-      setSessionSupplier(this::buildSession);
-      getDestroyables().add(this::destroySessionForRebuild);
+      setSessionBuilder(this::buildSession);
+      getDestroyables().add(() ->
+      {
+         avatarSimulation.destroy();
+      });
 
       robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, initialYaw, initialX, initialY);
 
@@ -59,7 +61,7 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
 
    public SimulationSession buildSession()
    {
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(ros2CommunicationMode.getPubSubImplementation(),
+      RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(ros2CommunicationMode.getPubSubImplementation(),
                                                           "flat_ground_walking_track_simulation");
 
       SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
@@ -88,13 +90,6 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
       avatarSimulation.setSystemExitOnDestroy(false);
 
       return avatarSimulation.getSimulationConstructionSet().getSimulationSession();
-   }
-
-   public void destroySessionForRebuild()
-   {
-      avatarSimulation.destroy();
-      realtimeROS2Node.destroy();
-      realtimeROS2Node = null;
    }
 
    public ArrayList<Function<ReferenceFrame, Robot>> getSecondaryRobots()
