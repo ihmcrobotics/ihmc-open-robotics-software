@@ -63,8 +63,7 @@ public class RDXRapidHeightMapExtractionDemo
    private OpenCLManager openCLManager;
    private RDXPanel navigationPanel;
    private String sensorTopicName;
-   private ROS2Helper ros2Helper;
-   private ROS2Node ros2Node;
+   private final ROS2Helper ros2Helper;
 
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame cameraZUpFrame = new PoseReferenceFrame("CameraZUpFrame", cameraFrame);
@@ -77,7 +76,7 @@ public class RDXRapidHeightMapExtractionDemo
    {
       perceptionDataLoader = new PerceptionDataLoader();
 
-      ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "simulation_ui");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "simulation_ui");
       ros2Helper = new ROS2Helper(ros2Node);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
@@ -252,7 +251,6 @@ public class RDXRapidHeightMapExtractionDemo
                                        humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat(),
                                        cameraFrame,
                                        cameraZUpFrame,
-                                       true,
                                        false);
 
    }
