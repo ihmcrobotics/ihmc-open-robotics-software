@@ -54,4 +54,9 @@ public interface ContinuousWalkingParametersReadOnly extends StoredPropertySetRe
    {
       return get(planningWithoutReferenceTimeout);
    }
+
+   default boolean getLogFootstepPlans()
+   {
+      return get(logFootstepPlans);
+   }
 }

@@ -52,4 +52,9 @@ public interface ContinuousWalkingParametersBasics extends ContinuousWalkingPara
    {
       set(ContinuousWalkingParameters.planningWithoutReferenceTimeout, planningWithoutReferenceTimeout);
    }
+
+   default void setLogFootstepPlans(boolean logFootstepPlans)
+   {
+      set(ContinuousWalkingParameters.logFootstepPlans, logFootstepPlans);
+   }
 }

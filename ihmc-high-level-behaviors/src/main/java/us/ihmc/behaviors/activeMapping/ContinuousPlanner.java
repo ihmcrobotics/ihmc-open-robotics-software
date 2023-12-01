@@ -38,8 +38,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousPlanner
 {
-   private static final boolean LOG_FOOTSTEP_PLANS = false;
-
    public enum PlanningMode
    {
       EXECUTE_AND_PAUSE, FRONTIER_EXPANSION, ACTIVE_SEARCH, WALK_TO_GOAL, RANDOM_WALK, INCREMENTAL_PLANNING
@@ -325,13 +323,12 @@ public class ContinuousPlanner
       assert plannerOutput != null;
       statistics.setTotalStepsPlanned(plannerOutput.getFootstepPlan().getNumberOfSteps());
 
-      if (LOG_FOOTSTEP_PLANS)
+      if (continuousPlanningParameters.getLogFootstepPlans())
       {
          ThreadTools.startAThread(() ->
                                   {
                                      LogTools.info("Logging Session");
                                      logger.logSession();
-                                     FootstepPlannerLogger.deleteOldLogs();
                                   }, "FootstepPlanLogAndDeletion");
       }
    }
