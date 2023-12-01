@@ -111,7 +111,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     {
        write_imageui(steppable_map, key, (uint4)(SNAP_FAILED,0,0,0));
 
-       write_imageui(snapped_height_map, key, (uint4)(0, 0, 0, 0));
+       write_imageui(snapped_height_map, key, (uint4)(32768, 0, 0, 0));
        write_imageui(snapped_normal_x_map, key, (uint4)(0, 0, 0, 0));
        write_imageui(snapped_normal_y_map, key, (uint4)(0, 0, 0, 0));
        write_imageui(snapped_normal_z_map, key, (uint4)(0, 0, 0, 0));
@@ -198,7 +198,7 @@ if (should_print)
                     // we're too close to the cliff bottom!
                     write_imageui(steppable_map, key, (uint4)(CLIFF_BOTTOM,0,0,0));
 
-                    write_imageui(snapped_height_map, key, (uint4)(0, 0, 0, 0));
+                    write_imageui(snapped_height_map, key, (uint4)(32768, 0, 0, 0));
                     write_imageui(snapped_normal_x_map, key, (uint4)(0, 0, 0, 0));
                     write_imageui(snapped_normal_y_map, key, (uint4)(0, 0, 0, 0));
                     write_imageui(snapped_normal_z_map, key, (uint4)(0, 0, 0, 0));
@@ -213,7 +213,7 @@ if (should_print)
                     // we're too close to the cliff top!
                     write_imageui(steppable_map, key, (uint4)(CLIFF_TOP,0,0,0));
 
-                    write_imageui(snapped_height_map, key, (uint4)(0, 0, 0, 0));
+                    write_imageui(snapped_height_map, key, (uint4)(32768, 0, 0, 0));
                     write_imageui(snapped_normal_x_map, key, (uint4)(0, 0, 0, 0));
                     write_imageui(snapped_normal_y_map, key, (uint4)(0, 0, 0, 0));
                     write_imageui(snapped_normal_z_map, key, (uint4)(0, 0, 0, 0));
@@ -376,7 +376,7 @@ if (should_print)
     else
     {
        write_imageui(steppable_map, key, (uint4)(SNAP_FAILED,0,0,0));
-       write_imageui(snapped_height_map, key, (uint4)(0, 0, 0, 0));
+       write_imageui(snapped_height_map, key, (uint4)(32768, 0, 0, 0));
        write_imageui(snapped_normal_x_map, key, (uint4)(0, 0, 0, 0));
        write_imageui(snapped_normal_y_map, key, (uint4)(0, 0, 0, 0));
        write_imageui(snapped_normal_z_map, key, (uint4)(0, 0, 0, 0));
