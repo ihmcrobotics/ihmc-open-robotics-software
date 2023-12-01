@@ -485,7 +485,11 @@ public class WalkingSingleSupportState extends SingleSupportState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return hasSwingFootTouchedDown.getValue() ? copCommand : null;
+      if (!hasSwingFootTouchedDown.getValue())
+         return null;
+      if (!Double.isFinite(swingFootCoPWeight.getValue()) || swingFootCoPWeight.getValue() <= 0)
+         return null;
+      return copCommand;
    }
 
    @Override
