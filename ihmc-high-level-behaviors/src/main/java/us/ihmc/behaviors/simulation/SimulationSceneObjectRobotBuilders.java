@@ -23,8 +23,8 @@ import java.util.function.Function;
 public class SimulationSceneObjectRobotBuilders
 {
    public static final double SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE = 0.01;
-   public static final double TABLE_X = 0.4;
-   public static final double TABLE_Y = 0.2;
+   public static final double TABLE_X = -1.0;
+   public static final double TABLE_Y = 2.0;
    public static final double TABLE_Z = TableDefinition.TABLE_LEG_LENGTH + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE;
    public static final double TABLE_SURFACE_Z = TableDefinition.TABLE_LEG_LENGTH + TableDefinition.TABLE_THICKNESS;
 
