@@ -45,6 +45,11 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
       this.ros2CommunicationMode = ros2CommunicationMode;
 
       setSessionBuilder(this::buildSession);
+      getOnSessionStartedRunnables().add(() ->
+      {
+         avatarSimulation.beforeSessionThreadStart();
+         avatarSimulation.afterSessionThreadStart();
+      });
       getDestroyables().add(() ->
       {
          avatarSimulation.destroy();
