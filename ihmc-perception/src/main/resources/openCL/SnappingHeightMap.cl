@@ -350,7 +350,7 @@ void kernel computeSnappedValuesKernel(global float* params,
                 if (isnan(query_height) || query_height < min_height_under_foot_to_consider)
                    continue;
 
-                points_detected_under_foot++;
+                points_detected_under_foot += 1.0f;;
                 running_height_total += query_height;
 
                 n += 1.0f;
