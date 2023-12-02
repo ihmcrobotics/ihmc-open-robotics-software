@@ -117,6 +117,8 @@ void kernel computeSnappedValuesKernel(global float* params,
     int idx_y = get_global_id(1); // row
     int idx_yaw = (int) idx_yaw_singular_buffer[0]; // TODO not needed
 
+    bool should_print = idx_x == 718 && idx_y == 850;
+
     int2 key = (int2) (idx_x, idx_y);
     uint foot_height_int = read_imageui(height_map, key).x;
 
@@ -161,7 +163,12 @@ void kernel computeSnappedValuesKernel(global float* params,
             if (y_query < 0 || y_query >= cells_per_side)
                 continue;
 
-            // get the x,y position and height at this offset point.
+            float2 vector_to_point_from_foot = map_resolution * (float2) ((float) (x_query - idx_x), (float) (y_query - idx_y));
+            // TODO use squared value to avoid the squareroot operator
+            if (length(vector_to_point_from_foot) > cliff_search_offset)
+                continue;
+
+            // get the height at this offset point.
             int2 query_key = (int2) (x_query, y_query);
             float query_height = (float) read_imageui(height_map, query_key).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
 
@@ -179,68 +186,69 @@ void kernel computeSnappedValuesKernel(global float* params,
             }
 
 
+
+
            // FIXME so this being a hard transition makes it a noisy signal. How can we smooth it?
 
-            if (relative_height_of_query > params[CLIFF_START_HEIGHT_TO_AVOID])
-            {
-                float height_alpha = (relative_height_of_query - params[CLIFF_START_HEIGHT_TO_AVOID]) / (params[CLIFF_END_HEIGHT_TO_AVOID] - params[CLIFF_START_HEIGHT_TO_AVOID]);
-                height_alpha = clamp(height_alpha, 0.0f, 1.0f);
-                float min_distance_from_this_point_to_avoid_cliff = height_alpha * params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS];
+//            if (relative_height_of_query > params[CLIFF_START_HEIGHT_TO_AVOID])
+//            {
+//                float height_alpha = (relative_height_of_query - params[CLIFF_START_HEIGHT_TO_AVOID]) / (params[CLIFF_END_HEIGHT_TO_AVOID] - params[CLIFF_START_HEIGHT_TO_AVOID]);
+//                height_alpha = clamp(height_alpha, 0.0f, 1.0f);
+//                float min_distance_from_this_point_to_avoid_cliff = height_alpha * params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS];
 
 
-                if (distance_to_foot_from_this_query < min_distance_from_this_point_to_avoid_cliff)
-                {
-                    // we're too close to the cliff bottom!
-                    write_imageui(steppable_map, key, (uint4)(CLIFF_BOTTOM,0,0,0));
+//                if (distance_to_foot_from_this_query < min_distance_from_this_point_to_avoid_cliff)
+//                {
+//                    // we're too close to the cliff bottom!
+//                    write_imageui(steppable_map, key, (uint4)(CLIFF_BOTTOM,0,0,0));
 
-                    write_imageui(snapped_height_map, key, (uint4)(32768, 0, 0, 0));
-                    write_imageui(snapped_normal_x_map, key, (uint4)(0, 0, 0, 0));
-                    write_imageui(snapped_normal_y_map, key, (uint4)(0, 0, 0, 0));
-                    write_imageui(snapped_normal_z_map, key, (uint4)(0, 0, 0, 0));
+//                    write_imageui(snapped_height_map, key, (uint4)(32768, 0, 0, 0));
+//                    write_imageui(snapped_normal_x_map, key, (uint4)(0, 0, 0, 0));
+//                    write_imageui(snapped_normal_y_map, key, (uint4)(0, 0, 0, 0));
+//                    write_imageui(snapped_normal_z_map, key, (uint4)(0, 0, 0, 0));
 
-                    return;
-                }
-            }
-            else if (relative_height_of_query < -params[CLIFF_START_HEIGHT_TO_AVOID])
-            {
+//                    return;
+//                }
+//            }
+//            else if (relative_height_of_query < -params[CLIFF_START_HEIGHT_TO_AVOID])
+//            {
 
-                // FIXME so this being a hard transition makes it a noisy signal. How can we smooth it?
-                if (distance_to_foot_from_this_query < params[MIN_DISTANCE_FROM_CLIFF_TOPS])
-                {
-                    // we're too close to the cliff top!
-                    write_imageui(steppable_map, key, (uint4)(CLIFF_TOP,0,0,0));
+//                // FIXME so this being a hard transition makes it a noisy signal. How can we smooth it?
+//                if (distance_to_foot_from_this_query < params[MIN_DISTANCE_FROM_CLIFF_TOPS])
+//                {
+//                    // we're too close to the cliff top!
+//                    write_imageui(steppable_map, key, (uint4)(CLIFF_TOP,0,0,0));
 
-                    write_imageui(snapped_height_map, key, (uint4)(32768, 0, 0, 0));
-                    write_imageui(snapped_normal_x_map, key, (uint4)(0, 0, 0, 0));
-                    write_imageui(snapped_normal_y_map, key, (uint4)(0, 0, 0, 0));
-                    write_imageui(snapped_normal_z_map, key, (uint4)(0, 0, 0, 0));
+//                    write_imageui(snapped_height_map, key, (uint4)(32768, 0, 0, 0));
+//                    write_imageui(snapped_normal_x_map, key, (uint4)(0, 0, 0, 0));
+//                    write_imageui(snapped_normal_y_map, key, (uint4)(0, 0, 0, 0));
+//                    write_imageui(snapped_normal_z_map, key, (uint4)(0, 0, 0, 0));
 
-                    return;
-                }
-            }
+//                    return;
+//                }
+//            }
 
             //  TODO extract epsilon
             // We want to find the max heigth under the foot. However, we don't want points that are very close to the foot edge to unduly affect
             // this height, because that can some times be noise. So instead, we can use an activation function. Increasing the slope of the activation
             // function will increase how quickly these get added, where a slope of infinity makes it an inequality condition.
-            float tanh_slope = 50000.0f;
-            float activation = 1.0f - 0.5f * (tanh(tanh_slope * distance_to_foot_from_this_query) + 1.0f);
-            max_height_under_foot += activation * max(max_height_under_foot - query_height, 0.0f);
+//            float tanh_slope = 50000.0f;
+//            float activation = 1.0f - 0.5f * (tanh(tanh_slope * distance_to_foot_from_this_query) + 1.0f);
+//            max_height_under_foot += activation * max(max_height_under_foot - query_height, 0.0f);
 
             // FIXME old code, where we're trying to smooth things
-            //if (distance_to_foot_from_this_query < 1e-3f)
-            //{
-            //    max_height_under_foot = max(query_height, max_height_under_foot);
-            //}
+            if (distance_to_foot_from_this_query < 1e-3f)
+            {
+                max_height_under_foot = max(query_height, max_height_under_foot);
+            }
         }
     }
 
     //////// Compute the local plane of the foot, as well as the area of support underneath it.
 
-    float points_detected_under_foot = 0.0f;
+    int points_detected_under_foot = 0;
     float running_height_total = 0.0f;
-    float min_height_under_foot_to_consider = max_height_under_foot - 0.05f;
-    float resolution = 0.02f;
+    float min_height_under_foot_to_consider = max_height_under_foot - 0.04f; // TODO extract parameter
     float half_length = foot_length / 2.0f;
     float half_width = foot_width / 2.0f;
     float foot_search_radius = length((float2) (half_length, half_width));
@@ -263,10 +271,15 @@ void kernel computeSnappedValuesKernel(global float* params,
 
     if (ASSUME_FOOT_IS_A_CIRCLE)
     {
-        for (float x_value = -foot_search_radius; x_value <= foot_search_radius; x_value += resolution)
+        int samples = 5;
+           float resolution = (2.0f * foot_search_radius) / (2.0f * samples - 1.0f);
+
+        for (int x_value_idx = -samples; x_value_idx <= samples; x_value_idx++)
         {
-            for (float y_value = -foot_search_radius; y_value <= foot_search_radius; y_value += resolution)
+            for (int y_value_idx = -samples; y_value_idx <= samples; y_value_idx++)
             {
+                float x_value = x_value_idx * resolution;
+                float y_value = y_value_idx * resolution;
                 float2 offset = (float2) (x_value, y_value);
 
                 // TODO replace with a squared operation
@@ -291,21 +304,27 @@ void kernel computeSnappedValuesKernel(global float* params,
                 float query_height = (float) query_height_int / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
 
                 // FIXME old code
-                //if (isnan(query_height) || query_height < min_height_under_foot_to_consider)
-                //    continue;
-                //
-                //points_detected_under_foot++;
-                //running_height_total += query_height;
+                if (isnan(query_height))
+                    continue;
+                if (query_height < min_height_under_foot_to_consider)
+                {
+                    if (should_print)
+                        printf("Filtering out below stuff (%d, %d) because it's at height %f, but foot max is at height %f\n", idx_x, idx_y, query_height, max_height_under_foot);
+                    continue;
+                }
+
+                points_detected_under_foot++;
+                running_height_total += query_height;
 
 
-                if (isnan(query_height))// || query_height < min_height_under_foot_to_consider)
-                   continue;
+//                if (isnan(query_height))// || query_height < min_height_under_foot_to_consider)
+//                   continue;
 
-            // fixme extract
-            float tanh_slope = 50000.0f;
-                float activation = 0.5f * (tanh(tanh_slope * (query_height - min_height_under_foot_to_consider)) + 1.0f);
-                points_detected_under_foot += activation;
-                running_height_total += activation * query_height;
+//            // fixme extract
+//              float tanh_slope = 50000.0f;
+//                float activation = 0.5f * (tanh(tanh_slope * (query_height - min_height_under_foot_to_consider)) + 1.0f);
+//                points_detected_under_foot += activation;
+//                running_height_total += activation * query_height;
 
                 n += 1.0f;
                 x += point_query.x;
@@ -325,6 +344,8 @@ void kernel computeSnappedValuesKernel(global float* params,
     }
     else
     {
+        float resolution = 0.02f;
+
         for (float x_value = -half_length; x_value <= half_length; x_value += resolution)
         {
             for (float y_value = -half_width; y_value <= half_width; y_value += resolution)
@@ -350,7 +371,7 @@ void kernel computeSnappedValuesKernel(global float* params,
                 if (isnan(query_height) || query_height < min_height_under_foot_to_consider)
                    continue;
 
-                points_detected_under_foot += 1.0f;;
+                points_detected_under_foot++;
                 running_height_total += query_height;
 
                 n += 1.0f;
@@ -390,11 +411,32 @@ void kernel computeSnappedValuesKernel(global float* params,
        float3 normal = (float3) (coefficients[0], coefficients[1], 1.0);
        normal = normalize(normal);
 
+        if (should_print)
+        {
+            printf("snap height %f\n", snap_height);
+            printf("Running total %f for %d points\n", running_height_total, points_detected_under_foot);
+        }
+       if (snap_height < -0.002f)
+       {
+            printf("Snap height is low %f at %d, %d\n", snap_height, idx_x, idx_y);
+       }
+       if (snap_height > 0.156f)
+              {
+                   printf("Snap height is high %f at %d, %d\n", snap_height, idx_x, idx_y);
+              }
+       if (points_detected_under_foot < 1)
+       {
+            printf("No points at %d, %d\n", idx_x, idx_y);
+       }
         // TODO potentially use the z solution.
        snap_height += params[HEIGHT_OFFSET];
+       max_height_under_foot += params[HEIGHT_OFFSET];
+
+
 
        write_imageui(steppable_map, key, (uint4)(VALID,0,0,0));
        write_imageui(snapped_height_map, key, (uint4)((int)(snap_height * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
+//       write_imageui(snapped_height_map, key, (uint4)((int)(max_height_under_foot * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
        write_imageui(snapped_normal_x_map, key, (uint4)((int)(normal.x * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
        write_imageui(snapped_normal_y_map, key, (uint4)((int)(normal.y * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
        write_imageui(snapped_normal_z_map, key, (uint4)((int)(normal.z * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
