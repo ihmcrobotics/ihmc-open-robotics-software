@@ -1,10 +1,21 @@
 
 import numpy as np
 import re
+import os
+
+home = os.path.expanduser('~')
+path = home + '/.ihmc/logs/continuous-planning/'
+files = sorted(os.listdir(path))
+
+if len(files) == 0:
+    print("No log files found at: ", path)
+    exit()
 
 # Open the log file and read the contents into a string variable
-with open('/home/bmishra/.ihmc/logs/continuous-planning/20231201_141907_ContinuousPlannerLog.txt', 'r') as f:
+with open(path + files[-1], 'r') as f:
     log_data = f.read()
+
+print("Opened log file: ", files[-1])
 
 # Split the string into individual lines
 lines = log_data.splitlines()
@@ -88,8 +99,8 @@ data_dict = {
 continuous_walking_speed = np.divide(total_length_completed, total_continuous_walking_time)
 
 # Print the data dictionary
-for key in data_dict:
-    print(key, data_dict[key])
+# for key in data_dict:
+#     print(key, data_dict[key])
 
 import matplotlib.pyplot as plt
 plt.rcParams.update({'font.size': 8})
@@ -105,44 +116,43 @@ plt.subplots_adjust(hspace=0.5)  # You can adjust the value as needed
 # Plot each data field in a separate subplot
 axs[0, 0].plot(data_dict['total_length_completed'])
 axs[0, 0].set_title('Continuous Walking Distance')
-axs[0, 0].set_xlabel('Time in seconds')
-axs[0, 0].set_ylabel('Distance in meters')
+axs[0, 3].set_xlabel('Iteration')
+axs[0, 0].set_ylabel('Total Displacement (m)')
 
 axs[0, 1].plot(data_dict['total_steps_completed'])
 axs[0, 1].set_title('Total Steps Completed')
-axs[0, 1].set_xlabel('Time in seconds')
-axs[0, 1].set_ylabel('Steps completed')
+axs[0, 3].set_xlabel('Iteration')
+axs[0, 1].set_ylabel('Number of Steps')
 
 axs[0, 2].plot(data_dict['total_planning_time'])
 axs[0, 2].set_title('Total Planning Time')
-axs[0, 2].set_xlabel('Time in seconds')
+axs[0, 3].set_xlabel('Iteration')
 axs[0, 2].set_ylabel('Planning time')
-
 
 axs[0, 3].plot(data_dict['total_waiting_time'])
 axs[0, 3].set_title('Total Waiting Time')
-axs[0, 3].set_xlabel('Time in seconds')
+axs[0, 3].set_xlabel('Iteration')
 axs[0, 3].set_ylabel('Total waiting time')
 
-# axs[0, 3].plot(data_dict['last_step_time'])
-# axs[0, 3].set_title('Last Step Time')
-# axs[0, 3].set_xlabel('Time in seconds')
-# axs[0, 3].set_ylabel('Not sure yet')
+axs[0, 3].plot(data_dict['last_step_time'])
+axs[0, 3].set_title('Last Step Time')
+axs[0, 3].set_xlabel('Iteration')
+axs[0, 3].set_ylabel('Time (s)')
 
-# axs[1, 0].plot(data_dict['total_continuous_walking_time'])
-# axs[1, 0].set_title('BAD CHART REMOVE')
-# axs[1, 0].set_xlabel('Time in seconds')
-# axs[1, 0].set_ylabel('Continuous Walking time')
+axs[1, 0].plot(data_dict['total_continuous_walking_time'])
+axs[1, 0].set_title('Total Continuous Walking Time')
+axs[0, 3].set_xlabel('Iteration')
+axs[1, 0].set_ylabel('Continuous Walking time')
 
 axs[1, 1].plot(data_dict['number_of_interventions'])
 axs[1, 1].set_title('Number of Interventions')
-axs[1, 1].set_xlabel('Time in seconds')
-axs[1, 1].set_ylabel('User interrupts')
+axs[0, 3].set_xlabel('Iteration')
+axs[1, 1].set_ylabel('Number of Interventions')
 
 axs[1, 2].plot(data_dict['last_planning_time'])
 axs[1, 2].set_title('Last Planning Time')
-axs[1, 2].set_xlabel('Time in seconds')
-axs[1, 2].set_ylabel('Planning time')
+axs[0, 3].set_xlabel('Iteration')
+axs[1, 2].set_ylabel('Planning Time (s)')
 
 axs[1, 3].plot(data_dict['last_waiting_time'])
 axs[1, 3].set_title('Last Waiting Time')
@@ -151,14 +161,14 @@ axs[1, 3].set_ylabel('Last waiting time')
 
 axs[2, 1].plot(data_dict['total_steps_planned'])
 axs[2, 1].set_title('Total Steps Planned')
-axs[2, 1].set_xlabel('Distance')
-axs[2, 1].set_ylabel('Time in seconds')
+axs[2, 1].set_xlabel('Iteration')
+axs[2, 1].set_ylabel('Number of Steps')
 
-last_footstep_queue_size
 axs[2, 2].plot(data_dict['last_footstep_queue_size'])
 axs[2, 2].set_title('Last Footstep Queue Size')
-axs[2, 2].set_xlabel('Time in seconds')
-axs[2, 2].set_ylabel('Size')
+axs[2, 2].set_xlabel('Iteration')
+axs[2, 2].set_ylabel('Number of Steps')
+axs[2, 2].set_ylim(0, 5)
 
 axs[2, 3].plot(continuous_walking_speed)
 axs[2, 3].set_title('Continuous Walking Speed')
