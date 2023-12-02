@@ -1,13 +1,15 @@
 {
   "title" : "Continuous Walking parameters",
-  "Active mapping" : false,
+  "Continuous walking enabled" : false,
+  "Step publisher enabled" : true,
   "Override entire queue each step" : true,
   "Number of steps to send" : 3,
   "Goal pose forward distance" : 1.6,
   "Goal pose up distance" : 0.8,
-  "Swing time" : 1.0,
-  "Transfer time" : 0.7,
-  "Planning reference timeout" : 0.84,
-  "Planning without reference timeout" : 2.5,
+  "Swing time" : 0.84,
+  "Transfer time" : 0.46,
+  "Planning timeout fraction" : 0.3,
+  "Planning reference timeout" : 0.3,
+  "Planning without reference timeout" : 1.3,
   "Log footstep plans" : true
 }

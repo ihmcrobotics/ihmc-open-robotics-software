@@ -98,11 +98,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          this.activePerceptionModule = activePerceptionModule;
       }
 
-      this.continuousPlanningUI = new RDXContinuousPlanningPanel("Active Mapping",
-                                                                 ros2Helper,
-                                                                 activePerceptionModule,
-                                                                 remotePerceptionUI.getContinuousPlanningParameters(),
-                                                                 syncedRobot);
+      this.continuousPlanningUI = new RDXContinuousPlanningPanel(ros2Helper, activePerceptionModule, syncedRobot);
    }
 
    public void initializeRapidRegionsUI()

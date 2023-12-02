@@ -100,7 +100,7 @@ public class ContinuousPlannerSchedulingTask
     */
    private void tickStateMachine()
    {
-      if (!continuousPlanningParameters.getActiveMapping())
+      if (!continuousPlanningParameters.getContinuousWalkingEnabled())
       {
          stopContinuousWalkingGracefully();
 
@@ -143,7 +143,8 @@ public class ContinuousPlannerSchedulingTask
       }
       else
       {
-         continuousPlanningParameters.setActiveMapping(false);
+         //continuousPlanningParameters.setContinuousWalkingEnabled(false);
+         continuousPlanningParameters.setStepPublisherEnabled(false);
          LogTools.error("Planning failed, restart active mapping and try again");
       }
    }
@@ -165,7 +166,7 @@ public class ContinuousPlannerSchedulingTask
          }
          else
          {
-            continuousPlanningParameters.setActiveMapping(false);
+            continuousPlanningParameters.setContinuousWalkingEnabled(false);
             LogTools.error("Planning failed, restart active mapping and try again");
          }
       }
@@ -175,19 +176,23 @@ public class ContinuousPlannerSchedulingTask
          LogTools.info("State: " + state);
          FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousPlanningParameters, controllerQueue);
          LogTools.info("Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller");
-         publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
 
-         state = ContinuousWalkingState.WAITING_TO_LAND;
-         continuousPlanner.setPlanAvailable(false);
-         continuousPlanner.transitionCallback();
-         continuousPlannerStatistics.setStartWaitingTime();
+         if (continuousPlanningParameters.getStepPublisherEnabled())
+         {
+            publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
+
+            state = ContinuousWalkingState.WAITING_TO_LAND;
+            continuousPlanner.setPlanAvailable(false);
+            continuousPlanner.transitionCallback();
+            continuousPlannerStatistics.setStartWaitingTime();
+         }
       }
    }
 
    // This receives a message each time there is a change in the FootstepStatusMessage
    private void footstepStatusReceived(FootstepStatusMessage footstepStatusMessage)
    {
-      if (!continuousPlanningParameters.getActiveMapping())
+      if (!continuousPlanningParameters.getContinuousWalkingEnabled())
          return;
 
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
@@ -215,7 +220,7 @@ public class ContinuousPlannerSchedulingTask
 
    private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
    {
-      if (!continuousPlanningParameters.getActiveMapping())
+      if (!continuousPlanningParameters.getContinuousWalkingEnabled())
          return;
 
       controllerQueue = footstepQueueStatusMessage.getQueuedFootstepList();

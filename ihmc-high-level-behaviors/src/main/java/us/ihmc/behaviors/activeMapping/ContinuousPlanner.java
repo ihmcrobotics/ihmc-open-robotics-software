@@ -65,7 +65,7 @@ public class ContinuousPlanner
 
    private final HumanoidReferenceFrames referenceFrames;
    private CollisionFreeSwingCalculator collisionFreeSwingCalculator;
-   private ContinuousWalkingParameters continuousPlanningParameters;
+   private ContinuousWalkingParameters continuousWalkingParameters;
    private ContinuousPlannerStatistics statistics;
    private SwingPlannerParametersBasics swingPlannerParameters;
    private FootstepPlanningModule footstepPlanner;
@@ -123,7 +123,7 @@ public class ContinuousPlanner
          {
             footstepPlanner.clearCustomTerminationConditions();
             footstepPlanner.addCustomTerminationCondition((time, iterations, finalStep, secondToFinalStep, pathSize) -> pathSize
-                                                                                                                        >= continuousPlanningParameters.getNumberOfStepsToSend());
+                                                                                                                        >= continuousWalkingParameters.getNumberOfStepsToSend());
          }
       }
 
@@ -146,7 +146,7 @@ public class ContinuousPlanner
 
    public void setGoalWaypointPoses(ContinuousWalkingParameters continuousPlanningParameters)
    {
-      this.continuousPlanningParameters = continuousPlanningParameters;
+      this.continuousWalkingParameters = continuousPlanningParameters;
 
       switch (this.mode)
       {
@@ -267,8 +267,8 @@ public class ContinuousPlanner
       }
 
       // Sync the swing time to always be the same whether its obstacle avoidance or not
-      swingPlannerParameters.setMinimumSwingTime(continuousPlanningParameters.getSwingTime());
-      swingPlannerParameters.setMaximumSwingTime(continuousPlanningParameters.getSwingTime());
+      swingPlannerParameters.setMinimumSwingTime(continuousWalkingParameters.getSwingTime());
+      swingPlannerParameters.setMaximumSwingTime(continuousWalkingParameters.getSwingTime());
 
       footstepPlanner.getSwingPlannerParameters().set(swingPlannerParameters);
 
@@ -278,12 +278,14 @@ public class ContinuousPlanner
       request.setHeightMapData(heightMapData);
       request.setAbortIfGoalStepSnappingFails(true);
 
+      double totalStepTime = continuousWalkingParameters.getSwingTime() + continuousWalkingParameters.getTransferTime();
+
       if (useReferencePlan)
       {
          // Sets the previous footstep plan to be a reference for the current plan
          FootstepPlan previousFootstepPlan = new FootstepPlan(latestFootstepPlan);
 
-         if (previousFootstepPlan.getNumberOfSteps() < continuousPlanningParameters.getNumberOfStepsToSend())
+         if (previousFootstepPlan.getNumberOfSteps() < continuousWalkingParameters.getNumberOfStepsToSend())
          {
             LogTools.error("Previous Plan for Reference: Not Enough Steps: {}!", previousFootstepPlan.getNumberOfSteps());
          }
@@ -292,16 +294,16 @@ public class ContinuousPlanner
             // These are steps that are considered to be at the start of the plan, don't want to use them as reference
             this.previousFootstepPlan.remove(0);
 
-            if (!continuousPlanningParameters.getOverrideEntireQueueEachStep())
+            if (!continuousWalkingParameters.getOverrideEntireQueueEachStep())
                this.previousFootstepPlan.remove(1);
 
             request.setReferencePlan(this.previousFootstepPlan);
-            request.setTimeout(continuousPlanningParameters.getPlanningReferenceTimeout());
+            request.setTimeout(totalStepTime * continuousWalkingParameters.getPlanningTimeoutFraction());
          }
       }
       else
       {
-         request.setTimeout(continuousPlanningParameters.getPlanningWithoutReferenceTimeout());
+         request.setTimeout(continuousWalkingParameters.getPlanningWithoutReferenceTimeout());
       }
 
       FootstepPlannerOutput plannerOutput = footstepPlanner.handleRequest(request);
@@ -323,7 +325,7 @@ public class ContinuousPlanner
       assert plannerOutput != null;
       statistics.setTotalStepsPlanned(plannerOutput.getFootstepPlan().getNumberOfSteps());
 
-      if (continuousPlanningParameters.getLogFootstepPlans())
+      if (continuousWalkingParameters.getLogFootstepPlans())
       {
          ThreadTools.startAThread(() ->
                                   {
@@ -455,7 +457,7 @@ public class ContinuousPlanner
 
       // We expect the plannerOutput to contain this number of steps we ask for
       int index = 0;
-      if (!controllerQueue.isEmpty() && !continuousPlanningParameters.getOverrideEntireQueueEachStep())
+      if (!controllerQueue.isEmpty() && !continuousWalkingParameters.getOverrideEntireQueueEachStep())
       {
          PlannedFootstep stepToNotOverride = new PlannedFootstep(RobotSide.fromByte(controllerQueue.get(1).getRobotSide()),
                                                                  new Pose3D(controllerQueue.get(1).getLocation(), controllerQueue.get(1).getOrientation()));
@@ -497,7 +499,7 @@ public class ContinuousPlanner
 
       FramePose3D nextRobotStepAfterCurrent;
 
-      if (continuousPlanningParameters.getOverrideEntireQueueEachStep())
+      if (continuousWalkingParameters.getOverrideEntireQueueEachStep())
       {
          nextRobotStepAfterCurrent = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                      referenceFrames.getSoleFrame(imminentFootstepSide.getOppositeSide()).getTransformToWorldFrame());

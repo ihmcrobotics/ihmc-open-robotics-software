@@ -38,9 +38,7 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
 {
    private final RDXSwingTrajectoryGraphic swingTrajectoryGraphic = new RDXSwingTrajectoryGraphic();
    private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
-   private final ImBoolean enableContinuousPlanner = new ImBoolean(false);
    private final ImBoolean renderEnabled = new ImBoolean(true);
-   private final ContinuousWalkingParameters continuousWalkingParameters;
    private final SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
    private final SideDependentList<RDXFootstepGraphic> startFootstepGraphics;
 
@@ -51,14 +49,9 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
    private final ROS2Helper ros2Helper;
    private HumanoidActivePerceptionModule activePerceptionModule;
 
-   public RDXContinuousPlanningPanel(String name,
-                                     ROS2Helper ros2Helper,
-                                     HumanoidActivePerceptionModule activePerceptionModule,
-                                     ContinuousWalkingParameters continuousWalkingParameters,
-                                     ROS2SyncedRobotModel syncedRobot)
+   public RDXContinuousPlanningPanel(ROS2Helper ros2Helper, HumanoidActivePerceptionModule activePerceptionModule, ROS2SyncedRobotModel syncedRobot)
    {
       this.ros2Helper = ros2Helper;
-      this.continuousWalkingParameters = continuousWalkingParameters;
       this.activePerceptionModule = activePerceptionModule;
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = syncedRobot.getRobotModel()
