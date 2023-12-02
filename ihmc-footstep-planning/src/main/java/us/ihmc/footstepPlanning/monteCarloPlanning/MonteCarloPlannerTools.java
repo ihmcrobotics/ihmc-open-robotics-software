@@ -5,6 +5,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -19,7 +20,10 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_GRAY2RGB;
 
@@ -307,7 +311,7 @@ public class MonteCarloPlannerTools
    public static FootstepPlan getFootstepPlanFromTree(MonteCarloFootstepNode root, MonteCarloFootstepPlannerRequest request)
    {
       List<MonteCarloTreeNode> path = new ArrayList<>();
-      MonteCarloPlannerTools.getOptimalPath(root, path);
+      MonteCarloPlannerTools.getOptimalPathByVisits(root, path);
 
       int offsetX = (int) (request.getSensorOrigin().getX() * 50);
       int offsetY = (int) (request.getSensorOrigin().getY() * 50);
@@ -437,8 +441,24 @@ public class MonteCarloPlannerTools
 
       Point2D previousPosition = new Point2D(oldNode.getState());
       Point2D currentPosition = new Point2D(newNode.getState());
-      Point2D goalPosition = new Point2D(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition());
+      Point2D goalPositionRight = new Point2D(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition());
+      Point2D goalPositionLeft = new Point2D(request.getGoalFootPoses().get(RobotSide.RIGHT).getPosition());
+      Point2D goalPosition = new Point2D();
+      goalPosition.add(goalPositionRight, goalPositionLeft);
+      goalPosition.scale(0.5f);
       goalPosition.scale(50.0f);
+
+      Point2D startPositionLeft = new Point2D(request.getStartFootPoses().get(RobotSide.LEFT).getPosition());
+      Point2D startPositionRight = new Point2D(request.getStartFootPoses().get(RobotSide.RIGHT).getPosition());
+      Point2D startPosition = new Point2D();
+      startPosition.add(startPositionLeft, startPositionRight);
+      startPosition.scale(0.5f);
+      startPosition.scale(50.0f);
+
+      double yawFromStartToGoal = Math.atan2(goalPosition.getY() - startPosition.getY(), goalPosition.getX() - startPosition.getX());
+      double yawDifferenceFromReference = Math.abs(yawFromStartToGoal - oldNode.getState().getZ());
+      double distanceFromReferenceLine = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(currentPosition, startPosition, goalPosition);
+      double referenceCost = distanceFromReferenceLine * 0.01f + yawDifferenceFromReference * 0.01f;
 
       double goalReward = plannerParameters.getGoalReward() / (currentPosition.distanceSquared(goalPosition));
       double contactReward = (((int) request.getContactMap().ptr(rIndex, cIndex).get() & 0xFF) / 255.0 - plannerParameters.getFeasibleContactCutoff())
@@ -449,7 +469,7 @@ public class MonteCarloPlannerTools
       double stepHeightCost = (getHeightAt(request.getHeightMap(), rIndex, cIndex) - getHeightAt(request.getHeightMap(), rIndex, cIndex)) * 0.01f;
       double edgeCost = stepYawCost + stepDistanceCost + stepHeightCost;
 
-      score = goalReward + contactReward - edgeCost;
+      score = goalReward + contactReward - edgeCost - referenceCost;
       return score;
    }
 
