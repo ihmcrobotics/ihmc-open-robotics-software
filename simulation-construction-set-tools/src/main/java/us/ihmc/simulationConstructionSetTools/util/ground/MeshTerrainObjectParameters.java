@@ -34,8 +34,17 @@ public final class MeshTerrainObjectParameters
    
    private Vhacd4Parameters vhacd4Parameters;
 
+   private String modelDirectory;
+
    public MeshTerrainObjectParameters()
    {
+      this(null);
+   }
+
+   public MeshTerrainObjectParameters(String modelDirectory)
+   {
+      this.modelDirectory = modelDirectory;
+
       NativeLibraryLoader.loadNativeLibrary("bulletjme", true);
       updateParameters();
    }
@@ -50,6 +59,11 @@ public final class MeshTerrainObjectParameters
       this.vhacd4Parameters.setVolumePercentError(this.maximumVolumetricPercentError);
       this.vhacd4Parameters.setMaxHulls(this.maximumNumberOfHulls);
       
+   }
+
+   public String getModelDirectory()
+   {
+      return modelDirectory;
    }
 
    public int getMaxNoOfHulls()
