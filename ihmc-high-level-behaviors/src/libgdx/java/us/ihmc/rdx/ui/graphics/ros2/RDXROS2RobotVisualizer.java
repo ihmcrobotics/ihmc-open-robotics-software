@@ -14,7 +14,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.scs2.definition.robot.RobotDefinition;
 
 import java.util.function.Supplier;
 
@@ -67,8 +66,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
       if (baseUI != null)
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
       cameraForTracking = cameraForTrackingSupplier.get();
-      RobotDefinition robotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
-      loadRobotModelAndGraphics(robotDefinition, syncedRobot.getFullRobotModel().getElevator());
+      loadRobotModelAndGraphics(robotModel.getRobotDefinition(), syncedRobot.getFullRobotModel().getElevator());
    }
 
    @Override

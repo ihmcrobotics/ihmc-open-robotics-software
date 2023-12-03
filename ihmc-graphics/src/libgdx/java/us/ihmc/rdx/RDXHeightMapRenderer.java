@@ -23,7 +23,15 @@ import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
 
 import java.nio.FloatBuffer;
+import java.util.stream.IntStream;
 
+/**
+ * Renders a height map as a point cloud. The height map is stored as a 16-bit grayscale image.
+ * height for each cell is represented in that buffer as value between 0 and 65536,
+ * where the midway point 32,768 is the metric 0.0f height,
+ * 0 is the metric -3.2768f height, and 65536 is the 3.2768f height.
+ * The height is scaled up by 10,000 for storage as 16-bit value (short)
+ */
 public class RDXHeightMapRenderer implements RenderableProvider
 {
    private Renderable renderable;
@@ -96,11 +104,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
       int cellsPerAxis = 2 * centerIndex + 1;
 
-      float maxHeight = 2.0f;
-      float minHeight = 0.0f;
-
       Point3D spritePoint = new Point3D();
-
       for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
       {
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
@@ -110,19 +114,14 @@ public class RDXHeightMapRenderer implements RenderableProvider
             double xPosition = indexToCoordinate(xIndex, gridCenterX, cellSizeXYInMeters, centerIndex); // + 1.5f
             double yPosition = indexToCoordinate(yIndex, gridCenterY, cellSizeXYInMeters, centerIndex);
 
+            /* look at the header docs for decoding the height map values as below */
             int heightIndex = xIndex * cellsPerAxis + yIndex;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
-            float zPosition = (heightMapPointer.getShort(heightIndex * 2L) / heightScalingFactor);
-            zPosition = (float) MathTools.clamp(zPosition, minHeight, maxHeight);
-            if (zPosition > maxHeight - 0.01f)
-               zPosition = 0.0f;
+            int height = heightMapPointer.getShort(heightIndex * 2L) & 0xFFFF;
+            float zPosition = ((float) height / heightScalingFactor);
+            zPosition -= 3.2768f;
 
             spritePoint.set(xPosition, yPosition, zPosition);
-            //spritePoint.applyTransform(zUpFrameToWorld);
-
-            //            spritePoint.setZ(zPosition);
-
-            // Position
             intermediateVertexBuffer[vertexIndex] = (float) spritePoint.getX();
             intermediateVertexBuffer[vertexIndex + 1] = (float) spritePoint.getY();
             intermediateVertexBuffer[vertexIndex + 2] = (float) spritePoint.getZ();

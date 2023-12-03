@@ -1,25 +1,42 @@
 package us.ihmc.perception.tools;
 
 import gnu.trove.list.array.TIntArrayList;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_highgui;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.MatVector;
-import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_core.*;
+import org.ejml.data.FMatrixRMaj;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint3f;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
+import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 
 public class PerceptionDebugTools
 {
+   public static final Scalar COLOR_RED = new Scalar(0, 0, 255, 255);
+   public static final Scalar COLOR_GREEN = new Scalar(0, 255, 0, 255);
+   public static final Scalar COLOR_BLUE = new Scalar(255, 0, 0, 255);
+   public static final Scalar COLOR_YELLOW = new Scalar(0, 255, 255, 255);
+   public static final Scalar COLOR_BLACK = new Scalar(0, 0, 0, 255);
+   public static final Scalar COLOR_WHITE = new Scalar(255, 255, 255, 255);
+   public static final Scalar COLOR_GRAY = new Scalar(128, 128, 128, 255);
+   public static final Scalar COLOR_PURPLE = new Scalar(255, 0, 255, 255);
+
    public static void printMatches(String tag, PlanarRegionsList map, PlanarRegionsList regions, HashMap<Integer, TIntArrayList> matches, boolean debug)
    {
       if (!debug)
@@ -43,7 +60,7 @@ public class PerceptionDebugTools
          return;
 
       LogTools.info("[{}]", tag);
-      for(int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
+      for (int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
       {
          LogTools.info("Region Index: {}, Region ID: {}", i, regions.getPlanarRegion(i).getRegionId());
          printPlanarRegionVertices(regions.getPlanarRegion(i), debug);
@@ -184,31 +201,84 @@ public class PerceptionDebugTools
       return "unknown image type";
    }
 
-   public static void printMat(String name, Mat image)
+   public static void printBuffer2D(String tag, FloatBuffer buffer, int rows, int cols, int skip)
    {
-      LogTools.info(matToString(name, image));
+      LogTools.info(bufferToString(tag, buffer, rows, cols, skip));
+   }
+
+   public static String bufferToString(String tag, FloatBuffer buffer, int rows, int cols, int skip)
+   {
+      StringBuilder matString = new StringBuilder("Buffer: [" + tag + "]\n");
+      for (int i = 0; i < rows; i += skip)
+      {
+         for (int j = 0; j < cols; j += skip)
+         {
+            matString.append(String.format("%.2f ", buffer.get(i * cols + j)));
+         }
+         matString.append("\n");
+      }
+      return matString.toString();
+   }
+
+   public static void printMat(String name, Mat image, int skip)
+   {
+      LogTools.info(matToString(name, image, 0, 0, image.rows(), image.cols(), skip));
+   }
+
+   public static void printMat(String name, Mat image, int row, int col, int nRows, int nCols, int skip)
+   {
+      LogTools.info(matToString(name, image, row, col, nRows, nCols, skip));
    }
 
    public static void printMatVector(String name, MatVector matVector)
    {
       for (int i = 0; i < matVector.size(); i++)
       {
-         LogTools.info(matToString("%s %d:".formatted(name, i), matVector.get(i)) + "\n");
+         printMat("%s %d:".formatted(name, i), matVector.get(i), 1);
+         System.out.println();
       }
    }
 
-   public static String matToString(String name, Mat image)
+   public static void printHeightMap(String name, HeightMapData heightMapData, int skip)
+   {
+      LogTools.info(heightMapToString(name, heightMapData, skip));
+   }
+
+   public static String heightMapToString(String name, HeightMapData heightMapData, int skip)
    {
       StringBuilder matString = new StringBuilder("Mat: [" + name + "]\n");
-
-      for (int i = 0; i < image.rows(); i++)
+      LogTools.info("Height Map: [Center: {}]", heightMapData.getGridCenter());
+      for (int i = 0; i < heightMapData.getCellsPerAxis(); i += skip)
       {
-         for (int j = 0; j < image.cols(); j++)
+         for (int j = 0; j < heightMapData.getCellsPerAxis(); j += skip)
          {
+            double height = heightMapData.getHeightAt(i, j);
+            if (height > 0.0001)
+               matString.append(String.format("%.2f", height)).append(" ");
+            else
+               matString.append("||||").append(" ");
+         }
+         matString.append("\n");
+      }
+      return matString.toString();
+   }
+
+   public static String matToString(String name, Mat image, int row, int col, int nRows, int nCols, int skip)
+   {
+      StringBuilder matString = new StringBuilder("Mat: [" + name + "], Type: [" + getTypeString(image.type()) + "], Channels: [" + image.channels() + "]\n");
+
+      for (int i = row; i < nRows; i += skip)
+      {
+         for (int j = col; j < nCols; j += skip)
+         {
+            if (image.type() == opencv_core.CV_8UC1)
+               matString.append(image.ptr(i, j).get() & 0xFF).append(" ");
             if (image.type() == opencv_core.CV_16UC1)
-               matString.append(image.ptr(i, j).getShort()).append("\t");
+               matString.append(((int) image.ptr(i, j).getShort()) & 0xFFFF).append("\t");
             if (image.type() == opencv_core.CV_64FC1)
                matString.append("%.5f\t".formatted(image.ptr(i, j).getDouble()));
+            if (image.type() == opencv_core.CV_32FC1)
+               matString.append("%.2f\t".formatted(image.ptr(i, j).getFloat()));
             if (image.type() == opencv_core.CV_32FC2)
                matString.append("%.5f\t%.5f\t\t".formatted(image.ptr(i, j).getFloat(), image.ptr(i, j).getFloat(Float.BYTES)));
          }
@@ -230,7 +300,7 @@ public class PerceptionDebugTools
 
       if (screenSize != -1)
       {
-         opencv_highgui.resizeWindow(tag, screenSize, screenSize);
+         opencv_highgui.resizeWindow(tag, screenSize / image.rows() * image.cols(), screenSize);
       }
 
       int code = opencv_highgui.waitKeyEx(delay);
@@ -322,6 +392,156 @@ public class PerceptionDebugTools
       LogTools.info(String.format("Projection: [%.2f,%.2f] (Yc:%d,Pc:%d, Z:%.2f,R:%.2f)\n", yaw, pitch, yawCount, pitchCount, z, radius));
 
       return proj;
+   }
+
+   public static void plotFootsteps(Mat displayImage, FMatrixRMaj linearOutput, int size)
+   {
+      Scalar leftColor = new Scalar(0, 255, 255, 0);
+      Scalar rightColor = new Scalar(0, 0, 255, 0);
+
+      for (int i = 0; i < linearOutput.getNumElements() / 2; i++)
+      {
+         Point2D point = new Point2D(linearOutput.get(2 * i, 0), linearOutput.get(2 * i + 1, 0));
+         Point2D positionOnMap = new Point2D(point.getY() * 50 + displayImage.rows() / 2, point.getX() * 50 + displayImage.cols() / 2);
+         opencv_imgproc.rectangle(displayImage,
+                                  new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
+                                  new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
+                                  i % 2 == 1 ? leftColor : rightColor,
+                                  -1,
+                                  opencv_imgproc.LINE_4,
+                                  0);
+      }
+   }
+
+   public static void plotRectangle(Mat displayImage, Point2D point, int size, Scalar color)
+   {
+      LogTools.info("Plotting Node: Footstep: {} {}", (int) (point.getY() * 50 + displayImage.rows() / 2), (int) (point.getX() * 50 + displayImage.cols() / 2));
+
+      // just like plotFootsteps
+      Point2D positionOnMap = new Point2D(point.getY() * 50 + displayImage.rows() / 2, point.getX() * 50 + displayImage.cols() / 2);
+      opencv_imgproc.rectangle(displayImage,
+                               new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
+                               new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
+                               color,
+                               -1,
+                               opencv_imgproc.LINE_4,
+                               0);
+   }
+
+   public static void plotRectangleNoScale(Mat displayImage, Point2D point, int size, Scalar color)
+   {
+      LogTools.debug("Plotting Node: Footstep: {} {}", (int) (point.getY() + displayImage.rows() / 2), (int) (point.getX() + displayImage.cols() / 2));
+
+      // just like plotFootsteps
+      Point2D positionOnMap = new Point2D(point.getY() + displayImage.rows() / 2, point.getX() + displayImage.cols() / 2);
+      opencv_imgproc.rectangle(displayImage,
+                               new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
+                               new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
+                               color,
+                               -1,
+                               opencv_imgproc.LINE_4,
+                               0);
+   }
+
+   public static void plotTiltedRectangle(Mat displayImage, Point2D origin, float yaw, int size, int side)
+   {
+      LogTools.debug("Footstep Plotted: {} {} {}",
+                     (int) (origin.getY() * 50 + displayImage.rows() / 2),
+                     (int) (origin.getX() * 50 + displayImage.cols() / 2),
+                     side);
+
+      Scalar color;
+
+      switch (side)
+      {
+         case 1: // right foot is red
+            color = new Scalar(0, 100, 255, 0);
+            break;
+         case -1: // left foot is blue
+            color = new Scalar(255, 100, 0, 0);
+            break;
+         case 2: // start poses are black
+            color = new Scalar(0, 0, 0, 0);
+            break;
+         case 3: // goal poses are white
+            color = new Scalar(255, 255, 255, 0);
+            break;
+         default:
+            color = new Scalar(255, 255, 255, 255);
+            break;
+      }
+
+      // just like plotFootsteps
+      //Point2D positionOnMap = new Point2D(origin.getY() * 50 + displayImage.rows() / 2, origin.getX() * 50 + displayImage.cols() / 2);
+      //opencv_imgproc.rectangle(displayImage,
+      //                         new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size * 2),
+      //                         new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size * 2),
+      //                         color,
+      //                         -1,
+      //                         opencv_imgproc.LINE_4,
+      //                         0);
+
+      plotFootstepWithYaw(displayImage, new Point3D(origin.getX(), origin.getY(), yaw), color, -1, size, size * 2);
+   }
+
+   public static void plotFootstepWithYaw(Mat display, Point3D pose, Scalar color, int index, double width, double length)
+   {
+      double[] positionOnMap = {pose.getX() * 50 + display.rows() / 2, pose.getY() * 50 + display.cols() / 2};
+      double yaw = pose.getZ();
+
+      // Create the footstep rectangle using the position and orientation
+      Point3D[] points = {new Point3D(-length, -width, 0),
+                          new Point3D(-length, width, 0),
+                          new Point3D(length, width, 0),
+                          new Point3D(length, -width, 0)};
+
+      Quaternion quat = new Quaternion();
+      quat.setYawPitchRoll(yaw + Math.PI / 2, 0, 0);
+
+      Vector3D translation = new Vector3D(positionOnMap[1], positionOnMap[0], 0);
+
+      RigidBodyTransform transform = new RigidBodyTransform(quat, translation);
+
+      // Rotate the points
+      for (Point3D point : points)
+      {
+         point.applyTransform(transform);
+      }
+
+      Mat matOfPoints = new Mat(4, 2, opencv_core.CV_32SC1);
+
+      for (int i = 0; i < 4; i++)
+      {
+         matOfPoints.ptr(i, 0).putInt((int) points[i].getX());
+         matOfPoints.ptr(i, 1).putInt((int) points[i].getY());
+      }
+
+      // Draw the polyline on the image
+      opencv_imgproc.fillConvexPoly(display, matOfPoints, color);
+
+      // Plot text on the footstep which is the index of the footstep (size 0.1)
+      if (index != -1)
+      {
+         String text = String.valueOf(index);
+         Size textsize = opencv_imgproc.getTextSize(text, opencv_imgproc.FONT_HERSHEY_SIMPLEX, 0.1, 1, new IntPointer());
+         int textX = (int) (positionOnMap[0] - textsize.width() / 2) + 2;
+         int textY = (int) (positionOnMap[1] + textsize.height() / 2);
+         opencv_imgproc.putText(display, text, new Point(textX, textY), opencv_imgproc.FONT_HERSHEY_SIMPLEX, 0.1, color, 1, 0, false);
+      }
+   }
+
+   public static void plotCircle(Mat displayImage, Point2D origin, int radius)
+   {
+      Scalar color = new Scalar(0, 255, 255, 255);
+
+      Point2D positionOnMap = new Point2D(origin.getY() * 50 + displayImage.rows() / 2, origin.getX() * 50 + displayImage.cols() / 2);
+      opencv_imgproc.circle(displayImage, new Point((int) positionOnMap.getX(), (int) positionOnMap.getY()), radius, color, -1, opencv_imgproc.LINE_4, 0);
+   }
+
+   public static void convertDepthCopyToColor(Mat depthImage16UC1Copy, Mat colorImage8UC3)
+   {
+      opencv_core.convertScaleAbs(depthImage16UC1Copy, depthImage16UC1Copy, 255.0 / 65535.0, 0);
+      opencv_imgproc.cvtColor(depthImage16UC1Copy, colorImage8UC3, opencv_imgproc.COLOR_GRAY2RGB);
    }
 
    public static void clearAllWindows()

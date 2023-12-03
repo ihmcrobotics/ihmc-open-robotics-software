@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.FormattingTools;
@@ -73,6 +74,11 @@ public abstract class WalkingState implements State
    public void handleFootLoadBearingCommand(FootLoadBearingCommand command)
    {
       // Override in state that can handle EndEffectorLoadBearingCommand
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return null;
    }
 
    public boolean isStateSafeToConsumePelvisTrajectoryCommand()
