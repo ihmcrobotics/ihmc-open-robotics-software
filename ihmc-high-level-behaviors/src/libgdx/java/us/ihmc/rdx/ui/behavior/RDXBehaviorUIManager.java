@@ -6,9 +6,9 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import org.apache.logging.log4j.Level;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorMessageTools;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeBasics;
 import us.ihmc.behaviors.behaviorTree.FallbackNode;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
@@ -38,7 +38,7 @@ import static us.ihmc.behaviors.BehaviorModule.API.*;
  */
 public class RDXBehaviorUIManager
 {
-   private final AtomicReference<BehaviorTreeNodeBasics> behaviorTreeStatus = new AtomicReference<>(new FallbackNode());
+   private final AtomicReference<BehaviorTreeNodeExecutor> behaviorTreeStatus = new AtomicReference<>(new FallbackNode());
    private final Stopwatch statusStopwatch = new Stopwatch();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Tree status", 1000, 230, 15);
@@ -120,7 +120,7 @@ public class RDXBehaviorUIManager
       statusReceivedPlot.setNextValue((float) statusStopwatch.totalElapsed());
       statusReceivedPlot.calculate("");
 
-      ImGui.text("Root node: %s".formatted(highestLevelUI == null ? "None." : highestLevelUI.getName()));
+      ImGui.text("Root node: %s".formatted(highestLevelUI == null ? "None." : highestLevelUI.getDefinition().getDescription()));
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)

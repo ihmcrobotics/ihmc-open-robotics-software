@@ -1,45 +1,41 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class PelvisHeightPitchActionState extends BehaviorActionState
+public class PelvisHeightPitchActionState extends ActionNodeState<PelvisHeightPitchActionDefinition>
 {
-   private final PelvisHeightPitchActionDefinition definition = new PelvisHeightPitchActionDefinition();
    private final DetachableReferenceFrame pelvisFrame;
 
-   public PelvisHeightPitchActionState(ReferenceFrameLibrary referenceFrameLibrary)
+   public PelvisHeightPitchActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      pelvisFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getPelvisToParentTransform());
+      super(id, new PelvisHeightPitchActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+
+      pelvisFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getPelvisToParentTransform().getValueReadOnly());
    }
 
    @Override
    public void update()
    {
-      pelvisFrame.update(definition.getParentFrameName());
-      setCanExecute(pelvisFrame.isChildOfWorld());
+      pelvisFrame.update(getDefinition().getParentFrameName());
    }
 
    public void toMessage(PelvisHeightPitchActionStateMessage message)
    {
-      super.toMessage(message.getActionState());
+      getDefinition().toMessage(message.getDefinition());
 
-      definition.toMessage(message.getDefinition());
+      super.toMessage(message.getState());
    }
 
    public void fromMessage(PelvisHeightPitchActionStateMessage message)
    {
-      super.fromMessage(message.getActionState());
+      super.fromMessage(message.getState());
 
-      definition.fromMessage(message.getDefinition());
-   }
-
-   @Override
-   public PelvisHeightPitchActionDefinition getDefinition()
-   {
-      return definition;
+      getDefinition().fromMessage(message.getDefinition());
    }
 
    public DetachableReferenceFrame getPelvisFrame()

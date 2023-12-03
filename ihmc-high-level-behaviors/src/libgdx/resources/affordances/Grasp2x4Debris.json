@@ -1,6 +1,6 @@
 {
   "name" : "Grasp2x4Debris",
-  "actions" : [ {
+  "children" : [ {
     "type" : "HandPoseActionDefinition",
     "parentFrame" : "2x4Debris",
     "side" : "right",

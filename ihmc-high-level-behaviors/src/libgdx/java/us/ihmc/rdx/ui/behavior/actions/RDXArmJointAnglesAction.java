@@ -6,30 +6,38 @@ import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.ArmJointAnglesActionDefinition;
 import us.ihmc.behaviors.sequence.actions.ArmJointAnglesActionState;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class RDXArmJointAnglesAction extends RDXBehaviorAction
+public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionState, ArmJointAnglesActionDefinition>
 {
    private final DRCRobotModel robotModel;
-   private final ArmJointAnglesActionState state = new ArmJointAnglesActionState();
-   private final ArmJointAnglesActionDefinition definition = state.getDefinition();
+   private final ArmJointAnglesActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(definition::getSide, definition::setSide, labels.get("Side"));
+   private final ImIntegerWrapper sideWidget;
    private final String[] configurations = new String[PresetArmConfiguration.values().length + 1];
    private final ImInt currentConfiguration = new ImInt(PresetArmConfiguration.HOME.ordinal() + 1);
    private final ImDoubleWrapper[] jointAngleWidgets = new ImDoubleWrapper[ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS];
-   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
-                                                                                definition::setTrajectoryDuration,
-                                                                                imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
-   public RDXArmJointAnglesAction(RDXBehaviorActionSequenceEditor editor, DRCRobotModel robotModel)
+   private final ImDoubleWrapper trajectoryDurationWidget;
+
+   public RDXArmJointAnglesAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, DRCRobotModel robotModel)
    {
-      super(editor);
+      super(new ArmJointAnglesActionState(id, crdtInfo, saveFileDirectory));
+
+      state = getState();
 
       this.robotModel = robotModel;
+
+      getDefinition().setDescription("Arm joint angles");
+
+      sideWidget = new ImIntegerWrapper(getDefinition()::getSide, getDefinition()::setSide, labels.get("Side"));
+      trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
+                                                     getDefinition()::setTrajectoryDuration,
+                                                     imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
 
       int c = 0;
       configurations[c++] = ArmJointAnglesActionDefinition.CUSTOM_ANGLES_NAME;
@@ -41,8 +49,8 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
       for (int i = 0; i < ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS; i++)
       {
          int jointIndex = i;
-         jointAngleWidgets[i] = new ImDoubleWrapper(() -> definition.getJointAngles()[jointIndex],
-                                                    jointAngle -> definition.getJointAngles()[jointIndex] = jointAngle,
+         jointAngleWidgets[i] = new ImDoubleWrapper(() -> getDefinition().getJointAngles().getValue()[jointIndex],
+                                                    jointAngle -> getDefinition().getJointAngles().getValue()[jointIndex] = jointAngle,
                                                     imDouble -> ImGui.inputDouble(labels.get("j" + jointIndex), imDouble));
       }
    }
@@ -52,13 +60,20 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
    {
       super.update();
 
-      PresetArmConfiguration preset = definition.getPreset();
+      PresetArmConfiguration preset = getDefinition().getPreset();
       currentConfiguration.set(preset == null ? 0 : preset.ordinal() + 1);
 
       // Copy the preset values into the custom data fields so they can be tweaked
       // relatively when switching to custom angles.
       if (preset != null)
-         definition.setJointAngles(robotModel.getPresetArmConfiguration(definition.getSide(), preset));
+      {
+         // TODO: Would be great if there was a #getPresetArmConfiguration that accepts an array to pack
+         double[] jointAngles = robotModel.getPresetArmConfiguration(getDefinition().getSide(), preset);
+         for (int i = 0; i < jointAngles.length; i++)
+         {
+            getDefinition().getJointAngles().getValue()[i] = jointAngles[i];
+         }
+      }
    }
 
    @Override
@@ -73,10 +88,10 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
 
       ImGui.pushItemWidth(200.0f);
       if (ImGui.combo(labels.get("Configuration"), currentConfiguration, configurations))
-         definition.setPreset(currentConfiguration.get() == 0 ? null : PresetArmConfiguration.values()[currentConfiguration.get() - 1]);
+         getDefinition().setPreset(currentConfiguration.get() == 0 ? null : PresetArmConfiguration.values()[currentConfiguration.get() - 1]);
       ImGui.popItemWidth();
 
-      if (definition.getPreset() == null)
+      if (getDefinition().getPreset() == null)
       {
          ImGui.pushItemWidth(80.0f);
          for (int i = 0; i < ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS; i++)
@@ -91,17 +106,5 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
    public String getActionTypeTitle()
    {
       return "Arm Joint Angles";
-   }
-
-   @Override
-   public ArmJointAnglesActionState getState()
-   {
-      return state;
-   }
-
-   @Override
-   public ArmJointAnglesActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

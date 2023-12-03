@@ -11,7 +11,7 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
    /**
             * Name of the frame the this action is expressed in
             */
@@ -39,7 +39,7 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
 
    public WalkActionDefinitionMessage()
    {
-      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       parent_frame_name_ = new java.lang.StringBuilder(255);
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
       left_goal_foot_transform_to_gizmo_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
@@ -54,7 +54,7 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
 
    public void set(WalkActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       parent_frame_name_.setLength(0);
       parent_frame_name_.append(other.parent_frame_name_);
 
@@ -71,9 +71,9 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getDefinition()
    {
-      return action_definition_;
+      return definition_;
    }
 
    /**
@@ -175,7 +175,7 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_definition_.epsilonEquals(other.action_definition_, epsilon)) return false;
+      if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.parent_frame_name_, other.parent_frame_name_, epsilon)) return false;
 
       if (!this.transform_to_parent_.epsilonEquals(other.transform_to_parent_, epsilon)) return false;
@@ -198,7 +198,7 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
 
       WalkActionDefinitionMessage otherMyClass = (WalkActionDefinitionMessage) other;
 
-      if (!this.action_definition_.equals(otherMyClass.action_definition_)) return false;
+      if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if (!us.ihmc.idl.IDLTools.equals(this.parent_frame_name_, otherMyClass.parent_frame_name_)) return false;
 
       if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
@@ -218,8 +218,8 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
       StringBuilder builder = new StringBuilder();
 
       builder.append("WalkActionDefinitionMessage {");
-      builder.append("action_definition=");
-      builder.append(this.action_definition_);      builder.append(", ");
+      builder.append("definition=");
+      builder.append(this.definition_);      builder.append(", ");
       builder.append("parent_frame_name=");
       builder.append(this.parent_frame_name_);      builder.append(", ");
       builder.append("transform_to_parent=");

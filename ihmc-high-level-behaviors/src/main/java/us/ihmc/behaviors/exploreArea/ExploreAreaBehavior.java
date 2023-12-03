@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.exploreArea;
 
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.packets.MessageTools;
@@ -10,6 +9,7 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -24,7 +24,7 @@ import static us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus.*;
  * An attempt mostly in simulation to explore a building.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
-public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterface
+public class ExploreAreaBehavior extends FallbackNode implements Destroyable
 {
    public static final double TICK_PERIOD = UnitConversions.hertzToSeconds(2);
 
@@ -61,8 +61,8 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
       stop = new StopNode();
       restOfStatesNode = new RestOfStatesNode();
 
-      addChild(stop);
-      addChild(restOfStatesNode);
+      getChildren().add(stop);
+      getChildren().add(restOfStatesNode);
 
       mainThread = helper.createPausablePeriodicThread(getClass(), TICK_PERIOD, 5, this::tick);
    }
@@ -72,10 +72,10 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
       mainThread.setRunning(enabled);
    }
 
-   class StopNode extends BehaviorTreeNode // TODO: Is there a more general reusable robot stop node?
+   class StopNode extends LocalOnlyBehaviorTreeNodeExecutor // TODO: Is there a more general reusable robot stop node?
    {
       @Override
-      public BehaviorTreeNodeStatus tickInternal()
+      public BehaviorTreeNodeStatus determineStatus()
       {
          if (explore.get())
          {
@@ -113,11 +113,11 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
                                                   helper,
                                                   determineNextLocations.getExplorationPlanner());
 
-         addChild(lookAround);
-         addChild(determineNextLocations);
-         addChild(lookAndStep);
-         addChild(turnInPlace);
-         addChild(new AlwaysSuccessfulAction(lookAround::reset));
+         getChildren().add(lookAround);
+         getChildren().add(determineNextLocations);
+         getChildren().add(lookAndStep);
+         getChildren().add(turnInPlace);
+         getChildren().add(new AlwaysSuccessfulAction(lookAround::reset));
       }
 
       class LookAndStepNode extends AsynchronousActionNode // TODO: Use look and step node directly somehow.

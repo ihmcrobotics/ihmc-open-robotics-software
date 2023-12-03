@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
@@ -65,7 +66,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
       footstepPlanGraphic = new RDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
       helper.subscribeViaCallback(TraverseStairsBehaviorAPI.PLANNED_STEPS, footsteps ->
       {
-         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, getName()));
+         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, getDefinition().getDescription()));
       });
       footstepPlanGraphic.setOpacity(0.5);
 //      distanceToStairs = helper.subscribeViaReference(DistanceToStairs, Double.NaN);
@@ -130,7 +131,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      return wasTickedRecently(0.5);
+      return getState().getIsActive();
    }
 
    @Override
@@ -232,7 +233,6 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
       }
    }
 
-   @Override
    public String getName()
    {
       return "Traverse Stairs";

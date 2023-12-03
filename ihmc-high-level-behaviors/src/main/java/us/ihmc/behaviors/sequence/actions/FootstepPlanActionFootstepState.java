@@ -18,7 +18,7 @@ public class FootstepPlanActionFootstepState
       this.footstepPlan = footstepPlan;
       this.definition = definition;
 
-      soleFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getSoleToPlanFrameTransform());
+      soleFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getSoleToPlanFrameTransform().getValueReadOnly());
    }
 
    public void update()

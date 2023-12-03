@@ -11,7 +11,7 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
    /**
             * Specifies the side of the robot that this message refers to.
             */
@@ -29,10 +29,6 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
             */
    public double trajectory_duration_;
    /**
-            * Whether the next action can be executed at the same time of this one
-            */
-   public boolean execute_with_next_action_;
-   /**
             * Whether maintaining the rigid body controlled in world after the action is complete
             */
    public boolean hold_pose_in_world_;
@@ -43,7 +39,7 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
 
    public HandPoseActionDefinitionMessage()
    {
-      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       parent_frame_name_ = new java.lang.StringBuilder(255);
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
@@ -56,7 +52,7 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
 
    public void set(HandPoseActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       robot_side_ = other.robot_side_;
 
       parent_frame_name_.setLength(0);
@@ -64,8 +60,6 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
       trajectory_duration_ = other.trajectory_duration_;
-
-      execute_with_next_action_ = other.execute_with_next_action_;
 
       hold_pose_in_world_ = other.hold_pose_in_world_;
 
@@ -77,9 +71,9 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getDefinition()
    {
-      return action_definition_;
+      return definition_;
    }
 
    /**
@@ -146,21 +140,6 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
    }
 
    /**
-            * Whether the next action can be executed at the same time of this one
-            */
-   public void setExecuteWithNextAction(boolean execute_with_next_action)
-   {
-      execute_with_next_action_ = execute_with_next_action;
-   }
-   /**
-            * Whether the next action can be executed at the same time of this one
-            */
-   public boolean getExecuteWithNextAction()
-   {
-      return execute_with_next_action_;
-   }
-
-   /**
             * Whether maintaining the rigid body controlled in world after the action is complete
             */
    public void setHoldPoseInWorld(boolean hold_pose_in_world)
@@ -208,15 +187,13 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_definition_.epsilonEquals(other.action_definition_, epsilon)) return false;
+      if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.parent_frame_name_, other.parent_frame_name_, epsilon)) return false;
 
       if (!this.transform_to_parent_.epsilonEquals(other.transform_to_parent_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_with_next_action_, other.execute_with_next_action_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_pose_in_world_, other.hold_pose_in_world_, epsilon)) return false;
 
@@ -235,15 +212,13 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
 
       HandPoseActionDefinitionMessage otherMyClass = (HandPoseActionDefinitionMessage) other;
 
-      if (!this.action_definition_.equals(otherMyClass.action_definition_)) return false;
+      if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if (!us.ihmc.idl.IDLTools.equals(this.parent_frame_name_, otherMyClass.parent_frame_name_)) return false;
 
       if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
       if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
-
-      if(this.execute_with_next_action_ != otherMyClass.execute_with_next_action_) return false;
 
       if(this.hold_pose_in_world_ != otherMyClass.hold_pose_in_world_) return false;
 
@@ -259,8 +234,8 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       StringBuilder builder = new StringBuilder();
 
       builder.append("HandPoseActionDefinitionMessage {");
-      builder.append("action_definition=");
-      builder.append(this.action_definition_);      builder.append(", ");
+      builder.append("definition=");
+      builder.append(this.definition_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("parent_frame_name=");
@@ -269,8 +244,6 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       builder.append(this.transform_to_parent_);      builder.append(", ");
       builder.append("trajectory_duration=");
       builder.append(this.trajectory_duration_);      builder.append(", ");
-      builder.append("execute_with_next_action=");
-      builder.append(this.execute_with_next_action_);      builder.append(", ");
       builder.append("hold_pose_in_world=");
       builder.append(this.hold_pose_in_world_);      builder.append(", ");
       builder.append("joint_space_control=");

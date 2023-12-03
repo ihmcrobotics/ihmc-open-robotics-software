@@ -11,15 +11,23 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionStateMessage action_state_;
+   public behavior_msgs.msg.dds.ActionNodeStateMessage state_;
    /**
             * Definition
             */
    public behavior_msgs.msg.dds.WalkActionDefinitionMessage definition_;
+   /**
+            * Total number of footsteps; used for walking actions
+            */
+   public int total_number_of_footsteps_;
+   /**
+            * Incomplete footsteps; used for walking actions
+            */
+   public int number_of_incomplete_footsteps_;
 
    public WalkActionStateMessage()
    {
-      action_state_ = new behavior_msgs.msg.dds.BehaviorActionStateMessage();
+      state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.WalkActionDefinitionMessage();
    }
 
@@ -31,17 +39,21 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
 
    public void set(WalkActionStateMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.staticCopy(other.action_state_, action_state_);
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.WalkActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      total_number_of_footsteps_ = other.total_number_of_footsteps_;
+
+      number_of_incomplete_footsteps_ = other.number_of_incomplete_footsteps_;
+
    }
 
 
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionStateMessage getActionState()
+   public behavior_msgs.msg.dds.ActionNodeStateMessage getState()
    {
-      return action_state_;
+      return state_;
    }
 
 
@@ -51,6 +63,36 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
    public behavior_msgs.msg.dds.WalkActionDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+   /**
+            * Total number of footsteps; used for walking actions
+            */
+   public void setTotalNumberOfFootsteps(int total_number_of_footsteps)
+   {
+      total_number_of_footsteps_ = total_number_of_footsteps;
+   }
+   /**
+            * Total number of footsteps; used for walking actions
+            */
+   public int getTotalNumberOfFootsteps()
+   {
+      return total_number_of_footsteps_;
+   }
+
+   /**
+            * Incomplete footsteps; used for walking actions
+            */
+   public void setNumberOfIncompleteFootsteps(int number_of_incomplete_footsteps)
+   {
+      number_of_incomplete_footsteps_ = number_of_incomplete_footsteps;
+   }
+   /**
+            * Incomplete footsteps; used for walking actions
+            */
+   public int getNumberOfIncompleteFootsteps()
+   {
+      return number_of_incomplete_footsteps_;
    }
 
 
@@ -71,8 +113,12 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_state_.epsilonEquals(other.action_state_, epsilon)) return false;
+      if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.total_number_of_footsteps_, other.total_number_of_footsteps_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_incomplete_footsteps_, other.number_of_incomplete_footsteps_, epsilon)) return false;
+
 
       return true;
    }
@@ -86,8 +132,12 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
 
       WalkActionStateMessage otherMyClass = (WalkActionStateMessage) other;
 
-      if (!this.action_state_.equals(otherMyClass.action_state_)) return false;
+      if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if(this.total_number_of_footsteps_ != otherMyClass.total_number_of_footsteps_) return false;
+
+      if(this.number_of_incomplete_footsteps_ != otherMyClass.number_of_incomplete_footsteps_) return false;
+
 
       return true;
    }
@@ -98,10 +148,14 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
       StringBuilder builder = new StringBuilder();
 
       builder.append("WalkActionStateMessage {");
-      builder.append("action_state=");
-      builder.append(this.action_state_);      builder.append(", ");
+      builder.append("state=");
+      builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");
-      builder.append(this.definition_);
+      builder.append(this.definition_);      builder.append(", ");
+      builder.append("total_number_of_footsteps=");
+      builder.append(this.total_number_of_footsteps_);      builder.append(", ");
+      builder.append("number_of_incomplete_footsteps=");
+      builder.append(this.number_of_incomplete_footsteps_);
       builder.append("}");
       return builder.toString();
    }

@@ -14,6 +14,7 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import std_msgs.msg.dds.Bool;
 import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonMessage;
 import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonsMessage;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
@@ -346,7 +347,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      boolean wasTickedRecently = wasTickedRecently(0.5);
+      boolean wasTickedRecently = getState().getIsActive();
       boolean currentStateIsNotEmpty = !currentState.isEmpty();
       boolean isInResetState = currentState.equals(LookAndStepBehavior.State.RESET.name());
       boolean isPlacingGoal = goalAffordance.isPlacingGoal();
@@ -416,7 +417,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       return "Look and Step";
    }
 
-   @Override
    public String getName()
    {
       return "Look and Step";
