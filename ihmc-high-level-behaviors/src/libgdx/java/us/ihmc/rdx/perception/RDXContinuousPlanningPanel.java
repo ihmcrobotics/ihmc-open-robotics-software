@@ -9,7 +9,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
+import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.video.ContinuousPlanningAPI;
@@ -20,6 +20,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
@@ -45,6 +47,11 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
    private final AtomicReference<FootstepDataListMessage> footstepDataListMessage = new AtomicReference<>(null);
    private final SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+
+   private static final int numberOfKnotPoints = 12;
+   private static final int maxIterationsOptimization = 100;
+   private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator(numberOfKnotPoints,
+                                                                                                                           maxIterationsOptimization);
 
    private final ROS2Helper ros2Helper;
    private HumanoidActivePerceptionModule activePerceptionModule;
@@ -87,13 +94,6 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
       }
    }
 
-   public void generateSwingGraphics(FootstepDataListMessage message)
-   {
-      FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(message);
-
-      //swingTrajectoryGraphic.updateFromPlan(plan);
-   }
-
    public void generateSwingGraphics(FootstepPlan plan, List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories)
    {
       if (plan != null)
@@ -104,10 +104,21 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
 
    public void render()
    {
-      if (activePerceptionModule != null)
+      //if (activePerceptionModule != null)
+      //{
+      //   generateSwingGraphics(activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestFootstepPlan(),
+      //                         activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestSwingTrajectories());
+      //}
+
+      if (footstepDataListMessage.get() != null)
       {
-         generateSwingGraphics(activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestFootstepPlan(),
-                               activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestSwingTrajectories());
+         FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage.get());
+         List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = SwingPlannerTools.computeTrajectories(positionTrajectoryGenerator,
+                                                                                                                   startStancePose, plan);
+
+         LogTools.warn("Total Trajectories: " + swingTrajectories.size());
+
+         generateSwingGraphics(plan, swingTrajectories);
       }
 
       generateStartAndGoalFootstepGraphics();

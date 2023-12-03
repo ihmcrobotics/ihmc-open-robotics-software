@@ -180,6 +180,7 @@ public class ContinuousPlannerSchedulingTask
          if (continuousPlanningParameters.getStepPublisherEnabled())
          {
             publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
+            publisherForUI.publish(footstepDataList);
 
             state = ContinuousWalkingState.WAITING_TO_LAND;
             continuousPlanner.setPlanAvailable(false);
