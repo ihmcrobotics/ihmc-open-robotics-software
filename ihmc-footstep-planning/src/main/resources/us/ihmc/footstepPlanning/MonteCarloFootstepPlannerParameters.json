@@ -16,7 +16,7 @@
     "upperBound" : 1.0
   },
   "Feasible Contact Reward" : {
-    "value" : 446.428567,
+    "value" : 702.380955,
     "lowerBound" : 0.0,
     "upperBound" : 1000.0
   },
@@ -36,7 +36,7 @@
     "upperBound" : 1000
   },
   "Max transfer height" : {
-    "value" : 0.181735,
+    "value" : 0.302959,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
@@ -51,7 +51,7 @@
     "upperBound" : 1.0
   },
   "Feasible contact cutoff" : {
-    "value" : 0.823056,
+    "value" : 0.856354,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -66,27 +66,27 @@
     "upperBound" : 1000
   },
   "Max tree depth" : {
-    "value" : 4,
+    "value" : 5,
     "lowerBound" : 2,
     "upperBound" : 12
   },
   "Sided yaw offset" : {
-    "value" : 0.161402,
+    "value" : 0.66028,
     "lowerBound" : 0.0,
     "upperBound" : 3.14
   },
   "Search yaw band" : {
-    "value" : 0.882191,
+    "value" : 0.358857,
     "lowerBound" : 0.0,
     "upperBound" : 3.14
   },
   "Search inner radius" : {
-    "value" : 0.3,
+    "value" : 0.204061,
     "lowerBound" : 0.0,
     "upperBound" : 0.3
   },
   "Search outer radius" : {
-    "value" : 0.862245,
+    "value" : 0.556122,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -96,7 +96,7 @@
     "upperBound" : 10
   },
   "Transfer yaw cost" : {
-    "value" : 0.194175,
+    "value" : 0.5,
     "lowerBound" : 0.0,
     "upperBound" : 5.0
   },

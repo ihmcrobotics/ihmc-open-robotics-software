@@ -115,9 +115,6 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
          FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage.get());
          List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = SwingPlannerTools.computeTrajectories(positionTrajectoryGenerator,
                                                                                                                    startStancePose, plan);
-
-         LogTools.warn("Total Trajectories: " + swingTrajectories.size());
-
          generateSwingGraphics(plan, swingTrajectories);
       }
 

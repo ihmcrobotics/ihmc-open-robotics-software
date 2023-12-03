@@ -65,7 +65,8 @@ public class ContinuousPlannerSchedulingTask
    public ContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
                                           ROS2Node ros2Node,
                                           HumanoidReferenceFrames referenceFrames,
-                                          ContinuousWalkingParameters continuousPlanningParameters)
+                                          ContinuousWalkingParameters continuousPlanningParameters,
+                                          ContinuousPlanner.PlanningMode mode)
    {
       this.referenceFrames = referenceFrames;
       this.continuousPlanningParameters = continuousPlanningParameters;
@@ -87,7 +88,7 @@ public class ContinuousPlannerSchedulingTask
 
       continuousPlanner = new ContinuousPlanner(robotModel,
                                                 referenceFrames,
-                                                ContinuousPlanner.PlanningMode.WALK_TO_GOAL);
+                                                mode);
 
       continuousPlannerStatistics = new ContinuousPlannerStatistics();
       continuousPlanner.setContinuousPlannerStatistics(continuousPlannerStatistics);

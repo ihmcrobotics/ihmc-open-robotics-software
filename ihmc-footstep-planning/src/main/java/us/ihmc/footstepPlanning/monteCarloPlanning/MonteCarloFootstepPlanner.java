@@ -20,6 +20,7 @@ public class MonteCarloFootstepPlanner
    private MonteCarloFootstepPlanningDebugger debugger;
    private MonteCarloFootstepNode root;
 
+   private MonteCarloFootstepPlannerRequest request;
    private final HashMap<MonteCarloFootstepNode, MonteCarloFootstepNode> visitedNodes = new HashMap<>();
    private final Random random = new Random();
 
@@ -35,6 +36,7 @@ public class MonteCarloFootstepPlanner
 
    public FootstepPlan generateFootstepPlan(MonteCarloFootstepPlannerRequest request)
    {
+      this.request = request;
       statistics.startTotalTime();
       if (root == null)
       {
@@ -237,6 +239,12 @@ public class MonteCarloFootstepPlanner
 
    public Vector3D transitionToOptimal()
    {
+      if (root.getChildren().isEmpty())
+      {
+         reset(request);
+         return new Vector3D();
+      }
+
       for (MonteCarloTreeNode child : root.getChildren())
       {
          child.getParents().clear();

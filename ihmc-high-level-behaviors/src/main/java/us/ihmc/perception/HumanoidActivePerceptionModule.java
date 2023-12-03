@@ -3,6 +3,7 @@ package us.ihmc.perception;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ActivePlanarMappingRemoteTask;
+import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
@@ -50,9 +51,9 @@ public class HumanoidActivePerceptionModule
                                                                          ros2Node, referenceFrames, () -> {}, true);
    }
 
-   public void initializeContinuousPlannerSchedulingTask(DRCRobotModel robotModel, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames)
+   public void initializeContinuousPlannerSchedulingTask(DRCRobotModel robotModel, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames, ContinuousPlanner.PlanningMode mode)
    {
-      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel, ros2Node, referenceFrames, continuousPlanningParameters);
+      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel, ros2Node, referenceFrames, continuousPlanningParameters, mode);
    }
 
    public void update(ReferenceFrame sensorFrame, boolean display)

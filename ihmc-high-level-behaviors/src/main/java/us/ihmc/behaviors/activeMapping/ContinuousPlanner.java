@@ -85,9 +85,7 @@ public class ContinuousPlanner
    private float gridResolution = 10.0f;
    private int offset = 70;
 
-   public ContinuousPlanner(DRCRobotModel robotModel,
-                            HumanoidReferenceFrames humanoidReferenceFrames,
-                            PlanningMode mode)
+   public ContinuousPlanner(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames, PlanningMode mode)
    {
       this.referenceFrames = humanoidReferenceFrames;
       this.mode = mode;
@@ -230,6 +228,8 @@ public class ContinuousPlanner
       request.setGoalFootPose(RobotSide.RIGHT, goalStancePose.get(RobotSide.RIGHT));
       request.setContactMap(contactMapImage);
       request.setHeightMap(heightMapImage);
+      request.setSensorOrigin(referenceFrames.getSteppingCameraZUpFrame().getTransformToWorldFrame().getTranslationX(),
+                              referenceFrames.getSteppingCameraZUpFrame().getTransformToWorldFrame().getTranslationY());
 
       long timeStart = System.nanoTime();
 
@@ -535,7 +535,8 @@ public class ContinuousPlanner
    {
       switch (mode)
       {
-         case WALK_TO_GOAL -> {
+         case WALK_TO_GOAL ->
+         {
             LogTools.info("Setting Previously Sent Plan for Reference");
             this.previousFootstepPlan = new FootstepPlan(latestFootstepPlan);
          }

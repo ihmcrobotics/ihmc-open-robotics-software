@@ -35,7 +35,7 @@ public class PerceptionDebugTools
    public static final Scalar COLOR_BLACK = new Scalar(0, 0, 0, 255);
    public static final Scalar COLOR_WHITE = new Scalar(255, 255, 255, 255);
    public static final Scalar COLOR_GRAY = new Scalar(128, 128, 128, 255);
-   public static final Scalar COLOR_PURPLE = new Scalar(255, 0, 255, 255);
+   public static final Scalar COLOR_PURPLE = new Scalar(255, 0, 160, 255);
 
    public static void printMatches(String tag, PlanarRegionsList map, PlanarRegionsList regions, HashMap<Integer, TIntArrayList> matches, boolean debug)
    {

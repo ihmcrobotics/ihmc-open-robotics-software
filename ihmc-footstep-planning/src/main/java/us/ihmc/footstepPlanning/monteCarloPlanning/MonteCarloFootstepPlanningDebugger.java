@@ -67,12 +67,12 @@ public class MonteCarloFootstepPlanningDebugger
       PerceptionDebugTools.plotRectangleNoScale(contactHeatMapColorImage,
                                                 new Point2D((int) (node.getState().getX() - offsetX) * scale,
                                                             (int) (node.getState().getY() - offsetY) * scale),
-                                                1 * scale,
+                                                1,
                                                 PerceptionDebugTools.COLOR_PURPLE);
       PerceptionDebugTools.plotRectangleNoScale(heightMapColorImage,
                                                 new Point2D((int) (node.getState().getX() - offsetX) * scale,
                                                             (int) (node.getState().getY() - offsetY) * scale),
-                                                1 * scale,
+                                                1,
                                                 PerceptionDebugTools.COLOR_PURPLE);
    }
 
