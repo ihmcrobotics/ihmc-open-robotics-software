@@ -1,0 +1,173 @@
+{
+  "title" : "GPU Height Map Parameters",
+  "Reset Height Map" : false,
+  "Search window height" : {
+    "value" : 500,
+    "lowerBound" : 100,
+    "upperBound" : 800
+  },
+  "Search window width" : {
+    "value" : 350,
+    "lowerBound" : 100,
+    "upperBound" : 800
+  },
+  "Min height registration" : {
+    "value" : -0.5,
+    "lowerBound" : -5.0,
+    "upperBound" : 5.0
+  },
+  "Max height registration" : {
+    "value" : 1.0,
+    "lowerBound" : -5.0,
+    "upperBound" : 5.0
+  },
+  "Min height difference" : {
+    "value" : -0.05,
+    "lowerBound" : -0.15,
+    "upperBound" : 0.05
+  },
+  "Max height difference" : {
+    "value" : 1.0,
+    "lowerBound" : 0.01,
+    "upperBound" : 0.4
+  },
+  "Height filter alpha" : {
+    "value" : 0.5,
+    "lowerBound" : 0.2,
+    "upperBound" : 0.85
+  },
+  "Spatial alpha" : {
+    "value" : 0.5,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
+  },
+  "Height offset" : {
+    "value" : 3.2768,
+    "lowerBound" : -10.0,
+    "upperBound" : 10.0
+  },
+  "Min Clamp Height" : {
+    "value" : -3.2768,
+    "lowerBound" : -8.0,
+    "upperBound" : 8.0
+  },
+  "Max Clamp Height" : {
+    "value" : 3.2768,
+    "lowerBound" : -8.0,
+    "upperBound" : 8.0
+  },
+  "Local width in meters" : {
+    "value" : 3.0,
+    "lowerBound" : 1.0,
+    "upperBound" : 4.5
+  },
+  "Local cell size in meters" : {
+    "value" : 0.02,
+    "lowerBound" : 0.01,
+    "upperBound" : 0.06
+  },
+  "Global width in meters" : {
+    "value" : 4.0,
+    "lowerBound" : 1.0,
+    "upperBound" : 5.5
+  },
+  "Global cell size in meters" : {
+    "value" : 0.02,
+    "lowerBound" : 0.01,
+    "upperBound" : 0.06
+  },
+  "Robot collision cylinder radius" : {
+    "value" : 0.4,
+    "lowerBound" : 0.1,
+    "upperBound" : 0.8
+  },
+  "Internal global width in meters" : {
+    "value" : 30.0,
+    "lowerBound" : 20.0,
+    "upperBound" : 40.0
+  },
+  "Internal global cell size in meters" : {
+    "value" : 0.02,
+    "lowerBound" : 0.01,
+    "upperBound" : 0.06
+  },
+  "Height scale factor" : {
+    "value" : 10000.0,
+    "lowerBound" : 1000.0,
+    "upperBound" : 20000.0
+  },
+  "Crop window size" : {
+    "value" : 201,
+    "lowerBound" : 40,
+    "upperBound" : 300
+  },
+  "Stepping contact threshold" : {
+    "value" : 0,
+    "lowerBound" : 0,
+    "upperBound" : 255
+  },
+  "Contact window size" : {
+    "value" : 8,
+    "lowerBound" : 2,
+    "upperBound" : 64
+  },
+  "Stepping cosine threshold" : {
+    "value" : 0.94,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
+  },
+  "Grid resolution XY" : {
+    "value" : 0.03,
+    "lowerBound" : 0.01,
+    "upperBound" : 0.1,
+    "description" : "Resolution of the height map grid"
+  },
+  "Grid size XY" : {
+    "value" : 5.0,
+    "lowerBound" : 1.0,
+    "upperBound" : 10.0,
+    "description" : "Length of the side of the square height map grid"
+  },
+  "Max Z" : {
+    "value" : 0.6,
+    "lowerBound" : 0.1,
+    "upperBound" : 1.0,
+    "description" : "Max z relative to robot mid foot z. Points above this threshold are ignored."
+  },
+  "Nominal standard deviation" : {
+    "value" : 0.017992,
+    "lowerBound" : 0.01,
+    "upperBound" : 0.1,
+    "description" : "When calibrated on flat ground, this is the average standard deviation observed for a grid cell."
+  },
+  "Max points per cell" : {
+    "value" : 20,
+    "lowerBound" : 10,
+    "upperBound" : 30
+  },
+  "Mahalanobis scale" : {
+    "value" : 2.0,
+    "lowerBound" : 1.0,
+    "upperBound" : 3.0,
+    "description" : "If a grid cell is at height h, points below (h - s * m) are ignored, and points above (h + s * m) will cause the cell to throw out old data and reset. where s is getNominalStandardDeviation() and m is this value."
+  },
+  "Variance added when translating" : {
+    "value" : 0.1,
+    "lowerBound" : 0.01,
+    "upperBound" : 0.2,
+    "description" : "This is the variance added to all past measurements when a cell is translated"
+  },
+  "Sensor variance when standing" : {
+    "value" : 0.01,
+    "lowerBound" : 0.001,
+    "upperBound" : 0.1,
+    "description" : "This is the measurement variance when the robot is standing"
+  },
+  "Sensor variance when moving" : {
+    "value" : 0.1,
+    "lowerBound" : 0.01,
+    "upperBound" : 0.2,
+    "description" : "This is the measurement variance when the robot is moving"
+  },
+  "Estimate height with kalman filter" : true
+}
