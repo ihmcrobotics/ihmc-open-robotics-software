@@ -220,12 +220,9 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
          if (heightMapImage.ptr(0) != null)
          {
             //PerceptionDebugTools.printMat("Height Map Image", heightMapImage, 10);
-            heightMapRenderer.update(zUpToWorldTransform,
-                                     heightMapImage.ptr(0),
-                                     zUpToWorldTransform.getTranslation().getX32(),
-                                     zUpToWorldTransform.getTranslation().getY32(),
-                                     heightMapImage.rows() / 2,
-                                     (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
+            heightMapRenderer.update(zUpToWorldTransform, heightMapImage.ptr(0), (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset(),
+                                     zUpToWorldTransform.getTranslation().getX32(), zUpToWorldTransform.getTranslation().getY32(),
+                                     heightMapImage.rows() / 2, (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
                                      pixelScalingFactor);
          }
       }

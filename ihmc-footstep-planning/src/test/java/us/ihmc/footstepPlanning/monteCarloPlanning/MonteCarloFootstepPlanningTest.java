@@ -12,11 +12,13 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.HeightMapTerrainGeneratorTools;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.tools.PerceptionDataTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class MonteCarloFootstepPlanningTest

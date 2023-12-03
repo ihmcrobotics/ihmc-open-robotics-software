@@ -277,10 +277,10 @@ public class HumanoidPerceptionModule
       this.rapidPlanarRegionsExtractor.getDebugger().setEnabled(false);
    }
 
-   public void initializeHeightMapExtractor(CameraIntrinsics cameraIntrinsics)
+   public void initializeHeightMapExtractor(HumanoidReferenceFrames referenceFrames, CameraIntrinsics cameraIntrinsics)
    {
       LogTools.info("Rapid Height Map: {}", cameraIntrinsics);
-      rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager);
+      rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager, referenceFrames);
       rapidHeightMapExtractor.setDepthIntrinsics(cameraIntrinsics);
       rapidHeightMapExtractor.create(realsenseDepthImage, 1);
    }

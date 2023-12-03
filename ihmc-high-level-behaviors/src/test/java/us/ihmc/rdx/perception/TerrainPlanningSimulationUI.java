@@ -631,7 +631,7 @@ public class TerrainPlanningSimulationUI
             humanoidPerception = new HumanoidPerceptionModule(openCLManager);
             humanoidPerception.initializeRealsenseDepthImage(steppingL515Simulator.getCopyOfCameraParameters().getHeight(),
                                                              steppingL515Simulator.getCopyOfCameraParameters().getWidth());
-            humanoidPerception.initializeHeightMapExtractor(steppingL515Simulator.getLowLevelSimulator().getCameraIntrinsics());
+            humanoidPerception.initializeHeightMapExtractor(null, steppingL515Simulator.getLowLevelSimulator().getCameraIntrinsics());
 
             if (USE_EXTERNAL_HEIGHT_MAP)
             {

@@ -11,6 +11,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
@@ -43,6 +45,7 @@ public class RapidHeightMapExtractor
    private final Point3D sensorOrigin = new Point3D();
 
 //   private HeightMapAutoencoder denoiser;
+   private HumanoidReferenceFrames referenceFrames;
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
    private OpenCLFloatBuffer worldToGroundTransformBuffer;
@@ -81,6 +84,12 @@ public class RapidHeightMapExtractor
 
    public RapidHeightMapExtractor(OpenCLManager openCLManager)
    {
+      this.openCLManager = openCLManager;
+   }
+
+   public RapidHeightMapExtractor(OpenCLManager openCLManager, HumanoidReferenceFrames referenceFrames)
+   {
+      this.referenceFrames = referenceFrames;
       this.openCLManager = openCLManager;
 //      denoiser = new HeightMapAutoencoder();
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
@@ -282,9 +291,17 @@ public class RapidHeightMapExtractor
 
    public void reset()
    {
-      localHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(32768));
+      double height = 0.0f;
+      if (referenceFrames != null)
+      {
+         height = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslationZ();
+      }
+
+      int offset = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
+      localHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(offset));
+      globalHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(offset));
+
       localHeightMapImage.writeOpenCLImage(openCLManager);
-      globalHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(32768));
       globalHeightMapImage.writeOpenCLImage(openCLManager);
       sequenceNumber = 0;
    }
