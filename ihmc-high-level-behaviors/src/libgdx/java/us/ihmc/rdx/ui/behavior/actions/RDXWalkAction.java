@@ -11,6 +11,7 @@ import us.ihmc.behaviors.sequence.actions.WalkActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -38,6 +39,7 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final SideDependentList<ImBoolean> goalFeetPosesSelected = new SideDependentList<>();
    private final SideDependentList<RDXPose3DGizmo> goalFeetGizmos = new SideDependentList<>();
+   private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImDoubleWrapper swingDurationWidget;
    private final ImDoubleWrapper transferDurationWidget;
    private final RDX3DPanelTooltip tooltip;
@@ -72,6 +74,9 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
                                                                 referenceFrameLibrary,
                                                                 getDefinition()::getParentFrameName,
                                                                 getDefinition()::setParentFrameName);
+      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
+                                                          getDefinition()::setExecuteWithNextAction,
+                                                          imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
       swingDurationWidget = new ImDoubleWrapper(getDefinition()::getSwingDuration,
                                                 getDefinition()::setSwingDuration,
                                                 imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
@@ -190,6 +195,8 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
    @Override
    protected void renderImGuiWidgetsInternal()
    {
+      ImGui.sameLine();
+      executeWithNextActionWrapper.renderImGuiWidget();
       parentFrameComboBox.render();
       if (ImGui.button(labels.get("Plan")))
       {
