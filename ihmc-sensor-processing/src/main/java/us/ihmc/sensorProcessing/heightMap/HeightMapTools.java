@@ -63,4 +63,14 @@ public class HeightMapTools
    {
       return xIndex + yIndex * (2 * centerIndex + 1);
    }
+
+   public static int getIndexFromCoordinates(double coordinate, float resolution, int offset)
+   {
+      return (int) (coordinate * resolution + offset);
+   }
+
+   public static double getCoordinateFromIndex(int index, double resolution, int offset)
+   {
+      return (index - offset) / resolution;
+   }
 }

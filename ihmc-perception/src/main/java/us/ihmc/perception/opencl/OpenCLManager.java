@@ -1,5 +1,6 @@
 package us.ihmc.perception.opencl;
 
+import io.netty.buffer.ByteBuf;
 import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.opencl.*;
@@ -7,6 +8,7 @@ import org.bytedeco.opencl.global.OpenCL;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
 
+import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -348,6 +350,16 @@ public class OpenCLManager
                                          numberOfEventsInWaitList,
                                          eventWaitList,
                                          event));
+   }
+
+   public void enqueueFillBuffer(_cl_mem bufferObject, long sizeInBytes, byte value)
+   {
+      ByteBuffer patternByteBuffer = ByteBuffer.allocateDirect(1);
+      patternByteBuffer.put(value);
+      Pointer patternPointer = new Pointer(patternByteBuffer);
+      PointerPointer eventWaitList = null; // no events
+      PointerPointer event = null; // no events
+      OpenCLTools.checkReturnCode(clEnqueueFillBuffer(commandQueue, bufferObject, patternPointer, patternPointer.limit(), 0, sizeInBytes, 0, eventWaitList, event));
    }
 
    public void releaseBufferObject(_cl_mem bufferObject)
