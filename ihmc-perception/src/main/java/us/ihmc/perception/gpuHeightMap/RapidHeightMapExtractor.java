@@ -258,7 +258,7 @@ public class RapidHeightMapExtractor
 
          sequenceNumber++;
 
-         terrainMapStatistics.logToFile(heightMapParameters.getStatisticsLoggingEnabled(), true);
+         terrainMapStatistics.logToFile(heightMapParameters.getStatisticsLoggingEnabled(), false);
       }
    }
 

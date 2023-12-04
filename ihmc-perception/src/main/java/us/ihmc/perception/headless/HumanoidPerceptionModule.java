@@ -238,8 +238,6 @@ public class HumanoidPerceptionModule
       long begin = System.nanoTime();
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
       perceptionStatistics.updateTimeToComputeHeightMap((System.nanoTime() - begin) * 1e-6f);
-
-      LogTools.info("Height Map Time: {} ms", perceptionStatistics.getTimeToComputeHeightMap());
    }
 
    public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, Mat occupancy, float thresholdHeight)

@@ -274,8 +274,8 @@ public class ContinuousPlanner
 
       FootstepPlannerRequest request = createFootstepPlannerRequest(startingStancePose, goalStancePose);
       request.setRequestedInitialStanceSide(imminentFootstepSide);
-      request.setSnapGoalSteps(true);
       request.setHeightMapData(heightMapData);
+      request.setSnapGoalSteps(true);
       request.setAbortIfGoalStepSnappingFails(true);
 
       double totalStepTime = continuousWalkingParameters.getSwingTime() + continuousWalkingParameters.getTransferTime();

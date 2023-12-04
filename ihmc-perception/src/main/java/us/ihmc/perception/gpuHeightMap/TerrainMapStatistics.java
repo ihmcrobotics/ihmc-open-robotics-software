@@ -63,7 +63,6 @@ public class TerrainMapStatistics
 
    public void endTotalTime()
    {
-      LogTools.warn("Total time: {} {}", statistics.get(TOTAL_TIME), ((System.nanoTime() * 1e-6f) - statistics.get(TOTAL_TIME)));
       statistics.put(TOTAL_TIME, ((System.nanoTime() * 1e-6f) - statistics.get(TOTAL_TIME)));
    }
 
