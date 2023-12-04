@@ -198,10 +198,9 @@ public class BlackflyImageRetriever
    {
       LogTools.info("Initializing Blackfly: " + blackflySerialNumber);
       if (blackfly != null)
-      {
          blackfly.stopAcquiringImages();
+      if (blackflyManager != null)
          blackflyManager.destroy();
-      }
 
       blackflyManager = new SpinnakerBlackflyManager();
       blackfly = blackflyManager.createSpinnakerBlackfly(blackflySerialNumber);
