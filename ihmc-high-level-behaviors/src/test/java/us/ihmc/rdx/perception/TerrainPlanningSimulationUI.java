@@ -657,7 +657,7 @@ public class TerrainPlanningSimulationUI
             }
             else
             {
-               environmentBuilder.loadEnvironment("LookAndStepEasy.json");
+               environmentBuilder.loadEnvironment("HarderTerrain.json");
             }
          }
 

@@ -8,6 +8,11 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface MonteCarloFootstepPlannerParametersBasics extends MonteCarloFootstepPlannerParametersReadOnly, StoredPropertySetBasics
 {
+   default void setReset(boolean reset)
+   {
+      set(MonteCarloFootstepPlannerParameters.reset, reset);
+   }
+
    default void setNumberOfIterations(int numberOfIterations)
    {
       set(MonteCarloFootstepPlannerParameters.numberOfIterations, numberOfIterations);

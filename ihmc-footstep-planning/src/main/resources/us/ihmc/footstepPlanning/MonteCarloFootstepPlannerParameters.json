@@ -1,5 +1,6 @@
 {
   "title" : "MonteCarloFootstepPlannerParameters",
+  "Reset" : false,
   "Number of iterations" : {
     "value" : 100,
     "lowerBound" : 1,

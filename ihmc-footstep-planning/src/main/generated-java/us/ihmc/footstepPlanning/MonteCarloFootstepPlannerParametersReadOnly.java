@@ -10,6 +10,11 @@ import static us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters.*;
  */
 public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPropertySetReadOnly
 {
+   default boolean getReset()
+   {
+      return get(reset);
+   }
+
    default int getNumberOfIterations()
    {
       return get(numberOfIterations);
