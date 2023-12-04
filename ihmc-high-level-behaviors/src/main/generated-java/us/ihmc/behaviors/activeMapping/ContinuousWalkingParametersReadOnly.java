@@ -10,9 +10,14 @@ import static us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters.*;
  */
 public interface ContinuousWalkingParametersReadOnly extends StoredPropertySetReadOnly
 {
-   default boolean getContinuousWalkingEnabled()
+   default boolean getEnableContinuousWalking()
    {
-      return get(continuousWalkingEnabled);
+      return get(enableContinuousWalking);
+   }
+
+   default boolean getShortcutIsPressed()
+   {
+      return get(shortcutIsPressed);
    }
 
    default boolean getStepPublisherEnabled()
@@ -50,9 +55,9 @@ public interface ContinuousWalkingParametersReadOnly extends StoredPropertySetRe
       return get(transferTime);
    }
 
-   default double getPlanningTimeoutFraction()
+   default double getPlannerTimeoutFraction()
    {
-      return get(planningTimeoutFraction);
+      return get(plannerTimeoutFraction);
    }
 
    default double getPlanningReferenceTimeout()

@@ -8,9 +8,14 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface ContinuousWalkingParametersBasics extends ContinuousWalkingParametersReadOnly, StoredPropertySetBasics
 {
-   default void setContinuousWalkingEnabled(boolean continuousWalkingEnabled)
+   default void setEnableContinuousWalking(boolean enableContinuousWalking)
    {
-      set(ContinuousWalkingParameters.continuousWalkingEnabled, continuousWalkingEnabled);
+      set(ContinuousWalkingParameters.enableContinuousWalking, enableContinuousWalking);
+   }
+
+   default void setShortcutIsPressed(boolean shortcutIsPressed)
+   {
+      set(ContinuousWalkingParameters.shortcutIsPressed, shortcutIsPressed);
    }
 
    default void setStepPublisherEnabled(boolean stepPublisherEnabled)
@@ -48,9 +53,9 @@ public interface ContinuousWalkingParametersBasics extends ContinuousWalkingPara
       set(ContinuousWalkingParameters.transferTime, transferTime);
    }
 
-   default void setPlanningTimeoutFraction(double planningTimeoutFraction)
+   default void setPlannerTimeoutFraction(double plannerTimeoutFraction)
    {
-      set(ContinuousWalkingParameters.planningTimeoutFraction, planningTimeoutFraction);
+      set(ContinuousWalkingParameters.plannerTimeoutFraction, plannerTimeoutFraction);
    }
 
    default void setPlanningReferenceTimeout(double planningReferenceTimeout)

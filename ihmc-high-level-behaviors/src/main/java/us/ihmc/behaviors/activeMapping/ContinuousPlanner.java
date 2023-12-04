@@ -278,8 +278,6 @@ public class ContinuousPlanner
       request.setSnapGoalSteps(true);
       request.setAbortIfGoalStepSnappingFails(true);
 
-      double totalStepTime = continuousWalkingParameters.getSwingTime() + continuousWalkingParameters.getTransferTime();
-
       if (useReferencePlan)
       {
          // Sets the previous footstep plan to be a reference for the current plan
@@ -299,7 +297,7 @@ public class ContinuousPlanner
                this.previousFootstepPlan.remove(1);
 
             request.setReferencePlan(this.previousFootstepPlan);
-            request.setTimeout(totalStepTime * continuousWalkingParameters.getPlanningTimeoutFraction());
+            request.setTimeout(continuousWalkingParameters.getPlanningReferenceTimeout());
          }
       }
       else
