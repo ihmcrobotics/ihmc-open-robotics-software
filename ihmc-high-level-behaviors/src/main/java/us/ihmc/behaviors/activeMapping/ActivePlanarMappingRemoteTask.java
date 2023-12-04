@@ -91,7 +91,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
     */
    private void updateActiveMappingPlan()
    {
-      if (continuousPlanningParameters.getContinuousWalkingEnabled())
+      if (continuousPlanningParameters.getEnableContinuousWalking())
       {
          if (walkingStatusMessage.get() != null)
          {
