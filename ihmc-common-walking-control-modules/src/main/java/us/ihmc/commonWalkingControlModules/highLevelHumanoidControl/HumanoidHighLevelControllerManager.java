@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.parameterEstimation.InertialExtendedKalmanFilter;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ControllerCrashLocation;
@@ -89,6 +90,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    private final IntegerParameter jointDesiredOutputBroadcastFrequency = new IntegerParameter("jointDesiredOutputBroadcastFrequency", registry, 10);
 
    private final InertialParameterEstimator inertialParameterEstimator;
+   private final InertialExtendedKalmanFilter inertialExtendedKalmanFilter;
 
    public HumanoidHighLevelControllerManager(CommandInputManager commandInputManager,
                                              StatusMessageOutputManager statusMessageOutputManager,
@@ -145,6 +147,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       pluginFactories.forEach(this::addControllerPluginFactory);
 
       inertialParameterEstimator = new InertialParameterEstimator(controllerToolbox, registry);
+      inertialExtendedKalmanFilter = new InertialExtendedKalmanFilter(controllerToolbox, registry);
    }
 
    /**
@@ -240,6 +243,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       reportRobotDesiredConfigurationData();
 
       inertialParameterEstimator.update();
+      inertialExtendedKalmanFilter.update();
    }
 
    @Override
