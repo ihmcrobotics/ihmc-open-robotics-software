@@ -145,8 +145,6 @@ public class RDXVRModeManager
       if (ImGui.radioButton(labels.get("Whole body IK streaming"), mode == RDXVRMode.WHOLE_BODY_IK_STREAMING))
       {
          mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
-         //         if (!kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().isStarted())
-         //            kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().start();
       }
       if (ImGui.radioButton(labels.get("Joystick walking"), mode == RDXVRMode.JOYSTICK_WALKING))
       {
