@@ -57,6 +57,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    /* Image panel to display the internal (cropped) height map */
    private RDXBytedecoImagePanel croppedHeightMapPanel;
    private RDXBytedecoImagePanel croppedSnappedHeightMapPanel;
+   private RDXBytedecoImagePanel croppedNormalZPanel;
+   private RDXBytedecoImagePanel croppedSteppabilityPanel;
 
    /* Image panel to display the depth image */
    private RDXBytedecoImagePanel depthImagePanel;
@@ -167,6 +169,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          localHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat());
          croppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage());
          croppedSnappedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedSnappedHeightMapImage());
+         croppedNormalZPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedNormalZImage());
+         croppedSteppabilityPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedSteppabilityImage());
          internalHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat());
          snappedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppableHeightMapImage().getBytedecoOpenCVMat());
          steppabilityPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppabilityImage().getBytedecoOpenCVMat());
@@ -346,6 +350,14 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
                                                            humanoidPerception.getRapidHeightMapExtractor().getCroppedSnappedHeightMapImage().cols(),
                                                            humanoidPerception.getRapidHeightMapExtractor().getCroppedSnappedHeightMapImage().rows(),
                                                            RDXImagePanel.FLIP_Y);
+         croppedNormalZPanel = new RDXBytedecoImagePanel("Cropped Normal Z",
+                                                                  humanoidPerception.getRapidHeightMapExtractor().getCroppedNormalZImage().cols(),
+                                                                  humanoidPerception.getRapidHeightMapExtractor().getCroppedNormalZImage().rows(),
+                                                                  RDXImagePanel.FLIP_Y);
+         croppedSteppabilityPanel = new RDXBytedecoImagePanel("Cropped Steppability",
+                                                                  humanoidPerception.getRapidHeightMapExtractor().getCroppedSteppabilityImage().cols(),
+                                                                  humanoidPerception.getRapidHeightMapExtractor().getCroppedSteppabilityImage().rows(),
+                                                                  RDXImagePanel.FLIP_Y);
          //sensorCroppedHeightMapPanel = new RDXBytedecoImagePanel("Sensor Cropped Height Map",
          //                                                        humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().cols(),
          //                                                        humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().rows(),
@@ -361,6 +373,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          addChild(localHeightMapPanel.getImagePanel());
          addChild(croppedHeightMapPanel.getImagePanel());
          addChild(croppedSnappedHeightMapPanel.getImagePanel());
+         addChild(croppedNormalZPanel.getImagePanel());
+         addChild(croppedSteppabilityPanel.getImagePanel());
          //addChild(sensorCroppedHeightMapPanel.getImagePanel());
          addChild(depthImagePanel.getImagePanel());
          addChild(internalHeightMapPanel.getImagePanel());

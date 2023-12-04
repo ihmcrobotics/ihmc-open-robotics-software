@@ -40,7 +40,7 @@ public class RapidHeightMapExtractor
    private static final double footSize = 0.22;
    private static final double distanceFromCliffTops = 0.02;
    private static final double distanceFromCliffBottoms = 0.05;
-   private static final double cliffStartHeightToAvoid = 0.2;
+   private static final double cliffStartHeightToAvoid = 0.08;
    private static final double cliffEndHeightToAvoid = 1.2;
 
    private int mode = 1; // 0 -> Ouster, 1 -> Realsense
@@ -97,6 +97,8 @@ public class RapidHeightMapExtractor
 
    private Mat croppedHeightMapImage;
    private Mat croppedSnappedMapImage;
+   private Mat croppedNormalZImage;
+   private Mat croppedSteppabilityImage;
    private Mat denoisedHeightMap;
    private Rect cropWindowRectangle;
 
@@ -135,6 +137,8 @@ public class RapidHeightMapExtractor
 
       croppedHeightMapImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
       croppedSnappedMapImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
+      croppedNormalZImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
+      croppedSteppabilityImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
       denoisedHeightMap = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
 
       createLocalHeightMapImage(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
@@ -246,6 +250,8 @@ public class RapidHeightMapExtractor
 
          croppedHeightMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
          croppedSnappedMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, snapHeightImage.getBytedecoOpenCVMat());
+         croppedNormalZImage = getCroppedImage(sensorOrigin, globalCenterIndex, snapNormalZImage.getBytedecoOpenCVMat());
+         croppedSteppabilityImage = getCroppedImage(sensorOrigin, globalCenterIndex, steppabilityImage.getBytedecoOpenCVMat());
          //denoisedHeightMap = denoiser.denoiseHeightMap(croppedHeightMapImage, 3.2768f);
 
          //PerceptionDebugTools.printMat("Cropped Height Map", croppedHeightMapImage, 4);
@@ -458,6 +464,16 @@ public class RapidHeightMapExtractor
    public Mat getCroppedSnappedHeightMapImage()
    {
       return croppedSnappedMapImage;
+   }
+
+   public Mat getCroppedNormalZImage()
+   {
+      return croppedNormalZImage;
+   }
+
+   public Mat getCroppedSteppabilityImage()
+   {
+      return croppedSteppabilityImage;
    }
 
 //   public Mat getDenoisedHeightMap()
