@@ -76,19 +76,19 @@ public class RDXVRModeManager
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
-                                                      {
-                                                         // During kinematic streaming, the only way to get out of it is the left hand panel.
-                                                         controller.setExclusiveAccess(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING ? leftHandPanel : null);
+         {
+            // During kinematic streaming, the only way to get out of it is the left hand panel.
+            controller.setExclusiveAccess(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING ? leftHandPanel : null);
 
-                                                         if (side == RobotSide.LEFT)
-                                                         {
-                                                            leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
-                                                            leftHandPanelPose.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 4.0);
-                                                            leftHandPanelPose.getPosition().addY(-0.05);
-                                                            leftHandPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
-                                                            leftHandPanel.updateDesiredPose(leftHandPanelPose::get);
-                                                         }
-                                                      });
+            if (side == RobotSide.LEFT)
+            {
+               leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
+               leftHandPanelPose.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 4.0);
+               leftHandPanelPose.getPosition().addY(-0.05);
+               leftHandPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
+               leftHandPanel.updateDesiredPose(leftHandPanelPose::get);
+            }
+         });
       }
 
       switch (mode)
