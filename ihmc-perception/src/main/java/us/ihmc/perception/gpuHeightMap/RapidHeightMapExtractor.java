@@ -236,21 +236,24 @@ public class RapidHeightMapExtractor
          computeContactMap();
 
          terrainMapStatistics.startTerrainMapDownloadTime();
+
          // read local and global height map images
-         localHeightMapImage.readOpenCLImage(openCLManager);
          croppedHeightMapImage = getCroppedImageOnKernel(globalHeightMapImage, sensorCroppedHeightMapImage, parametersBuffer);
-         croppedTerrainCostImage = getCroppedImageOnKernel(terrainCostImage, sensorCroppedTerrainCostImage, parametersBuffer);
+         //croppedTerrainCostImage = getCroppedImageOnKernel(terrainCostImage, sensorCroppedTerrainCostImage, parametersBuffer);
          croppedContactMapImage = getCroppedImageOnKernel(contactMapImage, sensorCroppedContactMapImage, parametersBuffer);
-         terrainMapStatistics.endTerrainMapDownloadTime();
 
          //croppedHeightMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
+         //croppedTerrainCostImage = getCroppedImage(sensorOrigin, globalCenterIndex, terrainCostImage.getBytedecoOpenCVMat());
+         //croppedContactMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, contactMapImage.getBytedecoOpenCVMat());
+
+         terrainMapStatistics.endTerrainMapDownloadTime();
 
          if (heightMapParameters.getDenoiserEnabled())
          {
             denoisedHeightMapImage = denoiser.denoiseHeightMap(croppedHeightMapImage, heightMapParameters.getHeightOffset());
          }
-
          terrainMapStatistics.endGPUProcessingTime();
+
          terrainMapStatistics.endTotalTime();
 
          sequenceNumber++;
@@ -437,13 +440,13 @@ public class RapidHeightMapExtractor
    public Mat getCroppedTerrainCostImage()
    {
       //return getCroppedImage(sensorOrigin, globalCenterIndex, terrainCostImage.getBytedecoOpenCVMat());
-      return getCroppedImageOnKernel(terrainCostImage, sensorCroppedTerrainCostImage, parametersBuffer);
+      return croppedTerrainCostImage;
    }
 
    public Mat getCroppedContactMapImage()
    {
       //return getCroppedImage(sensorOrigin, globalCenterIndex, contactMapImage.getBytedecoOpenCVMat());
-      return getCroppedImageOnKernel(contactMapImage, sensorCroppedContactMapImage, parametersBuffer);
+      return croppedContactMapImage;
    }
 
    public Mat getGlobalContactImage()

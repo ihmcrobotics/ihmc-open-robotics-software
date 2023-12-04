@@ -174,7 +174,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
 
    float currentAverageHeight = 0.0f;
    float averageHeightZ = 0.0f;
-   float3 cellCenterInZUp = (float3) (0.0f, 0.0f, 0.0f);
+   float3 cellCenterInZUp = (float3) (0.0f, 0.0f, 0.5f);
    cellCenterInZUp.xy = indices_to_coordinate((int2) (xIndex, yIndex),
                                                (float2) (0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
                                                params[LOCAL_CELL_SIZE],
@@ -213,12 +213,13 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    }
 
    int count = 0;
-   for (int pitch_count_offset = - (int) (params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset <  (int) (params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=3)
+   for (int pitch_count_offset = - (int) (params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset <  (int) (params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=4)
    {
-      for (int yaw_count_offset = - (int) (params[SEARCH_WINDOW_WIDTH] / 2); yaw_count_offset <  (int) (params[SEARCH_WINDOW_WIDTH] / 2 + 1); yaw_count_offset+=3)
+      int pitch_count = projectedPoint.y + pitch_count_offset;
+
+      for (int yaw_count_offset = - (int) (params[SEARCH_WINDOW_WIDTH] / 2); yaw_count_offset <  (int) (params[SEARCH_WINDOW_WIDTH] / 2 + 1); yaw_count_offset+=4)
       {
          int yaw_count = projectedPoint.x + yaw_count_offset;
-         int pitch_count = projectedPoint.y + pitch_count_offset;
 
          if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
          {

@@ -30,7 +30,7 @@ public class TerrainMapStatistics
    public TerrainMapStatistics()
    {
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-      String logFileName = dateFormat.format(new Date()) + "_" + "ContinuousPlannerLog.txt";
+      String logFileName = dateFormat.format(new Date()) + "_" + "TerrainMapStatistics.txt";
       FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.TERRAIN_MAP_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       String filePath = IHMCCommonPaths.TERRAIN_MAP_DIRECTORY.resolve(logFileName).toString();
 
@@ -58,62 +58,63 @@ public class TerrainMapStatistics
 
    public void startTotalTime()
    {
-      statistics.put(TOTAL_TIME, System.currentTimeMillis() / 1000.0f);
+      statistics.put(TOTAL_TIME, (System.nanoTime() * 1e-6f));
    }
 
    public void endTotalTime()
    {
-      statistics.put(TOTAL_TIME, (System.currentTimeMillis() / 1000.0f - statistics.get(TOTAL_TIME)));
+      LogTools.warn("Total time: {} {}", statistics.get(TOTAL_TIME), ((System.nanoTime() * 1e-6f) - statistics.get(TOTAL_TIME)));
+      statistics.put(TOTAL_TIME, ((System.nanoTime() * 1e-6f) - statistics.get(TOTAL_TIME)));
    }
 
    public void startDepthUploadTime()
    {
-      statistics.put(DEPTH_UPLOAD_TIME, System.currentTimeMillis() / 1000.0f);
+      statistics.put(DEPTH_UPLOAD_TIME, (System.nanoTime() * 1e-6f));
    }
 
    public void endDepthUploadTime()
    {
-      statistics.put(DEPTH_UPLOAD_TIME, (System.currentTimeMillis() / 1000.0f - statistics.get(DEPTH_UPLOAD_TIME)));
+      statistics.put(DEPTH_UPLOAD_TIME, ((System.nanoTime() * 1e-6f) - statistics.get(DEPTH_UPLOAD_TIME)));
    }
 
    public void startTerrainMapDownloadTime()
    {
-      statistics.put(TERRAIN_MAP_DOWNLOAD_TIME, System.currentTimeMillis() / 1000.0f);
+      statistics.put(TERRAIN_MAP_DOWNLOAD_TIME, (System.nanoTime() * 1e-6f));
    }
 
    public void endTerrainMapDownloadTime()
    {
-      statistics.put(TERRAIN_MAP_DOWNLOAD_TIME, (System.currentTimeMillis() / 1000.0f - statistics.get(TERRAIN_MAP_DOWNLOAD_TIME)));
+      statistics.put(TERRAIN_MAP_DOWNLOAD_TIME, ((System.nanoTime() * 1e-6f) - statistics.get(TERRAIN_MAP_DOWNLOAD_TIME)));
    }
 
    public void startExtractionTime()
    {
-      statistics.put(EXTRACTION_TIME, System.currentTimeMillis() / 1000.0f);
+      statistics.put(EXTRACTION_TIME, (System.nanoTime() * 1e-6f));
    }
 
    public void endExtractionTime()
    {
-      statistics.put(EXTRACTION_TIME, (System.currentTimeMillis() / 1000.0f - statistics.get(EXTRACTION_TIME)));
+      statistics.put(EXTRACTION_TIME, ((System.nanoTime() * 1e-6f) - statistics.get(EXTRACTION_TIME)));
    }
 
    public void startCPUProcessingTime()
    {
-      statistics.put(CPU_PROCESSING_TIME, System.currentTimeMillis() / 1000.0f);
+      statistics.put(CPU_PROCESSING_TIME, (System.nanoTime() * 1e-6f));
    }
 
    public void endCPUProcessingTime()
    {
-      statistics.put(CPU_PROCESSING_TIME, (System.currentTimeMillis() / 1000.0f - statistics.get(CPU_PROCESSING_TIME)));
+      statistics.put(CPU_PROCESSING_TIME, ((System.nanoTime() * 1e-6f) - statistics.get(CPU_PROCESSING_TIME)));
    }
 
    public void startGPUProcessingTime()
    {
-      statistics.put(GPU_PROCESSING_TIME, System.currentTimeMillis() / 1000.0f);
+      statistics.put(GPU_PROCESSING_TIME, (System.nanoTime() * 1e-6f));
    }
 
    public void endGPUProcessingTime()
    {
-      statistics.put(GPU_PROCESSING_TIME, (System.currentTimeMillis() / 1000.0f - statistics.get(GPU_PROCESSING_TIME)));
+      statistics.put(GPU_PROCESSING_TIME, ((System.nanoTime() * 1e-6f) - statistics.get(GPU_PROCESSING_TIME)));
    }
 
    public void logToFile(boolean logToFile, boolean printToConsole)
