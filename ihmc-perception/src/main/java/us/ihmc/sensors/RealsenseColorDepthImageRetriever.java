@@ -3,7 +3,7 @@ package us.ihmc.sensors;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ros2.ROS2HeartbeatDependencyNode;
+import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -39,7 +39,7 @@ public class RealsenseColorDepthImageRetriever
    private final FramePose3D depthPose = new FramePose3D();
    private final FramePose3D colorPose = new FramePose3D();
    private final Supplier<ReferenceFrame> sensorFrameSupplier;
-   private final ROS2HeartbeatDependencyNode realsenseDesiredNode;
+   private final ROS2DemandGraphNode demandGraphNode;
    private final RestartableThrottledThread realsenseGrabThread;
 
    private final Lock newDepthImageLock = new ReentrantLock();
@@ -56,13 +56,13 @@ public class RealsenseColorDepthImageRetriever
                                             String realsenseSerialNumber,
                                             RealsenseConfiguration realsenseConfiguration,
                                             Supplier<ReferenceFrame> sensorFrameSupplier,
-                                            ROS2HeartbeatDependencyNode realsenseDesiredNode)
+                                            ROS2DemandGraphNode realsenseDemandNode)
    {
       this.sensorFrameSupplier = sensorFrameSupplier;
       this.realsenseManager = realsenseManager;
       this.realsenseSerialNumber = realsenseSerialNumber;
       this.realsenseConfiguration = realsenseConfiguration;
-      this.realsenseDesiredNode = realsenseDesiredNode;
+      this.demandGraphNode = realsenseDemandNode;
 
       realsenseGrabThread = new RestartableThrottledThread("RealsenseImageGrabber", OUTPUT_FREQUENCY, this::updateImages);
       realsenseGrabThread.start();
@@ -70,7 +70,7 @@ public class RealsenseColorDepthImageRetriever
 
    private void updateImages()
    {
-      if (realsenseDesiredNode.checkIfDesired())
+      if (demandGraphNode.isDemanded())
       {
          if (realsense == null || realsense.getDevice() == null || numberOfFailedReads > 30)
          {
@@ -215,7 +215,7 @@ public class RealsenseColorDepthImageRetriever
 
    public void destroy()
    {
-      System.out.println("Destroying " + this.getClass().getSimpleName());
+      System.out.println("Destroying " + getClass().getSimpleName());
       stop();
 
       if (depthImage != null)
@@ -225,7 +225,7 @@ public class RealsenseColorDepthImageRetriever
       if (realsense != null && realsense.getDevice() != null)
          realsense.deleteDevice();
       realsenseManager.deleteContext();
-      System.out.println("Destroyed " + this.getClass().getSimpleName());
+      System.out.println("Destroyed " + getClass().getSimpleName());
    }
 
    private boolean startRealsense()

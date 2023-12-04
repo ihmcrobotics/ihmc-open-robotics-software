@@ -9,8 +9,7 @@ import org.bytedeco.zed.SL_CalibrationParameters;
 import org.bytedeco.zed.SL_InitParameters;
 import org.bytedeco.zed.SL_RuntimeParameters;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ros2.ROS2Heartbeat;
-import us.ihmc.communication.ros2.ROS2HeartbeatDependencyNode;
+import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -77,9 +76,8 @@ public class ZEDColorDepthImageRetriever
 
    public ZEDColorDepthImageRetriever(int cameraID,
                                       Supplier<ReferenceFrame> sensorFrameSupplier,
-                                      ROS2HeartbeatDependencyNode pointCloudDesiredNode,
-                                      ROS2HeartbeatDependencyNode depthDesiredNode,
-                                      ROS2HeartbeatDependencyNode colorDesiredNode)
+                                      ROS2DemandGraphNode depthDemandNode,
+                                      ROS2DemandGraphNode colorDemandNode)
    {
       this.cameraID = cameraID;
 
@@ -87,7 +85,7 @@ public class ZEDColorDepthImageRetriever
 
       zedGrabThread = new RestartableThread("ZEDImageGrabber", () ->
       {
-         if (depthDesiredNode.checkIfDesired() || colorDesiredNode.checkIfDesired())
+         if (depthDemandNode.isDemanded() || colorDemandNode.isDemanded())
          {
             if (!initialized)
             {
@@ -276,7 +274,7 @@ public class ZEDColorDepthImageRetriever
 
    public void destroy()
    {
-      System.out.println("Destroying " + this.getClass().getSimpleName());
+      System.out.println("Destroying " + getClass().getSimpleName());
       zedGrabThread.stop();
 
       if (depthImagePointer != null)
@@ -292,7 +290,7 @@ public class ZEDColorDepthImageRetriever
             colorImages.get(side).release();
       }
       sl_close_camera(cameraID);
-      System.out.println("Destroyed " + this.getClass().getSimpleName());
+      System.out.println("Destroyed " + getClass().getSimpleName());
    }
 
    private boolean startZED()
