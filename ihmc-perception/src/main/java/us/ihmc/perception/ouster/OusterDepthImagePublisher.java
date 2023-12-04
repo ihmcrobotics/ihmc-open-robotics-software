@@ -128,7 +128,7 @@ public class OusterDepthImagePublisher
 
    public void destroy()
    {
-      System.out.println("Destroying " + this.getClass().getSimpleName());
+      System.out.println("Destroying " + getClass().getSimpleName());
       stopDepth();
 
       if (nextCpuDepthImage != null)
@@ -136,7 +136,7 @@ public class OusterDepthImagePublisher
 
       ros2DepthImagePublisher.destroy();
       ros2Node.destroy();
-      System.out.println("Destroyed " + this.getClass().getSimpleName());
+      System.out.println("Destroyed " + getClass().getSimpleName());
    }
 
    public void setNextDepthImage(RawImage depthImage)

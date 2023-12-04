@@ -152,7 +152,7 @@ public class BlackflyImagePublisher
 
    public void destroy()
    {
-      System.out.println("Destroying " + this.getClass().getSimpleName());
+      System.out.println("Destroying " + getClass().getSimpleName());
       publishDistoredColorThread.stop();
       imagePublishLock.lock();
       try
@@ -170,7 +170,7 @@ public class BlackflyImagePublisher
       imageEncoder.destroy();
       ros2DistoredImagePublisher.destroy();
       ros2Node.destroy();
-      System.out.println("Destroyed " + this.getClass().getSimpleName());
+      System.out.println("Destroyed " + getClass().getSimpleName());
    }
 
    public void setNextDistortedImage(RawImage distortedImage)

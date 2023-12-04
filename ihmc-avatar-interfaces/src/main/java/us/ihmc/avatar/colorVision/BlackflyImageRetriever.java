@@ -7,7 +7,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ros2.ROS2HeartbeatDependencyNode;
+import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -43,7 +43,7 @@ public class BlackflyImageRetriever
    private int imageWidth = 0;
    private int imageHeight = 0;
    private RawImage distortedImage = null;
-   private final ROS2HeartbeatDependencyNode blackflyDesiredNode;
+   private final ROS2DemandGraphNode demandGraphNode;
    private final RestartableThrottledThread imageGrabThread;
    private int numberOfFailedReads = 0;
 
@@ -55,12 +55,12 @@ public class BlackflyImageRetriever
                                  BlackflyLensProperties lensProperties,
                                  RobotSide side,
                                  Supplier<ReferenceFrame> cameraFrameSupplier,
-                                 ROS2HeartbeatDependencyNode blackflyDesiredNode)
+                                 ROS2DemandGraphNode blackflyDemandNode)
    {
       this.blackflySerialNumber = blackflySerialNumber;
       this.ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(lensProperties);
       this.cameraFrameSupplier = cameraFrameSupplier;
-      this.blackflyDesiredNode = blackflyDesiredNode;
+      this.demandGraphNode = blackflyDemandNode;
 
       imageGrabThread = new RestartableThrottledThread(side.getCamelCaseName() + "BlackflyImageGrabber", BLACKFLY_FPS, this::grabImage);
       imageGrabThread.start();
@@ -68,7 +68,7 @@ public class BlackflyImageRetriever
 
    private void grabImage()
    {
-      if (blackflyDesiredNode.checkIfDesired())
+      if (demandGraphNode.isDemanded())
       {
          if (blackfly == null || numberOfFailedReads > 30)
          {
@@ -185,13 +185,13 @@ public class BlackflyImageRetriever
 
    public void destroy()
    {
-      System.out.println("Destroying " + this.getClass().getSimpleName());
+      System.out.println("Destroying " + getClass().getSimpleName());
       imageGrabThread.blockingStop();
       if (blackfly != null)
          blackfly.stopAcquiringImages();
       if (blackflyManager != null)
          blackflyManager.destroy();
-      System.out.println("Destroyed " + this.getClass().getSimpleName());
+      System.out.println("Destroyed " + getClass().getSimpleName());
    }
 
    private boolean initializeBlackfly()

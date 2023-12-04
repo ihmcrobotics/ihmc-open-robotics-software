@@ -2,14 +2,13 @@ package us.ihmc.perception.ouster;
 
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ros2.ROS2HeartbeatDependencyNode;
+import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencl.OpenCLManager;
 
-import java.nio.FloatBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -26,7 +25,7 @@ public class OusterDepthImageRetriever
    private final FramePose3D sensorFramePose = new FramePose3D();
 
    private final OusterNetServer ouster;
-   private final ROS2HeartbeatDependencyNode ousterDesiredNode;
+   private final ROS2DemandGraphNode demandGraphNode;
 
    private OpenCLManager openCLManager;
    private OusterDepthExtractionKernel depthExtractionKernel;
@@ -43,13 +42,13 @@ public class OusterDepthImageRetriever
                                     Supplier<ReferenceFrame> sensorFrameSupplier,
                                     Supplier<Boolean> computeLidarScan,
                                     Supplier<Boolean> computeHeightMap,
-                                    ROS2HeartbeatDependencyNode ousterDesiredNode)
+                                    ROS2DemandGraphNode ousterDemandNode)
    {
       this.ouster = ouster;
       this.sensorFrameSupplier = sensorFrameSupplier;
       this.computeLidarScan = computeLidarScan;
       this.computeHeightMap = computeHeightMap;
-      this.ousterDesiredNode = ousterDesiredNode;
+      this.demandGraphNode = ousterDemandNode;
 
       openCLManager = new OpenCLManager();
       this.ouster.setOnFrameReceived(this::retrieveDepth);
@@ -58,7 +57,7 @@ public class OusterDepthImageRetriever
 
    private void retrieveDepth()
    {
-      if (ousterDesiredNode.checkIfDesired())
+      if (demandGraphNode.isDemanded())
       {
          if (depthExtractionKernel == null)
             depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager, computeLidarScan, computeHeightMap);
@@ -138,10 +137,10 @@ public class OusterDepthImageRetriever
 
    public void destroy()
    {
-      System.out.println("Destroying " + this.getClass().getSimpleName());
+      System.out.println("Destroying " + getClass().getSimpleName());
       stop();
       if (depthImage != null)
          depthImage.release();
-      System.out.println("Destroyed " + this.getClass().getSimpleName());
+      System.out.println("Destroyed " + getClass().getSimpleName());
    }
 }
