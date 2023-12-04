@@ -102,10 +102,11 @@ public class ContinuousPlannerSchedulingTask
    private void tickStateMachine()
    {
       // Sets the planner timeout to be a percentage of the total step duration
-      double stepDuration = continuousWalkingParameters.getSwingTime() + continuousWalkingParameters.getTransferTime();
-      continuousWalkingParameters.setPlanningReferenceTimeout(stepDuration * continuousWalkingParameters.getPlannerTimeoutFraction());
+//      double stepDuration = continuousWalkingParameters.getSwingTime() + continuousWalkingParameters.getTransferTime();
+//      continuousWalkingParameters.setPlanningReferenceTimeout(stepDuration * continuousWalkingParameters.getPlannerTimeoutFraction());
 
-      if (!continuousWalkingParameters.getEnableContinuousWalking() || !continuousWalkingParameters.getShortcutIsPressed())
+      //      if (!continuousWalkingParameters.getEnableContinuousWalking() || !continuousWalkingParameters.getShortcutIsPressed())
+      if (!continuousWalkingParameters.getEnableContinuousWalking())
       {
          stopContinuousWalkingGracefully();
 

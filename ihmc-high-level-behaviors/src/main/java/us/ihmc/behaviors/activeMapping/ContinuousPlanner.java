@@ -297,7 +297,11 @@ public class ContinuousPlanner
                this.previousFootstepPlan.remove(1);
 
             request.setReferencePlan(this.previousFootstepPlan);
-            request.setTimeout(continuousWalkingParameters.getPlanningReferenceTimeout());
+
+            double stepDuration = continuousWalkingParameters.getSwingTime() + continuousWalkingParameters.getTransferTime();
+            double referencePlanTimeout = stepDuration * continuousWalkingParameters.getPlanningReferenceTimeout();
+            LogTools.warn("TIMEOUT WITH REFERENCE PLAN - " + referencePlanTimeout);
+            request.setTimeout(referencePlanTimeout);
          }
       }
       else
