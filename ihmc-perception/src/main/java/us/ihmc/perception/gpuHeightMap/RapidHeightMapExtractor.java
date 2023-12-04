@@ -45,7 +45,7 @@ public class RapidHeightMapExtractor
    private final Point3D sensorOrigin = new Point3D();
    private final TerrainMapStatistics terrainMapStatistics = new TerrainMapStatistics();
 
-   private HeightMapAutoencoder denoiser;
+//   private HeightMapAutoencoder denoiser;
    private HumanoidReferenceFrames referenceFrames;
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
@@ -99,7 +99,7 @@ public class RapidHeightMapExtractor
    {
       this.referenceFrames = referenceFrames;
       this.openCLManager = openCLManager;
-      denoiser = new HeightMapAutoencoder();
+//      denoiser = new HeightMapAutoencoder();
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
    }
 
@@ -250,7 +250,7 @@ public class RapidHeightMapExtractor
 
          if (heightMapParameters.getDenoiserEnabled())
          {
-            denoisedHeightMapImage = denoiser.denoiseHeightMap(croppedHeightMapImage, heightMapParameters.getHeightOffset());
+//            denoisedHeightMapImage = denoiser.denoiseHeightMap(croppedHeightMapImage, heightMapParameters.getHeightOffset());
          }
          terrainMapStatistics.endGPUProcessingTime();
 
@@ -329,10 +329,12 @@ public class RapidHeightMapExtractor
 
    public void reset()
    {
+      double thicknessOfTheFoot = 0.02;
       double height = 0.0f;
+
       if (referenceFrames != null)
       {
-         height = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslationZ();
+         height = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslationZ() - thicknessOfTheFoot;
       }
 
       int offset = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());

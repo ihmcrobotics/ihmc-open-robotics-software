@@ -211,7 +211,6 @@ public class TerrainPlanningSimulationUI
                                                 steppingL515Simulator.getLowLevelSimulator().getMetersDepthOpenCVMat(),
                                                 cameraFrame,
                                                 cameraZUpFrame,
-                                                initialized,
                                                 true);
             }
 

@@ -16,7 +16,7 @@ import java.util.HashMap;
 
 public class ContinuousPlannerStatistics
 {
-   private final File file;
+   private File file;
    private final HashMap<String, Float> statistics = new HashMap<>();
 
    // These all need to be snake case in order for everything to work
@@ -46,8 +46,11 @@ public class ContinuousPlannerStatistics
          {
             Files.createDirectory(IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY);
          }
-         Files.createFile(Paths.get(filePath));
-         file = new File(filePath);
+         if (!Files.exists(IHMCCommonPaths.TERRAIN_MAP_DIRECTORY.resolve(logFileName)))
+         {
+            Files.createFile(Paths.get(filePath));
+            file = new File(filePath);
+         }
       }
       catch (IOException e)
       {

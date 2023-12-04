@@ -83,6 +83,11 @@ public class RDXRemotePerceptionUI
       remotePropertySets.renderImGuiWidgets();
    }
 
+   public void setPropertyChanged()
+   {
+      remotePropertySets.setPropertyChanged();
+   }
+
    public void destroy()
    {
    }

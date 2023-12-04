@@ -38,4 +38,13 @@ public class ImGuiRemoteROS2StoredPropertySetGroup
          }
       }
    }
+
+   public void setPropertyChanged()
+   {
+      for (int i = 0; i < remotePropertySets.size(); i++)
+      {
+         ImGuiRemoteROS2StoredPropertySet remotePropertySet = remotePropertySets.get(i);
+         remotePropertySet.setPropertyChanged();
+      }
+   }
 }

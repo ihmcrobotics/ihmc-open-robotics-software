@@ -200,6 +200,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
    public void renderImGuiWidgets()
    {
+      remotePerceptionUI.setPropertyChanged();
+
       if (ImGui.collapsingHeader("Configuration"))
       {
          ImGui.indent();
