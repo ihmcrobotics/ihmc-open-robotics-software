@@ -7,6 +7,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.ros2.ROS2HeartbeatDependencyNode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -42,6 +43,7 @@ public class BlackflyImageRetriever
    private int imageWidth = 0;
    private int imageHeight = 0;
    private RawImage distortedImage = null;
+   private final ROS2HeartbeatDependencyNode blackflyDesiredNode;
    private final RestartableThrottledThread imageGrabThread;
    private int numberOfFailedReads = 0;
 
@@ -52,11 +54,13 @@ public class BlackflyImageRetriever
    public BlackflyImageRetriever(String blackflySerialNumber,
                                  BlackflyLensProperties lensProperties,
                                  RobotSide side,
-                                 Supplier<ReferenceFrame> cameraFrameSupplier)
+                                 Supplier<ReferenceFrame> cameraFrameSupplier,
+                                 ROS2HeartbeatDependencyNode blackflyDesiredNode)
    {
       this.blackflySerialNumber = blackflySerialNumber;
       this.ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(lensProperties);
       this.cameraFrameSupplier = cameraFrameSupplier;
+      this.blackflyDesiredNode = blackflyDesiredNode;
 
       imageGrabThread = new RestartableThrottledThread(side.getCamelCaseName() + "BlackflyImageGrabber", BLACKFLY_FPS, this::grabImage);
       imageGrabThread.start();
@@ -64,80 +68,85 @@ public class BlackflyImageRetriever
 
    private void grabImage()
    {
-      if (blackfly == null || numberOfFailedReads > 30)
+      if (blackflyDesiredNode.checkIfDesired())
       {
-         if (!initializeBlackfly())
-            ThreadTools.sleep(3000);
-      }
-      else
-      {
-         // grab image
-         spinImage spinImage = new spinImage();
-         if (blackfly.getNextImage(spinImage))
+         if (blackfly == null || numberOfFailedReads > 30)
          {
-            Instant acquisitionTime = Instant.now();
-            cameraPose.setToZero(cameraFrameSupplier.get());
-            cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-            // Initialize image dimensions from first image
-            if (imageWidth == 0 || imageHeight == 0)
-            {
-               this.imageWidth = blackfly.getWidth(spinImage);
-               this.imageHeight = blackfly.getHeight(spinImage);
-            }
-
-            // Get image data
-            BytePointer spinImageData = new BytePointer((long) imageWidth * imageHeight);
-            blackfly.setPointerToSpinImageData(spinImage, spinImageData);
-            BytedecoImage sourceByedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
-            sourceByedecoImage.changeAddress(spinImageData.address());
-
-            // Upload image to GPU
-            GpuMat deviceSourceImage = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC1);
-            deviceSourceImage.upload(sourceByedecoImage.getBytedecoOpenCVMat());
-
-            // Convert from BayerRG8 to BGR
-            GpuMat sourceImageBGR = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
-            opencv_cudaimgproc.cvtColor(deviceSourceImage, sourceImageBGR, opencv_imgproc.COLOR_BayerBG2BGR);
-
-            newImageLock.lock();
-            try
-            {
-               if (distortedImage != null)
-                  distortedImage.release();
-               distortedImage = new RawImage(sequenceNumber++,
-                                             acquisitionTime,
-                                             imageWidth,
-                                             imageHeight,
-                                             0,
-                                             null,
-                                             sourceImageBGR.clone(),
-                                             opencv_core.CV_8UC3,
-                                             (float) ousterFisheyeColoringIntrinsics.getFocalLengthX(),
-                                             (float) ousterFisheyeColoringIntrinsics.getFocalLengthY(),
-                                             (float) ousterFisheyeColoringIntrinsics.getPrinciplePointX(),
-                                             (float) ousterFisheyeColoringIntrinsics.getPrinciplePointY(),
-                                             cameraPose.getPosition(),
-                                             cameraPose.getOrientation());
-
-               newImageAvailable.signal();
-            }
-            finally
-            {
-               newImageLock.unlock();
-            }
-
-            // close stuff
-            spinImageData.close();
-            deviceSourceImage.close();
-            sourceImageBGR.close();
+            if (!initializeBlackfly())
+               ThreadTools.sleep(3000);
          }
          else
          {
-            numberOfFailedReads++;
+            // grab image
+            spinImage spinImage = new spinImage();
+            if (blackfly.getNextImage(spinImage))
+            {
+               Instant acquisitionTime = Instant.now();
+               cameraPose.setToZero(cameraFrameSupplier.get());
+               cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+               // Initialize image dimensions from first image
+               if (imageWidth == 0 || imageHeight == 0)
+               {
+                  this.imageWidth = blackfly.getWidth(spinImage);
+                  this.imageHeight = blackfly.getHeight(spinImage);
+               }
+
+               // Get image data
+               BytePointer spinImageData = new BytePointer((long) imageWidth * imageHeight);
+               blackfly.setPointerToSpinImageData(spinImage, spinImageData);
+               BytedecoImage sourceByedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
+               sourceByedecoImage.changeAddress(spinImageData.address());
+
+               // Upload image to GPU
+               GpuMat deviceSourceImage = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC1);
+               deviceSourceImage.upload(sourceByedecoImage.getBytedecoOpenCVMat());
+
+               // Convert from BayerRG8 to BGR
+               GpuMat sourceImageBGR = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+               opencv_cudaimgproc.cvtColor(deviceSourceImage, sourceImageBGR, opencv_imgproc.COLOR_BayerBG2BGR);
+
+               newImageLock.lock();
+               try
+               {
+                  if (distortedImage != null)
+                     distortedImage.release();
+                  distortedImage = new RawImage(sequenceNumber++,
+                                                acquisitionTime,
+                                                imageWidth,
+                                                imageHeight,
+                                                0,
+                                                null,
+                                                sourceImageBGR.clone(),
+                                                opencv_core.CV_8UC3,
+                                                (float) ousterFisheyeColoringIntrinsics.getFocalLengthX(),
+                                                (float) ousterFisheyeColoringIntrinsics.getFocalLengthY(),
+                                                (float) ousterFisheyeColoringIntrinsics.getPrinciplePointX(),
+                                                (float) ousterFisheyeColoringIntrinsics.getPrinciplePointY(),
+                                                cameraPose.getPosition(),
+                                                cameraPose.getOrientation());
+
+                  newImageAvailable.signal();
+               }
+               finally
+               {
+                  newImageLock.unlock();
+               }
+
+               // close stuff
+               spinImageData.close();
+               deviceSourceImage.close();
+               sourceImageBGR.close();
+            }
+            else
+            {
+               numberOfFailedReads++;
+            }
+            blackfly.releaseImage(spinImage);
          }
-         blackfly.releaseImage(spinImage);
       }
+      else
+         ThreadTools.sleep(500);
    }
 
    public RawImage getLatestRawImage()
