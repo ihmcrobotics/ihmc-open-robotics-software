@@ -43,6 +43,50 @@ public class YoMatrix
       }
    }
 
+   public YoMatrix(String name, int maxNumberOfRows, int maxNumberOfColumns, String[] rowNames, YoRegistry registry)
+   {
+      this.maxNumberOfRows = maxNumberOfRows;
+      this.maxNumberOfColumns = maxNumberOfColumns;
+
+      this.numberOfRows = new YoInteger(name + "NumRows", registry);
+      this.numberOfColumns = new YoInteger(name + "NumCols", registry);
+
+      this.numberOfRows.set(maxNumberOfRows);
+      this.numberOfColumns.set(maxNumberOfColumns);
+
+      variables = new YoDouble[maxNumberOfRows][maxNumberOfColumns];
+
+      for (int row = 0; row < maxNumberOfRows; row++)
+      {
+         for (int column = 0; column < maxNumberOfColumns; column++)
+         {
+            variables[row][column] = new YoDouble(name + "_" + rowNames[row], registry);
+         }
+      }
+   }
+
+   public YoMatrix(String name, int maxNumberOfRows, int maxNumberOfColumns, String[] rowNames, String[] columnNames, YoRegistry registry)
+   {
+      this.maxNumberOfRows = maxNumberOfRows;
+      this.maxNumberOfColumns = maxNumberOfColumns;
+
+      this.numberOfRows = new YoInteger(name + "NumRows", registry);
+      this.numberOfColumns = new YoInteger(name + "NumCols", registry);
+
+      this.numberOfRows.set(maxNumberOfRows);
+      this.numberOfColumns.set(maxNumberOfColumns);
+
+      variables = new YoDouble[maxNumberOfRows][maxNumberOfColumns];
+
+      for (int row = 0; row < maxNumberOfRows; row++)
+      {
+         for (int column = 0; column < maxNumberOfColumns; column++)
+         {
+            variables[row][column] = new YoDouble(name + "_" + rowNames[row] + "_" + columnNames[column], registry);
+         }
+      }
+   }
+
    public void set(DMatrixRMaj matrix)
    {
       int numRows = matrix.getNumRows();
