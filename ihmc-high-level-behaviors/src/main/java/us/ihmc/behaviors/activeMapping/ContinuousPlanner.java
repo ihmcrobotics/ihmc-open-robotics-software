@@ -43,7 +43,7 @@ public class ContinuousPlanner
       EXECUTE_AND_PAUSE, FRONTIER_EXPANSION, ACTIVE_SEARCH, WALK_TO_GOAL, RANDOM_WALK, INCREMENTAL_PLANNING
    }
 
-   private PlanningMode mode = PlanningMode.WALK_TO_GOAL;
+   private PlanningMode mode;
 
    private ContinuousGoalGenerator goalGenerator = new ContinuousGoalGenerator(0.0, 5.0, 0.0, 5.0);
    private FramePose3D walkingStartMidPose = new FramePose3D();
@@ -283,7 +283,8 @@ public class ContinuousPlanner
       if (useReferencePlan)
       {
          // Sets the previous footstep plan to be a reference for the current plan
-         FootstepPlan previousFootstepPlan = new FootstepPlan(latestFootstepPlan);
+         if (latestFootstepPlan.getNumberOfSteps() >= continuousWalkingParameters.getNumberOfStepsToSend())
+            previousFootstepPlan = new FootstepPlan(latestFootstepPlan);
 
          if (previousFootstepPlan.getNumberOfSteps() < continuousWalkingParameters.getNumberOfStepsToSend())
          {

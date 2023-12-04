@@ -144,8 +144,7 @@ public class ContinuousPlannerSchedulingTask
       }
       else
       {
-         //continuousPlanningParameters.setContinuousWalkingEnabled(false);
-         continuousPlanningParameters.setStepPublisherEnabled(false);
+         state = ContinuousWalkingState.READY_TO_PLAN;
          LogTools.error("Planning failed, restart active mapping and try again");
       }
    }
@@ -157,7 +156,7 @@ public class ContinuousPlannerSchedulingTask
          LogTools.info("State: " + state);
          continuousPlannerStatistics.setLastAndTotalWaitingTimes();
          continuousPlanner.getImminentStanceFromLatestStatus(footstepStatusMessage, controllerQueue);
-         publishForVisualization();
+         publishStartAndGoalForVisualization();
          continuousPlanner.setGoalWaypointPoses(continuousPlanningParameters);
          continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, heightMapImage, contactMapImage, true);
 
@@ -167,7 +166,7 @@ public class ContinuousPlannerSchedulingTask
          }
          else
          {
-            continuousPlanningParameters.setContinuousWalkingEnabled(false);
+            state = ContinuousWalkingState.READY_TO_PLAN;
             LogTools.error("Planning failed, restart active mapping and try again");
          }
       }
@@ -231,7 +230,7 @@ public class ContinuousPlannerSchedulingTask
       controllerQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
    }
 
-   public void publishForVisualization()
+   public void publishStartAndGoalForVisualization()
    {
       List<Pose3D> poses = new ArrayList<>();
       poses.add(new Pose3D(continuousPlanner.getStartingStancePose().get(RobotSide.LEFT)));
