@@ -183,11 +183,8 @@ public class RigidBodyJointControlHelper
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          OneDoFJointBasics joint = joints[jointIdx];
-         if (lowLevelGains.containsKey(joint.getName()))
-         {
-            this.lowLevelGains.add(lowLevelGains.get(joint.getName()));
-            hasLowLevelGains[jointIdx].set(true);
-         }
+         this.lowLevelGains.add(jointIdx, lowLevelGains.get(joint.getName()));
+         hasLowLevelGains[jointIdx].set(lowLevelGains.containsKey(joint.getName()));
       }
    }
 
