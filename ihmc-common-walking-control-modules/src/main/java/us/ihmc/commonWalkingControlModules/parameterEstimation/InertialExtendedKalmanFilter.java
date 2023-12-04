@@ -110,7 +110,7 @@ public class InertialExtendedKalmanFilter
 
    public void update()
    {
-      if (!enableFilter.getBooleanValue())
+      if (enableFilter.getBooleanValue())
       {
          updateEstimatedModelJointState();
 
@@ -133,7 +133,7 @@ public class InertialExtendedKalmanFilter
             DMatrixRMaj residualToPack = new DMatrixRMaj(generalizedForcesContainer);
 
             perfectRegressor.set(jointTorqueRegressorCalculator.getJointTorqueRegressorMatrix());
-            CommonOps_DDRM.mult(-1.0, perfectRegressor, perfectParameters, residualToPack);
+            CommonOps_DDRM.multAdd(-1.0, perfectRegressor, perfectParameters, residualToPack);
             residual.set(residualToPack);
          }
       }
