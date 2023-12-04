@@ -354,7 +354,12 @@ public class PerceptionAndAutonomyProcess
          return;
       }
 
-      blackflyImageRetrievers.put(side, new BlackflyImageRetriever(serialNumber, BLACKFLY_LENS, RobotSide.RIGHT, blackflyFrameSuppliers.get(side)));
+      blackflyImageRetrievers.put(side,
+                                  new BlackflyImageRetriever(serialNumber,
+                                                             BLACKFLY_LENS,
+                                                             RobotSide.RIGHT,
+                                                             blackflyFrameSuppliers.get(side),
+                                                             blackflyImageNodes.get(side)));
       blackflyImagePublishers.put(side, new BlackflyImagePublisher(BLACKFLY_LENS, BLACKFLY_IMAGE_TOPIC));
    }
 
