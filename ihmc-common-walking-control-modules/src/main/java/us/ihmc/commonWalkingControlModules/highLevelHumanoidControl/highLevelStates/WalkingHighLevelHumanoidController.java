@@ -657,7 +657,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       currentState.handleChangeInContactState();
 
-      submitControllerCoreCommands();
+      submitControllerCoreCommands(currentState);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -867,9 +867,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       return pelvisStatusMessage;
    }
 
-   private void submitControllerCoreCommands()
+   private void submitControllerCoreCommands(WalkingState currentState)
    {
       planeContactStateCommandPool.clear();
+
+      controllerCoreCommand.addInverseDynamicsCommand(currentState.getInverseDynamicsCommand());
 
       if (naturalPostureManager != null && naturalPostureManager.isEnabled())
       {
