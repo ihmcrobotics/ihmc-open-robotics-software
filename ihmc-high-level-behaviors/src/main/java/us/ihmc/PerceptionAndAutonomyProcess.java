@@ -1,5 +1,6 @@
 package us.ihmc;
 
+import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.colorVision.BlackflyImagePublisher;
 import us.ihmc.avatar.colorVision.BlackflyImageRetriever;
@@ -7,6 +8,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2HeartbeatDependencyNode;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -14,9 +16,12 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.comms.PerceptionComms;
+import us.ihmc.perception.headless.HumanoidPerceptionModule;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
 import us.ihmc.perception.ouster.OusterNetServer;
+import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectionUpdater;
@@ -79,6 +84,12 @@ public class PerceptionAndAutonomyProcess
 
    private static final double SCENE_GRAPH_UPDATE_FREQUENCY = 10.0;
 
+   private final ROS2Helper ros2Helper;
+   private final PerceptionConfigurationParameters perceptionParameters = new PerceptionConfigurationParameters();
+   private final ROS2StoredPropertySetGroup ros2StoredPropertySetGroup;
+   private final HumanoidPerceptionModule perceptionModule;
+   private boolean perceptionModuleInitialized = false;
+
    private ROS2HeartbeatDependencyNode zedPointCloudNode;
    private ROS2HeartbeatDependencyNode zedColorNode;
    private ROS2HeartbeatDependencyNode zedDepthNode;
@@ -88,6 +99,8 @@ public class PerceptionAndAutonomyProcess
    private ZEDColorDepthImagePublisher zedImagePublisher;
    private RestartableThread zedProcessAndPublishThread;
 
+   private final Supplier<ReferenceFrame> realsenseFrameSupplier;
+   private final Supplier<ReferenceFrame> realsenseZUpFrameSupplier;
    private ROS2HeartbeatDependencyNode realsensePublishNode;
    private RawImage realsenseDepthImage;
    private RawImage realsenseColorImage;
@@ -127,22 +140,31 @@ public class PerceptionAndAutonomyProcess
    private ROS2Heartbeat leftBlackflyHeartbeat;
    private ROS2Heartbeat rightBlackflyHeartbeat;
 
-   public PerceptionAndAutonomyProcess(ROS2PublishSubscribeAPI ros2,
+   public PerceptionAndAutonomyProcess(ROS2Helper ros2Helper,
+                                       ROS2StoredPropertySetGroup ros2StoredPropertySetGroup,
+                                       HumanoidPerceptionModule perceptionModule,
                                        Supplier<ReferenceFrame> zedFrameSupplier,
                                        Supplier<ReferenceFrame> realsenseFrameSupplier,
+                                       Supplier<ReferenceFrame> realsenseZUpFrameSupplier,
                                        Supplier<ReferenceFrame> ousterFrameSupplier,
                                        Supplier<ReferenceFrame> leftBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> rightBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> robotPelvisFrameSupplier,
                                        ReferenceFrame zed2iLeftCameraFrame)
    {
-      initializeDependencyGraph(ros2);
+      this.ros2Helper = ros2Helper;
+      this.ros2StoredPropertySetGroup = ros2StoredPropertySetGroup;
+      this.perceptionModule = perceptionModule;
+
+      initializeDependencyGraph(ros2Helper);
 
       zedImageRetriever = new ZEDColorDepthImageRetriever(ZED_CAMERA_ID, zedFrameSupplier, zedPointCloudNode, zedDepthNode, zedColorNode);
       zedImagePublisher = new ZEDColorDepthImagePublisher(ZED_COLOR_TOPICS, ZED_DEPTH_TOPIC);
       zedProcessAndPublishThread = new RestartableThread("ZEDImageProcessAndPublish", this::processAndPublishZED);
       zedProcessAndPublishThread.start();
 
+      this.realsenseFrameSupplier = realsenseFrameSupplier;
+      this.realsenseZUpFrameSupplier = realsenseZUpFrameSupplier;
       realsenseImageRetriever = new RealsenseColorDepthImageRetriever(new RealsenseDeviceManager(),
                                                                       REALSENSE_SERIAL_NUMBER,
                                                                       RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
@@ -169,12 +191,12 @@ public class PerceptionAndAutonomyProcess
       blackflyProcessAndPublishThread.start();
 
       this.robotPelvisFrameSupplier = robotPelvisFrameSupplier;
-      sceneGraph = new ROS2SceneGraph(ros2);
+      sceneGraph = new ROS2SceneGraph(ros2Helper);
       sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", SCENE_GRAPH_UPDATE_FREQUENCY, this::updateSceneGraph);
 
       arUcoUpdater = new ArUcoDetectionUpdater(sceneGraph, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
 
-      centerposeDetectionManager = new CenterposeDetectionManager(ros2, zed2iLeftCameraFrame);
+      centerposeDetectionManager = new CenterposeDetectionManager(ros2Helper, zed2iLeftCameraFrame);
 
       sceneGraphUpdateThread.start(); // scene graph runs at all times
    }
@@ -219,6 +241,8 @@ public class PerceptionAndAutonomyProcess
             blackflyImageRetrievers.get(side).destroy();
       }
 
+      if (perceptionModule != null)
+         perceptionModule.destroy();
 
       zedPointCloudNode.destroy();
       zedColorNode.destroy();
@@ -276,7 +300,45 @@ public class PerceptionAndAutonomyProcess
          realsenseDepthImage = realsenseImageRetriever.getLatestRawDepthImage();
          realsenseColorImage = realsenseImageRetriever.getLatestRawColorImage();
 
-         // Do processing on image
+         if (!perceptionModuleInitialized && perceptionModule != null)
+         {
+            System.out.println("Initializing HumanoidPerceptionModule...");
+            perceptionModule.initializeRealsenseDepthImage(realsenseDepthImage.getImageHeight(), realsenseDepthImage.getImageWidth());
+            perceptionModule.initializePerspectiveRapidRegionsExtractor(realsenseImageRetriever.getRealsenseDepthCameraIntrinsics());
+            perceptionModule.getRapidHeightMapExtractor().setDepthIntrinsics(realsenseImageRetriever.getRealsenseDepthCameraIntrinsics());
+            perceptionModule.setUpHeightMapExtractor(realsenseImageRetriever.getRealsenseDepthCameraIntrinsics());
+            perceptionModule.getRapidRegionsExtractor().setEnabled(true);
+
+            ros2StoredPropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, perceptionParameters);
+            ros2StoredPropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS,
+                                                           perceptionModule.getRapidHeightMapExtractor().getHeightMapParameters());
+            ros2StoredPropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
+                                                           perceptionModule.getRapidRegionsExtractor().getParameters());
+            ros2StoredPropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS,
+                                                           perceptionModule.getRapidRegionsExtractor()
+                                                                             .getRapidPlanarRegionsCustomizer()
+                                                                             .getPolygonizerParameters());
+            ros2StoredPropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS,
+                                                           perceptionModule.getRapidRegionsExtractor()
+                                                                             .getRapidPlanarRegionsCustomizer()
+                                                                             .getConcaveHullFactoryParameters());
+            perceptionModuleInitialized = true;
+         }
+         else if (perceptionModule != null)
+         {
+            perceptionModule.setRapidRegionsEnabled(perceptionParameters.getRapidRegionsEnabled());
+            perceptionModule.setHeightMapEnabled(perceptionParameters.getHeightMapEnabled());
+            perceptionModule.setMappingEnabled(perceptionParameters.getSLAMEnabled());
+
+            Mat realsenseDepthMat = realsenseDepthImage.getCpuImageMatrix().clone();
+            perceptionModule.updateTerrain(ros2Helper,
+                                           realsenseDepthMat,
+                                           realsenseFrameSupplier.get(),
+                                           realsenseZUpFrameSupplier.get(),
+                                           true,
+                                           false);
+            realsenseDepthMat.close();
+         }
 
          realsenseImagePublisher.setNextDepthImage(realsenseDepthImage.get());
          realsenseImagePublisher.setNextColorImage(realsenseColorImage.get());
@@ -418,6 +480,9 @@ public class PerceptionAndAutonomyProcess
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       PerceptionAndAutonomyProcess perceptionAndAutonomyProcess = new PerceptionAndAutonomyProcess(ros2Helper,
+                                                                                                   null,
+                                                                                                   null,
+                                                                                                   ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
