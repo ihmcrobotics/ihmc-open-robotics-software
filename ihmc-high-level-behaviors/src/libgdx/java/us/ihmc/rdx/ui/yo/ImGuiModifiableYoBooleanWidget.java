@@ -10,9 +10,9 @@ public class ImGuiModifiableYoBooleanWidget
    private final ImGuiModifiableYoBoolean modifiableYoBoolean;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
-   public ImGuiModifiableYoBooleanWidget(ImGuiYoVariableClientUI yoVariableClientUI, String yoVariableName)
+   public ImGuiModifiableYoBooleanWidget(RDXYoVariableClientPanel yoVariableClientPanel, String yoVariableName)
    {
-      yoBooleanClientHelper = yoVariableClientUI.getYoVariableClientHelper().subscribeToYoBoolean(yoVariableName);
+      yoBooleanClientHelper = yoVariableClientPanel.getYoVariableClientHelper().subscribeToYoBoolean(yoVariableName);
       modifiableYoBoolean = new ImGuiModifiableYoBoolean(yoBooleanClientHelper);
    }
 
