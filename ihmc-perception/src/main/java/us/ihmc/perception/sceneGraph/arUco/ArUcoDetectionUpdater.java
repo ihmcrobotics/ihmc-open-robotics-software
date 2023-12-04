@@ -25,7 +25,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
-public class ArUcoUpdateProcess
+public class ArUcoDetectionUpdater
 {
    private final ROS2Helper ros2Helper;
    private final ROS2SceneGraph sceneGraph;
@@ -48,7 +48,7 @@ public class ArUcoUpdateProcess
 
    private AtomicBoolean arUcoProcessInitialized = new AtomicBoolean(false);
 
-   public ArUcoUpdateProcess(ROS2SceneGraph sceneGraph, BlackflyLensProperties blackflyLensProperties, Supplier<ReferenceFrame> blackflyFrameSupplier)
+   public ArUcoDetectionUpdater(ROS2SceneGraph sceneGraph, BlackflyLensProperties blackflyLensProperties, Supplier<ReferenceFrame> blackflyFrameSupplier)
    {
       this.sceneGraph = sceneGraph;
       this.blackflyLensProperties = blackflyLensProperties;
