@@ -150,15 +150,15 @@ public class RDXVRKinematicsStreamingMode
          InputDigitalActionData aButton = controller.getAButtonActionData();
          if (aButton.bChanged() && !aButton.bState())
          {
-          streamToController.set(!streamToController.get());
+            streamToController.set(!streamToController.get());
          }
 
          // NOTE: Implement hand open close for controller trigger button.
          InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
          if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
          {
-          HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.LEFT);
-          sendHandCommand(RobotSide.LEFT, handConfiguration);
+            HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.LEFT);
+            sendHandCommand(RobotSide.LEFT, handConfiguration);
          }
 
          // Check if left joystick is pressed in order to trigger recording or replay of motion
