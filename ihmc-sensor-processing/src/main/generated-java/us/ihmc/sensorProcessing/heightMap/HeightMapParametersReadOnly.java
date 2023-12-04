@@ -211,4 +211,9 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    {
       return get(denoiserEnabled);
    }
+
+   default boolean getStatisticsLoggingEnabled()
+   {
+      return get(statisticsLoggingEnabled);
+   }
 }

@@ -156,8 +156,6 @@ public class HumanoidPerceptionModule
 
                                    Instant acquisitionTime = Instant.now();
                                    Mat croppedHeightMapImage = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
-                                   Mat localHeightMapImage = rapidHeightMapExtractor.getLocalHeightMapImage().getBytedecoOpenCVMat();
-                                   Mat globalHeightMapImage = rapidHeightMapExtractor.getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
 
                                    if (ros2Helper != null)
                                    {
@@ -240,6 +238,8 @@ public class HumanoidPerceptionModule
       long begin = System.nanoTime();
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
       perceptionStatistics.updateTimeToComputeHeightMap((System.nanoTime() - begin) * 1e-6f);
+
+      LogTools.info("Height Map Time: {} ms", perceptionStatistics.getTimeToComputeHeightMap());
    }
 
    public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, Mat occupancy, float thresholdHeight)

@@ -170,5 +170,6 @@
     "description" : "This is the measurement variance when the robot is moving"
   },
   "Estimate height with kalman filter" : true,
-  "Denoiser enabled" : false
+  "Denoiser enabled" : false,
+  "Statistics logging enabled" : false
 }

@@ -126,5 +126,6 @@
   "Sensor variance when standing" : [ 0.01, "This is the measurement variance when the robot is standing" ],
   "Sensor variance when moving" : [ 0.1, "This is the measurement variance when the robot is moving" ],
   "Estimate height with kalman filter" : true,
-  "Denoiser enabled" : false
+  "Denoiser enabled" : false,
+  "Statistics logging enabled" : false
 }

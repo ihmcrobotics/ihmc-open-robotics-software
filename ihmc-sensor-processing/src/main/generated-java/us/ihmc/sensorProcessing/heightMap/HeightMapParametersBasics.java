@@ -209,4 +209,9 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    {
       set(HeightMapParameters.denoiserEnabled, denoiserEnabled);
    }
+
+   default void setStatisticsLoggingEnabled(boolean statisticsLoggingEnabled)
+   {
+      set(HeightMapParameters.statisticsLoggingEnabled, statisticsLoggingEnabled);
+   }
 }

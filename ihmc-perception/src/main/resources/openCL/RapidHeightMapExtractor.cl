@@ -361,7 +361,7 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    write_imageui(globalMap, (int2)(yIndex, xIndex), (uint4)((int)(finalHeight * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }
 
-void kernel croppingKernel(read_write image2d_t heightMap,
+void kernel croppingKernelZUp(read_write image2d_t heightMap,
                               read_write image2d_t croppedMap,
                               global float *params,
                               global float *zUpToWorldFrameTf)
@@ -397,6 +397,36 @@ void kernel croppingKernel(read_write image2d_t heightMap,
    if (globalCellIndex.x >= 0 && globalCellIndex.x < globalMapSize.x && globalCellIndex.y >= 0 && globalCellIndex.y < globalMapSize.y)
    {
       uint height = read_imageui(heightMap, (int2)(globalCellIndex.y, globalCellIndex.x)).x;
+      write_imageui(croppedMap, (int2)(yIndex, xIndex), (uint4)(height, 0, 0, 0));
+   }
+   else
+   {
+      write_imageui(croppedMap, (int2)(yIndex, xIndex), (uint4)(0, 0, 0, 0));
+   }
+}
+
+void kernel croppingKernel(read_write image2d_t inputMap,
+                           read_write image2d_t croppedMap,
+                           global float *params)
+{
+   int xIndex = get_global_id(0);
+   int yIndex = get_global_id(1);
+
+   int2 globalMapSize = (int2) (params[GLOBAL_CELLS_PER_AXIS], params[GLOBAL_CELLS_PER_AXIS]);
+
+   int2 globalSensorIndex = coordinate_to_indices(
+      (float2)(params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
+      (float2)(0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
+      params[GLOBAL_CELL_SIZE],
+      params[GLOBAL_CENTER_INDEX]);
+
+   int2 globalCellIndex = (int2) (globalSensorIndex.x + xIndex - params[CROPPED_WINDOW_CENTER_INDEX],
+                                    globalSensorIndex.y + yIndex - params[CROPPED_WINDOW_CENTER_INDEX]);
+
+   // check if global cell index is within bounds
+   if (globalCellIndex.x >= 0 && globalCellIndex.x < globalMapSize.x && globalCellIndex.y >= 0 && globalCellIndex.y < globalMapSize.y)
+   {
+      uint height = read_imageui(inputMap, (int2)(globalCellIndex.y, globalCellIndex.x)).x;
       write_imageui(croppedMap, (int2)(yIndex, xIndex), (uint4)(height, 0, 0, 0));
    }
    else

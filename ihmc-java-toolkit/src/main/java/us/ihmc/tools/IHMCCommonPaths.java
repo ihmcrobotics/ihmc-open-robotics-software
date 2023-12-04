@@ -23,6 +23,9 @@ public class IHMCCommonPaths
    public static final String CONTINUOUS_PLANNING_DIRECTORY_NAME = "continuous-planning";
    public static final Path CONTINUOUS_PLANNING_DIRECTORY = LOGS_DIRECTORY.resolve(CONTINUOUS_PLANNING_DIRECTORY_NAME);
 
+   public static final String TERRAIN_MAP_DIRECTORY_NAME = "terrain-map";
+   public static final Path TERRAIN_MAP_DIRECTORY = LOGS_DIRECTORY.resolve(TERRAIN_MAP_DIRECTORY_NAME);
+
    public static final String MISSION_CONTROL_LOGS_DIRECTORY_NAME = "mission-control";
    public static final Path MISSION_CONTROL_LOGS_DIRECTORY = LOGS_DIRECTORY.resolve(MISSION_CONTROL_LOGS_DIRECTORY_NAME);
 }
