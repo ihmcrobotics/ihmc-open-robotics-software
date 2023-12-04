@@ -157,7 +157,6 @@ public class BlackflyImagePublisher
       imagePublishLock.lock();
       try
       {
-         System.out.println("Signaling");
          newImageAvailable.signal();
       }
       finally
