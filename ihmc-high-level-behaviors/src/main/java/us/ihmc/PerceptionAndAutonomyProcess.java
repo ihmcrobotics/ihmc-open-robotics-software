@@ -40,7 +40,7 @@ import java.util.function.Supplier;
  * <p>
  *    This class holds all sensor drivers and publishers, as well as some algorithms which consume the images
  *    produced by the sensors. In general, each sensor has "Retriever" and "Publisher" classes. The retriever
- *    is responsible for grabbing images from the sensor and providing them to this class. hen, andy kind of
+ *    is responsible for grabbing images from the sensor and providing them to this class. Then, any kind of
  *    processing can be performed on the images, which are then given to the publisher or any algorithm which
  *    requires the images.
  * </p>
