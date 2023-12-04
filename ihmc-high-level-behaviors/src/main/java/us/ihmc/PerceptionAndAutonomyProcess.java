@@ -19,7 +19,7 @@ import us.ihmc.perception.ouster.OusterDepthImageRetriever;
 import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
-import us.ihmc.perception.sceneGraph.arUco.ArUcoUpdateProcess;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectionUpdater;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
@@ -36,6 +36,30 @@ import us.ihmc.tools.thread.RestartableThrottledThread;
 
 import java.util.function.Supplier;
 
+/**
+ * <p>
+ *    This class holds all sensor drivers and publishers, as well as some algorithms which consume the images
+ *    produced by the sensors. In general, each sensor has "Retriever" and "Publisher" classes. The retriever
+ *    is responsible for grabbing images from the sensor and providing them to this class. hen, andy kind of
+ *    processing can be performed on the images, which are then given to the publisher or any algorithm which
+ *    requires the images.
+ * </p>
+ * <p>
+ *    In general, the retrievers have a thread in which images are grabbed from the sensors.
+ *    The publishers have threads which wait for new images to arrive, and once given an image they publish it
+ *    and wait again.
+ *    Within this class, each sensor has a thread which takes the most recent image from a retriever, performs
+ *    any processing, and passes the image on to the publisher.
+ * </p>
+ * <p>
+ *    To launch the Nadia specific sensor configuration, see: {@code NadiaPerceptionAndAutonomyProcess}
+ *    To launch the process with no specific configuration, uncomment the call to {@code forceEnableAllSensors}
+ *    in the {@code main} method. When launching only one sensor, comment out the other sensor heartbeats in the
+ *    {@code forceEnableAllSensors} method.
+ * </p>
+ *
+ * TODO: Add HumanoidPerceptionModule, add depth image overlap removal.
+ */
 public class PerceptionAndAutonomyProcess
 {
    private static final int ZED_CAMERA_ID = 0;
@@ -91,7 +115,7 @@ public class PerceptionAndAutonomyProcess
    private final ROS2SceneGraph sceneGraph;
    private RestartableThrottledThread sceneGraphUpdateThread;
    private ROS2HeartbeatDependencyNode arUcoDetectionNode;
-   private final ArUcoUpdateProcess arUcoUpdater;
+   private final ArUcoDetectionUpdater arUcoUpdater;
 
    private final CenterposeDetectionManager centerposeDetectionManager;
    private ROS2HeartbeatDependencyNode centerposeUpdateNode;
@@ -148,7 +172,7 @@ public class PerceptionAndAutonomyProcess
       sceneGraph = new ROS2SceneGraph(ros2);
       sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", SCENE_GRAPH_UPDATE_FREQUENCY, this::updateSceneGraph);
 
-      arUcoUpdater = new ArUcoUpdateProcess(sceneGraph, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
+      arUcoUpdater = new ArUcoDetectionUpdater(sceneGraph, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2, zed2iLeftCameraFrame);
 
