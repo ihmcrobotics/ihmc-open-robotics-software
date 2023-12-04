@@ -35,7 +35,7 @@ public class PerceptionDebugTools
    public static final Scalar COLOR_BLACK = new Scalar(0, 0, 0, 255);
    public static final Scalar COLOR_WHITE = new Scalar(255, 255, 255, 255);
    public static final Scalar COLOR_GRAY = new Scalar(128, 128, 128, 255);
-   public static final Scalar COLOR_PURPLE = new Scalar(255, 0, 255, 255);
+   public static final Scalar COLOR_PURPLE = new Scalar(255, 0, 160, 255);
 
    public static void printMatches(String tag, PlanarRegionsList map, PlanarRegionsList regions, HashMap<Integer, TIntArrayList> matches, boolean debug)
    {
@@ -300,7 +300,10 @@ public class PerceptionDebugTools
 
       if (screenSize != -1)
       {
-         opencv_highgui.resizeWindow(tag, screenSize / image.rows() * image.cols(), screenSize);
+         int finalRows = screenSize;
+         int finalCols = (int)((float) screenSize / (float) image.rows() * (float) image.cols());
+         LogTools.debug(String.format("Image Size: %d x %d Display Size: %d x %d", finalRows, finalCols, image.rows(), image.cols()));
+         opencv_highgui.resizeWindow(tag, finalCols, finalRows);
       }
 
       int code = opencv_highgui.waitKeyEx(delay);
@@ -484,10 +487,10 @@ public class PerceptionDebugTools
       plotFootstepWithYaw(displayImage, new Point3D(origin.getX(), origin.getY(), yaw), color, -1, size, size * 2);
    }
 
-   public static void plotFootstepWithYaw(Mat display, Point3D pose, Scalar color, int index, double width, double length)
+   public static void plotFootstepWithYaw(Mat display, Point3D imageCoordinatesWithYaw, Scalar color, int index, double width, double length)
    {
-      double[] positionOnMap = {pose.getX() * 50 + display.rows() / 2, pose.getY() * 50 + display.cols() / 2};
-      double yaw = pose.getZ();
+      double[] positionOnMap = {imageCoordinatesWithYaw.getX() + display.rows() / 2, imageCoordinatesWithYaw.getY() + display.cols() / 2};
+      double yaw = imageCoordinatesWithYaw.getZ();
 
       // Create the footstep rectangle using the position and orientation
       Point3D[] points = {new Point3D(-length, -width, 0),

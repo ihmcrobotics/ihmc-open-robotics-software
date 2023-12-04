@@ -362,4 +362,9 @@ public class RDXPolynomial implements RenderableProvider
       PolynomialReadOnly getPolynomialZ();
 
    }
+
+   public void dispose()
+   {
+      line.dispose();
+   }
 }

@@ -134,7 +134,7 @@ public class RDXRapidHeightMapExtractionDemo
 
             cameraIntrinsics = new CameraIntrinsics(depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89);
             humanoidPerception.initializeRealsenseDepthImage(depthHeight, depthWidth);
-            humanoidPerception.initializeHeightMapExtractor(cameraIntrinsics);
+            humanoidPerception.initializeHeightMapExtractor(null, cameraIntrinsics);
 
             perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer, 10);
             perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer, 10);
@@ -246,7 +246,8 @@ public class RDXRapidHeightMapExtractionDemo
       RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
       groundToSensorTransform.invert();
 
-      cameraZUpFrame.setPoseAndUpdate(groundToSensorTransform);
+      Pose3D groundPoseInSensorFrame = new Pose3D(groundToSensorTransform);
+      cameraZUpFrame.setPoseAndUpdate(groundPoseInSensorFrame);
 
       humanoidPerception.updateTerrain(ros2Helper,
                                        humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat(),

@@ -3,10 +3,15 @@
   "windows" : {
     "3D View" : true,
     "Dataset Navigation Panel" : true,
+    "Perception Panel" : true,
+    "Contact Map Image" : true,
     "Cropped Height Map" : true,
     "Depth Image" : true,
+    "Height Map Parameters" : true,
+    "Internal Height Map" : true,
     "Local Height Map" : true,
-    "Perception Panel" : true,
+    "Sensor Cropped Height Map" : true,
+    "Terrain Cost Image" : true,
     "VR Settings" : false,
     "VR Thread Debugger" : false
   }

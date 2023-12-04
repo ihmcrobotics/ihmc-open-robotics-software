@@ -156,8 +156,6 @@ public class HumanoidPerceptionModule
 
                                    Instant acquisitionTime = Instant.now();
                                    Mat croppedHeightMapImage = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
-                                   Mat localHeightMapImage = rapidHeightMapExtractor.getLocalHeightMapImage().getBytedecoOpenCVMat();
-                                   Mat globalHeightMapImage = rapidHeightMapExtractor.getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
 
                                    if (ros2Helper != null)
                                    {
@@ -277,10 +275,10 @@ public class HumanoidPerceptionModule
       this.rapidPlanarRegionsExtractor.getDebugger().setEnabled(false);
    }
 
-   public void initializeHeightMapExtractor(CameraIntrinsics cameraIntrinsics)
+   public void initializeHeightMapExtractor(HumanoidReferenceFrames referenceFrames, CameraIntrinsics cameraIntrinsics)
    {
       LogTools.info("Rapid Height Map: {}", cameraIntrinsics);
-      rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager);
+      rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager, referenceFrames);
       rapidHeightMapExtractor.setDepthIntrinsics(cameraIntrinsics);
       rapidHeightMapExtractor.create(realsenseDepthImage, 1);
    }

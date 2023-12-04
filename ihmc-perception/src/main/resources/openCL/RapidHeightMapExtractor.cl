@@ -174,7 +174,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
 
    float currentAverageHeight = 0.0f;
    float averageHeightZ = 0.0f;
-   float3 cellCenterInZUp = (float3) (0.0f, 0.0f, 0.0f);
+   float3 cellCenterInZUp = (float3) (0.0f, 0.0f, 0.5f);
    cellCenterInZUp.xy = indices_to_coordinate((int2) (xIndex, yIndex),
                                                (float2) (0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
                                                params[LOCAL_CELL_SIZE],
@@ -213,12 +213,13 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    }
 
    int count = 0;
-   for (int pitch_count_offset = - (int) (params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset <  (int) (params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=3)
+   for (int pitch_count_offset = - (int) (params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset <  (int) (params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=4)
    {
-      for (int yaw_count_offset = - (int) (params[SEARCH_WINDOW_WIDTH] / 2); yaw_count_offset <  (int) (params[SEARCH_WINDOW_WIDTH] / 2 + 1); yaw_count_offset+=3)
+      int pitch_count = projectedPoint.y + pitch_count_offset;
+
+      for (int yaw_count_offset = - (int) (params[SEARCH_WINDOW_WIDTH] / 2); yaw_count_offset <  (int) (params[SEARCH_WINDOW_WIDTH] / 2 + 1); yaw_count_offset+=4)
       {
          int yaw_count = projectedPoint.x + yaw_count_offset;
-         int pitch_count = projectedPoint.y + pitch_count_offset;
 
          if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
          {
@@ -361,7 +362,7 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    write_imageui(globalMap, (int2)(yIndex, xIndex), (uint4)((int)(finalHeight * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }
 
-void kernel croppingKernel(read_write image2d_t heightMap,
+void kernel croppingKernelZUp(read_write image2d_t heightMap,
                               read_write image2d_t croppedMap,
                               global float *params,
                               global float *zUpToWorldFrameTf)
@@ -397,6 +398,36 @@ void kernel croppingKernel(read_write image2d_t heightMap,
    if (globalCellIndex.x >= 0 && globalCellIndex.x < globalMapSize.x && globalCellIndex.y >= 0 && globalCellIndex.y < globalMapSize.y)
    {
       uint height = read_imageui(heightMap, (int2)(globalCellIndex.y, globalCellIndex.x)).x;
+      write_imageui(croppedMap, (int2)(yIndex, xIndex), (uint4)(height, 0, 0, 0));
+   }
+   else
+   {
+      write_imageui(croppedMap, (int2)(yIndex, xIndex), (uint4)(0, 0, 0, 0));
+   }
+}
+
+void kernel croppingKernel(read_write image2d_t inputMap,
+                           read_write image2d_t croppedMap,
+                           global float *params)
+{
+   int xIndex = get_global_id(0);
+   int yIndex = get_global_id(1);
+
+   int2 globalMapSize = (int2) (params[GLOBAL_CELLS_PER_AXIS], params[GLOBAL_CELLS_PER_AXIS]);
+
+   int2 globalSensorIndex = coordinate_to_indices(
+      (float2)(params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
+      (float2)(0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
+      params[GLOBAL_CELL_SIZE],
+      params[GLOBAL_CENTER_INDEX]);
+
+   int2 globalCellIndex = (int2) (globalSensorIndex.x + xIndex - params[CROPPED_WINDOW_CENTER_INDEX],
+                                    globalSensorIndex.y + yIndex - params[CROPPED_WINDOW_CENTER_INDEX]);
+
+   // check if global cell index is within bounds
+   if (globalCellIndex.x >= 0 && globalCellIndex.x < globalMapSize.x && globalCellIndex.y >= 0 && globalCellIndex.y < globalMapSize.y)
+   {
+      uint height = read_imageui(inputMap, (int2)(globalCellIndex.y, globalCellIndex.x)).x;
       write_imageui(croppedMap, (int2)(yIndex, xIndex), (uint4)(height, 0, 0, 0));
    }
    else
