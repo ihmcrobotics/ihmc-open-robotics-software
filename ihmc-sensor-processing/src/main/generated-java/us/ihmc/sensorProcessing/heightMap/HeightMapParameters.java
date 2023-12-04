@@ -79,6 +79,7 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
     */
    public static final DoubleStoredPropertyKey sensorVarianceWhenMoving = keys.addDoubleKey("Sensor variance when moving");
    public static final BooleanStoredPropertyKey estimateHeightWithKalmanFilter = keys.addBooleanKey("Estimate height with kalman filter");
+   public static final BooleanStoredPropertyKey denoiserEnabled = keys.addBooleanKey("Denoiser enabled");
 
    /**
     * Loads this property set.

@@ -204,4 +204,9 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    {
       set(HeightMapParameters.estimateHeightWithKalmanFilter, estimateHeightWithKalmanFilter);
    }
+
+   default void setDenoiserEnabled(boolean denoiserEnabled)
+   {
+      set(HeightMapParameters.denoiserEnabled, denoiserEnabled);
+   }
 }

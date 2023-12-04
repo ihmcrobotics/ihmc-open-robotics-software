@@ -169,5 +169,6 @@
     "upperBound" : 0.2,
     "description" : "This is the measurement variance when the robot is moving"
   },
-  "Estimate height with kalman filter" : true
+  "Estimate height with kalman filter" : true,
+  "Denoiser enabled" : false
 }

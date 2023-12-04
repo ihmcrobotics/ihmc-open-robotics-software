@@ -125,5 +125,6 @@
   "Variance added when translating" : [ 0.1, "This is the variance added to all past measurements when a cell is translated" ],
   "Sensor variance when standing" : [ 0.01, "This is the measurement variance when the robot is standing" ],
   "Sensor variance when moving" : [ 0.1, "This is the measurement variance when the robot is moving" ],
-  "Estimate height with kalman filter" : true
+  "Estimate height with kalman filter" : true,
+  "Denoiser enabled" : false
 }
