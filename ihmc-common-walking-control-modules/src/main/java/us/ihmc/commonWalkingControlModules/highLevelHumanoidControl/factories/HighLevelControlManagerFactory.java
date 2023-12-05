@@ -241,7 +241,10 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
       boolean enableFunctionGenerators = walkingControllerParameters.enableFunctionGeneratorMode(bodyName);
-      Vector3DReadOnly handLoadedAccelerationWeight = loadedFootLinearWeight; // Use same task weight as foot support, add custom parameter if needed
+
+      PIDSE3GainsReadOnly holdLoadedHandGains = holdFootGains; // Use same gains as foot support, add custom parameter if needed
+      Vector3DReadOnly handLoadedLinearWeight = loadedFootLinearWeight; // Use same task weight as foot support, add custom parameter if needed
+      Vector3DReadOnly handLoadedAngularWeight = loadedFootAngularWeight; // Use same task weight as foot support, add custom parameter if needed
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
@@ -255,7 +258,9 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     taskspaceOrientationGains,
                                                                     taskspacePositionGains,
                                                                     contactableBody,
-                                                                    handLoadedAccelerationWeight,
+                                                                    holdLoadedHandGains,
+                                                                    handLoadedLinearWeight,
+                                                                    handLoadedAngularWeight,
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
                                                                     yoTime,

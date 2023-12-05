@@ -21,6 +21,7 @@ import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -83,7 +84,9 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   PID3DGainsReadOnly taskspaceOrientationGains,
                                   PID3DGainsReadOnly taskspacePositionGains,
                                   ContactablePlaneBody contactableBody,
-                                  Vector3DReadOnly handLoadedAccelerationWeight,
+                                  PIDSE3GainsReadOnly holdLoadedHandPositionGains,
+                                  Vector3DReadOnly handLoadedLinearWeight,
+                                  Vector3DReadOnly handLoadedAngularWeight,
                                   RigidBodyControlMode defaultControlMode,
                                   boolean enableFunctionGenerators,
                                   YoDouble yoTime,
@@ -185,7 +188,9 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                         yoTime,
                                                                         jointControlHelper,
                                                                         taskspaceControlState.getOrientationControlHelper(),
-                                                                        handLoadedAccelerationWeight,
+                                                                        holdLoadedHandPositionGains,
+                                                                        handLoadedLinearWeight,
+                                                                        handLoadedAngularWeight,
                                                                         graphicsListRegistry,
                                                                         registry);
       }
