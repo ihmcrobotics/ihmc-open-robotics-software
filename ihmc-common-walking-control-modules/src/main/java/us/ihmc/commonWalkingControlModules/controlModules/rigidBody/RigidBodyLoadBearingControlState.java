@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -53,6 +55,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final PlaneContactStateCommand planeContactStateCommand = new PlaneContactStateCommand();
 
+   private ControllerCoreOutputReadOnly controllerCoreOutput;
    private final SelectionMatrix6D accelerationSelectionMatrix = new SelectionMatrix6D();
    private final SelectionMatrix6D feedbackSelectionMatrix = new SelectionMatrix6D();
    private final boolean[] isDirectionFeedbackControlled = new boolean[dofs];
@@ -384,5 +387,10 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
                                                                     0.1,
                                                                     ColorDefinitions.Black()));
       return group;
+   }
+
+   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
+   {
+      this.controllerCoreOutput = controllerCoreOutput;
    }
 }
