@@ -1,13 +1,11 @@
 package us.ihmc.rdx.perception;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -23,7 +21,6 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
-import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.mesh.MeshDataGeneratorMissing;
@@ -42,6 +39,7 @@ public class RDXProjectionSphere
    private final ImDouble focalLengthY = new ImDouble(0.2878);
    private final ImDouble principlePointX = new ImDouble(0.0);
    private final ImDouble principlePointY = new ImDouble(0.0);
+   private final ImBoolean renderSphereIfNoTexture = new ImBoolean(true);
    private Model model;
    private final Vector3D vertexRay = new Vector3D();
    private Mesh mesh;
@@ -70,8 +68,9 @@ public class RDXProjectionSphere
       {
          ImGui.endDisabled();
       }
-      rebuildMesh |= ImGuiTools.volatileInputDouble(labels.get("Priciple point X (Cx)"), principlePointX);
-      rebuildMesh |= ImGuiTools.volatileInputDouble(labels.get("Priciple point Y (Cy)"), principlePointY);
+      rebuildMesh |= ImGuiTools.volatileInputDouble(labels.get("Principle point X (Cx)"), principlePointX);
+      rebuildMesh |= ImGuiTools.volatileInputDouble(labels.get("Principle point Y (Cy)"), principlePointY);
+      rebuildMesh |= ImGui.checkbox(labels.get("Render sphere if no texture"), renderSphereIfNoTexture);
 
       if (rebuildMesh)
          rebuildUVSphereMesh();
@@ -111,7 +110,6 @@ public class RDXProjectionSphere
       Material material = new Material();
       if (latestTexture != null)
          material.set(TextureAttribute.createDiffuse(latestTexture));
-      material.set(ColorAttribute.createDiffuse(Color.WHITE));
       modelBuilder.part(meshPart, material);
 
       if (model != null)
@@ -134,7 +132,11 @@ public class RDXProjectionSphere
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (modelInstance != null)
+      boolean skipRenderables = false;
+      if (!renderSphereIfNoTexture.get() && latestTexture == null)
+         skipRenderables = true;
+
+      if (modelInstance != null && !skipRenderables)
          modelInstance.getRenderables(renderables, pool);
    }
 

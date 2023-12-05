@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -33,6 +34,8 @@ public class RDXDualBlackflySphericalProjection
    private final DualBlackflyUDPReceiver dualBlackflyUDPReceiver = new DualBlackflyUDPReceiver();
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private ImBoolean leftParametersVisible = new ImBoolean(true);
+   private ImBoolean rightParametersVisible = new ImBoolean(true);
 
    public RDXDualBlackflySphericalProjection(RDXBaseUI baseUI)
    {
@@ -42,10 +45,17 @@ public class RDXDualBlackflySphericalProjection
          {
 
          }
-         ImGui.text("Left:");
+         ImGui.separator();
+         ImGuiTools.textBold("Left:");
+         ImGui.indent();
          projectionSpheres.get(RobotSide.LEFT).renderImGuiWidgets();
-         ImGui.text("Right:");
+         ImGui.unindent();
+         ImGui.separator();
+         ImGuiTools.textBold("Right:");
+         ImGui.indent();
          projectionSpheres.get(RobotSide.RIGHT).renderImGuiWidgets();
+         ImGui.unindent();
+         ImGui.separator();
       });
    }
 

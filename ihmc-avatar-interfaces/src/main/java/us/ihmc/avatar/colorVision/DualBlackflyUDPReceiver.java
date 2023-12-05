@@ -42,7 +42,7 @@ public class DualBlackflyUDPReceiver
             }
             catch (SocketException e)
             {
-               LogTools.error(e);
+               LogTools.error("Unable to bind to address for blackfly UDP streaming: "  + socketAddress);
                return;
             }
 
