@@ -136,29 +136,15 @@ public class ActionNodeInitialization
       return ReferenceFrame.getWorldFrame().getName();
    }
 
-   private static <T extends ActionNodeState<?>> T findNextPreviousAction(@Nullable ActionSequenceState actionSequence,
-                                                                          Class<T> actionClass,
-                                                                          int indexOfInsertion,
-                                                                          @Nullable RobotSide side)
+   public static <T extends ActionNodeState<?>> T findNextPreviousAction(@Nullable ActionSequenceState actionSequence,
+                                                                         Class<T> actionClass,
+                                                                         int indexOfInsertion,
+                                                                         @Nullable RobotSide side)
    {
       T previousAction = null;
-
       if (actionSequence != null)
       {
-         for (int i = indexOfInsertion - 1; i >= 0; i--)
-         {
-            ActionNodeState<?> action = actionSequence.getActionChildren().get(i);
-            if (actionClass.isInstance(action))
-            {
-               boolean match = side == null;
-               match |= action.getDefinition() instanceof SidedObject sidedAction && sidedAction.getSide() == side;
-
-               if (match)
-               {
-                  previousAction = actionClass.cast(action);
-               }
-            }
-         }
+         previousAction = actionSequence.findNextPreviousAction(actionClass, indexOfInsertion, side);
       }
       return previousAction;
    }
