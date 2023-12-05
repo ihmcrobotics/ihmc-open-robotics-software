@@ -1,45 +1,16 @@
-#define LOCAL_CELL_SIZE 0
-#define LOCAL_CENTER_INDEX 1
-#define DEPTH_INPUT_HEIGHT 2
-#define DEPTH_INPUT_WIDTH 3
-#define HEIGHT_MAP_CENTER_X 4
-#define HEIGHT_MAP_CENTER_Y 5
-#define MODE 6
-#define DEPTH_CX 7
-#define DEPTH_CY 8
-#define DEPTH_FX 9
-#define DEPTH_FY 10
-#define GLOBAL_CELL_SIZE 11
-#define GLOBAL_CENTER_INDEX 12
-#define ROBOT_COLLISION_RADIUS 13
-#define GRID_OFFSET_X 14
-#define HEIGHT_FILTER_ALPHA 15
-#define LOCAL_CELLS_PER_AXIS 16
-#define GLOBAL_CELLS_PER_AXIS 17
-#define HEIGHT_SCALING_FACTOR 18
-#define MIN_HEIGHT_REGISTRATION 19
-#define MAX_HEIGHT_REGISTRATION 20
-#define MIN_HEIGHT_DIFFERENCE 21
-#define MAX_HEIGHT_DIFFERENCE 22
-#define SEARCH_WINDOW_HEIGHT 23
-#define SEARCH_WINDOW_WIDTH 24
-#define CROPPED_WINDOW_CENTER_INDEX 25
-#define MIN_CLAMP_HEIGHT 26
-#define MAX_CLAMP_HEIGHT 27
-#define HEIGHT_OFFSET 28
-#define STEPPING_COSINE_THRESHOLD 29
-#define STEPPING_CONTACT_THRESHOLD 30
-#define CONTACT_WINDOW_SIZE 31
-#define SPATIAL_ALPHA 32
-#define FOOT_LENGTH 330
-#define FOOT_WIDTH 34
-#define MIN_DISTANCE_FROM_CLIFF_TOPS 35
-#define MIN_DISTANCE_FROM_CLIFF_BOTTOMS 36
-#define CLIFF_START_HEIGHT_TO_AVOID 37
-#define CLIFF_END_HEIGHT_TO_AVOID 38
-
-#define VERTICAL_FOV M_PI_2_F
-#define HORIZONTAL_FOV (2.0f * M_PI_F)
+#define HEIGHT_MAP_CENTER_X 0
+#define HEIGHT_MAP_CENTER_Y 1
+#define GLOBAL_CELL_SIZE 2
+#define GLOBAL_CENTER_INDEX 3
+#define CROPPED_WINDOW_CENTER_INDEX 4
+#define HEIGHT_SCALING_FACTOR 5
+#define HEIGHT_OFFSET 6
+#define FOOT_LENGTH 7
+#define FOOT_WIDTH 8
+#define MIN_DISTANCE_FROM_CLIFF_TOPS 9
+#define MIN_DISTANCE_FROM_CLIFF_BOTTOMS 10
+#define CLIFF_START_HEIGHT_TO_AVOID 11
+#define CLIFF_END_HEIGHT_TO_AVOID 12
 
 #define SNAP_FAILED 0
 #define CLIFF_TOP 1
@@ -338,6 +309,12 @@ void kernel computeSnappedValuesKernel(global float* params,
     }
 
     ///////////// Solve for the plane normal, as well as the height of the foot along that plane.
+    // FIXME for some reason all the points were bad
+    if (n < 0.0001f)
+    {
+        printf("We got no heights, %f, %f\n", z, n);
+        n = 1.0f;
+    }
     // This is the actual height of the snapped foot
     float snap_height = z / n;
 
@@ -420,7 +397,6 @@ void kernel computeSnappedValuesKernel(global float* params,
                 {
                     // we're too close to the cliff bottom!
                     snap_result = CLIFF_BOTTOM;
-                    snap_height = 0.0f;
                     failed = true;
                     break;
                 }
@@ -432,7 +408,6 @@ void kernel computeSnappedValuesKernel(global float* params,
                 {
                     // we're too close to the cliff top!
                     snap_result = CLIFF_TOP;
-                    snap_height = 0.0f;
                     failed = true;
                     break;
                 }
@@ -452,9 +427,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     // FIXME this hard inequality is causing some noise in the solution space. How could we reduce that?
     if (n < min_points_needed_for_support)
     {
-        //printf("Not enough support\n");
         snap_result = NOT_ENOUGH_AREA;
-        snap_height = 0.0f;
     }
 
     snap_height += params[HEIGHT_OFFSET];
