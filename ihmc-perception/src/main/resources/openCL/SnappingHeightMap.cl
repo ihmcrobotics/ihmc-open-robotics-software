@@ -309,10 +309,14 @@ void kernel computeSnappedValuesKernel(global float* params,
     }
 
     ///////////// Solve for the plane normal, as well as the height of the foot along that plane.
+    bool failed = false;
+    int snap_result = VALID;
+
     // FIXME for some reason all the points were bad
     if (n < 0.0001f)
     {
-        printf("We got no heights, %f, %f\n", z, n);
+        snap_result = SNAP_FAILED;
+        failed = true;
         n = 1.0f;
     }
     // This is the actual height of the snapped foot
@@ -344,13 +348,11 @@ void kernel computeSnappedValuesKernel(global float* params,
 
 
     //////////// Check to make sure we're not stepping too near a cliff base or top
-    int snap_result = VALID;
 
     float cliff_search_offset = max_dimension / 2.0f + max(params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS], params[MIN_DISTANCE_FROM_CLIFF_TOPS]);
     int cliff_offset_indices = (int) ceil(cliff_search_offset / map_resolution);
 
     // search for a cliff base that's too close
-    bool failed = false;
     for (int x_query = idx_x - cliff_offset_indices; x_query <= idx_x + cliff_offset_indices && !failed; x_query++)
     {
         // if we're outside of the search area in the x direction, skip to the end
