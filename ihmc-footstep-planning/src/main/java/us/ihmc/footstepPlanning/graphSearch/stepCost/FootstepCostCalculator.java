@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
+import org.apache.batik.ext.awt.geom.Polygon2D;
+import org.ojalgo.function.multiary.MultiaryFunction;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
@@ -7,6 +9,7 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
@@ -72,16 +75,41 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       this.environmentHandler = environmentHandler;
 
       /* Scale's by a factor of the foot length/width */
-      double polygonScaleFactor = 0.65;
+      double polygonScaleFactor = 0.25;
 
       for (RobotSide robotSide : RobotSide.values())
       {
          ConvexPolygon2D scaledFootPolygon = new ConvexPolygon2D(footPolygons.get(robotSide));
+
+         addVertexToFootPolygon(scaledFootPolygon);
          scaledFootPolygon.scale(1.0 + polygonScaleFactor);
          scaledFootPolygons.put(robotSide, scaledFootPolygon);
       }
 
       parentRegistry.addChild(registry);
+   }
+
+   public void addVertexToFootPolygon(ConvexPolygon2D scaledFootPolygon)
+   {
+      int numberOfVertices = scaledFootPolygon.getNumberOfVertices();
+
+      for (int i = 0; i + 1 < numberOfVertices; i++)
+      {
+         Point2DReadOnly start = scaledFootPolygon.getVertex(i);
+         Point2DReadOnly end = scaledFootPolygon.getVertex(i + 1);
+
+         Point2D firstPointToAdd = new Point2D();
+         firstPointToAdd.interpolate(start, end, 0.3);
+         firstPointToAdd.scale(1.02);
+         scaledFootPolygon.addVertex(firstPointToAdd);
+         scaledFootPolygon.update();
+
+         Point2D secondPointToAdd = new Point2D();
+         secondPointToAdd.interpolate(start, end, 0.3);
+         secondPointToAdd.scale(1.02);
+         scaledFootPolygon.addVertex(secondPointToAdd);
+         scaledFootPolygon.update();
+      }
    }
 
    @Override
@@ -203,7 +231,7 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       snappedStepTransform.getRotation().transform(bestFitPlane.getNormal());
 
       /* Compute cliff cost */
-      double cliffThreshold = 0.07;
+      double cliffThreshold = 0.025;
 
       for (int pointIdx = 0; pointIdx < scaledFootPolygon.getNumberOfVertices(); pointIdx++)
       {

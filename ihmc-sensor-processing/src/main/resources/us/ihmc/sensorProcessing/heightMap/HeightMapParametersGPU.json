@@ -2,12 +2,12 @@
   "title" : "GPU Height Map Parameters",
   "Reset Height Map" : false,
   "Search window height" : {
-    "value" : 309,
+    "value" : 345,
     "lowerBound" : 100,
     "upperBound" : 800
   },
   "Search window width" : {
-    "value" : 323,
+    "value" : 280,
     "lowerBound" : 100,
     "upperBound" : 800
   },
