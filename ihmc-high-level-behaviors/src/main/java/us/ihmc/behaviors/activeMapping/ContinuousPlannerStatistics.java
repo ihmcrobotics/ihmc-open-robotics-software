@@ -1,9 +1,18 @@
 package us.ihmc.behaviors.activeMapping;
 
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.logging.PerceptionDataLogger;
+import us.ihmc.perception.logging.PerceptionLoggerConstants;
+import us.ihmc.perception.tools.PerceptionLoggingTools;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
@@ -11,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -33,6 +43,13 @@ public class ContinuousPlannerStatistics
    private static final String LAST_FOOTSTEP_QUEUE_SIZE = "last_footstep_queue_size";
    private static final String LAST_CONTINUOUS_WALKING_TIME = "last_continuous_walking_time";
 
+   private boolean startedWalking = false;
+   private boolean inWaitingTime = false;
+   private long startWaitingTime;
+   private long startContinuousWalkingTime;
+
+   private final PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
+
    StringBuilder additionalString = new StringBuilder();
 
    public ContinuousPlannerStatistics()
@@ -41,6 +58,12 @@ public class ContinuousPlannerStatistics
       String logFileName = dateFormat.format(new Date()) + "_" + "ContinuousPlannerLog.txt";
       FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       String filePath = IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY.resolve(logFileName).toString();
+
+//      perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
+//      perceptionDataLogger.addLongChannel(PerceptionLoggerConstants.L515_SENSOR_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+//      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_POSITION, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+//      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+//      perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.L515_DEPTH_NAME);
 
       try
       {
@@ -80,13 +103,6 @@ public class ContinuousPlannerStatistics
       statistics.put(LAST_PLANNING_TIME, lastPlanningTime);
       statistics.put(TOTAL_PLANNING_TIME, statistics.get(TOTAL_PLANNING_TIME) + lastPlanningTime);
    }
-
-
-   private boolean startedWalking = false;
-   private boolean inWaitingTime = false;
-   private long startWaitingTime;
-   private long startContinuousWalkingTime;
-
 
    public void setStartWaitingTime()
    {
@@ -163,6 +179,17 @@ public class ContinuousPlannerStatistics
 
          additionalString.setLength(0);
       }
+   }
+
+   public void logHeightMap(Mat heightMap, RigidBodyTransform sensorToWorldTransform)
+   {
+      Instant acquisitionTime = Instant.now();
+      long timestamp = Conversions.secondsToNanoseconds(acquisitionTime.getEpochSecond()) + acquisitionTime.getNano();
+
+      perceptionDataLogger.storeLongs(PerceptionLoggerConstants.L515_SENSOR_TIME, timestamp);
+      perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_POSITION, new Point3D(sensorToWorldTransform.getTranslation()));
+      perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, new Quaternion(sensorToWorldTransform.getRotation()));
+      PerceptionLoggingTools.logHeightMap(perceptionDataLogger, heightMap, PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
    }
 
    public String toString()
