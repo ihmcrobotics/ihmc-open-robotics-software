@@ -318,11 +318,13 @@ public class ContinuousPlanner
          latestFootstepPlan = plannerOutput.getFootstepPlan();
          latestSwingTrajectories = plannerOutput.getSwingTrajectories();
 
-         LogTools.info(String.format("Plan Result: %s, Steps: %d, Result: %s, Initial Stance: %s",
-                                     footstepPlanningResult,
-                                     footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps(),
-                                     planAvailable,
-                                     imminentFootstepSide));
+         String message = String.format("Plan Result: %s, Steps: %d, Result: %s, Initial Stance: %s",
+                                        footstepPlanningResult,
+                                        footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps(),
+                                        planAvailable,
+                                        imminentFootstepSide);
+         LogTools.info(message);
+         statistics.appendString(message);
       }
 
       assert plannerOutput != null;

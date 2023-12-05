@@ -59,6 +59,7 @@ public class ContinuousPlannerSchedulingTask
 
    private final ContinuousPlanner continuousPlanner;
 
+   private String message = "";
    private int controllerQueueSize = 0;
    private List<QueuedFootstepStatusMessage> controllerQueue;
 
@@ -151,7 +152,9 @@ public class ContinuousPlannerSchedulingTask
       {
          state = ContinuousWalkingState.NOT_STARTED;
          continuousPlanner.setInitialized(false);
-         LogTools.error("Initialization failed... will retry initializing next tick");
+
+         LogTools.error(message = String.format("State: [%s]: Initialization failed... will retry initializing next tick", state));
+         continuousPlannerStatistics.appendString(message);
       }
    }
 
@@ -173,7 +176,8 @@ public class ContinuousPlannerSchedulingTask
          else
          {
             state = ContinuousWalkingState.WAITING_TO_LAND;
-            LogTools.error("Planning failed... will try again when current step is completed");
+            LogTools.error(message = String.format("State: [%s]: Planning failed... will try again when current step is completed", state));
+            continuousPlannerStatistics.appendString(message);
          }
       }
 
@@ -181,7 +185,7 @@ public class ContinuousPlannerSchedulingTask
       {
          LogTools.info("State: " + state);
          FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousWalkingParameters, controllerQueue);
-         LogTools.info("Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller");
+         LogTools.info(message = String.format("State: [%s]: Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller", state));
 
          if (continuousWalkingParameters.getStepPublisherEnabled())
          {
@@ -232,7 +236,9 @@ public class ContinuousPlannerSchedulingTask
 
       controllerQueue = footstepQueueStatusMessage.getQueuedFootstepList();
       if (controllerQueueSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
-         LogTools.warn("Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());
+      {
+         LogTools.warn(message = String.format("State: [%s]: Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size(), state));
+      }
       controllerQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
    }
 

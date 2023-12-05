@@ -33,6 +33,8 @@ public class ContinuousPlannerStatistics
    private static final String LAST_FOOTSTEP_QUEUE_SIZE = "last_footstep_queue_size";
    private static final String LAST_CONTINUOUS_WALKING_TIME = "last_continuous_walking_time";
 
+   StringBuilder additionalString = new StringBuilder();
+
    public ContinuousPlannerStatistics()
    {
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
@@ -158,6 +160,8 @@ public class ContinuousPlannerStatistics
             LogTools.info("Logging Continuous Walking Statistics: {}", file.getAbsoluteFile().toPath());
             FileTools.write(file.getAbsoluteFile().toPath(), toString().getBytes(), WriteOption.APPEND, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          }
+
+         additionalString.setLength(0);
       }
    }
 
@@ -170,6 +174,15 @@ public class ContinuousPlannerStatistics
          builder.append(key).append(":").append(statistics.get(key)).append(", ");
       }
       builder.append("]\n");
+      LogTools.warn("Additional String: {}", additionalString.toString());
+      builder.append(additionalString.toString()).append("\n");
       return builder.toString();
+   }
+
+   public void appendString(String string)
+   {
+      additionalString.append(String.format("[%s]: (", new SimpleDateFormat("HH:mm:ss.SSS").format(new Date())));
+      additionalString.append(string);
+      additionalString.append(")\n");
    }
 }
