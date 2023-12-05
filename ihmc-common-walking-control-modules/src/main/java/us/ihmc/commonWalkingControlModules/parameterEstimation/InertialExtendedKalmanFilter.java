@@ -5,13 +5,11 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.math.frames.YoMatrix;
@@ -22,6 +20,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class InertialExtendedKalmanFilter
@@ -49,14 +48,18 @@ public class InertialExtendedKalmanFilter
    /** What we do all the math in */
    private final DMatrixRMaj generalizedForcesContainer;
 
+   private final List<RigidBodyInertialParameters> inertialParameters = new ArrayList<>();
+   private final List<YoMatrix> inertialParametersPiBasisWatchers = new ArrayList<>();
+   private final List<YoMatrix> inertialParametersThetaBasisWatchers = new ArrayList<>();
+   private final DMatrixRMaj inertialParameterPiBasisContainer;
+   private final DMatrixRMaj inertialParameterThetaBasisContainer;
+
    // DEBUG variables
    private static final boolean DEBUG = true;
    private final DMatrixRMaj perfectRegressor;
    private final DMatrixRMaj perfectParameters;
 
    private final YoMatrix residual;
-
-
 
    public InertialExtendedKalmanFilter(HighLevelHumanoidControllerToolbox toolbox, YoRegistry parentRegistry)
    {
@@ -88,8 +91,7 @@ public class InertialExtendedKalmanFilter
       legJoints = new SideDependentList<>();
       compactContactJacobians = new SideDependentList<>();
       fullContactJacobians = new SideDependentList<>();
-      // NOTE: for the leg joints and compact jacobians, we use the actual robot model because it has the full model information, including all joint names. The
-      // estimate robot model does not
+      // NOTE: for the leg joints and compact jacobians, we use the actual robot model because it has the full model information, including all joint names
       for (RobotSide side : RobotSide.values)
       {
          legJoints.set(side, MultiBodySystemTools.createJointPath(actualRobotModel.getElevator(), actualRobotModel.getFoot(side)));
@@ -100,6 +102,24 @@ public class InertialExtendedKalmanFilter
       wholeSystemTorques = new DMatrixRMaj(totalNumberOfDoFs, 1);
 
       generalizedForcesContainer = new DMatrixRMaj(totalNumberOfDoFs, 1);
+
+      inertialParameterPiBasisContainer = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1);
+      inertialParameterThetaBasisContainer = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1);
+      for (RigidBodyBasics body : estimateRobotModel.getElevator().subtreeList())
+      {
+         if (body.getInertia() != null)
+         {
+            inertialParameters.add(new RigidBodyInertialParameters(body.getInertia()));
+
+            inertialParametersPiBasisWatchers.add(new YoMatrix(body.getName() + "_PiBasis", RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1, getRowNames(ParameterRepresentation.PI_BASIS), registry));
+            inertialParametersThetaBasisWatchers.add(new YoMatrix(body.getName() + "_ThetaBasis", RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1, getRowNames(ParameterRepresentation.THETA_BASIS), registry));
+
+            inertialParameters.get(inertialParameters.size() - 1).getParameterVectorPiBasis(inertialParameterPiBasisContainer);
+            inertialParametersPiBasisWatchers.get(inertialParametersPiBasisWatchers.size() - 1).set(inertialParameterPiBasisContainer);
+            inertialParameters.get(inertialParameters.size() - 1).getParameterVectorThetaBasis(inertialParameterThetaBasisContainer);
+            inertialParametersThetaBasisWatchers.get(inertialParametersThetaBasisWatchers.size() - 1).set(inertialParameterThetaBasisContainer);
+         }
+      }
 
       if (DEBUG)
       {
@@ -153,6 +173,8 @@ public class InertialExtendedKalmanFilter
             CommonOps_DDRM.multAdd(-1.0, perfectRegressor, perfectParameters, residualToPack);
             residual.set(residualToPack);
          }
+
+         updateWatchers();
       }
    }
 
@@ -185,6 +207,61 @@ public class InertialExtendedKalmanFilter
       {
          compactContactJacobians.get(side).compute();
          jointIndexHandler.compactBlockToFullBlock(legJoints.get(side), compactContactJacobians.get(side).getJacobianMatrix(), fullContactJacobians.get(side));
+      }
+   }
+
+   private void updateWatchers()
+   {
+      for (int i = 0; i < inertialParameters.size(); i++)
+      {
+         inertialParameters.get(i).getParameterVectorPiBasis(inertialParameterPiBasisContainer);
+         inertialParametersPiBasisWatchers.get(i).set(inertialParameterPiBasisContainer);
+
+         inertialParameters.get(i).getParameterVectorThetaBasis(inertialParameterThetaBasisContainer);
+         inertialParametersThetaBasisWatchers.get(i).set(inertialParameterThetaBasisContainer);
+      }
+   }
+
+   private enum ParameterRepresentation
+   {
+      PI_BASIS, THETA_BASIS
+   }
+
+   private String[] getRowNames(ParameterRepresentation representation)
+   {
+      String[] rowNames = new String[RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
+      switch (representation)
+      {
+      case PI_BASIS:
+      {
+         rowNames[0] = "m";
+         rowNames[1] = "comX";
+         rowNames[2] = "comY";
+         rowNames[3] = "comZ";
+         rowNames[4] = "Ixx";
+         rowNames[5] = "Ixy";
+         rowNames[6] = "Iyy";
+         rowNames[7] = "Ixz";
+         rowNames[8] = "Iyz";
+         rowNames[9] = "Izz";
+         return rowNames;
+      }
+      case THETA_BASIS:
+      {
+         rowNames[0] = "alpha";
+         rowNames[1] = "dx";
+         rowNames[2] = "dy";
+         rowNames[3] = "dz";
+         rowNames[4] = "sxy";
+         rowNames[5] = "sxz";
+         rowNames[6] = "syz";
+         rowNames[7] = "tx";
+         rowNames[8] = "ty";
+         rowNames[9] = "tz";
+         return rowNames;
+      }
+      default:
+         throw new RuntimeException("Unhandled case: " + representation);
       }
    }
 }
