@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
@@ -104,7 +105,23 @@ public class InertialExtendedKalmanFilter
       {
          perfectRegressor = new DMatrixRMaj(jointTorqueRegressorCalculator.getJointTorqueRegressorMatrix());
          perfectParameters = new DMatrixRMaj(jointTorqueRegressorCalculator.getParameterVector());
-         residual = new YoMatrix("residual", totalNumberOfDoFs, 1, registry);
+
+         String[] rowNames = new String[totalNumberOfDoFs];
+         int index = 0;
+         for (JointReadOnly joint : actualModelJoints)
+         {
+            if (joint.getDegreesOfFreedom() > 1)
+            {
+               for (int i = 0; i < joint.getDegreesOfFreedom(); i++)
+                  rowNames[index + i] = joint.getName() + "_" + i;
+            }
+            else
+            {
+               rowNames[index] = joint.getName();
+            }
+            index += joint.getDegreesOfFreedom();
+         }
+         residual = new YoMatrix("residual", totalNumberOfDoFs, 1, rowNames, registry);
       }
    }
 
