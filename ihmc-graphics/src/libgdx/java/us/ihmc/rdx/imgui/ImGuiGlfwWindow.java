@@ -194,7 +194,7 @@ public class ImGuiGlfwWindow
       glfwWindowForImGui.setVSyncEnabled(enableVsync);
    }
 
-   public ImGuiPanelManager getPanelManager()
+   public RDXPanelManager getPanelManager()
    {
       return imGuiWindowAndDockSystem.getPanelManager();
    }

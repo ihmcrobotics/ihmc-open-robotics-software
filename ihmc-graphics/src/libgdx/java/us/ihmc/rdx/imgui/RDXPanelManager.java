@@ -7,11 +7,16 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ImGuiPanelManager
+public class RDXPanelManager
 {
    private final TreeSet<RDXPanel> panels = new TreeSet<>(Comparator.comparing(RDXPanel::getPanelName));
    private final ConcurrentLinkedQueue<RDXPanel> removalQueue = new ConcurrentLinkedQueue<>();
    private final ConcurrentLinkedQueue<RDXPanel> addQueue = new ConcurrentLinkedQueue<>();
+
+   public Collection<RDXPanel> getPanels()
+   {
+      return panels;
+   }
 
    public void addPanel(RDXPanel panel)
    {
