@@ -5,8 +5,11 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +39,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       super.update();
 
       actionIndex.setValue(0);
+      actionChildren.clear();
       updateActionSubtree(this, actionIndex);
    }
 
@@ -77,6 +81,27 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       executionNextIndex.fromMessage(message.getExecutionNextIndex());
       manualExecutionRequested.fromMessage(message.getManualExecutionRequested());
       nextActionRejectionTooltip.fromMessage(message.getNextActionRejectionTooltipAsString());
+   }
+
+   @Nullable
+   public <T extends ActionNodeState<?>> T findNextPreviousAction(Class<T> actionClass, int queryIndex, @Nullable RobotSide side)
+   {
+      T previousAction = null;
+      for (int i = queryIndex - 1; i >= 0 && previousAction == null; i--)
+      {
+         ActionNodeState<?> action = actionChildren.get(i);
+         if (actionClass.isInstance(action))
+         {
+            boolean match = side == null;
+            match |= action.getDefinition() instanceof SidedObject sidedAction && sidedAction.getSide() == side;
+
+            if (match)
+            {
+               previousAction = actionClass.cast(action);
+            }
+         }
+      }
+      return previousAction;
    }
 
    public void stepBackNextExecutionIndex()
