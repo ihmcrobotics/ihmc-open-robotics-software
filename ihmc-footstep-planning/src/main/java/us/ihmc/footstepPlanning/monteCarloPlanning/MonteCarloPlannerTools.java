@@ -311,7 +311,7 @@ public class MonteCarloPlannerTools
    public static FootstepPlan getFootstepPlanFromTree(MonteCarloFootstepNode root, MonteCarloFootstepPlannerRequest request)
    {
       List<MonteCarloTreeNode> path = new ArrayList<>();
-      MonteCarloPlannerTools.getOptimalPath(root, path);
+      MonteCarloPlannerTools.getOptimalPathByVisits(root, path);
 
       int offsetX = (int) (request.getSensorOrigin().getX() * 50);
       int offsetY = (int) (request.getSensorOrigin().getY() * 50);
