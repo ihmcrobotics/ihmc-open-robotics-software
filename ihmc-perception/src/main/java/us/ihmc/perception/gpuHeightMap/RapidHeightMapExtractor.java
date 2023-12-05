@@ -58,6 +58,7 @@ public class RapidHeightMapExtractor
 //   private HeightMapAutoencoder denoiser;
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
+   private OpenCLFloatParameters snappingParametersBuffer;
    private OpenCLFloatBuffer worldToGroundTransformBuffer;
    private OpenCLFloatBuffer groundToWorldTransformBuffer;
    private OpenCLFloatBuffer groundToSensorTransformBuffer;
@@ -123,6 +124,7 @@ public class RapidHeightMapExtractor
                                      heightMapParameters.getCropWindowSize());
 
       parametersBuffer = new OpenCLFloatParameters();
+      snappingParametersBuffer = new OpenCLFloatParameters();
       groundToSensorTransformBuffer = new OpenCLFloatBuffer(16);
       sensorToGroundTransformBuffer = new OpenCLFloatBuffer(16);
       worldToGroundTransformBuffer = new OpenCLFloatBuffer(16);
@@ -297,14 +299,24 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) parameters.getSteppingContactThreshold());
       parametersBuffer.setParameter((float) parameters.getContactWindowSize());
       parametersBuffer.setParameter((float) parameters.getSpatialAlpha());
-      parametersBuffer.setParameter((float) footSize);
-      parametersBuffer.setParameter((float) footSize);
-      parametersBuffer.setParameter((float) distanceFromCliffTops);
-      parametersBuffer.setParameter((float) distanceFromCliffBottoms);
-      parametersBuffer.setParameter((float) cliffStartHeightToAvoid);
-      parametersBuffer.setParameter((float) cliffEndHeightToAvoid);
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
+
+      snappingParametersBuffer.setParameter((float) gridCenter.getX());
+      snappingParametersBuffer.setParameter((float) gridCenter.getY());
+      snappingParametersBuffer.setParameter((float) parameters.getGlobalCellSizeInMeters());
+      snappingParametersBuffer.setParameter(globalCenterIndex);
+      snappingParametersBuffer.setParameter((float) heightMapParameters.getCropWindowSize() / 2);
+      snappingParametersBuffer.setParameter((float) parameters.getHeightScaleFactor());
+      snappingParametersBuffer.setParameter((float) parameters.getHeightOffset());
+      snappingParametersBuffer.setParameter((float) footSize);
+      snappingParametersBuffer.setParameter((float) footSize);
+      snappingParametersBuffer.setParameter((float) distanceFromCliffTops);
+      snappingParametersBuffer.setParameter((float) distanceFromCliffBottoms);
+      snappingParametersBuffer.setParameter((float) cliffStartHeightToAvoid);
+      snappingParametersBuffer.setParameter((float) cliffEndHeightToAvoid);
+
+      snappingParametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
    public void computeContactMap()
@@ -329,7 +341,7 @@ public class RapidHeightMapExtractor
       yaw.setParameter(0.0f); // we're only doing a single discretization, and then assuming the foot is a big rectangle
       yaw.writeOpenCLBufferObject(openCLManager);
 
-      openCLManager.setKernelArgument(computeSnappedValuesKernel, 0, parametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeSnappedValuesKernel, 0, snappingParametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 1, globalHeightMapImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 2, yaw.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 3, steppabilityImage.getOpenCLImageObject());
