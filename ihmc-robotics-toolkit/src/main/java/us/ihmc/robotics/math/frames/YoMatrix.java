@@ -49,7 +49,7 @@ public class YoMatrix
     */
    public YoMatrix(String name, int maxNumberOfRows, int maxNumberOfColumns, String[] rowNames, YoRegistry registry)
    {
-      this(name, maxNumberOfRows, maxNumberOfColumns, rowNames, new String[maxNumberOfColumns], registry);
+      this(name, maxNumberOfRows, maxNumberOfColumns, rowNames, null, registry);
 
       if (maxNumberOfColumns > 1)
          throw new IllegalArgumentException("The YoMatrix must be a column vector if only row names are provided, else unique names cannot be generated.");
