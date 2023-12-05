@@ -12,8 +12,9 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.avatar.colorVision.DualBlackflyReader;
+import us.ihmc.avatar.colorVision.DualBlackflyUDPReceiver;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.ImageDimensions;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -24,7 +25,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXDualBlackflySphericalProjectionDemo
 {
@@ -34,7 +34,8 @@ public class RDXDualBlackflySphericalProjectionDemo
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RigidBodyTransform leftEyePose = new RigidBodyTransform();
 
-   private final DualBlackflyReader dualBlackflyReader = new DualBlackflyReader();
+//   private final DualBlackflyReader dualBlackflyReader = new DualBlackflyReader();
+   private final DualBlackflyUDPReceiver dualBlackflyUDPReceiver = new DualBlackflyUDPReceiver();
 
    public RDXDualBlackflySphericalProjectionDemo()
    {
@@ -45,7 +46,8 @@ public class RDXDualBlackflySphericalProjectionDemo
          {
             try
             {
-               dualBlackflyReader.start();
+//               dualBlackflyReader.start();
+               dualBlackflyUDPReceiver.start();
             }
             catch (Exception e)
             {
@@ -91,14 +93,17 @@ public class RDXDualBlackflySphericalProjectionDemo
          {
             for (RobotSide side : RobotSide.values)
             {
-               DualBlackflyReader.SpinnakerBlackflyReaderThread readerThread = dualBlackflyReader.getSpinnakerBlackflyReaderThreads().get(side);
+//               DualBlackflyReader.SpinnakerBlackflyReaderThread readerThread = dualBlackflyReader.getSpinnakerBlackflyReaderThreads().get(side);
+               byte[] imageBuffer = dualBlackflyUDPReceiver.getImageBuffers().get(side);
 
-               AtomicReference<BytePointer> latestImage = readerThread.getLatestImageDataPointer();
-               if (latestImage.get() != null)
+//               AtomicReference<BytePointer> latestImage = readerThread.getLatestImageDataPointer();
+               if (imageBuffer != null)
                {
-                  BytePointer latestImageData = latestImage.get();
+                  ImageDimensions imageDimensions = dualBlackflyUDPReceiver.getImageDimensions().get(side);
 
-                  Mat mat = new Mat(readerThread.getHeight(), readerThread.getWidth(), opencv_core.CV_8UC1);
+                  BytePointer latestImageData = new BytePointer(imageBuffer);
+
+                  Mat mat = new Mat(imageDimensions.getImageHeight(), imageDimensions.getImageWidth(), opencv_core.CV_8UC1);
                   mat.data(latestImageData);
 
                   Pixmap pixmap = new Pixmap(mat.cols(), mat.rows(), Pixmap.Format.RGBA8888);
@@ -112,6 +117,7 @@ public class RDXDualBlackflySphericalProjectionDemo
                   rgba8Mat.close();
                   pixmap.dispose();
                   mat.close();
+                  latestImageData.close();
                }
             }
 
@@ -125,7 +131,8 @@ public class RDXDualBlackflySphericalProjectionDemo
          @Override
          public void dispose()
          {
-            dualBlackflyReader.stop();
+//            dualBlackflyReader.stop();
+            dualBlackflyUDPReceiver.stop();
             baseUI.dispose();
          }
       });

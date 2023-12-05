@@ -5,6 +5,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.ImageDimensions;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 import java.io.IOException;
 import java.net.*;
@@ -24,11 +25,11 @@ public class DualBlackflyUDPReceiver
    {
       running = true;
 
-      for (RobotSide side : RobotSide.values())
+      for (RobotSide side : RobotSide.values)
       {
          Thread receiveThread = new Thread(() ->
          {
-            SocketAddress socketAddress = new InetSocketAddress(side == RobotSide.LEFT ? "127.0.0.1" : "127.0.0.1",
+            SocketAddress socketAddress = new InetSocketAddress(side == RobotSide.LEFT ? "192.1.0.1" : "192.1.0.1",
                                                                 side == RobotSide.LEFT ?
                                                                       DualBlackflyUDPSender.LEFT_UDP_PORT :
                                                                       DualBlackflyUDPSender.RIGHT_UDP_PORT);
@@ -37,6 +38,7 @@ public class DualBlackflyUDPReceiver
             try
             {
                socket = new DatagramSocket(socketAddress);
+//               socket.setReceiveBufferSize(socket.getReceiveBufferSize() * 16);
             }
             catch (SocketException e)
             {
@@ -48,6 +50,8 @@ public class DualBlackflyUDPReceiver
 
             byte[] buffer = new byte[(int) ((Math.pow(2, 16)) - 1)];
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+
+            FrequencyStatisticPrinter frequencyStatisticPrinter = new FrequencyStatisticPrinter();
 
             while (running)
             {
@@ -88,6 +92,8 @@ public class DualBlackflyUDPReceiver
                {
                   imageBuffer[fragmentDataOffset + i] = datagramBuffer.get(fragmentHeaderLength + i);
                }
+
+               frequencyStatisticPrinter.ping();
             }
 
             socket.disconnect();
