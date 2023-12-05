@@ -12,6 +12,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
+import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -33,7 +34,11 @@ public class InertialExtendedKalmanFilter
    private final FullHumanoidRobotModel estimateRobotModel;
    private final List<? extends JointBasics> estimateModelJoints;
 
+   private final int totalNumberOfDoFs;
+
    private final JointTorqueRegressorCalculator jointTorqueRegressorCalculator;
+   private final DMatrixRMaj regressor;
+   private final DMatrixRMaj regressorBlockContainer;
 
    private final SideDependentList<? extends FootSwitchInterface> footSwitches;
    private final SideDependentList<DMatrixRMaj> contactWrenches;
@@ -56,8 +61,6 @@ public class InertialExtendedKalmanFilter
 
    // DEBUG variables
    private static final boolean DEBUG = true;
-   private final DMatrixRMaj perfectRegressor;
-   private final DMatrixRMaj perfectParameters;
 
    private final YoMatrix residual;
 
@@ -78,10 +81,12 @@ public class InertialExtendedKalmanFilter
       estimateRobotModel = new FullHumanoidRobotModelWrapper(clonedElevator, true);
       estimateModelJoints = estimateRobotModel.getRootJoint().subtreeList();
 
-      int totalNumberOfDoFs = actualRobotModel.getRootJoint().getDegreesOfFreedom() + actualRobotModel.getOneDoFJoints().length;
+      totalNumberOfDoFs = actualRobotModel.getRootJoint().getDegreesOfFreedom() + actualRobotModel.getOneDoFJoints().length;
 
       jointTorqueRegressorCalculator = new JointTorqueRegressorCalculator(estimateRobotModel.getElevator());
       jointTorqueRegressorCalculator.setGravitationalAcceleration(-toolbox.getGravityZ());
+      regressor = new DMatrixRMaj(totalNumberOfDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY * estimateRobotModel.getRootBody().subtreeArray().length);
+      regressorBlockContainer = new DMatrixRMaj(totalNumberOfDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
 
       this.footSwitches = toolbox.getFootSwitches();
       contactWrenches = new SideDependentList<>(new DMatrixRMaj(6 ,1),
@@ -123,9 +128,6 @@ public class InertialExtendedKalmanFilter
 
       if (DEBUG)
       {
-         perfectRegressor = new DMatrixRMaj(jointTorqueRegressorCalculator.getJointTorqueRegressorMatrix());
-         perfectParameters = new DMatrixRMaj(jointTorqueRegressorCalculator.getParameterVector());
-
          String[] rowNames = new String[totalNumberOfDoFs];
          int index = 0;
          for (JointReadOnly joint : actualModelJoints)
@@ -164,13 +166,19 @@ public class InertialExtendedKalmanFilter
          for (RobotSide side : RobotSide.values)
             CommonOps_DDRM.multAddTransA(fullContactJacobians.get(side), contactWrenches.get(side), generalizedForcesContainer);
 
+         regressor.set(jointTorqueRegressorCalculator.getJointTorqueRegressorMatrix());
 
          if(DEBUG)
          {
             DMatrixRMaj residualToPack = new DMatrixRMaj(generalizedForcesContainer);
 
-            perfectRegressor.set(jointTorqueRegressorCalculator.getJointTorqueRegressorMatrix());
-            CommonOps_DDRM.multAdd(-1.0, perfectRegressor, perfectParameters, residualToPack);
+            // Iterate over each rigid body and subtract the contribution of its inertial parameters
+            for (int i = 0; i < inertialParameters.size(); ++i)
+            {
+               inertialParameters.get(i).getParameterVectorPiBasis(inertialParameterPiBasisContainer);
+               MatrixMissingTools.setMatrixBlock(regressorBlockContainer, 0, 0, regressor, 0, i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, totalNumberOfDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1.0);
+               CommonOps_DDRM.multAdd(-1.0, regressorBlockContainer, inertialParameterPiBasisContainer, residualToPack);
+            }
             residual.set(residualToPack);
          }
 
