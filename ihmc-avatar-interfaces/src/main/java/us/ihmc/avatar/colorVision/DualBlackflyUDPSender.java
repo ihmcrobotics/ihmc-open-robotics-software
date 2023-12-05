@@ -18,8 +18,8 @@ public class DualBlackflyUDPSender
 {
    private static final String LEFT_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
    private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
-   private static final String LEFT_DESTINATION_IP_ADDRESS = System.getProperty("blackfly.left.udp.dest.address", "127.0.0.1");
-   private static final String RIGHT_DESTINATION_IP_ADDRESS = System.getProperty("blackfly.right.udp.dest.address", "127.0.0.1");
+   private static final String LEFT_DESTINATION_IP_ADDRESS = System.getProperty("blackfly.left.udp.dest.address", "192.1.0.1");
+   private static final String RIGHT_DESTINATION_IP_ADDRESS = System.getProperty("blackfly.right.udp.dest.address", "192.1.0.1");
    public static final int LEFT_UDP_PORT = 9200;
    public static final int RIGHT_UDP_PORT = 9201;
    public static final int IPV4_HEADER_LENGTH = 28;
@@ -45,6 +45,7 @@ public class DualBlackflyUDPSender
             try
             {
                socket = new DatagramSocket();
+//               socket.setSendBufferSize(socket.getSendBufferSize() * 16);
             }
             catch (SocketException e)
             {
