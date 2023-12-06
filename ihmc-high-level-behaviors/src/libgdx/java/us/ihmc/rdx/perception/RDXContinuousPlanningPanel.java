@@ -9,6 +9,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -19,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
@@ -52,11 +54,19 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
 
    private final ROS2Helper ros2Helper;
    private HumanoidActivePerceptionModule activePerceptionModule;
+   private SwingPlannerParametersBasics swingPlannerParameters;
+   private SwingTrajectoryParameters swingTrajectoryParameters;
 
-   public RDXContinuousPlanningPanel(ROS2Helper ros2Helper, HumanoidActivePerceptionModule activePerceptionModule, ROS2SyncedRobotModel syncedRobot)
+   public RDXContinuousPlanningPanel(ROS2Helper ros2Helper,
+                                     HumanoidActivePerceptionModule activePerceptionModule,
+                                     ROS2SyncedRobotModel syncedRobot,
+                                     SwingPlannerParametersBasics swingPlannerParameters,
+                                     SwingTrajectoryParameters swingTrajectoryParameters)
    {
       this.ros2Helper = ros2Helper;
       this.activePerceptionModule = activePerceptionModule;
+      this.swingPlannerParameters = swingPlannerParameters;
+      this.swingTrajectoryParameters = swingTrajectoryParameters;
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = syncedRobot.getRobotModel()
                                                                                      .getContactPointParameters()
@@ -110,17 +120,19 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
       if (footstepDataListMessage.get() != null)
       {
          generateFootstepPlanGraphic(footstepDataListMessage.get());
-         //if (activePerceptionModule != null)
-         //{
-         //   generateSwingGraphics(activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestFootstepPlan(),
-         //                         activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestSwingTrajectories());
-         //}
-         //else
+//         if (activePerceptionModule != null)
+//         {
+//            generateSwingGraphics(activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestFootstepPlan(),
+//                                  activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestSwingTrajectories());
+//         }
+//         else
          {
             FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage.get());
 
             // FIXME: This method is supposed to compute the polynomials from the waypoints. Currently the polynomials are zero for some reason.
-            List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = SwingPlannerTools.computeTrajectories(positionTrajectoryGenerator,
+            List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = SwingPlannerTools.computeTrajectories(swingPlannerParameters,
+                                                                                                                      swingTrajectoryParameters,
+                                                                                                                      positionTrajectoryGenerator,
                                                                                                                       startStancePose,
                                                                                                                       plan);
             generateSwingGraphics(plan, swingTrajectories);

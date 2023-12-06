@@ -258,11 +258,14 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
          double proportion1 = footstepDataMessage.getCustomWaypointProportions().get(1);
          plannedFootstep.setCustomWaypointProportions(proportion0, proportion1);
       }
-      if (footstepDataMessage.getCustomPositionWaypoints().size() == 2)
+      if (footstepDataMessage.getCustomPositionWaypoints().size() >= 2)
       {
-         Point3D waypoint0 = footstepDataMessage.getCustomPositionWaypoints().get(0);
-         Point3D waypoint1 = footstepDataMessage.getCustomPositionWaypoints().get(1);
-         plannedFootstep.setCustomWaypointPositions(waypoint0, waypoint1);
+         plannedFootstep.getCustomWaypointPositions().clear();
+         for (int i = 0; i < footstepDataMessage.getCustomPositionWaypoints().size(); i++)
+         {
+            Point3D waypoint = footstepDataMessage.getCustomPositionWaypoints().get(i);
+            plannedFootstep.getCustomWaypointPositions().add(waypoint);
+         }
       }
       for (int i = 0; i < footstepDataMessage.getSwingTrajectory().size(); i++)
       {

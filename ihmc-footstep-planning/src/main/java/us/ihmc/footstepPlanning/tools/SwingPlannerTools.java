@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.tools;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -14,6 +15,8 @@ import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.swing.SwingKnotPoint;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
@@ -26,7 +29,12 @@ import java.util.stream.Collectors;
 
 public class SwingPlannerTools
 {
-   public static List<EnumMap<Axis3D, List<PolynomialReadOnly>>> computeTrajectories(PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator,
+   private static Vector3D infiniteWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+   private static FrameVector3D zeroVector = new FrameVector3D();
+
+   public static List<EnumMap<Axis3D, List<PolynomialReadOnly>>> computeTrajectories(SwingPlannerParametersBasics swingPlannerParameters,
+                                                                                     SwingTrajectoryParameters swingTrajectoryParameters,
+                                                                                     PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator,
                                                                                      SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses,
                                                                                      FootstepPlan footstepPlan)
    {
@@ -42,7 +50,8 @@ public class SwingPlannerTools
          startOfSwingPose.set((i < 2 ? initialStanceFootPoses.get(footstep.getRobotSide()) : footstepPlan.getFootstep(i - 2).getFootstepPose()));
          endOfSwingPose.set(footstep.getFootstepPose());
 
-         EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory = computeTrajectory(positionTrajectoryGenerator,
+         EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory = computeTrajectory(swingPlannerParameters, swingTrajectoryParameters,
+                                                                                       positionTrajectoryGenerator,
                                                                                        startOfSwingPose,
                                                                                        endOfSwingPose,
                                                                                        footstepPlan.getFootstep(i));
@@ -52,13 +61,56 @@ public class SwingPlannerTools
       return swingTrajectories;
    }
 
-   public static EnumMap<Axis3D, List<PolynomialReadOnly>> computeTrajectory(PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator,
+   public static EnumMap<Axis3D, List<PolynomialReadOnly>> computeTrajectory(SwingPlannerParametersBasics swingPlannerParameters,
+                                                                             SwingTrajectoryParameters swingTrajectoryParameters,
+                                                                             PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator,
                                                                              FramePose3D startOfSwingPose,
                                                                              FramePose3D endOfSwingPose,
                                                                              PlannedFootstep footstep)
    {
       double downSamplePercentage = 0.3;
+      List<FramePoint3D> defaultWaypoints = new ArrayList<>();
 
+      /*
+      * Initialization for trajectory optimization
+//      * */
+//      double[] defaultWaypointProportions = new double[] {0.15, 0.85};
+//      double defaultSwingHeightFromStanceFoot = swingTrajectoryParameters.getDefaultSwingHeight();
+//
+//      for (int i = 0; i < 2; i++)
+//      {
+//         FramePoint3D waypoint = new FramePoint3D();
+//         waypoint.interpolate(startOfSwingPose.getPosition(), endOfSwingPose.getPosition(), defaultWaypointProportions[i]);
+//         waypoint.addZ(defaultSwingHeightFromStanceFoot);
+//         defaultWaypoints.add(waypoint);
+//      }
+//
+//      double zDifference = Math.abs(startOfSwingPose.getZ() - endOfSwingPose.getZ());
+//      boolean obstacleClearance = zDifference > swingTrajectoryParameters.getMinHeightDifferenceForStepUpOrDown();
+//      if (obstacleClearance)
+//      {
+//         double maxStepZ = Math.max(startOfSwingPose.getZ(), endOfSwingPose.getZ());
+//         for (int i = 0; i < 2; i++)
+//         {
+//            defaultWaypoints.get(i).setZ(maxStepZ + defaultSwingHeightFromStanceFoot);
+//         }
+//      }
+//
+//      positionTrajectoryGenerator.setEndpointConditions(startOfSwingPose.getPosition(), zeroVector, endOfSwingPose.getPosition(), zeroVector);
+//      positionTrajectoryGenerator.setEndpointWeights(infiniteWeight, infiniteWeight, infiniteWeight, infiniteWeight);
+//      positionTrajectoryGenerator.setWaypoints(defaultWaypoints);
+//      positionTrajectoryGenerator.initialize();
+//
+//      for (int i = 0; i < 30; i++)
+//      {
+//         boolean isDone = positionTrajectoryGenerator.doOptimizationUpdate();
+//         if (isDone)
+//            break;
+//      }
+
+      LogTools.warn("Computing Swing Trajectory: {}", footstep.getCustomWaypointPositions().size());
+
+      /* Initialization complete */
       FrameVector3D zeroVector = new FrameVector3D();
       Vector3D infiniteWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
@@ -67,6 +119,7 @@ public class SwingPlannerTools
       for (int i = 0; i < footstep.getCustomWaypointPositions().size(); i++)
       {
          modifiedWaypoints.add(new FramePoint3D(ReferenceFrame.getWorldFrame(), footstep.getCustomWaypointPositions().get(i)));
+         LogTools.warn("Modified waypoint: " + modifiedWaypoints.get(i));
       }
 
       /* Recompute and visualize modified trajectory */

@@ -9,8 +9,10 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
@@ -59,12 +61,12 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    private RDXBytedecoImagePanel depthImagePanel;
 
    /* Image panel to display the terrain cost map (16-bit scalar metric for steppability cost per cell,
-   *  computed based on terrain inclination and continuity) */
+    *  computed based on terrain inclination and continuity) */
    private RDXBytedecoImagePanel terrainCostImagePanel;
 
    /* Image panel to display the feasible contact map (16-bit scalar for distance transform of the terrain cost map, represents safety score
-   *  for distance away from boundaries and edges for each cell). For more information on Distance Transform visit:
-   *  https://en.wikipedia.org/wiki/Distance_transform */
+    *  for distance away from boundaries and edges for each cell). For more information on Distance Transform visit:
+    *  https://en.wikipedia.org/wiki/Distance_transform */
    private RDXBytedecoImagePanel contactMapImagePanel;
 
    private final ImBoolean rapidRegionsCollapsedHeader = new ImBoolean(true);
@@ -92,14 +94,18 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       }
    }
 
-   public void setupForActiveMapping(HumanoidActivePerceptionModule activePerceptionModule, ROS2SyncedRobotModel syncedRobot, ROS2Helper ros2Helper)
+   public void setupForActiveMapping(HumanoidActivePerceptionModule activePerceptionModule,
+                                     ROS2SyncedRobotModel syncedRobot,
+                                     ROS2Helper ros2Helper,
+                                     SwingPlannerParametersBasics swingPlannerParameters,
+                                     SwingTrajectoryParameters swingTrajectoryParameters)
    {
       if (activePerceptionModule != null)
       {
          this.activePerceptionModule = activePerceptionModule;
       }
 
-      this.continuousPlanningUI = new RDXContinuousPlanningPanel(ros2Helper, activePerceptionModule, syncedRobot);
+      this.continuousPlanningUI = new RDXContinuousPlanningPanel(ros2Helper, activePerceptionModule, syncedRobot, swingPlannerParameters, swingTrajectoryParameters);
    }
 
    public void initializeRapidRegionsUI()
@@ -111,8 +117,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    public void initializeMapRegionsVisualizer(ROS2Node ros2Node)
    {
       RDXROS2PlanarRegionsVisualizer mapRegionsVisualizer = new RDXROS2PlanarRegionsVisualizer("SLAM Rapid Regions",
-                                                                                                    ros2Node,
-                                                                                                    PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS);
+                                                                                               ros2Node,
+                                                                                               PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS);
       mapRegionsVisualizer.setActive(true);
       mapRegionsVisualizer.create();
       visualizers.put("MapRegions", mapRegionsVisualizer);
@@ -248,32 +254,30 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
             if (ImGui.button("Print Local Height Map"))
             {
                PerceptionDebugTools.printMat("Local Height Map",
-                                             humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat(),4);
+                                             humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat(),
+                                             4);
             }
             if (ImGui.button("Print Cropped Height Map"))
             {
-               PerceptionDebugTools.printMat("Cropped Height Map",
-                                             humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage(),4);
+               PerceptionDebugTools.printMat("Cropped Height Map", humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage(), 4);
             }
             if (ImGui.button("Print Sensor Cropped Height Map"))
             {
-               PerceptionDebugTools.printMat("Sensor Cropped Height Map",
-                                             humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage(),4);
+               PerceptionDebugTools.printMat("Sensor Cropped Height Map", humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage(), 4);
             }
             if (ImGui.button("Print Internal Height Map"))
             {
                PerceptionDebugTools.printMat("Internal Height Map",
-                                             humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat(),32);
+                                             humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat(),
+                                             32);
             }
             if (ImGui.button("Print Terrain Cost Image"))
             {
-               PerceptionDebugTools.printMat("Terrain Cost Image",
-                                             humanoidPerception.getRapidHeightMapExtractor().getCroppedTerrainCostImage(),4);
+               PerceptionDebugTools.printMat("Terrain Cost Image", humanoidPerception.getRapidHeightMapExtractor().getCroppedTerrainCostImage(), 4);
             }
             if (ImGui.button("Print Contact Map Image"))
             {
-               PerceptionDebugTools.printMat("Contact Map Image",
-                                             humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage(),4);
+               PerceptionDebugTools.printMat("Contact Map Image", humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage(), 4);
             }
          }
 
@@ -291,7 +295,6 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          }
          ImGui.unindent();
       }
-
    }
 
    public void destroy()

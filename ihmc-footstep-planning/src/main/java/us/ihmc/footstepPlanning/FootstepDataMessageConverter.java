@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -49,10 +50,15 @@ public class FootstepDataMessageConverter
 
       for (FootstepDataMessage footstepMessage : footstepDataListMessage.getFootstepDataList())
       {
-         footstepPlan.addFootstep(PlannedFootstep.getFromMessage(footstepMessage));
+         PlannedFootstep plannedFootstep = PlannedFootstep.getFromMessage(footstepMessage);
+         footstepPlan.addFootstep(plannedFootstep);
+         LogTools.warn("Custom Waypoints: Before: [{}], After: [{}]", footstepMessage.getCustomPositionWaypoints().size(),
+                       plannedFootstep.getCustomWaypointPositions().size());
       }
 
+
       return footstepPlan;
+
    }
 
    public static ArrayList<Pair<RobotSide, Pose3D>> reduceFootstepPlanForUIMessager(FootstepDataListMessage footstepDataListMessage)
