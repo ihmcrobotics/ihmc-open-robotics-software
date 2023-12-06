@@ -41,7 +41,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private transient final ImVec2 descriptionTextSize = new ImVec2();
    private transient final ImBoolean isJSONFileRoot = new ImBoolean();
    private final String nodePopupID = labels.get("Node popup");
-   private final String modalPopupID = labels.get("Create Node");
+   private String modalPopupID = labels.get("Create node");
    private boolean nodeContextMenuShowing = false;
 
    /** For extending types. */
@@ -227,6 +227,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public String getNodePopupID()
    {
       return nodePopupID;
+   }
+
+   public void setModalPopupTitle(String modalPopupTitle)
+   {
+      modalPopupID = labels.get(modalPopupTitle);
    }
 
    public String getModalPopupID()

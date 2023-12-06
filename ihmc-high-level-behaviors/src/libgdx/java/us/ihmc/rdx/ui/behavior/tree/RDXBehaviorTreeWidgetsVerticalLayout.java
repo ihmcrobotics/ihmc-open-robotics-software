@@ -128,6 +128,14 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
    {
       this.modalPopupNode = node;
       this.insertionType = insertionType;
+
+      switch (insertionType)
+      {
+         case INSERT_BEFORE -> node.setModalPopupTitle("Insert before \"%s\"".formatted(node.getDefinition().getDescription()));
+         case INSERT_AFTER -> node.setModalPopupTitle("Insert after \"%s\"".formatted(node.getDefinition().getDescription()));
+         case INSERT_AS_CHILD -> node.setModalPopupTitle("Insert as child of \"%s\"".formatted(node.getDefinition().getDescription()));
+      }
+
       ImGui.openPopup(node.getModalPopupID());
       LogTools.info("Opening popup {}", node.getModalPopupID());
    }
