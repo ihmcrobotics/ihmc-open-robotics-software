@@ -29,9 +29,6 @@ public class HeightMapCliffAvoider
 
    private final Plane3D bestFitPlane = new Plane3D();
 
-   private final RigidBodyTransform stanceStepTransform = new RigidBodyTransform();
-   private final RigidBodyTransform candidateStepTransform = new RigidBodyTransform();
-
    public HeightMapCliffAvoider(FootstepPlannerParametersReadOnly parameters, FootstepSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.parameters = parameters;
@@ -51,22 +48,31 @@ public class HeightMapCliffAvoider
    {
       int numberOfVertices = scaledFootPolygon.getNumberOfVertices();
 
-      for (int i = 0; i + 1 < numberOfVertices; i++)
+      for (int i = 0; i < numberOfVertices; i++)
       {
          Point2DReadOnly start = scaledFootPolygon.getVertex(i);
-         Point2DReadOnly end = scaledFootPolygon.getVertex(i + 1);
+         Point2DReadOnly end;
 
-         Point2D firstPointToAdd = new Point2D();
-         firstPointToAdd.interpolate(start, end, 0.3);
-         firstPointToAdd.scale(1.02);
-         scaledFootPolygon.addVertex(firstPointToAdd);
-         scaledFootPolygon.update();
+         // Make sure we do the entire loop which includes the line segment back to the first vertex
+         if (i + 1 < numberOfVertices)
+            end = scaledFootPolygon.getVertex(i + 1);
+         else
+            end = scaledFootPolygon.getVertex(0);
 
-         Point2D secondPointToAdd = new Point2D();
-         secondPointToAdd.interpolate(start, end, 1 - 0.3);
-         secondPointToAdd.scale(1.02);
-         scaledFootPolygon.addVertex(secondPointToAdd);
-         scaledFootPolygon.update();
+         if (start.distance(end) > 0.1)
+         {
+            Point2D firstPointToAdd = new Point2D();
+            firstPointToAdd.interpolate(start, end, 0.3);
+            firstPointToAdd.scale(1.02);
+            scaledFootPolygon.addVertex(firstPointToAdd);
+            scaledFootPolygon.update();
+
+            Point2D secondPointToAdd = new Point2D();
+            secondPointToAdd.interpolate(start, end, 1 - 0.3);
+            secondPointToAdd.scale(1.02);
+            scaledFootPolygon.addVertex(secondPointToAdd);
+            scaledFootPolygon.update();
+         }
       }
    }
 
