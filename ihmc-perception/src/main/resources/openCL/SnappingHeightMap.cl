@@ -84,8 +84,8 @@ void kernel computeSnappedValuesKernel(global float* params,
                                 read_write image2d_t snapped_normal_z_map)
 {
     // Remember, these are x and y in image coordinates, not world
-    int idx_x = get_global_id(0); // column
-    int idx_y = get_global_id(1); // row
+    int idx_x = get_global_id(0); // column, top left
+    int idx_y = get_global_id(1); // row, top left
     int idx_yaw = (int) idx_yaw_singular_buffer[0]; // TODO not needed
 
     bool should_print = false;//idx_x == 20 && idx_y == 20;
@@ -106,19 +106,22 @@ void kernel computeSnappedValuesKernel(global float* params,
     float map_resolution = params[GLOBAL_CELL_SIZE];
     float max_dimension = max(params[FOOT_WIDTH], params[FOOT_LENGTH]);
     int map_center_index = params[GLOBAL_CENTER_INDEX];
-    int cropped_center_index = params[GLOBAL_CENTER_INDEX];
-    float2 center = (float2) (params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]);
+    int cropped_center_index = params[CROPPED_WINDOW_CENTER_INDEX];
+    float2 center = (float2) (params[HEIGHT_MAP_CENTER_Y], params[HEIGHT_MAP_CENTER_X]);
+    float2 map_center = (float2) (0.0, 0.0);
+
     int map_cells_per_side = 2 * map_center_index + 1;
     int cropped_cells_per_side = 2 * cropped_center_index + 1;
 
-    int crop_idx_x = cropped_cells_per_side - idx_y;
-    int crop_idx_y = idx_x;
+    int crop_idx_x = idx_x;
+    int crop_idx_y = idx_y;
     int2 crop_key = (int2) (crop_idx_x, crop_idx_y);
-    // TODO make the conversion
-    int map_idx_x = map_cells_per_side - idx_y;
-    int map_idx_y = idx_x;
-    int2 map_key = (int2) (map_idx_x, map_idx_y);
-    float2 foot_position = indices_to_coordinate(map_key, center, map_resolution, map_center_index);
+
+    // FIXME why is this negative
+    float2 foot_position = indices_to_coordinate(crop_key, center, map_resolution, cropped_center_index);
+
+    // Convert from the world coordinate to the map index.
+    int2 map_key = coordinate_to_indices(foot_position, map_center, map_resolution, map_center_index);
 
     ////// Find the maximum height of any point underneath the foot
 
@@ -129,19 +132,21 @@ void kernel computeSnappedValuesKernel(global float* params,
 
     float max_height_under_foot = -INFINITY;
 
-    for (int x_query = idx_x - foot_offset_indices; x_query <= idx_x + foot_offset_indices; x_query++)
+    for (int x_query = map_key.x - foot_offset_indices; x_query <= map_key.x + foot_offset_indices; x_query++)
     {
         // if we're outside of the search area in the x direction, skip to the end
+        // FIXME should this include an equals?
         if (x_query < 0 || x_query >= map_cells_per_side)
             continue;
 
-        for (int y_query = idx_y - foot_offset_indices; y_query <= idx_y + foot_offset_indices; y_query++)
+        for (int y_query = map_key.y - foot_offset_indices; y_query <= map_key.y + foot_offset_indices; y_query++)
         {
             // y is out of bounds, so skip it
+            // FIXME should this include an equals?
             if (y_query < 0 || y_query >= map_cells_per_side)
                 continue;
 
-            float2 vector_to_point_from_foot = map_resolution * (float2) ((float) (x_query - idx_x), (float) (y_query - idx_y));
+            float2 vector_to_point_from_foot = map_resolution * (float2) ((float) (x_query - map_key.x), (float) (y_query - map_key.y));
             // TODO use squared value to avoid the squareroot operator
             if (length(vector_to_point_from_foot) > foot_search_radius)
                 continue;
@@ -218,19 +223,13 @@ void kernel computeSnappedValuesKernel(global float* params,
 
                 float2 point_query = offset + foot_position;
 
-                int map_query_x = coordinate_to_index(point_query.x, center.x, map_resolution, map_center_index);
-                int map_query_y = coordinate_to_index(point_query.y, center.y, map_resolution, map_center_index);
-
-                int image_query_x = map_query_y;
-                int image_query_y = map_cells_per_side - map_query_x;
+                int2 query_key = coordinate_to_indices(point_query, map_center, map_resolution, map_center_index);
 
                 // This query position is out of bounds of the incoming height map, so it should be skipped.
-                if (image_query_x < 0 || image_query_x > map_cells_per_side - 1 || image_query_y < 0 || image_query_y > map_cells_per_side - 1)
+                if (query_key.x < 0 || query_key.x > map_cells_per_side - 1 || query_key.y < 0 || query_key.y > map_cells_per_side - 1)
                     continue;
 
-                int2 query_key = (int2) (image_query_x, image_query_y);
                 uint query_height_int = read_imageui(height_map, query_key).x;
-
                 float query_height = (float) query_height_int / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
 
                 // FIXME old code
@@ -274,8 +273,8 @@ void kernel computeSnappedValuesKernel(global float* params,
                 float2 vector_in_foot = applyYawRotationToVector2D((float2) (x_value, y_value), foot_yaw);
                 float2 point_query = vector_in_foot + foot_position;
 
-                int map_query_x = coordinate_to_index(point_query.x, center.x, map_resolution, map_center_index);
-                int map_query_y = coordinate_to_index(point_query.y, center.y, map_resolution, map_center_index);
+                int map_query_x = coordinate_to_index(point_query.x, map_center.x, map_resolution, map_center_index);
+                int map_query_y = coordinate_to_index(point_query.y, map_center.y, map_resolution, map_center_index);
 
                 int image_query_x = map_query_y;
                 int image_query_y = map_cells_per_side - map_query_x;
@@ -317,7 +316,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     // FIXME for some reason all the points were bad
     if (n < 0.0001f)
     {
-        snap_result = SNAP_FAILED;
+//        snap_result = SNAP_FAILED;
         failed = true;
         n = 1.0f;
     }
@@ -334,14 +333,6 @@ void kernel computeSnappedValuesKernel(global float* params,
     float y_solution = y / n;  // average of y positions
     float z_solution = -coefficients[0] * x_solution - coefficients[1] * y_solution - coefficients[2];
 
-    if (should_print)
-    {
-        printf("xx %f, xy %f, x %f, xy %f, yy %f, y %f, x %f, y %f, n %f\n", xx, xy, x, xy, yy, y, x, y, n);
-        printf("xz %f, yz %f, z %f\n:", xz, yz, z);
-        printf("Centroid : %f, %f, %f\n", x_solution, y_solution, z_solution);
-    }
-
-
     float3 normal = (float3) (coefficients[0], coefficients[1], 1.0);
     normal = normalize(normal);
 
@@ -355,19 +346,19 @@ void kernel computeSnappedValuesKernel(global float* params,
     int cliff_offset_indices = (int) ceil(cliff_search_offset / map_resolution);
 
     // search for a cliff base that's too close
-    for (int x_query = idx_x - cliff_offset_indices; x_query <= idx_x + cliff_offset_indices && !failed; x_query++)
+    for (int x_query = map_key.x - cliff_offset_indices && !failed; x_query <= map_key.x + cliff_offset_indices && !failed; x_query++)
     {
         // if we're outside of the search area in the x direction, skip to the end
         if (x_query < 0 || x_query >= map_cells_per_side)
             continue;
 
-        for (int y_query = idx_y - cliff_offset_indices && !failed; y_query <= idx_y + cliff_offset_indices; y_query++)
+        for (int y_query = map_key.y - cliff_offset_indices && !failed; y_query <= map_key.y + cliff_offset_indices; y_query++)
         {
             // y is out of bounds, so skip it
             if (y_query < 0 || y_query >= map_cells_per_side)
                 continue;
 
-            float2 vector_to_point_from_foot = map_resolution * (float2) ((float) (x_query - idx_x), (float) (y_query - idx_y));
+            float2 vector_to_point_from_foot = map_resolution * (float2) ((float) (x_query - map_key.x), (float) (y_query - map_key.y));
             // TODO use squared value to avoid the squareroot operator
             if (length(vector_to_point_from_foot) > cliff_search_offset)
                 continue;
@@ -399,6 +390,8 @@ void kernel computeSnappedValuesKernel(global float* params,
 
                 if (distance_to_foot_from_this_query < min_distance_from_this_point_to_avoid_cliff)
                 {
+                                    printf("near cliff bottom\n");
+
                     // we're too close to the cliff bottom!
                     snap_result = CLIFF_BOTTOM;
                     failed = true;
@@ -407,9 +400,12 @@ void kernel computeSnappedValuesKernel(global float* params,
             }
             else if (relative_height_of_query < -params[CLIFF_START_HEIGHT_TO_AVOID])
             {
+                printf("Checking if cliff top\n");
+
                 // FIXME so this being a hard transition makes it a noisy signal. How can we smooth it?
                 if (distance_to_foot_from_this_query < params[MIN_DISTANCE_FROM_CLIFF_TOPS])
                 {
+                    printf("near cliff top\n");
                     // we're too close to the cliff top!
                     snap_result = CLIFF_TOP;
                     failed = true;
@@ -431,14 +427,15 @@ void kernel computeSnappedValuesKernel(global float* params,
     // FIXME this hard inequality is causing some noise in the solution space. How could we reduce that?
     if (n < min_points_needed_for_support)
     {
-        snap_result = NOT_ENOUGH_AREA;
+   //     snap_result = NOT_ENOUGH_AREA;
     }
 
     snap_height += params[HEIGHT_OFFSET];
 
-    write_imageui(steppable_map, crop_key, (uint4)(snap_result,0,0,0));
-    write_imageui(snapped_height_map, crop_key, (uint4)((int)(snap_height * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
-    write_imageui(snapped_normal_x_map, crop_key, (uint4)((int)(normal.x * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
-    write_imageui(snapped_normal_y_map, crop_key, (uint4)((int)(normal.y * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
-    write_imageui(snapped_normal_z_map, crop_key, (uint4)((int)(normal.z * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
+    int2 storage_key = (int2) (idx_x, idx_y);
+    write_imageui(steppable_map, storage_key, (uint4)(snap_result,0,0,0));
+    write_imageui(snapped_height_map, storage_key, (uint4)((int)(snap_height * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
+    write_imageui(snapped_normal_x_map, storage_key, (uint4)((int)(normal.x * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
+    write_imageui(snapped_normal_y_map, storage_key, (uint4)((int)(normal.y * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
+    write_imageui(snapped_normal_z_map, storage_key, (uint4)((int)(normal.z * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }
