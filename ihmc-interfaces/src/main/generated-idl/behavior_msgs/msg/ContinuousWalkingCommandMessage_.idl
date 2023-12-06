@@ -1,0 +1,31 @@
+#ifndef __behavior_msgs__msg__ContinuousWalkingCommandMessage__idl__
+#define __behavior_msgs__msg__ContinuousWalkingCommandMessage__idl__
+
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::ContinuousWalkingCommandMessage_")
+      struct ContinuousWalkingCommandMessage
+      {
+        /**
+         * flag to enable/disable publishing to controller
+         */
+        boolean publish_to_controller;
+        /**
+         * flag to enable/disable continuous walking state machine
+         */
+        boolean enable_continuous_walking;
+        /**
+         * number of steps to send to controller
+         */
+        unsigned short number_of_steps_to_send;
+      };
+    };
+  };
+};
+
+#endif

@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.activeMapping;
 
+import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
 import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -43,6 +44,7 @@ public class ContinuousPlannerSchedulingTask
                                                                                                           ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
+   private final AtomicReference<ContinuousWalkingCommandMessage> commandMessage = new AtomicReference<>(new ContinuousWalkingCommandMessage());
    private final ROS2Topic controllerFootstepDataTopic;
    private final IHMCROS2Publisher<FootstepDataListMessage> publisherForUI;
    private final IHMCROS2Publisher<PoseListMessage> startAndGoalPublisherForUI;
@@ -87,6 +89,7 @@ public class ContinuousPlannerSchedulingTask
                                       this::footstepStatusReceived);
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepQueueStatusMessage.class, robotModel.getSimpleRobotName()),
                                       this::footstepQueueStatusReceived);
+      ros2Helper.subscribeViaCallback(ContinuousPlanningAPI.CONTINUOUS_WALKING_COMMAND, commandMessage::set);
 
       continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, mode);
 
@@ -105,8 +108,8 @@ public class ContinuousPlannerSchedulingTask
       //      double stepDuration = continuousWalkingParameters.getSwingTime() + continuousWalkingParameters.getTransferTime();
       //      continuousWalkingParameters.setPlanningReferenceTimeout(stepDuration * continuousWalkingParameters.getPlannerTimeoutFraction());
 
-      //      if (!continuousWalkingParameters.getEnableContinuousWalking() || !continuousWalkingParameters.getShortcutIsPressed())
-      if (!continuousWalkingParameters.getEnableContinuousWalking())
+      if (!continuousWalkingParameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
+      //if (!continuousWalkingParameters.getEnableContinuousWalking())
       {
          stopContinuousWalkingGracefully();
 

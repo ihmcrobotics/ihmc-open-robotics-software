@@ -1,5 +1,6 @@
 package us.ihmc.communication.video;
 
+import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
@@ -24,6 +25,8 @@ public class ContinuousPlanningAPI
           IHMC_ROOT.withModule("continuous_planning").withType(RigidBodyTransformMessage.class).withSuffix("footstep_planning_goal_left"),
             IHMC_ROOT.withModule("continuous_planning").withType(RigidBodyTransformMessage.class).withSuffix("footstep_planning_goal_right")
     );
+
+    public static final ROS2Topic<ContinuousWalkingCommandMessage> CONTINUOUS_WALKING_COMMAND = IHMC_ROOT.withModule("continuous_planning").withType(ContinuousWalkingCommandMessage.class).withSuffix("command");
 
     public static final ROS2Topic<FootstepDataListMessage> PLANNED_FOOTSTEPS = IHMC_ROOT.withModule("continuous_planning").withType(FootstepDataListMessage.class).withSuffix("planned_footsteps");
     public static final ROS2Topic<PoseListMessage> START_AND_GOAL_FOOTSTEPS = IHMC_ROOT.withModule("continuous_planning").withType(PoseListMessage.class).withSuffix("start_and_goal");
