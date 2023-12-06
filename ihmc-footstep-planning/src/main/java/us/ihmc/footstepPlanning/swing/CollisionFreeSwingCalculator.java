@@ -29,6 +29,7 @@ import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -78,6 +79,7 @@ public class CollisionFreeSwingCalculator
    private final List<FramePoint3D> defaultWaypoints = new ArrayList<>();
    private final List<FramePoint3D> modifiedWaypoints = new ArrayList<>();
 
+   private final SwingKnotOptimizationResult swingKnotOptimizationResult = new SwingKnotOptimizationResult();
    private final ExpandingPolytopeAlgorithm collisionDetector = new ExpandingPolytopeAlgorithm();
    private final List<Vector3D> collisionGradients = new ArrayList<>();
    private final List<Vector3D> convolvedGradients = new ArrayList<>();
@@ -258,7 +260,11 @@ public class CollisionFreeSwingCalculator
 
          initializeKnotPoints();
          // FIXME figure out how to avoid using the height map data when possible.
+
+         swingKnotOptimizationResult.reset();
          optimizeKnotPoints(planarRegionsList, heightMapData);
+         LogTools.info("Swing Knot Result: [{}]", swingKnotOptimizationResult.toString());
+
 
          if (!collisionFound.getValue())
          {
@@ -350,7 +356,7 @@ public class CollisionFreeSwingCalculator
    {
       collisionFound.set(false);
       planPhase.set(PlanPhase.PERFORM_COLLISION_CHECK);
-      int maxIterations = 30;
+      int maxIterations = 15;
 
       for (int i = 0; i < maxIterations; i++)
       {
@@ -362,7 +368,8 @@ public class CollisionFreeSwingCalculator
             SwingKnotPoint knotPoint = swingKnotPoints.get(j);
 
             // collision gradient
-            boolean collisionDetected = knotPoint.doCollisionCheck(collisionDetector, planarRegionsList, heightMapData);
+            boolean collisionDetected = knotPoint.doCollisionCheck(collisionDetector, planarRegionsList, heightMapData, swingKnotOptimizationResult);
+            swingKnotOptimizationResult.setKnotCollisions(j, collisionDetected);
             if (collisionDetected)
             {
                collisionFound.set(true);
@@ -416,6 +423,7 @@ public class CollisionFreeSwingCalculator
 
             swingKnotPoints.get(j).project(convolvedGradients.get(j));
             swingKnotPoints.get(j).shiftWaypoint(convolvedGradients.get(j));
+            swingKnotOptimizationResult.setKnotDisplacement(j, convolvedGradients.get(j));
 
             if (visualize)
             {

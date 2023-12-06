@@ -43,7 +43,6 @@ public class SwingPlannerTools
          endOfSwingPose.set(footstep.getFootstepPose());
 
          EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory = computeTrajectory(positionTrajectoryGenerator,
-                                                                                       initialStanceFootPoses,
                                                                                        startOfSwingPose,
                                                                                        endOfSwingPose,
                                                                                        footstepPlan.getFootstep(i));
@@ -54,7 +53,6 @@ public class SwingPlannerTools
    }
 
    public static EnumMap<Axis3D, List<PolynomialReadOnly>> computeTrajectory(PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator,
-                                                                             SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses,
                                                                              FramePose3D startOfSwingPose,
                                                                              FramePose3D endOfSwingPose,
                                                                              PlannedFootstep footstep)

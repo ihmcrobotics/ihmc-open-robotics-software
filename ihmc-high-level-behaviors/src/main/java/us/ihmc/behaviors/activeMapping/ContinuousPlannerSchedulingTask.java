@@ -32,6 +32,7 @@ public class ContinuousPlannerSchedulingTask
    private final static long CONTINUOUS_PLANNING_DELAY_MS = 16;
 
    private ContinuousWalkingState state = ContinuousWalkingState.NOT_STARTED;
+
    private enum ContinuousWalkingState
    {
       NOT_STARTED, READY_TO_PLAN, NEED_TO_REPLAN, PLAN_AVAILABLE, WAITING_TO_LAND
@@ -87,9 +88,7 @@ public class ContinuousPlannerSchedulingTask
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepQueueStatusMessage.class, robotModel.getSimpleRobotName()),
                                       this::footstepQueueStatusReceived);
 
-      continuousPlanner = new ContinuousPlanner(robotModel,
-                                                referenceFrames,
-                                                mode);
+      continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, mode);
 
       continuousPlannerStatistics = new ContinuousPlannerStatistics();
       continuousPlanner.setContinuousPlannerStatistics(continuousPlannerStatistics);
@@ -103,8 +102,8 @@ public class ContinuousPlannerSchedulingTask
    private void tickStateMachine()
    {
       // Sets the planner timeout to be a percentage of the total step duration
-//      double stepDuration = continuousWalkingParameters.getSwingTime() + continuousWalkingParameters.getTransferTime();
-//      continuousWalkingParameters.setPlanningReferenceTimeout(stepDuration * continuousWalkingParameters.getPlannerTimeoutFraction());
+      //      double stepDuration = continuousWalkingParameters.getSwingTime() + continuousWalkingParameters.getTransferTime();
+      //      continuousWalkingParameters.setPlanningReferenceTimeout(stepDuration * continuousWalkingParameters.getPlannerTimeoutFraction());
 
       //      if (!continuousWalkingParameters.getEnableContinuousWalking() || !continuousWalkingParameters.getShortcutIsPressed())
       if (!continuousWalkingParameters.getEnableContinuousWalking())
@@ -144,7 +143,8 @@ public class ContinuousPlannerSchedulingTask
       continuousPlanner.setGoalWaypointPoses(continuousWalkingParameters);
       continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, heightMapImage, contactMapImage, false);
 
-      if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
+      if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION
+          || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
       {
          state = ContinuousWalkingState.PLAN_AVAILABLE;
       }
@@ -160,16 +160,26 @@ public class ContinuousPlannerSchedulingTask
 
    public void planAndSendFootsteps()
    {
+      /*
+       * Ready to plan means that the current step is completed and the planner is ready to plan the next step
+       */
       if (state == ContinuousWalkingState.READY_TO_PLAN)
       {
          LogTools.info("State: " + state);
          continuousPlannerStatistics.setLastAndTotalWaitingTimes();
-         continuousPlanner.getImminentStanceFromLatestStatus(footstepStatusMessage, controllerQueue);
+
+         if (continuousWalkingParameters.getStepPublisherEnabled())
+            continuousPlanner.getImminentStanceFromLatestStatus(footstepStatusMessage, controllerQueue);
+
          publishStartAndGoalForVisualization();
          continuousPlanner.setGoalWaypointPoses(continuousWalkingParameters);
-         continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, heightMapImage, contactMapImage, true);
+         continuousPlanner.planToGoalWithHeightMap(latestHeightMapData,
+                                                   heightMapImage,
+                                                   contactMapImage,
+                                                   true);
 
-         if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
+         if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION
+             || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
          {
             state = ContinuousWalkingState.PLAN_AVAILABLE;
          }
@@ -181,21 +191,29 @@ public class ContinuousPlannerSchedulingTask
          }
       }
 
+      /*
+       * Plan available means that the planner has a plan ready to send to the controller
+       */
       if (state == ContinuousWalkingState.PLAN_AVAILABLE)
       {
          LogTools.info("State: " + state);
          FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousWalkingParameters, controllerQueue);
          LogTools.info(message = String.format("State: [%s]: Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller", state));
 
+         publisherForUI.publish(footstepDataList);
          if (continuousWalkingParameters.getStepPublisherEnabled())
          {
             publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
-            publisherForUI.publish(footstepDataList);
 
             state = ContinuousWalkingState.WAITING_TO_LAND;
             continuousPlanner.setPlanAvailable(false);
             continuousPlanner.transitionCallback();
             continuousPlannerStatistics.setStartWaitingTime();
+         }
+         else
+         {
+            state = ContinuousWalkingState.NOT_STARTED;
+            continuousPlanner.setInitialized(false);
          }
       }
    }
@@ -237,7 +255,8 @@ public class ContinuousPlannerSchedulingTask
       controllerQueue = footstepQueueStatusMessage.getQueuedFootstepList();
       if (controllerQueueSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
       {
-         LogTools.warn(message = String.format("State: [%s]: Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size(), state));
+         LogTools.warn(message = String.format("State: [%s]: Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size(),
+                                               state));
       }
       controllerQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
    }

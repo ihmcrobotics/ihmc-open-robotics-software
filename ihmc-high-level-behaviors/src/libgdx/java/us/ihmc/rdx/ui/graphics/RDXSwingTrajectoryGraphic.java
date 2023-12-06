@@ -25,7 +25,7 @@ import java.util.List;
 public class RDXSwingTrajectoryGraphic implements RenderableProvider
 {
    private final List<ModelInstance> trajectoryWaypointModel = new ArrayList<>();
-   private final RDXPolynomial swingTrajectoryModel = new RDXPolynomial(0.03, 25);
+   private final RDXPolynomial swingTrajectoryModel = new RDXPolynomial(0.02, 25);
    private final EnumMap<Axis3D, List<PolynomialReadOnly>> plannedFootstepTrajectory = new EnumMap<>(Axis3D.class);
 
    public RDXSwingTrajectoryGraphic()

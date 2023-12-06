@@ -102,19 +102,25 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
       }
    }
 
+   public void generateFootstepPlanGraphic(FootstepDataListMessage message)
+   {
+      footstepPlanGraphic.generateMeshesAsync(message, "Continuous Walking");
+      footstepPlanGraphic.update();
+   }
+
    public void render()
    {
-      //if (activePerceptionModule != null)
-      //{
-      //   generateSwingGraphics(activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestFootstepPlan(),
-      //                         activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestSwingTrajectories());
-      //}
-
-      if (footstepDataListMessage.get() != null)
+      if (activePerceptionModule != null)
+      {
+         generateSwingGraphics(activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestFootstepPlan(),
+                               activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestSwingTrajectories());
+      }
+      else if (footstepDataListMessage.get() != null)
       {
          FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage.get());
          List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = SwingPlannerTools.computeTrajectories(positionTrajectoryGenerator,
                                                                                                                    startStancePose, plan);
+         generateFootstepPlanGraphic(footstepDataListMessage.get());
          generateSwingGraphics(plan, swingTrajectories);
       }
 
