@@ -103,8 +103,10 @@ public class RDXInteractableObject implements RenderableProvider
 
    public void updateVisuals() {
       ImGui.text("Modify shape:");
-      switch (shape) {
-         case BOX, PRISM -> {
+      switch (shape)
+      {
+         case BOX, PRISM ->
+         {
             if (ImGuiTools.volatileInputFloat(labels.get("depth"), xLength) ||
                 ImGuiTools.volatileInputFloat(labels.get("width"), yLength) ||
                 ImGuiTools.volatileInputFloat(labels.get("height"), zLength)) {
@@ -112,14 +114,16 @@ public class RDXInteractableObject implements RenderableProvider
                newScale = true;
             }
          }
-         case CYLINDER, CONE -> {
+         case CYLINDER, CONE ->
+         {
             if (ImGuiTools.volatileInputFloat(labels.get("radius"), xRadius) ||
                 ImGuiTools.volatileInputFloat(labels.get("height"), zLength)) {
                createVisuals();
                newScale = true;
             }
          }
-         case ELLIPSOID -> {
+         case ELLIPSOID ->
+         {
             if (ImGuiTools.volatileInputFloat(labels.get("xRadius"), xRadius) ||
                 ImGuiTools.volatileInputFloat(labels.get("yRadius"), yRadius) ||
                 ImGuiTools.volatileInputFloat(labels.get("zRadius"), zRadius)) {
