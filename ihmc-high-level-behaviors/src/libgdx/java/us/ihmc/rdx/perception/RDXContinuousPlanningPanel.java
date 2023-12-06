@@ -21,11 +21,9 @@ import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
-import us.ihmc.rdx.ui.graphics.RDXSwingTrajectoryGraphic;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
@@ -50,7 +48,7 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
    private static final int numberOfKnotPoints = 12;
    private static final int maxIterationsOptimization = 100;
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator(numberOfKnotPoints,
-                                                                                                                           maxIterationsOptimization);
+                                                                                                                             maxIterationsOptimization);
 
    private final ROS2Helper ros2Helper;
    private HumanoidActivePerceptionModule activePerceptionModule;
@@ -112,16 +110,19 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
       if (footstepDataListMessage.get() != null)
       {
          generateFootstepPlanGraphic(footstepDataListMessage.get());
-         if (activePerceptionModule != null)
-         {
-            generateSwingGraphics(activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestFootstepPlan(),
-                                  activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestSwingTrajectories());
-         }
-         else
+         //if (activePerceptionModule != null)
+         //{
+         //   generateSwingGraphics(activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestFootstepPlan(),
+         //                         activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestSwingTrajectories());
+         //}
+         //else
          {
             FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage.get());
+
+            // FIXME: This method is supposed to compute the polynomials from the waypoints. Currently the polynomials are zero for some reason.
             List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = SwingPlannerTools.computeTrajectories(positionTrajectoryGenerator,
-                                                                                                                      startStancePose, plan);
+                                                                                                                      startStancePose,
+                                                                                                                      plan);
             generateSwingGraphics(plan, swingTrajectories);
          }
          footstepDataListMessage.set(null);

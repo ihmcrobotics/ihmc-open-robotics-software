@@ -240,22 +240,16 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
 
    public void updateTrajectoriesFromPlan(FootstepPlan footstepPlan, List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories)
    {
+      trajectoryGraphics.clear();
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {
          PlannedFootstep plannedStep = footstepPlan.getFootstep(i);
          EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory;
 
-         if (swingTrajectories == null)
-         {
-            swingTrajectory = null;
-         }
+         if (i < swingTrajectories.size())
+            swingTrajectory = swingTrajectories.get(i);
          else
-         {
-            if (i < swingTrajectories.size())
-               swingTrajectory = swingTrajectories.get(i);
-            else
-               swingTrajectory = null;
-         }
+            swingTrajectory = null;
 
          if (swingTrajectory != null)
          {
@@ -276,10 +270,10 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
             textRenderable.getRenderables(renderables, pool);
          }
 
-         //for (RDXSwingTrajectoryGraphic trajectoryGraphic : trajectoryGraphics)
-         //{
-         //   trajectoryGraphic.getRenderables(renderables, pool);
-         //}
+         for (RDXSwingTrajectoryGraphic trajectoryGraphic : trajectoryGraphics)
+         {
+            trajectoryGraphic.getRenderables(renderables, pool);
+         }
       }
    }
 

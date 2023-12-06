@@ -10,6 +10,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -62,6 +63,8 @@ public class RDXSwingTrajectoryGraphic implements RenderableProvider
                                                                                                          trajectory.get(Axis3D.Y),
                                                                                                          trajectory.get(Axis3D.Z));
       swingTrajectoryModel.compute(polynomials);
+
+      LogTools.warn("Swing trajectory type: " + footstep.getTrajectoryType() + ", number of waypoints: " + trajectoryWaypointModel.size() + ", number of polynomials: " + polynomials.size());
    }
 
    @Override
