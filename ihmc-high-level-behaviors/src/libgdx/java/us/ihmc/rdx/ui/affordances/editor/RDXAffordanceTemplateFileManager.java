@@ -615,7 +615,7 @@ public class RDXAffordanceTemplateFileManager
             String resizablePrimitiveShape = jsonNode.get("resizablePrimitiveShape").asText();
             if (!resizablePrimitiveShape.equals("NULL"))
             {
-               List<Float> readPrimitiveSize = new ArrayList<Float>();
+               List<Float> readPrimitiveSize = new ArrayList<>();
                readPrimitiveSize.add(jsonNode.get("xLength").floatValue());
                readPrimitiveSize.add(jsonNode.get("yLength").floatValue());
                readPrimitiveSize.add(jsonNode.get("zLength").floatValue());
