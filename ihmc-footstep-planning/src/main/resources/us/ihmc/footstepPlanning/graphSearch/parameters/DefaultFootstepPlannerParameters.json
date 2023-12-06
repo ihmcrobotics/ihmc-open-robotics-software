@@ -73,5 +73,7 @@
   "Cliff bottom height to avoid" : 0.05,
   "Min distance from cliff bottoms" : 0.14,
   "Cliff top height to avoid" : 0.07,
-  "Min distance from cliff tops" : 0.0
+  "Min distance from cliff tops" : 0.0,
+  "Scaled foot polygon percentage" : 1.25,
+  "Cliff height threshold" : 0.025
 }
