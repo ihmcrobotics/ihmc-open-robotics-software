@@ -71,6 +71,8 @@ public class RDXAffordanceTemplateEditorUI
    private long lastPlayTime = 0;
 
    private final float DEFAULT_FRACTIONAL_SCALE = 1.0f;
+   private final float MAXIMUM_FRATIONAL_SCALING = 1.5f;
+   private final float MINIMUM_FRATIONAL_SCALING = 0.5f;
    private final float[] fractionalScaleX = {DEFAULT_FRACTIONAL_SCALE};
    private final float[] fractionalScaleY = {DEFAULT_FRACTIONAL_SCALE};
    private final float[] fractionalScaleZ = {DEFAULT_FRACTIONAL_SCALE};
@@ -540,25 +542,26 @@ public class RDXAffordanceTemplateEditorUI
 
    }
 
+   // frational scaling to fine tune the frame poses in realtime
    public void fractionalyScaleAffordanceTemplate()
    {
       switch (objectBuilder.getSelectedObject().getShape())
       {
          case BOX, PRISM:
-            if (ImGui.sliderFloat("Fractinol Scaling X", fractionalScaleX, 0.5f, 1.5f) ||
-                ImGui.sliderFloat("Fractinol Scaling Y", fractionalScaleY, 0.5f, 1.5f) ||
-                ImGui.sliderFloat("Fractinol Scaling Z", fractionalScaleZ, 0.5f, 1.5f))
+            if (ImGui.sliderFloat("Fractinol Scaling X", fractionalScaleX, MINIMUM_FRATIONAL_SCALING, MAXIMUM_FRATIONAL_SCALING) ||
+                ImGui.sliderFloat("Fractinol Scaling Y", fractionalScaleY, MINIMUM_FRATIONAL_SCALING, MAXIMUM_FRATIONAL_SCALING) ||
+                ImGui.sliderFloat("Fractinol Scaling Z", fractionalScaleZ, MINIMUM_FRATIONAL_SCALING, MAXIMUM_FRATIONAL_SCALING))
                rescaleAffordanceTemplate();
             break;
          case CYLINDER, CONE:
-            if (ImGui.sliderFloat("Fractinol Scaling Radius", fractionalScaleX, 0.5f, 1.5f) ||
-                ImGui.sliderFloat("Fractinol Scaling Height", fractionalScaleY, 0.5f, 1.5f))
+            if (ImGui.sliderFloat("Fractinol Scaling Radius", fractionalScaleX, MINIMUM_FRATIONAL_SCALING, MAXIMUM_FRATIONAL_SCALING) ||
+                ImGui.sliderFloat("Fractinol Scaling Height", fractionalScaleY, MINIMUM_FRATIONAL_SCALING, MAXIMUM_FRATIONAL_SCALING))
                rescaleAffordanceTemplate();
             break;
          case ELLIPSOID:
-            if (ImGui.sliderFloat("Fractinol Scaling rX", fractionalScaleX, 0.5f, 1.5f) ||
-                ImGui.sliderFloat("Fractinol Scaling rY", fractionalScaleY, 0.5f, 1.5f) ||
-                ImGui.sliderFloat("Fractinol Scaling rZ", fractionalScaleZ, 0.5f, 1.5f))
+            if (ImGui.sliderFloat("Fractinol Scaling rX", fractionalScaleX, MINIMUM_FRATIONAL_SCALING, MAXIMUM_FRATIONAL_SCALING) ||
+                ImGui.sliderFloat("Fractinol Scaling rY", fractionalScaleY, MINIMUM_FRATIONAL_SCALING, MAXIMUM_FRATIONAL_SCALING) ||
+                ImGui.sliderFloat("Fractinol Scaling rZ", fractionalScaleZ, MINIMUM_FRATIONAL_SCALING, MAXIMUM_FRATIONAL_SCALING))
                rescaleAffordanceTemplate();
             break;
       }
@@ -569,10 +572,12 @@ public class RDXAffordanceTemplateEditorUI
       reset();
       fileManager.load();
 
+      // Calculate object scale based on the selected object's resizable primitive size
       objectScale = new float[objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size()];
       for (int i = 0; i < objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size(); i++)
          objectScale[i] = objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(i) / objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().get(i);
 
+      // Update frame poses based on the selected object's shape and scaling factors
       for (RDXActiveAffordanceMenu frameType : RDXActiveAffordanceMenu.values())
       {
          SideDependentList<List<FramePose3D>> framePose3DList = getFramePose3DList(frameType);
@@ -584,6 +589,7 @@ public class RDXAffordanceTemplateEditorUI
             {
                if (frameType == RDXActiveAffordanceMenu.POST_GRASP)
                {
+                  // Update post-grasp frame poses in the object frame rather than affordance frame
                   ReferenceFrame olfFrame = framePose3DList.get(side).get(i).getReferenceFrame();
                   ReferenceFrame objectFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("ObjectFrame", ReferenceFrame.getWorldFrame(), postGraspFrames.getObjectTransforms().get(i));
                   framePose3DList.get(side).get(i).changeFrame(objectFrame);
@@ -596,6 +602,7 @@ public class RDXAffordanceTemplateEditorUI
          }
       }
 
+      // Update internal frames for pre-grasp, grasp, and post-grasp
       for (RobotSide side : RobotSide.values())
       {
          for (int i = 1; i < preGraspFrames.getPoses().get(side).size() + 1; i++)
@@ -609,6 +616,7 @@ public class RDXAffordanceTemplateEditorUI
 
    }
 
+   // Helper method to get the appropriate frame pose list based on the active affordance menu
    private SideDependentList<List<FramePose3D>> getFramePose3DList(RDXActiveAffordanceMenu frameType)
    {
       switch (frameType)
@@ -616,6 +624,7 @@ public class RDXAffordanceTemplateEditorUI
          case PRE_GRASP:
             return preGraspFrames.getPoses();
          case GRASP:
+            // Create a framePose3DList with the grasp frame for each side
             SideDependentList<List<FramePose3D>> framePose3DList = new SideDependentList<>();
             for (RobotSide side : RobotSide.values())
             {
@@ -631,6 +640,7 @@ public class RDXAffordanceTemplateEditorUI
       }
    }
 
+   // Helper method to update the frame pose based on the selected object's shape and scaling factors
    private void updateFramePose3D(FramePose3D framePose3D)
    {
       switch (objectBuilder.getSelectedObject().getShape())
