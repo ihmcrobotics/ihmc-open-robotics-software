@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
-import imgui.type.ImFloat;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -71,10 +70,11 @@ public class RDXAffordanceTemplateEditorUI
    private boolean playing = false;
    private long lastPlayTime = 0;
 
-   private final ImFloat fractionalScaling = new ImFloat(0.95F);
-   private final float[] fractionalScaling1 = {1.0f};
+   private final float[] fractionalScale = {1.0f};
    private boolean fractionalScalingEnabled = false;
    private boolean affordanceTemplateLoaded = false;
+   private float[] objectScale;
+
    private final ImGuiInputText textInput = new ImGuiInputText("(optional) Enter additional description");
    private final ImGuiDirectory fileManagerDirectory;
 
@@ -476,7 +476,7 @@ public class RDXAffordanceTemplateEditorUI
          if (ImGui.button(labels.get("Play")))
          {
             playing = true;
-            lastPlayTime = System.currentTimeMillis();;
+            lastPlayTime = System.currentTimeMillis();
          }
 
          if (ImGui.button("Reset"))
@@ -503,8 +503,7 @@ public class RDXAffordanceTemplateEditorUI
          }
          ImGui.separator();
 
-         if (fractionalScalingEnabled && ImGui.sliderFloat("Affordance Template Fractinol Scaling",
-                                                           fractionalScaling1,
+         if (fractionalScalingEnabled && ImGui.sliderFloat("Affordance Template Fractinol Scaling", fractionalScale,
                                                            0.5f,
                                                            1.5f))
          {
@@ -523,6 +522,7 @@ public class RDXAffordanceTemplateEditorUI
                reset();
                fileManager.load();
 
+               fractionalScale[0] = 1.0f;
                rescaleAffordanceTemplate();
                objectBuilder.getSelectedObject().setNewScale(false);
                fractionalScalingEnabled = true;
@@ -540,6 +540,10 @@ public class RDXAffordanceTemplateEditorUI
 
    public void rescaleAffordanceTemplate()
    {
+      objectScale = new float[objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size()];
+      for (int i = 0; i < objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size(); i++)
+         objectScale[i] = objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(i) / objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().get(i);
+
       for (RDXActiveAffordanceMenu frameType : RDXActiveAffordanceMenu.values())
       {
          SideDependentList<List<FramePose3D>> framePose3DList = getFramePose3DList(frameType);
@@ -583,10 +587,10 @@ public class RDXAffordanceTemplateEditorUI
          case PRE_GRASP:
             return preGraspFrames.getPoses();
          case GRASP:
-            SideDependentList<List<FramePose3D>> framePose3DList = new SideDependentList<List<FramePose3D>>();
+            SideDependentList<List<FramePose3D>> framePose3DList = new SideDependentList<>();
             for (RobotSide side : RobotSide.values())
             {
-               List<FramePose3D> sidePoses = new ArrayList<FramePose3D>();
+               List<FramePose3D> sidePoses = new ArrayList<>();
                sidePoses.add(graspFrame.getPoses().get(side));
                framePose3DList.put(side, sidePoses);
             }
@@ -600,29 +604,25 @@ public class RDXAffordanceTemplateEditorUI
 
    private void updateFramePose3D(FramePose3D framePose3D)
    {
-      float[] objectScale = new float[objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size()];
-      for (int i = 0; i < objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size(); i++)
-         objectScale[i] = objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(i) / objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().get(i);
-
       switch (objectBuilder.getSelectedObject().getShape())
       {
          case BOX, PRISM:
             if (objectScale[0] != 1.0f || objectScale[1] != 1.0f || objectScale[2] != 1.0f)
-               framePose3D.getTranslation().set(fractionalScaling1[0]*objectScale[0] * framePose3D.getPosition().getX(),
-                                                fractionalScaling1[0]*objectScale[1] * framePose3D.getPosition().getY(),
-                                                fractionalScaling1[0]*objectScale[2] * framePose3D.getPosition().getZ());
+               framePose3D.getTranslation().set(fractionalScale[0] * objectScale[0] * framePose3D.getPosition().getX(),
+                                                fractionalScale[0] * objectScale[1] * framePose3D.getPosition().getY(),
+                                                fractionalScale[0] * objectScale[2] * framePose3D.getPosition().getZ());
             break;
          case CYLINDER, CONE:
             if (objectScale[2] != 1.0f || objectScale[3] != 1.0f)
-               framePose3D.getTranslation().set(fractionalScaling.get()*objectScale[3] * framePose3D.getPosition().getX(),
-                                                fractionalScaling.get()*objectScale[3] * framePose3D.getPosition().getY(),
-                                                fractionalScaling.get()*objectScale[2] * framePose3D.getPosition().getZ());
+               framePose3D.getTranslation().set(fractionalScale[0] * objectScale[3] * framePose3D.getPosition().getX(),
+                                                fractionalScale[0] * objectScale[3] * framePose3D.getPosition().getY(),
+                                                fractionalScale[0]* objectScale[2] * framePose3D.getPosition().getZ());
             break;
          case ELLIPSOID:
             if (objectScale[3] != 1.0f || objectScale[4] != 1.0f || objectScale[5] != 1.0f)
-               framePose3D.getTranslation().set(fractionalScaling.get()*objectScale[3] * framePose3D.getPosition().getX(),
-                                                fractionalScaling.get()*objectScale[4] * framePose3D.getPosition().getY(),
-                                                fractionalScaling.get()*objectScale[5] * framePose3D.getPosition().getZ());
+               framePose3D.getTranslation().set(fractionalScale[0] * objectScale[3] * framePose3D.getPosition().getX(),
+                                                fractionalScale[0] * objectScale[4] * framePose3D.getPosition().getY(),
+                                                fractionalScale[0] * objectScale[5] * framePose3D.getPosition().getZ());
             break;
       }
    }
