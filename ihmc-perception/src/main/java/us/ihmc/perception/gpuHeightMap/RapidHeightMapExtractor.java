@@ -299,6 +299,12 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) parameters.getSteppingContactThreshold());
       parametersBuffer.setParameter((float) parameters.getContactWindowSize());
       parametersBuffer.setParameter((float) parameters.getSpatialAlpha());
+      parametersBuffer.setParameter((float) footSize);
+      parametersBuffer.setParameter((float) footSize);
+      parametersBuffer.setParameter((float) distanceFromCliffTops);
+      parametersBuffer.setParameter((float) distanceFromCliffBottoms);
+      parametersBuffer.setParameter((float) cliffStartHeightToAvoid);
+      parametersBuffer.setParameter((float) cliffEndHeightToAvoid);
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
@@ -316,7 +322,7 @@ public class RapidHeightMapExtractor
       snappingParametersBuffer.setParameter((float) cliffStartHeightToAvoid);
       snappingParametersBuffer.setParameter((float) cliffEndHeightToAvoid);
 
-      snappingParametersBuffer.writeOpenCLBufferObject(openCLManager);
+      parametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
    public void computeContactMap()
@@ -341,7 +347,7 @@ public class RapidHeightMapExtractor
       yaw.setParameter(0.0f); // we're only doing a single discretization, and then assuming the foot is a big rectangle
       yaw.writeOpenCLBufferObject(openCLManager);
 
-      openCLManager.setKernelArgument(computeSnappedValuesKernel, 0, snappingParametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeSnappedValuesKernel, 0, parametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 1, globalHeightMapImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 2, yaw.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 3, steppabilityImage.getOpenCLImageObject());
