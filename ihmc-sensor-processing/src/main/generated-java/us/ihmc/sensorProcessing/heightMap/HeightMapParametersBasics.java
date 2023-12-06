@@ -128,6 +128,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.steppingCosineThreshold, steppingCosineThreshold);
    }
 
+   default void setSearchSkipSize(int searchSkipSize)
+   {
+      set(HeightMapParameters.searchSkipSize, searchSkipSize);
+   }
+
    /**
     * Resolution of the height map grid
     */

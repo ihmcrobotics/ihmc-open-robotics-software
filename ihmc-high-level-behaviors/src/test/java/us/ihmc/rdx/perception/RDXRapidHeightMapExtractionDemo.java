@@ -254,6 +254,8 @@ public class RDXRapidHeightMapExtractionDemo
                                        cameraZUpFrame,
                                        false);
 
+      LogTools.info(humanoidPerception.getPerceptionStatistics());
+
    }
 
    public static void main(String[] args)

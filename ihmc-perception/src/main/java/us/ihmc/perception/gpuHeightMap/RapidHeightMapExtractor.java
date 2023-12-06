@@ -298,6 +298,7 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) parameters.getSteppingContactThreshold());
       parametersBuffer.setParameter((float) parameters.getContactWindowSize());
       parametersBuffer.setParameter((float) parameters.getSpatialAlpha());
+      parametersBuffer.setParameter((float) parameters.getSearchSkipSize());
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
       initialized = true;

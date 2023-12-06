@@ -116,6 +116,11 @@
     "lowerBound": 0.0,
     "upperBound": 1.0
   },
+  "Search skip size" : {
+    "value": 4,
+    "lowerBound": 0,
+    "upperBound": 16
+  },
   "Grid resolution XY" : [ 0.03, "Resolution of the height map grid" ],
   "Grid size XY" : [ 5.0, "Length of the side of the square height map grid" ],
   "Max Z" : [ 0.6, "Max z relative to robot mid foot z. Points above this threshold are ignored." ],

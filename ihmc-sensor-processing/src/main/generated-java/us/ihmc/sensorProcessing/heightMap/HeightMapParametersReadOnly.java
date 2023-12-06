@@ -130,6 +130,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(steppingCosineThreshold);
    }
 
+   default int getSearchSkipSize()
+   {
+      return get(searchSkipSize);
+   }
+
    /**
     * Resolution of the height map grid
     */

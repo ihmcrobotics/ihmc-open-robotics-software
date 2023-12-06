@@ -31,6 +31,7 @@
 #define STEPPING_CONTACT_THRESHOLD 30
 #define CONTACT_WINDOW_SIZE 31
 #define SPATIAL_ALPHA 32
+#define SEARCH_SKIP_SIZE 33
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -213,11 +214,12 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    }
 
    int count = 0;
-   for (int pitch_count_offset = - (int) (params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset <  (int) (params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=4)
+   int skip = (int) params[SEARCH_SKIP_SIZE];
+   for (int pitch_count_offset = - (int) (params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset <  (int) (params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=skip)
    {
       int pitch_count = projectedPoint.y + pitch_count_offset;
 
-      for (int yaw_count_offset = - (int) (params[SEARCH_WINDOW_WIDTH] / 2); yaw_count_offset <  (int) (params[SEARCH_WINDOW_WIDTH] / 2 + 1); yaw_count_offset+=4)
+      for (int yaw_count_offset = - (int) (params[SEARCH_WINDOW_WIDTH] / 2); yaw_count_offset <  (int) (params[SEARCH_WINDOW_WIDTH] / 2 + 1); yaw_count_offset+=skip)
       {
          int yaw_count = projectedPoint.x + yaw_count_offset;
 

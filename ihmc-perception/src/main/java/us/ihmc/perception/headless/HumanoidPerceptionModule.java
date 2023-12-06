@@ -453,4 +453,9 @@ public class HumanoidPerceptionModule
    {
       this.sphericalRegionsEnabled = sphericalRegionsEnabled;
    }
+
+   public PerceptionStatistics getPerceptionStatistics()
+   {
+      return perceptionStatistics;
+   }
 }
