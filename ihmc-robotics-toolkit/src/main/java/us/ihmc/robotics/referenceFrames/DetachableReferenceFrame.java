@@ -3,7 +3,6 @@ package us.ihmc.robotics.referenceFrames;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
 /**
@@ -62,45 +61,31 @@ public class DetachableReferenceFrame
       }
    }
 
-   public void changeFrame(String parentFrameName, RigidBodyTransformBasics transformToParent)
+   /**
+    * Changes the parent frame of this reference frame while
+    * keeping it in the same place w.r.t. a common ancestors.
+    *
+    * @param parentFrameName The new parent frame's name
+    */
+   public void changeFrame(String parentFrameName)
    {
-      ReferenceFrame parentFrameInWorld = referenceFrameLibrary.findFrameByName(parentFrameName);
-
-      boolean shouldBeChildOfWorld = parentFrameInWorld != null;
-
-      boolean frameNeedsRecreating = referenceFrame == null;
-
       if (referenceFrame != null)
       {
-         frameNeedsRecreating |= shouldBeChildOfWorld != isChildOfWorld();
-         frameNeedsRecreating |= referenceFrame.getParent() != parentFrameInWorld;
-      }
+         ReferenceFrame parentFrame = referenceFrameLibrary.findFrameByName(parentFrameName);
+         RigidBodyTransform newTransformToParent = new RigidBodyTransform();
 
-      if (frameNeedsRecreating)
-      {
-         ReferenceFrame parentFrame;
-         if (shouldBeChildOfWorld) // Attached to world frame tree
+         if (parentFrame != null && referenceFrame.getRootFrame() == parentFrame.getRootFrame()) // Attached to world frame tree
          {
-            parentFrame = parentFrameInWorld;
-
-            if (referenceFrame.getRootFrame() == parentFrame.getRootFrame())
-            {
-               RigidBodyTransform newTransformToParent = new RigidBodyTransform();
-               referenceFrame.getTransformToDesiredFrame(newTransformToParent, parentFrame);
-               transformToParent.set(newTransformToParent);
-            }
+            referenceFrame.getTransformToDesiredFrame(newTransformToParent, parentFrame);
          }
-         else // Detached under it's own root
+         else // switch over to new root
          {
             parentFrame = ReferenceFrameTools.constructARootFrame(parentFrameName);
          }
 
-         referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transformToParent);
+         referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, newTransformToParent);
       }
-      else
-      {
-         referenceFrame.update(); // Neccessary?
-      }   }
+   }
 
    public boolean isChildOfWorld()
    {

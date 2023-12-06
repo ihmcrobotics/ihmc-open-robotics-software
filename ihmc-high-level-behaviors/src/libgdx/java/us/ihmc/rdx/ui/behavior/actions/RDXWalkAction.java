@@ -73,13 +73,7 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
                                                                 getDefinition()::getParentFrameName,
-                                                                updatedFrameName ->
-                                                                {
-                                                                   getDefinition().setParentFrameName(updatedFrameName);
-                                                                   getState().getGoalFrame()
-                                                                             .changeFrame(getDefinition().getParentFrameName(),
-                                                                                          getDefinition().getGoalToParentTransform().getValue());
-                                                                });
+                                                                this::changeParentFrame);
       executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
                                                           getDefinition()::setExecuteWithNextAction,
                                                           imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
@@ -260,5 +254,11 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
    public String getActionTypeTitle()
    {
       return "Walk Goal";
+   }
+
+   private void changeParentFrame(String newParentFrameName)
+   {
+      getDefinition().setParentFrameName(newParentFrameName);
+      getState().getGoalFrame().changeFrame(getDefinition().getParentFrameName());
    }
 }
