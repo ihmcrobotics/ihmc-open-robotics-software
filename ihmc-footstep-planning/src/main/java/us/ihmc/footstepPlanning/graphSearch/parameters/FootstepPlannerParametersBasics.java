@@ -382,6 +382,16 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.shinHeightOffet, shinHeightOffet);
    }
 
+   default void setScaledFootPolygonPercentage(double scaledFootPolygonPercentage)
+   {
+      set(FootstepPlannerParameterKeys.scaledFootPolygonPercentage, scaledFootPolygonPercentage);
+   }
+
+   default void setCliffHeightThreshold(double cliffHeightThreshold)
+   {
+      set(FootstepPlannerParameterKeys.cliffHeightThreshold, cliffHeightThreshold);
+   }
+
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
       double noValue = FootstepPlannerParametersPacket.DEFAULT_NO_VALUE;
