@@ -32,33 +32,12 @@ public class RDXSwingTrajectoryGraphic implements RenderableProvider
    {
    }
 
-   public void updateFromPlan(FootstepPlan footstepPlan, List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories)
+   public void updateTrajectoryModel(PlannedFootstep footstep, EnumMap<Axis3D, List<PolynomialReadOnly>> trajectory)
    {
-      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
-      {
-         PlannedFootstep plannedStep = footstepPlan.getFootstep(i);
-         EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory;
-         if (swingTrajectories == null)
-         {
-            swingTrajectory = null;
-         }
-         else
-         {
-            if (i < swingTrajectories.size())
-               swingTrajectory = swingTrajectories.get(i);
-            else
-               swingTrajectory = null;
-         }
-         plannedFootstepTrajectory.clear();
-         if (swingTrajectory != null)
-            swingTrajectory.keySet().forEach(key -> plannedFootstepTrajectory.put(key, RDXVisualTools.copyPolynomialList(swingTrajectory.get(key))));
+      plannedFootstepTrajectory.clear();
+      if (trajectory != null)
+         trajectory.keySet().forEach(key -> plannedFootstepTrajectory.put(key, RDXVisualTools.copyPolynomialList(trajectory.get(key))));
 
-         updateTrajectoryModel(plannedStep, plannedFootstepTrajectory);
-      }
-   }
-
-   private void updateTrajectoryModel(PlannedFootstep footstep, EnumMap<Axis3D, List<PolynomialReadOnly>> trajectory)
-   {
       trajectoryWaypointModel.clear();
       if (footstep.getTrajectoryType() == TrajectoryType.CUSTOM)
       {

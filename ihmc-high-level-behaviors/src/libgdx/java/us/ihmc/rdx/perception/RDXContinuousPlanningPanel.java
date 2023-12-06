@@ -38,7 +38,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXContinuousPlanningPanel implements RenderableProvider
 {
-   private final RDXSwingTrajectoryGraphic swingTrajectoryGraphic = new RDXSwingTrajectoryGraphic();
    private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private final ImBoolean renderEnabled = new ImBoolean(true);
    private final SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
@@ -98,30 +97,35 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
    {
       if (plan != null)
       {
-         swingTrajectoryGraphic.updateFromPlan(plan, swingTrajectories);
+         footstepPlanGraphic.updateTrajectoriesFromPlan(plan, swingTrajectories);
       }
    }
 
    public void generateFootstepPlanGraphic(FootstepDataListMessage message)
    {
+      LogTools.warn("Generating footstep plan graphic: {}", message.getFootstepDataList().size());
       footstepPlanGraphic.generateMeshesAsync(message, "Continuous Walking");
       footstepPlanGraphic.update();
    }
 
    public void render()
    {
-      if (activePerceptionModule != null)
+      if (footstepDataListMessage.get() != null)
       {
-         generateSwingGraphics(activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestFootstepPlan(),
-                               activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestSwingTrajectories());
-      }
-      else if (footstepDataListMessage.get() != null)
-      {
-         FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage.get());
-         List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = SwingPlannerTools.computeTrajectories(positionTrajectoryGenerator,
-                                                                                                                   startStancePose, plan);
          generateFootstepPlanGraphic(footstepDataListMessage.get());
-         generateSwingGraphics(plan, swingTrajectories);
+         if (activePerceptionModule != null)
+         {
+            generateSwingGraphics(activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestFootstepPlan(),
+                                  activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestSwingTrajectories());
+         }
+         else
+         {
+            FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage.get());
+            List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = SwingPlannerTools.computeTrajectories(positionTrajectoryGenerator,
+                                                                                                                      startStancePose, plan);
+            generateSwingGraphics(plan, swingTrajectories);
+         }
+         footstepDataListMessage.set(null);
       }
 
       generateStartAndGoalFootstepGraphics();
@@ -132,7 +136,6 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
    {
       if (renderEnabled.get())
       {
-         swingTrajectoryGraphic.getRenderables(renderables, pool);
          footstepPlanGraphic.getRenderables(renderables, pool);
          goalFootstepGraphics.get(RobotSide.LEFT).getRenderables(renderables, pool);
          goalFootstepGraphics.get(RobotSide.RIGHT).getRenderables(renderables, pool);
@@ -143,7 +146,10 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
 
    public void onPlannedFootstepsReceived(FootstepDataListMessage message)
    {
-      this.footstepDataListMessage.set(message);
+      if (footstepDataListMessage.get() == null)
+      {
+         this.footstepDataListMessage.set(message);
+      }
    }
 
    public void onStartAndGoalPosesReceived(PoseListMessage poseListMessage)
@@ -157,7 +163,6 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
 
    public void destroy()
    {
-      swingTrajectoryGraphic.destroy();
       footstepPlanGraphic.destroy();
       goalFootstepGraphics.get(RobotSide.LEFT).destroy();
       goalFootstepGraphics.get(RobotSide.RIGHT).destroy();
