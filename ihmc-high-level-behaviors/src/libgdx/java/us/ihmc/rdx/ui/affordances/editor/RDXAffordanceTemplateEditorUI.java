@@ -12,8 +12,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
@@ -22,7 +20,6 @@ import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.rdx.imgui.ImGuiInputText;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -76,7 +73,7 @@ public class RDXAffordanceTemplateEditorUI
 
    private final ImFloat fractionalScaling = new ImFloat(0.95F);
    private final float[] fractionalScaling1 = {1.0f};
-   private boolean fractionalScalingUpdated = false;
+   private boolean fractionalScalingEnabled = false;
    private boolean affordanceTemplateLoaded = false;
    private final ImGuiInputText textInput = new ImGuiInputText("(optional) Enter additional description");
    private final ImGuiDirectory fileManagerDirectory;
@@ -506,15 +503,18 @@ public class RDXAffordanceTemplateEditorUI
          }
          ImGui.separator();
 
-         if (affordanceTemplateLoaded && ImGui.sliderFloat("Affordance Template Fractinol Scaling",
+         if (fractionalScalingEnabled && ImGui.sliderFloat("Affordance Template Fractinol Scaling",
                                                            fractionalScaling1,
                                                            0.5f,
                                                            1.5f))
          {
-            fractionalScalingUpdated = true;
+            reset();
+            fileManager.load();
+
+            rescaleAffordanceTemplate();
          }
 
-         if ((affordanceTemplateLoaded && (objectBuilder.getSelectedObject().isNewScale() || fractionalScalingUpdated) ))
+         if (( affordanceTemplateLoaded && objectBuilder.getSelectedObject().isNewScale() ))
          {
             ImGui.text("Rescaling Affordance Template only works for Primitive shapes.");
 
@@ -525,7 +525,7 @@ public class RDXAffordanceTemplateEditorUI
 
                rescaleAffordanceTemplate();
                objectBuilder.getSelectedObject().setNewScale(false);
-               fractionalScalingUpdated = false;
+               fractionalScalingEnabled = true;
             }
          }
       }
