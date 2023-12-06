@@ -62,18 +62,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
                                                                 getDefinition()::getParentFrameName,
-                                                                updatedFrameName ->
-                                                                {
-                                                                   getDefinition().setParentFrameName(updatedFrameName);
-                                                                   for (FootstepPlanActionFootstepState footstepState : getState().getFootsteps())
-                                                                   {
-                                                                      footstepState.getSoleFrame()
-                                                                                   .changeFrame(getDefinition().getParentFrameName(),
-                                                                                                footstepState.getDefinition()
-                                                                                                             .getSoleToPlanFrameTransform()
-                                                                                                             .getValue());
-                                                                   }
-                                                                });
+                                                                this::changeParentFrame);
       swingDurationWidget = new ImDoubleWrapper(getDefinition()::getSwingDuration,
                                                 getDefinition()::setSwingDuration,
                                                 imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
@@ -217,5 +206,14 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    public String getActionTypeTitle()
    {
       return "Footstep Plan";
+   }
+
+   public void changeParentFrame(String newParentFrameName)
+   {
+      getDefinition().setParentFrameName(newParentFrameName);
+      for (FootstepPlanActionFootstepState footstepState : getState().getFootsteps())
+      {
+         footstepState.getSoleFrame().changeFrame(getDefinition().getParentFrameName());
+      }
    }
 }

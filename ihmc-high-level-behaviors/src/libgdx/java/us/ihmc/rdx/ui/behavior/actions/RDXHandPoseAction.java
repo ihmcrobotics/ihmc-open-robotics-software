@@ -171,13 +171,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
                                                                 getDefinition()::getPalmParentFrameName,
-                                                                updatedFrameName ->
-                                                                {
-                                                                   getDefinition().setPalmParentFrameName(updatedFrameName);
-                                                                   getState().getPalmFrame()
-                                                                             .changeFrame(getDefinition().getPalmParentFrameName(),
-                                                                                          getDefinition().getPalmTransformToParent().getValue());
-                                                                });
+                                                                this::changeParentFrame);
 
       tooltip = new RDX3DPanelTooltip(panel3D);
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
@@ -334,5 +328,11 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    public ReferenceFrame getReferenceFrame()
    {
       return poseGizmo.getPoseGizmo().getGizmoFrame();
+   }
+
+   private void changeParentFrame(String newParentFrameName)
+   {
+      getDefinition().setPalmParentFrameName(newParentFrameName);
+      getState().getPalmFrame().changeFrame(getDefinition().getPalmParentFrameName());
    }
 }
