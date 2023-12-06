@@ -82,7 +82,13 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
                                                                 getDefinition()::getParentFrameName,
-                                                                getDefinition()::setParentFrameName);
+                                                                updatedFrameName ->
+                                                                {
+                                                                   getDefinition().setParentFrameName(updatedFrameName);
+                                                                   getState().getChestFrame()
+                                                                             .changeFrame(getDefinition().getParentFrameName(),
+                                                                                          getDefinition().getChestToParentTransform().getValue());
+                                                                });
       yawWidget = new ImDoubleWrapper(getDefinition().getRotation()::getYaw, getDefinition()::setYaw,
                                       imDouble -> ImGuiTools.volatileInputDouble(labels.get("Yaw"), imDouble));
       pitchWidget = new ImDoubleWrapper(getDefinition().getRotation()::getPitch, getDefinition()::setPitch,

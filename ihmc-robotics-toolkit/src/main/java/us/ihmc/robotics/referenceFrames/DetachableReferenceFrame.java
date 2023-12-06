@@ -2,6 +2,8 @@ package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
 /**
@@ -59,6 +61,46 @@ public class DetachableReferenceFrame
          referenceFrame.update(); // Neccessary?
       }
    }
+
+   public void changeFrame(String parentFrameName, RigidBodyTransformBasics transformToParent)
+   {
+      ReferenceFrame parentFrameInWorld = referenceFrameLibrary.findFrameByName(parentFrameName);
+
+      boolean shouldBeChildOfWorld = parentFrameInWorld != null;
+
+      boolean frameNeedsRecreating = referenceFrame == null;
+
+      if (referenceFrame != null)
+      {
+         frameNeedsRecreating |= shouldBeChildOfWorld != isChildOfWorld();
+         frameNeedsRecreating |= referenceFrame.getParent() != parentFrameInWorld;
+      }
+
+      if (frameNeedsRecreating)
+      {
+         ReferenceFrame parentFrame;
+         if (shouldBeChildOfWorld) // Attached to world frame tree
+         {
+            parentFrame = parentFrameInWorld;
+
+            if (referenceFrame.getRootFrame() == parentFrame.getRootFrame())
+            {
+               RigidBodyTransform newTransformToParent = new RigidBodyTransform();
+               referenceFrame.getTransformToDesiredFrame(newTransformToParent, parentFrame);
+               transformToParent.set(newTransformToParent);
+            }
+         }
+         else // Detached under it's own root
+         {
+            parentFrame = ReferenceFrameTools.constructARootFrame(parentFrameName);
+         }
+
+         referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transformToParent);
+      }
+      else
+      {
+         referenceFrame.update(); // Neccessary?
+      }   }
 
    public boolean isChildOfWorld()
    {
