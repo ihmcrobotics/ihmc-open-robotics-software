@@ -103,7 +103,6 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
 
    public void generateFootstepPlanGraphic(FootstepDataListMessage message)
    {
-      LogTools.warn("Generating footstep plan graphic: {}", message.getFootstepDataList().size());
       footstepPlanGraphic.generateMeshesAsync(message, "Continuous Walking");
       footstepPlanGraphic.update();
    }

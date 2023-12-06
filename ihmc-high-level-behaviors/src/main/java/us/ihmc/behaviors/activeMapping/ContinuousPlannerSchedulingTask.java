@@ -202,9 +202,7 @@ public class ContinuousPlannerSchedulingTask
          LogTools.info("State: " + state);
          FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousWalkingParameters, controllerQueue);
 
-         LogTools.warn("Publishing for UI");
          publisherForUI.publish(footstepDataList);
-         LogTools.warn("Published for UI");
          if (continuousWalkingParameters.getStepPublisherEnabled())
          {
             LogTools.info(message = String.format("State: [%s]: Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller", state));
