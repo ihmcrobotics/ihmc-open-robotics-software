@@ -15,7 +15,7 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "61a874561248a71c0bc5890e74b7f7f60fdf6d9803f6ec1aceca02b4d5e69488";
+   		return "0c997ddb04139b7ebbdc0f41ae14e427e5d37bd90365220adf611138fa40f6d6";
    }
    
    @Override
@@ -58,6 +58,12 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -80,6 +86,15 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -92,6 +107,12 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
 
       cdr.write_type_3(data.getNumberOfStepsToSend());
 
+      cdr.write_type_6(data.getForwardValue());
+
+      cdr.write_type_6(data.getLateralValue());
+
+      cdr.write_type_6(data.getTurningValue());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ContinuousWalkingCommandMessage data, us.ihmc.idl.CDR cdr)
@@ -102,6 +123,12 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
       	
       data.setNumberOfStepsToSend(cdr.read_type_3());
       	
+      data.setForwardValue(cdr.read_type_6());
+      	
+      data.setLateralValue(cdr.read_type_6());
+      	
+      data.setTurningValue(cdr.read_type_6());
+      	
 
    }
 
@@ -111,6 +138,9 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
       ser.write_type_7("publish_to_controller", data.getPublishToController());
       ser.write_type_7("enable_continuous_walking", data.getEnableContinuousWalking());
       ser.write_type_3("number_of_steps_to_send", data.getNumberOfStepsToSend());
+      ser.write_type_6("forward_value", data.getForwardValue());
+      ser.write_type_6("lateral_value", data.getLateralValue());
+      ser.write_type_6("turning_value", data.getTurningValue());
    }
 
    @Override
@@ -119,6 +149,9 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
       data.setPublishToController(ser.read_type_7("publish_to_controller"));
       data.setEnableContinuousWalking(ser.read_type_7("enable_continuous_walking"));
       data.setNumberOfStepsToSend(ser.read_type_3("number_of_steps_to_send"));
+      data.setForwardValue(ser.read_type_6("forward_value"));
+      data.setLateralValue(ser.read_type_6("lateral_value"));
+      data.setTurningValue(ser.read_type_6("turning_value"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ContinuousWalkingCommandMessage src, behavior_msgs.msg.dds.ContinuousWalkingCommandMessage dest)

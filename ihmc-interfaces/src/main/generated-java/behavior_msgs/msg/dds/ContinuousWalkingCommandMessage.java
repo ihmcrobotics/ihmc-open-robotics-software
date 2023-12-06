@@ -20,6 +20,18 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
             * number of steps to send to controller
             */
    public int number_of_steps_to_send_;
+   /**
+            * forward joystick value
+            */
+   public double forward_value_;
+   /**
+            * lateral joystick value
+            */
+   public double lateral_value_;
+   /**
+            * turning joystick value
+            */
+   public double turning_value_;
 
    public ContinuousWalkingCommandMessage()
    {
@@ -38,6 +50,12 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
       enable_continuous_walking_ = other.enable_continuous_walking_;
 
       number_of_steps_to_send_ = other.number_of_steps_to_send_;
+
+      forward_value_ = other.forward_value_;
+
+      lateral_value_ = other.lateral_value_;
+
+      turning_value_ = other.turning_value_;
 
    }
 
@@ -86,6 +104,51 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
       return number_of_steps_to_send_;
    }
 
+   /**
+            * forward joystick value
+            */
+   public void setForwardValue(double forward_value)
+   {
+      forward_value_ = forward_value;
+   }
+   /**
+            * forward joystick value
+            */
+   public double getForwardValue()
+   {
+      return forward_value_;
+   }
+
+   /**
+            * lateral joystick value
+            */
+   public void setLateralValue(double lateral_value)
+   {
+      lateral_value_ = lateral_value;
+   }
+   /**
+            * lateral joystick value
+            */
+   public double getLateralValue()
+   {
+      return lateral_value_;
+   }
+
+   /**
+            * turning joystick value
+            */
+   public void setTurningValue(double turning_value)
+   {
+      turning_value_ = turning_value;
+   }
+   /**
+            * turning joystick value
+            */
+   public double getTurningValue()
+   {
+      return turning_value_;
+   }
+
 
    public static Supplier<ContinuousWalkingCommandMessagePubSubType> getPubSubType()
    {
@@ -110,6 +173,12 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_steps_to_send_, other.number_of_steps_to_send_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.forward_value_, other.forward_value_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.lateral_value_, other.lateral_value_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.turning_value_, other.turning_value_, epsilon)) return false;
+
 
       return true;
    }
@@ -129,6 +198,12 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
 
       if(this.number_of_steps_to_send_ != otherMyClass.number_of_steps_to_send_) return false;
 
+      if(this.forward_value_ != otherMyClass.forward_value_) return false;
+
+      if(this.lateral_value_ != otherMyClass.lateral_value_) return false;
+
+      if(this.turning_value_ != otherMyClass.turning_value_) return false;
+
 
       return true;
    }
@@ -144,7 +219,13 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
       builder.append("enable_continuous_walking=");
       builder.append(this.enable_continuous_walking_);      builder.append(", ");
       builder.append("number_of_steps_to_send=");
-      builder.append(this.number_of_steps_to_send_);
+      builder.append(this.number_of_steps_to_send_);      builder.append(", ");
+      builder.append("forward_value=");
+      builder.append(this.forward_value_);      builder.append(", ");
+      builder.append("lateral_value=");
+      builder.append(this.lateral_value_);      builder.append(", ");
+      builder.append("turning_value=");
+      builder.append(this.turning_value_);
       builder.append("}");
       return builder.toString();
    }

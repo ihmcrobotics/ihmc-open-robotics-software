@@ -23,6 +23,18 @@ module behavior_msgs
          * number of steps to send to controller
          */
         unsigned short number_of_steps_to_send;
+        /**
+         * forward joystick value
+         */
+        double forward_value;
+        /**
+         * lateral joystick value
+         */
+        double lateral_value;
+        /**
+         * turning joystick value
+         */
+        double turning_value;
       };
     };
   };

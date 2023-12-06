@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
@@ -40,10 +39,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    private HumanoidPerceptionModule humanoidPerception;
-   private HumanoidActivePerceptionModule activePerceptionModule;
 
    private RDXRapidRegionsUI rapidRegionsUI;
-   private RDXContinuousPlanningPanel continuousPlanningUI;
    private RDXRemoteHeightMapPanel heightMapUI;
 
    private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
@@ -92,20 +89,6 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          this.humanoidPerception = humanoidPerception;
          this.humanoidPerception.setPerceptionConfigurationParameters(remotePerceptionUI.getPerceptionConfigurationParameters());
       }
-   }
-
-   public void setupForActiveMapping(HumanoidActivePerceptionModule activePerceptionModule,
-                                     ROS2SyncedRobotModel syncedRobot,
-                                     ROS2Helper ros2Helper,
-                                     SwingPlannerParametersBasics swingPlannerParameters,
-                                     SwingTrajectoryParameters swingTrajectoryParameters)
-   {
-      if (activePerceptionModule != null)
-      {
-         this.activePerceptionModule = activePerceptionModule;
-      }
-
-      this.continuousPlanningUI = new RDXContinuousPlanningPanel(ros2Helper, activePerceptionModule, syncedRobot, swingPlannerParameters, swingTrajectoryParameters);
    }
 
    public void initializeRapidRegionsUI()
@@ -181,9 +164,6 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
       if (rapidRegionsUI != null)
          rapidRegionsUI.render();
-
-      if (continuousPlanningUI != null)
-         continuousPlanningUI.render();
 
       if (humanoidPerception != null)
       {
@@ -305,9 +285,6 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       if (rapidRegionsUI != null)
          rapidRegionsUI.destroy();
 
-      if (continuousPlanningUI != null)
-         continuousPlanningUI.destroy();
-
       if (heightMapUI != null)
          heightMapUI.destroy();
 
@@ -369,11 +346,6 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    public RDXRemotePerceptionUI getRemotePerceptionUI()
    {
       return remotePerceptionUI;
-   }
-
-   public RDXContinuousPlanningPanel getContinuousPlanningUI()
-   {
-      return continuousPlanningUI;
    }
 
    public RDXHeightMapVisualizer getHeightMapVisualizer()

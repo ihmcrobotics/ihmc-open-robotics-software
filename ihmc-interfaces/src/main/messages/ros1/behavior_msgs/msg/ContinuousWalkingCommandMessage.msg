@@ -8,4 +8,13 @@ bool enable_continuous_walking
 # number of steps to send to controller
 uint16 number_of_steps_to_send
 
+# forward joystick value
+float64 forward_value
+
+# lateral joystick value
+float64 lateral_value
+
+# turning joystick value
+float64 turning_value
+
 
