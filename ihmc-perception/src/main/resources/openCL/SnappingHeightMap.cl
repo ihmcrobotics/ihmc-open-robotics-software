@@ -117,7 +117,6 @@ void kernel computeSnappedValuesKernel(global float* params,
     int crop_idx_y = idx_y;
     int2 crop_key = (int2) (crop_idx_x, crop_idx_y);
 
-    // FIXME why is this negative
     float2 foot_position = indices_to_coordinate(crop_key, center, map_resolution, cropped_center_index);
 
     // Convert from the world coordinate to the map index.
@@ -316,7 +315,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     // FIXME for some reason all the points were bad
     if (n < 0.0001f)
     {
-//        snap_result = SNAP_FAILED;
+        snap_result = SNAP_FAILED;
         failed = true;
         n = 1.0f;
     }
@@ -336,7 +335,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     float3 normal = (float3) (coefficients[0], coefficients[1], 1.0);
     normal = normalize(normal);
 
-    // FIXME remove this?
+    // FIXME include this?
    // snap_height = getZOnPlane(foot_position, (float3) (x_solution, y_solution, z_solution), normal);
 
 
@@ -390,8 +389,6 @@ void kernel computeSnappedValuesKernel(global float* params,
 
                 if (distance_to_foot_from_this_query < min_distance_from_this_point_to_avoid_cliff)
                 {
-                                    printf("near cliff bottom\n");
-
                     // we're too close to the cliff bottom!
                     snap_result = CLIFF_BOTTOM;
                     failed = true;
@@ -400,12 +397,9 @@ void kernel computeSnappedValuesKernel(global float* params,
             }
             else if (relative_height_of_query < -params[CLIFF_START_HEIGHT_TO_AVOID])
             {
-                printf("Checking if cliff top\n");
-
                 // FIXME so this being a hard transition makes it a noisy signal. How can we smooth it?
                 if (distance_to_foot_from_this_query < params[MIN_DISTANCE_FROM_CLIFF_TOPS])
                 {
-                    printf("near cliff top\n");
                     // we're too close to the cliff top!
                     snap_result = CLIFF_TOP;
                     failed = true;
@@ -420,14 +414,10 @@ void kernel computeSnappedValuesKernel(global float* params,
     // TODO extract area fraction
     float min_area_fraction = 0.9f;
     float min_points_needed_for_support = (int) (min_area_fraction * max_points_possible_under_support);
-    if (n < max_points_possible_under_support)
-    {
-        //printf("only %f supported of the total %d. %f needed\n", n, max_points_possible_under_support, min_points_needed_for_support);
-    }
     // FIXME this hard inequality is causing some noise in the solution space. How could we reduce that?
     if (n < min_points_needed_for_support)
     {
-   //     snap_result = NOT_ENOUGH_AREA;
+        snap_result = NOT_ENOUGH_AREA;
     }
 
     snap_height += params[HEIGHT_OFFSET];
