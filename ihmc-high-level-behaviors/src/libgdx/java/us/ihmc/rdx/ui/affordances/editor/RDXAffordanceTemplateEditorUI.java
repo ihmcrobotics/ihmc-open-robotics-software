@@ -627,47 +627,6 @@ public class RDXAffordanceTemplateEditorUI
       }
    }
 
-//   public Point3D findIntersection(Point3D point, Point3D shapeCenter, List<Point3D> convexHullVertices) {
-//      // Calculate the direction vector of the line
-//      Vector3D lineDirection = new Vector3D(shapeCenter.getX() - point.getX(),
-//                                            shapeCenter.getY() - point.getY(),
-//                                            shapeCenter.getZ() - point.getZ());
-//
-//      // Iterate through the convex hull faces to find the intersection point
-//      for (int i = 0; i < convexHullVertices.size(); i++) {
-//         Point3D vertex1 = convexHullVertices.get(i);
-//         Point3D vertex2 = convexHullVertices.get((i + 1) % convexHullVertices.size());
-//
-//         // Calculate the normal vector of the current face
-//         vertex1.sub(point);
-//         vertex2.sub(point);
-//
-//         Vector3D faceNormal = new Vector3D();
-//         faceNormal.cross(vertex1, vertex2);
-//         faceNormal.normalize();
-//
-//         // Check if the line is parallel to the face
-//         if (lineDirection.dot(faceNormal) == 0) {
-//            continue; // Line is parallel to the face, no intersection
-//         }
-//
-//         // Calculate the parameter t for the intersection point
-//         double t = vertex1.dot(faceNormal) / lineDirection.dot(faceNormal);
-//
-//         // Check if the intersection point is within the line segment
-//         if (t >= 0 && t <= 1) {
-//            // Calculate the intersection point
-//            double intersectionX = point.getX() + t * lineDirection.getX();
-//            double intersectionY = point.getY() + t * lineDirection.getY();
-//            double intersectionZ = point.getZ() + t * lineDirection.getZ();
-//
-//            return new Point3D(intersectionX, intersectionY, intersectionZ);
-//         }
-//      }
-//
-//      return null; // No intersection
-//   }
-
    private void reset()
    {
       for (RobotSide side : handPoses.keySet())
