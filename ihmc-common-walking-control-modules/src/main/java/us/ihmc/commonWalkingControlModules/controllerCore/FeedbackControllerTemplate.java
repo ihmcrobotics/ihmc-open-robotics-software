@@ -159,7 +159,7 @@ public class FeedbackControllerTemplate
       {
          Integer otherSize = template.getSpatialFeedbackControllerTemplate().get(rigidBodyBasics);
          Integer currentSize = spatialFeedbackControllerTemplate.get(rigidBodyBasics);
-         if (currentSize == null || otherSize > currentSize)
+         if (otherSize != null && (currentSize == null || otherSize > currentSize))
             spatialFeedbackControllerTemplate.put(rigidBodyBasics, otherSize);
       }
 
@@ -167,7 +167,7 @@ public class FeedbackControllerTemplate
       {
          Integer otherSize = template.getOrientationFeedbackControllerTemplate().get(rigidBodyBasics);
          Integer currentSize = orientationFeedbackControllerTemplate.get(rigidBodyBasics);
-         if (currentSize == null || otherSize > currentSize)
+         if (otherSize != null && (currentSize == null || otherSize > currentSize))
             orientationFeedbackControllerTemplate.put(rigidBodyBasics, otherSize);
       }
 
@@ -175,7 +175,7 @@ public class FeedbackControllerTemplate
       {
          Integer otherSize = template.getPointFeedbackControllerTemplate().get(rigidBodyBasics);
          Integer currentSize = pointFeedbackControllerTemplate.get(rigidBodyBasics);
-         if (currentSize == null || otherSize > currentSize)
+         if (otherSize != null && (currentSize == null || otherSize > currentSize))
             pointFeedbackControllerTemplate.put(rigidBodyBasics, otherSize);
       }
 
