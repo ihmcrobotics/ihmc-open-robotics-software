@@ -6,11 +6,14 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import imgui.type.ImFloat;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
@@ -19,6 +22,7 @@ import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.rdx.imgui.ImGuiInputText;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -70,6 +74,10 @@ public class RDXAffordanceTemplateEditorUI
    private boolean playing = false;
    private long lastPlayTime = 0;
 
+   private final ImFloat fractionalScaling = new ImFloat(0.95F);
+   private final float[] fractionalScaling1 = {1.0f};
+   private boolean fractionalScalingUpdated = false;
+   private boolean affordanceTemplateLoaded = false;
    private final ImGuiInputText textInput = new ImGuiInputText("(optional) Enter additional description");
    private final ImGuiDirectory fileManagerDirectory;
 
@@ -493,13 +501,23 @@ public class RDXAffordanceTemplateEditorUI
          {
             reset();
             fileManager.load();
+            affordanceTemplateLoaded = true;
             objectBuilder.getSelectedObject().setNewScale(true);
          }
          ImGui.separator();
 
-         if (objectBuilder.getSelectedObject().getShape() != null && objectBuilder.getSelectedObject().isNewScale())
+         if (affordanceTemplateLoaded && ImGui.sliderFloat("Affordance Template Fractinol Scaling",
+                                                           fractionalScaling1,
+                                                           0.5f,
+                                                           1.5f))
+         {
+            fractionalScalingUpdated = true;
+         }
+
+         if ((affordanceTemplateLoaded && (objectBuilder.getSelectedObject().isNewScale() || fractionalScalingUpdated) ))
          {
             ImGui.text("Rescaling Affordance Template only works for Primitive shapes.");
+
             if (ImGui.button(labels.get("Rescale Affordance Template")))
             {
                reset();
@@ -507,6 +525,7 @@ public class RDXAffordanceTemplateEditorUI
 
                rescaleAffordanceTemplate();
                objectBuilder.getSelectedObject().setNewScale(false);
+               fractionalScalingUpdated = false;
             }
          }
       }
@@ -589,24 +608,65 @@ public class RDXAffordanceTemplateEditorUI
       {
          case BOX, PRISM:
             if (objectScale[0] != 1.0f || objectScale[1] != 1.0f || objectScale[2] != 1.0f)
-               framePose3D.getTranslation().set(objectScale[0] * framePose3D.getPosition().getX(),
-                                                objectScale[1] * framePose3D.getPosition().getY(),
-                                                objectScale[2] * framePose3D.getPosition().getZ());
+               framePose3D.getTranslation().set(fractionalScaling1[0]*objectScale[0] * framePose3D.getPosition().getX(),
+                                                fractionalScaling1[0]*objectScale[1] * framePose3D.getPosition().getY(),
+                                                fractionalScaling1[0]*objectScale[2] * framePose3D.getPosition().getZ());
             break;
          case CYLINDER, CONE:
             if (objectScale[2] != 1.0f || objectScale[3] != 1.0f)
-               framePose3D.getTranslation().set(objectScale[3] * framePose3D.getPosition().getX(),
-                                                objectScale[3] * framePose3D.getPosition().getY(),
-                                                objectScale[2] * framePose3D.getPosition().getZ());
+               framePose3D.getTranslation().set(fractionalScaling.get()*objectScale[3] * framePose3D.getPosition().getX(),
+                                                fractionalScaling.get()*objectScale[3] * framePose3D.getPosition().getY(),
+                                                fractionalScaling.get()*objectScale[2] * framePose3D.getPosition().getZ());
             break;
          case ELLIPSOID:
             if (objectScale[3] != 1.0f || objectScale[4] != 1.0f || objectScale[5] != 1.0f)
-               framePose3D.getTranslation().set(objectScale[3] * framePose3D.getPosition().getX(),
-                                                objectScale[4] * framePose3D.getPosition().getY(),
-                                                objectScale[5] * framePose3D.getPosition().getZ());
+               framePose3D.getTranslation().set(fractionalScaling.get()*objectScale[3] * framePose3D.getPosition().getX(),
+                                                fractionalScaling.get()*objectScale[4] * framePose3D.getPosition().getY(),
+                                                fractionalScaling.get()*objectScale[5] * framePose3D.getPosition().getZ());
             break;
       }
    }
+
+//   public Point3D findIntersection(Point3D point, Point3D shapeCenter, List<Point3D> convexHullVertices) {
+//      // Calculate the direction vector of the line
+//      Vector3D lineDirection = new Vector3D(shapeCenter.getX() - point.getX(),
+//                                            shapeCenter.getY() - point.getY(),
+//                                            shapeCenter.getZ() - point.getZ());
+//
+//      // Iterate through the convex hull faces to find the intersection point
+//      for (int i = 0; i < convexHullVertices.size(); i++) {
+//         Point3D vertex1 = convexHullVertices.get(i);
+//         Point3D vertex2 = convexHullVertices.get((i + 1) % convexHullVertices.size());
+//
+//         // Calculate the normal vector of the current face
+//         vertex1.sub(point);
+//         vertex2.sub(point);
+//
+//         Vector3D faceNormal = new Vector3D();
+//         faceNormal.cross(vertex1, vertex2);
+//         faceNormal.normalize();
+//
+//         // Check if the line is parallel to the face
+//         if (lineDirection.dot(faceNormal) == 0) {
+//            continue; // Line is parallel to the face, no intersection
+//         }
+//
+//         // Calculate the parameter t for the intersection point
+//         double t = vertex1.dot(faceNormal) / lineDirection.dot(faceNormal);
+//
+//         // Check if the intersection point is within the line segment
+//         if (t >= 0 && t <= 1) {
+//            // Calculate the intersection point
+//            double intersectionX = point.getX() + t * lineDirection.getX();
+//            double intersectionY = point.getY() + t * lineDirection.getY();
+//            double intersectionZ = point.getZ() + t * lineDirection.getZ();
+//
+//            return new Point3D(intersectionX, intersectionY, intersectionZ);
+//         }
+//      }
+//
+//      return null; // No intersection
+//   }
 
    private void reset()
    {
