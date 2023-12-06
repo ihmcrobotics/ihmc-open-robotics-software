@@ -41,7 +41,7 @@ public class RDXImGuiWindowAndDockSystem
    private final ImString newDockPanelName = new ImString("", 100);
    private final TreeSet<RDXDockspacePanel> dockPanelSet = new TreeSet<>(Comparator.comparing(RDXDockspacePanel::getName));
    private final TIntObjectHashMap<RDXDockspacePanel> dockIDMap = new TIntObjectHashMap<>();
-   private final ImGuiPanelManager panelManager;
+   private final RDXPanelManager panelManager;
    private HybridResourceFile imGuiSettingsFile;
    private HybridResourceFile panelsFile;
    private Callback debugMessageCallback;
@@ -52,7 +52,7 @@ public class RDXImGuiWindowAndDockSystem
    public RDXImGuiWindowAndDockSystem(RDXImGuiLayoutManager layoutManager)
    {
       this.layoutManager = layoutManager;
-      panelManager = new ImGuiPanelManager();
+      panelManager = new RDXPanelManager();
    }
 
    public void setDirectory(HybridResourceDirectory configurationDirectory)
@@ -309,7 +309,7 @@ public class RDXImGuiWindowAndDockSystem
       return imGuiGl3;
    }
 
-   public ImGuiPanelManager getPanelManager()
+   public RDXPanelManager getPanelManager()
    {
       return panelManager;
    }
