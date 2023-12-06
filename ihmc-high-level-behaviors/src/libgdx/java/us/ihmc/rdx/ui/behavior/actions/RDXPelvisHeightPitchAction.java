@@ -78,7 +78,13 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
                                                                 getDefinition()::getParentFrameName,
-                                                                getDefinition()::setParentFrameName);
+                                                                updatedFrameName ->
+                                                                {
+                                                                   getDefinition().setParentFrameName(updatedFrameName);
+                                                                   getState().getPelvisFrame()
+                                                                             .changeFrame(getDefinition().getParentFrameName(),
+                                                                                          getDefinition().getPelvisToParentTransform().getValue());
+                                                                });
       heightWidget = new ImDoubleWrapper(getDefinition()::getHeight,
                                          getDefinition()::setHeight,
                                          imDouble -> ImGuiTools.volatileInputDouble(labels.get("Height"), imDouble));
