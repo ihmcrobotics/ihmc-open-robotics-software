@@ -128,7 +128,7 @@ public class TerrainMapStatistics
 
          if (logToFile)
          {
-            LogTools.info("Logging Terrain Map Statistics: {}", file.getAbsoluteFile().toPath());
+//            LogTools.info("Logging Terrain Map Statistics: {}", file.getAbsoluteFile().toPath());
             FileTools.write(file.getAbsoluteFile().toPath(), toString().getBytes(), WriteOption.APPEND, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          }
       }
