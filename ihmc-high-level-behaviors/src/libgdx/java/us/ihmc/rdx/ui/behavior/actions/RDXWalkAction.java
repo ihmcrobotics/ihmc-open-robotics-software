@@ -73,7 +73,7 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
                                                                 getDefinition()::getParentFrameName,
-                                                                getDefinition()::setParentFrameName);
+                                                                getState().getGoalFrame()::changeFrame);
       executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
                                                           getDefinition()::setExecuteWithNextAction,
                                                           imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
