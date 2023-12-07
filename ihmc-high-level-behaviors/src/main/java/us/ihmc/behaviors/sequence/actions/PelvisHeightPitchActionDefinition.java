@@ -110,6 +110,11 @@ public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
       this.parentFrameName.setValue(parentFrameName);
    }
 
+   public CRDTUnidirectionalString getCRDTParentFrameName()
+   {
+      return parentFrameName;
+   }
+
    public CRDTUnidirectionalRigidBodyTransform getPelvisToParentTransform()
    {
       return pelvisToParentTransform;

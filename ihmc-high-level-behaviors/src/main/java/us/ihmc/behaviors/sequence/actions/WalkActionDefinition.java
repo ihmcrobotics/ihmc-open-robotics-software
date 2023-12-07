@@ -125,6 +125,11 @@ public class WalkActionDefinition extends ActionNodeDefinition
       this.parentFrameName.setValue(parentFrameName);
    }
 
+   public CRDTUnidirectionalString getCRDTParentFrameName()
+   {
+      return parentFrameName;
+   }
+
    public CRDTUnidirectionalRigidBodyTransform getGoalToParentTransform()
    {
       return goalToParentTransform;
