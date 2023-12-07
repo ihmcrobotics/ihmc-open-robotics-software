@@ -99,7 +99,15 @@ public class RDXArmManager
       {
          handWrenchCalculators.put(side, new ROS2HandWrenchCalculator(side, syncedRobot));
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
-         desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, robotModel.getJointMap().getArmJointNames()));
+         // TODO: Fix this hack
+         ArmJointName[] armJointNames = new ArmJointName[robotModel.getJointMap().getArmJointNamesAsStrings(side).size()];
+         for (int i = 0; i < robotModel.getJointMap().getArmJointNamesAsStrings(side).size(); i++)
+         {
+            String armJointNameString = robotModel.getJointMap().getArmJointNamesAsStrings(side).get(i);
+            ArmJointName armJointName = robotModel.getJointMap().getArmJointName(armJointNameString).getValue();
+            armJointNames[i] = armJointName;
+         }
+         desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, armJointNames));
       }
 
       for (int i = 0; i < PresetArmConfiguration.values.length; i++)
