@@ -62,7 +62,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
                                                                 getDefinition()::getParentFrameName,
-                                                                getDefinition()::setParentFrameName);
+                                                                this::changeParentFrame);
       swingDurationWidget = new ImDoubleWrapper(getDefinition()::getSwingDuration,
                                                 getDefinition()::setSwingDuration,
                                                 imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
@@ -206,5 +206,13 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    public String getActionTypeTitle()
    {
       return "Footstep Plan";
+   }
+
+   public void changeParentFrame(String newParentFrameName)
+   {
+      for (FootstepPlanActionFootstepState footstepState : getState().getFootsteps())
+      {
+         footstepState.getSoleFrame().changeFrame(getDefinition().getParentFrameName());
+      }
    }
 }

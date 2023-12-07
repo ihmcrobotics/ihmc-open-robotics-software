@@ -122,6 +122,11 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       this.parentFrameName.setValue(parentFrameName);
    }
 
+   public CRDTUnidirectionalString getCRDTParentFrameName()
+   {
+      return parentFrameName;
+   }
+
    public RecyclingArrayList<FootstepPlanActionFootstepDefinition> getFootsteps()
    {
       return footsteps;
