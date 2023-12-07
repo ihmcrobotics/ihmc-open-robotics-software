@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
@@ -16,8 +17,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 public class HeightMapCliffAvoider
 {
    private final FootstepPlannerParametersReadOnly parameters;
@@ -25,26 +24,42 @@ public class HeightMapCliffAvoider
 
    private HeightMapData heightMapData;
    private final ConvexPolygon2D scaledFootPolygon = new ConvexPolygon2D();
+
+   private final SideDependentList<ConvexPolygon2D> defaultFootPolygons;
    private final SideDependentList<ConvexPolygon2DReadOnly> scaledFootPolygons = new SideDependentList<>();
 
    private final Plane3D bestFitPlane = new Plane3D();
 
-   public HeightMapCliffAvoider(FootstepPlannerParametersReadOnly parameters, FootstepSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> footPolygons)
+   private double previousScaledFootPolygonPercentage = Double.NaN;
+
+   public HeightMapCliffAvoider(FootstepPlannerParametersReadOnly parameters, FootstepSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> defaultFootPolygons)
    {
       this.parameters = parameters;
       this.snapper = snapper;
+      this.defaultFootPolygons = defaultFootPolygons;
+      updateScaledFootPolygons();
+   }
+
+   private void updateScaledFootPolygons()
+   {
+      double scaledFootPolygonPercentage = parameters.getScaledFootPolygonPercentage();
+      if (MathTools.epsilonEquals(previousScaledFootPolygonPercentage, scaledFootPolygonPercentage, 0.001))
+      {
+         return;
+      }
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         ConvexPolygon2D scaledFootPolygon = new ConvexPolygon2D(footPolygons.get(robotSide));
-
-         addVertexToFootPolygon(scaledFootPolygon);
-         scaledFootPolygon.scale(parameters.getScaledFootPolygonPercentage());
+         ConvexPolygon2D scaledFootPolygon = new ConvexPolygon2D(defaultFootPolygons.get(robotSide));
+         addVerticesToFootPolygon(scaledFootPolygon);
+         scaledFootPolygon.scale(scaledFootPolygonPercentage);
          scaledFootPolygons.put(robotSide, scaledFootPolygon);
       }
+
+      previousScaledFootPolygonPercentage = scaledFootPolygonPercentage;
    }
 
-   public void addVertexToFootPolygon(ConvexPolygon2D scaledFootPolygon)
+   public void addVerticesToFootPolygon(ConvexPolygon2D scaledFootPolygon)
    {
       int numberOfVertices = scaledFootPolygon.getNumberOfVertices();
       ConvexPolygon2D copyFootPolygon = new ConvexPolygon2D();
@@ -53,13 +68,7 @@ public class HeightMapCliffAvoider
       for (int i = 0; i < numberOfVertices; i++)
       {
          Point2DReadOnly start = copyFootPolygon.getVertex(i);
-         Point2DReadOnly end;
-
-         // Make sure we do the entire loop which includes the line segment back to the first vertex
-         if (i + 1 < numberOfVertices)
-            end = copyFootPolygon.getVertex(i + 1);
-         else
-            end = copyFootPolygon.getVertex(0);
+         Point2DReadOnly end = copyFootPolygon.getNextVertex(i);
 
          if (start.distance(end) > 0.1)
          {
@@ -85,6 +94,7 @@ public class HeightMapCliffAvoider
 
    public boolean isStepValid(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep)
    {
+      updateScaledFootPolygons();
 
       /* Transform to step location */
       FootstepSnapDataReadOnly snapData = snapper.snapFootstep(candidateStep);
