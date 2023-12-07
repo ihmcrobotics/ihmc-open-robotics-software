@@ -16,6 +16,8 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class HeightMapCliffAvoider
 {
@@ -27,16 +29,21 @@ public class HeightMapCliffAvoider
 
    private final SideDependentList<ConvexPolygon2D> defaultFootPolygons;
    private final SideDependentList<ConvexPolygon2DReadOnly> scaledFootPolygons = new SideDependentList<>();
+   private final YoDouble highestCliffHeight;
 
    private final Plane3D bestFitPlane = new Plane3D();
 
    private double previousScaledFootPolygonPercentage = Double.NaN;
 
-   public HeightMapCliffAvoider(FootstepPlannerParametersReadOnly parameters, FootstepSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> defaultFootPolygons)
+   public HeightMapCliffAvoider(FootstepPlannerParametersReadOnly parameters,
+                                FootstepSnapperReadOnly snapper,
+                                SideDependentList<ConvexPolygon2D> defaultFootPolygons,
+                                YoRegistry registry)
    {
       this.parameters = parameters;
       this.snapper = snapper;
       this.defaultFootPolygons = defaultFootPolygons;
+      highestCliffHeight = new YoDouble("highestCliffHeight", registry);
       updateScaledFootPolygons();
    }
 
@@ -70,20 +77,18 @@ public class HeightMapCliffAvoider
          Point2DReadOnly start = copyFootPolygon.getVertex(i);
          Point2DReadOnly end = copyFootPolygon.getNextVertex(i);
 
-         if (start.distance(end) > 0.1)
-         {
-            Point2D firstPointToAdd = new Point2D();
-            firstPointToAdd.interpolate(start, end, 0.3);
-            firstPointToAdd.scale(1.02);
-            scaledFootPolygon.addVertex(firstPointToAdd);
-            scaledFootPolygon.update();
+         int numInterpolations = 5;
 
-            Point2D secondPointToAdd = new Point2D();
-            secondPointToAdd.interpolate(start, end, 1 - 0.3);
-            secondPointToAdd.scale(1.02);
-            scaledFootPolygon.addVertex(secondPointToAdd);
-            scaledFootPolygon.update();
+         for (int j = 0; j < numInterpolations; j++)
+         {
+            double alpha = (j + 1.0) / (numInterpolations + 1.0);
+            Point2D pointToAdd = new Point2D();
+            pointToAdd.interpolate(start, end, alpha);
+            pointToAdd.scale(1.02);
+            scaledFootPolygon.addVertex(pointToAdd);
          }
+
+         scaledFootPolygon.update();
       }
    }
 
@@ -112,13 +117,15 @@ public class HeightMapCliffAvoider
       bestFitPlane.getPoint().set(snappedStepTransform.getTranslation());
       bestFitPlane.getNormal().set(Axis3D.Z);
       snappedStepTransform.getRotation().transform(bestFitPlane.getNormal());
+      highestCliffHeight.set(Double.NEGATIVE_INFINITY);
 
       for (int pointIdx = 0; pointIdx < scaledFootPolygon.getNumberOfVertices(); pointIdx++)
       {
          Point2DReadOnly polygonVertex = scaledFootPolygon.getVertex(pointIdx);
          double zBestFitPlane = bestFitPlane.getZOnPlane(polygonVertex.getX(), polygonVertex.getY());
          double zHeightMap = heightMapData.getHeightAt(polygonVertex.getX(), polygonVertex.getY());
-         double distanceFromBestFitPlane = Math.abs(zBestFitPlane - zHeightMap);
+         double distanceFromBestFitPlane = zHeightMap - zBestFitPlane;
+         highestCliffHeight.set(Math.max(distanceFromBestFitPlane, highestCliffHeight.getValue()));
 
          if (distanceFromBestFitPlane > parameters.getCliffHeightThreshold())
          {

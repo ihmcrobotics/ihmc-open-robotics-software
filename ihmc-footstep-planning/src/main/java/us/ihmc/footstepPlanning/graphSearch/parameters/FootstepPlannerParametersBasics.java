@@ -548,5 +548,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setRMSMinErrorToPenalize(parametersPacket.getRmsMinErrorToPenalize());
       if (parametersPacket.getHeightMapSnapThreshold() != noValue)
          setHeightMapSnapThreshold(parametersPacket.getHeightMapSnapThreshold());
+
+      if (parametersPacket.getCliffHeightThreshold() != noValue)
+         setCliffHeightThreshold(parametersPacket.getCliffHeightThreshold());
+      if (parametersPacket.getScaledFootPolygonPercentage() != noValue)
+         setScaledFootPolygonPercentage(parametersPacket.getScaledFootPolygonPercentage());
    }
 }

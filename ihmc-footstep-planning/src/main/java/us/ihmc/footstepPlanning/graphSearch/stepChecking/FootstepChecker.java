@@ -60,7 +60,7 @@ public class FootstepChecker implements FootstepCheckerInterface
       this.parameters = parameters;
       this.snapper = snapper;
       this.footPolygons = footPolygons;
-      this.heightMapCliffAvoider = new HeightMapCliffAvoider(parameters, snapper, footPolygons);
+      this.heightMapCliffAvoider = new HeightMapCliffAvoider(parameters, snapper, footPolygons, registry);
       this.planarRegionCliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
       this.obstacleBetweenStepsChecker = new ObstacleBetweenStepsChecker(parameters, snapper);
       this.collisionDetector = new FootstepPlannerBodyCollisionDetector(parameters);
