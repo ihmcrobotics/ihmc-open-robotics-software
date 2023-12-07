@@ -85,14 +85,7 @@ public class ArmIKSolver
    {
       RigidBodyBasics sourceChest = sourceFullRobotModel.getChest();
       OneDoFJointBasics sourceFirstArmJoint = sourceFullRobotModel.getArmJoint(side, robotModel.getJointMap().getArmJointNames()[0]);
-      // TODO: Fix this hack
-      ArmJointName[] armJointNames = new ArmJointName[robotModel.getJointMap().getArmJointNamesAsStrings(side).size()];
-      for (int i = 0; i < robotModel.getJointMap().getArmJointNamesAsStrings(side).size(); i++)
-      {
-         String armJointNameString = robotModel.getJointMap().getArmJointNamesAsStrings(side).get(i);
-         ArmJointName armJointName = robotModel.getJointMap().getArmJointName(armJointNameString).getValue();
-         armJointNames[i] = armJointName;
-      }
+      ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames(side);
       sourceOneDoFJoints = FullRobotModelUtils.getArmJoints(sourceFullRobotModel, side, armJointNames);
 
       // We clone a detached chest and single arm for the WBCC to work with. We just want to find arm joint angles.
