@@ -114,11 +114,14 @@ public class TerrainPlanningSimulationUI
    private final ImBoolean enableMonteCarloPlanner = new ImBoolean(false);
    private final ImFloat startMidX = new ImFloat(0.0f);
    private final ImFloat startMidY = new ImFloat(0.0f);
+   private final ImFloat startMidZ = new ImFloat(0.0f);
    private final ImFloat startYaw = new ImFloat(0.0f);
 
    private final ImFloat goalMidX = new ImFloat(1.5f);
    private final ImFloat goalMidY = new ImFloat(0.0f);
    private final ImFloat goalYaw = new ImFloat(0.0f);
+
+   private final ImBoolean enableSliders = new ImBoolean(false);
 
    private int autoIncrementCounter = 0;
    private int plansLoggedSoFar = 0;
@@ -226,6 +229,12 @@ public class TerrainPlanningSimulationUI
                footstepPlanGraphic.generateMeshesAsync(footstepsMessage, "Height Map Simulation");
                footstepPlanGraphic.update();
             }
+
+            l515PoseGizmo.getTransformToParent().getTranslation().setX(startMidX.get());
+            l515PoseGizmo.getTransformToParent().getTranslation().setY(startMidY.get());
+            l515PoseGizmo.getTransformToParent().getTranslation().setZ(startMidZ.get());
+            l515PoseGizmo.getTransformToParent().getRotation().setYawPitchRoll(startYaw.get(), 0, 0);
+            l515PoseGizmo.update();
 
             humanoidPerceptionUI.update();
             footstepPlanGraphic.update();
@@ -342,6 +351,7 @@ public class TerrainPlanningSimulationUI
             ImGui.separator();
             ImGui.sliderFloat("Start Mid X", startMidX.getData(), -2.0f, 2.0f);
             ImGui.sliderFloat("Start Mid Y", startMidY.getData(), -2.0f, 2.0f);
+            ImGui.sliderFloat("Start Mid Z", startMidZ.getData(), 1.0f, 3.0f);
             ImGui.sliderFloat("Start Yaw", startYaw.getData(), (float) -Math.PI, (float) Math.PI);
             ImGui.sliderFloat("Goal Mid X", goalMidX.getData(), -2.0f, 2.0f);
             ImGui.sliderFloat("Goal Mid Y", goalMidY.getData(), -2.0f, 2.0f);
