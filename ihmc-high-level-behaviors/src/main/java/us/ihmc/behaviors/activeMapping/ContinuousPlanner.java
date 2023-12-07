@@ -528,12 +528,26 @@ public class ContinuousPlanner
       return i;
    }
 
-   public void updateImminentStance(FramePose3D nextRobotStepAfterCurrent, FramePose3D imminentFootstepPose, RobotSide imminentFootstepSide)
+   public boolean updateImminentStance(FramePose3D nextRobotStepAfterCurrent, FramePose3D imminentFootstepPose, RobotSide imminentFootstepSide)
    {
+      FramePose3D oldLeftPose = new FramePose3D();
+      FramePose3D oldRightPose = new FramePose3D();
+      oldLeftPose.set(startingStancePose.get(RobotSide.LEFT));
+      oldRightPose.set(startingStancePose.get(RobotSide.RIGHT));
+
       this.imminentFootstepPose.set(imminentFootstepPose);
       this.imminentFootstepSide = imminentFootstepSide;
       startingStancePose.get(imminentFootstepSide.getOppositeSide()).set(nextRobotStepAfterCurrent);
       startingStancePose.get(imminentFootstepSide).set(imminentFootstepPose);
+
+      if (startingStancePose.get(RobotSide.LEFT).equals(oldLeftPose) && startingStancePose.get(RobotSide.RIGHT).equals(oldRightPose))
+      {
+         return false;
+      }
+      else
+      {
+         return true;
+      }
    }
 
    public void transitionCallback()

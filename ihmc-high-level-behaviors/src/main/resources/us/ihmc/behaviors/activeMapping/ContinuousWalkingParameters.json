@@ -12,6 +12,6 @@
   "Planner timeout fraction" : 0.3,
   "Planning reference timeout" : 0.3,
   "Planning without reference timeout" : 1.3,
-  "Log footstep plans" : false
+  "Log footstep plans" : true
 }
 

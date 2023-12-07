@@ -13,6 +13,8 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.communication.video.ContinuousPlanningAPI;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -99,6 +101,9 @@ public class ContinuousPlannerSchedulingTask
       executorService.scheduleWithFixedDelay(this::tickStateMachine, 1500, CONTINUOUS_PLANNING_DELAY_MS, TimeUnit.MILLISECONDS);
    }
 
+   FramePose3D rightRobotFoot;
+   FramePose3D leftRobotFoot;
+
    /**
     * Runs the continuous planner state machine every ACTIVE_MAPPING_UPDATE_TICK_MS milliseconds. The state is stored in the ContinuousWalkingState
     */
@@ -109,16 +114,24 @@ public class ContinuousPlannerSchedulingTask
       //      continuousWalkingParameters.setPlanningReferenceTimeout(stepDuration * continuousWalkingParameters.getPlannerTimeoutFraction());
 
       if (!continuousWalkingParameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
-      //if (!continuousWalkingParameters.getEnableContinuousWalking())
       {
          stopContinuousWalkingGracefully();
 
          state = ContinuousWalkingState.NOT_STARTED;
+
+         rightRobotFoot = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                     referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+         leftRobotFoot = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                          referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
+
+         if (continuousPlanner.updateImminentStance(rightRobotFoot, leftRobotFoot, RobotSide.RIGHT))
+            publishStartAndGoalForVisualization();
          return;
       }
 
       if (!continuousPlanner.isInitialized())
       {
+         LogTools.info("Restarting State Machine");
          initializeContinuousPlanner();
       }
       else

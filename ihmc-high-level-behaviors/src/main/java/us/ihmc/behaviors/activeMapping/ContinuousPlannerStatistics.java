@@ -196,13 +196,17 @@ public class ContinuousPlannerStatistics
    {
       StringBuilder builder = new StringBuilder();
       builder.append("ContinuousPlannerStatistics: [");
+
+      builder.append("continuous_walking_speed").append(":").append(statistics.get(TOTAL_DISTANCE_COMPLETED) / statistics.get(TOTAL_CONTINUOUS_WALKING_TIME));
       for (String key : statistics.keySet())
       {
          builder.append(key).append(":").append(statistics.get(key)).append(", ");
       }
+
       builder.append("]\n");
       LogTools.warn("Additional String: {}", additionalString.toString());
       builder.append(additionalString.toString()).append("\n");
+
       return builder.toString();
    }
 

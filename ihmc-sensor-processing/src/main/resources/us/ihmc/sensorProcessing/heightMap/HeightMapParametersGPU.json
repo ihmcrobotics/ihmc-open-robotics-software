@@ -176,5 +176,5 @@
   },
   "Estimate height with kalman filter" : true,
   "Denoiser enabled" : false,
-  "Statistics logging enabled" : false
+  "Statistics logging enabled" : true
 }

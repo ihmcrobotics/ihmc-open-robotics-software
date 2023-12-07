@@ -112,6 +112,11 @@ public class RDXRemotePerceptionUI
       return heightMapParameters;
    }
 
+   public FootstepPlannerParametersBasics getFootstepPlannerParameters()
+   {
+      return footstepPlannerParameters;
+   }
+
    public void setFootstepPlannerParameters(FootstepPlannerParametersBasics parameters)
    {
       this.footstepPlannerParameters = parameters;
