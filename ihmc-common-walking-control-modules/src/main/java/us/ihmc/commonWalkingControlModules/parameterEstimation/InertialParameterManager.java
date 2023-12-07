@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -9,6 +10,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
+import us.ihmc.parameterEstimation.NadiaInertialExtendedKalmanFilterParameters;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
@@ -24,7 +27,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InertialExtendedKalmanFilter
+public class InertialParameterManager
 {
    private final YoBoolean enableFilter;
 
@@ -59,12 +62,16 @@ public class InertialExtendedKalmanFilter
    private final DMatrixRMaj inertialParameterPiBasisContainer;
    private final DMatrixRMaj inertialParameterThetaBasisContainer;
 
+   private final List<DMatrixRMaj> parametersFromUrdf = new ArrayList<>();
+
    // DEBUG variables
    private static final boolean DEBUG = true;
 
    private final YoMatrix residual;
 
-   public InertialExtendedKalmanFilter(HighLevelHumanoidControllerToolbox toolbox, YoRegistry parentRegistry)
+   private final InertialExtendedKalmanFilter inertialExtendedKalmanFilter;
+
+   public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, YoRegistry parentRegistry)
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
@@ -123,6 +130,9 @@ public class InertialExtendedKalmanFilter
             inertialParametersPiBasisWatchers.get(inertialParametersPiBasisWatchers.size() - 1).set(inertialParameterPiBasisContainer);
             inertialParameters.get(inertialParameters.size() - 1).getParameterVectorThetaBasis(inertialParameterThetaBasisContainer);
             inertialParametersThetaBasisWatchers.get(inertialParametersThetaBasisWatchers.size() - 1).set(inertialParameterThetaBasisContainer);
+
+            parametersFromUrdf.add(new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1));
+            parametersFromUrdf.get(parametersFromUrdf.size() - 1).set(inertialParameterPiBasisContainer);
          }
       }
 
@@ -145,6 +155,8 @@ public class InertialExtendedKalmanFilter
          }
          residual = new YoMatrix("residual", totalNumberOfDoFs, 1, rowNames, registry);
       }
+
+      inertialExtendedKalmanFilter = new InertialExtendedKalmanFilter(0, totalNumberOfDoFs);
    }
 
    public void update()
@@ -270,6 +282,102 @@ public class InertialExtendedKalmanFilter
       }
       default:
          throw new RuntimeException("Unhandled case: " + representation);
+      }
+   }
+
+   private class InertialExtendedKalmanFilter extends ExtendedKalmanFilter
+   {
+      /** Process model Jacobian */
+      private final DMatrixRMaj F;
+      private final DMatrixRMaj G;
+
+      private final DMatrixRMaj generalizedTorques;
+      private final DMatrixRMaj generalizedContactWrenches;
+
+      private final List<Boolean> isRigidBodyBeingEstimated;
+      private final List<DMatrixRMaj> parametersFromUrdf;
+
+      private final DMatrixRMaj parameterContainer;
+      private final DMatrixRMaj measurement;
+
+      public InertialExtendedKalmanFilter(int numberOfParametersToEstimate, int totalNumberOfDoFs)
+      {
+         super(numberOfParametersToEstimate, totalNumberOfDoFs);
+
+         F = CommonOps_DDRM.identity(numberOfParametersToEstimate, numberOfParametersToEstimate);
+         G = new DMatrixRMaj(totalNumberOfDoFs, numberOfParametersToEstimate);
+
+         measurement = new DMatrixRMaj(totalNumberOfDoFs, 1);
+
+         generalizedTorques = new DMatrixRMaj(totalNumberOfDoFs, 1);
+         generalizedContactWrenches = new DMatrixRMaj(totalNumberOfDoFs, 1);
+      }
+
+      @Override
+      protected DMatrixRMaj linearizeProcessModel(DMatrixRMaj previousState)
+      {
+         return F;  // In the constructor, F is set to the identity matrix
+      }
+
+      @Override
+      protected DMatrixRMaj linearizeMeasurementModel(DMatrixRMaj predictedParameters)
+      {
+         G.zero();
+         for (int i = 0; i < isRigidBodyBeingEstimated.size(); ++i)
+         {
+            if (isRigidBodyBeingEstimated.get(i))
+            {
+               MatrixMissingTools.setMatrixBlock(regressorBlockContainer, 0, 0, regressor, 0, i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, totalNumberOfDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1.0);
+               MatrixMissingTools.setMatrixBlock(G, 0, i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, regressorBlockContainer, 0, 0, totalNumberOfDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1.0);
+            }
+         }
+      }
+
+      @Override
+      protected DMatrixRMaj processModel(DMatrixRMaj parameters)
+      {
+         return parameters;
+      }
+
+      /**
+       * Ensure that {@link #setTorquesContribution(DMatrixRMaj)} and {@link #setContactWrenchesContribution(DMatrixRMaj)} are called first.
+       */
+      @Override
+      protected DMatrixRMaj measurementModel(DMatrixRMaj parameters)
+      {
+         // Subtract the contribution of the contact wrenches from the generalized torques
+         measurement.set(generalizedTorques);
+         CommonOps_DDRM.subtractEquals(generalizedTorques, generalizedContactWrenches);
+
+         int bodiesToEstimateIndex = 0;
+
+         // Looping over a list of length equal to the number of rigid bodies. If the rigid body is being estimated
+         for (int i = 0; i < isRigidBodyBeingEstimated.size(); ++i)
+         {
+            MatrixMissingTools.setMatrixBlock(regressorBlockContainer, 0, 0, regressor, 0, i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, totalNumberOfDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1.0);
+
+            if (isRigidBodyBeingEstimated.get(i))
+            {
+               MatrixMissingTools.setMatrixBlock(parameterContainer, 0, 0, parameters, bodiesToEstimateIndex * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 0, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1, 1.0);
+               CommonOps_DDRM.multAdd(-1.0, regressorBlockContainer, parameterContainer, measurement);
+               bodiesToEstimateIndex += 1;
+            }
+            else
+            {
+               CommonOps_DDRM.multAdd(-1.0, regressorBlockContainer, parametersFromUrdf.get(i), measurement);
+            }
+         }
+         return measurement;
+      }
+
+      public void setTorquesContribution(DMatrixRMaj torquesContribution)
+      {
+         generalizedTorques.set(torquesContribution);
+      }
+
+      public void setContactWrenchesContribution(DMatrixRMaj contactWrenchesContribution)
+      {
+         generalizedContactWrenches.set(contactWrenchesContribution);
       }
    }
 }
