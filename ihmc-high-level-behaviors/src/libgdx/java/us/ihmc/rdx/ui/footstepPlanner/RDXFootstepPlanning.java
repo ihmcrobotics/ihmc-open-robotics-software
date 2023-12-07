@@ -131,9 +131,7 @@ public class RDXFootstepPlanning
       footstepPlanner.getSwingPlannerParameters().set(swingFootPlannerParameters);
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
-
       footstepPlannerRequest.setTimeout(locomotionParameters.getFootstepPlannerTimeout());
-
       footstepPlannerRequest.setGoalFootPoses(locomotionParameters.getIdealGoalFootstepWidth(), goalPose);
 
       if (locomotionParameters.getPlanSwingTrajectories())
@@ -197,9 +195,6 @@ public class RDXFootstepPlanning
          footstepPlannerRequest.getBodyPathWaypoints().add(startPose);
          footstepPlannerRequest.getBodyPathWaypoints().add(goalPose);
       }
-
-      // TODO: Set start footholds!!
-      //      request.setTimeout(lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped());
 
       footstepPlanner.handleRequest(footstepPlannerRequest);
 
