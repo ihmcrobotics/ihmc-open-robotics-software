@@ -2,26 +2,28 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class PelvisHeightPitchActionState extends ActionNodeState<PelvisHeightPitchActionDefinition>
 {
-   private final DetachableReferenceFrame pelvisFrame;
+   private final CRDTDetachableReferenceFrame pelvisFrame;
 
    public PelvisHeightPitchActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(id, new PelvisHeightPitchActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      pelvisFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getPelvisToParentTransform().getValueReadOnly());
+      pelvisFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
+                                                     getDefinition().getCRDTParentFrameName(),
+                                                     getDefinition().getPelvisToParentTransform());
    }
 
    @Override
    public void update()
    {
-      pelvisFrame.update(getDefinition().getParentFrameName());
+      pelvisFrame.update();
    }
 
    public void toMessage(PelvisHeightPitchActionStateMessage message)
@@ -38,7 +40,7 @@ public class PelvisHeightPitchActionState extends ActionNodeState<PelvisHeightPi
       getDefinition().fromMessage(message.getDefinition());
    }
 
-   public DetachableReferenceFrame getPelvisFrame()
+   public CRDTDetachableReferenceFrame getPelvisFrame()
    {
       return pelvisFrame;
    }
