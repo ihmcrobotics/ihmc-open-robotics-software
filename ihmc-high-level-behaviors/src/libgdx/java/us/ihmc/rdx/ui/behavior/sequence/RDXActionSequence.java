@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -90,7 +91,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       }
       ImGuiTools.previousWidgetTooltip("Go to next action");
 
-      boolean endOfSequence = getState().getExecutionNextIndex() >= getChildren().size();
+      boolean endOfSequence = getState().getExecutionNextIndex() >= getIndexEndOfSequence(getChildren());
       if (!endOfSequence)
       {
          String nextActionRejectionTooltip = getState().getNextActionRejectionTooltip();
@@ -167,5 +168,18 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
          actionProgressBars.setAction(currentlyExecutingAction);
       }
       multipleActionProgressBars.render();
+   }
+
+   private int getIndexEndOfSequence(List<RDXBehaviorTreeNode<?, ?>> children) {
+      int endIndex = children.size() - 1; // Count the immediate children
+      for (var child : children)
+      {
+         if (child.getChildren().size() > 0)
+         {
+            // Add the count of child's children recursively
+            endIndex += getIndexEndOfSequence(child.getChildren());
+         }
+      }
+      return endIndex;
    }
 }
