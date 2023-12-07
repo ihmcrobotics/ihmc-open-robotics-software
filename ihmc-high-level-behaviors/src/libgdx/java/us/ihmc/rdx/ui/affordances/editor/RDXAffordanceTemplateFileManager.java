@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -87,8 +88,9 @@ public class RDXAffordanceTemplateFileManager
          LogTools.info("Saving to file ...");
          JSONFileTools.save(file, jsonNode ->
          {
-            jsonNode.put("name", fileName);
-            ArrayNode actionsArrayNode = jsonNode.putArray("actions");
+            jsonNode.put("type", BehaviorTreeNodeDefinition.class.getSimpleName());
+            jsonNode.put("description", fileName);
+            ArrayNode actionsArrayNode = jsonNode.putArray("children");
 
             var preGraspPoses = preGraspFrames.getPoses();
             var graspPoses = graspFrame.getPoses();
@@ -114,12 +116,8 @@ public class RDXAffordanceTemplateFileManager
                      ObjectNode actionNode = actionsArrayNode.addObject();
                      actionNode.put("type", HandPoseActionDefinition.class.getSimpleName());
                      actionNode.put("description", "Pre-grasp " + side.getPascalCaseName() + " Hand Pose");
-                     actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
-                     actionNode.put("side", side.getLowerCaseName());
-                     actionNode.put("trajectoryDuration", trajectoryDurations.get(side).get(i));
-                     preGraspPoses.get(side).get(i).changeFrame(affordanceFrame.getReferenceFrame());
-                     RigidBodyTransform transformToParent = new RigidBodyTransform(preGraspPoses.get(side).get(i));
-                     JSONTools.toJSON(actionNode, transformToParent);
+                     actionNode.putArray("children");
+
                      boolean bothPosesAreSet = false;
                      if (activeSides.size() == 2)
                      {
@@ -140,8 +138,17 @@ public class RDXAffordanceTemplateFileManager
                         actionNode.put("executeWithNextAction", executeWithNextAction);
                      }
                      else
-                        actionNode.put("executeWithNextAction", preGraspHandConfigurations.get(side).get(i) != null ? true : false);
+                        actionNode.put("executeWithNextAction", preGraspHandConfigurations.get(side).get(i) != null);
+
+                     actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
+                     preGraspPoses.get(side).get(i).changeFrame(affordanceFrame.getReferenceFrame());
+                     RigidBodyTransform transformToParent = new RigidBodyTransform(preGraspPoses.get(side).get(i));
+                     JSONTools.toJSON(actionNode, transformToParent);
+
+                     actionNode.put("side", side.getLowerCaseName());
+                     actionNode.put("trajectoryDuration", trajectoryDurations.get(side).get(i));
                      actionNode.put("holdPoseInWorldLater", true);
+                     actionNode.put("jointSpaceControl", true);
 
                      double[] dataTrajectories = new double[16];
                      transformToParent.get(dataTrajectories);
@@ -174,12 +181,8 @@ public class RDXAffordanceTemplateFileManager
                   ObjectNode actionNode = actionsArrayNode.addObject();
                   actionNode.put("type", HandPoseActionDefinition.class.getSimpleName());
                   actionNode.put("description", "Grasp " + side.getPascalCaseName() + " Hand Pose");
-                  actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
-                  actionNode.put("side", side.getLowerCaseName());
-                  actionNode.put("trajectoryDuration", trajectoryDurations.get(side).get(preGraspPoses.get(side).size()));
-                  graspPoses.get(side).changeFrame(affordanceFrame.getReferenceFrame());
-                  RigidBodyTransform transformToParent = new RigidBodyTransform(graspPoses.get(side));
-                  JSONTools.toJSON(actionNode, transformToParent);
+                  actionNode.putArray("children");
+
                   boolean bothPosesAreSet = false;
                   if (activeSides.size() == 2)
                   {
@@ -199,8 +202,17 @@ public class RDXAffordanceTemplateFileManager
                      actionNode.put("executeWithNextAction", executeWithNextAction);
                   }
                   else
-                     actionNode.put("executeWithNextAction", graspFrame.getHandConfiguration(side) != null ? true : false);
+                     actionNode.put("executeWithNextAction", graspFrame.getHandConfiguration(side) != null);
+
+                  actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
+                  graspPoses.get(side).changeFrame(affordanceFrame.getReferenceFrame());
+                  RigidBodyTransform transformToParent = new RigidBodyTransform(graspPoses.get(side));
+                  JSONTools.toJSON(actionNode, transformToParent);
+
+                  actionNode.put("side", side.getLowerCaseName());
+                  actionNode.put("trajectoryDuration", trajectoryDurations.get(side).get(preGraspPoses.get(side).size()));
                   actionNode.put("holdPoseInWorldLater", true);
+                  actionNode.put("jointSpaceControl", true);
 
                   double[] dataTrajectories = new double[16];
                   transformToParent.get(dataTrajectories);
@@ -239,12 +251,8 @@ public class RDXAffordanceTemplateFileManager
                      ObjectNode actionNode = actionsArrayNode.addObject();
                      actionNode.put("type", HandPoseActionDefinition.class.getSimpleName());
                      actionNode.put("description", "Post-grasp " + side.getPascalCaseName() + " Hand Pose");
-                     actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
-                     actionNode.put("side", side.getLowerCaseName());
-                     actionNode.put("trajectoryDuration", trajectoryDurations.get(side).get(preGraspPoses.get(side).size() + 1 + i));
-                     postGraspPoses.get(side).get(i).changeFrame(affordanceFrame.getReferenceFrame());
-                     RigidBodyTransform transformToParent = new RigidBodyTransform(postGraspPoses.get(side).get(i));
-                     JSONTools.toJSON(actionNode, transformToParent);
+                     actionNode.putArray("children");
+
                      boolean bothPosesAreSet = false;
                      if (activeSides.size() == 2)
                      {
@@ -265,8 +273,17 @@ public class RDXAffordanceTemplateFileManager
                         actionNode.put("executeWithNextAction", executeWithNextAction);
                      }
                      else
-                        actionNode.put("executeWithNextAction", postGraspHandConfigurations.get(side).get(i) != null ? true : false);
+                        actionNode.put("executeWithNextAction", postGraspHandConfigurations.get(side).get(i) != null);
+
+                     actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
+                     postGraspPoses.get(side).get(i).changeFrame(affordanceFrame.getReferenceFrame());
+                     RigidBodyTransform transformToParent = new RigidBodyTransform(postGraspPoses.get(side).get(i));
+                     JSONTools.toJSON(actionNode, transformToParent);
+
+                     actionNode.put("side", side.getLowerCaseName());
+                     actionNode.put("trajectoryDuration", trajectoryDurations.get(side).get(preGraspPoses.get(side).size() + 1 + i));
                      actionNode.put("holdPoseInWorldLater", (i != numberOfPostGraspFrames - 1));
+                     actionNode.put("jointSpaceControl", true);
 
                      double[] dataTrajectories = new double[16];
                      transformToParent.get(dataTrajectories);
