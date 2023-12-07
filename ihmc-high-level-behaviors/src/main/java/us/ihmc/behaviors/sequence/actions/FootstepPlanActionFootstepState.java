@@ -1,14 +1,14 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
-import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
+import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class FootstepPlanActionFootstepState
 {
    private final FootstepPlanActionState footstepPlan;
    private final FootstepPlanActionFootstepDefinition definition;
-   private final DetachableReferenceFrame soleFrame;
+   private final CRDTDetachableReferenceFrame soleFrame;
    private int index = -1;
 
    public FootstepPlanActionFootstepState(ReferenceFrameLibrary referenceFrameLibrary,
@@ -18,12 +18,14 @@ public class FootstepPlanActionFootstepState
       this.footstepPlan = footstepPlan;
       this.definition = definition;
 
-      soleFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getSoleToPlanFrameTransform().getValueReadOnly());
+      soleFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
+                                                   footstepPlan.getDefinition().getCRDTParentFrameName(),
+                                                   definition.getSoleToPlanFrameTransform());
    }
 
    public void update()
    {
-      soleFrame.update(footstepPlan.getDefinition().getParentFrameName());
+      soleFrame.update();
    }
 
    public void toMessage(FootstepPlanActionFootstepStateMessage message)
@@ -41,7 +43,7 @@ public class FootstepPlanActionFootstepState
       return definition;
    }
 
-   public DetachableReferenceFrame getSoleFrame()
+   public CRDTDetachableReferenceFrame getSoleFrame()
    {
       return soleFrame;
    }

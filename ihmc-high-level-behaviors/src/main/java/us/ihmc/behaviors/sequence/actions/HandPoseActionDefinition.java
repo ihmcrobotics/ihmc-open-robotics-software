@@ -134,6 +134,11 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       this.palmParentFrameName.setValue(palmParentFrameName);
    }
 
+   public CRDTUnidirectionalString getCRDTPalmParentFrameName()
+   {
+      return palmParentFrameName;
+   }
+
    public CRDTUnidirectionalRigidBodyTransform getPalmTransformToParent()
    {
       return palmTransformToParent;
