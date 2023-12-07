@@ -17,7 +17,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.20.0")
+   api("us.ihmc:euclid:0.21.0")
    api("commons-net:commons-net:3.3")
    api("org.yaml:snakeyaml:1.17") //1.11
    api("us.ihmc:ihmc-realtime:1.6.0")

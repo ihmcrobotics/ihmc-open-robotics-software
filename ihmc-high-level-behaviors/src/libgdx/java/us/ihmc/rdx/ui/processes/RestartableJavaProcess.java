@@ -6,14 +6,9 @@ public class RestartableJavaProcess extends RestartableProcess
 {
    private final JavaProcessSpawner spawner;
    private final Class<?> mainClass;
-   private String[] javaArgs;
+   private final String[] javaArgs;
    private Process process;
    private int destroyCount = 0;
-
-   public RestartableJavaProcess(Class<?> mainClass)
-   {
-      this(mainClass, null);
-   }
 
    public RestartableJavaProcess(Class<?> mainClass, String[] javaArgs)
    {

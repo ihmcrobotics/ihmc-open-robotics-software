@@ -18,8 +18,8 @@ mainDependencies {
    api("jakarta.xml.bind:jakarta.xml.bind-api:2.3.2")
    api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
-   api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:euclid-geometry:0.20.0")
+   api("us.ihmc:euclid:0.21.0")
+   api("us.ihmc:euclid-geometry:0.21.0")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-sensor-processing:source")
@@ -30,8 +30,8 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:euclid-geometry:0.20.0")
+   api("us.ihmc:euclid:0.21.0")
+   api("us.ihmc:euclid-geometry:0.21.0")
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }

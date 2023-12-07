@@ -9,7 +9,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 /**
  * Natural Posture deals with the center of mass orientation or angular center of mass. It is a conceptualization of the average orientation of the
  * robot, similar to how center of mass is the average position of all mass in the robot. It short, it is the angle to which the robot is servoed.
- * REF: Y.-M. Chen, G. Nelson, R. Griffin, M. Posa, and J. Pratt, “Angular Center of Mass for Humanoid Robots.” 2022. http://arxiv.org/abs/2210.08111
+ * REF: Y.-M. Chen, G. Nelson, R. Griffin, M. Posa, and J. Pratt, "Angular Center of Mass for Humanoid Robots." 2022. http://arxiv.org/abs/2210.08111
  */
 public interface HumanoidRobotNaturalPosture
 {
