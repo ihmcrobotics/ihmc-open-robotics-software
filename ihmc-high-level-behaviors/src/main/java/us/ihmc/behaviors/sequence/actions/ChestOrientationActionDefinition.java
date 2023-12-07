@@ -123,6 +123,11 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
       this.parentFrameName.setValue(parentFrameName);
    }
 
+   public CRDTUnidirectionalString getCRDTParentFrameName()
+   {
+      return parentFrameName;
+   }
+
    public CRDTUnidirectionalRigidBodyTransform getChestToParentTransform()
    {
       return chestToParentTransform;

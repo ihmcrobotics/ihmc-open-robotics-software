@@ -2,20 +2,16 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.HandPoseActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
-import us.ihmc.communication.crdt.CRDTUnidirectionalDoubleArray;
-import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
+import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinition>
 {
-   private final DetachableReferenceFrame palmFrame;
+   private final CRDTDetachableReferenceFrame palmFrame;
    /**
     * This is the estimated goal chest frame as the robot executes a potential whole body action.
     * This is used to compute joint angles that achieve the desired and previewed end pose
@@ -31,7 +27,9 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    {
       super(id, new HandPoseActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      palmFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getPalmTransformToParent().getValueReadOnly());
+      palmFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
+                                                   getDefinition().getCRDTPalmParentFrameName(),
+                                                   getDefinition().getPalmTransformToParent());
       goalChestToWorldTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);
       goalChestFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                               goalChestToWorldTransform.getValueReadOnly());
@@ -43,7 +41,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    @Override
    public void update()
    {
-      palmFrame.update(getDefinition().getPalmParentFrameName());
+      palmFrame.update();
    }
 
    public void toMessage(HandPoseActionStateMessage message)
@@ -74,7 +72,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
       goalChestFrame.update();
    }
 
-   public DetachableReferenceFrame getPalmFrame()
+   public CRDTDetachableReferenceFrame getPalmFrame()
    {
       return palmFrame;
    }

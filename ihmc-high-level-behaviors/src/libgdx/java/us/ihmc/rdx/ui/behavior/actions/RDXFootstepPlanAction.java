@@ -210,7 +210,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
    public void changeParentFrame(String newParentFrameName)
    {
-      getDefinition().setParentFrameName(newParentFrameName);
       for (FootstepPlanActionFootstepState footstepState : getState().getFootsteps())
       {
          footstepState.getSoleFrame().changeFrame(getDefinition().getParentFrameName());
