@@ -81,7 +81,6 @@ public class RDXVRKinematicsStreamingMode
    private KinematicsRecordReplay kinematicsRecorder;
    private final SceneGraph sceneGraph;
    private double userHeightChangeRate = 0.0;
-   private int numberOfPartsToRecord = 0;
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
    private int leftIndex = -1;
