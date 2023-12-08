@@ -233,7 +233,6 @@ public class TerrainPlanningSimulationUI
             l515PoseGizmo.getTransformToParent().getTranslation().setX(startMidX.get());
             l515PoseGizmo.getTransformToParent().getTranslation().setY(startMidY.get());
             l515PoseGizmo.getTransformToParent().getTranslation().setZ(startMidZ.get());
-            l515PoseGizmo.getTransformToParent().getRotation().setYawPitchRoll(startYaw.get(), 0, 0);
             l515PoseGizmo.update();
 
             humanoidPerceptionUI.update();
@@ -349,9 +348,9 @@ public class TerrainPlanningSimulationUI
                l515PoseGizmo.update();
             }
             ImGui.separator();
-            ImGui.sliderFloat("Start Mid X", startMidX.getData(), -2.0f, 2.0f);
-            ImGui.sliderFloat("Start Mid Y", startMidY.getData(), -2.0f, 2.0f);
-            ImGui.sliderFloat("Start Mid Z", startMidZ.getData(), 1.0f, 3.0f);
+            ImGui.sliderFloat("Start Mid X", startMidX.getData(), -4.0f, 4.0f);
+            ImGui.sliderFloat("Start Mid Y", startMidY.getData(), -4.0f, 4.0f);
+            ImGui.sliderFloat("Start Mid Z", startMidZ.getData(), -3.0f, 3.0f);
             ImGui.sliderFloat("Start Yaw", startYaw.getData(), (float) -Math.PI, (float) Math.PI);
             ImGui.sliderFloat("Goal Mid X", goalMidX.getData(), -2.0f, 2.0f);
             ImGui.sliderFloat("Goal Mid Y", goalMidY.getData(), -2.0f, 2.0f);
