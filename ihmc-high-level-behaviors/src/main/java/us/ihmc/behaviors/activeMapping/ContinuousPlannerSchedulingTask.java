@@ -169,8 +169,6 @@ public class ContinuousPlannerSchedulingTask
 
    public void handleStateMachine()
    {
-      LogTools.info("State: {}", state);
-
       /*
        * Ready to plan means that the current step is completed and the planner is ready to plan the next step
        */
