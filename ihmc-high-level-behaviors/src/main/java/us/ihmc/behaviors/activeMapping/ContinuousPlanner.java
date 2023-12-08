@@ -493,8 +493,8 @@ public class ContinuousPlanner
    public void getImminentStanceFromLatestStatus(AtomicReference<FootstepStatusMessage> footstepStatusMessage,
                                                  List<QueuedFootstepStatusMessage> controllerQueue)
    {
-      RobotSide imminentFootstepSide = RobotSide.fromByte(footstepStatusMessage.get().getRobotSide());
-      assert imminentFootstepSide != null;
+      RobotSide imminentFootSide = RobotSide.fromByte(footstepStatusMessage.get().getRobotSide());
+      assert imminentFootSide != null;
 
       int index = getNextIndexOnOppositeSide(RobotSide.fromByte(footstepStatusMessage.get().getRobotSide()), controllerQueue);
 
@@ -507,7 +507,7 @@ public class ContinuousPlanner
       if (continuousWalkingParameters.getOverrideEntireQueueEachStep())
       {
          nextRobotStepAfterCurrent = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                     referenceFrames.getSoleFrame(imminentFootstepSide.getOppositeSide()).getTransformToWorldFrame());
+                                                     referenceFrames.getSoleFrame(imminentFootSide.getOppositeSide()).getTransformToWorldFrame());
       }
       else
       {
@@ -516,7 +516,7 @@ public class ContinuousPlanner
                                                      controllerQueue.get(index).getOrientation());
       }
 
-      updateImminentStance(nextRobotStepAfterCurrent, imminentFootstepPose, imminentFootstepSide);
+      updateImminentStance(nextRobotStepAfterCurrent, imminentFootstepPose, imminentFootSide);
    }
 
    private int getNextIndexOnOppositeSide(RobotSide side, List<QueuedFootstepStatusMessage> controllerQueue)

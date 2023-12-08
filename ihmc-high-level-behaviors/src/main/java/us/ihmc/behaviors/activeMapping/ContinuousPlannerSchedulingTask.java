@@ -38,7 +38,7 @@ public class ContinuousPlannerSchedulingTask
 
    private enum ContinuousWalkingState
    {
-      NOT_STARTED, READY_TO_PLAN, NEED_TO_REPLAN, PLAN_AVAILABLE, WAITING_TO_LAND
+      NOT_STARTED, READY_TO_PLAN, NEED_TO_REPLAN, PLAN_AVAILABLE, WAITING_TO_LAND, PAUSED
    }
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
@@ -57,8 +57,8 @@ public class ContinuousPlannerSchedulingTask
    private Mat heightMapImage;
    private Mat contactMapImage;
 
-   private ContinuousPlannerStatistics continuousPlannerStatistics;
-   private final ContinuousWalkingParameters continuousWalkingParameters;
+   private ContinuousPlannerStatistics statistics;
+   private final ContinuousWalkingParameters parameters;
 
    private final HumanoidReferenceFrames referenceFrames;
 
@@ -71,11 +71,11 @@ public class ContinuousPlannerSchedulingTask
    public ContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
                                           ROS2Node ros2Node,
                                           HumanoidReferenceFrames referenceFrames,
-                                          ContinuousWalkingParameters continuousWalkingParameters,
+                                          ContinuousWalkingParameters parameters,
                                           ContinuousPlanner.PlanningMode mode)
    {
       this.referenceFrames = referenceFrames;
-      this.continuousWalkingParameters = continuousWalkingParameters;
+      this.parameters = parameters;
 
       controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
       publisherMap = new ROS2PublisherMap(ros2Node);
@@ -95,8 +95,8 @@ public class ContinuousPlannerSchedulingTask
 
       continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, mode);
 
-      continuousPlannerStatistics = new ContinuousPlannerStatistics();
-      continuousPlanner.setContinuousPlannerStatistics(continuousPlannerStatistics);
+      statistics = new ContinuousPlannerStatistics();
+      continuousPlanner.setContinuousPlannerStatistics(statistics);
 
       executorService.scheduleWithFixedDelay(this::tickStateMachine, 1500, CONTINUOUS_PLANNING_DELAY_MS, TimeUnit.MILLISECONDS);
    }
@@ -113,19 +113,14 @@ public class ContinuousPlannerSchedulingTask
       //      double stepDuration = continuousWalkingParameters.getSwingTime() + continuousWalkingParameters.getTransferTime();
       //      continuousWalkingParameters.setPlanningReferenceTimeout(stepDuration * continuousWalkingParameters.getPlannerTimeoutFraction());
 
-      if (!continuousWalkingParameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
+      if (!parameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
       {
-         stopContinuousWalkingGracefully();
-
          state = ContinuousWalkingState.NOT_STARTED;
 
-         rightRobotFoot = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                     referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
-         leftRobotFoot = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                          referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
+         sendPauseWalkingMessage();
+         setImminentStanceToCurrent();
 
-         if (continuousPlanner.updateImminentStance(rightRobotFoot, leftRobotFoot, RobotSide.RIGHT))
-            publishStartAndGoalForVisualization();
+         continuousPlanner.setInitialized(false);
          return;
       }
 
@@ -136,11 +131,11 @@ public class ContinuousPlannerSchedulingTask
       }
       else
       {
-         planAndSendFootsteps();
+         handleStateMachine();
       }
    }
 
-   private void stopContinuousWalkingGracefully()
+   private void sendPauseWalkingMessage()
    {
       PauseWalkingMessage message = new PauseWalkingMessage();
 
@@ -149,14 +144,12 @@ public class ContinuousPlannerSchedulingTask
          message.setPause(true);
          pauseWalkingPublisher.publish(message);
       }
-
-      continuousPlanner.setInitialized(false);
    }
 
    public void initializeContinuousPlanner()
    {
       continuousPlanner.initialize();
-      continuousPlanner.setGoalWaypointPoses(continuousWalkingParameters);
+      continuousPlanner.setGoalWaypointPoses(parameters);
       continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, heightMapImage, contactMapImage, false);
 
       if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION
@@ -170,29 +163,28 @@ public class ContinuousPlannerSchedulingTask
          continuousPlanner.setInitialized(false);
 
          LogTools.error(message = String.format("State: [%s]: Initialization failed... will retry initializing next tick", state));
-         continuousPlannerStatistics.appendString(message);
+         statistics.appendString(message);
       }
    }
 
-   public void planAndSendFootsteps()
+   public void handleStateMachine()
    {
+      LogTools.info("State: {}", state);
+
       /*
        * Ready to plan means that the current step is completed and the planner is ready to plan the next step
        */
       if (state == ContinuousWalkingState.READY_TO_PLAN)
       {
          LogTools.info("State: " + state);
-         continuousPlannerStatistics.setLastAndTotalWaitingTimes();
+         statistics.setLastAndTotalWaitingTimes();
 
-         if (continuousWalkingParameters.getStepPublisherEnabled())
+         if (parameters.getStepPublisherEnabled())
             continuousPlanner.getImminentStanceFromLatestStatus(footstepStatusMessage, controllerQueue);
 
          publishStartAndGoalForVisualization();
-         continuousPlanner.setGoalWaypointPoses(continuousWalkingParameters);
-         continuousPlanner.planToGoalWithHeightMap(latestHeightMapData,
-                                                   heightMapImage,
-                                                   contactMapImage,
-                                                   true);
+         continuousPlanner.setGoalWaypointPoses(parameters);
+         continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, heightMapImage, contactMapImage, true);
 
          if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION
              || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
@@ -203,7 +195,7 @@ public class ContinuousPlannerSchedulingTask
          {
             state = ContinuousWalkingState.WAITING_TO_LAND;
             LogTools.error(message = String.format("State: [%s]: Planning failed... will try again when current step is completed", state));
-            continuousPlannerStatistics.appendString(message);
+            statistics.appendString(message);
          }
       }
 
@@ -213,10 +205,10 @@ public class ContinuousPlannerSchedulingTask
       if (state == ContinuousWalkingState.PLAN_AVAILABLE)
       {
          LogTools.info("State: " + state);
-         FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousWalkingParameters, controllerQueue);
+         FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(parameters, controllerQueue);
 
          publisherForUI.publish(footstepDataList);
-         if (continuousWalkingParameters.getStepPublisherEnabled())
+         if (parameters.getStepPublisherEnabled())
          {
             LogTools.info(message = String.format("State: [%s]: Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller", state));
             publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
@@ -224,12 +216,11 @@ public class ContinuousPlannerSchedulingTask
             state = ContinuousWalkingState.WAITING_TO_LAND;
             continuousPlanner.setPlanAvailable(false);
             continuousPlanner.transitionCallback();
-            continuousPlannerStatistics.setStartWaitingTime();
+            statistics.setStartWaitingTime();
          }
          else
          {
-            state = ContinuousWalkingState.NOT_STARTED;
-            continuousPlanner.setInitialized(false);
+            state = ContinuousWalkingState.READY_TO_PLAN;
          }
       }
    }
@@ -237,27 +228,27 @@ public class ContinuousPlannerSchedulingTask
    // This receives a message each time there is a change in the FootstepStatusMessage
    private void footstepStatusReceived(FootstepStatusMessage footstepStatusMessage)
    {
-      if (!continuousWalkingParameters.getEnableContinuousWalking())
+      if (!parameters.getEnableContinuousWalking())
          return;
 
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
       {
          state = ContinuousWalkingState.READY_TO_PLAN;
-         continuousPlannerStatistics.endStepTime();
-         continuousPlannerStatistics.startStepTime();
+         statistics.endStepTime();
+         statistics.startStepTime();
       }
       else if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
       {
-         continuousPlannerStatistics.setLastFootstepQueueLength(controllerQueueSize);
-         continuousPlannerStatistics.incrementTotalStepsCompleted();
+         statistics.setLastFootstepQueueLength(controllerQueueSize);
+         statistics.incrementTotalStepsCompleted();
 
          double distance = referenceFrames.getSoleFrame(RobotSide.LEFT)
                                           .getTransformToDesiredFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT))
                                           .getTranslation()
                                           .norm();
-         continuousPlannerStatistics.setLastLengthCompleted((float) distance);
+         statistics.setLastLengthCompleted((float) distance);
 
-         continuousPlannerStatistics.logToFile(true, true);
+         statistics.logToFile(true, true);
       }
 
       this.footstepStatusMessage.set(footstepStatusMessage);
@@ -265,7 +256,7 @@ public class ContinuousPlannerSchedulingTask
 
    private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
    {
-      if (!continuousWalkingParameters.getEnableContinuousWalking())
+      if (!parameters.getEnableContinuousWalking())
          return;
 
       controllerQueue = footstepQueueStatusMessage.getQueuedFootstepList();
@@ -275,6 +266,17 @@ public class ContinuousPlannerSchedulingTask
                                                state));
       }
       controllerQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
+   }
+
+   private void setImminentStanceToCurrent()
+   {
+      rightRobotFoot = new FramePose3D(ReferenceFrame.getWorldFrame(), referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+      leftRobotFoot = new FramePose3D(ReferenceFrame.getWorldFrame(), referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
+
+      if (continuousPlanner.updateImminentStance(rightRobotFoot, leftRobotFoot, RobotSide.LEFT))
+      {
+         publishStartAndGoalForVisualization();
+      }
    }
 
    public void publishStartAndGoalForVisualization()
