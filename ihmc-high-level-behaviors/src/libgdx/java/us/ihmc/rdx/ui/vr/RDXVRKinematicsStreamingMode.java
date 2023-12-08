@@ -83,7 +83,6 @@ public class RDXVRKinematicsStreamingMode
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
    private final SceneGraph sceneGraph;
-   private double userHeightChangeRate = 0.0;
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
    private int leftIndex = -1;
@@ -188,13 +187,6 @@ public class RDXVRKinematicsStreamingMode
               HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
               sendHandCommand(RobotSide.RIGHT, handConfiguration);
            }
-
-           // use right joystick values to control pelvis height of robot indirectly by teleporting operator up/down
-           // NOTE. intentionally not controlling pelvis height directly but teleporting the whole user to make them more comfortable
-           userHeightChangeRate = -controller.getJoystickActionData().y();
-           vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation()
-                                                                                            .addZ(userHeightChangeRate
-                                                                                                  * 0.01));
         });
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
