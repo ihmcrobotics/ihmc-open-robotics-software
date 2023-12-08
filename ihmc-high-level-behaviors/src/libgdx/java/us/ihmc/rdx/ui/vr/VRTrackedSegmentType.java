@@ -6,8 +6,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public enum VRTrackedSegmentType
 {
-   LEFT_HAND("leftHand", RobotSide.LEFT, new Point3D(-0.0, 0.0, 0.350), new YawPitchRoll(Math.PI / 2.0, -Math.PI / 4.0, -Math.PI / 2.0), Double.NaN, Double.NaN),
-   RIGHT_HAND("rightHand", RobotSide.RIGHT, new Point3D(-0.0, -0.0, 0.350), new YawPitchRoll(-Math.PI / 2.0, -Math.PI / 4.0, Math.PI / 2.0), Double.NaN, Double.NaN),
+   LEFT_HAND("leftHand", RobotSide.LEFT, new Point3D(-0.0, 0.0, 0.350), new YawPitchRoll(0.0, -Math.PI / 2.0, 0.0), Double.NaN, Double.NaN),
+   RIGHT_HAND("rightHand", RobotSide.RIGHT, new Point3D(-0.0, -0.0, 0.350), new YawPitchRoll(0.0, -Math.PI / 2.0, 0.0), Double.NaN, Double.NaN),
    LEFT_FOREARM("leftForeArm", RobotSide.LEFT, new Point3D(), new YawPitchRoll(-Math.PI / 2.0, 0.0, 0.0), 0.0, 1),
    RIGHT_FOREARM("rightForeArm", RobotSide.RIGHT, new Point3D(), new YawPitchRoll(Math.PI / 2.0, 0.0, 0.0), 0.0, 1),
    CHEST("chest", null, new Point3D(), new YawPitchRoll(), 0.0, 10);
