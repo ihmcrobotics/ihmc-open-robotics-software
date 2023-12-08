@@ -15,7 +15,7 @@ public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c68b53c4003ca884492a729578321fff138ffc4d937e89773c59afbb5dc081d0";
+   		return "8f7ec192b8b2f40fb0d29a05b092b56cf031395643f36659e70bd2f654acc7fd";
    }
    
    @Override
@@ -58,7 +58,7 @@ public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -84,7 +84,7 @@ public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getBodyFrameToContactFrame(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getContactPointInBodyFrame(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getContactNormalInWorldFrame(), current_alignment);
 
@@ -100,7 +100,7 @@ public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       cdr.write_type_6(data.getCoefficientOfFriction());
 
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getBodyFrameToContactFrame(), cdr);
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getContactPointInBodyFrame(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getContactNormalInWorldFrame(), cdr);
    }
 
@@ -112,7 +112,7 @@ public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       	
       data.setCoefficientOfFriction(cdr.read_type_6());
       	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getBodyFrameToContactFrame(), cdr);	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getContactPointInBodyFrame(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getContactNormalInWorldFrame(), cdr);	
 
    }
@@ -123,7 +123,7 @@ public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("load", data.getLoad());
       ser.write_type_6("coefficient_of_friction", data.getCoefficientOfFriction());
-      ser.write_type_a("body_frame_to_contact_frame", new geometry_msgs.msg.dds.PosePubSubType(), data.getBodyFrameToContactFrame());
+      ser.write_type_a("contact_point_in_body_frame", new geometry_msgs.msg.dds.PointPubSubType(), data.getContactPointInBodyFrame());
 
       ser.write_type_a("contact_normal_in_world_frame", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getContactNormalInWorldFrame());
 
@@ -135,7 +135,7 @@ public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setLoad(ser.read_type_7("load"));
       data.setCoefficientOfFriction(ser.read_type_6("coefficient_of_friction"));
-      ser.read_type_a("body_frame_to_contact_frame", new geometry_msgs.msg.dds.PosePubSubType(), data.getBodyFrameToContactFrame());
+      ser.read_type_a("contact_point_in_body_frame", new geometry_msgs.msg.dds.PointPubSubType(), data.getContactPointInBodyFrame());
 
       ser.read_type_a("contact_normal_in_world_frame", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getContactNormalInWorldFrame());
 

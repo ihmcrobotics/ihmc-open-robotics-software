@@ -242,10 +242,6 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
       boolean enableFunctionGenerators = walkingControllerParameters.enableFunctionGeneratorMode(bodyName);
 
-      PIDSE3GainsReadOnly holdLoadedHandGains = holdFootGains; // Use same gains as foot support, add custom parameter if needed
-      Vector3DReadOnly handLoadedLinearWeight = loadedFootLinearWeight; // Use same task weight as foot support, add custom parameter if needed
-      Vector3DReadOnly handLoadedAngularWeight = loadedFootAngularWeight; // Use same task weight as foot support, add custom parameter if needed
-
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
                                                                     elevator,
@@ -258,9 +254,6 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     taskspaceOrientationGains,
                                                                     taskspacePositionGains,
                                                                     contactableBody,
-                                                                    holdLoadedHandGains,
-                                                                    handLoadedLinearWeight,
-                                                                    handLoadedAngularWeight,
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
                                                                     yoTime,

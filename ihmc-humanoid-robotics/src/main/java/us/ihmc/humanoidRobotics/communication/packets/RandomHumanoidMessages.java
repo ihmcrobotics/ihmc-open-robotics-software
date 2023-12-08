@@ -336,7 +336,7 @@ public final class RandomHumanoidMessages
       LoadBearingMessage next = new LoadBearingMessage();
       next.setLoad(random.nextBoolean());
       next.setCoefficientOfFriction(RandomNumbers.nextDoubleWithEdgeCases(random, 0.1));
-      next.getBodyFrameToContactFrame().set(EuclidGeometryRandomTools.nextPose3D(random));
+      next.getContactPointInBodyFrame().set(EuclidCoreRandomTools.nextPoint3D(random));
       next.getContactNormalInWorldFrame().set(EuclidCoreRandomTools.nextVector3D(random));
       return next;
    }

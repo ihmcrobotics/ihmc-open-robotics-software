@@ -1,7 +1,7 @@
 #ifndef __controller_msgs__msg__LoadBearingMessage__idl__
 #define __controller_msgs__msg__LoadBearingMessage__idl__
 
-#include "geometry_msgs/msg/./Pose_.idl"
+#include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
 module controller_msgs
 {
@@ -33,7 +33,7 @@ module controller_msgs
         /**
          * Sets the pose of the contact frame in the frame of the end effector body.
          */
-        geometry_msgs::msg::dds::Pose body_frame_to_contact_frame;
+        geometry_msgs::msg::dds::Point contact_point_in_body_frame;
         /**
          * Sets the contact normal used by the controller to load the contact point.
          */
