@@ -15,7 +15,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4b4ad4d0d684b0bedf83957d6339d4795c5a6950dc1e1cfb9ba787e35f536a44";
+   		return "714eb9d6a51f107d47d1ec844485b03a72735d0333d7609e928a41736f2aacce";
    }
    
    @Override
@@ -64,7 +64,12 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
       return current_alignment - initial_alignment;
@@ -97,7 +102,15 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getErrorMessage().length() + 1;
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
 
@@ -110,15 +123,23 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       cdr.write_type_9(data.getRobotSide());
 
-      cdr.write_type_6(data.getTemperature());
+      cdr.write_type_6(data.getNormalizedDesiredPosition());
 
-      cdr.write_type_6(data.getPresentTorqueRatio());
+      cdr.write_type_6(data.getNormalizedDesiredTorque());
 
-      cdr.write_type_6(data.getPostionRatio());
+      cdr.write_type_6(data.getNormalizedTemperature());
 
-      cdr.write_type_6(data.getGoalTorqueRatio());
+      cdr.write_type_6(data.getNormalizedMeasuredPosition());
 
-      cdr.write_type_9(data.getErrorStatus());
+      cdr.write_type_6(data.getNormalizedMeasuredTorque());
+
+      cdr.write_type_6(data.getNormalizedMeasuredVelocity());
+
+      if(data.getErrorMessage().length() <= 255)
+      cdr.write_type_d(data.getErrorMessage());else
+          throw new RuntimeException("error_message field exceeds the maximum length");
+
+      cdr.write_type_3(data.getRealtimeTick());
 
    }
 
@@ -128,15 +149,20 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       	
       data.setRobotSide(cdr.read_type_9());
       	
-      data.setTemperature(cdr.read_type_6());
+      data.setNormalizedDesiredPosition(cdr.read_type_6());
       	
-      data.setPresentTorqueRatio(cdr.read_type_6());
+      data.setNormalizedDesiredTorque(cdr.read_type_6());
       	
-      data.setPostionRatio(cdr.read_type_6());
+      data.setNormalizedTemperature(cdr.read_type_6());
       	
-      data.setGoalTorqueRatio(cdr.read_type_6());
+      data.setNormalizedMeasuredPosition(cdr.read_type_6());
       	
-      data.setErrorStatus(cdr.read_type_9());
+      data.setNormalizedMeasuredTorque(cdr.read_type_6());
+      	
+      data.setNormalizedMeasuredVelocity(cdr.read_type_6());
+      	
+      cdr.read_type_d(data.getErrorMessage());	
+      data.setRealtimeTick(cdr.read_type_3());
       	
 
    }
@@ -146,11 +172,14 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
-      ser.write_type_6("temperature", data.getTemperature());
-      ser.write_type_6("present_torque_ratio", data.getPresentTorqueRatio());
-      ser.write_type_6("postion_ratio", data.getPostionRatio());
-      ser.write_type_6("goal_torque_ratio", data.getGoalTorqueRatio());
-      ser.write_type_9("error_status", data.getErrorStatus());
+      ser.write_type_6("normalized_desired_position", data.getNormalizedDesiredPosition());
+      ser.write_type_6("normalized_desired_torque", data.getNormalizedDesiredTorque());
+      ser.write_type_6("normalized_temperature", data.getNormalizedTemperature());
+      ser.write_type_6("normalized_measured_position", data.getNormalizedMeasuredPosition());
+      ser.write_type_6("normalized_measured_torque", data.getNormalizedMeasuredTorque());
+      ser.write_type_6("normalized_measured_velocity", data.getNormalizedMeasuredVelocity());
+      ser.write_type_d("error_message", data.getErrorMessage());
+      ser.write_type_3("realtime_tick", data.getRealtimeTick());
    }
 
    @Override
@@ -158,11 +187,14 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
-      data.setTemperature(ser.read_type_6("temperature"));
-      data.setPresentTorqueRatio(ser.read_type_6("present_torque_ratio"));
-      data.setPostionRatio(ser.read_type_6("postion_ratio"));
-      data.setGoalTorqueRatio(ser.read_type_6("goal_torque_ratio"));
-      data.setErrorStatus(ser.read_type_9("error_status"));
+      data.setNormalizedDesiredPosition(ser.read_type_6("normalized_desired_position"));
+      data.setNormalizedDesiredTorque(ser.read_type_6("normalized_desired_torque"));
+      data.setNormalizedTemperature(ser.read_type_6("normalized_temperature"));
+      data.setNormalizedMeasuredPosition(ser.read_type_6("normalized_measured_position"));
+      data.setNormalizedMeasuredTorque(ser.read_type_6("normalized_measured_torque"));
+      data.setNormalizedMeasuredVelocity(ser.read_type_6("normalized_measured_velocity"));
+      ser.read_type_d("error_message", data.getErrorMessage());
+      data.setRealtimeTick(ser.read_type_3("realtime_tick"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.SakeHandStatusMessage src, controller_msgs.msg.dds.SakeHandStatusMessage dest)

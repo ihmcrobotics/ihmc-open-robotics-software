@@ -39,8 +39,8 @@ public class RDXSakeHandPositionSlider
    private final RobotSide handSide;
    private final String sliderName;
    private final float[] sliderValue = new float[1];
-   private double presentGoalPosition = Double.NaN;
-   private double presentGoalTorque = Double.NaN;
+   private double measuredPosition = Double.NaN;
+   private double desiredTorque = Double.NaN;
    private final Throttler updateThrottler = new Throttler();
    private final Throttler sendThrottler = new Throttler();
 
@@ -59,8 +59,8 @@ public class RDXSakeHandPositionSlider
    {
       if (updateThrottler.run(UPDATE_PERIOD) && handStatusMessage.hasReceivedFirstMessage())
       {
-         presentGoalPosition = handStatusMessage.getLatest().getPostionRatio();
-         presentGoalTorque = handStatusMessage.getLatest().getGoalTorqueRatio();
+         measuredPosition = handStatusMessage.getLatest().getNormalizedMeasuredPosition();
+         desiredTorque = handStatusMessage.getLatest().getNormalizedDesiredTorque();
       }
    }
 
@@ -83,7 +83,7 @@ public class RDXSakeHandPositionSlider
       }
       else
       {
-         sliderValue[0] = (float) (Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS) * (1.0 - presentGoalPosition));
+         sliderValue[0] = (float) (Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS) * (1.0 - measuredPosition));
       }
 
       receiveRobotConfigurationData();
@@ -93,7 +93,7 @@ public class RDXSakeHandPositionSlider
    {
       float previousValue = sliderValue[0];
 
-      if (presentGoalTorque < 0.2)  // render slider with warning that torque is too low
+      if (desiredTorque < 0.2)  // render slider with warning that torque is too low
       {
          ImGui.pushStyleColor(ImGuiCol.SliderGrab, ImGuiTools.RED);
          ImGui.sliderAngle(labels.get(sliderName),

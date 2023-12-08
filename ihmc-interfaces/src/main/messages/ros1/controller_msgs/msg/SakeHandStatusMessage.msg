@@ -10,18 +10,28 @@ uint32 sequence_id
 # Field default value 255
 int8 robot_side
 
-float64 temperature
+# 0.0 open, 1.0 closed
+float64 normalized_desired_position
 
 # 0.0 min, 1.0 max
-float64 present_torque_ratio
+float64 normalized_desired_torque
 
-# 0.0 closed, 1.0 open
-float64 postion_ratio
+# Celsius divided by 100
+float64 normalized_temperature
+
+# 0.0 open, 1.0 closed
+float64 normalized_measured_position
 
 # 0.0 min, 1.0 max
-float64 goal_torque_ratio
+float64 normalized_measured_torque
 
-# error status as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
-int8 error_status
+# -1.0 = opening, 1.0 = closing. 0.0 = not moving
+float64 normalized_measured_velocity
+
+# error message as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+string error_message
+
+# tick value from Dynamixel. Increments from 0 to 32767, then repeats
+uint16 realtime_tick
 
 

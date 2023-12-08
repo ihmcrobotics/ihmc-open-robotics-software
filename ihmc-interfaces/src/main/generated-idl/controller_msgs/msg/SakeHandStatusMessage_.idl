@@ -26,23 +26,38 @@ module controller_msgs
         unsigned long sequence_id;
         @defaultValue(value=255)
         octet robot_side;
-        double temperature;
+        /**
+         * 0.0 open, 1.0 closed
+         */
+        double normalized_desired_position;
         /**
          * 0.0 min, 1.0 max
          */
-        double present_torque_ratio;
+        double normalized_desired_torque;
         /**
-         * 0.0 closed, 1.0 open
+         * Celsius divided by 100
          */
-        double postion_ratio;
+        double normalized_temperature;
+        /**
+         * 0.0 open, 1.0 closed
+         */
+        double normalized_measured_position;
         /**
          * 0.0 min, 1.0 max
          */
-        double goal_torque_ratio;
+        double normalized_measured_torque;
         /**
-         * error status as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+         * -1.0 = opening, 1.0 = closing. 0.0 = not moving
          */
-        octet error_status;
+        double normalized_measured_velocity;
+        /**
+         * error message as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+         */
+        string error_message;
+        /**
+         * tick value from Dynamixel. Increments from 0 to 32767, then repeats
+         */
+        unsigned short realtime_tick;
       };
     };
   };

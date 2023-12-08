@@ -18,26 +18,42 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
             */
    public long sequence_id_;
    public byte robot_side_ = (byte) 255;
-   public double temperature_;
+   /**
+            * 0.0 open, 1.0 closed
+            */
+   public double normalized_desired_position_;
    /**
             * 0.0 min, 1.0 max
             */
-   public double present_torque_ratio_;
+   public double normalized_desired_torque_;
    /**
-            * 0.0 closed, 1.0 open
+            * Celsius divided by 100
             */
-   public double postion_ratio_;
+   public double normalized_temperature_;
+   /**
+            * 0.0 open, 1.0 closed
+            */
+   public double normalized_measured_position_;
    /**
             * 0.0 min, 1.0 max
             */
-   public double goal_torque_ratio_;
+   public double normalized_measured_torque_;
    /**
-            * error status as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+            * -1.0 = opening, 1.0 = closing. 0.0 = not moving
             */
-   public byte error_status_;
+   public double normalized_measured_velocity_;
+   /**
+            * error message as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+            */
+   public java.lang.StringBuilder error_message_;
+   /**
+            * tick value from Dynamixel. Increments from 0 to 32767, then repeats
+            */
+   public int realtime_tick_;
 
    public SakeHandStatusMessage()
    {
+      error_message_ = new java.lang.StringBuilder(255);
    }
 
    public SakeHandStatusMessage(SakeHandStatusMessage other)
@@ -52,15 +68,22 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       robot_side_ = other.robot_side_;
 
-      temperature_ = other.temperature_;
+      normalized_desired_position_ = other.normalized_desired_position_;
 
-      present_torque_ratio_ = other.present_torque_ratio_;
+      normalized_desired_torque_ = other.normalized_desired_torque_;
 
-      postion_ratio_ = other.postion_ratio_;
+      normalized_temperature_ = other.normalized_temperature_;
 
-      goal_torque_ratio_ = other.goal_torque_ratio_;
+      normalized_measured_position_ = other.normalized_measured_position_;
 
-      error_status_ = other.error_status_;
+      normalized_measured_torque_ = other.normalized_measured_torque_;
+
+      normalized_measured_velocity_ = other.normalized_measured_velocity_;
+
+      error_message_.setLength(0);
+      error_message_.append(other.error_message_);
+
+      realtime_tick_ = other.realtime_tick_;
 
    }
 
@@ -88,73 +111,133 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       return robot_side_;
    }
 
-   public void setTemperature(double temperature)
+   /**
+            * 0.0 open, 1.0 closed
+            */
+   public void setNormalizedDesiredPosition(double normalized_desired_position)
    {
-      temperature_ = temperature;
+      normalized_desired_position_ = normalized_desired_position;
    }
-   public double getTemperature()
+   /**
+            * 0.0 open, 1.0 closed
+            */
+   public double getNormalizedDesiredPosition()
    {
-      return temperature_;
+      return normalized_desired_position_;
    }
 
    /**
             * 0.0 min, 1.0 max
             */
-   public void setPresentTorqueRatio(double present_torque_ratio)
+   public void setNormalizedDesiredTorque(double normalized_desired_torque)
    {
-      present_torque_ratio_ = present_torque_ratio;
+      normalized_desired_torque_ = normalized_desired_torque;
    }
    /**
             * 0.0 min, 1.0 max
             */
-   public double getPresentTorqueRatio()
+   public double getNormalizedDesiredTorque()
    {
-      return present_torque_ratio_;
+      return normalized_desired_torque_;
    }
 
    /**
-            * 0.0 closed, 1.0 open
+            * Celsius divided by 100
             */
-   public void setPostionRatio(double postion_ratio)
+   public void setNormalizedTemperature(double normalized_temperature)
    {
-      postion_ratio_ = postion_ratio;
+      normalized_temperature_ = normalized_temperature;
    }
    /**
-            * 0.0 closed, 1.0 open
+            * Celsius divided by 100
             */
-   public double getPostionRatio()
+   public double getNormalizedTemperature()
    {
-      return postion_ratio_;
+      return normalized_temperature_;
+   }
+
+   /**
+            * 0.0 open, 1.0 closed
+            */
+   public void setNormalizedMeasuredPosition(double normalized_measured_position)
+   {
+      normalized_measured_position_ = normalized_measured_position;
+   }
+   /**
+            * 0.0 open, 1.0 closed
+            */
+   public double getNormalizedMeasuredPosition()
+   {
+      return normalized_measured_position_;
    }
 
    /**
             * 0.0 min, 1.0 max
             */
-   public void setGoalTorqueRatio(double goal_torque_ratio)
+   public void setNormalizedMeasuredTorque(double normalized_measured_torque)
    {
-      goal_torque_ratio_ = goal_torque_ratio;
+      normalized_measured_torque_ = normalized_measured_torque;
    }
    /**
             * 0.0 min, 1.0 max
             */
-   public double getGoalTorqueRatio()
+   public double getNormalizedMeasuredTorque()
    {
-      return goal_torque_ratio_;
+      return normalized_measured_torque_;
    }
 
    /**
-            * error status as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+            * -1.0 = opening, 1.0 = closing. 0.0 = not moving
             */
-   public void setErrorStatus(byte error_status)
+   public void setNormalizedMeasuredVelocity(double normalized_measured_velocity)
    {
-      error_status_ = error_status;
+      normalized_measured_velocity_ = normalized_measured_velocity;
    }
    /**
-            * error status as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+            * -1.0 = opening, 1.0 = closing. 0.0 = not moving
             */
-   public byte getErrorStatus()
+   public double getNormalizedMeasuredVelocity()
    {
-      return error_status_;
+      return normalized_measured_velocity_;
+   }
+
+   /**
+            * error message as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+            */
+   public void setErrorMessage(java.lang.String error_message)
+   {
+      error_message_.setLength(0);
+      error_message_.append(error_message);
+   }
+
+   /**
+            * error message as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+            */
+   public java.lang.String getErrorMessageAsString()
+   {
+      return getErrorMessage().toString();
+   }
+   /**
+            * error message as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+            */
+   public java.lang.StringBuilder getErrorMessage()
+   {
+      return error_message_;
+   }
+
+   /**
+            * tick value from Dynamixel. Increments from 0 to 32767, then repeats
+            */
+   public void setRealtimeTick(int realtime_tick)
+   {
+      realtime_tick_ = realtime_tick;
+   }
+   /**
+            * tick value from Dynamixel. Increments from 0 to 32767, then repeats
+            */
+   public int getRealtimeTick()
+   {
+      return realtime_tick_;
    }
 
 
@@ -179,15 +262,21 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.temperature_, other.temperature_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_desired_position_, other.normalized_desired_position_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.present_torque_ratio_, other.present_torque_ratio_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_desired_torque_, other.normalized_desired_torque_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.postion_ratio_, other.postion_ratio_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_temperature_, other.normalized_temperature_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_torque_ratio_, other.goal_torque_ratio_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_measured_position_, other.normalized_measured_position_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.error_status_, other.error_status_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_measured_torque_, other.normalized_measured_torque_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_measured_velocity_, other.normalized_measured_velocity_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.error_message_, other.error_message_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.realtime_tick_, other.realtime_tick_, epsilon)) return false;
 
 
       return true;
@@ -206,15 +295,21 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
-      if(this.temperature_ != otherMyClass.temperature_) return false;
+      if(this.normalized_desired_position_ != otherMyClass.normalized_desired_position_) return false;
 
-      if(this.present_torque_ratio_ != otherMyClass.present_torque_ratio_) return false;
+      if(this.normalized_desired_torque_ != otherMyClass.normalized_desired_torque_) return false;
 
-      if(this.postion_ratio_ != otherMyClass.postion_ratio_) return false;
+      if(this.normalized_temperature_ != otherMyClass.normalized_temperature_) return false;
 
-      if(this.goal_torque_ratio_ != otherMyClass.goal_torque_ratio_) return false;
+      if(this.normalized_measured_position_ != otherMyClass.normalized_measured_position_) return false;
 
-      if(this.error_status_ != otherMyClass.error_status_) return false;
+      if(this.normalized_measured_torque_ != otherMyClass.normalized_measured_torque_) return false;
+
+      if(this.normalized_measured_velocity_ != otherMyClass.normalized_measured_velocity_) return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.error_message_, otherMyClass.error_message_)) return false;
+
+      if(this.realtime_tick_ != otherMyClass.realtime_tick_) return false;
 
 
       return true;
@@ -230,16 +325,22 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
-      builder.append("temperature=");
-      builder.append(this.temperature_);      builder.append(", ");
-      builder.append("present_torque_ratio=");
-      builder.append(this.present_torque_ratio_);      builder.append(", ");
-      builder.append("postion_ratio=");
-      builder.append(this.postion_ratio_);      builder.append(", ");
-      builder.append("goal_torque_ratio=");
-      builder.append(this.goal_torque_ratio_);      builder.append(", ");
-      builder.append("error_status=");
-      builder.append(this.error_status_);
+      builder.append("normalized_desired_position=");
+      builder.append(this.normalized_desired_position_);      builder.append(", ");
+      builder.append("normalized_desired_torque=");
+      builder.append(this.normalized_desired_torque_);      builder.append(", ");
+      builder.append("normalized_temperature=");
+      builder.append(this.normalized_temperature_);      builder.append(", ");
+      builder.append("normalized_measured_position=");
+      builder.append(this.normalized_measured_position_);      builder.append(", ");
+      builder.append("normalized_measured_torque=");
+      builder.append(this.normalized_measured_torque_);      builder.append(", ");
+      builder.append("normalized_measured_velocity=");
+      builder.append(this.normalized_measured_velocity_);      builder.append(", ");
+      builder.append("error_message=");
+      builder.append(this.error_message_);      builder.append(", ");
+      builder.append("realtime_tick=");
+      builder.append(this.realtime_tick_);
       builder.append("}");
       return builder.toString();
    }

@@ -34,8 +34,8 @@ public class RDXSakeHandTorqueSlider
    private final CommunicationHelper communicationHelper;
    private final String sliderName;
    private final float[] sliderValue = new float[1];
-   private double loadValueFromRobot = Double.NaN;
-   private double presentGoalTorque = Double.NaN;
+   private double measuredTorque = Double.NaN;
+   private double desiredTorque = Double.NaN;
    private final RobotSide handSide;
    private final Throttler updateThrottler = new Throttler();
    private final Throttler sendThrottler = new Throttler();
@@ -56,8 +56,8 @@ public class RDXSakeHandTorqueSlider
    {
       if (updateThrottler.run(UPDATE_PERIOD) && handStatusMessage.hasReceivedFirstMessage())
       {
-         loadValueFromRobot = handStatusMessage.getLatest().getPresentTorqueRatio();
-         presentGoalTorque = handStatusMessage.getLatest().getGoalTorqueRatio();
+         measuredTorque = handStatusMessage.getLatest().getNormalizedMeasuredTorque();
+         desiredTorque = handStatusMessage.getLatest().getNormalizedDesiredTorque();
       }
    }
 
@@ -80,7 +80,7 @@ public class RDXSakeHandTorqueSlider
       }
       else
       {
-         sliderValue[0] = (float) presentGoalTorque;
+         sliderValue[0] = (float) desiredTorque;
       }
 
       receiveSakeHandData();
@@ -104,8 +104,8 @@ public class RDXSakeHandTorqueSlider
 
    private void renderPresentTorqueBar()
    {
-      int barColor = ImGuiTools.greenToRedGradiatedColor(loadValueFromRobot, 0.5, 0.7, 0.9);
-      float presentTorqueBar = (float) ((ImGui.getItemRectSizeX() - textSize.x - 12.0f) * loadValueFromRobot);
+      int barColor = ImGuiTools.greenToRedGradiatedColor(measuredTorque, 0.5, 0.7, 0.9);
+      float presentTorqueBar = (float) ((ImGui.getItemRectSizeX() - textSize.x - 12.0f) * measuredTorque);
 
       ImGui.getWindowDrawList().addRectFilled(ImGui.getCursorScreenPosX() + 2.0f,
                                               ImGui.getCursorScreenPosY() + 2.0f,

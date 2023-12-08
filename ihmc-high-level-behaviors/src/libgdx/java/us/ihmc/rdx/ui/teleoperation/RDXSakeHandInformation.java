@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.teleoperation;
 
-import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import controller_msgs.msg.dds.SakeHandStatusMessage;
 import imgui.ImGui;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
@@ -21,7 +20,7 @@ public class RDXSakeHandInformation
    private final ImGuiFlashingText presentTemperatureText = new ImGuiFlashingText(ImGuiTools.RED);
    private final ImGuiFlashingText errorStatusText = new ImGuiFlashingText(ImGuiTools.RED);
 
-   private byte lastErrorStatus = 0;
+   private String lastErrorMessage = "";
 
    public RDXSakeHandInformation(RobotSide side, CommunicationHelper communicationHelper)
    {
@@ -37,8 +36,8 @@ public class RDXSakeHandInformation
       ImGui.sameLine();
       if (statusInput.hasReceivedFirstMessage())
       {
-         double temperature = 100 * statusInput.getLatest().getTemperature();
-         byte error = statusInput.getLatest().getErrorStatus();
+         double temperature = 100 * statusInput.getLatest().getNormalizedTemperature();
+         String errorMessage = statusInput.getLatest().getErrorMessageAsString();
 
          if (temperature < 55.0)
          {
@@ -51,19 +50,19 @@ public class RDXSakeHandInformation
          }
          ImGui.sameLine();
 
-         if (error == 0 && lastErrorStatus == 0)
+         if (errorMessage.isEmpty() && lastErrorMessage.isEmpty())
          {
             ImGui.textColored(ImGuiTools.GREEN, "Status: all good");
          }
          else
          {
-            if (lastErrorStatus == 0)
-               lastErrorStatus = error;
-            errorStatusText.renderText(SakeHandParameters.getErrorString(lastErrorStatus), true);
+            if (lastErrorMessage.isEmpty())
+               lastErrorMessage = errorMessage;
+            errorStatusText.renderText(lastErrorMessage, true);
             ImGui.sameLine();
             if (ImGui.button(labels.get("Confirm")))
             {
-               lastErrorStatus = 0;
+               lastErrorMessage = "";
             }
          }
       }
