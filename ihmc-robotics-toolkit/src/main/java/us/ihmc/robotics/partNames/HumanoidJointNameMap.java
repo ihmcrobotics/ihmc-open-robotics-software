@@ -100,9 +100,16 @@ public interface HumanoidJointNameMap extends LeggedJointNameMap<RobotSide>
    default List<String> getArmJointNamesAsStrings(RobotSide robotSide)
    {
       List<String> armJointNames = new ArrayList<>();
+
+      // Must iterate in kinematic joint order
+      // Iterating over Set<Enum>#values will reorder the entries
       for (ArmJointName jointName : getArmJointNames())
       {
-         armJointNames.add(getArmJointName(robotSide, jointName));
+         String armJointName = getArmJointName(robotSide, jointName);
+         if (armJointName != null) // Account for asymetrical arms
+         {
+            armJointNames.add(armJointName);
+         }
       }
       return armJointNames;
    }
