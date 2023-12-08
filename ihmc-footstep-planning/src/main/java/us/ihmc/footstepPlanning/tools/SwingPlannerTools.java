@@ -69,13 +69,13 @@ public class SwingPlannerTools
                                                                              PlannedFootstep footstep)
    {
 
-      boolean customWaypointsAvailable = !footstep.getCustomWaypointPositions().isEmpty();
-      int totalNumberOfWaypoints = customWaypointsAvailable ? 2 : footstep.getCustomWaypointPositions().size() + 1;
+      boolean defaultTrajectoryUsed = footstep.getCustomWaypointPositions().isEmpty();
+      int totalNumberOfWaypoints = defaultTrajectoryUsed ? 2 : footstep.getCustomWaypointPositions().size();
 
       /*
       * Compute default trajectories
       * */
-      if (customWaypointsAvailable)
+      if (defaultTrajectoryUsed)
       {
          List<FramePoint3D> defaultWaypoints = new ArrayList<>();
          double[] defaultWaypointProportions = new double[] {0.15, 0.85};
@@ -134,6 +134,7 @@ public class SwingPlannerTools
          }
       }
 
+      LogTools.info("[{}] Trajectories For Visualization: {}", footstep.getRobotSide(), totalNumberOfWaypoints + 1);
       return copySwingTrajectories(positionTrajectoryGenerator.getTrajectories(), totalNumberOfWaypoints + 1);
    }
 

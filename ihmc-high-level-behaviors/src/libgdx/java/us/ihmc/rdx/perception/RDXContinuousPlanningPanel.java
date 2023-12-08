@@ -15,6 +15,7 @@ import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -108,8 +109,12 @@ public class RDXContinuousPlanningPanel extends RDXPanel implements RenderablePr
       startFootstepGraphics.get(RobotSide.LEFT).setColor(new Color(0.0f, 0.0f, 0.0f, 1.0f));
       startFootstepGraphics.get(RobotSide.LEFT).create();
 
+      footstepPlanGraphic.setColor(RobotSide.LEFT, Color.GRAY);
+      footstepPlanGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
+
       ros2Helper.subscribeViaCallback(ContinuousPlanningAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Helper.subscribeViaCallback(ContinuousPlanningAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
+      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()), this::onControllerFootstepsReceived);
 
       commandPublisher = ROS2Tools.createPublisher(ros2Helper.getROS2NodeInterface(), ContinuousPlanningAPI.CONTINUOUS_WALKING_COMMAND);
    }
@@ -192,6 +197,12 @@ public class RDXContinuousPlanningPanel extends RDXPanel implements RenderablePr
    {
       LogTools.warn("Received footstep plan: {}", message.getFootstepDataList().size());
       this.footstepDataListMessage.set(message);
+   }
+
+   public void onControllerFootstepsReceived(FootstepDataListMessage message)
+   {
+      //LogTools.warn("Received footstep plan: {}", message.getFootstepDataList().size());
+      //this.footstepDataListMessage.set(message);
    }
 
    public void onStartAndGoalPosesReceived(PoseListMessage poseListMessage)
