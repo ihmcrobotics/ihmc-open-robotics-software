@@ -10,6 +10,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
@@ -22,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -75,6 +78,9 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final TouchdownErrorCompensator touchdownErrorCompensator;
    private final StepConstraintRegionsList stepConstraints = new StepConstraintRegionsList();
 
+   private final DoubleProvider swingFootCoPWeight;
+   private final CenterOfPressureCommand copCommand = new CenterOfPressureCommand();
+
    public WalkingSingleSupportState(WalkingStateEnum stateEnum,
                                     WalkingMessageHandler walkingMessageHandler,
                                     TouchdownErrorCompensator touchdownErrorCompensator,
@@ -122,6 +128,10 @@ public class WalkingSingleSupportState extends SingleSupportState
       footsteps = Footstep.createFootsteps(additionalFootstepsToConsider);
       footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
       isFootInContact = robotSide -> robotSide == supportSide;
+      ContactableFoot contactableSwingFoot = controllerToolbox.getContactableFeet().get(getSwingSide());
+      copCommand.setContactingRigidBody(contactableSwingFoot.getRigidBody());
+      copCommand.getDesiredCoP().setToZero(contactableSwingFoot.getSoleFrame());
+      swingFootCoPWeight = ParameterProvider.getOrCreateParameter(parentRegistry.getName(), getClass().getSimpleName(), "swingFootCoPWeight", registry, Double.NaN);
    }
 
    int stepsToAdd;
@@ -152,6 +162,14 @@ public class WalkingSingleSupportState extends SingleSupportState
             walkingMessageHandler.peekFootstep(i, footsteps[i]);
             walkingMessageHandler.peekTiming(i, footstepTimings[i]);
             balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
+         }
+
+         if (Double.isFinite(swingFootCoPWeight.getValue()))
+         {
+            copCommand.getWeight()
+                      .setIncludingFrame(controllerToolbox.getContactableFeet().get(getSwingSide()).getSoleFrame(),
+                                         swingFootCoPWeight.getValue(),
+                                         swingFootCoPWeight.getValue());
          }
       }
       else if (resubmitStepsInSwingEveryTick.getBooleanValue())
@@ -400,8 +418,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    /**
-    * Request the swing trajectory. It is clamped w.r.t. to
-    * {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
+    * Request the swing trajectory. It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
     *
     * @return the current swing time remaining for the swing foot trajectory
     */
@@ -410,7 +427,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       double remainingSwingTimeAccordingToPlan = balanceManager.getTimeRemainingInCurrentState();
       double adjustedRemainingTime = Math.max(0.0,
                                               balanceManager.getAdjustedTimeRemainingInCurrentSupportSequence()
-                                                   - balanceManager.getExtraTimeAdjustmentForSwing());
+                                              - balanceManager.getExtraTimeAdjustmentForSwing());
 
       if (adjustedRemainingTime > 1.0e-3)
       {
@@ -463,6 +480,16 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       controllerToolbox.updateBipedSupportPolygons();
       balanceManager.computeICPPlan(isFootInContact);
+   }
+
+   @Override
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      if (!hasSwingFootTouchedDown.getValue())
+         return null;
+      if (!Double.isFinite(swingFootCoPWeight.getValue()) || swingFootCoPWeight.getValue() <= 0)
+         return null;
+      return copCommand;
    }
 
    @Override
