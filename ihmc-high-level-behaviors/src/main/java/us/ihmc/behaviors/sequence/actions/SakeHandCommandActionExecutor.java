@@ -6,6 +6,8 @@ import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -36,13 +38,34 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    @Override
    public void triggerActionExecution()
    {
-      SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
-      message.setRobotSide(getDefinition().getSide().toByte());
-      message.setDesiredHandConfiguration((byte) SakeHandCommandOption.values[getDefinition().getHandConfigurationIndex()].getCommandNumber());
-      message.setPostionRatio(getDefinition().getGoalPosition());
-      message.setTorqueRatio(getDefinition().getGoalTorque());
+      // FIXME: Needs major work
+      if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.GOTO)
+      {
+         SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
+         message.setRobotSide(getDefinition().getSide().toByte());
+         message.setDesiredHandConfiguration((byte) SakeHandCommandOption.values[getDefinition().getHandConfigurationIndex()].getCommandNumber());
+         message.setPostionRatio(getDefinition().getGoalPosition());
+         message.setTorqueRatio(-1.0);
 
-      ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
+         ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
+
+         message.setPostionRatio(-1.0);
+         message.setTorqueRatio(getDefinition().getGoalTorque());
+
+         ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
+      }
+      else if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.OPEN)
+      {
+         ros2ControllerHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                      HumanoidMessageTools.createHandDesiredConfigurationMessage(getDefinition().getSide(),
+                                                                                                 HandConfiguration.OPEN));
+      }
+      else if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.CLOSE)
+      {
+         ros2ControllerHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                      HumanoidMessageTools.createHandDesiredConfigurationMessage(getDefinition().getSide(),
+                                                                                                 HandConfiguration.CLOSE));
+      }
 
       executionTimer.reset();
    }
