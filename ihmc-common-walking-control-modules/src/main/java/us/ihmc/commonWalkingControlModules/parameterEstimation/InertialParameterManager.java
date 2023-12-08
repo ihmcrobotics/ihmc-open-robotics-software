@@ -1,17 +1,16 @@
 package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
-import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
-import us.ihmc.parameterEstimation.NadiaInertialExtendedKalmanFilterParameters;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
@@ -39,7 +38,7 @@ public class InertialParameterManager
 
    private final int totalNumberOfDoFs;
 
-   private final JointTorqueRegressorCalculator jointTorqueRegressorCalculator;
+   private final JointTorqueRegressorCalculator regressorCalculator;
    private final DMatrixRMaj regressor;
    private final DMatrixRMaj regressorBlockContainer;
 
@@ -90,8 +89,8 @@ public class InertialParameterManager
 
       totalNumberOfDoFs = actualRobotModel.getRootJoint().getDegreesOfFreedom() + actualRobotModel.getOneDoFJoints().length;
 
-      jointTorqueRegressorCalculator = new JointTorqueRegressorCalculator(estimateRobotModel.getElevator());
-      jointTorqueRegressorCalculator.setGravitationalAcceleration(-toolbox.getGravityZ());
+      regressorCalculator = new JointTorqueRegressorCalculator(estimateRobotModel.getElevator());
+      regressorCalculator.setGravitationalAcceleration(-toolbox.getGravityZ());
       regressor = new DMatrixRMaj(totalNumberOfDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY * estimateRobotModel.getRootBody().subtreeArray().length);
       regressorBlockContainer = new DMatrixRMaj(totalNumberOfDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
 
@@ -169,7 +168,7 @@ public class InertialParameterManager
          updateContactWrenches();
          updateWholeSystemTorques();
 
-         jointTorqueRegressorCalculator.compute();
+         regressorCalculator.compute();
 
          // Start with system torques
          generalizedForcesContainer.set(wholeSystemTorques);
@@ -178,7 +177,7 @@ public class InertialParameterManager
          for (RobotSide side : RobotSide.values)
             CommonOps_DDRM.multAddTransA(fullContactJacobians.get(side), contactWrenches.get(side), generalizedForcesContainer);
 
-         regressor.set(jointTorqueRegressorCalculator.getJointTorqueRegressorMatrix());
+         regressor.set(regressorCalculator.getJointTorqueRegressorMatrix());
 
          if(DEBUG)
          {
@@ -291,26 +290,29 @@ public class InertialParameterManager
       private final DMatrixRMaj F;
       private final DMatrixRMaj G;
 
-      private final DMatrixRMaj generalizedTorques;
-      private final DMatrixRMaj generalizedContactWrenches;
-
-      private final List<Boolean> isRigidBodyBeingEstimated;
-      private final List<DMatrixRMaj> parametersFromUrdf;
+      private final List<Boolean> isBodyEstimated;
+      private final DMatrixRMaj parametersFromUrdfContainer;
+      private final List<DMatrixRMaj> parametersFromUrdf = new ArrayList<>();
 
       private final DMatrixRMaj parameterContainer;
       private final DMatrixRMaj measurement;
 
-      public InertialExtendedKalmanFilter(int numberOfParametersToEstimate, int totalNumberOfDoFs)
+      private final DMatrixRMaj generalizedContactWrenchesContainer;
+
+      public InertialExtendedKalmanFilter(List<RigidBodyReadOnly> bodies, List<Boolean> isBodyEstimated, int numberOfParametersToEstimate, int totalNumberOfDoFs)
       {
          super(numberOfParametersToEstimate, totalNumberOfDoFs);
 
          F = CommonOps_DDRM.identity(numberOfParametersToEstimate, numberOfParametersToEstimate);
          G = new DMatrixRMaj(totalNumberOfDoFs, numberOfParametersToEstimate);
 
-         measurement = new DMatrixRMaj(totalNumberOfDoFs, 1);
+         this.isBodyEstimated = isBodyEstimated;
+         // TODO: maybe some logic checking that length of bodies and length of isBodyEstimated is the same, or find a better API than two lists
+         parametersFromUrdfContainer = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1);
+         for (int i = 0; i < bodies.size(); ++i)
+            parametersFromUrdf.add(spatialInertiaToParameterVector(bodies.get(i).getInertia()));
 
-         generalizedTorques = new DMatrixRMaj(totalNumberOfDoFs, 1);
-         generalizedContactWrenches = new DMatrixRMaj(totalNumberOfDoFs, 1);
+         measurement = new DMatrixRMaj(totalNumberOfDoFs, 1);
       }
 
       @Override
@@ -319,19 +321,56 @@ public class InertialParameterManager
          return F;  // In the constructor, F is set to the identity matrix
       }
 
+      /**
+       * The correct measurement Jacobian consists of only the blocks of the regressor that correspond to the bodies we're estimating parameters of.
+       */
       @Override
       protected DMatrixRMaj linearizeMeasurementModel(DMatrixRMaj predictedParameters)
       {
          G.zero();
-         for (int i = 0; i < isRigidBodyBeingEstimated.size(); ++i)
+         int index = 0;
+         int numberOfParams = RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY;
+
+         for (int i = 0; i < isBodyEstimated.size(); ++i)
          {
-            if (isRigidBodyBeingEstimated.get(i))
+            // If we're estimating this body, extract the block of the regressor corresponding to that body, and place it in G
+            if (isBodyEstimated.get(i))
             {
-               MatrixMissingTools.setMatrixBlock(regressorBlockContainer, 0, 0, regressor, 0, i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, totalNumberOfDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1.0);
-               MatrixMissingTools.setMatrixBlock(G, 0, i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, regressorBlockContainer, 0, 0, totalNumberOfDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1.0);
+               MatrixMissingTools.setMatrixBlock(G,
+                                                 0, index * numberOfParams,
+                                                 regressorCalculator.getRegressorBlockForBodyIndex(i),
+                                                 0, 0,
+                                                 totalNumberOfDoFs, numberOfParams, 1.0);
+               index++;
             }
          }
+         return G;
       }
+
+      /**
+       * This is a wrapper method used in {@link #linearizeProcessModel(DMatrixRMaj)} and {@link #processModel(DMatrixRMaj)} which pulls out the parameters
+       * we're estimating from the overall parameter vector
+       */
+      public DMatrixRMaj packConsideredParameters(DMatrixRMaj parameters)
+      {
+         int index = 0;
+         int numberOfParams = RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY;
+
+         for (int i = 0; i < isBodyEstimated.size(); ++i)
+         {
+            if (isBodyEstimated.get(i))
+            {
+               MatrixMissingTools.setMatrixBlock(parameterContainer,
+                                                 index * numberOfParams, 0,
+                                                 parameters,
+                                                 i * numberOfParams, 0,
+                                                 numberOfParams, 1, 1.0);
+               index++;
+            }
+         }
+         return parameterContainer;
+      }
+
 
       @Override
       protected DMatrixRMaj processModel(DMatrixRMaj parameters)
@@ -339,45 +378,56 @@ public class InertialParameterManager
          return parameters;
       }
 
-      /**
-       * Ensure that {@link #setTorquesContribution(DMatrixRMaj)} and {@link #setContactWrenchesContribution(DMatrixRMaj)} are called first.
-       */
       @Override
       protected DMatrixRMaj measurementModel(DMatrixRMaj parameters)
       {
-         // Subtract the contribution of the contact wrenches from the generalized torques
-         measurement.set(generalizedTorques);
-         CommonOps_DDRM.subtractEquals(generalizedTorques, generalizedContactWrenches);
+         measurement.zero();
 
-         int bodiesToEstimateIndex = 0;
+         // TODO: calling fullContactJacobians and contactWrenches from outer class might be dangerous, but getters are a PITA
+         DMatrixRMaj generalizedContactWrenches = calculateGeneralizedContactWrenches(fullContactJacobians, contactWrenches);
 
-         // Looping over a list of length equal to the number of rigid bodies. If the rigid body is being estimated
-         for (int i = 0; i < isRigidBodyBeingEstimated.size(); ++i)
+         measurement.set(generalizedContactWrenches);
+
+         for (int i = 0; i < isBodyEstimated.size(); ++i)
          {
-            MatrixMissingTools.setMatrixBlock(regressorBlockContainer, 0, 0, regressor, 0, i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, totalNumberOfDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1.0);
-
-            if (isRigidBodyBeingEstimated.get(i))
+            if (isBodyEstimated.get(i))
             {
-               MatrixMissingTools.setMatrixBlock(parameterContainer, 0, 0, parameters, bodiesToEstimateIndex * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 0, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1, 1.0);
-               CommonOps_DDRM.multAdd(-1.0, regressorBlockContainer, parameterContainer, measurement);
-               bodiesToEstimateIndex += 1;
+               // TODO: multiply by the corresponding entry in parameters and add to measurement
             }
-            else
+            else  // The parameters are assumed known if they are not being estimated
             {
-               CommonOps_DDRM.multAdd(-1.0, regressorBlockContainer, parametersFromUrdf.get(i), measurement);
+               regressorBlockContainer.set(regressorCalculator.getRegressorBlockForBodyIndex(i));
+               // TODO: multiply by the corresponding entry in parametersFromUrdf and add to measurement
             }
          }
+
          return measurement;
       }
 
-      public void setTorquesContribution(DMatrixRMaj torquesContribution)
+      private DMatrixRMaj calculateGeneralizedContactWrenches(SideDependentList<DMatrixRMaj> contactJacobians, SideDependentList<DMatrixRMaj> wrenches)
       {
-         generalizedTorques.set(torquesContribution);
+         generalizedContactWrenchesContainer.zero();
+         for (RobotSide side : RobotSide.values)
+            CommonOps_DDRM.multAdd(contactJacobians.get(side), wrenches.get(side), generalizedContactWrenchesContainer);
+         return generalizedContactWrenchesContainer;
       }
 
-      public void setContactWrenchesContribution(DMatrixRMaj contactWrenchesContribution)
+      private DMatrixRMaj spatialInertiaToParameterVector(SpatialInertiaReadOnly spatialInertia)
       {
-         generalizedContactWrenches.set(contactWrenchesContribution);
+         double mass = spatialInertia.getMass();
+         parametersFromUrdfContainer.set(0, mass);
+         // TODO: check whether this is center of mass offset or first mass moment
+         parametersFromUrdfContainer.set(1, spatialInertia.getCenterOfMassOffset().getX() * mass);
+         parametersFromUrdfContainer.set(2, spatialInertia.getCenterOfMassOffset().getY() * mass);
+         parametersFromUrdfContainer.set(3, spatialInertia.getCenterOfMassOffset().getZ() * mass);
+         parametersFromUrdfContainer.set(4, spatialInertia.getMomentOfInertia().getM00());
+         parametersFromUrdfContainer.set(5, spatialInertia.getMomentOfInertia().getM01());
+         parametersFromUrdfContainer.set(6, spatialInertia.getMomentOfInertia().getM11());
+         parametersFromUrdfContainer.set(7, spatialInertia.getMomentOfInertia().getM02());
+         parametersFromUrdfContainer.set(8, spatialInertia.getMomentOfInertia().getM12());
+         parametersFromUrdfContainer.set(9, spatialInertia.getMomentOfInertia().getM22());
+         return parametersFromUrdfContainer;
+
       }
    }
 }
