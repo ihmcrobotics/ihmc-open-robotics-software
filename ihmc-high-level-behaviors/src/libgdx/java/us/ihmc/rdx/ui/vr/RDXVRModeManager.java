@@ -11,6 +11,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -45,7 +46,8 @@ public class RDXVRModeManager
                       ROS2SyncedRobotModel syncedRobot,
                       ROS2ControllerHelper controllerHelper,
                       SceneGraph sceneGraph,
-                      RestartableJavaProcess kinematicsStreamingToolboxProcess)
+                      RestartableJavaProcess kinematicsStreamingToolboxProcess,
+                      RetargetingParameters retargetingParameters)
    {
       this.syncedRobot = syncedRobot;
       handPlacedFootstepMode = new RDXVRHandPlacedFootstepMode();
@@ -53,7 +55,7 @@ public class RDXVRModeManager
 
       if (syncedRobot.getRobotModel().getRobotVersion().hasBothArms())
       {
-         kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, sceneGraph, kinematicsStreamingToolboxProcess);
+         kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, sceneGraph, kinematicsStreamingToolboxProcess, retargetingParameters);
          kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
       }
 

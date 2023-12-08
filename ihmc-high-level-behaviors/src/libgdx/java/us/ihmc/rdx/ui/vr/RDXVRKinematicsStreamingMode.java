@@ -20,6 +20,8 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.motionRetargeting.RetargetingParameters;
+import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -57,6 +59,7 @@ public class RDXVRKinematicsStreamingMode
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final RestartableJavaProcess kinematicsStreamingToolboxProcess;
+   private final RetargetingParameters retargetingParameters;
    private RDXMultiBodyGraphic ghostRobotGraphic;
    private FullHumanoidRobotModel ghostFullRobotModel;
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
@@ -90,12 +93,15 @@ public class RDXVRKinematicsStreamingMode
    public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
                                        SceneGraph sceneGraph,
-                                       RestartableJavaProcess kinematicsStreamingToolboxProcess)
+                                       RestartableJavaProcess kinematicsStreamingToolboxProcess,
+                                       RetargetingParameters retargetingParameters)
    {
       this.syncedRobot = syncedRobot;
+      syncedRobot.getRobotModel().getRobotVersion();
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.sceneGraph = sceneGraph;
       this.kinematicsStreamingToolboxProcess = kinematicsStreamingToolboxProcess;
+      this.retargetingParameters = retargetingParameters;
    }
 
    public void create(RDXVRContext vrContext)
@@ -120,13 +126,13 @@ public class RDXVRKinematicsStreamingMode
          {
             if (side == RobotSide.LEFT)
             {
-               handDesiredControlFrame.getTransformToParent().appendOrientation(VRTrackedSegmentType.LEFT_HAND.getTrackerToSegmentRotation());
-               handDesiredControlFrame.getTransformToParent().appendTranslation(VRTrackedSegmentType.LEFT_HAND.getTrackerToSegmentTranslation());
+               handDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.LEFT_HAND));
+               handDesiredControlFrame.getTransformToParent().appendTranslation(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.LEFT_HAND));
             }
             else
             {
-               handDesiredControlFrame.getTransformToParent().appendOrientation(VRTrackedSegmentType.RIGHT_HAND.getTrackerToSegmentRotation());
-               handDesiredControlFrame.getTransformToParent().appendTranslation(VRTrackedSegmentType.RIGHT_HAND.getTrackerToSegmentTranslation());
+               handDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.RIGHT_HAND));
+               handDesiredControlFrame.getTransformToParent().appendTranslation(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.RIGHT_HAND));
             }
          }
          handDesiredControlFrame.getReferenceFrame().update();
@@ -225,7 +231,7 @@ public class RDXVRKinematicsStreamingMode
             if (!trackedSegmentDesiredFrame.containsKey(segmentType.getSegmentName()))
             {
                MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(tracker.getXForwardZUpTrackerFrame());
-               trackerDesiredControlFrame.getTransformToParent().appendOrientation(segmentType.getTrackerToSegmentRotation());
+               trackerDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(segmentType));
                trackerDesiredControlFrame.getReferenceFrame().update();
                trackedSegmentDesiredFrame.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
             }
