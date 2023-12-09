@@ -24,6 +24,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
@@ -200,20 +201,20 @@ public class ContinuousPlanner
       }
    }
 
-   public void planToGoalWithHeightMap(HeightMapData heightMapData, Mat heightMap, Mat contactMap, boolean useReferencePlan)
+   public void planToGoalWithHeightMap(HeightMapData heightMapData, TerrainMapData terrainMap, boolean useReferencePlan)
    {
       long startTimeForStatistics = System.currentTimeMillis();
 
       switch (mode)
       {
          case WALK_TO_GOAL, RANDOM_WALK -> planWithAStarPlanner(heightMapData, useReferencePlan);
-         case INCREMENTAL_PLANNING -> planWithMonteCarloPlanner(heightMapData, heightMap, contactMap, false);
+         case INCREMENTAL_PLANNING -> planWithMonteCarloPlanner(heightMapData, terrainMap, false);
       }
 
       statistics.setLastAndTotalPlanningTimes((float) (System.currentTimeMillis() - startTimeForStatistics) / 1000.0f);
    }
 
-   public void planWithMonteCarloPlanner(HeightMapData heightMapData, Mat heightMapImage, Mat contactMapImage, boolean reset)
+   public void planWithMonteCarloPlanner(HeightMapData heightMapData, TerrainMapData terrainMap, boolean reset)
    {
       if (monteCarloFootstepPlanner.isPlanning())
       {
@@ -226,8 +227,7 @@ public class ContinuousPlanner
       request.setStartFootPose(RobotSide.RIGHT, startingStancePose.get(RobotSide.RIGHT));
       request.setGoalFootPose(RobotSide.LEFT, goalStancePose.get(RobotSide.LEFT));
       request.setGoalFootPose(RobotSide.RIGHT, goalStancePose.get(RobotSide.RIGHT));
-      request.setContactMap(contactMapImage);
-      request.setHeightMap(heightMapImage);
+      request.setTerrainMapData(terrainMap);
       request.setSensorOrigin(referenceFrames.getSteppingCameraZUpFrame().getTransformToWorldFrame().getTranslationX(),
                               referenceFrames.getSteppingCameraZUpFrame().getTransformToWorldFrame().getTranslationY());
 

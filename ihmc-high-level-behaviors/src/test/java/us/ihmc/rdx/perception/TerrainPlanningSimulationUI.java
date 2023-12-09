@@ -1,7 +1,6 @@
 package us.ihmc.rdx.perception;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import imgui.ImColor;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
@@ -34,9 +33,9 @@ import us.ihmc.footstepPlanning.tools.HeightMapTerrainGeneratorTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.logging.HDF5Tools;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
@@ -324,7 +323,7 @@ public class TerrainPlanningSimulationUI
             ImGui.separator();
             if (ImGui.button("Plan Footsteps"))
             {
-               FootstepPlannerOutput output = planFootsteps(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage(),
+               FootstepPlannerOutput output = planFootsteps(humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData().getHeightMap(),
                                                             cameraZUpFrame.getTransformToWorldFrame());
                printStatusAndUpdateMeshes(output);
             }
@@ -381,19 +380,18 @@ public class TerrainPlanningSimulationUI
                executorService.clearTaskQueue();
                executorService.submit(() ->
                  {
-                    Mat heightMapToUse, contactMapToUse;
+                    TerrainMapData terrainMap;
                     if (USE_EXTERNAL_HEIGHT_MAP)
                     {
-                       heightMapToUse = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
-                       contactMapToUse = humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage();
+                       terrainMap = new TerrainMapData(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat(),
+                                                       humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage(), null);
                     }
                     else
                     {
-                       heightMapToUse = humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage();
-                       contactMapToUse = humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage();
+                       terrainMap = humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData();
                     }
 
-                    FootstepPlan plan = planFootstepsMonteCarlo(heightMapToUse, contactMapToUse, cameraZUpFrame.getTransformToWorldFrame(), reset);
+                    FootstepPlan plan = planFootstepsMonteCarlo(terrainMap, cameraZUpFrame.getTransformToWorldFrame(), reset);
                     footstepPlanToRenderNotificaiton.set(plan);
                  });
             }
@@ -401,7 +399,7 @@ public class TerrainPlanningSimulationUI
 
          public ArrayList<Point3D> predictFootsteps(RigidBodyTransform zUpToWorldTransform)
          {
-            Mat heightMapImage = humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage();
+            Mat heightMapImage = humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData().getHeightMap();
             if (latestHeightMapData == null)
             {
                latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
@@ -498,11 +496,10 @@ public class TerrainPlanningSimulationUI
                                                        new Quaternion()));
          }
 
-         public FootstepPlan planFootstepsMonteCarlo(Mat heightMapImage, Mat contactMapImage, RigidBodyTransform zUpToWorldTransform, boolean reset)
+         public FootstepPlan planFootstepsMonteCarlo(TerrainMapData terrainMap, RigidBodyTransform zUpToWorldTransform, boolean reset)
          {
             MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
-            request.setContactMap(contactMapImage);
-            request.setHeightMap(heightMapImage);
+            request.setTerrainMapData(terrainMap);
             request.setSensorOrigin(zUpToWorldTransform.getTranslationX(), zUpToWorldTransform.getTranslationY());
 
             //setStartAndGoalFootPosesWithSliders(request);
@@ -553,7 +550,7 @@ public class TerrainPlanningSimulationUI
 
             if (counter % 10 == 0)
             {
-               FootstepPlannerOutput footstepPlannerOutput = planFootsteps(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage(),
+               FootstepPlannerOutput footstepPlannerOutput = planFootsteps(humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData().getHeightMap(),
                                                                            cameraZUpFrame.getTransformToWorldFrame());
                printStatusAndUpdateMeshes(footstepPlannerOutput);
 
@@ -580,11 +577,8 @@ public class TerrainPlanningSimulationUI
                                                                  sidednessBit);
 
                         PerceptionLoggingTools.logHeightMap(perceptionDataLogger,
-                                                            humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage(),
+                                                            humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData().getHeightMap(),
                                                             PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
-                        PerceptionLoggingTools.logHeightMap(perceptionDataLogger,
-                                                            humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage(),
-                                                            PerceptionLoggerConstants.SENSOR_CROPPED_HEIGHT_MAP_NAME);
                      }
                   }
                }

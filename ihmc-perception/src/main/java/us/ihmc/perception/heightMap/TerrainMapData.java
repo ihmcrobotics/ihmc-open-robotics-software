@@ -1,7 +1,9 @@
 package us.ihmc.perception.heightMap;
 
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 
 public class TerrainMapData
 {
@@ -10,16 +12,19 @@ public class TerrainMapData
    private int cellsPerMeter = 50;
    private int gridSize = 201;
    private int heightScaleFactor = 10000;
+   private float heightOffset = 3.2768f;
 
-   private final Mat heightMap;
-   private final Mat contactMap;
-   private final Mat terrainCostMap;
+   private Mat heightMap;
+   private Mat contactMap;
+   private Mat terrainCostMap;
 
    public TerrainMapData(Mat heightMap, Mat contactMap, Mat terrainCostMap)
    {
       this.heightMap = heightMap;
       this.contactMap = contactMap;
       this.terrainCostMap = terrainCostMap;
+
+      this.gridSize = heightMap.rows();
    }
 
    public TerrainMapData(TerrainMapData data)
@@ -33,9 +38,31 @@ public class TerrainMapData
       this.heightScaleFactor = data.heightScaleFactor;
    }
 
-   public float getHeightAt(int x, int y)
+   public TerrainMapData(int height, int width)
    {
-      return (float) ((heightMap.ptr(x, y).getShort() & 0xFFFF));
+      heightMap = new Mat(height, width, opencv_core.CV_16UC1);
+      terrainCostMap = new Mat(height, width, opencv_core.CV_8UC1);
+      contactMap = new Mat(height, width, opencv_core.CV_8UC1);
+   }
+
+   public void set(TerrainMapData terrainMapData)
+   {
+      this.heightMap = terrainMapData.getHeightMap().clone();
+      this.contactMap = terrainMapData.getContactMap().clone();
+      this.terrainCostMap = terrainMapData.getTerrainCostMap().clone();
+   }
+
+   public float getHeightAt(int rIndex, int cIndex)
+   {
+      int height = ((int) heightMap.ptr(rIndex, cIndex).getShort() & 0xFFFF);
+      float cellHeight = (float) ((float) height / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
+                          - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
+      return cellHeight;
+   }
+
+   public float getContactScoreAt(int rIndex, int cIndex)
+   {
+      return (float) ((heightMap.ptr(rIndex, cIndex).get() & 0xFF));
    }
 
    public Mat getHeightMap()
@@ -61,5 +88,20 @@ public class TerrainMapData
    public int getGridSize()
    {
       return gridSize;
+   }
+
+   public void setHeightMap(Mat heightMap)
+   {
+      this.heightMap = heightMap;
+   }
+
+   public void setContactMap(Mat contactMap)
+   {
+      this.contactMap = contactMap;
+   }
+
+   public void setTerrainCostMap(Mat terrainCostMap)
+   {
+      this.terrainCostMap = terrainCostMap;
    }
 }

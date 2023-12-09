@@ -54,8 +54,8 @@ public class MonteCarloFootstepPlanningDebugger
 
    public void refresh()
    {
-      PerceptionDebugTools.convertDepthCopyToColor(request.getHeightMap().clone(), heightMapColorImage);
-      this.contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(request.getContactMap().clone());
+      PerceptionDebugTools.convertDepthCopyToColor(request.getTerrainMapData().getHeightMap().clone(), heightMapColorImage);
+      this.contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(request.getTerrainMapData().getContactMap().clone());
       opencv_imgproc.cvtColor(contactHeatMapImage, contactHeatMapColorImage, opencv_imgproc.COLOR_BGRA2BGR);
 
       opencv_imgproc.resize(heightMapColorImage, heightMapColorImage, new Size(scaledWidth, scaledHeight));
@@ -99,10 +99,10 @@ public class MonteCarloFootstepPlanningDebugger
    public void display(int delay)
    {
       LogTools.debug(String.format("Dimensions: HeightMap(%d x %d), ContactMap(%d x %d)",
-                                   request.getHeightMap().rows(),
-                                   request.getHeightMap().cols(),
-                                   request.getContactMap().rows(),
-                                   request.getContactMap().cols()));
+                                   request.getTerrainMapData().getHeightMap().rows(),
+                                   request.getTerrainMapData().getHeightMap().cols(),
+                                   request.getTerrainMapData().getContactMap().rows(),
+                                   request.getTerrainMapData().getContactMap().cols()));
 
       //MonteCarloPlannerTools.plotFootstepNodeList(planner.getVisitedNodes(), contactHeatMapColorImage);
 
@@ -143,12 +143,12 @@ public class MonteCarloFootstepPlanningDebugger
 
    public void printContactMap()
    {
-      PerceptionDebugTools.printMat("Contact Map", request.getContactMap(), 4);
+      PerceptionDebugTools.printMat("Contact Map", request.getTerrainMapData().getContactMap(), 4);
    }
 
    public void printHeightMap()
    {
-      PerceptionDebugTools.printMat("Height Map", request.getHeightMap(), 4);
+      PerceptionDebugTools.printMat("Height Map", request.getTerrainMapData().getHeightMap(), 4);
    }
 
    public Mat getDisplayImage()

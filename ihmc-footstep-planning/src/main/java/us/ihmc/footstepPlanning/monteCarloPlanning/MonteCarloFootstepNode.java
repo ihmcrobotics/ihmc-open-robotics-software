@@ -39,7 +39,7 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
 
       for (Vector3D action : actions)
       {
-         if (checkActionBoundaries(action, request.getHeightMap().rows()) && checkReachability(request, parameters, action))
+         if (checkActionBoundaries(action, request.getTerrainMapData().getGridSize()) && checkReachability(request, parameters, action))
          {
             MonteCarloFootstepNode nodeToInsert = computeActionResult(action);
             availableStates.add(nodeToInsert);
@@ -65,14 +65,14 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
       int offsetX = (int) (request.getSensorOrigin().getX() * 50);
       int offsetY = (int) (request.getSensorOrigin().getY() * 50);
 
-      int rIndexPrevious = (int) (state.getX() + request.getContactMap().rows() / 2) - offsetX;
-      int cIndexPrevious = (int) (state.getY() + request.getContactMap().cols() / 2) - offsetY;
+      int rIndexPrevious = (int) (state.getX() + request.getTerrainMapData().getGridSize() / 2) - offsetX;
+      int cIndexPrevious = (int) (state.getY() + request.getTerrainMapData().getGridSize() / 2) - offsetY;
 
-      int rIndex = (int) (newPosition.getX() + request.getContactMap().rows() / 2) - offsetX;
-      int cIndex = (int) (newPosition.getY() + request.getContactMap().cols() / 2) - offsetY;
+      int rIndex = (int) (newPosition.getX() + request.getTerrainMapData().getGridSize() / 2) - offsetX;
+      int cIndex = (int) (newPosition.getY() + request.getTerrainMapData().getGridSize() / 2) - offsetY;
 
-      double previousHeight = MonteCarloPlannerTools.getHeightAt(request.getHeightMap(), rIndexPrevious, cIndexPrevious);
-      double currentHeight = MonteCarloPlannerTools.getHeightAt(request.getHeightMap(), rIndex, cIndex);
+      double previousHeight = request.getTerrainMapData().getHeightAt(rIndexPrevious, cIndexPrevious);
+      double currentHeight = request.getTerrainMapData().getHeightAt(rIndex, cIndex);
 
       boolean valid = ((currentHeight - previousHeight) < parameters.getMaxTransferHeight());
       valid = valid & ((currentHeight - previousHeight) > -parameters.getMaxTransferDepth());

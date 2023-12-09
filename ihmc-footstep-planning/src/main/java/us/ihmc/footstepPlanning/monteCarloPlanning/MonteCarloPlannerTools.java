@@ -17,7 +17,6 @@ import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -324,14 +323,11 @@ public class MonteCarloPlannerTools
          int nodeX = (int) footstepNode.getState().getX();
          int nodeY = (int) footstepNode.getState().getY();
 
-         int rIndex = nodeX + request.getHeightMap().rows() / 2 - offsetX;
-         int cIndex = nodeY + request.getHeightMap().cols() / 2 - offsetY;
+         int rIndex = nodeX + request.getTerrainMapData().getGridSize() / 2 - offsetX;
+         int cIndex = nodeY + request.getTerrainMapData().getGridSize() / 2 - offsetY;
 
          // decode height from 16-bit scaled and offset height value stored in OpenCV Mat
-         int height = ((int) request.getHeightMap().ptr(rIndex, cIndex).getShort() & 0xFFFF);
-         float cellHeight = (float) ((float) height / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
-                            - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
-
+         float cellHeight = request.getTerrainMapData().getHeightAt(rIndex, cIndex);
          FramePose3D footstepPose = getFramePose3D(cellHeight, nodeX / 50.0f, nodeY / 50.0f, footstepNode.getState().getZ());
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
@@ -436,8 +432,8 @@ public class MonteCarloPlannerTools
       int offsetX = (int) (request.getSensorOrigin().getX() * 50);
       int offsetY = (int) (request.getSensorOrigin().getY() * 50);
 
-      int rIndex = (int) (newNode.getState().getX() + request.getContactMap().rows() / 2) - offsetX;
-      int cIndex = (int) (newNode.getState().getY() + request.getContactMap().cols() / 2) - offsetY;
+      int rIndex = (int) (newNode.getState().getX() + request.getTerrainMapData().getGridSize() / 2) - offsetX;
+      int cIndex = (int) (newNode.getState().getY() + request.getTerrainMapData().getGridSize() / 2) - offsetY;
 
       Point2D previousPosition = new Point2D(oldNode.getState());
       Point2D currentPosition = new Point2D(newNode.getState());
@@ -461,12 +457,12 @@ public class MonteCarloPlannerTools
       double referenceCost = distanceFromReferenceLine * 0.01f + yawDifferenceFromReference * 0.01f;
 
       double goalReward = plannerParameters.getGoalReward() / (currentPosition.distanceSquared(goalPosition));
-      double contactReward = (((int) request.getContactMap().ptr(rIndex, cIndex).get() & 0xFF) / 255.0 - plannerParameters.getFeasibleContactCutoff())
+      double contactReward = (((int) request.getTerrainMapData().getContactScoreAt(rIndex, cIndex) & 0xFF) / 255.0 - plannerParameters.getFeasibleContactCutoff())
                             * plannerParameters.getFeasibleContactReward();
 
       double stepYawCost = Math.abs(oldNode.getState().getZ() - newNode.getState().getZ()) * 0.01f;
       double stepDistanceCost = Math.abs(previousPosition.distance(currentPosition)) * 0.01f;
-      double stepHeightCost = (getHeightAt(request.getHeightMap(), rIndex, cIndex) - getHeightAt(request.getHeightMap(), rIndex, cIndex)) * 0.01f;
+      double stepHeightCost = (request.getTerrainMapData().getHeightAt(rIndex, cIndex) - request.getTerrainMapData().getHeightAt(rIndex, cIndex)) * 0.01f;
       double edgeCost = stepYawCost + stepDistanceCost + stepHeightCost;
 
       score = goalReward + contactReward - edgeCost - referenceCost;
@@ -511,14 +507,5 @@ public class MonteCarloPlannerTools
       }
       root.sortChildren();
       root.prune(numberOfChildrenToKeep);
-   }
-
-   public static double getHeightAt(Mat heightMap, int rIndex, int cIndex)
-   {
-      // decode height from 16-bit scaled and offset height value stored in OpenCV Mat
-      int height = ((int) heightMap.ptr(rIndex, cIndex).getShort() & 0xFFFF);
-      double cellHeight = (double) ((double) height / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
-                          - (double) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
-      return cellHeight;
    }
 }

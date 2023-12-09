@@ -154,7 +154,7 @@ public class HumanoidPerceptionModule
                                    }
 
                                    Instant acquisitionTime = Instant.now();
-                                   Mat croppedHeightMapImage = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
+                                   Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
 
                                    if (ros2Helper != null)
                                    {
@@ -418,7 +418,7 @@ public class HumanoidPerceptionModule
 
    public HeightMapData getLatestHeightMapData()
    {
-      Mat heightMapMat = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
+      Mat heightMapMat = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
       if (latestHeightMapData == null)
       {
          latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),

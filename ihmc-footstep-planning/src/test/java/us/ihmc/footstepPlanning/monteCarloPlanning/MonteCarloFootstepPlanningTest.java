@@ -16,6 +16,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.tools.PerceptionDataTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -52,13 +53,14 @@ public class MonteCarloFootstepPlanningTest
 
       Mat contactMap = heightMapExtractor.getGlobalContactImage();
 
+      TerrainMapData terrainMapData = new TerrainMapData(heightMap, contactMap, null);
+
       MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
       request.setStartFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.5, -0.3, 0.0), new Quaternion()));
       request.setStartFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.5, -0.1, 0.0), new Quaternion()));
       request.setGoalFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(1.5, -0.3, 0.0), new Quaternion()));
       request.setGoalFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(1.5, -0.1, 0.0), new Quaternion()));
-      request.setContactMap(contactMap);
-      request.setHeightMap(heightMap);
+      request.setTerrainMapData(terrainMapData);
 
       long timeStart = System.nanoTime();
       FootstepPlan plan = planner.generateFootstepPlan(request);

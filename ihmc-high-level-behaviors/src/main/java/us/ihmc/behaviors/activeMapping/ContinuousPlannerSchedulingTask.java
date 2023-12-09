@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
@@ -54,8 +55,7 @@ public class ContinuousPlannerSchedulingTask
    private final ROS2PublisherMap publisherMap;
 
    private HeightMapData latestHeightMapData;
-   private Mat heightMapImage;
-   private Mat contactMapImage;
+   private TerrainMapData terrainMap;
 
    private ContinuousPlannerStatistics statistics;
    private final ContinuousWalkingParameters parameters;
@@ -150,7 +150,7 @@ public class ContinuousPlannerSchedulingTask
    {
       continuousPlanner.initialize();
       continuousPlanner.setGoalWaypointPoses(parameters);
-      continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, heightMapImage, contactMapImage, false);
+      continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, terrainMap, false);
 
       if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION
           || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
@@ -182,7 +182,7 @@ public class ContinuousPlannerSchedulingTask
 
          publishStartAndGoalForVisualization();
          continuousPlanner.setGoalWaypointPoses(parameters);
-         continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, heightMapImage, contactMapImage, true);
+         continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, terrainMap, true);
 
          if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION
              || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
@@ -296,14 +296,9 @@ public class ContinuousPlannerSchedulingTask
       this.latestHeightMapData = new HeightMapData(heightMapData);
    }
 
-   public void setHeightMapImage(Mat heightMapImage)
+   public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      this.heightMapImage = heightMapImage.clone();
-   }
-
-   public void setContactMapImage(Mat contactMapImage)
-   {
-      this.contactMapImage = contactMapImage.clone();
+      terrainMap = new TerrainMapData(terrainMapData);
    }
 
    public ContinuousPlanner getContinuousPlanner()

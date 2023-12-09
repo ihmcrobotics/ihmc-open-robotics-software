@@ -6,6 +6,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -54,12 +55,7 @@ public class MonteCarloFootstepPlannerRequest
    /**
     * Height Map image in OpenCV format
     */
-   private Mat heightMap;
-
-   /**
-    * Contact map image in OpenCV format
-    */
-   private Mat contactMap;
+   private TerrainMapData terrainMapData;
 
    /**
     * Sensor origin that defines the center of the height map
@@ -204,24 +200,14 @@ public class MonteCarloFootstepPlannerRequest
       return maximumIterations;
    }
 
-   public void setHeightMap(Mat heightMap)
+   public void setTerrainMapData(TerrainMapData terrainMap)
    {
-      this.heightMap = heightMap;
+      this.terrainMapData = terrainMap;
    }
 
-   public void setContactMap(Mat contactMap)
+   public TerrainMapData getTerrainMapData()
    {
-      this.contactMap = contactMap;
-   }
-
-   public Mat getHeightMap()
-   {
-      return heightMap;
-   }
-
-   public Mat getContactMap()
-   {
-      return contactMap;
+      return terrainMapData;
    }
 
    public void setSensorOrigin(double originX, double originY)

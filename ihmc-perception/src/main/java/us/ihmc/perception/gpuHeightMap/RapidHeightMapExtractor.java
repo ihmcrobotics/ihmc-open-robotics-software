@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.neural.HeightMapAutoencoder;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
@@ -79,9 +80,7 @@ public class RapidHeightMapExtractor
    private float[] groundToSensorTransformArray = new float[16];
    private float[] sensorToGroundTransformArray = new float[16];
 
-   private Mat croppedHeightMapImage;
-   private Mat croppedTerrainCostImage;
-   private Mat croppedContactMapImage;
+   private TerrainMapData terrainMapData;
    private Mat denoisedHeightMapImage;
    private Rect cropWindowRectangle;
 
@@ -124,9 +123,7 @@ public class RapidHeightMapExtractor
       groundToWorldTransformBuffer.createOpenCLBufferObject(openCLManager);
       groundPlaneBuffer.createOpenCLBufferObject(openCLManager);
 
-      croppedHeightMapImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
-      croppedTerrainCostImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
-      croppedContactMapImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
+      terrainMapData = new TerrainMapData(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
       denoisedHeightMapImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
 
       createLocalHeightMapImage(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
@@ -238,9 +235,9 @@ public class RapidHeightMapExtractor
          terrainMapStatistics.startTerrainMapDownloadTime();
 
          // read local and global height map images
-         croppedHeightMapImage = getCroppedImageOnKernel(globalHeightMapImage, sensorCroppedHeightMapImage, parametersBuffer);
-         //croppedTerrainCostImage = getCroppedImageOnKernel(terrainCostImage, sensorCroppedTerrainCostImage, parametersBuffer);
-         croppedContactMapImage = getCroppedImageOnKernel(contactMapImage, sensorCroppedContactMapImage, parametersBuffer);
+         terrainMapData.setHeightMap(getCroppedImageOnKernel(globalHeightMapImage, sensorCroppedHeightMapImage, parametersBuffer));
+         //terrainMapData.setTerrainCostMap(getCroppedImageOnKernel(terrainCostImage, sensorCroppedTerrainCostImage, parametersBuffer));
+         terrainMapData.setContactMap(getCroppedImageOnKernel(contactMapImage, sensorCroppedContactMapImage, parametersBuffer));
 
          //croppedHeightMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
          //croppedTerrainCostImage = getCroppedImage(sensorOrigin, globalCenterIndex, terrainCostImage.getBytedecoOpenCVMat());
@@ -425,32 +422,35 @@ public class RapidHeightMapExtractor
       return globalHeightMapImage;
    }
 
-   public Mat getCroppedGlobalHeightMapImage()
+   public TerrainMapData getTerrainMapData()
    {
-      return heightMapParameters.getDenoiserEnabled() ? denoisedHeightMapImage : croppedHeightMapImage;
+      return terrainMapData;
    }
 
-   public Mat getDenoisedHeightMapImage()
-   {
-      return denoisedHeightMapImage;
-   }
-
-   public Mat getSensorCroppedHeightMapImage()
-   {
-      return getCroppedGlobalHeightMapImage();
-   }
-
-   public Mat getCroppedTerrainCostImage()
-   {
-      //return getCroppedImage(sensorOrigin, globalCenterIndex, terrainCostImage.getBytedecoOpenCVMat());
-      return croppedTerrainCostImage;
-   }
-
-   public Mat getCroppedContactMapImage()
-   {
-      //return getCroppedImage(sensorOrigin, globalCenterIndex, contactMapImage.getBytedecoOpenCVMat());
-      return croppedContactMapImage;
-   }
+   //public Mat getCroppedGlobalHeightMapImage()
+   //{
+   //   return heightMapParameters.getDenoiserEnabled() ? denoisedHeightMapImage : terrainMapData.getHeightMap();
+   //}
+   //
+   //public Mat getDenoisedHeightMapImage()
+   //{
+   //   return denoisedHeightMapImage;
+   //}
+   //
+   //public Mat getSensorCroppedHeightMapImage()
+   //{
+   //   return getCroppedGlobalHeightMapImage();
+   //}
+   //
+   //public Mat getCroppedTerrainCostImage()
+   //{
+   //   return terrainMapData.getTerrainCostMap();
+   //}
+   //
+   //public Mat getCroppedContactMapImage()
+   //{
+   //   return terrainMapData.getContactMap();
+   //}
 
    public Mat getGlobalContactImage()
    {
