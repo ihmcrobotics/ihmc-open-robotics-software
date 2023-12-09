@@ -5,6 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
@@ -155,7 +156,17 @@ public class InertialParameterManager
          residual = new YoMatrix("residual", totalNumberOfDoFs, 1, rowNames, registry);
       }
 
-      inertialExtendedKalmanFilter = new InertialExtendedKalmanFilter(0, totalNumberOfDoFs);
+      List<RigidBodyReadOnly> bodies = new ArrayList<>();
+      List<Boolean> isBodyEstimated = new ArrayList<>();
+      for (RigidBodyReadOnly body : estimateRobotModel.getRootBody().subtreeArray())
+      {
+         if (body.getInertia() != null)
+         {
+            bodies.add(body);
+            isBodyEstimated.add(false);
+         }
+      }
+      inertialExtendedKalmanFilter = new InertialExtendedKalmanFilter(bodies, isBodyEstimated);
    }
 
    public void update()
@@ -286,25 +297,41 @@ public class InertialParameterManager
 
    private class InertialExtendedKalmanFilter extends ExtendedKalmanFilter
    {
-      /** Process model Jacobian */
+      /** Process model Jacobian. */
       private final DMatrixRMaj F;
+      /** Measurement model Jacobian. */
       private final DMatrixRMaj G;
 
+      /** List of booleans indicating whether the parameters of the corresponding rigid body are being estimated. */
       private final List<Boolean> isBodyEstimated;
-      private final DMatrixRMaj parametersFromUrdfContainer;
+      /** List of column vectors containing the inertial parameters in pi basis from the URDF. */
       private final List<DMatrixRMaj> parametersFromUrdf = new ArrayList<>();
+      /** Container variable for the inertial parameters in pi basis of one rigid body from the URDF. */
+      private final DMatrixRMaj parametersFromUrdfContainer;
 
+      /** Container variable storing a vertical slice of the regressor matrix that corresponds to one rigid body. */
+      private final DMatrixRMaj regressorBlockContainer;
+      /** Container variable storing the inertial parameters in pi basis of one rigid body. */
       private final DMatrixRMaj parameterContainer;
+
+      /**
+       * The EKF API demands that the parameters we're estimating be packed into a single vector. Notably, this means we must omit the parameters we
+       * assume known.
+       */
+      private final DMatrixRMaj consideredParameters;
+
       private final DMatrixRMaj measurement;
 
       private final DMatrixRMaj generalizedContactWrenchesContainer;
 
-      public InertialExtendedKalmanFilter(List<RigidBodyReadOnly> bodies, List<Boolean> isBodyEstimated, int numberOfParametersToEstimate, int totalNumberOfDoFs)
+      public InertialExtendedKalmanFilter(List<RigidBodyReadOnly> bodies, List<Boolean> isBodyEstimated)
       {
-         super(numberOfParametersToEstimate, totalNumberOfDoFs);
+         super(countParametersToEstimate(isBodyEstimated), countDoFs(bodies));
+         int numberOfParametersToEstimate = countParametersToEstimate(isBodyEstimated);
+         int numberOfDoFs = countDoFs(bodies);
 
          F = CommonOps_DDRM.identity(numberOfParametersToEstimate, numberOfParametersToEstimate);
-         G = new DMatrixRMaj(totalNumberOfDoFs, numberOfParametersToEstimate);
+         G = new DMatrixRMaj(numberOfDoFs, numberOfParametersToEstimate);
 
          this.isBodyEstimated = isBodyEstimated;
          // TODO: maybe some logic checking that length of bodies and length of isBodyEstimated is the same, or find a better API than two lists
@@ -312,9 +339,19 @@ public class InertialParameterManager
          for (int i = 0; i < bodies.size(); ++i)
             parametersFromUrdf.add(spatialInertiaToParameterVector(bodies.get(i).getInertia()));
 
+         regressorBlockContainer = new DMatrixRMaj(totalNumberOfDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+         parameterContainer = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1);
+
+         consideredParameters = new DMatrixRMaj(numberOfParametersToEstimate, 1);
+
          measurement = new DMatrixRMaj(totalNumberOfDoFs, 1);
+
+         generalizedContactWrenchesContainer = new DMatrixRMaj(totalNumberOfDoFs, 1);
       }
 
+      /**
+       * Because {@link #processModel(DMatrixRMaj)} is the identity mapping, the Jacobian of the process model is the identity matrix.
+       */
       @Override
       protected DMatrixRMaj linearizeProcessModel(DMatrixRMaj previousState)
       {
@@ -322,25 +359,25 @@ public class InertialParameterManager
       }
 
       /**
-       * The correct measurement Jacobian consists of only the blocks of the regressor that correspond to the bodies we're estimating parameters of.
+       * The measurement Jacobian consists of vertical slices of the regressor that correspond to the bodies we're estimating parameters of, stacked
+       * horizontally.
+       * <p>
+       * For example, if the system under consideration consists of four rigid bodies, then we can slice up Y as: Y = [Y_1, Y_2, Y_3, Y_4], where Y_i is a
+       * n x 10 matrix. If we are only estimating the parameters of bodies 1 and 3, then the measurement Jacobian is: G = [Y_1, Y_3].
+       * </p>
        */
       @Override
       protected DMatrixRMaj linearizeMeasurementModel(DMatrixRMaj predictedParameters)
       {
          G.zero();
-         int index = 0;
-         int numberOfParams = RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY;
 
+         int index = 0;  // need a separate index to keep track of how many bodies we've packed into G
          for (int i = 0; i < isBodyEstimated.size(); ++i)
          {
-            // If we're estimating this body, extract the block of the regressor corresponding to that body, and place it in G
             if (isBodyEstimated.get(i))
             {
-               MatrixMissingTools.setMatrixBlock(G,
-                                                 0, index * numberOfParams,
-                                                 regressorCalculator.getRegressorBlockForBodyIndex(i),
-                                                 0, 0,
-                                                 totalNumberOfDoFs, numberOfParams, 1.0);
+               packRegressorBlockForBodyIndex(i);  // packs the relevant regressor block into regressorBlockContainer
+               packMeasurementModelJacobianForBodyIndex(index);  // packs the relevant regressor block into G, note the use of index rather than i
                index++;
             }
          }
@@ -354,30 +391,31 @@ public class InertialParameterManager
       public DMatrixRMaj packConsideredParameters(DMatrixRMaj parameters)
       {
          int index = 0;
-         int numberOfParams = RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY;
-
          for (int i = 0; i < isBodyEstimated.size(); ++i)
          {
             if (isBodyEstimated.get(i))
             {
-               MatrixMissingTools.setMatrixBlock(parameterContainer,
-                                                 index * numberOfParams, 0,
-                                                 parameters,
-                                                 i * numberOfParams, 0,
-                                                 numberOfParams, 1, 1.0);
+               packParameterVectorForBodyIndex(index);
                index++;
             }
          }
          return parameterContainer;
       }
 
-
+      /**
+       * For inertial parameter estimation, the process model is the identity function. That is, the parameters are assumed to be constant.
+       */
       @Override
       protected DMatrixRMaj processModel(DMatrixRMaj parameters)
       {
          return parameters;
       }
 
+      /**
+       *
+       * @param parameters the state at the current time step.
+       * @return
+       */
       @Override
       protected DMatrixRMaj measurementModel(DMatrixRMaj parameters)
       {
@@ -388,19 +426,23 @@ public class InertialParameterManager
 
          measurement.set(generalizedContactWrenches);
 
+         int index = 0;
          for (int i = 0; i < isBodyEstimated.size(); ++i)
          {
             if (isBodyEstimated.get(i))
             {
-               // TODO: multiply by the corresponding entry in parameters and add to measurement
+               packRegressorBlockForBodyIndex(i);
+               packParameterVectorForBodyIndex(index); // note the use of index here
+               CommonOps_DDRM.multAdd(regressorBlockContainer, parameterContainer, measurement);
+               index++;
             }
             else  // The parameters are assumed known if they are not being estimated
             {
-               regressorBlockContainer.set(regressorCalculator.getRegressorBlockForBodyIndex(i));
-               // TODO: multiply by the corresponding entry in parametersFromUrdf and add to measurement
+               packRegressorBlockForBodyIndex(i);
+               packUrdfParameterVectorForBodyIndex(i);
+               CommonOps_DDRM.multAdd(regressorBlockContainer, parameterContainer, measurement);
             }
          }
-
          return measurement;
       }
 
@@ -427,7 +469,54 @@ public class InertialParameterManager
          parametersFromUrdfContainer.set(8, spatialInertia.getMomentOfInertia().getM12());
          parametersFromUrdfContainer.set(9, spatialInertia.getMomentOfInertia().getM22());
          return parametersFromUrdfContainer;
+      }
 
+      /**
+       * TODO: note this only packs one regressor block at a time into {@code regressorBlockContainer}
+       */
+      private void packRegressorBlockForBodyIndex(int index)
+      {
+         CommonOps_DDRM.extract(regressor,0, index * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, regressorBlockContainer);
+      }
+
+      private void packMeasurementModelJacobianForBodyIndex(int index)
+      {
+         CommonOps_DDRM.insert(regressorBlockContainer, G, 0, index * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+      }
+
+      /**
+       * TODO: note this only packs one parameter vector at a time into {@code parameterContainer}
+       */
+      private void packUrdfParameterVectorForBodyIndex(int index)
+      {
+         CommonOps_DDRM.insert(parametersFromUrdf.get(index), parameterContainer, 0, 0);
+      }
+
+      private void packParameterVectorForBodyIndex(int index)
+      {
+         CommonOps_DDRM.extract(consideredParameters, index * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 0, parameterContainer);
+      }
+
+      private static int countParametersToEstimate(List<Boolean> isBodyEstimated)
+      {
+         int count = 0;
+         for (Boolean isBodyEstimatedBoolean : isBodyEstimated)
+         {
+            if (isBodyEstimatedBoolean)
+               count++;
+         }
+         return RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY * count;
+      }
+
+      private static int countDoFs(List<RigidBodyReadOnly> bodies)
+      {
+         int dofs = 0;
+         for (RigidBodyReadOnly body : bodies)
+         {
+            if (body.getInertia() != null)
+               dofs += body.getParentJoint().getDegreesOfFreedom();
+         }
+         return dofs;
       }
    }
 }
