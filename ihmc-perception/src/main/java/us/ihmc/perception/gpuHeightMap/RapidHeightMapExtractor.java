@@ -15,7 +15,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.neural.HeightMapAutoencoder;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
@@ -234,10 +233,11 @@ public class RapidHeightMapExtractor
 
          terrainMapStatistics.startTerrainMapDownloadTime();
 
-         // read local and global height map images
-         terrainMapData.setHeightMap(getCroppedImageOnKernel(globalHeightMapImage, sensorCroppedHeightMapImage, parametersBuffer));
+         terrainMapData.setSensorOrigin(referenceFrames.getSteppingCameraZUpFrame().getTransformToWorldFrame().getTranslationX(),
+                                        referenceFrames.getSteppingCameraZUpFrame().getTransformToWorldFrame().getTranslationY());
+         terrainMapData.setHeightMap(getCroppedImage_OpenCL(globalHeightMapImage, sensorCroppedHeightMapImage, parametersBuffer));
+         terrainMapData.setContactMap(getCroppedImage_OpenCL(contactMapImage, sensorCroppedContactMapImage, parametersBuffer));
          //terrainMapData.setTerrainCostMap(getCroppedImageOnKernel(terrainCostImage, sensorCroppedTerrainCostImage, parametersBuffer));
-         terrainMapData.setContactMap(getCroppedImageOnKernel(contactMapImage, sensorCroppedContactMapImage, parametersBuffer));
 
          //croppedHeightMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
          //croppedTerrainCostImage = getCroppedImage(sensorOrigin, globalCenterIndex, terrainCostImage.getBytedecoOpenCVMat());
@@ -457,7 +457,7 @@ public class RapidHeightMapExtractor
       return contactMapImage.getBytedecoOpenCVMat();
    }
 
-   public Mat getCroppedImageOnKernel(BytedecoImage inputMap, BytedecoImage croppedMap, OpenCLFloatParameters parametersBuffer)
+   public Mat getCroppedImage_OpenCL(BytedecoImage inputMap, BytedecoImage croppedMap, OpenCLFloatParameters parametersBuffer)
    {
       openCLManager.setKernelArgument(croppingKernel, 0, inputMap.getOpenCLImageObject());
       openCLManager.setKernelArgument(croppingKernel, 1, croppedMap.getOpenCLImageObject());

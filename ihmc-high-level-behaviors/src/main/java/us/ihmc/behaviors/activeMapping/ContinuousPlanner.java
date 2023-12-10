@@ -228,8 +228,6 @@ public class ContinuousPlanner
       request.setGoalFootPose(RobotSide.LEFT, goalStancePose.get(RobotSide.LEFT));
       request.setGoalFootPose(RobotSide.RIGHT, goalStancePose.get(RobotSide.RIGHT));
       request.setTerrainMapData(terrainMap);
-      request.setSensorOrigin(referenceFrames.getSteppingCameraZUpFrame().getTransformToWorldFrame().getTranslationX(),
-                              referenceFrames.getSteppingCameraZUpFrame().getTransformToWorldFrame().getTranslationY());
 
       long timeStart = System.nanoTime();
 

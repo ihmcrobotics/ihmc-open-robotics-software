@@ -62,8 +62,8 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
       Point3D newPosition = new Point3D();
       newPosition.add(state, action);
 
-      int offsetX = (int) (request.getSensorOrigin().getX() * 50);
-      int offsetY = (int) (request.getSensorOrigin().getY() * 50);
+      int offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * 50);
+      int offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * 50);
 
       int rIndexPrevious = (int) (state.getX() + request.getTerrainMapData().getGridSize() / 2) - offsetX;
       int cIndexPrevious = (int) (state.getY() + request.getTerrainMapData().getGridSize() / 2) - offsetY;

@@ -67,6 +67,7 @@ public class StancePoseCalculator
             cost = Math.abs(0.5f - leftPose.getPositionDistance(rightPose));
 
             // TODO: Compute elevation and feasibility costs using height and contact maps
+            //float height = terrainMap.getHeightAt()
 
             if (cost < minCost)
             {

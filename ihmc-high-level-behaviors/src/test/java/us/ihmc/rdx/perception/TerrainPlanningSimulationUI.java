@@ -385,6 +385,7 @@ public class TerrainPlanningSimulationUI
                     {
                        terrainMap = new TerrainMapData(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat(),
                                                        humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage(), null);
+                       terrainMap.setSensorOrigin(0, 0);
                     }
                     else
                     {
@@ -500,7 +501,6 @@ public class TerrainPlanningSimulationUI
          {
             MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
             request.setTerrainMapData(terrainMap);
-            request.setSensorOrigin(zUpToWorldTransform.getTranslationX(), zUpToWorldTransform.getTranslationY());
 
             //setStartAndGoalFootPosesWithSliders(request);
             setStartAndGoalFootPoses(request, zUpToWorldTransform);
@@ -511,7 +511,7 @@ public class TerrainPlanningSimulationUI
                monteCarloFootstepPlanner.reset(request);
 
             LogTools.debug("Start: {}, Goal: {}, Origin: {}", request.getStartFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.LEFT),
-                          request.getSensorOrigin());
+                          request.getTerrainMapData().getSensorOrigin());
 
             FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(request);
             long timeEnd = System.nanoTime();

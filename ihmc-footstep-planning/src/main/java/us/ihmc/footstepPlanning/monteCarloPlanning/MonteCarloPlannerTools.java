@@ -312,8 +312,8 @@ public class MonteCarloPlannerTools
       List<MonteCarloTreeNode> path = new ArrayList<>();
       MonteCarloPlannerTools.getOptimalPathByVisits(root, path);
 
-      int offsetX = (int) (request.getSensorOrigin().getX() * 50);
-      int offsetY = (int) (request.getSensorOrigin().getY() * 50);
+      int offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * 50);
+      int offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * 50);
 
       FootstepPlan footstepPlan = new FootstepPlan();
       for (MonteCarloTreeNode node : path)
@@ -429,8 +429,8 @@ public class MonteCarloPlannerTools
    {
       double score = 0.0;
 
-      int offsetX = (int) (request.getSensorOrigin().getX() * 50);
-      int offsetY = (int) (request.getSensorOrigin().getY() * 50);
+      int offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * 50);
+      int offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * 50);
 
       int rIndex = (int) (newNode.getState().getX() + request.getTerrainMapData().getGridSize() / 2) - offsetX;
       int cIndex = (int) (newNode.getState().getY() + request.getTerrainMapData().getGridSize() / 2) - offsetY;

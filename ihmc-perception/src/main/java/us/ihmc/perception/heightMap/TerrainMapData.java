@@ -3,10 +3,15 @@ package us.ihmc.perception.heightMap;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 
 public class TerrainMapData
 {
+   /**
+    * Sensor origin that defines the center of the height map
+    */
+   private Point2D sensorOrigin;
    private RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
 
    private int cellsPerMeter = 50;
@@ -60,10 +65,22 @@ public class TerrainMapData
       return cellHeight;
    }
 
+   public float getHeightInWorld()
+   {
+
+   }
+
    public float getContactScoreAt(int rIndex, int cIndex)
    {
       return (float) ((heightMap.ptr(rIndex, cIndex).get() & 0xFF));
    }
+
+   public void setSensorOrigin(double originX, double originY)
+   {
+      this.sensorOrigin.set(originX, originY);
+   }
+
+   public Point2D getSensorOrigin() { return sensorOrigin; }
 
    public Mat getHeightMap()
    {
