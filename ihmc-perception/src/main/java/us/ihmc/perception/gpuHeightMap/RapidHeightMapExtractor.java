@@ -233,8 +233,8 @@ public class RapidHeightMapExtractor
 
          terrainMapStatistics.startTerrainMapDownloadTime();
 
-         terrainMapData.setSensorOrigin(referenceFrames.getSteppingCameraZUpFrame().getTransformToWorldFrame().getTranslationX(),
-                                        referenceFrames.getSteppingCameraZUpFrame().getTransformToWorldFrame().getTranslationY());
+         terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(),
+                                        groundToWorldTransform.getTranslationY());
          terrainMapData.setHeightMap(getCroppedImage_OpenCL(globalHeightMapImage, sensorCroppedHeightMapImage, parametersBuffer));
          terrainMapData.setContactMap(getCroppedImage_OpenCL(contactMapImage, sensorCroppedContactMapImage, parametersBuffer));
          //terrainMapData.setTerrainCostMap(getCroppedImageOnKernel(terrainCostImage, sensorCroppedTerrainCostImage, parametersBuffer));

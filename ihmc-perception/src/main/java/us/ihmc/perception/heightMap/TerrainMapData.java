@@ -11,8 +11,8 @@ public class TerrainMapData
    /**
     * Sensor origin that defines the center of the height map
     */
-   private Point2D sensorOrigin;
-   private RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
+   private final Point2D sensorOrigin = new Point2D();
+   private final RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
 
    private int cellsPerMeter = 50;
    private int gridSize = 201;
@@ -57,7 +57,7 @@ public class TerrainMapData
       this.terrainCostMap = terrainMapData.getTerrainCostMap().clone();
    }
 
-   public float getHeightAt(int rIndex, int cIndex)
+   public float getHeightLocal(int rIndex, int cIndex)
    {
       int height = ((int) heightMap.ptr(rIndex, cIndex).getShort() & 0xFFFF);
       float cellHeight = (float) ((float) height / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
@@ -65,12 +65,29 @@ public class TerrainMapData
       return cellHeight;
    }
 
-   public float getHeightInWorld()
+   public float getHeightInWorld(float x, float y)
    {
-
+      int rIndex = getLocalIndex(x);
+      int cIndex = getLocalIndex(y);
+      return getHeightLocal(rIndex, cIndex);
    }
 
-   public float getContactScoreAt(int rIndex, int cIndex)
+   public float getContactScoreInWorld(float x, float y)
+   {
+      int rIndex = getLocalIndex(x);
+      int cIndex = getLocalIndex(y);
+      return getContactScoreLocal(rIndex, cIndex);
+   }
+
+   public int getLocalIndex(float coordinate)
+   {
+      int grIndex = (int) coordinate / cellsPerMeter;
+      int offsetX = (int) (sensorOrigin.getX() * 50);
+      int rIndex = (int) (grIndex + gridSize / 2) - offsetX;
+      return rIndex;
+   }
+
+   public float getContactScoreLocal(int rIndex, int cIndex)
    {
       return (float) ((heightMap.ptr(rIndex, cIndex).get() & 0xFF));
    }

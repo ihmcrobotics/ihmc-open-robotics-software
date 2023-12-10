@@ -327,7 +327,7 @@ public class MonteCarloPlannerTools
          int cIndex = nodeY + request.getTerrainMapData().getGridSize() / 2 - offsetY;
 
          // decode height from 16-bit scaled and offset height value stored in OpenCV Mat
-         float cellHeight = request.getTerrainMapData().getHeightAt(rIndex, cIndex);
+         float cellHeight = request.getTerrainMapData().getHeightLocal(rIndex, cIndex);
          FramePose3D footstepPose = getFramePose3D(cellHeight, nodeX / 50.0f, nodeY / 50.0f, footstepNode.getState().getZ());
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
@@ -457,12 +457,12 @@ public class MonteCarloPlannerTools
       double referenceCost = distanceFromReferenceLine * 0.01f + yawDifferenceFromReference * 0.01f;
 
       double goalReward = plannerParameters.getGoalReward() / (currentPosition.distanceSquared(goalPosition));
-      double contactReward = (((int) request.getTerrainMapData().getContactScoreAt(rIndex, cIndex) & 0xFF) / 255.0 - plannerParameters.getFeasibleContactCutoff())
+      double contactReward = (((int) request.getTerrainMapData().getContactScoreLocal(rIndex, cIndex) & 0xFF) / 255.0 - plannerParameters.getFeasibleContactCutoff())
                             * plannerParameters.getFeasibleContactReward();
 
       double stepYawCost = Math.abs(oldNode.getState().getZ() - newNode.getState().getZ()) * 0.01f;
       double stepDistanceCost = Math.abs(previousPosition.distance(currentPosition)) * 0.01f;
-      double stepHeightCost = (request.getTerrainMapData().getHeightAt(rIndex, cIndex) - request.getTerrainMapData().getHeightAt(rIndex, cIndex)) * 0.01f;
+      double stepHeightCost = (request.getTerrainMapData().getHeightLocal(rIndex, cIndex) - request.getTerrainMapData().getHeightLocal(rIndex, cIndex)) * 0.01f;
       double edgeCost = stepYawCost + stepDistanceCost + stepHeightCost;
 
       score = goalReward + contactReward - edgeCost - referenceCost;

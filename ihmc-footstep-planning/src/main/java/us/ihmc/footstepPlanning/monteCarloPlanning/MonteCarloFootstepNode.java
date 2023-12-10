@@ -1,12 +1,10 @@
 package us.ihmc.footstepPlanning.monteCarloPlanning;
 
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -71,8 +69,8 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
       int rIndex = (int) (newPosition.getX() + request.getTerrainMapData().getGridSize() / 2) - offsetX;
       int cIndex = (int) (newPosition.getY() + request.getTerrainMapData().getGridSize() / 2) - offsetY;
 
-      double previousHeight = request.getTerrainMapData().getHeightAt(rIndexPrevious, cIndexPrevious);
-      double currentHeight = request.getTerrainMapData().getHeightAt(rIndex, cIndex);
+      double previousHeight = request.getTerrainMapData().getHeightLocal(rIndexPrevious, cIndexPrevious);
+      double currentHeight = request.getTerrainMapData().getHeightLocal(rIndex, cIndex);
 
       boolean valid = ((currentHeight - previousHeight) < parameters.getMaxTransferHeight());
       valid = valid & ((currentHeight - previousHeight) > -parameters.getMaxTransferDepth());
