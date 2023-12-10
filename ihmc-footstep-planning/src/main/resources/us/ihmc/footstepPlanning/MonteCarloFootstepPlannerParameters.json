@@ -37,17 +37,17 @@
     "upperBound" : 1000
   },
   "Max transfer height" : {
-    "value" : 0.302959,
+    "value" : 0.4,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
   "Max transfer depth" : {
-    "value" : 0.35,
+    "value" : 0.4,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
   "Max transfer yaw" : {
-    "value" : 0.245125,
+    "value" : 0.5,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
@@ -92,7 +92,7 @@
     "upperBound" : 1.0
   },
   "Search skip size" : {
-    "value" : 3,
+    "value" : 2,
     "lowerBound" : 0,
     "upperBound" : 10
   },

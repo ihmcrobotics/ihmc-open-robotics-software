@@ -36,10 +36,14 @@ public class MonteCarloFootstepPlanningTest
    @Test
    public void testMonteCarloFootstepPlanning()
    {
+      LogTools.info("Initializing");
+
       RapidHeightMapExtractor.getHeightMapParameters().setInternalGlobalWidthInMeters(4.0);
       RapidHeightMapExtractor.getHeightMapParameters().setInternalGlobalCellSizeInMeters(0.02);
       heightMapExtractor.initialize();
       heightMapExtractor.reset();
+
+      LogTools.info("Initialized");
 
       // height map is 8x8 meters, with a resolution of 0.02 meters, and a 50x50 patch in the center is set to 1m
       Mat heightMap = heightMapExtractor.getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();

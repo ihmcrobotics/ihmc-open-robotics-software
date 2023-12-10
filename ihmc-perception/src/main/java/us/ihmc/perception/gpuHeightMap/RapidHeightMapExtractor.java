@@ -91,14 +91,14 @@ public class RapidHeightMapExtractor
    public RapidHeightMapExtractor(OpenCLManager openCLManager)
    {
       this.openCLManager = openCLManager;
+      //      denoiser = new HeightMapAutoencoder();
+      rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
    }
 
    public RapidHeightMapExtractor(OpenCLManager openCLManager, HumanoidReferenceFrames referenceFrames)
    {
+      this(openCLManager);
       this.referenceFrames = referenceFrames;
-      this.openCLManager = openCLManager;
-//      denoiser = new HeightMapAutoencoder();
-      rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
    }
 
    public void initialize()
@@ -320,9 +320,12 @@ public class RapidHeightMapExtractor
 
    public void readContactMapImage()
    {
-      // Read height map image into CPU memory
-      terrainCostImage.readOpenCLImage(openCLManager);
       contactMapImage.readOpenCLImage(openCLManager);
+   }
+
+   public void readTerrainCostImage()
+   {
+      terrainCostImage.readOpenCLImage(openCLManager);
    }
 
    public void reset()
