@@ -11,6 +11,8 @@
 #define MIN_DISTANCE_FROM_CLIFF_BOTTOMS 10
 #define CLIFF_START_HEIGHT_TO_AVOID 11
 #define CLIFF_END_HEIGHT_TO_AVOID 12
+#define MIN_SNAP_HEIGHT_THRESHOLD 13
+#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 14
 
 #define SNAP_FAILED 0
 #define CLIFF_TOP 1
@@ -86,7 +88,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     // Remember, these are x and y in image coordinates, not world
     int idx_x = get_global_id(0); // column, top left
     int idx_y = get_global_id(1); // row, top left
-    int idx_yaw = (int) idx_yaw_singular_buffer[0]; // TODO not needed
+    int idx_yaw = (int) idx_yaw_singular_buffer[0];
 
     bool should_print = false;//idx_x == 20 && idx_y == 20;
 
@@ -94,8 +96,6 @@ void kernel computeSnappedValuesKernel(global float* params,
     uint foot_height_int = read_imageui(height_map, key).x;
 
     float foot_height = (float) foot_height_int / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
-
-    // TODO yaw discretizations should get set
     float foot_yaw = get_yaw_from_index(2, idx_yaw);
 
     float foot_width = params[FOOT_WIDTH];
@@ -182,7 +182,6 @@ void kernel computeSnappedValuesKernel(global float* params,
 
     //////// Compute the local plane of the foot, as well as the area of support underneath it.
 
-    float min_height_under_foot_to_consider = max_height_under_foot - 0.05f; // TODO extract parameter
 
     // these are values that will be used for the plane calculation
     float n = 0.0f;
@@ -240,9 +239,10 @@ void kernel computeSnappedValuesKernel(global float* params,
                 if (isnan(query_height))
                    continue;
 
-                min_height_under_foot_to_consider = max_height_under_foot - (0.03f + 0.06f * clamp(offset_distance / foot_search_radius, 0.0f, 1.0f));
+                float snap_height_threshold = params[MIN_SNAP_HEIGHT_THRESHOLD] + params[SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE] * clamp(offset_distance / foot_search_radius, 0.0f, 1.0f);
+                float min_height_under_foot_to_consider = max_height_under_foot - snap_height_threshold;
 
-//            // fixme extract
+//            // todo extract parameter
                 float tanh_slope = 50000.0f;
                 float activation = 0.5f * (tanh(tanh_slope * (query_height - min_height_under_foot_to_consider)) + 1.0f);
 
@@ -263,6 +263,8 @@ void kernel computeSnappedValuesKernel(global float* params,
     }
     else
     {
+        float min_height_under_foot_to_consider = max_height_under_foot - params[MIN_SNAP_HEIGHT_THRESHOLD];
+
         float resolution = 0.02f;
 
         for (float x_value = -half_length; x_value <= half_length; x_value += resolution)
@@ -312,7 +314,6 @@ void kernel computeSnappedValuesKernel(global float* params,
     bool failed = false;
     int snap_result = VALID;
 
-    // FIXME for some reason all the points were bad
     if (n < 0.0001f)
     {
         snap_result = SNAP_FAILED;
@@ -335,7 +336,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     float3 normal = (float3) (coefficients[0], coefficients[1], 1.0);
     normal = normalize(normal);
 
-    // FIXME include this?
+    // TODO include this?
    // snap_height = getZOnPlane(foot_position, (float3) (x_solution, y_solution, z_solution), normal);
 
 
@@ -379,7 +380,7 @@ void kernel computeSnappedValuesKernel(global float* params,
                 distance_to_foot_from_this_query = signed_distance_to_foot_polygon(map_center_index, map_resolution, params, map_key, foot_yaw, query_key);
             }
 
-           // FIXME so this being a hard transition makes it a noisy signal. How can we smooth it?
+           // TODO so this being a hard transition makes it a noisy signal. How can we smooth it?
             if (relative_height_of_query > params[CLIFF_START_HEIGHT_TO_AVOID])
             {
                 float height_alpha = (relative_height_of_query - params[CLIFF_START_HEIGHT_TO_AVOID]) / (params[CLIFF_END_HEIGHT_TO_AVOID] - params[CLIFF_START_HEIGHT_TO_AVOID]);
@@ -397,7 +398,7 @@ void kernel computeSnappedValuesKernel(global float* params,
             }
             else if (relative_height_of_query < -params[CLIFF_START_HEIGHT_TO_AVOID])
             {
-                // FIXME so this being a hard transition makes it a noisy signal. How can we smooth it?
+                // TODO so this being a hard transition makes it a noisy signal. How can we smooth it?
                 if (distance_to_foot_from_this_query < params[MIN_DISTANCE_FROM_CLIFF_TOPS])
                 {
                     // we're too close to the cliff top!
@@ -414,7 +415,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     // TODO extract area fraction
     float min_area_fraction = 0.9f;
     float min_points_needed_for_support = (int) (min_area_fraction * max_points_possible_under_support);
-    // FIXME this hard inequality is causing some noise in the solution space. How could we reduce that?
+    // TODO this hard inequality is causing some noise in the solution space. How could we reduce that?
     if (n < min_points_needed_for_support)
     {
         snap_result = NOT_ENOUGH_AREA;

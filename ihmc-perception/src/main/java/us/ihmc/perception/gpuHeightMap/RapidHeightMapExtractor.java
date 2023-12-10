@@ -42,6 +42,8 @@ public class RapidHeightMapExtractor
    private static final double distanceFromCliffBottoms = 0.05;
    private static final double cliffStartHeightToAvoid = 0.08;
    private static final double cliffEndHeightToAvoid = 1.2;
+   private static final double minSnapHeightThreshold = 0.03;
+   private static final double snapHeightThresholdAtSearchEdge = 0.06;
 
    private int mode = 1; // 0 -> Ouster, 1 -> Realsense
    private float gridOffsetX;
@@ -296,12 +298,6 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) parameters.getSteppingContactThreshold());
       parametersBuffer.setParameter((float) parameters.getContactWindowSize());
       parametersBuffer.setParameter((float) parameters.getSpatialAlpha());
-      parametersBuffer.setParameter((float) footSize);
-      parametersBuffer.setParameter((float) footSize);
-      parametersBuffer.setParameter((float) distanceFromCliffTops);
-      parametersBuffer.setParameter((float) distanceFromCliffBottoms);
-      parametersBuffer.setParameter((float) cliffStartHeightToAvoid);
-      parametersBuffer.setParameter((float) cliffEndHeightToAvoid);
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
@@ -319,6 +315,8 @@ public class RapidHeightMapExtractor
       snappingParametersBuffer.setParameter((float) distanceFromCliffBottoms);
       snappingParametersBuffer.setParameter((float) cliffStartHeightToAvoid);
       snappingParametersBuffer.setParameter((float) cliffEndHeightToAvoid);
+      snappingParametersBuffer.setParameter((float) minSnapHeightThreshold);
+      snappingParametersBuffer.setParameter((float) snapHeightThresholdAtSearchEdge);
 
       snappingParametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
