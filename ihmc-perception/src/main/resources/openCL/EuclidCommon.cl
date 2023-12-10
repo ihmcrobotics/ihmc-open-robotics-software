@@ -245,13 +245,13 @@ float* invert3x3Matrix(float* matrix)
    float detMinor01 = m10 * m22 - m12 * m20;
    float detMinor02 = m10 * m21 - m11 * m20;
 
-   float detMinor10 = matrix[1] * matrix[8] - matrix[2] * matrix[7];
-   float detMinor11 = matrix[0] * matrix[8] - matrix[2] * matrix[6];
-   float detMinor12 = matrix[0] * matrix[7] - matrix[1] * matrix[6];
+   float detMinor10 = m01 * m22 - m02 * m21;
+   float detMinor11 = m00 * m22 - m02 * m20;
+   float detMinor12 = m00 * m21 - m01 * m20;
 
-   float detMinor20 = matrix[1] * matrix[5] - matrix[2] * matrix[4];
-   float detMinor21 = matrix[0] * matrix[5] - matrix[2] * matrix[3];
-   float detMinor22 = matrix[0] * matrix[4] - matrix[1] * matrix[3];
+   float detMinor20 = m01 * m12 - m02 * m11;
+   float detMinor21 = m00 * m12 - m02 * m10;
+   float detMinor22 = m00 * m11 - m01 * m10;
 
    ret[0] = detMinor00 / det;
    ret[1] = -detMinor10 / det;
