@@ -418,35 +418,14 @@ public class RDXVRKinematicsStreamingMode
          ImGui.text("Left A Button");
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Control/Stop Robot"), streamToController);
-
-      // add widget for using shared control assistance in VR
-      if (controllerModel == RDXVRControllerModel.FOCUS3)
-         ImGui.text("Y Button");
-      else
-         ImGui.text("Left B Button");
+      ImGui.text("Right A Button");
       ImGui.sameLine();
-
-      kinematicsStreamingToolboxProcess.renderImGuiWidgets();
-      ghostRobotGraphic.renderImGuiWidgets();
       if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
       {
          setEnabled(enabled.get());
       }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Reinitialize")))
-      {
-         reinitializeToolbox();
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Wake up")))
-      {
-         wakeUpToolbox();
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Sleep")))
-      {
-         sleepToolbox();
-      }
+
+      ghostRobotGraphic.renderImGuiWidgets();
       // add widgets for recording/replaying motion in VR
       ImGui.text("Press Left Joystick - Start/Stop recording");
       kinematicsRecorder.renderRecordWidgets(labels);
