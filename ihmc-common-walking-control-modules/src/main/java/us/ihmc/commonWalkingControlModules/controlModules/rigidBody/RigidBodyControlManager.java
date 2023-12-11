@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -613,6 +614,12 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    public RigidBodyTaskspaceControlState getTaskspaceControlState()
    {
       return taskspaceControlState;
+   }
+
+   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
+   {
+      if (loadBearingControlState != null)
+         loadBearingControlState.setControllerCoreOutput(controllerCoreOutput);
    }
 
    @Override
