@@ -27,7 +27,7 @@ testDependencies {
 javafxDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.7")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.8")
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 
