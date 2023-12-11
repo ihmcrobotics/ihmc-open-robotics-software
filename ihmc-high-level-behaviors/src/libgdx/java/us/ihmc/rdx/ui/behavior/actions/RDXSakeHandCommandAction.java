@@ -69,13 +69,13 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
 
       // Set position and torque slider values to match selected command option
       SakeHandCommandOption command = SakeHandCommandOption.values[definition.getHandConfigurationIndex()];
-      if (command.getGoalPosition() >= 0)
+      if (command.getDesiredPosition() >= 0)
       {
-         positionValue[0] = (float) (command.getGoalPosition() * Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS));
+         positionValue[0] = (float) (command.getDesiredPosition() * Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS));
       }
-      if (command.getGoalTorque() >= 0)
+      if (command.getDesiredTorque() >= 0)
       {
-         torqueValue[0] = (float) command.getGoalTorque();
+         torqueValue[0] = (float) command.getDesiredTorque();
       }
 
       float lastPositionValue = positionValue[0];

@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.SakeHandStatusMessage;
 import imgui.flag.ImGuiCol;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.behaviors.sakeHandCommunication.ROS2SakeHandCommander;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Input;
@@ -34,8 +35,8 @@ public class RDXSakeHandPositionSlider
    private static final double EPSILON = 1E-6;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ROS2SakeHandCommander handCommander;
    private final IHMCROS2Input<SakeHandStatusMessage> handStatusMessage;
-   private final CommunicationHelper communicationHelper;
    private final RobotSide handSide;
    private final String sliderName;
    private final float[] sliderValue = new float[1];
@@ -46,8 +47,8 @@ public class RDXSakeHandPositionSlider
 
    public RDXSakeHandPositionSlider(CommunicationHelper communicationHelper, RobotSide handSide)
    {
-      this.communicationHelper = communicationHelper;
       this.handSide = handSide;
+      this.handCommander = ROS2SakeHandCommander.getSakeHandCommander(communicationHelper);
       sliderName = handSide.getPascalCaseName() + " angle";
 
       handStatusMessage = communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
@@ -70,16 +71,9 @@ public class RDXSakeHandPositionSlider
       {
          if (sendThrottler.run(SEND_PERIOD))
          {
-            double positionRatio = sliderValue[0] / Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS);
+            double desiredPosition = 1.0 - (sliderValue[0] / Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS));
 
-            SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
-            message.setRobotSide(handSide.toByte());
-            message.setDesiredCommandOption((byte) SakeHandCommandOption.CUSTOM.getCommandNumber());
-            message.setErrorConfirmation(false);
-            message.setPositionRatio(1.0 - positionRatio);
-            message.setTorqueRatio(-1.0);
-
-            communicationHelper.publish(ROS2Tools::getSakeHandCommandTopic, message);
+            handCommander.setDesiredPosition(handSide, desiredPosition);
          }
       }
       else

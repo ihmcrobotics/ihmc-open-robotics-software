@@ -112,8 +112,8 @@ public class RDXHandConfigurationManager
       SakeHandDesiredCommandMessage commandMessage = new SakeHandDesiredCommandMessage();
       commandMessage.setDesiredCommandOption((byte) handCommandOption.getCommandNumber());
       commandMessage.setErrorConfirmation(handCommandOption.getErrorConfirmation());
-      commandMessage.setPositionRatio(handCommandOption.getGoalPosition());
-      commandMessage.setTorqueRatio(handCommandOption.getGoalTorque());
+      commandMessage.setPositionRatio(handCommandOption.getDesiredPosition());
+      commandMessage.setTorqueRatio(handCommandOption.getDesiredTorque());
       commandMessage.setRobotSide(side.toByte());
 
       communicationHelper.publish(ROS2Tools::getSakeHandCommandTopic,

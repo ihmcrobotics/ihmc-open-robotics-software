@@ -20,15 +20,15 @@ public enum SakeHandCommandOption
 
    private final int commandNumber;
    private final boolean errorConfirmation;
-   private final double goalPosition;
-   private final double goalTorque;
+   private final double desiredPosition;
+   private final double desiredTorque;
 
-   SakeHandCommandOption(int commandNumber, boolean errorConfirmation, double goalPosition, double goalTorque)
+   SakeHandCommandOption(int commandNumber, boolean errorConfirmation, double desiredPosition, double desiredTorque)
    {
       this.commandNumber = commandNumber;
       this.errorConfirmation = errorConfirmation;
-      this.goalPosition = goalPosition;
-      this.goalTorque = goalTorque;
+      this.desiredPosition = desiredPosition;
+      this.desiredTorque = desiredTorque;
    }
 
    public final static SakeHandCommandOption[] values = values();
@@ -49,12 +49,12 @@ public enum SakeHandCommandOption
    {
       return errorConfirmation;
    }
-   public double getGoalPosition()
+   public double getDesiredPosition()
    {
-      return goalPosition;
+      return desiredPosition;
    }
-   public double getGoalTorque()
+   public double getDesiredTorque()
    {
-      return goalTorque;
+      return desiredTorque;
    }
 }

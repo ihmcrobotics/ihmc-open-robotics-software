@@ -7,6 +7,7 @@ import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.behaviors.sakeHandCommunication.ROS2SakeHandCommander;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Input;
@@ -31,7 +32,7 @@ public class RDXSakeHandTorqueSlider
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ROS2SyncedRobotModel syncedRobot;
    private final IHMCROS2Input<SakeHandStatusMessage> handStatusMessage;
-   private final CommunicationHelper communicationHelper;
+   private final ROS2SakeHandCommander handCommander;
    private final String sliderName;
    private final float[] sliderValue = new float[1];
    private double measuredTorque = Double.NaN;
@@ -40,11 +41,11 @@ public class RDXSakeHandTorqueSlider
    private final Throttler updateThrottler = new Throttler();
    private final Throttler sendThrottler = new Throttler();
 
-   public RDXSakeHandTorqueSlider(ROS2SyncedRobotModel syncedRobot, CommunicationHelper communicationhelper, RobotSide handSide)
+   public RDXSakeHandTorqueSlider(ROS2SyncedRobotModel syncedRobot, CommunicationHelper communicationHelper, RobotSide handSide)
    {
       this.syncedRobot = syncedRobot;
-      this.communicationHelper = communicationhelper;
       this.handSide = handSide;
+      handCommander = ROS2SakeHandCommander.getSakeHandCommander(communicationHelper);
       sliderName = handSide.getPascalCaseName() + " torque";
 
       handStatusMessage = communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
@@ -67,16 +68,7 @@ public class RDXSakeHandTorqueSlider
       {
          if (sendThrottler.run(SEND_PERIOD) && syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION_DURATION));
          {
-            SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
-
-            // This attempts to keep the hand's position identical when sending a new goal torque
-            message.setRobotSide(handSide.toByte());
-            message.setDesiredCommandOption((byte) SakeHandCommandOption.CUSTOM.getCommandNumber());
-            message.setErrorConfirmation(false);
-            message.setPositionRatio(-1.0);
-            message.setTorqueRatio(sliderValue[0]);
-
-            communicationHelper.publish(ROS2Tools::getSakeHandCommandTopic, message);
+            handCommander.setDesiredTorque(handSide, sliderValue[0]);
          }
       }
       else
