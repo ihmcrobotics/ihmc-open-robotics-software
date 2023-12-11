@@ -78,6 +78,12 @@ float get_height_on_plane(float x, float y, global float *plane)
    return height;
 }
 
+// This kernel is designed to compute the average snap height for every cell in the window. This can be done by either snapping a rectangular foot down if
+// there's a known yaw, or, more efficiently, a circle on the ground, where you don't need to know the yaw. It also computes the local normal at that cell.
+// Additionally, it performs some validity checks about the snap, specifically checking the minimum area, or whether it's too close to a cliff top or bottom.
+// The results of that check is returned in the steppable map image. When performing the snap, points that are too far below the highest point are ignored. This
+// enables a better "sharp" edge around corners, to avound rounding by averaging. It also is how the support area is calculated. In the future, the support area
+// should be the area of the convex hull, not just the area of the cells, since that will allow "bridging" gaps.
 void kernel computeSnappedValuesKernel(global float* params,
                                 read_write image2d_t height_map,
                                 global float* idx_yaw_singular_buffer,
@@ -113,6 +119,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     float2 map_center = (float2) (0.0, 0.0);
 
     int map_cells_per_side = 2 * map_center_index + 1;
+    int map_cells_per_side_for_checking = map_cells_per_side - 1;
     int cropped_cells_per_side = 2 * cropped_center_index + 1;
 
     int crop_idx_x = idx_x;
@@ -138,15 +145,13 @@ void kernel computeSnappedValuesKernel(global float* params,
     for (int x_query = map_key.x - foot_offset_indices; x_query <= map_key.x + foot_offset_indices; x_query++)
     {
         // if we're outside of the search area in the x direction, skip to the end
-        // FIXME should this include an equals?
-        if (x_query < 0 || x_query >= map_cells_per_side)
+        if (x_query < 0 || x_query > map_cells_per_side_for_checking)
             continue;
 
         for (int y_query = map_key.y - foot_offset_indices; y_query <= map_key.y + foot_offset_indices; y_query++)
         {
             // y is out of bounds, so skip it
-            // FIXME should this include an equals?
-            if (y_query < 0 || y_query >= map_cells_per_side)
+            if (y_query < 0 || y_query > map_cells_per_side_for_checking)
                 continue;
 
             float2 vector_to_point_from_foot = map_resolution * (float2) ((float) (x_query - map_key.x), (float) (y_query - map_key.y));
@@ -216,7 +221,7 @@ void kernel computeSnappedValuesKernel(global float* params,
                 int2 query_key = coordinate_to_indices(point_query, map_center, map_resolution, map_center_index);
 
                 // This query position is out of bounds of the incoming height map, so it should be skipped.
-                if (query_key.x < 0 || query_key.x > map_cells_per_side - 1 || query_key.y < 0 || query_key.y > map_cells_per_side - 1)
+                if (query_key.x < 0 || query_key.x > map_cells_per_side_for_checking || query_key.y < 0 || query_key.y > map_cells_per_side_for_checking)
                     continue;
 
                 // We want to put this after the bounds check. That way, if it's outside the FOV, we don't count it against the minimum area.
@@ -254,6 +259,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     }
     else
     {
+        // FIXME this block of code possibly doesn't work since some indexing was refactored
         float min_height_under_foot_to_consider = max_height_under_foot - params[MIN_SNAP_HEIGHT_THRESHOLD];
 
         float resolution = 0.02f;
@@ -272,7 +278,7 @@ void kernel computeSnappedValuesKernel(global float* params,
                 int image_query_y = map_cells_per_side - map_query_x;
 
                 // This query position is out of bounds of the incoming height map, so it should be skipped.
-                if (image_query_x < 0 || image_query_x > map_cells_per_side - 1 || image_query_y < 0 || image_query_y > map_cells_per_side - 1)
+                if (image_query_x < 0 || image_query_x > map_cells_per_side_for_checking || image_query_y < 0 || image_query_y > map_cells_per_side_for_checking)
                     continue;
 
                 int2 query_key = (int2) (image_query_x, image_query_y);
@@ -330,7 +336,6 @@ void kernel computeSnappedValuesKernel(global float* params,
     // TODO include this?
    // snap_height = getZOnPlane(foot_position, (float3) (x_solution, y_solution, z_solution), normal);
 
-
     //////////// Check to make sure we're not stepping too near a cliff base or top
 
     float cliff_search_offset = max_dimension / 2.0f + max(params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS], params[MIN_DISTANCE_FROM_CLIFF_TOPS]);
@@ -341,13 +346,13 @@ void kernel computeSnappedValuesKernel(global float* params,
     for (int x_query = map_key.x - cliff_offset_indices && !failed; x_query <= map_key.x + cliff_offset_indices && !failed; x_query++)
     {
         // if we're outside of the search area in the x direction, skip to the end
-        if (x_query < 0 || x_query >= map_cells_per_side)
+        if (x_query < 0 || x_query > map_cells_per_side_for_checking)
             continue;
 
         for (int y_query = map_key.y - cliff_offset_indices && !failed; y_query <= map_key.y + cliff_offset_indices; y_query++)
         {
             // y is out of bounds, so skip it
-            if (y_query < 0 || y_query >= map_cells_per_side)
+            if (y_query < 0 || y_query > map_cells_per_side_for_checking)
                 continue;
 
             float2 vector_to_point_from_foot = map_resolution * (float2) ((float) (x_query - map_key.x), (float) (y_query - map_key.y));
