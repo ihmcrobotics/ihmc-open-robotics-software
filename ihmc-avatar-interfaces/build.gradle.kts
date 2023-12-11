@@ -28,7 +28,7 @@ mainDependencies {
    api("us.ihmc:jinput:2.0.6-ihmc2")
    api("us.ihmc:euclid:0.21.0")
    api("us.ihmc:euclid-geometry:0.21.0")
-   api("us.ihmc:mecano-graphviz:17-0.15.0")
+   api("us.ihmc:mecano-graphviz:17-0.16.0")
    api("us.ihmc:robot-environment-awareness:source")
    api("us.ihmc:robot-environment-awareness-visualizers:source")
    api("us.ihmc:ihmc-ros-tools:source")
