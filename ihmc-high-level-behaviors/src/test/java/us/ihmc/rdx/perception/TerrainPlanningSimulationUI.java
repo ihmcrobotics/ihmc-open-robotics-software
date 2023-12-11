@@ -8,6 +8,7 @@ import imgui.type.ImFloat;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.behaviors.activeMapping.ContinuousPlanningTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -31,7 +32,6 @@ import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlannerRequ
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerLoggingTools;
-import us.ihmc.footstepPlanning.tools.HeightMapTerrainGeneratorTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
@@ -43,7 +43,6 @@ import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.neural.FootstepPredictor;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.behaviors.activeMapping.ContinuousPlanningTools;
 import us.ihmc.perception.tools.PerceptionLoggingTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -62,7 +61,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -350,7 +348,7 @@ public class TerrainPlanningSimulationUI
                l515PoseGizmo.update();
             }
             ImGui.separator();
-            if (ImGui.button("Load Height Map"))
+            if (ImGui.button("Load Footstep Planner Log"))
             {
                // height map is 8x8 meters, with a resolution of 0.02 meters, and a 50x50 patch in the center is set to 1m
                FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
@@ -376,14 +374,22 @@ public class TerrainPlanningSimulationUI
                                                           new Point3D());
                humanoidPerception.getRapidHeightMapExtractor().computeContactMap();
                humanoidPerception.getRapidHeightMapExtractor().readContactMapImage();
+
+               startMidX.set((float) log.getRequestPacket().getStartLeftFootPose().getX());
+               startMidY.set((float) log.getRequestPacket().getStartLeftFootPose().getY());
+               startMidZ.set((float) log.getRequestPacket().getStartLeftFootPose().getZ());
+               startYaw.set((float) log.getRequestPacket().getStartLeftFootPose().getYaw());
+               goalMidX.set((float) log.getRequestPacket().getGoalLeftFootPose().getX());
+               goalMidY.set((float) log.getRequestPacket().getGoalLeftFootPose().getY());
+               goalYaw.set((float) log.getRequestPacket().getGoalLeftFootPose().getYaw());
             }
-            ImGui.sliderFloat("Start Mid X", startMidX.getData(), -4.0f, 4.0f);
-            ImGui.sliderFloat("Start Mid Y", startMidY.getData(), -4.0f, 4.0f);
-            ImGui.sliderFloat("Start Mid Z", startMidZ.getData(), -3.0f, 3.0f);
-            ImGui.sliderFloat("Start Yaw", startYaw.getData(), (float) -Math.PI, (float) Math.PI);
-            ImGui.sliderFloat("Goal Mid X", goalMidX.getData(), -2.0f, 2.0f);
-            ImGui.sliderFloat("Goal Mid Y", goalMidY.getData(), -2.0f, 2.0f);
-            ImGui.sliderFloat("Goal Yaw", goalYaw.getData(), (float) -Math.PI, (float) Math.PI);
+//            ImGui.sliderFloat("Start Mid X", startMidX.getData(), -4.0f, 4.0f);
+//            ImGui.sliderFloat("Start Mid Y", startMidY.getData(), -4.0f, 4.0f);
+//            ImGui.sliderFloat("Start Mid Z", startMidZ.getData(), -3.0f, 3.0f);
+//            ImGui.sliderFloat("Start Yaw", startYaw.getData(), (float) -Math.PI, (float) Math.PI);
+//            ImGui.sliderFloat("Goal Mid X", goalMidX.getData(), -2.0f, 2.0f);
+//            ImGui.sliderFloat("Goal Mid Y", goalMidY.getData(), -2.0f, 2.0f);
+//            ImGui.sliderFloat("Goal Yaw", goalYaw.getData(), (float) -Math.PI, (float) Math.PI);
             ImGui.separator();
             if (ImGui.button("Plan Steps"))
             {
