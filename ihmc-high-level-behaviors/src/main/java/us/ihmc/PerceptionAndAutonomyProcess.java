@@ -7,8 +7,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -73,11 +73,11 @@ public class PerceptionAndAutonomyProcess
    private static final ROS2Topic<ImageMessage> OUSTER_DEPTH_TOPIC = PerceptionAPI.OUSTER_DEPTH_IMAGE;
 
    private static final String LEFT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
-   private static final String RIGHT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "17403057");
+   private static final String RIGHT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
    private static final BlackflyLensProperties BLACKFLY_LENS = BlackflyLensProperties.BFS_U3_27S5C_FE185C086HA_1;
    private static final ROS2Topic<ImageMessage> BLACKFLY_IMAGE_TOPIC = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT);
 
-   private static final double SCENE_GRAPH_UPDATE_FREQUENCY = 10.0;
+   private static final double SCENE_GRAPH_UPDATE_FREQUENCY = 5.0;
 
    private ROS2DemandGraphNode zedPointCloudDemandNode;
    private ROS2DemandGraphNode zedColorDemandNode;
@@ -127,7 +127,7 @@ public class PerceptionAndAutonomyProcess
    private ROS2Heartbeat leftBlackflyHeartbeat;
    private ROS2Heartbeat rightBlackflyHeartbeat;
 
-   public PerceptionAndAutonomyProcess(ROS2PublishSubscribeAPI ros2,
+   public PerceptionAndAutonomyProcess(ROS2Helper ros2Helper,
                                        Supplier<ReferenceFrame> zedFrameSupplier,
                                        Supplier<ReferenceFrame> realsenseFrameSupplier,
                                        Supplier<ReferenceFrame> ousterFrameSupplier,
@@ -136,7 +136,7 @@ public class PerceptionAndAutonomyProcess
                                        Supplier<ReferenceFrame> robotPelvisFrameSupplier,
                                        ReferenceFrame zed2iLeftCameraFrame)
    {
-      initializeDependencyGraph(ros2);
+      initializeDependencyGraph(ros2Helper);
 
       zedImageRetriever = new ZEDColorDepthImageRetriever(ZED_CAMERA_ID, zedFrameSupplier, zedDepthDemandNode, zedColorDemandNode);
       zedImagePublisher = new ZEDColorDepthImagePublisher(ZED_COLOR_TOPICS, ZED_DEPTH_TOPIC);
@@ -167,12 +167,12 @@ public class PerceptionAndAutonomyProcess
       blackflyProcessAndPublishThread.start();
 
       this.robotPelvisFrameSupplier = robotPelvisFrameSupplier;
-      sceneGraph = new ROS2SceneGraph(ros2);
+      sceneGraph = new ROS2SceneGraph(ros2Helper);
       sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", SCENE_GRAPH_UPDATE_FREQUENCY, this::updateSceneGraph);
 
-      arUcoUpdater = new ArUcoDetectionUpdater(sceneGraph, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
+      arUcoUpdater = new ArUcoDetectionUpdater(ros2Helper, sceneGraph, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
 
-      centerposeDetectionManager = new CenterposeDetectionManager(ros2, zed2iLeftCameraFrame);
+      centerposeDetectionManager = new CenterposeDetectionManager(ros2Helper, zed2iLeftCameraFrame);
 
       sceneGraphUpdateThread.start(); // scene graph runs at all times
    }
@@ -205,7 +205,6 @@ public class PerceptionAndAutonomyProcess
       }
 
       sceneGraphUpdateThread.stop();
-      arUcoUpdater.stopArUcoDetection();
 
       if (blackflyProcessAndPublishThread != null)
          blackflyProcessAndPublishThread.stop();
@@ -318,9 +317,6 @@ public class PerceptionAndAutonomyProcess
 
                blackflyImagePublishers.get(side).setNextDistortedImage(blackflyImages.get(side).get());
 
-               if (side == RobotSide.RIGHT && blackflyImages.get(RobotSide.RIGHT).getImageWidth() != 0)
-                  arUcoUpdater.setNextArUcoImage(blackflyImages.get(RobotSide.RIGHT).get());
-
                blackflyImages.get(side).release();
             }
             else
@@ -333,12 +329,22 @@ public class PerceptionAndAutonomyProcess
 
    private void updateSceneGraph()
    {
-      sceneGraph.updateSubscription();
-      if (arUcoDetectionDemandNode.isDemanded() && arUcoUpdater.isInitialized())
-         arUcoUpdater.updateArUcoDetection();
+      // Update ArUco stuff
+      if (arUcoDetectionDemandNode.isDemanded() && blackflyImages.get(RobotSide.RIGHT) != null)
+      {
+         if (!arUcoUpdater.isInitialized())
+            arUcoUpdater.initializeArUcoDetection(blackflyImages.get(RobotSide.RIGHT).getImageWidth(), blackflyImages.get(RobotSide.RIGHT).getImageHeight());
+         arUcoUpdater.undistortAndUpdateArUco(blackflyImages.get(RobotSide.RIGHT).get());
+      }
+      else
+         sceneGraph.updateSubscription();
+
+      // Update CenterPose stuff
       if (centerposeDemandNode.isDemanded())
          centerposeDetectionManager.updateSceneGraph(sceneGraph);
-      sceneGraph.updateOnRobotOnly(robotPelvisFrameSupplier.get());
+
+      // Update general stuff
+      sceneGraph.updateOnRobotOnly(blackflyFrameSuppliers.get(RobotSide.RIGHT).get());
       sceneGraph.updatePublication();
    }
 
