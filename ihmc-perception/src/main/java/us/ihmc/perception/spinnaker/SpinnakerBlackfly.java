@@ -117,6 +117,39 @@ public class SpinnakerBlackfly
       assertNoError(Spinnaker_C.spinEnumerationSetIntValue(pixelFormatNode, ptrPixelFormat.get()), "Setting pixel format int value");
    }
 
+   public void setResolution(int width, int height)
+   {
+      spinNodeHandle widthNode = new spinNodeHandle();
+      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("Width"), widthNode), "Getting width node map node");
+      Spinnaker_C.spinIntegerSetValue(widthNode, width);
+
+      spinNodeHandle heightNode = new spinNodeHandle();
+      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("Height"), heightNode), "Getting height node map node");
+      Spinnaker_C.spinIntegerSetValue(heightNode, height);
+   }
+
+   public void setOffset(int xOffset, int yOffset)
+   {
+      spinNodeHandle xOffsetNode = new spinNodeHandle();
+      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetX"), xOffsetNode), "Getting OffsetX node map node");
+      Spinnaker_C.spinIntegerSetValue(xOffsetNode, xOffset);
+
+      spinNodeHandle yOffsetNode = new spinNodeHandle();
+      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetY"), yOffsetNode), "Getting OffsetY node map node");
+      Spinnaker_C.spinIntegerSetValue(yOffsetNode, yOffset);
+   }
+
+   // http://softwareservices.flir.com/Spinnaker/latest/_programmer_guide.html#Setting_Exposure_Time
+   public void setExposure(int exposureTimeNs)
+   {
+      spinNodeHandle exposureAutoHandle = new spinNodeHandle();
+      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("ExposureAuto"), exposureAutoHandle), "Getting ExposureAuto node map node");
+      Spinnaker_C.spinIntegerSetValue(exposureAutoHandle, 0);
+
+//      spinNodeHandle
+
+   }
+
    public void startAcquiringImages()
    {
       assertNoError(Spinnaker_C.spinCameraBeginAcquisition(spinCamera), "Beginning camera acquisition");

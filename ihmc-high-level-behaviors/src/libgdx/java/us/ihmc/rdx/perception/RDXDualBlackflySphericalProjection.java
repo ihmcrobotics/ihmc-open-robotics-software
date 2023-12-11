@@ -29,7 +29,7 @@ import java.util.Set;
 public class RDXDualBlackflySphericalProjection
 {
    private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(RDXProjectionSphere::new);
-   private final ImDouble pupillaryDistance = new ImDouble(0.140187);
+   private final ImDouble pupillaryDistance = new ImDouble(0.180724);
    private final RigidBodyTransform leftEyePose = new RigidBodyTransform();
    private final DualBlackflyUDPReceiver dualBlackflyUDPReceiver = new DualBlackflyUDPReceiver();
 
