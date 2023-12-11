@@ -200,8 +200,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     if (ASSUME_FOOT_IS_A_CIRCLE)
     {
         int samples = 5;
-         // fixme get this resolution right.
-        float resolution = (2.0f * foot_search_radius) / (2.0f * samples + 1.0f);
+        float resolution = foot_search_radius / samples;
 
         max_points_possible_under_support = 0;
 
