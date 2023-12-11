@@ -1,13 +1,12 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
-import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.behaviors.sequence.ActionNodeExecutor;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,14 +14,15 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor
+public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHeightPitchActionState, PelvisHeightPitchActionDefinition>
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
-   private final PelvisHeightPitchActionState state;
    private final PelvisHeightPitchActionDefinition definition;
+   private final PelvisHeightPitchActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final Timer executionTimer = new Timer();
@@ -30,27 +30,31 @@ public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor
    private final FramePose3D syncedPelvisPose = new FramePose3D();
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
-   private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
 
-   public PelvisHeightPitchActionExecutor(BehaviorActionSequence sequence,
+   public PelvisHeightPitchActionExecutor(long id,
+                                          CRDTInfo crdtInfo,
+                                          WorkspaceResourceDirectory saveFileDirectory,
                                           ROS2ControllerHelper ros2ControllerHelper,
                                           ReferenceFrameLibrary referenceFrameLibrary,
                                           ROS2SyncedRobotModel syncedRobot)
    {
-      super(sequence);
+      super(new PelvisHeightPitchActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+
+      state = getState();
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
-      state = new PelvisHeightPitchActionState(referenceFrameLibrary);
-      definition = state.getDefinition();
+      definition = getDefinition();
    }
 
    @Override
    public void update()
    {
       super.update();
+
+      state.setCanExecute(state.getPelvisFrame().isChildOfWorld());
    }
 
    @Override
@@ -109,33 +113,14 @@ public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor
                                                                executionTimer,
                                                                BehaviorActionCompletionComponent.TRANSLATION));
 
-         executionStatusMessage.setActionIndex(state.getActionIndex());
-         executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
-         executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-         executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-         executionStatusMessage.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
-         executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
-         executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
-         executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-         executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+         state.setNominalExecutionDuration(definition.getTrajectoryDuration());
+         state.setElapsedExecutionTime(executionTimer.getElapsedTime());
+         state.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
+         state.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
+         state.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
+         state.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
+         state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
+         state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
       }
-   }
-
-   @Override
-   public ActionExecutionStatusMessage getExecutionStatusMessage()
-   {
-      return executionStatusMessage;
-   }
-
-   @Override
-   public PelvisHeightPitchActionState getState()
-   {
-      return state;
-   }
-
-   @Override
-   public PelvisHeightPitchActionDefinition getDefinition()
-   {
-      return definition;
    }
 }
