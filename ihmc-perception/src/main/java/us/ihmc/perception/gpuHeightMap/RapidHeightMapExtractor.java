@@ -42,6 +42,7 @@ public class RapidHeightMapExtractor
    private static final double distanceFromCliffBottoms = 0.05;
    private static final double cliffStartHeightToAvoid = 0.08;
    private static final double cliffEndHeightToAvoid = 1.2;
+   private static final double minSupportAreaFraction = 0.85;
    private static final double minSnapHeightThreshold = 0.03;
    private static final double snapHeightThresholdAtSearchEdge = 0.06;
    private static final double inequalityAcvitationSlope =  50000.0;
@@ -316,6 +317,7 @@ public class RapidHeightMapExtractor
       snappingParametersBuffer.setParameter((float) distanceFromCliffBottoms);
       snappingParametersBuffer.setParameter((float) cliffStartHeightToAvoid);
       snappingParametersBuffer.setParameter((float) cliffEndHeightToAvoid);
+      snappingParametersBuffer.setParameter((float) minSupportAreaFraction);
       snappingParametersBuffer.setParameter((float) minSnapHeightThreshold);
       snappingParametersBuffer.setParameter((float) snapHeightThresholdAtSearchEdge);
       snappingParametersBuffer.setParameter((float) inequalityAcvitationSlope);
