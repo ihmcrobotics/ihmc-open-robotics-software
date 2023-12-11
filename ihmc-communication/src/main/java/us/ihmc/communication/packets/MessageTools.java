@@ -42,10 +42,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class MessageTools
 {
@@ -1284,6 +1281,20 @@ public class MessageTools
    public static Instant toInstant(InstantMessage instantMessage)
    {
       return Instant.ofEpochSecond(instantMessage.getSecondsSinceEpoch(), instantMessage.getAdditionalNanos());
+   }
+
+   public static void toMessage(UUID uuid, UUIDMessage uuidMessage)
+   {
+      uuidMessage.setLeastSignificantBits(uuid.getLeastSignificantBits());
+      uuidMessage.setMostSignificantBits(uuid.getMostSignificantBits());
+   }
+
+   /**
+    * UUID is immutable so there is no allocation free option.
+    */
+   public static UUID toUUID(UUIDMessage uuidMessage)
+   {
+      return new UUID(uuidMessage.getMostSignificantBits(), uuidMessage.getLeastSignificantBits());
    }
 
    public static double calculateDelay(ImageMessage imageMessage)
