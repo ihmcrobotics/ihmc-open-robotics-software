@@ -34,9 +34,9 @@ public class RDXProjectionSphere
    private final ImDouble sphereRadius = new ImDouble(20.0);
    private final ImInt sphereLatitudeVertices = new ImInt(100);
    private final ImInt sphereLongitudeVertices = new ImInt(100);
-   private final ImBoolean syncProjectionScales = new ImBoolean(true);
-   private final ImDouble focalLengthX = new ImDouble(0.2878);
-   private final ImDouble focalLengthY = new ImDouble(0.2878);
+   private final ImBoolean syncProjectionScales = new ImBoolean(false);
+   private final ImDouble focalLengthX = new ImDouble(1.0);
+   private final ImDouble focalLengthY = new ImDouble(0.5);
    private final ImDouble principlePointX = new ImDouble(0.0);
    private final ImDouble principlePointY = new ImDouble(0.0);
    private final ImBoolean renderSphereIfNoTexture = new ImBoolean(true);

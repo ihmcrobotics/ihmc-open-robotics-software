@@ -34,6 +34,8 @@ public class SpinnakerBlackflyManager
       SpinnakerBlackfly spinnakerBlackfly = new SpinnakerBlackfly(spinCamera, serialNumber);
       spinnakerBlackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
       spinnakerBlackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_BayerRG8);
+      spinnakerBlackfly.setResolution(968, 1464);
+      spinnakerBlackfly.setOffset(968 / 2, 0);
       // We only want the newest image for the lowest latency possible
       spinnakerBlackfly.setBufferHandlingMode(spinTLStreamBufferHandlingModeEnums.StreamBufferHandlingMode_NewestOnly);
       spinnakerBlackfly.startAcquiringImages();
