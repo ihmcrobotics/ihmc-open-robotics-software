@@ -32,7 +32,7 @@ public class WholeBodyControllerCoreFactory
 
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
-   private FeedbackControllerTemplate template;
+   private final FeedbackControllerTemplate template = new FeedbackControllerTemplate();
 
    public WholeBodyControllerCoreFactory(YoRegistry parentRegistry)
    {
@@ -55,14 +55,6 @@ public class WholeBodyControllerCoreFactory
       return false;
    }
 
-   private boolean hasFeedbackControllerTemplate(Class<?> managerClass)
-   {
-      if (template != null)
-         return true;
-      missingObjectWarning(FeedbackControllerTemplate.class, managerClass);
-      return false;
-   }
-
    private void missingObjectWarning(Class<?> missingObjectClass, Class<?> managerClass)
    {
       LogTools.warn(missingObjectClass.getSimpleName() + " has not been set, cannot create: " + managerClass.getSimpleName());
@@ -80,7 +72,10 @@ public class WholeBodyControllerCoreFactory
 
    public void setFeedbackControllerTemplate(FeedbackControllerTemplate template)
    {
-      this.template = template;
+      if (controllerCore == null)
+         this.template.mergeWithOtherTemplate(template);
+      else
+         controllerCore.registerAdditionalControllers(template);
    }
 
    public WholeBodyControlCoreToolbox getOrCreateWholeBodyControllerCoreToolbox()
@@ -122,8 +117,6 @@ public class WholeBodyControllerCoreFactory
       if (!hasHighLevelHumanoidControllerToolbox(WholeBodyControllerCore.class))
          return null;
       if (!hasWalkingControllerParameters(WholeBodyControllerCore.class))
-         return null;
-      if (!hasFeedbackControllerTemplate(WholeBodyControllerCore.class))
          return null;
 
       WholeBodyControlCoreToolbox toolbox = getOrCreateWholeBodyControllerCoreToolbox();
