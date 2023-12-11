@@ -111,6 +111,7 @@ public class RDXHandConfigurationManager
    {
       SakeHandDesiredCommandMessage commandMessage = new SakeHandDesiredCommandMessage();
       commandMessage.setDesiredCommandOption((byte) handCommandOption.getCommandNumber());
+      commandMessage.setErrorConfirmation(handCommandOption.getErrorConfirmation());
       commandMessage.setPositionRatio(handCommandOption.getGoalPosition());
       commandMessage.setTorqueRatio(handCommandOption.getGoalTorque());
       commandMessage.setRobotSide(side.toByte());

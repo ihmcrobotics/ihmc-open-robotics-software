@@ -75,6 +75,7 @@ public class RDXSakeHandPositionSlider
             SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
             message.setRobotSide(handSide.toByte());
             message.setDesiredCommandOption((byte) SakeHandCommandOption.CUSTOM.getCommandNumber());
+            message.setErrorConfirmation(false);
             message.setPositionRatio(1.0 - positionRatio);
             message.setTorqueRatio(-1.0);
 

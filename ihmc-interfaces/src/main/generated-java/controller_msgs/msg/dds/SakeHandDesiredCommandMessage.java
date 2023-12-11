@@ -32,6 +32,10 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
             */
    public byte desired_command_option_ = (byte) 255;
    /**
+            * Set to true when user confirms an error
+            */
+   public boolean error_confirmation_;
+   /**
             * 1.0 is closed, 0.0 is open
             */
    public double position_ratio_;
@@ -57,6 +61,8 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
       robot_side_ = other.robot_side_;
 
       desired_command_option_ = other.desired_command_option_;
+
+      error_confirmation_ = other.error_confirmation_;
 
       position_ratio_ = other.position_ratio_;
 
@@ -107,6 +113,21 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
    public byte getDesiredCommandOption()
    {
       return desired_command_option_;
+   }
+
+   /**
+            * Set to true when user confirms an error
+            */
+   public void setErrorConfirmation(boolean error_confirmation)
+   {
+      error_confirmation_ = error_confirmation;
+   }
+   /**
+            * Set to true when user confirms an error
+            */
+   public boolean getErrorConfirmation()
+   {
+      return error_confirmation_;
    }
 
    /**
@@ -163,6 +184,8 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.desired_command_option_, other.desired_command_option_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.error_confirmation_, other.error_confirmation_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_ratio_, other.position_ratio_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.torque_ratio_, other.torque_ratio_, epsilon)) return false;
@@ -186,6 +209,8 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
       if(this.desired_command_option_ != otherMyClass.desired_command_option_) return false;
 
+      if(this.error_confirmation_ != otherMyClass.error_confirmation_) return false;
+
       if(this.position_ratio_ != otherMyClass.position_ratio_) return false;
 
       if(this.torque_ratio_ != otherMyClass.torque_ratio_) return false;
@@ -206,6 +231,8 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("desired_command_option=");
       builder.append(this.desired_command_option_);      builder.append(", ");
+      builder.append("error_confirmation=");
+      builder.append(this.error_confirmation_);      builder.append(", ");
       builder.append("position_ratio=");
       builder.append(this.position_ratio_);      builder.append(", ");
       builder.append("torque_ratio=");

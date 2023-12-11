@@ -26,6 +26,9 @@ int8 robot_side
 # Field default value 255
 int8 desired_command_option
 
+# Set to true when user confirms an error
+bool error_confirmation
+
 # 1.0 is closed, 0.0 is open
 float64 position_ratio
 

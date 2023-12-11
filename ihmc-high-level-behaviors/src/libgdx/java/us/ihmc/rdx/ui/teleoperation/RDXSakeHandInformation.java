@@ -1,8 +1,9 @@
 package us.ihmc.rdx.ui.teleoperation;
 
+import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import controller_msgs.msg.dds.SakeHandStatusMessage;
 import imgui.ImGui;
-import us.ihmc.avatar.sakeGripper.SakeHandParameters;
+import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
@@ -15,16 +16,16 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class RDXSakeHandInformation
 {
    private final RobotSide side;
+   private final CommunicationHelper communicationHelper;
    private final IHMCROS2Input<SakeHandStatusMessage> statusInput;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiFlashingText presentTemperatureText = new ImGuiFlashingText(ImGuiTools.RED);
    private final ImGuiFlashingText errorStatusText = new ImGuiFlashingText(ImGuiTools.RED);
 
-   private String lastErrorMessage = "";
-
    public RDXSakeHandInformation(RobotSide side, CommunicationHelper communicationHelper)
    {
       this.side = side;
+      this.communicationHelper = communicationHelper;
       statusInput = communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
                                                            .withTypeName(SakeHandStatusMessage.class),
                                                   message -> message.getRobotSide() == side.toByte());
@@ -50,19 +51,17 @@ public class RDXSakeHandInformation
          }
          ImGui.sameLine();
 
-         if (errorMessage.isEmpty() && lastErrorMessage.isEmpty())
+         if (errorMessage.isEmpty())
          {
             ImGui.textColored(ImGuiTools.GREEN, "Status: all good");
          }
          else
          {
-            if (lastErrorMessage.isEmpty())
-               lastErrorMessage = errorMessage;
-            errorStatusText.renderText(lastErrorMessage, true);
+            errorStatusText.renderText(errorMessage, true);
             ImGui.sameLine();
             if (ImGui.button(labels.get("Confirm")))
             {
-               lastErrorMessage = "";
+               sendErrorConfirmation();
             }
          }
       }
@@ -70,5 +69,16 @@ public class RDXSakeHandInformation
       {
          ImGui.text("No status received.");
       }
+   }
+
+   private void sendErrorConfirmation()
+   {
+      SakeHandDesiredCommandMessage commandMessage = new SakeHandDesiredCommandMessage();
+      commandMessage.setDesiredCommandOption((byte) SakeHandCommandOption.CONFIRM_ERROR.getCommandNumber());
+      commandMessage.setErrorConfirmation(SakeHandCommandOption.CONFIRM_ERROR.getErrorConfirmation());
+      commandMessage.setPositionRatio(SakeHandCommandOption.CONFIRM_ERROR.getGoalPosition());
+      commandMessage.setTorqueRatio(SakeHandCommandOption.CONFIRM_ERROR.getGoalTorque());
+      commandMessage.setRobotSide(side.toByte());
+      communicationHelper.publish(ROS2Tools::getSakeHandCommandTopic, commandMessage);
    }
 }

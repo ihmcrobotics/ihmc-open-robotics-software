@@ -51,6 +51,10 @@ module controller_msgs
         @defaultValue(value=255)
         octet desired_command_option;
         /**
+         * Set to true when user confirms an error
+         */
+        boolean error_confirmation;
+        /**
          * 1.0 is closed, 0.0 is open
          */
         double position_ratio;

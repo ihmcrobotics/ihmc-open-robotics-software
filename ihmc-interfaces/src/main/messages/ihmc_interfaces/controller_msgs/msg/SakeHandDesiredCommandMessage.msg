@@ -17,6 +17,8 @@ uint32 sequence_id
 byte robot_side 255
 # Specifies the grasp to perform
 byte desired_command_option 255
+# Set to true when user confirms an error
+bool error_confirmation
 
 # 1.0 is closed, 0.0 is open
 float64 position_ratio

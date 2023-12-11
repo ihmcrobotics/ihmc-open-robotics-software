@@ -15,7 +15,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a7a2a67a90a8de5856796f3b718b89e28350b7be9b3ea1ba6e6198cca510ec39";
+   		return "a45a6f57361e44b5d1121f6c9c12c13eec55dbe0ad1983fca03d3e24330f9df8";
    }
    
    @Override
@@ -58,6 +58,8 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -84,6 +86,9 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -102,6 +107,8 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_9(data.getDesiredCommandOption());
 
+      cdr.write_type_7(data.getErrorConfirmation());
+
       cdr.write_type_6(data.getPositionRatio());
 
       cdr.write_type_6(data.getTorqueRatio());
@@ -116,6 +123,8 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       	
       data.setDesiredCommandOption(cdr.read_type_9());
       	
+      data.setErrorConfirmation(cdr.read_type_7());
+      	
       data.setPositionRatio(cdr.read_type_6());
       	
       data.setTorqueRatio(cdr.read_type_6());
@@ -129,6 +138,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_9("desired_command_option", data.getDesiredCommandOption());
+      ser.write_type_7("error_confirmation", data.getErrorConfirmation());
       ser.write_type_6("position_ratio", data.getPositionRatio());
       ser.write_type_6("torque_ratio", data.getTorqueRatio());
    }
@@ -139,6 +149,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setDesiredCommandOption(ser.read_type_9("desired_command_option"));
+      data.setErrorConfirmation(ser.read_type_7("error_confirmation"));
       data.setPositionRatio(ser.read_type_6("position_ratio"));
       data.setTorqueRatio(ser.read_type_6("torque_ratio"));
    }
