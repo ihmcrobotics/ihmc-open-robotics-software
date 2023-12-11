@@ -44,6 +44,7 @@ public class RapidHeightMapExtractor
    private static final double cliffEndHeightToAvoid = 1.2;
    private static final double minSnapHeightThreshold = 0.03;
    private static final double snapHeightThresholdAtSearchEdge = 0.06;
+   private static final double inequalityAcvitationSlope =  50000.0;
 
    private int mode = 1; // 0 -> Ouster, 1 -> Realsense
    private float gridOffsetX;
@@ -317,6 +318,7 @@ public class RapidHeightMapExtractor
       snappingParametersBuffer.setParameter((float) cliffEndHeightToAvoid);
       snappingParametersBuffer.setParameter((float) minSnapHeightThreshold);
       snappingParametersBuffer.setParameter((float) snapHeightThresholdAtSearchEdge);
+      snappingParametersBuffer.setParameter((float) inequalityAcvitationSlope);
 
       snappingParametersBuffer.writeOpenCLBufferObject(openCLManager);
    }

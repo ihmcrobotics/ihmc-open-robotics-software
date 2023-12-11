@@ -13,6 +13,7 @@
 #define CLIFF_END_HEIGHT_TO_AVOID 12
 #define MIN_SNAP_HEIGHT_THRESHOLD 13
 #define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 14
+#define INEQUALITY_ACTIVATION_SLOPE 15
 
 #define SNAP_FAILED 0
 #define CLIFF_TOP 1
@@ -126,7 +127,9 @@ void kernel computeSnappedValuesKernel(global float* params,
 
     float half_length = foot_length / 2.0f;
     float half_width = foot_width / 2.0f;
-    float foot_search_radius = length((float2) (half_length, half_width));
+    float2 half_foot_size = (float2) (half_length, half_width);
+    float foot_search_radius_squared = dot(half_foot_size, half_foot_size);
+    float foot_search_radius = sqrt(foot_search_radius_squared);
     int foot_offset_indices = (int) ceil(foot_search_radius / map_resolution);
 
     float max_height_under_foot = -INFINITY;
@@ -146,8 +149,7 @@ void kernel computeSnappedValuesKernel(global float* params,
                 continue;
 
             float2 vector_to_point_from_foot = map_resolution * (float2) ((float) (x_query - map_key.x), (float) (y_query - map_key.y));
-            // TODO use squared value to avoid the squareroot operator
-            if (length(vector_to_point_from_foot) > foot_search_radius)
+            if (dot(vector_to_point_from_foot, vector_to_point_from_foot) > foot_search_radius_squared)
                 continue;
 
             // get the height at this offset point.
@@ -168,7 +170,7 @@ void kernel computeSnappedValuesKernel(global float* params,
             // We want to find the max heigth under the foot. However, we don't want points that are very close to the foot edge to unduly affect
             // this height, because that can some times be noise. So instead, we can use an activation function. Increasing the slope of the activation
             // function will increase how quickly these get added, where a slope of infinity makes it an inequality condition.
-//            float tanh_slope = 50000.0f;
+//            float tanh_slope = params[INEQUALITY_ACTIVATION_SLOPE];
 //            float activation = 1.0f - 0.5f * (tanh(tanh_slope * distance_to_foot_from_this_query) + 1.0f);
 //            max_height_under_foot += activation * max(max_height_under_foot - query_height, 0.0f);
 
@@ -210,15 +212,13 @@ void kernel computeSnappedValuesKernel(global float* params,
             for (int y_value_idx = -samples; y_value_idx <= samples; y_value_idx++)
             {
                 float2 offset = resolution * (float2) (x_value_idx, y_value_idx);
-                float offset_distance  = length(offset);
+                float offset_distance_squared = dot(offset, offset);
 
                 // TODO replace with a squared operation
-                if (offset_distance > foot_search_radius)
+                if (offset_distance_squared > foot_search_radius_squared)
                     continue;
 
-                // TODO do we want to put this after the check below? That would allow it to consider different sizes based on the FOV
-                max_points_possible_under_support++;
-
+                float offset_distance = sqrt(offset_distance_squared);
                 float2 point_query = offset + foot_position;
 
                 int2 query_key = coordinate_to_indices(point_query, map_center, map_resolution, map_center_index);
@@ -227,14 +227,11 @@ void kernel computeSnappedValuesKernel(global float* params,
                 if (query_key.x < 0 || query_key.x > map_cells_per_side - 1 || query_key.y < 0 || query_key.y > map_cells_per_side - 1)
                     continue;
 
+                // We want to put this after the bounds check. That way, if it's outside the FOV, we don't count it against the minimum area.
+                max_points_possible_under_support++;
+
                 uint query_height_int = read_imageui(height_map, query_key).x;
                 float query_height = (float) query_height_int / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
-
-                // FIXME old code
-//                if (isnan(query_height) || query_height < min_height_under_foot_to_consider)
-//                    continue;
-//
-                //float activation = 1.0;
 
                 if (isnan(query_height))
                    continue;
@@ -242,9 +239,11 @@ void kernel computeSnappedValuesKernel(global float* params,
                 float snap_height_threshold = params[MIN_SNAP_HEIGHT_THRESHOLD] + params[SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE] * clamp(offset_distance / foot_search_radius, 0.0f, 1.0f);
                 float min_height_under_foot_to_consider = max_height_under_foot - snap_height_threshold;
 
-//            // todo extract parameter
-                float tanh_slope = 50000.0f;
-                float activation = 0.5f * (tanh(tanh_slope * (query_height - min_height_under_foot_to_consider)) + 1.0f);
+                // This activation gain is a way of doing a soft inequality. If the query height is less than the min height, as an inequality constraint, the
+                // activation value is zero, and if it's greater, the activation is 1.0. In this formulation, we're blurring around that hard inequality. If the
+                // query height is less than the min height, the "error" is negative, so the tanh function returns -1.0f. If it's positive, tanh returns 1.0f.
+                float tanh_slope = params[INEQUALITY_ACTIVATION_SLOPE];
+                float activation = 0.5f * (1.0f + tanh(tanh_slope * (query_height - min_height_under_foot_to_consider)));
 
                 float activation2 = activation * activation;
 
@@ -343,6 +342,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     //////////// Check to make sure we're not stepping too near a cliff base or top
 
     float cliff_search_offset = max_dimension / 2.0f + max(params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS], params[MIN_DISTANCE_FROM_CLIFF_TOPS]);
+    float cliff_search_offset_squared = cliff_search_offset * cliff_search_offset;
     int cliff_offset_indices = (int) ceil(cliff_search_offset / map_resolution);
 
     // search for a cliff base that's too close
@@ -359,8 +359,7 @@ void kernel computeSnappedValuesKernel(global float* params,
                 continue;
 
             float2 vector_to_point_from_foot = map_resolution * (float2) ((float) (x_query - map_key.x), (float) (y_query - map_key.y));
-            // TODO use squared value to avoid the squareroot operator
-            if (length(vector_to_point_from_foot) > cliff_search_offset)
+            if (dot(vector_to_point_from_foot, vector_to_point_from_foot) > cliff_search_offset_squared)
                 continue;
 
             // get the height at this offset point.
