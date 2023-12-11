@@ -61,7 +61,7 @@ public class RDXArmManager
    private final RDXTeleoperationParameters teleoperationParameters;
    private final SideDependentList<RDXInteractableHand> interactableHands;
 
-   private final ArmJointName[] armJointNames;
+   private final SideDependentList<ArmJointName[]> armJointNames = new SideDependentList<>();
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINT_ANGLES;
    private final RDXHandConfigurationManager handManager;
 
@@ -93,13 +93,14 @@ public class RDXArmManager
       this.desiredRobot = desiredRobot;
       this.teleoperationParameters = teleoperationParameters;
       this.interactableHands = interactableHands;
-      armJointNames = robotModel.getJointMap().getArmJointNames();
 
       for (RobotSide side : RobotSide.values)
       {
          handWrenchCalculators.put(side, new ROS2HandWrenchCalculator(side, syncedRobot));
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
-         desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, robotModel.getJointMap().getArmJointNames()));
+         ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames(side);
+         desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, armJointNames));
+         this.armJointNames.put(side, armJointNames);
       }
 
       for (int i = 0; i < PresetArmConfiguration.values.length; i++)
@@ -309,9 +310,9 @@ public class RDXArmManager
       {
          if (armControlMode == RDXArmControlMode.JOINT_ANGLES)
          {
-            double[] jointAngles = new double[armJointNames.length];
+            double[] jointAngles = new double[armJointNames.get(robotSide).length];
             int i = -1;
-            for (ArmJointName armJoint : armJointNames)
+            for (ArmJointName armJoint : armJointNames.get(robotSide))
             {
                jointAngles[++i] = desiredRobot.getDesiredFullRobotModel().getArmJoint(robotSide, armJoint).getQ();
             }
