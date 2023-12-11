@@ -21,9 +21,10 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.RDXImagePanel;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -40,13 +41,12 @@ import java.util.ArrayList;
 public class RDXRapidHeightMapExtractionDemo
 {
    private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_201947_PerceptionLog.hdf5").toString();
+   private final RDXStoredPropertySetTuner heightMapParametersTuner = new RDXStoredPropertySetTuner("Height Map Parameters");
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
                                                                                                                                          true,
                                                                                                                                          1);
-   private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
    private final ArrayList<Quaternion> sensorOrientationBuffer = new ArrayList<>();
    private final ArrayList<Point3D> sensorPositionBuffer = new ArrayList<>();
-   private final Notification heightMapUpdateNotification = new Notification();
    private final RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform sensorToGroundTransform = new RigidBodyTransform();
    private final RigidBodyTransform groundToWorldTransform = new RigidBodyTransform();
@@ -59,18 +59,14 @@ public class RDXRapidHeightMapExtractionDemo
    private final PerceptionDataLoader perceptionDataLoader;
    private RDXHumanoidPerceptionUI humanoidPerceptionUI;
    private HumanoidPerceptionModule humanoidPerception;
-   private RDXBytedecoImagePanel localHeightMapPanel;
-   private RDXBytedecoImagePanel internalHeightMapPanel;
-   private RDXBytedecoImagePanel croppedHeightMapPanel;
-   private RDXBytedecoImagePanel depthImagePanel;
    private CameraIntrinsics cameraIntrinsics;
    private OpenCLManager openCLManager;
    private RDXPanel navigationPanel;
    private String sensorTopicName;
-   private ROS2Helper ros2Helper;
-   private ROS2Node ros2Node;
+   private final ROS2Helper ros2Helper;
 
-   private PoseReferenceFrame cameraZUpFrame = new PoseReferenceFrame("CameraZUpFrame", cameraFrame);
+   private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame cameraZUpFrame = new PoseReferenceFrame("CameraZUpFrame", cameraFrame);
 
    private int totalCount = 0;
    private int skipIndex = 0;
@@ -80,7 +76,7 @@ public class RDXRapidHeightMapExtractionDemo
    {
       perceptionDataLoader = new PerceptionDataLoader();
 
-      ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "simulation_ui");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "simulation_ui");
       ros2Helper = new ROS2Helper(ros2Node);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
@@ -96,39 +92,22 @@ public class RDXRapidHeightMapExtractionDemo
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
             humanoidPerception = new HumanoidPerceptionModule(openCLManager);
+            //            createForSpherical(128, 2048);
+            createForPerspective(720, 1280);
+
             humanoidPerceptionUI = new RDXHumanoidPerceptionUI(humanoidPerception, ros2Helper);
             humanoidPerceptionUI.initializeHeightMapVisualizer(ros2Helper);
             humanoidPerceptionUI.initializeHeightMapUI(ros2Helper);
 
-            //internalHeightMapPanel = new RDXBytedecoImagePanel("Internal Height Map", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-            //debugExtractionPanel = new RDXMatImagePanel("Planar Region Extraction Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-
-            //            createForSpherical(128, 2048);
-            createForPerspective(720, 1280);
+            HeightMapParameters heightMapParameters = humanoidPerception.getRapidHeightMapExtractor().getHeightMapParameters();
+            LogTools.info("Height Map Parameters Save File " + heightMapParameters.findSaveFileDirectory().getFileName().toString());
+            heightMapParametersTuner.create(heightMapParameters, false);
+            humanoidPerceptionUI.addChild(heightMapParametersTuner);
 
             baseUI.getImGuiPanelManager().addPanel(humanoidPerceptionUI);
             baseUI.getPrimaryScene().addRenderableProvider(humanoidPerceptionUI.getHeightMapVisualizer());
 
             updateHeightMap();
-
-            depthImagePanel = new RDXBytedecoImagePanel("Depth Image",
-                                                        humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat().cols(),
-                                                         humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat().rows(),
-                                                         RDXImagePanel.FLIP_Y);
-            localHeightMapPanel = new RDXBytedecoImagePanel("Local Height Map",
-                                                            humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getImageWidth(),
-                                                            humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getImageHeight(),
-                                                            RDXImagePanel.FLIP_Y);
-            croppedHeightMapPanel = new RDXBytedecoImagePanel("Cropped Height Map",
-                                                              humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage().cols(),
-                                                              humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage().rows(),
-                                                              RDXImagePanel.FLIP_Y);
-
-
-
-            navigationPanel.addChild(localHeightMapPanel.getImagePanel());
-            navigationPanel.addChild(croppedHeightMapPanel.getImagePanel());
-            navigationPanel.addChild(depthImagePanel.getImagePanel());
 
             navigationPanel.setRenderMethod(this::renderNavigationPanel);
          }
@@ -177,15 +156,11 @@ public class RDXRapidHeightMapExtractionDemo
                loadAndExecute();
             }
 
-            if (skipIndex % 30 == 0 && autoIncrement && frameIndex.get() < totalCount - 10)
+            if (skipIndex % 10 == 0 && autoIncrement && frameIndex.get() < totalCount - 10)
             {
                frameIndex.set(frameIndex.get() + 1);
                loadAndExecute();
             }
-
-            depthImagePanel.drawDepthImage(humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat());
-            localHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat());
-            croppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage());
 
             humanoidPerceptionUI.update();
 
@@ -256,8 +231,6 @@ public class RDXRapidHeightMapExtractionDemo
       cameraPose.set(position, orientation);
       cameraFrame.setPoseAndUpdate(cameraPose);
 
-      long begin = System.nanoTime();
-
       sensorToWorldTransform.set(sensorOrientationBuffer.get(frameIndex.get()), sensorPositionBuffer.get(frameIndex.get()));
 
       groundToWorldTransform.set(sensorToWorldTransform);
@@ -270,18 +243,16 @@ public class RDXRapidHeightMapExtractionDemo
       sensorToGroundTransform.getRotation()
                              .set(new Quaternion(0.0f, sensorToGroundTransform.getRotation().getPitch(), sensorToGroundTransform.getRotation().getRoll()));
       RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
-//      groundToSensorTransform.invert();
-      cameraZUpFrame.getTransformToParent().set(groundToSensorTransform);
+      groundToSensorTransform.invert();
+
+      cameraZUpFrame.setPoseAndUpdate(groundToSensorTransform);
 
       humanoidPerception.updateTerrain(ros2Helper,
                                        humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat(),
                                        cameraFrame,
                                        cameraZUpFrame,
-                                       true,
                                        false);
 
-      long end = System.nanoTime();
-      LogTools.info("Update Height Map ({}): {} ms", frameIndex.get(), (end - begin) / 1e6);
    }
 
    public static void main(String[] args)
