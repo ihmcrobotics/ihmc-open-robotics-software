@@ -110,7 +110,10 @@ public class SceneGraph
    private void update()
    {
       idToNodeMap.clear();
-      nodeNameList.clear();
+      synchronized (nodeNameList)
+      {
+         nodeNameList.clear();
+      }
       namesToNodesMap.clear();
       arUcoMarkerIDToNodeMap.clear();
       centerposeDetectedMarkerIDToNodeMap.clear();
@@ -121,7 +124,10 @@ public class SceneGraph
    private void updateCaches(SceneNode node)
    {
       idToNodeMap.put(node.getID(), node);
-      nodeNameList.add(node.getName());
+      synchronized (nodeNameList)
+      {
+         nodeNameList.add(node.getName());
+      }
       namesToNodesMap.put(node.getName(), node);
       sceneNodesByID.add(node);
 

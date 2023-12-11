@@ -25,7 +25,6 @@ import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
  */
 public class ROS2SceneGraphPublisher
 {
-   private ROS2IOTopicQualifier ioQualifier;
    private final SceneGraphMessage sceneGraphMessage = new SceneGraphMessage();
    private final FramePose3D sceneNodePose = new FramePose3D();
    private final RigidBodyTransform sceneNodeToWorldTransform = new RigidBodyTransform();
@@ -38,8 +37,6 @@ public class ROS2SceneGraphPublisher
                        ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                        ROS2IOTopicQualifier ioQualifier)
    {
-      this.ioQualifier = ioQualifier;
-
       sceneGraphMessage.setNextId(sceneGraph.getNextID().intValue());
       sceneGraphMessage.getSceneTreeTypes().clear();
       sceneGraphMessage.getSceneTreeIndices().clear();
@@ -51,12 +48,12 @@ public class ROS2SceneGraphPublisher
       sceneGraphMessage.getStaticRelativeSceneNodes().clear();
       sceneGraphMessage.getPrimitiveRigidBodySceneNodes().clear();
 
-      packSceneTreeToMessage(sceneGraph.getRootNode(), sceneGraphMessage);
+      packSceneTreeToMessage(sceneGraph.getRootNode());
 
       ros2PublishSubscribeAPI.publish(PerceptionAPI.SCENE_GRAPH.getTopic(ioQualifier), sceneGraphMessage);
    }
 
-   private void packSceneTreeToMessage(SceneNode sceneNode, SceneGraphMessage sceneGraphMessage)
+   private void packSceneTreeToMessage(SceneNode sceneNode)
    {
       // We handle packing the most specific types and then the more basic ones
       // We keep track of the more basic ones so we can share the
@@ -156,7 +153,7 @@ public class ROS2SceneGraphPublisher
 
       for (SceneNode child : sceneNode.getChildren())
       {
-         packSceneTreeToMessage(child, sceneGraphMessage);
+         packSceneTreeToMessage(child);
       }
    }
 }
