@@ -23,6 +23,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlanner;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlannerRequest;
@@ -60,6 +62,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -70,7 +73,7 @@ import java.util.Random;
 
 public class TerrainPlanningSimulationUI
 {
-   private final boolean USE_EXTERNAL_HEIGHT_MAP = false;
+   private final boolean USE_EXTERNAL_HEIGHT_MAP = true;
    private final double MAXIMUM_NUMBER_OF_ITERATIONS = 100000;
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
@@ -347,6 +350,33 @@ public class TerrainPlanningSimulationUI
                l515PoseGizmo.update();
             }
             ImGui.separator();
+            if (ImGui.button("Load Height Map"))
+            {
+               // height map is 8x8 meters, with a resolution of 0.02 meters, and a 50x50 patch in the center is set to 1m
+               FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
+               FootstepPlannerLogLoader.LoadResult loadResult = logLoader.load();
+
+               if (loadResult != FootstepPlannerLogLoader.LoadResult.LOADED)
+               {
+                  return;
+               }
+               FootstepPlannerLog log = logLoader.getLog();
+
+               Mat heightMap = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
+               Mat contactMap = humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage();
+               TerrainMapData terrainMap = new TerrainMapData(heightMap, contactMap, null);
+               PerceptionMessageTools.unpackMessage(log.getRequestPacket().getHeightMapMessage(), terrainMap);
+
+               //HeightMapTerrainGeneratorTools.fillWithSteppingStones(heightMap, 0.4f, 0.4f, 0.3f, 0.25f, 3);
+
+               humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
+               humanoidPerception.getRapidHeightMapExtractor()
+                                 .populateParameterBuffer(RapidHeightMapExtractor.getHeightMapParameters(),
+                                                          steppingL515Simulator.getCopyOfCameraParameters(),
+                                                          new Point3D());
+               humanoidPerception.getRapidHeightMapExtractor().computeContactMap();
+               humanoidPerception.getRapidHeightMapExtractor().readContactMapImage();
+            }
             ImGui.sliderFloat("Start Mid X", startMidX.getData(), -4.0f, 4.0f);
             ImGui.sliderFloat("Start Mid Y", startMidY.getData(), -4.0f, 4.0f);
             ImGui.sliderFloat("Start Mid Z", startMidZ.getData(), -3.0f, 3.0f);
@@ -641,21 +671,6 @@ public class TerrainPlanningSimulationUI
                RapidHeightMapExtractor.getHeightMapParameters().setInternalGlobalCellSizeInMeters(0.02);
                humanoidPerception.getRapidHeightMapExtractor().initialize();
                humanoidPerception.getRapidHeightMapExtractor().reset();
-
-               // height map is 8x8 meters, with a resolution of 0.02 meters, and a 50x50 patch in the center is set to 1m
-               Mat heightMap = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
-
-               HeightMapTerrainGeneratorTools.fillWithSteppingStones(heightMap, 0.4f, 0.4f, 0.3f, 0.25f, 3);
-
-               humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
-               humanoidPerception.getRapidHeightMapExtractor()
-                                 .populateParameterBuffer(RapidHeightMapExtractor.getHeightMapParameters(),
-                                                          steppingL515Simulator.getCopyOfCameraParameters(),
-                                                          new Point3D());
-               humanoidPerception.getRapidHeightMapExtractor().computeContactMap();
-               humanoidPerception.getRapidHeightMapExtractor().readContactMapImage();
-
-               Mat contactMap = humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage();
             }
             else
             {

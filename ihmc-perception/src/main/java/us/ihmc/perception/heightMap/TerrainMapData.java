@@ -5,6 +5,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 public class TerrainMapData
 {
@@ -85,6 +87,27 @@ public class TerrainMapData
       int offsetX = (int) (sensorOrigin.getX() * 50);
       int rIndex = (int) (grIndex + gridSize / 2) - offsetX;
       return rIndex;
+   }
+
+   public void setHeightLocal(float height, int rIndex, int cIndex)
+   {
+      float offsetHeight = height - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
+      int finalHeight = (int) (offsetHeight * RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+      heightMap.ptr(rIndex, cIndex).putShort((short) finalHeight);
+   }
+
+   public void fillHeightMap(HeightMapData heightMapData)
+   {
+      this.sensorOrigin.set(heightMapData.getGridCenter());
+      int centerIndex = heightMapData.getCenterIndex();
+      for (int i = 0; i < heightMapData.getNumberOfOccupiedCells(); i++)
+      {
+         int key = heightMapData.getKey(i);
+         int xIndex = HeightMapTools.keyToXIndex(key, centerIndex);
+         int yIndex = HeightMapTools.keyToYIndex(key, centerIndex);
+         double height = heightMapData.getHeightAt(key);
+         setHeightLocal((float) height, xIndex, yIndex);
+      }
    }
 
    public float getContactScoreLocal(int rIndex, int cIndex)
