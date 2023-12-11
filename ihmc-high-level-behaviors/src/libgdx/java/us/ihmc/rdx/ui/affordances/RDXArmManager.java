@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -60,7 +61,7 @@ public class RDXArmManager
    private final RDXTeleoperationParameters teleoperationParameters;
    private final SideDependentList<RDXInteractableHand> interactableHands;
 
-   private final ArmJointName[] armJointNames;
+   private final SideDependentList<ArmJointName[]> armJointNames = new SideDependentList<>();
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINT_ANGLES;
    private final RDXHandConfigurationManager handManager;
 
@@ -73,6 +74,9 @@ public class RDXArmManager
    private final SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators = new SideDependentList<>();
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
+
+   private final ImInt selectedArmConfiguration = new ImInt();
+   private final String[] armConfigurationNames = new String[PresetArmConfiguration.values.length];
 
    private final TypedNotification<RobotSide> showWarningNotification = new TypedNotification<>();
 
@@ -89,13 +93,19 @@ public class RDXArmManager
       this.desiredRobot = desiredRobot;
       this.teleoperationParameters = teleoperationParameters;
       this.interactableHands = interactableHands;
-      armJointNames = robotModel.getJointMap().getArmJointNames();
 
       for (RobotSide side : RobotSide.values)
       {
          handWrenchCalculators.put(side, new ROS2HandWrenchCalculator(side, syncedRobot));
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
-         desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, robotModel.getJointMap().getArmJointNames()));
+         ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames(side);
+         desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, armJointNames));
+         this.armJointNames.put(side, armJointNames);
+      }
+
+      for (int i = 0; i < PresetArmConfiguration.values.length; i++)
+      {
+         armConfigurationNames[i] = PresetArmConfiguration.values[i].name();
       }
 
       handManager = new RDXHandConfigurationManager();
@@ -190,41 +200,18 @@ public class RDXArmManager
    {
       handManager.renderImGuiWidgets();
 
-      ImGui.text("Arms Home:");
+      ImGui.text("Arm Presets:");
+      ImGui.pushItemWidth(140.0f);
+      ImGui.combo(labels.getHidden("Arm Configuration Combo"), selectedArmConfiguration, armConfigurationNames);
+      ImGui.popItemWidth();
+      ImGui.sameLine();
+      ImGui.text("Command");
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get(side.getPascalCaseName(), "Home")))
+         if (ImGui.button(labels.get(side.getPascalCaseName())))
          {
-            executeArmAngles(side, PresetArmConfiguration.HOME, teleoperationParameters.getTrajectoryTime());
-         }
-      }
-
-      ImGui.text("Arms Wide:");
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.sameLine();
-         if (ImGui.button(labels.get(side.getPascalCaseName(), "Wide")))
-         {
-            executeArmAngles(side, PresetArmConfiguration.WIDE_ARMS, teleoperationParameters.getTrajectoryTime());
-         }
-      }
-      ImGui.text("Arms Tucked Up:");
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.sameLine();
-         if (ImGui.button(labels.get(side.getPascalCaseName(), "Tucked Up")))
-         {
-            executeArmAngles(side, PresetArmConfiguration.TUCKED_UP_ARMS, teleoperationParameters.getTrajectoryTime());
-         }
-      }
-      ImGui.text("Door avoidance arms:");
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.sameLine();
-         if (ImGui.button(labels.get(side.getPascalCaseName(), "Door avoidance")))
-         {
-            executeDoorAvoidanceArmAngles(side);
+            executeArmAngles(side, PresetArmConfiguration.values[selectedArmConfiguration.get()], teleoperationParameters.getTrajectoryTime());
          }
       }
 
@@ -323,9 +310,9 @@ public class RDXArmManager
       {
          if (armControlMode == RDXArmControlMode.JOINT_ANGLES)
          {
-            double[] jointAngles = new double[armJointNames.length];
+            double[] jointAngles = new double[armJointNames.get(robotSide).length];
             int i = -1;
-            for (ArmJointName armJoint : armJointNames)
+            for (ArmJointName armJoint : armJointNames.get(robotSide))
             {
                jointAngles[++i] = desiredRobot.getDesiredFullRobotModel().getArmJoint(robotSide, armJoint).getQ();
             }
