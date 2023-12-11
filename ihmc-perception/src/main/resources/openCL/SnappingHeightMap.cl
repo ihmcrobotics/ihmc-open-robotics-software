@@ -11,9 +11,10 @@
 #define MIN_DISTANCE_FROM_CLIFF_BOTTOMS 10
 #define CLIFF_START_HEIGHT_TO_AVOID 11
 #define CLIFF_END_HEIGHT_TO_AVOID 12
-#define MIN_SNAP_HEIGHT_THRESHOLD 13
-#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 14
-#define INEQUALITY_ACTIVATION_SLOPE 15
+#define MIN_SUPPORT_AREA_FRACTION 13
+#define MIN_SNAP_HEIGHT_THRESHOLD 14
+#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 15
+#define INEQUALITY_ACTIVATION_SLOPE 16
 
 #define SNAP_FAILED 0
 #define CLIFF_TOP 1
@@ -166,15 +167,7 @@ void kernel computeSnappedValuesKernel(global float* params,
                 distance_to_foot_from_this_query = signed_distance_to_foot_polygon(map_center_index, map_resolution, params, map_key, foot_yaw, query_key);
             }
 
-            //  TODO extract epsilon
-            // We want to find the max heigth under the foot. However, we don't want points that are very close to the foot edge to unduly affect
-            // this height, because that can some times be noise. So instead, we can use an activation function. Increasing the slope of the activation
-            // function will increase how quickly these get added, where a slope of infinity makes it an inequality condition.
-//            float tanh_slope = params[INEQUALITY_ACTIVATION_SLOPE];
-//            float activation = 1.0f - 0.5f * (tanh(tanh_slope * distance_to_foot_from_this_query) + 1.0f);
-//            max_height_under_foot += activation * max(max_height_under_foot - query_height, 0.0f);
-
-            // FIXME old code, where we're trying to smooth things
+            // If the distance is within the search area, we want to include it.
             if (distance_to_foot_from_this_query < 1e-3f)
             {
                 max_height_under_foot = max(query_height, max_height_under_foot);
@@ -214,7 +207,6 @@ void kernel computeSnappedValuesKernel(global float* params,
                 float2 offset = resolution * (float2) (x_value_idx, y_value_idx);
                 float offset_distance_squared = dot(offset, offset);
 
-                // TODO replace with a squared operation
                 if (offset_distance_squared > foot_search_radius_squared)
                     continue;
 
@@ -379,13 +371,11 @@ void kernel computeSnappedValuesKernel(global float* params,
                 distance_to_foot_from_this_query = signed_distance_to_foot_polygon(map_center_index, map_resolution, params, map_key, foot_yaw, query_key);
             }
 
-           // TODO so this being a hard transition makes it a noisy signal. How can we smooth it?
             if (relative_height_of_query > params[CLIFF_START_HEIGHT_TO_AVOID])
             {
                 float height_alpha = (relative_height_of_query - params[CLIFF_START_HEIGHT_TO_AVOID]) / (params[CLIFF_END_HEIGHT_TO_AVOID] - params[CLIFF_START_HEIGHT_TO_AVOID]);
                 height_alpha = clamp(height_alpha, 0.0f, 1.0f);
                 float min_distance_from_this_point_to_avoid_cliff = height_alpha * params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS];
-
 
                 if (distance_to_foot_from_this_query < min_distance_from_this_point_to_avoid_cliff)
                 {
@@ -397,7 +387,6 @@ void kernel computeSnappedValuesKernel(global float* params,
             }
             else if (relative_height_of_query < -params[CLIFF_START_HEIGHT_TO_AVOID])
             {
-                // TODO so this being a hard transition makes it a noisy signal. How can we smooth it?
                 if (distance_to_foot_from_this_query < params[MIN_DISTANCE_FROM_CLIFF_TOPS])
                 {
                     // we're too close to the cliff top!
@@ -411,10 +400,7 @@ void kernel computeSnappedValuesKernel(global float* params,
 
     /////////////// Make sure there's enough step area.
 
-    // TODO extract area fraction
-    float min_area_fraction = 0.9f;
-    float min_points_needed_for_support = (int) (min_area_fraction * max_points_possible_under_support);
-    // TODO this hard inequality is causing some noise in the solution space. How could we reduce that?
+    float min_points_needed_for_support = (int) (params[MIN_SUPPORT_AREA_FRACTION] * max_points_possible_under_support);
     if (n < min_points_needed_for_support)
     {
         snap_result = NOT_ENOUGH_AREA;
