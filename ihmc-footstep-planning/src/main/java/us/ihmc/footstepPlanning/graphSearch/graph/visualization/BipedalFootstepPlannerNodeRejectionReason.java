@@ -26,7 +26,8 @@ public enum BipedalFootstepPlannerNodeRejectionReason
    SWING_REACH_TOO_LARGE,
    REACHABILITY_CHECK,
    RMS_ERROR_TOO_HIGH,
-   STEP_ON_CLIFF_EDGE;
+   STEP_ON_CLIFF_EDGE,
+   HEIGHT_MAP_NONTRAVERSABLE;
 
    public static final BipedalFootstepPlannerNodeRejectionReason[] values = values();
 
