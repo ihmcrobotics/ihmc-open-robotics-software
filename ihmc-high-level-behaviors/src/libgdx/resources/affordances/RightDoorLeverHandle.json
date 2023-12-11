@@ -1,6 +1,6 @@
 {
   "name" : "RightDoorLeverHandle",
-  "actions" : [ {
+  "children" : [ {
     "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Right Hand Pose",
     "parentFrame" : "RightDoorLeverHandle",

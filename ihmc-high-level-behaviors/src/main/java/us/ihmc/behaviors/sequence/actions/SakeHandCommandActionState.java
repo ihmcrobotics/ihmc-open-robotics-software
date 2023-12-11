@@ -1,29 +1,28 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.SakeHandCommandActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class SakeHandCommandActionState extends BehaviorActionState
+public class SakeHandCommandActionState extends ActionNodeState<SakeHandCommandActionDefinition>
 {
-   private final SakeHandCommandActionDefinition definition = new SakeHandCommandActionDefinition();
+   public SakeHandCommandActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   {
+      super(id, new SakeHandCommandActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+   }
 
    public void toMessage(SakeHandCommandActionStateMessage message)
    {
-      super.toMessage(message.getActionState());
+      getDefinition().toMessage(message.getDefinition());
 
-      definition.toMessage(message.getDefinition());
+      super.toMessage(message.getState());
    }
 
    public void fromMessage(SakeHandCommandActionStateMessage message)
    {
-      super.fromMessage(message.getActionState());
+      super.fromMessage(message.getState());
 
-      definition.fromMessage(message.getDefinition());
-   }
-
-   @Override
-   public SakeHandCommandActionDefinition getDefinition()
-   {
-      return definition;
+      getDefinition().fromMessage(message.getDefinition());
    }
 }
