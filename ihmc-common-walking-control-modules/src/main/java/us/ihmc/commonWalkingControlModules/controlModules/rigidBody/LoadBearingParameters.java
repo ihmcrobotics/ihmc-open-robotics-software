@@ -23,7 +23,7 @@ public class LoadBearingParameters
 
       for (int i = 0; i < 3; i++)
       {
-         angularAxisSelection[i] = new BooleanParameter(prefix + "Angular" + Axis3D.values[i].name() + "Enabled", registry, i == 1);
+         angularAxisSelection[i] = new BooleanParameter(prefix + "Angular" + Axis3D.values[i].name() + "Enabled", registry, i == 2);
          linearAxisSelection[i] = new BooleanParameter(prefix + "Linear" + Axis3D.values[i].name() + "Enabled", registry, true);
       }
    }

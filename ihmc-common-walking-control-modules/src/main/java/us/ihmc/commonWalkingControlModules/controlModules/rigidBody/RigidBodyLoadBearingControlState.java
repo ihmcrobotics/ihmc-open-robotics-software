@@ -76,8 +76,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final YoBoolean[] isAngularAxisFeedbackControlled = new YoBoolean[3];
    private final YoBoolean[] isLinearAxisFeedbackControlled = new YoBoolean[3];
    private final PIDSE3GainsReadOnly holdHandPositionGains;
-   private final Vector3DReadOnly handLoadedLinearWeight = new Vector3D(30.0, 30.0, 30.0);
-   private final Vector3DReadOnly handLoadedAngularWeight = new Vector3D(10.0, 10.0, 10.0);
+   private final Vector3DReadOnly handLoadedLinearWeight = new Vector3D(5.0, 5.0, 5.0);
+   private final Vector3DReadOnly handLoadedAngularWeight = new Vector3D(3.0, 3.0, 3.0);
    private final YoEnum<LoadBearingControlMode> controlMode;
 
    /* Hand load status */
@@ -163,6 +163,16 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
          isLinearAxisFeedbackControlled[i] = new YoBoolean("isLinear" + Axis3D.values[i] + "FeedbackControlled", registry);
       }
 
+
+      // set axis control strategies
+      isLinearAxisFeedbackControlled[0].set(true); // bodyBarelyLoaded.getValue());
+      isLinearAxisFeedbackControlled[1].set(true); // bodyBarelyLoaded.getValue());
+      isLinearAxisFeedbackControlled[2].set(false);
+
+      isAngularAxisFeedbackControlled[0].set(false);
+      isAngularAxisFeedbackControlled[1].set(false);
+      isAngularAxisFeedbackControlled[2].set(true);
+
       setupViz(graphicsListRegistry, bodyName);
    }
 
@@ -220,15 +230,6 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
          bodyBarelyLoaded.set(true);
       }
 
-      // set axis control strategies
-      isLinearAxisFeedbackControlled[0].set(true); // bodyBarelyLoaded.getValue());
-      isLinearAxisFeedbackControlled[1].set(true); // bodyBarelyLoaded.getValue());
-      isLinearAxisFeedbackControlled[2].set(true);
-
-      isAngularAxisFeedbackControlled[0].set(true);
-      isAngularAxisFeedbackControlled[1].set(true);
-      isAngularAxisFeedbackControlled[2].set(true);
-
       // assemble contact command
       planeContactStateCommand.clearContactPoints();
       planeContactStateCommand.setCoefficientOfFriction(coefficientOfFriction.getDoubleValue());
@@ -236,10 +237,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       planeContactStateCommand.addPointInContact(getContactPoint());
       planeContactStateCommand.setHasContactStateChanged(false);
 
-
       positionError.setMatchingFrame(desiredContactPointInWorld);
       orientationError.setMatchingFrame(desiredContactOrientationInWorld);
-
 
       // assemble spatial feedback command
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(contactFrameInBodyFrame);
@@ -353,24 +352,20 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
    public PIDSE3Configuration getHoldPositionHandControlGains()
    {
-      double kpXY = 100.0;
-      double kpZ = 0.0;
-      double zetaXYZ = 0.4;
-      double kpXYOrientation = 100.0;
-      double kpZOrientation = 200.0;
-      double zetaOrientation = 0.4;
-      double maxLinearAcceleration = Double.POSITIVE_INFINITY;
-      double maxLinearJerk = Double.POSITIVE_INFINITY;
-      double maxAngularAcceleration = Double.POSITIVE_INFINITY;
-      double maxAngularJerk = Double.POSITIVE_INFINITY;
+      double kpXYZ = 150.0;
+      double zetaXYZ = 0.7;
+      double kpXYZOrientation = 150.0;
+      double zetaOrientation = 0.8;
+      double maxAcceleration = 8.0;
+      double maxJerk = 100.0;
 
       DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
-      gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
+      gains.setPositionProportionalGains(kpXYZ);
       gains.setPositionDampingRatios(zetaXYZ);
-      gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
-      gains.setOrientationProportionalGains(kpXYOrientation, kpXYOrientation, kpZOrientation);
+      gains.setPositionMaxFeedbackAndFeedbackRate(maxAcceleration, maxJerk);
+      gains.setOrientationProportionalGains(kpXYZOrientation);
       gains.setOrientationDampingRatios(zetaOrientation);
-      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
+      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAcceleration, maxJerk);
 
       return new PIDSE3Configuration(GainCoupling.XY, false, gains);
    }
@@ -392,7 +387,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       inverseDynamicsCommandList.clear();
-//      inverseDynamicsCommandList.addCommand(planeContactStateCommand);
+      inverseDynamicsCommandList.addCommand(planeContactStateCommand);
       inverseDynamicsCommandList.addCommand(spatialAccelerationCommand);
       return inverseDynamicsCommandList;
    }
@@ -401,12 +396,13 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       feedbackControlCommandList.clear();
-//      if (controlMode.getValue() == LoadBearingControlMode.JOINTSPACE)
-//         feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
-//      else
-//         feedbackControlCommandList.addCommand(orientationControlHelper.getFeedbackControlCommand());
+//      feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
       feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
       return feedbackControlCommandList;
+
+      //      if (controlMode.getValue() == LoadBearingControlMode.JOINTSPACE)
+      //      else
+      //         feedbackControlCommandList.addCommand(orientationControlHelper.getFeedbackControlCommand());
    }
 
    @Override
@@ -414,9 +410,10 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    {
       feedbackControlCommandList.clear();
 //      feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
-//      feedbackControlCommandList.addCommand(orientationControlHelper.getFeedbackControlCommand());
       feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
       return feedbackControlCommandList;
+
+      //      feedbackControlCommandList.addCommand(orientationControlHelper.getFeedbackControlCommand());
    }
 
    @Override
