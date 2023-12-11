@@ -11,7 +11,11 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
@@ -23,6 +27,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
@@ -39,14 +44,17 @@ import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.HashMap;
@@ -60,6 +68,7 @@ public class RDXVRKinematicsStreamingMode
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final RestartableJavaProcess kinematicsStreamingToolboxProcess;
    private final RetargetingParameters retargetingParameters;
+   private final DRCRobotModel robotModel;
    private RDXMultiBodyGraphic ghostRobotGraphic;
    private FullHumanoidRobotModel ghostFullRobotModel;
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
@@ -71,8 +80,6 @@ public class RDXVRKinematicsStreamingMode
    private final FramePose3D tempFramePose = new FramePose3D();
    private final ImGuiFrequencyPlot statusFrequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiFrequencyPlot outputFrequencyPlot = new ImGuiFrequencyPlot();
-   private PausablePeriodicThread wakeUpThread;
-   private final ImBoolean wakeUpThreadRunning = new ImBoolean(false);
    private final SideDependentList<MutableReferenceFrame> handDesiredControlFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> handFrameGraphics = new SideDependentList<>();
@@ -83,6 +90,7 @@ public class RDXVRKinematicsStreamingMode
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
    private final SceneGraph sceneGraph;
+   private KinematicsStreamingToolboxModule toolbox;
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
    private int leftIndex = -1;
@@ -96,7 +104,7 @@ public class RDXVRKinematicsStreamingMode
                                        RetargetingParameters retargetingParameters)
    {
       this.syncedRobot = syncedRobot;
-      syncedRobot.getRobotModel().getRobotVersion();
+      this.robotModel = syncedRobot.getRobotModel();
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.sceneGraph = sceneGraph;
       this.kinematicsStreamingToolboxProcess = kinematicsStreamingToolboxProcess;
@@ -140,9 +148,54 @@ public class RDXVRKinematicsStreamingMode
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
 
-      wakeUpThread = new PausablePeriodicThread(getClass().getSimpleName() + "WakeUpThread", 1.0, true, this::wakeUpToolbox);
-
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled);
+
+      KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
+      parameters.setDefault();
+      parameters.setPublishingPeriod(0.030); // Publishing period in seconds.
+      parameters.setDefaultChestMessageAngularWeight(0.15, 0.15, 0.02);
+      parameters.setDefaultLinearRateLimit(3.0);
+      parameters.setDefaultAngularRateLimit(30.0);
+      parameters.getDefaultConfiguration().setEnableLeftHandTaskspace(false);
+      parameters.getDefaultConfiguration().setEnableRightHandTaskspace(false);
+      parameters.getDefaultConfiguration().setEnableNeckJointspace(false);
+      parameters.setUseStreamingPublisher(true);
+
+      boolean startYoVariableServer = false;
+      toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer, PubSubImplementation.FAST_RTPS);
+      ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(createInitialConfiguration(robotModel));
+   }
+
+   private Map<String, Double> createInitialConfiguration(DRCRobotModel robotModel)
+   {
+      Map<String, Double> initialConfigurationMap = new HashMap<>();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
+      FullHumanoidRobotModel robot = robotModel.createFullRobotModel();
+      HumanoidJointNameMap jointMap = robotModel.getJointMap();
+      defaultRobotInitialSetup.initializeFullRobotModel(robot);
+
+      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
+      {
+         String jointName = joint.getName();
+         double q_priv = robot.getOneDoFJointByName(jointName).getQ();
+         initialConfigurationMap.put(jointName, q_priv);
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         // TODO: Extract preset configuration to robot model
+         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), 0.5);
+         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(0.0));
+         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), robotSide.negateIfRightSide(-0.5));
+         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), -1.0);
+
+         initialConfigurationMap.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.58);
+         initialConfigurationMap.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 0.55 + 0.672);
+         initialConfigurationMap.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.64);
+      }
+
+      return initialConfigurationMap;
    }
 
    public void processVRInput(RDXVRContext vrContext)
@@ -400,10 +453,6 @@ public class RDXVRKinematicsStreamingMode
       ImGui.text("Press Left Joystick - Start/Stop replay");
       kinematicsRecorder.renderReplayWidgets(labels);
       kinematicsRecorder.renderReferenceFrameSelection(labels);
-      if (ImGui.checkbox(labels.get("Wake up thread"), wakeUpThreadRunning))
-      {
-         wakeUpThread.setRunning(wakeUpThreadRunning.get());
-      }
       ImGui.text("Output:");
       ImGui.sameLine();
       outputFrequencyPlot.renderImGuiWidgets();
@@ -466,6 +515,7 @@ public class RDXVRKinematicsStreamingMode
 
    public void destroy()
    {
+      toolbox.closeAndDispose();
       ghostRobotGraphic.destroy();
       for (RobotSide side : RobotSide.values)
       {
