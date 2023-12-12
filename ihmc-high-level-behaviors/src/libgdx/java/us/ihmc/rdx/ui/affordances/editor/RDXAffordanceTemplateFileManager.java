@@ -87,8 +87,9 @@ public class RDXAffordanceTemplateFileManager
          LogTools.info("Saving to file ...");
          JSONFileTools.save(file, jsonNode ->
          {
-            jsonNode.put("name", fileName);
-            ArrayNode actionsArrayNode = jsonNode.putArray("actions");
+            jsonNode.put("type", "ActionSequenceDefinition");
+            jsonNode.put("description", fileName);
+            ArrayNode actionsArrayNode = jsonNode.putArray("children");
 
             var preGraspPoses = preGraspFrames.getPoses();
             var graspPoses = graspFrame.getPoses();
@@ -142,6 +143,7 @@ public class RDXAffordanceTemplateFileManager
                      else
                         actionNode.put("executeWithNextAction", preGraspHandConfigurations.get(side).get(i) != null ? true : false);
                      actionNode.put("holdPoseInWorldLater", true);
+                     actionNode.put("jointSpaceControl", true);
 
                      double[] dataTrajectories = new double[16];
                      transformToParent.get(dataTrajectories);
