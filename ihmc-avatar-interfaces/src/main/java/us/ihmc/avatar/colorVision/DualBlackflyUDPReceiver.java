@@ -51,8 +51,6 @@ public class DualBlackflyUDPReceiver
             byte[] buffer = new byte[(int) ((Math.pow(2, 16)) - 1)];
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 
-            FrequencyStatisticPrinter frequencyStatisticPrinter = new FrequencyStatisticPrinter();
-
             while (running)
             {
                try
@@ -92,8 +90,6 @@ public class DualBlackflyUDPReceiver
                {
                   imageBuffer[fragmentDataOffset + i] = datagramBuffer.get(fragmentHeaderLength + i);
                }
-
-               frequencyStatisticPrinter.ping();
             }
 
             socket.disconnect();

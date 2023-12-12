@@ -35,8 +35,8 @@ public class RDXProjectionSphere
    private final ImInt sphereLatitudeVertices = new ImInt(100);
    private final ImInt sphereLongitudeVertices = new ImInt(100);
    private final ImBoolean syncProjectionScales = new ImBoolean(false);
-   private final ImDouble focalLengthX = new ImDouble(1.0);
-   private final ImDouble focalLengthY = new ImDouble(0.5);
+   private final ImDouble focalLengthX = new ImDouble(0.560838);
+   private final ImDouble focalLengthY = new ImDouble(1.0);
    private final ImDouble principlePointX = new ImDouble(0.0);
    private final ImDouble principlePointY = new ImDouble(0.0);
    private final ImBoolean renderSphereIfNoTexture = new ImBoolean(true);
@@ -98,7 +98,7 @@ public class RDXProjectionSphere
          double imageY = principlePointY.get() + focalLengthY.get() * angleOfIncidence * Math.sin(azimuthalAngle);
 
          texturePoint.setX(imageX + 0.5);
-         texturePoint.setY(imageY + 0.5);
+         texturePoint.setY(imageY + 0.0);
       }
 
       mesh = RDXMeshDataInterpreter.interpretMeshData(sphereMeshDataHolder);
