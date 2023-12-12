@@ -106,7 +106,7 @@ public class RigidBodyJointControlHelper
 
          if (enableFunctionGenerators)
          {
-            functionGenerators.add(new YoFunctionGeneratorNew(prefix + "_" + jointName + "_FuncGen", time, registry));
+            functionGenerators.add(new YoFunctionGeneratorNew(prefix + "_" + jointName + "_FG", time, registry));
          }
 
          hasLowLevelGains[jointIdx] = new YoBoolean(joint.getName() + "HasLowLevelGains", registry);

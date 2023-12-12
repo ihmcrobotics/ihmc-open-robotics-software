@@ -72,9 +72,9 @@ public class ExploreAreaLookAroundNode extends SequenceNode
       lookCenter = new LookInADirection(0.0, 0.0);
       lookLeft = new LookInADirection(40.0, 20.0);
 
-      addChild(lookRight);
-      addChild(lookCenter);
-      addChild(lookLeft);
+      getChildren().add(lookRight);
+      getChildren().add(lookCenter);
+      getChildren().add(lookLeft);
    }
 
    public void reset()
