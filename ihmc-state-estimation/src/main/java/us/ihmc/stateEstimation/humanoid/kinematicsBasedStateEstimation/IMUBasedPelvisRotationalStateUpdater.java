@@ -215,7 +215,9 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       angularVelocityMeasurement.set(imuProcessedOutput.getAngularVelocityMeasurement());
       if (imuBiasProvider != null)
       {
-         angularVelocityMeasurement.sub(imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuProcessedOutput));
+         FrameVector3DReadOnly angularVelocityBiasInIMUFrame = imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuProcessedOutput);
+         if (angularVelocityBiasInIMUFrame != null)
+            angularVelocityMeasurement.sub(angularVelocityBiasInIMUFrame);
       }
       angularVelocityMeasurementLinkRelativeToWorld.setIncludingFrame(measurementFrame, angularVelocityMeasurement);
 

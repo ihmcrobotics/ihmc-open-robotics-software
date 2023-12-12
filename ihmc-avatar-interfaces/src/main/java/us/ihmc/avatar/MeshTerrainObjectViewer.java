@@ -176,12 +176,12 @@ public class MeshTerrainObjectViewer
       meshTerrainObject = new MeshTerrainObject(pathToMesh);
    }
 
-   private void makeMeshTerrainObject(String pathToMesh, MeshTerrainObjectParameters parameters)
+   private void makeMeshTerrainObject(MeshTerrainObjectParameters parameters)
    {
-      if (pathToMesh == null)
+      if (parameters == null || parameters.getModelDirectory() == null)
          return;
 
-      meshTerrainObject = new MeshTerrainObject(pathToMesh, parameters);
+      meshTerrainObject = new MeshTerrainObject(parameters);
    }
 
    private void updateGraphics()
@@ -232,7 +232,7 @@ public class MeshTerrainObjectViewer
          {
             viewer.updateVisuals.set(false);
             viewer.updateParameters();
-            viewer.makeMeshTerrainObject(viewer.currentMeshFile.getAbsolutePath(), viewer.getParameters());
+            viewer.makeMeshTerrainObject(viewer.getParameters());
             viewer.updateGraphics();
          }
       });

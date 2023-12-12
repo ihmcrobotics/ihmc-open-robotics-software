@@ -3,26 +3,33 @@ package us.ihmc.rdx.ui.behavior.actions;
 import imgui.ImGui;
 import us.ihmc.behaviors.sequence.actions.HandWrenchActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandWrenchActionState;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class RDXHandWrenchAction extends RDXBehaviorAction
+public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, HandWrenchActionDefinition>
 {
-   private final HandWrenchActionState state = new HandWrenchActionState();
-   private final HandWrenchActionDefinition definition = state.getDefinition();
+   private final HandWrenchActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
-                                                                                definition::setTrajectoryDuration,
-                                                                                imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
-   private final ImDoubleWrapper forceWidget = new ImDoubleWrapper(definition::getForce,
-                                                                   definition::setForce,
-                                                                   imDouble -> ImGui.inputDouble(labels.get("Force"), imDouble));
+   private final ImDoubleWrapper trajectoryDurationWidget;
+   private final ImDoubleWrapper forceWidget;
 
-   public RDXHandWrenchAction(RDXBehaviorActionSequenceEditor editor)
+   public RDXHandWrenchAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super(editor);
+      super(new HandWrenchActionState(id, crdtInfo, saveFileDirectory));
+
+      state = getState();
+
+      getDefinition().setDescription("Hand wrench");
+
+      trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
+                                                     getDefinition()::setTrajectoryDuration,
+                                                     imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
+      forceWidget = new ImDoubleWrapper(getDefinition()::getForce,
+                                        getDefinition()::setForce,
+                                        imDouble -> ImGui.inputDouble(labels.get("Force"), imDouble));
    }
 
    @Override
@@ -37,18 +44,6 @@ public class RDXHandWrenchAction extends RDXBehaviorAction
    @Override
    public String getActionTypeTitle()
    {
-      return definition.getSide().getPascalCaseName() + " Hand Wrench";
-   }
-
-   @Override
-   public HandWrenchActionState getState()
-   {
-      return state;
-   }
-
-   @Override
-   public HandWrenchActionDefinition getDefinition()
-   {
-      return definition;
+      return getDefinition().getSide().getPascalCaseName() + " Hand Wrench";
    }
 }

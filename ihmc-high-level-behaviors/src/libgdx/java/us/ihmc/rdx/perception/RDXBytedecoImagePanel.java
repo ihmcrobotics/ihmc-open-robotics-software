@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -68,6 +69,18 @@ public class RDXBytedecoImagePanel
       {
          OpenCVTools.clampTo8BitUnsignedChar(singleChannelImage, normalizedScaledImage.getBytedecoOpenCVMat(), 0.0, 255.0);
          OpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage.getBytedecoOpenCVMat(), bytedecoImage.getBytedecoOpenCVMat());
+         draw();
+      }
+   }
+
+   /**
+    * @param colorImage Color image to display
+    */
+   public void drawColorImage(Mat colorImage)
+   {
+      if (imagePanel.getIsShowing().get())
+      {
+         opencv_imgproc.cvtColor(colorImage, bytedecoImage.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_BGRA2RGBA);
          draw();
       }
    }
