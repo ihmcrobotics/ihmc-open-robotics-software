@@ -82,7 +82,7 @@ class ZED2CenterposeNode():
         self.opt.debug = 5
         self.opt.nms = True
         self.opt.obj_scale = True
-        self.image_process_frequency = 30
+        self.image_process_frequency = 60
         self.image_process_period_ns = int(1e9 / self.image_process_frequency)
         self.last_image_process_time_ns = 0
 
