@@ -19,7 +19,12 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class RDXIterativeClosestPointBasicDemo
@@ -56,7 +61,7 @@ public class RDXIterativeClosestPointBasicDemo
    private final ReferenceFrame envReferenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), envTransform);
    private final FramePoint3D pointB = new FramePoint3D(envReferenceFrame);
 
-   private final int envSize = 1000;
+   private final int envSize = 100;
 
    private final DMatrixRMaj objectCentroid = new DMatrixRMaj(1, 3);
    private final DMatrixRMaj envCentroid = new DMatrixRMaj(1, 3);
@@ -86,7 +91,9 @@ public class RDXIterativeClosestPointBasicDemo
 
             // Create Shape
 //            createICPPointCloudBox();
-            createICPPointCloudCone();
+//            createICPPointCloudCone();
+//            createICPPointCloudCylinder();
+            createICPPointCloudCSV();
 
             // Create Renderables for Object
             baseUI.getPrimaryScene().addRenderableProvider(objectPointCloudRenderer, RDXSceneLevel.VIRTUAL);
@@ -152,8 +159,8 @@ public class RDXIterativeClosestPointBasicDemo
             for (int i = 0; i < envSize; i++) {
                float z = (float)random.nextDouble(0, coneLength);
                double phi = random.nextDouble(0, 2*Math.PI);
-               float x = (float)Math.cos(phi)*z;
-               float y =(float)Math.sin(phi)*z;
+               float x = (float)Math.cos(phi)*z*(coneRadius/coneLength);
+               float y =(float)Math.sin(phi)*z*(coneRadius/coneLength);
                pointA.setToZero(objectReferenceFrame);
                pointA.set(x,y,z);
                FramePoint3D worldFramePoint = objectModelPointCloud.add();
@@ -162,8 +169,8 @@ public class RDXIterativeClosestPointBasicDemo
             for (int i = 0; i < envSize; i++) {
                float z = (float)random.nextDouble(0, coneLength);
                double phi = random.nextDouble(0, Math.PI);
-               float x = (float)Math.cos(phi)*z;
-               float y =(float)Math.sin(phi)*z;
+               float x = (float)Math.cos(phi)*z*(coneRadius/coneLength);
+               float y =(float)Math.sin(phi)*z*(coneRadius/coneLength);
                pointB.setToZero(envReferenceFrame);
                pointB.set(x,y,z);
                FramePoint3D envFramePoint = envModelPoints.add();
@@ -172,10 +179,89 @@ public class RDXIterativeClosestPointBasicDemo
          }
 
 
+         // Create Box Cylinder
+         private void createICPPointCloudCylinder(){
+            Random random = new Random(0);
+            float CylinderLength = 1.0f;
+            float CylinderRadius = 0.2f;
+            for (int i = 0; i < envSize; i++) {
+               int j = random.nextInt(6);
+               float z = (float)random.nextDouble(0, CylinderLength);
+               float r = CylinderRadius;
+               if (j==0) {z = 0; r = (float)random.nextDouble(0, CylinderRadius);}
+               if (j==1) {z = CylinderLength; r = (float)random.nextDouble(0, CylinderRadius);}
+               double phi = random.nextDouble(0, 2*Math.PI);
+               float x = (float)Math.cos(phi)*r;
+               float y =(float)Math.sin(phi)*r;
+               pointA.setToZero(objectReferenceFrame);
+               pointA.set(x,y,z);
+               FramePoint3D worldFramePoint = objectModelPointCloud.add();
+               worldFramePoint.setIncludingFrame(pointA);
+            }
+            for (int i = 0; i < envSize; i++) {
+               int j = random.nextInt(6);
+               float z = (float)random.nextDouble(0, CylinderLength);
+               float r = CylinderRadius;
+               if (j==0) {z = 0; r = (float)random.nextDouble(0, CylinderRadius);}
+               if (j==1) {z = CylinderLength; r = (float)random.nextDouble(0, CylinderRadius);}
+               double phi = random.nextDouble(0, 2*Math.PI);
+               float x = (float)Math.cos(phi)*r;
+               float y =(float)Math.sin(phi)*r;
+               pointB.setToZero(envReferenceFrame);
+               pointB.set(x,y,z);
+               FramePoint3D envFramePoint = envModelPoints.add();
+               envFramePoint.setIncludingFrame(pointB);
+            }
+         }
+
+
+         // Create Object from CSV
+//         Box.csv
+//         mug_modified_accurate.csv
+         private void createICPPointCloudCSV() {
+            Random random = new Random(0);
+            List<String[]> rowList = new ArrayList<String[]>();
+            try (BufferedReader br = new BufferedReader(new FileReader("/home/gclark/Downloads/mug_modified_accurate.csv"))) {
+               String line;
+               while ((line = br.readLine()) != null) {
+                  String[] lineItems = line.split(",");
+                  rowList.add(lineItems);
+               }
+               br.close();
+            }
+            catch (Exception e) {
+            // Handle any I/O problems
+            }
+
+            for (int i = 0; i < envSize; i++) {
+               int j = random.nextInt(rowList.size()-1);
+               String[] row = rowList.get(j+1);
+               float x = Float.parseFloat(row[0]);
+               float y = Float.parseFloat(row[1]);
+               float z = Float.parseFloat(row[2]);
+               pointA.setToZero(objectReferenceFrame);
+               pointA.set(x,y,z);
+               FramePoint3D worldFramePoint = objectModelPointCloud.add();
+               worldFramePoint.setIncludingFrame(pointA);
+            }
+            for (int i = 0; i < envSize; i++) {
+               int j = random.nextInt(rowList.size()-1);
+               String[] row = rowList.get(j+1);
+               float x = Float.parseFloat(row[0]);
+               float y = Float.parseFloat(row[1]);
+               float z = Float.parseFloat(row[2]);
+               pointB.setToZero(envReferenceFrame);
+               pointB.set(x,y,z);
+               FramePoint3D envFramePoint = envModelPoints.add();
+               envFramePoint.setIncludingFrame(pointB);
+            }
+
+            }
+
          // Render ICP Panel
          private void renderImGuiICPWidgets()
          {
-            DecimalFormat tf = new DecimalFormat("#.####");
+            DecimalFormat tf = new DecimalFormat("#.#########");
             DecimalFormat df = new DecimalFormat("#.###");
             ImGui.text("ICP Time: " + tf.format(icpGuiICPRunTimeInSeconds));
             ImGui.text(" ");
@@ -285,6 +371,7 @@ public class RDXIterativeClosestPointBasicDemo
                   CommonOps_DDRM.multTransB(R, objectCentroid, objAdjustedLocation);
                   CommonOps_DDRM.transpose(objAdjustedLocation);
                   CommonOps_DDRM.subtract(envCentroid, objAdjustedLocation, objTranslation);
+
 
                   // Rotate and translate object points
                   for (Point3D32 objectInWorldPoint : objectInWorldPoints) {
