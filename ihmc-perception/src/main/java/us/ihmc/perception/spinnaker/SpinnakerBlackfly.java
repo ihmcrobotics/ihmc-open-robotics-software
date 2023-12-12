@@ -9,7 +9,6 @@ import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import org.bytedeco.spinnaker.Spinnaker_C.spinNodeHandle;
 import org.bytedeco.spinnaker.Spinnaker_C.spinNodeMapHandle;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
-import us.ihmc.log.LogTools;
 
 import static us.ihmc.perception.spinnaker.SpinnakerBlackflyTools.printOnError;
 
@@ -120,33 +119,33 @@ public class SpinnakerBlackfly
    public void setResolution(int width, int height)
    {
       spinNodeHandle widthNode = new spinNodeHandle();
-      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("Width"), widthNode), "Getting width node map node");
+      printOnError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("Width"), widthNode), "Getting width node map node");
       Spinnaker_C.spinIntegerSetValue(widthNode, width);
 
       spinNodeHandle heightNode = new spinNodeHandle();
-      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("Height"), heightNode), "Getting height node map node");
+      printOnError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("Height"), heightNode), "Getting height node map node");
       Spinnaker_C.spinIntegerSetValue(heightNode, height);
    }
 
    public void setOffset(int xOffset, int yOffset)
    {
       spinNodeHandle xOffsetNode = new spinNodeHandle();
-      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetX"), xOffsetNode), "Getting OffsetX node map node");
+      printOnError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetX"), xOffsetNode), "Getting OffsetX node map node");
       Spinnaker_C.spinIntegerSetValue(xOffsetNode, xOffset);
 
       spinNodeHandle yOffsetNode = new spinNodeHandle();
-      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetY"), yOffsetNode), "Getting OffsetY node map node");
+      printOnError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetY"), yOffsetNode), "Getting OffsetY node map node");
       Spinnaker_C.spinIntegerSetValue(yOffsetNode, yOffset);
    }
 
    // http://softwareservices.flir.com/Spinnaker/latest/_programmer_guide.html#Setting_Exposure_Time
    public void setExposure(int exposureTimeNs)
    {
+      // TODO: finish
       spinNodeHandle exposureAutoHandle = new spinNodeHandle();
-      assertNoError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("ExposureAuto"), exposureAutoHandle), "Getting ExposureAuto node map node");
+      printOnError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("ExposureAuto"), exposureAutoHandle), "Getting ExposureAuto node map node");
       Spinnaker_C.spinIntegerSetValue(exposureAutoHandle, 0);
 
-//      spinNodeHandle
 
    }
 
