@@ -1,6 +1,7 @@
 {
-  "name" : "ResizableBox",
-  "actions" : [ {
+  "type" : "ActionSequenceDefinition",
+  "description" : "ResizableBox",
+  "children" : [ {
     "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Left Hand Pose",
     "parentFrame" : "ResizableBox",
@@ -13,7 +14,8 @@
     "pitchInDegrees" : -75.38,
     "yawInDegrees" : 0.0,
     "executeWithNextAction" : true,
-    "holdPoseInWorldLater" : true
+    "holdPoseInWorldLater" : true,
+    "jointSpaceControl" : true
   }, {
     "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Right Hand Pose",
@@ -27,7 +29,8 @@
     "pitchInDegrees" : -75.38,
     "yawInDegrees" : 0.0,
     "executeWithNextAction" : false,
-    "holdPoseInWorldLater" : true
+    "holdPoseInWorldLater" : true,
+    "jointSpaceControl" : true
   }, {
     "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Left Hand Pose",
@@ -41,7 +44,8 @@
     "pitchInDegrees" : -75.38,
     "yawInDegrees" : 0.0,
     "executeWithNextAction" : true,
-    "holdPoseInWorldLater" : true
+    "holdPoseInWorldLater" : true,
+    "jointSpaceControl" : true
   }, {
     "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Right Hand Pose",
@@ -55,7 +59,8 @@
     "pitchInDegrees" : -75.38,
     "yawInDegrees" : 0.0,
     "executeWithNextAction" : false,
-    "holdPoseInWorldLater" : true
+    "holdPoseInWorldLater" : true,
+    "jointSpaceControl" : true
   }, {
     "type" : "HandPoseActionDefinition",
     "description" : "Grasp Left Hand Pose",
