@@ -15,7 +15,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "23eb3e2ef86916acee43dd5ed069ca71bdeaaea0ce8810960567d8cb1b52a7bd";
+   		return "5416513dbc729b33b11814397bea9c39eb3d2c155ae1ca1880c04616df26205c";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -60,8 +60,6 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -80,7 +78,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getActionDefinition(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -98,16 +96,13 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(behavior_msgs.msg.dds.HandPoseActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.write(data.getActionDefinition(), cdr);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_9(data.getRobotSide());
 
       if(data.getParentFrameName().length() <= 255)
@@ -117,8 +112,6 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToParent(), cdr);
       cdr.write_type_6(data.getTrajectoryDuration());
 
-      cdr.write_type_7(data.getExecuteWithNextAction());
-
       cdr.write_type_7(data.getHoldPoseInWorld());
 
       cdr.write_type_7(data.getJointSpaceControl());
@@ -127,14 +120,12 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
    public static void read(behavior_msgs.msg.dds.HandPoseActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.read(data.getActionDefinition(), cdr);	
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setRobotSide(cdr.read_type_9());
       	
       cdr.read_type_d(data.getParentFrameName());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToParent(), cdr);	
       data.setTrajectoryDuration(cdr.read_type_6());
-      	
-      data.setExecuteWithNextAction(cdr.read_type_7());
       	
       data.setHoldPoseInWorld(cdr.read_type_7());
       	
@@ -146,14 +137,13 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final void serialize(behavior_msgs.msg.dds.HandPoseActionDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("action_definition", new behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType(), data.getActionDefinition());
+      ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_d("parent_frame_name", data.getParentFrameName());
       ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
-      ser.write_type_7("execute_with_next_action", data.getExecuteWithNextAction());
       ser.write_type_7("hold_pose_in_world", data.getHoldPoseInWorld());
       ser.write_type_7("joint_space_control", data.getJointSpaceControl());
    }
@@ -161,14 +151,13 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.HandPoseActionDefinitionMessage data)
    {
-      ser.read_type_a("action_definition", new behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType(), data.getActionDefinition());
+      ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_d("parent_frame_name", data.getParentFrameName());
       ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
-      data.setExecuteWithNextAction(ser.read_type_7("execute_with_next_action"));
       data.setHoldPoseInWorld(ser.read_type_7("hold_pose_in_world"));
       data.setJointSpaceControl(ser.read_type_7("joint_space_control"));
    }

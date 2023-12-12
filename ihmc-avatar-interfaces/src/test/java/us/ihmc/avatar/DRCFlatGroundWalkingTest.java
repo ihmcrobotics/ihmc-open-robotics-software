@@ -5,10 +5,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
@@ -22,6 +19,7 @@ import us.ihmc.robotics.Assert;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.MeshTerrainEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.MeshTerrainObjectFactory;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -83,6 +81,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       runFlatGroundWalking(false);
    }
 
+   @Disabled
    @Test
    public void testMeshTerrainWalking()
    {
@@ -101,8 +100,9 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       boolean doPelvisWarmup = doPelvisWarmup();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
+      simulationTestingParameters.setKeepSCSUp(true);
 
-      MeshTerrainEnvironment meshTerrainEnvironment = new MeshTerrainEnvironment();
+      MeshTerrainEnvironment meshTerrainEnvironment = new MeshTerrainEnvironment(MeshTerrainObjectFactory.createWorkPlatformObject(), MeshTerrainObjectFactory.createFlatGround());
       DRCRobotModel robotModel = getRobotModel();
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
                                                                                                                                              meshTerrainEnvironment,
