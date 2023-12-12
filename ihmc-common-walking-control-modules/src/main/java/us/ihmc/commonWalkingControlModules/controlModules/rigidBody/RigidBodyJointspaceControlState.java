@@ -273,6 +273,8 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       inverseDynamicsCommandList.clear();
+      accelerationIntegrationCommand.clear();
+      activateJointsCommand.getJointsToActivate().clear();
 
       for (int jointIdx = 0; jointIdx < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); jointIdx++)
       {

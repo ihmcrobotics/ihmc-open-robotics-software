@@ -11,7 +11,7 @@ public class HandWrenchActionStateMessage extends Packet<HandWrenchActionStateMe
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionStateMessage action_state_;
+   public behavior_msgs.msg.dds.ActionNodeStateMessage state_;
    /**
             * Definition
             */
@@ -19,7 +19,7 @@ public class HandWrenchActionStateMessage extends Packet<HandWrenchActionStateMe
 
    public HandWrenchActionStateMessage()
    {
-      action_state_ = new behavior_msgs.msg.dds.BehaviorActionStateMessage();
+      state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.HandWrenchActionDefinitionMessage();
    }
 
@@ -31,7 +31,7 @@ public class HandWrenchActionStateMessage extends Packet<HandWrenchActionStateMe
 
    public void set(HandWrenchActionStateMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.staticCopy(other.action_state_, action_state_);
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.HandWrenchActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
    }
 
@@ -39,9 +39,9 @@ public class HandWrenchActionStateMessage extends Packet<HandWrenchActionStateMe
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionStateMessage getActionState()
+   public behavior_msgs.msg.dds.ActionNodeStateMessage getState()
    {
-      return action_state_;
+      return state_;
    }
 
 
@@ -71,7 +71,7 @@ public class HandWrenchActionStateMessage extends Packet<HandWrenchActionStateMe
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_state_.epsilonEquals(other.action_state_, epsilon)) return false;
+      if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
 
       return true;
@@ -86,7 +86,7 @@ public class HandWrenchActionStateMessage extends Packet<HandWrenchActionStateMe
 
       HandWrenchActionStateMessage otherMyClass = (HandWrenchActionStateMessage) other;
 
-      if (!this.action_state_.equals(otherMyClass.action_state_)) return false;
+      if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
 
       return true;
@@ -98,8 +98,8 @@ public class HandWrenchActionStateMessage extends Packet<HandWrenchActionStateMe
       StringBuilder builder = new StringBuilder();
 
       builder.append("HandWrenchActionStateMessage {");
-      builder.append("action_state=");
-      builder.append(this.action_state_);      builder.append(", ");
+      builder.append("state=");
+      builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");
       builder.append(this.definition_);
       builder.append("}");

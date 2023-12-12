@@ -7,7 +7,6 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
@@ -27,6 +26,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -46,7 +46,7 @@ import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.REACHED_GOAL;
  * an upgrade was planned but never finished.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
-public class BuildingExplorationBehaviorOld extends ResettingNode implements BehaviorInterface
+public class BuildingExplorationBehaviorOld extends ResettingNode implements Destroyable
 {
    private static final int UPDATE_RATE_MILLIS = 50;
    private final static Pose3D NAN_POSE = new Pose3D();
@@ -94,7 +94,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
       walkThroughDoorState = new BuildingExplorationBehaviorWalkThroughDoorState(helper);
       traverseStairsState = new BuildingExplorationBehaviorTraverseStairsState(helper, bombPose);
 
-      addChild(lookAndStepBehavior);
+      getChildren().add(lookAndStepBehavior);
 
       syncedRobot = helper.newSyncedRobot();
 //      helper.subscribeViaCallback(Goal, this::setGoal);
@@ -152,7 +152,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       syncedRobot.update();
 
@@ -160,7 +160,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
       {
          if (lookAndStepBehavior.isReset())
             lookAndStepBehavior.acceptGoal(goal.get());
-         return lookAndStepBehavior.tick();
+         return lookAndStepBehavior.tickAndGetStatus();
       }
 
       return BehaviorTreeNodeStatus.RUNNING;
@@ -172,7 +172,6 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
 
    }
 
-   @Override
    public String getName()
    {
       return "Building Exploration";
@@ -284,7 +283,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
       return factory.build(BuildingExplorationStateName.TELEOP);
    }
 
-   private void update()
+   public void update()
    {
       if (stopRequested.getAndSet(false))
       {
