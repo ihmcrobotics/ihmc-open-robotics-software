@@ -61,7 +61,7 @@ public class RDXIterativeClosestPointBasicDemo
    private final ReferenceFrame envReferenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), envTransform);
    private final FramePoint3D pointB = new FramePoint3D(envReferenceFrame);
 
-   private final int envSize = 100;
+   private final int envSize = 1000;
 
    private final DMatrixRMaj objectCentroid = new DMatrixRMaj(1, 3);
    private final DMatrixRMaj envCentroid = new DMatrixRMaj(1, 3);
