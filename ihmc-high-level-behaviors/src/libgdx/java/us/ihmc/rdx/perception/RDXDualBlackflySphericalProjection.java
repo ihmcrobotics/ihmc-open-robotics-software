@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -34,8 +33,6 @@ public class RDXDualBlackflySphericalProjection
    private final DualBlackflyUDPReceiver dualBlackflyUDPReceiver = new DualBlackflyUDPReceiver();
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private ImBoolean leftParametersVisible = new ImBoolean(true);
-   private ImBoolean rightParametersVisible = new ImBoolean(true);
 
    public RDXDualBlackflySphericalProjection(RDXBaseUI baseUI)
    {
@@ -106,13 +103,23 @@ public class RDXDualBlackflySphericalProjection
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (sceneLevels.contains(RDXSceneLevel.VR_EYE_RIGHT))
+      // Left eye or 3D scene in UI
+      if (sceneLevels.contains(RDXSceneLevel.VR_EYE_LEFT) || sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
-         projectionSpheres.get(RobotSide.RIGHT).getRenderables(renderables, pool);
+         // Only show the renderables if there is an image frame in the buffer
+         if (dualBlackflyUDPReceiver.getImageBuffers().get(RobotSide.LEFT) != null)
+         {
+            projectionSpheres.get(RobotSide.LEFT).getRenderables(renderables, pool);
+         }
       }
-      else
+      // Right eye
+      else if (sceneLevels.contains(RDXSceneLevel.VR_EYE_RIGHT))
       {
-         projectionSpheres.get(RobotSide.LEFT).getRenderables(renderables, pool);
+         // Only show the renderables if there is an image frame in the buffer
+         if (dualBlackflyUDPReceiver.getImageBuffers().get(RobotSide.RIGHT) != null)
+         {
+            projectionSpheres.get(RobotSide.RIGHT).getRenderables(renderables, pool);
+         }
       }
    }
 }
