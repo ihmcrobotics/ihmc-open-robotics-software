@@ -213,6 +213,27 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
       ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(colorChannel.getTopic().getName());
+
+      renderStatistics();
+
+      ImGui.checkbox(labels.get("Use sensor color"), useSensorColor);
+      ImGui.text("Gradient mode:");
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("World Z"), gradientMode == RDXColorGradientMode.WORLD_Z))
+         gradientMode = RDXColorGradientMode.WORLD_Z;
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Sensor X"), gradientMode == RDXColorGradientMode.SENSOR_X))
+         gradientMode = RDXColorGradientMode.SENSOR_X;
+      ImGui.checkbox(labels.get("Sinusoidal gradient"), useSinusoidalGradientPattern);
+      ImGui.sliderFloat(labels.get("Point scale"), pointSizeScale.getData(), 0.0f, 2.0f);
+      if (depthChannel.getCameraModel() == CameraModel.OUSTER && colorChannel.getCameraModel() == CameraModel.EQUIDISTANT_FISHEYE)
+      {
+         ImGui.sliderInt(labels.get("Level of color detail"), levelOfColorDetail.getData(), 0, 3);
+      }
+   }
+
+   public void renderStatistics()
+   {
       if (colorChannel.getReceivedOne())
       {
          colorChannel.getMessageSizeReadout().renderImGuiWidgets();
@@ -236,20 +257,6 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
          colorChannel.getSequenceDiscontinuityPlot().renderImGuiWidgets();
       if (depthChannel.getReceivedOne())
          depthChannel.getSequenceDiscontinuityPlot().renderImGuiWidgets();
-      ImGui.checkbox(labels.get("Use sensor color"), useSensorColor);
-      ImGui.text("Gradient mode:");
-      ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("World Z"), gradientMode == RDXColorGradientMode.WORLD_Z))
-         gradientMode = RDXColorGradientMode.WORLD_Z;
-      ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Sensor X"), gradientMode == RDXColorGradientMode.SENSOR_X))
-         gradientMode = RDXColorGradientMode.SENSOR_X;
-      ImGui.checkbox(labels.get("Sinusoidal gradient"), useSinusoidalGradientPattern);
-      ImGui.sliderFloat(labels.get("Point scale"), pointSizeScale.getData(), 0.0f, 2.0f);
-      if (depthChannel.getCameraModel() == CameraModel.OUSTER && colorChannel.getCameraModel() == CameraModel.EQUIDISTANT_FISHEYE)
-      {
-         ImGui.sliderInt(labels.get("Level of color detail"), levelOfColorDetail.getData(), 0, 3);
-      }
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
@@ -302,5 +309,45 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    public void setLevelOfColorDetail(int levelOfColorDetail)
    {
       this.levelOfColorDetail.set(levelOfColorDetail);
+   }
+
+   public ImBoolean useSensorColor()
+   {
+      return useSensorColor;
+   }
+
+   public ImBoolean useSinusoidalGradientPattern()
+   {
+      return useSinusoidalGradientPattern;
+   }
+
+   public RDXColorGradientMode getGradientMode()
+   {
+      return gradientMode;
+   }
+
+   public void setGradientMode(RDXColorGradientMode mode)
+   {
+      gradientMode = mode;
+   }
+
+   public ImFloat getPointSizeScale()
+   {
+      return pointSizeScale;
+   }
+
+   public CameraModel getColorChannelCamera()
+   {
+      return colorChannel.getCameraModel();
+   }
+
+   public CameraModel getDepthChannelCamera()
+   {
+      return depthChannel.getCameraModel();
+   }
+
+   public ImInt getLevelOfColorDetail()
+   {
+      return levelOfColorDetail;
    }
 }
