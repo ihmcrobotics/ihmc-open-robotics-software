@@ -307,10 +307,12 @@ public class PerceptionAndAutonomyProcess
 
    private void processAndPublishBlackfly()
    {
+      boolean atLeastOneDemanded = false;
       for (RobotSide side : RobotSide.values)
       {
          if (blackflyImageDemandNodes.get(side).isDemanded())
          {
+            atLeastOneDemanded = true;
             if (blackflyImageRetrievers.get(side) != null && blackflyImagePublishers.get(side) != null)
             {
                blackflyImages.put(side, blackflyImageRetrievers.get(side).getLatestRawImage());
@@ -325,6 +327,9 @@ public class PerceptionAndAutonomyProcess
             }
          }
       }
+
+      if (!atLeastOneDemanded)
+         ThreadTools.sleep(500);
    }
 
    private void updateSceneGraph()
@@ -344,7 +349,7 @@ public class PerceptionAndAutonomyProcess
          centerposeDetectionManager.updateSceneGraph(sceneGraph);
 
       // Update general stuff
-      sceneGraph.updateOnRobotOnly(blackflyFrameSuppliers.get(RobotSide.RIGHT).get());
+      sceneGraph.updateOnRobotOnly(robotPelvisFrameSupplier.get());
       sceneGraph.updatePublication();
    }
 
