@@ -11,6 +11,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.behaviors.sakeHandCommunication.ROS2SakeHandCommander;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
@@ -101,6 +102,7 @@ public class RDXTeleoperationManager extends RDXPanel
 
    private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
    private final SideDependentList<RDXInteractableHand> interactableHands = new SideDependentList<>();
+   private  ROS2SakeHandCommander handCommander;
    private RDXInteractableRobotLink interactableChest;
    private RDXInteractableRobotLink interactablePelvis;
    private final ArrayList<RDXInteractableRobotLink> allInteractableRobotLinks = new ArrayList<>();
@@ -175,6 +177,7 @@ public class RDXTeleoperationManager extends RDXPanel
                                         desiredRobot,
                                         teleoperationParameters,
                                         interactableHands);
+         handCommander = ROS2SakeHandCommander.getSakeHandCommander(communicationHelper);
       }
 
       RDXBaseUI.getInstance().getKeyBindings().register("Delete all Interactables", "Shift + Escape");
@@ -293,8 +296,8 @@ public class RDXTeleoperationManager extends RDXPanel
                // TODO this should probably not handle the space event!
                // This sends a command to the controller.
                interactableHands.get(side).setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
-               interactableHands.get(side).setOpenHand(() -> armManager.getHandManager().publishHandCommand(side, SakeHandCommandOption.OPEN));
-               interactableHands.get(side).setCloseHand(() -> armManager.getHandManager().publishHandCommand(side, SakeHandCommandOption.CLOSE));
+               interactableHands.get(side).setOpenHand(() -> handCommander.sendPredefinedCommand(side, SakeHandCommandOption.OPEN));
+               interactableHands.get(side).setCloseHand(() -> handCommander.sendPredefinedCommand(side, SakeHandCommandOption.CLOSE));
                interactableHands.get(side).setGotoDoorAvoidanceArmAngles(() -> armManager.executeDoorAvoidanceArmAngles(side));
                interactableHands.get(side).setGotoArmHome(() -> armManager.executeArmHome(side));
             }

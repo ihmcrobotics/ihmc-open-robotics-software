@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.behaviors.sakeHandCommunication.ROS2SakeHandCommander;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -20,6 +21,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class RDXHandConfigurationManager
 {
    private CommunicationHelper communicationHelper;
+   private ROS2SakeHandCommander handCommander;
    private final SideDependentList<RDXIconTexture> handIcons = new SideDependentList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final SideDependentList<RDXSakeHandInformation> sakeHandInfo = new SideDependentList<>();
@@ -30,15 +32,16 @@ public class RDXHandConfigurationManager
    public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
       this.communicationHelper = communicationHelper;
+      handCommander = ROS2SakeHandCommander.getSakeHandCommander(communicationHelper);
 
       for (RobotSide side : RobotSide.values)
       {
          handIcons.put(side, new RDXIconTexture("icons/" + side.getLowerCaseName() + "Hand.png"));
 
-         Runnable openHand = () -> publishHandCommand(side, SakeHandCommandOption.OPEN);
-         Runnable closeHand = () -> publishHandCommand(side, SakeHandCommandOption.CLOSE);
-         Runnable calibrateHand = () -> publishHandCommand(side, SakeHandCommandOption.CALIBRATE);
-         Runnable resetHand = () -> publishHandCommand(side, SakeHandCommandOption.RESET);
+         Runnable openHand = () -> handCommander.sendPredefinedCommand(side, SakeHandCommandOption.OPEN);
+         Runnable closeHand = () -> handCommander.sendPredefinedCommand(side, SakeHandCommandOption.CLOSE);
+         Runnable calibrateHand = () -> handCommander.sendPredefinedCommand(side, SakeHandCommandOption.CALIBRATE);
+         Runnable resetHand = () -> handCommander.sendPredefinedCommand(side, SakeHandCommandOption.RESET);
          handQuickAccessButtons.put(side, new RDXHandQuickAccessButtons(baseUI, side, openHand, closeHand, calibrateHand, resetHand));
 
          handPositionSliders.put(side, new RDXSakeHandPositionSlider(communicationHelper, side));
@@ -73,27 +76,28 @@ public class RDXHandConfigurationManager
          ImGui.sameLine();
          if (ImGui.button(labels.get("Calibrate", side.getCamelCaseName())))
          {
-            publishHandCommand(side, SakeHandCommandOption.CALIBRATE);
+            handCommander.sendPredefinedCommand(side, SakeHandCommandOption.CALIBRATE);
          }
          ImGui.sameLine();
          if (ImGui.button(labels.get("Open", side.getCamelCaseName())))
          {
-            publishHandCommand(side, SakeHandCommandOption.OPEN);
+            handCommander.sendPredefinedCommand(side, SakeHandCommandOption.OPEN);
          }
          ImGui.sameLine();
          if (ImGui.button(labels.get("Close", side.getCamelCaseName())))
          {
-            publishHandCommand(side, SakeHandCommandOption.CLOSE);
+            handCommander.sendPredefinedCommand(side, SakeHandCommandOption.CLOSE);
          }
          ImGui.sameLine();
          if (ImGui.button(labels.get("Grip", side.getCamelCaseName())))
          {
-            publishHandCommand(side, SakeHandCommandOption.GRIP);
+            handCommander.sendPredefinedCommand(side, SakeHandCommandOption.GRIP);
          }
          ImGui.sameLine();
          if (ImGui.button(labels.get("Reset", side.getCamelCaseName())))
          {
-            publishHandCommand(side, SakeHandCommandOption.RESET);
+            handCommander.sendPredefinedCommand(side, SakeHandCommandOption.RESET);
+            handCommander.sendErrorConfirmation(side);
          }
 
          handPositionSliders.get(side).renderImGuiWidgets();
@@ -105,18 +109,5 @@ public class RDXHandConfigurationManager
       {
          sakeHandInfo.get(side).renderImGuiWidgets();
       }
-   }
-
-   public void publishHandCommand(RobotSide side, SakeHandCommandOption handCommandOption)
-   {
-      SakeHandDesiredCommandMessage commandMessage = new SakeHandDesiredCommandMessage();
-      commandMessage.setDesiredCommandOption((byte) handCommandOption.getCommandNumber());
-      commandMessage.setErrorConfirmation(handCommandOption.getErrorConfirmation());
-      commandMessage.setPositionRatio(handCommandOption.getDesiredPosition());
-      commandMessage.setTorqueRatio(handCommandOption.getDesiredTorque());
-      commandMessage.setRobotSide(side.toByte());
-
-      communicationHelper.publish(ROS2Tools::getSakeHandCommandTopic,
-                                  commandMessage);
    }
 }

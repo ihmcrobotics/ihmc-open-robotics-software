@@ -8,7 +8,7 @@ public enum SakeHandCommandOption
    e.g. RESET does not change goal position; The hand remains in same position.
    */
    FULLY_OPEN(0, false, 0.0, 0.3),
-   CLOSE(1, false, 1.0, 0.3),
+   CLOSE(1, false, 0.95, 0.3),
    GRIP(2, false, 1.0, 0.7),
    CUSTOM(3, false, -1.0, -1.0),
    CALIBRATE(4, false, 1.0, 0.3),

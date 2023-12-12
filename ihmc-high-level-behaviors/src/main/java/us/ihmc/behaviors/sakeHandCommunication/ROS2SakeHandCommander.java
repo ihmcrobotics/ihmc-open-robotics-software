@@ -7,7 +7,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-// TODO: Use this class
 public class ROS2SakeHandCommander
 {
    private static ROS2SakeHandCommander commander;
@@ -37,8 +36,11 @@ public class ROS2SakeHandCommander
    {
       commandNumbers.put(commandSide, commandOption.getCommandNumber());
       errorConfirmations.put(commandSide, commandOption.getErrorConfirmation());
-      desiredPositions.put(commandSide, commandOption.getDesiredPosition());
-      desiredTorques.put(commandSide, commandOption.getDesiredTorque());
+      if (commandOption.getDesiredPosition() >= -0.01)
+         desiredPositions.put(commandSide, commandOption.getDesiredPosition());
+      if (commandOption.getDesiredTorque() >= -0.01)
+         desiredTorques.put(commandSide, commandOption.getDesiredTorque());
+
       sendCommandMessage(commandSide);
 
       if (errorConfirmations.get(commandSide))
@@ -54,13 +56,23 @@ public class ROS2SakeHandCommander
 
    public void setDesiredPosition(RobotSide commandSide, double desiredPosition)
    {
-      desiredPositions.put(commandSide, desiredPosition);
+      if (desiredPosition >= -0.01)
+      {
+         commandNumbers.put(commandSide, SakeHandCommandOption.CUSTOM.getCommandNumber());
+         desiredPositions.put(commandSide, desiredPosition);
+      }
+
       sendCommandMessage(commandSide);
    }
 
    public void setDesiredTorque(RobotSide commandSide, double desiredTorque)
    {
-      desiredTorques.put(commandSide, desiredTorque);
+      if (desiredTorque >= -0.01)
+      {
+         commandNumbers.put(commandSide, SakeHandCommandOption.CUSTOM.getCommandNumber());
+         desiredTorques.put(commandSide, desiredTorque);
+      }
+
       sendCommandMessage(commandSide);
    }
 

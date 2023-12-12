@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import controller_msgs.msg.dds.SakeHandStatusMessage;
 import imgui.ImGui;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.behaviors.sakeHandCommunication.ROS2SakeHandCommander;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
@@ -16,7 +17,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class RDXSakeHandInformation
 {
    private final RobotSide side;
-   private final CommunicationHelper communicationHelper;
+   private final ROS2SakeHandCommander handCommander;
    private final IHMCROS2Input<SakeHandStatusMessage> statusInput;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiFlashingText presentTemperatureText = new ImGuiFlashingText(ImGuiTools.RED);
@@ -25,7 +26,7 @@ public class RDXSakeHandInformation
    public RDXSakeHandInformation(RobotSide side, CommunicationHelper communicationHelper)
    {
       this.side = side;
-      this.communicationHelper = communicationHelper;
+      handCommander = ROS2SakeHandCommander.getSakeHandCommander(communicationHelper);
       statusInput = communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
                                                            .withTypeName(SakeHandStatusMessage.class),
                                                   message -> message.getRobotSide() == side.toByte());
@@ -61,7 +62,7 @@ public class RDXSakeHandInformation
             ImGui.sameLine();
             if (ImGui.button(labels.get("Confirm")))
             {
-               sendErrorConfirmation();
+               handCommander.sendErrorConfirmation(side);
             }
          }
       }
@@ -69,16 +70,5 @@ public class RDXSakeHandInformation
       {
          ImGui.text("No status received.");
       }
-   }
-
-   private void sendErrorConfirmation()
-   {
-      SakeHandDesiredCommandMessage commandMessage = new SakeHandDesiredCommandMessage();
-      commandMessage.setDesiredCommandOption((byte) SakeHandCommandOption.CONFIRM_ERROR.getCommandNumber());
-      commandMessage.setErrorConfirmation(SakeHandCommandOption.CONFIRM_ERROR.getErrorConfirmation());
-      commandMessage.setPositionRatio(SakeHandCommandOption.CONFIRM_ERROR.getDesiredPosition());
-      commandMessage.setTorqueRatio(SakeHandCommandOption.CONFIRM_ERROR.getDesiredTorque());
-      commandMessage.setRobotSide(side.toByte());
-      communicationHelper.publish(ROS2Tools::getSakeHandCommandTopic, commandMessage);
    }
 }
