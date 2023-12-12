@@ -28,8 +28,11 @@ import java.util.Set;
 public class RDXDualBlackflySphericalProjection
 {
    private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(RDXProjectionSphere::new);
-   private final ImDouble pupillaryDistance = new ImDouble(0.180724);
+   // As you approach infinite distance, pupillary distance needs to be 1
+   // Close up things look good with a pupillary distance of ~2.0
+   private final ImDouble pupillaryDistance = new ImDouble(1.666667);
    private final RigidBodyTransform leftEyePose = new RigidBodyTransform();
+   private final RigidBodyTransform rightEyePose = new RigidBodyTransform();
    private final DualBlackflyUDPReceiver dualBlackflyUDPReceiver = new DualBlackflyUDPReceiver();
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -97,28 +100,28 @@ public class RDXDualBlackflySphericalProjection
          }
       }
 
-      leftEyePose.getTranslation().setY(pupillaryDistance.get());
+      leftEyePose.getTranslation().setY(pupillaryDistance.get() / 2);
+      rightEyePose.getTranslation().setY(-pupillaryDistance.get() / 2);
       LibGDXTools.toLibGDX(leftEyePose, projectionSpheres.get(RobotSide.LEFT).getModelInstance().transform);
+      LibGDXTools.toLibGDX(rightEyePose, projectionSpheres.get(RobotSide.RIGHT).getModelInstance().transform);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      // Left eye or 3D scene in UI
-      if (sceneLevels.contains(RDXSceneLevel.VR_EYE_LEFT) || sceneLevels.contains(RDXSceneLevel.VIRTUAL))
-      {
-         // Only show the renderables if there is an image frame in the buffer
-         if (dualBlackflyUDPReceiver.getImageBuffers().get(RobotSide.LEFT) != null)
-         {
-            projectionSpheres.get(RobotSide.LEFT).getRenderables(renderables, pool);
-         }
-      }
-      // Right eye
-      else if (sceneLevels.contains(RDXSceneLevel.VR_EYE_RIGHT))
+      if (sceneLevels.contains(RDXSceneLevel.VR_EYE_RIGHT))
       {
          // Only show the renderables if there is an image frame in the buffer
          if (dualBlackflyUDPReceiver.getImageBuffers().get(RobotSide.RIGHT) != null)
          {
             projectionSpheres.get(RobotSide.RIGHT).getRenderables(renderables, pool);
+         }
+      }
+      else
+      {
+         // Only show the renderables if there is an image frame in the buffer
+         if (dualBlackflyUDPReceiver.getImageBuffers().get(RobotSide.LEFT) != null)
+         {
+            projectionSpheres.get(RobotSide.LEFT).getRenderables(renderables, pool);
          }
       }
    }
