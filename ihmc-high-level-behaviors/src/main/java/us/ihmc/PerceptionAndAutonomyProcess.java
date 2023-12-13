@@ -79,6 +79,8 @@ public class PerceptionAndAutonomyProcess
 
    private static final double SCENE_GRAPH_UPDATE_FREQUENCY = 5.0;
 
+   private final DepthImageOverlapRemover overlapRemover = new DepthImageOverlapRemover();
+
    private ROS2DemandGraphNode zedPointCloudDemandNode;
    private ROS2DemandGraphNode zedColorDemandNode;
    private ROS2DemandGraphNode zedDepthDemandNode;
@@ -251,15 +253,22 @@ public class PerceptionAndAutonomyProcess
             zedColorImages.put(side, zedImageRetriever.getLatestRawColorImage(side));
          }
 
-         // Do processing on image
+         RawImage zedProcessedImage;
+         if (realsenseDepthImage != null)
+         {
+            zedProcessedImage = overlapRemover.removeOverlap(realsenseDepthImage.get(), zedDepthImage.get());
+         }
+         else
+            zedProcessedImage = zedDepthImage.get();
 
-         zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
+         zedImagePublisher.setNextGpuDepthImage(zedProcessedImage.get());
          for (RobotSide side : RobotSide.values)
          {
             zedImagePublisher.setNextColorImage(zedColorImages.get(side).get(), side);
          }
 
          zedDepthImage.release();
+         zedProcessedImage.release();
          zedColorImages.forEach(RawImage::release);
       }
       else
