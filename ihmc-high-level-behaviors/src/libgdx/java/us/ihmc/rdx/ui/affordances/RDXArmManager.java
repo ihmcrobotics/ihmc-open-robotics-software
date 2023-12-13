@@ -17,6 +17,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -194,6 +195,7 @@ public class RDXArmManager
 
       desiredRobot.getDesiredFullRobotModel().getRootJoint().setJointConfiguration(syncedRobot.getFullRobotModel().getRootJoint().getJointPose());
       desiredRobot.getDesiredFullRobotModel().updateFrames();
+
    }
 
    public void renderImGuiWidgets()
@@ -359,5 +361,38 @@ public class RDXArmManager
    public RDXArmControlMode getArmControlMode()
    {
       return armControlMode;
+   }
+
+   public FramePose3D getDesiredHandFramePose(RobotSide side)
+   {
+      if (interactableHands.containsKey(side))
+         return new FramePose3D(interactableHands.get(side).getControlReferenceFrame());
+      else
+         return null;
+   }
+
+   public void setDesiredHandFramePose(RobotSide side, FramePose3D desiredPose)
+   {
+      if (interactableHands.containsKey(side))
+      {
+         interactableHands.get(side).selectInteractable();
+         ReferenceFrame interactableHandFrame = interactableHands.get(side).getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame().getParent();
+         desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
+         interactableHands.get(side).getSyncedControlFrame().getTransformToWorldFrame().set(desiredPose);
+         if (!interactableHandFrame.isWorldFrame())
+            desiredPose.changeFrame(interactableHandFrame);
+         interactableHands.get(side).getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent().set(desiredPose);
+      }
+   }
+
+   public double[] getDesiredJointAngles(RobotSide side)
+   {
+      double[] jointAngles = new double[armJointNames.get(side).length];
+      int i = -1;
+      for (ArmJointName armJoint : armJointNames.get(side))
+      {
+         jointAngles[++i] = desiredRobot.getDesiredFullRobotModel().getArmJoint(side, armJoint).getQ();
+      }
+      return jointAngles;
    }
 }

@@ -674,4 +674,9 @@ public class RDXTeleoperationManager extends RDXPanel
    {
       return locomotionManager;
    }
+
+   public RDXArmManager getArmManager()
+   {
+      return armManager;
+   }
 }
