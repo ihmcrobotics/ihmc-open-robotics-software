@@ -9,6 +9,7 @@ import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
+import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
@@ -61,6 +62,14 @@ public class ROS2SceneGraphTools
                                          subscriptionNode.getArUcoMarkerNodeMessage().getMarkerId(),
                                          subscriptionNode.getArUcoMarkerNodeMessage().getMarkerSize());
       }
+      else if (nodeType == SceneGraphMessage.CENTERPOSE_NODE_TYPE)
+      {
+         sceneNode = new CenterposeNode(nodeID,
+                                        nodeName,
+                                        subscriptionNode.getCenterposeNodeMessage().getObjectId(),
+                                        subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices(),
+                                        subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices());
+      }
       else if (nodeType == SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE)
       {
          sceneNode = new DetectableSceneNode(nodeID, nodeName);
@@ -82,7 +91,7 @@ public class ROS2SceneGraphTools
          sceneNode = new SceneNode(nodeID, nodeName);
       }
 
-      sceneGraph.getIDToNodeMap().put(nodeID, sceneNode); // Make sure any new nodes are in the map
+      sceneGraph.getIDToNodeMap().put(nodeID, sceneNode); // Make sure any new nodes are in the map // TODO: Probably remove not necessary
 
       return sceneNode;
    }

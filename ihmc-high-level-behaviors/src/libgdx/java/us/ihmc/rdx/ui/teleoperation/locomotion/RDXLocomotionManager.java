@@ -4,9 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.AbortWalkingMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.*;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
@@ -15,11 +13,11 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.subscribers.FilteredNotification;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -72,7 +70,7 @@ public class RDXLocomotionManager
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
    private ImGuiStoredPropertySetEnumWidget initialStanceSideRadioButtons;
 
-   private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
+   private final RDXFootstepPlanGraphic controllerFootstepQueueGraphic;
    private final RDXBodyPathPlanGraphic bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
 
    private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
@@ -90,6 +88,8 @@ public class RDXLocomotionManager
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
    private final Notification abortedNotification = new Notification();
+   private final FilteredNotification<FootstepQueueStatusMessage> footstepQueueNotification
+         = new FilteredNotification<>(new FootstepQueueAcceptanceFunction());
    private final Timer footstepPlanningCompleteTimer = new Timer();
 
    // Used for UI logic
@@ -120,6 +120,7 @@ public class RDXLocomotionManager
 
       footstepPlanning = new RDXFootstepPlanning(robotModel,
                                                  syncedRobot,
+                                                 controllerStatusTracker,
                                                  locomotionParameters,
                                                  footstepPlannerParameters,
                                                  bodyPathPlannerParameters,
@@ -139,10 +140,7 @@ public class RDXLocomotionManager
          interactableFootstepPlan.setHeightMapMessage(heightMap);
       });
 
-      footstepsSentToControllerGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
-      communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
-            footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps,
-                                                                                                                "Teleoperation Panel Controller Spy")));
+      controllerFootstepQueueGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
    }
 
    private PlanarRegionsList getPlanarRegionListInWorld(FramePlanarRegionsListMessage message)
@@ -159,6 +157,7 @@ public class RDXLocomotionManager
       this.baseUI = baseUI;
 
       controllerStatusTracker.registerAbortedListener(abortedNotification);
+      controllerStatusTracker.getFootstepTracker().registerFootstepQueuedMessageListener(footstepQueueNotification);
       locomotionParameters.addAnyPropertyChangedListener(locomotionParametersChanged);
       footstepPlannerParameters.addAnyPropertyChangedListener(footstepPlanningParametersChanged);
 
@@ -196,6 +195,12 @@ public class RDXLocomotionManager
    public void update()
    {
       controllerStatusTracker.checkControllerIsRunning();
+
+      if (footstepQueueNotification.pollFiltered())
+      {
+         controllerFootstepQueueGraphic.generateMeshesAsync(footstepQueueNotification.read(), "Controller Queue");
+      }
+      controllerFootstepQueueGraphic.update(); // Will happen once the async mesh generation has completed on a later tick
 
       if (abortedNotification.poll())
       {
@@ -271,13 +276,6 @@ public class RDXLocomotionManager
       bodyPathPlanGraphic.update();
       interactableFootstepPlan.update();
 
-      if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
-      {
-         footstepsSentToControllerGraphic.clear();
-      }
-
-      footstepsSentToControllerGraphic.update();
-
       boolean isCurrentlyPlacingFootstep =
             getManualFootstepPlacement().isPlacingFootstep() || ballAndArrowMidFeetPosePlacement.isPlacingGoal() || walkPathControlRing.isSelected();
       if (isPlacingFootstep != isCurrentlyPlacingFootstep)
@@ -292,8 +290,6 @@ public class RDXLocomotionManager
       boolean pauseAvailable = controllerStatusTracker.isWalking();
       boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
       boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
-
-      ImGui.text("Queued footsteps: " + controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps());
 
       if (ImGui.button(labels.get("Disable Leg Mode")))
       {
@@ -432,14 +428,13 @@ public class RDXLocomotionManager
    public void destroy()
    {
       footstepPlanning.destroy();
-      footstepsSentToControllerGraphic.destroy();
+      controllerFootstepQueueGraphic.destroy();
       bodyPathPlanGraphic.destroy();
       interactableFootstepPlan.destroy();
    }
 
    public void deleteAll()
    {
-      footstepsSentToControllerGraphic.clear();
       ballAndArrowMidFeetPosePlacement.clear();
       manualFootstepPlacement.exitPlacement();
       interactableFootstepPlan.clear();
@@ -485,7 +480,7 @@ public class RDXLocomotionManager
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      footstepsSentToControllerGraphic.getRenderables(renderables, pool);
+      controllerFootstepQueueGraphic.getRenderables(renderables, pool);
       ballAndArrowMidFeetPosePlacement.getRenderables(renderables, pool);
       manualFootstepPlacement.getRenderables(renderables, pool);
       interactableFootstepPlan.getRenderables(renderables, pool);
@@ -520,7 +515,7 @@ public class RDXLocomotionManager
       }
    }
 
-   public void submitHeightMapData(HeightMapMessage heightMapData)
+   public void setHeightMapData(HeightMapMessage heightMapData)
    {
       footstepPlanning.setHeightMapData(heightMapData);
       interactableFootstepPlan.setHeightMapMessage(heightMapData);

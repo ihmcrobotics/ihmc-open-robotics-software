@@ -1,29 +1,28 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.WaitDurationActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class WaitDurationActionState extends BehaviorActionState
+public class WaitDurationActionState extends ActionNodeState<WaitDurationActionDefinition>
 {
-   private final WaitDurationActionDefinition definition = new WaitDurationActionDefinition();
+   public WaitDurationActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   {
+      super(id, new WaitDurationActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+   }
 
    public void toMessage(WaitDurationActionStateMessage message)
    {
-      super.toMessage(message.getActionState());
+      getDefinition().toMessage(message.getDefinition());
 
-      definition.toMessage(message.getDefinition());
+      super.toMessage(message.getState());
    }
 
    public void fromMessage(WaitDurationActionStateMessage message)
    {
-      super.fromMessage(message.getActionState());
+      super.fromMessage(message.getState());
 
-      definition.fromMessage(message.getDefinition());
-   }
-
-   @Override
-   public WaitDurationActionDefinition getDefinition()
-   {
-      return definition;
+      getDefinition().fromMessage(message.getDefinition());
    }
 }

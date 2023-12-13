@@ -97,7 +97,7 @@ public class HDF5Tools
     */
    public void storeFloatArray2D(Group group, long index, FloatPointer pointer, int rows, int cols)
    {
-      LogTools.info("Store Float Array 2D: Index: {} Rows: {} Cols: {}", index, rows, cols);
+      LogTools.debug("Store Float Array 2D: Index: {} Rows: {} Cols: {}", index, rows, cols);
 
       // Log the data buffer as separate dataset with same index
       long[] dimensions = {rows, cols};

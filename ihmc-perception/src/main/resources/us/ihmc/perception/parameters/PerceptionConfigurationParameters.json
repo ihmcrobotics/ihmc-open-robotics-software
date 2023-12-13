@@ -27,6 +27,5 @@
   "Support square enabled" : true,
   "Bounding box filter" : true,
   "Concave hull filters" : true,
-  "Shadow filter" : true,
-  "Active mapping" : false
+  "Shadow filter" : true
 }

@@ -82,7 +82,7 @@ public class RDXActiveMappingUI implements RenderableProvider
             LogTools.info("Enabled Remove Active Mapping");
             if (perceptionConfigurationParameters != null)
             {
-               perceptionConfigurationParameters.setActiveMapping(true);
+               //perceptionConfigurationParameters.setActiveMapping(true);
             }
          }
       }

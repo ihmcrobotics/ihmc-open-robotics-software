@@ -295,7 +295,10 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          handsMass = null;
          handWrenchCalculators = new SideDependentList<>();
          for (RobotSide robotSide : RobotSide.values)
-            handWrenchCalculators.put(robotSide, new HandWrenchCalculator(robotSide, fullRobotModel, registry, controlDT));
+         {
+            if (fullRobotModel.getHand(robotSide) != null)
+               handWrenchCalculators.put(robotSide, new HandWrenchCalculator(robotSide, fullRobotModel, registry, controlDT));
+         }
       }
       else
       {
@@ -418,7 +421,10 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       if (handWrenchCalculators != null)
       {
          for (RobotSide robotSide : RobotSide.values)
-            handWrenchCalculators.get(robotSide).compute();
+         {
+            if (handWrenchCalculators.get(robotSide) != null)
+               handWrenchCalculators.get(robotSide).compute();
+         }
       }
 
       for (int i = 0; i < updatables.size(); i++)

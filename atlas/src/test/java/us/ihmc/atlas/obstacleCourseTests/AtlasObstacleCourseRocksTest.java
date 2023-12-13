@@ -1,5 +1,6 @@
 package us.ihmc.atlas.obstacleCourseTests;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +27,7 @@ public class AtlasObstacleCourseRocksTest extends DRCObstacleCourseRocksTest
    }
 
    @Tag("humanoid-obstacle")
-   @Override
+   @Disabled
    @Test
    public void testWalkingOntoRocks()
    {

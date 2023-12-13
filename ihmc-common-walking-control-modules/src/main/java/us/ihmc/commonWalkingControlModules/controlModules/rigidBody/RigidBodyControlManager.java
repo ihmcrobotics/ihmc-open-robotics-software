@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -71,6 +72,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   PID3DGainsReadOnly taskspacePositionGains,
                                   ContactablePlaneBody contactableBody,
                                   RigidBodyControlMode defaultControlMode,
+                                  boolean enableFunctionGenerators,
                                   YoDouble yoTime,
                                   YoGraphicsListRegistry graphicsListRegistry,
                                   YoRegistry parentRegistry)
@@ -88,7 +90,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
       initialJointPositions = new double[jointsToControl.length];
 
-      RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, yoTime, parentRegistry);
+      RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, yoTime, enableFunctionGenerators, parentRegistry);
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, jointControlHelper, registry);
 
@@ -100,6 +102,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                                    baseFrame,
                                                                                                    yoTime,
                                                                                                    jointControlHelper,
+                                                                                                   enableFunctionGenerators,
                                                                                                    parentRegistry);
          if (taskspaceOrientationGains == null)
          {
@@ -118,6 +121,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                              controlFrame,
                                                                                              baseFrame,
                                                                                              yoTime,
+                                                                                             enableFunctionGenerators,
                                                                                              parentRegistry,
                                                                                              graphicsListRegistry);
          if (taskspacePositionGains == null)
@@ -138,6 +142,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                      baseFrame,
                                                                                      yoTime,
                                                                                      jointControlHelper,
+                                                                                     enableFunctionGenerators,
                                                                                      graphicsListRegistry,
                                                                                      registry);
          if (taskspaceOrientationGains == null || taskspacePositionGains == null)
@@ -612,6 +617,12 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    public RigidBodyTaskspaceControlState getTaskspaceControlState()
    {
       return taskspaceControlState;
+   }
+
+   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
+   {
+      if (loadBearingControlState != null)
+         loadBearingControlState.setControllerCoreOutput(controllerCoreOutput);
    }
 
    @Override

@@ -7,6 +7,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.frames.MovingCenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -166,7 +167,11 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          {
             for (ArmJointName armJointName : robotJointNames.getArmJointNames())
             {
-               this.armJointFrames.get(robotSide).put(armJointName, fullRobotModel.getArmJoint(robotSide, armJointName).getFrameAfterJoint());
+               OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
+               if(armJoint != null)
+               {
+                  this.armJointFrames.get(robotSide).put(armJointName, armJoint.getFrameAfterJoint());
+               }
             }
          }
       }
