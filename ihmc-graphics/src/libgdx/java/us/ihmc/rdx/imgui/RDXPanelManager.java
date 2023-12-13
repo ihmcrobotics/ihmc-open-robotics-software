@@ -87,9 +87,4 @@ public class RDXPanelManager
          panel.save(anchorJSON);
       }
    }
-
-   public TreeSet<RDXPanel> getPanels()
-   {
-      return panels;
-   }
 }

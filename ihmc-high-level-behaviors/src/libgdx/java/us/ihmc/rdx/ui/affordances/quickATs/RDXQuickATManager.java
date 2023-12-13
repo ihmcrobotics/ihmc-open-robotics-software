@@ -30,7 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.TreeSet;
+import java.util.Collection;
 
 public class RDXQuickATManager
 {
@@ -47,6 +47,7 @@ public class RDXQuickATManager
    {
       this.node = node;
       String[] nameParts = node.getName().split(" ");
+
       quickATDirectory = new ImGuiDirectory(resourceDirectory.getFilesystemDirectory().toString(),
                                        pathEntry -> pathEntry.type() == BasicPathVisitor.PathType.FILE
                                                     && Arrays.stream(nameParts)
@@ -54,8 +55,9 @@ public class RDXQuickATManager
                                                              .anyMatch(pathEntry.path().getFileName().toString().toLowerCase()::contains)
                                                     && pathEntry.path().getFileName().toString().endsWith(".json"),
                                        this::setLoadingFile);
+      extraFileNameToSave.setImString(node.getName());
 
-      TreeSet<RDXPanel> RDXPanels = RDXBaseUI.getInstance().getImGuiPanelManager().getPanels();
+      Collection<RDXPanel> RDXPanels = RDXBaseUI.getInstance().getImGuiPanelManager().getPanels();
       for (RDXPanel panel : RDXPanels)
          if (panel instanceof RDXTeleoperationManager)
          {
@@ -85,7 +87,6 @@ public class RDXQuickATManager
       }
       if (!fileToSaveHasCompleteName)
       {
-         extraFileNameToSave.setImString(node.getName());
          ImGui.sameLine();
          extraFileNameToSave.render();
          ImGui.pushStyleColor(ImGuiCol.Text, 1.0f, 0.0f, 0.0f, 1.0f);
@@ -146,7 +147,7 @@ public class RDXQuickATManager
          JSONFileTools.save(file, jsonNode ->
          {
             jsonNode.put("name", node.getName());
-            // TODO deal with hand manager as well
+//            jsonNode.put("name", node.getName());
             ArrayNode footstepsArrayNode = jsonNode.putArray("footsteps");
             RDXInteractableFootstepPlan footstepPlan = teleoperationManager.getLocomotionManager().getInteractableFootstepPlan();
             RecyclingArrayList<RDXInteractableFootstep> footsteps = footstepPlan.getFootsteps();
