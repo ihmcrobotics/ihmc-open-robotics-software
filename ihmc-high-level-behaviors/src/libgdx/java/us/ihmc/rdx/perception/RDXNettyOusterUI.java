@@ -14,7 +14,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.ouster.NettyOuster;
+import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -33,7 +33,7 @@ import java.util.Set;
 
 public class RDXNettyOusterUI
 {
-   private NettyOuster ouster;
+   private OusterNetServer ouster;
    private RDXBytedecoImagePanel imagePanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private OpenCLManager openCLManager;
@@ -67,9 +67,9 @@ public class RDXNettyOusterUI
       ousterInteractable = new RDXInteractableOuster(baseUI.getPrimary3DPanel(),
                                                      sensorFrame.getReferenceFrame(),
                                                      sensorFrame.getTransformToParent());
-      ouster = new NettyOuster();
+      ouster = new OusterNetServer();
       ouster.setOnFrameReceived(this::onFrameReceived);
-      ouster.bind();
+      ouster.start();
 
       openCLManager = new OpenCLManager();
       ousterFisheyeKernel = new RDXOusterFisheyeColoredPointCloudKernel(openCLManager);

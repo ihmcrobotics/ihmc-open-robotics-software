@@ -22,8 +22,8 @@ mainDependencies {
 
    api("us.ihmc:ihmc-realtime:1.6.0")
    api("us.ihmc:ihmc-native-library-loader:2.0.2")
-   api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:euclid-geometry:0.20.0")
+   api("us.ihmc:euclid:0.21.0")
+   api("us.ihmc:euclid-geometry:0.21.0")
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-trajectory-optimization:source")
@@ -46,8 +46,8 @@ testDependencies {
 
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:simulation-construction-set:0.24.2")
-   api("us.ihmc:scs2-simulation-construction-set:17-0.16.3")
+   api("us.ihmc:simulation-construction-set:0.25.0")
+   api("us.ihmc:scs2-simulation-construction-set:17-0.19.0")
 
    var javaFXVersion = "17.0.2"
    api(ihmc.javaFXModule("base", javaFXVersion))

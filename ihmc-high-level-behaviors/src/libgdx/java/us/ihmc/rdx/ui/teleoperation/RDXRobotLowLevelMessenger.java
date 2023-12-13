@@ -46,7 +46,7 @@ public class RDXRobotLowLevelMessenger
       ImGui.sameLine();
       if (ImGui.button(labels.get("Home Pose")))
       {
-         double trajectoryTime = 3.5;
+         double trajectoryTime = 3.0;
 
          GoHomeMessage homeLeftArm = new GoHomeMessage();
          homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);

@@ -42,7 +42,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
 //      humanoidJointPoseList.createPoseSettersTuneWaist();
       
       boolean robotIsHanging = true;
-      boolean hasArms = robotModel.getRobotVersion().hasArms();
+      boolean hasArms = robotModel.getRobotVersion().hasBothArms();
       HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation = new HumanoidDiagnosticsWhenHangingSimulation(humanoidJointPoseList, hasArms, robotIsHanging, robotModel, robotInitialSetup, computeTorqueOffsetsBasedOnAverages);
       humanoidDiagnosticsWhenHangingSimulation.rememberCorruptorVariableValues();
 

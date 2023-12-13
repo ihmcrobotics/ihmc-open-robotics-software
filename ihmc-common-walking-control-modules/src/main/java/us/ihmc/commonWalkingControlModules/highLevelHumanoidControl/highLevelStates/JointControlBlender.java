@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -15,9 +14,6 @@ public class JointControlBlender
    private static final boolean ENABLE_TAU_SCALE = false;
 
    private final YoDouble tauScale;
-   private final DeltaLimitedYoVariable positionStepSizeLimiter;
-   private final DeltaLimitedYoVariable velocityStepSizeLimiter;
-
    private final OneDoFJointBasics oneDoFJoint;
 
    public JointControlBlender(String nameSuffix, OneDoFJointBasics oneDoFJoint, YoRegistry parentRegistry)
@@ -26,9 +22,6 @@ public class JointControlBlender
       String namePrefix = oneDoFJoint.getName();
 
       YoRegistry registry = new YoRegistry(namePrefix + nameSuffix + "JointControlBlender");
-
-      this.positionStepSizeLimiter = new DeltaLimitedYoVariable(namePrefix + "PositionStepSizeLimiter", registry, 0.15);
-      this.velocityStepSizeLimiter = new DeltaLimitedYoVariable(namePrefix + "VelocityStepSizeLimiter", registry, 1.5);
 
       if (ENABLE_TAU_SCALE)
       {
@@ -46,10 +39,6 @@ public class JointControlBlender
 
    public void initialize()
    {
-      double q = oneDoFJoint.getQ();
-      double qd = oneDoFJoint.getQd();
-      positionStepSizeLimiter.updateOutput(q, q);
-      velocityStepSizeLimiter.updateOutput(qd, qd);
    }
 
    /**
@@ -88,16 +77,12 @@ public class JointControlBlender
       outputDataToPack.setControlMode(outputData0.getControlMode());
       outputDataToPack.setLoadMode(outputData0.getLoadMode());
 
-      double currentJointAngle = oneDoFJoint.getQ();
-      double currentJointVelocity = oneDoFJoint.getQd();
-
       if (hasDesiredPosition(outputData0) || hasDesiredPosition(outputData1))
       {
          double desiredPosition0 = hasDesiredPosition(outputData0) ? outputData0.getDesiredPosition() : oneDoFJoint.getQ();
          double desiredPosition1 = hasDesiredPosition(outputData1) ? outputData1.getDesiredPosition() : oneDoFJoint.getQ();
          double desiredPosition = EuclidCoreTools.interpolate(desiredPosition0, desiredPosition1, blendingFactor);
-         positionStepSizeLimiter.updateOutput(currentJointAngle, desiredPosition);
-         outputDataToPack.setDesiredPosition(positionStepSizeLimiter.getDoubleValue());
+         outputDataToPack.setDesiredPosition(desiredPosition);
       }
 
       if (hasDesiredVelocity(outputData0) || hasDesiredVelocity(outputData1))
@@ -105,8 +90,7 @@ public class JointControlBlender
          double desiredVelocity0 = hasDesiredVelocity(outputData0) ? outputData0.getDesiredVelocity() : oneDoFJoint.getQd();
          double desiredVelocity1 = hasDesiredVelocity(outputData1) ? outputData1.getDesiredVelocity() : oneDoFJoint.getQd();
          double desiredVelocity = EuclidCoreTools.interpolate(desiredVelocity0, desiredVelocity1, blendingFactor);
-         velocityStepSizeLimiter.updateOutput(currentJointVelocity, desiredVelocity);
-         outputDataToPack.setDesiredVelocity(velocityStepSizeLimiter.getDoubleValue());
+         outputDataToPack.setDesiredVelocity(desiredVelocity);
       }
 
       if (hasDesiredAcceleration(outputData0) || hasDesiredAcceleration(outputData1))

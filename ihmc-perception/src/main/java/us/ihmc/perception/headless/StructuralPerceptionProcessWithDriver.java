@@ -20,7 +20,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.comms.PerceptionComms;
-import us.ihmc.perception.ouster.NettyOuster;
+import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.NativeMemoryTools;
@@ -58,7 +58,7 @@ public class StructuralPerceptionProcessWithDriver
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final FramePose3D cameraPose = new FramePose3D();
    private final ResettableExceptionHandlingExecutorService extractCompressAndPublishThread;
-   private final NettyOuster ouster;
+   private final OusterNetServer ouster;
    private int depthWidth;
    private int depthHeight;
    private int numberOfPointsPerFullScan;
@@ -85,8 +85,8 @@ public class StructuralPerceptionProcessWithDriver
       this.frameRegionsTopic = frameRegionsTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
 
-      ouster = new NettyOuster();
-      ouster.bind();
+      ouster = new OusterNetServer();
+      ouster.start();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "spherical_regions_node");
       ros2Helper = new ROS2Helper(ros2Node);

@@ -1,8 +1,9 @@
 #ifndef __behavior_msgs__msg__HandPoseActionStateMessage__idl__
 #define __behavior_msgs__msg__HandPoseActionStateMessage__idl__
 
-#include "behavior_msgs/msg/./BehaviorActionStateMessage_.idl"
+#include "behavior_msgs/msg/./ActionNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./HandPoseActionDefinitionMessage_.idl"
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -16,11 +17,27 @@ module behavior_msgs
         /**
          * Parent state fields
          */
-        behavior_msgs::msg::dds::BehaviorActionStateMessage action_state;
+        behavior_msgs::msg::dds::ActionNodeStateMessage state;
         /**
          * Definition
          */
         behavior_msgs::msg::dds::HandPoseActionDefinitionMessage definition;
+        /**
+         * This is the estimated goal chest frame as the robot executes a potential whole body action.
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage goal_chest_transform_to_world;
+        /**
+         * Linear hand wrench magnitude
+         */
+        double hand_wrench_magnitude_linear;
+        /**
+         * Joint angles
+         */
+        double joint_angles[7];
+        /**
+         * Quality of the IK solution
+         */
+        double solution_quality;
       };
     };
   };

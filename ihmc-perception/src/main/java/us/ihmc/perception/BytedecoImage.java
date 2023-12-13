@@ -162,6 +162,12 @@ public class BytedecoImage
       openCLManager.enqueueReadImage(openCLImageObject, imageWidth, imageHeight, bytedecoByteBufferPointer);
    }
 
+   public void fill(OpenCLManager openCLManager, byte value)
+   {
+      bytedecoByteBufferPointer.fill(value);
+      openCLManager.enqueueFillBuffer(openCLImageObject, 1, value);
+   }
+
    public void resize(int imageWidth, int imageHeight, OpenCLManager openCLManager, ByteBuffer externalByteBuffer)
    {
       this.imageWidth = imageWidth;
