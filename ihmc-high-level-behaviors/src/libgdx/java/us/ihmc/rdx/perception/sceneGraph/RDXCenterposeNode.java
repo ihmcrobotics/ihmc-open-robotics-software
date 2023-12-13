@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
+import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.RDX3DSituatedTextData;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -22,7 +23,10 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.interactable.RDXInteractableObject;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 public class RDXCenterposeNode extends RDXDetectableSceneNode
@@ -32,10 +36,13 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    private final RDX3DSituatedText text;
    private final FramePose3D textPose = new FramePose3D();
    private RDX3DSituatedTextData previousTextData;
-   private ModelInstance objectModelInstance;
+   private ModelInstance boundingBoxModelInstance;
    private final FramePoint3D[] vertices3D = new FramePoint3D[8];
    private final RDX3DPanel panel3D;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+
+   @Nullable
+   private RDXInteractableObject interactableObject;
 
    public RDXCenterposeNode(CenterposeNode centerposeNode, RDX3DPanel panel3D)
    {
@@ -65,13 +72,13 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
          vertices3D[i].changeFrame(ReferenceFrame.getWorldFrame());
          vertices3D[i].interpolate(vertices[i], 0.2);
       }
-      Model objectModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices3D, 0.005, Color.WHITE));
+      Model boundingBoxModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices3D, 0.005, Color.WHITE));
 
-      if (objectModelInstance != null)
+      if (boundingBoxModelInstance != null)
       {
-         objectModelInstance.model.dispose();
+         boundingBoxModelInstance.model.dispose();
       }
-      objectModelInstance = new RDXModelInstance(objectModel);
+      boundingBoxModelInstance = new RDXModelInstance(boundingBoxModel);
 
       if (previousTextData != null)
          previousTextData.dispose();
@@ -85,6 +92,19 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
       textPose.getPosition().set(centerposeNode.getNodeFrame().getTransformToWorldFrame().getTranslation()); // Not sure if this is correct?
 
       LibGDXTools.toLibGDX(textPose, tempTransform, text.getModelTransform());
+
+      if (interactableObject == null)
+      {
+         if (centerposeNode.getObjectType().equals("SHOE"))
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(RigidBodySceneObjectDefinitions.SHOE_VISUAL_MODEL_FILE_PATH, new RigidBodyTransform());
+         }
+      }
+      else
+      {
+         interactableObject.setPose(centerposeNode.getModifiableNodeFrame().getTransformToParent());
+      }
    }
 
    @Override
@@ -101,10 +121,11 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
       super.getRenderables(renderables, pool, sceneLevels);
       if (sceneLevelCheck(sceneLevels))
       {
-         if (objectModelInstance != null)
+         if (boundingBoxModelInstance != null)
          {
             text.getRenderables(renderables, pool);
-            objectModelInstance.getRenderables(renderables, pool);
+            boundingBoxModelInstance.getRenderables(renderables, pool);
+            interactableObject.getRenderables(renderables, pool);
          }
       }
    }
