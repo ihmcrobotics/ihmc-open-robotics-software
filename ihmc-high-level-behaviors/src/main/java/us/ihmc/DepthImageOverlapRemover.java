@@ -18,17 +18,16 @@ public class DepthImageOverlapRemover
    private final _cl_kernel kernel;
    private final OpenCLFloatParameters parameters = new OpenCLFloatParameters();
    private final OpenCLRigidBodyTransformParameter zedToRealsenseTransformParameter = new OpenCLRigidBodyTransformParameter();
-   private final OpenCLRigidBodyTransformParameter realsenseToWorldTransformParameter = new OpenCLRigidBodyTransformParameter();
 
    private final MutableReferenceFrame zedFrame = new MutableReferenceFrame();
    private final RigidBodyTransform zedToRealsenseTransform = new RigidBodyTransform();
 
    private final MutableReferenceFrame realsenseFrame = new MutableReferenceFrame();
+   private final Object imageDataUsageSynchronizer = new Object();
 
    private RawImage inputZEDImage;
    private BytedecoImage bytedecoZEDInput;
    private RawImage inputRealsenseImage;
-   private BytedecoImage bytedecoRealsenseInput;
 
    private BytedecoImage bytedecoZEDOutput;
 
@@ -41,24 +40,21 @@ public class DepthImageOverlapRemover
 
    public void setRealsenseDepthImage(RawImage realsenseDepthImage)
    {
-      if (inputRealsenseImage != null)
+      synchronized (imageDataUsageSynchronizer)
       {
-         inputRealsenseImage.release();
-         bytedecoRealsenseInput.destroy(openCLManager);
+         if (inputRealsenseImage != null)
+         {
+            inputRealsenseImage.release();
+         }
+         inputRealsenseImage = realsenseDepthImage;
       }
-      inputRealsenseImage = realsenseDepthImage;
-      bytedecoRealsenseInput = new BytedecoImage(inputRealsenseImage.getCpuImageMatrix());
    }
 
-   public RawImage removeOverlap(RawImage realsenseDepthImage, RawImage zedDepthImage)
+   public RawImage removeOverlap(RawImage zedDepthImage)
    {
       if (inputZEDImage != null)
          inputZEDImage.release();
       inputZEDImage = zedDepthImage;
-
-      if (inputRealsenseImage != null)
-         inputRealsenseImage.release();
-      inputRealsenseImage = realsenseDepthImage;
 
       if (inputRealsenseImage == null || inputRealsenseImage.isEmpty())
          return inputZEDImage;
@@ -91,26 +87,22 @@ public class DepthImageOverlapRemover
       bytedecoZEDInput.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
       bytedecoZEDInput.writeOpenCLImage(openCLManager);
 
-      if (bytedecoRealsenseInput != null)
-         bytedecoRealsenseInput.destroy(openCLManager);
-      bytedecoRealsenseInput = new BytedecoImage(inputRealsenseImage.getCpuImageMatrix());
-      bytedecoRealsenseInput.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-      bytedecoRealsenseInput.writeOpenCLImage(openCLManager);
-
       if (bytedecoZEDOutput != null)
          bytedecoZEDOutput.destroy(openCLManager);
       bytedecoZEDOutput = new BytedecoImage(inputZEDImage.getImageWidth(), inputZEDImage.getImageHeight(), inputZEDImage.getOpenCVType());
       bytedecoZEDOutput.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
 
-      openCLManager.setKernelArgument(kernel, 0, bytedecoZEDInput.getOpenCLImageObject());
-      openCLManager.setKernelArgument(kernel, 1, bytedecoRealsenseInput.getOpenCLImageObject());
-      openCLManager.setKernelArgument(kernel, 2, bytedecoZEDOutput.getOpenCLImageObject());
-      openCLManager.setKernelArgument(kernel, 3, parameters.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(kernel, 4, zedToRealsenseTransformParameter.getOpenCLBufferObject());
+      synchronized (imageDataUsageSynchronizer)
+      {
+         openCLManager.setKernelArgument(kernel, 0, bytedecoZEDInput.getOpenCLImageObject());
+         openCLManager.setKernelArgument(kernel, 1, bytedecoZEDOutput.getOpenCLImageObject());
+         openCLManager.setKernelArgument(kernel, 2, parameters.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(kernel, 3, zedToRealsenseTransformParameter.getOpenCLBufferObject());
 
-      openCLManager.execute2D(kernel, inputZEDImage.getImageWidth(), inputZEDImage.getImageHeight());
+         openCLManager.execute2D(kernel, inputZEDImage.getImageWidth(), inputZEDImage.getImageHeight());
 
-      bytedecoZEDOutput.readOpenCLImage(openCLManager);
+         bytedecoZEDOutput.readOpenCLImage(openCLManager);
+      }
 
       zedDepthImage.release();
 

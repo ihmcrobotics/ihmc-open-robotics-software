@@ -201,8 +201,10 @@ public class RawImage
 
    public RawImage get()
    {
-      numberOfReferences.incrementAndGet();
-      return this;
+      if (numberOfReferences.incrementAndGet() > 1)
+         return this;
+      else
+         throw new NullPointerException("The RawImage has already been destroyed");
    }
 
    public void release()
