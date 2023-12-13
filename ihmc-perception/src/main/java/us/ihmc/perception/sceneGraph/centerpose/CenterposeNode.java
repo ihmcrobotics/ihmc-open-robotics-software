@@ -15,7 +15,6 @@ public class CenterposeNode extends DetectableSceneNode
 
    private final AlphaFilteredRigidBodyTransform alphaFilteredTransformToParent = new AlphaFilteredRigidBodyTransform();
    private final BreakFrequencyAlphaCalculator breakFrequencyAlphaCalculator = new BreakFrequencyAlphaCalculator();
-   private double breakFrequency = 1.0;
 
    public CenterposeNode(long id, String name, int markerID, Point3D[] vertices3D, Point3D[] vertices2D)
    {
@@ -27,10 +26,10 @@ public class CenterposeNode extends DetectableSceneNode
 
    public void update()
    {
-//      breakFrequency = 0.2;
-//      alphaFilteredTransformToParent.setAlpha(breakFrequencyAlphaCalculator.calculateAlpha(breakFrequency));
-//      alphaFilteredTransformToParent.update(getNodeToParentFrameTransform());
-//      getNodeToParentFrameTransform().set(alphaFilteredTransformToParent);
+      double breakFrequency = 1.0;
+      alphaFilteredTransformToParent.setAlpha(breakFrequencyAlphaCalculator.calculateAlpha(breakFrequency));
+      alphaFilteredTransformToParent.update(getNodeToParentFrameTransform());
+      getNodeToParentFrameTransform().set(alphaFilteredTransformToParent);
       getNodeFrame().update();
    }
 
@@ -84,13 +83,13 @@ public class CenterposeNode extends DetectableSceneNode
       this.confidence = confidence;
    }
 
-   public double getBreakFrequency()
-   {
-      return breakFrequency;
-   }
-
-   public void setBreakFrequency(double breakFrequency)
-   {
-      this.breakFrequency = breakFrequency;
-   }
+//   public double getBreakFrequency()
+//   {
+//      return breakFrequency;
+//   }
+//
+//   public void setBreakFrequency(double breakFrequency)
+//   {
+//      this.breakFrequency = breakFrequency;
+//   }
 }
