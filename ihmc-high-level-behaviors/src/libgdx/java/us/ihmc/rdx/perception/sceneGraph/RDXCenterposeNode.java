@@ -1,9 +1,8 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
@@ -27,6 +26,8 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObject;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class RDXCenterposeNode extends RDXDetectableSceneNode
@@ -44,6 +45,8 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    @Nullable
    private RDXInteractableObject interactableObject;
 
+   private boolean wentUndetected;
+
    public RDXCenterposeNode(CenterposeNode centerposeNode, RDX3DPanel panel3D)
    {
       super(centerposeNode);
@@ -54,7 +57,14 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
 
    private String getObjectTooltip()
    {
-      return centerposeNode.getObjectType() + " %.1f".formatted(centerposeNode.getConfidence());
+      if (centerposeNode.getCurrentlyDetected())
+      {
+         return centerposeNode.getObjectType() + " %.1f".formatted(centerposeNode.getConfidence());
+      }
+      else
+      {
+         return centerposeNode.getObjectType() + " NOT DETECTED";
+      }
    }
 
    @Override
@@ -95,15 +105,43 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
 
       if (interactableObject == null)
       {
-         if (centerposeNode.getObjectType().equals("SHOE"))
-         {
-            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
-            interactableObject.load(RigidBodySceneObjectDefinitions.SHOE_VISUAL_MODEL_FILE_PATH, new RigidBodyTransform());
-         }
+         createInteractableObject();
       }
       else
       {
-         interactableObject.setPose(centerposeNode.getModifiableNodeFrame().getTransformToParent());
+         if (centerposeNode.getCurrentlyDetected())
+         {
+            interactableObject.setPose(centerposeNode.getNodeToParentFrameTransform());
+            LibGDXTools.setOpacity(interactableObject.getModelInstance(), (float) centerposeNode.getConfidence());
+         }
+
+         if (centerposeNode.getCurrentlyDetected() && wentUndetected)
+         {
+            wentUndetected = false;
+            // Recreate to remove the red diffuse
+            createInteractableObject();
+         }
+         else if (!centerposeNode.getCurrentlyDetected())
+         {
+            LibGDXTools.setDiffuseColor(interactableObject.getModelInstance(), Color.RED);
+            LibGDXTools.setOpacity(interactableObject.getModelInstance(), 0.2f);
+            wentUndetected = true;
+         }
+      }
+   }
+
+   private void createInteractableObject()
+   {
+      if (interactableObject != null)
+      {
+         interactableObject.getModelInstance().model.dispose();
+         interactableObject.clear();
+      }
+
+      if (centerposeNode.getObjectType().equals("SHOE"))
+      {
+         interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+         interactableObject.load(RigidBodySceneObjectDefinitions.SHOE_VISUAL_MODEL_FILE_PATH, new RigidBodyTransform());
       }
    }
 
@@ -124,7 +162,12 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
          if (boundingBoxModelInstance != null)
          {
             text.getRenderables(renderables, pool);
-            boundingBoxModelInstance.getRenderables(renderables, pool);
+            // TODO: add button for enabling this
+//            boundingBoxModelInstance.getRenderables(renderables, pool);
+         }
+
+         if (interactableObject != null)
+         {
             interactableObject.getRenderables(renderables, pool);
          }
       }
