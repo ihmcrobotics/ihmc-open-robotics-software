@@ -27,9 +27,9 @@ public class CenterposeNode extends DetectableSceneNode
 
    public void update()
    {
-      alphaFilteredTransformToParent.setAlpha(breakFrequencyAlphaCalculator.calculateAlpha(breakFrequency));
-      alphaFilteredTransformToParent.update(getNodeToParentFrameTransform());
-      getNodeToParentFrameTransform().set(alphaFilteredTransformToParent);
+      //      alphaFilteredTransformToParent.setAlpha(breakFrequencyAlphaCalculator.calculateAlpha(breakFrequency));
+      //      alphaFilteredTransformToParent.update(getNodeToParentFrameTransform());
+      //      getNodeToParentFrameTransform().set(alphaFilteredTransformToParent);
       getNodeFrame().update();
    }
 
