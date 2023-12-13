@@ -334,4 +334,19 @@ public class RDXInteractableRobotLink
    {
       return selectablePose3DGizmo.getPoseGizmo().getGizmoModifiedByUser();
    }
+
+   public RDXSelectablePose3DGizmo getSelectablePose3DGizmo()
+   {
+      return selectablePose3DGizmo;
+   }
+
+   public ReferenceFrame getSyncedControlFrame()
+   {
+      return syncedControlFrame;
+   }
+
+   public void selectInteractable()
+   {
+      isMouseHovering = true;
+   }
 }

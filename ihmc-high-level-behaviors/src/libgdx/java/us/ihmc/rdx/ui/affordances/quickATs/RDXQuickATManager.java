@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import imgui.type.ImBoolean;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -16,11 +17,10 @@ import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.affordances.RDXInteractableFootstep;
-import us.ihmc.rdx.ui.affordances.RDXInteractableFootstepPlan;
-import us.ihmc.rdx.ui.affordances.RDXManualFootstepPlacement;
+import us.ihmc.rdx.ui.affordances.*;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -42,6 +42,10 @@ public class RDXQuickATManager
    private String loadingFileName = "";
    private boolean fileToSaveHasCompleteName = true;
    private RDXTeleoperationManager teleoperationManager;
+   private final ImBoolean saveArms = new ImBoolean(false);
+   private final ImBoolean saveFootsteps = new ImBoolean(false);
+   private final SideDependentList<ImBoolean> saveArmsSide = new SideDependentList<>();
+   private RDXArmControlMode armControlMode = RDXArmControlMode.POSE_WORLD;
 
    public RDXQuickATManager(RigidBodySceneNode node)
    {
@@ -59,11 +63,18 @@ public class RDXQuickATManager
 
       Collection<RDXPanel> RDXPanels = RDXBaseUI.getInstance().getImGuiPanelManager().getPanels();
       for (RDXPanel panel : RDXPanels)
+      {
          if (panel instanceof RDXTeleoperationManager)
          {
             teleoperationManager = (RDXTeleoperationManager) panel;
             break;
          }
+      }
+
+      for (RobotSide side : RobotSide.values)
+      {
+         saveArmsSide.put(side, new ImBoolean(true));
+      }
    }
 
    public void renderImGuiWidgets()
@@ -78,7 +89,7 @@ public class RDXQuickATManager
          quickATDirectory.renderImGuiWidgetsAsDropDownMenu();
       }
 
-      String saveButtonLabel = fileToSaveHasCompleteName ? "Save AT" : "Confirm Name";
+      String saveButtonLabel = fileToSaveHasCompleteName ? "Save AT" : "Confirm Options";
       if (ImGui.button(labels.get(saveButtonLabel)))
       {
          fileToSaveHasCompleteName = !fileToSaveHasCompleteName;
@@ -89,6 +100,24 @@ public class RDXQuickATManager
       {
          ImGui.sameLine();
          extraFileNameToSave.render();
+         ImGui.checkbox(labels.get("Arms"), saveArms);
+         if(saveArms.get())
+         {
+            for (RobotSide side : RobotSide.values)
+            {
+               ImGui.sameLine();
+               ImGui.checkbox(labels.get(side.getLowerCaseName()), saveArmsSide.get(side));
+            }
+            if (ImGui.radioButton(labels.get("Joint angles"), armControlMode == RDXArmControlMode.JOINT_ANGLES))
+            {
+               armControlMode = RDXArmControlMode.JOINT_ANGLES;
+            }
+            if (ImGui.radioButton(labels.get("Hands Pose"), armControlMode == RDXArmControlMode.POSE_WORLD))
+            {
+               armControlMode = RDXArmControlMode.POSE_WORLD;
+            }
+         }
+         ImGui.checkbox(labels.get("Footsteps"), saveFootsteps);
          ImGui.pushStyleColor(ImGuiCol.Text, 1.0f, 0.0f, 0.0f, 1.0f);
          ImGui.text("Saving Pending ...");
          ImGui.popStyleColor();
@@ -111,7 +140,17 @@ public class RDXQuickATManager
          {
             JSONFileTools.load(filePath, jsonNode ->
             {
-               // TODO deal with hand manager as well
+               JSONTools.forEachArrayElement(jsonNode, "arms", armsNode ->
+               {
+                  RobotSide side = RobotSide.getSideFromString(armsNode.get("side").asText());
+                  // get transform from json
+                  RigidBodyTransform handFrameTransform = new RigidBodyTransform();
+                  JSONTools.toEuclid(armsNode, handFrameTransform);
+                  // create frame pose to express it in world frame
+                  FramePose3D handFrame = new FramePose3D(node.getNodeFrame(), handFrameTransform);
+                  teleoperationManager.getArmManager().setDesiredHandFramePose(side, handFrame);
+               });
+
                teleoperationManager.getLocomotionManager().getInteractableFootstepPlan().clear();
                RDXManualFootstepPlacement footstepPlacer = teleoperationManager.getLocomotionManager().getManualFootstepPlacement();
                JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode ->
@@ -147,19 +186,57 @@ public class RDXQuickATManager
          JSONFileTools.save(file, jsonNode ->
          {
             jsonNode.put("name", node.getName());
-//            jsonNode.put("name", node.getName());
-            ArrayNode footstepsArrayNode = jsonNode.putArray("footsteps");
-            RDXInteractableFootstepPlan footstepPlan = teleoperationManager.getLocomotionManager().getInteractableFootstepPlan();
-            RecyclingArrayList<RDXInteractableFootstep> footsteps = footstepPlan.getFootsteps();
-            for (RDXInteractableFootstep footstep : footsteps)
+
+            if (saveArms.get())
             {
-               ObjectNode footstepNode = footstepsArrayNode.addObject();
-               footstepNode.put("side", footstep.getPlannedFootstep().getRobotSide().getLowerCaseName());
-               // get sole frame pose
-               FramePose3D soleFrame = new FramePose3D(footstep.getPlannedFootstep().getFootstepPose());
-               soleFrame.changeFrame(node.getNodeFrame());
-               // save pose to json
-               JSONTools.toJSON(footstepNode, soleFrame);
+               ArrayNode armsArrayNode = jsonNode.putArray("arms");
+               RDXArmManager armManager = teleoperationManager.getArmManager();
+               for (RobotSide side : RobotSide.values)
+               {
+                  if (saveArmsSide.get(side).get())
+                  {
+                     if (armControlMode == RDXArmControlMode.JOINT_ANGLES)
+                     {
+                        ObjectNode armNode = armsArrayNode.addObject();
+                        armNode.put("side", side.getLowerCaseName());
+                        double[] jointAngles = armManager.getDesiredJointAngles(side);
+                        for (int i = 0; i < jointAngles.length; i++)
+                        {
+                           armNode.put("j" + i, jointAngles[i]);
+                        }
+                     }
+                     else
+                     {
+                        FramePose3D desiredHandPose = armManager.getDesiredHandFramePose(side);
+                        if (desiredHandPose != null)
+                        {
+                           ObjectNode armNode = armsArrayNode.addObject();
+                           armNode.put("side", side.getLowerCaseName());
+                           // get hand pose in node frame
+                           desiredHandPose.changeFrame(node.getNodeFrame());
+                           // save pose to json
+                           JSONTools.toJSON(armNode, desiredHandPose);
+                        }
+                     }
+                  }
+               }
+            }
+
+            if (saveFootsteps.get())
+            {
+               ArrayNode footstepsArrayNode = jsonNode.putArray("footsteps");
+               RDXInteractableFootstepPlan footstepPlan = teleoperationManager.getLocomotionManager().getInteractableFootstepPlan();
+               RecyclingArrayList<RDXInteractableFootstep> footsteps = footstepPlan.getFootsteps();
+               for (RDXInteractableFootstep footstep : footsteps)
+               {
+                  ObjectNode footstepNode = footstepsArrayNode.addObject();
+                  footstepNode.put("side", footstep.getPlannedFootstep().getRobotSide().getLowerCaseName());
+                  // get sole frame pose
+                  FramePose3D solePose = new FramePose3D(footstep.getPlannedFootstep().getFootstepPose());
+                  solePose.changeFrame(node.getNodeFrame());
+                  // save pose to json
+                  JSONTools.toJSON(footstepNode, solePose);
+               }
             }
          });
          LogTools.info("Saved to file {}", file.getFileName());
@@ -169,5 +246,16 @@ public class RDXQuickATManager
       {
          LogTools.warn("Could not save to {}", file.getFileName());
       }
+      resetSavingOptions();
+   }
+
+   private void resetSavingOptions()
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         saveArmsSide.get(side).set(true);
+      }
+      saveArms.set(false);
+      saveFootsteps.set(false);
    }
 }
