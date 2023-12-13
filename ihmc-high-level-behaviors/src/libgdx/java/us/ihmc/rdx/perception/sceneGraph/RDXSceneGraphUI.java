@@ -146,6 +146,7 @@ public class RDXSceneGraphUI
                      RDXPredefinedRigidBodySceneNode workPlatform = predefinedRigidBodySceneNodeBuilder.build("WorkPlatform");
                      modificationQueue.accept(new SceneGraphNodeAddition(workPlatform.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(workPlatform);
+                  }
                   if (ImGui.button(labels.get("Add Shoe")))
                   {
                      RDXPredefinedRigidBodySceneNode shoe = predefinedRigidBodySceneNodeBuilder.build("Shoe");
