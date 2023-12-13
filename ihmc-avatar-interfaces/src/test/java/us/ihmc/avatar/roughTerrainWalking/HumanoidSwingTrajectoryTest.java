@@ -40,6 +40,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -291,7 +292,7 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
 
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(simulationTestHelper.getControllerFullRobotModel());
+      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       referenceFrames.updateFrames();
       SideDependentList<ArrayList<Point2D>> footContactPoints = new SideDependentList<>(robotModel.getContactPointParameters().getFootContactPoints());
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
@@ -359,14 +360,14 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
 
    private class CollisionDetector extends SimpleRobotController
    {
-      private final HumanoidReferenceFrames referenceFrames;
+      private final CommonHumanoidReferenceFrames referenceFrames;
       private final SideDependentList<ConvexPolygon2D> footPolygonsInSole;
       private final SideDependentList<ConvexPolygon2D> footPolygonsInWorld;
       private final FrameConvexPolygon2D framePolygon = new FrameConvexPolygon2D();
 
       private boolean collision = false;
 
-      public CollisionDetector(HumanoidReferenceFrames referenceFrames, SideDependentList<ConvexPolygon2D> footPolygons)
+      public CollisionDetector(CommonHumanoidReferenceFrames referenceFrames, SideDependentList<ConvexPolygon2D> footPolygons)
       {
          this.referenceFrames = referenceFrames;
          this.footPolygonsInSole = footPolygons;

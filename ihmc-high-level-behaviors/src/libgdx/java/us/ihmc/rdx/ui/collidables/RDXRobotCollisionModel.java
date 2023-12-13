@@ -35,9 +35,9 @@ public class RDXRobotCollisionModel
    public void create(RigidBodyBasics rootBody, AppearanceDefinition color)
    {
       collidables = robotCollisionModel.getRobotCollidables(rootBody);
-      for (Collidable collidable : collidables)
+      for (int i = 0; i < collidables.size(); i++)
       {
-         RDXRobotCollidable robotCollidable = new RDXRobotCollidable(collidable, LibGDXTools.toLibGDX(color));
+         RDXRobotCollidable robotCollidable = new RDXRobotCollidable(collidables.get(i), i, LibGDXTools.toLibGDX(color));
          robotCollidables.add(robotCollidable);
       }
    }

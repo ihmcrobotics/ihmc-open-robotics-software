@@ -8,6 +8,7 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.log.LogTools;
@@ -63,7 +64,7 @@ public class ImGuiMapSenseConfigurationPanel
       {
          Float64 message = new Float64();
          message.setData(planarRegionsDelayOffset.get());
-         ros2Publisher.publish(ROS2Tools.MAPSENSE_REGIONS_DELAY_OFFSET, message);
+         ros2Publisher.publish(PerceptionAPI.MAPSENSE_REGIONS_DELAY_OFFSET, message);
       }
 
       boolean concaveHullFactoryParametersChanged = false;
@@ -81,7 +82,7 @@ public class ImGuiMapSenseConfigurationPanel
       {
          ConcaveHullFactoryParametersStringMessage message = new ConcaveHullFactoryParametersStringMessage();
          message.getParameters().add(concaveHullFactoryParameters.toString());
-         ros2Publisher.publish(ROS2Tools.CONCAVE_HULL_FACTORY_PARAMETERS, message);
+         ros2Publisher.publish(PerceptionAPI.CONCAVE_HULL_FACTORY_PARAMETERS, message);
       }
 
       boolean polygonizerParametersChanged = false;
@@ -103,7 +104,7 @@ public class ImGuiMapSenseConfigurationPanel
       {
          PolygonizerParametersStringMessage message = new PolygonizerParametersStringMessage();
          message.getParameters().add(polygonizerParameters.toString());
-         ros2Publisher.publish(ROS2Tools.POLYGONIZER_PARAMETERS, message);
+         ros2Publisher.publish(PerceptionAPI.POLYGONIZER_PARAMETERS, message);
       }
 
       boolean mapSenseParamsChanged = false;

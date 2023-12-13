@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.function.Consumer;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -25,7 +26,8 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
+import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -46,8 +48,8 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
-import us.ihmc.valkyrie.behaviors.ValkyrieLookAndStepParameters;
 import us.ihmc.tools.io.WorkspacePathTools;
+import us.ihmc.valkyrie.behaviors.ValkyrieLookAndStepParameters;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerControlThread;
@@ -72,6 +74,7 @@ import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 public class ValkyrieRobotModel implements DRCRobotModel
 {
    private static final boolean PRINT_MODEL = false;
+   public static final String CUSTOM_ROBOT_PATH_ENVIRONMENT_VARIABLE_NAME = "IHMC_CUSTOM_VALKYRIE_ROBOT_PATH";
 
    private final String[] resourceDirectories = {"models/", "models/gazebo/", "models/val_description/", "models/val_description/urdf/"};
 
@@ -105,6 +108,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private WallTimeBasedROSClockCalculator rosClockCalculator;
    private RobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup;
    private StepReachabilityData stepReachabilityData;
+   private RobotCollisionModel kinematicsCollisionModel;
 
    private SimulationLowLevelControllerFactory simulationLowLevelControllerFactory;
 
@@ -131,6 +135,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       setModelMassScale(0.925170);
    }
 
+   @Override
    public ValkyrieRobotVersion getRobotVersion()
    {
       return robotVersion;
@@ -256,6 +261,21 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.customModel = customModel;
    }
 
+   public void setCustomModelFromEnvironment()
+   {
+      String valueFromEnvironment = System.getenv(CUSTOM_ROBOT_PATH_ENVIRONMENT_VARIABLE_NAME);
+
+      if (valueFromEnvironment == null)
+      {
+         LogTools.warn("No custom robot was set via environment variable.");
+      }
+      else
+      {
+         LogTools.info("Loading custom robot from environment: {}", valueFromEnvironment);
+         setCustomModel(valueFromEnvironment);
+      }
+   }
+
    /**
     * Scale to apply to the robot mass.
     *
@@ -318,6 +338,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
                                                               getContactPointParameters(),
                                                               getJointMap(),
                                                               true);
+         // For backward compatibility w.r.t. when we were using SDF file.
+         // The URDF to SDF conversion appeared to sort the joints by alphabetical order.
+         // The ordering matters when serializing messages such as RobotConfigurationData.
+         robotDefinition.forEachRigidBodyDefinition(body -> Collections.sort(body.getChildrenJoints(), (j1, j2) -> j1.getName().compareTo(j2.getName())));
+
          if (robotMaterial != null)
             RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, robotMaterial);
          getRobotDefinitionMutator().accept(robotDefinition);
@@ -389,6 +414,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public FullHumanoidRobotModel createFullRobotModel()
    {
       return new FullHumanoidRobotModelWrapper(getRobotDefinition(), getJointMap());
+   }
+
+   @Override
+   public FullHumanoidRobotModel createFullRobotModel(boolean enforceUniqueReferenceFrames)
+   {
+      return new FullHumanoidRobotModelWrapper(getRobotDefinition(), getJointMap(), enforceUniqueReferenceFrames);
    }
 
    @Override
@@ -641,6 +672,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.simulationLowLevelControllerFactory = simulationLowLevelControllerFactory;
    }
 
+   public void setHumanoidRobotKinematicsCollisionModel(RobotCollisionModel kinematicsCollisionModel)
+   {
+      this.kinematicsCollisionModel = kinematicsCollisionModel;
+   }
+
    @Override
    public WalkingControllerParameters getWalkingControllerParameters()
    {
@@ -668,7 +704,9 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
-      return new ValkyrieKinematicsCollisionModel(getJointMap());
+      if (kinematicsCollisionModel == null)
+         kinematicsCollisionModel = new ValkyrieKinematicsCollisionModel(getJointMap());
+      return kinematicsCollisionModel;
    }
 
    @Override
@@ -676,7 +714,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       if (robotVersion == ValkyrieRobotVersion.ARM_MASS_SIM)
       {
-         ValkyrieArmMassSimCollisionModel collisionModel = new ValkyrieArmMassSimCollisionModel(getJointMap(), true);
+         ValkyrieArmMassSimCollisionModel collisionModel = new ValkyrieArmMassSimCollisionModel(getJointMap(), getContactPointParameters(), true);
          collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
          return collisionModel;
       }

@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class PelvisPoseErrorPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PelvisPoseErrorPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PelvisPoseErrorPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "8a1e2507219677c650ee7505b2f2621f1ea18fd8f1dea16465d5d2ed25096f3e";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

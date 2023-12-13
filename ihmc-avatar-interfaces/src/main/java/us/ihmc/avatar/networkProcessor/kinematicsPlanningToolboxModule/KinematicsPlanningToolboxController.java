@@ -51,6 +51,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -138,8 +139,8 @@ public class KinematicsPlanningToolboxController extends ToolboxController
                                                              updateDT,
                                                              yoGraphicsListRegistry,
                                                              parentRegistry);
-      ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, ikController.getDesiredReferenceFrames()));
-      initialRobotConfiguration = MessageTools.createKinematicsToolboxOutputStatus(ikController.getDesiredOneDoFJoint());
+      ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel, ikController.getDesiredReferenceFrames()));
+      initialRobotConfiguration = MessageTools.createKinematicsToolboxOutputStatus(ikController.getDesiredOneDoFJoints());
 
       indexOfCurrentKeyFrame = new YoInteger("indexOfCurrentKeyFrame", parentRegistry);
       totalComputationTime = new YoDouble("totalComputationTime", parentRegistry);
@@ -648,5 +649,15 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
    {
       latestCapturabilityBasedStatusReference.set(newStatus);
+   }
+
+   public CommonHumanoidReferenceFrames getCurrentReferenceFrames()
+   {
+      return ikController.getCurrentReferenceFrames();
+   }
+
+   public CommonHumanoidReferenceFrames getDesiredReferenceFrames()
+   {
+      return ikController.getDesiredReferenceFrames();
    }
 }

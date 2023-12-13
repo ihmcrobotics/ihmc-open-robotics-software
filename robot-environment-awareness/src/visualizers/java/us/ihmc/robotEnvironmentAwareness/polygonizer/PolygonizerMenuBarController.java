@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutorService;
 
 import javafx.fxml.FXML;
 import javafx.stage.Window;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationRawDataImporter;
 
 public class PolygonizerMenuBarController

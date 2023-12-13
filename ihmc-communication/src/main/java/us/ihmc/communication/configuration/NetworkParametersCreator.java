@@ -32,9 +32,6 @@ public class NetworkParametersCreator
 
    private final EnumMap<NetworkParameterKeys, JTextField> entryBoxes = new EnumMap<>(NetworkParameterKeys.class);
 
-//   private final JTextField exportName;
-//   private final JComboBox<NetworkParameterKeys> destination;
-
    public NetworkParametersCreator()
    {
       File defaultFile = new File(NetworkParameters.defaultParameterFile);
@@ -49,7 +46,7 @@ public class NetworkParametersCreator
          panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
          panel.setBorder(BorderFactory.createTitledBorder(key.toString()));
          JLabel description = new JLabel(key.getDescription());
-         JTextField host = new JTextField(64);
+         JTextField host = new JTextField();
          host.setText(key.getDefaultValue());
          panel.add(description);
          panel.add(host);
@@ -99,22 +96,6 @@ public class NetworkParametersCreator
       savePanel.add(quit);
       
       content.add(savePanel);
-
-//      JPanel exportPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-//      exportPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-//
-//      JButton export = new JButton("Export to: ");
-//      export.addActionListener(new ExportActionListener());
-//      destination = new JComboBox<>(NetworkParameterKeys.values());
-//      JLabel nameLabel = new JLabel(" Path:");
-//      exportName = new JTextField(NetworkParameters.defaultParameterFile, 32);
-//
-//      exportPanel.add(export);
-//      exportPanel.add(destination);
-//      exportPanel.add(nameLabel);
-//      exportPanel.add(exportName);
-//
-//      content.add(exportPanel);
       
       if(defaultFile.exists())
       {
@@ -132,7 +113,7 @@ public class NetworkParametersCreator
             {
                lock.wait();
             }
-            catch (InterruptedException e)
+            catch (InterruptedException ignored)
             {
             }
          }
@@ -163,7 +144,7 @@ public class NetworkParametersCreator
             }
             else
             {
-               entryBoxes.get(key).setText("");               
+               entryBoxes.get(key).setText("");
             }
          }
          in.close();
@@ -185,7 +166,7 @@ public class NetworkParametersCreator
          Properties properties = new Properties();
          for (NetworkParameterKeys key : NetworkParameterKeys.values())
          {
-            if (entryBoxes.get(key).getText().length() != 0)
+            if (!entryBoxes.get(key).getText().isEmpty())
             {
                properties.setProperty(key.toString(), entryBoxes.get(key).getText());
             }
@@ -206,40 +187,6 @@ public class NetworkParametersCreator
          JOptionPane.showMessageDialog(frame, "Cannot write to file " + file, "Write error", JOptionPane.ERROR_MESSAGE);
       }
    }
-
-//   private void export(String host, String path)
-//   {
-//      JOptionPane.showMessageDialog(frame, "TODO: Implement exporting to " + host + ":" + path, "Implement me", JOptionPane.ERROR_MESSAGE);
-//
-//   }
-//
-//   private class ExportActionListener implements ActionListener
-//   {
-//
-//      @Override
-//      public void actionPerformed(ActionEvent e)
-//      {
-//         if (isValid())
-//         {
-//            NetworkParameterKeys key = (NetworkParameterKeys) destination.getSelectedItem();
-//            if (entryBoxes.get(key).getText().length() == 0)
-//            {
-//               JOptionPane.showMessageDialog(frame, key + " is not set.", "Invalid host", JOptionPane.ERROR_MESSAGE);
-//               return;
-//            }
-//
-//            if (exportName.getText().length() == 0)
-//            {
-//               JOptionPane.showMessageDialog(frame, "No path given", "Invalid entry", JOptionPane.ERROR_MESSAGE);
-//               return;
-//            }
-//
-//            export(entryBoxes.get(key).getText(), exportName.getText());
-//         }
-//
-//      }
-//
-//   }
 
    private class LoadActionListener implements ActionListener
    {
@@ -305,19 +252,12 @@ public class NetworkParametersCreator
 
    }
 
-   private final class INIFileFilter implements FilenameFilter
+   private static final class INIFileFilter implements FilenameFilter
    {
       @Override
       public boolean accept(File dir, String name)
       {
-         if (name.endsWith(".ini"))
-         {
-            return true;
-         }
-         else
-         {
-            return false;
-         }
+         return name.endsWith(".ini");
       }
    }
 

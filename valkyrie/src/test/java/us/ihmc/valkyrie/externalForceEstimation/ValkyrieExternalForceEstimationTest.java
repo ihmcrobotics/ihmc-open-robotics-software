@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.externalForceEstimation;
 
-import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicArrow3DDefinition;
-import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicPoint3DDefinition;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicArrow3D;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +37,7 @@ import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicArrow3DDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicPoint3DDefinition;
 import us.ihmc.scs2.simulation.TimeConsumer;
@@ -158,12 +159,15 @@ public class ValkyrieExternalForceEstimationTest
 
          YoFramePoint3D efp_point = testConfig.externalWrenchPoint.getOffset().getPosition();
          YoFrameVector3D simulatedForce = testConfig.externalWrenchPoint.getWrench().getLinearPart();
-         YoGraphicArrow3DDefinition simulatedFoceViz = newYoGraphicArrow3DDefinition("simulatedForceVector"
+         YoGraphicArrow3DDefinition simulatedFoceViz = newYoGraphicArrow3D("simulatedForceVector"
                + i, efp_point, simulatedForce, forceGraphicScale, simulatedForceColor);
-         YoGraphicArrow3DDefinition estimatedForceViz = newYoGraphicArrow3DDefinition("estimatedForceVector"
+         YoGraphicArrow3DDefinition estimatedForceViz = newYoGraphicArrow3D("estimatedForceVector"
                + i, efp_point, testConfig.estimatedForce, forceGraphicScale, estimatedForceColor);
-         YoGraphicPoint3DDefinition simulatedPointViz = newYoGraphicPoint3DDefinition("simulatedForcePoint" + i, efp_point, 0.025, simulatedForceColor);
-         simulationTestHelper.addYoGraphicDefinition(new YoGraphicGroupDefinition("externalForceVectors", simulatedFoceViz, estimatedForceViz, simulatedPointViz));
+         YoGraphicPoint3DDefinition simulatedPointViz = newYoGraphicPoint3D("simulatedForcePoint" + i, efp_point, 0.025, simulatedForceColor);
+         simulationTestHelper.addYoGraphicDefinition(new YoGraphicGroupDefinition("externalForceVectors",
+                                                                                  simulatedFoceViz,
+                                                                                  estimatedForceViz,
+                                                                                  simulatedPointViz));
       }
 
       simulationTestHelper.addYoGraphicsListRegistry(graphicsListRegistry);
@@ -219,7 +223,7 @@ public class ValkyrieExternalForceEstimationTest
             simulationTestHelper.simulateNow(7.0);
             Assertions.assertTrue(force.epsilonEquals(testConfig.estimatedForce, epsilon),
                                   "Estimator failed to estimate force applied on " + testConfig.endEffectorName + ", simulated force: " + force
-                                  + ", estimated force: " + testConfig.estimatedForce);
+                                        + ", estimated force: " + testConfig.estimatedForce);
          }
 
          testConfigs.get(i).desiredSimulatedForceInWorld.setToZero();

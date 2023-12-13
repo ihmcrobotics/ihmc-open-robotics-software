@@ -2,17 +2,27 @@ package us.ihmc.valkyrie.parameters;
 
 import static us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap.jointNames;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
-import us.ihmc.robotics.partNames.*;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
+import us.ihmc.robotics.partNames.JointRole;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ValkyrieJointMap implements HumanoidJointNameMap
@@ -31,9 +41,9 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    private final SpineJointName[] spineJoints = {SpineJointName.SPINE_YAW, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL};
    private final NeckJointName[] neckJoints = {NeckJointName.PROXIMAL_NECK_PITCH, NeckJointName.DISTAL_NECK_YAW, NeckJointName.DISTAL_NECK_PITCH};
    private final SideDependentList<String> handNames = new SideDependentList<>();
+   protected final SideDependentList<String> forearmNames = new SideDependentList<>();
 
    private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
-   private final LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>>();
 
    private final LinkedHashMap<String, ImmutablePair<RobotSide, LegJointName>> legJointNames = new LinkedHashMap<String, ImmutablePair<RobotSide, LegJointName>>();
    private final LinkedHashMap<String, ImmutablePair<RobotSide, ArmJointName>> armJointNames = new LinkedHashMap<String, ImmutablePair<RobotSide, ArmJointName>>();
@@ -45,7 +55,6 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    private final EnumMap<SpineJointName, String> spineJointStrings = new EnumMap<>(SpineJointName.class);
    private final EnumMap<NeckJointName, String> neckJointStrings = new EnumMap<>(NeckJointName.class);
 
-   private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<>();
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
    private final String[] jointNamesBeforeFeet = new String[2];
 
@@ -120,17 +129,14 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
             case DEFAULT:
             case FINGERLESS:
                String endEffectorName = prefix + "Palm";
-               limbNames.put(endEffectorName, new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
                handNames.put(robotSide, endEffectorName);
                break;
             case ARM_MASS_SIM:
                endEffectorName = prefix + "ElbowPitchLink";
-               limbNames.put(endEffectorName, new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
                handNames.put(robotSide, endEffectorName);
                break;
             default:
          }
-         limbNames.put(prefix + "Foot", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.LEG));
       }
 
       spineJointNames.put(jointNames[ValkyrieOrderedJointMap.TorsoYaw], SpineJointName.SPINE_YAW);
@@ -171,7 +177,6 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
 
       for (RobotSide robtSide : RobotSide.values)
       {
-         nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(LegJointName.HIP_PITCH));
          nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(ArmJointName.FIRST_WRIST_PITCH));
       }
 
@@ -212,12 +217,6 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    }
 
    @Override
-   public SideDependentList<String> getNameOfJointBeforeThighs()
-   {
-      return nameOfJointsBeforeThighs;
-   }
-
-   @Override
    public String getNameOfJointBeforeChest()
    {
       return spineJointStrings.get(SpineJointName.SPINE_ROLL);
@@ -233,12 +232,6 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    public ImmutablePair<RobotSide, ArmJointName> getArmJointName(String jointName)
    {
       return armJointNames.get(jointName);
-   }
-
-   @Override
-   public ImmutablePair<RobotSide, LimbName> getLimbName(String limbName)
-   {
-      return limbNames.get(limbName);
    }
 
    @Override
@@ -281,6 +274,12 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    public String getHandName(RobotSide robotSide)
    {
       return handNames.get(robotSide);
+   }
+
+   @Override
+   public String getForearmName(RobotSide robotSide)
+   {
+      return forearmNames.get(robotSide);
    }
 
    @Override
@@ -365,7 +364,7 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    }
 
    @Override
-   public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide)
+   public RigidBodyTransform getSoleToParentFrameTransform(RobotSide robotSide)
    {
       return physicalProperties.getSoleToAnkleFrameTransform(robotSide);
    }

@@ -9,12 +9,9 @@ import us.ihmc.log.LogTools;
  */
 public class ValkyrieLookAndStepParameters extends LookAndStepBehaviorParameters
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "valkyrie/src/main/resources";
-
    public ValkyrieLookAndStepParameters()
    {
-      super(ValkyrieLookAndStepParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, "ForValkyrie");
+      super(ValkyrieLookAndStepParameters.class, "ForValkyrie");
    }
 
    public static void main(String[] args)

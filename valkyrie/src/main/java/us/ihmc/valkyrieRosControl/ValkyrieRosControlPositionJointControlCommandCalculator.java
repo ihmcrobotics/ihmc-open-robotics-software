@@ -28,6 +28,7 @@ public class ValkyrieRosControlPositionJointControlCommandCalculator
 
    public void computeAndUpdateJointPosition()
    {
+      yoPositionJointHandleHolder.updateControllerOutput();
       double currentJointAngle = yoPositionJointHandleHolder.getQ();
       double desiredPosition = yoPositionJointHandleHolder.getControllerPositionDesired();
 

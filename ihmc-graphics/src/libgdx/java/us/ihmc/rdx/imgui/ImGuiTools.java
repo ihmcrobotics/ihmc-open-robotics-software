@@ -3,18 +3,14 @@ package us.ihmc.rdx.imgui;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import imgui.*;
-import imgui.flag.ImGuiFreeTypeBuilderFlags;
-import imgui.flag.ImGuiInputTextFlags;
-import imgui.flag.ImGuiKey;
+import imgui.flag.*;
 import imgui.internal.ImGuiContext;
-import imgui.type.ImDouble;
-import imgui.type.ImFloat;
-import imgui.type.ImInt;
-import imgui.type.ImString;
+import imgui.type.*;
 import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.tools.string.StringTools;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -36,9 +32,13 @@ public class ImGuiTools
    public static final int GDX_TO_IMGUI_KEY_CODE_OFFSET = GLFW.GLFW_KEY_A - Input.Keys.A;
    public static final float FLOAT_MIN = -3.40282346638528859811704183484516925e+38F / 2.0f;
    public static final float FLOAT_MAX = 3.40282346638528859811704183484516925e+38F / 2.0f;
+   /** This is used so a scroll area can end reasonably for long scrolls so stuff below it can be accessed. */
+   public static final float REASONABLE_HEIGHT_FOR_A_SCROLL_AREA = 150.0f;
+   public static final int MAX_STRING_SIZE_FOR_PATH = 1024;
 
    private static ImFont consoleFont;
    private static ImFont smallFont;
+   private static ImFont smallBoldFont;
    private static ImFont mediumFont;
    private static ImFont bigFont;
    private static ImFont nodeFont;
@@ -47,11 +47,21 @@ public class ImGuiTools
    private static int spaceKey;
    private static int deleteKey;
    private static int escapeKey;
+   private static int enterKey;
    private static int upArrowKey;
    private static int downArrowKey;
    private static int leftArrowKey;
    private static int rightArrowKey;
    private static ImFontAtlas fontAtlas;
+
+   public static int BLACK = Color.BLACK.toIntBits();
+   public static int WHITE = Color.WHITE.toIntBits();
+   public static int RED = Color.RED.toIntBits();
+   public static int GREEN = Color.GREEN.toIntBits();
+   public static int DARK_GREEN = new Color(0.0f, 0.7f, 0.0f, 1.0f).toIntBits();
+   public static int LIGHT_BLUE = new Color(0.4f, 0.4f, 0.8f, 1.0f).toIntBits();
+
+   private static final ImVec2 calcTextSize = new ImVec2();
 
    public static long createContext()
    {
@@ -75,10 +85,75 @@ public class ImGuiTools
       ImGui.setCurrentContext(contextHolder);
    }
 
+   public static void parsePrimaryWindowSizeFromSettingsINI(String settingsINIAsString, ImGuiSize sizeToPack)
+   {
+      settingsINIAsString = StringTools.filterOutCRLFLineEndings(settingsINIAsString);
+      int indexOfDockingSection = settingsINIAsString.indexOf("[Docking]");
+      int indexOfDockspace = settingsINIAsString.indexOf("DockSpace", indexOfDockingSection); // The first DockSpace entry is the primary one
+      int indexOfSize = settingsINIAsString.indexOf("Size", indexOfDockspace);
+      int indexOfWidth = indexOfSize + 5; // Account for '='
+      int indexOfComma = settingsINIAsString.indexOf(",", indexOfWidth);
+      int width = Integer.parseInt(settingsINIAsString.substring(indexOfWidth, indexOfComma));
+
+      int indexOfHeight = indexOfComma + 1; // Account for ','
+      int indexOfSpace = settingsINIAsString.indexOf(" ", indexOfComma);
+      int height = Integer.parseInt(settingsINIAsString.substring(indexOfHeight, indexOfSpace));
+
+      sizeToPack.setWidth(width);
+      sizeToPack.setHeight(height);
+   }
+
+   public static void parsePrimaryWindowPositionFromSettingsINI(String settingsINIAsString, ImGuiPosition positionToPack)
+   {
+      settingsINIAsString = StringTools.filterOutCRLFLineEndings(settingsINIAsString);
+      int indexOfDockingSection = settingsINIAsString.indexOf("[Docking]");
+      int indexOfDockspace = settingsINIAsString.indexOf("DockSpace", indexOfDockingSection); // The first DockSpace entry is the primary one
+      int indexOfPosition = settingsINIAsString.indexOf("Pos", indexOfDockspace);
+      int indexOfX = indexOfPosition + 4; // Account for '='
+      int indexOfComma = settingsINIAsString.indexOf(",", indexOfX);
+      int x = Integer.parseInt(settingsINIAsString.substring(indexOfX, indexOfComma));
+
+      int indexOfY = indexOfComma + 1; // Account for ','
+      int indexOfSpace = settingsINIAsString.indexOf(" ", indexOfComma);
+      int y = Integer.parseInt(settingsINIAsString.substring(indexOfY, indexOfSpace));
+
+      positionToPack.setX(x);
+      positionToPack.setY(y);
+   }
+
    public static void initializeColorStyle()
    {
       if (!Boolean.parseBoolean(System.getProperty("imgui.dark")))
          ImGui.styleColorsLight();
+   }
+
+   /**
+    * Method for getting color ranging from green to red based on value inputted (greater value = more red)
+    * Values at which color changes are provided using the colorSwitchValues varargs.
+    * e.g.
+    *    greenToRedGradiatedColor(0.5, 0.7, 0.9) -> returns green color       (0.5 < 0.7)
+    *    greenToRedGradiatedColor(0.8, 0.7, 0.9) -> returns orange-ish color  (0.7 < 0.8 < 0.9)
+    *    greenToRedGradiatedColor(1.0, 0.7, 0.9) -> returns red color         (1.0 > 0.9)
+    *
+    * @param value The value which determines returned color
+    * @param colorSwitchValues values at which color changes (if given 3 values, color will switch from green -> yellow -> orange -> red)
+    * @return Integer value representing color
+    */
+   public static int greenToRedGradiatedColor(double value, double... colorSwitchValues)
+   {
+      float redValue = 0.0f;
+      float greenValue = 1.0f;
+
+      for (double switchValue : colorSwitchValues)
+      {
+         if (value < switchValue)
+            break;
+
+         redValue = 1.0f;
+         greenValue -= 1.0 / colorSwitchValues.length;
+      }
+
+      return new Color(redValue, greenValue, 0.0f, 0.5f).toIntBits();
    }
 
    public static int nextWidgetIndex()
@@ -102,6 +177,18 @@ public class ImGuiTools
       int inputTextFlags = ImGuiInputTextFlags.None;
       inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
       return ImGui.inputInt(label, imInt, step, 100, inputTextFlags);
+   }
+
+   public static boolean volatileInputLong(String label, ImLong imLong)
+   {
+      return volatileInputLong(label, imLong, 1);
+   }
+
+   public static boolean volatileInputLong(String label, ImLong imLong, long step)
+   {
+      int inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
+      return ImGui.inputScalar(label, ImGuiDataType.U32, imLong, step, 100, "%d", inputTextFlags);
    }
 
    public static boolean volatileInputFloat(String label, ImFloat imFloat)
@@ -135,16 +222,59 @@ public class ImGuiTools
       return ImGui.inputDouble(label, imDouble, step, stepFast, format, inputTextFlags);
    }
 
+   public static boolean sliderDouble(String label, ImDouble imDouble, double minValue, double maxValue)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, minValue, maxValue);
+   }
+
+   public static boolean sliderDouble(String label, ImDouble imDouble, double minValue, double maxValue, String format)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, minValue, maxValue, format);
+   }
+
+   public static boolean sliderDouble(String label, ImDouble imDouble, double minValue, double maxValue, String format, int imGuiSliderFlags)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, minValue, maxValue, format, imGuiSliderFlags);
+   }
+
+   public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue);
+   }
+
+   public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue, String format)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue, format);
+   }
+
+   public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue, String format, int imGuiSliderFlags)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue, format, imGuiSliderFlags);
+   }
+
+   /**
+    * Returns true if the user presses Enter, but unlike the EnterReturnsTrue flag,
+    * using this method, the currently input text can be retrieved without the
+    * user hitting the Enter key.
+    *
+    * @return if the user presses Enter
+    */
    public static boolean inputText(String label, ImString text)
    {
-      int flags = ImGuiInputTextFlags.None;
-      flags += ImGuiInputTextFlags.CallbackResize;
-      return ImGui.inputText(label, text, flags);
+      ImGui.inputText(label, text);
+      return ImGui.isItemFocused() && ImGui.isKeyReleased(ImGuiTools.getEnterKey());
    }
 
    public static void textColored(Color color, String text)
    {
       ImGui.textColored(color.r, color.g, color.b, color.a, text);
+   }
+
+   public static void textBold(String text)
+   {
+      ImGui.pushFont(getSmallBoldFont());
+      ImGui.text(text);
+      ImGui.popFont();
    }
 
    public static void previousWidgetTooltip(String tooltipText)
@@ -153,6 +283,80 @@ public class ImGuiTools
       {
          ImGui.setTooltip(tooltipText);
       }
+   }
+
+   /**
+    * Places a mark, a vertical black line, at some point on the progress bar to
+    * convey to the user where a threshold is.
+    */
+   public static void markedProgressBar(float barHeight, float barWidth, int color, double percent, double markPercent, String text)
+   {
+      float markPosition = (float) (barWidth * markPercent);
+      float actualCursorX = ImGui.getWindowPosX() + ImGui.getCursorPosX() - ImGui.getScrollX();
+      float actualCursorY = ImGui.getWindowPosY() + ImGui.getCursorPosY() - ImGui.getScrollY();
+      float verticalExtents = 3.0f;
+      ImGui.getWindowDrawList().addRectFilled(actualCursorX + markPosition,
+                                              actualCursorY - verticalExtents,
+                                              actualCursorX + markPosition + 2.0f,
+                                              actualCursorY + barHeight + verticalExtents,
+                                              ImGuiTools.BLACK, 1.0f);
+      ImGui.pushStyleColor(ImGuiCol.PlotHistogram, color);
+      ImGui.progressBar((float) percent, barWidth, barHeight, text);
+      ImGui.popStyleColor();
+   }
+
+   /**
+    * Useful for custom widgets.
+    * @return Whether the area of the current custom item is hovered.
+    */
+   public static boolean isItemHovered(float itemWidth)
+   {
+      float mousePosXInDesktopFrame = ImGui.getMousePosX();
+      float mousePosYInDesktopFrame = ImGui.getMousePosY();
+      // Widget frame is the top-left of the start of the widgets, which is not the same as window
+      // frame in the case the window is scrolled.
+      float mousePosXInWidgetFrame = mousePosXInDesktopFrame - ImGui.getWindowPosX() + ImGui.getScrollX();
+      float mousePosYInWidgetFrame = mousePosYInDesktopFrame - ImGui.getWindowPosY() + ImGui.getScrollY();
+
+      boolean isHovered = mousePosXInWidgetFrame >= ImGui.getCursorPosX();
+      isHovered &= mousePosXInWidgetFrame <= ImGui.getCursorPosX() + itemWidth + ImGui.getStyle().getFramePaddingX();
+      isHovered &= mousePosYInWidgetFrame >= ImGui.getCursorPosY();
+      isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + ImGui.getFontSize() + ImGui.getStyle().getFramePaddingY();
+      isHovered &= ImGui.isWindowHovered();
+
+      return isHovered;
+   }
+
+   /** ImGui doesn't support underlined text so this is the best we can do. */
+   public static boolean textWithUnderlineOnHover(String text)
+   {
+      ImGui.calcTextSize(calcTextSize, text);
+
+      // We must store the cursor position before rendering the text
+      float cursorPosXInDesktopFrame = ImGui.getCursorScreenPosX();
+      float cursorPosYInDesktopFrame = ImGui.getCursorScreenPosY();
+
+      ImGui.text(text);
+
+      boolean isHovered = ImGui.isItemHovered();
+
+      if (isHovered)
+      {
+         ImGui.getWindowDrawList()
+              .addRectFilled(cursorPosXInDesktopFrame,
+                             cursorPosYInDesktopFrame + calcTextSize.y,
+                             cursorPosXInDesktopFrame + calcTextSize.x,
+                             cursorPosYInDesktopFrame + calcTextSize.y + 1.0f,
+                             ImGui.getColorU32(ImGuiCol.Text));
+      }
+
+      return isHovered;
+   }
+
+   public static float calcTextSizeX(String text)
+   {
+      ImGui.calcTextSize(calcTextSize, text);
+      return calcTextSize.x;
    }
 
    /** @deprecated Use ImGuiUniqueLabelMap instead. */
@@ -189,7 +393,8 @@ public class ImGuiTools
     */
    public static ImFont setupFonts(ImGuiIO io, int fontSizeLevel)
    {
-      final ImFontConfig fontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
+      final ImFontConfig smallFontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
+      final ImFontConfig smallBoldFontConfig = new ImFontConfig();
       final ImFontConfig consoleFontConfig = new ImFontConfig();
       final ImFontConfig mediumFontConfig = new ImFontConfig();
       final ImFontConfig bigFontConfig = new ImFontConfig();
@@ -208,7 +413,8 @@ public class ImGuiTools
 //      fontConfig.setRasterizerFlags(flags);
 //      fontConfig.setRasterizerMultiply(2.0f);
 //      fontConfig.setPixelSnapH(true);
-      fontConfig.setFontBuilderFlags(fontsFlags);
+      smallFontConfig.setFontBuilderFlags(fontsFlags);
+      smallBoldFontConfig.setFontBuilderFlags(fontsFlags + ImGuiFreeTypeBuilderFlags.Bold);
       consoleFontConfig.setFontBuilderFlags(fontsFlags);
       mediumFontConfig.setFontBuilderFlags(fontsFlags);
       bigFontConfig.setFontBuilderFlags(fontsFlags);
@@ -216,20 +422,20 @@ public class ImGuiTools
 
 //      fontToReturn = fontAtlas.addFontDefault(); // Add a default font, which is 'ProggyClean.ttf, 13px'
 //      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("basis33.ttf"), 16, fontConfig);
-      String fontDir;
-      if (SystemUtils.IS_OS_WINDOWS) {
-         fontDir = System.getenv("WINDIR") + "/Fonts";
-      } else {
-         fontDir = "/usr/share/fonts/TTF/";
-      }
+      String fontDirectory;
+      if (SystemUtils.IS_OS_WINDOWS)
+         fontDirectory = System.getenv("WINDIR") + "/Fonts";
+      else
+         fontDirectory = "/usr/share/fonts/TTF/";
 
-      Path segoeui = Paths.get(fontDir, "segoeui.ttf");
+      Path segoeui = Paths.get(fontDirectory, "segoeui.ttf");
       if (Files.exists(segoeui))
       {
-         fontConfig.setName("segoeui.ttf, 16px");
-         smallFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, fontConfig);
+         smallFontConfig.setName("segoeui.ttf, 16px");
+         smallFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, smallFontConfig);
+         smallBoldFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, smallBoldFontConfig);
 
-         fontConfig.setName("segoeui.ttf, 20px");
+         mediumFontConfig.setName("segoeui.ttf, 20px");
          mediumFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 20.0f, mediumFontConfig);
 
          bigFontConfig.setName("segoeui.ttf, 38px");
@@ -240,10 +446,11 @@ public class ImGuiTools
       }
       else
       {
-         fontConfig.setName("DejaVuSans.ttf, 13px");
-         smallFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, fontConfig);
+         smallFontConfig.setName("DejaVuSans.ttf, 13px");
+         smallFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, smallFontConfig);
+         smallBoldFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, smallBoldFontConfig);
 
-         fontConfig.setName("DejaVuSans.ttf, 17px");
+         mediumFontConfig.setName("DejaVuSans.ttf, 17px");
          mediumFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 17.0f, mediumFontConfig);
 
          bigFontConfig.setName("DejaVuSans.ttf, 32px");
@@ -251,8 +458,13 @@ public class ImGuiTools
 
          nodeFontConfig.setName("DejaVuSans.ttf, 26px 1/2");
          nodeFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 26.0f, nodeFontConfig);
+
+         // Accomodate for ImGui issue where the Windows fonts will render smaller than normal
+         // This is so saving layout does not change the result depending on the fonts you have installed.
+         // Can be removed when this is fixed: https://github.com/ocornut/imgui/issues/4780
+         ImGui.getStyle().setFramePadding(ImGui.getStyle().getFramePaddingX(), 4.5f);
       }
-      Path lucidaConsole = Paths.get(fontDir, "lucon.ttf");
+      Path lucidaConsole = Paths.get(fontDirectory, "lucon.ttf");
 
       ImFontGlyphRangesBuilder glyphRangesBuilder = new ImFontGlyphRangesBuilder();
       glyphRangesBuilder.addRanges(ImGui.getIO().getFonts().getGlyphRangesDefault());
@@ -284,7 +496,7 @@ public class ImGuiTools
       fontAtlas = ImGui.getIO().getFonts();
       fontAtlas.build();
 
-      fontConfig.destroy(); // After all fonts were added we don't need this config more
+      smallFontConfig.destroy(); // After all fonts were added we don't need this config more
       consoleFontConfig.destroy();
       mediumFontConfig.destroy();
       bigFontConfig.destroy();
@@ -310,6 +522,11 @@ public class ImGuiTools
    public static ImFont getSmallFont()
    {
       return smallFont;
+   }
+
+   public static ImFont getSmallBoldFont()
+   {
+      return smallBoldFont;
    }
 
    public static ImFont getNodeFont() {
@@ -368,6 +585,7 @@ public class ImGuiTools
       spaceKey = ImGui.getKeyIndex(ImGuiKey.Space);
       deleteKey = ImGui.getKeyIndex(ImGuiKey.Delete);
       escapeKey = ImGui.getKeyIndex(ImGuiKey.Escape);
+      enterKey = ImGui.getKeyIndex(ImGuiKey.Enter);
       upArrowKey = ImGui.getKeyIndex(ImGuiKey.UpArrow);
       downArrowKey = ImGui.getKeyIndex(ImGuiKey.DownArrow);
       leftArrowKey = ImGui.getKeyIndex(ImGuiKey.LeftArrow);
@@ -393,6 +611,13 @@ public class ImGuiTools
       if (!userKeysHaveBeenMapped)
          initializeUserMappedKeys();
       return escapeKey;
+   }
+
+   public static int getEnterKey()
+   {
+      if (!userKeysHaveBeenMapped)
+         initializeUserMappedKeys();
+      return enterKey;
    }
 
    public static int getUpArrowKey()

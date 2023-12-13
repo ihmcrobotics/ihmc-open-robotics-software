@@ -1,0 +1,24 @@
+#ifndef __toolbox_msgs__msg__FootstepPlannerRejectionReasonsMessage__idl__
+#define __toolbox_msgs__msg__FootstepPlannerRejectionReasonsMessage__idl__
+
+#include "toolbox_msgs/msg/./FootstepPlannerRejectionReasonMessage_.idl"
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="toolbox_msgs::msg::dds_::FootstepPlannerRejectionReasonsMessage_")
+      struct FootstepPlannerRejectionReasonsMessage
+      {
+        /**
+         * Rejection reasons
+         */
+        sequence<toolbox_msgs::msg::dds::FootstepPlannerRejectionReasonMessage, 30> rejection_reasons;
+      };
+    };
+  };
+};
+
+#endif

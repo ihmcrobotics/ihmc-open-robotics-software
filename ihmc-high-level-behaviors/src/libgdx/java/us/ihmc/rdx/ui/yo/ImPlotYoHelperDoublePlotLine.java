@@ -2,6 +2,8 @@ package us.ihmc.rdx.ui.yo;
 
 import us.ihmc.behaviors.tools.yo.YoDoubleClientHelper;
 import us.ihmc.behaviors.tools.yo.YoVariableClientPublishSubscribeAPI;
+import us.ihmc.rdx.imgui.ImPlotDoublePlotLine;
+import us.ihmc.rdx.imgui.ImPlotPlot;
 
 import java.text.DecimalFormat;
 

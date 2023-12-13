@@ -74,4 +74,10 @@ public class ROS2StoredPropertySet<T extends StoredPropertySetBasics>
    {
       return storedPropertySet;
    }
+
+   @Override
+   public String toString()
+   {
+      return "{" + this.topicPair.getCommandTopic().getName() + ", " + this.topicPair.getStatusTopic().getName() + "}";
+   }
 }

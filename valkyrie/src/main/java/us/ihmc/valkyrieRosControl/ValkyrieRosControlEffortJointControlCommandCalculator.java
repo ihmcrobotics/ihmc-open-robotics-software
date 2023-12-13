@@ -45,6 +45,7 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
 
    public void computeAndUpdateJointTorque()
    {
+      yoEffortJointHandleHolder.updateControllerOutput();
       JointDesiredOutputReadOnly desiredOutput = yoEffortJointHandleHolder.getDesiredJointData();
       pidController.setProportionalGain(desiredOutput.hasStiffness() ? desiredOutput.getStiffness() : 0.0);
       pidController.setDerivativeGain(desiredOutput.hasDamping() ? desiredOutput.getDamping() : 0.0);

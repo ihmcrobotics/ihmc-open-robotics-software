@@ -1,10 +1,8 @@
 @echo on
 
-:: Requires: cmake, msvc2022, JDK 17
-:: Assumes msbuild is in the Path. For VC2022, it's in: C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin
-:: Assumes this is also in the Path: C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.33.31629\bin\Hostx64\x64
+:: Requires: msvc2022 BuildTools, Eigen, JDK 17
 
-pushd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools"
+pushd "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools"
 call VsDevCmd.bat -host_arch=amd64 -arch=amd64
 popd
 

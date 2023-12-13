@@ -40,29 +40,29 @@ public class UIFootstepPlanManager
    public UIFootstepPlanManager(Messager messager)
    {
       this.messager = messager;
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, this::updatePaths);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, this::updatePaths);
 
       ignorePartialFootholds = messager.createInput(FootstepPlannerMessagerAPI.IgnorePartialFootholds, false);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.IgnorePartialFootholds, this::updatePartialFootholds);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.IgnorePartialFootholds, this::updatePartialFootholds);
 
       overrideStepTimings = messager.createInput(FootstepPlannerMessagerAPI.OverrideStepTimings, false);
       manualSwingTime = messager.createInput(FootstepPlannerMessagerAPI.ManualSwingTime);
       manualTransferTime = messager.createInput(FootstepPlannerMessagerAPI.ManualTransferTime);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.OverrideStepTimings, value -> updateStepTimings());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ManualSwingTime, value -> updateStepTimings());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ManualTransferTime, value -> updateStepTimings());
+      messager.addTopicListener(FootstepPlannerMessagerAPI.OverrideStepTimings, value -> updateStepTimings());
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ManualSwingTime, value -> updateStepTimings());
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ManualTransferTime, value -> updateStepTimings());
 
       overrideStepHeight = messager.createInput(FootstepPlannerMessagerAPI.OverrideSwingHeight, false);
       manualSwingHeight = messager.createInput(FootstepPlannerMessagerAPI.ManualSwingHeight);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.OverrideSwingHeight, value -> updateStepHeights());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ManualSwingHeight, value -> updateStepHeights());
+      messager.addTopicListener(FootstepPlannerMessagerAPI.OverrideSwingHeight, value -> updateStepHeights());
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ManualSwingHeight, value -> updateStepHeights());
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ManuallyAdjustmentedStep, this::updateStepPlacements);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.OverrideSpecificSwingTime, this::updateSpecificStepSwingTime);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ManuallyAdjustmentedStep, this::updateStepPlacements);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.OverrideSpecificSwingTime, this::updateSpecificStepSwingTime);
 
       // Send plan to robot when requested
       Runnable dispathPlanRunnable = () -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, adjustedPath.get());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.SendPlan, send ->
+      messager.addTopicListener(FootstepPlannerMessagerAPI.SendPlan, send ->
       {
          if (adjustedPath.get() != null)
          {

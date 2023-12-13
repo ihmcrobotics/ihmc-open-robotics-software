@@ -18,6 +18,7 @@ public class StartFlamingoCondition implements StateTransitionCondition
    @Override
    public boolean testCondition(double timeInState)
    {
-      return walkingMessageHandler.hasFootTrajectoryForFlamingoStance(transferToSide.getOppositeSide());
+      return walkingMessageHandler.hasFootTrajectoryForFlamingoStance(transferToSide.getOppositeSide())
+             || walkingMessageHandler.hasLegTrajectoryForFlamingoStance(transferToSide.getOppositeSide());
    }
 }

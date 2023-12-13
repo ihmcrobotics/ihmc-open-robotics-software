@@ -6,16 +6,17 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
+import us.ihmc.log.LogToolsWriteOnly;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
 
@@ -30,7 +31,7 @@ public class ControllerStatusTracker
    private static final double CAPTURABILITY_BASED_STATUS_EXPIRATION_TIME = 0.25;
 
    private final WalkingFootstepTracker footstepTracker;
-   private final StatusLogger statusLogger;
+   private final LogToolsWriteOnly statusLogger;
    private volatile HighLevelControllerName latestKnownState;
    private final Vector3D lastPlanOffset = new Vector3D();
    private final Timer capturabilityBasedStatusTimer = new Timer();
@@ -41,7 +42,9 @@ public class ControllerStatusTracker
    private final ArrayList<Runnable> notWalkingStateAnymoreCallbacks = new ArrayList<>();
    private final Throttler notWalkingStateAnymoreCallbackThrottler = new Throttler();
 
-   public ControllerStatusTracker(StatusLogger statusLogger, ROS2NodeInterface ros2Node, String robotName)
+   private final List<Notification> abortedListeners = new ArrayList<>();
+
+   public ControllerStatusTracker(LogToolsWriteOnly statusLogger, ROS2NodeInterface ros2Node, String robotName)
    {
       this.statusLogger = statusLogger;
       footstepTracker = new WalkingFootstepTracker(ros2Node, robotName);
@@ -55,6 +58,11 @@ public class ControllerStatusTracker
       new IHMCROS2Callback<>(ros2Node, getTopic(ControllerCrashNotificationPacket.class, robotName), this::acceptControllerCrashNotificationPacket);
       new IHMCROS2Callback<>(ros2Node, getTopic(CapturabilityBasedStatus.class, robotName), this::acceptCapturabilityBasedStatus);
       new IHMCROS2Callback<>(ros2Node, getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatusMessage);
+   }
+
+   public void registerAbortedListener(Notification abortedListener)
+   {
+      abortedListeners.add(abortedListener);
    }
 
    // TODO: Make a "snapshot" or "view" that would hold perspective/thread sensitive data?
@@ -89,12 +97,14 @@ public class ControllerStatusTracker
       }
       statusLogger.info("Controller state changed from {} to {}", initialState, endState);
       latestKnownState = endState;
+      footstepTracker.reset();
    }
 
    private void acceptWalkingControllerFailureStatusMessage(WalkingControllerFailureStatusMessage message)
    {
       triggerNotWalkingStateAnymoreCallbacks();
       statusLogger.error("Robot is falling! direction: {}", message.getFallingDirection());
+      footstepTracker.reset();
    }
 
    private void acceptPlanOffsetStatus(PlanOffsetStatus message)
@@ -110,6 +120,7 @@ public class ControllerStatusTracker
    {
       statusLogger.error("Controller crashed! {}", message::toString);
       triggerNotWalkingStateAnymoreCallbacks();
+      footstepTracker.reset();
    }
 
    private void acceptCapturabilityBasedStatus(CapturabilityBasedStatus message)
@@ -119,20 +130,36 @@ public class ControllerStatusTracker
 
    private void acceptWalkingStatusMessage(WalkingStatusMessage message)
    {
+      // Declared locally since this represents the absolute state which other threads can access
+      boolean isWalking = false;
       WalkingStatus walkingStatus = WalkingStatus.fromByte(message.getWalkingStatus());
+
       if (walkingStatus == WalkingStatus.STARTED || walkingStatus == WalkingStatus.RESUMED)
       {
          isWalking = true;
       }
       else if (walkingStatus == WalkingStatus.ABORT_REQUESTED)
       {
+         for (Notification abortedListener : abortedListeners)
+         {
+            abortedListener.set();
+         }
 
+         footstepTracker.reset();
+         LogTools.info("Walking Aborted.");
+      }
+      else if (walkingStatus == WalkingStatus.PAUSED)
+      {
+         LogTools.info("Walking Paused.");
       }
       else
       {
-         isWalking = false;
+         // Walking completed
+         footstepTracker.reset();
          finishedWalkingNotification.set();
       }
+
+      this.isWalking = isWalking;
    }
 
    public boolean isWalking()
@@ -173,5 +200,15 @@ public class ControllerStatusTracker
    public WalkingFootstepTracker getFootstepTracker()
    {
       return footstepTracker;
+   }
+
+   public void checkControllerIsRunning()
+   {
+      boolean controllerIsRunning = robotConfigurationDataTimer.isRunning(CAPTURABILITY_BASED_STATUS_EXPIRATION_TIME);
+
+      if (!controllerIsRunning)
+      {
+         reset();
+      }
    }
 }

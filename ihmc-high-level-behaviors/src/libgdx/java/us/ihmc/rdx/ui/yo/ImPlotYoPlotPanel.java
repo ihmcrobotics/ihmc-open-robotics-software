@@ -1,11 +1,12 @@
 package us.ihmc.rdx.ui.yo;
 
 import imgui.internal.ImGui;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.imgui.ImPlotPlotPanelLayout;
 
 import java.util.ArrayList;
 
-public class ImPlotYoPlotPanel extends ImGuiPanel
+public class ImPlotYoPlotPanel extends RDXPanel
 {
    private final ArrayList<ImPlotYoPlot> yoPlots = new ArrayList<>();
    private final ImPlotPlotPanelLayout layout = new ImPlotPlotPanelLayout();

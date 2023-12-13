@@ -46,12 +46,6 @@ public class AtlasKinematicSimulation
       {
          super(jointMap);
       }
-
-      @Override
-      public double getMinSwingHeightFromStanceFoot()
-      {
-         return 0.05 * jointMap.getModelScale();
-      }
    }
 
    static class AtlasKinematicSwingTrajectoryParameters extends AtlasSwingTrajectoryParameters
@@ -59,6 +53,12 @@ public class AtlasKinematicSimulation
       public AtlasKinematicSwingTrajectoryParameters(RobotTarget target, double modelScale)
       {
          super(target, modelScale);
+      }
+
+      @Override
+      public double getMinSwingHeight()
+      {
+         return 0.05 * modelScale;
       }
 
       @Override

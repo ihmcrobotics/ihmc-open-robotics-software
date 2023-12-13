@@ -6,6 +6,7 @@ import java.util.HashMap;
 import com.esotericsoftware.minlog.Log;
 
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -54,12 +55,16 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
    private final ValkyrieSensorInformation sensorInformation;
    private final ValkyrieJointMap jointMap;
 
-   public ValkyrieRosControlSensorReaderFactory(TimestampProvider wallTimeProvider, TimestampProvider monotonicTimeProvider,
+   public ValkyrieRosControlSensorReaderFactory(TimestampProvider wallTimeProvider,
+                                                TimestampProvider monotonicTimeProvider,
                                                 SensorProcessingConfiguration sensorProcessingConfiguration,
                                                 HashMap<String, EffortJointHandle> effortJointHandles,
-                                                HashMap<String, PositionJointHandle> positionJointHandles, HashMap<String, JointStateHandle> jointStateHandles,
-                                                HashMap<String, IMUHandle> imuHandles, HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles,
-                                                ValkyrieJointMap jointMap, ValkyrieSensorInformation sensorInformation)
+                                                HashMap<String, PositionJointHandle> positionJointHandles,
+                                                HashMap<String, JointStateHandle> jointStateHandles,
+                                                HashMap<String, IMUHandle> imuHandles,
+                                                HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles,
+                                                ValkyrieJointMap jointMap,
+                                                ValkyrieSensorInformation sensorInformation)
    {
       this.wallTimeProvider = wallTimeProvider;
       this.monotonicTimeProvider = monotonicTimeProvider;
@@ -76,8 +81,11 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
    }
 
    @Override
-   public void build(FloatingJointBasics rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
-                     JointDesiredOutputListBasics estimatorDesiredJointDataHolder, YoRegistry parentRegistry)
+   public void build(FloatingJointBasics rootJoint,
+                     IMUDefinition[] imuDefinitions,
+                     ForceSensorDefinition[] forceSensorDefinitions,
+                     JointDesiredOutputListBasics estimatorDesiredJointDataHolder,
+                     YoRegistry parentRegistry)
    {
       YoRegistry sensorReaderRegistry = new YoRegistry("ValkyrieRosControlSensorReader");
 
@@ -97,17 +105,21 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
             stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
             if (effortJointHandles.containsKey(joint.getName()))
             {
-               YoEffortJointHandleHolder holder = new YoEffortJointHandleHolder(effortJointHandles.get(joint.getName()), oneDoFJoint,
-                     estimatorDesiredJointDataHolder.getJointDesiredOutput(oneDoFJoint), sensorReaderRegistry);
+               YoEffortJointHandleHolder holder = new YoEffortJointHandleHolder(effortJointHandles.get(joint.getName()),
+                                                                                oneDoFJoint,
+                                                                                estimatorDesiredJointDataHolder.getJointDesiredOutput(oneDoFJoint),
+                                                                                sensorReaderRegistry);
                yoEffortJointHandleHolders.add(holder);
             }
             else if (positionJointHandles.containsKey(joint.getName()))
             {
-               YoPositionJointHandleHolder holder = new YoPositionJointHandleHolder(positionJointHandles.get(joint.getName()), oneDoFJoint,
-                     estimatorDesiredJointDataHolder.getJointDesiredOutput(oneDoFJoint), sensorReaderRegistry);
+               YoPositionJointHandleHolder holder = new YoPositionJointHandleHolder(positionJointHandles.get(joint.getName()),
+                                                                                    oneDoFJoint,
+                                                                                    estimatorDesiredJointDataHolder.getJointDesiredOutput(oneDoFJoint),
+                                                                                    sensorReaderRegistry);
                yoPositionJointHandleHolders.add(holder);
             }
-            else if(jointStateHandles.containsKey(joint.getName()))
+            else if (jointStateHandles.containsKey(joint.getName()))
             {
                YoJointStateHandleHolder holder = new YoJointStateHandleHolder(jointStateHandles.get(joint.getName()), oneDoFJoint, sensorReaderRegistry);
                yoJointStateHandleHolders.add(holder);
@@ -134,8 +146,9 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
             if (imuUSBSerialIds.containsKey(imuDefinition.getName()))
             {
                Log.info("Starting listener for IMU " + imuDefinition.getName());
-               YoMicroStrainIMUHandleHolder holder = YoMicroStrainIMUHandleHolder.create(imuUSBSerialIds.get(imuDefinition.getName()), imuDefinition,
-                     parentRegistry);
+               YoMicroStrainIMUHandleHolder holder = YoMicroStrainIMUHandleHolder.create(imuUSBSerialIds.get(imuDefinition.getName()),
+                                                                                         imuDefinition,
+                                                                                         parentRegistry);
                yoIMUHandleHolders.add(holder);
                stateEstimatorSensorDefinitions.addIMUSensorDefinition(imuDefinition);
             }
@@ -155,8 +168,10 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
                IMUHandle complimentaryFilterHandle = imuHandles.get("CF" + name);
                IMUHandle kalmanFilterHandle = imuHandles.get("EF" + name);
 
-               YoSwitchableFilterModeIMUHandleHolder holder = YoSwitchableFilterModeIMUHandleHolder.create(complimentaryFilterHandle, kalmanFilterHandle,
-                     imuDefinition, sensorReaderRegistry);
+               YoSwitchableFilterModeIMUHandleHolder holder = YoSwitchableFilterModeIMUHandleHolder.create(complimentaryFilterHandle,
+                                                                                                           kalmanFilterHandle,
+                                                                                                           imuDefinition,
+                                                                                                           sensorReaderRegistry);
                yoIMUHandleHolders.add(holder);
                stateEstimatorSensorDefinitions.addIMUSensorDefinition(imuDefinition);
             }
@@ -180,18 +195,27 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
 
       for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
       {
-         System.out.println("Looking for forceSensorDefinition " + forceSensorDefinition.getSensorName());
          if (forceTorqueSensorHandles.containsKey(forceSensorDefinition.getSensorName()))
          {
             stateEstimatorSensorDefinitions.addForceSensorDefinition(forceSensorDefinition);
             YoForceTorqueSensorHandle holder = new YoForceTorqueSensorHandle(forceTorqueSensorHandles.get(forceSensorDefinition.getSensorName()),
-                  forceSensorDefinition, sensorReaderRegistry);
+                                                                             forceSensorDefinition,
+                                                                             sensorReaderRegistry);
             yoForceTorqueSensorHandles.add(holder);
          }
       }
 
-      sensorReader = new ValkyrieRosControlSensorReader(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, wallTimeProvider, monotonicTimeProvider,
-            yoEffortJointHandleHolders, yoPositionJointHandleHolders, yoJointStateHandleHolders, yoIMUHandleHolders, yoForceTorqueSensorHandles, jointMap, sensorReaderRegistry);
+      sensorReader = new ValkyrieRosControlSensorReader(stateEstimatorSensorDefinitions,
+                                                        sensorProcessingConfiguration,
+                                                        wallTimeProvider,
+                                                        monotonicTimeProvider,
+                                                        yoEffortJointHandleHolders,
+                                                        yoPositionJointHandleHolders,
+                                                        yoJointStateHandleHolders,
+                                                        yoIMUHandleHolders,
+                                                        yoForceTorqueSensorHandles,
+                                                        jointMap,
+                                                        sensorReaderRegistry);
 
       parentRegistry.addChild(sensorReaderRegistry);
    }

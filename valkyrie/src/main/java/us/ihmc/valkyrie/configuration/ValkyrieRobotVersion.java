@@ -1,6 +1,8 @@
 package us.ihmc.valkyrie.configuration;
 
-public enum ValkyrieRobotVersion
+import us.ihmc.avatar.drcRobot.RobotVersion;
+
+public enum ValkyrieRobotVersion implements RobotVersion
 {
    DEFAULT,
    FINGERLESS,
@@ -59,7 +61,7 @@ public enum ValkyrieRobotVersion
       }
    }
 
-   public boolean hasArms()
+   public boolean hasBothArms()
    {
       switch(this)
       {

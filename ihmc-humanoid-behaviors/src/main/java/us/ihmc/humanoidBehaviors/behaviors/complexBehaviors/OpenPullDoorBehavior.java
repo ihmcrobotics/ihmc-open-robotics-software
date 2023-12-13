@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.*;
 import perception_msgs.msg.dds.DoorLocationPacket;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -94,7 +95,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
       abortMessagePublisher = createPublisherForController(AutomaticManipulationAbortMessage.class);
 
-      createSubscriber(DoorLocationPacket.class, ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationPacket::set);
+      createSubscriber(DoorLocationPacket.class, PerceptionAPI.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationPacket::set);
 
       setupStateMachine();
 

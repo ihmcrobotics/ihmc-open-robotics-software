@@ -59,11 +59,13 @@ public class RDXPointCloudRenderer implements RenderableProvider
 
    public interface ColorProvider
    {
-      public float getNextR();
+      float getNextR();
 
-      public float getNextG();
+      float getNextG();
 
-      public float getNextB();
+      float getNextB();
+
+      float getNextA();
    }
 
    public void create(int size)
@@ -226,7 +228,7 @@ public class RDXPointCloudRenderer implements RenderableProvider
    {
       FloatBuffer floatBuffer = renderable.meshPart.mesh.getVerticesBuffer();
       floatBuffer.position(0);
-      floatBuffer.limit(numberOfPoints * floatsPerVertex);
+      floatBuffer.limit(numberOfPoints * FLOATS_PER_VERTEX);
       renderable.meshPart.size = numberOfPoints;
    }
 
@@ -402,6 +404,12 @@ public class RDXPointCloudRenderer implements RenderableProvider
          {
             return Color.WHITE.b;
          }
+
+         @Override
+         public float getNextA()
+         {
+            return Color.WHITE.a;
+         }
       });
    }
 
@@ -426,6 +434,12 @@ public class RDXPointCloudRenderer implements RenderableProvider
          {
             return color.b;
          }
+
+         @Override
+         public float getNextA()
+         {
+            return color.a;
+         }
       });
    }
 
@@ -443,6 +457,11 @@ public class RDXPointCloudRenderer implements RenderableProvider
    public int getFloatsPerVertex()
    {
       return floatsPerVertex;
+   }
+
+   public int getMaxPoints()
+   {
+      return maxPoints;
    }
 
    public int getCurrentSegmentIndex()

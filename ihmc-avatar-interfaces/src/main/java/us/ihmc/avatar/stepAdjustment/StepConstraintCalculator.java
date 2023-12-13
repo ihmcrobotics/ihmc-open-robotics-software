@@ -66,38 +66,32 @@ public class StepConstraintCalculator
 
    public StepConstraintCalculator(WalkingControllerParameters walkingControllerParameters,
                                    SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                                   ReferenceFrame centerOfMassFrame,
-                                   DoubleProvider timeProvider,
-                                   double gravityZ)
+                                   DoubleProvider timeProvider)
    {
       this(soleZUpFrames,
-           centerOfMassFrame,
            walkingControllerParameters.getSteppingParameters().getFootLength(),
            walkingControllerParameters.getSteppingParameters().getFootWidth(),
            walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
            walkingControllerParameters.getSteppingParameters().getMaxBackwardStepLength(),
            walkingControllerParameters.getSteppingParameters().getMinStepWidth(),
            walkingControllerParameters.getSteppingParameters().getMaxStepWidth(),
-           timeProvider,
-           gravityZ);
+           timeProvider);
    }
 
    public StepConstraintCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                                   ReferenceFrame centerOfMassFrame,
                                    double footLength,
                                    double footWidth,
                                    double kinematicStepRange,
                                    double maxBackwardStepLength,
                                    double minStepWidth,
                                    double maxStepWidth,
-                                   DoubleProvider timeProvider,
-                                   double gravityZ)
+                                   DoubleProvider timeProvider)
    {
       this.timeProvider = timeProvider;
       this.soleZUpFrames = soleZUpFrames;
       this.steppableRegionsCalculator = new SteppableRegionsCalculator(kinematicStepRange, registry);
       this.captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange, soleZUpFrames, registry, graphicsListRegistry);
-      this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, gravityZ, () -> true, registry, graphicsListRegistry);
+      this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(registry, graphicsListRegistry);
       this.reachabilityConstraintCalculator = new ReachabilityConstraintCalculator(soleZUpFrames,
                                                                                    footLength,
                                                                                    footWidth,
@@ -208,7 +202,6 @@ public class StepConstraintCalculator
             return;
 
          planarRegionDecider.setConstraintRegions(steppableRegions);
-         planarRegionDecider.setOmega0(omega);
          planarRegionDecider.setCaptureRegion(captureRegionCalculator.getCaptureRegion());
          planarRegionDecider.updatePlanarRegionConstraintForStep(currentStep.getStepPose(), yoReachabilityRegion);
 

@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::KinematicsToolboxCenterOfMassMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "6c372e16c39ac26f646ed283adcdd54d5e01eb2546014e395bdb0d65f80dd999";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -7,12 +7,10 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
-import us.ihmc.behaviors.BehaviorDefinition;
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
-import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.ResettingNode;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
@@ -28,6 +26,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -40,15 +39,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorOldAPI.*;
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.REACHED_GOAL;
 
-public class BuildingExplorationBehaviorOld extends ResettingNode implements BehaviorInterface
+/**
+ * This was used for the 2019 Atlas building exploration demo. It is called old because
+ * an upgrade was planned but never finished.
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
+public class BuildingExplorationBehaviorOld extends ResettingNode implements Destroyable
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration",
-                                                                              BuildingExplorationBehaviorOld::new,
-                                                                              BuildingExplorationBehaviorAPI.API);
-
    private static final int UPDATE_RATE_MILLIS = 50;
    private final static Pose3D NAN_POSE = new Pose3D();
    static
@@ -95,28 +94,28 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
       walkThroughDoorState = new BuildingExplorationBehaviorWalkThroughDoorState(helper);
       traverseStairsState = new BuildingExplorationBehaviorTraverseStairsState(helper, bombPose);
 
-      addChild(lookAndStepBehavior);
+      getChildren().add(lookAndStepBehavior);
 
       syncedRobot = helper.newSyncedRobot();
-      helper.subscribeViaCallback(Goal, this::setGoal);
+//      helper.subscribeViaCallback(Goal, this::setGoal);
       helper.subscribeViaCallback(REACHED_GOAL, () -> setGoal(NAN_POSE));
-      helper.subscribeViaCallback(RequestedState, this::requestState);
-      AtomicReference<BuildingExplorationStateName> requestedState = helper.subscribeViaReference(RequestedState, BuildingExplorationStateName.TELEOP);
+//      helper.subscribeViaCallback(RequestedState, this::requestState);
+//      AtomicReference<BuildingExplorationStateName> requestedState = helper.subscribeViaReference(RequestedState, BuildingExplorationStateName.TELEOP);
 
-      helper.subscribeViaCallback(Start, start ->
-      {
-         LogTools.info("Starting");
-         setBombPose(goal.get());
-         requestState(requestedState.get());
-         start();
-      });
-      helper.subscribeViaCallback(Stop, s -> stop());
-      setStateChangedCallback(newState -> helper.publish(CurrentState, newState));
-      setDebrisDetectedCallback(() -> helper.publish(DebrisDetected, true));
-      setStairsDetectedCallback(() -> helper.publish(StairsDetected, true));
-      setDoorDetectedCallback(() -> helper.publish(DoorDetected, true));
-      helper.subscribeViaCallback(IgnoreDebris, ignore -> ignoreDebris());
-      helper.subscribeViaCallback(ConfirmDoor, confirm -> proceedWithDoorBehavior());
+//      helper.subscribeViaCallback(Start, start ->
+//      {
+//         LogTools.info("Starting");
+//         setBombPose(goal.get());
+//         requestState(requestedState.get());
+//         start();
+//      });
+//      helper.subscribeViaCallback(Stop, s -> stop());
+//      setStateChangedCallback(newState -> helper.publish(CurrentState, newState));
+//      setDebrisDetectedCallback(() -> helper.publish(DebrisDetected, true));
+//      setStairsDetectedCallback(() -> helper.publish(StairsDetected, true));
+//      setDoorDetectedCallback(() -> helper.publish(DoorDetected, true));
+//      helper.subscribeViaCallback(IgnoreDebris, ignore -> ignoreDebris());
+//      helper.subscribeViaCallback(ConfirmDoor, confirm -> proceedWithDoorBehavior());
       helper.subscribeToDoorLocationViaCallback(doorLocationPacket::set);
       helper.subscribeToRobotConfigurationDataViaCallback(robotConfigurationData::set);
 
@@ -139,7 +138,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
       goal.set(newGoal);
       if (!newGoal.containsNaN())
          lookAndStepBehavior.acceptGoal(newGoal);
-      helper.publish(GoalForUI, goal.get());
+//      helper.publish(GoalForUI, goal.get());
    }
 
    private void startWakeUpToolboxesThread()
@@ -153,7 +152,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       syncedRobot.update();
 
@@ -161,7 +160,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
       {
          if (lookAndStepBehavior.isReset())
             lookAndStepBehavior.acceptGoal(goal.get());
-         return lookAndStepBehavior.tick();
+         return lookAndStepBehavior.tickAndGetStatus();
       }
 
       return BehaviorTreeNodeStatus.RUNNING;
@@ -173,10 +172,9 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
 
    }
 
-   @Override
    public String getName()
    {
-      return DEFINITION.getName();
+      return "Building Exploration";
    }
 
    public void setBombPose(Pose3DReadOnly bombPose)
@@ -285,7 +283,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
       return factory.build(BuildingExplorationStateName.TELEOP);
    }
 
-   private void update()
+   public void update()
    {
       if (stopRequested.getAndSet(false))
       {

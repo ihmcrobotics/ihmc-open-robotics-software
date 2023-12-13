@@ -6,7 +6,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
+import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
@@ -85,7 +85,7 @@ public class FFMPEGLoggerDemoHelper
       ImGui.inputInt(labels.get("framerate"), framerate, 1);
    }
 
-   public void renderImGuiNativesLoaded()
+   public void renderImGuiWidgets()
    {
       if (!logging)
       {
@@ -141,23 +141,23 @@ public class FFMPEGLoggerDemoHelper
          {
             LogTools.info("Creating logger of class " + loggerClass.getSimpleName() + " using reflection");
             Constructor<? extends FFMPEGLogger> constructor = loggerClass.getConstructor(int.class,
-                                                                               int.class,
-                                                                               boolean.class,
-                                                                               int.class,
-                                                                               int.class,
-                                                                               int.class,
-                                                                               int.class,
-                                                                               String.class,
-                                                                               String.class);
+                                                                                         int.class,
+                                                                                         boolean.class,
+                                                                                         int.class,
+                                                                                         int.class,
+                                                                                         int.class,
+                                                                                         int.class,
+                                                                                         String.class,
+                                                                                         String.class);
             logger = constructor.newInstance(imageWidth,
-                                   imageHeight,
-                                   lossless,
-                                   framerate.get(),
-                                   bitRate,
-                                   sourcePixelFormat,
-                                   encoderPixelFormat,
-                                   fileName,
-                                   preferredVideoEncoder);
+                                             imageHeight,
+                                             lossless,
+                                             framerate.get(),
+                                             bitRate,
+                                             sourcePixelFormat,
+                                             encoderPixelFormat,
+                                             fileName,
+                                             preferredVideoEncoder);
          }
          catch (ReflectiveOperationException ex)
          {
@@ -167,15 +167,15 @@ public class FFMPEGLoggerDemoHelper
       }
 
       if (logger == null)
-         logger = new FFMPEGLogger(imageWidth,
-                                   imageHeight,
-                                   lossless,
-                                   framerate.get(),
-                                   bitRate,
-                                   sourcePixelFormat,
-                                   encoderPixelFormat,
-                                   fileName,
-                                   preferredVideoEncoder);
+         logger = new FFMPEGFileLogger(imageWidth,
+                                       imageHeight,
+                                       lossless,
+                                       framerate.get(),
+                                       bitRate,
+                                       sourcePixelFormat,
+                                       encoderPixelFormat,
+                                       fileName,
+                                       preferredVideoEncoder);
 
       finalizing = true;
 

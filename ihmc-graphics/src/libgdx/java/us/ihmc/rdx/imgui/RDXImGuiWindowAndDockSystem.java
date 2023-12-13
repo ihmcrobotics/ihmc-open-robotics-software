@@ -2,37 +2,34 @@ package us.ihmc.rdx.imgui;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import imgui.*;
 import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImString;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.opengl.KHRDebug;
 import org.lwjgl.system.Callback;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.HybridDirectory;
-import us.ihmc.tools.io.HybridFile;
-import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
+import us.ihmc.tools.io.*;
 import us.ihmc.tools.io.resources.ResourceTools;
 
-import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Consumer;
-
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.KHRDebug.GL_DEBUG_SEVERITY_HIGH;
 
 public class RDXImGuiWindowAndDockSystem
 {
    public static final String IMGUI_SETTINGS_INI_FILE_NAME = "ImGuiSettings.ini";
+   private final RDXImGuiLayoutManager layoutManager;
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
    private long context;
@@ -42,22 +39,26 @@ public class RDXImGuiWindowAndDockSystem
    private ImFont imFont;
    private int dockspaceId;
    private final ImString newDockPanelName = new ImString("", 100);
-   private final TreeSet<ImGuiDockspacePanel> dockPanelSet = new TreeSet<>(Comparator.comparing(ImGuiDockspacePanel::getName));
-   private final ImGuiPanelManager panelManager;
-   private HybridFile imGuiSettingsFile;
-   private HybridFile panelsFile;
-   private boolean isFirstRenderCall = true;
+   private final TreeSet<RDXDockspacePanel> dockPanelSet = new TreeSet<>(Comparator.comparing(RDXDockspacePanel::getName));
+   private final TIntObjectHashMap<RDXDockspacePanel> dockIDMap = new TIntObjectHashMap<>();
+   private final RDXPanelManager panelManager;
+   private HybridResourceFile imGuiSettingsFile;
+   private HybridResourceFile panelsFile;
    private Callback debugMessageCallback;
+   private final ImGuiSize calculatedPrimaryWindowSize = new ImGuiSize(LibGDXApplicationCreator.DEFAULT_WINDOW_WIDTH,
+                                                                       LibGDXApplicationCreator.DEFAULT_WINDOW_HEIGHT);
+   private final ImGuiPosition primaryWindowContentAreaPosition = new ImGuiPosition(0, 0);
 
-   public RDXImGuiWindowAndDockSystem()
+   public RDXImGuiWindowAndDockSystem(RDXImGuiLayoutManager layoutManager)
    {
-      panelManager = new ImGuiPanelManager();
+      this.layoutManager = layoutManager;
+      panelManager = new RDXPanelManager();
    }
 
-   public void setDirectory(HybridDirectory configurationDirectory)
+   public void setDirectory(HybridResourceDirectory configurationDirectory)
    {
-      imGuiSettingsFile = new HybridFile(configurationDirectory, IMGUI_SETTINGS_INI_FILE_NAME);
-      panelsFile = new HybridFile(configurationDirectory, "ImGuiPanels.json");
+      imGuiSettingsFile = new HybridResourceFile(configurationDirectory, IMGUI_SETTINGS_INI_FILE_NAME);
+      panelsFile = new HybridResourceFile(configurationDirectory, "ImGuiPanels.json");
    }
 
    public void create(long windowHandle)
@@ -66,13 +67,13 @@ public class RDXImGuiWindowAndDockSystem
 
       GLFWErrorCallback.createPrint(System.err).set();
 
-      if (!glfwInit())
+      if (!GLFW.glfwInit())
       {
          throw new IllegalStateException("Unable to initialize GLFW");
       }
 
       if (LibGDXTools.ENABLE_OPENGL_DEBUGGER)
-         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_DEBUG_CONTEXT, GLFW.GLFW_TRUE);
 
       // TODO: Something needed here for Mac support?
       // glfwDefaultWindowHints();
@@ -93,7 +94,7 @@ public class RDXImGuiWindowAndDockSystem
       ImGuiTools.setCurrentContext(context);
 
       if (LibGDXTools.ENABLE_OPENGL_DEBUGGER)
-         debugMessageCallback = LibGDXTools.setupDebugMessageCallback(GL_DEBUG_SEVERITY_HIGH);
+         debugMessageCallback = LibGDXTools.setupDebugMessageCallback(KHRDebug.GL_DEBUG_SEVERITY_HIGH);
 
       final ImGuiIO io = ImGui.getIO();
       io.setIniFilename(null); // We don't want to save .ini file
@@ -108,10 +109,13 @@ public class RDXImGuiWindowAndDockSystem
       ImGuiTools.initializeColorStyle();
       imFont = ImGuiTools.setupFonts(io, fontSizeLevel);
 
+      // Add a 1px frame border to UI elements
+      ImGuiStyle style = ImGui.getStyle();
+      style.setFrameBorderSize(1.0f);
+
       // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
       if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable))
       {
-         final ImGuiStyle style = imgui.ImGui.getStyle();
          style.setWindowRounding(0.0f);
          style.setColor(ImGuiCol.WindowBg, imgui.ImGui.getColorU32(ImGuiCol.WindowBg, 1));
       }
@@ -124,14 +128,11 @@ public class RDXImGuiWindowAndDockSystem
    {
       ImGuiTools.setCurrentContext(context);
 
-      if (isFirstRenderCall)
-      {
-         loadUserConfigurationWithDefaultFallback();
-      }
-
       ImGuiTools.glClearDarkGray();
       imGuiGlfw.newFrame();
       ImGui.newFrame();
+
+      layoutManager.loadInitialLayout();
 
       ImGui.pushFont(imFont);
 
@@ -141,18 +142,13 @@ public class RDXImGuiWindowAndDockSystem
 
       dockspaceId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), flags);
 
-      ImGuiDockspacePanel justClosedPanel = null;
-      for (ImGuiDockspacePanel dockspacePanel : dockPanelSet)
+      for (RDXDockspacePanel dockspacePanel : dockPanelSet)
       {
          dockspacePanel.renderPanel();
-         if (dockspacePanel.getWasJustClosed())
-         {
-            justClosedPanel = dockspacePanel;
-            LogTools.debug("Closed dockspace panel: {}", justClosedPanel.getName());
-         }
+         dockIDMap.put(dockspacePanel.getDockspaceID(), dockspacePanel);
       }
 
-      panelManager.renderPanels(justClosedPanel);
+      panelManager.renderPanels(dockIDMap);
    }
 
    public void renderMenuDockPanelItems()
@@ -165,11 +161,11 @@ public class RDXImGuiWindowAndDockSystem
       ImGui.sameLine();
       if (ImGui.button("Create###createNewDockPanelButton") && !newDockPanelName.get().isEmpty())
       {
-         dockPanelSet.add(new ImGuiDockspacePanel(newDockPanelName.get()));
+         dockPanelSet.add(new RDXDockspacePanel(newDockPanelName.get()));
       }
 
-      ImGuiDockspacePanel dockspacePanelToRemove = null;
-      for (ImGuiDockspacePanel dockspacePanel : dockPanelSet)
+      RDXDockspacePanel dockspacePanelToRemove = null;
+      for (RDXDockspacePanel dockspacePanel : dockPanelSet)
       {
          dockspacePanel.renderMenuItem();
          ImGui.sameLine();
@@ -200,52 +196,61 @@ public class RDXImGuiWindowAndDockSystem
 
    public boolean loadConfiguration(ImGuiConfigurationLocation configurationLocation)
    {
-      boolean success = false;
       imGuiSettingsFile.setMode(configurationLocation.toHybridResourceMode());
-      if (imGuiSettingsFile.isInputStreamAvailable())
+      LogTools.info("Loading ImGui settings from {}", imGuiSettingsFile.getLocationOfResourceForReading());
+      boolean settingsSuccess = imGuiSettingsFile.getInputStream(inputStream ->
       {
-         LogTools.info("Loading ImGui settings from {}", imGuiSettingsFile.getLocationOfResourceForReading());
-         InputStream classpathResourceAsStream = imGuiSettingsFile.getClasspathResourceAsStream();
-         if (classpathResourceAsStream == null)
-         {
-            throw new RuntimeException("Classpath resource stream is null!");
-         }
-         String iniContentsAsString = ResourceTools.readResourceToString(classpathResourceAsStream);
-         ImGui.loadIniSettingsFromMemory(iniContentsAsString);
-         success = true;
+         String settingsINIAsString = ResourceTools.readResourceToString(inputStream);
+         ImGuiTools.parsePrimaryWindowSizeFromSettingsINI(settingsINIAsString, calculatedPrimaryWindowSize);
+         int widthFromINI = calculatedPrimaryWindowSize.getWidth();
+         int heightFromINI = calculatedPrimaryWindowSize.getHeight();
+         int menuBarHeight = (int) ImGui.getFrameHeight();
+         calculatedPrimaryWindowSize.setWidth(widthFromINI);
+         calculatedPrimaryWindowSize.setHeight(heightFromINI + menuBarHeight);
+         ImGuiTools.parsePrimaryWindowPositionFromSettingsINI(settingsINIAsString, primaryWindowContentAreaPosition);
+         int loadedX = primaryWindowContentAreaPosition.getX();
+         int loadedY = primaryWindowContentAreaPosition.getY();
+         primaryWindowContentAreaPosition.setX(loadedX);
+         primaryWindowContentAreaPosition.setY(loadedY - menuBarHeight);
+         ImGui.loadIniSettingsFromMemory(settingsINIAsString);
+      });
 
-         panelsFile.setMode(configurationLocation.toHybridResourceMode());
-         LogTools.info("Loading ImGui panels settings from {}", panelsFile.getLocationOfResourceForReading());
-         JSONFileTools.load(panelsFile.getInputStream(), jsonNode ->
+      panelsFile.setMode(configurationLocation.toHybridResourceMode());
+      LogTools.info("Loading ImGui panels settings from {}", panelsFile.getLocationOfResourceForReading());
+      boolean panelSettingsSuccess = panelsFile.getInputStream(inputStream ->
+      {
+         JSONFileTools.load(inputStream, this::loadPanelsJSON);
+      });
+      return settingsSuccess && panelSettingsSuccess;
+   }
+
+   private void loadPanelsJSON(JsonNode jsonNode)
+   {
+      JsonNode dockspacePanelsNode = jsonNode.get("dockspacePanels");
+      if (dockspacePanelsNode != null)
+      {
+         RDXDockspacePanel[] priorDockpanelSet = dockPanelSet.toArray(new RDXDockspacePanel[0]);
+         dockPanelSet.clear();
+         for (Iterator<Map.Entry<String, JsonNode>> it = dockspacePanelsNode.fields(); it.hasNext(); )
          {
-            JsonNode dockspacePanelsNode = jsonNode.get("dockspacePanels");
-            if (dockspacePanelsNode != null)
+            Map.Entry<String, JsonNode> dockspacePanelEntry = it.next();
+            RDXDockspacePanel dockspacePanel = null;
+            for (RDXDockspacePanel otherDockspacePanel : priorDockpanelSet)
             {
-               ImGuiDockspacePanel[] priorDockpanelSet = dockPanelSet.toArray(new ImGuiDockspacePanel[0]);
-               dockPanelSet.clear();
-               for (Iterator<Map.Entry<String, JsonNode>> it = dockspacePanelsNode.fields(); it.hasNext(); )
+               if (otherDockspacePanel.getName().equals(dockspacePanelEntry.getKey()))
                {
-                  Map.Entry<String, JsonNode> dockspacePanelEntry = it.next();
-                  ImGuiDockspacePanel dockspacePanel = null;
-                  for (ImGuiDockspacePanel otherDockspacePanel : priorDockpanelSet)
-                  {
-                     if (otherDockspacePanel.getName().equals(dockspacePanelEntry.getKey()))
-                     {
-                        dockspacePanel = otherDockspacePanel;
-                     }
-                  }
-                  if (dockspacePanel == null)
-                  {
-                     dockspacePanel = new ImGuiDockspacePanel(dockspacePanelEntry.getKey());
-                  }
-                  dockPanelSet.add(dockspacePanel);
-                  dockspacePanel.getIsShowing().set(dockspacePanelEntry.getValue().asBoolean());
+                  dockspacePanel = otherDockspacePanel;
                }
             }
-            panelManager.loadConfiguration(jsonNode);
-         });
+            if (dockspacePanel == null)
+            {
+               dockspacePanel = new RDXDockspacePanel(dockspacePanelEntry.getKey());
+            }
+            dockPanelSet.add(dockspacePanel);
+            dockspacePanel.getIsShowing().set(dockspacePanelEntry.getValue().asBoolean());
+         }
       }
-      return success;
+      panelManager.loadConfiguration(jsonNode);
    }
 
    public void saveConfiguration(ImGuiConfigurationLocation saveConfigurationLocation)
@@ -260,7 +265,7 @@ public class RDXImGuiWindowAndDockSystem
       Consumer<ObjectNode> rootConsumer = root ->
       {
          ObjectNode anchorJSON = root.putObject("dockspacePanels");
-         for (ImGuiDockspacePanel dockspacePanel : dockPanelSet)
+         for (RDXDockspacePanel dockspacePanel : dockPanelSet)
          {
             anchorJSON.put(dockspacePanel.getName(), dockspacePanel.getIsShowing().get());
          }
@@ -275,25 +280,6 @@ public class RDXImGuiWindowAndDockSystem
 
    public void afterWindowManagement()
    {
-      if (isFirstRenderCall)
-      {
-         JSONFileTools.loadUserWithClasspathDefaultFallback(panelsFile, jsonNode ->
-         {
-            JsonNode dockspacePanelsNode = jsonNode.get("dockspacePanels");
-            if (dockspacePanelsNode != null)
-            {
-               for (Iterator<Map.Entry<String, JsonNode>> it = dockspacePanelsNode.fields(); it.hasNext(); )
-               {
-                  Map.Entry<String, JsonNode> dockspacePanelEntry = it.next();
-                  ImGuiDockspacePanel dockspacePanel = new ImGuiDockspacePanel(dockspacePanelEntry.getKey());
-                  dockspacePanel.getIsShowing().set(dockspacePanelEntry.getValue().asBoolean());
-                  dockPanelSet.add(dockspacePanel);
-               }
-            }
-            panelManager.loadConfiguration(jsonNode);
-         });
-      }
-
       ImGui.popFont();
 
       ImGui.render();
@@ -301,13 +287,11 @@ public class RDXImGuiWindowAndDockSystem
 
       if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable))
       {
-         final long backupWindowPtr = glfwGetCurrentContext();
+         final long backupWindowPtr = GLFW.glfwGetCurrentContext();
          ImGui.updatePlatformWindows();
          ImGui.renderPlatformWindowsDefault();
-         glfwMakeContextCurrent(backupWindowPtr);
+         GLFW.glfwMakeContextCurrent(backupWindowPtr);
       }
-
-      isFirstRenderCall = false;
    }
 
    public void dispose()
@@ -325,7 +309,7 @@ public class RDXImGuiWindowAndDockSystem
       return imGuiGl3;
    }
 
-   public ImGuiPanelManager getPanelManager()
+   public RDXPanelManager getPanelManager()
    {
       return panelManager;
    }
@@ -338,5 +322,15 @@ public class RDXImGuiWindowAndDockSystem
    public ImFont getImFont()
    {
       return imFont;
+   }
+
+   public ImGuiSize getCalculatedPrimaryWindowSize()
+   {
+      return calculatedPrimaryWindowSize;
+   }
+
+   public ImGuiPosition getPrimaryWindowContentAreaPosition()
+   {
+      return primaryWindowContentAreaPosition;
    }
 }

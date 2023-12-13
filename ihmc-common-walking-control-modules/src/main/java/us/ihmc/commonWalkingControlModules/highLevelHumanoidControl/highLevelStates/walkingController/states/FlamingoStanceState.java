@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
@@ -38,8 +39,12 @@ public class FlamingoStanceState extends SingleSupportState
    private final FootstepTiming footstepTiming = new FootstepTiming();
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   public FlamingoStanceState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
-                              HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
+   public FlamingoStanceState(WalkingStateEnum stateEnum,
+                              WalkingControllerParameters walkingControllerParameters,
+                              WalkingMessageHandler walkingMessageHandler,
+                              HighLevelHumanoidControllerToolbox controllerToolbox,
+                              HighLevelControlManagerFactory managerFactory,
+                              WalkingFailureDetectionControlModule failureDetectionControlModule,
                               YoRegistry parentRegistry)
    {
       super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, parentRegistry);
@@ -59,8 +64,8 @@ public class FlamingoStanceState extends SingleSupportState
       loadFootTransferDuration = new YoDouble(namePrefix + "LoadFootTransferDuration", registry);
 
       loadFoot.set(false);
-      loadFootDuration.set(1.2);
-      loadFootTransferDuration.set(0.8);
+      loadFootDuration.set(walkingControllerParameters.getLoadFootDuration()); //1.2
+      loadFootTransferDuration.set(walkingControllerParameters.getLoadFootTransferDuration()); //0.8
    }
 
    @Override
@@ -73,11 +78,10 @@ public class FlamingoStanceState extends SingleSupportState
       if (loadFoot.getBooleanValue() && loadFootStartTime.isNaN())
          loadFootStartTime.set(timeInState);
 
-      if (walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
-      {
-         while (walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
-            feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
-      }
+      while (walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
+         feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
+      while (walkingMessageHandler.hasLegTrajectoryForFlamingoStance(swingSide))
+         feetManager.handleLegTrajectoryCommand(walkingMessageHandler.pollLegTrajectoryForFlamingoStance(swingSide));
 
       capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
 
@@ -99,7 +103,7 @@ public class FlamingoStanceState extends SingleSupportState
          }
       }
 
-      walkingMessageHandler.clearFootTrajectory(supportSide);
+      walkingMessageHandler.clearFlamingoCommands(supportSide);
    }
 
    @Override
@@ -131,7 +135,12 @@ public class FlamingoStanceState extends SingleSupportState
       super.onEntry();
 
       balanceManager.enablePelvisXYControl();
-      feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
+      if (walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
+         feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
+      else if (walkingMessageHandler.hasLegTrajectoryForFlamingoStance(swingSide))
+         feetManager.handleLegTrajectoryCommand(walkingMessageHandler.pollLegTrajectoryForFlamingoStance(swingSide));
+      else
+         throw new IllegalStateException("Entered flamingo stance state without Foot/LegTrajectoryCommand?!");
 
       double swingTime = Double.POSITIVE_INFINITY;
       double initialTransferTime = walkingMessageHandler.getInitialTransferTime();

@@ -14,8 +14,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -23,7 +28,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class PartialFootholdControlModule
+public class PartialFootholdControlModule implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -41,8 +46,10 @@ public class PartialFootholdControlModule
    public enum RotationCalculatorType
    {
       VELOCITY, GEOMETRY, BOTH;
+
       public static RotationCalculatorType[] values = values();
    }
+
    private final EnumMap<RotationCalculatorType, FootRotationCalculator> rotationCalculators = new EnumMap<>(RotationCalculatorType.class);
    private final EnumMap<RotationCalculatorType, FrameLine2D> lineOfRotations = new EnumMap<>(RotationCalculatorType.class);
    private final YoEnum<RotationCalculatorType> rotationCalculatorType;
@@ -100,9 +107,12 @@ public class PartialFootholdControlModule
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
-   public PartialFootholdControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                       WalkingControllerParameters walkingControllerParameters, ExplorationParameters explorationParameters,
-                                       YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public PartialFootholdControlModule(RobotSide robotSide,
+                                       HighLevelHumanoidControllerToolbox controllerToolbox,
+                                       WalkingControllerParameters walkingControllerParameters,
+                                       ExplorationParameters explorationParameters,
+                                       YoRegistry parentRegistry,
+                                       YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       ContactableFoot contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       String namePrefix = contactableFoot.getRigidBody().getName();
@@ -145,7 +155,13 @@ public class PartialFootholdControlModule
          yoGraphicsListRegistry.registerArtifact(listName, yoShrunkPolygon);
       }
 
-      footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix, soleFrame, 40, 20, walkingControllerParameters, explorationParameters, yoGraphicsListRegistry,
+      footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix,
+                                                      soleFrame,
+                                                      40,
+                                                      20,
+                                                      walkingControllerParameters,
+                                                      explorationParameters,
+                                                      yoGraphicsListRegistry,
                                                       registry);
 
       shrinkMaxLimit = explorationParameters.getShrinkMaxLimit();
@@ -169,10 +185,17 @@ public class PartialFootholdControlModule
 
       double dt = controllerToolbox.getControlDT();
 
-      FootRotationCalculator velocityFootRotationCalculator =
-            new VelocityFootRotationCalculator(namePrefix, dt, contactableFoot, explorationParameters, yoGraphicsListRegistry, registry);
-      FootRotationCalculator geometricFootRotationCalculator =
-            new GeometricFootRotationCalculator(namePrefix, contactableFoot, explorationParameters, yoGraphicsListRegistry, registry);
+      FootRotationCalculator velocityFootRotationCalculator = new VelocityFootRotationCalculator(namePrefix,
+                                                                                                 dt,
+                                                                                                 contactableFoot,
+                                                                                                 explorationParameters,
+                                                                                                 yoGraphicsListRegistry,
+                                                                                                 registry);
+      FootRotationCalculator geometricFootRotationCalculator = new GeometricFootRotationCalculator(namePrefix,
+                                                                                                   contactableFoot,
+                                                                                                   explorationParameters,
+                                                                                                   yoGraphicsListRegistry,
+                                                                                                   registry);
       rotationCalculators.put(RotationCalculatorType.VELOCITY, velocityFootRotationCalculator);
       rotationCalculators.put(RotationCalculatorType.GEOMETRY, geometricFootRotationCalculator);
       lineOfRotations.put(RotationCalculatorType.VELOCITY, new FrameLine2D(soleFrame));
@@ -200,7 +223,8 @@ public class PartialFootholdControlModule
       boolean atLeastOneTriggered = false;
       for (RotationCalculatorType calculatorType : RotationCalculatorType.values)
       {
-         if (!rotationCalculators.containsKey(calculatorType)) continue;
+         if (!rotationCalculators.containsKey(calculatorType))
+            continue;
          rotationCalculators.get(calculatorType).compute(desiredCenterOfPressure, centerOfPressure);
          rotationCalculators.get(calculatorType).getLineOfRotation(lineOfRotations.get(calculatorType));
 
@@ -267,9 +291,11 @@ public class PartialFootholdControlModule
    private void computeShrunkFoothold(FramePoint2D desiredCenterOfPressure)
    {
       boolean wasCoPInThatRegion = false;
-      if (useCoPOccupancyGrid.getBooleanValue()) {
-         numberOfCellsOccupiedOnSideOfLine.set(footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, RobotSide.RIGHT,
-               distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue()));
+      if (useCoPOccupancyGrid.getBooleanValue())
+      {
+         numberOfCellsOccupiedOnSideOfLine.set(footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation,
+                                                                                                             RobotSide.RIGHT,
+                                                                                                             distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue()));
          wasCoPInThatRegion = numberOfCellsOccupiedOnSideOfLine.getIntegerValue() >= thresholdForCoPRegionOccupancy.getIntegerValue();
       }
 
@@ -348,12 +374,12 @@ public class PartialFootholdControlModule
       fullSupportAfterShrinking.update();
       controllerToolbox.getCapturePoint(capturePoint);
       yoFullSupportAfterShrinking.set(fullSupportAfterShrinking);
-//      boolean icpInPolygon = fullSupportAfterShrinking.isPointInside(capturePoint);
-//      if (!icpInPolygon)
-//      {
-//         shrunkFootPolygon.set(backupFootPolygon);
-//         return false;
-//      }
+      //      boolean icpInPolygon = fullSupportAfterShrinking.isPointInside(capturePoint);
+      //      if (!icpInPolygon)
+      //      {
+      //         shrunkFootPolygon.set(backupFootPolygon);
+      //         return false;
+      //      }
 
       List<YoContactPoint> contactPoints = contactStateToModify.getContactPoints();
       for (int i = 0; i < controllerFootPolygon.getNumberOfVertices(); i++)
@@ -378,16 +404,17 @@ public class PartialFootholdControlModule
    private final FrameLine2D lineL = new FrameLine2D();
    private final FrameLine2D lineR = new FrameLine2D();
    private static final double width = 0.01;
+
    private void fitLine()
    {
       if (!footCoPOccupancyGrid.fitLineToData(line))
          return;
 
       lineL.setIncludingFrame(line);
-      lineL.shiftToLeft(width/2.0);
+      lineL.shiftToLeft(width / 2.0);
 
       lineR.setIncludingFrame(line);
-      lineR.shiftToRight(width/2.0);
+      lineR.shiftToRight(width / 2.0);
 
       backupFootPolygon.set(shrunkFootPolygon);
       shrunkFootPolygon.clear();
@@ -410,7 +437,8 @@ public class PartialFootholdControlModule
       yoFullSupportAfterShrinking.clear();
       for (RotationCalculatorType calculatorType : RotationCalculatorType.values)
       {
-         if (!rotationCalculators.containsKey(calculatorType)) continue;
+         if (!rotationCalculators.containsKey(calculatorType))
+            continue;
          rotationCalculators.get(calculatorType).reset();
       }
       footCoPOccupancyGrid.reset();
@@ -450,5 +478,19 @@ public class PartialFootholdControlModule
          requestLineFit();
          turnOffCropping();
       }
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      String namePrefix = controllerToolbox.getContactableFeet().get(robotSide).getName();
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D(namePrefix + "UnsafeRegion", yoUnsafePolygon, ColorDefinitions.Red()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D(namePrefix + "ShrunkPolygon", yoShrunkFootPolygon, ColorDefinitions.Cyan()));
+      group.addChild(footCoPOccupancyGrid.getSCS2YoGraphics());
+      for (FootRotationCalculator rotationCalculator : rotationCalculators.values())
+         group.addChild(rotationCalculator.getSCS2YoGraphics());
+      group.setVisible(false);
+      return group;
    }
 }

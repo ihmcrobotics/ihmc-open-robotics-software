@@ -5,13 +5,16 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
+import us.ihmc.euclid.referenceFrame.FrameNameRestrictionLevel;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -58,14 +61,24 @@ public class FullQuadrupedRobotModelWrapper extends FullRobotModelWrapper implem
 
    public FullQuadrupedRobotModelWrapper(RobotDefinition robotDefinition, QuadrupedJointNameMap jointNameMap)
    {
-      super(robotDefinition.newInstance(ReferenceFrame.getWorldFrame()));
+      this(robotDefinition, jointNameMap, true);
+   }
+
+   public FullQuadrupedRobotModelWrapper(RobotDefinition robotDefinition, QuadrupedJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
+   {
+      super(robotDefinition.newInstance(ReferenceFrame.getWorldFrame()), enforceUniqueReferenceFrames);
       setupQuadrupedJointNameMap(jointNameMap);
       setupRobotDefinition(robotDefinition);
    }
 
    public FullQuadrupedRobotModelWrapper(RobotDescription robotDescription, QuadrupedJointNameMap jointNameMap)
    {
-      super(instantiateRobot(robotDescription, ReferenceFrame.getWorldFrame()));
+      this(robotDescription, jointNameMap, true);
+   }
+
+   public FullQuadrupedRobotModelWrapper(RobotDescription robotDescription, QuadrupedJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
+   {
+      super(instantiateRobot(robotDescription, ReferenceFrame.getWorldFrame()), enforceUniqueReferenceFrames);
       setupQuadrupedJointNameMap(jointNameMap);
       setupRobotDescription(robotDescription);
    }

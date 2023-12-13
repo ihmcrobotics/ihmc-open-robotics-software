@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -44,7 +44,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private final DoubleProvider icpErrorThresholdForSlowTransfer;
    private final DoubleProvider minimumSlowTransferDuration;
 
-   private final FramePoint3D actualFootPositionInWorld = new FramePoint3D();
+   private final FramePose3D actualFootPositionInWorld = new FramePose3D();
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
@@ -243,6 +243,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       super.onExit(timeInState);
 
+      touchdownErrorCompensator.commitToFootTouchdownError(transferToSide);
+      touchdownErrorCompensator.clear();
       firstTickInState = true;
       balanceManager.minimizeAngularMomentumRateZ(false);
    }
@@ -296,7 +298,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
          actualFootPositionInWorld.setToZero(controllerToolbox.getReferenceFrames().getSoleFrame(previousSwingSide));
          actualFootPositionInWorld.changeFrame(worldFrame);
 
-         touchdownErrorCompensator.addOffsetVectorFromTouchdownError(previousSwingSide, actualFootPositionInWorld);
+         touchdownErrorCompensator.updateFootTouchdownError(previousSwingSide, actualFootPositionInWorld);
       }
    }
 }

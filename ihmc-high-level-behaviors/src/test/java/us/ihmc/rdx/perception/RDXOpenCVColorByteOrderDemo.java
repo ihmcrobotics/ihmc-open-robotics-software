@@ -3,7 +3,7 @@ package us.ihmc.rdx.perception;
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
@@ -18,14 +18,12 @@ import java.nio.ByteOrder;
 
 public class RDXOpenCVColorByteOrderDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
 
    private RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
-   private RDXCVImagePanel openCVImagePanel;
+   private RDXBytedecoImagePanel openCVImagePanel;
    private final float[] imColor = new float[] {0.8f, 0.0f, 0.0f, 1.0f};
    private final Color gdxColor = new Color();
 
@@ -56,11 +54,11 @@ public class RDXOpenCVColorByteOrderDemo
             highLevelDepthSensorSimulator.setRenderColorVideoDirectly(true);
             baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);
 
-            ImGuiPanel panel = new ImGuiPanel("Color Byte Order Debugging", this::renderImGuiWidgets);
+            RDXPanel panel = new RDXPanel("Color Byte Order Debugging", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
-            openCVImagePanel = new RDXCVImagePanel("OpenCV Image Panel", highLevelDepthSensorSimulator.getLowLevelSimulator().getRGBA8888ColorImage());
-            baseUI.getImGuiPanelManager().addPanel(openCVImagePanel.getVideoPanel());
+            openCVImagePanel = new RDXBytedecoImagePanel("OpenCV Image Panel", highLevelDepthSensorSimulator.getLowLevelSimulator().getRGBA8888ColorImage());
+            baseUI.getImGuiPanelManager().addPanel(openCVImagePanel.getImagePanel());
          }
 
          private void renderImGuiWidgets()

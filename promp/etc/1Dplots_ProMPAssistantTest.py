@@ -16,7 +16,7 @@ import os
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-n_demos=35
+n_demos=20
 colorX ='red'
 colorY ='yellowgreen'
 colorZ ='cornflowerblue'
@@ -121,7 +121,7 @@ for bodyPart in bodyParts:
     meanModulatedZ = numpy.array([row[6] for row in meanModulated])
     stdModulatedZ = numpy.array([row[6] for row in stdDeviationModulated])
     
-    test = numpy.genfromtxt('test/PushDoorTest/test.csv',delimiter=',', dtype = float)
+    test = numpy.genfromtxt('test/test.csv',delimiter=',', dtype = float)
 
     fig = plotter.figure()
     fig.suptitle('ProMP before and after modulation with observation', fontsize=16)
@@ -292,9 +292,9 @@ for bodyPart in bodyParts:
     
     fig = plotter.figure()
     fig.suptitle('Shared-control motion', fontsize=16)
-    plotter.plot(x,colorX,linewidth=5.0)
-    plotter.plot(y,colorY,linewidth=5.0)
-    plotter.plot(z,colorZ,linewidth=5.0,label='final executed trajectory')
+    plotter.plot(x,colorX,linewidth=1.0)
+    plotter.plot(y,colorY,linewidth=1.0)
+    plotter.plot(z,colorZ,linewidth=1.0,label='final executed trajectory')
     plotter.plot(meanConditionedX,democolorX,linewidth=1.0)
     plotter.plot(meanConditionedY,democolorY,linewidth=1.0)
     plotter.plot(meanConditionedZ,democolorZ,linewidth=1.0,label='ProMP mean conditioned')
@@ -317,10 +317,10 @@ for bodyPart in bodyParts:
     fig = plotter.figure()
     fig.suptitle('Shared-control motion', fontsize=16)
   
-    plotter.plot(qX,colorX,linewidth=5.0)
-    plotter.plot(qY,colorY,linewidth=5.0)
-    plotter.plot(qZ,colorZ,linewidth=5.0,label='final executed trajectory')
-    plotter.plot(qS,colorS,linewidth=5.0)
+    plotter.plot(qX,colorX,linewidth=1.0)
+    plotter.plot(qY,colorY,linewidth=1.0)
+    plotter.plot(qZ,colorZ,linewidth=1.0,label='final executed trajectory')
+    plotter.plot(qS,colorS,linewidth=1.0)
     plotter.plot(meanConditionedQX,democolorX,linewidth=1.0)
     plotter.plot(meanConditionedQY,democolorY,linewidth=1.0)
     plotter.plot(meanConditionedQZ,democolorZ,linewidth=1.0,label='ProMP mean conditioned')

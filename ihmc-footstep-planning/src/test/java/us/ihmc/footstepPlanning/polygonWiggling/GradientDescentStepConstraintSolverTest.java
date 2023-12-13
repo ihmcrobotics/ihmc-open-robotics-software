@@ -31,7 +31,7 @@ import java.util.List;
 
 public class GradientDescentStepConstraintSolverTest
 {
-   private static boolean visualize = true;
+   private static boolean visualize = false;
 
    private GradientDescentStepConstraintSolver gradientDescentStepConstraintSolver;
    private SimulationConstructionSet scs;
@@ -40,7 +40,7 @@ public class GradientDescentStepConstraintSolverTest
    private WiggleParameters wiggleParameters;
 
    @BeforeEach
-   private void setup()
+   public void setup()
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
       wiggleParameters = new WiggleParameters();
@@ -64,7 +64,7 @@ public class GradientDescentStepConstraintSolverTest
    }
 
    @AfterEach
-   private void after()
+   public void after()
    {
       if (visualize)
       {

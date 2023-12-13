@@ -20,6 +20,7 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXDoorPanelObject.FACTORY);
       objectFactories.add(RDXDoorLeverHandleObject.FACTORY);
       objectFactories.add(RDXDoorObject.FACTORY);
+      objectFactories.add(RDXArUcoBoxObject.FACTORY);
       objectFactories.add(RDXPointLightObject.FACTORY);
       objectFactories.add(RDXDirectionalLightObject.FACTORY);
       objectFactories.add(RDXL515SensorObject.FACTORY);

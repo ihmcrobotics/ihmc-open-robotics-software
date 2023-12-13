@@ -21,6 +21,10 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
             * True to pause walking, false to unpause and resume an existing footstep plan.
             */
    public boolean pause_;
+   /**
+            * True to clear the remaining footstep queue, if the robot is told to pause walking
+            */
+   public boolean clear_remaining_footstep_queue_;
 
    public PauseWalkingMessage()
    {
@@ -37,6 +41,8 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
       sequence_id_ = other.sequence_id_;
 
       pause_ = other.pause_;
+
+      clear_remaining_footstep_queue_ = other.clear_remaining_footstep_queue_;
 
    }
 
@@ -70,6 +76,21 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
       return pause_;
    }
 
+   /**
+            * True to clear the remaining footstep queue, if the robot is told to pause walking
+            */
+   public void setClearRemainingFootstepQueue(boolean clear_remaining_footstep_queue)
+   {
+      clear_remaining_footstep_queue_ = clear_remaining_footstep_queue;
+   }
+   /**
+            * True to clear the remaining footstep queue, if the robot is told to pause walking
+            */
+   public boolean getClearRemainingFootstepQueue()
+   {
+      return clear_remaining_footstep_queue_;
+   }
+
 
    public static Supplier<PauseWalkingMessagePubSubType> getPubSubType()
    {
@@ -92,6 +113,8 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.pause_, other.pause_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.clear_remaining_footstep_queue_, other.clear_remaining_footstep_queue_, epsilon)) return false;
+
 
       return true;
    }
@@ -109,6 +132,8 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
 
       if(this.pause_ != otherMyClass.pause_) return false;
 
+      if(this.clear_remaining_footstep_queue_ != otherMyClass.clear_remaining_footstep_queue_) return false;
+
 
       return true;
    }
@@ -122,7 +147,9 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("pause=");
-      builder.append(this.pause_);
+      builder.append(this.pause_);      builder.append(", ");
+      builder.append("clear_remaining_footstep_queue=");
+      builder.append(this.clear_remaining_footstep_queue_);
       builder.append("}");
       return builder.toString();
    }

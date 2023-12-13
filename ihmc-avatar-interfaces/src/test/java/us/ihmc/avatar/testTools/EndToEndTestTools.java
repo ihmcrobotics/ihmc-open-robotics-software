@@ -30,7 +30,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTas
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.nio.FileTools;
@@ -516,16 +515,14 @@ public class EndToEndTestTools
 
    public static YoDouble findOneDoFJointFeedbackControllerDesiredPosition(String jointName, YoVariableHolder yoVariableHolder)
    {
-      String namespace = jointName + OneDoFJointFeedbackController.shortName;
       String variable = "q_d_" + jointName;
-      return findYoDouble(namespace, variable, yoVariableHolder);
+      return findYoDouble(FeedbackControllerToolbox.class.getSimpleName(), variable, yoVariableHolder);
    }
 
    public static YoDouble findOneDoFJointFeedbackControllerDesiredVelocity(String jointName, YoVariableHolder yoVariableHolder)
    {
-      String namespace = jointName + OneDoFJointFeedbackController.shortName;
       String variable = "qd_d_" + jointName;
-      return findYoDouble(namespace, variable, yoVariableHolder);
+      return findYoDouble(FeedbackControllerToolbox.class.getSimpleName(), variable, yoVariableHolder);
    }
 
    /**

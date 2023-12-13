@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
+import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DefaultShapeCollisionSettings;
 import us.ihmc.avatar.factory.DefaultSimulatedHandOutputWriter;
@@ -25,9 +26,10 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingEnvironmentalC
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
@@ -75,6 +77,20 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       robotInitialSetup.setInitialYaw(initialYaw);
       robotInitialSetup.setOffset(new Vector3D(x, y, 0.0));
       return robotInitialSetup;
+   }
+   
+   default RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw, double x, double y, double z)
+   {
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = getDefaultRobotInitialSetup();
+      robotInitialSetup.setInitialGroundHeight(groundHeight);
+      robotInitialSetup.setInitialYaw(initialYaw);
+      robotInitialSetup.setOffset(new Vector3D(x, y, z));
+      return robotInitialSetup;
+   }
+
+   public default double[] getPresetArmConfiguration(RobotSide side, PresetArmConfiguration presetArmConfiguration)
+   {
+      throw new RuntimeException("Not implemented");
    }
 
    public abstract HandModel getHandModel(RobotSide side);
@@ -214,6 +230,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
+   default AStarBodyPathPlannerParametersBasics getAStarBodyPathPlannerParameters()
+   {
+      return null;
+   }
+
    default SteppingEnvironmentalConstraintParameters getSteppingEnvironmentalConstraintParameters()
    {
       return new SteppingEnvironmentalConstraintParameters();
@@ -289,6 +310,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    default Path getMultiContactScriptPath()
+   {
+      return null;
+   }
+
+   default RobotVersion getRobotVersion()
    {
       return null;
    }

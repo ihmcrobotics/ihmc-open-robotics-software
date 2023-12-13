@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 import java.util.Collection;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -32,7 +33,9 @@ public class KinematicsBasedFootSwitchFactory implements FootSwitchFactory
 
    @Override
    public FootSwitchInterface newFootSwitch(String namePrefix, ContactablePlaneBody foot, Collection<? extends ContactablePlaneBody> otherFeet,
-                                            ForceSensorDataReadOnly footForceSensor, double totalRobotWeight, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                            RigidBodyBasics rootBody,
+                                            ForceSensorDataReadOnly footForceSensor,
+                                            double totalRobotWeight, YoGraphicsListRegistry yoGraphicsListRegistry,
                                             YoRegistry registry)
    {
       if (contactThresholdHeight == null)

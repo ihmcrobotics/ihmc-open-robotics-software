@@ -18,7 +18,7 @@ public class SimulatedHandControlTask extends HumanoidRobotControlTask
    private final ThreadTimer timer;
    private final YoLong ticksBehindScheduled;
 
-   private final List<Runnable> taskThreadRunnables = new ArrayList<>();
+   private final List<Runnable> postControllerCallback = new ArrayList<>();
    private final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
    private boolean controllerRan = false;
@@ -47,7 +47,7 @@ public class SimulatedHandControlTask extends HumanoidRobotControlTask
       long schedulerTick = handControlThread.getHumanoidRobotContextData().getSchedulerTick();
       ticksBehindScheduled.set(schedulerTick - timer.getTickCount() * divisor);
       handControlThread.run();
-      runAll(taskThreadRunnables);
+      runAll(postControllerCallback);
       controllerRan = handControlThread.hasControllerRan();
       timer.stop();
    }
@@ -72,9 +72,9 @@ public class SimulatedHandControlTask extends HumanoidRobotControlTask
    }
 
    @Override
-   public void addRunnableOnTaskThread(Runnable runnable)
+   public void addCallbackPostTask(Runnable runnable)
    {
-      taskThreadRunnables.add(runnable);
+      postControllerCallback.add(runnable);
    }
 
    @Override

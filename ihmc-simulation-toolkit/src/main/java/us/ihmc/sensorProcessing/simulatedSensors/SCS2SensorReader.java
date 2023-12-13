@@ -9,6 +9,7 @@ import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -54,6 +55,7 @@ public class SCS2SensorReader implements SensorReader
    private ForceSensorDataHolder forceSensorOutputs = null;
 
    private final List<JointSensorReader> jointSensorReaders = new ArrayList<>();
+   private final Map<String, OneDoFJointSensorReader> oneDoFJointSensorReaderMap = new HashMap<>();
    private final List<OneDoFJointStateReadOnly> jointSensorOutputList = new ArrayList<>();
    private final Map<OneDoFJointBasics, OneDoFJointStateReadOnly> jointToSensorOutputMap = new HashMap<>();
 
@@ -228,6 +230,12 @@ public class SCS2SensorReader implements SensorReader
             jointSensorReaders.add(new OneDoFJointSensorReader((OneDoFJointBasics) controllerJoint, (OneDoFJointReadOnly) simJoint, sensorProcessing));
          }
       }
+
+      for (JointSensorReader jointSensorReader : jointSensorReaders)
+      {
+         if (jointSensorReader instanceof OneDoFJointSensorReader oneDoFJointSensorReader)
+            oneDoFJointSensorReaderMap.put(oneDoFJointSensorReader.controllerJoint.getName(), oneDoFJointSensorReader);
+      }
    }
 
    private void addIMUSensors(IMUDefinition[] definitions)
@@ -265,7 +273,7 @@ public class SCS2SensorReader implements SensorReader
 
       for (ForceSensorDefinition definition : forceSensorDataHolderToUpdate.getForceSensorDefinitions())
       {
-         addWrenchSensor(definition, forceSensorDataHolderToUpdate.get(definition));
+         addWrenchSensor(definition, forceSensorDataHolderToUpdate.getData(definition));
       }
       forceSensorOutputs = forceSensorDataHolderToUpdate;
    }
@@ -361,6 +369,50 @@ public class SCS2SensorReader implements SensorReader
       return stateEstimatorSensorDefinitions;
    }
 
+   public void setOneDoFJointConfigurationCorruptor(String jointName, OneDoFJointStateCorruptor corruptor)
+   {
+      OneDoFJointSensorReader sensorReader = oneDoFJointSensorReaderMap.get(jointName);
+      if (sensorReader == null)
+      {
+         LogTools.error("Couldn't find 1-DoF joint sensor reader for joint {}." + jointName);
+         return;
+      }
+      sensorReader.setJointConfigurationCorruptor(corruptor);
+   }
+
+   public void setOneDoFJointVelocityCorruptor(String jointName, OneDoFJointStateCorruptor corruptor)
+   {
+      OneDoFJointSensorReader sensorReader = oneDoFJointSensorReaderMap.get(jointName);
+      if (sensorReader == null)
+      {
+         LogTools.error("Couldn't find 1-DoF joint sensor reader for joint {}." + jointName);
+         return;
+      }
+      sensorReader.setJointVelocityCorruptor(corruptor);
+   }
+
+   public void setOneDoFJointAccelerationCorruptor(String jointName, OneDoFJointStateCorruptor corruptor)
+   {
+      OneDoFJointSensorReader sensorReader = oneDoFJointSensorReaderMap.get(jointName);
+      if (sensorReader == null)
+      {
+         LogTools.error("Couldn't find 1-DoF joint sensor reader for joint {}." + jointName);
+         return;
+      }
+      sensorReader.setJointAccelerationCorruptor(corruptor);
+   }
+
+   public void setOneDoFJointEffortCorruptor(String jointName, OneDoFJointStateCorruptor corruptor)
+   {
+      OneDoFJointSensorReader sensorReader = oneDoFJointSensorReaderMap.get(jointName);
+      if (sensorReader == null)
+      {
+         LogTools.error("Couldn't find 1-DoF joint sensor reader for joint {}." + jointName);
+         return;
+      }
+      sensorReader.setJointEffortCorruptor(corruptor);
+   }
+
    @Override
    public SensorOutputMapReadOnly getProcessedSensorOutputMap()
    {
@@ -409,6 +461,10 @@ public class SCS2SensorReader implements SensorReader
       private final OneDoFJointBasics controllerJoint;
       private final OneDoFJointReadOnly simJoint;
       private final SensorProcessing sensorProcessing;
+      private OneDoFJointStateCorruptor jointConfigurationCorruptor = null;
+      private OneDoFJointStateCorruptor jointVelocityCorruptor = null;
+      private OneDoFJointStateCorruptor jointAccelerationCorruptor = null;
+      private OneDoFJointStateCorruptor jointEffortCorruptor = null;
 
       public OneDoFJointSensorReader(OneDoFJointBasics controllerJoint, OneDoFJointReadOnly simJoint, SensorProcessing sensorProcessing)
       {
@@ -420,39 +476,72 @@ public class SCS2SensorReader implements SensorReader
       @Override
       public void read()
       {
+         double q = simJoint.getQ();
+         double qd = simJoint.getQd();
+         double qdd = simJoint.getQdd();
+         double tau = simJoint.getTau();
+
+         if (jointConfigurationCorruptor != null)
+            q = jointConfigurationCorruptor.corruptState(q, simJoint);
+         if (jointVelocityCorruptor != null)
+            qd = jointVelocityCorruptor.corruptState(qd, simJoint);
+         if (jointAccelerationCorruptor != null)
+            qdd = jointAccelerationCorruptor.corruptState(qdd, simJoint);
+         if (jointEffortCorruptor != null)
+            tau = jointEffortCorruptor.corruptState(tau, simJoint);
+
          if (sensorProcessing == null)
          {
-            controllerJoint.setJointConfiguration(simJoint);
-            controllerJoint.setJointTwist(simJoint);
-            controllerJoint.setJointAcceleration(simJoint);
-            controllerJoint.setJointWrench(simJoint);
+            controllerJoint.setQ(q);
+            controllerJoint.setQd(qd);
+            controllerJoint.setQdd(qdd);
+            controllerJoint.setTau(tau);
          }
          else
          {
-            sensorProcessing.setJointPositionSensorValue(controllerJoint, simJoint.getQ());
-            sensorProcessing.setJointVelocitySensorValue(controllerJoint, simJoint.getQd());
-            sensorProcessing.setJointAccelerationSensorValue(controllerJoint, simJoint.getQdd());
-            sensorProcessing.setJointTauSensorValue(controllerJoint, simJoint.getTau());
+            sensorProcessing.setJointPositionSensorValue(controllerJoint, q);
+            sensorProcessing.setJointVelocitySensorValue(controllerJoint, qd);
+            sensorProcessing.setJointAccelerationSensorValue(controllerJoint, qdd);
+            sensorProcessing.setJointTauSensorValue(controllerJoint, tau);
          }
+      }
+
+      public void setJointConfigurationCorruptor(OneDoFJointStateCorruptor jointConfigurationCorruptor)
+      {
+         this.jointConfigurationCorruptor = jointConfigurationCorruptor;
+      }
+
+      public void setJointVelocityCorruptor(OneDoFJointStateCorruptor jointVelocityCorruptor)
+      {
+         this.jointVelocityCorruptor = jointVelocityCorruptor;
+      }
+
+      public void setJointAccelerationCorruptor(OneDoFJointStateCorruptor jointAccelerationCorruptor)
+      {
+         this.jointAccelerationCorruptor = jointAccelerationCorruptor;
+      }
+
+      public void setJointEffortCorruptor(OneDoFJointStateCorruptor jointEffortCorruptor)
+      {
+         this.jointEffortCorruptor = jointEffortCorruptor;
       }
    }
 
-   private static class CrossFourBarJointSensorReader implements JointSensorReader
+   private static class CrossFourBarJointSensorReader extends OneDoFJointSensorReader
    {
-      private final CrossFourBarJointBasics controllerJoint;
       private final OneDoFJointReadOnly[] simJoints;
-      private final SensorProcessing sensorProcessing;
 
       private final CrossFourBarJoint localFourBarJoint;
       private final int[] activeJointIndices;
 
       public CrossFourBarJointSensorReader(CrossFourBarJointBasics controllerJoint, OneDoFJointReadOnly[] simJoints, SensorProcessing sensorProcessing)
       {
-         this.controllerJoint = controllerJoint;
+         super(controllerJoint,
+               CrossFourBarJoint.cloneCrossFourBarJoint(controllerJoint, ReferenceFrameTools.constructARootFrame("dummy"), ""),
+               sensorProcessing);
          this.simJoints = simJoints;
-         this.sensorProcessing = sensorProcessing;
 
-         localFourBarJoint = CrossFourBarJoint.cloneCrossFourBarJoint(controllerJoint, ReferenceFrameTools.constructARootFrame("dummy"), "dummy");
+         localFourBarJoint = (CrossFourBarJoint) super.simJoint;
          if (controllerJoint.getJointA().isLoopClosure() || controllerJoint.getJointD().isLoopClosure())
             activeJointIndices = new int[] {1, 2};
          else
@@ -471,28 +560,35 @@ public class SCS2SensorReader implements SensorReader
          localFourBarJoint.updateFrame();
          DMatrixRMaj loopJacobian = localFourBarJoint.getFourBarFunction().getLoopJacobian();
          double tau = loopJacobian.get(activeJointIndices[0]) * simJoints[activeJointIndices[0]].getTau()
-               + loopJacobian.get(activeJointIndices[1]) * simJoints[activeJointIndices[1]].getTau();
+                      + loopJacobian.get(activeJointIndices[1]) * simJoints[activeJointIndices[1]].getTau();
          int actuatedJointIndex = localFourBarJoint.getFourBarFunction().getActuatedJointIndex();
 
          if (actuatedJointIndex == 0 || actuatedJointIndex == 3)
             tau /= (loopJacobian.get(0) + loopJacobian.get(3));
          else
             tau /= (loopJacobian.get(1) + loopJacobian.get(2));
+         localFourBarJoint.setTau(tau);
 
-         if (sensorProcessing == null)
-         {
-            controllerJoint.setQ(q);
-            controllerJoint.setQd(qd);
-            controllerJoint.setQdd(qdd);
-            controllerJoint.setTau(tau);
-         }
-         else
-         {
-            sensorProcessing.setJointPositionSensorValue(controllerJoint, q);
-            sensorProcessing.setJointVelocitySensorValue(controllerJoint, qd);
-            sensorProcessing.setJointAccelerationSensorValue(controllerJoint, qdd);
-            sensorProcessing.setJointTauSensorValue(controllerJoint, tau);
-         }
+         // This will copy the state from localFourBarJoint to the controllerJoint
+         super.read();
       }
+   }
+
+   @Override
+   public SensorProcessing getSensorProcessing()
+   {
+      return sensorProcessing;
+   }
+
+   public static interface OneDoFJointStateCorruptor
+   {
+      /**
+       * Corrupt the state of the given joint before feeding it to the robot controller.
+       * 
+       * @param originalStateValue the state that would be used if no corruption was to be applied.
+       * @param joint              the joint to which the state is to be corrupted.
+       * @return the corrupted state value. Return {@code originalStateValue} for no corruption.
+       */
+      double corruptState(double originalStateValue, OneDoFJointReadOnly joint);
    }
 }

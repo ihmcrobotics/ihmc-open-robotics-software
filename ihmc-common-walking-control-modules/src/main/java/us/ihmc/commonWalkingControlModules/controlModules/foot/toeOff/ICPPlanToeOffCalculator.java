@@ -36,8 +36,9 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
    private final YoBoolean hasComputedToeOffContactPoint;
    private final YoBoolean hasComputedToeOffContactLine;
 
-   public ICPPlanToeOffCalculator(SideDependentList<YoPlaneContactState> contactStates, SideDependentList<? extends ContactablePlaneBody> feet,
-         YoRegistry parentRegistry)
+   public ICPPlanToeOffCalculator(SideDependentList<YoPlaneContactState> contactStates,
+                                  SideDependentList<? extends ContactablePlaneBody> feet,
+                                  YoRegistry parentRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PelvisOrientationTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "bbf28ab951db0bd903feb11b8d9646533375b69e8b6dea0b253e2ae1825bf75d";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

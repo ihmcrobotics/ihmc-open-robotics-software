@@ -59,6 +59,7 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -83,7 +84,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class AvatarPostProcessingTests implements MultiRobotTestInterface
 {
-   private static final boolean keepSCSUp = true;
+   private static final boolean keepSCSUp = false;
 
    protected SimulationTestingParameters simulationTestingParameters;
    protected SCS2AvatarTestingSimulation simulationTestHelper;
@@ -183,6 +184,10 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlannerParameters.setBodyBoxBaseZ(0.4);
       footstepPlannerParameters.setCheckForBodyBoxCollisions(false);
       footstepPlannerParameters.setCheckForPathCollisions(false);
+      footstepPlannerParameters.setMinimumFootholdPercent(0.99);
+      footstepPlannerParameters.setMaximumStepZ(0.32);
+      footstepPlannerParameters.setMinimumDistanceFromCliffBottoms(-1.0);
+      footstepPlannerParameters.setMinimumDistanceFromCliffTops(-1.0);
 
       ThreadTools.sleep(1000);
       simulationTestHelper.simulateNow(1.0);
@@ -195,6 +200,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
                                                                environment.getPlanarRegionsList(),
                                                                goalPose,
                                                                footstepPlannerParameters);
+      requestPacket.setTimeout(10.0);
       requestPacket.setRequestedSwingPlanner(SwingPlannerType.TWO_WAYPOINT_POSITION.toByte());
 
       runTest(requestPacket);
@@ -427,13 +433,9 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       request.setFromPacket(requestPacket);
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
-      footstepPlanningModule.getFootstepPlannerParameters().setMinimumFootholdPercent(0.99);
-      footstepPlanningModule.getFootstepPlannerParameters().setMaximumStepZ(0.32);
-      footstepPlanningModule.getFootstepPlannerParameters().setMinimumDistanceFromCliffBottoms(-1.0);
-      footstepPlanningModule.getFootstepPlannerParameters().setMinimumDistanceFromCliffTops(-1.0);
       FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
 
-      System.out.println("output. " + plannerOutput.getFootstepPlanningResult());
+      LogTools.info("output. " + plannerOutput.getFootstepPlanningResult());
 
       if (!plannerOutput.getFootstepPlanningResult().validForExecution())
       {

@@ -12,10 +12,16 @@ import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 public class RDXModelBuilder
@@ -47,12 +53,28 @@ public class RDXModelBuilder
 
    public static Model buildModel(Consumer<RDXMultiColorMeshBuilder> buildModel, String nodeName)
    {
-      ModelBuilder modelBuilder = new ModelBuilder();
-      modelBuilder.begin();
-      modelBuilder.node().id = nodeName; // optional
-
       RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
       buildModel.accept(meshBuilder);
+
+      return buildModelFromMesh(meshBuilder, nodeName);
+   }
+
+   public static Model buildModelFromMesh(RDXMultiColorMeshBuilder meshBuilder)
+   {
+      return buildModelFromMesh(meshBuilder, null);
+   }
+
+   public static Model buildModelFromMesh(RDXMultiColorMeshBuilder meshBuilder, String nodeName)
+   {
+      ModelBuilder modelBuilder = new ModelBuilder();
+//      modelBuilder.node().id = nodeName;
+
+      return buildModelFromMesh(modelBuilder, meshBuilder);
+   }
+
+   public static Model buildModelFromMesh(ModelBuilder modelBuilder, RDXMultiColorMeshBuilder meshBuilder)
+   {
+      modelBuilder.begin();
       Mesh mesh = meshBuilder.generateMesh();
 
       MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
@@ -138,12 +160,24 @@ public class RDXModelBuilder
       return buildModelInstance(meshBuilder -> meshBuilder.addBox(lx, ly, lz, color), "box");
    }
 
-   public static ModelInstance createCylinder(double height, double radius, Color color)
+   public static ModelInstance createCylinder(float height, float radius, Color color)
    {
-      return buildModelInstance(meshBuilder ->
-      {
-         meshBuilder.addCylinder(height, radius, new Point3D(), color);
-      }, "cylinder");
+      return buildModelInstance(meshBuilder -> meshBuilder.addCylinder(height, radius, new Point3D(), color), "cylinder");
+   }
+
+   public static ModelInstance createEllipsoid(float xRadius, float yRadius, float zRadius, Color color)
+   {
+      return buildModelInstance(meshBuilder -> meshBuilder.addEllipsoid(xRadius, yRadius, zRadius, new Point3D(), color), "ellipsoid");
+   }
+
+   public static ModelInstance createPrism(float triangleWidth, float prismThickness, float triangleHeight, Color color)
+   {
+      return buildModelInstance(meshBuilder -> meshBuilder.addIsoscelesTriangularPrism(triangleWidth, triangleHeight, prismThickness, new Point3D(), color), "prism");
+   }
+
+   public static ModelInstance createCone(float height, float radius, Color color)
+   {
+      return buildModelInstance(meshBuilder -> meshBuilder.addCone(height, radius, new Point3D(), color), "cone");
    }
 
    public static ModelInstance createArrow(double length, Color color)
@@ -161,6 +195,14 @@ public class RDXModelBuilder
                              new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0),
                              color);
       }, "arrow");
+   }
+
+   public static ModelInstance createLine(Point3DReadOnly start, Point3DReadOnly end, double lineWidth, Color color)
+   {
+      return buildModelInstance(meshBuilder ->
+      {
+         meshBuilder.addLine(start, end, lineWidth, color);
+      }, "line");
    }
 
    public static ModelInstance createPose(double radius, Color color)
@@ -200,5 +242,40 @@ public class RDXModelBuilder
          meshBuilder.addCylinder(EuclidCoreTools.norm(numberOfSteps * stepWidth, numberOfSteps * stepHeight), 0.03f, new Point3D(0.0f, width * 0.45f, 1.0f), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 4.0), Color.DARK_GRAY);
 
       }, "stairs");
+   }
+
+   public static ModelInstance createMultiLine(RigidBodyTransformReadOnly transformToWorld, Point2DReadOnly[] points, double lineWidth, Color color, boolean close)
+   {
+      return buildModelInstance(meshBuilder -> meshBuilder.addMultiLine(transformToWorld, points, lineWidth, color, close));
+   }
+
+   public static ModelInstance createPolygon(RigidBodyTransformReadOnly transformToWorld, ConvexPolygon2DReadOnly polygon, Color color)
+   {
+      return buildModelInstance(meshBuilder -> meshBuilder.addPolygon(transformToWorld, polygon, color));
+   }
+
+   public static ModelInstance createLinedPolygon(List<? extends Point3DReadOnly> points,
+                                                  double lineWidth,
+                                                  Color color,
+                                                  boolean close)
+   {
+      return buildModelInstance(meshBuilder ->
+      {
+         meshBuilder.addMultiLine(points, lineWidth, color, close);
+         meshBuilder.addPolygon(points, color);
+      });
+   }
+
+   public static ModelInstance createLinedPolygon(RigidBodyTransformReadOnly transformToWorld,
+                                                  List<? extends Point2DReadOnly> points,
+                                                  double lineWidth,
+                                                  Color color,
+                                                  boolean close)
+   {
+      return buildModelInstance(meshBuilder ->
+      {
+         meshBuilder.addMultiLine(transformToWorld, points, lineWidth, color, close);
+         meshBuilder.addPolygon(transformToWorld, points, color);
+      });
    }
 }

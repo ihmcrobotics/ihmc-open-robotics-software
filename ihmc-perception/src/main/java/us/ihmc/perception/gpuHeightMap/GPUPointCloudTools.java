@@ -9,8 +9,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
+import us.ihmc.perception.opencl.OpenCLManager;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -37,7 +37,6 @@ public class GPUPointCloudTools
    public GPUPointCloudTools(int maxNumberOfPoints)
    {
       this.maxNumberOfPoints = maxNumberOfPoints;
-      openCLManager.create();
 
 //      inputPointCloudBuffer = new OpenCLFloatBuffer(maxNumberOfPoints * 3 * Float.BYTES);
 //      transformedPointCloudBuffer = new OpenCLFloatBuffer(maxNumberOfPoints * 3 * Float.BYTES);
@@ -81,8 +80,6 @@ public class GPUPointCloudTools
       openCLManager.execute1D(transformPointsKernel, points.size());
 
       transformedPointCloudBuffer.readOpenCLBufferObject(openCLManager);
-
-      openCLManager.finish();
 
       return retrieveTransformedPoints(points.size(), transformedPointCloudBuffer.getBackingDirectFloatBuffer());
    }

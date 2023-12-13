@@ -271,6 +271,15 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
    }
 
    /**
+    * Expiration so we don't use data that's old because we haven't received new data
+    * in a while.
+    */
+   default double getHeightMapExpiration()
+   {
+      return get(heightMapExpiration);
+   }
+
+   /**
     * We want to wait a little after footstep planning fails so we can get new sensor
     * data, not free spin, let things settle down, not generate too many failure logs,
     * etc.

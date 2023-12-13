@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class PolygonizerParametersStringMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.PolygonizerParametersStringMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::PolygonizerParametersStringMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "a2d7bb77d841f2e3b1f64e128e22d4c8955998a8abd5267076474acab8f5bdd5";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

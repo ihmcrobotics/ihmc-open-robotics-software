@@ -16,6 +16,7 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -102,7 +103,7 @@ public class SLAMModule implements PerceptionModule
 
    public SLAMModule(Messager messager, File configurationFile)
    {
-      this(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), messager, configurationFile, new RigidBodyTransform(), true);
+      this(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, PerceptionAPI.REA_NODE_NAME), messager, configurationFile, new RigidBodyTransform(), true);
    }
 
    public SLAMModule(ROS2Node ros2Node, Messager messager, File configurationFile)
@@ -125,10 +126,10 @@ public class SLAMModule implements PerceptionModule
 
       // TODO: Check name space and fix. Suspected atlas sensor suite and publisher.
       ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ROS2Tools.MULTISENSE_STEREO_POINT_CLOUD,
+                                           PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD,
                                            this::handlePointCloud);
       ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ROS2Tools.D435_POINT_CLOUD,
+                                           PerceptionAPI.D435_POINT_CLOUD,
                                            this::handlePointCloud);
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            REAStateRequestMessage.class,
@@ -150,8 +151,8 @@ public class SLAMModule implements PerceptionModule
       enableNormalEstimation = reaMessager.createInput(SLAMModuleAPI.NormalEstimationEnable, true);
       clearNormals = reaMessager.createInput(SLAMModuleAPI.NormalEstimationClear, false);
 
-      reaMessager.registerTopicListener(SLAMModuleAPI.SLAMClear, (content) -> clearSLAM());
-      reaMessager.registerTopicListener(SLAMModuleAPI.RequestEntireModuleState, update -> sendCurrentState());
+      reaMessager.addTopicListener(SLAMModuleAPI.SLAMClear, (content) -> clearSLAM());
+      reaMessager.addTopicListener(SLAMModuleAPI.RequestEntireModuleState, update -> sendCurrentState());
 
       NormalEstimationParameters normalEstimationParametersLocal = new NormalEstimationParameters();
       normalEstimationParametersLocal.setNumberOfIterations(1);
@@ -182,10 +183,10 @@ public class SLAMModule implements PerceptionModule
          FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
          loadConfiguration(filePropertyHelper);
 
-         reaMessager.registerTopicListener(SLAMModuleAPI.SaveConfiguration, content -> saveConfiguration(filePropertyHelper));
+         reaMessager.addTopicListener(SLAMModuleAPI.SaveConfiguration, content -> saveConfiguration(filePropertyHelper));
       }
       slamDataExportPath = reaMessager.createInput(SLAMModuleAPI.UISLAMDataExportDirectory);
-      reaMessager.registerTopicListener(SLAMModuleAPI.UISLAMDataExportRequest, content -> exportSLAMHistory());
+      reaMessager.addTopicListener(SLAMModuleAPI.UISLAMDataExportRequest, content -> exportSLAMHistory());
 
       sendCurrentState();
    }

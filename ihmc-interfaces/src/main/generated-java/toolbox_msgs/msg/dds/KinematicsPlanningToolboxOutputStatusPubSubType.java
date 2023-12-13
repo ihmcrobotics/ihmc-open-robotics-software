@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::KinematicsPlanningToolboxOutputStatus_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "3b8f8a8d094d7c54de715bdcad9ff80015dba2b611809411ed070a14f583f047";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

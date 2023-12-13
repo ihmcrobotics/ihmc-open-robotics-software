@@ -4,21 +4,13 @@ import org.bytedeco.hdf5.*;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.*;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.nio.FileTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
 
+import java.io.File;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
-/**
- * We can't initialize an HDF5 file from resource currently, so we can't run this on CI at all.
- */
-@Disabled
 public class HDF5Test
 {
    static
@@ -29,9 +21,9 @@ public class HDF5Test
    @Test
    public void testInts()
    {
-      WorkspaceFile file = getFile("NativeInts");
+      File file = new File("NativeInts.hdf5");
 
-      String filePath = file.getFilePath().toString();
+      String filePath = file.getAbsolutePath();
       H5File h5File = new H5File(filePath, hdf5.H5F_ACC_TRUNC);
       String datasetId = "ints";
 
@@ -46,9 +38,9 @@ public class HDF5Test
 
       dataSet.write(dataPointer, dataType);
 
-      dataSet.close();
-      fileSpace.close();
-      h5File.close();
+      dataSet._close();
+      fileSpace._close();
+      h5File._close();
 
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
@@ -59,8 +51,8 @@ public class HDF5Test
       int[] readData = new int[writeData.length];
       dataPointer.get(readData);
 
-      dataSet.close();
-      h5File.close();
+      dataSet._close();
+      h5File._close();
 
       LogTools.info("Wrote: {}", Arrays.toString(writeData));
       LogTools.info("Read:  {}", Arrays.toString(readData));
@@ -70,9 +62,9 @@ public class HDF5Test
    @Test
    public void testFloats()
    {
-      WorkspaceFile file = getFile("NativeFloats");
+      File file = new File("NativeFloats.hdf5");
 
-      String filePath = file.getFilePath().toString();
+      String filePath = file.getAbsolutePath();
       H5File h5File = new H5File(filePath, hdf5.H5F_ACC_TRUNC);
       String datasetId = "floats";
 
@@ -88,9 +80,9 @@ public class HDF5Test
 
       dataSet.write(dataPointer, dataType);
 
-      dataSet.close();
-      fileSpace.close();
-      h5File.close();
+      dataSet._close();
+      fileSpace._close();
+      h5File._close();
 
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
@@ -101,8 +93,8 @@ public class HDF5Test
       float[] readData = new float[writeData.length];
       dataPointer.get(readData);
 
-      dataSet.close();
-      h5File.close();
+      dataSet._close();
+      h5File._close();
 
       LogTools.info("Wrote: {}", Arrays.toString(writeData));
       LogTools.info("Read:  {}", Arrays.toString(readData));
@@ -112,9 +104,9 @@ public class HDF5Test
    @Test
    public void testDoubles()
    {
-      WorkspaceFile file = getFile("NativeDoubles");
+      File file = new File("NativeDoubles.hdf5");
 
-      String filePath = file.getFilePath().toString();
+      String filePath = file.getAbsolutePath();
       H5File h5File = new H5File(filePath, hdf5.H5F_ACC_TRUNC);
       String datasetId = "doubles";
 
@@ -130,9 +122,9 @@ public class HDF5Test
 
       dataSet.write(dataPointer, dataType);
 
-      dataSet.close();
-      fileSpace.close();
-      h5File.close();
+      dataSet._close();
+      fileSpace._close();
+      h5File._close();
 
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
@@ -143,8 +135,8 @@ public class HDF5Test
       double[] readData = new double[writeData.length];
       dataPointer.get(readData);
 
-      dataSet.close();
-      h5File.close();
+      dataSet._close();
+      h5File._close();
 
       LogTools.info("Wrote: {}", Arrays.toString(writeData));
       LogTools.info("Read:  {}", Arrays.toString(readData));
@@ -154,9 +146,9 @@ public class HDF5Test
    @Test
    public void testChars()
    {
-      WorkspaceFile file = getFile("NativeChars");
+      File file = new File("NativeChars.hdf5");
 
-      String filePath = file.getFilePath().toString();
+      String filePath = file.getAbsolutePath();
       H5File h5File = new H5File(filePath, hdf5.H5F_ACC_TRUNC);
       String datasetId = "chars";
 
@@ -172,9 +164,9 @@ public class HDF5Test
 
       dataSet.write(dataPointer, dataType);
 
-      dataSet.close();
-      fileSpace.close();
-      h5File.close();
+      dataSet._close();
+      fileSpace._close();
+      h5File._close();
 
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
@@ -185,8 +177,8 @@ public class HDF5Test
       char[] readData = new char[writeData.length];
       dataPointer.get(readData);
 
-      dataSet.close();
-      h5File.close();
+      dataSet._close();
+      h5File._close();
 
       LogTools.info("Wrote: {}", Arrays.toString(writeData));
       LogTools.info("Read:  {}", Arrays.toString(readData));
@@ -196,9 +188,9 @@ public class HDF5Test
    @Test
    public void testShorts()
    {
-      WorkspaceFile file = getFile("NativeShorts");
+      File file = new File("NativeShorts.hdf5");
 
-      String filePath = file.getFilePath().toString();
+      String filePath = file.getAbsolutePath();
       H5File h5File = new H5File(filePath, hdf5.H5F_ACC_TRUNC);
       String datasetId = "shorts";
 
@@ -213,9 +205,9 @@ public class HDF5Test
 
       dataSet.write(dataPointer, dataType);
 
-      dataSet.close();
-      fileSpace.close();
-      h5File.close();
+      dataSet._close();
+      fileSpace._close();
+      h5File._close();
 
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
@@ -226,8 +218,8 @@ public class HDF5Test
       short[] readData = new short[writeData.length];
       dataPointer.get(readData);
 
-      dataSet.close();
-      h5File.close();
+      dataSet._close();
+      h5File._close();
 
       LogTools.info("Wrote: {}", Arrays.toString(writeData));
       LogTools.info("Read:  {}", Arrays.toString(readData));
@@ -237,9 +229,9 @@ public class HDF5Test
    @Test
    public void testBytesWithoutZeros()
    {
-      WorkspaceFile file = getFile("NativeBytesWithoutZeros");
+      File file = new File("NativeBytesWithoutZeros.hdf5");
 
-      String filePath = file.getFilePath().toString();
+      String filePath = file.getAbsolutePath();
       H5File h5File = new H5File(filePath, hdf5.H5F_ACC_TRUNC);
       String datasetId = "bytes";
 
@@ -255,9 +247,9 @@ public class HDF5Test
 
       dataSet.write((Pointer) dataPointer, dataType);
 
-      dataSet.close();
-      fileSpace.close();
-      h5File.close();
+      dataSet._close();
+      fileSpace._close();
+      h5File._close();
 
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
@@ -268,8 +260,8 @@ public class HDF5Test
       byte[] readData = new byte[(int) dataPointer.limit()];
       dataPointer.get(readData);
 
-      dataSet.close();
-      h5File.close();
+      dataSet._close();
+      h5File._close();
 
       LogTools.info("Wrote: {}", Arrays.toString(writeData));
       LogTools.info("Read:  {}", Arrays.toString(readData));
@@ -279,15 +271,23 @@ public class HDF5Test
    @Test
    public void testBytesWithZeros()
    {
-      WorkspaceFile file = getFile("NativeBytesWithZeros");
+      File file = new File("NativeBytesWithZeros.hdf5");
 
-      String filePath = file.getFilePath().toString();
+      String filePath = file.getAbsolutePath();
       H5File h5File = new H5File(filePath, hdf5.H5F_ACC_TRUNC);
       String datasetId = "bytes";
 
       // There is a 0 in here that causes the problem
-      byte[] writeData = new byte[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'f',
-                                      0, -2, -1, 1, 0, 2, 3, 4, Byte.MIN_VALUE, Byte.MAX_VALUE };
+      //byte[] writeData = new byte[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'f',
+      //                                0, -2, -1, 1, 0, 2, 3, 4, Byte.MIN_VALUE, Byte.MAX_VALUE };
+
+      byte[] writeData = new byte[10000];
+
+      for (int i = 0; i < writeData.length; i++)
+      {
+         writeData[i] = (byte) i;
+      }
+
       BytePointer dataPointer = new BytePointer(writeData);
 
       byte[] beforeWriteData = new byte[(int) dataPointer.limit()];
@@ -304,9 +304,9 @@ public class HDF5Test
       dataSet.write((Pointer) dataPointer, dataType);
       LogTools.info("Wrote:  {}", Arrays.toString(writeData));
 
-      dataSet.close();
-      fileSpace.close();
-      h5File.close();
+      dataSet._close();
+      fileSpace._close();
+      h5File._close();
 
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
@@ -321,21 +321,21 @@ public class HDF5Test
       dataPointer.get(readData);
       LogTools.info("Read:   {}", Arrays.toString(readData));
 
-      dataSet.close();
-      h5File.close();
+      dataSet._close();
+      h5File._close();
 
       Assertions.assertArrayEquals(writeData, readData);
    }
 
-   private static WorkspaceFile getFile(String name)
+   /**
+    * Make sure we can successively close and reopen an HDF5 file
+    */
+   @Test
+   public void testCloseAndReopenInts()
    {
-      return new WorkspaceFile(getDirectory(), name + HDF5Tools.HDF5_FILE_EXTENSION);
-   }
-
-   private static WorkspaceDirectory getDirectory()
-   {
-      WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-perception/src/test/resources", HDF5Test.class);
-      FileTools.ensureDirectoryExists(directory.getDirectoryPath(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-      return directory;
+      for (int i = 0; i < 5; i++)
+      {
+         testInts();
+      }
    }
 }

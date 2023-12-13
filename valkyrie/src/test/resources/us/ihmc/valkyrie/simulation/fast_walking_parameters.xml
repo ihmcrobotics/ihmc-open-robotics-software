@@ -60,7 +60,7 @@
                         <parameter name="extraCoMMaxHeightWithToes" type="DoubleParameter" min="0.0" max="1.0" value="0.08" />
                         <parameter name="minStepLengthForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.24" />
                         <parameter name="minStepForwardForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.24" />
-                        <parameter name="minStepHeightForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
+                        <parameter name="heightChangeForNonFlatStep" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
                         <parameter name="useToeLineContactInSwing" type="BooleanParameter" value="true" />
                         <parameter name="useToeLineContactInTransfer" type="BooleanParameter" value="false" />
                         <parameter name="updateLineContactDuringToeOff" type="BooleanParameter" value="false" />

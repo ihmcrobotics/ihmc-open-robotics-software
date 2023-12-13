@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HoldPositionControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.SmoothTransitionControllerState;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
@@ -13,10 +14,13 @@ public class QuadrupedExitWalkingControllerState extends SmoothTransitionControl
 
    private final HoldPositionControllerState finalControllerState;
 
-   public QuadrupedExitWalkingControllerState(HighLevelControllerState initialControllerState, HoldPositionControllerState finalControllerState,
-                                              OneDoFJointBasics[] controlledJoints, HighLevelControllerParameters highLevelControllerParameters)
+   public QuadrupedExitWalkingControllerState(HighLevelControllerState initialControllerState,
+                                              HoldPositionControllerState finalControllerState,
+                                              OneDoFJointBasics[] controlledJoints,
+                                              HighLevelControllerParameters highLevelControllerParameters,
+                                              CommandInputManager commandInputManager)
    {
-      super(namePrefix, HighLevelControllerName.EXIT_WALKING, initialControllerState, finalControllerState, controlledJoints, highLevelControllerParameters);
+      super(namePrefix, HighLevelControllerName.EXIT_WALKING, initialControllerState, finalControllerState, controlledJoints, highLevelControllerParameters, commandInputManager);
 
       this.finalControllerState = finalControllerState;
    }

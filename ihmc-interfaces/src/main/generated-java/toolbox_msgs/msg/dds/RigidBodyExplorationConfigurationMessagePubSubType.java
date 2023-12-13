@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class RigidBodyExplorationConfigurationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.RigidBodyExplorationConfigurationMessage>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::RigidBodyExplorationConfigurationMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "f7f7b073143ba28c63f87111b4116b613b419406831a1478deb5525b2d3b8d72";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -53,6 +53,14 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
             */
    public controller_msgs.msg.dds.FootTrajectoryMessage right_foot_trajectory_message_;
    /**
+            * Trajectory for the left leg
+            */
+   public controller_msgs.msg.dds.LegTrajectoryMessage left_leg_trajectory_message_;
+   /**
+            * Trajectory for the right leg
+            */
+   public controller_msgs.msg.dds.LegTrajectoryMessage right_leg_trajectory_message_;
+   /**
             * Trajectory for the neck joints
             */
    public controller_msgs.msg.dds.NeckTrajectoryMessage neck_trajectory_message_;
@@ -72,6 +80,8 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       pelvis_trajectory_message_ = new controller_msgs.msg.dds.PelvisTrajectoryMessage();
       left_foot_trajectory_message_ = new controller_msgs.msg.dds.FootTrajectoryMessage();
       right_foot_trajectory_message_ = new controller_msgs.msg.dds.FootTrajectoryMessage();
+      left_leg_trajectory_message_ = new controller_msgs.msg.dds.LegTrajectoryMessage();
+      right_leg_trajectory_message_ = new controller_msgs.msg.dds.LegTrajectoryMessage();
       neck_trajectory_message_ = new controller_msgs.msg.dds.NeckTrajectoryMessage();
       head_trajectory_message_ = new controller_msgs.msg.dds.HeadTrajectoryMessage();
    }
@@ -95,6 +105,8 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       controller_msgs.msg.dds.PelvisTrajectoryMessagePubSubType.staticCopy(other.pelvis_trajectory_message_, pelvis_trajectory_message_);
       controller_msgs.msg.dds.FootTrajectoryMessagePubSubType.staticCopy(other.left_foot_trajectory_message_, left_foot_trajectory_message_);
       controller_msgs.msg.dds.FootTrajectoryMessagePubSubType.staticCopy(other.right_foot_trajectory_message_, right_foot_trajectory_message_);
+      controller_msgs.msg.dds.LegTrajectoryMessagePubSubType.staticCopy(other.left_leg_trajectory_message_, left_leg_trajectory_message_);
+      controller_msgs.msg.dds.LegTrajectoryMessagePubSubType.staticCopy(other.right_leg_trajectory_message_, right_leg_trajectory_message_);
       controller_msgs.msg.dds.NeckTrajectoryMessagePubSubType.staticCopy(other.neck_trajectory_message_, neck_trajectory_message_);
       controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType.staticCopy(other.head_trajectory_message_, head_trajectory_message_);
    }
@@ -197,6 +209,24 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
 
    /**
+            * Trajectory for the left leg
+            */
+   public controller_msgs.msg.dds.LegTrajectoryMessage getLeftLegTrajectoryMessage()
+   {
+      return left_leg_trajectory_message_;
+   }
+
+
+   /**
+            * Trajectory for the right leg
+            */
+   public controller_msgs.msg.dds.LegTrajectoryMessage getRightLegTrajectoryMessage()
+   {
+      return right_leg_trajectory_message_;
+   }
+
+
+   /**
             * Trajectory for the neck joints
             */
    public controller_msgs.msg.dds.NeckTrajectoryMessage getNeckTrajectoryMessage()
@@ -242,6 +272,8 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       if (!this.pelvis_trajectory_message_.epsilonEquals(other.pelvis_trajectory_message_, epsilon)) return false;
       if (!this.left_foot_trajectory_message_.epsilonEquals(other.left_foot_trajectory_message_, epsilon)) return false;
       if (!this.right_foot_trajectory_message_.epsilonEquals(other.right_foot_trajectory_message_, epsilon)) return false;
+      if (!this.left_leg_trajectory_message_.epsilonEquals(other.left_leg_trajectory_message_, epsilon)) return false;
+      if (!this.right_leg_trajectory_message_.epsilonEquals(other.right_leg_trajectory_message_, epsilon)) return false;
       if (!this.neck_trajectory_message_.epsilonEquals(other.neck_trajectory_message_, epsilon)) return false;
       if (!this.head_trajectory_message_.epsilonEquals(other.head_trajectory_message_, epsilon)) return false;
 
@@ -268,6 +300,8 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       if (!this.pelvis_trajectory_message_.equals(otherMyClass.pelvis_trajectory_message_)) return false;
       if (!this.left_foot_trajectory_message_.equals(otherMyClass.left_foot_trajectory_message_)) return false;
       if (!this.right_foot_trajectory_message_.equals(otherMyClass.right_foot_trajectory_message_)) return false;
+      if (!this.left_leg_trajectory_message_.equals(otherMyClass.left_leg_trajectory_message_)) return false;
+      if (!this.right_leg_trajectory_message_.equals(otherMyClass.right_leg_trajectory_message_)) return false;
       if (!this.neck_trajectory_message_.equals(otherMyClass.neck_trajectory_message_)) return false;
       if (!this.head_trajectory_message_.equals(otherMyClass.head_trajectory_message_)) return false;
 
@@ -300,6 +334,10 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       builder.append(this.left_foot_trajectory_message_);      builder.append(", ");
       builder.append("right_foot_trajectory_message=");
       builder.append(this.right_foot_trajectory_message_);      builder.append(", ");
+      builder.append("left_leg_trajectory_message=");
+      builder.append(this.left_leg_trajectory_message_);      builder.append(", ");
+      builder.append("right_leg_trajectory_message=");
+      builder.append(this.right_leg_trajectory_message_);      builder.append(", ");
       builder.append("neck_trajectory_message=");
       builder.append(this.neck_trajectory_message_);      builder.append(", ");
       builder.append("head_trajectory_message=");

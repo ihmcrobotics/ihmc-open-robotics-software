@@ -33,7 +33,7 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
                                                             waypointIndexUIUpdateTopic,
                                                             null,
                                                             true);
-      messager.registerTopicListener(goToWaypointTopic, goToWaypointIndex -> // easy to put here, so do
+      messager.addTopicListener(goToWaypointTopic, goToWaypointIndex -> // easy to put here, so do
       {
          LogTools.info("Recieved GoToWaypoint {}", goToWaypointIndex);
          waypointManager.updateToMostRecentData();
@@ -69,7 +69,7 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
       this.waypointIndexUIUpdateTopic = waypointIndexUIUpdateTopic;
       this.delayUpdate = delayUpdate;
 
-      messager.registerTopicListener(receiveTopic, newSequence ->
+      messager.addTopicListener(receiveTopic, newSequence ->
       {
          LogTools.info("Received {} updated waypoints.", newSequence.size());
          if (delayUpdate)

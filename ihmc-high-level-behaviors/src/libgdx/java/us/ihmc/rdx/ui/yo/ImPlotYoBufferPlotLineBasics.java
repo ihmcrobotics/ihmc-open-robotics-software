@@ -4,6 +4,7 @@ import imgui.extension.implot.ImPlot;
 import imgui.internal.ImGui;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.simulation.scs2.RDXYoManager;
+import us.ihmc.rdx.imgui.ImPlotPlotLine;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.function.Consumer;

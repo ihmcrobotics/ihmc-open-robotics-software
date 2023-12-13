@@ -9,6 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.footstepPlanning.bodyPath.HeightMapRANSACNormalCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
@@ -127,7 +128,7 @@ public class HeightMapDataVisualizer
    }
 
    private static Graphics3DObject buildHeightMapGraphics(HeightMapData heightMapData,
-                                                          IntFunction<UnitVector3DBasics> surfaceNormalCalculator,
+                                                          IntFunction<UnitVector3DReadOnly> surfaceNormalCalculator,
                                                           HeightMapPlanarRegionCalculator planarRegionCalculator)
    {
       Graphics3DObject graphics3DObject = new Graphics3DObject();
@@ -182,7 +183,7 @@ public class HeightMapDataVisualizer
             if (SHOW_NORMALS)
             {
                graphics3DObject.translate(0.0, 0.0, 0.5 * renderedHeight + 0.01);
-               UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.apply(key);
+               UnitVector3DReadOnly surfaceNormal = surfaceNormalCalculator.apply(key);
 
                if (!surfaceNormal.epsilonEquals(Axis3D.Z, 1e-4))
                {

@@ -7,20 +7,20 @@ import java.util.Map;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WholeBodyStreamingMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -31,16 +31,16 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 
 public class KinematicsStreamingToolboxModule extends ToolboxModule
 {
    private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 5;
 
    protected final KinematicsStreamingToolboxController controller;
-   private IHMCRealtimeROS2Publisher<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
-   private IHMCRealtimeROS2Publisher<WholeBodyStreamingMessage> streamingMessagePublisher;
+   private IHMCROS2Publisher<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
+   private IHMCROS2Publisher<WholeBodyStreamingMessage> streamingMessagePublisher;
 
    public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
@@ -97,17 +97,17 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    }
 
    @Override
-   public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
+   public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
       ROS2Topic<?> controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
       ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
-      trajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, WholeBodyTrajectoryMessage.class, controllerInputTopic);
-      streamingMessagePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, WholeBodyStreamingMessage.class, controllerInputTopic);
+      trajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WholeBodyTrajectoryMessage.class, controllerInputTopic);
+      streamingMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WholeBodyStreamingMessage.class, controllerInputTopic);
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
       {
          if (controller != null)
          {
@@ -118,7 +118,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
       {
          if (controller != null)
          {

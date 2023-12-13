@@ -7,7 +7,7 @@
 
 #### Robots
 
-- Atlas
+- DRC-Atlas
 - Valkyrie
 - [Nadia](https://boardwalkrobotics.com/Nadia.html)
 
@@ -180,6 +180,5 @@ testDependencies {
 * Bhavyansh Mishra (bmishra@ihmc.org)
 * James Foster (jfoster@ihmc.org)
 * Dexton Anderson (danderson@ihmc.org)
-* Jae Oh (joh@ihmc.org)
 * Luigi Penco (lpenco@ihmc.org)
 * Nick Kitchel (nkitchel@ihmc.org)

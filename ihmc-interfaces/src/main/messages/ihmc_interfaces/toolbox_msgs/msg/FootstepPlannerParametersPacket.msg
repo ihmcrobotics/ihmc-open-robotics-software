@@ -355,6 +355,9 @@ float64 long_step_weight -11.1
 # When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
 float64 foothold_area_weight -11.1
 
+# When using a reference based ideal step calculator, alpha determines how much we value the reference plan vs. new plan. Value should be between 0 and 1
+float64 reference_plan_alpha -11.1
+
 # When using a cost based planning approach this value defines the cost that is added for each step
 # taken. Setting this value to a high number will favor plans with less steps.
 float64 cost_per_step -11.1

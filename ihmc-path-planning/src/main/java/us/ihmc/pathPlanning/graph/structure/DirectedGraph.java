@@ -91,20 +91,21 @@ public class DirectedGraph<N>
       edgeCostMap.put(edge, cost);
 
       double newNodeCost = nodeCostMap.get(startNode).getNodeCost() + transitionCost;
-      if (nodeCostMap.containsKey(endNode))
+      NodeCost endCost = nodeCostMap.get(endNode);
+      if (endCost == null)
       {
-         double oldNodeCost = nodeCostMap.get(endNode).getNodeCost();
+         nodeCostMap.put(endNode, new NodeCost(newNodeCost));
+         incomingBestEdge.put(endNode, edge);
+      }
+      else
+      {
+         double oldNodeCost = endCost.getNodeCost();
          if (newNodeCost < oldNodeCost)
          {
             nodeCostMap.put(endNode, new NodeCost(newNodeCost));
             incomingBestEdge.put(endNode, edge);
             updateChildCostsRecursively(endNode);
          }
-      }
-      else
-      {
-         nodeCostMap.put(endNode, new NodeCost(newNodeCost));
-         incomingBestEdge.put(endNode, edge);
       }
    }
 
@@ -113,9 +114,8 @@ public class DirectedGraph<N>
     */
    public double getCostFromStart(N node)
    {
-      checkNodeExists(node);
-
-      return nodeCostMap.get(node).getNodeCost();
+      NodeCost nodeCost = safelyGetNodeCost(node);
+      return nodeCost.getNodeCost();
    }
 
    /**
@@ -195,6 +195,15 @@ public class DirectedGraph<N>
    {
       if (!nodeCostMap.containsKey(node))
          throw new RuntimeException("Node has not been added to graph yet.");
+   }
+
+   private NodeCost safelyGetNodeCost(N node)
+   {
+      NodeCost nodeCost = nodeCostMap.get(node);
+      if (nodeCost == null)
+         throw new RuntimeException("Node has not been added to graph yet.");
+
+      return nodeCost;
    }
 
    public N getParentNode(N node)

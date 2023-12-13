@@ -27,4 +27,16 @@ bool hold_support_rigid_bodies
 # If this is true and the solver receives a MultiContactBalanceStatus, it will solve for the multi-contact support region
 bool enable_multi_contact_support_region_solver
 
+# Whether restrictive joint limits are enabled, in order to have the IK avoid a solution at the joint limit.
+# Field default value True
+bool enable_joint_limit_reduction
+
+# By default, the hip joint limits are restricted by 0.05 of the RoM.
+# When this and the subsequent list are set, the default limit restrictions are replaced with these values.
+# This list are the new joint limit reduction factors to be used, such that a value 0.05 means the restricted RoM will be 0.95 of the nominal (0.025 from either end).
+float32[] joint_limit_reduction_factors
+
+# The list of joints that the field joint_limit_reduction_values correspond to, by hash-code. The hash-code is computed from OneDoFJoint#hashcode().
+int32[] joint_limit_reduction_hash_codes
+
 

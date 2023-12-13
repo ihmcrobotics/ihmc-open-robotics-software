@@ -1,18 +1,19 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePath;
+
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.TableView;
 import javafx.scene.shape.Rectangle;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper.ParametersTableRow;
 import us.ihmc.log.LogTools;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePath;
+import us.ihmc.messager.javafx.JavaFXMessager;
 
 public class FootstepPlannerParametersUIController
 {
@@ -68,7 +69,7 @@ public class FootstepPlannerParametersUIController
       });
 
       // set messager updates to update all stored properties and select JavaFX properties
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParameters, parameters ->
+      messager.addTopicListener(FootstepPlannerMessagerAPI.PlannerParameters, parameters ->
       {
          if (!parameters.equals(planningParameters)) // stop feedback loop
          {

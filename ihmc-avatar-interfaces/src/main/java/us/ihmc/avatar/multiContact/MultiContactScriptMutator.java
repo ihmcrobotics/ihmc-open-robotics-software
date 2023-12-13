@@ -15,8 +15,7 @@ public class MultiContactScriptMutator
 {
    public MultiContactScriptMutator()
    {
-//      reverseValkyrieScript();
-      setShoeWristsToZero();
+      reverseValkyrieScript();
    }
 
    private void reverseValkyrieScript()
@@ -49,55 +48,6 @@ public class MultiContactScriptMutator
 
       String originalFilename = selectedFile.getName();
       String newFilename = originalFilename.substring(0, originalFilename.length() - ".json".length()) + "_reversed.json";
-      scriptWriter.startNewScript(new File(path.toFile(), newFilename), false);
-      for (int i = 0; i < script.size(); i++)
-      {
-         scriptWriter.recordConfiguration(script.get(i));
-      }
-
-      scriptWriter.writeScript();
-   }
-
-   private void setShoeWristsToZero()
-   {
-      Path currentDirectory = WorkspacePathTools.handleWorkingDirectoryFuzziness("shoe").resolve("optimus-simulation/src/main/resources/multiContact/scripts").toAbsolutePath().normalize();
-
-      JFileChooser fileChooser = new JFileChooser(currentDirectory.toFile());
-      fileChooser.setFileFilter(new FileNameExtensionFilter("JSON log", "json"));
-
-      int chooserState = fileChooser.showOpenDialog(null);
-      if (chooserState != JFileChooser.APPROVE_OPTION)
-         return;
-
-      File selectedFile = fileChooser.getSelectedFile();
-      MultiContactScriptReader scriptReader = new MultiContactScriptReader();
-      if (!scriptReader.loadScript(selectedFile))
-         return;
-
-      TIntArrayList wristJointIndices = new TIntArrayList();
-      wristJointIndices.add(6);
-      wristJointIndices.add(7);
-      wristJointIndices.add(14);
-      wristJointIndices.add(15);
-
-      List<KinematicsToolboxSnapshotDescription> script = scriptReader.getAllItems();
-      for (int i = 0; i < script.size(); i++)
-      {
-         KinematicsToolboxOutputStatus ikSolution = script.get(i).getIkSolution();
-
-         for (int j = 0; j < wristJointIndices.size(); j++)
-         {
-            ikSolution.getDesiredJointAngles().set(wristJointIndices.get(j), 0.0f);
-         }
-      }
-
-      MultiContactScriptWriter scriptWriter = new MultiContactScriptWriter();
-      Path folderPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("shoe");
-      folderPath = folderPath.getParent().resolve("shoe/optimus-simulation/src/main/resources/multiContact/scripts");
-      Path path = folderPath.toAbsolutePath().normalize();
-
-      String originalFilename = selectedFile.getName();
-      String newFilename = originalFilename.substring(0, originalFilename.length() - ".json".length()) + "_wristsZeroed.json";
       scriptWriter.startNewScript(new File(path.toFile(), newFilename), false);
       for (int i = 0; i < script.size(); i++)
       {

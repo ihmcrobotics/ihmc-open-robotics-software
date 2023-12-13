@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class HeadTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HeadTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HeadTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "498520b93d9647b2e9acb46dfb40843e09967c5e684ecd775156d630eaa5a6fa";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

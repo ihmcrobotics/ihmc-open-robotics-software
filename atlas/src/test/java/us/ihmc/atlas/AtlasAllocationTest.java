@@ -17,10 +17,11 @@ import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import gnu.trove.list.array.TIntArrayList;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
-import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.avatar.DRCEstimatorThread;
+import us.ihmc.avatar.AvatarControllerThread;
+import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -61,7 +62,6 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.wholeBodyController.DRCControllerThread;
 
 public class AtlasAllocationTest
 {
@@ -82,8 +82,8 @@ public class AtlasAllocationTest
 
       AllocationProfiler.checkInstrumentation();
 
-      allocationProfiler.includeAllocationsInsideClass(DRCControllerThread.class.getName()); // only testing these classes!
-      allocationProfiler.includeAllocationsInsideClass(DRCEstimatorThread.class.getName()); // only testing these classes!
+      allocationProfiler.includeAllocationsInsideClass(AvatarControllerThread.class.getName()); // only testing these classes!
+      allocationProfiler.includeAllocationsInsideClass(AvatarEstimatorThread.class.getName()); // only testing these classes!
       allocationProfiler.excludeAllocationsInsideClass(MirroredYoVariableRegistry.class.getName());
       allocationProfiler.excludeAllocationsInsideClass(MeshDataGenerator.class.getName());
       allocationProfiler.excludeAllocationsInsideClass(JMEGraphicsObject.class.getName());

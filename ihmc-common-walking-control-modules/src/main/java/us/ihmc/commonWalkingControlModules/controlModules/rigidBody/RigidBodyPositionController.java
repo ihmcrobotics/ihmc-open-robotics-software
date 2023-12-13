@@ -14,6 +14,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTra
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -34,8 +36,15 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
 
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper;
 
-   public RigidBodyPositionController(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator, ReferenceFrame controlFrame,
-                                      ReferenceFrame baseFrame, YoDouble yoTime, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public RigidBodyPositionController(RigidBodyBasics bodyToControl,
+                                      RigidBodyBasics baseBody,
+                                      RigidBodyBasics elevator,
+                                      ReferenceFrame controlFrame,
+                                      ReferenceFrame baseFrame,
+                                      YoDouble yoTime,
+                                      boolean enableFunctionGenerators,
+                                      YoRegistry parentRegistry,
+                                      YoGraphicsListRegistry graphicsListRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
 
@@ -55,8 +64,18 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
 
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
-      positionHelper = new RigidBodyPositionControlHelper(prefix, bodyToControl, baseBody, elevator, controlFrame, baseFrame, useBaseFrameForControl,
-                                                          usingWeightFromMessage, yoTime, registry, graphicsListRegistry);
+      positionHelper = new RigidBodyPositionControlHelper(prefix,
+                                                          bodyToControl,
+                                                          baseBody,
+                                                          elevator,
+                                                          controlFrame,
+                                                          baseFrame,
+                                                          useBaseFrameForControl,
+                                                          usingWeightFromMessage,
+                                                          enableFunctionGenerators,
+                                                          yoTime,
+                                                          registry,
+                                                          graphicsListRegistry);
 
       graphics.addAll(positionHelper.getGraphics());
       hideGraphics();
@@ -191,6 +210,13 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       return positionHelper.getLastTrajectoryPointTime();
    }
 
+   @Override
+   public boolean isHybridModeActive()
+   {
+      // TODO Need to implement the hybrid mode for this guy
+      return false;
+   }
+
    private void clear()
    {
       numberOfPointsInQueue.set(0);
@@ -205,5 +231,13 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    public TaskspaceTrajectoryStatusMessage pollStatusToReport()
    {
       return statusHelper.pollStatusMessage(positionHelper.getFeedbackControlCommand());
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(positionHelper.getSCS2YoGraphics());
+      return group;
    }
 }

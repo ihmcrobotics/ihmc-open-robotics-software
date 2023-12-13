@@ -1,11 +1,11 @@
 package us.ihmc.rdx.ui.yo;
 
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 
 public class ImGuiYoVariableClientUI
 {
-   private final ImGuiPanel panel;
+   private final RDXPanel panel;
    private final YoVariableClientHelper yoVariableClientHelper;
    private final ImGuiYoVariableClientManagerWidget managerWidget;
 
@@ -13,7 +13,7 @@ public class ImGuiYoVariableClientUI
    {
       yoVariableClientHelper = new YoVariableClientHelper(registryName);
       managerWidget = new ImGuiYoVariableClientManagerWidget(yoVariableClientHelper, () -> hostname, port);
-      panel = new ImGuiPanel(registryName + " YoVariable Client", managerWidget::renderImGuiWidgets);
+      panel = new RDXPanel(registryName + " YoVariable Client", managerWidget::renderImGuiWidgets);
    }
 
    public YoVariableClientHelper getYoVariableClientHelper()
@@ -31,7 +31,7 @@ public class ImGuiYoVariableClientUI
       managerWidget.destroy();
    }
 
-   public ImGuiPanel getPanel()
+   public RDXPanel getPanel()
    {
       return panel;
    }

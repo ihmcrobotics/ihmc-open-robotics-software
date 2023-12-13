@@ -20,8 +20,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OneDoFJointFeedbackController implements FeedbackControllerInterface
 {
-   public static final String shortName = "PDController";
-
    private final JointspaceAccelerationCommand inverseDynamicsOutput = new JointspaceAccelerationCommand();
    private final JointspaceVelocityCommand inverseKinematicsOutput = new JointspaceVelocityCommand();
    private final JointTorqueCommand virtualModelControlOutput = new JointTorqueCommand();
@@ -67,11 +65,13 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
    private final YoDouble weightForSolver;
 
-   public OneDoFJointFeedbackController(OneDoFJointBasics joint, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
+   public OneDoFJointFeedbackController(OneDoFJointBasics joint,
+                                        WholeBodyControlCoreToolbox toolbox,
+                                        FeedbackControllerToolbox feedbackControllerToolbox,
                                         YoRegistry parentRegistry)
    {
       String jointName = joint.getName();
-      YoRegistry registry = new YoRegistry(jointName + shortName);
+      YoRegistry registry = feedbackControllerToolbox.getRegistry();
 
       this.joint = joint;
       isEnabled = new YoBoolean("control_enabled_" + jointName, registry);
@@ -173,8 +173,6 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       inverseDynamicsOutput.addJoint(joint, Double.NaN);
       inverseKinematicsOutput.addJoint(joint, Double.NaN);
       virtualModelControlOutput.addJoint(joint, Double.NaN);
-
-      parentRegistry.addChild(registry);
    }
 
    @Override

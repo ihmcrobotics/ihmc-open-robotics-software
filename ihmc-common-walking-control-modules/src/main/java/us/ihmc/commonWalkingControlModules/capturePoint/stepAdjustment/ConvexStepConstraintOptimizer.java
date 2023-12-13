@@ -106,6 +106,7 @@ public class ConvexStepConstraintOptimizer
                                                              ConstraintOptimizerParametersReadOnly parameters,
                                                              int[] startingVerticesToIgnore)
    {
+      iterations.set(-1);
       if (!parameters.shouldPerformOptimization())
       {
          transformToReturn.setToZero();
@@ -203,8 +204,8 @@ public class ConvexStepConstraintOptimizer
       // enforce the constraints manually
       if (parameters.getConstrainMaxAdjustment())
       {
-//         solution.set(0, 0, MathTools.clamp(solution.get(0), parameters.getMaxX()));
-//         solution.set(1, 0, MathTools.clamp(solution.get(1), parameters.getMaxY()));
+         solution.set(0, 0, MathTools.clamp(solution.get(0), parameters.getMaxX()));
+         solution.set(1, 0, MathTools.clamp(solution.get(1), parameters.getMaxY()));
       }
       // assemble the transform
       transformToReturn.getTranslation().set(solution.get(0), solution.get(1), 0.0);

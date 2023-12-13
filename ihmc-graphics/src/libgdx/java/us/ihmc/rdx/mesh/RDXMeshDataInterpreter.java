@@ -36,4 +36,34 @@ public class RDXMeshDataInterpreter
 
       return meshBuilder.end();
    }
+
+   // TODO: Support changing the number of vertices, too, which involves the indices buffer
+   public static void repositionMeshVertices(MeshDataHolder meshData, Mesh meshToPack, Color color)
+   {
+      meshToPack.getVerticesBuffer().clear();
+
+      for (int i = 0; i < meshData.getVertices().length; i++)
+      {
+         // Position
+         meshToPack.getVerticesBuffer().put(meshData.getVertices()[i].getX32());
+         meshToPack.getVerticesBuffer().put(meshData.getVertices()[i].getY32());
+         meshToPack.getVerticesBuffer().put(meshData.getVertices()[i].getZ32());
+
+         // ColorUnpacked
+         meshToPack.getVerticesBuffer().put(Color.WHITE.r);
+         meshToPack.getVerticesBuffer().put(Color.WHITE.g);
+         meshToPack.getVerticesBuffer().put(Color.WHITE.b);
+         meshToPack.getVerticesBuffer().put(Color.WHITE.a);
+
+         // Normal
+         meshToPack.getVerticesBuffer().put(meshData.getVertexNormals()[i].getX32());
+         meshToPack.getVerticesBuffer().put(meshData.getVertexNormals()[i].getY32());
+         meshToPack.getVerticesBuffer().put(meshData.getVertexNormals()[i].getZ32());
+
+         // UV TextureCoordinates
+         float[] textureLocation = RDXMultiColorMeshBuilder.getTextureLocation(color);
+         meshToPack.getVerticesBuffer().put(textureLocation[0]);
+         meshToPack.getVerticesBuffer().put(textureLocation[1]);
+      }
+   }
 }

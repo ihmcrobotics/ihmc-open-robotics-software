@@ -4,10 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import javafx.animation.AnimationTimer;
@@ -17,6 +13,10 @@ import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.transform.Affine;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxInputMessage;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.handControl.HandFingerTrajectoryMessagePublisher;
 import us.ihmc.avatar.joystickBasedJavaFXController.ButtonState;
 import us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController;
@@ -38,18 +38,18 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsPlanningToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javaFXToolkit.JavaFXTools;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javafx.JavaFXRobotHandVisualizer;
 import us.ihmc.javafx.JavaFXRobotVisualizer;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 
 /**
  * What to do this controller.
@@ -141,23 +141,23 @@ public class GraspingJavaFXController
       desiredMiddles.put(RobotSide.LEFT, messager.createInput(GraspingJavaFXTopics.LeftMiddle, 0.0));
       desiredPinkys.put(RobotSide.LEFT, messager.createInput(GraspingJavaFXTopics.LeftPinky, 0.0));
 
-      messager.registerTopicListener(XBoxOneJavaFXController.ButtonAState, state -> clearKeyFrame(state));
-      messager.registerTopicListener(XBoxOneJavaFXController.ButtonSelectState, state -> createKeyFrame(state, RobotSide.LEFT));
-      messager.registerTopicListener(XBoxOneJavaFXController.ButtonStartState, state -> createKeyFrame(state, RobotSide.RIGHT));
-      messager.registerTopicListener(XBoxOneJavaFXController.ButtonBState, state -> switchSelectedObject(state));
+      messager.addTopicListener(XBoxOneJavaFXController.ButtonAState, state -> clearKeyFrame(state));
+      messager.addTopicListener(XBoxOneJavaFXController.ButtonSelectState, state -> createKeyFrame(state, RobotSide.LEFT));
+      messager.addTopicListener(XBoxOneJavaFXController.ButtonStartState, state -> createKeyFrame(state, RobotSide.RIGHT));
+      messager.addTopicListener(XBoxOneJavaFXController.ButtonBState, state -> switchSelectedObject(state));
 
-      messager.registerJavaFXSyncedTopicListener(XBoxOneJavaFXController.LeftStickYAxis, this::appendingXAxis);
-      messager.registerJavaFXSyncedTopicListener(XBoxOneJavaFXController.LeftStickXAxis, this::appendingYAxis);
-      messager.registerTopicListener(XBoxOneJavaFXController.ButtonLeftBumperState, state -> appendingZAxisPositive(state));
-      messager.registerJavaFXSyncedTopicListener(XBoxOneJavaFXController.LeftTriggerAxis, this::appendingZAxisNegative);
+      messager.addFXTopicListener(XBoxOneJavaFXController.LeftStickYAxis, this::appendingXAxis);
+      messager.addFXTopicListener(XBoxOneJavaFXController.LeftStickXAxis, this::appendingYAxis);
+      messager.addTopicListener(XBoxOneJavaFXController.ButtonLeftBumperState, state -> appendingZAxisPositive(state));
+      messager.addFXTopicListener(XBoxOneJavaFXController.LeftTriggerAxis, this::appendingZAxisNegative);
 
-      messager.registerJavaFXSyncedTopicListener(XBoxOneJavaFXController.RightStickYAxis, this::appendingPitch);
-      messager.registerJavaFXSyncedTopicListener(XBoxOneJavaFXController.RightStickXAxis, this::appendingRoll);
-      messager.registerTopicListener(XBoxOneJavaFXController.ButtonRightBumperState, state -> appendingYawPositive(state));
-      messager.registerJavaFXSyncedTopicListener(XBoxOneJavaFXController.RightTriggerAxis, this::appendingYawNegative);
+      messager.addFXTopicListener(XBoxOneJavaFXController.RightStickYAxis, this::appendingPitch);
+      messager.addFXTopicListener(XBoxOneJavaFXController.RightStickXAxis, this::appendingRoll);
+      messager.addTopicListener(XBoxOneJavaFXController.ButtonRightBumperState, state -> appendingYawPositive(state));
+      messager.addFXTopicListener(XBoxOneJavaFXController.RightTriggerAxis, this::appendingYawNegative);
 
-      messager.registerTopicListener(XBoxOneJavaFXController.ButtonXState, state -> submitReachingManifoldsToToolbox(state));
-      messager.registerTopicListener(XBoxOneJavaFXController.ButtonYState, state -> confirmReachingMotion(state));
+      messager.addTopicListener(XBoxOneJavaFXController.ButtonXState, state -> submitReachingManifoldsToToolbox(state));
+      messager.addTopicListener(XBoxOneJavaFXController.ButtonYState, state -> confirmReachingMotion(state));
 
       ROS2Topic toolboxRequestTopicName = KinematicsPlanningToolboxModule.getInputTopic(robotName);
       ROS2Topic toolboxResponseTopicName = KinematicsPlanningToolboxModule.getOutputTopic(robotName);

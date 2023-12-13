@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class Cylinder3DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.Cylinder3DMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::Cylinder3DMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "c7498a4f717b1affd66e65cd5c7a644401b31a9163723b7ae8c5fd2458a97db8";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PauseWalkingMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PauseWalkingMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "7d71937432399f838a4eeba3038408fb32d86e387309d2f62200d240552fb047";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -44,6 +56,8 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -63,6 +77,9 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -73,6 +90,8 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       cdr.write_type_7(data.getPause());
 
+      cdr.write_type_7(data.getClearRemainingFootstepQueue());
+
    }
 
    public static void read(controller_msgs.msg.dds.PauseWalkingMessage data, us.ihmc.idl.CDR cdr)
@@ -80,6 +99,8 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       data.setSequenceId(cdr.read_type_4());
       	
       data.setPause(cdr.read_type_7());
+      	
+      data.setClearRemainingFootstepQueue(cdr.read_type_7());
       	
 
    }
@@ -89,6 +110,7 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("pause", data.getPause());
+      ser.write_type_7("clear_remaining_footstep_queue", data.getClearRemainingFootstepQueue());
    }
 
    @Override
@@ -96,6 +118,7 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setPause(ser.read_type_7("pause"));
+      data.setClearRemainingFootstepQueue(ser.read_type_7("clear_remaining_footstep_queue"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.PauseWalkingMessage src, controller_msgs.msg.dds.PauseWalkingMessage dest)

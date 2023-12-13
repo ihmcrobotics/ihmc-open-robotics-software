@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -39,10 +40,17 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
    private String[] otherCollisionMasks;
    private final HumanoidJointNameMap jointMap;
    private String robotCollisionMask;
+   private final boolean createForSimulation;
 
    public ValkyrieSimulationCollisionModel(HumanoidJointNameMap jointMap)
    {
+      this(jointMap, true);
+   }
+
+   public ValkyrieSimulationCollisionModel(HumanoidJointNameMap jointMap, boolean createForSimulation)
+   {
       this.jointMap = jointMap;
+      this.createForSimulation = createForSimulation;
       // Setting default info.
       setCollidableHelper(new CollidableHelper(), jointMap.getModelName(), "other");
    }
@@ -133,12 +141,24 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
          chestFrontShape.getAxis().set(Axis3D.Y);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, chestFrontShape));
 
-         FrameSTPBox3D chestBackShape = new FrameSTPBox3D(torsoFrame, 0.35, 0.35, 0.4);
-         chestBackShape.getSize().scale(modelScale);
-         chestBackShape.setMargins(1.0e-5, 4.0e-4);
-         chestBackShape.getPosition().set(-0.111, 0.0, 0.208);
-         chestBackShape.getPosition().scale(modelScale);
-         collidables.add(new Collidable(torso, collisionMask, collisionGroup, chestBackShape));
+         Vector3D checkBackShape = new Vector3D(0.35, 0.35, 0.4);
+         if (createForSimulation)
+         {
+            FrameSTPBox3D chestBackShape = new FrameSTPBox3D(torsoFrame, checkBackShape);
+            chestBackShape.getSize().scale(modelScale);
+            chestBackShape.setMargins(1.0e-5, 4.0e-4);
+            chestBackShape.getPosition().set(-0.111, 0.0, 0.208);
+            chestBackShape.getPosition().scale(modelScale);
+            collidables.add(new Collidable(torso, collisionMask, collisionGroup, chestBackShape));
+         }
+         else
+         {
+            FrameBox3D chestBackShape = new FrameBox3D(torsoFrame, checkBackShape);
+            chestBackShape.getSize().scale(modelScale);
+            chestBackShape.getPosition().set(-0.111, 0.0, 0.208);
+            chestBackShape.getPosition().scale(modelScale);
+            collidables.add(new Collidable(torso, collisionMask, collisionGroup, chestBackShape));
+         }
       }
 
       { // Pelvis
@@ -212,12 +232,24 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
             MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
 
             // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
-            FrameSTPBox3D footShape = new FrameSTPBox3D(ankleRollFrame, 0.275, 0.16, 0.095);
-            footShape.getSize().scale(modelScale);
-            footShape.setMargins(1.0e-5, 4.0e-4);
-            footShape.getPosition().set(0.044, 0.0, -0.042);
-            footShape.getPosition().scale(modelScale);
-            collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footShape));
+            Vector3D footSize = new Vector3D(0.275, 0.16, 0.095);
+            if (createForSimulation)
+            {
+               FrameSTPBox3D footShape = new FrameSTPBox3D(ankleRollFrame, footSize);
+               footShape.getSize().scale(modelScale);
+               footShape.setMargins(1.0e-5, 4.0e-4);
+               footShape.getPosition().set(0.044, 0.0, -0.042);
+               footShape.getPosition().scale(modelScale);
+               collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footShape));
+            }
+            else
+            {
+               FrameBox3D footShape = new FrameBox3D(ankleRollFrame, footSize);
+               footShape.getSize().scale(modelScale);
+               footShape.getPosition().set(0.044, 0.0, -0.042);
+               footShape.getPosition().scale(modelScale);
+               collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footShape));
+            }
          }
       }
 

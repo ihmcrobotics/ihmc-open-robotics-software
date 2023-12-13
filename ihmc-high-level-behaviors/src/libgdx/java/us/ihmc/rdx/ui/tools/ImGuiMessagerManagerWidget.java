@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.tools;
 
 import imgui.internal.ImGui;
-import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.tools.MessagerHelper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.messager.SharedMemoryMessager;
@@ -76,7 +75,7 @@ public class ImGuiMessagerManagerWidget
 
    private boolean isSharedMemoryAvailable()
    {
-      SharedMemoryMessager potentialSharedMemoryMessager = BehaviorModule.getSharedMemoryMessager();
+      SharedMemoryMessager potentialSharedMemoryMessager = null; //BehaviorModule.getSharedMemoryMessager();
       return potentialSharedMemoryMessager != null && potentialSharedMemoryMessager.isMessagerOpen();
    }
 
@@ -94,7 +93,7 @@ public class ImGuiMessagerManagerWidget
 
    private void connectSharedMemory()
    {
-      messagerHelper.connectViaSharedMemory(BehaviorModule.getSharedMemoryMessager());
+//      messagerHelper.connectViaSharedMemory(BehaviorModule.getSharedMemoryMessager());
    }
 
    private void connectKryo()

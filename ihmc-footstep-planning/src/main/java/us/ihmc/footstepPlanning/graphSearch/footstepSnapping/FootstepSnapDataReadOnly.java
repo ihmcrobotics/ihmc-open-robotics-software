@@ -68,6 +68,16 @@ public interface FootstepSnapDataReadOnly
     */
    double getHeightMapArea();
 
+   /**
+    * Returns whether the footstep was snapped to the planar regions.
+    */
+   boolean getSnappedToPlanarRegions();
+
+   /**
+    * Returns whether the footstep was snapped to the height map.
+    */
+   boolean getSnappedToHeightMap();
+
    default void packSnapAndWiggleTransform(RigidBodyTransform transformToPack)
    {
       transformToPack.set(getSnapTransform());

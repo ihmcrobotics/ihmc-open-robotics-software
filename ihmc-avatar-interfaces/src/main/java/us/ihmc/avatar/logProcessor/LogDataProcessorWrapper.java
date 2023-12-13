@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.yoVariables.buffer.interfaces.YoBufferProcessor;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.scripts.Script;
-import us.ihmc.wholeBodyController.DRCControllerThread;
 
 public class LogDataProcessorWrapper implements YoBufferProcessor, Script
 {
@@ -33,7 +32,8 @@ public class LogDataProcessorWrapper implements YoBufferProcessor, Script
       scs.addYoRegistry(logDataProcessorRegistry);
       scs.addScript(this);
 
-      controllerTimerCount = (YoLong) scs.findVariable(DRCControllerThread.class.getSimpleName(), "controllerTimerCount");
+      // FIXME
+      controllerTimerCount = (YoLong) scs.findVariable(/* DRCControllerThread.class.getSimpleName() , */ "controllerTimerCount");
       haveFoundControllerTimerVariable = controllerTimerCount != null;
       if (!haveFoundControllerTimerVariable)
       {

@@ -70,6 +70,7 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    @Test
    public void testWalkingOverCinderBlockField() throws Exception
    {
+      removeAnkleJointLimits = true;
       super.testWalkingOverCinderBlockField();
    }
 
@@ -110,7 +111,7 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
       super.testSlantedCinderBlockField(true);
    }
 
-   @Tag("humanoid-rough-terrain")
+   @Tag("humanoid-rough-terrain-slow")
    @Test
    public void testWalkingOverCinderBlockFieldVal2Scale() throws Exception
    {

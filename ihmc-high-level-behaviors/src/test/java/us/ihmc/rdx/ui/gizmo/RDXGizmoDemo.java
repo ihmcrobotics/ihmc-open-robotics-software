@@ -11,9 +11,7 @@ import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 
 public class RDXGizmoDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
 
    private RDXFocusBasedCamera focusBasedCamera;
    private final RDXPose3DGizmo poseGizmo = new RDXPose3DGizmo();
@@ -47,7 +45,7 @@ public class RDXGizmoDemo
 
             poseGizmo.getTransformToParent().getTranslation().set(-1.0, -2.0, 0.1);
 
-            footstepRingGizmo.create(focusBasedCamera);
+            footstepRingGizmo.create(baseUI.getPrimary3DPanel());
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(footstepRingGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(footstepRingGizmo);

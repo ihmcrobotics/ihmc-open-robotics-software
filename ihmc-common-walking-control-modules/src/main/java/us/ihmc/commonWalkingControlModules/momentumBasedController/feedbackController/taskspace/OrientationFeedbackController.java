@@ -48,8 +48,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoRegistry registry;
-
    private final YoBoolean isEnabled;
 
    private final FBQuaternion3D yoDesiredOrientation;
@@ -160,14 +158,13 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       rigidBodyAccelerationProvider = ccToolbox.getRigidBodyAccelerationProvider();
 
       String endEffectorName = endEffector.getName();
-      registry = new YoRegistry(appendIndex(endEffectorName, controllerIndex) + "OrientationFBController");
       dt = ccToolbox.getControlDT();
       gains = fbToolbox.getOrCreateOrientationGains(endEffector, controllerIndex, computeIntegralTerm, true);
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       endEffectorFrame = endEffector.getBodyFixedFrame();
 
-      isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "IsOrientationFBControllerEnabled", registry);
+      isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "IsOrientationFBControllerEnabled", fbToolbox.getRegistry());
       isEnabled.set(false);
 
       yoDesiredOrientation = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, DESIRED, isEnabled, true);
@@ -296,8 +293,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          yoFeedForwardAngularVelocity = null;
          rateLimitedFeedbackAngularVelocity = null;
       }
-
-      parentRegistry.addChild(registry);
    }
 
    public void submitFeedbackControlCommand(OrientationFeedbackControlCommand command)
@@ -385,7 +380,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularAcceleration.setIncludingFrame(proportionalFeedback);
       desiredAngularAcceleration.add(derivativeFeedback);
       desiredAngularAcceleration.add(integralFeedback);
-      desiredAngularAcceleration.clipToMaxLength(gains.getMaximumFeedback());
+      desiredAngularAcceleration.clipToMaxNorm(gains.getMaximumFeedback());
       yoFeedbackAngularAcceleration.setIncludingFrame(desiredAngularAcceleration);
       yoFeedbackAngularAcceleration.changeFrame(trajectoryFrame);
       yoFeedbackAngularAcceleration.setCommandId(currentCommandId);
@@ -419,7 +414,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       desiredAngularVelocity.setIncludingFrame(proportionalFeedback);
       desiredAngularVelocity.add(integralFeedback);
-      desiredAngularVelocity.clipToMaxLength(gains.getMaximumFeedback());
+      desiredAngularVelocity.clipToMaxNorm(gains.getMaximumFeedback());
       yoFeedbackAngularVelocity.setIncludingFrame(desiredAngularVelocity);
       yoFeedbackAngularVelocity.changeFrame(trajectoryFrame);
       yoFeedbackAngularVelocity.setCommandId(currentCommandId);
@@ -474,7 +469,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularTorque.setIncludingFrame(proportionalFeedback);
       desiredAngularTorque.add(derivativeFeedback);
       desiredAngularTorque.add(integralFeedback);
-      desiredAngularTorque.clipToMaxLength(gains.getMaximumFeedback());
+      desiredAngularTorque.clipToMaxNorm(gains.getMaximumFeedback());
       yoFeedbackAngularTorque.setIncludingFrame(desiredAngularTorque);
       yoFeedbackAngularTorque.changeFrame(trajectoryFrame);
       yoFeedbackAngularTorque.setCommandId(currentCommandId);
@@ -530,7 +525,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredOrientation.normalizeAndLimitToPi();
       desiredOrientation.getRotationVector(feedbackTermToPack);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
-      feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
+      feedbackTermToPack.clipToMaxNorm(gains.getMaximumProportionalError());
 
       yoErrorRotationVector.setIncludingFrame(feedbackTermToPack);
       yoErrorRotationVector.changeFrame(trajectoryFrame);
@@ -575,7 +570,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       feedbackTermToPack.sub(yoDesiredAngularVelocity, yoCurrentAngularVelocity);
       feedbackTermToPack.changeFrame(endEffectorFrame);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
-      feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
+      feedbackTermToPack.clipToMaxNorm(gains.getMaximumDerivativeError());
 
       if (yoFilteredErrorAngularVelocity != null)
       {
@@ -661,7 +656,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       feedbackTermToPack.scale(dt);
       feedbackTermToPack.changeFrame(endEffectorFrame);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
-      feedbackTermToPack.clipToMaxLength(maximumIntegralError);
+      feedbackTermToPack.clipToMaxNorm(maximumIntegralError);
       yoErrorRotationVectorIntegrated.setIncludingFrame(feedbackTermToPack);
       yoErrorRotationVectorIntegrated.changeFrame(trajectoryFrame);
       yoErrorRotationVectorIntegrated.setCommandId(currentCommandId);

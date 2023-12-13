@@ -3,8 +3,12 @@
     "Dockspace Panel" : true
   },
   "windows" : {
+    "3D View" : true,
+    "Second 3D View" : false,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false,
     "Window 1" : true,
-    "Window 2" : true,
-    "Window 3" : true
+    "Window 2" : false,
+    "Window 3" : false
   }
 }

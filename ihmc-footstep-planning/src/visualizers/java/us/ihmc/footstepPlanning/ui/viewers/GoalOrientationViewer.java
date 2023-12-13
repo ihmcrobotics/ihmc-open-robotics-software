@@ -77,7 +77,7 @@ public class GoalOrientationViewer extends AnimationTimer
       leftFootGoalPose = messager.createInput(LeftFootGoalPose);
       rightFootGoalPose = messager.createInput(RightFootGoalPose);
 
-      messager.registerTopicListener(ShowGoal, root::setVisible);
+      messager.addTopicListener(ShowGoal, root::setVisible);
    }
 
    public void setPlannerParameters(FootstepPlannerParametersBasics parameters)

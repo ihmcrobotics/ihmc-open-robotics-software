@@ -32,6 +32,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGuiMouseDragData;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class RDXFocusBasedCamera extends Camera
@@ -103,6 +104,19 @@ public class RDXFocusBasedCamera extends Camera
 
       updateCameraPose();
       update(true);
+
+      RDXBaseUI.getInstance().getKeyBindings().register("Move camera forward ", "W");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move camera back", "S");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move camera left", "A");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move camera right", "D");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move camera up", "Q");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move camera down", "Z");
+      RDXBaseUI.getInstance().getKeyBindings().register("Zoom camera in (broken?)", "C");
+      RDXBaseUI.getInstance().getKeyBindings().register("Zoom camera out (broken?)", "E");
+      RDXBaseUI.getInstance().getKeyBindings().register("Zoom camera in / out", "Mouse scroll");
+      RDXBaseUI.getInstance().getKeyBindings().register("Fine adjustment", "Shift");
+      RDXBaseUI.getInstance().getKeyBindings().register("Drag to orient camera", "Left mouse");
+      RDXBaseUI.getInstance().getKeyBindings().register("Drag to pan camera", "Middle mouse");
    }
 
    public InputProcessor setInputForLibGDX()
@@ -239,7 +253,7 @@ public class RDXFocusBasedCamera extends Camera
       {
          orbitDragData.setObjectBeingDragged(this);
       }
-      if (orbitDragData.isDragging() && orbitDragData.getObjectBeingDragged() == this)
+      if (orbitDragData.isBeingDragged(this))
       {
          mouseDragged(orbitDragData.getMouseDraggedX(), orbitDragData.getMouseDraggedY());
       }
@@ -248,7 +262,7 @@ public class RDXFocusBasedCamera extends Camera
       {
          panDragData.setObjectBeingDragged(this);
       }
-      if (panDragData != null && panDragData.isDragging() && panDragData.getObjectBeingDragged() == this)
+      if (panDragData != null && panDragData.isBeingDragged(this))
       {
          mousePanned(panDragData.getMouseDraggedX(), panDragData.getMouseDraggedY());
       }

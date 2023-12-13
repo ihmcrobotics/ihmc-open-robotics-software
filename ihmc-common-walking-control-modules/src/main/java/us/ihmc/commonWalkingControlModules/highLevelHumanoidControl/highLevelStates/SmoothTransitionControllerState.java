@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
@@ -30,15 +31,21 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
 
    private final HighLevelControllerState initialControllerState;
    private final HighLevelControllerState finalControllerState;
+   private final CommandInputManager commandInputManager;
 
-   public SmoothTransitionControllerState(String namePrefix, HighLevelControllerName controllerState, HighLevelControllerState initialControllerState,
-                                          HighLevelControllerState finalControllerState, OneDoFJointBasics[] controlledJoints,
-                                          HighLevelControllerParameters highLevelControllerParameters)
+   public SmoothTransitionControllerState(String namePrefix,
+                                          HighLevelControllerName controllerState,
+                                          HighLevelControllerState initialControllerState,
+                                          HighLevelControllerState finalControllerState,
+                                          OneDoFJointBasics[] controlledJoints,
+                                          HighLevelControllerParameters highLevelControllerParameters,
+                                          CommandInputManager commandInputManager)
    {
       super(namePrefix, controllerState, controlledJoints);
 
       this.initialControllerState = initialControllerState;
       this.finalControllerState = finalControllerState;
+      this.commandInputManager = commandInputManager;
 
       enableTimeBasedTransition = new BooleanParameter(namePrefix + "EnableTimeBasedTransition",
                                                        "When true, the ramp up follows a linear time-based trajectory, when false, the user has to ramp up manually TransitionRatioCurrentValue through SCS.",
@@ -65,6 +72,9 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
       finalControllerState.onEntry();
       transitionRatioTrajectory.setLinear(0.0, standTransitionDuration.getValue(), 0.0, 1.0);
       standTransitionRatioCurrentValue.set(0.0);
+
+      commandInputManager.clearAllCommands();
+      commandInputManager.setEnabled(false);
    }
 
    @Override
@@ -113,6 +123,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
    public void onExit(double timeInState)
    {
       initialControllerState.onExit(timeInState);
+      commandInputManager.setEnabled(true);
    }
 
    @Override

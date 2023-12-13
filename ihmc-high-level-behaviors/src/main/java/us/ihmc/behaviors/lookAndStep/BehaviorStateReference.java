@@ -1,23 +1,21 @@
 package us.ihmc.behaviors.lookAndStep;
 
+import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
-import us.ihmc.behaviors.tools.interfaces.UIPublisher;
 
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.CurrentState;
 
 public class BehaviorStateReference<E extends Enum<E>>
 {
    private final AtomicReference<E> atomicReference;
    private final StatusLogger statusLogger;
-   private final UIPublisher uiPublisher;
+   private final BehaviorHelper behaviorHelper;
 
-   public BehaviorStateReference(E initialValue, StatusLogger statusLogger, UIPublisher uiPublisher)
+   public BehaviorStateReference(E initialValue, StatusLogger statusLogger, BehaviorHelper behaviorHelper)
    {
       atomicReference = new AtomicReference<>(initialValue);
       this.statusLogger = statusLogger;
-      this.uiPublisher = uiPublisher;
+      this.behaviorHelper = behaviorHelper;
    }
 
    public void set(E state)
@@ -29,7 +27,7 @@ public class BehaviorStateReference<E extends Enum<E>>
 
    public void broadcast()
    {
-      uiPublisher.publishToUI(CurrentState, atomicReference.get().name());
+      behaviorHelper.publish(LookAndStepBehaviorAPI.CURRENT_STATE, atomicReference.get().name());
    }
 
    public E get()

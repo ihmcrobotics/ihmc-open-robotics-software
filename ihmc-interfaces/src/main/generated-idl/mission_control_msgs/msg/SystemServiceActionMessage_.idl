@@ -1,0 +1,28 @@
+#ifndef __mission_control_msgs__msg__SystemServiceActionMessage__idl__
+#define __mission_control_msgs__msg__SystemServiceActionMessage__idl__
+
+module mission_control_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="mission_control_msgs::msg::dds_::SystemServiceActionMessage_")
+      struct SystemServiceActionMessage
+      {
+        /**
+         * The name of the systemd service
+         */
+        string service_name;
+        /**
+         * The action to perform in the systemctl command
+         * Valid values: [start, stop, restart, kill]
+         */
+        string systemd_action;
+      };
+    };
+  };
+};
+
+#endif

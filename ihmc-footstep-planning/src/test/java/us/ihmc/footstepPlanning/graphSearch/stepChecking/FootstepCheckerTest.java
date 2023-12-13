@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -377,8 +378,9 @@ public class FootstepCheckerTest
          }
       };
 
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
-      testSnappingToInclinedPlane(parameters, snapper);
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
+      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
+      testSnappingToInclinedPlane(parameters, snapper, environmentHandler);
    }
 
    @Test
@@ -400,11 +402,12 @@ public class FootstepCheckerTest
          }
       };
 
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
-      testSnappingToInclinedPlane(parameters, snapper);
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
+      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
+      testSnappingToInclinedPlane(parameters, snapper, environmentHandler);
    }
 
-   public void testSnappingToInclinedPlane(FootstepPlannerParametersBasics parameters, FootstepSnapAndWiggler snapper)
+   public void testSnappingToInclinedPlane(FootstepPlannerParametersBasics parameters, FootstepSnapAndWiggler snapper, FootstepPlannerEnvironmentHandler environmentHandler)
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       ConvexPolygon2D polygon = new ConvexPolygon2D();
@@ -428,10 +431,11 @@ public class FootstepCheckerTest
       FootstepChecker nodeChecker = new FootstepChecker(parameters, footPolygons, snapper, null, registry);
       nodeChecker.setPlanarRegions(planarRegionsList);
 
-      DiscreteFootstep step0 = new DiscreteFootstep(-0.1, -0.1, 0.0, RobotSide.RIGHT);
-      DiscreteFootstep step1 = new DiscreteFootstep(0.0, 0.1, 0.0, RobotSide.LEFT);
-      DiscreteFootstep step2 = new DiscreteFootstep(0.0, -0.1, 0.0, RobotSide.RIGHT);
+      DiscreteFootstep step0 = new DiscreteFootstep(-0.1, -0.1, 0.0, RobotSide.RIGHT); // the previous right foot position
+      DiscreteFootstep step1 = new DiscreteFootstep(0.0, 0.1, 0.0, RobotSide.LEFT); // the left foot stance position for executing step 2
+      DiscreteFootstep step2 = new DiscreteFootstep(0.0, -0.1, 0.0, RobotSide.RIGHT); // the candidate right foot position after the swing.
 
+      // This should be true, as it just a translation of 10 cm forward.
       // TODO add getter for rejection reason or retreive from
       assertTrue(nodeChecker.isStepValid(step2, step1, step0));
 //      assertEquals(null, nodeChecker.getRejectionReason());
@@ -445,35 +449,41 @@ public class FootstepCheckerTest
          transformToWorld.appendRollRotation(rotationAngle);
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
-         snapper.setPlanarRegions(planarRegionsList);
+         environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
 
-         Assert.assertTrue(nodeChecker.isStepValid(step2, step1, step0));
-//         assertEquals(null, registry.getRejectionReason());
+         assertTrue(nodeChecker.isStepValid(step2, step1, step0));
+         //         assertEquals(null, registry.getRejectionReason());
 
          transformToWorld.setIdentity();
          transformToWorld.appendPitchRotation(rotationAngle);
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
+         environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+         snapper.clearSnapData();
 
-         Assert.assertTrue(nodeChecker.isStepValid(step2, step1, step0));
+         assertTrue(nodeChecker.isStepValid(step2, step1, step0));
 //         assertEquals(null, registry.getRejectionReason());
       }
 
+      // This should be false, as
       for (rotationAngle = parameters.getMinimumSurfaceInclineRadians() + 0.001; rotationAngle < Math.toRadians(75); rotationAngle += 0.001)
       {
          transformToWorld.setIdentity();
          transformToWorld.appendRollRotation(rotationAngle);
          planarRegion.set(transformToWorld, polygons);
-         snapper.setPlanarRegions(planarRegionsList);
+         environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
          nodeChecker.setPlanarRegions(planarRegionsList);
+         snapper.clearSnapData();
 
          assertFalse("rotation = " + rotationAngle, nodeChecker.isStepValid(step2, step1, step0));
-//         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
+         //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
 
          transformToWorld.setIdentity();
          transformToWorld.appendPitchRotation(rotationAngle);
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
+         environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+         snapper.clearSnapData();
 
          assertFalse("rotation = " + rotationAngle, nodeChecker.isStepValid(step2, step1, step0));
 //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
@@ -485,15 +495,18 @@ public class FootstepCheckerTest
          transformToWorld.appendRollRotation(rotationAngle);
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
-         snapper.setPlanarRegions(planarRegionsList);
+         environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+         snapper.clearSnapData();
 
          assertFalse("rotation = " + rotationAngle, nodeChecker.isStepValid(step2, step1, step0));
-//         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
+         //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
 
          transformToWorld.setIdentity();
          transformToWorld.appendPitchRotation(rotationAngle);
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
+         environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+         snapper.clearSnapData();
 
          assertFalse("rotation = " + rotationAngle, nodeChecker.isStepValid(step2, step1, step0));
 //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
@@ -509,7 +522,7 @@ public class FootstepCheckerTest
          transformToWorld.getRotation().set(orientation3DReadOnly);
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
-         snapper.setPlanarRegions(planarRegionsList);
+         environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
 
          Vector3D vertical = new Vector3D(0.0, 0.0, 1.0);
          Vector3D normal = new Vector3D(vertical);
@@ -555,7 +568,8 @@ public class FootstepCheckerTest
       double footWidth = 0.1;
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
 
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters);
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
+      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters, environmentHandler);
       FootstepChecker checker = new FootstepChecker(footstepPlannerParameters, footPolygons, snapper, null, new YoRegistry("testRegistry"));
 
       DiscreteFootstep step0 = new DiscreteFootstep(0.0, -0.2, 0.0, RobotSide.RIGHT);
@@ -572,7 +586,7 @@ public class FootstepCheckerTest
       planarRegionsListGenerator.translate(0.5 * maxXYWiggle, 0.5 * maxXYWiggle, 0.1);
       planarRegionsListGenerator.addRectangle(regionX, regionY);
       PlanarRegionsList regions = planarRegionsListGenerator.getPlanarRegionsList();
-      snapper.setPlanarRegions(regions);
+      environmentHandler.setPrimaryPlanarRegions(regions);
       checker.setPlanarRegions(regions);
       snapper.initialize();
       snapper.addSnapData(step0, new FootstepSnapData(new RigidBodyTransform()));
@@ -588,7 +602,7 @@ public class FootstepCheckerTest
       planarRegionsListGenerator.translate(0.5 * maxXYWiggle, 0.5 * maxXYWiggle, 0.1);
       planarRegionsListGenerator.addRectangle(regionX, regionY);
       regions = planarRegionsListGenerator.getPlanarRegionsList();
-      snapper.setPlanarRegions(regions);
+      environmentHandler.setPrimaryPlanarRegions(regions);
       checker.setPlanarRegions(regions);
       snapper.initialize();
       snapper.addSnapData(step0, new FootstepSnapData(new RigidBodyTransform()));
@@ -604,7 +618,7 @@ public class FootstepCheckerTest
       planarRegionsListGenerator.translate(0.5 * maxXYWiggle, 0.5 * maxXYWiggle, 0.1);
       planarRegionsListGenerator.addRectangle(regionX, regionY);
       regions = planarRegionsListGenerator.getPlanarRegionsList();
-      snapper.setPlanarRegions(regions);
+      environmentHandler.setPrimaryPlanarRegions(regions);
       checker.setPlanarRegions(regions);
       snapper.initialize();
       snapper.addSnapData(step0, new FootstepSnapData(new RigidBodyTransform()));
@@ -614,9 +628,16 @@ public class FootstepCheckerTest
 
    private class TestSnapper extends FootstepSnapAndWiggler
    {
+      private final FootstepPlannerEnvironmentHandler environmentHandler;
+
       public TestSnapper()
       {
-         super(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters());
+         this(new FootstepPlannerEnvironmentHandler(PlannerTools.createDefaultFootPolygons()));
+      }
+      public TestSnapper(FootstepPlannerEnvironmentHandler environmentHandler)
+      {
+         super(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters(), environmentHandler);
+         this.environmentHandler = environmentHandler;
       }
 
       @Override

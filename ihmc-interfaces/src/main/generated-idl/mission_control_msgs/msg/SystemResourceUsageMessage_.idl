@@ -1,0 +1,77 @@
+#ifndef __mission_control_msgs__msg__SystemResourceUsageMessage__idl__
+#define __mission_control_msgs__msg__SystemResourceUsageMessage__idl__
+
+module mission_control_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="mission_control_msgs::msg::dds_::SystemResourceUsageMessage_")
+      struct SystemResourceUsageMessage
+      {
+        string uptime;
+        /**
+         * ======== System memory statistics ========
+         */
+        float memory_used;
+        float memory_total;
+        /**
+         * ======== CPU statistics ========
+         */
+        long cpu_count;
+        /**
+         * [n] : usage for nth CPU
+         */
+        sequence<float> cpu_usages;
+        /**
+         * [n] : temperature for nth CPU
+         */
+        sequence<float> cpu_temps;
+        /**
+         * ======== Network statistics ========
+         */
+        long iface_count;
+        /**
+         * [n] : name for nth iface
+         */
+        sequence<string> iface_names;
+        /**
+         * [n] : current rx (kbps) for nth iface
+         */
+        sequence<float> iface_rx_kbps;
+        /**
+         * [n] : current tx (kbps) for nth iface
+         */
+        sequence<float> iface_tx_kbps;
+        /**
+         * ======== NVIDIA GPU statistics ========
+         */
+        long nvidia_gpu_count;
+        /**
+         * [n] : model for nth GPU
+         */
+        sequence<string> nvidia_gpu_models;
+        /**
+         * [n] : memory used for nth GPU
+         */
+        sequence<float> nvidia_gpu_memory_used;
+        /**
+         * [n] : total memory for nth GPU
+         */
+        sequence<float> nvidia_gpu_memory_total;
+        /**
+         * [n] : utilization for nth GPU
+         */
+        sequence<float> nvidia_gpu_utilization;
+        /**
+         * [n] : die temperature for nth GPU
+         */
+        sequence<float> nvidia_gpu_temps;
+      };
+    };
+  };
+};
+
+#endif

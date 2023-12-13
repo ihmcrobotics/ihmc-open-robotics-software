@@ -28,6 +28,7 @@ public class RDXMultiColorMeshBuilder
 {
    private static final int DEFAULT_RES = 32;
    private static final float TwoPi = 2.0f * (float) Math.PI;
+   private static Texture paletteTexture;
 
    private int hueResolution = 256;
    private int saturationResolution = -1;
@@ -730,6 +731,20 @@ public class RDXMultiColorMeshBuilder
    }
 
    /**
+    * Add a polygon to this builder. No sanity check is performed on the polygon's vertices.
+    *
+    * @param transformToWorld the transform from the polygon's local coordinates to world. Not
+    *                         modified.
+    * @param polygon the polygon 3D vertices.
+    * @param color   color of the polygon. Color accuracy depends on the color palette in use.
+    */
+   public void addPolygon(RigidBodyTransformReadOnly transformToWorld, List<? extends Point2DReadOnly> polygon, Color color)
+   {
+      addMesh(MeshDataGenerator.Polygon(transformToWorld, polygon), color);
+   }
+
+
+   /**
     * Add a sphere centered to this builder.
     *
     * @param radius the sphere radius.
@@ -1008,7 +1023,7 @@ public class RDXMultiColorMeshBuilder
       return new MeshDataHolder(vertices, outputTexturePoints, triangleIndices, vertexNormals);
    }
 
-   public float[] getTextureLocation(Color color)
+   public static float[] getTextureLocation(Color color)
    {
       // texture 64 vertical pixels of white to black fully saturated hues
       // then, 12 pixels of grayscale blacl left to right white
@@ -1049,7 +1064,9 @@ public class RDXMultiColorMeshBuilder
 
    public static Texture loadPaletteTexture()
    {
-      return new Texture(Gdx.files.classpath(getPalletImagePath()));
+      if (paletteTexture == null)
+         paletteTexture = new Texture(Gdx.files.classpath(getPalletImagePath()));
+      return paletteTexture;
    }
 
    public Mesh generateMesh()

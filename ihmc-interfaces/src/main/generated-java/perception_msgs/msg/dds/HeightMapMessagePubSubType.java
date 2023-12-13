@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.HeightMapMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::HeightMapMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "02834143142106e8df98428110fd9ed671901225742ce0e986fd45c55959544f";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -52,16 +64,16 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (30000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (45000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (30000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (45000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (30000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (45000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 30000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 45000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 30000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 45000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -135,23 +147,23 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       cdr.write_type_6(data.getEstimatedGroundHeight());
 
-      if(data.getKeys().size() <= 30000)
+      if(data.getKeys().size() <= 45000)
       cdr.write_type_e(data.getKeys());else
           throw new RuntimeException("keys field exceeds the maximum length");
 
-      if(data.getHeights().size() <= 30000)
+      if(data.getHeights().size() <= 45000)
       cdr.write_type_e(data.getHeights());else
           throw new RuntimeException("heights field exceeds the maximum length");
 
-      if(data.getVariances().size() <= 30000)
+      if(data.getVariances().size() <= 45000)
       cdr.write_type_e(data.getVariances());else
           throw new RuntimeException("variances field exceeds the maximum length");
 
-      if(data.getCentroids().size() <= 30000)
+      if(data.getCentroids().size() <= 45000)
       cdr.write_type_e(data.getCentroids());else
           throw new RuntimeException("centroids field exceeds the maximum length");
 
-      if(data.getNormals().size() <= 30000)
+      if(data.getNormals().size() <= 45000)
       cdr.write_type_e(data.getNormals());else
           throw new RuntimeException("normals field exceeds the maximum length");
 

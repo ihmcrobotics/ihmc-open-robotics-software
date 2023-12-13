@@ -1,5 +1,9 @@
 package us.ihmc.robotics.geometry;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
@@ -16,6 +20,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.yawPitchRoll.interfaces.YawPitchRollReadOnly;
+import us.ihmc.log.LogTools;
+
+import java.util.List;
 
 public class RotationTools
 {
@@ -636,5 +643,62 @@ public class RotationTools
          return (Math.sin(roll) * wy + Math.cos(roll) * wz) / Math.cos(pitch);
       else
          return wz + Math.tan(pitch) * (Math.sin(yaw) * wy + Math.cos(yaw) * wx);
+   }
+
+   /**
+    * Computes the weighted average of multiple quaternions using Singular Value Decomposition.
+    * WARNING: This method generates garbage as it creates new matrices and vectors at every call
+    *
+    * @param quaternions list of quaternions
+    * @param weights list of weights
+    * @return Returns the weighted average quaternion if SVD succeeds. Otherwise, returns the first quaternion in the list.
+    */
+   public static Quaternion computeAverageQuaternion(List<QuaternionReadOnly> quaternions, TDoubleArrayList weights)
+   {
+      DMatrixRMaj Q = new DMatrixRMaj(4, quaternions.size());
+      DMatrixRMaj QWQt = new DMatrixRMaj(4, 4);
+      DMatrixRMaj QW = new DMatrixRMaj(4, weights.size());
+
+      DMatrixRMaj W = new DMatrixRMaj(weights.size(), weights.size());
+      for (int i = 0; i< weights.size(); i++)
+      {
+         W.set(i, i, weights.get(i));
+      }
+
+      for (int i = 0; i< quaternions.size(); i++)
+      {
+         QuaternionReadOnly quaternion = quaternions.get(i);
+         Q.set(0, i, quaternion.getX());
+         Q.set(1, i, quaternion.getY());
+         Q.set(2, i, quaternion.getZ());
+         Q.set(3, i, quaternion.getS());
+      }
+
+      CommonOps_DDRM.mult(Q, W, QW);
+      CommonOps_DDRM.multTransB(QW, Q, QWQt);
+      CommonOps_DDRM.scale(quaternions.size() / CommonOps_DDRM.trace(W), QWQt);
+
+      SvdImplicitQrDecompose_DDRM svd = new SvdImplicitQrDecompose_DDRM(false, true, true, true);
+      DMatrixRMaj U = new DMatrixRMaj(4, 4);
+      DMatrixRMaj D = new DMatrixRMaj(4, 4);
+      DMatrixRMaj Vt = new DMatrixRMaj(4, 4);
+
+      if (svd.decompose(QWQt))
+      {
+         svd.getU(U, false);
+         svd.getV(Vt, true);
+         svd.getW(D);
+
+         int maxIndex = 0;
+         for (int i = 1; i < 4; i++)
+         {
+            if (D.get(i, i) > D.get(maxIndex, maxIndex))
+               maxIndex = i;
+         }
+
+         return new Quaternion(U.get(0, maxIndex), U.get(1, maxIndex), U.get(2, maxIndex), U.get(3, maxIndex));
+      }
+
+      return new Quaternion(quaternions.get(0));
    }
 }

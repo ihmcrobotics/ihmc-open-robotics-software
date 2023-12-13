@@ -75,8 +75,11 @@ public class MessagerHelper implements MessagerPublishSubscribeAPI
          disconnecting = true;
          ThreadTools.startAThread(() ->
          {
-            ExceptionTools.handle(messager::closeMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION);
-            messager = null;
+            if (messager != null)
+            {
+               ExceptionTools.handle(messager::closeMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION);
+               messager = null;
+            }
             disconnecting = false;
          }, "MessagerDisconnectionThread");
       }
@@ -128,7 +131,7 @@ public class MessagerHelper implements MessagerPublishSubscribeAPI
    @Override
    public <T> void subscribeViaCallback(MessagerAPIFactory.Topic<T> topic, TopicListener<T> listener)
    {
-      managedMessager.registerTopicListener(topic, listener);
+      managedMessager.addTopicListener(topic, listener);
    }
 
    @Override

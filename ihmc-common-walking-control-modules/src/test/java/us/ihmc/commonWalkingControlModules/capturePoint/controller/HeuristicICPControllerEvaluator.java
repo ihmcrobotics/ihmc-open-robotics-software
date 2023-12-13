@@ -112,11 +112,8 @@ public class HeuristicICPControllerEvaluator
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCoP, perfectCMPOffset, currentICP, currentCoMPosition, omega);
 
       FrameVector2D expectedControlICPVelocity = new FrameVector2D(worldFrame);
-      FramePoint2D desiredCMP = new FramePoint2D(worldFrame);
-      FramePoint2D desiredCoP = new FramePoint2D(worldFrame);
-
-      controller.getDesiredCMP(desiredCMP);
-      controller.getDesiredCoP(desiredCoP);
+      FramePoint2D desiredCMP = new FramePoint2D(controller.getDesiredCMP());
+      FramePoint2D desiredCoP = new FramePoint2D(controller.getDesiredCoP());
 
       testCase.setDesiredCMP(desiredCMP);
       testCase.setDesiredCoP(desiredCoP);

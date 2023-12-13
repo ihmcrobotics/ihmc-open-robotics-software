@@ -1,11 +1,11 @@
 package us.ihmc.robotDataCommunication;
 
-import static us.ihmc.robotics.Assert.*;
-
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.buffer.YoBuffer;
@@ -13,103 +13,105 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoLong;
 
+import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.random;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+
 public class YoVariableConnectionBurstTest
 {
    enum TestEnum
    {
       A, B, C, D
    }
-   
-   private final YoRegistry registry = new YoRegistry("tester");
-   private final YoLong seq_id = new YoLong("seq_id", registry);
-   private final YoLong sleep = new YoLong("sleep", registry);
-   private final YoEnum<TestEnum> var3 = new YoEnum<TestEnum>("var3", "", registry, TestEnum.class, true);
-   
-   
 
-   
-   
-//   @Test
+   private static final double dt = 0.001;
+   private long timestamp = 0;
+   private static final DataServerSettings logSettings = new DataServerSettings(true);
+
+   private final YoRegistry registry = new YoRegistry("Main");
+   private final YoLong seq_id = new YoLong("seq_id", registry);
+   private final YoEnum<TestEnum> var3 = new YoEnum<>("var3", "", registry, TestEnum.class, true);
+
+   private void ensureServerClientConnection(YoVariableServer server, long jitteryTimestamp)
+   {
+      //This amount of updates and sleep prevents any loss in data being lost in the initial connection
+      ThreadTools.sleepSeconds(10);
+
+      for (int i = 0; i < 6; i++)
+      {
+         server.update(jitteryTimestamp);
+      }
+
+      ThreadTools.sleepSeconds(10);
+   }
+
+   private void updateVariables(YoVariableServer server, long jitteryTimestamp)
+   {
+      for (int i = 0; i < 6; i++)
+      {
+         server.update(jitteryTimestamp);
+      }
+
+      ThreadTools.sleepSeconds(5);
+   }
+
+   @Disabled
+   @Test
    public void TestYoVariableConnectionBurst()
    {
-      
-
-	  //start server
-      final YoVariableServer server = new YoVariableServer(getClass(), null, new DataServerSettings(false), 0.001);
+      // Creates server, adds the main registry, and starts the server
+      final YoVariableServer server = new YoVariableServer("TestServer", null, logSettings, dt);
       server.setMainRegistry(registry, null);
       server.start();
 
-      
-      //start client
-      int bufferSize=256;
-      SCSVisualizer scsYoVariablesUpdatedListener = new SCSVisualizer(bufferSize, false);      
-      scsYoVariablesUpdatedListener.setDisplayOneInNPackets(1);
+      //Creates the listener for the client and starts the client with the localhost
+      int bufferSize = 256;
+      SCSVisualizer scsYoVariablesUpdatedListener = new SCSVisualizer(bufferSize);
+      scsYoVariablesUpdatedListener.setVariableUpdateRate(0);
       scsYoVariablesUpdatedListener.setShowOverheadView(false);
 
-      final YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener);
-      client.startWithHostSelector();
-      
-      
-      ThreadTools.sleep(1000); //ensure connections
+      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener);
+      client.start("localhost", 8008);
 
-      
-      //start a producer/consumer test with frequent burst send
+      // timestamp and dtFactor are used to generate the jitteryTimestamp that will be sent to the server as the time when the update method was called
+      timestamp += Conversions.secondsToNanoseconds(dt);
+      long dtFactor = Conversions.secondsToNanoseconds(dt) / 2;
+      long jitteryTimestamp = timestamp + (long) ((random.nextDouble() - 0.5) * dtFactor);
+
+      ensureServerClientConnection(server, jitteryTimestamp);
+
+      // Start a producer/consumer test
       seq_id.set(0L);
 
-      long timestamp = 0;
-      int i = 0;
-      TestEnum[] values = { TestEnum.A, TestEnum.B, TestEnum.C, TestEnum.D };
-      
-      for(int iter=0;iter<100;iter++)
+      TestEnum[] values = {TestEnum.A, TestEnum.B, TestEnum.C, TestEnum.D};
+
+      for (int i = 0; i < 16; i++)
       {
          seq_id.increment();
-         
-         if(++i >= values.length)
-         {
-            i = 0;
-         }
-         var3.set(values[i]);
-         
-         server.update(++timestamp);
-         
-         
-         if (iter < 50)
-        	 sleep.set(5);
-         else
-         {
-	         if(iter % 10 !=0)
-	        	 sleep.set(5);
-	         else
-	        	 sleep.set(0);
-         }
-    	 ThreadTools.sleep(sleep.getLongValue());
-      }
-      
+         var3.set(values[i % 4]);
 
-      ThreadTools.sleep(1000);
-      
-      
-      //make sure last nCheck seq_ids are consecutive.
-      final int nCheck=20;
-      YoBuffer buffer=scsYoVariablesUpdatedListener.getDataBuffer();
-      YoLong seq =  (YoLong)buffer.findVariable("seq_id");
-      buffer.setLockIndex(true);
-      long lastSeq = seq.getLongValue();
-      int lastIndex = buffer.getCurrentIndex();
-      
-      for(int j=0;j<nCheck;j++)
-      {
-    	  buffer.setCurrentIndex(lastIndex-j);
-    	  assertEquals(seq.getLongValue() , (lastSeq-j));
+         updateVariables(server, jitteryTimestamp);
+
+         YoBuffer buffer = scsYoVariablesUpdatedListener.getDataBuffer();
+         YoLong seq = (YoLong) buffer.findVariable("seq_id");
+
+         double[] filledBuffer = buffer.getEntry(seq).getBuffer();
+         int lastIndex = bufferSize - 1;
+
+         while (buffer.getEntry(seq).getBuffer()[lastIndex] == 0.0)
+         {
+            lastIndex = lastIndex - 1;
+         }
+
+         //Check if last 8 values of the YoVariable match the buffer data
+         for (int j = lastIndex; j > (lastIndex - 8); j--)
+         {
+            assertEquals("Buffer at j: " + filledBuffer[j] + " but buffer at j + 1: " + filledBuffer[j + 1], filledBuffer[j], (double) j);
+            assertFalse(filledBuffer[j] == filledBuffer[j - 1]);
+         }
+
+         scsYoVariablesUpdatedListener.closeAndDispose();
+         server.close();
       }
-      
-      
-      scsYoVariablesUpdatedListener.closeAndDispose();
-   }
-   
-   
-   public static void main(String[] arg)
-   {
-	   new YoVariableConnectionBurstTest();
    }
 }

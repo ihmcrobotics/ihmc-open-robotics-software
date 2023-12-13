@@ -51,6 +51,7 @@ public class NarrowPassageBodyPathOptimizerTest
 
       module = new FootstepPlanningModule(getClass().getSimpleName(),
                                           visibilityGraphParameters,
+                                          defaultFootstepPlanningModule.getAStarBodyPathPlannerParameters(),
                                           footstepPlanningParameters,
                                           defaultFootstepPlanningModule.getSwingPlannerParameters(),
                                           null,

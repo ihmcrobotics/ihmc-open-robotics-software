@@ -1,0 +1,50 @@
+#ifndef __controller_msgs__msg__CrocoddylSolverTrajectoryMessage__idl__
+#define __controller_msgs__msg__CrocoddylSolverTrajectoryMessage__idl__
+
+#include "controller_msgs/msg/./CrocoddylControlMessage_.idl"
+#include "controller_msgs/msg/./CrocoddylStateMessage_.idl"
+#include "controller_msgs/msg/./CrocoddylTimeIntervalMessage_.idl"
+#include "std_msgs/msg/./Header_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This is a message that holds data to describe the state and control trajectories.
+       * 
+       * The trajectory is defined by:
+       * * the time interval,
+       * * the state, and
+       * * the control for each node.
+       * 
+       * The dimension of the intervals, state and control trajectories must be equal.
+       * The header specifies the time at which the message is published.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::CrocoddylSolverTrajectoryMessage_")
+      struct CrocoddylSolverTrajectoryMessage
+      {
+        /**
+         * This represents the time and frame at which the message is published
+         */
+        std_msgs::msg::dds::Header header;
+        /**
+         * This represents the time and duration of each interval
+         */
+        sequence<controller_msgs::msg::dds::CrocoddylTimeIntervalMessage> intervals;
+        /**
+         * This represents the state for each interval
+         */
+        sequence<controller_msgs::msg::dds::CrocoddylStateMessage> state_trajectory;
+        /**
+         * This represents the control for each interval
+         */
+        sequence<controller_msgs::msg::dds::CrocoddylControlMessage> control_trajectory;
+      };
+    };
+  };
+};
+
+#endif

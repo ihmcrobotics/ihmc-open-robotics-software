@@ -17,6 +17,8 @@ package us.ihmc.ros2.atlasMock;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import us.ihmc.pubsub.Domain;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2PublisherBasics;
@@ -27,7 +29,8 @@ public class MockAtlasController
 {
    public static void main(String[] args) throws IOException, InterruptedException
    {
-      ROS2Node node = new ROS2Node(PubSubImplementation.FAST_RTPS, "MockAtlasController");
+      Domain domain = DomainFactory.getDomain(PubSubImplementation.FAST_RTPS);
+      ROS2Node node = new ROS2Node(domain, "MockAtlasController");
       ROS2PublisherBasics<RobotConfigurationData> publisher = node.createPublisher(new RobotConfigurationDataPubSubType(), "/robot_configuration_data");
 
       for (int i = 0; true; i++)

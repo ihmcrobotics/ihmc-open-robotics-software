@@ -248,7 +248,7 @@ class CrossRobotCommandResolverTest
       public TestData(Random random, int numberOfFrames, int numberOfJoints)
       {
 
-         frameResolverForB.put(rootFrameB, rootFrameA.hashCode());
+         frameResolverForB.put(rootFrameB, rootFrameA.getFrameNameHashCode());
          frameTreeA = EuclidFrameRandomTools.nextReferenceFrameTree("frameTreeA", random, rootFrameA, numberOfFrames);
          frameTreeB = new ReferenceFrame[frameTreeA.length];
          frameTreeB[0] = rootFrameB;
@@ -257,11 +257,11 @@ class CrossRobotCommandResolverTest
          {
             ReferenceFrame frameA = frameTreeA[frameIndex];
             ReferenceFrame parentFrameA = frameA.getParent();
-            ReferenceFrame parentFrameB = frameResolverForB.getReferenceFrame(parentFrameA.hashCode());
+            ReferenceFrame parentFrameB = frameResolverForB.getReferenceFrame(parentFrameA.getFrameNameHashCode());
             ReferenceFrame frameB = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("frameTreeB" + (frameIndex - 1), parentFrameB,
                                                                                                       frameA.getTransformToParent());
             frameTreeB[frameIndex] = frameB;
-            frameResolverForB.put(frameB, frameA.hashCode());
+            frameResolverForB.put(frameB, frameA.getFrameNameHashCode());
          }
 
          chainA = MultiBodySystemRandomTools.nextOneDoFJointChain(random, "chain", rootBodyA, numberOfJoints);
@@ -269,7 +269,7 @@ class CrossRobotCommandResolverTest
          chainB = SubtreeStreams.fromChildren(OneDoFJoint.class, rootBodyB).collect(Collectors.toList());
 
          bodyResolverForB.put(rootBodyB, rootBodyA.hashCode());
-         frameResolverForB.put(rootBodyB.getBodyFixedFrame(), rootBodyA.getBodyFixedFrame().hashCode());
+         frameResolverForB.put(rootBodyB.getBodyFixedFrame(), rootBodyA.getBodyFixedFrame().getFrameNameHashCode());
 
          for (int i = 0; i < chainA.size(); i++)
          {
@@ -280,9 +280,9 @@ class CrossRobotCommandResolverTest
 
             jointResolverForB.put(chainBJoint, chainAJoint.hashCode());
             bodyResolverForB.put(chainBBody, chainABody.hashCode());
-            frameResolverForB.put(chainBBody.getBodyFixedFrame(), chainABody.getBodyFixedFrame().hashCode());
-            frameResolverForB.put(chainBJoint.getFrameAfterJoint(), chainAJoint.getFrameAfterJoint().hashCode());
-            frameResolverForB.put(chainBJoint.getFrameBeforeJoint(), chainAJoint.getFrameBeforeJoint().hashCode());
+            frameResolverForB.put(chainBBody.getBodyFixedFrame(), chainABody.getBodyFixedFrame().getFrameNameHashCode());
+            frameResolverForB.put(chainBJoint.getFrameAfterJoint(), chainAJoint.getFrameAfterJoint().getFrameNameHashCode());
+            frameResolverForB.put(chainBJoint.getFrameBeforeJoint(), chainAJoint.getFrameBeforeJoint().getFrameNameHashCode());
          }
       }
    }

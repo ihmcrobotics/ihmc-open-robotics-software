@@ -48,6 +48,13 @@ public class RDXReferenceFrameGraphic extends RDXModelInstance
       LibGDXTools.toLibGDX(rigidBodyTransform, transform);
    }
 
+   public void updateFromFramePose(FramePose3D framePose3D)
+   {
+      referenceFrame = framePose3D.getReferenceFrame();
+      this.framePose3D.set(framePose3D);
+      updateFromFramePose();
+   }
+
    public void dispose()
    {
       model.dispose();

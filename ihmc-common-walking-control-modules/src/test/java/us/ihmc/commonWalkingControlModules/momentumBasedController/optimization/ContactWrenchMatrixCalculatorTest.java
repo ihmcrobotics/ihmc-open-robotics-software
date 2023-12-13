@@ -61,7 +61,7 @@ public class ContactWrenchMatrixCalculatorTest
          ContactWrenchMatrixCalculator contactWrenchMatrixCalculator = new ContactWrenchMatrixCalculator(toolbox);
          InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(robot.getElevator());
 
-         wrenchMatrixCalculator.computeMatrices();
+         wrenchMatrixCalculator.computeMatrices(null);
          DMatrixRMaj rho = RandomMatrices_DDRM.rectangle(wrenchMatrixCalculator.getRhoSize(), 1, 0.0, 10000.0, random);
          Wrench externalWrench = wrenchMatrixCalculator.computeWrenchesFromRho(rho).get(contactablePlaneBody.getRigidBody());
          inverseDynamicsCalculator.getExternalWrench(contactablePlaneBody.getRigidBody()).setMatchingFrame(externalWrench);

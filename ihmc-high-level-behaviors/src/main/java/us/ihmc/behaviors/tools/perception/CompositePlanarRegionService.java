@@ -2,6 +2,7 @@ package us.ihmc.behaviors.tools.perception;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
@@ -36,7 +37,7 @@ public class CompositePlanarRegionService
          planarRegionPublishers.add(ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, topicNames.get(i)));
       }
 
-      combinedPlanarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.MAP_REGIONS);
+      combinedPlanarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, PerceptionAPI.MAP_REGIONS);
       thread = new PausablePeriodicThread(getClass().getSimpleName(), period, this::process);
    }
 

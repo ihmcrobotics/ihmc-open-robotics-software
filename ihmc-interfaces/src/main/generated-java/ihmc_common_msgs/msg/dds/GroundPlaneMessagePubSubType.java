@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class GroundPlaneMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.GroundPlaneMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::GroundPlaneMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "ed19af7d7c3bc34bb786f6a4999564a3d394808a87981e48abf81e4f809affef";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

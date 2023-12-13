@@ -73,6 +73,7 @@ public class ConcaveHullMerger
       List<? extends Point2DReadOnly> concaveHullTwoVertices = regionTwo.getConcaveHull();
       ArrayList<Point2D> concaveHullTwoVerticesTransformed = new ArrayList<Point2D>(concaveHullTwoVertices.size());
 
+      // Transform the vertices of the second hull to the frame of the first hull
       for (int i = 0; i < concaveHullTwoVertices.size(); i++)
       {
          Point3D point3D = new Point3D(concaveHullTwoVertices.get(i));

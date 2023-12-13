@@ -13,4 +13,10 @@ public class IHMCCommonPaths
 
    public static final String LOGS_DIRECTORY_NAME = "logs";
    public static final Path LOGS_DIRECTORY = DOT_IHMC_DIRECTORY.resolve(LOGS_DIRECTORY_NAME);
+
+   public static final String PERCEPTION_LOGS_DIRECTORY_NAME = "perception";
+   public static final Path PERCEPTION_LOGS_DIRECTORY = LOGS_DIRECTORY.resolve(PERCEPTION_LOGS_DIRECTORY_NAME);
+
+   public static final String MISSION_CONTROL_LOGS_DIRECTORY_NAME = "mission-control";
+   public static final Path MISSION_CONTROL_LOGS_DIRECTORY = LOGS_DIRECTORY.resolve(MISSION_CONTROL_LOGS_DIRECTORY_NAME);
 }

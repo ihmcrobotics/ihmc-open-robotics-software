@@ -1,0 +1,45 @@
+#ifndef __perception_msgs__msg__PredefinedRigidBodySceneNodeMessage__idl__
+#define __perception_msgs__msg__PredefinedRigidBodySceneNodeMessage__idl__
+
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+#include "perception_msgs/msg/./SceneNodeMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * A predefined rigid body scene node
+       * The topic name identifies the node.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::PredefinedRigidBodySceneNodeMessage_")
+      struct PredefinedRigidBodySceneNodeMessage
+      {
+        /**
+         * The base scene node information
+         */
+        perception_msgs::msg::dds::SceneNodeMessage scene_node;
+        /**
+         * Initial parent ID
+         */
+        unsigned long initial_parent_id;
+        /**
+         * Initial transform to initial parent
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage initial_transform_to_parent;
+        /**
+         * The path to the visual model file
+         */
+        string visual_model_file_path;
+        /**
+         * The visual transform to parent
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage visual_transform_to_parent;
+      };
+    };
+  };
+};
+
+#endif

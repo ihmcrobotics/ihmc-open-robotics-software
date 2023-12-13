@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -12,10 +11,11 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 
-public abstract class AbstractFootControlState implements State
+public abstract class AbstractFootControlState implements State, SCS2YoGraphicHolder
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -51,9 +51,16 @@ public abstract class AbstractFootControlState implements State
 
    public abstract void doSpecificAction(double timeInState);
 
+   public abstract boolean isLoadBearing();
+
    public abstract InverseDynamicsCommand<?> getInverseDynamicsCommand();
 
    public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
+
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return getFeedbackControlCommand();
+   }
 
    @Override
    public void doAction(double timeInState)

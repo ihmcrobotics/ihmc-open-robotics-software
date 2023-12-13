@@ -1,10 +1,6 @@
 package us.ihmc.robotModels;
 
-import java.util.Arrays;
-import java.util.EnumMap;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.FixedMovingReferenceFrame;
@@ -12,15 +8,14 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.partNames.JointRole;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.partNames.*;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+
+import java.util.Arrays;
+import java.util.EnumMap;
 
 public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper implements FullHumanoidRobotModel
 {
@@ -28,6 +23,7 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
    private RigidBodyBasics chest;
    private SideDependentList<RigidBodyBasics> feet;
    private SideDependentList<RigidBodyBasics> hands;
+   private SideDependentList<RigidBodyBasics> forearms;
    private SideDependentList<EnumMap<LegJointName, OneDoFJointBasics>> legJointMaps;
    private SideDependentList<EnumMap<ArmJointName, OneDoFJointBasics>> armJointMaps;
    private SideDependentList<MovingReferenceFrame> soleFrames;
@@ -43,28 +39,38 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
 
    public FullHumanoidRobotModelWrapper(RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap)
    {
-      this(robotDefinition.newInstance(ReferenceFrame.getWorldFrame()));
+      this(robotDefinition, jointNameMap, true);
+   }
+
+   public FullHumanoidRobotModelWrapper(RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
+   {
+      this(robotDefinition.newInstance(ReferenceFrame.getWorldFrame()), enforceUniqueReferenceFrames);
       setupHumanoidJointNameMap(jointNameMap);
       setupRobotDefinition(robotDefinition);
    }
 
    public FullHumanoidRobotModelWrapper(RobotDescription robotDescription, HumanoidJointNameMap jointNameMap)
    {
-      this(instantiateRobot(robotDescription, ReferenceFrame.getWorldFrame()));
+      this(robotDescription, jointNameMap, true);
+   }
+
+   public FullHumanoidRobotModelWrapper(RobotDescription robotDescription, HumanoidJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
+   {
+      this(instantiateRobot(robotDescription, ReferenceFrame.getWorldFrame()), enforceUniqueReferenceFrames);
       setupHumanoidJointNameMap(jointNameMap);
       setupRobotDescription(robotDescription);
    }
 
-   public FullHumanoidRobotModelWrapper(RigidBodyBasics elevator, RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap)
+   public FullHumanoidRobotModelWrapper(RigidBodyBasics elevator, RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
    {
-      this(elevator);
+      this(elevator, enforceUniqueReferenceFrames);
       setupHumanoidJointNameMap(jointNameMap);
       setupRobotDefinition(robotDefinition);
    }
 
-   public FullHumanoidRobotModelWrapper(RigidBodyBasics elevator)
+   public FullHumanoidRobotModelWrapper(RigidBodyBasics elevator, boolean enforceUniqueReferenceFrames)
    {
-      super(elevator);
+      super(elevator, enforceUniqueReferenceFrames);
    }
 
    protected void setupHumanoidJointNameMap(HumanoidJointNameMap jointNameMap)
@@ -76,6 +82,7 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
 
       feet = new SideDependentList<>();
       hands = new SideDependentList<>();
+      forearms = new SideDependentList<>();
       soleFrames = new SideDependentList<>();
       handControlFrames = new SideDependentList<>();
 
@@ -83,6 +90,7 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
       {
          feet.put(robotSide, MultiBodySystemTools.findRigidBody(getElevator(), jointNameMap.getFootName(robotSide)));
          hands.put(robotSide, MultiBodySystemTools.findRigidBody(chest, jointNameMap.getHandName(robotSide)));
+         forearms.put(robotSide, MultiBodySystemTools.findRigidBody(chest, jointNameMap.getForearmName(robotSide)));
 
          RigidBodyTransform soleFrameTransform = jointNameMap.getSoleToParentFrameTransform(robotSide);
          if (soleFrameTransform != null)
@@ -180,6 +188,12 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
    public RigidBodyBasics getHand(RobotSide robotSide)
    {
       return hands.get(robotSide);
+   }
+
+   @Override
+   public RigidBodyBasics getForearm(RobotSide robotSide)
+   {
+      return forearms.get(robotSide);
    }
 
    @Override

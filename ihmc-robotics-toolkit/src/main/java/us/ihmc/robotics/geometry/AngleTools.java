@@ -5,10 +5,13 @@ import java.util.Random;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 
 public class AngleTools
@@ -320,6 +323,23 @@ public class AngleTools
          heading = AngleTools.trimAngleMinusPiToPi(pathHeading + headingOffset);
       }
       return heading;
+   }
+
+   /**
+    * Returns an angle between two points + heading Offset from -PI to PI.
+    *
+    * @param startPose              initial position and orientation
+    * @param endPoint               end position
+    * @param headingOffset          offset from path angle
+    * @return number between -PI and PI
+    */
+   public static double calculateHeading(Tuple3DReadOnly startPose, Tuple3DReadOnly endPoint, double headingOffset)
+   {
+      double deltaX = endPoint.getX() - startPose.getX();
+      double deltaY = endPoint.getY() - startPose.getY();
+
+      double pathHeading = Math.atan2(deltaY, deltaX);
+      return AngleTools.trimAngleMinusPiToPi(pathHeading + headingOffset);
    }
 
    /**

@@ -1,20 +1,20 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.controllers;
 
+import java.io.File;
+import java.io.IOException;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParameterKeys;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
-import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
-
-import java.io.File;
-import java.io.IOException;
 
 public class PlannerReachParametersUIController
 {
@@ -169,7 +169,7 @@ public class PlannerReachParametersUIController
       javaFXStoredPropertyMap.put(maxStepChangeZ, PawStepPlannerParameterKeys.maximumStepChangeZ);
 
       // set messager updates to update all stored properties and select JavaFX properties
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.PlannerParametersTopic, parameters ->
+      messager.addTopicListener(PawStepPlannerMessagerAPI.PlannerParametersTopic, parameters ->
       {
          planningParameters.set(parameters);
 

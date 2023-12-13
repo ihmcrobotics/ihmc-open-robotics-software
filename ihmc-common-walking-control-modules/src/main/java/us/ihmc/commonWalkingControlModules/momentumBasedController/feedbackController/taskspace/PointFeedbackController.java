@@ -48,8 +48,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoRegistry registry;
-
    private final YoBoolean isEnabled;
 
    private final FBPoint3D yoDesiredPosition;
@@ -156,14 +154,13 @@ public class PointFeedbackController implements FeedbackControllerInterface
       rigidBodyAccelerationProvider = ccToolbox.getRigidBodyAccelerationProvider();
 
       String endEffectorName = endEffector.getName();
-      registry = new YoRegistry(appendIndex(endEffectorName, controllerIndex) + "PointFBController");
       dt = ccToolbox.getControlDT();
       gains = fbToolbox.getOrCreatePositionGains(endEffector, controllerIndex, computeIntegralTerm, true);
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       controlFrame = fbToolbox.getOrCreateControlFrame(endEffector, controllerIndex, true);
 
-      isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isPointFBControllerEnabled", registry);
+      isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isPointFBControllerEnabled", fbToolbox.getRegistry());
       isEnabled.set(false);
 
       yoDesiredPosition = fbToolbox.getOrCreatePositionData(endEffector, controllerIndex, DESIRED, isEnabled, true);
@@ -291,8 +288,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
          yoFeedForwardLinearVelocity = null;
          rateLimitedFeedbackLinearVelocity = null;
       }
-
-      parentRegistry.addChild(registry);
    }
 
    public void submitFeedbackControlCommand(PointFeedbackControlCommand command)
@@ -378,7 +373,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       desiredLinearAcceleration.setIncludingFrame(proportionalFeedback);
       desiredLinearAcceleration.add(derivativeFeedback);
       desiredLinearAcceleration.add(integralFeedback);
-      desiredLinearAcceleration.clipToMaxLength(gains.getMaximumFeedback());
+      desiredLinearAcceleration.clipToMaxNorm(gains.getMaximumFeedback());
       yoFeedbackLinearAcceleration.setIncludingFrame(desiredLinearAcceleration);
       yoFeedbackLinearAcceleration.changeFrame(trajectoryFrame);
       yoFeedbackLinearAcceleration.setCommandId(currentCommandId);
@@ -414,7 +409,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       desiredLinearVelocity.setIncludingFrame(proportionalFeedback);
       desiredLinearVelocity.add(integralFeedback);
-      desiredLinearVelocity.clipToMaxLength(gains.getMaximumFeedback());
+      desiredLinearVelocity.clipToMaxNorm(gains.getMaximumFeedback());
       yoFeedbackLinearVelocity.setIncludingFrame(desiredLinearVelocity);
       yoFeedbackLinearVelocity.changeFrame(trajectoryFrame);
       yoFeedbackLinearVelocity.setCommandId(currentCommandId);
@@ -474,7 +469,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       desiredLinearForce.setIncludingFrame(proportionalFeedback);
       desiredLinearForce.add(derivativeFeedback);
       desiredLinearForce.add(integralFeedback);
-      desiredLinearForce.clipToMaxLength(gains.getMaximumFeedback());
+      desiredLinearForce.clipToMaxNorm(gains.getMaximumFeedback());
       yoFeedbackLinearForce.setIncludingFrame(desiredLinearForce);
       yoFeedbackLinearForce.changeFrame(trajectoryFrame);
       yoFeedbackLinearForce.setCommandId(currentCommandId);
@@ -530,7 +525,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       feedbackTermToPack.setIncludingFrame(desiredPosition);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
-      feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
+      feedbackTermToPack.clipToMaxNorm(gains.getMaximumProportionalError());
 
       yoErrorPosition.setIncludingFrame(feedbackTermToPack);
       yoErrorPosition.changeFrame(trajectoryFrame);
@@ -573,7 +568,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.sub(yoDesiredLinearVelocity, yoCurrentLinearVelocity);
       feedbackTermToPack.changeFrame(controlFrame);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
-      feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
+      feedbackTermToPack.clipToMaxNorm(gains.getMaximumDerivativeError());
 
       if (yoFilteredErrorLinearVelocity != null)
       {
@@ -649,7 +644,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.add(yoErrorPositionIntegrated);
       feedbackTermToPack.changeFrame(controlFrame);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
-      feedbackTermToPack.clipToMaxLength(maximumIntegralError);
+      feedbackTermToPack.clipToMaxNorm(maximumIntegralError);
       yoErrorPositionIntegrated.setIncludingFrame(feedbackTermToPack);
       yoErrorPositionIntegrated.changeFrame(trajectoryFrame);
       yoErrorPositionIntegrated.setCommandId(currentCommandId);

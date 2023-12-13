@@ -1,0 +1,63 @@
+#ifndef __controller_msgs__msg__CrocoddylControlMessage__idl__
+#define __controller_msgs__msg__CrocoddylControlMessage__idl__
+
+#include "controller_msgs/msg/./CrocoddylFeedbackGainMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      /**
+       * Type of control inputs
+       */
+      const octet EFFORT =
+      0;
+
+      const octet ACCELERATION_CONTACTFORCE =
+      1;
+
+      /**
+       * Type of control parametrization
+       */
+      const octet POLYZERO =
+      0;
+
+      const octet POLYONE =
+      1;
+
+      const octet POLYTWO =
+      2;
+
+
+      /**
+       * This is a message that holds data to describe the control.
+       * 
+       * The control is defined by:
+       * * the type of control input,
+       * * the type of control parametrization,
+       * * the control vector, and
+       * * the feedback gain
+       * 
+       * This information allow us to compute the control in a desired time.
+       * The order of the control is designed to be consistent with the URDF.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::CrocoddylControlMessage_")
+      struct CrocoddylControlMessage
+      {
+        octet input;
+        octet parametrization;
+        /**
+         * This represents the control input vector
+         */
+        sequence<double> u;
+        /**
+         * This represents the feedback gain
+         */
+        controller_msgs::msg::dds::CrocoddylFeedbackGainMessage gain;
+      };
+    };
+  };
+};
+
+#endif

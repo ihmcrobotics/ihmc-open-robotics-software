@@ -1,0 +1,27 @@
+#ifndef __behavior_msgs__msg__BehaviorTreeMessage__idl__
+#define __behavior_msgs__msg__BehaviorTreeMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorTreeNodeMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeMessage_")
+      struct BehaviorTreeMessage
+      {
+        /**
+         * DEPRECATED: This is an old message replaced by BehaviorTreeStateMessage
+         * Nodes in the tree in "depth first" order.
+         * We must reconstruct the tree on the subscription end.
+         * This is because messages cannot be recursive.
+         */
+        sequence<behavior_msgs::msg::dds::BehaviorTreeNodeMessage, 2048> nodes;
+      };
+    };
+  };
+};
+
+#endif

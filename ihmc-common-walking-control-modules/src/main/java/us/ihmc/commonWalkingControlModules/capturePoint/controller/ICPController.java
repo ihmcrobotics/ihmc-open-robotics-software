@@ -1,10 +1,15 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
+import static us.ihmc.scs2.definition.visual.ColorDefinitions.DarkOrange;
+import static us.ihmc.scs2.definition.visual.ColorDefinitions.Purple;
+import static us.ihmc.scs2.definition.visual.ColorDefinitions.Red;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_PLUS;
+
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-
 import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
@@ -13,11 +18,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -28,6 +29,8 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -40,8 +43,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
 public class ICPController implements ICPControllerInterface
 {
@@ -64,12 +65,13 @@ public class ICPController implements ICPControllerInterface
 
    private final YoFrameVector2D unconstrainedFeedback = new YoFrameVector2D(yoNamePrefix + "UnconstrainedFeedback", worldFrame, registry);
    private final YoFramePoint2D unconstrainedFeedbackCMP = new YoFramePoint2D(yoNamePrefix + "UnconstrainedFeedbackCMP", worldFrame, registry);
+   private final YoFrameVector2D unconstrainedFeedbackNoScaling = new YoFrameVector2D(yoNamePrefix + "UnconstrainedFeedbackNoScaling", worldFrame, registry);
+   private final YoFramePoint2D unconstrainedFeedbackCMPNoScaling = new YoFramePoint2D(yoNamePrefix + "UnconstrainedFeedbackCMPNoScaling", worldFrame, registry);
    final YoFramePoint2D perfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
    final YoFramePoint2D perfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
-   
+
    private final YoFramePoint2D referenceFeedForwardCoP = new YoFramePoint2D(yoNamePrefix + "ReferenceFeedForwardCoP", worldFrame, registry);
    private final YoFrameVector2D referenceFeedForwardCMPOffset = new YoFrameVector2D(yoNamePrefix + "ReferenceFeedForwardCMPOffset", worldFrame, registry);
-
 
    final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
@@ -98,7 +100,7 @@ public class ICPController implements ICPControllerInterface
    private final ICPControlGainsReadOnly feedbackGains;
    private final DMatrixRMaj transformedGains = new DMatrixRMaj(2, 2);
    private final DMatrixRMaj inverseTransformedGains = new DMatrixRMaj(2, 2);
-   private final FrameVector2D transformedMagnitudeLimits = new FrameVector2D();
+   private final DMatrixRMaj transformedMagnitudeJacobian = new DMatrixRMaj(2, 2);
 
    private final YoInteger numberOfIterations = new YoInteger(yoNamePrefix + "NumberOfIterations", registry);
    private final YoBoolean hasNotConvergedInPast = new YoBoolean(yoNamePrefix + "HasNotConvergedInPast", registry);
@@ -117,7 +119,7 @@ public class ICPController implements ICPControllerInterface
    private final FramePoint2D finalICP = new FramePoint2D();
    private final FrameVector2D desiredICPVelocity = new FrameVector2D();
    private final FrameVector2D perfectCMPOffset = new FrameVector2D();
-   
+
    private final FramePoint2D currentICP = new FramePoint2D();
    private final FramePoint2D currentCoMPosition = new FramePoint2D();
    private final FrameVector2D currentCoMVelocity = new FrameVector2D();
@@ -130,7 +132,6 @@ public class ICPController implements ICPControllerInterface
    private final ICPControllerHelper helper = new ICPControllerHelper();
 
    public ICPController(WalkingControllerParameters walkingControllerParameters,
-                        BipedSupportPolygons bipedSupportPolygons,
                         ICPControlPolygons icpControlPolygons,
                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                         double controlDT,
@@ -139,7 +140,6 @@ public class ICPController implements ICPControllerInterface
    {
       this(walkingControllerParameters,
            walkingControllerParameters.getICPControllerParameters(),
-           bipedSupportPolygons,
            icpControlPolygons,
            contactableFeet,
            controlDT,
@@ -149,7 +149,6 @@ public class ICPController implements ICPControllerInterface
 
    public ICPController(WalkingControllerParameters walkingControllerParameters,
                         ICPControllerParameters icpOptimizationParameters,
-                        BipedSupportPolygons bipedSupportPolygons,
                         ICPControlPolygons icpControlPolygons,
                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                         double controlDT,
@@ -189,8 +188,8 @@ public class ICPController implements ICPControllerInterface
       boolean hasICPControlPolygons = icpControlPolygons != null;
 
       safeCoPDistanceToEdge = new DoubleParameter(yoNamePrefix + "SafeCoPDistanceToEdge", registry, icpOptimizationParameters.getSafeCoPDistanceToEdge());
-      double defaultMaxAllowedDistanceCMPSupport =
-            walkingControllerParameters != null ? walkingControllerParameters.getMaxAllowedDistanceCMPSupport() : Double.NaN;
+      double defaultMaxAllowedDistanceCMPSupport = walkingControllerParameters != null ? walkingControllerParameters.getMaxAllowedDistanceCMPSupport()
+                                                                                       : Double.NaN;
       maxAllowedDistanceCMPSupport = new DoubleParameter(yoNamePrefix + "MaxAllowedDistanceCMPSupport", registry, defaultMaxAllowedDistanceCMPSupport);
 
       integrator = new AngularMomentumIntegrator(yoNamePrefix, icpOptimizationParameters, feedbackGains, controlDT, registry);
@@ -202,9 +201,9 @@ public class ICPController implements ICPControllerInterface
       boolean updateRateAutomatically = true;
       solver = new ICPControllerQPSolver(totalVertices, updateRateAutomatically, registry);
 
-      copConstraintHandler = new ICPCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons, useICPControlPolygons, hasICPControlPolygons, registry);
+      copConstraintHandler = new ICPCoPConstraintHandler(icpControlPolygons, useICPControlPolygons, hasICPControlPolygons, registry);
 
-      parameters.createFeedForwardAlphaCalculator(registry, null);
+      parameters.createFeedForwardAlphaCalculator(registry, yoGraphicsListRegistry);
       parameters.createFeedbackAlphaCalculator(registry, null);
       parameters.createFeedbackProjectionOperator(registry, null);
 
@@ -224,15 +223,15 @@ public class ICPController implements ICPControllerInterface
                                                             YoAppearance.Darkorange(),
                                                             YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       YoGraphicPosition feedForwardCoP = new YoGraphicPosition(yoNamePrefix + "ReferenceFeedForwardCoP",
-                                                            this.referenceFeedForwardCoP,
-                                                            0.005,
-                                                            YoAppearance.Red(),
-                                                            YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+                                                               this.referenceFeedForwardCoP,
+                                                               0.005,
+                                                               YoAppearance.Red(),
+                                                               YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
 
-      YoGraphicPosition unconstrainedFeedbackCMP = new YoGraphicPosition(yoNamePrefix + "UnconstrainedFeedbackCoP",
+      YoGraphicPosition unconstrainedFeedbackCMP = new YoGraphicPosition(yoNamePrefix + "UnconstrainedFeedbackCMP",
                                                                          this.unconstrainedFeedbackCMP,
                                                                          0.006,
-                                                                         Purple(),
+                                                                         YoAppearance.Purple(),
                                                                          GraphicType.BALL_WITH_CROSS);
 
       artifactList.add(feedbackCoP.createArtifact());
@@ -257,27 +256,29 @@ public class ICPController implements ICPControllerInterface
     * {@inheritDoc}
     */
    @Override
-   public void getDesiredCMP(FixedFramePoint2DBasics desiredCMPToPack)
+   public FramePoint2DReadOnly getDesiredCMP()
    {
-      desiredCMPToPack.set(feedbackCMP);
+      return feedbackCMP;
+   }
+
+   /**
+    * {@inheritDoc}
+    * 
+    * @return
+    */
+   @Override
+   public FramePoint2DReadOnly getDesiredCoP()
+   {
+      return feedbackCoP;
    }
 
    /**
     * {@inheritDoc}
     */
    @Override
-   public void getDesiredCoP(FixedFramePoint2DBasics desiredCoPToPack)
+   public FrameVector2DReadOnly getExpectedControlICPVelocity()
    {
-      desiredCoPToPack.set(feedbackCoP);
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public void getExpectedControlICPVelocity(FixedFrameVector2DBasics expectedControlICPVelocityToPack)
-   {
-      expectedControlICPVelocityToPack.set(expectedControlICPVelocity);
+      return expectedControlICPVelocity;
    }
 
    /**
@@ -287,25 +288,6 @@ public class ICPController implements ICPControllerInterface
    public boolean useAngularMomentum()
    {
       return useAngularMomentum.getValue();
-   }
-
-   private final FrameVector2D desiredCMPOffsetToThrowAway = new FrameVector2D();
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
-                       FramePoint2DReadOnly desiredICP,
-                       FrameVector2DReadOnly desiredICPVelocity,
-                       FramePoint2DReadOnly finalICP,
-                       FramePoint2DReadOnly perfectCoP,
-                       FramePoint2DReadOnly currentICP,
-                       FramePoint2DReadOnly currentCoMPosition,
-                       double omega0)
-   {
-      desiredCMPOffsetToThrowAway.setToZero(worldFrame);
-      compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, finalICP, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentCoMPosition, omega0);
    }
 
    /**
@@ -327,20 +309,31 @@ public class ICPController implements ICPControllerInterface
       this.desiredICP.setMatchingFrame(desiredICP);
       this.finalICP.setMatchingFrame(finalICP);
       this.desiredICPVelocity.setMatchingFrame(desiredICPVelocity);
-      this.perfectCMPOffset.setMatchingFrame(perfectCMPOffset);
+      if (perfectCMPOffset == null)
+         this.perfectCMPOffset.setToZero();
+      else
+         this.perfectCMPOffset.setMatchingFrame(perfectCMPOffset);
       this.currentICP.setMatchingFrame(currentICP);
       this.currentCoMPosition.setMatchingFrame(currentCoMPosition);
 
       CapturePointTools.computeCenterOfMassVelocity(currentCoMPosition, currentICP, omega0, currentCoMVelocity);
 
-      this.perfectCoP.setMatchingFrame(perfectCoP);
-      this.perfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
+      if (perfectCoP == null)
+      { // Then compute the perfect CMP using: x_{CMP} = x_{ICP} - xDot_{ICP} / omega0, and perfect CoP using the perfect CMP offset.
+         this.perfectCMP.scaleAdd(-1.0 / omega0, desiredICPVelocity, desiredICP);
+         this.perfectCoP.sub(this.perfectCMP, this.perfectCMPOffset);
+      }
+      else
+      {
+         this.perfectCoP.setMatchingFrame(perfectCoP);
+         this.perfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
+      }
 
       this.icpError.sub(currentICP, desiredICP);
-      
+
       scaleFeedbackWeightWithGain();
 
-      submitSolverTaskConditions();
+      submitSolverTaskConditions(supportPolygonInWorld);
 
       solver.setMaxNumberOfIterations(maxNumberOfIterations.getValue());
 
@@ -358,10 +351,10 @@ public class ICPController implements ICPControllerInterface
       controllerTimer.stopMeasurement();
    }
 
-   private void submitSolverTaskConditions()
+   private void submitSolverTaskConditions(FrameConvexPolygon2DReadOnly supportPolygonInWorld)
    {
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraint());
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraint(supportPolygonInWorld));
 
       if (copConstraintHandler.hasSupportPolygonChanged())
          solver.notifyResetActiveSet();
@@ -370,19 +363,16 @@ public class ICPController implements ICPControllerInterface
                                              desiredICPVelocity,
                                              feedbackGains.getKpParallelToMotion(),
                                              feedbackGains.getKpOrthogonalToMotion());
-      helper.transformFromDynamicsFrame(transformedMagnitudeLimits,
-                                        desiredICPVelocity,
-                                        feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
-                                        feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
+      helper.getTransformToDynamicsFrame(transformedMagnitudeJacobian, desiredICPVelocity);
 
       // run a temporary computation here to get what the  unconstrained CMP would be with none of the scaling
-      computeUnconstrainedFeedbackCMP(perfectCoP, perfectCMPOffset);
+      computeUnconstrainedFeedbackCMP(perfectCoP, perfectCMPOffset, unconstrainedFeedbackNoScaling, unconstrainedFeedbackCMPNoScaling);
       computeFeedForwardAndFeedBackAlphas();
 
       referenceFeedForwardCMPOffset.setAndScale(1.0 - feedForwardAlpha.getDoubleValue(), perfectCMPOffset);
       referenceFeedForwardCoP.interpolate(perfectCoP, desiredICP, feedForwardAlpha.getDoubleValue());
 
-      computeUnconstrainedFeedbackCMP(referenceFeedForwardCoP, referenceFeedForwardCMPOffset);
+      computeUnconstrainedFeedbackCMP(referenceFeedForwardCoP, referenceFeedForwardCMPOffset, unconstrainedFeedback, unconstrainedFeedbackCMP);
 
       UnrolledInverseFromMinor_DDRM.inv(transformedGains, inverseTransformedGains);
 
@@ -393,7 +383,18 @@ public class ICPController implements ICPControllerInterface
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getValue());
       solver.setDesiredFeedbackDirection(unconstrainedFeedback, feedbackDirectionWeight.getValue());
 
-      solver.setMaximumFeedbackMagnitude(transformedMagnitudeLimits);
+      if (ICPControllerHelper.isStationary(desiredICPVelocity))
+      {
+         solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
+                                            feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion(),
+                                            feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
+      }
+      else
+      {
+         solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
+                                            feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
+                                            feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
+      }
       solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), controlDT);
 
       solver.setFeedbackRateWeight(copCMPFeedbackRateWeight.getValue() / controlDTSquare, feedbackRateWeight.getValue() / controlDTSquare);
@@ -404,8 +405,6 @@ public class ICPController implements ICPControllerInterface
 
    private boolean solveQP()
    {
-
-
       boolean converged = solver.compute(icpError, referenceFeedForwardCoP, referenceFeedForwardCMPOffset);
       previousTickFailed.set(solver.previousTickFailed());
       if (!converged)
@@ -422,12 +421,15 @@ public class ICPController implements ICPControllerInterface
       return converged;
    }
 
-   private void computeUnconstrainedFeedbackCMP(FramePoint2DReadOnly feedforwardCoP, FrameVector2DReadOnly feedForwardCMPOffset)
+   private void computeUnconstrainedFeedbackCMP(FramePoint2DReadOnly feedforwardCoP,
+                                                FrameVector2DReadOnly feedForwardCMPOffset,
+                                                FixedFrameVector2DBasics unconstrainedFeedbackToPack,
+                                                FixedFramePoint2DBasics unconstrainedFeedbackCMPToPack)
    {
-      unconstrainedFeedback.setX(transformedGains.get(0, 0) * icpError.getX() + transformedGains.get(0, 1) * icpError.getY());
-      unconstrainedFeedback.setY(transformedGains.get(1, 0) * icpError.getX() + transformedGains.get(1, 1) * icpError.getY());
-      unconstrainedFeedbackCMP.add(feedforwardCoP, feedForwardCMPOffset);
-      unconstrainedFeedbackCMP.add(unconstrainedFeedback);
+      unconstrainedFeedbackToPack.setX(transformedGains.get(0, 0) * icpError.getX() + transformedGains.get(0, 1) * icpError.getY());
+      unconstrainedFeedbackToPack.setY(transformedGains.get(1, 0) * icpError.getX() + transformedGains.get(1, 1) * icpError.getY());
+      unconstrainedFeedbackCMPToPack.add(feedforwardCoP, feedForwardCMPOffset);
+      unconstrainedFeedbackCMPToPack.add(unconstrainedFeedbackToPack);
    }
 
    private void extractSolutionsFromSolver(boolean converged)
@@ -444,7 +446,7 @@ public class ICPController implements ICPControllerInterface
 
       integrator.update(desiredICPVelocity, currentCoMVelocity, icpError);
    }
-   
+
    private void computeFeedForwardAndFeedBackAlphas()
    {
       if (parameters.getFeedbackAlphaCalculator() != null)
@@ -458,9 +460,13 @@ public class ICPController implements ICPControllerInterface
                                                       desiredICP,
                                                       finalICP,
                                                       perfectCMP,
-                                                      unconstrainedFeedbackCMP,
+                                                      unconstrainedFeedbackCMPNoScaling,
                                                       copConstraintHandler.getCoPConstraint()));
       else
+         feedForwardAlpha.set(0.0);
+
+      // catches a few bugs
+      if (feedForwardAlpha.isNaN())
          feedForwardAlpha.set(0.0);
    }
 
@@ -500,5 +506,17 @@ public class ICPController implements ICPControllerInterface
    public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
    {
       this.copConstraintHandler.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(newYoGraphicPoint2D("FeedbackCoP", feedbackCoP, 0.01, DarkOrange(), CIRCLE_PLUS));
+      group.addChild(newYoGraphicPoint2D("ReferenceFeedForwardCoP", referenceFeedForwardCoP, 0.01, Red(), CIRCLE_PLUS));
+      group.addChild(newYoGraphicPoint2D("UnconstrainedFeedbackCMP", unconstrainedFeedbackCMP, 0.012, Purple(), CIRCLE_PLUS));
+      group.setVisible(VISUALIZE);
+      return group;
+
    }
 }

@@ -30,7 +30,7 @@ public interface ControllerCoreOutputReadOnly
    /**
     * Typically used to obtain the desired external wrench for the feet.
     */
-   public abstract void getDesiredExternalWrench(WrenchBasics desiredExternalWrenchToPack, RigidBodyBasics rigidBody);
+   public abstract boolean getDesiredExternalWrench(WrenchBasics desiredExternalWrenchToPack, RigidBodyBasics rigidBody);
 
    /**
     * Retrieves the linear momentum rate obtained after the optimization problem has been solved.

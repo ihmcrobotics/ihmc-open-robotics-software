@@ -3,9 +3,8 @@ package us.ihmc.robotics.sensors;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
 public interface ForceSensorDataReadOnly
 {
@@ -15,23 +14,13 @@ public interface ForceSensorDataReadOnly
 
    public RigidBodyBasics getMeasurementLink();
 
-   /*
-    * Get force sensor wrench data and write to Matrix argument.
+   /**
+    * Get force sensor wrench data. The returned type is expected to be read-only.
     */
-   public void getWrench(DMatrixRMaj wrenchToPack);
+   void getWrenchMatrix(DMatrixRMaj wrenchMatrixToPack);
 
-   /*
-    * Get force sensor wrench data and write to Wrench argument.
+   /**
+    * Get force sensor wrench data.
     */
-   public void getWrench(Wrench wrenchToPack);
-
-   /*
-    * Get force sensor wrench data and write to float array argument.
-    */
-   public void getWrench(float[] wrenchToPack);
-   
-   /*
-    * Get force sensor wrench data and write to vector arguments for moment and force.
-    */
-   public void getWrench(Vector3DBasics momentToPack, Vector3DBasics forceToPack);
+   WrenchReadOnly getWrench();
 }

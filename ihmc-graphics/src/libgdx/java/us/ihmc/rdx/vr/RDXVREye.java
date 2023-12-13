@@ -122,6 +122,11 @@ public class RDXVREye extends Camera
       frameBuffer.end();
    }
 
+   public RobotSide getSide()
+   {
+      return side;
+   }
+
    public ReferenceFrame getEyeXForwardZUpFrame()
    {
       return eyeXForwardZUpFrame;

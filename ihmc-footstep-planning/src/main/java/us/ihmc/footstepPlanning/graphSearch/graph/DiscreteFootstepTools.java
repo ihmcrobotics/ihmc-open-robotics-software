@@ -30,8 +30,19 @@ public class DiscreteFootstepTools
     */
    public static void getStepTransform(DiscreteFootstep step, RigidBodyTransform stepToWorldTransformToPack)
    {
-      stepToWorldTransformToPack.setRotationYawAndZeroTranslation(step.getYaw());
-      stepToWorldTransformToPack.getTranslation().set(step.getX(), step.getY(), 0.0);
+      getStepTransform(step.getX(), step.getY(), step.getYaw(), stepToWorldTransformToPack);
+   }
+
+   /**
+    * Computes a step-to-world RigidBodyTransform from the step's x, y and yaw. This transform
+    * will always have no z translation, pitch and roll.
+    * @param step
+    * @param stepToWorldTransformToPack
+    */
+   public static void getStepTransform(double x, double y, double yaw, RigidBodyTransform stepToWorldTransformToPack)
+   {
+      stepToWorldTransformToPack.setRotationYawAndZeroTranslation(yaw);
+      stepToWorldTransformToPack.getTranslation().set(x, y, 0.0);
    }
 
    /**
@@ -76,6 +87,7 @@ public class DiscreteFootstepTools
       getSnappedStepTransform(step, snapTransform, snappedTransform);
       stepPoseToSet.set(snappedTransform);
    }
+
    /**
     * Computes the foot polygon in world frame that corresponds to the give footstep step
     *
@@ -85,10 +97,22 @@ public class DiscreteFootstepTools
     */
    public static void getFootPolygon(DiscreteFootstep step, ConvexPolygon2DReadOnly footPolygonInSoleFrame, ConvexPolygon2D footPolygonToPack)
    {
+      getFootPolygon(step.getX(), step.getY(), step.getYaw(), footPolygonInSoleFrame, footPolygonToPack);
+   }
+
+   /**
+    * Computes the foot polygon in world frame that corresponds to the give footstep step
+    *
+    * @param step
+    * @param footPolygonInSoleFrame
+    * @param footPolygonToPack
+    */
+   public static void getFootPolygon(double stepX, double stepY, double stepYaw, ConvexPolygon2DReadOnly footPolygonInSoleFrame, ConvexPolygon2D footPolygonToPack)
+   {
       footPolygonToPack.set(footPolygonInSoleFrame);
 
       RigidBodyTransform footstepTransform = new RigidBodyTransform();
-      DiscreteFootstepTools.getStepTransform(step, footstepTransform);
+      DiscreteFootstepTools.getStepTransform(stepX, stepY, stepYaw, footstepTransform);
 
       footPolygonToPack.applyTransform(footstepTransform);
    }

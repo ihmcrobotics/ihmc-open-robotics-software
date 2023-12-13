@@ -30,7 +30,7 @@ public class UserPelvisOrientationManager implements PelvisOrientationControlSta
       baseFrame = controllerToolbox.getReferenceFrames().getMidFootZUpGroundFrame();
       YoDouble yoTime = controllerToolbox.getYoTime();
 
-      orientationController = new RigidBodyOrientationController(pelvis, elevator, elevator, baseFrame, yoTime, null, registry);
+      orientationController = new RigidBodyOrientationController(pelvis, elevator, elevator, baseFrame, yoTime, null, false, registry);
       orientationController.setGains(gains);
 
       homeOrientation = new FrameQuaternion(baseFrame);

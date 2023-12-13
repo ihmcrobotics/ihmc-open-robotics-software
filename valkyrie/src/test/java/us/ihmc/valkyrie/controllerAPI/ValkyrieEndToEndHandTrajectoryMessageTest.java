@@ -157,7 +157,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       se3TrajectoryMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(new SelectionMatrix3D(null, false, false, false)));
 
       WrenchTrajectoryMessage wrenchTrajectoryMessage = new WrenchTrajectoryMessage();
-      wrenchTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame().hashCode());
+      wrenchTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
       wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1.8, null, null));
       wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add()
                              .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1.9, null, new Vector3D(150.0, 0.0, 75.0)));

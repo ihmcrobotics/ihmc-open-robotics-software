@@ -25,7 +25,7 @@ public class RDXPlanarRegionLoggingDevelopmentUI
    public RDXPlanarRegionLoggingDevelopmentUI()
    {
       LogTools.info("Starting UI");
-      baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", WINDOW_NAME);
+      baseUI = new RDXBaseUI(WINDOW_NAME);
       timer = new Timer();
       rand = new Random();
    }

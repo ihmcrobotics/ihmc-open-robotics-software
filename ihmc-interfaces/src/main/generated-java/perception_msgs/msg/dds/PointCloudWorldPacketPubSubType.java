@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class PointCloudWorldPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.PointCloudWorldPacket>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::PointCloudWorldPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "a850b95e1a21eb88741f024cd8f24d7b073d17d7552df0b7331a2215067bcbda";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

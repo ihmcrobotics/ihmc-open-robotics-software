@@ -19,4 +19,10 @@ public class AtlasStepAdjustmentParameters extends StepAdjustmentParameters
    {
       return 0.02;
    }
+
+   @Override
+   public double getMinimumTimeForStepAdjustment()
+   {
+      return -0.2;
+   }
 }

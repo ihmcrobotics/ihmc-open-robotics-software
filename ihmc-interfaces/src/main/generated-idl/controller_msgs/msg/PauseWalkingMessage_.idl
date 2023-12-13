@@ -24,6 +24,10 @@ module controller_msgs
          * True to pause walking, false to unpause and resume an existing footstep plan.
          */
         boolean pause;
+        /**
+         * True to clear the remaining footstep queue, if the robot is told to pause walking
+         */
+        boolean clear_remaining_footstep_queue;
       };
     };
   };

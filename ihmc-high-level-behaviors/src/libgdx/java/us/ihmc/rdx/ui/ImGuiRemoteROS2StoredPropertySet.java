@@ -6,7 +6,7 @@ import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.communication.property.StoredPropertySetROS2Input;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.tools.property.StoredPropertySetBasics;
@@ -18,7 +18,7 @@ public class ImGuiRemoteROS2StoredPropertySet
    private final StoredPropertySetROS2TopicPair topicPair;
    private final StoredPropertySetROS2Input storedPropertySetROS2Input;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiStoredPropertySetTuner imGuiStoredPropertySetTuner;
+   private final RDXStoredPropertySetTuner imGuiStoredPropertySetTuner;
    private boolean storedPropertySetChangedByImGuiUser = false;
    private static final Color DARK_RED = new Color(0x781d1dff);
    private static final Color YELLOW = new Color(0xa6b51bff);
@@ -39,9 +39,10 @@ public class ImGuiRemoteROS2StoredPropertySet
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
       this.storedPropertySet = storedPropertySet;
       this.topicPair = topicPair;
+      ros2PublishSubscribeAPI.createPublisher(topicPair.getCommandTopic());
 
       storedPropertySetROS2Input = new StoredPropertySetROS2Input(ros2PublishSubscribeAPI, topicPair.getStatusTopic(), storedPropertySet);
-      imGuiStoredPropertySetTuner = new ImGuiStoredPropertySetTuner(storedPropertySet.getTitle());
+      imGuiStoredPropertySetTuner = new RDXStoredPropertySetTuner(storedPropertySet.getTitle());
       imGuiStoredPropertySetTuner.create(storedPropertySet, false, () -> storedPropertySetChangedByImGuiUser = true);
    }
 
@@ -111,8 +112,8 @@ public class ImGuiRemoteROS2StoredPropertySet
       return storedPropertySet;
    }
 
-   public ImGuiPanel createPanel()
+   public RDXPanel createPanel()
    {
-      return new ImGuiPanel(storedPropertySet.getTitle(), this::renderImGuiWidgetsWithUpdateButton);
+      return new RDXPanel(storedPropertySet.getTitle(), this::renderImGuiWidgetsWithUpdateButton);
    }
 }

@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.log;
 
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessagePubSubType;
 import org.apache.commons.lang3.tuple.Pair;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.ContinuousIntegrationTools;
@@ -67,6 +69,7 @@ public class FootstepPlannerLogger
    // File names
    static final String requestPacketFileName = "RequestPacket.json";
    static final String footstepParametersFileName = "FootstepParametersPacket.json";
+   static final String bodyPathParametersFileName = "BodyPathParametersPacket.json";
    static final String swingParametersFileName = "SwingParametersPacket.json";
    static final String statusPacketFileName = "StatusPacket.json";
    static final String headerFileName = "Header.txt";
@@ -83,11 +86,13 @@ public class FootstepPlannerLogger
 
    private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
+   private final StoredPropertySetMessage bodyPathParametersPacket = new StoredPropertySetMessage();
    private final SwingPlannerParametersPacket swingPlannerParametersPacket = new SwingPlannerParametersPacket();
    private final FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
 
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersPacketSerializer = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
+   private final JSONSerializer<StoredPropertySetMessage> bodyPathParametersPacketSerializer = new JSONSerializer<>(new StoredPropertySetMessagePubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingPlannerParametersPacketSerializer = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
@@ -180,6 +185,12 @@ public class FootstepPlannerLogger
          byte[] serializedFootstepParameters = footstepParametersPacketSerializer.serializeToBytes(footstepParametersPacket);
          writeToFile(footstepParametersPacketFile, serializedFootstepParameters);
 
+         // log body path planner parameters packet
+         String bodyPathParametersPacketFile = sessionDirectory + bodyPathParametersFileName;
+         planner.getAStarBodyPathPlannerParameters().getAllAsStrings().forEach(value -> bodyPathParametersPacket.getStrings().add(value));
+         byte[] serializedBodyPathParameters = bodyPathParametersPacketSerializer.serializeToBytes(bodyPathParametersPacket);
+         writeToFile(bodyPathParametersPacketFile, serializedBodyPathParameters);
+
          // log swing parameters packet
          String swingParametersPacketFile = sessionDirectory + swingParametersFileName;
          swingPlannerParametersPacket.set(planner.getSwingPlannerParameters().getAsPacket());
@@ -262,6 +273,7 @@ public class FootstepPlannerLogger
             fileWriter.write("Iteration " + i + newLine);
             writeNode(1, "parentNode", iterationData.getParentNode());
             writeNode(1, "idealStep", iterationData.getIdealChildNode());
+            writeNode(1, "nominalIdealStep", iterationData.getNominalIdealChildNode());
             writeLine(1, "edges:" + iterationData.getChildNodes().size());
             writeSnapData(1, iterationData.getParentStartSnapData());
             writeSnapData(1, iterationData.getParentEndSnapData());
@@ -269,21 +281,23 @@ public class FootstepPlannerLogger
             for (int j = 0; j < iterationData.getChildNodes().size(); j++)
             {
                FootstepPlannerEdgeData edgeData = planner.getEdgeDataMap().get(new GraphEdge<>(iterationData.getParentNode(), iterationData.getChildNodes().get(j)));
-
-               // indicate start of data
-               writeLine(1, "Edge:");
-               writeNode(2, "candidateNode", edgeData.getChildNode());
-               writeLine(2, "solutionEdge:" + edgeData.isSolutionEdge());
-               writeSnapData(2, edgeData.getEndStepSnapData());
-
-               // write additional data as doubles
-               fileWriter.write(tab + tab + "data:");
-               long[] dataBuffer = edgeData.getDataBuffer();
-               for (int k = 0; k < dataBuffer.length; k++)
+               if (edgeData != null) // Sometimes it's not there. Not sure if that's expected. TODO: Verify. @dcalvert
                {
-                  fileWriter.write(dataBuffer[k] + (k == dataBuffer.length - 1 ? "" : ","));
+                  // indicate start of data
+                  writeLine(1, "Edge:");
+                  writeNode(2, "candidateNode", edgeData.getChildNode());
+                  writeLine(2, "solutionEdge:" + edgeData.isSolutionEdge());
+                  writeSnapData(2, edgeData.getEndStepSnapData());
+
+                  // write additional data as doubles
+                  fileWriter.write(tab + tab + "data:");
+                  long[] dataBuffer = edgeData.getDataBuffer();
+                  for (int k = 0; k < dataBuffer.length; k++)
+                  {
+                     fileWriter.write(dataBuffer[k] + (k == dataBuffer.length - 1 ? "" : ","));
+                  }
+                  fileWriter.write(newLine);
                }
-               fileWriter.write(newLine);
             }
          }
 
@@ -299,7 +313,7 @@ public class FootstepPlannerLogger
          return false;
       }
 
-      // Log footstep planner iteration data
+      // Log body path planner iteration data
       try
       {
          File plannerDataFile = new File(sessionDirectory + astarBodyPathPlanFileName);
@@ -345,7 +359,7 @@ public class FootstepPlannerLogger
       }
       catch (Exception e)
       {
-         LogTools.error("Error logging footstep planner data");
+         LogTools.error("Error logging body path planner data");
          fileWriter = null;
          outputStream = null;
          printStream = null;

@@ -15,7 +15,7 @@ public class StoredPropertySetTest
       DoubleStoredPropertyKey keyTwo = keyList.addDoubleKey("KeyTwo");
       IntegerStoredPropertyKey keyThree = keyList.addIntegerKey("KeyThree");
 
-      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class, "ihmc-java-toolkit", "src/test/resources");
+      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class);
       storedPropertySet.load();
 
       assertEquals(false, storedPropertySet.get(keyOne));
@@ -31,7 +31,7 @@ public class StoredPropertySetTest
       DoubleStoredPropertyKey keyTwo = keyList.addDoubleKey("KeyTwo");
       IntegerStoredPropertyKey keyThree = keyList.addIntegerKey("KeyThree");
 
-      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class, "ihmc-java-toolkit", "src/test/resources");
+      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class);
       storedPropertySet.load();
 
       assertEquals(false, storedPropertySet.get(keyOne));
@@ -65,7 +65,7 @@ public class StoredPropertySetTest
       DoubleStoredPropertyKey keyTwo = keyList.addDoubleKey("KeyTwo", 0.4);
       IntegerStoredPropertyKey keyThree = keyList.addIntegerKey("KeyThree", 8);
 
-      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class, "ihmc-java-toolkit", "src/test/resources");
+      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class);
       assertEquals(true, storedPropertySet.get(keyOne));
       assertEquals(0.4, storedPropertySet.get(keyTwo));
       assertEquals(8, storedPropertySet.get(keyThree));
@@ -86,12 +86,12 @@ public class StoredPropertySetTest
       DoubleStoredPropertyKey keyTwo = keyList.addDoubleKey("KeyTwo", 0.4);
       IntegerStoredPropertyKey keyThree = keyList.addIntegerKey("KeyThree", 8);
 
-      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class, "ihmc-java-toolkit", "src/test/resources");
+      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class);
       assertEquals(true, storedPropertySet.get(keyOne));
       assertEquals(0.4, storedPropertySet.get(keyTwo));
       assertEquals(8, storedPropertySet.get(keyThree));
 
-      StoredPropertySet storedPropertySet2 = new StoredPropertySet(keyList, StoredPropertySetTest.class, "ihmc-java-toolkit", "src/test/resources");
+      StoredPropertySet storedPropertySet2 = new StoredPropertySet(keyList, StoredPropertySetTest.class);
       assertEquals(true, storedPropertySet2.get(keyOne));
       assertEquals(0.4, storedPropertySet2.get(keyTwo));
       assertEquals(8, storedPropertySet2.get(keyThree));

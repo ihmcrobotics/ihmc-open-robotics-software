@@ -5,6 +5,12 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -13,7 +19,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MultiStepPushRecoveryCalculatorVisualizer
+public class MultiStepPushRecoveryCalculatorVisualizer implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -25,8 +31,12 @@ public class MultiStepPushRecoveryCalculatorVisualizer
    private final List<YoFrameConvexPolygon2D> yoReachableRegions = new ArrayList<>();
 
    private final int maxRegionDepth;
+
+   private final String suffix;
+
    public MultiStepPushRecoveryCalculatorVisualizer(String suffix, int maxRegionDepth, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
+      this.suffix = suffix;
       this.maxRegionDepth = maxRegionDepth;
       if (graphicsListRegistry != null)
       {
@@ -116,5 +126,37 @@ public class MultiStepPushRecoveryCalculatorVisualizer
          yoCaptureRegionsAtTouchdown.get(i).set(pushRecoveryCalculator.getCaptureRegionAtTouchdown(i));
          yoIntersectingRegions.get(i).set(pushRecoveryCalculator.getIntersectingRegion(i));
       }
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      for (int i = 0; i < maxRegionDepth; i++)
+      {
+         String captureName = "captureRegion" + i;
+         // TODO The stroke graphic was initially dashed
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D(captureName + "AtTouchdown" + suffix,
+                                                                         yoCaptureRegionsAtTouchdown.get(i),
+                                                                         ColorDefinitions.Red()));
+
+         String reachableName = "reachableRegion" + i;
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D(reachableName + suffix, yoReachableRegions.get(i), ColorDefinitions.Blue()));
+
+         String intersectingName = "intersectingRegion" + i;
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D(intersectingName + suffix, yoIntersectingRegions.get(i), ColorDefinitions.Yellow()));
+
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("capturePointTouchdown" + i + suffix,
+                                                                       capturePointsAtTouchdown.get(i),
+                                                                       0.02,
+                                                                       ColorDefinitions.Yellow(),
+                                                                       DefaultPoint2DGraphic.CIRCLE_FILLED));
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("recoveryStepLocation" + i + suffix,
+                                                                       recoveryStepLocations.get(i),
+                                                                       0.02,
+                                                                       ColorDefinitions.Blue(),
+                                                                       DefaultPoint2DGraphic.CIRCLE_FILLED));
+      }
+      return group;
    }
 }

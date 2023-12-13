@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.VideoPacket>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::VideoPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "ec4aae5c1dd82dc69a8b73789df338f210c80d23378f1a142393e7def2b1acb2";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

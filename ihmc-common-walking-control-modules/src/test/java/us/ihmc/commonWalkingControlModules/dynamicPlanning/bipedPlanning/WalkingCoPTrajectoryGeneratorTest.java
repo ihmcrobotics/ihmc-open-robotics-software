@@ -83,7 +83,7 @@ public class WalkingCoPTrajectoryGeneratorTest
       for (RobotSide robotSide : RobotSide.values)
       {
          soleFrames.get(robotSide).setPositionWithoutChecksAndUpdate(0.0,  robotSide.negateIfRightSide(0.5) * stanceWidth, 0.0);
-         polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon()));
+         polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon().get(robotSide)));
       }
 
       Footstep footstep = new Footstep();
@@ -160,7 +160,7 @@ public class WalkingCoPTrajectoryGeneratorTest
       for (RobotSide robotSide : RobotSide.values)
       {
          soleFrames.get(robotSide).setPositionWithoutChecksAndUpdate(0.0,  robotSide.negateIfRightSide(0.5) * stanceWidth, 0.0);
-         polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon()));
+         polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon().get(robotSide)));
       }
 
       Footstep footstep = new Footstep();
@@ -253,7 +253,7 @@ public class WalkingCoPTrajectoryGeneratorTest
       for (RobotSide robotSide : RobotSide.values)
       {
          soleFrames.get(robotSide).setPositionWithoutChecksAndUpdate(0.0,  robotSide.negateIfRightSide(0.5) * stanceWidth, 0.0);
-         polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon()));
+         polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon().get(robotSide)));
       }
 
       Footstep footstep = new Footstep();

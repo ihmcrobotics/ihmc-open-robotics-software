@@ -13,6 +13,11 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.function.Consumer;
 
+/**
+ * TODO: This class would benefit from a different structure.
+ *   Instead of the slightly different constructors, maybe it should have a series
+ *   of methods that can be called to configure it after construction.
+ */
 public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySetWidget
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -22,7 +27,6 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
    private String unitString;
    private final Runnable onParametersUpdatedCallback;
    private final ImDoubleWrapper imDoubleWrapper;
-   private final Consumer<ImDouble> accessImDouble;
    private double step;
    private double stepFast;
    private DoubleStoredPropertyKey key;
@@ -41,9 +45,8 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
       this.min = min;
       this.max = max;
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
-      imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key);
       label = labels.get(key.getTitleCasedName());
-      accessImDouble = this::renderSliderWithMinMax;
+      imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key, this::renderSliderWithMinMax);
    }
 
    public ImGuiStoredPropertySetDoubleWidget(StoredPropertySetBasics storedPropertySet,
@@ -54,26 +57,26 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
                                              Runnable onParametersUpdatedCallback)
    {
       this.key = key;
+      this.min = key.getLowerBound();
+      this.max = key.getUpperBound();
       this.format = format;
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
-      imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key);
       label = labels.getHidden(key.getTitleCasedName());
       fancyPrefixLabel = key.getTitleCasedName() + ":";
 
+      Consumer<ImDouble> widgetRenderer;
       if (key.hasLowerBound() && key.hasUpperBound())
       {
-         this.min = key.getLowerBound();
-         this.max = key.getUpperBound();
-         accessImDouble = this::renderSliderWithMinMaxAndFormatFancy;
+         widgetRenderer = this::renderSliderWithMinMaxAndFormatFancy;
       }
       else
       {
          this.step = step;
          this.stepFast = stepFast;
-         min = Double.NaN;
-         max = Double.NaN;
-         accessImDouble = this::renderInputWithStepAndStepFastFancy;
+         widgetRenderer = this::renderInputWithStepAndStepFastFancy;
       }
+
+      imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key, widgetRenderer);
    }
 
    public ImGuiStoredPropertySetDoubleWidget(StoredPropertySetBasics storedPropertySet,
@@ -84,34 +87,46 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
                                              String unitString,
                                              Runnable onParametersUpdatedCallback)
    {
+      this(storedPropertySet, key, step, stepFast, format, unitString, onParametersUpdatedCallback, false);
+   }
+
+   public ImGuiStoredPropertySetDoubleWidget(StoredPropertySetBasics storedPropertySet,
+                                             DoubleStoredPropertyKey key,
+                                             double step,
+                                             double stepFast,
+                                             String format,
+                                             String unitString,
+                                             Runnable onParametersUpdatedCallback,
+                                             boolean enforceInputWidget)
+   {
       this.key = key;
+      this.min = key.getLowerBound();
+      this.max = key.getUpperBound();
       this.format = format;
       this.unitString = unitString;
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
-      imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key);
       label = labels.get(unitString, key.getTitleCasedName());
       fancyPrefixLabel = key.getTitleCasedName() + ":";
 
-      if (key.hasLowerBound() && key.hasUpperBound())
+      Consumer<ImDouble> widgetRenderer;
+      if (!enforceInputWidget && key.hasLowerBound() && key.hasUpperBound())
       {
-         this.min = key.getLowerBound();
-         this.max = key.getUpperBound();
-         accessImDouble = this::renderSliderWithMinMaxAndFormatFancy;
+         widgetRenderer = this::renderSliderWithMinMaxAndFormatFancy;
       }
       else
       {
          this.step = step;
          this.stepFast = stepFast;
-         min = Double.NaN;
-         max = Double.NaN;
-         accessImDouble = this::renderInputWithStepAndStepFastFancy;
+         widgetRenderer = this::renderInputWithStepAndStepFastFancy;
       }
+
+      imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key, widgetRenderer);
    }
 
    @Override
-   public void render()
+   public void renderImGuiWidget()
    {
-      imDoubleWrapper.accessImDouble(accessImDouble);
+      imDoubleWrapper.renderImGuiWidget();
    }
 
    @Override
@@ -147,6 +162,7 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
    {
       if (ImGuiTools.volatileInputDouble(label, imDouble, step, stepFast, format))
       {
+         clamp(imDouble);
          onParametersUpdatedCallback.run();
       }
    }
@@ -170,14 +186,15 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
    {
       if (ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, min, max))
       {
-//         clamp(imDouble); // TODO: In what case is this necessary?
+         //         clamp(imDouble); // TODO: In what case is this necessary?
          onParametersUpdatedCallback.run();
       }
    }
 
    private void clamp(ImDouble imDouble)
    {
-      imDouble.set(MathTools.clamp(imDouble.get(), min, max));
+      if (!Double.isNaN(min) && !Double.isNaN(max))
+         imDouble.set(MathTools.clamp(imDouble.get(), min, max));
    }
 
    private void fancyBefore()

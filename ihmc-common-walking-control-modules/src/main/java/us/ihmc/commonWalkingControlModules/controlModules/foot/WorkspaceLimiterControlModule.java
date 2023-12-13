@@ -1,5 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicArrow3D;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint3D;
+
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -18,19 +22,23 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -39,7 +47,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class WorkspaceLimiterControlModule
+public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
 {
    private static final double epsilon = 5e-3;
    private boolean visualize = true;
@@ -103,9 +111,7 @@ public class WorkspaceLimiterControlModule
    private final YoFrameVector3D yoDesiredFootLinearAcceleration;
    private final YoFrameVector3D yoCorrectedDesiredFootLinearAcceleration;
 
-   private final YoGraphicReferenceFrame virtualLegTangentialFrameHipCenteredGraphics, virtualLegTangentialFrameAnkleCenteredGraphics;
-   private final YoGraphicPosition yoDesiredFootPositionGraphic, yoCorrectedDesiredFootPositionGraphic;
-   private final YoGraphicVector yoDesiredFootLinearVelocityGraphic, yoCorrectedDesiredFootLinearVelocityGraphic;
+   private final YoFramePose3D yoVirtualLegTangentialFrameHipCenteredPose, yoVirtualLegTangentialFrameAnkleCenteredPose;
 
    private final YoBoolean isSwingSingularityAvoidanceUsed;
    private final YoBoolean isSwingSingularityAvoidanceUsedOnHeight;
@@ -118,6 +124,9 @@ public class WorkspaceLimiterControlModule
 
    private final YoBoolean doSmoothTransitionOutOfSingularityAvoidance;
    private final YoBoolean doSmoothTransitionOutOfUnreachableStep;
+
+   private final YoBoolean isLegLengthening;
+   private final YoBoolean isLegShortening;
 
    private final YoDouble alphaSupportSingularityAvoidance;
 
@@ -137,6 +146,7 @@ public class WorkspaceLimiterControlModule
    private final AlphaFilteredYoVariable heightCorrectedFilteredForSingularityAvoidance;
    private final AlphaFilteredYoVariable heightVelocityCorrectedFilteredForSingularityAvoidance;
    private final AlphaFilteredYoVariable heightAccelerationCorrectedFilteredForSingularityAvoidance;
+   private final String namePrefix;
 
    public WorkspaceLimiterControlModule(String namePrefix,
                                         ContactablePlaneBody contactablePlaneBody,
@@ -146,6 +156,7 @@ public class WorkspaceLimiterControlModule
                                         final HighLevelHumanoidControllerToolbox controllerToolbox,
                                         YoRegistry parentRegistry)
    {
+      this.namePrefix = namePrefix;
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
@@ -268,6 +279,9 @@ public class WorkspaceLimiterControlModule
       doSmoothTransitionOutOfSingularityAvoidance = new YoBoolean(namePrefix + "DoSmoothTransitionSingularityAvoidance", registry);
       doSmoothTransitionOutOfUnreachableStep = new YoBoolean(namePrefix + "DoSmoothTransitionUnreachableStep", registry);
 
+      isLegLengthening = new YoBoolean(namePrefix + "IsLegLengthening", registry);
+      isLegShortening = new YoBoolean(namePrefix + "IsLegShortening", registry);
+
       isSupportSingularityAvoidanceUsed = new YoBoolean(namePrefix + "IsSupportSingularityAvoidanceUsed", registry);
       useSingularityAvoidanceInSupport = new BooleanParameter(namePrefix + "UseSingularityAvoidanceInSupport",
                                                               registry,
@@ -277,58 +291,61 @@ public class WorkspaceLimiterControlModule
       heightCorrectedFilteredForSingularityAvoidance = new AlphaFilteredYoVariable(namePrefix + "HeightCorrectedFilteredForSingularityAvoidance",
                                                                                    registry,
                                                                                    correctionAlphaFilter);
-      heightVelocityCorrectedFilteredForSingularityAvoidance = new AlphaFilteredYoVariable(
-            namePrefix + "HeightVelocityCorrectedFilteredForSingularityAvoidance", registry, correctionAlphaFilter);
-      heightAccelerationCorrectedFilteredForSingularityAvoidance = new AlphaFilteredYoVariable(
-            namePrefix + "HeightAccelerationCorrectedFilteredForSingularityAvoidance", registry, correctionAlphaFilter);
+      heightVelocityCorrectedFilteredForSingularityAvoidance = new AlphaFilteredYoVariable(namePrefix
+                                                                                           + "HeightVelocityCorrectedFilteredForSingularityAvoidance",
+                                                                                           registry,
+                                                                                           correctionAlphaFilter);
+      heightAccelerationCorrectedFilteredForSingularityAvoidance = new AlphaFilteredYoVariable(namePrefix
+                                                                                               + "HeightAccelerationCorrectedFilteredForSingularityAvoidance",
+                                                                                               registry,
+                                                                                               correctionAlphaFilter);
 
       if (visualize)
       {
-         yoDesiredFootPositionGraphic = new YoGraphicPosition(namePrefix + "DesiredFootPosition",
-                                                              yoDesiredFootPosition,
-                                                              0.025,
-                                                              YoAppearance.Red(),
-                                                              GraphicType.BALL);
-         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", yoDesiredFootPositionGraphic);
-         yoCorrectedDesiredFootPositionGraphic = new YoGraphicPosition(namePrefix + "CorrectedDesiredFootPosition",
-                                                                       yoCorrectedDesiredFootPosition,
-                                                                       0.025,
-                                                                       YoAppearance.Green(),
-                                                                       GraphicType.BALL);
-         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", yoCorrectedDesiredFootPositionGraphic);
-      }
-      else
-      {
-         yoDesiredFootPositionGraphic = null;
-         yoCorrectedDesiredFootPositionGraphic = null;
+         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance",
+                                                  new YoGraphicPosition(namePrefix + "DesiredFootPosition",
+                                                                        yoDesiredFootPosition,
+                                                                        0.025,
+                                                                        YoAppearance.Red(),
+                                                                        GraphicType.BALL));
+         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance",
+                                                  new YoGraphicPosition(namePrefix + "CorrectedDesiredFootPosition",
+                                                                        yoCorrectedDesiredFootPosition,
+                                                                        0.025,
+                                                                        YoAppearance.Green(),
+                                                                        GraphicType.BALL));
       }
 
       if (moreVisualizers)
       {
-         virtualLegTangentialFrameHipCenteredGraphics = new YoGraphicReferenceFrame(virtualLegTangentialFrameHipCentered, registry, false, 0.1);
-         virtualLegTangentialFrameAnkleCenteredGraphics = new YoGraphicReferenceFrame(virtualLegTangentialFrameAnkleCentered, registry, false, 0.1);
-         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", virtualLegTangentialFrameHipCenteredGraphics);
-         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", virtualLegTangentialFrameAnkleCenteredGraphics);
+         yoVirtualLegTangentialFrameHipCenteredPose = new YoFramePose3D(virtualLegTangentialFrameHipCentered.getName(), worldFrame, registry);
+         yoVirtualLegTangentialFrameAnkleCenteredPose = new YoFramePose3D(virtualLegTangentialFrameAnkleCentered.getName(), worldFrame, registry);
+         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance",
+                                                  new YoGraphicCoordinateSystem(virtualLegTangentialFrameHipCentered.getName(),
+                                                                                yoVirtualLegTangentialFrameHipCenteredPose,
+                                                                                0.1));
+         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance",
+                                                  new YoGraphicCoordinateSystem(virtualLegTangentialFrameAnkleCentered.getName(),
+                                                                                yoVirtualLegTangentialFrameAnkleCenteredPose,
+                                                                                0.1));
 
-         yoDesiredFootLinearVelocityGraphic = new YoGraphicVector(namePrefix + "DesiredFootLinearVelocity",
-                                                                  yoDesiredFootPosition,
-                                                                  yoDesiredFootLinearVelocity,
-                                                                  0.2,
-                                                                  YoAppearance.Red());
-         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", yoDesiredFootLinearVelocityGraphic);
-         yoCorrectedDesiredFootLinearVelocityGraphic = new YoGraphicVector(namePrefix + "CorrectedDesiredFootLinearVelocity",
-                                                                           yoCorrectedDesiredFootPosition,
-                                                                           yoCorrectedDesiredFootLinearVelocity,
-                                                                           0.2,
-                                                                           YoAppearance.Green());
-         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", yoCorrectedDesiredFootLinearVelocityGraphic);
+         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance",
+                                                  new YoGraphicVector(namePrefix + "DesiredFootLinearVelocity",
+                                                                      yoDesiredFootPosition,
+                                                                      yoDesiredFootLinearVelocity,
+                                                                      0.2,
+                                                                      YoAppearance.Red()));
+         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance",
+                                                  new YoGraphicVector(namePrefix + "CorrectedDesiredFootLinearVelocity",
+                                                                      yoCorrectedDesiredFootPosition,
+                                                                      yoCorrectedDesiredFootLinearVelocity,
+                                                                      0.2,
+                                                                      YoAppearance.Green()));
       }
       else
       {
-         virtualLegTangentialFrameHipCenteredGraphics = null;
-         virtualLegTangentialFrameAnkleCenteredGraphics = null;
-         yoDesiredFootLinearVelocityGraphic = null;
-         yoCorrectedDesiredFootLinearVelocityGraphic = null;
+         yoVirtualLegTangentialFrameHipCenteredPose = null;
+         yoVirtualLegTangentialFrameAnkleCenteredPose = null;
       }
    }
 
@@ -342,6 +359,12 @@ public class WorkspaceLimiterControlModule
       anklePosition.changeFrame(virtualLegTangentialFrameHipCentered);
       currentLegLength.set(-anklePosition.getZ());
       currentPercentOfLegLength.set(currentLegLength.getDoubleValue() / maximumLegLength.getDoubleValue());
+
+      if (moreVisualizers)
+      {
+         yoVirtualLegTangentialFrameHipCenteredPose.setFromReferenceFrame(virtualLegTangentialFrameHipCentered);
+         yoVirtualLegTangentialFrameAnkleCenteredPose.setFromReferenceFrame(virtualLegTangentialFrameAnkleCentered);
+      }
    }
 
    public void resetHeightCorrectionParameters()
@@ -358,17 +381,10 @@ public class WorkspaceLimiterControlModule
       yoDesiredFootLinearVelocity.setToNaN();
       yoCorrectedDesiredFootLinearVelocity.setToNaN();
 
-      if (visualize)
+      if (moreVisualizers)
       {
-         yoDesiredFootPositionGraphic.hideGraphicObject();
-         yoCorrectedDesiredFootPositionGraphic.hideGraphicObject();
-         if (moreVisualizers)
-         {
-            virtualLegTangentialFrameHipCenteredGraphics.update();
-            virtualLegTangentialFrameAnkleCenteredGraphics.update();
-            yoDesiredFootLinearVelocityGraphic.hideGraphicObject();
-            yoCorrectedDesiredFootLinearVelocityGraphic.hideGraphicObject();
-         }
+         yoVirtualLegTangentialFrameHipCenteredPose.setToNaN();
+         yoVirtualLegTangentialFrameAnkleCenteredPose.setToNaN();
       }
 
       alphaSwingSingularityAvoidanceForFoot.set(0.0);
@@ -378,9 +394,9 @@ public class WorkspaceLimiterControlModule
       unachievedSwingAcceleration.setToZero();
    }
 
-   public void setCheckVelocityForSwingSingularityAvoidance(boolean value)
+   public void setCheckVelocityForSwingSingularityAvoidance(boolean checkVelocityForSwingSingularityAvoidance)
    {
-      checkVelocityForSwingSingularityAvoidance.set(value);
+      this.checkVelocityForSwingSingularityAvoidance.set(checkVelocityForSwingSingularityAvoidance);
    }
 
    public void correctSwingFootTrajectory(FixedFramePoint3DBasics desiredFootPositionToCorrect,
@@ -422,10 +438,10 @@ public class WorkspaceLimiterControlModule
             correctHeightForOverExtensionForSingularityAvoidance();
          }
 
-         double upperBoundToStartFootCorrection =
-               maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot.getValue() - percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot.getValue();
-         double lowerBoundToStartFootCorrection =
-               minPercentOfLegLengthForSingularityAvoidanceInSwing.getValue() + percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot.getValue();
+         double upperBoundToStartFootCorrection = maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot.getValue()
+                                                  - percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot.getValue();
+         double lowerBoundToStartFootCorrection = minPercentOfLegLengthForSingularityAvoidanceInSwing.getValue()
+                                                  + percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot.getValue();
 
          if (desiredPercentOfLegLength.getDoubleValue() > upperBoundToStartFootCorrection)
          {
@@ -456,7 +472,7 @@ public class WorkspaceLimiterControlModule
 
       double desiredFootPositionInAxisFrame = -Math.min(desiredLegLength.getDoubleValue(),
                                                         maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight.getValue()
-                                                        * maximumLegLength.getDoubleValue());
+                                                                                           * maximumLegLength.getDoubleValue());
 
       // Mix the desired leg extension velocity to progressively follow the pelvis velocity as the the leg is more straight
       double desiredLinearVelocityZ = InterpolationTools.linearInterpolate(desiredFootLinearVelocity.getZ(),
@@ -499,7 +515,7 @@ public class WorkspaceLimiterControlModule
 
       double desiredFootPositionInAxisFrame = -Math.min(desiredLegLength.getDoubleValue(),
                                                         maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot.getValue()
-                                                        * maximumLegLength.getDoubleValue());
+                                                                                           * maximumLegLength.getDoubleValue());
 
       correctFootDesiredsWithScaleFactor(desiredFootPositionInAxisFrame,
                                          desiredFootPositionToCorrect,
@@ -564,29 +580,20 @@ public class WorkspaceLimiterControlModule
       yoCorrectedDesiredFootPosition.set(desiredFootPositionToCorrect);
       yoCorrectedDesiredFootLinearVelocity.set(desiredFootLinearVelocityToCorrect);
       yoCorrectedDesiredFootLinearAcceleration.set(desiredFootLinearAccelerationToCorrect);
-
-      if (visualize)
-      {
-         yoDesiredFootPositionGraphic.showGraphicObject();
-         yoCorrectedDesiredFootPositionGraphic.showGraphicObject();
-         if (moreVisualizers)
-         {
-            yoDesiredFootLinearVelocityGraphic.showGraphicObject();
-            yoCorrectedDesiredFootLinearVelocityGraphic.showGraphicObject();
-         }
-      }
    }
 
    private boolean isLegLengthening()
    {
       pelvisLinearVelocity.checkReferenceFrameMatch(desiredFootLinearVelocity);
-      return pelvisLinearVelocity.getZ() - desiredFootLinearVelocity.getZ() > velocityDifferenceForLengthening.getValue();
+      isLegLengthening.set(pelvisLinearVelocity.getZ() - desiredFootLinearVelocity.getZ() > velocityDifferenceForLengthening.getValue());
+      return isLegLengthening.getBooleanValue();
    }
 
    private boolean isLegShortening()
    {
       pelvisLinearVelocity.checkReferenceFrameMatch(desiredFootLinearVelocity);
-      return desiredFootLinearVelocity.getZ() - pelvisLinearVelocity.getZ() > velocityDifferenceForLengthening.getValue();
+      isLegShortening.set(desiredFootLinearVelocity.getZ() - pelvisLinearVelocity.getZ() > velocityDifferenceForLengthening.getValue());
+      return isLegShortening.getBooleanValue();
    }
 
    public boolean correctCoMHeightTrajectoryForUnreachableFootStep(CoMHeightTimeDerivativesDataBasics comHeightDataToCorrect, ConstraintType constraintType)
@@ -621,8 +628,8 @@ public class WorkspaceLimiterControlModule
          unachievedSwingAccelerationFiltered.update(unachievedSwingVelocityFiltered.getDoubleValue() / timeToCorrectForUnachievedSwingTranslation.getValue());
 
          comHeightDataToCorrect.setComHeightVelocity(comHeightDataToCorrect.getComHeightVelocity() + unachievedSwingVelocityFiltered.getDoubleValue());
-         comHeightDataToCorrect.setComHeightAcceleration(
-               comHeightDataToCorrect.getComHeightAcceleration() + unachievedSwingAccelerationFiltered.getDoubleValue());
+         comHeightDataToCorrect.setComHeightAcceleration(comHeightDataToCorrect.getComHeightAcceleration()
+                                                         + unachievedSwingAccelerationFiltered.getDoubleValue());
 
          return true;
       }
@@ -668,10 +675,10 @@ public class WorkspaceLimiterControlModule
       }
 
       double maxPercent = maxPercentOfLegLengthForSingularityAvoidanceInSupport.getValue();
-      boolean singularityAvoidanceShouldBeDisabled =
-            desiredPercentOfLegLength.getDoubleValue() < maxPercent - percentOfLegLengthMarginToDisableSingularityAvoidance.getValue();
-      boolean legDoesNotNeedSingularityAvoidance =
-            desiredPercentOfLegLength.getDoubleValue() < maxPercent - percentOfLegLengthMarginToEnableSingularityAvoidanceForHeight.getValue();
+      boolean singularityAvoidanceShouldBeDisabled = desiredPercentOfLegLength.getDoubleValue()
+                                                     < maxPercent - percentOfLegLengthMarginToDisableSingularityAvoidance.getValue();
+      boolean legDoesNotNeedSingularityAvoidance = desiredPercentOfLegLength.getDoubleValue()
+                                                   < maxPercent - percentOfLegLengthMarginToEnableSingularityAvoidanceForHeight.getValue();
 
       // This checks to see if we were doing singularity avoidance, but the leg is straight now, and we aren't already transitioning out of using
       // singularity avoidance.
@@ -690,7 +697,7 @@ public class WorkspaceLimiterControlModule
             return false;
       }
       else if (!isSupportSingularityAvoidanceUsed.getBooleanValue())
-      {  // The leg is too straight, so we need to use singularity avoidance, but we haven't set it up yet, so set up singularity avoidance and start it.
+      { // The leg is too straight, so we need to use singularity avoidance, but we haven't set it up yet, so set up singularity avoidance and start it.
          isSupportSingularityAvoidanceUsed.set(true);
          doSmoothTransitionOutOfSingularityAvoidance.set(false);
 
@@ -740,9 +747,9 @@ public class WorkspaceLimiterControlModule
       }
 
       // If height is lower than filtered and the knee is bent enough, then really want to get out of singularity avoidance faster. So in this case, smooth faster...
-      else if (desiredCenterOfMassHeightPoint.getZ() <= heightCorrectedFilteredForSingularityAvoidance.getDoubleValue() && (
-            desiredPercentOfLegLength.getDoubleValue()
-            < maxPercentOfLegLengthForSingularityAvoidanceInSupport.getValue() - percentOfLegLengthMarginToDisableSingularityAvoidance.getValue()))
+      else if (desiredCenterOfMassHeightPoint.getZ() <= heightCorrectedFilteredForSingularityAvoidance.getDoubleValue()
+               && (desiredPercentOfLegLength.getDoubleValue()
+                   < maxPercentOfLegLengthForSingularityAvoidanceInSupport.getValue() - percentOfLegLengthMarginToDisableSingularityAvoidance.getValue()))
       {
          // Call this twice here to smooth faster. Need to get out of singularity avoidance!
          heightCorrectedFilteredForSingularityAvoidance.update(desiredCenterOfMassHeightPoint.getZ());
@@ -843,5 +850,34 @@ public class WorkspaceLimiterControlModule
       comHeightDataToCorrect.setComHeightAcceleration(comHeightDataToCorrect.getComHeightAcceleration() + unachievedSwingAccelerationFiltered.getDoubleValue());
 
       return true;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      if (!visualize)
+         return null;
+
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(newYoGraphicPoint3D(namePrefix + "SingularityCollapseAvoidance", yoDesiredFootPosition, 0.025, ColorDefinitions.Red()));
+      group.addChild(newYoGraphicPoint3D(namePrefix + "CorrectedDesiredFootPosition", yoCorrectedDesiredFootPosition, 0.025, ColorDefinitions.Green()));
+
+      if (moreVisualizers)
+      {
+         group.addChild(newYoGraphicCoordinateSystem3D(virtualLegTangentialFrameHipCentered.getName(), yoVirtualLegTangentialFrameHipCenteredPose, 0.1));
+         group.addChild(newYoGraphicCoordinateSystem3D(virtualLegTangentialFrameAnkleCentered.getName(), yoVirtualLegTangentialFrameAnkleCenteredPose, 0.1));
+         group.addChild(newYoGraphicArrow3D(namePrefix + "DesiredFootVelocity",
+                                            yoDesiredFootPosition,
+                                            yoDesiredFootLinearVelocity,
+                                            0.2,
+                                            ColorDefinitions.Red()));
+         group.addChild(newYoGraphicArrow3D(namePrefix + "CorrectedFootVelocity",
+                                            yoCorrectedDesiredFootPosition,
+                                            yoCorrectedDesiredFootLinearVelocity,
+                                            0.2,
+                                            ColorDefinitions.Green()));
+      }
+
+      return group;
    }
 }

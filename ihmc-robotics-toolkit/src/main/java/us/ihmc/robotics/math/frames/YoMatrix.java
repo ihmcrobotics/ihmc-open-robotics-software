@@ -21,7 +21,52 @@ public class YoMatrix
    private final YoInteger numberOfRows, numberOfColumns;
    private final YoDouble[][] variables;
 
+   /**
+    * Create a YoMatrix with the given name, number of rows, and number of columns. The constituent YoDoubles are named by index.
+    *
+    * @param name               common name component of the YoMatrix entries.
+    * @param maxNumberOfRows    maximum number of rows in the YoMatrix.
+    * @param maxNumberOfColumns maximum number of columns in the YoMatrix.
+    * @param registry           YoRegistry to register the YoMatrix with.
+    */
    public YoMatrix(String name, int maxNumberOfRows, int maxNumberOfColumns, YoRegistry registry)
+   {
+      this(name, maxNumberOfRows, maxNumberOfColumns, null, null, registry);
+   }
+
+   /**
+    * Create a YoMatrix with the given name, number of rows, and number of columns. The constituent YoDoubles are named by row name.
+    * <p>
+    * The number of columns must be equal to 1, that is, the YoMatrix must be a column vector. Otherwise, it is difficult to provide an API that will name the
+    * YoDoubles uniquely.
+    * </p>
+    *
+    * @param name               common name component of the YoMatrix entries.
+    * @param maxNumberOfRows    maximum number of rows in the YoMatrix.
+    * @param maxNumberOfColumns maximum number of columns in the YoMatrix.
+    * @param rowNames           names of the rows.
+    * @param registry           YoRegistry to register the YoMatrix with.
+    */
+   public YoMatrix(String name, int maxNumberOfRows, int maxNumberOfColumns, String[] rowNames, YoRegistry registry)
+   {
+      this(name, maxNumberOfRows, maxNumberOfColumns, rowNames, null, registry);
+   }
+
+   /**
+    * Create a YoMatrix with the given name, number of rows, and number of columns. The constituent YoDoubles are named by the entries in {@code rowNames} and
+    * {@code columnNames}.
+    * <p>
+    * NOTE: the entries in {@code rowNames} and {@code columnNames} must be unique. Otherwise, the YoDoubles will not have unique names.
+    * </p>
+    *
+    * @param name               common name component of the YoMatrix entries.
+    * @param maxNumberOfRows    maximum number of rows in the YoMatrix.
+    * @param maxNumberOfColumns maximum number of columns in the YoMatrix.
+    * @param rowNames           names of the rows.
+    * @param columnNames        names of the columns.
+    * @param registry           YoRegistry to register the YoMatrix with.
+    */
+   public YoMatrix(String name, int maxNumberOfRows, int maxNumberOfColumns, String[] rowNames, String[] columnNames, YoRegistry registry)
    {
       this.maxNumberOfRows = maxNumberOfRows;
       this.maxNumberOfColumns = maxNumberOfColumns;
@@ -38,9 +83,44 @@ public class YoMatrix
       {
          for (int column = 0; column < maxNumberOfColumns; column++)
          {
-            variables[row][column] = new YoDouble(name + "_" + row + "_" + column, registry);
+            switch (checkNames(rowNames, columnNames))
+            {
+               case NONE:
+               {
+                  variables[row][column] = new YoDouble(name + "_" + row + "_" + column, registry);  // names are simply the row and column indices
+                  break;
+               }
+               case ROWS:
+               {
+                  if (maxNumberOfColumns > 1)
+                     throw new IllegalArgumentException("The YoMatrix must be a column vector if only row names are provided, else unique names cannot be generated.");
+
+                  variables[row][column] = new YoDouble(name + "_" + rowNames[row], registry);  // names are the row names, no column identifier
+                  break;
+               }
+               case ROWS_AND_COLUMNS:
+               {
+                  variables[row][column] = new YoDouble(name + "_" + rowNames[row] + "_" + columnNames[column], registry);  // names are the row and column names
+                  break;
+               }
+            }
          }
       }
+   }
+
+   private enum NamesProvided
+   {
+      NONE, ROWS, ROWS_AND_COLUMNS
+   }
+
+   private NamesProvided checkNames(String[] rowNames, String[] columnNames)
+   {
+      if (rowNames == null && columnNames == null)
+         return NamesProvided.NONE;
+      else if (rowNames != null && columnNames == null)
+         return NamesProvided.ROWS;
+      else
+         return NamesProvided.ROWS_AND_COLUMNS;
    }
 
    public void set(DMatrixRMaj matrix)

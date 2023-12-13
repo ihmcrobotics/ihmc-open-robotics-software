@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class Ramp3DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.Ramp3DMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::Ramp3DMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "4d1338746ea3a19b24879cea89ba8c660eaf1af338787b0f316403329ad0b3df";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -269,6 +269,15 @@ public interface LookAndStepBehaviorParametersBasics extends LookAndStepBehavior
    }
 
    /**
+    * Expiration so we don't use data that's old because we haven't received new data
+    * in a while.
+    */
+   default void setHeightMapExpiration(double heightMapExpiration)
+   {
+      set(LookAndStepBehaviorParameters.heightMapExpiration, heightMapExpiration);
+   }
+
+   /**
     * We want to wait a little after footstep planning fails so we can get new sensor
     * data, not free spin, let things settle down, not generate too many failure logs,
     * etc.

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import org.ejml.data.DMatrix1Row;
 
+import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
@@ -10,37 +11,39 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class ICPControllerHelper
 {
+   private static final double epsilonZeroICPVelocity = MathTools.square(1e-5);
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final Vector2dZUpFrame icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
 
    private final FrameMatrix3D frameMatrix3D = new FrameMatrix3D();
 
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final FrameVector2D tempVector = new FrameVector2D();
 
-
-   public double transformGainsFromDynamicsFrame(DMatrix1Row feedbackGainsToPack, FrameVector2DReadOnly desiredICPVelocity, double parallelGain,
-                                               double orthogonalGain)
+   public double transformGainsFromDynamicsFrame(DMatrix1Row feedbackGainsToPack,
+                                                 FrameVector2DReadOnly desiredICPVelocity,
+                                                 double parallelGain,
+                                                 double orthogonalGain)
    {
       return transformFromDynamicsFrame(feedbackGainsToPack, desiredICPVelocity, parallelGain + 1.0, orthogonalGain + 1.0);
    }
 
-   public double transformFromDynamicsFrame(DMatrix1Row valuesToPack, FrameVector2DReadOnly desiredICPVelocity, double parallelValue,
-                                            double orthogonalValue)
+   public double transformFromDynamicsFrame(DMatrix1Row valuesToPack, FrameVector2DReadOnly desiredICPVelocity, double parallelValue, double orthogonalValue)
    {
-      double epsilonZeroICPVelocity = 1e-5;
-
-      if (desiredICPVelocity.lengthSquared() > MathTools.square(epsilonZeroICPVelocity))
+      if (!isStationary(desiredICPVelocity))
       {
          icpVelocityDirectionFrame.setXAxis(desiredICPVelocity);
 
          transformValues(valuesToPack, parallelValue, orthogonalValue, icpVelocityDirectionFrame, worldFrame);
 
-         return Math.sqrt(parallelValue * parallelValue + orthogonalValue * orthogonalValue);
+         return EuclidCoreTools.norm(parallelValue, orthogonalValue);
       }
       else
       {
@@ -53,31 +56,58 @@ public class ICPControllerHelper
       }
    }
 
-   private final FrameVector2D tempVector = new FrameVector2D();
-   public void transformFromDynamicsFrame(FixedFrameVector2DBasics valuesToPack, FrameVector2DReadOnly desiredICPVelocity, double parallelValue,
+   public void getTransformToDynamicsFrame(DMatrix1Row transformToPack, FrameVector2DReadOnly desiredICPVelocity)
+   {
+      if (!isStationary(desiredICPVelocity))
+      {
+         icpVelocityDirectionFrame.setXAxis(desiredICPVelocity);
+         RigidBodyTransform transformToWorld = icpVelocityDirectionFrame.getTransformToRoot();
+         transformToWorld.invert();
+
+         transformToPack.set(0, 0, transformToWorld.getRotation().getElement(0, 0));
+         transformToPack.set(0, 1, transformToWorld.getRotation().getElement(0, 1));
+         transformToPack.set(1, 0, transformToWorld.getRotation().getElement(1, 0));
+         transformToPack.set(1, 1, transformToWorld.getRotation().getElement(1, 1));
+      }
+      else
+      {
+         CommonOps_DDRM.setIdentity(transformToPack);
+      }
+   }
+
+   public static boolean isStationary(FrameVector2DReadOnly desiredICPVelocity)
+   {
+      return desiredICPVelocity.normSquared() < MathTools.square(epsilonZeroICPVelocity);
+   }
+
+   // FIXME this is wrong.
+   public void transformFromDynamicsFrame(FixedFrameVector2DBasics valuesToPack,
+                                          FrameVector2DReadOnly desiredICPVelocity,
+                                          double parallelValue,
                                           double orthogonalValue)
    {
-      double epsilonZeroICPVelocity = 1e-5;
 
-      if (desiredICPVelocity.lengthSquared() > MathTools.square(epsilonZeroICPVelocity))
+      if (!isStationary(desiredICPVelocity))
       {
          icpVelocityDirectionFrame.setXAxis(desiredICPVelocity);
          icpVelocityDirectionFrame.getTransformToDesiredFrame(tempTransform, worldFrame);
 
          tempVector.setIncludingFrame(icpVelocityDirectionFrame, parallelValue, orthogonalValue);
          tempVector.changeFrameAndProjectToXYPlane(valuesToPack.getReferenceFrame());
-         valuesToPack.set(tempVector);
+         if (Double.isNaN(tempVector.getX()))
+            valuesToPack.setX(Double.POSITIVE_INFINITY);
+         else
+            valuesToPack.setX(tempVector.getX());
+         if (Double.isNaN(tempVector.getY()))
+            valuesToPack.setY(Double.POSITIVE_INFINITY);
+         else
+            valuesToPack.setY(tempVector.getY());
       }
       else
       {
          valuesToPack.setX(orthogonalValue);
          valuesToPack.setY(orthogonalValue);
       }
-   }
-
-   public void transformToWorldFrame(DMatrix1Row weightsToPack, double xValue, double yValue, ReferenceFrame frame)
-   {
-      transformValues(weightsToPack, xValue, yValue, frame, worldFrame);
    }
 
    private void transformValues(DMatrix1Row valuesToPack, double xValue, double yValue, ReferenceFrame currentFrame, ReferenceFrame desiredFrame)
@@ -93,7 +123,7 @@ public class ICPControllerHelper
       valuesToPack.set(1, 1, frameMatrix3D.getElement(1, 1));
    }
 
-   private static class Vector2dZUpFrame extends ReferenceFrame
+   public static class Vector2dZUpFrame extends ReferenceFrame
    {
       private final FrameVector2D xAxis;
       private final Vector3D x = new Vector3D();

@@ -1,0 +1,22 @@
+# ihmcrobotics/gtsam-windows-build
+# Current version: 0.1
+
+FROM ihmcrobotics/windows-build:0.1
+
+# Install Boost
+RUN choco install boost-msvc-14.2 -y
+
+# Download and build GTSAM
+RUN curl https://codeload.github.com/borglab/gtsam/zip/refs/heads/develop -o gtsam-develop.zip
+RUN tar -xf gtsam-develop.zip
+RUN cd gtsam-develop; \
+    mkdir build; \
+    cd build; \
+    cmake -G \"Visual Studio 17 2022\" -A x64 -DGTSAM_BUILD_EXAMPLES_ALWAYS=OFF -DGTSAM_BUILD_UNSTABLE=OFF -DGTSAM_BUILD_PYTHON=OFF -DGTSAM_USE_SYSTEM_EIGEN=ON ..; \
+    cmake --build . --config Release; \
+    cmake --install .
+# TODO: this doesn't work fully, so we have to exit with code 0
+RUN Remove-Item -LiteralPath '.\gtsam-develop\' -Recurse -ErrorAction Ignore; exit 0
+RUN Remove-Item '.\gtsam-develop.zip' -ErrorAction Ignore
+
+ENTRYPOINT ["powershell.exe"]

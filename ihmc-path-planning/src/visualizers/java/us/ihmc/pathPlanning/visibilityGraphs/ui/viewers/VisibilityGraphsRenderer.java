@@ -66,8 +66,8 @@ public class VisibilityGraphsRenderer
       goalPositionReference = messager.createInput(UIVisibilityGraphsTopics.GoalPosition);
       parameters = messager.createInput(UIVisibilityGraphsTopics.VisibilityGraphsParameters, new DefaultVisibilityGraphParameters());
 
-      messager.registerTopicListener(UIVisibilityGraphsTopics.VisibilityGraphsComputePath, request -> computePathOnThread(false));
-      messager.registerTopicListener(UIVisibilityGraphsTopics.VisibilityGraphsComputePathWithOcclusions, request -> computePathOnThread(true));
+      messager.addTopicListener(UIVisibilityGraphsTopics.VisibilityGraphsComputePath, request -> computePathOnThread(false));
+      messager.addTopicListener(UIVisibilityGraphsTopics.VisibilityGraphsComputePathWithOcclusions, request -> computePathOnThread(true));
 
       bodyPathMeshViewer = new BodyPathMeshViewer(messager, executorService);
 

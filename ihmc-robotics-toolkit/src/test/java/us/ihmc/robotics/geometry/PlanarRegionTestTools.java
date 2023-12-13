@@ -6,6 +6,8 @@ import static us.ihmc.robotics.Assert.assertTrue;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class PlanarRegionTestTools
 {
@@ -61,6 +63,7 @@ public class PlanarRegionTestTools
       {
          ConvexPolygon2D expectedConvexPolygon = expected.getConvexPolygon(i);
          ConvexPolygon2D actualConvexPolygon = actual.getConvexPolygon(i);
+
          EuclidCoreTestTools.assertGeometricallyEquals(expectedConvexPolygon, actualConvexPolygon, epsilon);
       }
    }

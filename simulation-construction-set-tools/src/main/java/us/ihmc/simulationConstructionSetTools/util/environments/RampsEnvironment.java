@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.graphics.VisualDefinitionConverter;
+import us.ihmc.graphicsDescription.conversion.VisualsConversionTools;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
@@ -35,7 +35,7 @@ public class RampsEnvironment implements CommonAvatarEnvironmentInterface
       double xRampStart = 0.5 * flatgroundLengthAtZero;
       boolean up = true;
 
-      AppearanceDefinition appearance = VisualDefinitionConverter.toAppearanceDefinition(new MaterialDefinition(ColorDefinitions.DarkGrey(),
+      AppearanceDefinition appearance = VisualsConversionTools.toAppearanceDefinition(new MaterialDefinition(ColorDefinitions.DarkGrey(),
                                                                                                                 ColorDefinitions.DarkGrey(),
                                                                                                                 ColorDefinitions.White(),
                                                                                                                 null,

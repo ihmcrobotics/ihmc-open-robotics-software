@@ -1,0 +1,27 @@
+#ifndef __behavior_msgs__msg__StatusLogMessage__idl__
+#define __behavior_msgs__msg__StatusLogMessage__idl__
+
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::StatusLogMessage_")
+      struct StatusLogMessage
+      {
+        /**
+         * Log level
+         */
+        unsigned short log_level;
+        /**
+         * Log message
+         */
+        sequence<octet> log_message;
+      };
+    };
+  };
+};
+
+#endif

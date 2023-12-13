@@ -113,10 +113,13 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
       csgFootstepGenerator.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
       csgFootstepGenerator.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
       csgFootstepGenerator.setWalkInputProvider(commandInputManager.createWalkInputProvider());
+      csgFootstepGenerator.setSwingHeightInputProvider(commandInputManager.createSwingHeightProvider());
+
 
       fastWalkingPlugin.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
       fastWalkingPlugin.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
       fastWalkingPlugin.setWalkInputProvider(commandInputManager.createWalkInputProvider());
+      fastWalkingPlugin.setSwingHeightInputProvider(commandInputManager.createSwingHeightProvider());
 
       walkingStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
                                                                     commandInputManager::setHighLevelStateChangeStatusMessage);

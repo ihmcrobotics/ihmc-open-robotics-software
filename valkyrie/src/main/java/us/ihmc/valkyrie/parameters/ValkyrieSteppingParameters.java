@@ -81,27 +81,6 @@ public class ValkyrieSteppingParameters implements SteppingParameters
    }
 
    @Override
-   public double getMaxSwingHeightFromStanceFoot()
-   {
-      return 0.3 * physicalProperties.getModelSizeScale();
-   }
-
-   @Override
-   public double getDefaultSwingHeightFromStanceFoot()
-   {
-      if (target == RobotTarget.REAL_ROBOT)
-         return 0.05 * physicalProperties.getModelSizeScale(); //changed from 0.025 to 0.05 in 11/2018 to help with foot getting caught on pallet
-      else
-         return 0.1 * physicalProperties.getModelSizeScale();
-   }
-
-   @Override
-   public double getMinSwingHeightFromStanceFoot()
-   {
-      return 0.025 * physicalProperties.getModelSizeScale();
-   }
-
-   @Override
    public double getMaxAngleTurnOutwards()
    {
       return Math.PI / 3.0;

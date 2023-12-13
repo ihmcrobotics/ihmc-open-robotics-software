@@ -15,19 +15,16 @@ import com.badlogic.gdx.graphics.g3d.utils.TextureProvider;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import org.lwjgl.opengl.GL41;
-import us.ihmc.rdx.sceneManager.RDX3DBareBonesScene;
-import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
-import us.ihmc.rdx.tools.LibGDXApplicationCreator;
+import us.ihmc.rdx.ui.RDXBaseUI;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
 
 public class RDX3DImageTextureDemo
 {
-   private final RDX3DBareBonesScene sceneManager = new RDX3DBareBonesScene();
-
    public RDX3DImageTextureDemo()
    {
-      LibGDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
+      RDXBaseUI baseUI = new RDXBaseUI();
+      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          private int width = 800;
          private int height = 600;
@@ -35,9 +32,9 @@ public class RDX3DImageTextureDemo
          @Override
          public void create()
          {
-            sceneManager.create();
+            baseUI.create();
 
-            sceneManager.addCoordinateFrame(0.3);
+            baseUI.getPrimaryScene().addCoordinateFrame(0.3);
 
             ModelBuilder modelBuilder = new ModelBuilder();
             modelBuilder.begin();
@@ -81,23 +78,22 @@ public class RDX3DImageTextureDemo
             Model model = modelBuilder.end();
             ModelInstance modelInstance = new ModelInstance(model);
             modelInstance.transform.scale(0.01f, 0.01f, 0.01f);
-            sceneManager.addRenderableProvider(modelInstance);
+            baseUI.getPrimaryScene().addRenderableProvider(modelInstance);
          }
 
          @Override
          public void render()
          {
-            RDX3DSceneTools.glClearGray();
-            sceneManager.setViewportBoundsToWindow();
-            sceneManager.render();
+            baseUI.renderBeforeOnScreenUI();
+            baseUI.renderEnd();
          }
 
          @Override
          public void dispose()
          {
-            sceneManager.dispose();
+            baseUI.dispose();
          }
-      }, "RDX3DDemo", 1100, 800);
+      });
    }
 
    public static void main(String[] args)

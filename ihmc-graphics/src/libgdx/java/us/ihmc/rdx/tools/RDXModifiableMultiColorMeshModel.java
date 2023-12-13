@@ -23,6 +23,7 @@ public class RDXModifiableMultiColorMeshModel
    private final Material material = new Material();
    private final TextureAttribute diffuseTexture = TextureAttribute.createDiffuse(paletteTexture);
    private final ColorAttribute diffuseColor = ColorAttribute.createDiffuse(Color.WHITE);
+   private Mesh mesh;
 
    public RDXModifiableMultiColorMeshModel()
    {
@@ -45,7 +46,10 @@ public class RDXModifiableMultiColorMeshModel
 
    public void end()
    {
-      Mesh mesh = meshBuilder.generateMesh(); // TODO: Do this without allocating
+      if (mesh != null)
+         mesh.dispose(); // Avoid memory leak
+
+      mesh = meshBuilder.generateMesh();
 
       if (model == null)
       {

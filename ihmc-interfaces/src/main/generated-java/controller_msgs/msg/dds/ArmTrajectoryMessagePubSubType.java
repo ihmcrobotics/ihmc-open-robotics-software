@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ArmTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ArmTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "f280f8abbb3e79c8f1b46b98a20fe9c1f0decdfbe4c011456f9b25906010fc5d";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

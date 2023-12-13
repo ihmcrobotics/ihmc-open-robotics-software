@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
@@ -18,12 +18,10 @@ public class HeightMapBasedFootstepAdjustment implements FootstepAdjustment
    }
 
    @Override
-   public boolean adjustFootstep(FramePose3DReadOnly supportFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedPose)
+   public boolean adjustFootstep(FramePose3DReadOnly supportFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FootstepDataMessage adjustedPose)
    {
-      adjustedPose.getPosition().set(footstepPose.getPosition());
-
-      if (heightMap != null)
-         adjustedPose.setZ(heightMap.heightAt(footstepPose.getX(), footstepPose.getY(), 0.0));
+      adjustedPose.getLocation().set(footstepPose.getPosition());
+      adjustedPose.getLocation().setZ(heightMap.heightAt(footstepPose.getX(), footstepPose.getY(), 0.0));
 
       yawPitchRoll.set(supportFootPose.getOrientation());
       yawPitchRoll.setYaw(footstepPose.getYaw());

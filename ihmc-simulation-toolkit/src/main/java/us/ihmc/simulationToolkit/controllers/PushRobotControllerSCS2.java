@@ -3,14 +3,16 @@ package us.ihmc.simulationToolkit.controllers;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicReference;
 
-import javax.swing.JButton;
-
+import javafx.scene.control.Button;
+import javafx.scene.control.Tooltip;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;
 import us.ihmc.scs2.definition.yoComposite.YoTuple3DDefinition;
@@ -18,7 +20,6 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicArrow3DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.trackers.ExternalWrenchPoint;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -52,6 +53,7 @@ public class PushRobotControllerSCS2 implements Controller
    private final String jointNameToApplyForce;
 
    private final double visualScale;
+   private final AtomicReference<Runnable> scheduledPushAction = new AtomicReference<>(null);
 
    public PushRobotControllerSCS2(DoubleProvider time, Robot pushableRobot, FullHumanoidRobotModel fullRobotModel)
    {
@@ -69,7 +71,8 @@ public class PushRobotControllerSCS2 implements Controller
       this.jointNameToApplyForce = jointNameToApplyForce;
       this.visualScale = visualScale;
       registry = new YoRegistry(jointNameToApplyForce + "_" + getClass().getSimpleName());
-      forcePoint = pushableRobot.getJoint(jointNameToApplyForce).getAuxialiryData()
+      forcePoint = pushableRobot.getJoint(jointNameToApplyForce)
+                                .getAuxiliaryData()
                                 .addExternalWrenchPoint(new ExternalWrenchPointDefinition(jointNameToApplyForce + "_externalForcePoint", forcePointOffset));
 
       pushDuration = new YoDouble(jointNameToApplyForce + "_pushDuration", registry);
@@ -134,25 +137,25 @@ public class PushRobotControllerSCS2 implements Controller
       pushDelay.set(delay);
    }
 
-   public void addPushButtonToSCS(final SimulationConstructionSet scs)
+   public void addPushButtonToSCS(SimulationConstructionSet2 scs)
    {
       if (scs != null)
       {
-         JButton button = new JButton("PushRobot");
-         button.setToolTipText("Click to push the robot as defined in the variables 'pushDirection' and 'pushMagnitude'");
-
-         ActionListener listener = new ActionListener()
+         scs.executeOrScheduleVisualizerTask(() ->
          {
-            @Override
-            public void actionPerformed(ActionEvent e)
+            Button button = new Button("PushRobot");
+            button.setTooltip(new Tooltip("Click to push the robot as defined in the variables 'pushDirection' and 'pushMagnitude'"));
+            button.setOnAction(e ->
             {
-               pushCondition = null;
-               applyForce();
-            }
-         };
+               scheduledPushAction.set(() ->
+               {
+                  pushCondition = null;
+                  applyForce();
+               });
+            });
+            scs.addCustomGUIControl(button);
+         });
 
-         button.addActionListener(listener);
-         scs.addButton(button);
       }
    }
 
@@ -209,6 +212,12 @@ public class PushRobotControllerSCS2 implements Controller
    @Override
    public void doControl()
    {
+      { // Poll scheduled push from SCS2
+         Runnable pushAction = scheduledPushAction.getAndSet(null);
+         if (pushAction != null)
+            pushAction.run();
+      }
+
       if (pushCondition != null)
       {
          if (pushCondition.testCondition(yoTime.getValue()))

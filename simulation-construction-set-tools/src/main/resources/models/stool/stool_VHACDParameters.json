@@ -1,0 +1,9 @@
+{
+  "maximumNumberOfHulls" : 20,
+  "maximumNumberOfVerticesPerHull" : 64,
+  "maximumVolumetricPercentError" : 0.01,
+  "maximumVoxelResolution" : 100000,
+  "showDecomposedMeshGraphics" : true,
+  "showOriginalMeshGraphics" : false,
+  "doConvexDecomposition" : true
+}

@@ -35,13 +35,15 @@ public class FootstepCostCalculatorTest
 
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       SideDependentList<ConvexPolygon2D> defaultFootPolygons = PlannerTools.createDefaultFootPolygons();
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(defaultFootPolygons, footstepPlannerParameters);
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(defaultFootPolygons);
+      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(defaultFootPolygons, footstepPlannerParameters, environmentHandler);
 
       HashMap<DiscreteFootstep, DiscreteFootstep> idealStepMap = new HashMap<>();
       IdealStepCalculatorInterface idealStepCalculator = (stance, startOfSwing) -> idealStepMap.computeIfAbsent(stance, n -> DiscreteFootstep.generateRandomFootstep(random, 2.0, n.getRobotSide().getOppositeSide()));
 
       YoRegistry registry = new YoRegistry("testRegistry");
       FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, node -> 10.0, defaultFootPolygons,
+                                                                             environmentHandler,
                                                                              registry);
       int numberOfTests = 1000;
 

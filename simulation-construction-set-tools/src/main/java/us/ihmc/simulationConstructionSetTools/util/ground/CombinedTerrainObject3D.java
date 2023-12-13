@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -75,7 +76,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       addTerrainObject(box);
    }
 
-   public void addRotatableBox(RigidBodyTransform configuration, double xLength, double yWidth, double zLength, AppearanceDefinition appearanceDefinition)
+   public void addRotatableBox(RigidBodyTransformReadOnly configuration, double xLength, double yWidth, double zLength, AppearanceDefinition appearanceDefinition)
    {
       Box3D box3d = new Box3D(configuration, xLength, yWidth, zLength);
       RotatableBoxTerrainObject box = new RotatableBoxTerrainObject(box3d, appearanceDefinition);

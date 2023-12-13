@@ -61,6 +61,8 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
 
       jointspaceWeightGroups.add(new GroupParameter<>("Arms", jointMap.getArmJointNamesAsStrings()));
       userModeWeightGroups.add(new GroupParameter<>("Arms", jointMap.getArmJointNamesAsStrings()));
+      jointspaceWeightGroups.add(new GroupParameter<>("Legs", jointMap.getLegJointNamesAsStrings()));
+      userModeWeightGroups.add(new GroupParameter<>("Legs", jointMap.getLegJointNamesAsStrings()));
 
       jointspaceWeightGroups.add(new GroupParameter<>("Neck", jointMap.getNeckJointNamesAsStrings()));
       userModeWeightGroups.add(new GroupParameter<>("Neck", jointMap.getNeckJointNamesAsStrings()));

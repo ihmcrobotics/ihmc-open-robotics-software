@@ -1,6 +1,6 @@
 package us.ihmc.avatar.reachabilityMap;
 
-import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3DDefinition;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -25,7 +26,6 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -95,7 +95,8 @@ public class ReachabilitySphereMapCalculator implements Controller
             RigidBodyBasics originalRootBody = MultiBodySystemTools.getRootBody(firstJoint.getPredecessor());
             cloneSuffix = "-solver" + i;
             RigidBodyBasics solverRootBody = MultiBodySystemFactories.cloneMultiBodySystem(originalRootBody, ReferenceFrame.getWorldFrame(), cloneSuffix);
-            solverJoints = Arrays.stream(armJoints).map(originalJoint -> MultiBodySystemTools.findJoint(solverRootBody, originalJoint.getName() + cloneSuffix))
+            solverJoints = Arrays.stream(armJoints)
+                                 .map(originalJoint -> MultiBodySystemTools.findJoint(solverRootBody, originalJoint.getName() + cloneSuffix))
                                  .toArray(OneDoFJointBasics[]::new);
          }
 
@@ -105,7 +106,7 @@ public class ReachabilitySphereMapCalculator implements Controller
          if (i == 0 || VISUALIZE_ALL_SOLVERS)
          {
             YoGraphicGroupDefinition solverYoGraphicGroup = new YoGraphicGroupDefinition("solver" + i);
-            solverYoGraphicGroup.setChildren(SCS1GraphicConversionTools.toYoGraphicDefinitions(solverGraphicsRegistry));
+            solverYoGraphicGroup.setChildren(YoGraphicConversionTools.toYoGraphicDefinitions(solverGraphicsRegistry));
             solverYoGraphicGroupDefinitions.add(solverYoGraphicGroup);
          }
          solverInputs[i] = new FramePose3D();
@@ -165,12 +166,9 @@ public class ReachabilitySphereMapCalculator implements Controller
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition("ReachabilityCalculatorVisuals");
       List<YoGraphicDefinition> yoGraphics = new ArrayList<>();
-      yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("gridFramePose", gridFramePose, 0.5, ColorDefinitions.Blue()));
-      yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("evaluatedPose", evaluatedPose, 0.15, ColorDefinitions.HotPink()));
-      yoGraphics.add(newYoGraphicCoordinateSystem3DDefinition("controlFrame",
-                                                              solvers[0].getControlFramePoseInEndEffector(),
-                                                              0.05,
-                                                              ColorDefinitions.parse("#A1887F")));
+      yoGraphics.add(newYoGraphicCoordinateSystem3D("gridFramePose", gridFramePose, 0.5, ColorDefinitions.Blue()));
+      yoGraphics.add(newYoGraphicCoordinateSystem3D("evaluatedPose", evaluatedPose, 0.15, ColorDefinitions.HotPink()));
+      yoGraphics.add(newYoGraphicCoordinateSystem3D("controlFrame", solvers[0].getControlFramePoseInEndEffector(), 0.05, ColorDefinitions.parse("#A1887F")));
       yoGraphics.addAll(solverYoGraphicGroupDefinitions);
       group.setChildren(yoGraphics);
       return group;

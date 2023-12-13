@@ -1,6 +1,6 @@
 package us.ihmc.robotDataVisualizer.logger;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,12 +10,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import gnu.trove.list.array.TLongArrayList;
+import javafx.scene.image.WritableImage;
 import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
@@ -23,11 +22,16 @@ import us.ihmc.robotDataLogger.Camera;
 import us.ihmc.robotDataVisualizer.logger.converters.VideoConverter;
 import us.ihmc.robotDataVisualizer.logger.util.ProgressMonitorInterface;
 
+import static java.lang.Long.parseLong;
+
 public class VideoDataPlayer
 {
+   private static final boolean VIDEO_STATISTICS = false;
    private final String name;
    private final boolean hasTimebase;
    private final boolean interlaced;
+
+   private static HideableMediaFrame viewer;
 
    private long[] robotTimestamps;
    private long[] videoTimestamps;
@@ -36,15 +40,13 @@ public class VideoDataPlayer
    private long bmdTimeBaseDen;
 
    private final MP4VideoDemuxer demuxer;
-   private final HideableMediaFrame viewer;
-
    private final YUVPictureConverter converter = new YUVPictureConverter();
+
+   private final File videoFile;
 
    private int currentlyShowingIndex = 0;
    private long currentlyShowingRobottimestamp = 0;
    private long upcomingRobottimestamp = 0;
-
-   private final File videoFile;
 
    public VideoDataPlayer(Camera camera, File dataDirectory, boolean hasTimeBase) throws IOException
    {
@@ -81,17 +83,23 @@ public class VideoDataPlayer
       long previousTimestamp = videoTimestamps[currentlyShowingIndex];
 
       long videoTimestamp;
+      long nextVideoTimestamp = videoTimestamps[currentlyShowingIndex];
+
+
       if (robotTimestamps.length > currentlyShowingIndex + 1 && robotTimestamps[currentlyShowingIndex + 1] == timestamp)
       {
          currentlyShowingIndex++;
          videoTimestamp = videoTimestamps[currentlyShowingIndex];
          currentlyShowingRobottimestamp = robotTimestamps[currentlyShowingIndex];
-
       }
       else
       {
-         videoTimestamp = getVideoTimestamp(timestamp);
+         videoTimestamp = getVideoTimestampWithBinarySearch(timestamp);
+      }
 
+      if (robotTimestamps.length > currentlyShowingIndex + 1)
+      {
+         nextVideoTimestamp = videoTimestamps[currentlyShowingIndex + 1];
       }
 
       if (currentlyShowingIndex + 1 < robotTimestamps.length)
@@ -110,9 +118,16 @@ public class VideoDataPlayer
 
       try
       {
+         FrameData copyForWriting = new FrameData();
+         copyForWriting.cameraTargetPTS = nextVideoTimestamp;
+         copyForWriting.cameraCurrentPTS = demuxer.getCurrentPTS();
+         copyForWriting.cameraPreviousPTS = previousTimestamp;
+         copyForWriting.robotTimestamp = currentlyShowingRobottimestamp;
+
          demuxer.seekToPTS(videoTimestamp);
          YUVPicture nextFrame = demuxer.getNextFrame();
-         viewer.update(nextFrame);
+
+         viewer.update(nextFrame, copyForWriting);
       }
       catch (IOException e)
       {
@@ -127,63 +142,50 @@ public class VideoDataPlayer
       viewer.setVisible(visible);
    }
 
-   private long getVideoTimestamp(long timestamp)
+   private long getVideoTimestampWithBinarySearch(long timestamp)
    {
+      if (timestamp <= robotTimestamps[0])
+      {
+         currentlyShowingIndex = 0;
+         return videoTimestamps[currentlyShowingIndex];
+      }
+
+      if (timestamp >= robotTimestamps[robotTimestamps.length-1])
+      {
+         currentlyShowingIndex = robotTimestamps.length - 2;
+         return videoTimestamps[currentlyShowingIndex];
+      }
+
       currentlyShowingIndex = Arrays.binarySearch(robotTimestamps, timestamp);
 
       if (currentlyShowingIndex < 0)
       {
-         int nextIndex = -currentlyShowingIndex + 1;
-         if ((nextIndex < robotTimestamps.length) && (Math.abs(robotTimestamps[-currentlyShowingIndex] - timestamp) > Math.abs(robotTimestamps[nextIndex])))
-         {
-            currentlyShowingIndex = nextIndex;
-         }
-         else
-         {
-            currentlyShowingIndex = -currentlyShowingIndex;
-         }
+         int nextIndex = -currentlyShowingIndex - 1; // insertionPoint
+         currentlyShowingIndex = nextIndex;
       }
 
-      if (currentlyShowingIndex < 0)
-         currentlyShowingIndex = 0;
-      if (currentlyShowingIndex >= robotTimestamps.length)
-         currentlyShowingIndex = robotTimestamps.length - 1;
-      currentlyShowingRobottimestamp = robotTimestamps[currentlyShowingIndex];
-
-      long videoTimestamp = videoTimestamps[currentlyShowingIndex];
-
-      if (hasTimebase)
-      {
-         videoTimestamp = (videoTimestamp * bmdTimeBaseNum * demuxer.getTimescale()) / (bmdTimeBaseDen);
-      }
-
-      return videoTimestamp;
+      return videoTimestamps[currentlyShowingIndex];
    }
 
    private void parseTimestampData(File timestampFile) throws IOException
    {
-      BufferedReader reader = null;
-      try
+      try (BufferedReader reader = new BufferedReader(new FileReader(timestampFile)))
       {
-         reader = new BufferedReader(new FileReader(timestampFile));
-
          String line;
          if (hasTimebase)
          {
             if ((line = reader.readLine()) != null)
             {
-               bmdTimeBaseNum = Long.valueOf(line);
-            }
-            else
+               bmdTimeBaseNum = parseLong(line);
+            } else
             {
                throw new IOException("Cannot read numerator");
             }
 
             if ((line = reader.readLine()) != null)
             {
-               bmdTimeBaseDen = Long.valueOf(line);
-            }
-            else
+               bmdTimeBaseDen = parseLong(line);
+            } else
             {
                throw new IOException("Cannot read denumerator");
             }
@@ -194,8 +196,8 @@ public class VideoDataPlayer
          while ((line = reader.readLine()) != null)
          {
             String[] stamps = line.split("\\s");
-            long robotStamp = Long.valueOf(stamps[0]);
-            long videoStamp = Long.valueOf(stamps[1]);
+            long robotStamp = parseLong(stamps[0]);
+            long videoStamp = parseLong(stamps[1]);
 
             if (interlaced)
             {
@@ -204,36 +206,22 @@ public class VideoDataPlayer
 
             robotTimestamps.add(robotStamp);
             videoTimestamps.add(videoStamp);
-
          }
 
          this.robotTimestamps = robotTimestamps.toArray();
          this.videoTimestamps = videoTimestamps.toArray();
 
-      }
-      catch (FileNotFoundException e)
+      } catch (FileNotFoundException e)
       {
          throw new RuntimeException(e);
-      } finally
-      {
-         try
-         {
-            if (reader != null)
-            {
-               reader.close();
-            }
-         }
-         catch (IOException e)
-         {
-         }
       }
    }
 
    public void exportVideo(File selectedFile, long startTimestamp, long endTimestamp, ProgressMonitorInterface monitor)
    {
 
-      long startVideoTimestamp = getVideoTimestamp(startTimestamp);
-      long endVideoTimestamp = getVideoTimestamp(endTimestamp);
+      long startVideoTimestamp = getVideoTimestampWithBinarySearch(startTimestamp);
+      long endVideoTimestamp = getVideoTimestampWithBinarySearch(endTimestamp);
 
       try
       {
@@ -249,14 +237,14 @@ public class VideoDataPlayer
    public void cropVideo(File outputFile, File timestampFile, long startTimestamp, long endTimestamp, ProgressMonitorInterface monitor) throws IOException
    {
 
-      long startVideoTimestamp = getVideoTimestamp(startTimestamp);
-      long endVideoTimestamp = getVideoTimestamp(endTimestamp);
+      long startVideoTimestamp = getVideoTimestampWithBinarySearch(startTimestamp);
+      long endVideoTimestamp = getVideoTimestampWithBinarySearch(endTimestamp);
 
-      int framerate = VideoConverter.crop(videoFile, outputFile, startVideoTimestamp, endVideoTimestamp, monitor);
+      int frameRate = VideoConverter.crop(videoFile, outputFile, startVideoTimestamp, endVideoTimestamp, monitor);
 
       PrintWriter timestampWriter = new PrintWriter(timestampFile);
       timestampWriter.println(1);
-      timestampWriter.println(framerate);
+      timestampWriter.println(frameRate);
 
       long pts = 0;
       /*
@@ -283,32 +271,99 @@ public class VideoDataPlayer
       timestampWriter.close();
    }
 
+   private static class BoldCellRenderer extends DefaultTableCellRenderer
+   {
+      public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
+      {
+         Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+         // Check if we are in the first row and BOLD that text
+         if (row == 0)
+         {
+            Font boldFont = new Font(component.getFont().getName(), Font.BOLD, component.getFont().getSize());
+            component.setFont(boldFont);
+
+            ((JLabel) component).setHorizontalAlignment(SwingConstants.CENTER);
+         }
+         else
+         {
+            // Otherwise don't BOLD anything
+            Font plainFont = new Font(component.getFont().getName(), Font.PLAIN, component.getFont().getSize());
+            component.setFont(plainFont);
+
+            ((JLabel) component).setHorizontalAlignment(SwingConstants.LEFT);
+         }
+
+         return component;
+      }
+   }
+
+
    private class HideableMediaFrame extends JFrame
    {
       private static final long serialVersionUID = -3494797002318746347L;
-      final JLabel label = new JLabel();
+      private final JLabel label = new JLabel();
+      private final JPanel panel = new JPanel();
       private BufferedImage img;
       private int width, height;
+      SpringLayout springLayout = new SpringLayout();
+
+      private final Object[][] data = new Object[][]{ {"Timestamp Lable:", "Value:"},
+                                                      {" cameraTargetPTS", 0},
+                                                      {" cameraCurrentPTS", 0},
+                                                      {" cameraPreviousPTS", 0},
+                                                      {" robotTimestamp", 0} };
+
+      JTable table = new JTable(data, new String[]{"Timestamp Lable:", "Value: "});
 
       public HideableMediaFrame(String name, int width, int height)
       {
          super(name);
-         label.setPreferredSize(new Dimension(width, height));
-         getContentPane().add(label);
          this.width = width;
          this.height = height;
+
+         panel.setLayout(springLayout);
+
+         if (VIDEO_STATISTICS)
+         {
+            panel.add(table);
+
+            table.setBorder(BorderFactory.createLineBorder(Color.GREEN, 2));
+            table.setRowHeight(20);
+            table.getColumnModel().getColumn(0).setPreferredWidth(42);
+            table.setDefaultRenderer(Object.class, new BoldCellRenderer());
+            table.setPreferredSize(new Dimension(280, data.length * 20 + 2));
+
+            springLayout.putConstraint(SpringLayout.SOUTH, label,0, SpringLayout.SOUTH, panel);
+            springLayout.putConstraint(SpringLayout.WEST, label,0, SpringLayout.WEST, panel);
+            springLayout.putConstraint(SpringLayout.SOUTH, table,0, SpringLayout.SOUTH, panel);
+            springLayout.putConstraint(SpringLayout.WEST, table,0, SpringLayout.WEST, panel);
+         }
+
+         panel.add(label);
          pack();
       }
 
-      public void update(final YUVPicture nextFrame)
+      public JPanel getPanel()
+      {
+         return panel;
+      }
+
+      public void update(final YUVPicture nextFrame, FrameData timestampData)
       {
          SwingUtilities.invokeLater(new Runnable()
          {
             @Override
             public void run()
             {
+               table.setValueAt(timestampData.cameraTargetPTS, 1, 1);
+               table.setValueAt(timestampData.cameraCurrentPTS, 2, 1);
+               table.setValueAt(timestampData.cameraPreviousPTS, 3, 1);
+               table.setValueAt(timestampData.robotTimestamp, 4, 1);
+
                img = converter.toBufferedImage(nextFrame, img);
                nextFrame.delete();
+
                ImageIcon icon = new ImageIcon(img);
                label.setIcon(icon);
 
@@ -334,10 +389,12 @@ public class VideoDataPlayer
       Camera camera = new Camera();
       camera.setName("test");
       camera.setInterlaced(false);
-      camera.setTimestampFile("Camera-1_Timestamps.dat");
-      camera.setVideoFile("Camera-1_Video.mov");
+      String videoName = "ValkyrieTripodNorth";
+      camera.setTimestampFile(videoName + "_Timestamps.dat");
+      camera.setVideoFile(videoName + "_Video.mov");
 
-      File dataDirectory = new File("/home/jesper/robotLogs/20170724_135638_AtlasControllerFactory/");
+      File dataDirectory = new File("//Gideon/LogData/LoggerDevLogs/Comparison/Valkyrie_Capture_SDI_timestamps_3003/");
+//      File dataDirectory = new File("//Gideon/LogData/LoggerDevLogs/Comparison/Valkyrie_GStreamer_HDMI_timestamps_3003/");
 
       VideoDataPlayer player = new VideoDataPlayer(camera, dataDirectory, true);
 
@@ -356,14 +413,41 @@ public class VideoDataPlayer
 
       }
 
-      player.viewer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      viewer.add(viewer.getPanel());
+      viewer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      viewer.setSize(screenSize.width - 100, screenSize.height - 120);
+
       player.setVisible(true);
 
+      long previousRobotTimestamp = player.robotTimestamps[0];
+      long previousNanos = System.nanoTime();
+      boolean playRealtime = true;
+      
       for (int i = 1; i < player.robotTimestamps.length; i++)
       {
+         long nextRobotTimestamp = player.robotTimestamps[i];
+         long nextNanos = previousNanos + nextRobotTimestamp - previousRobotTimestamp;
 
-         player.showVideoFrame(player.robotTimestamps[i]);
+         if (playRealtime)
+         {
+            while (System.nanoTime() < nextNanos);
+         }
+
+         previousNanos = System.nanoTime();
+
+         player.showVideoFrame(nextRobotTimestamp);
+         previousRobotTimestamp = nextRobotTimestamp;
       }
+   }
 
+   public static class FrameData
+   {
+      public WritableImage frame;
+      public long cameraTargetPTS;
+      public long cameraCurrentPTS;
+      public long cameraPreviousPTS;
+      public long robotTimestamp;
    }
 }

@@ -1,0 +1,36 @@
+#ifndef __ihmc_common_msgs__msg__YawPitchRollMessage__idl__
+#define __ihmc_common_msgs__msg__YawPitchRollMessage__idl__
+
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * A yaw-pitch-roll is used to represent a 3D orientation by three successive rotations: rotation around the z-axis
+       * (yaw), then around the y-axis (pitch), and then around the x-axis (roll). The three components yaw, pitch, and
+       * roll represents the angle for rotation expressed in radians.
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::YawPitchRollMessage_")
+      struct YawPitchRollMessage
+      {
+        /**
+         * The yaw angle representing the first rotation around the z-axis.
+         */
+        double yaw;
+        /**
+         * The pitch angle representing the second rotation around the y-axis.
+         */
+        double pitch;
+        /**
+         * The roll angle representing the third rotation around the x-axis.
+         */
+        double roll;
+      };
+    };
+  };
+};
+
+#endif

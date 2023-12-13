@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class WalkingControllerPreviewInputMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.WalkingControllerPreviewInputMessage>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::WalkingControllerPreviewInputMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "f415c52b1c0828fc0e3ec069036da2b26b4c4eb2e188fbf16691d38850e5756c";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

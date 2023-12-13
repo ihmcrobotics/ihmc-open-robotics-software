@@ -54,13 +54,16 @@ public class GradientDescentStepConstraintSolverLogViewer
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
+
       FootstepSnapAndWiggler snapAndWiggler = new FootstepSnapAndWiggler(footPolygons,
                                                                          footstepPlannerParameters,
                                                                          scs,
+                                                                         environmentHandler,
                                                                          graphicsListRegistry,
                                                                          scs.getRootRegistry());
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage());
-      snapAndWiggler.setPlanarRegions(planarRegionsList);
+      environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
 
       Graphics3DObject regionsGraphic = new Graphics3DObject();
       IdMappedColorFunction colorMapper = IdMappedColorFunction.INSTANCE;

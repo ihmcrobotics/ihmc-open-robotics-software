@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class HandCollisionDetectedPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HandCollisionDetectedPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HandCollisionDetectedPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "da130ac45eb1053e2cbdb8cb30808851da9b02457163addcb7ba5b43c617765f";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

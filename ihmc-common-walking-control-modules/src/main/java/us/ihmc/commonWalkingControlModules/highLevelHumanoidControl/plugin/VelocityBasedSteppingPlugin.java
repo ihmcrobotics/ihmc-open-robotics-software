@@ -7,6 +7,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -39,6 +40,7 @@ public class VelocityBasedSteppingPlugin implements HumanoidSteppingPlugin
    private final YoInteger numberOfTicksBeforeSubmittingCommands = new YoInteger("numberOfTicksBeforeSubmittingFootsteps" + variableNameSuffix, registry);
 
    private BooleanProvider walkInputProvider;
+   private DoubleProvider swingHeightInputProvider;
 
    private final List<Updatable> updatables;
 
@@ -128,6 +130,7 @@ public class VelocityBasedSteppingPlugin implements HumanoidSteppingPlugin
          if (counter >= numberOfTicksBeforeSubmittingCommands.getValue())
          {
             directionalControlMessenger.submitDirectionalControlRequest(desiredVelocityX, desiredVelocityY, turningVelocity);
+            directionalControlMessenger.submitGaitParameters(swingHeightInputProvider.getValue(), Double.NaN, Double.NaN);
             counter = 0;
          }
          else
@@ -153,6 +156,17 @@ public class VelocityBasedSteppingPlugin implements HumanoidSteppingPlugin
    public void setWalkInputProvider(BooleanProvider walkInputProvider)
    {
       this.walkInputProvider = walkInputProvider;
+   }
+
+   /**
+    * Sets a provider that is to be used to update the desired swing height of each foot internally
+    * on each call to {@link #update(double)}
+    *
+    * @param swingHeightInputProvider the provider used to set the swing height
+    */
+   public void setSwingHeightInputProvider(DoubleProvider swingHeightInputProvider)
+   {
+      this.swingHeightInputProvider = swingHeightInputProvider;
    }
 
    /**

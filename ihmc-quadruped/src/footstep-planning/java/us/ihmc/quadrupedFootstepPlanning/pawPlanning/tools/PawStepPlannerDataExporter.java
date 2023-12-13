@@ -43,7 +43,7 @@ public class PawStepPlannerDataExporter
       timeout = messager.createInput(PawStepPlannerMessagerAPI.PlannerTimeoutTopic);
       plannerType = messager.createInput(PawStepPlannerMessagerAPI.PlannerTypeTopic);
       dataDirectoryPath = messager.createInput(PawStepPlannerMessagerAPI.exportUnitTestPath, null);
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.exportUnitTestDataFile, this::exportPawPlannerData);
+      messager.addTopicListener(PawStepPlannerMessagerAPI.exportUnitTestDataFile, this::exportPawPlannerData);
    }
 
    private void exportPawPlannerData(boolean export)

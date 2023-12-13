@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -27,7 +26,6 @@ public abstract class SingleSupportState extends WalkingState
    protected final SideDependentList<FootSwitchInterface> footSwitches;
    protected final FullHumanoidRobotModel fullRobotModel;
 
-   protected final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
 
    public SingleSupportState(WalkingStateEnum singleSupportStateEnum,
@@ -36,7 +34,7 @@ public abstract class SingleSupportState extends WalkingState
                              HighLevelControlManagerFactory managerFactory,
                              YoRegistry parentRegistry)
    {
-      super(singleSupportStateEnum, parentRegistry);
+      super(singleSupportStateEnum, managerFactory, controllerToolbox, parentRegistry);
 
       this.supportSide = singleSupportStateEnum.getSupportSide();
       swingSide = supportSide.getOppositeSide();
@@ -48,7 +46,6 @@ public abstract class SingleSupportState extends WalkingState
       footSwitches = controllerToolbox.getFootSwitches();
       fullRobotModel = controllerToolbox.getFullRobotModel();
 
-      balanceManager = managerFactory.getOrCreateBalanceManager();
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
    }
 

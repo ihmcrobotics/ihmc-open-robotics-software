@@ -95,10 +95,10 @@ public class ECMPTrajectoryCalculatorTest
       state.setFinalTransferDuration(1.0);
 
       state.initializeStance(RobotSide.LEFT,
-                             new FrameConvexPolygon2D(leftFootFrame, CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon()),
+                             new FrameConvexPolygon2D(leftFootFrame, CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon().get(RobotSide.LEFT)),
                              leftFootFrame);
       state.initializeStance(RobotSide.RIGHT,
-                             new FrameConvexPolygon2D(rightFootFrame, CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon()),
+                             new FrameConvexPolygon2D(rightFootFrame, CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon().get(RobotSide.RIGHT)),
                              rightFootFrame);
 
       copTrajectoryGenerator.compute(state);

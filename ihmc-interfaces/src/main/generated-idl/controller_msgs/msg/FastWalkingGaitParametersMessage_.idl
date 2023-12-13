@@ -1,0 +1,25 @@
+#ifndef __controller_msgs__msg__FastWalkingGaitParametersMessage__idl__
+#define __controller_msgs__msg__FastWalkingGaitParametersMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is sent to the Fast Walking Controller to control the gait profiles.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::FastWalkingGaitParametersMessage_")
+      struct FastWalkingGaitParametersMessage
+      {
+        double swing_height;
+        double swing_duration;
+        double double_support_fraction;
+      };
+    };
+  };
+};
+
+#endif

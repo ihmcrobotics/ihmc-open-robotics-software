@@ -3,32 +3,37 @@ package us.ihmc.rdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Matrix4;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.rdx.sceneManager.RDX3DBareBonesScene;
-import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.sensors.RDXLowLevelDepthSensorSimulator;
-import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.ui.RDXBaseUI;
 
+/**
+ * TODO: Fix me
+ */
 public class RDXDepthSensorDemo
 {
+   private RDXLowLevelDepthSensorSimulator depthSensorSimulator;
+   private RDXPointCloudRenderer pointCloudRenderer;
+
    public RDXDepthSensorDemo()
    {
-      RDX3DBareBonesScene sceneManager = new RDX3DBareBonesScene();
-      RDXLowLevelDepthSensorSimulator depthSensorSimulator = new RDXLowLevelDepthSensorSimulator("Sensor", 80.0, 800, 600, 0.05, 5.0, 0.03, 0.07, false);
-      RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
-      LibGDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
+      RDXBaseUI baseUI = new RDXBaseUI();
+      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
-            sceneManager.create();
+            baseUI.create();
 
-            sceneManager.addCoordinateFrame(0.3);
-            sceneManager.addModelInstance(new DepthSensorDemoObjectsModel().newInstance());
+            depthSensorSimulator = new RDXLowLevelDepthSensorSimulator("Sensor", 80.0, 800, 600, 0.05, 5.0, 0.03, 0.07, false);
+            pointCloudRenderer = new RDXPointCloudRenderer();
+
+            baseUI.getPrimaryScene().addCoordinateFrame(0.3);
+            baseUI.getPrimaryScene().addModelInstance(new DepthSensorDemoObjectsModel().newInstance());
 
             pointCloudRenderer.create(depthSensorSimulator.getNumberOfPoints());
-            sceneManager.addRenderableProvider(pointCloudRenderer, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer, RDXSceneLevel.VIRTUAL);
 
             depthSensorSimulator.create(pointCloudRenderer.getVertexBuffer());
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
@@ -43,15 +48,19 @@ public class RDXDepthSensorDemo
          @Override
          public void render()
          {
-            depthSensorSimulator.render(sceneManager.getScene(), false, Color.WHITE, 0.01f);
+            depthSensorSimulator.render(baseUI.getPrimaryScene(), false, Color.WHITE, 0.01f);
             pointCloudRenderer.updateMeshFastest(depthSensorSimulator.getNumberOfPoints());
 
-            RDX3DSceneTools.glClearGray();
-            pointCloudRenderer.updateMesh();
-            sceneManager.setViewportBoundsToWindow();
-            sceneManager.render();
+            baseUI.renderBeforeOnScreenUI();
+            baseUI.renderEnd();
          }
-      }, "RDX3DDemo", 1100, 800);
+
+         @Override
+         public void dispose()
+         {
+            baseUI.dispose();
+         }
+      });
    }
 
    public static void main(String[] args)

@@ -7,8 +7,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -43,7 +43,7 @@ public class ForceSensorDistalMassCompensator
 
    private final YoFrameVector3D yoSensorForceMassCompensated;
    private final YoFrameVector3D yoSensorTorqueMassCompensated;
-   
+
    private final YoBoolean addSimulatedSensorNoise;
 
    public ForceSensorDistalMassCompensator(ForceSensorDefinition forceSensorDefinition, double dtForLowpassFilter, YoRegistry registry)
@@ -57,7 +57,9 @@ public class ForceSensorDistalMassCompensator
 
       distalMassCalc = new CenterOfMassCalculator(forceSensorDefinition.getRigidBody(), world);
       distalMass = new YoDouble(sensorName + "DistalMass", registry);
-      lowPassSensorForceZ = new AlphaFilteredYoVariable(sensorName + "LowPassFz", registry, AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.0001, dtForLowpassFilter));
+      lowPassSensorForceZ = new AlphaFilteredYoVariable(sensorName + "LowPassFz",
+                                                        registry,
+                                                        AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.0001, dtForLowpassFilter));
       distalMassForceInWorld = new YoFrameVector3D(sensorName + "DistalWeight", world, registry);
       distalCoMInWorld = new YoFramePoint3D(sensorName + "DistalCoM", world, registry);
 
@@ -73,7 +75,7 @@ public class ForceSensorDistalMassCompensator
 
       yoSensorForceMassCompensated = new YoFrameVector3D(sensorName + "ForceMassCompensated", world, registry);
       yoSensorTorqueMassCompensated = new YoFrameVector3D(sensorName + "TorqueMassCompensated", world, registry);
-      
+
       addSimulatedSensorNoise = new YoBoolean(sensorName + "AddSimulatedNoise", registry);
       addSimulatedSensorNoise.set(false);
    }
@@ -87,7 +89,7 @@ public class ForceSensorDistalMassCompensator
    {
       return yoSensorPositionInWorld;
    }
-   
+
    public ReferenceFrame getSensorReferenceFrame()
    {
       return sensorFrame;
@@ -112,37 +114,26 @@ public class ForceSensorDistalMassCompensator
    {
       return yoSensorTorqueMassCompensated;
    }
-   
+
    public double getSensorZForceLowPassFilteredInWorld()
    {
       return lowPassSensorForceZ.getDoubleValue();
    }
 
-
-   private final Wrench sensorWrench = new Wrench();
-
-   public void update(ForceSensorData forceSensorData)
+   public void update(WrenchReadOnly sensorWrench)
    {
-      forceSensorData.getWrench(sensorWrench);
-      update(sensorWrench);
-   }
-
-   public void update(Wrench sensorWrench)
-   {
-      sensorWrench.changeFrame(world);
-
-      yoSensorForce.set(sensorWrench.getReferenceFrame(), sensorWrench.getLinearPartX(), sensorWrench.getLinearPartY(), sensorWrench.getLinearPartZ());
-      yoSensorTorque.set(sensorWrench.getReferenceFrame(), sensorWrench.getAngularPartX(), sensorWrench.getAngularPartY(), sensorWrench.getAngularPartZ());
+      yoSensorForce.setMatchingFrame(sensorWrench.getLinearPart());
+      yoSensorTorque.setMatchingFrame(sensorWrench.getAngularPart());
 
       if (addSimulatedSensorNoise.getBooleanValue())
       {
          double amp = 0.1;
          double bias = 0.25;
-         
-         yoSensorForce.add(amp*2.0*(Math.random()-0.5)+bias, amp*2.0*(Math.random()-0.5)+bias, amp*2.0*(Math.random()-0.5)+bias);
-         yoSensorTorque.add(amp*2.0*(Math.random()-0.5)+bias, amp*2.0*(Math.random()-0.5)+bias, amp*2.0*(Math.random()-0.5)+bias);
+
+         yoSensorForce.add(amp * 2.0 * (Math.random() - 0.5) + bias, amp * 2.0 * (Math.random() - 0.5) + bias, amp * 2.0 * (Math.random() - 0.5) + bias);
+         yoSensorTorque.add(amp * 2.0 * (Math.random() - 0.5) + bias, amp * 2.0 * (Math.random() - 0.5) + bias, amp * 2.0 * (Math.random() - 0.5) + bias);
       }
-      
+
       updateSensorPosition();
       updateCenterOfMass();
       yoSensorToDistalCoMvectorInWorld.sub(distalCoMInWorld, yoSensorPositionInWorld);
@@ -150,8 +141,14 @@ public class ForceSensorDistalMassCompensator
       distalMassWrench.setToZero(world);
       distalMassWrench.setIncludingFrame(null, distalMassForceInWorld, new FramePoint3D(yoSensorToDistalCoMvectorInWorld));
 
-      yoSensorForceFromDistalMass.set(distalMassWrench.getReferenceFrame(), distalMassWrench.getLinearPartX(), distalMassWrench.getLinearPartY(), distalMassWrench.getLinearPartZ());
-      yoSensorTorqueFromDistalMass.set(distalMassWrench.getReferenceFrame(), distalMassWrench.getAngularPartX(), distalMassWrench.getAngularPartY(), distalMassWrench.getAngularPartZ());
+      yoSensorForceFromDistalMass.set(distalMassWrench.getReferenceFrame(),
+                                      distalMassWrench.getLinearPartX(),
+                                      distalMassWrench.getLinearPartY(),
+                                      distalMassWrench.getLinearPartZ());
+      yoSensorTorqueFromDistalMass.set(distalMassWrench.getReferenceFrame(),
+                                       distalMassWrench.getAngularPartX(),
+                                       distalMassWrench.getAngularPartY(),
+                                       distalMassWrench.getAngularPartZ());
 
       yoSensorForceMassCompensated.sub(yoSensorForce, yoSensorForceFromDistalMass);
       yoSensorTorqueMassCompensated.sub(yoSensorTorque, yoSensorTorqueFromDistalMass);
@@ -175,7 +172,7 @@ public class ForceSensorDistalMassCompensator
       distalMassForceInWorld.set(0.0, 0.0, Math.abs(GRAVITY) * distalMass.getDoubleValue());
 
       distalCoMInWorld.set(distalMassCalc.getCenterOfMass());
-      
+
       lowPassSensorForceZ.update(yoSensorForce.getZ());
    }
 }

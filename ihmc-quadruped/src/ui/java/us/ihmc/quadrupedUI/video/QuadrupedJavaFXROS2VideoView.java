@@ -61,7 +61,7 @@ public class QuadrupedJavaFXROS2VideoView extends ImageView
       }
 
       running = true;
-      messager.registerTopicListener(videoTopic, this::acceptVideo);
+      messager.addTopicListener(videoTopic, this::acceptVideo);
       animationTimer.start();
    }
 

@@ -1,0 +1,34 @@
+#ifndef __behavior_msgs__msg__ChestOrientationActionStateMessage__idl__
+#define __behavior_msgs__msg__ChestOrientationActionStateMessage__idl__
+
+#include "behavior_msgs/msg/./ActionNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./ChestOrientationActionDefinitionMessage_.idl"
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::ChestOrientationActionStateMessage_")
+      struct ChestOrientationActionStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::ActionNodeStateMessage state;
+        /**
+         * Definition
+         */
+        behavior_msgs::msg::dds::ChestOrientationActionDefinitionMessage definition;
+        /**
+         * This is the estimated goal pelvis frame as the robot executes a potential whole body action.
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage goal_pelvis_transform_to_world;
+      };
+    };
+  };
+};
+
+#endif

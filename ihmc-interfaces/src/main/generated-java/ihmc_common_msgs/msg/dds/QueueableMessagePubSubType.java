@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.QueueableMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::QueueableMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "532884e5aaa2436daa1cc485344f57765ae426d736760fd218be445b0b85978c";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

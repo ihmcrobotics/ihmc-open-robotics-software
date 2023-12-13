@@ -1,18 +1,24 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class CoPPointViewer
+public class CoPPointViewer implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -63,5 +69,21 @@ public class CoPPointViewer
          copStartPoints.get(i).setToNaN();
          copEndPoints.get(i).setToNaN();
       }
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+
+      for (int i = 0; i < maxPoints; i++)
+      {
+         YoFramePoint3D copStartPoint = copStartPoints.get(i);
+         YoFramePoint3D copEndPoint = copEndPoints.get(i);
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("copStartPoint" + i, copStartPoint, size, ColorDefinitions.DarkRed(), DefaultPoint2DGraphic.CROSS));
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("copEndPoint" + i, copEndPoint, size, ColorDefinitions.DarkRed(), DefaultPoint2DGraphic.PLUS));
+      }
+
+      return group;
    }
 }

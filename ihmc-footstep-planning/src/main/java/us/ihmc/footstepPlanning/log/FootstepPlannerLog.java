@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.log;
 
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
@@ -22,6 +23,7 @@ public class FootstepPlannerLog
    // Packets
    private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
+   private final StoredPropertySetMessage bodyPathParametersPacket = new StoredPropertySetMessage();
    private final SwingPlannerParametersPacket swingPlannerParametersPacket = new SwingPlannerParametersPacket();
    private final FootstepPlanningToolboxOutputStatus statusPacket = new FootstepPlanningToolboxOutputStatus();
 
@@ -54,6 +56,11 @@ public class FootstepPlannerLog
    public FootstepPlannerParametersPacket getFootstepParametersPacket()
    {
       return footstepParametersPacket;
+   }
+
+   public StoredPropertySetMessage getBodyPathParametersPacket()
+   {
+      return bodyPathParametersPacket;
    }
 
    public SwingPlannerParametersPacket getSwingPlannerParametersPacket()

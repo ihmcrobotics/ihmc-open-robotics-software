@@ -17,9 +17,6 @@
 
 #include <iostream>
 #include <stdexcept>
-//#include <fstream>
-//using namespace Eigen;
-//const static IOFormat CSVFormat(StreamPrecision, DontAlignCols, ", ", "\n");
 
 namespace promp 
 {
@@ -93,9 +90,7 @@ namespace promp
     {
         assert(obs_traj.cols() == this->dims());
         assert(obs_traj.rows() > 0);
-
         Eigen::VectorXd alphas = Eigen::VectorXd::LinSpaced(steps, lb, ub);
-//        std::cout << "alphas vector " << alphas << std::endl;
         
         // Find the alpha that minimizes the distance between the 
         // observed trajectory and the mean trajectory of the ProMP. 
@@ -105,10 +100,6 @@ namespace promp
             double ratio = this->speed() / alphas[i];
             // compute promp trajectory given a certain alpha
             Eigen::MatrixXd mod_traj = this->modulate(ratio * this->timesteps(), true).matrix();
-//            std::ofstream myfile;
-//            myfile.open("/home/luigi/repository-group/ihmc-open-robotics-software/promp/etc/my_promp"+std::to_string(i)+".csv");
-//            myfile << mod_traj.format(CSVFormat);
-//            myfile.close();
 
             // compute derivate mean traj of promp
             int min_size = std::min(obs_traj.rows(), mod_traj.rows());
@@ -117,9 +108,7 @@ namespace promp
 //            Eigen::MatrixXd do_traj = obs_traj.topRows(min_size-1) - obs_traj.middleRows(1, min_size-1);
 //
 //            scores[i] = (do_traj - dm_traj).cwiseAbs().sum();
-
             scores[i] = (obs_traj.topRows(min_size-1) - mod_traj.topRows(min_size-1)).cwiseAbs().sum();
-//            std::cout << i << " - alpha: " << alphas[i] << " - score: " << scores[i] << std::endl;
         }
 
         int min_distance_idx = std::min_element(scores.begin(), scores.end()) - scores.begin();

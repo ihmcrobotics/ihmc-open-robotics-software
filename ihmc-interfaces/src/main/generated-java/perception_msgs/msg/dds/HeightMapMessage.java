@@ -59,14 +59,14 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
    public HeightMapMessage()
    {
-      keys_ = new us.ihmc.idl.IDLSequence.Integer (30000, "type_2");
+      keys_ = new us.ihmc.idl.IDLSequence.Integer (45000, "type_2");
 
-      heights_ = new us.ihmc.idl.IDLSequence.Float (30000, "type_5");
+      heights_ = new us.ihmc.idl.IDLSequence.Float (45000, "type_5");
 
-      variances_ = new us.ihmc.idl.IDLSequence.Float (30000, "type_5");
+      variances_ = new us.ihmc.idl.IDLSequence.Float (45000, "type_5");
 
-      centroids_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (30000, new geometry_msgs.msg.dds.PointPubSubType());
-      normals_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D> (30000, new geometry_msgs.msg.dds.Vector3PubSubType());
+      centroids_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (45000, new geometry_msgs.msg.dds.PointPubSubType());
+      normals_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D> (45000, new geometry_msgs.msg.dds.Vector3PubSubType());
 
    }
 

@@ -3,6 +3,7 @@ package us.ihmc.exampleSimulations.genericQuadruped.model;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import us.ihmc.modelFileLoaders.RobotDefinitionLoader;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
@@ -14,6 +15,7 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 
 public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
 {
+
    private static final String parameterFileName = "/parameters/simulation_force_controller.xml";
 
    private final GenericQuadrupedSDFParameters sdfParameters = new GenericQuadrupedSDFParameters();
@@ -39,6 +41,12 @@ public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
    public FullQuadrupedRobotModel createFullRobotModel()
    {
       return new FullQuadrupedRobotModelWrapper(robotDefinition, jointMapAndContactInfo);
+   }
+
+   @Override
+   public FullQuadrupedRobotModel createFullRobotModel(boolean enforceUniqueReferenceFrames)
+   {
+      return new FullQuadrupedRobotModelWrapper(robotDefinition, jointMapAndContactInfo, enforceUniqueReferenceFrames);
    }
 
    @Override

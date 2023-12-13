@@ -11,6 +11,18 @@ package atlas_msgs.msg.dds;
 public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.TopicDataType<atlas_msgs.msg.dds.AtlasElectricMotorEnablePacket>
 {
    public static final java.lang.String name = "atlas_msgs::msg::dds_::AtlasElectricMotorEnablePacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "484307c2f6f4576ee0dddc567e694b03030dd7a88b2c9aa5c65b6b9c0d095ad6";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

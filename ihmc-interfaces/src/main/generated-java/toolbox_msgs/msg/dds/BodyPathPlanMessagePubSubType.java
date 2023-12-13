@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class BodyPathPlanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.BodyPathPlanMessage>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::BodyPathPlanMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "f946c1a87691219f82288488e08a1bbaaf945255a5af78e15d86c8ee9be35387";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

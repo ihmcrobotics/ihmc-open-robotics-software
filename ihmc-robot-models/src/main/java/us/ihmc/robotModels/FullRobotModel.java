@@ -1,22 +1,18 @@
 package us.ihmc.robotModels;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public interface FullRobotModel
 {
@@ -36,6 +32,14 @@ public interface FullRobotModel
    default MovingReferenceFrame getElevatorFrame()
    {
       return getElevator().getBodyFixedFrame();
+   }
+
+   /**
+    * Returns a stationary reference that is centered at World but has a unique name for this robot model.
+    */
+   default ReferenceFrame getModelStationaryFrame()
+   {
+      return getElevator().getBodyFixedFrame().getParent();
    }
 
    /**

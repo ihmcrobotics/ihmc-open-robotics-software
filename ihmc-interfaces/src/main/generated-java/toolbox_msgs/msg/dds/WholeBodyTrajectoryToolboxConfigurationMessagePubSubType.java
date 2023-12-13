@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::WholeBodyTrajectoryToolboxConfigurationMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "42605e13cd0f54e38ac3a1e2aeb5ca43df62c9846ab4125012d4a248efd562a3";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -49,7 +49,7 @@ public class JavaFXRobotVisualizer
 
    public JavaFXRobotVisualizer(FullHumanoidRobotModelFactory fullRobotModelFactory, boolean checkJointNameHash)
    {
-      fullRobotModel = fullRobotModelFactory.createFullRobotModel();
+      fullRobotModel = fullRobotModelFactory.createFullRobotModel(false);
 
       allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
 

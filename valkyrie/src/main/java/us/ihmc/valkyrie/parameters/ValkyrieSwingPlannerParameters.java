@@ -11,19 +11,9 @@ public class ValkyrieSwingPlannerParameters extends StoredPropertySet implements
       this("");
    }
 
-   public ValkyrieSwingPlannerParameters(String fileNameSuffix)
+   public ValkyrieSwingPlannerParameters(String versionSuffix)
    {
-      this("ihmc-open-robotics-software", "valkyrie/src/main/resources", fileNameSuffix);
-   }
-
-   public ValkyrieSwingPlannerParameters(String projectName, String pathToResources)
-   {
-      this(projectName, pathToResources, "");
-   }
-
-   public ValkyrieSwingPlannerParameters(String projectName, String pathToResources, String fileNameSuffix)
-   {
-      super(SwingPlannerParameterKeys.keys, ValkyrieSwingPlannerParameters.class, projectName, pathToResources, fileNameSuffix);
+      super(SwingPlannerParameterKeys.keys, ValkyrieSwingPlannerParameters.class, versionSuffix);
       loadUnsafe();
    }
 

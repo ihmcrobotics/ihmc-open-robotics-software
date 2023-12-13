@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.SmoothTransitionControllerState;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
@@ -30,9 +31,15 @@ public class ExitWalkingTransitionControllerStateFactory implements HighLevelCon
          HighLevelControllerState initialControllerState = initialControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
          HighLevelControllerState finalControllerState = finalControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
          OneDoFJointBasics[] controlledJoints = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlledOneDoFJoints();
+         CommandInputManager commandInputManager = controllerFactoryHelper.getCommandInputManager();
 
-         transitionControllerState = new SmoothTransitionControllerState("exitWalking", HighLevelControllerName.EXIT_WALKING, initialControllerState,
-                                                                         finalControllerState, controlledJoints, controllerFactoryHelper.getHighLevelControllerParameters());
+         transitionControllerState = new SmoothTransitionControllerState("exitWalking",
+                                                                         HighLevelControllerName.EXIT_WALKING,
+                                                                         initialControllerState,
+                                                                         finalControllerState,
+                                                                         controlledJoints,
+                                                                         controllerFactoryHelper.getHighLevelControllerParameters(),
+                                                                         commandInputManager);
       }
 
       return transitionControllerState;

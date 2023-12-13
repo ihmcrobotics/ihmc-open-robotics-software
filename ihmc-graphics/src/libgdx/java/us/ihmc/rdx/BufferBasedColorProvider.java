@@ -39,6 +39,15 @@ public class BufferBasedColorProvider implements ColorProvider
       return colors.get(indexB++).b;
    }
 
+   @Override
+   public float getNextA()
+   {
+      if (colors.size() <= indexG)
+         return 0;
+
+      return colors.get(indexG++).a;
+   }
+
    public void resetIndex() {
       indexR = 0;
       indexG = 0;

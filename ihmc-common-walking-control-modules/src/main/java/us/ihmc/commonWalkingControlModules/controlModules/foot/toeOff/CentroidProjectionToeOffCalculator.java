@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
@@ -27,16 +27,20 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
-
 public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
 {
    private static final boolean visualize = false;
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private static final String namePrefix = "centProj";
@@ -74,8 +78,11 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       this(contactStates, feet, toeOffParameters, parentRegistry, null);
    }
 
-   public CentroidProjectionToeOffCalculator(SideDependentList<YoPlaneContactState> contactStates, SideDependentList<? extends ContactablePlaneBody> feet,
-                                             ToeOffParameters toeOffParameters, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public CentroidProjectionToeOffCalculator(SideDependentList<YoPlaneContactState> contactStates,
+                                             SideDependentList<? extends ContactablePlaneBody> feet,
+                                             ToeOffParameters toeOffParameters,
+                                             YoRegistry parentRegistry,
+                                             YoGraphicsListRegistry graphicsListRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -263,5 +270,19 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
          footPolygon.addVertex(contactPoints.get(trailingLeg).get(i));
       }
       footPolygon.update();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      if (!visualize)
+         return null;
+      if (rayOrigin == null)
+         return null;
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("origin", rayOrigin, 0.01, ColorDefinitions.Blue(), DefaultPoint2DGraphic.CIRCLE_FILLED));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("end", rayEnd, 0.01, ColorDefinitions.Red(), DefaultPoint2DGraphic.CIRCLE_FILLED));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicLineSegment2DDefinition("toeOffList", rayOrigin, rayEnd, ColorDefinitions.Red()));
+      return group;
    }
 }

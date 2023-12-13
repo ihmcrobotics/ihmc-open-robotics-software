@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -7,7 +9,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -25,6 +31,10 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -45,6 +55,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final PlaneContactStateCommand planeContactStateCommand = new PlaneContactStateCommand();
 
+   private ControllerCoreOutputReadOnly controllerCoreOutput;
    private final SelectionMatrix6D accelerationSelectionMatrix = new SelectionMatrix6D();
    private final SelectionMatrix6D feedbackSelectionMatrix = new SelectionMatrix6D();
    private final boolean[] isDirectionFeedbackControlled = new boolean[dofs];
@@ -86,8 +97,13 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private Vector3DReadOnly taskspaceAngularWeight;
    private Vector3DReadOnly taskspaceLinearWeight;
 
-   public RigidBodyLoadBearingControlState(RigidBodyBasics bodyToControl, ContactablePlaneBody contactableBody, RigidBodyBasics elevator, YoDouble yoTime,
-         RigidBodyJointControlHelper jointControlHelper, YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
+   public RigidBodyLoadBearingControlState(RigidBodyBasics bodyToControl,
+                                           ContactablePlaneBody contactableBody,
+                                           RigidBodyBasics elevator,
+                                           YoDouble yoTime,
+                                           RigidBodyJointControlHelper jointControlHelper,
+                                           YoGraphicsListRegistry graphicsListRegistry,
+                                           YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.LOADBEARING, bodyToControl.getName(), yoTime, parentRegistry);
       this.bodyFrame = bodyToControl.getBodyFixedFrame();
@@ -237,7 +253,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       accelerationSelectionMatrix.resetSelection();
       feedbackSelectionMatrix.resetSelection();
 
-      for (int i = dofs-1; i >= 0; i--)
+      for (int i = dofs - 1; i >= 0; i--)
       {
          if (isDirectionFeedbackControlled[i])
             accelerationSelectionMatrix.selectAxis(i, false);
@@ -358,5 +374,23 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    {
       // this control mode does not support command queuing
       return 0.0;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D(contactPoint.getNamePrefix(), contactPointInWorld, 0.01, ColorDefinitions.Black()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(contactNormal.getNamePrefix(),
+                                                                    contactPointInWorld,
+                                                                    contactNormal,
+                                                                    0.1,
+                                                                    ColorDefinitions.Black()));
+      return group;
+   }
+
+   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
+   {
+      this.controllerCoreOutput = controllerCoreOutput;
    }
 }

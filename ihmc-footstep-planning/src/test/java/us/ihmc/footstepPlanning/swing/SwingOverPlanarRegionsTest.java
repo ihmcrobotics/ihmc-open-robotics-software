@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.*;
@@ -32,10 +31,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -55,6 +51,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.Robot;
@@ -94,7 +91,7 @@ public class SwingOverPlanarRegionsTest
       endFoot.getOrientation().setYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-//      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
+      //      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
    }
 
    @Test
@@ -122,7 +119,7 @@ public class SwingOverPlanarRegionsTest
       endFoot.getOrientation().setYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-//      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
+      //      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
    }
 
    @Test
@@ -298,6 +295,7 @@ public class SwingOverPlanarRegionsTest
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side -> getFootPolygon());
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(),
                                                                          new DefaultVisibilityGraphParameters(),
+                                                                         new AStarBodyPathPlannerParameters(),
                                                                          new DefaultFootstepPlannerParameters(),
                                                                          swingPlannerParameters,
                                                                          walkingControllerParameters,
@@ -361,7 +359,12 @@ public class SwingOverPlanarRegionsTest
          scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
       }
 
-      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(), footstepPlan, request.getStartFootPoses(), SwingPlannerType.TWO_WAYPOINT_POSITION);
+      planningModule.getSwingPlanningModule()
+                    .computeSwingWaypoints(request.getPlanarRegionsList(),
+                                           request.getHeightMapData(),
+                                           footstepPlan,
+                                           request.getStartFootPoses(),
+                                           SwingPlannerType.TWO_WAYPOINT_POSITION);
 
       boolean wasAdjusted = expander.wereWaypointsAdjusted();
       if (wasAdjusted)
@@ -398,12 +401,12 @@ public class SwingOverPlanarRegionsTest
 
    private void checkForCollisions(FootstepPlannerRequest request, FootstepPlan footstepPlan, boolean ignoreGroundSegments)
    {
-      SteppingParameters steppingParameters = getWalkingControllerParameters().getSteppingParameters();
+      SwingTrajectoryParameters swingTrajectoryParameters = getWalkingControllerParameters().getSwingTrajectoryParameters();
       TwoWaypointSwingGenerator twoWaypointSwingGenerator = new TwoWaypointSwingGenerator("",
-                                                                                          steppingParameters.getMinSwingHeightFromStanceFoot(),
-                                                                                          steppingParameters.getMaxSwingHeightFromStanceFoot(),
-                                                                                          steppingParameters.getMinSwingHeightFromStanceFoot(),
-                                                                                          steppingParameters.getCustomWaypointAngleThreshold(),
+                                                                                          swingTrajectoryParameters.getMinSwingHeight(),
+                                                                                          swingTrajectoryParameters.getMaxSwingHeight(),
+                                                                                          swingTrajectoryParameters.getMinSwingHeight(),
+                                                                                          swingTrajectoryParameters.getCustomWaypointAngleThreshold(),
                                                                                           new YoRegistry(getClass().getSimpleName()),
                                                                                           null);
 
@@ -461,9 +464,10 @@ public class SwingOverPlanarRegionsTest
       double distance = Math.max(Math.max(footLength / 2.0, toeLength), heelLength);
 
       Box3D foot = new Box3D();
-      foot.getSize().set(getWalkingControllerParameters().getSteppingParameters().getActualFootLength(),
-                         getWalkingControllerParameters().getSteppingParameters().getActualFootWidth(),
-                         0.1);
+      foot.getSize()
+          .set(getWalkingControllerParameters().getSteppingParameters().getActualFootLength(),
+               getWalkingControllerParameters().getSteppingParameters().getActualFootWidth(),
+               0.1);
 
       for (double time = 0.0; time <= 1.0; time += dt)
       {
@@ -491,8 +495,10 @@ public class SwingOverPlanarRegionsTest
                collisionRelativeToEndFoot.changeFrame(endFootPoseFrame);
                collisionRelativeToStartFoot.changeFrame(startFootPoseFrame);
 
-               boolean hittingEndGoal = footPolygon.isPointInside(collisionRelativeToEndFoot.getX(), collisionRelativeToEndFoot.getY()) && Math.abs(collisionRelativeToEndFoot.getZ()) < 0.01;
-               boolean hittingStartGoal = footPolygon.isPointInside(collisionRelativeToStartFoot.getX(), collisionRelativeToStartFoot.getY()) && Math.abs(collisionRelativeToStartFoot.getZ()) < 0.01;
+               boolean hittingEndGoal = footPolygon.isPointInside(collisionRelativeToEndFoot.getX(), collisionRelativeToEndFoot.getY())
+                                        && Math.abs(collisionRelativeToEndFoot.getZ()) < 0.01;
+               boolean hittingStartGoal = footPolygon.isPointInside(collisionRelativeToStartFoot.getX(), collisionRelativeToStartFoot.getY())
+                                          && Math.abs(collisionRelativeToStartFoot.getZ()) < 0.01;
 
                hittingEndGoal |= endFootPolygon.getMinX() < desiredPosition.getX();
                hittingStartGoal |= desiredPosition.getX() < startFootPolygon.getMaxX();
@@ -512,7 +518,7 @@ public class SwingOverPlanarRegionsTest
    public SwingPlannerParametersBasics getParameters()
    {
       SwingPlannerParametersBasics parameters = new DefaultSwingPlannerParameters();
-//      parameters.setDoInitialFastApproximation(true);
+      //      parameters.setDoInitialFastApproximation(true);
       parameters.setMinimumSwingFootClearance(0.05);
       return parameters;
    }
@@ -680,12 +686,6 @@ public class SwingOverPlanarRegionsTest
          }
 
          @Override
-         public double defaultOffsetHeightAboveAnkle()
-         {
-            return 0;
-         }
-
-         @Override
          public SteppingParameters getSteppingParameters()
          {
             return getTestSteppingParameters();
@@ -697,24 +697,6 @@ public class SwingOverPlanarRegionsTest
    {
       return new SteppingParameters()
       {
-         @Override
-         public double getMinSwingHeightFromStanceFoot()
-         {
-            return 0.10;
-         }
-
-         @Override
-         public double getDefaultSwingHeightFromStanceFoot()
-         {
-            return getMinSwingHeightFromStanceFoot();
-         }
-
-         @Override
-         public double getMaxSwingHeightFromStanceFoot()
-         {
-            return 0.30;
-         }
-
          @Override
          public double getFootForwardOffset()
          {
@@ -828,6 +810,24 @@ public class SwingOverPlanarRegionsTest
       return new SwingTrajectoryParameters()
       {
          @Override
+         public double getMinSwingHeight()
+         {
+            return 0.10;
+         }
+
+         @Override
+         public double getDefaultSwingHeight()
+         {
+            return getMinSwingHeight();
+         }
+
+         @Override
+         public double getMaxSwingHeight()
+         {
+            return 0.30;
+         }
+
+         @Override
          public double getDesiredTouchdownHeightOffset()
          {
             return 0;
@@ -843,13 +843,6 @@ public class SwingOverPlanarRegionsTest
          public double getDesiredTouchdownAcceleration()
          {
             return -1.0;
-         }
-
-         /** {@inheritDoc} */
-         @Override
-         public double getSwingFootVelocityAdjustmentDamping()
-         {
-            return 0.8;
          }
 
          /** {@inheritDoc} */

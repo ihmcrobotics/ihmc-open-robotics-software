@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
-   id("us.ihmc.ihmc-cd") version "1.23"
+   id("us.ihmc.ihmc-ci") version "8.3"
+   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -22,13 +22,13 @@ mainDependencies {
    api("us.ihmc:jinput:2.0.6-ihmc2")
    api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
-   api("us.ihmc:euclid:0.19.1")
-   api("us.ihmc:euclid-geometry:0.19.1")
-   api("us.ihmc:euclid-frame:0.19.1")
-   api("us.ihmc:euclid-shape:0.19.1")
-   api("us.ihmc:euclid-frame-shape:0.19.1")
-   api("us.ihmc:ihmc-realtime:1.5.1")
-   api("us.ihmc:ihmc-ros-control:0.6.0")
+   api("us.ihmc:euclid:0.21.0")
+   api("us.ihmc:euclid-geometry:0.21.0")
+   api("us.ihmc:euclid-frame:0.21.0")
+   api("us.ihmc:euclid-shape:0.21.0")
+   api("us.ihmc:euclid-frame-shape:0.21.0")
+   api("us.ihmc:ihmc-realtime:1.6.0")
+   api("us.ihmc:ihmc-ros-control:0.7.1")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-system-identification:source")
@@ -46,16 +46,15 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-data-visualizer:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
    api("us.ihmc:ihmc-footstep-planning-visualizers:source")
-   api("us.ihmc:ihmc-high-level-behaviors-javafx:source")
    api("us.ihmc:ihmc-parameter-tuner:source")
 }
 
 testDependencies {
-   api("us.ihmc:euclid:0.19.1")
-   api("us.ihmc:euclid-geometry:0.19.1")
-   api("us.ihmc:euclid-frame:0.19.1")
-   api("us.ihmc:euclid-shape:0.19.1")
-   api("us.ihmc:euclid-frame-shape:0.19.1")
+   api("us.ihmc:euclid:0.21.0")
+   api("us.ihmc:euclid-geometry:0.21.0")
+   api("us.ihmc:euclid-frame:0.21.0")
+   api("us.ihmc:euclid-shape:0.21.0")
+   api("us.ihmc:euclid-frame-shape:0.21.0")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
 }

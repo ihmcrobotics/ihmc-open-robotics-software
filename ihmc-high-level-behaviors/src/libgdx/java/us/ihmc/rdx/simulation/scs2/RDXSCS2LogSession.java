@@ -7,8 +7,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.live.LogVideoLoader;
-import us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer;
+import us.ihmc.rdx.ui.graphics.LogVideoLoader;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.session.log.LogSession;
 import us.ihmc.tools.UnitConversions;
@@ -45,7 +45,8 @@ public class RDXSCS2LogSession extends RDXSCS2Session
 
    public void createPerceptionDataLoader(String perceptionLogFile)
    {
-      loader = new PerceptionDataLoader(perceptionLogFile);
+      loader = new PerceptionDataLoader();
+      loader.openLogFile(perceptionLogFile);
    }
 
    public void create(RDXBaseUI baseUI)
@@ -87,6 +88,11 @@ public class RDXSCS2LogSession extends RDXSCS2Session
       {
          visualizer.renderImGuiWidgets();
       }
+   }
+
+   public void destroy()
+   {
+      loader.closeLogFile();
    }
 
    protected void renderImGuiWidgetsPartOne()

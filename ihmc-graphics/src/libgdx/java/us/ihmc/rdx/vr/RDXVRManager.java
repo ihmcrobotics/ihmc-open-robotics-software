@@ -111,7 +111,7 @@ public class RDXVRManager
 
             if (!Boolean.parseBoolean(System.getProperty("rdx.free.spin")))
             {
-               baseUI.setForegroundFPS(350); // TODO: Do something better with this
+               baseUI.setForegroundFPSLimit(350); // TODO: Do something better with this
             }
             baseUI.setVsync(false); // important to disable vsync for VR
             scenePoseGizmo = new RDXPose3DGizmo(context.getTeleportFrameIHMCZUp(), context.getTeleportIHMCZUpToIHMCZUpWorld());
@@ -268,7 +268,7 @@ public class RDXVRManager
             context.getHeadsetRenderable(renderables, pool);
          }
          context.getControllerRenderables(renderables, pool);
-         context.getBaseStationRenderables(renderables, pool);
+         context.getTrackerRenderables(renderables, pool);
          if (showScenePoseGizmo.get())
             scenePoseGizmo.getRenderables(renderables, pool);
       }

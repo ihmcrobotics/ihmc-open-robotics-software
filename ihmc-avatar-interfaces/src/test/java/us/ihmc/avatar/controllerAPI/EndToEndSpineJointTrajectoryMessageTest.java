@@ -22,6 +22,7 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -654,7 +655,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private static YoBoolean findOrientationControlEnabled(YoVariableHolder yoVariableHolder, RigidBodyBasics body)
    {
       String bodyName = body.getName();
-      String namespace = bodyName + "OrientationFBController";
+      String namespace = FeedbackControllerToolbox.class.getSimpleName();
       String variable = bodyName + "IsOrientationFBControllerEnabled";
       return EndToEndTestTools.findYoBoolean(namespace, variable, yoVariableHolder);
    }
@@ -662,7 +663,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private static YoBoolean findJointControlEnabled(YoVariableHolder yoVariableHolder, OneDoFJointBasics joint)
    {
       String jointName = joint.getName();
-      String namespace = jointName + "PDController";
+      String namespace = FeedbackControllerToolbox.class.getSimpleName();
       String variable = "control_enabled_" + jointName;
       return EndToEndTestTools.findYoBoolean(namespace, variable, yoVariableHolder);
    }

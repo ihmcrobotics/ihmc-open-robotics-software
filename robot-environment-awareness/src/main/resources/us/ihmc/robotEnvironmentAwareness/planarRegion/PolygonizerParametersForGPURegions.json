@@ -21,7 +21,7 @@
     "upperBound" : 6.2831853
   },
   "Length threshold" : {
-    "value" : 0.05,
+    "value" : 0.08,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
