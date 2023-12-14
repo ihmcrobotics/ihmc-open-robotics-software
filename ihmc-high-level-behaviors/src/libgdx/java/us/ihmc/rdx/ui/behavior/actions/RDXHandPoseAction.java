@@ -214,7 +214,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getDefinition().getSide()).getRigidBody().getChildrenJoints().get(0);
       floatingJoint.getJointPose().set(state.getGoalChestToWorldTransform().getValueReadOnly());
 
-      for (int i = 0; i < state.getJointAngles().getLength(); i++)
+      for (int i = 0; i < armGraphicOneDoFJoints.get(getDefinition().getSide()).length; i++)
       {
          armGraphicOneDoFJoints.get(getDefinition().getSide())[i].setQ(state.getJointAngles().getValueReadOnly(i));
       }
