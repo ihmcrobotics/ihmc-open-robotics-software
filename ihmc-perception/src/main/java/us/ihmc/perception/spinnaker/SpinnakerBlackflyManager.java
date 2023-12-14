@@ -38,9 +38,26 @@ public class SpinnakerBlackflyManager
       SpinnakerBlackfly spinnakerBlackfly = new SpinnakerBlackfly(spinCamera, serialNumber);
       spinnakerBlackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
       spinnakerBlackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_BayerRG8);
-      // BFS-U3-27S5C-C 1936 x 1464
-      spinnakerBlackfly.setResolution(1936 - 600, (1464 / 2) + 200);
-      spinnakerBlackfly.setOffset(600 / 2, (1464 / 2) + (200 / 2) + 100); // +100 for getting rid of the realsense
+      // We only want the newest image for the lowest latency possible
+      spinnakerBlackfly.setBufferHandlingMode(spinTLStreamBufferHandlingModeEnums.StreamBufferHandlingMode_NewestOnly);
+      spinnakerBlackfly.startAcquiringImages();
+      serialNumberToBlackflyMap.put(serialNumber, spinnakerBlackfly);
+      return spinnakerBlackfly;
+   }
+
+   public SpinnakerBlackfly createSpinnakerBlackfly(String serialNumber, int width, int height, int xOffset, int yOffset)
+   {
+      spinCamera spinCamera = new spinCamera();
+      printOnError(spinCameraListGetBySerial(spinCameraList, new BytePointer(serialNumber), spinCamera), "Unable to create spinCamera from serial number!");
+      // Ensure camera was found
+      if (spinCamera.isNull())
+         return null;
+
+      SpinnakerBlackfly spinnakerBlackfly = new SpinnakerBlackfly(spinCamera, serialNumber);
+      spinnakerBlackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
+      spinnakerBlackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_BayerRG8);
+      spinnakerBlackfly.setResolution(width, height);
+      spinnakerBlackfly.setOffset(xOffset, yOffset);
       // We only want the newest image for the lowest latency possible
       spinnakerBlackfly.setBufferHandlingMode(spinTLStreamBufferHandlingModeEnums.StreamBufferHandlingMode_NewestOnly);
       spinnakerBlackfly.startAcquiringImages();
