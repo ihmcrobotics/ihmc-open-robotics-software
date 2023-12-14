@@ -112,7 +112,6 @@ public class ROS2SceneGraphPublisher
             {
                centerposeNodeMessage.getBoundingBoxVertices()[i].set(centerposeNode.getVertices3D()[i]);
             }
-//            centerposeNodeMessage.setBreakFrequency((float) centerposeNode.getBreakFrequency());
             detectableSceneNodeMessage = centerposeNodeMessage.getDetectableSceneNode();
          }
          else
