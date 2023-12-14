@@ -13,11 +13,14 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.filters.TimeBasedDetectionFilter;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Topic;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CenterposeDetectionManager
@@ -56,49 +59,49 @@ public class CenterposeDetectionManager
 
          // Update or add the corresponding CenterposeSceneNode
          sceneGraph.modifyTree(modificationQueue ->
-                               {
-                                  CenterposeNode centerposeNode;
+         {
+          CenterposeNode centerposeNode;
 
-                                  Point3D[] vertices = detectedObjectPacket.getBoundingBoxVertices();
-                                  for (Point3D vertex : vertices)
-                                  {
-                                     FramePoint3D frameVertex = new FramePoint3D();
-                                     frameVertex.setIncludingFrame(centerposeOutputFrame, vertex);
-                                     frameVertex.changeFrame(ReferenceFrame.getWorldFrame());
-                                     vertex.set(frameVertex);
-                                  }
+            Point3D[] vertices = detectedObjectPacket.getBoundingBoxVertices();
+            for (Point3D vertex : vertices)
+            {
+               FramePoint3D frameVertex = new FramePoint3D();
+               frameVertex.setIncludingFrame(centerposeOutputFrame, vertex);
+               frameVertex.changeFrame(ReferenceFrame.getWorldFrame());
+               vertex.set(frameVertex);
+            }
 
-                                  // Update
-                                  if (sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().containsKey(detectedObjectPacket.getId()))
-                                  {
-                                     centerposeNode = sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().get(detectedObjectPacket.getId());
+            // Update
+            if (sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().containsKey(detectedObjectPacket.getId()))
+            {
+               centerposeNode = sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().get(detectedObjectPacket.getId());
 
-                                     centerposeNode.setVertices3D(vertices);
-                                     centerposeNode.setObjectType(detectedObjectPacket.getObjectTypeAsString());
-                                     centerposeNode.setConfidence(detectedObjectPacket.getConfidence());
+               centerposeNode.setVertices3D(vertices);
+               centerposeNode.setObjectType(detectedObjectPacket.getObjectTypeAsString());
+               centerposeNode.setConfidence(detectedObjectPacket.getConfidence());
 
-                                     Pose3D objectPoseInSensorFrame = detectedObjectPacket.getPose();
-                                     FramePose3D objectOriginPoseFrame = new FramePose3D();
-                                     objectOriginPoseFrame.setIncludingFrame(centerposeOutputFrame, objectPoseInSensorFrame);
-                                     objectOriginPoseFrame.changeFrame(ReferenceFrame.getWorldFrame());
-                                     centerposeNode.getNodeToParentFrameTransform().set(objectOriginPoseFrame);
-                                  }
-                                  // Add
-                                  else
-                                  {
-                                     centerposeNode = new CenterposeNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                         "CenterposeDetectedObject%d".formatted(detectedObjectPacket.getId()),
-                                                                         detectedObjectPacket.getId(),
-                                                                         vertices,
-                                                                         detectedObjectPacket.getBoundingBox2dVertices());
+               Pose3D objectPoseInSensorFrame = detectedObjectPacket.getPose();
+               FramePose3D objectOriginPoseFrame = new FramePose3D();
+               objectOriginPoseFrame.setIncludingFrame(centerposeOutputFrame, objectPoseInSensorFrame);
+               objectOriginPoseFrame.changeFrame(ReferenceFrame.getWorldFrame());
+               centerposeNode.getNodeToParentFrameTransform().set(objectOriginPoseFrame);
+            }
+            // Add
+            else
+            {
+               centerposeNode = new CenterposeNode(sceneGraph.getNextID().getAndIncrement(),
+                                                   "CenterposeDetectedObject%d".formatted(detectedObjectPacket.getId()),
+                                                   detectedObjectPacket.getId(),
+                                                   vertices,
+                                                   detectedObjectPacket.getBoundingBox2dVertices());
 
-                                     modificationQueue.accept(new SceneGraphNodeAddition(centerposeNode, sceneGraph.getRootNode()));
-                                     sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().put(centerposeNode.getObjectID(), centerposeNode);
-                                     centerposeNodeDetectionFilters.put(centerposeNode.getObjectID(), new TimeBasedDetectionFilter(1.0f, 2));
-                                  }
+               modificationQueue.accept(new SceneGraphNodeAddition(centerposeNode, sceneGraph.getRootNode()));
+               sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().put(centerposeNode.getObjectID(), centerposeNode);
+               centerposeNodeDetectionFilters.put(centerposeNode.getObjectID(), new TimeBasedDetectionFilter(1.0f, 2));
+            }
 
-                                  centerposeNodeDetectionFilters.get(centerposeNode.getObjectID()).registerDetection();
-                               });
+            centerposeNodeDetectionFilters.get(centerposeNode.getObjectID()).registerDetection();
+         });
       }
 
       for (CenterposeNode centerposeNode : sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().valueCollection())

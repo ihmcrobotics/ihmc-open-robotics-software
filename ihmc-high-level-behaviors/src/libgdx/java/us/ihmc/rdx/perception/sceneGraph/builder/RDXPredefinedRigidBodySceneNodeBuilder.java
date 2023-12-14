@@ -71,6 +71,16 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                       SHOE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             yield new RDXPredefinedRigidBodySceneNode(shoe, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
+         case "ThinkPad" ->
+         {
+            PredefinedRigidBodySceneNode thinkpad = new PredefinedRigidBodySceneNode(nextID,
+                                                                                 name.get(),
+                                                                                 sceneGraph.getIDToNodeMap(),
+                                                                                 parent.getID(),
+                                                                                 new RigidBodyTransform(), THINKPAD_VISUAL_MODEL_FILE_PATH,
+                                                                                 THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            yield new RDXPredefinedRigidBodySceneNode(thinkpad, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
          default -> throw new IllegalStateException("Unexpected value: " + name);
       };
    }
