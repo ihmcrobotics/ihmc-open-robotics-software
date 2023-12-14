@@ -1,6 +1,6 @@
 
 # Parent state fields
-behavior_msgs/BehaviorActionStateMessage action_state
+behavior_msgs/ActionNodeStateMessage state
 
 # Definition
 behavior_msgs/ArmJointAnglesActionDefinitionMessage definition

@@ -102,6 +102,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                                    baseFrame,
                                                                                                    yoTime,
                                                                                                    jointControlHelper,
+                                                                                                   enableFunctionGenerators,
                                                                                                    parentRegistry);
          if (taskspaceOrientationGains == null)
          {
@@ -120,6 +121,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                              controlFrame,
                                                                                              baseFrame,
                                                                                              yoTime,
+                                                                                             enableFunctionGenerators,
                                                                                              parentRegistry,
                                                                                              graphicsListRegistry);
          if (taskspacePositionGains == null)
@@ -140,6 +142,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                      baseFrame,
                                                                                      yoTime,
                                                                                      jointControlHelper,
+                                                                                     enableFunctionGenerators,
                                                                                      graphicsListRegistry,
                                                                                      registry);
          if (taskspaceOrientationGains == null || taskspacePositionGains == null)
