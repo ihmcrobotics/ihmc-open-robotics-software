@@ -147,6 +147,12 @@ public class RDXSceneGraphUI
                      modificationQueue.accept(new SceneGraphNodeAddition(shoe.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(shoe);
                   }
+                  if (ImGui.button(labels.get("Add ThinkPad")))
+                  {
+                     RDXPredefinedRigidBodySceneNode thinkpad = predefinedRigidBodySceneNodeBuilder.build("ThinkPad");
+                     modificationQueue.accept(new SceneGraphNodeAddition(thinkpad.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(thinkpad);
+                  }
                   ImGui.endTable();
                }
                if (!predefinedRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
