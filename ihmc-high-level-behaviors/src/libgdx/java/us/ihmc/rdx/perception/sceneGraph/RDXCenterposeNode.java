@@ -83,7 +83,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
             vertices3D[i] = new FramePoint3D();
          }
          vertices3D[i].changeFrame(ReferenceFrame.getWorldFrame());
-         vertices3D[i].interpolate(vertices[i], 1);
+         vertices3D[i].interpolate(vertices[i], 1); // optional interpolation
       }
       Model boundingBoxModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices3D, 0.005, Color.WHITE));
 

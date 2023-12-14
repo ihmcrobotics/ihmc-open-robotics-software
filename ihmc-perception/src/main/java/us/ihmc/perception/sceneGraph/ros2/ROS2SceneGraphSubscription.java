@@ -129,7 +129,6 @@ public class ROS2SceneGraphSubscription
             centerposeNode.setObjectType(subscriptionNode.getCenterposeNodeMessage().getObjectTypeAsString());
             centerposeNode.setVertices3D(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices());
             centerposeNode.setVertices2D(subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices());
-//            centerposeNode.setBreakFrequency(subscriptionNode.getCenterposeNodeMessage().getBreakFrequency());
          }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {
