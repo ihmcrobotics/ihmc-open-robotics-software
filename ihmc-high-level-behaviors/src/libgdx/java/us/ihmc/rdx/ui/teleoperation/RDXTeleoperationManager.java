@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.teleoperation;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
@@ -15,6 +16,7 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -679,10 +681,5 @@ public class RDXTeleoperationManager extends RDXPanel
    public RDXArmManager getArmManager()
    {
       return armManager;
-   }
-
-   public void moveHand(RobotSide side)
-   {
-      interactableHands.get(side).moveInteractable();
    }
 }

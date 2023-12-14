@@ -14,6 +14,7 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -409,16 +410,6 @@ public class RDXArmManager
       trajectoryTime.replace(side, Math.max(positionDistance / desiredLinearVelocity, angularDistance / desiredAngularVelocity));
    }
 
-   public boolean isTrackingErrorOverThreshold(RobotSide side, double threshold)
-   {
-      FramePose3D currentPoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(), syncedRobot.getReferenceFrames().getHandFrame(side).getTransformToWorldFrame());
-      FramePose3D goalPoseInWorld  = new FramePose3D(ReferenceFrame.getWorldFrame(), desiredRobot.getDesiredFullRobotModel().getHandControlFrame(side).getTransformToWorldFrame());
-      double positionDistance = goalPoseInWorld.getPositionDistance(currentPoseInWorld);
-      double angularDistance = goalPoseInWorld.getOrientationDistance(currentPoseInWorld);
-      LogTools.info(Math.max(positionDistance, angularDistance));
-      return Math.max(positionDistance, angularDistance) > threshold;
-   }
-
    public void adaptIKBasedOnReachability(RobotSide side)
    {
       RigidBodyTransform desiredTransformToWorld = interactableHands.get(side).getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent();
@@ -456,8 +447,27 @@ public class RDXArmManager
       return jointAngles;
    }
 
+   public double[] getCurrentJointAngles(RobotSide side)
+   {
+      double[] jointAngles = new double[armJointNames.get(side).length];
+      int i = -1;
+      for (ArmJointName armJoint : armJointNames.get(side))
+      {
+         jointAngles[++i] = syncedRobot.getFullRobotModel().getArmJoint(side, armJoint).getQ();
+      }
+      return jointAngles;
+   }
+
    public double getTrajectoryTime(RobotSide side)
    {
       return trajectoryTime.get(side);
+   }
+
+   public void moveHand(RobotSide side, double[] qDesireds, double[] qDDesireds)
+   {
+      ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(side, 0.0, qDesireds, qDDesireds, null);
+      message.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
+      message.getJointspaceTrajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
+      communicationHelper.publishToController(message);
    }
 }
