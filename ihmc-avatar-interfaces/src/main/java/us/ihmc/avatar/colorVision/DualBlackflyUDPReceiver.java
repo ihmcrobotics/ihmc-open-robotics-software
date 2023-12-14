@@ -38,7 +38,6 @@ public class DualBlackflyUDPReceiver
             try
             {
                socket = new DatagramSocket(socketAddress);
-//               socket.setReceiveBufferSize(socket.getReceiveBufferSize() * 16);
             }
             catch (SocketException e)
             {
