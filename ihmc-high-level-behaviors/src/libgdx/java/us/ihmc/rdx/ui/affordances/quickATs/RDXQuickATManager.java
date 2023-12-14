@@ -2,20 +2,19 @@ package us.ihmc.rdx.ui.affordances.quickATs;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.nio.BasicPathVisitor;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.rdx.imgui.ImGuiInputText;
@@ -30,8 +29,6 @@ import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
-import us.ihmc.tools.thread.Throttler;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,7 +39,7 @@ import java.util.Collection;
 public class RDXQuickATManager
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final RigidBodySceneNode node;
+   private final SceneNode node;
    private final WorkspaceResourceDirectory resourceDirectory = new WorkspaceResourceDirectory(getClass(), "/quickATs");
    private final ImGuiDirectory quickATDirectory;
    private final ImGuiInputText extraFileNameToSave = new ImGuiInputText("Enter file name (.json)");
@@ -58,7 +55,7 @@ public class RDXQuickATManager
    private SideDependentList<RigidBodyTransform> handFrameTransforms = new SideDependentList<>();
    private final SideDependentList<Double> timeLastCommandHand = new SideDependentList<>();
 
-   public RDXQuickATManager(RigidBodySceneNode node)
+   public RDXQuickATManager(SceneNode node)
    {
       this.node = node;
       String[] nameParts = node.getName().split(" ");
@@ -91,6 +88,14 @@ public class RDXQuickATManager
 
    public void update()
    {
+      if (node instanceof CenterposeNode centerposeNode)
+      {
+         if (centerposeNode.getConfidence() < 0.3 || !centerposeNode.getCurrentlyDetected())
+         {
+            ATTracking = false;
+         }
+      }
+
       if (ATTracking)
       {
          //TODO add other interactable link poses
