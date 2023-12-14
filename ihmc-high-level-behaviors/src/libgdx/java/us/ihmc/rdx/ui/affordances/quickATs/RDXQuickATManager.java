@@ -2,14 +2,19 @@ package us.ihmc.rdx.ui.affordances.quickATs;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImGuiDirectory;
@@ -26,6 +31,7 @@ import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 import us.ihmc.tools.thread.Throttler;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,8 +57,6 @@ public class RDXQuickATManager
    private boolean ATTracking = false;
    private SideDependentList<RigidBodyTransform> handFrameTransforms = new SideDependentList<>();
    private final SideDependentList<Double> timeLastCommandHand = new SideDependentList<>();
-   private final SideDependentList<Double> durationLastCommandHand = new SideDependentList<>();
-   private final Throttler armRecoveryFrequency = new Throttler().setFrequency(1);
 
    public RDXQuickATManager(RigidBodySceneNode node)
    {
@@ -82,7 +86,6 @@ public class RDXQuickATManager
       {
          saveArmsSide.put(side, new ImBoolean(true));
          timeLastCommandHand.put(side, 0.0);
-         durationLastCommandHand.put(side, 0.0);
       }
    }
 
@@ -96,28 +99,31 @@ public class RDXQuickATManager
             // create frame pose to express it in world frame
             FramePose3D handFrame = new FramePose3D(node.getNodeFrame(), handFrameTransforms.get(side));
             teleoperationManager.getArmManager().setDesiredHandFramePose(side, handFrame);
-//            teleoperationManager.getArmManager().computeTrajectoryTime(side, 0.2, 2.0);
-            if ( (System.nanoTime()/1_000_000_000.0 - timeLastCommandHand.get(side)) > durationLastCommandHand.get(side))
-            {
-               if (teleoperationManager.getArmManager().isTrackingErrorOverThreshold(side, 0.05))
-               {
-                  if (armRecoveryFrequency.run())
-                  {
-                     teleoperationManager.getArmManager().computeTrajectoryTime(side, 0.2, 2.0);
-                     teleoperationManager.moveHand(side);
-                     timeLastCommandHand.replace(side, System.nanoTime() / 1_000_000_000.0);
-                     durationLastCommandHand.replace(side, teleoperationManager.getArmManager().getTrajectoryTime(side));
-                  }
-               }
-               else if (teleoperationManager.getArmManager().isTrackingErrorOverThreshold(side, 0.01))
-               {
-                  teleoperationManager.getArmManager().computeTrajectoryTime(side, 0.2, 2.0);
-                  teleoperationManager.moveHand(side);
-                  timeLastCommandHand.replace(side, System.nanoTime() / 1_000_000_000.0);
-                  durationLastCommandHand.replace(side, teleoperationManager.getArmManager().getTrajectoryTime(side));
-               }
+            teleoperationManager.getArmManager().computeTrajectoryTime(side, 0.5, 5.0);
 
+            double timeInTrajectory = System.nanoTime()/1_000_000_000.0 - timeLastCommandHand.get(side);
+            timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, teleoperationManager.getArmManager().getTrajectoryTime(side));
+            double alpha = timeInTrajectory / teleoperationManager.getArmManager().getTrajectoryTime(side);
+
+            double[] qInitials = teleoperationManager.getArmManager().getCurrentJointAngles(side);
+            double[] qGoals = teleoperationManager.getArmManager().getDesiredJointAngles(side);
+            double[] qDesireds = new double[qInitials.length];
+            double[] qDDesireds = new double[qInitials.length];
+
+            for (int i = 0; i < qInitials.length; i++)
+            {
+               double qDes = EuclidCoreTools.interpolate(qInitials[i], qGoals[i], alpha);
+               double qDDes;
+               if (alpha <= 0.0 || alpha >= 1.0)
+                  qDDes = 0.0;
+               else
+                  qDDes = (qGoals[i] - qInitials[i]) / teleoperationManager.getArmManager().getTrajectoryTime(side);
+               qDesireds[i] = qDes;
+               qDDesireds[i] = qDDes;
             }
+
+            timeLastCommandHand.replace(side, System.nanoTime() / 1_000_000_000.0);
+            teleoperationManager.getArmManager().moveHand(side, qDesireds, qDDesireds);
          }
       }
    }
