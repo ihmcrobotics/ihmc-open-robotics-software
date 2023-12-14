@@ -49,7 +49,6 @@ public class DualBlackflyUDPSender
             try
             {
                socket = new DatagramSocket();
-               //               socket.setSendBufferSize(socket.getSendBufferSize() * 16);
             }
             catch (SocketException e)
             {
