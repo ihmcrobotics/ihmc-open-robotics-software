@@ -15,6 +15,7 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -678,5 +679,10 @@ public class RDXTeleoperationManager extends RDXPanel
    public RDXArmManager getArmManager()
    {
       return armManager;
+   }
+
+   public void moveHand(RobotSide side)
+   {
+      interactableHands.get(side).moveInteractable();
    }
 }
