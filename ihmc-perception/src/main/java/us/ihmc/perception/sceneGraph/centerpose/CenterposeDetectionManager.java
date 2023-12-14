@@ -100,18 +100,14 @@ public class CenterposeDetectionManager
                centerposeNodeDetectionFilters.put(centerposeNode.getObjectID(), new TimeBasedDetectionFilter(1.0f, 2));
             }
 
-            // TODO: fix null edge case
-            if (centerposeNodeDetectionFilters.get(centerposeNode.getObjectID()) != null)
-               centerposeNodeDetectionFilters.get(centerposeNode.getObjectID()).registerDetection();
+            centerposeNodeDetectionFilters.get(centerposeNode.getObjectID()).registerDetection();
          });
       }
 
       for (CenterposeNode centerposeNode : sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().valueCollection())
       {
          centerposeNode.update();
-         // TODO: fix null edge case
-         if (centerposeNodeDetectionFilters.get(centerposeNode.getObjectID()) != null)
-            centerposeNode.setCurrentlyDetected(centerposeNodeDetectionFilters.get(centerposeNode.getObjectID()).isDetected());
+         centerposeNode.setCurrentlyDetected(centerposeNodeDetectionFilters.get(centerposeNode.getObjectID()).isDetected());
       }
    }
 
