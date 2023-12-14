@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,6 +18,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.RDX3DSituatedTextData;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -41,6 +43,9 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    private final FramePoint3D[] vertices3D = new FramePoint3D[8];
    private final RDX3DPanel panel3D;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final ImBoolean showBoundingBox = new ImBoolean(false);
+
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    @Nullable
    private RDXInteractableObject interactableObject;
@@ -80,7 +85,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
             vertices3D[i] = new FramePoint3D();
          }
          vertices3D[i].changeFrame(ReferenceFrame.getWorldFrame());
-         vertices3D[i].interpolate(vertices[i], 0.2);
+         vertices3D[i].interpolate(vertices[i], 1);
       }
       Model boundingBoxModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices3D, 0.005, Color.WHITE));
 
@@ -149,6 +154,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
+      ImGui.checkbox(labels.get("Show bounding box"), showBoundingBox);
       ImGui.text("ID: %d".formatted(centerposeNode.getObjectID()));
       ImGui.sameLine();
    }
@@ -162,14 +168,12 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
          if (boundingBoxModelInstance != null)
          {
             text.getRenderables(renderables, pool);
-            // TODO: add button for enabling this
-//            boundingBoxModelInstance.getRenderables(renderables, pool);
+            if (showBoundingBox.get())
+               boundingBoxModelInstance.getRenderables(renderables, pool);
          }
 
          if (interactableObject != null)
-         {
             interactableObject.getRenderables(renderables, pool);
-         }
       }
    }
 
