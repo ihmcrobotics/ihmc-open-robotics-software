@@ -141,6 +141,12 @@ public class RDXSceneGraphUI
                      modificationQueue.accept(new SceneGraphNodeAddition(twoByFour.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(twoByFour);
                   }
+                  if (ImGui.button(labels.get("Add Shoe")))
+                  {
+                     RDXPredefinedRigidBodySceneNode shoe = predefinedRigidBodySceneNodeBuilder.build("Shoe");
+                     modificationQueue.accept(new SceneGraphNodeAddition(shoe.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(shoe);
+                  }
                   ImGui.endTable();
                }
                if (!predefinedRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())

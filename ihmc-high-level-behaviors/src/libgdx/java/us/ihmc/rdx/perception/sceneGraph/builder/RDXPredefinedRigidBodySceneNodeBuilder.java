@@ -1,5 +1,6 @@
 package us.ihmc.rdx.perception.sceneGraph.builder;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.rdx.perception.sceneGraph.RDXPredefinedRigidBodySceneNode;
@@ -58,6 +59,17 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                       DEBRIS_VISUAL_MODEL_FILE_PATH,
                                                                                       DEBRIS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             yield new RDXPredefinedRigidBodySceneNode(twoByFour, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
+         case "Shoe" ->
+         {
+            PredefinedRigidBodySceneNode shoe = new PredefinedRigidBodySceneNode(nextID,
+                                                                                      name.get(),
+                                                                                      sceneGraph.getIDToNodeMap(),
+                                                                                      parent.getID(),
+                                                                                      new RigidBodyTransform(),
+                                                                                      SHOE_VISUAL_MODEL_FILE_PATH,
+                                                                                      SHOE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            yield new RDXPredefinedRigidBodySceneNode(shoe, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          default -> throw new IllegalStateException("Unexpected value: " + name);
       };
