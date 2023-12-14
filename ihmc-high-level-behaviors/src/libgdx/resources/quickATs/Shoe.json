@@ -1,0 +1,12 @@
+{
+  "name" : "Shoe",
+  "arms" : [ {
+    "side" : "left",
+    "x" : -0.001,
+    "y" : 0.1045,
+    "z" : -0.061,
+    "rollInDegrees" : 138.5,
+    "pitchInDegrees" : -84.8,
+    "yawInDegrees" : 135.42
+  } ]
+}

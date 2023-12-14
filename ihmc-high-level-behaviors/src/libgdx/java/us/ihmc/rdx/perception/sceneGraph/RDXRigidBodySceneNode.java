@@ -91,6 +91,8 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
       visualModelToWorldTransform.set(visualModelPose);
 
       getModelInstance().setTransformToWorldFrame(visualModelToWorldTransform);
+
+      quickATManager.update();
    }
 
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)

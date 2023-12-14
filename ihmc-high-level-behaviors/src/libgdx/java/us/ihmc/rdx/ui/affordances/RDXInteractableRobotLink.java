@@ -349,4 +349,9 @@ public class RDXInteractableRobotLink
    {
       isMouseHovering = true;
    }
+
+   public void moveInteractable()
+   {
+      onSpacePressed.run();
+   }
 }

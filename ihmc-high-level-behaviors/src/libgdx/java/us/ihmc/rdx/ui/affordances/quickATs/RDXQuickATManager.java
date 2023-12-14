@@ -25,6 +25,7 @@ import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
+import us.ihmc.tools.thread.Throttler;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,6 +47,12 @@ public class RDXQuickATManager
    private final ImBoolean saveFootsteps = new ImBoolean(false);
    private final SideDependentList<ImBoolean> saveArmsSide = new SideDependentList<>();
    private RDXArmControlMode armControlMode = RDXArmControlMode.POSE_WORLD;
+
+   private boolean ATTracking = false;
+   private SideDependentList<RigidBodyTransform> handFrameTransforms = new SideDependentList<>();
+   private final SideDependentList<Double> timeLastCommandHand = new SideDependentList<>();
+   private final SideDependentList<Double> durationLastCommandHand = new SideDependentList<>();
+   private final Throttler armRecoveryFrequency = new Throttler().setFrequency(1);
 
    public RDXQuickATManager(RigidBodySceneNode node)
    {
@@ -74,6 +81,44 @@ public class RDXQuickATManager
       for (RobotSide side : RobotSide.values)
       {
          saveArmsSide.put(side, new ImBoolean(true));
+         timeLastCommandHand.put(side, 0.0);
+         durationLastCommandHand.put(side, 0.0);
+      }
+   }
+
+   public void update()
+   {
+      if (ATTracking)
+      {
+         //TODO add other interactable link poses
+         for (RobotSide side : handFrameTransforms.keySet())
+         {
+            // create frame pose to express it in world frame
+            FramePose3D handFrame = new FramePose3D(node.getNodeFrame(), handFrameTransforms.get(side));
+            teleoperationManager.getArmManager().setDesiredHandFramePose(side, handFrame);
+//            teleoperationManager.getArmManager().computeTrajectoryTime(side, 0.2, 2.0);
+            if ( (System.nanoTime()/1_000_000_000.0 - timeLastCommandHand.get(side)) > durationLastCommandHand.get(side))
+            {
+               if (teleoperationManager.getArmManager().isTrackingErrorOverThreshold(side, 0.05))
+               {
+                  if (armRecoveryFrequency.run())
+                  {
+                     teleoperationManager.getArmManager().computeTrajectoryTime(side, 0.2, 2.0);
+                     teleoperationManager.moveHand(side);
+                     timeLastCommandHand.replace(side, System.nanoTime() / 1_000_000_000.0);
+                     durationLastCommandHand.replace(side, teleoperationManager.getArmManager().getTrajectoryTime(side));
+                  }
+               }
+               else if (teleoperationManager.getArmManager().isTrackingErrorOverThreshold(side, 0.01))
+               {
+                  teleoperationManager.getArmManager().computeTrajectoryTime(side, 0.2, 2.0);
+                  teleoperationManager.moveHand(side);
+                  timeLastCommandHand.replace(side, System.nanoTime() / 1_000_000_000.0);
+                  durationLastCommandHand.replace(side, teleoperationManager.getArmManager().getTrajectoryTime(side));
+               }
+
+            }
+         }
       }
    }
 
@@ -122,6 +167,23 @@ public class RDXQuickATManager
          ImGui.text("Saving Pending ...");
          ImGui.popStyleColor();
       }
+
+      if (!loadingFileName.isEmpty())
+      {
+         boolean changedColorPreviewButton = false;
+         if (ATTracking)
+         {
+            ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
+            changedColorPreviewButton = true;
+         }
+         if (ImGui.button(labels.get("AT Tracking")))
+         {
+            ATTracking = !ATTracking;
+         }
+         if (changedColorPreviewButton)
+            ImGui.popStyleColor();
+
+      }
    }
 
    public void setLoadingFile(String fileName)
@@ -146,6 +208,7 @@ public class RDXQuickATManager
                   // get transform from json
                   RigidBodyTransform handFrameTransform = new RigidBodyTransform();
                   JSONTools.toEuclid(armsNode, handFrameTransform);
+                  handFrameTransforms.put(side, handFrameTransform);
                   // create frame pose to express it in world frame
                   FramePose3D handFrame = new FramePose3D(node.getNodeFrame(), handFrameTransform);
                   teleoperationManager.getArmManager().setDesiredHandFramePose(side, handFrame);
