@@ -1,6 +1,5 @@
 import os, time
 from typing import List, Optional
-from threading import Lock
 
 import cv2
 import h5py
@@ -16,13 +15,11 @@ from perception_msgs.msg import ImageMessage
 
 from lib.opts import opts
 from lib.detectors.object_pose import ObjectPoseDetector
-from models import CenterPoseModels, archType, experiment_type
+from models import CenterPoseTrackModels, CenterPoseModels, archType, experiment_type
 from dataclasses import dataclass
 
 @dataclass
 class Detection():
-    cameraPose : Pose = None
-    object_id : int = 0
     stabilizer : int = 0
     sequence_id : int = 0
     skipDetaction : bool = False
@@ -34,55 +31,31 @@ class Detection():
     quaternion_xyzw: Rotation = Rotation.from_quat([0, 0, 0, 1])
     position: np.ndarray = np.zeros((3))
 
-@dataclass
-class swapRef:
-    var1: ImageMessage = None
-    var2: ImageMessage = None
-    lock: Lock = Lock()
-
-    def set_var1(self, value):
-        with self.lock:
-            self.var1 = value
-            self.swap()
-
-    def get_var2(self):
-        with self.lock:
-            return self.var2
-
-    def swap(self):
-        self.var1, self.var2 = self.var2, self.var1
 
 class ZED2CenterposeNode():
     def __init__(self, experiment:experiment_type):
         self.experiment = experiment
 
         # Default params with commandline input
-        opts_args = opts()
-        opts_args.parser.add_argument('--model', type=CenterPoseModels.argtype, default=CenterPoseModels.MUG, choices=CenterPoseModels)
-        self.opt = opts_args.parser.parse_args()
+        self.opt = opts().parser.parse_args()
 
-        self.my_model = self.opt.model
-        self.opt.tracking_task = self.opt.tracking
-
-        self.myModelName = self.my_model.name
-        print("Detecting " + self.myModelName)
-        self.myModelID = self.my_model.value.getID()
-        self.scale = self.my_model.value.getModelScale()
-
+        self.opt.tracking_task = False
         if self.opt.tracking_task == True:
-            print(0)
-            self.opt.arch = archType.TRACKING.value
-            self.opt.load_model = self.my_model.value.getTrackingModelPath()
+            my_archType = archType.TRACKING
+            my_model = CenterPoseTrackModels.MUG
         else:
-            print(1)
-            self.opt.arch = archType.NOTRACKING.value
-            self.opt.load_model = self.my_model.value.getModelPath()
+            my_archType = archType.NOTRACKING
+            my_model = CenterPoseModels.MUG
+        self.scale = 10.0
+        
+        self.opt.arch = my_archType.value
+        self.opt.load_model = my_model.value
+        self.opt.debug = 5
 
         # Default setting
-        self.opt.debug = 5
         self.opt.nms = True
         self.opt.obj_scale = True
-        self.image_process_frequency = 60
+        self.image_process_frequency = 5
         self.image_process_period_ns = int(1e9 / self.image_process_frequency)
         self.last_image_process_time_ns = 0
 
@@ -122,10 +95,10 @@ class ZED2CenterposeNode():
         self.opt.use_pnp = True
 
         # Update default configurations
-        self.opt = opts_args.parse(self.opt)
+        self.opt = opts().parse(self.opt)
 
         # Update dataset info/training params
-        self.opt = opts_args.init(self.opt)
+        self.opt = opts().init(self.opt)
 
         if self.opt.use_pnp == True and 'camera_matrix' not in self.meta.keys():
             raise RuntimeError('Error found. Please give the camera matrix when using pnp algorithm!')
@@ -134,12 +107,10 @@ class ZED2CenterposeNode():
         self.opt.debug = max(self.opt.debug, 1)
         self.detector = ObjectPoseDetector(self.opt)
         self.detector.pause = False
-
+        
         if (self.experiment==experiment_type.LIVE):
             self.ros2_node = Node('zed2_centerpose_node')
-
-            self.depthImageSwapReference = swapRef()
-
+            
             qos_profile = QoSProfile(
                 reliability=QoSReliabilityPolicy.BEST_EFFORT,
                 history=QoSHistoryPolicy.KEEP_LAST,
@@ -148,13 +119,7 @@ class ZED2CenterposeNode():
             self.subscription = self.ros2_node.create_subscription(
                 ImageMessage,
                 '/ihmc/zed2/left_color',
-                self.listener_color_callback,
-                qos_profile)
-
-            self.subscription = self.ros2_node.create_subscription(
-                ImageMessage,
-                '/ihmc/zed2/depth',
-                self.listener_depth_callback,
+                self.listener_callback,
                 qos_profile)
 
             # Create a publisher for the pose topic
@@ -162,7 +127,7 @@ class ZED2CenterposeNode():
             self.detected_object = DetectedObjectPacket()
 
             self.ros2_node.get_logger().info("Waiting for an Image...")
-
+        
         elif (self.experiment==experiment_type.VIDEO):
             fps = 5
 
@@ -180,7 +145,7 @@ class ZED2CenterposeNode():
                 colorBufferImage = cv2.imdecode(colorBufferImage, cv2.IMREAD_COLOR)
 
                 detection:Detection = self.processImage(colorBufferImage)
-
+                
                 # if detection is not None and isinstance(detection, Detection):
                 #     if detection.skipDetaction == False:
                 #         cv2.line(colorBufferImage, tuple(detection.kps_2d_array[0,:]), tuple(detection.kps_2d_array[1,:]), (0, 0, 225), 2)
@@ -197,21 +162,14 @@ class ZED2CenterposeNode():
                 #         cv2.line(colorBufferImage, tuple(detection.kps_2d_array[6,:]), tuple(detection.kps_2d_array[7,:]), (0, 0, 225), 2)
 
                 # img = cv2.hconcat([colorBufferImage, depthBufferImage])
-
+                
             #     cv2.imshow(img)
             #     cv2.waitKey(1000//fps)
 
             # # Close all windows
             # cv2.destroyAllWindows()
 
-    def listener_depth_callback(self, msg):
-        self.depthImageSwapReference.set_var1(msg)
-
-    def checkForFalseDetections(self, image:ImageMessage, detection:Detection):
-        # TODO
-        return detection
-
-    def listener_color_callback(self, msg):
+    def listener_callback(self, msg):
         # Skip the ImageMessage if not enough time has passed since we processed the last one to save CPU - it can't
         # keep up at 30hz even on an i7 13700 -danderson
         if time.time_ns() - self.last_image_process_time_ns < self.image_process_period_ns:
@@ -221,24 +179,12 @@ class ZED2CenterposeNode():
         self.ros2_node.get_logger().info("Processing ImageMessage #" + str(msg.sequence_number))
         image_np = np.frombuffer(b''.join(msg.data), dtype=np.uint8)
         image = cv2.imdecode(image_np, cv2.COLOR_BGR2RGB)
-
-        x_pixels_width = 720
-        y_pixels_height = 200
-        x = 1280 - x_pixels_width
-        y = 720 - y_pixels_height
-        # cv2.rectangle(image, (x, y), (x + x_pixels_width, y + y_pixels_height), (0, 0, 0), -1)
-        cv2.rectangle(image, (600, 520), (1280, 720), (0, 0, 0), -1)
-
+        
         detection:Detection = self.processImage(image)
 
         if detection is not None and isinstance(detection, Detection):
-            detection.cameraPose = Pose(position=msg.position, orientation=msg.orientation)
-
-            # # TODO: use Depth Image
-            # detection = checkForFalseDetections(self.depthImageSwapReference.get_var2(), detection)
-
             self.publish_message(detection)
-
+        
     def processImage(self, image) -> Optional[Detection]:
         ret = self.detector.run(np.asarray(image), meta_inp=self.meta)
 
@@ -246,8 +192,7 @@ class ZED2CenterposeNode():
             detection = Detection()
 
             detection.confidence = ret['results'][0]['score']
-            detection.objectType = self.myModelName
-            detection.object_id = self.myModelID
+            detection.objectType = "cup"
 
             if 'kps_3d_cam' in ret['results'][0]:
                 detection.kps_3d = []
@@ -269,7 +214,7 @@ class ZED2CenterposeNode():
                 detection.kps_2d = detection.kps_2d[-8:]
             else:
                 detection.skipDetaction = True
-
+            
             if 'location' in ret['results'][0]:
                 detection.quaternion_xyzw = Rotation.from_quat([ret['results'][0]['quaternion_xyzw'][0],
                                                                 ret['results'][0]['quaternion_xyzw'][1],
@@ -280,14 +225,13 @@ class ZED2CenterposeNode():
                                                ret['results'][0]['location'][2]])/self.scale
             else:
                 detection.skipDetaction = True
-
+        
             return detection
         else:
             return None
 
     def publish_message(self, detection:Detection):
         if detection.skipDetaction == False:
-            self.detected_object.id = detection.object_id
             detection.sequence_id += 1
             self.detected_object.sequence_id = detection.sequence_id
             self.detected_object.confidence = detection.confidence
@@ -304,8 +248,6 @@ class ZED2CenterposeNode():
                 detection.stabilizer += 1
             self.detected_object.sequence_id = detection.sequence_id
             self.ros2_node.get_logger().info('No Object Detected in the Image!')
-
-        self.detected_object.sensor_pose = detection.cameraPose
 
         self.centerpose_publisher_.publish(self.detected_object)
 

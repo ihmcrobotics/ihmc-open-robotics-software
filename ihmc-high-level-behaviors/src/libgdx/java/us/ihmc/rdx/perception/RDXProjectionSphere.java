@@ -1,11 +1,13 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -34,12 +36,11 @@ public class RDXProjectionSphere
    private final ImDouble sphereRadius = new ImDouble(20.0);
    private final ImInt sphereLatitudeVertices = new ImInt(100);
    private final ImInt sphereLongitudeVertices = new ImInt(100);
-   private final ImBoolean syncProjectionScales = new ImBoolean(false);
-   private final ImDouble focalLengthX = new ImDouble(0.560838);
-   private final ImDouble focalLengthY = new ImDouble(1.0);
+   private final ImBoolean syncProjectionScales = new ImBoolean(true);
+   private final ImDouble focalLengthX = new ImDouble(0.45);
+   private final ImDouble focalLengthY = new ImDouble(0.45);
    private final ImDouble principlePointX = new ImDouble(0.0);
    private final ImDouble principlePointY = new ImDouble(0.0);
-   private final ImBoolean renderSphereIfNoTexture = new ImBoolean(true);
    private Model model;
    private final Vector3D vertexRay = new Vector3D();
    private Mesh mesh;
@@ -68,9 +69,8 @@ public class RDXProjectionSphere
       {
          ImGui.endDisabled();
       }
-      rebuildMesh |= ImGuiTools.volatileInputDouble(labels.get("Principle point X (Cx)"), principlePointX);
-      rebuildMesh |= ImGuiTools.volatileInputDouble(labels.get("Principle point Y (Cy)"), principlePointY);
-      rebuildMesh |= ImGui.checkbox(labels.get("Render sphere if no texture"), renderSphereIfNoTexture);
+      rebuildMesh |= ImGuiTools.volatileInputDouble(labels.get("Priciple point X (Cx)"), principlePointX);
+      rebuildMesh |= ImGuiTools.volatileInputDouble(labels.get("Priciple point Y (Cy)"), principlePointY);
 
       if (rebuildMesh)
          rebuildUVSphereMesh();
@@ -93,12 +93,11 @@ public class RDXProjectionSphere
          double angleOfIncidence = EuclidCoreMissingTools.angleFromFirstToSecondVector3D(Axis3D.X, vertexRay);
          double azimuthalAngle = Math.atan2(-vertex.getZ(), -vertex.getY());
 
-
          double imageX = principlePointX.get() + focalLengthX.get() * angleOfIncidence * Math.cos(azimuthalAngle);
          double imageY = principlePointY.get() + focalLengthY.get() * angleOfIncidence * Math.sin(azimuthalAngle);
 
          texturePoint.setX(imageX + 0.5);
-         texturePoint.setY(imageY + 0.0);
+         texturePoint.setY(imageY + 0.5);
       }
 
       mesh = RDXMeshDataInterpreter.interpretMeshData(sphereMeshDataHolder);
@@ -110,6 +109,7 @@ public class RDXProjectionSphere
       Material material = new Material();
       if (latestTexture != null)
          material.set(TextureAttribute.createDiffuse(latestTexture));
+      material.set(ColorAttribute.createDiffuse(Color.WHITE));
       modelBuilder.part(meshPart, material);
 
       if (model != null)
@@ -122,8 +122,6 @@ public class RDXProjectionSphere
 
    public void updateTexture(Texture texture)
    {
-      if (this.latestTexture != null)
-         this.latestTexture.dispose();
       this.latestTexture = texture;
       Material material = model.nodes.get(0).parts.get(0).material;
       material.set(TextureAttribute.createDiffuse(texture));
@@ -132,12 +130,7 @@ public class RDXProjectionSphere
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      boolean skipRenderables = false;
-      if (!renderSphereIfNoTexture.get() && latestTexture == null)
-         skipRenderables = true;
-
-      if (modelInstance != null && !skipRenderables)
-         modelInstance.getRenderables(renderables, pool);
+      modelInstance.getRenderables(renderables, pool);
    }
 
    public ModelInstance getModelInstance()

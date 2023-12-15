@@ -1,10 +1,17 @@
-package us.ihmc.behaviors.tools;
+package us.ihmc.rdx.ui.tools;
+
+import us.ihmc.log.LogTools;
 
 import java.io.*;
+import java.lang.reflect.Array;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Class to record and replay multidimensional trajectories.
@@ -18,12 +25,12 @@ public class TrajectoryRecordReplay
 {
    private String filePath;
    private int numberOfParts; // specify the number of parts you want to record (e.g., left hand, right hand, chest)
-   private final List<double[]> dataMatrix = new ArrayList<>();
-   private final List<double[]> concatenatedDataMatrix = new ArrayList<>();
-   private final List<double[]> splitDataMatrix = new ArrayList<>();
+   private final ArrayList<double[]> dataMatrix = new ArrayList<>();
+   private final ArrayList<double[]> concatenatedDataMatrix = new ArrayList<>();
+   private final ArrayList<double[]> splitDataMatrix = new ArrayList<>();
    private int timeStepReplay = 0;
    private boolean savedRecording = true;
-   private boolean doneReplaying = false;
+   private boolean doneReplaying = true;
    private boolean concatenated = false;
    private String recordFileName = "";
 
@@ -157,7 +164,7 @@ public class TrajectoryRecordReplay
       }
    }
 
-   public void writeCSV(List<double[]> dataMatrix)
+   public void writeCSV(ArrayList<double[]> dataMatrix)
    {
       // if recordFile name has not been set, generate file with current date and time as name
       String fileName = "";
@@ -171,19 +178,15 @@ public class TrajectoryRecordReplay
       File csvFile = new File(filePath + "/" + fileName);
       try (PrintWriter writer = new PrintWriter(csvFile))
       {
-         for (int row = 0; row < dataMatrix.size(); row++)
+         for (double[] dataLine : dataMatrix)
          {
-            double[] dataLine = dataMatrix.get(row);
-            for (int col = 0; col < dataLine.length; col++)
+            for (int i = 0; i < dataLine.length; i++)
             {
-               writer.print(dataLine[col]);
-               if (col < dataLine.length - 1)
+               writer.print(dataLine[i]);
+               if (i < dataLine.length - 1)
                   writer.append(",");
             }
-            if (row < dataMatrix.size() - 1)
-            {
-               writer.println();
-            }
+            writer.println();
          }
       }
       catch (IOException e)
@@ -249,19 +252,14 @@ public class TrajectoryRecordReplay
       this.numberOfParts = numberOfParts;
    }
 
-   public List<double[]> getData()
+   public ArrayList<double[]> getData()
    {
       return dataMatrix;
    }
 
-   public List<double[]> getConcatenatedData()
+   public ArrayList<double[]> getConcatenatedData()
    {
       return concatenatedDataMatrix;
-   }
-
-   public int getTimeStepReplay()
-   {
-      return timeStepReplay;
    }
 
    public String getRecordFileName()
