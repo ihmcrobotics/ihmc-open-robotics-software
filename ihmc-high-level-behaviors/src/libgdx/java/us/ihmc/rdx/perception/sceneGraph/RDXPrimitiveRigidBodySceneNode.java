@@ -14,7 +14,6 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
@@ -79,11 +78,11 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
 
       requestPublisherThread = new RestartableThrottledThread(getClass().getName() + getSceneNode().getID() + "ICPRequest",
                                                               ICP_REQUEST_FREQUENCY,
-                                                              this::publishICPRequest);
+                                                              this::updateICP);
       icpResultSubscription = ros2Helper.subscribe(PerceptionAPI.ICP_RESULT, message -> message.getId() == getSceneNode().getID());
    }
 
-   private void publishICPRequest()
+   private void updateICP()
    {
       IterativeClosestPointRequest requestMessage = new IterativeClosestPointRequest();
       requestMessage.setNodeId(getSceneNode().getID());

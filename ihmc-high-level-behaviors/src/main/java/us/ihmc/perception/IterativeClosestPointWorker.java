@@ -52,8 +52,11 @@ public class IterativeClosestPointWorker
    private RecyclingArrayList<Point3D32> objectInWorldPoints;
 
    private final AtomicBoolean useTargetPoint = new AtomicBoolean(true);
+   // Point around which ICP will segment the environment point cloud
    private final FramePoint3D targetPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
+   // This is the centroid of the ICP object point cloud, updated after each iteration
    private final FramePoint3D lastCentroidPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
+   // FIXME: Calculations of this orientation are incorrect
    private final Quaternion orientation = new Quaternion();
 
 
@@ -103,23 +106,18 @@ public class IterativeClosestPointWorker
       }
    }
 
-   public void setEnvironmentPointCloud(RecyclingArrayList<Point3D32> pointCloud)
-   {
-      synchronized (environmentPointCloudSynchronizer)
-      {
-         environmentPointCloud = pointCloud;
-      }
-   }
-
    public void runICP(int numberOfIterations)
    {
+      // Determine around where the point cloud should be segmented
+      // (user provided point or last centroid)
       FramePoint3D detectionPoint;
       if (useTargetPoint.get())
          detectionPoint = new FramePoint3D(targetPoint);
       else
          detectionPoint = new FramePoint3D(lastCentroidPoint);
 
-      synchronized (environmentPointCloudSynchronizer)
+      // Segment the point cloud
+      synchronized (environmentPointCloudSynchronizer) // synchronize as to avoid changes to environment point cloud while segmenting it
       {
          if (environmentPointCloud == null)
             return;
@@ -127,6 +125,7 @@ public class IterativeClosestPointWorker
          segmentPointCloud(environmentPointCloud, detectionPoint, segmentSphereRadius);
       }
 
+      // Only run ICP iteration if segmented point cloud has enough points
       if (segmentedPointCloud.size() >= numberOfICPObjectPoints)
       {
          for (int i = 0; i < numberOfIterations; ++i)
@@ -135,6 +134,7 @@ public class IterativeClosestPointWorker
          }
       }
 
+      // Send result message
       if (sceneNodeID != -1L)
       {
          DetectedObjectPacket resultMessage = new DetectedObjectPacket();
@@ -367,6 +367,18 @@ public class IterativeClosestPointWorker
             Point3D32 segmentPoint = segmentedPointCloud.add();
             segmentPoint.set(point);
          }
+      }
+   }
+
+   // TODO: Color filtering could go here
+   // pass in depth and color image -> cut out invalid pixels of depth image based on color image ->
+   // -> create "environmentPointCloud" based off the color-filtered depth image ->
+   // -> set the segmentation radius to be large (1.0~1.5?)
+   public void setEnvironmentPointCloud(RecyclingArrayList<Point3D32> pointCloud)
+   {
+      synchronized (environmentPointCloudSynchronizer)
+      {
+         environmentPointCloud = pointCloud;
       }
    }
 

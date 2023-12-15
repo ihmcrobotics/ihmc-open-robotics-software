@@ -13,6 +13,9 @@ import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
 
 import java.nio.FloatBuffer;
 
+/**
+ * Class used to get a RecyclingArrayList of Point3D32s (point cloud) from a 16UC1 depth image
+ */
 public class OpenCLPointCloudExtractor
 {
    private static final int FLOATS_PER_PIXEL = 3;
