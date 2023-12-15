@@ -4,15 +4,19 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImFloat;
+import imgui.type.ImInt;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.IterativeClosestPointWorker;
+import us.ihmc.perception.OpenCLPointCloudExtractor;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.pubsub.DomainFactory;
@@ -23,6 +27,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -39,18 +44,21 @@ public class RDXIterativeClosestPointWorkerDemo
    private static final int MAX_ENVIRONMENT_SIZE = 1000;
 
    private final OpenCLManager openCLManager = new OpenCLManager();
+   private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor(openCLManager);
    private final Random random = new Random(System.nanoTime());
 
-   private final IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(MAX_ENVIRONMENT_SIZE, openCLManager, random);
    private final ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "icp_worker_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(node);
    private final ZEDColorDepthImageRetriever zedImageRetriever;
    private final ZEDColorDepthImagePublisher zedImagePublisher;
    private RawImage zedDepthImage;
    private RawImage zedLeftColorImage;
+   private final IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(MAX_ENVIRONMENT_SIZE, ros2Helper, random);
+
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
+   private RDXReferenceFrameGraphic referenceFrameGraphic;
 
    private ModelInstance mousePickSphere;
    FramePoint3D pickFramePoint = new FramePoint3D();
@@ -63,6 +71,12 @@ public class RDXIterativeClosestPointWorkerDemo
    private final RecyclingArrayList<Point3D32> segmentedPtCld = new RecyclingArrayList<>(Point3D32::new);
 
    private boolean mouseTrackingToggle = true;
+
+   private final ImFloat width = new ImFloat(0.405f);
+   private final ImFloat height = new ImFloat(0.31f);
+   private final ImFloat depth = new ImFloat(0.19f);
+   private final ImInt numberOfPoints = new ImInt(1000);
+   private final ImFloat segmentationRadius = new ImFloat(0.2f);
 
    public RDXIterativeClosestPointWorkerDemo()
    {
@@ -85,12 +99,12 @@ public class RDXIterativeClosestPointWorkerDemo
       zedLeftColorImage = zedImageRetriever.getLatestRawColorImage(RobotSide.LEFT);
 
       if (zedDepthImage != null && !zedDepthImage.isEmpty())
-         icpWorker.setEnvironmentPointCloud(zedDepthImage);
+         icpWorker.setEnvironmentPointCloud(pointCloudExtractor.extractPointCloud(zedDepthImage));
 
-      if (mouseTrackingToggle)
-         icpWorker.runICP(pickFramePoint, 0.25, 1);
-      else
-         icpWorker.runICP(null, 0.3, 3);
+      icpWorker.setTargetPoint(pickFramePoint);
+      icpWorker.useProvidedTargetPoint(mouseTrackingToggle);
+      icpWorker.setSegmentSphereRadius(segmentationRadius.get());
+      icpWorker.runICP(1);
 
       List<Point3D32> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
       segmentedPtCld.clear();
@@ -103,6 +117,8 @@ public class RDXIterativeClosestPointWorkerDemo
          }
          segmentedPointCloudRenderer.setPointsToRender(segmentedPtCld, Color.GRAY);
       }
+
+      referenceFrameGraphic.setPoseInWorldFrame(new Pose3D(icpWorker.getCentroid(), icpWorker.getOrientation()));
 
       zedImagePublisher.setNextColorImage(zedLeftColorImage.get(), RobotSide.LEFT);
       zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
@@ -140,6 +156,11 @@ public class RDXIterativeClosestPointWorkerDemo
                                                                                                                 PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             perceptionVisualizerPanel.addVisualizer(zedPointCloudVisualizer, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
 
+            baseUI.getImGuiPanelManager().addPanel("Settings", this::renderSettings);
+
+            referenceFrameGraphic = new RDXReferenceFrameGraphic(0.3);
+            baseUI.getPrimaryScene().addRenderableProvider(referenceFrameGraphic);
+
             baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
             baseUI.create();
             baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
@@ -155,7 +176,7 @@ public class RDXIterativeClosestPointWorkerDemo
             }
 
             icpBoxPointCloud.clear();
-            objectPointCloud = icpWorker.getObjectPointcloud();
+            objectPointCloud = icpWorker.getObjectPointCloud();
             if (objectPointCloud != null && !objectPointCloud.isEmpty())
             {
                for (int i = 0; i < MAX_ENVIRONMENT_SIZE && i < objectPointCloud.size(); ++i)
@@ -182,6 +203,19 @@ public class RDXIterativeClosestPointWorkerDemo
             zedImageRetriever.destroy();
             perceptionVisualizerPanel.destroy();
             baseUI.dispose();
+         }
+
+         private void renderSettings()
+         {
+            ImGui.sliderFloat("Width", width.getData(), 0.0f, 1.0f);
+            ImGui.sliderFloat("Height", height.getData(), 0.0f, 1.0f);
+            ImGui.sliderFloat("Depth", depth.getData(), 0.0f, 1.0f);
+            ImGui.sliderInt("Num Points", numberOfPoints.getData(), 0, 10000);
+            if (ImGui.button("Apply Size"))
+            {
+               icpWorker.changeSize(width.get(), height.get(), depth.get(), 0.0f, 0.0f, numberOfPoints.get());
+            }
+            ImGui.sliderFloat("Segmentation Radisu", segmentationRadius.getData(), 0.0f, 1.0f);
          }
 
          private void calculatePickPoint(us.ihmc.rdx.input.ImGui3DViewInput input)

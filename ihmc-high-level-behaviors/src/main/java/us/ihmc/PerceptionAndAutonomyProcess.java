@@ -1,5 +1,6 @@
 package us.ihmc;
 
+import boofcv.alg.sfm.DepthSparse3D;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.colorVision.BlackflyImagePublisher;
 import us.ihmc.avatar.colorVision.BlackflyImageRetriever;
@@ -13,6 +14,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.IterativeClosestPointManager;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
@@ -120,6 +122,8 @@ public class PerceptionAndAutonomyProcess
    private final CenterposeDetectionManager centerposeDetectionManager;
    private ROS2DemandGraphNode centerposeDemandNode;
 
+   private final IterativeClosestPointManager icpManager;
+
    // Sensor heartbeats to run main method without UI
    private ROS2Heartbeat zedHeartbeat;
    private ROS2Heartbeat realsenseHeartbeat;
@@ -174,6 +178,9 @@ public class PerceptionAndAutonomyProcess
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2Helper, zed2iLeftCameraFrame);
 
+      icpManager = new IterativeClosestPointManager(ros2Helper, sceneGraph);
+      icpManager.startWorkers();
+
       sceneGraphUpdateThread.start(); // scene graph runs at all times
    }
 
@@ -216,6 +223,7 @@ public class PerceptionAndAutonomyProcess
             blackflyImageRetrievers.get(side).destroy();
       }
 
+      icpManager.destroy();
 
       zedPointCloudDemandNode.destroy();
       zedColorDemandNode.destroy();
@@ -251,7 +259,8 @@ public class PerceptionAndAutonomyProcess
             zedColorImages.put(side, zedImageRetriever.getLatestRawColorImage(side));
          }
 
-         // Do processing on image
+         if (zedDepthImage != null && !zedDepthImage.isEmpty())
+            icpManager.setEnvironmentPointCloud(zedDepthImage);
 
          zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
          for (RobotSide side : RobotSide.values)

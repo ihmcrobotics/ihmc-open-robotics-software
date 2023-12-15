@@ -86,4 +86,17 @@ public class OpenCLPointCloudExtractor
 
       return pointCloud;
    }
+
+   public void destroy()
+   {
+      if (bytedecoDepthImage != null)
+         bytedecoDepthImage.destroy(openCLManager);
+      if (depthImage != null)
+         depthImage.release();
+
+      openCLProgram.close();
+      kernel.close();
+
+      openCLManager.destroy();
+   }
 }
