@@ -1,6 +1,6 @@
 
 # Parent definition fields
-behavior_msgs/BehaviorActionDefinitionMessage action_definition
+behavior_msgs/ActionNodeDefinitionMessage definition
 
 # Specifies the side of the robot that this message refers to.
 # Field default value 255

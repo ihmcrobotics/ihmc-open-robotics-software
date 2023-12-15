@@ -646,6 +646,7 @@ public class YoFunctionGeneratorNew
          else
          {
             dt = time - timePrevious;
+            timePrevious = time;
          }
       }
 

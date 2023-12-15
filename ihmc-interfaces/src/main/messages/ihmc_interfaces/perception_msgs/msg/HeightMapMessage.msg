@@ -19,17 +19,17 @@ float64 grid_center_y 0.0
 float64 estimated_ground_height 0.0
 
 # List of height map keys. See HeightMapTools for converting keys to coordinates
-int32[<=30000] keys
+int32[<=45000] keys
 
 # List of heights, which correspond to the list of keys
-float32[<=30000] heights
+float32[<=45000] heights
 
 # List of variances, which correspond to the list of keys. May be empty.
-float32[<=30000] variances
+float32[<=45000] variances
 
 # List of centroids for each cell, which correspond to the list of keys. May be empty
 # Note: The z coordinate of each point is ignored, but should correspond to the height.
-geometry_msgs/Point[<=30000] centroids
+geometry_msgs/Point[<=45000] centroids
 
 # List of normals for each cell, which correspond to the list of keys. May be empty.
-geometry_msgs/Vector3[<=30000] normals
+geometry_msgs/Vector3[<=45000] normals

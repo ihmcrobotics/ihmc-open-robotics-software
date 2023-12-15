@@ -23,7 +23,7 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.perception.realsense.BytedecoRealsense;
+import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
@@ -32,10 +32,11 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
+import java.util.stream.IntStream;
 
 public class PerceptionMessageTools
 {
-   public static void setDepthIntrinsicsFromRealsense(BytedecoRealsense sensor, ImageMessage imageMessageToPack)
+   public static void setDepthIntrinsicsFromRealsense(RealsenseDevice sensor, ImageMessage imageMessageToPack)
    {
       imageMessageToPack.setFocalLengthXPixels((float) sensor.getDepthFocalLengthPixelsX());
       imageMessageToPack.setFocalLengthYPixels((float) sensor.getDepthFocalLengthPixelsY());
@@ -43,7 +44,7 @@ public class PerceptionMessageTools
       imageMessageToPack.setPrincipalPointYPixels((float) sensor.getDepthPrincipalOffsetYPixels());
    }
 
-   public static void setColorIntrinsicsFromRealsense(BytedecoRealsense sensor, ImageMessage imageMessageToPack)
+   public static void setColorIntrinsicsFromRealsense(RealsenseDevice sensor, ImageMessage imageMessageToPack)
    {
       imageMessageToPack.setFocalLengthXPixels((float) sensor.getColorFocalLengthPixelsX());
       imageMessageToPack.setFocalLengthYPixels((float) sensor.getColorFocalLengthPixelsY());
@@ -210,15 +211,8 @@ public class PerceptionMessageTools
       floatPointer.put(startIndex + 3, (float) quaternion.getS());
    }
 
-   public static void convertToHeightMapData(BytePointer heightMapPointer,
-                                             HeightMapData heightMapData,
-                                             Point3D gridCenter,
-                                             float widthInMeters,
-                                             float cellSizeInMeters)
+   public static void convertToHeightMapData(Mat heightMapPointer, HeightMapData heightMapData, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
    {
-      float maxHeight = 0.7f;
-      float minHeight = 0.0f;
-
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
       int cellsPerAxis = 2 * centerIndex + 1;
 
@@ -228,11 +222,9 @@ public class PerceptionMessageTools
       {
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
          {
-            int heightIndex = xIndex * cellsPerAxis + yIndex;
-            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L)) / RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR;
-            cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
-            if (cellHeight > maxHeight - 0.01f)
-               cellHeight = 0.0f;
+            int height = ((int) heightMapPointer.ptr(xIndex, yIndex).getShort() & 0xFFFF);
+            float cellHeight = (float) ((float) (height) / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
+                               - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
 
             int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
             heightMapData.setHeightAt(key, cellHeight);
@@ -241,10 +233,10 @@ public class PerceptionMessageTools
    }
 
    public static void convertToHeightMapImage(ImageMessage imageMessage,
-                                             Mat heightMapImageToPack,
-                                             ByteBuffer compressedByteBuffer,
-                                             BytePointer byteBufferAccessPointer,
-                                             Mat compressedBytesMat)
+                                              Mat heightMapImageToPack,
+                                              ByteBuffer compressedByteBuffer,
+                                              BytePointer byteBufferAccessPointer,
+                                              Mat compressedBytesMat)
    {
       int numberOfBytes = imageMessage.getData().size();
       compressedByteBuffer.rewind();

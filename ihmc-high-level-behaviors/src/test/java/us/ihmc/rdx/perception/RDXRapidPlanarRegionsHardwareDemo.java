@@ -8,8 +8,8 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.perception.realsense.BytedecoRealsense;
-import us.ihmc.perception.realsense.RealSenseHardwareManager;
+import us.ihmc.perception.realsense.RealsenseDevice;
+import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -21,8 +21,8 @@ public class RDXRapidPlanarRegionsHardwareDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
-   private RealSenseHardwareManager realSenseHardwareManager;
-   private BytedecoRealsense l515;
+   private RealsenseDeviceManager realsenseDeviceManager;
+   private RealsenseDevice l515;
    private Mat depthU16C1Image;
    private BytedecoImage bytedecoDepthImage;
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
@@ -53,9 +53,9 @@ public class RDXRapidPlanarRegionsHardwareDemo
             baseUI.getPrimaryScene().addRenderableProvider(l515PoseGizmo, RDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
 
-            realSenseHardwareManager = new RealSenseHardwareManager();
+            realsenseDeviceManager = new RealsenseDeviceManager();
             //                  l515 = realSenseHardwareManager.createFullFeaturedL515("F1120418");
-            l515 = realSenseHardwareManager.createFullFeaturedL515("F1121365");
+            l515 = realsenseDeviceManager.createFullFeaturedL515("F1121365");
             l515.initialize();
          }
 
@@ -71,8 +71,8 @@ public class RDXRapidPlanarRegionsHardwareDemo
                   openCLManager = new OpenCLManager();
                   openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
 
-                  realSenseHardwareManager = new RealSenseHardwareManager();
-                  l515 = realSenseHardwareManager.createFullFeaturedL515("F1121365");
+                  realsenseDeviceManager = new RealsenseDeviceManager();
+                  l515 = realsenseDeviceManager.createFullFeaturedL515("F1121365");
                   l515.initialize();
                }
 
