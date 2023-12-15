@@ -26,13 +26,13 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfigurat
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
-import us.ihmc.rdx.ui.vr.TrackedSegmentType;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -257,7 +257,7 @@ public class RDXIKStreamer
                ReferenceFrame controlFrame = interactableHands.get(side).getControlReferenceFrame();
                controlFrameGraphics.get(side).setToReferenceFrame(controlFrame);
 
-               TrackedSegmentType trackedSegmentHand = side == RobotSide.LEFT ? TrackedSegmentType.LEFT_HAND : TrackedSegmentType.RIGHT_HAND;
+               VRTrackedSegmentType trackedSegmentHand = side == RobotSide.LEFT ? VRTrackedSegmentType.LEFT_HAND : VRTrackedSegmentType.RIGHT_HAND;
 
                KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(ghostFullRobotModel.getHand(side),
                                                                                   controlFrame,
