@@ -1,5 +1,8 @@
 package us.ihmc.rdx.ui.affordances;
 
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
@@ -18,12 +21,12 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
@@ -35,8 +38,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 /**
  * This class manages the UI for operating the arms of a humanoid robot.
@@ -70,6 +72,8 @@ public class RDXArmManager
    private final SideDependentList<ArmJointName[]> armJointNames = new SideDependentList<>();
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINT_ANGLES;
    private final RDXHandConfigurationManager handManager;
+   private final RDXIKStreamer ikStreamer;
+   private final ImBoolean ikStreamerCollapsedHeader = new ImBoolean(true);
 
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> desiredRobotArmJoints = new SideDependentList<>();
@@ -117,6 +121,7 @@ public class RDXArmManager
       }
 
       handManager = new RDXHandConfigurationManager();
+      ikStreamer = new RDXIKStreamer(robotModel, communicationHelper, interactableHands, syncedRobot);
    }
 
    public void create(RDXBaseUI baseUI)
@@ -129,11 +134,14 @@ public class RDXArmManager
       });
 
       handManager.create(baseUI, communicationHelper, syncedRobot);
+      ikStreamer.create(baseUI.getVRManager().getContext());
+      baseUI.getPrimaryScene().addRenderableProvider(this::getVirtualRenderables);
    }
 
    public void update()
    {
       handManager.update();
+      ikStreamer.update(armControlMode == RDXArmControlMode.IK_STREAMING);
 
       boolean desiredHandPoseChanged = false;
       for (RobotSide side : interactableHands.sides())
@@ -226,9 +234,14 @@ public class RDXArmManager
 
       ImGui.text("Arm & hand control mode:");
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Joint angles (DDogleg)"), armControlMode == RDXArmControlMode.JOINT_ANGLES))
+      if (ImGui.radioButton(labels.get("Joint angles"), armControlMode == RDXArmControlMode.JOINT_ANGLES))
       {
          armControlMode = RDXArmControlMode.JOINT_ANGLES;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("IK Streaming"), armControlMode == RDXArmControlMode.IK_STREAMING))
+      {
+         armControlMode = RDXArmControlMode.IK_STREAMING;
       }
       ImGui.text("Hand pose only:");
       ImGui.sameLine();
@@ -243,6 +256,13 @@ public class RDXArmManager
       }
 
       ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen);
+
+      if (ImGui.collapsingHeader(labels.get("IK Streaming Options"), ikStreamerCollapsedHeader))
+      {
+         ImGui.indent();
+         ikStreamer.renderImGuiWidgets();
+         ImGui.unindent();
+      }
 
       // Pop up warning if notification is set
       if (showWarningNotification.peekHasValue() && showWarningNotification.poll())
@@ -366,6 +386,19 @@ public class RDXArmManager
          }
       };
       return runnable;
+   }
+
+   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
+   {
+      if (armControlMode == RDXArmControlMode.IK_STREAMING)
+      {
+         ikStreamer.getVirtualRenderables(renderables, pool, sceneLevels);
+      }
+   }
+
+   public void destroy()
+   {
+      ikStreamer.destroy();
    }
 
    public RDXHandConfigurationManager getHandManager()
