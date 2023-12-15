@@ -13,13 +13,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.*;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -32,14 +32,16 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
+import java.util.*;
 
-public class RDXQuickATManager
+public class RDXQuickATManager extends RDXPanel
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final SceneNode node;
+   private SceneGraph sceneGraph;
+   private SceneNode defaultNode = new SceneNode(100, "");
+   private SceneNode selectedNode = defaultNode;
    private final WorkspaceResourceDirectory resourceDirectory = new WorkspaceResourceDirectory(getClass(), "/quickATs");
-   private final ImGuiDirectory quickATDirectory;
+   private ImGuiDirectory quickATDirectory;
    private final ImGuiInputText extraFileNameToSave = new ImGuiInputText("Enter file name (.json)");
    private String loadingFileName = "";
    private boolean fileToSaveHasCompleteName = true;
@@ -53,29 +55,14 @@ public class RDXQuickATManager
    private SideDependentList<RigidBodyTransform> handFrameTransforms = new SideDependentList<>();
    private final SideDependentList<Double> timeLastCommandHand = new SideDependentList<>();
 
-   public RDXQuickATManager(SceneNode node)
+   private List<String> nodeNames;
+   private transient String[] selectableNodeNameArray = new String[0];
+   private int selectedIndex = 0;
+
+   public RDXQuickATManager()
    {
-      this.node = node;
-//      String[] nameParts = node.getName().split(" ");
-
-      quickATDirectory = new ImGuiDirectory(resourceDirectory.getFilesystemDirectory().toString(),
-                                       pathEntry -> pathEntry.type() == BasicPathVisitor.PathType.FILE
-//                                                    && Arrays.stream(nameParts)
-//                                                             .map(String::toLowerCase)
-//                                                             .anyMatch(pathEntry.path().getFileName().toString().toLowerCase()::contains)
-                                                    && pathEntry.path().getFileName().toString().endsWith(".json"),
-                                       this::setLoadingFile);
-      extraFileNameToSave.setImString(node.getName());
-
-      Collection<RDXPanel> RDXPanels = RDXBaseUI.getInstance().getImGuiPanelManager().getPanels();
-      for (RDXPanel panel : RDXPanels)
-      {
-         if (panel instanceof RDXTeleoperationManager)
-         {
-            teleoperationManager = (RDXTeleoperationManager) panel;
-            break;
-         }
-      }
+      super("Quick AT Manager");
+      setRenderMethod(this::renderImGuiWidgets);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -84,12 +71,26 @@ public class RDXQuickATManager
       }
    }
 
+   public void create(RDXTeleoperationManager teleoperationManager, SceneGraph sceneGraph)
+   {
+      this.teleoperationManager = teleoperationManager;
+      this.sceneGraph = sceneGraph;
+      nodeNames = sceneGraph.getNodeNameList();
+
+      quickATDirectory = new ImGuiDirectory(resourceDirectory.getFilesystemDirectory().toString(),
+                                            pathEntry -> pathEntry.type() == BasicPathVisitor.PathType.FILE
+                                                         && pathEntry.path().getFileName().toString().endsWith(".json"),
+                                            this::setLoadingFile);
+   }
+
    public void update()
    {
+      nodeNames = sceneGraph.getNodeNameList();
+
       if (ATTracking)
       {
          boolean freezeTracking = false;
-         if (node instanceof CenterposeNode centerposeNode)
+         if (selectedNode instanceof CenterposeNode centerposeNode)
          {
             if (centerposeNode.getConfidence() < 0.3 || !centerposeNode.getCurrentlyDetected())
             {
@@ -103,7 +104,7 @@ public class RDXQuickATManager
             for (RobotSide side : handFrameTransforms.keySet())
             {
                // create frame pose to express it in world frame
-               FramePose3D handFrame = new FramePose3D(node.getNodeFrame(), handFrameTransforms.get(side));
+               FramePose3D handFrame = new FramePose3D(selectedNode.getNodeFrame(), handFrameTransforms.get(side));
                teleoperationManager.getArmManager().setDesiredHandFramePose(side, handFrame);
                teleoperationManager.getArmManager().computeTrajectoryTime(side, 0.5, 5.0);
 
@@ -137,7 +138,26 @@ public class RDXQuickATManager
 
    public void renderImGuiWidgets()
    {
-      if (!quickATDirectory.isEmpty())
+      if (nodeNames.size() > 0)
+      {
+         selectableNodeNameArray = nodeNames.toArray(selectableNodeNameArray);
+         if (ImGui.beginCombo(labels.get("Select node"), selectableNodeNameArray[selectedIndex]))
+         {
+            for (int i = 0; i < selectableNodeNameArray.length; i++)
+            {
+               String pathName = selectableNodeNameArray[i];
+               if (ImGui.selectable(pathName, selectedIndex == i))
+               {
+                  selectedIndex = i;
+                  selectedNode = sceneGraph.getNamesToNodesMap().get(selectableNodeNameArray[selectedIndex]);
+                  extraFileNameToSave.setImString(selectedNode.getName());
+               }
+            }
+            ImGui.endCombo();
+         }
+      }
+
+      if (!quickATDirectory.isEmpty() && selectedIndex != 0)
       {
          if (ImGui.button(labels.get("Load AT")))
          {
@@ -147,38 +167,41 @@ public class RDXQuickATManager
          quickATDirectory.renderImGuiWidgetsAsDropDownMenu();
       }
 
-      String saveButtonLabel = fileToSaveHasCompleteName ? "Save AT" : "Confirm Options";
-      if (ImGui.button(labels.get(saveButtonLabel)))
+      if (!selectedNode.equals(defaultNode))
       {
-         fileToSaveHasCompleteName = !fileToSaveHasCompleteName;
-         if (fileToSaveHasCompleteName)
-            saveToFile(extraFileNameToSave.getString() + ".json");
-      }
-      if (!fileToSaveHasCompleteName)
-      {
-         ImGui.sameLine();
-         extraFileNameToSave.render();
-         ImGui.checkbox(labels.get("Arms"), saveArms);
-         if(saveArms.get())
+         String saveButtonLabel = fileToSaveHasCompleteName ? "Save AT" : "Confirm Options";
+         if (ImGui.button(labels.get(saveButtonLabel)))
          {
-            for (RobotSide side : RobotSide.values)
-            {
-               ImGui.sameLine();
-               ImGui.checkbox(labels.get(side.getLowerCaseName()), saveArmsSide.get(side));
-            }
-            if (ImGui.radioButton(labels.get("Joint angles"), armControlMode == RDXArmControlMode.JOINT_ANGLES))
-            {
-               armControlMode = RDXArmControlMode.JOINT_ANGLES;
-            }
-            if (ImGui.radioButton(labels.get("Hands Pose"), armControlMode == RDXArmControlMode.POSE_WORLD))
-            {
-               armControlMode = RDXArmControlMode.POSE_WORLD;
-            }
+            fileToSaveHasCompleteName = !fileToSaveHasCompleteName;
+            if (fileToSaveHasCompleteName)
+               saveToFile(extraFileNameToSave.getString() + ".json");
          }
-         ImGui.checkbox(labels.get("Footsteps"), saveFootsteps);
-         ImGui.pushStyleColor(ImGuiCol.Text, 1.0f, 0.0f, 0.0f, 1.0f);
-         ImGui.text("Saving Pending ...");
-         ImGui.popStyleColor();
+         if (!fileToSaveHasCompleteName)
+         {
+            ImGui.sameLine();
+            extraFileNameToSave.render();
+            ImGui.checkbox(labels.get("Arms"), saveArms);
+            if (saveArms.get())
+            {
+               for (RobotSide side : RobotSide.values)
+               {
+                  ImGui.sameLine();
+                  ImGui.checkbox(labels.get(side.getLowerCaseName()), saveArmsSide.get(side));
+               }
+               if (ImGui.radioButton(labels.get("Joint angles"), armControlMode == RDXArmControlMode.JOINT_ANGLES))
+               {
+                  armControlMode = RDXArmControlMode.JOINT_ANGLES;
+               }
+               if (ImGui.radioButton(labels.get("Hands Pose"), armControlMode == RDXArmControlMode.POSE_WORLD))
+               {
+                  armControlMode = RDXArmControlMode.POSE_WORLD;
+               }
+            }
+            ImGui.checkbox(labels.get("Footsteps"), saveFootsteps);
+            ImGui.pushStyleColor(ImGuiCol.Text, 1.0f, 0.0f, 0.0f, 1.0f);
+            ImGui.text("Saving Pending ...");
+            ImGui.popStyleColor();
+         }
       }
 
       if (!loadingFileName.isEmpty())
@@ -223,7 +246,7 @@ public class RDXQuickATManager
                   JSONTools.toEuclid(armsNode, handFrameTransform);
                   handFrameTransforms.put(side, handFrameTransform);
                   // create frame pose to express it in world frame
-                  FramePose3D handFrame = new FramePose3D(node.getNodeFrame(), handFrameTransform);
+                  FramePose3D handFrame = new FramePose3D(selectedNode.getNodeFrame(), handFrameTransform);
                   teleoperationManager.getArmManager().setDesiredHandFramePose(side, handFrame);
                });
 
@@ -235,7 +258,7 @@ public class RDXQuickATManager
                   RigidBodyTransform soleFrameTransform = new RigidBodyTransform();
                   JSONTools.toEuclid(footstepNode, soleFrameTransform);
                   // create frame pose to express it in world frame
-                  FramePose3D soleFrame = new FramePose3D(node.getNodeFrame(), soleFrameTransform);
+                  FramePose3D soleFrame = new FramePose3D(selectedNode.getNodeFrame(), soleFrameTransform);
                   soleFrame.changeFrame(ReferenceFrame.getWorldFrame());
                   footstepPlacer.createNewFootstep(RobotSide.getSideFromString(footstepNode.get("side").asText()));
                   footstepPlacer.setFootstepPose(soleFrame);
@@ -261,7 +284,7 @@ public class RDXQuickATManager
          LogTools.info("Saving to file ...");
          JSONFileTools.save(file, jsonNode ->
          {
-            jsonNode.put("name", node.getName());
+            jsonNode.put("name", selectedNode.getName());
 
             if (saveArms.get())
             {
@@ -289,7 +312,7 @@ public class RDXQuickATManager
                            ObjectNode armNode = armsArrayNode.addObject();
                            armNode.put("side", side.getLowerCaseName());
                            // get hand pose in node frame
-                           desiredHandPose.changeFrame(node.getNodeFrame());
+                           desiredHandPose.changeFrame(selectedNode.getNodeFrame());
                            // save pose to json
                            JSONTools.toJSON(armNode, desiredHandPose);
                         }
@@ -309,7 +332,7 @@ public class RDXQuickATManager
                   footstepNode.put("side", footstep.getPlannedFootstep().getRobotSide().getLowerCaseName());
                   // get sole frame pose
                   FramePose3D solePose = new FramePose3D(footstep.getPlannedFootstep().getFootstepPose());
-                  solePose.changeFrame(node.getNodeFrame());
+                  solePose.changeFrame(selectedNode.getNodeFrame());
                   // save pose to json
                   JSONTools.toJSON(footstepNode, solePose);
                }
