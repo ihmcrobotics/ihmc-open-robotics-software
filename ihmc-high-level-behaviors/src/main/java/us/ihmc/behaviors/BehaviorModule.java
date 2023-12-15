@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.BehaviorTreeMessage;
 import behavior_msgs.msg.dds.StatusLogMessage;
 
 import std_msgs.msg.dds.Empty;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.tools.BehaviorMessageTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
@@ -14,15 +15,17 @@ import us.ihmc.ros2.ROS2Topic;
 /**
  * Manages a behavior tree based process on the real robot and syncs it
  * with an operator UI with shared autonomy.
+ *
+ * @deprecated Replaced by ROS2BehaviorTreeExecutor
  */
 public class BehaviorModule
 {
    private final BehaviorTreeMessage behaviorTreeMessage = new BehaviorTreeMessage();
    private final StatusLogger statusLogger;
-   private final BehaviorInterface rootNode;
+   private final BehaviorTreeNodeExecutor rootNode;
    private final BehaviorHelper behaviorHelper;
 
-   public BehaviorModule(BehaviorInterface rootNode, BehaviorHelper behaviorHelper)
+   public BehaviorModule(BehaviorTreeNodeExecutor rootNode, BehaviorHelper behaviorHelper)
    {
       this.rootNode = rootNode;
       this.behaviorHelper = behaviorHelper;

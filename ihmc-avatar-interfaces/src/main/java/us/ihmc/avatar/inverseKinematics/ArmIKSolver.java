@@ -28,6 +28,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
@@ -84,7 +85,8 @@ public class ArmIKSolver
    {
       RigidBodyBasics sourceChest = sourceFullRobotModel.getChest();
       OneDoFJointBasics sourceFirstArmJoint = sourceFullRobotModel.getArmJoint(side, robotModel.getJointMap().getArmJointNames()[0]);
-      sourceOneDoFJoints = FullRobotModelUtils.getArmJoints(sourceFullRobotModel, side, robotModel.getJointMap().getArmJointNames());
+      ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames(side);
+      sourceOneDoFJoints = FullRobotModelUtils.getArmJoints(sourceFullRobotModel, side, armJointNames);
 
       // We clone a detached chest and single arm for the WBCC to work with. We just want to find arm joint angles.
       workChest = MultiBodySystemMissingTools.getDetachedCopyOfSubtree(sourceChest, armWorldFrame, sourceFirstArmJoint);

@@ -3,159 +3,136 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.matrixlib.MatrixTools;
 
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.ContactPoint.basisVectorsPerContactPoint;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.*;
 
 /**
- * Whole-body force distribution calculator.
- * Solves the QP:
- *
- * min_{f} f^2                         (min force)
- *    s.t.  mg + sum(f) = 0            (lin static equilibrium)
- *    s.t.  sum (r x f + r x mg) = 0   (ang static equilibrium)
- *          f is friction constrained
- *          tau_min <= G - J^T f <= tau_max  (f is actuation constrained)
- *
- * Notation taken from EoM:
- * M qdd + C qd + G = tau + J^T f
+ * Static whole-body force distribution calculator using the constraints from {@link CenterOfMassStabilityMarginOptimizationModule},
+ * but instead of varying CoM position and solving with an LP, it keeps the CoM fixed and solves with a QP.
  */
 public class MultiContactForceDistributionCalculator
 {
-   /* Maintain static equilibrium */
-   private static final int staticEquilibriumConstraints = 6;
+   private final CenterOfMassStabilityMarginOptimizationModule comOptimizationModule;
+   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
+   private final double mg;
 
-   private final DMatrixRMaj Aeq = new DMatrixRMaj(0);
-   private final DMatrixRMaj beq = new DMatrixRMaj(0);
-   private final DMatrixRMaj Ain = new DMatrixRMaj(0);
-   private final DMatrixRMaj bin = new DMatrixRMaj(0);
-   private final DMatrixRMaj rho = new DMatrixRMaj(0);
+   /* Solver solution for x_force = [f_0x, ... f_nz] */
+   private final DMatrixRMaj solutionForce = new DMatrixRMaj(0);
+   /* Solver solution for x_rho = [rho_0, ..., rho_n] */
+   private final DMatrixRMaj solutionRho = new DMatrixRMaj(0);
+
    private final DMatrixRMaj quadraticCost = new DMatrixRMaj(0);
    private final DMatrixRMaj linearCost = new DMatrixRMaj(0);
 
-   private final FramePoint3D contactPointPosition = new FramePoint3D();
-   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
+   /* Number of decision variables in x_force = [f_0x, ... f_nz] */
+   private int forceDecisionVariables;
+   /* Number of decision variables in x_rho = [rho_0, ..., rho_n] */
+   private int rhoDecisionVariables;
 
-   /**
-    * Returns whether an optimal solution was found
-    */
-   public boolean solve(WholeBodyContactDescription input)
+   /* Equality matrices for Aeq x_force = beq, where x_force = [f_0x, f_0y, ..., c_x, c_y] are the force-based decision variables */
+   private final DMatrixRMaj Aeq = new DMatrixRMaj(0);
+   private final DMatrixRMaj beq = new DMatrixRMaj(0);
+
+   /* Equality matrix for Aeq_rho x_rho = b, where x_rho = [rho_0, ..., rho_n] */
+   private final DMatrixRMaj Aeq_rho = new DMatrixRMaj(0);
+
+   /* Conversion from x_force = [f_0x, ... f_nz] to x_rho = [rho_0, ..., rho_n] , and x_rho > =0 */
+   private final DMatrixRMaj rhoToForce = new DMatrixRMaj(0);
+
+   /* Actuation constraint expressed in terms of x_rho */
+   private final DMatrixRMaj Aact_rho = new DMatrixRMaj(0);
+
+   /* Inequality matrices for Ain_rho x_rho <= bin where x_rho = [rho_0, ..., rho_n] */
+   private final DMatrixRMaj Ain_rho = new DMatrixRMaj(0);
+   private final DMatrixRMaj bin = new DMatrixRMaj(0);
+
+   private boolean feasibilityMode = false;
+
+   public MultiContactForceDistributionCalculator(double robotMass)
    {
-      clear();
+      comOptimizationModule = new CenterOfMassStabilityMarginOptimizationModule(robotMass);
+      mg = robotMass * GRAVITY;
+   }
 
-      double mg = 9.81 * input.getRobotMass();
+   public boolean solve(WholeBodyContactStateInterface contactState, double comX, double comY)
+   {
+      comOptimizationModule.updateContactState(contactState);
 
-      int rhoSize = WholeBodyContactDescription.numberOfBasisVectors * input.getNumberOfContactPoints();
-      int decisionVariables = rhoSize;
+      /* Compute nominal equality constraint to enforce static equilibrium */
 
-      rho.reshape(rhoSize, 1);
-      Aeq.reshape(staticEquilibriumConstraints, decisionVariables);
-      beq.reshape(staticEquilibriumConstraints, 1);
-      Ain.reshape(rhoSize + 2 * input.getNumberOfJoints(), rhoSize);
-      bin.reshape(rhoSize + 2 * input.getNumberOfJoints(), 1);
-      quadraticCost.reshape(rhoSize, rhoSize);
-      linearCost.reshape(rhoSize, 1);
+      forceDecisionVariables = LINEAR_DIMENSIONS * contactState.getNumberOfContactPoints();
+      Aeq.reshape(STATIC_EQUILIBRIUM_CONSTRAINTS, forceDecisionVariables);
+      beq.reshape(STATIC_EQUILIBRIUM_CONSTRAINTS, 1);
 
-      CommonOps_DDRM.setIdentity(quadraticCost);
-      CommonOps_DDRM.fill(beq, 0.0);
+      MatrixTools.setMatrixBlock(Aeq, 0, 0, comOptimizationModule.Aeq, 0, 0, Aeq.getNumRows(), Aeq.getNumCols(), 1.0);
 
-      for (int i = 0; i < rhoSize; i++)
-      { // Constraint for rho to be positive
-         Ain.set(i, i, -1.0);
-      }
-
-      DMatrixRMaj constraintUpperBound = input.getConstraintUpperBound();
-      DMatrixRMaj constraintLowerBound = input.getConstraintLowerBound();
-      DMatrixRMaj graspMatrixJacobianTranspose = input.getGraspMatrixJacobianTranspose();
-
-      MatrixTools.setMatrixBlock(Ain, rhoSize, 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), 1.0);
-      MatrixTools.setMatrixBlock(bin, rhoSize, 0, constraintUpperBound, 0, 0, constraintUpperBound.getNumRows(), constraintUpperBound.getNumCols(), 1.0);
-
-      MatrixTools.setMatrixBlock(Ain, rhoSize + graspMatrixJacobianTranspose.getNumRows(), 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), -1.0);
-      MatrixTools.setMatrixBlock(bin, rhoSize + graspMatrixJacobianTranspose.getNumRows(), 0, constraintLowerBound, 0, 0, constraintLowerBound.getNumRows(), constraintLowerBound.getNumCols(), -1.0);
-
-      for (int contactPointIndex = 0; contactPointIndex < input.getNumberOfContactPoints(); contactPointIndex++)
-      {
-         contactPointPosition.setToZero(input.getContactFrame(contactPointIndex));
-         contactPointPosition.changeFrame(ReferenceFrame.getWorldFrame());
-
-         for (int basisVectorIndex = 0; basisVectorIndex < WholeBodyContactDescription.numberOfBasisVectors; basisVectorIndex++)
-         {
-            FrameVector3D basisVector = input.getBasisVector(contactPointIndex, basisVectorIndex);
-            int column = basisVectorsPerContactPoint * contactPointIndex + basisVectorIndex;
-
-            Aeq.set(0, column, basisVector.getX());
-            Aeq.set(1, column, basisVector.getY());
-            Aeq.set(2, column, basisVector.getZ());
-
-            // x-component of cross product
-            double xMomentScale = contactPointPosition.getY() * basisVector.getZ() - contactPointPosition.getZ() * basisVector.getY();
-            Aeq.set(3, column, xMomentScale);
-
-            // y-component of cross product
-            double yMomentScale = contactPointPosition.getZ() * basisVector.getX() - contactPointPosition.getX() * basisVector.getZ();
-            Aeq.set(4, column, yMomentScale);
-
-            // z-component of cross product
-            double zMomentScale = contactPointPosition.getX() * basisVector.getY() - contactPointPosition.getY() * basisVector.getX();
-            Aeq.set(5, column, zMomentScale);
-         }
-      }
-
-      FramePoint3DReadOnly centerOfMass = input.getCenterOfMass();
       beq.set(2, 0, mg);
-      beq.set(3, 0, mg * centerOfMass.getY());
-      beq.set(4, 0, -mg * centerOfMass.getX());
+      beq.set(3, 0, comY * mg);
+      beq.set(4, 0, -comX * mg);
 
+      /* Compute map from positive x to nominal x */
+
+      rhoDecisionVariables = NUM_BASIS_VECTORS * contactState.getNumberOfContactPoints();
+      rhoToForce.reshape(forceDecisionVariables, rhoDecisionVariables);
+
+      MatrixTools.setMatrixBlock(rhoToForce, 0, 0, comOptimizationModule.rhoToForce, 0, 0, rhoToForce.getNumRows(), rhoToForce.getNumCols(), 1.0);
+
+      /* Compute constraint matrices */
+      CommonOps_DDRM.mult(Aeq, rhoToForce, Aeq_rho);
+
+      /* Compute inequality matrices */
+      DMatrixRMaj A_actuation = contactState.getActuationConstraintMatrix();
+      DMatrixRMaj b_actuation = contactState.getActuationConstraintVector();
+      CommonOps_DDRM.mult(A_actuation, rhoToForce, Aact_rho);
+
+      Ain_rho.reshape(rhoDecisionVariables + A_actuation.getNumRows(), rhoDecisionVariables);
+      bin.reshape(rhoDecisionVariables + b_actuation.getNumRows(), 1);
+
+      for (int basisIdx = 0; basisIdx < rhoDecisionVariables; basisIdx++)
+      {
+         Ain_rho.set(basisIdx, basisIdx, -1.0);
+      }
+
+      MatrixTools.setMatrixBlock(Ain_rho, rhoDecisionVariables, 0, A_actuation, 0, 0, A_actuation.getNumRows(), A_actuation.getNumCols(), 1.0);
+      MatrixTools.setMatrixBlock(bin, rhoDecisionVariables, 0, b_actuation, 0, 0, b_actuation.getNumRows(), b_actuation.getNumCols(), 1.0);
+
+      /* Compute optimal force distribution */
       qpSolver.clear();
       qpSolver.resetActiveSet();
 
-      qpSolver.setMaxNumberOfIterations(500);
-      qpSolver.setConvergenceThreshold(1e-9);
+      qpSolver.setMaxNumberOfIterations(feasibilityMode ? 100 : 500);
+      qpSolver.setConvergenceThreshold(feasibilityMode ? 1e-2 : 1e-9);
       qpSolver.setQuadraticCostFunction(quadraticCost, linearCost, 0.0);
-      qpSolver.setLinearEqualityConstraints(Aeq, beq);
-      qpSolver.setLinearInequalityConstraints(Ain, bin);
+      qpSolver.setLinearEqualityConstraints(Aeq_rho, beq);
+      qpSolver.setLinearInequalityConstraints(Ain_rho, bin);
 
-      qpSolver.solve(rho);
-      return !MatrixTools.containsNaN(rho);
-   }
-
-   public DMatrixRMaj getRho()
-   {
-      return rho;
-   }
-
-   private void clear()
-   {
-      Aeq.zero();
-      beq.zero();
-      Ain.zero();
-      bin.zero();
-      quadraticCost.zero();
-      linearCost.zero();
-      rho.zero();
-   }
-
-   public Vector3D getResolvedForce(int contactPointIndex, WholeBodyContactDescription input)
-   {
-      Vector3D resolvedForce = new Vector3D();
-      for (int i = 0; i < WholeBodyContactDescription.numberOfBasisVectors; i++)
+      qpSolver.solve(solutionRho);
+      boolean success = !MatrixTools.containsNaN(solutionRho);
+      if (success)
       {
-         FrameVector3D basisVector = input.getBasisVector(contactPointIndex, i);
-         basisVector.changeFrame(ReferenceFrame.getWorldFrame());
-
-         double rho = this.rho.get(WholeBodyContactDescription.numberOfBasisVectors * contactPointIndex + i, 0);
-
-         resolvedForce.addX(basisVector.getX() * rho);
-         resolvedForce.addY(basisVector.getY() * rho);
-         resolvedForce.addZ(basisVector.getZ() * rho);
+         CommonOps_DDRM.mult(rhoToForce, solutionRho, solutionForce);
       }
 
-      return resolvedForce;
+      return success;
+   }
+
+   public void getResolvedForce(int contactIdx, Vector3DBasics resolvedForceToPack)
+   {
+      resolvedForceToPack.setX(solutionForce.get(LINEAR_DIMENSIONS * contactIdx + Axis3D.X.ordinal()));
+      resolvedForceToPack.setY(solutionForce.get(LINEAR_DIMENSIONS * contactIdx + Axis3D.Y.ordinal()));
+      resolvedForceToPack.setZ(solutionForce.get(LINEAR_DIMENSIONS * contactIdx + Axis3D.Z.ordinal()));
+   }
+
+   public void setAsFeasibilitySolver(boolean feasibilityMode)
+   {
+      this.feasibilityMode = feasibilityMode;
+   }
+
+   public DMatrixRMaj getRhoSolution()
+   {
+      return solutionRho;
    }
 }

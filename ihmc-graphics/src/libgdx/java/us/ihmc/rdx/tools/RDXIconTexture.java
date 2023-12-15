@@ -15,19 +15,25 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 
 /**
- * Uses OpenCV to load a PNG icon from file or as a resource
+ * Uses OpenCV to load an encoded image (i.e. PNG/JPEG) icon from file or as a resource
  * and writes it to an OpenGL texture to be rendered by libGDX.
  */
 public class RDXIconTexture
 {
    private final Texture texture;
 
-   public RDXIconTexture(Path pngFile)
+   /**
+    * Load from a file path on disk.
+    */
+   public RDXIconTexture(Path imagePath)
    {
-      Mat readImage = opencv_imgcodecs.imread(pngFile.toString());
+      Mat readImage = opencv_imgcodecs.imread(imagePath.toString());
       texture = initialize(readImage);
    }
 
+   /**
+    * Load from classpath resource path.
+    */
    public RDXIconTexture(String iconResourceAbsolutePath)
    {
       if (!iconResourceAbsolutePath.startsWith("/"))

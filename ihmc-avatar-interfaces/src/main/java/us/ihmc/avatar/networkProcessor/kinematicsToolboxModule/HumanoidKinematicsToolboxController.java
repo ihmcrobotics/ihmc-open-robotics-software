@@ -1,17 +1,11 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
-import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
-import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
-
-import java.util.*;
-
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -20,17 +14,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.*;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
-import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -48,7 +36,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -60,6 +47,12 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.*;
+
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
+import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
 
 public class HumanoidKinematicsToolboxController extends KinematicsToolboxController
 {
@@ -111,10 +104,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private final YoFramePoint3D initialCenterOfMassPosition = new YoFramePoint3D("initialCenterOfMass", worldFrame, registry);
 
-   /** Multi-contact support region solver */
-   private final YoBoolean enableMultiContactSupportRegionSolver = new YoBoolean("enableMultiContactSupportRegionSolver", registry);
-   private final MultiContactActuationBasedSupportRegionSolver supportRegionSolver = new MultiContactActuationBasedSupportRegionSolver(20, registry);
-   private final WholeBodyContactDescription supportRegionSolverInput;
    /**
     * Indicates whether the rigid-bodies currently in contact as reported per:
     * {@link CapturabilityBasedStatus} or {@link MultiContactBalanceStatus} should be held in place for
@@ -225,7 +214,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          endEffectorToPrimaryBaseMap.put(desiredFullRobotModel.getPelvis(), desiredFullRobotModel.getFoot(robotSide));
       }
 
-      supportRegionSolverInput = new WholeBodyContactDescription(getDesiredOneDoFJoints());
       populateDefaultJointLimitReductionFactors();
    }
 
@@ -421,7 +409,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          holdSupportRigidBodies.set(command.holdSupportRigidBodies());
-         enableMultiContactSupportRegionSolver.set(command.enableMultiContactSupportRegionSolver());
          enableJointLimitReduction.set(command.enableJointLimitReduction());
          
          if (command.hasCustomJointRestrictionLimits())
@@ -658,58 +645,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          ContactingRigidBody contactingRigidBody = contactingRigidBodies.add();
          contactingRigidBody.initialize(rigidBodyHashCodeMap.get(supportRigidBodyIds.get(i)), worldFrame, supportPolygon.get(i));
       }
-
-      /* Update active contact points */
-      if (solveForMultiContactSupportRegion(multiContactBalanceStatus))
-      {
-         activeContactPointPositions.clear();
-         getSolution().getSupportRegion().clear();
-
-         ConvexPolygon2DReadOnly supportRegion = supportRegionSolver.getSupportRegion();
-         for (int i = 0; i < supportRegion.getNumberOfVertices(); i++)
-         {
-            getSolution().getSupportRegion().add().set(supportRegion.getVertex(i));
-            activeContactPointPositions.add().set(supportRegion.getVertex(i));
-         }
-
-         updateSupportPolygonConstraint(activeContactPointPositions);
-      }
-   }
-
-   private final RecyclingArrayList<PoseReferenceFrame> contactFrames = new RecyclingArrayList<>(20, SupplierBuilder.indexedSupplier(i -> new PoseReferenceFrame("contactFrame" + i, ReferenceFrame.getWorldFrame())));
-   private final FramePose3D tmpContactPose = new FramePose3D();
-
-   private boolean solveForMultiContactSupportRegion(MultiContactBalanceStatus multiContactBalanceStatus)
-   {
-      if (isUserProvidingSupportPolygon())
-         return false;
-      if (!enableMultiContactSupportRegionSolver.getValue())
-         return false;
-      boolean hasSurfaceNormalData = multiContactBalanceStatus.getSurfaceNormalsInWorld().size() == multiContactBalanceStatus.getContactPointsInWorld().size();
-      if (!hasSurfaceNormalData)
-         return false;
-
-      supportRegionSolverInput.clear();
-      contactFrames.clear();
-
-      for (int i = 0; i < multiContactBalanceStatus.getSupportRigidBodyIds().size(); i++)
-      {
-         tmpContactPose.getPosition().set(multiContactBalanceStatus.getContactPointsInWorld().get(i));
-         EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, multiContactBalanceStatus.getSurfaceNormalsInWorld().get(i), tmpContactPose.getOrientation());
-
-         PoseReferenceFrame contactFrame = contactFrames.add();
-         contactFrame.setPoseAndUpdate(tmpContactPose);
-         RigidBodyBasics contactingBody = rigidBodyHashCodeMap.get(multiContactBalanceStatus.getSupportRigidBodyIds().get(i));
-         supportRegionSolverInput.addContactPoint(contactFrame, contactingBody, rootJacobians.get(contactingBody));
-      }
-
-      supportRegionSolver.startTimer();
-      supportRegionSolverInput.update();
-      supportRegionSolver.initialize(supportRegionSolverInput);
-      boolean success = supportRegionSolver.solve();
-      supportRegionSolver.stopTimer();
-
-      return success;
    }
 
    @Override

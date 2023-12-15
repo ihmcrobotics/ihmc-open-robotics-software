@@ -18,10 +18,10 @@ basicsDependencies {
    api("org.ejml:ejml-ddense:0.39")
 
    api("us.ihmc:jinput:2.0.6-ihmc2")
-   api("us.ihmc:euclid-frame:0.20.0")
-   api("us.ihmc:euclid-frame-shape:0.20.0")
-   api("us.ihmc:euclid-shape:0.20.0")
-   api("us.ihmc:ihmc-robot-description:0.21.13")
+   api("us.ihmc:euclid-frame:0.21.0")
+   api("us.ihmc:euclid-frame-shape:0.21.0")
+   api("us.ihmc:euclid-shape:0.21.0")
+   api("us.ihmc:ihmc-robot-description:0.25.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
 }
@@ -39,7 +39,7 @@ planningDependencies {
 
    api("us.ihmc:robot-environment-awareness:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.28.5")
+   api("us.ihmc:ihmc-robot-data-logger:0.28.7")
    api("us.ihmc:ihmc-path-planning:source")
 }
 
@@ -69,7 +69,7 @@ footstepPlanningTestDependencies {
 communicationDependencies {
    api(ihmc.sourceSetProject("footstep-planning"))
 
-   api("us.ihmc:euclid-geometry:0.20.0")
+   api("us.ihmc:euclid-geometry:0.21.0")
 }
 
 communicationTestDependencies {

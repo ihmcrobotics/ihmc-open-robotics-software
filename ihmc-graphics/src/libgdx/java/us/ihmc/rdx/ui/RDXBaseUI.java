@@ -21,7 +21,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXKeyBindings;
 import us.ihmc.rdx.RDXSettings;
-import us.ihmc.rdx.imgui.ImGuiPanelManager;
+import us.ihmc.rdx.imgui.RDXPanelManager;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
@@ -559,7 +559,7 @@ public class RDXBaseUI
       Gdx.graphics.setForegroundFPS(foregroundFPSLimit);
    }
 
-   public ImGuiPanelManager getImGuiPanelManager()
+   public RDXPanelManager getImGuiPanelManager()
    {
       return imGuiWindowAndDockSystem.getPanelManager();
    }

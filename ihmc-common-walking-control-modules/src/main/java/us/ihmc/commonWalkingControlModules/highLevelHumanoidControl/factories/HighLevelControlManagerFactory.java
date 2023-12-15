@@ -1,9 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
@@ -12,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -46,6 +43,10 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
 {
    public static final String weightRegistryName = "MomentumOptimizationSettings";
@@ -65,6 +66,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private CenterOfMassHeightManager centerOfMassHeightManager;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
+   private NaturalPostureManager naturalPostureManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
@@ -239,6 +241,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       ContactablePlaneBody contactableBody = controllerToolbox.getContactableBody(bodyToControl);
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
+      boolean enableFunctionGenerators = walkingControllerParameters.enableFunctionGeneratorMode(bodyName);
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
@@ -253,6 +256,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     taskspacePositionGains,
                                                                     contactableBody,
                                                                     defaultControlMode,
+                                                                    enableFunctionGenerators,
                                                                     yoTime,
                                                                     graphicsListRegistry,
                                                                     registry);
@@ -355,6 +359,29 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
       pelvisOrientationManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
       return pelvisOrientationManager;
+   }
+
+   public NaturalPostureManager getOrCreateNaturalPostureManager()
+   {
+      if (naturalPostureManager != null)
+         return naturalPostureManager;
+
+      if (!hasHighLevelHumanoidControllerToolbox(NaturalPostureManager.class))
+         return null;
+      if (!hasWalkingControllerParameters(NaturalPostureManager.class))
+         return null;
+      if (walkingControllerParameters.getNaturalPostureParameters() == null)
+         return null;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (controllerToolbox.getFullRobotModel().getHand(robotSide) == null)
+            return null;
+      }
+      
+      naturalPostureManager = new NaturalPostureManager(walkingControllerParameters.getNaturalPostureParameters(), controllerToolbox, registry);
+
+      return naturalPostureManager;
    }
 
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)

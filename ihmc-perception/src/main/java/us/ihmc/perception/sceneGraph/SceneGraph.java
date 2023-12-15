@@ -8,6 +8,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
+import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
@@ -43,6 +44,7 @@ public class SceneGraph
    private transient final List<String> nodeNameList = new ArrayList<>();
    private transient final Map<String, SceneNode> namesToNodesMap = new HashMap<>();
    private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
+   private transient final TIntObjectMap<CenterposeNode> centerposeDetectedMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
 
    public SceneGraph()
@@ -68,12 +70,12 @@ public class SceneGraph
     * This method updates the caches and the static relative nodes, whose
     * tracking state should only be evaluated by the robot.
     */
-   public void updateOnRobotOnly(ReferenceFrame sensorFrame)
+   public void updateOnRobotOnly(ReferenceFrame robotPelvisFrame)
    {
       // This must happen only once per on-robot tick
       detectionFilterCollection.update();
 
-      modifyTree(modificationQueue -> updateOnRobotOnly(rootNode, sensorFrame, modificationQueue));
+      modifyTree(modificationQueue -> updateOnRobotOnly(rootNode, robotPelvisFrame, modificationQueue));
    }
 
    private void updateOnRobotOnly(SceneNode sceneNode, ReferenceFrame sensorFrame, SceneGraphModificationQueue modificationQueue)
@@ -108,9 +110,13 @@ public class SceneGraph
    private void update()
    {
       idToNodeMap.clear();
-      nodeNameList.clear();
+      synchronized (nodeNameList)
+      {
+         nodeNameList.clear();
+      }
       namesToNodesMap.clear();
       arUcoMarkerIDToNodeMap.clear();
+      centerposeDetectedMarkerIDToNodeMap.clear();
       sceneNodesByID.clear();
       updateCaches(rootNode);
    }
@@ -118,13 +124,20 @@ public class SceneGraph
    private void updateCaches(SceneNode node)
    {
       idToNodeMap.put(node.getID(), node);
-      nodeNameList.add(node.getName());
+      synchronized (nodeNameList)
+      {
+         nodeNameList.add(node.getName());
+      }
       namesToNodesMap.put(node.getName(), node);
       sceneNodesByID.add(node);
 
       if (node instanceof ArUcoMarkerNode arUcoMarkerNode)
       {
          arUcoMarkerIDToNodeMap.put(arUcoMarkerNode.getMarkerID(), arUcoMarkerNode);
+      }
+      else if (node instanceof CenterposeNode centerposeNode)
+      {
+         centerposeDetectedMarkerIDToNodeMap.put(centerposeNode.getObjectID(), centerposeNode);
       }
 
       for (SceneNode child : node.getChildren())
@@ -166,6 +179,11 @@ public class SceneGraph
    public TIntObjectMap<ArUcoMarkerNode> getArUcoMarkerIDToNodeMap()
    {
       return arUcoMarkerIDToNodeMap;
+   }
+
+   public TIntObjectMap<CenterposeNode> getCenterposeDetectedMarkerIDToNodeMap()
+   {
+      return centerposeDetectedMarkerIDToNodeMap;
    }
 
    public SortedSet<SceneNode> getSceneNodesByID()

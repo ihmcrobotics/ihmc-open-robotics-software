@@ -22,8 +22,8 @@ import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
-import us.ihmc.perception.realsense.BytedecoRealsense;
-import us.ihmc.perception.realsense.RealSenseHardwareManager;
+import us.ihmc.perception.realsense.RealsenseDevice;
+import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
@@ -32,11 +32,15 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.Throttler;
 
 import java.time.Instant;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -66,7 +70,12 @@ public class TerrainPerceptionProcessWithDriver
    private final FramePose3D cameraPose = new FramePose3D();
    private final Throttler throttler = new Throttler();
 
-   private final ExecutorService executorService = Executors.newFixedThreadPool(16);
+   private final ResettableExceptionHandlingExecutorService executorService =  MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 8);
+//   private final ExecutorService executorService = Executors.newFixedThreadPool(16);
+
+   protected final ScheduledExecutorService scheduledExecutorService = ExecutorServiceTools.newScheduledThreadPool(1,
+                                                                                                          getClass(),
+                                                                                                          ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
    private final ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic;
    private final ROS2Topic<ImageMessage> colorTopic;
@@ -74,9 +83,9 @@ public class TerrainPerceptionProcessWithDriver
 
    private final OpenCLManager openCLManager;
    private final ROS2Helper ros2Helper;
-   private final RealSenseHardwareManager realSenseHardwareManager;
+   private final RealsenseDeviceManager realsenseDeviceManager;
    private final RealsenseConfiguration realsenseConfiguration;
-   private final BytedecoRealsense realsense;
+   private final RealsenseDevice realsense;
    private final BytedecoImage depthBytedecoImage;
    private final Runnable syncedRobotUpdater;
    private final RobotConfigurationData robotConfigurationData;
@@ -108,6 +117,8 @@ public class TerrainPerceptionProcessWithDriver
                                              CollisionBoxProvider collisionBoxProvider,
                                              FullHumanoidRobotModel fullRobotModel,
                                              RealsenseConfiguration realsenseConfiguration,
+                                             ROS2StoredPropertySetGroup ros2PropertySetGroup,
+                                             ROS2Helper ros2Helper,
                                              ROS2Topic<ImageMessage> depthTopic,
                                              ROS2Topic<ImageMessage> colorTopic,
                                              ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic,
@@ -115,6 +126,8 @@ public class TerrainPerceptionProcessWithDriver
                                              Runnable syncedRobotUpdater)
    {
       this.syncedRobotUpdater = syncedRobotUpdater;
+      this.ros2PropertySetGroup = ros2PropertySetGroup;
+      this.ros2Helper = ros2Helper;
       this.realsenseConfiguration = realsenseConfiguration;
       this.depthTopic = depthTopic;
       this.colorTopic = colorTopic;
@@ -129,14 +142,14 @@ public class TerrainPerceptionProcessWithDriver
          LogTools.info("Creating terrain process with no collision provider.");
 
       this.robotConfigurationData = new RobotConfigurationData();
-      this.outputPeriod = UnitConversions.hertzToSeconds(31.0f);
+      this.outputPeriod = UnitConversions.hertzToSeconds(30.0f);
       openCLManager = new OpenCLManager();
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
       realtimeROS2Node.spin();
-      realSenseHardwareManager = new RealSenseHardwareManager();
+      realsenseDeviceManager = new RealsenseDeviceManager();
 
       LogTools.info("Creating Bytedeco Realsense Using: {}", serialNumber);
-      realsense = realSenseHardwareManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
+      realsense = realsenseDeviceManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
       if (realsense.getDevice() == null)
       {
          destroy();
@@ -154,7 +167,6 @@ public class TerrainPerceptionProcessWithDriver
       LogTools.info("Color width: " + colorWidth + ", height: " + colorHeight);
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_and_depth_publisher");
-      ros2Helper = new ROS2Helper(ros2Node);
 
       depthBytedecoImage = new BytedecoImage(realsense.getDepthWidth(), realsense.getDepthHeight(), opencv_core.CV_16UC1);
 
@@ -176,7 +188,7 @@ public class TerrainPerceptionProcessWithDriver
     */
    public void run()
    {
-      ThreadTools.startAsDaemon(this::updateThread, getClass().getSimpleName() + "UpdateThread");
+      scheduledExecutorService.scheduleAtFixedRate(this::updateThread, 0, 33, TimeUnit.MILLISECONDS);
    }
 
    private void updateThread()
@@ -187,11 +199,9 @@ public class TerrainPerceptionProcessWithDriver
          throttler.waitAndRun(outputPeriod); // do the waiting after we send to remove unnecessary latency
       }
 
-      ThreadTools.sleep(100);
-
       if (realsense != null)
          realsense.deleteDevice();
-      realSenseHardwareManager.deleteContext();
+      realsenseDeviceManager.deleteContext();
 
       destroyedNotification.set();
    }
@@ -225,14 +235,19 @@ public class TerrainPerceptionProcessWithDriver
             humanoidPerception.initializeHeightMapExtractor(realsense.getDepthCameraIntrinsics());
             humanoidPerception.getRapidRegionsExtractor().setEnabled(true);
 
-            ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
+            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS,
+                                                           humanoidPerception.getRapidHeightMapExtractor().getHeightMapParameters());
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
                                                            humanoidPerception.getRapidRegionsExtractor().getParameters());
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS,
-                    humanoidPerception.getRapidRegionsExtractor().getRapidPlanarRegionsCustomizer().getPolygonizerParameters());
+                                                           humanoidPerception.getRapidRegionsExtractor()
+                                                                             .getRapidPlanarRegionsCustomizer()
+                                                                             .getPolygonizerParameters());
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS,
-                    humanoidPerception.getRapidRegionsExtractor().getRapidPlanarRegionsCustomizer().getConcaveHullFactoryParameters());
+                                                           humanoidPerception.getRapidRegionsExtractor()
+                                                                             .getRapidPlanarRegionsCustomizer()
+                                                                             .getConcaveHullFactoryParameters());
 
             initialized = true;
          }
@@ -315,22 +330,19 @@ public class TerrainPerceptionProcessWithDriver
 
          // TODO: Add spherical region extraction toggling parameter.
          // humanoidPerception.setSphericalRegionsEnabled(parameters.getRapidRegionsEnabled());
-
          humanoidPerception.setRapidRegionsEnabled(parameters.getRapidRegionsEnabled());
          humanoidPerception.setHeightMapEnabled(parameters.getHeightMapEnabled());
          humanoidPerception.setMappingEnabled(parameters.getSLAMEnabled());
 
          /* Call all "enabled" setters before this update call.*/
          humanoidPerception.updateTerrain(ros2Helper, depth16UC1Image, cameraFrame,
-                                          cameraZUpFrame, true, false);
+                                          cameraZUpFrame, false);
 
          if (parameters.getPublishDepth() || parameters.getRapidRegionsEnabled())
          {
             sourceDepthImage.deallocate();
             compressedDepthPointer.deallocate();
          }
-
-         ros2PropertySetGroup.update();
       }
    }
 
@@ -341,19 +353,26 @@ public class TerrainPerceptionProcessWithDriver
    {
       running = false;
 
-      executorService.shutdownNow();
-      try
-      {
-         boolean result = executorService.awaitTermination(200, TimeUnit.MILLISECONDS);
-      }
-      catch (InterruptedException e)
-      {
-         throw new RuntimeException(e);
-      }
+      scheduledExecutorService.shutdown();
+      executorService.clearTaskQueue();
+      executorService.destroy();
 
+      realtimeROS2Node.destroy();;
       humanoidPerception.destroy();
-      depthBytedecoImage.destroy(openCLManager);
+
       openCLManager.destroy();
+      depthBytedecoImage.destroy(openCLManager);
+
       destroyedNotification.blockingPoll();
+   }
+
+   public PerceptionConfigurationParameters getConfigurationParameters()
+   {
+      return parameters;
+   }
+
+   public HumanoidPerceptionModule getHumanoidPerceptionModule()
+   {
+      return humanoidPerception;
    }
 }

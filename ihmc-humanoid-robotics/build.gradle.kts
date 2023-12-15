@@ -19,7 +19,7 @@ mainDependencies {
    api("org.ejml:ejml-ddense:0.39")
    api("org.boofcv:boofcv-geo:0.36")
 
-   api("us.ihmc:euclid:0.20.0")
+   api("us.ihmc:euclid:0.21.0")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-communication:source")

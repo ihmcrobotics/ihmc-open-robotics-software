@@ -16,11 +16,11 @@ ihmc {
 mainDependencies {
    api("org.jgrapht:jgrapht-core:0.9.0")
 
-   api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:euclid-geometry:0.20.0")
-   api("us.ihmc:euclid-frame:0.20.0")
-   api("us.ihmc:euclid-shape:0.20.0")
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.6")
+   api("us.ihmc:euclid:0.21.0")
+   api("us.ihmc:euclid-geometry:0.21.0")
+   api("us.ihmc:euclid-frame:0.21.0")
+   api("us.ihmc:euclid-shape:0.21.0")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.8")
    api("us.ihmc:ihmc-convex-optimization:0.17.18")
    api("us.ihmc:robot-environment-awareness:source")
 }
@@ -29,7 +29,7 @@ visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
    api(ihmc.sourceSetProject("data-sets"))
 
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.6")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.8")
    api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-graphics-javafx:source")
@@ -41,7 +41,7 @@ testDependencies {
    api(ihmc.sourceSetProject("data-sets"))
 
    api("us.ihmc:ihmc-commons-testing:0.32.0")
-   api("us.ihmc:simulation-construction-set:0.24.2")
+   api("us.ihmc:simulation-construction-set:0.25.0")
    api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }

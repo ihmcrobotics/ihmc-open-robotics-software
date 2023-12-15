@@ -20,6 +20,8 @@ import us.ihmc.rdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.vr.RDXVREye;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.*;
 
@@ -27,7 +29,7 @@ public class RDX3DScene
 {
    private final HashSet<ModelInstance> modelInstances = new HashSet<>();
    private final Set<RDXRenderableAdapter> renderables = new HashSet<>();
-   private final Map<Object, RDXRenderableAdapter> renderableObjectMap = new HashMap<>();
+   private final Map<Object, RDXRenderableAdapter> renderableOwnerKeyMap = new HashMap<>();
 
    private TreeSet<RDXSceneLevel> sceneLevelsToRender;
    private float ambientLight = 0.4f;
@@ -117,6 +119,19 @@ public class RDX3DScene
    // For VR in particular
    public void renderToCamera(Camera camera)
    {
+      if (camera instanceof RDXVREye eye)
+      {
+         if (eye.getSide() == RobotSide.LEFT)
+         {
+            sceneLevelsToRender.add(RDXSceneLevel.VR_EYE_LEFT);
+         }
+
+         if (eye.getSide() == RobotSide.RIGHT)
+         {
+            sceneLevelsToRender.add(RDXSceneLevel.VR_EYE_RIGHT);
+         }
+      }
+
       if (shadowsEnabled)
       {
          shadowManager.preRender(camera);
@@ -127,6 +142,20 @@ public class RDX3DScene
          shadowsDisabledModelBatch.begin(camera);
          renderInternal(shadowsDisabledModelBatch, sceneLevelsToRender);
       }
+
+      if (camera instanceof RDXVREye eye)
+      {
+         if (eye.getSide() == RobotSide.LEFT)
+         {
+            sceneLevelsToRender.remove(RDXSceneLevel.VR_EYE_LEFT);
+         }
+
+         if (eye.getSide() == RobotSide.RIGHT)
+         {
+            sceneLevelsToRender.remove(RDXSceneLevel.VR_EYE_RIGHT);
+         }
+      }
+
       postRender(camera, RDXSceneLevel.VIRTUAL.SINGLETON_SET);
    }
 
@@ -216,22 +245,22 @@ public class RDX3DScene
       return renderableAdapter;
    }
 
-   public void addRenderableProvider(Object supplier, RDXRenderableProvider renderableProvider)
+   public void addRenderableProvider(Object ownerKey, RDXRenderableProvider renderableProvider)
    {
       RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider);
-      renderableObjectMap.put(supplier, renderableAdapter);
+      renderableOwnerKeyMap.put(ownerKey, renderableAdapter);
       renderables.add(renderableAdapter);
    }
 
-   public void addRenderableProvider(Object supplier, RenderableProvider renderableProvider)
+   public void addRenderableProvider(Object ownerKey, RenderableProvider renderableProvider)
    {
-      addRenderableProvider(supplier, renderableProvider, RDXSceneLevel.MODEL);
+      addRenderableProvider(ownerKey, renderableProvider, RDXSceneLevel.MODEL);
    }
 
-   public void addRenderableProvider(Object supplier, RenderableProvider renderableProvider, RDXSceneLevel sceneLevel)
+   public void addRenderableProvider(Object ownerKey, RenderableProvider renderableProvider, RDXSceneLevel sceneLevel)
    {
       RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider, sceneLevel);
-      renderableObjectMap.put(supplier, renderableAdapter);
+      renderableOwnerKeyMap.put(ownerKey, renderableAdapter);
       renderables.add(renderableAdapter);
    }
 
@@ -240,10 +269,9 @@ public class RDX3DScene
       renderables.add(renderableAdapter);
    }
 
-   public void removeRenderable(Object supplier)
+   public void removeRenderable(Object ownerKey)
    {
-      RDXRenderableAdapter item = renderableObjectMap.remove(supplier);
-      renderables.remove(item);
+      renderables.remove(renderableOwnerKeyMap.remove(ownerKey));
    }
 
    public void removeRenderableAdapter(RDXRenderableAdapter renderableAdapter)

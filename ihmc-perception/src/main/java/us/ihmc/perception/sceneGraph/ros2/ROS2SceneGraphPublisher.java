@@ -12,6 +12,7 @@ import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
+import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
@@ -24,7 +25,6 @@ import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
  */
 public class ROS2SceneGraphPublisher
 {
-   private ROS2IOTopicQualifier ioQualifier;
    private final SceneGraphMessage sceneGraphMessage = new SceneGraphMessage();
    private final FramePose3D sceneNodePose = new FramePose3D();
    private final RigidBodyTransform sceneNodeToWorldTransform = new RigidBodyTransform();
@@ -37,8 +37,6 @@ public class ROS2SceneGraphPublisher
                        ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                        ROS2IOTopicQualifier ioQualifier)
    {
-      this.ioQualifier = ioQualifier;
-
       sceneGraphMessage.setNextId(sceneGraph.getNextID().intValue());
       sceneGraphMessage.getSceneTreeTypes().clear();
       sceneGraphMessage.getSceneTreeIndices().clear();
@@ -46,15 +44,16 @@ public class ROS2SceneGraphPublisher
       sceneGraphMessage.getDetectableSceneNodes().clear();
       sceneGraphMessage.getPredefinedRigidBodySceneNodes().clear();
       sceneGraphMessage.getArucoMarkerSceneNodes().clear();
+      sceneGraphMessage.getCenterposeSceneNodes().clear();
       sceneGraphMessage.getStaticRelativeSceneNodes().clear();
       sceneGraphMessage.getPrimitiveRigidBodySceneNodes().clear();
 
-      packSceneTreeToMessage(sceneGraph.getRootNode(), sceneGraphMessage);
+      packSceneTreeToMessage(sceneGraph.getRootNode());
 
       ros2PublishSubscribeAPI.publish(PerceptionAPI.SCENE_GRAPH.getTopic(ioQualifier), sceneGraphMessage);
    }
 
-   private void packSceneTreeToMessage(SceneNode sceneNode, SceneGraphMessage sceneGraphMessage)
+   private void packSceneTreeToMessage(SceneNode sceneNode)
    {
       // We handle packing the most specific types and then the more basic ones
       // We keep track of the more basic ones so we can share the
@@ -101,6 +100,20 @@ public class ROS2SceneGraphPublisher
             arUcoMarkerNodeMessage.setBreakFrequency((float) arUcoMarkerNode.getBreakFrequency());
             detectableSceneNodeMessage = arUcoMarkerNodeMessage.getDetectableSceneNode();
          }
+         else if (sceneNode instanceof CenterposeNode centerposeNode)
+         {
+            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.CENTERPOSE_NODE_TYPE);
+            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getCenterposeSceneNodes().size());
+            CenterposeNodeMessage centerposeNodeMessage = sceneGraphMessage.getCenterposeSceneNodes().add();
+            centerposeNodeMessage.setObjectId(centerposeNode.getObjectID());
+            centerposeNodeMessage.setObjectType(centerposeNode.getObjectType());
+            centerposeNodeMessage.setConfidence(centerposeNode.getConfidence());
+            for (int i = 0; i < centerposeNodeMessage.getBoundingBoxVertices().length; i++)
+            {
+               centerposeNodeMessage.getBoundingBoxVertices()[i].set(centerposeNode.getVertices3D()[i]);
+            }
+            detectableSceneNodeMessage = centerposeNodeMessage.getDetectableSceneNode();
+         }
          else
          {
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE);
@@ -140,7 +153,7 @@ public class ROS2SceneGraphPublisher
 
       for (SceneNode child : sceneNode.getChildren())
       {
-         packSceneTreeToMessage(child, sceneGraphMessage);
+         packSceneTreeToMessage(child);
       }
    }
 }
