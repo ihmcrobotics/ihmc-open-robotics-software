@@ -14,10 +14,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.visual.ColorDefinitions;
-import us.ihmc.scs2.definition.visual.MaterialDefinition;
 
 import java.util.function.Supplier;
 
@@ -70,16 +66,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
       if (baseUI != null)
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
       cameraForTracking = cameraForTrackingSupplier.get();
-      RobotDefinition robotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
-      // We are just making the hands black here
-      MaterialDefinition material = new MaterialDefinition(ColorDefinitions.Black());
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         String handName = robotModel.getJointMap().getHandName(robotSide);
-         RobotDefinition.forEachRigidBodyDefinition(robotDefinition.getRigidBodyDefinition(handName),
-                                                    body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
-      }
-      loadRobotModelAndGraphics(robotDefinition, syncedRobot.getFullRobotModel().getElevator());
+      loadRobotModelAndGraphics(robotModel.getRobotDefinition(), syncedRobot.getFullRobotModel().getElevator());
    }
 
    @Override

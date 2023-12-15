@@ -3,10 +3,9 @@ package us.ihmc.rdx.ui.behavior.registry;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeControlFlowNodeBasics;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeBasics;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.LocalOnlyBehaviorTreeNodeExecutor;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -20,7 +19,7 @@ import java.util.Set;
  * The UI has a tree structure, but not a decision or search one.
  * Currently calls propagate down to all the nodes so they can decide to take action.
  */
-public abstract class RDXBehaviorUIInterface extends BehaviorTreeNode implements RDXRenderableProvider
+public abstract class RDXBehaviorUIInterface extends LocalOnlyBehaviorTreeNodeExecutor implements RDXRenderableProvider
 {
    private final ArrayList<RDXBehaviorUIInterface> children = new ArrayList<>();
 
@@ -80,31 +79,25 @@ public abstract class RDXBehaviorUIInterface extends BehaviorTreeNode implements
       }
    }
 
-   public void syncTree(BehaviorTreeNodeBasics externalNode)
+   public void syncTree(BehaviorTreeNodeExecutor<?, ?> externalNode)
    {
-      setPreviousStatus(externalNode.getPreviousStatus());
-      setName(externalNode.getName());
-      setLastTickInstant(externalNode.getLastTickInstant());
-      setType(externalNode.getType());
+//      getState().setStatus(externalNode.getState().getStatus());
+      getDefinition().setDescription(externalNode.getDefinition().getDescription());
 
-      if (externalNode instanceof BehaviorTreeControlFlowNodeBasics)
+      for (BehaviorTreeNodeExecutor<?, ?> externalChild : externalNode.getChildren())
       {
-         BehaviorTreeControlFlowNodeBasics externalControlFlowNode = (BehaviorTreeControlFlowNodeBasics) externalNode;
-         for (BehaviorTreeNodeBasics externalChild : externalControlFlowNode.getChildren())
+         for (RDXBehaviorUIInterface child : children)
          {
-            for (RDXBehaviorUIInterface child : children)
+            if (externalChild.getDefinition().getDescription().equals(child.getDefinition().getDescription()))
             {
-               if (externalChild.getName().equals(child.getName()))
-               {
-                  child.syncTree(externalChild);
-               }
+               child.syncTree(externalChild);
             }
          }
       }
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       return null;
    }
@@ -130,7 +123,7 @@ public abstract class RDXBehaviorUIInterface extends BehaviorTreeNode implements
    {
       StringBuilder out = new StringBuilder();
 
-      out.append(this.getType());
+      out.append(getClass().getSimpleName());
       out.append("(");
       for (RDXBehaviorUIInterface child : this.getUIChildren()) {
          out.append(child.toString()).append(",");

@@ -11,6 +11,8 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.motionRetargeting.RetargetingParameters;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -29,7 +31,7 @@ public class RDXVRModeManager
 {
    private ROS2SyncedRobotModel syncedRobot;
    private RDXVRHandPlacedFootstepMode handPlacedFootstepMode;
-//   private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
+   private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
    private RDXJoystickBasedStepping joystickBasedStepping;
    private RDX3DSituatedImGuiPanel leftHandPanel;
    private final FramePose3D leftHandPanelPose = new FramePose3D();
@@ -43,7 +45,9 @@ public class RDXVRModeManager
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
                       ROS2ControllerHelper controllerHelper,
-                      RestartableJavaProcess kinematicsStreamingToolboxProcess)
+                      SceneGraph sceneGraph,
+                      RestartableJavaProcess kinematicsStreamingToolboxProcess,
+                      RetargetingParameters retargetingParameters)
    {
       this.syncedRobot = syncedRobot;
       handPlacedFootstepMode = new RDXVRHandPlacedFootstepMode();
@@ -51,8 +55,8 @@ public class RDXVRModeManager
 
       if (syncedRobot.getRobotModel().getRobotVersion().hasBothArms())
       {
-//         kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot.getRobotModel(), controllerHelper, kinematicsStreamingToolboxProcess);
-//         kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
+         kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, sceneGraph, kinematicsStreamingToolboxProcess, retargetingParameters);
+         kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
       }
 
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
@@ -94,16 +98,16 @@ public class RDXVRModeManager
          case FOOTSTEP_PLACEMENT -> handPlacedFootstepMode.processVRInput(vrContext);
          case WHOLE_BODY_IK_STREAMING ->
          {
-//            if (kinematicsStreamingMode != null)
-//               kinematicsStreamingMode.processVRInput(vrContext);
+            if (kinematicsStreamingMode != null)
+               kinematicsStreamingMode.processVRInput(vrContext);
          }
       }
    }
 
    public void update()
    {
-//      if (kinematicsStreamingMode != null)
-//         kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
+      if (kinematicsStreamingMode != null)
+         kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
       leftHandPanel.update();
       joystickBasedStepping.update(mode == RDXVRMode.JOYSTICK_WALKING);
    }
@@ -143,8 +147,6 @@ public class RDXVRModeManager
       if (ImGui.radioButton(labels.get("Whole body IK streaming"), mode == RDXVRMode.WHOLE_BODY_IK_STREAMING))
       {
          mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
-//         if (!kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().isStarted())
-//            kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().start();
       }
       if (ImGui.radioButton(labels.get("Joystick walking"), mode == RDXVRMode.JOYSTICK_WALKING))
       {
@@ -163,8 +165,8 @@ public class RDXVRModeManager
          }
          case WHOLE_BODY_IK_STREAMING ->
          {
-//            if (kinematicsStreamingMode != null)
-//               kinematicsStreamingMode.renderImGuiWidgets();
+            if (kinematicsStreamingMode != null)
+               kinematicsStreamingMode.renderImGuiWidgets();
          }
          case JOYSTICK_WALKING ->
          {
@@ -185,8 +187,8 @@ public class RDXVRModeManager
             }
             case WHOLE_BODY_IK_STREAMING ->
             {
-//               if (kinematicsStreamingMode != null)
-//                  kinematicsStreamingMode.getVirtualRenderables(renderables, pool, sceneLevels);
+               if (kinematicsStreamingMode != null)
+                  kinematicsStreamingMode.getVirtualRenderables(renderables, pool, sceneLevels);
             }
             case JOYSTICK_WALKING ->
             {
@@ -204,15 +206,15 @@ public class RDXVRModeManager
    public void destroy()
    {
       leftHandPanel.dispose();
-//      if (kinematicsStreamingMode != null)
-//         kinematicsStreamingMode.destroy();
+      if (kinematicsStreamingMode != null)
+         kinematicsStreamingMode.destroy();
       joystickBasedStepping.destroy();
    }
 
-//   public RDXVRKinematicsStreamingMode getKinematicsStreamingMode()
-//   {
-//      return kinematicsStreamingMode;
-//   }
+   public RDXVRKinematicsStreamingMode getKinematicsStreamingMode()
+   {
+      return kinematicsStreamingMode;
+   }
 
    public ImBoolean getShowFloatingVideoPanel()
    {
