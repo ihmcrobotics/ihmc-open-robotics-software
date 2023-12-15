@@ -37,15 +37,16 @@ import java.util.*;
 public class RDXQuickATManager extends RDXPanel
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private RDXTeleoperationManager teleoperationManager;
    private SceneGraph sceneGraph;
    private SceneNode defaultNode = new SceneNode(100, "");
    private SceneNode selectedNode = defaultNode;
+
    private final WorkspaceResourceDirectory resourceDirectory = new WorkspaceResourceDirectory(getClass(), "/quickATs");
    private ImGuiDirectory quickATDirectory;
    private final ImGuiInputText extraFileNameToSave = new ImGuiInputText("Enter file name (.json)");
    private String loadingFileName = "";
    private boolean fileToSaveHasCompleteName = true;
-   private RDXTeleoperationManager teleoperationManager;
    private final ImBoolean saveArms = new ImBoolean(false);
    private final ImBoolean saveFootsteps = new ImBoolean(false);
    private final SideDependentList<ImBoolean> saveArmsSide = new SideDependentList<>();
