@@ -15,7 +15,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
-import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -33,7 +32,6 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collection;
 
 public class RDXQuickATManager
@@ -58,13 +56,13 @@ public class RDXQuickATManager
    public RDXQuickATManager(SceneNode node)
    {
       this.node = node;
-      String[] nameParts = node.getName().split(" ");
+//      String[] nameParts = node.getName().split(" ");
 
       quickATDirectory = new ImGuiDirectory(resourceDirectory.getFilesystemDirectory().toString(),
                                        pathEntry -> pathEntry.type() == BasicPathVisitor.PathType.FILE
-                                                    && Arrays.stream(nameParts)
-                                                             .map(String::toLowerCase)
-                                                             .anyMatch(pathEntry.path().getFileName().toString().toLowerCase()::contains)
+//                                                    && Arrays.stream(nameParts)
+//                                                             .map(String::toLowerCase)
+//                                                             .anyMatch(pathEntry.path().getFileName().toString().toLowerCase()::contains)
                                                     && pathEntry.path().getFileName().toString().endsWith(".json"),
                                        this::setLoadingFile);
       extraFileNameToSave.setImString(node.getName());
@@ -88,47 +86,51 @@ public class RDXQuickATManager
 
    public void update()
    {
-      if (node instanceof CenterposeNode centerposeNode)
-      {
-         if (centerposeNode.getConfidence() < 0.3 || !centerposeNode.getCurrentlyDetected())
-         {
-            ATTracking = false;
-         }
-      }
-
       if (ATTracking)
       {
-         //TODO add other interactable link poses
-         for (RobotSide side : handFrameTransforms.keySet())
+         boolean freezeTracking = false;
+         if (node instanceof CenterposeNode centerposeNode)
          {
-            // create frame pose to express it in world frame
-            FramePose3D handFrame = new FramePose3D(node.getNodeFrame(), handFrameTransforms.get(side));
-            teleoperationManager.getArmManager().setDesiredHandFramePose(side, handFrame);
-            teleoperationManager.getArmManager().computeTrajectoryTime(side, 0.5, 5.0);
-
-            double timeInTrajectory = System.nanoTime()/1_000_000_000.0 - timeLastCommandHand.get(side);
-            timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, teleoperationManager.getArmManager().getTrajectoryTime(side));
-            double alpha = timeInTrajectory / teleoperationManager.getArmManager().getTrajectoryTime(side);
-
-            double[] qInitials = teleoperationManager.getArmManager().getCurrentJointAngles(side);
-            double[] qGoals = teleoperationManager.getArmManager().getDesiredJointAngles(side);
-            double[] qDesireds = new double[qInitials.length];
-            double[] qDDesireds = new double[qInitials.length];
-
-            for (int i = 0; i < qInitials.length; i++)
+            if (centerposeNode.getConfidence() < 0.3 || !centerposeNode.getCurrentlyDetected())
             {
-               double qDes = EuclidCoreTools.interpolate(qInitials[i], qGoals[i], alpha);
-               double qDDes;
-               if (alpha <= 0.0 || alpha >= 1.0)
-                  qDDes = 0.0;
-               else
-                  qDDes = (qGoals[i] - qInitials[i]) / teleoperationManager.getArmManager().getTrajectoryTime(side);
-               qDesireds[i] = qDes;
-               qDDesireds[i] = qDDes;
+               freezeTracking = true;
             }
+         }
 
-            timeLastCommandHand.replace(side, System.nanoTime() / 1_000_000_000.0);
-            teleoperationManager.getArmManager().moveHand(side, qDesireds, qDDesireds);
+         //TODO add other interactable link poses
+         if (!freezeTracking)
+         {
+            for (RobotSide side : handFrameTransforms.keySet())
+            {
+               // create frame pose to express it in world frame
+               FramePose3D handFrame = new FramePose3D(node.getNodeFrame(), handFrameTransforms.get(side));
+               teleoperationManager.getArmManager().setDesiredHandFramePose(side, handFrame);
+               teleoperationManager.getArmManager().computeTrajectoryTime(side, 0.5, 5.0);
+
+               double timeInTrajectory = System.nanoTime() / 1_000_000_000.0 - timeLastCommandHand.get(side);
+               timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, teleoperationManager.getArmManager().getTrajectoryTime(side));
+               double alpha = timeInTrajectory / teleoperationManager.getArmManager().getTrajectoryTime(side);
+
+               double[] qInitials = teleoperationManager.getArmManager().getCurrentJointAngles(side);
+               double[] qGoals = teleoperationManager.getArmManager().getDesiredJointAngles(side);
+               double[] qDesireds = new double[qInitials.length];
+               double[] qDDesireds = new double[qInitials.length];
+
+               for (int i = 0; i < qInitials.length; i++)
+               {
+                  double qDes = EuclidCoreTools.interpolate(qInitials[i], qGoals[i], alpha);
+                  double qDDes;
+                  if (alpha <= 0.0 || alpha >= 1.0)
+                     qDDes = 0.0;
+                  else
+                     qDDes = (qGoals[i] - qInitials[i]) / teleoperationManager.getArmManager().getTrajectoryTime(side);
+                  qDesireds[i] = qDes;
+                  qDDesireds[i] = qDDes;
+               }
+
+               timeLastCommandHand.replace(side, System.nanoTime() / 1_000_000_000.0);
+               teleoperationManager.getArmManager().moveHand(side, qDesireds, qDDesireds);
+            }
          }
       }
    }
