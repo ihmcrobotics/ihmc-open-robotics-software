@@ -45,7 +45,6 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    private final ImBoolean showBoundingBox = new ImBoolean(false);
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final RDXQuickATManager quickATManager;
 
    @Nullable
    private RDXInteractableObject interactableObject;
@@ -58,8 +57,6 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
       this.panel3D = panel3D;
       this.centerposeNode = centerposeNode;
       this.text = new RDX3DSituatedText(getObjectTooltip(), 0.05f);
-
-      quickATManager = new RDXQuickATManager(centerposeNode);
    }
 
    private String getObjectTooltip()
@@ -136,8 +133,6 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
             wentUndetected = true;
          }
       }
-
-      quickATManager.update();
    }
 
    private void createInteractableObject()
@@ -167,8 +162,6 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
       ImGui.checkbox(labels.get("Show bounding box"), showBoundingBox);
       ImGui.text("ID: %d".formatted(centerposeNode.getObjectID()));
       ImGui.sameLine();
-
-      quickATManager.renderImGuiWidgets();
    }
 
    @Override

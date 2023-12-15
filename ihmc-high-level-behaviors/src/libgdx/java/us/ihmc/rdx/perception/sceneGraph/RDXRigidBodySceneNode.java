@@ -36,7 +36,6 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
    protected transient final FramePose3D visualModelPose = new FramePose3D();
 
    private transient final RigidBodyTransform visualModelToWorldTransform = new RigidBodyTransform();
-   private final RDXQuickATManager quickATManager;
 
    public RDXRigidBodySceneNode(RigidBodySceneNode rigidBodySceneNode, RigidBodyTransform visualModelToNodeTransform, RDX3DPanel panel3D)
    {
@@ -52,7 +51,6 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
       trackDetectedPoseWrapper = new ImBooleanWrapper(rigidBodySceneNode::getTrackingInitialParent,
                                                       trackDetectedPoseChanged::set,
                                                       imBoolean -> ImGui.checkbox(labels.get("Track " + initialParentName), imBoolean));
-      quickATManager = new RDXQuickATManager(rigidBodySceneNode);
    }
 
    public void update(SceneGraphModificationQueue modificationQueue)
@@ -91,8 +89,6 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
       visualModelToWorldTransform.set(visualModelPose);
 
       getModelInstance().setTransformToWorldFrame(visualModelToWorldTransform);
-
-      quickATManager.update();
    }
 
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
@@ -110,7 +106,6 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
          rigidBodySceneNode.clearOffset();
          rigidBodySceneNode.freeze();
       }
-      quickATManager.renderImGuiWidgets();
    }
 
    @Override
