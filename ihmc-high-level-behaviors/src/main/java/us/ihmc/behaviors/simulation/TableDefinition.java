@@ -4,6 +4,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
+import us.ihmc.perception.sceneGraph.rigidBody.TableModelParameters;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Box3DDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
@@ -20,11 +21,6 @@ import us.ihmc.scs2.definition.visual.VisualDefinition;
  */
 public class TableDefinition  extends RobotDefinition
 {
-   public static final double TABLE_LEG_LENGTH = 0.85;
-   public static final double TABLE_THICKNESS = 0.05;
-   public static final double TABLE_ARUCO_MARKER_FROM_LEFT_EDGE = 0.675956;
-   public static final double TABLE_ARUCO_MARKER_FROM_FRONT_EDGE = 0.03;
-
    private SixDoFJointState initialSixDoFState;
    private boolean addArUcoMarkers = false;
 
@@ -50,7 +46,7 @@ public class TableDefinition  extends RobotDefinition
 
       double sizeX = 2.0;
       double sizeY = 0.75;
-      double sizeZ = TABLE_THICKNESS;
+      double sizeZ = TableModelParameters.TABLE_THICKNESS;
       RigidBodyDefinition tableSurface = new RigidBodyDefinition("tableSurface");
       VisualDefinition modelVisualDefinition = new VisualDefinition();
       ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition("environmentObjects/table/Table.g3dj");
@@ -71,20 +67,20 @@ public class TableDefinition  extends RobotDefinition
       collisionShapeDefinition.getOriginPose().getTranslation().set(sizeX / 2.0, sizeY / 2.0, sizeZ / 2.0);
       tableSurface.addCollisionShapeDefinition(collisionShapeDefinition);
 
-      CollisionShapeDefinition leg1 = new CollisionShapeDefinition(new Box3DDefinition(TABLE_THICKNESS, TABLE_THICKNESS, TABLE_LEG_LENGTH));
-      leg1.getOriginPose().getTranslation().set(0.075, 0.075, -TABLE_LEG_LENGTH / 2.0);
+      CollisionShapeDefinition leg1 = new CollisionShapeDefinition(new Box3DDefinition(TableModelParameters.TABLE_THICKNESS, TableModelParameters.TABLE_THICKNESS, TableModelParameters.TABLE_LEG_LENGTH));
+      leg1.getOriginPose().getTranslation().set(0.075, 0.075, -TableModelParameters.TABLE_LEG_LENGTH / 2.0);
       tableSurface.addCollisionShapeDefinition(leg1);
 
-      CollisionShapeDefinition leg2 = new CollisionShapeDefinition(new Box3DDefinition(TABLE_THICKNESS, TABLE_THICKNESS, TABLE_LEG_LENGTH));
-      leg2.getOriginPose().getTranslation().set(sizeX - 0.075, 0.075, -TABLE_LEG_LENGTH / 2.0);
+      CollisionShapeDefinition leg2 = new CollisionShapeDefinition(new Box3DDefinition(TableModelParameters.TABLE_THICKNESS, TableModelParameters.TABLE_THICKNESS, TableModelParameters.TABLE_LEG_LENGTH));
+      leg2.getOriginPose().getTranslation().set(sizeX - 0.075, 0.075, -TableModelParameters.TABLE_LEG_LENGTH / 2.0);
       tableSurface.addCollisionShapeDefinition(leg2);
 
-      CollisionShapeDefinition leg3 = new CollisionShapeDefinition(new Box3DDefinition(TABLE_THICKNESS, TABLE_THICKNESS, TABLE_LEG_LENGTH));
-      leg3.getOriginPose().getTranslation().set(sizeX - 0.075, sizeY - 0.075, -TABLE_LEG_LENGTH / 2.0);
+      CollisionShapeDefinition leg3 = new CollisionShapeDefinition(new Box3DDefinition(TableModelParameters.TABLE_THICKNESS, TableModelParameters.TABLE_THICKNESS, TableModelParameters.TABLE_LEG_LENGTH));
+      leg3.getOriginPose().getTranslation().set(sizeX - 0.075, sizeY - 0.075, -TableModelParameters.TABLE_LEG_LENGTH / 2.0);
       tableSurface.addCollisionShapeDefinition(leg3);
 
-      CollisionShapeDefinition leg4 = new CollisionShapeDefinition(new Box3DDefinition(TABLE_THICKNESS, TABLE_THICKNESS, TABLE_LEG_LENGTH));
-      leg4.getOriginPose().getTranslation().set(0.075, sizeY - 0.075, -TABLE_LEG_LENGTH / 2.0);
+      CollisionShapeDefinition leg4 = new CollisionShapeDefinition(new Box3DDefinition(TableModelParameters.TABLE_THICKNESS, TableModelParameters.TABLE_THICKNESS, TableModelParameters.TABLE_LEG_LENGTH));
+      leg4.getOriginPose().getTranslation().set(0.075, sizeY - 0.075, -TableModelParameters.TABLE_LEG_LENGTH / 2.0);
       tableSurface.addCollisionShapeDefinition(leg4);
 
       tableSurface.setMass(50.0);
