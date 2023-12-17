@@ -37,6 +37,13 @@ public class MultiBodySystemMissingTools
     */
    public static RigidBodyBasics getDetachedCopyOfSubtreeWithElevator(RigidBodyBasics rootBodyToDetach, OneDoFJointBasics childJointToFollow)
    {
+      return getDetachedCopyOfSubtreeWithElevator(rootBodyToDetach, childJointToFollow, null);
+   }
+
+   public static RigidBodyBasics getDetachedCopyOfSubtreeWithElevator(RigidBodyBasics rootBodyToDetach,
+                                                                      OneDoFJointBasics childJointToFollow,
+                                                                      String endRigidBodyName)
+   {
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       SixDoFJoint floatingJoint = new SixDoFJoint(rootBodyToDetach.getName(), elevator);
       RigidBodyBasics clonedChest = MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER.cloneRigidBody(rootBodyToDetach,
@@ -48,7 +55,7 @@ public class MultiBodySystemMissingTools
                                                                                                                    null,
                                                                                                                    "",
                                                                                                                    clonedFirstShoulderJoint);
-      cloneSubtree(childJointToFollow.getSuccessor(), clonedFirstShoulderLink, "");
+      cloneSubtree(childJointToFollow.getSuccessor(), clonedFirstShoulderLink, "", endRigidBodyName);
       return elevator;
    }
 
@@ -82,7 +89,7 @@ public class MultiBodySystemMissingTools
                                                                                                                    null,
                                                                                                                    "",
                                                                                                                    clonedFirstShoulderJoint);
-      cloneSubtree(childJointToFollow.getSuccessor(), clonedFirstShoulderLink, "");
+      cloneSubtree(childJointToFollow.getSuccessor(), clonedFirstShoulderLink, "", null);
       return clonedChest;
    }
 
@@ -90,7 +97,7 @@ public class MultiBodySystemMissingTools
     * Sad to have to copy all this over, but it was private :(
     * https://github.com/ihmcrobotics/mecano/issues/12
     */
-   private static void cloneSubtree(RigidBodyReadOnly originalStart, RigidBodyBasics cloneStart, String cloneSuffix)
+   private static void cloneSubtree(RigidBodyReadOnly originalStart, RigidBodyBasics cloneStart, String cloneSuffix, String endRigidBodyName)
    {
       MultiBodySystemFactories.RigidBodyBuilder rigidBodyBuilder = MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER;
       MultiBodySystemFactories.JointBuilder jointBuilder = MultiBodySystemFactories.DEFAULT_JOINT_BUILDER;
@@ -105,24 +112,32 @@ public class MultiBodySystemMissingTools
       for (JointReadOnly originalJoint : originalStart.childrenSubtreeIterable())
       {
          RigidBodyReadOnly originalPredecessor = originalJoint.getPredecessor();
-         // Retrieve the right predecessor for the joint to clone. The map has to contain the clone predecessor.
-         RigidBodyBasics clonePredecessor = originalToCloneBodyMap.get(originalPredecessor.getName());
 
-         // Clone the joint
-         JointBasics cloneJoint = jointBuilder.cloneJoint(originalJoint, cloneSuffix, clonePredecessor);
+         if (endRigidBodyName == null || !originalPredecessor.getName().equals(endRigidBodyName))
+         {
+            // Retrieve the right predecessor for the joint to clone. The map has to contain the clone predecessor.
+            RigidBodyBasics clonePredecessor = originalToCloneBodyMap.get(originalPredecessor.getName());
 
-         if (originalJoint.isLoopClosure())
-         { // We rely on the iterator to stop at the loop closure joint.
-            loopClosureCloneJoints.add(cloneJoint);
-            loopClosureOriginalJoints.add(originalJoint);
-            // We will complete their setup at the end to ensure the successors are already created.
-            continue;
+            // Clone the joint
+            JointBasics cloneJoint = jointBuilder.cloneJoint(originalJoint, cloneSuffix, clonePredecessor);
+
+            if (originalJoint.isLoopClosure())
+            { // We rely on the iterator to stop at the loop closure joint.
+               loopClosureCloneJoints.add(cloneJoint);
+               loopClosureOriginalJoints.add(originalJoint);
+               // We will complete their setup at the end to ensure the successors are already created.
+               continue;
+            }
+
+            // Clone the successor
+            RigidBodyReadOnly originalSuccessor = originalJoint.getSuccessor();
+            RigidBodyBasics cloneSuccessor = rigidBodyBuilder.cloneRigidBody(originalSuccessor, null, cloneSuffix, cloneJoint);
+            originalToCloneBodyMap.put(originalSuccessor.getName(), cloneSuccessor);
          }
-
-         // Clone the successor
-         RigidBodyReadOnly originalSuccessor = originalJoint.getSuccessor();
-         RigidBodyBasics cloneSuccessor = rigidBodyBuilder.cloneRigidBody(originalSuccessor, null, cloneSuffix, cloneJoint);
-         originalToCloneBodyMap.put(originalSuccessor.getName(), cloneSuccessor);
+         else
+         {
+            break;
+         }
       }
 
       for (int loopClosureIndex = 0; loopClosureIndex < loopClosureCloneJoints.size(); loopClosureIndex++)
