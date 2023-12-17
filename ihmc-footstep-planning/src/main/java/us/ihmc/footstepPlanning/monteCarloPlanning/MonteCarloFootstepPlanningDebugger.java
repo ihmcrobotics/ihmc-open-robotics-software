@@ -124,7 +124,7 @@ public class MonteCarloFootstepPlanningDebugger
          else if (mode == 2)
             LogTools.debug(String.format("Start: %d, %d", (int) point.getX(), (int) point.getY()));
 
-         PerceptionDebugTools.plotTiltedRectangle(image, point, (float) pose.getYaw(), 2 * scale, mode);
+         PerceptionDebugTools.plotTiltedRectangle(image, point, (float) -pose.getYaw(), 2 * scale, mode);
       }
    }
 

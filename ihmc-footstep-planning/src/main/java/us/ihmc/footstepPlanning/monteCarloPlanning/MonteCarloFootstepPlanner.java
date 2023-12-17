@@ -42,7 +42,7 @@ public class MonteCarloFootstepPlanner
       {
          Point2D position = new Point2D(request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getX() * 50,
                                         request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getY() * 50);
-         float yaw = (float) request.getStartFootPoses().get(RobotSide.LEFT).getYaw();
+         float yaw = (float) -request.getStartFootPoses().get(RobotSide.LEFT).getYaw();
          Point3D state = new Point3D(position.getX(), position.getY(), yaw);
          root = new MonteCarloFootstepNode(state, null, RobotSide.LEFT, uniqueNodeId++);
       }
@@ -231,7 +231,7 @@ public class MonteCarloFootstepPlanner
       else
          root = new MonteCarloFootstepNode(new Point3D(request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getX() * 50,
                                                        request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getY() * 50,
-                                                       request.getStartFootPoses().get(RobotSide.LEFT).getYaw()),
+                                                       -request.getStartFootPoses().get(RobotSide.LEFT).getYaw()),
                                            null,
                                            RobotSide.LEFT,
                                            uniqueNodeId++);

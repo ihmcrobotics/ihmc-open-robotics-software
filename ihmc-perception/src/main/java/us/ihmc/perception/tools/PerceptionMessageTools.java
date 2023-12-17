@@ -263,7 +263,7 @@ public class PerceptionMessageTools
          int xIndex = HeightMapTools.keyToXIndex(key, centerIndex);
          int yIndex = HeightMapTools.keyToYIndex(key, centerIndex);
          double height = heightMapMessage.getHeights().get(key);
-         terrainMapData.setHeightLocal((float) height, xIndex, yIndex);
+         terrainMapData.setHeightLocal((float) height, yIndex, xIndex);
       }
    }
 }

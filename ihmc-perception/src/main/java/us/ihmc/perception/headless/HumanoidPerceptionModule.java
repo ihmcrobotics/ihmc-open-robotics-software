@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
@@ -206,7 +207,9 @@ public class HumanoidPerceptionModule
                                                               PerceptionAPI.HEIGHT_MAP_CROPPED,
                                                               croppedHeightMapImageMessage,
                                                               ros2Helper,
-                                                              cameraPose,
+                                                              new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                              rapidHeightMapExtractor.getSensorOrigin(),
+                                                                              new Quaternion()),
                                                               acquisitionTime,
                                                               rapidHeightMapExtractor.getSequenceNumber(),
                                                               heightMapImage.rows(),

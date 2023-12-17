@@ -65,8 +65,10 @@ import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 public class TerrainPlanningSimulationUI
@@ -89,6 +91,8 @@ public class TerrainPlanningSimulationUI
    private BytedecoImage bytedecoDepthImage;
    private OpenCLManager openCLManager;
    private RDXPanel navigationPanel;
+   private FootstepPlannerLog log;
+   private TerrainMapData loadedMapData;
 
    private FootstepPredictor footstepPredictor;
    private FootstepPlanningModule footstepPlanningModule;
@@ -108,6 +112,10 @@ public class TerrainPlanningSimulationUI
    private final RigidBodyTransform sensorToGroundTransform = new RigidBodyTransform();
    private final RigidBodyTransform groundToWorldTransform = new RigidBodyTransform();
 
+   private final File logFile = new File(IHMCCommonPaths.PLANNING_DIRECTORY.resolve("NadiaPlannerLogs").toString());
+   //private final File logFile = new File(IHMCCommonPaths.LOGS_DIRECTORY.toString());
+   private final FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
+   private final File[] files = logFile.listFiles(name -> name.toString().contains("FootstepPlannerLog"));
    private final Random random = new Random(System.currentTimeMillis());
    private final Pose3D cameraPose = new Pose3D();
 
@@ -125,6 +133,7 @@ public class TerrainPlanningSimulationUI
 
    private int autoIncrementCounter = 0;
    private int plansLoggedSoFar = 0;
+   private int logIndex = 0;
    private boolean planLogged = false;
    private boolean initialized = false;
    private boolean sidednessBit = false;
@@ -133,6 +142,9 @@ public class TerrainPlanningSimulationUI
 
    public TerrainPlanningSimulationUI()
    {
+      if (files != null)
+         Arrays.sort(files);
+
       ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "height_map_simulation_ui");
       ros2Helper = new ROS2Helper(ros2Node);
 
@@ -348,48 +360,33 @@ public class TerrainPlanningSimulationUI
                l515PoseGizmo.update();
             }
             ImGui.separator();
-            if (ImGui.button("Load Footstep Planner Log"))
+            if (ImGui.button("Load Log"))
             {
-               // height map is 8x8 meters, with a resolution of 0.02 meters, and a 50x50 patch in the center is set to 1m
-               FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-               FootstepPlannerLogLoader.LoadResult loadResult = logLoader.load();
-
-               if (loadResult != FootstepPlannerLogLoader.LoadResult.LOADED)
-               {
-                  return;
-               }
-               FootstepPlannerLog log = logLoader.getLog();
-
-               Mat heightMap = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
-               Mat contactMap = humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage();
-               TerrainMapData terrainMap = new TerrainMapData(heightMap, contactMap, null);
-               PerceptionMessageTools.unpackMessage(log.getRequestPacket().getHeightMapMessage(), terrainMap);
-
-               //HeightMapTerrainGeneratorTools.fillWithSteppingStones(heightMap, 0.4f, 0.4f, 0.3f, 0.25f, 3);
-
-               humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
-               humanoidPerception.getRapidHeightMapExtractor()
-                                 .populateParameterBuffer(RapidHeightMapExtractor.getHeightMapParameters(),
-                                                          steppingL515Simulator.getCopyOfCameraParameters(),
-                                                          new Point3D());
-               humanoidPerception.getRapidHeightMapExtractor().computeContactMap();
-               humanoidPerception.getRapidHeightMapExtractor().readContactMapImage();
-
-               startMidX.set((float) log.getRequestPacket().getStartLeftFootPose().getX());
-               startMidY.set((float) log.getRequestPacket().getStartLeftFootPose().getY());
-               startMidZ.set((float) log.getRequestPacket().getStartLeftFootPose().getZ());
-               startYaw.set((float) log.getRequestPacket().getStartLeftFootPose().getYaw());
-               goalMidX.set((float) log.getRequestPacket().getGoalLeftFootPose().getX());
-               goalMidY.set((float) log.getRequestPacket().getGoalLeftFootPose().getY());
-               goalYaw.set((float) log.getRequestPacket().getGoalLeftFootPose().getYaw());
+               loadFootstepPlannerLog();
             }
-//            ImGui.sliderFloat("Start Mid X", startMidX.getData(), -4.0f, 4.0f);
-//            ImGui.sliderFloat("Start Mid Y", startMidY.getData(), -4.0f, 4.0f);
-//            ImGui.sliderFloat("Start Mid Z", startMidZ.getData(), -3.0f, 3.0f);
-//            ImGui.sliderFloat("Start Yaw", startYaw.getData(), (float) -Math.PI, (float) Math.PI);
-//            ImGui.sliderFloat("Goal Mid X", goalMidX.getData(), -2.0f, 2.0f);
-//            ImGui.sliderFloat("Goal Mid Y", goalMidY.getData(), -2.0f, 2.0f);
-//            ImGui.sliderFloat("Goal Yaw", goalYaw.getData(), (float) -Math.PI, (float) Math.PI);
+            ImGui.sameLine();
+            ImGui.pushStyleColor(ImGuiCol.Button, 0.8f, 0.1f, 0.1f, 0.5f);
+            if (ImGui.button("Load Previous"))
+            {
+               logIndex--;
+               loadFootstepPlannerLog();
+            }
+            ImGui.popStyleColor();
+            ImGui.sameLine();
+            ImGui.pushStyleColor(ImGuiCol.Button, 0.1f, 0.8f, 0.1f, 0.5f);
+            if (ImGui.button("Load Next"))
+            {
+               logIndex++;
+               loadFootstepPlannerLog();
+            }
+            ImGui.popStyleColor();
+            ImGui.sliderFloat("Start Mid X", startMidX.getData(), -4.0f, 4.0f);
+            ImGui.sliderFloat("Start Mid Y", startMidY.getData(), -4.0f, 4.0f);
+            ImGui.sliderFloat("Start Mid Z", startMidZ.getData(), -3.0f, 3.0f);
+            ImGui.sliderFloat("Start Yaw", startYaw.getData(), (float) -Math.PI, (float) Math.PI);
+            ImGui.sliderFloat("Goal Mid X", goalMidX.getData(), -2.0f, 2.0f);
+            ImGui.sliderFloat("Goal Mid Y", goalMidY.getData(), -2.0f, 2.0f);
+            ImGui.sliderFloat("Goal Yaw", goalYaw.getData(), (float) -Math.PI, (float) Math.PI);
             ImGui.separator();
             if (ImGui.button("Plan Steps"))
             {
@@ -409,6 +406,24 @@ public class TerrainPlanningSimulationUI
             ImGui.checkbox("Enable Monte Carlo Planning", enableMonteCarloPlanner);
          }
 
+         public void loadFootstepPlannerLog()
+         {
+            if (files == null)
+               throw new RuntimeException("No log files found in " + logFile.getAbsolutePath());
+
+            File file = files[logIndex];
+            LogTools.info("Loading log: {}", file.getName());
+            FootstepPlannerLogLoader.LoadResult loadResult = logLoader.load(file);
+            if (loadResult != FootstepPlannerLogLoader.LoadResult.LOADED)
+            {
+               return;
+            }
+            log = logLoader.getLog();
+            loadedMapData = getTerrainMapData(log);
+
+            LogTools.warn("Footstep Planner Request: Start: {}, Goal: {}", log.getRequestPacket().getStartLeftFootPose(), log.getRequestPacket().getGoalLeftFootPose());
+         }
+
          public void updateMonteCarloPlanner(boolean reset)
          {
             if (!monteCarloFootstepPlanner.isPlanning())
@@ -416,20 +431,22 @@ public class TerrainPlanningSimulationUI
                executorService.clearTaskQueue();
                executorService.submit(() ->
                  {
-                    TerrainMapData terrainMap;
-                    if (USE_EXTERNAL_HEIGHT_MAP)
+                    if (USE_EXTERNAL_HEIGHT_MAP && log != null)
                     {
-                       terrainMap = new TerrainMapData(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat(),
-                                                       humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage(), null);
-                       terrainMap.setSensorOrigin(0, 0);
+                       MonteCarloFootstepPlannerRequest request = createMonteCarloFootstepPlannerRequest(loadedMapData, log);
+                       FootstepPlan plan = planFootstepsMonteCarlo(request, reset);
+                       footstepPlanToRenderNotificaiton.set(plan);
                     }
-                    else
+                    else if (!USE_EXTERNAL_HEIGHT_MAP)
                     {
-                       terrainMap = humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData();
+                       TerrainMapData terrainMap = humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData();
+                       MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
+                       request.setTerrainMapData(terrainMap);
+                       //setStartAndGoalFootPosesWithSliders(request);
+                       setStartAndGoalFootPosesFromSimulation(request, cameraZUpFrame.getTransformToWorldFrame());
+                       FootstepPlan plan = planFootstepsMonteCarlo(request, reset);
+                       footstepPlanToRenderNotificaiton.set(plan);
                     }
-
-                    FootstepPlan plan = planFootstepsMonteCarlo(terrainMap, cameraZUpFrame.getTransformToWorldFrame(), reset);
-                    footstepPlanToRenderNotificaiton.set(plan);
                  });
             }
          }
@@ -513,7 +530,7 @@ public class TerrainPlanningSimulationUI
                                                     new Quaternion(goalYaw.get(), 0, 0)));
          }
 
-         private void setStartAndGoalFootPoses(MonteCarloFootstepPlannerRequest request, RigidBodyTransform transform)
+         private void setStartAndGoalFootPosesFromSimulation(MonteCarloFootstepPlannerRequest request, RigidBodyTransform transform)
          {
             Point3D startPosition = new Point3D(transform.getTranslation());
             Point3D goalPosition = new Point3D(transform.getTranslation());
@@ -533,21 +550,51 @@ public class TerrainPlanningSimulationUI
                                                        new Quaternion()));
          }
 
-         public FootstepPlan planFootstepsMonteCarlo(TerrainMapData terrainMap, RigidBodyTransform zUpToWorldTransform, boolean reset)
+         public TerrainMapData getTerrainMapData(FootstepPlannerLog footstepPlannerLog)
+         {
+            Mat heightMap = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
+            Mat contactMap = humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage();
+            TerrainMapData terrainMap = new TerrainMapData(heightMap, contactMap, null);
+            PerceptionMessageTools.unpackMessage(footstepPlannerLog.getRequestPacket().getHeightMapMessage(), terrainMap);
+
+            //HeightMapTerrainGeneratorTools.fillWithSteppingStones(heightMap, 0.4f, 0.4f, 0.3f, 0.25f, 3);
+            humanoidPerception.getRapidHeightMapExtractor().getSensorOrigin().set(terrainMap.getSensorOrigin());
+            humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
+            humanoidPerception.getRapidHeightMapExtractor()
+                              .populateParameterBuffer(RapidHeightMapExtractor.getHeightMapParameters(),
+                                                       steppingL515Simulator.getCopyOfCameraParameters(),
+                                                       new Point3D());
+            humanoidPerception.getRapidHeightMapExtractor().computeContactMap();
+            humanoidPerception.getRapidHeightMapExtractor().readContactMapImage();
+
+            return terrainMap;
+         }
+
+         public MonteCarloFootstepPlannerRequest createMonteCarloFootstepPlannerRequest(TerrainMapData terrainMapData, FootstepPlannerLog footstepPlannerLog)
          {
             MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
-            request.setTerrainMapData(terrainMap);
+            request.setTerrainMapData(terrainMapData);
+            request.setStartFootPose(RobotSide.LEFT, footstepPlannerLog.getRequestPacket().getStartLeftFootPose());
+            request.setStartFootPose(RobotSide.RIGHT, footstepPlannerLog.getRequestPacket().getStartRightFootPose());
+            request.setGoalFootPose(RobotSide.LEFT, footstepPlannerLog.getRequestPacket().getGoalLeftFootPose());
+            request.setGoalFootPose(RobotSide.RIGHT, footstepPlannerLog.getRequestPacket().getGoalRightFootPose());
 
-            //setStartAndGoalFootPosesWithSliders(request);
-            setStartAndGoalFootPoses(request, zUpToWorldTransform);
+            LogTools.debug("Start: {}, Goal: {}, Origin: {}", request.getStartFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.LEFT),
+                           request.getTerrainMapData().getSensorOrigin());
 
+            return request;
+         }
+
+         public FootstepPlan planFootstepsMonteCarlo(MonteCarloFootstepPlannerRequest request, boolean reset)
+         {
+            LogTools.warn("Start: {}, Goal: {}, Origin: {}", request.getStartFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.LEFT),
+                           request.getTerrainMapData().getSensorOrigin());
             long timeStart = System.nanoTime();
 
             if (reset)
+            {
                monteCarloFootstepPlanner.reset(request);
-
-            LogTools.debug("Start: {}, Goal: {}, Origin: {}", request.getStartFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.LEFT),
-                          request.getTerrainMapData().getSensorOrigin());
+            }
 
             FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(request);
             long timeEnd = System.nanoTime();
