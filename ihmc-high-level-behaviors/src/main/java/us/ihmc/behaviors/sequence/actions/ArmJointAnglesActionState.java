@@ -1,29 +1,28 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ArmJointAnglesActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class ArmJointAnglesActionState extends BehaviorActionState
+public class ArmJointAnglesActionState extends ActionNodeState<ArmJointAnglesActionDefinition>
 {
-   private final ArmJointAnglesActionDefinition definition = new ArmJointAnglesActionDefinition();
+   public ArmJointAnglesActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   {
+      super(id, new ArmJointAnglesActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+   }
 
    public void toMessage(ArmJointAnglesActionStateMessage message)
    {
-      super.toMessage(message.getActionState());
+      getDefinition().toMessage(message.getDefinition());
 
-      definition.toMessage(message.getDefinition());
+      super.toMessage(message.getState());
    }
 
    public void fromMessage(ArmJointAnglesActionStateMessage message)
    {
-      super.fromMessage(message.getActionState());
+      super.fromMessage(message.getState());
 
-      definition.fromMessage(message.getDefinition());
-   }
-
-   @Override
-   public ArmJointAnglesActionDefinition getDefinition()
-   {
-      return definition;
+      getDefinition().fromMessage(message.getDefinition());
    }
 }
