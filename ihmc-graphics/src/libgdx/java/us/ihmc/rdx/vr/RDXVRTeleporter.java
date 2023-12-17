@@ -13,7 +13,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDXVRTeleporter
 {
@@ -28,8 +30,8 @@ public class RDXVRTeleporter
    private final Color color = Color.WHITE;
    private double lastTouchpadY = Double.NaN;
 
-   // Reference frame of mid-feet to be set from syncedRobot (used for teleporting vr viewPoint to robot position)
-   private ReferenceFrame robotMidFeetZUpReferenceFrame = null;
+   // Reference frame of cameras to be set from syncedRobot (used for teleporting vr viewPoint to robot position)
+   private final SideDependentList<ReferenceFrame> robotCameraReferenceFrames = new SideDependentList<>();
 
    public void create(RDXVRContext context)
    {
@@ -88,9 +90,9 @@ public class RDXVRTeleporter
            }
 
            // Pressed right joystick button
-           if (robotMidFeetZUpReferenceFrame != null && controller.getJoystickIsCentered() && joystickButton.bChanged() && !joystickButton.bState())
+           if (!robotCameraReferenceFrames.isEmpty() && controller.getJoystickIsCentered() && joystickButton.bChanged() && !joystickButton.bState())
            {
-              snapToMidFeetZUp(vrContext);
+              snapToCameraView(vrContext);
            }
            else if (preparingToTeleport) // Holding B button
            {
@@ -126,23 +128,29 @@ public class RDXVRTeleporter
      });
    }
 
-   private void snapToMidFeetZUp(RDXVRContext vrContext)
+   private void snapToCameraView(RDXVRContext vrContext)
    {
+      RigidBodyTransform leftToMidCamerasFrameTransform = new RigidBodyTransform(robotCameraReferenceFrames.get(RobotSide.LEFT).getTransformToParent());
+      leftToMidCamerasFrameTransform.getTranslation().addX( (robotCameraReferenceFrames.get(RobotSide.RIGHT).getTransformToParent().getTranslationX() - robotCameraReferenceFrames.get(RobotSide.LEFT).getTransformToParent().getTranslationX()) / 2);
+      leftToMidCamerasFrameTransform.getTranslation().addY( (robotCameraReferenceFrames.get(RobotSide.RIGHT).getTransformToParent().getTranslationY() - robotCameraReferenceFrames.get(RobotSide.LEFT).getTransformToParent().getTranslationY()) / 2);
+      leftToMidCamerasFrameTransform.getTranslation().addZ( (robotCameraReferenceFrames.get(RobotSide.RIGHT).getTransformToParent().getTranslationZ() - robotCameraReferenceFrames.get(RobotSide.LEFT).getTransformToParent().getTranslationZ()) / 2);
+      ReferenceFrame robotCameraReferenceFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(robotCameraReferenceFrames.get(RobotSide.LEFT).getParent(), leftToMidCamerasFrameTransform);
+
       vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
-      {
-         xyYawHeadsetToTeleportTransform.setIdentity();
-         vrContext.getHeadset().runIfConnected(headset -> // Teleport such that your headset ends up where you're trying to go
-         {
-            headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
-            xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
-            xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
-      });
-      teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
-      teleportIHMCZUpToIHMCZUpWorld.invert();
-      // Set tempTransform to incoming rigidbodyTransform.
-      tempTransform.set(robotMidFeetZUpReferenceFrame.getTransformToWorldFrame());
-      tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
-      });
+       {
+          xyYawHeadsetToTeleportTransform.setIdentity();
+          vrContext.getHeadset().runIfConnected(headset -> // Teleport such that your headset ends up where the robot eyes/cameras are
+                                                {
+                                                   headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+                                                   xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+                                                });
+          teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
+          teleportIHMCZUpToIHMCZUpWorld.invert();
+
+          // Transform teleportFrame based on camera frame
+          tempTransform.set(robotCameraReferenceFrame.getTransformToWorldFrame());
+          tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
+       });
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -154,8 +162,9 @@ public class RDXVRTeleporter
       }
    }
 
-   public void setRobotMidFeetZUpReferenceFrame(ReferenceFrame robotMidFeetZUpReferenceFrame)
+   public void setRobotCameraReferenceFrames(ReferenceFrame leftCameraReferenceFrame, ReferenceFrame rightCameraReferenceFrame)
    {
-      this.robotMidFeetZUpReferenceFrame = robotMidFeetZUpReferenceFrame;
+      robotCameraReferenceFrames.put(RobotSide.LEFT, leftCameraReferenceFrame);
+      robotCameraReferenceFrames.put(RobotSide.RIGHT, rightCameraReferenceFrame);
    }
 }
