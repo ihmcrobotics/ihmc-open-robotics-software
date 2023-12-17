@@ -52,7 +52,7 @@ public class RigidBodySceneObjectDefinitions
    {
       CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(CAN_OF_SOUP_HEIGHT / 2.0);
    }
-   public static final double MARKER_TO_CAN_OF_SOUP_X = -0.55;
+   public static final double MARKER_TO_CAN_OF_SOUP_X = 0.5;
    public static final RigidBodyTransform MARKER_TO_CAN_OF_SOUP_TRANSFORM = new RigidBodyTransform();
    public static final RigidBodyTransform CAN_OF_SOUP_TO_MARKER_TRANSFORM = new RigidBodyTransform();
    static
