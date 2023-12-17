@@ -52,10 +52,6 @@ public class RDXQuickATManager extends RDXPanel
    private final SideDependentList<ImBoolean> saveArmsSide = new SideDependentList<>();
    private RDXArmControlMode armControlMode = RDXArmControlMode.POSE_WORLD;
 
-   private boolean ATTracking = false;
-   private SideDependentList<RigidBodyTransform> handFrameTransforms = new SideDependentList<>();
-   private final SideDependentList<Double> timeLastCommandHand = new SideDependentList<>();
-
    private List<String> nodeNames;
    private transient String[] selectableNodeNameArray = new String[0];
    private int selectedIndex = 0;
@@ -68,7 +64,6 @@ public class RDXQuickATManager extends RDXPanel
       for (RobotSide side : RobotSide.values)
       {
          saveArmsSide.put(side, new ImBoolean(true));
-         timeLastCommandHand.put(side, 0.0);
       }
    }
 
@@ -87,54 +82,6 @@ public class RDXQuickATManager extends RDXPanel
    public void update()
    {
       nodeNames = sceneGraph.getNodeNameList();
-
-      if (ATTracking)
-      {
-         boolean freezeTracking = false;
-         if (selectedNode instanceof CenterposeNode centerposeNode)
-         {
-            if (centerposeNode.getConfidence() < 0.3 || !centerposeNode.getCurrentlyDetected())
-            {
-               freezeTracking = true;
-            }
-         }
-
-         //TODO add other interactable link poses
-         if (!freezeTracking)
-         {
-            for (RobotSide side : handFrameTransforms.keySet())
-            {
-               // create frame pose to express it in world frame
-               FramePose3D handFrame = new FramePose3D(selectedNode.getNodeFrame(), handFrameTransforms.get(side));
-               teleoperationManager.getArmManager().setDesiredHandFramePose(side, handFrame);
-               teleoperationManager.getArmManager().computeTrajectoryTime(side, 0.5, 5.0);
-
-               double timeInTrajectory = System.nanoTime() / 1_000_000_000.0 - timeLastCommandHand.get(side);
-               timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, teleoperationManager.getArmManager().getTrajectoryTime(side));
-               double alpha = timeInTrajectory / teleoperationManager.getArmManager().getTrajectoryTime(side);
-
-               double[] qInitials = teleoperationManager.getArmManager().getCurrentJointAngles(side);
-               double[] qGoals = teleoperationManager.getArmManager().getDesiredJointAngles(side);
-               double[] qDesireds = new double[qInitials.length];
-               double[] qDDesireds = new double[qInitials.length];
-
-               for (int i = 0; i < qInitials.length; i++)
-               {
-                  double qDes = EuclidCoreTools.interpolate(qInitials[i], qGoals[i], alpha);
-                  double qDDes;
-                  if (alpha <= 0.0 || alpha >= 1.0)
-                     qDDes = 0.0;
-                  else
-                     qDDes = (qGoals[i] - qInitials[i]) / teleoperationManager.getArmManager().getTrajectoryTime(side);
-                  qDesireds[i] = qDes;
-                  qDDesireds[i] = qDDes;
-               }
-
-               timeLastCommandHand.replace(side, System.nanoTime() / 1_000_000_000.0);
-               teleoperationManager.getArmManager().moveHand(side, qDesireds, qDDesireds);
-            }
-         }
-      }
    }
 
    public void renderImGuiWidgets()
@@ -204,23 +151,6 @@ public class RDXQuickATManager extends RDXPanel
             ImGui.popStyleColor();
          }
       }
-
-      if (!loadingFileName.isEmpty())
-      {
-         boolean changedColorPreviewButton = false;
-         if (ATTracking)
-         {
-            ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
-            changedColorPreviewButton = true;
-         }
-         if (ImGui.button(labels.get("AT Tracking")))
-         {
-            ATTracking = !ATTracking;
-         }
-         if (changedColorPreviewButton)
-            ImGui.popStyleColor();
-
-      }
    }
 
    public void setLoadingFile(String fileName)
@@ -245,7 +175,6 @@ public class RDXQuickATManager extends RDXPanel
                   // get transform from json
                   RigidBodyTransform handFrameTransform = new RigidBodyTransform();
                   JSONTools.toEuclid(armsNode, handFrameTransform);
-                  handFrameTransforms.put(side, handFrameTransform);
                   // create frame pose to express it in world frame
                   FramePose3D handFrame = new FramePose3D(selectedNode.getNodeFrame(), handFrameTransform);
                   teleoperationManager.getArmManager().setDesiredHandFramePose(side, handFrame);
