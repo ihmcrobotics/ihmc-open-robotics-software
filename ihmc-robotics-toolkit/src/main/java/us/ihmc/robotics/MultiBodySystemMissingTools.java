@@ -10,6 +10,7 @@ import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,17 +33,12 @@ public class MultiBodySystemMissingTools
    /**
     * You want an elevator if you want to move the base around in world.
     * Otherwise, it's stuck there.
-    * 
-    * See {@link #getDetachedCopyOfSubtree(RigidBodyBasics, OneDoFJointBasics)}
+    *
+    * See {@link #getDetachedCopyOfSubtree}
     */
-   public static RigidBodyBasics getDetachedCopyOfSubtreeWithElevator(RigidBodyBasics rootBodyToDetach, OneDoFJointBasics childJointToFollow)
-   {
-      return getDetachedCopyOfSubtreeWithElevator(rootBodyToDetach, childJointToFollow, null);
-   }
-
    public static RigidBodyBasics getDetachedCopyOfSubtreeWithElevator(RigidBodyBasics rootBodyToDetach,
                                                                       OneDoFJointBasics childJointToFollow,
-                                                                      String endRigidBodyName)
+                                                                      @Nullable String endRigidBodyName)
    {
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       SixDoFJoint floatingJoint = new SixDoFJoint(rootBodyToDetach.getName(), elevator);
@@ -64,24 +60,14 @@ public class MultiBodySystemMissingTools
     * for running IK over it.
     *
     * @param rootBodyToDetach not the elevator, but like the chest, or the pelvis
+    * @param cloneStationaryFrame Usually world frame, can be null
     * @param childJointToFollow for the chest, like one of the shoulders or something
-    */
-   public static RigidBodyBasics getDetachedCopyOfSubtree(RigidBodyBasics rootBodyToDetach, OneDoFJointBasics childJointToFollow)
-   {
-      return getDetachedCopyOfSubtree(rootBodyToDetach, null, childJointToFollow);
-   }
-
-   /**
-    * This is useful to get a detached copy of an arm or a leg, or perhaps a finger,
-    * for running IK over it.
-    *
-    * @param rootBodyToDetach not the elevator, but like the chest, or the pelvis
-    * @param cloneStationaryFrame Usually world frame
-    * @param childJointToFollow for the chest, like one of the shoulders or something
+    * @param endRigidBodyName null or the name of the rigid body to stop at, which will be included with no children joints
     */
    public static RigidBodyBasics getDetachedCopyOfSubtree(RigidBodyBasics rootBodyToDetach,
-                                                          ReferenceFrame cloneStationaryFrame,
-                                                          OneDoFJointBasics childJointToFollow)
+                                                          @Nullable ReferenceFrame cloneStationaryFrame,
+                                                          OneDoFJointBasics childJointToFollow,
+                                                          @Nullable String endRigidBodyName)
    {
       RigidBodyBasics clonedChest = MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER.cloneRigidBody(rootBodyToDetach, cloneStationaryFrame, "", null);
       JointBasics clonedFirstShoulderJoint = MultiBodySystemFactories.DEFAULT_JOINT_BUILDER.cloneJoint(childJointToFollow, "", clonedChest);
@@ -89,7 +75,7 @@ public class MultiBodySystemMissingTools
                                                                                                                    null,
                                                                                                                    "",
                                                                                                                    clonedFirstShoulderJoint);
-      cloneSubtree(childJointToFollow.getSuccessor(), clonedFirstShoulderLink, "", null);
+      cloneSubtree(childJointToFollow.getSuccessor(), clonedFirstShoulderLink, "", endRigidBodyName);
       return clonedChest;
    }
 
