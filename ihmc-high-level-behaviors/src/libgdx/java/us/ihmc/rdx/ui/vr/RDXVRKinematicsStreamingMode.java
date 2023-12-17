@@ -21,6 +21,7 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -84,6 +85,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImGuiFrequencyPlot outputFrequencyPlot = new ImGuiFrequencyPlot();
    private final SideDependentList<MutableReferenceFrame> handDesiredControlFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
+   private final SideDependentList<Pose3D> ikControlFramePoses = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> handFrameGraphics = new SideDependentList<>();
    private final Map<String, MutableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
@@ -133,23 +135,34 @@ public class RDXVRKinematicsStreamingMode
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
 
-      for (RobotSide side : RobotSide.values)
-      {
+      for (RobotSide side : RobotSide.values) {
          handFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          controllerFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          MutableReferenceFrame handDesiredControlFrame = new MutableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
          {
-            if (side == RobotSide.LEFT)
-            {
-               handDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.LEFT_HAND));
-               handDesiredControlFrame.getTransformToParent().appendTranslation(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.LEFT_HAND));
-            }
-            else
-            {
-               handDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.RIGHT_HAND));
-               handDesiredControlFrame.getTransformToParent().appendTranslation(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.RIGHT_HAND));
-            }
+//            if (side == RobotSide.LEFT)
+//            {
+//               handDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.LEFT_HAND));
+//               handDesiredControlFrame.getTransformToParent().appendTranslation(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.LEFT_HAND));
+//            }
+//            else
+//            {
+//               handDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.RIGHT_HAND));
+//               handDesiredControlFrame.getTransformToParent().appendTranslation(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.RIGHT_HAND));
+//            }
          }
+         Pose3D ikControlFramePose = new Pose3D();
+         if (side == RobotSide.LEFT)
+         {
+            ikControlFramePose.getPosition().setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.LEFT_HAND));
+            ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.LEFT_HAND));
+         }
+         else
+         {
+            ikControlFramePose.getPosition().setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.RIGHT_HAND));
+            ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.RIGHT_HAND));
+         }
+         ikControlFramePoses.put(side, ikControlFramePose);
          handDesiredControlFrame.getReferenceFrame().update();
          handDesiredControlFrames.put(side, handDesiredControlFrame);
       }
@@ -169,7 +182,7 @@ public class RDXVRKinematicsStreamingMode
       parameters.getDefaultConfiguration().setEnableNeckJointspace(false);
       parameters.setUseStreamingPublisher(true);
 
-      boolean startYoVariableServer = false;
+      boolean startYoVariableServer = true;
       toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer, PubSubImplementation.FAST_RTPS);
       ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(createInitialConfiguration(robotModel));
    }
@@ -355,6 +368,8 @@ public class RDXVRKinematicsStreamingMode
                                                                                segmentType.getSegmentName(),
                                                                                segmentType.getPositionWeight(),
                                                                                segmentType.getOrientationWeight());
+            message.getControlFramePositionInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getPosition());
+            message.getControlFrameOrientationInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getOrientation());
             toolboxInputMessage.getInputs().add().set(message);
          });
       }
