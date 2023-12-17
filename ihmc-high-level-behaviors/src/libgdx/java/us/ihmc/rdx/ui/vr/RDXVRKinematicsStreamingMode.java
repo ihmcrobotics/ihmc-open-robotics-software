@@ -23,6 +23,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.motionRetargeting.VRTrackedSegmentType;
@@ -48,6 +49,7 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -91,6 +93,12 @@ public class RDXVRKinematicsStreamingMode
    private KinematicsRecordReplay kinematicsRecorder;
    private final SceneGraph sceneGraph;
    private KinematicsStreamingToolboxModule toolbox;
+
+   private final ImBoolean controlArmsOnly = new ImBoolean(false);
+   private ReferenceFrame pelvisFrame;
+   private RigidBodyTransform pelvisTransformToWorld = new RigidBodyTransform();
+   private ReferenceFrame chestFrame;
+   private RigidBodyTransform chestTransformToWorld = new RigidBodyTransform();
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
    private int leftIndex = -1;
@@ -248,6 +256,42 @@ public class RDXVRKinematicsStreamingMode
          Set<String> additionalTrackedSegments = vrContext.getBodySegmentsWithTrackers();
          for (VRTrackedSegmentType segmentType : VRTrackedSegmentType.values())
             handleTrackedSegment(vrContext, toolboxInputMessage, segmentType, additionalTrackedSegments);
+
+         if (controlArmsOnly.get())
+         {
+            if (pelvisFrame == null)
+            {
+               pelvisTransformToWorld.set(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
+               pelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), pelvisTransformToWorld);
+            }
+
+            KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
+            message.setEndEffectorHashCode(ghostFullRobotModel.getPelvis().hashCode());
+            tempFramePose.setToZero(pelvisFrame);
+            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+            message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+            message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
+            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
+
+            toolboxInputMessage.getInputs().add().set(message);
+
+            if (chestFrame == null)
+            {
+               chestTransformToWorld.set(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame().getTransformToWorldFrame());
+               chestFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), chestTransformToWorld);
+            }
+
+            message = new KinematicsToolboxRigidBodyMessage();
+            message.setEndEffectorHashCode(ghostFullRobotModel.getChest().hashCode());
+            tempFramePose.setToZero(chestFrame);
+            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+            message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0));
+            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(10));
+
+            toolboxInputMessage.getInputs().add().set(message);
+         }
 
          if (enabled.get())
             toolboxInputMessage.setStreamToController(streamToController.get());
@@ -424,6 +468,7 @@ public class RDXVRKinematicsStreamingMode
       {
          setEnabled(enabled.get());
       }
+      ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly);
 
       ghostRobotGraphic.renderImGuiWidgets();
       // add widgets for recording/replaying motion in VR
