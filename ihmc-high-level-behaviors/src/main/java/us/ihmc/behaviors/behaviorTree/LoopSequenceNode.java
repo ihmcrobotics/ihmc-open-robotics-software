@@ -11,20 +11,18 @@ public class LoopSequenceNode extends SequenceNode
 
    public LoopSequenceNode()
    {
-      setType(LoopSequenceNode.class);
+
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
-      super.tickInternal();
-
       if (currentChild >= getChildren().size())
       {
          currentChild = 0; // this loops back to first child
       }
 
-      BehaviorTreeNodeBasics.checkStatusInNotNull(getChildren().get(currentChild++).tick());
+      getChildren().get(currentChild++).tick();
 
       return RUNNING;
    }

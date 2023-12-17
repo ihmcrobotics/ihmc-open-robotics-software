@@ -38,14 +38,17 @@ public class DualBlackflyUDPSender
       {
          Thread publishThread = new Thread(() ->
          {
-            SpinnakerBlackfly spinnakerBlackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(
-                  side == RobotSide.LEFT ? LEFT_SERIAL_NUMBER : RIGHT_SERIAL_NUMBER);
+          SpinnakerBlackfly spinnakerBlackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(
+                side == RobotSide.LEFT ? LEFT_SERIAL_NUMBER : RIGHT_SERIAL_NUMBER,
+                1936 - 600,
+                (1464 / 2) + 200,
+                600 / 2,
+                (1464 / 2) + (200 / 2) + 100); // +100 for getting rid of the realsense
 
             DatagramSocket socket;
             try
             {
                socket = new DatagramSocket();
-//               socket.setSendBufferSize(socket.getSendBufferSize() * 16);
             }
             catch (SocketException e)
             {
@@ -120,10 +123,7 @@ public class DualBlackflyUDPSender
                      }
                   }
 
-                  DatagramPacket packet = new DatagramPacket(datagramData,
-                                                             datagramLength,
-                                                             address,
-                                                             side == RobotSide.LEFT ? LEFT_UDP_PORT : RIGHT_UDP_PORT);
+                  DatagramPacket packet = new DatagramPacket(datagramData, datagramLength, address, side == RobotSide.LEFT ? LEFT_UDP_PORT : RIGHT_UDP_PORT);
                   try
                   {
                      socket.send(packet);

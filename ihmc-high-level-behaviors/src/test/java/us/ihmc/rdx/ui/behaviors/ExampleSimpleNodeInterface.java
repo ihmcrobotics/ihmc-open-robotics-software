@@ -7,7 +7,7 @@ public class ExampleSimpleNodeInterface extends RDXBehaviorUIInterface
 {
    public ExampleSimpleNodeInterface(String name)
    {
-      setName(name);
+      getDefinition().setDescription(name);
    }
 
    @Override

@@ -71,25 +71,4 @@ public class ReferenceFrameMissingTools
       StackTraceElement callerStackElement = new Throwable().getStackTrace()[2];
       return callerStackElement.getClassName();
    }
-
-   public static boolean checkIsAncestorOfWorld(ReferenceFrame referenceFrame)
-   {
-      return checkIsAncestor(ReferenceFrame.getWorldFrame(), referenceFrame);
-   }
-
-   public static boolean checkIsAncestor(ReferenceFrame rootFrame, ReferenceFrame possibleAncestor)
-   {
-      if (rootFrame == possibleAncestor)
-      {
-         return true;
-      }
-      else if (possibleAncestor.isRootFrame())
-      {
-         return false;
-      }
-      else
-      {
-         return checkIsAncestorOfWorld(possibleAncestor.getParent());
-      }
-   }
 }

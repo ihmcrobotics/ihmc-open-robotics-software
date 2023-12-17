@@ -13,10 +13,14 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.filters.TimeBasedDetectionFilter;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Topic;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CenterposeDetectionManager
@@ -30,14 +34,16 @@ public class CenterposeDetectionManager
    private final IHMCROS2Input<DetectedObjectPacket> subscriber;
    private final Map<Integer, TimeBasedDetectionFilter> centerposeNodeDetectionFilters = new HashMap<>();
    private final ReferenceFrame centerposeOutputFrame;
+   private final MutableReferenceFrame imageAquisitionSensorFrame = new MutableReferenceFrame();
 
    public CenterposeDetectionManager(ROS2Helper ros2Helper, ReferenceFrame sensorFrame)
    {
       ROS2Topic<DetectedObjectPacket> topicName = PerceptionAPI.CENTERPOSE_DETECTED_OBJECT;
       subscriber = ros2Helper.subscribe(topicName);
 
+
       centerposeOutputFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("CenterposeOutputFrame",
-                                                                                                sensorFrame,
+                                                                                                imageAquisitionSensorFrame.getReferenceFrame(),
                                                                                                 CENTERPOSE_DETECTION_TO_IHMC_ZUP_TRANSFORM);
    }
 
@@ -48,10 +54,13 @@ public class CenterposeDetectionManager
       {
          DetectedObjectPacket detectedObjectPacket = subscriber.getMessageNotification().read();
 
+         imageAquisitionSensorFrame.getTransformToParent().set(detectedObjectPacket.getSensorPose());
+         imageAquisitionSensorFrame.getReferenceFrame().update();
+
          // Update or add the corresponding CenterposeSceneNode
          sceneGraph.modifyTree(modificationQueue ->
          {
-            CenterposeNode centerposeNode;
+          CenterposeNode centerposeNode;
 
             Point3D[] vertices = detectedObjectPacket.getBoundingBoxVertices();
             for (Point3D vertex : vertices)
@@ -100,6 +109,11 @@ public class CenterposeDetectionManager
          centerposeNode.update();
          centerposeNode.setCurrentlyDetected(centerposeNodeDetectionFilters.get(centerposeNode.getObjectID()).isDetected());
       }
+   }
+
+   public RigidBodyTransform getImageAquisitionSensorFrameTransformToRoot()
+   {
+      return imageAquisitionSensorFrame.getReferenceFrame().getTransformToRoot();
    }
 
    public void destroy()
