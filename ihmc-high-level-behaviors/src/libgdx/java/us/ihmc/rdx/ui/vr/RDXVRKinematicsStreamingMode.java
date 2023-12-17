@@ -470,7 +470,7 @@ public class RDXVRKinematicsStreamingMode
       }
       if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
       {
-         if (!controlArmsOnly.get())
+         if (controlArmsOnly.get())
          {
             pelvisFrame = null;
             chestFrame = null;
