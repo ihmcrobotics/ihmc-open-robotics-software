@@ -468,7 +468,14 @@ public class RDXVRKinematicsStreamingMode
       {
          setEnabled(enabled.get());
       }
-      ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly);
+      if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
+      {
+         if (!controlArmsOnly.get())
+         {
+            pelvisFrame = null;
+            chestFrame = null;
+         }
+      }
 
       ghostRobotGraphic.renderImGuiWidgets();
       // add widgets for recording/replaying motion in VR
