@@ -1,12 +1,12 @@
 {
-  "name" : "Shoe",
+  "name" : "s",
   "arms" : [ {
     "side" : "left",
-    "x" : -0.001,
-    "y" : 0.1045,
-    "z" : -0.061,
-    "rollInDegrees" : 138.5,
-    "pitchInDegrees" : -84.8,
-    "yawInDegrees" : 135.42
+    "x" : 0.0075,
+    "y" : 0.0855,
+    "z" : -0.067,
+    "rollInDegrees" : 170.9,
+    "pitchInDegrees" : -67.7,
+    "yawInDegrees" : 102.48
   } ]
 }

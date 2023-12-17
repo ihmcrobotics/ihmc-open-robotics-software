@@ -271,7 +271,7 @@ public class RDXIKStreamer
 
                MutableReferenceFrame handDesiredControlFrame = new MutableReferenceFrame(controlFrame);
                {
-                  handDesiredControlFrame.getTransformToParent().appendTranslation(new Point3D(0.0, 0.0, 0.05));
+                  handDesiredControlFrame.getTransformToParent().appendTranslation(new Point3D(0.0, 0.0, 0.2));
                }
                handDesiredControlFrame.getReferenceFrame().update();
 
@@ -313,7 +313,7 @@ public class RDXIKStreamer
             tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
             message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
             message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0));
-            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(10));
+            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1));
 
             toolboxInputMessage.getInputs().add().set(message);
          }
