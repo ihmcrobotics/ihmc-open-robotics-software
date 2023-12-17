@@ -146,13 +146,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
    {
       return hideChest;
    }
-
-   public void setRobotOpacity(float value)
-   {
-      opacitySlider.setFloatValue(value);
-      setOpacity(value);
-   }
-
+   
    public void teleportCameraToRobotPelvis()
    {
       cameraForTracking.setCameraFocusPoint(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getPosition());
