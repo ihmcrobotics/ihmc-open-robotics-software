@@ -13,7 +13,7 @@ import static org.bytedeco.spinnaker.global.Spinnaker_C.spinErrorGetLastFullMess
 
 public final class SpinnakerBlackflyTools
 {
-   public static void assertNoError(Spinnaker_C.spinError error, String errorMessage)
+   public static Spinnaker_C.spinError printOnError(Spinnaker_C.spinError error, String errorMessage)
    {
       if (error.value != Spinnaker_C.spinError.SPINNAKER_ERR_SUCCESS.value)
       {
@@ -30,8 +30,9 @@ public final class SpinnakerBlackflyTools
          }
 
          Supplier<String> message = StringTools.format("Error code: {}: {}: {}: {}", error.value, error.toString(), fullMessageString.toString(), errorMessage);
-         LogTools.fatal(message);
-         throw new RuntimeException(message.get());
+         LogTools.error(message);
       }
+
+      return error;
    }
 }

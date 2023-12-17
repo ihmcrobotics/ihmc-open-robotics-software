@@ -11,7 +11,7 @@ public class ArmJointAnglesActionDefinitionMessage extends Packet<ArmJointAngles
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
    /**
             * Specifies the side of the robot that this message refers to.
             */
@@ -31,7 +31,7 @@ public class ArmJointAnglesActionDefinitionMessage extends Packet<ArmJointAngles
 
    public ArmJointAnglesActionDefinitionMessage()
    {
-      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       joint_angles_ = new double[7];
 
    }
@@ -44,7 +44,7 @@ public class ArmJointAnglesActionDefinitionMessage extends Packet<ArmJointAngles
 
    public void set(ArmJointAnglesActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       robot_side_ = other.robot_side_;
 
       preset_ = other.preset_;
@@ -63,9 +63,9 @@ public class ArmJointAnglesActionDefinitionMessage extends Packet<ArmJointAngles
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getDefinition()
    {
-      return action_definition_;
+      return definition_;
    }
 
    /**
@@ -140,7 +140,7 @@ public class ArmJointAnglesActionDefinitionMessage extends Packet<ArmJointAngles
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_definition_.epsilonEquals(other.action_definition_, epsilon)) return false;
+      if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.preset_, other.preset_, epsilon)) return false;
@@ -165,7 +165,7 @@ public class ArmJointAnglesActionDefinitionMessage extends Packet<ArmJointAngles
 
       ArmJointAnglesActionDefinitionMessage otherMyClass = (ArmJointAnglesActionDefinitionMessage) other;
 
-      if (!this.action_definition_.equals(otherMyClass.action_definition_)) return false;
+      if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if(this.preset_ != otherMyClass.preset_) return false;
@@ -187,8 +187,8 @@ public class ArmJointAnglesActionDefinitionMessage extends Packet<ArmJointAngles
       StringBuilder builder = new StringBuilder();
 
       builder.append("ArmJointAnglesActionDefinitionMessage {");
-      builder.append("action_definition=");
-      builder.append(this.action_definition_);      builder.append(", ");
+      builder.append("definition=");
+      builder.append(this.definition_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("preset=");

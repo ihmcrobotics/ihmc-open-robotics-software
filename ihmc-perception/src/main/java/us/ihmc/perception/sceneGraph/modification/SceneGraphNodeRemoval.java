@@ -24,7 +24,7 @@ public class SceneGraphNodeRemoval implements SceneGraphTreeModification
    {
       if (node.getChildren().remove(nodeToRemove))
       {
-         node.freezeFromModification();
+         node.freeze();
       }
       else
       {
