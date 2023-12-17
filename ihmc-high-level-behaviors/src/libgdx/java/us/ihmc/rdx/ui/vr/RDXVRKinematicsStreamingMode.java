@@ -308,7 +308,7 @@ public class RDXVRKinematicsStreamingMode
                                      VRTrackedSegmentType segmentType,
                                      Set<String> additionalTrackedSegments)
    {
-      if (additionalTrackedSegments.contains(segmentType.getSegmentName()))
+      if (additionalTrackedSegments.contains(segmentType.getSegmentName()) && !controlArmsOnly.get())
       {
          vrContext.getTracker(segmentType.getSegmentName()).runIfConnected(tracker ->
          {
