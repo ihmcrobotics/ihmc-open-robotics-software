@@ -104,6 +104,8 @@ public class DoorDefinition extends RobotDefinition
    {
       SimRevoluteJoint doorLeverJoint = (SimRevoluteJoint) robot.getJoint("doorLeverJoint");
       SimPrismaticJoint doorBoltJoint = (SimPrismaticJoint) robot.getJoint("doorBoltJoint");
+
+      // TODO: Make this happen at simulation rate instead of control rate
       robot.getControllerManager().addController(() ->
       {
          double p = 2.0;
