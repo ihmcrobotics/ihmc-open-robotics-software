@@ -7,6 +7,11 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletRobot;
 
+/**
+ * Allows a user to move robots around with gizmos in an SCS 2 session.
+ * This can be used to reset the state of the environment when doing
+ * mobile manipulation experiments.
+ */
 public class RDXSCS2BulletRobotMover
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
