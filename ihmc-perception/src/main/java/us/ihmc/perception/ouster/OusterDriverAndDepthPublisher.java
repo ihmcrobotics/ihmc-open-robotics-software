@@ -2,7 +2,6 @@ package us.ihmc.perception.ouster;
 
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.communication.ros2.ROS2HeartbeatMonitor;
@@ -46,9 +45,9 @@ public class OusterDriverAndDepthPublisher
    {
       this.humanoidReferenceFramesSupplier = humanoidReferenceFramesSupplier;
 
-      publishLidarScanMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_LIDAR_SCAN);
+      publishLidarScanMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_LIDAR_SCAN);
       publishSteppableRegionsMonitor = new ROS2HeartbeatMonitor(ros2, SteppableRegionsAPI.PUBLISH_STEPPABLE_REGIONS);
-      publishHeightMapMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_HEIGHT_MAP);
+      publishHeightMapMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
 
       ouster = new OusterNetServer();
       ouster.start();

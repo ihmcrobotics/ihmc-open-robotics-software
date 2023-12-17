@@ -171,6 +171,7 @@ public class AStarFootstepPlanner
 
       checker.setPlanarRegions(planarRegionsListForCollisionChecking);
       checker.setHeightMapData(heightMapData);
+      stepCostCalculator.setHeightMapData(heightMapData);
 
       double pathLength = bodyPathPlanHolder.computePathLength(0.0);
       boolean imposeHorizonLength = request.getPlanBodyPath() && request.getHorizonLength() > 0.0 && !MathTools.intervalContains(pathLength, 0.0, request.getHorizonLength());
