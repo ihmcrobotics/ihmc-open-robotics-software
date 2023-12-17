@@ -2,47 +2,53 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
 import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class FootstepPlanActionState extends BehaviorActionState
+public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionDefinition>
 {
-   private final FootstepPlanActionDefinition definition = new FootstepPlanActionDefinition();
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<FootstepPlanActionFootstepState> footsteps;
+   private int totalNumberOfFootsteps;
+   private int numberOfIncompleteFootsteps;
 
-   public FootstepPlanActionState(ReferenceFrameLibrary referenceFrameLibrary)
+   public FootstepPlanActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
+      super(id, new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+
       this.referenceFrameLibrary = referenceFrameLibrary;
 
       footsteps = new RecyclingArrayList<>(() ->
          new FootstepPlanActionFootstepState(referenceFrameLibrary,
                                              this,
-                                             RecyclingArrayListTools.getUnsafe(definition.getFootsteps(), numberOfAllocatedFootsteps++)));
+                                             RecyclingArrayListTools.getUnsafe(getDefinition().getFootsteps(), numberOfAllocatedFootsteps++)));
    }
 
    @Override
    public void update()
    {
-      RecyclingArrayListTools.synchronizeSize(footsteps, definition.getFootsteps());
+      RecyclingArrayListTools.synchronizeSize(footsteps, getDefinition().getFootsteps());
 
       for (int i = 0; i < footsteps.size(); i++)
       {
          footsteps.get(i).setIndex(i);
          footsteps.get(i).update();
       }
-
-      setCanExecute(referenceFrameLibrary.containsFrame(definition.getParentFrameName()));
    }
 
    public void toMessage(FootstepPlanActionStateMessage message)
    {
-      super.toMessage(message.getActionState());
+      getDefinition().toMessage(message.getDefinition());
 
-      definition.toMessage(message.getDefinition());
+      super.toMessage(message.getState());
+
+      message.setTotalNumberOfFootsteps(totalNumberOfFootsteps);
+      message.setNumberOfIncompleteFootsteps(numberOfIncompleteFootsteps);
 
       message.getFootsteps().clear();
       for (FootstepPlanActionFootstepState footstep : footsteps)
@@ -53,9 +59,12 @@ public class FootstepPlanActionState extends BehaviorActionState
 
    public void fromMessage(FootstepPlanActionStateMessage message)
    {
-      super.fromMessage(message.getActionState());
+      super.fromMessage(message.getState());
 
-      definition.fromMessage(message.getDefinition());
+      getDefinition().fromMessage(message.getDefinition());
+
+      totalNumberOfFootsteps = message.getTotalNumberOfFootsteps();
+      numberOfIncompleteFootsteps = message.getNumberOfIncompleteFootsteps();
 
       footsteps.clear();
       for (FootstepPlanActionFootstepStateMessage footstep : message.getFootsteps())
@@ -69,9 +78,23 @@ public class FootstepPlanActionState extends BehaviorActionState
       return footsteps;
    }
 
-   @Override
-   public FootstepPlanActionDefinition getDefinition()
+   public int getTotalNumberOfFootsteps()
    {
-      return definition;
+      return totalNumberOfFootsteps;
+   }
+
+   public void setTotalNumberOfFootsteps(int totalNumberOfFootsteps)
+   {
+      this.totalNumberOfFootsteps = totalNumberOfFootsteps;
+   }
+
+   public int getNumberOfIncompleteFootsteps()
+   {
+      return numberOfIncompleteFootsteps;
+   }
+
+   public void setNumberOfIncompleteFootsteps(int numberOfIncompleteFootsteps)
+   {
+      this.numberOfIncompleteFootsteps = numberOfIncompleteFootsteps;
    }
 }

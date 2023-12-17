@@ -5,10 +5,10 @@ import gnu.trove.map.hash.TIntDoubleHashMap;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 /**
@@ -74,6 +74,27 @@ public class RigidBodySceneObjectDefinitions
    {
       ARUCO_MARKER_SIZES.put(BOX_MARKER_ID, BOX_MARKER_SIZE);
       ARUCO_MARKER_SIZES.put(CAN_OF_SOUP_MARKER_ID, RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
+   }
+
+   public static final String SHOE_NAME = "Shoe";
+   public static final double SHOE_WIDTH = 0.921;
+   public static final double SHOE_DEPTH = 0.123;
+   public static final double SHOE_HEIGHT = 0.245;
+   public static final String SHOE_VISUAL_MODEL_FILE_PATH = "environmentObjects/shoe/shoe.g3dj";
+   public static final RigidBodyTransform SHOE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
+   public static final String THINKPAD_NAME = "ThinkPad";
+   public static final double THINKPAD_WIDTH = 0.34;
+   public static final double THINKPAD_DEPTH = 0.23;
+   public static final double THINKPAD_HEIGHT = 0.05;
+   public static final String THINKPAD_VISUAL_MODEL_FILE_PATH = "environmentObjects/thinkpad/thinkpad.g3dj";
+   public static final RigidBodyTransform THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      EuclidCoreMissingTools.setYawPitchRollDegrees(THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 180, 0, 90);
+      THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(0.5);
+      THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addX(0.5);
+      THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.15);
    }
 
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
@@ -144,5 +165,30 @@ public class RigidBodySceneObjectDefinitions
                                                              DEBRIS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       LogTools.info("Adding Debris to scene graph.");
       modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup, parentNode));
+   }
+
+   public static void ensureShoeNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   {
+      SceneNode shoe = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                             SHOE_NAME,
+                                                             sceneGraph.getIDToNodeMap(),
+                                                             parentNode.getID(),
+                                                             new RigidBodyTransform(),
+                                                             SHOE_VISUAL_MODEL_FILE_PATH,
+                                                             SHOE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      LogTools.info("Adding Shoe to scene graph.");
+      modificationQueue.accept(new SceneGraphNodeAddition(shoe, parentNode));
+   }
+
+   public static void ensureThinkPadNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   {
+      SceneNode thinkpad = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                        THINKPAD_NAME,
+                                                        sceneGraph.getIDToNodeMap(),
+                                                        parentNode.getID(),
+                                                        new RigidBodyTransform(), THINKPAD_VISUAL_MODEL_FILE_PATH,
+                                                        THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      LogTools.info("Adding ThinkPad to scene graph.");
+      modificationQueue.accept(new SceneGraphNodeAddition(thinkpad, parentNode));
    }
 }
