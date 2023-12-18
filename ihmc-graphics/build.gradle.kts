@@ -48,6 +48,8 @@ jmonkeyengineTestDependencies {
    api(ihmc.sourceSetProject("jmonkeyengine"))
 }
 
+val lwjglVersion = "3.3.1"
+
 libgdxDependencies {
    api(ihmc.sourceSetProject("main"))
 
@@ -55,7 +57,6 @@ libgdxDependencies {
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
    api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
 
-   val lwjglVersion = "3.3.1"
    api("org.lwjgl:lwjgl-openvr:$lwjglVersion")
    api("org.lwjgl:lwjgl-openvr:$lwjglVersion:natives-linux")
    api("org.lwjgl:lwjgl-openvr:$lwjglVersion:natives-windows")
@@ -92,4 +93,11 @@ libgdxDependencies {
 
 libgdxTestDependencies {
    api(ihmc.sourceSetProject("libgdx"))
+
+   api("org.lwjgl:lwjgl-vulkan:$lwjglVersion")
+   api("org.lwjgl:lwjgl-shaderc:$lwjglVersion")
+   api("org.lwjgl:lwjgl-shaderc:$lwjglVersion:natives-linux")
+   api("org.lwjgl:lwjgl-shaderc:$lwjglVersion:natives-windows")
+   api("org.lwjgl:lwjgl-shaderc:$lwjglVersion:natives-windows-x86")
+   api("org.lwjgl:lwjgl-shaderc:$lwjglVersion:natives-macos")
 }
