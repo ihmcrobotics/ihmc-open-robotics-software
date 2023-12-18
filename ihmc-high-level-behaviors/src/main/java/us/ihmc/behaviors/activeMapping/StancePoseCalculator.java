@@ -46,6 +46,8 @@ public class StancePoseCalculator
 
             FramePose3D pose = new FramePose3D(goalPose);
             pose.appendTranslation(x, y, 0);
+
+            poses.add(pose);
          }
       }
    }
@@ -66,8 +68,11 @@ public class StancePoseCalculator
          {
             cost = Math.abs(0.5f - leftPose.getPositionDistance(rightPose));
 
-            // TODO: Compute elevation and feasibility costs using height and contact maps
-            //float height = terrainMap.getHeightAt()
+            float heightLeft = terrainMap.getHeightInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32());
+            float heightRight = terrainMap.getHeightInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32());
+
+            leftPose.setZ(heightLeft);
+            rightPose.setZ(heightRight);
 
             if (cost < minCost)
             {

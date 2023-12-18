@@ -4,6 +4,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -17,7 +18,7 @@ public class TerrainMapData
    private final RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
 
    private int cellsPerMeter = 50;
-   private int gridSize = 201;
+   private int localGridSize = 201;
    private int heightScaleFactor = 10000;
    private float heightOffset = 3.2768f;
 
@@ -31,7 +32,7 @@ public class TerrainMapData
       this.contactMap = contactMap;
       this.terrainCostMap = terrainCostMap;
 
-      this.gridSize = heightMap.rows();
+      this.localGridSize = heightMap.rows();
    }
 
    public TerrainMapData(TerrainMapData data)
@@ -41,7 +42,7 @@ public class TerrainMapData
       this.terrainCostMap = data.terrainCostMap.clone();
 
       this.cellsPerMeter = data.cellsPerMeter;
-      this.gridSize = data.gridSize;
+      this.localGridSize = data.localGridSize;
       this.heightScaleFactor = data.heightScaleFactor;
    }
 
@@ -61,6 +62,9 @@ public class TerrainMapData
 
    public float getHeightLocal(int rIndex, int cIndex)
    {
+      if (rIndex < 0 || rIndex >= localGridSize || cIndex < 0 || cIndex >= localGridSize)
+         return 0.0f;
+
       int height = ((int) heightMap.ptr(rIndex, cIndex).getShort() & 0xFFFF);
       float cellHeight = (float) ((float) height / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
                           - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
@@ -69,24 +73,22 @@ public class TerrainMapData
 
    public float getHeightInWorld(float x, float y)
    {
-      int rIndex = getLocalIndex(x);
-      int cIndex = getLocalIndex(y);
+      int rIndex = getLocalIndex(x, sensorOrigin.getX32());
+      int cIndex = getLocalIndex(y, sensorOrigin.getY32());
       return getHeightLocal(rIndex, cIndex);
    }
 
    public float getContactScoreInWorld(float x, float y)
    {
-      int rIndex = getLocalIndex(x);
-      int cIndex = getLocalIndex(y);
+      int rIndex = getLocalIndex(x, sensorOrigin.getX32());
+      int cIndex = getLocalIndex(y, sensorOrigin.getY32());
       return getContactScoreLocal(rIndex, cIndex);
    }
 
-   public int getLocalIndex(float coordinate)
+   public int getLocalIndex(float coordinate, float center)
    {
-      int grIndex = (int) coordinate / cellsPerMeter;
-      int offsetX = (int) (sensorOrigin.getX() * 50);
-      int rIndex = (int) (grIndex + gridSize / 2) - offsetX;
-      return rIndex;
+      int localIndex = (int) ((coordinate - center) * cellsPerMeter + localGridSize / 2);
+      return localIndex;
    }
 
    public void setHeightLocal(float height, int rIndex, int cIndex)
@@ -142,9 +144,9 @@ public class TerrainMapData
       return cellsPerMeter;
    }
 
-   public int getGridSize()
+   public int getLocalGridSize()
    {
-      return gridSize;
+      return localGridSize;
    }
 
    public void setHeightMap(Mat heightMap)

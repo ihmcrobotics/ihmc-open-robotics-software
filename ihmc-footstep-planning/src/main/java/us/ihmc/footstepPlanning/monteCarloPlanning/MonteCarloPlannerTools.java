@@ -323,8 +323,8 @@ public class MonteCarloPlannerTools
          int nodeX = (int) footstepNode.getState().getX();
          int nodeY = (int) footstepNode.getState().getY();
 
-         int rIndex = nodeX + request.getTerrainMapData().getGridSize() / 2 - offsetX;
-         int cIndex = nodeY + request.getTerrainMapData().getGridSize() / 2 - offsetY;
+         int rIndex = nodeX + request.getTerrainMapData().getLocalGridSize() / 2 - offsetX;
+         int cIndex = nodeY + request.getTerrainMapData().getLocalGridSize() / 2 - offsetY;
 
          // decode height from 16-bit scaled and offset height value stored in OpenCV Mat
          float cellHeight = request.getTerrainMapData().getHeightLocal(rIndex, cIndex);
@@ -432,8 +432,8 @@ public class MonteCarloPlannerTools
       int offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * 50);
       int offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * 50);
 
-      int rIndex = (int) (newNode.getState().getX() + request.getTerrainMapData().getGridSize() / 2) - offsetX;
-      int cIndex = (int) (newNode.getState().getY() + request.getTerrainMapData().getGridSize() / 2) - offsetY;
+      int rIndex = (int) (newNode.getState().getX() + request.getTerrainMapData().getLocalGridSize() / 2) - offsetX;
+      int cIndex = (int) (newNode.getState().getY() + request.getTerrainMapData().getLocalGridSize() / 2) - offsetY;
 
       Point2D previousPosition = new Point2D(oldNode.getState());
       Point2D currentPosition = new Point2D(newNode.getState());

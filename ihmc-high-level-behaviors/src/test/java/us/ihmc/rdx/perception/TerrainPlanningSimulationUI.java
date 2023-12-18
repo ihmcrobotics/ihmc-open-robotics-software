@@ -8,7 +8,11 @@ import imgui.type.ImFloat;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+<<<<<<< HEAD
 import us.ihmc.behaviors.activeMapping.ContinuousPlanningTools;
+=======
+import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
+>>>>>>> 2a48f8f491a (Add stance selector UI.)
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -84,6 +88,7 @@ public class TerrainPlanningSimulationUI
    private PerceptionDataLogger perceptionDataLogger;
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
+   private RDXStancePoseSelectionPanel stancePoseSelectionPanel;
    private RDXHighLevelDepthSensorSimulator steppingL515Simulator;
    private RDXHumanoidPerceptionUI humanoidPerceptionUI;
    private HumanoidPerceptionModule humanoidPerception;
@@ -111,6 +116,8 @@ public class TerrainPlanningSimulationUI
    private final RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform sensorToGroundTransform = new RigidBodyTransform();
    private final RigidBodyTransform groundToWorldTransform = new RigidBodyTransform();
+
+   private final StancePoseCalculator stancePoseCalculator = new StancePoseCalculator(0.5f, 0.5f, 0.1f);
 
    private final File logFile = new File(IHMCCommonPaths.PLANNING_DIRECTORY.resolve("NadiaPlannerLogs").toString());
    //private final File logFile = new File(IHMCCommonPaths.LOGS_DIRECTORY.toString());
@@ -183,6 +190,10 @@ public class TerrainPlanningSimulationUI
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(30.0));
             l515PoseGizmo.getTransformToParent().prependTranslation(1.0, 0.0, 0.0);
 
+            stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(stancePoseCalculator);
+            baseUI.getPrimaryScene().addRenderableProvider(stancePoseSelectionPanel, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(stancePoseSelectionPanel::processImGui3DViewInput);
+
             baseUI.getPrimaryScene().addRenderableProvider(footstepPlanGraphic, RDXSceneLevel.MODEL);
 
             navigationPanel.setRenderMethod(this::renderNavigationPanel);
@@ -246,6 +257,9 @@ public class TerrainPlanningSimulationUI
             l515PoseGizmo.getTransformToParent().getTranslation().setY(startMidY.get());
             l515PoseGizmo.getTransformToParent().getTranslation().setZ(startMidZ.get());
             l515PoseGizmo.update();
+
+            stancePoseSelectionPanel.update(goalPose.get(RobotSide.LEFT), loadedMapData);
+            stancePoseSelectionPanel.renderImGuiWidgets();
 
             humanoidPerceptionUI.update();
             footstepPlanGraphic.update();

@@ -37,7 +37,7 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
 
       for (Vector3D action : actions)
       {
-         if (checkActionBoundaries(action, request.getTerrainMapData().getGridSize()) && checkReachability(request, parameters, action))
+         if (checkActionBoundaries(action, request.getTerrainMapData().getLocalGridSize()) && checkReachability(request, parameters, action))
          {
             MonteCarloFootstepNode nodeToInsert = computeActionResult(action);
             availableStates.add(nodeToInsert);
@@ -63,11 +63,11 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
       int offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * 50);
       int offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * 50);
 
-      int rIndexPrevious = (int) (state.getX() + request.getTerrainMapData().getGridSize() / 2) - offsetX;
-      int cIndexPrevious = (int) (state.getY() + request.getTerrainMapData().getGridSize() / 2) - offsetY;
+      int rIndexPrevious = (int) (state.getX() + request.getTerrainMapData().getLocalGridSize() / 2) - offsetX;
+      int cIndexPrevious = (int) (state.getY() + request.getTerrainMapData().getLocalGridSize() / 2) - offsetY;
 
-      int rIndex = (int) (newPosition.getX() + request.getTerrainMapData().getGridSize() / 2) - offsetX;
-      int cIndex = (int) (newPosition.getY() + request.getTerrainMapData().getGridSize() / 2) - offsetY;
+      int rIndex = (int) (newPosition.getX() + request.getTerrainMapData().getLocalGridSize() / 2) - offsetX;
+      int cIndex = (int) (newPosition.getY() + request.getTerrainMapData().getLocalGridSize() / 2) - offsetY;
 
       double previousHeight = request.getTerrainMapData().getHeightLocal(rIndexPrevious, cIndexPrevious);
       double currentHeight = request.getTerrainMapData().getHeightLocal(rIndex, cIndex);
