@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.graphics;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
