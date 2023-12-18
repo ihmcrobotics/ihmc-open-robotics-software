@@ -8,11 +8,8 @@ import imgui.type.ImFloat;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-<<<<<<< HEAD
 import us.ihmc.behaviors.activeMapping.ContinuousPlanningTools;
-=======
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
->>>>>>> 2a48f8f491a (Add stance selector UI.)
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.TypedNotification;
