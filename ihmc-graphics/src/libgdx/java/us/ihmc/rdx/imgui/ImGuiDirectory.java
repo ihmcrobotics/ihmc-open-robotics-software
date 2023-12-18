@@ -46,9 +46,7 @@ public class ImGuiDirectory
       this.pathSelectedAction = pathSelectedAction;
    }
 
-   public ImGuiDirectory(String initialDirectory,
-                         Function<PathEntry, Boolean> pathFilter,
-                         Consumer<String> pathSelectedAction)
+   public ImGuiDirectory(String initialDirectory, Function<PathEntry, Boolean> pathFilter, Consumer<String> pathSelectedAction)
    {
       this.pathFilter = pathFilter;
       directory.set(initialDirectory);
