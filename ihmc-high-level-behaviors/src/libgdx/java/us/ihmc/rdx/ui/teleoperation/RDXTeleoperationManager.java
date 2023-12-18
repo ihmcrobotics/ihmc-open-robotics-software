@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.teleoperation;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
@@ -16,8 +15,6 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -220,7 +217,7 @@ public class RDXTeleoperationManager extends RDXPanel
                                             syncedRobot.getReferenceFrames().getChestFrame(),
                                             modelFileName,
                                             baseUI.getPrimary3DPanel());
-                  interactableChest.setOnSpacePressed(() ->
+                  interactableChest.setActionExecutor(() ->
                   {
                      ros2Helper.publishToController(HumanoidMessageTools.createChestTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
                                                                                                      interactableChest.getPose().getOrientation()));
@@ -241,7 +238,7 @@ public class RDXTeleoperationManager extends RDXPanel
                                             syncedRobot.getReferenceFrames().getPelvisFrame(),
                                             modelFileName,
                                             baseUI.getPrimary3DPanel());
-                  interactablePelvis.setOnSpacePressed(() ->
+                  interactablePelvis.setActionExecutor(() ->
                   {
                      ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
                                                                                                        interactablePelvis.getPose()));
@@ -260,7 +257,7 @@ public class RDXTeleoperationManager extends RDXPanel
                   if (!interactableFeet.containsKey(side))
                   {
                      RDXInteractableFoot interactableFoot = new RDXInteractableFoot(side, baseUI, robotCollidable, robotModel, fullRobotModel);
-                     interactableFoot.setOnSpacePressed(() ->
+                     interactableFoot.setActionExecutor(() ->
                              ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side,
                                                                                                              teleoperationParameters.getTrajectoryTime(),
                                                                                                              interactableFoot.getPose())));
@@ -295,7 +292,7 @@ public class RDXTeleoperationManager extends RDXPanel
             {
                // TODO this should probably not handle the space event!
                // This sends a command to the controller.
-               interactableHands.get(side).setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
+               interactableHands.get(side).setActionExecutor(armManager.getSubmitDesiredArmSetpointsCallback(side));
                interactableHands.get(side).setOpenHand(() -> armManager.getHandManager().publishHandCommand(side, HandConfiguration.OPEN));
                interactableHands.get(side).setCloseHand(() -> armManager.getHandManager().publishHandCommand(side, HandConfiguration.CLOSE));
                interactableHands.get(side).setGotoDoorAvoidanceArmAngles(() -> armManager.executeDoorAvoidanceArmAngles(side));
