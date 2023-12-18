@@ -98,12 +98,12 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             FramePose3D newFootstepPose = new FramePose3D();
             if (footsteps.size() > 1)
             {
-               RDXFootstepPlanActionFootstep previousFootstep = footsteps.get(footsteps.size() - 1);
+               RDXFootstepPlanActionFootstep previousFootstep = footsteps.get(footsteps.size() - 2);
                newFootstepPose.setToZero(previousFootstep.getState().getSoleFrame().getReferenceFrame());
 
                if (previousFootstep.getDefinition().getSide() != newSide)
                {
-                  double minStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getMinStepWidth();
+                  double minStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getInPlaceWidth();
                   newFootstepPose.getPosition().addY(newSide.negateIfRightSide(minStepWidth));
                }
             }
@@ -115,7 +115,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             double aLittleInFront = 0.15;
             newFootstepPose.getPosition().addX(aLittleInFront);
 
-            newFootstepPose.changeFrame(addedFootstep.getState().getSoleFrame().getReferenceFrame());
+            newFootstepPose.changeFrame(addedFootstep.getState().getSoleFrame().getReferenceFrame().getParent());
             addedFootstep.getDefinition().getSoleToPlanFrameTransform().getValue().set(newFootstepPose);
 
             addedFootstep.update();
