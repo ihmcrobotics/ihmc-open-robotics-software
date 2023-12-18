@@ -70,7 +70,7 @@ public class RDXFootstepPlanActionFootstep
 
          interactableFootstep.update();
 
-         flatFootstepGraphic.setPose(getGizmo().getPose());
+         flatFootstepGraphic.setPoseFromReferenceFrame(getState().getSoleFrame().getReferenceFrame());
       }
    }
 

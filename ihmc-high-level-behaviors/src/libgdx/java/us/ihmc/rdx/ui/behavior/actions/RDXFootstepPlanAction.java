@@ -117,8 +117,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
             newFootstepPose.changeFrame(addedFootstep.getState().getSoleFrame().getReferenceFrame().getParent());
             addedFootstep.getDefinition().getSoleToPlanFrameTransform().getValue().set(newFootstepPose);
-
-            addedFootstep.update();
          }
 
          if (userRemovedFootstep.poll())
@@ -126,6 +124,11 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             RecyclingArrayListTools.removeLast(footsteps);
             RecyclingArrayListTools.removeLast(state.getFootsteps());
             RecyclingArrayListTools.removeLast(getDefinition().getFootsteps().getValue());
+         }
+
+         for (RDXFootstepPlanActionFootstep footstep : footsteps)
+         {
+            footstep.update();
          }
       }
    }
@@ -208,9 +211,10 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
    public void changeParentFrame(String newParentFrameName)
    {
+      getDefinition().setParentFrameName(newParentFrameName);
       for (FootstepPlanActionFootstepState footstepState : getState().getFootsteps())
       {
-         footstepState.getSoleFrame().changeFrame(getDefinition().getParentFrameName());
+         footstepState.getSoleFrame().changeFrame(newParentFrameName);
       }
    }
 }
