@@ -168,7 +168,7 @@ public class RDXVRKinematicsStreamingMode
       parameters.getDefaultConfiguration().setEnableNeckJointspace(false);
       parameters.setUseStreamingPublisher(true);
 
-      boolean startYoVariableServer = true;
+      boolean startYoVariableServer = false;
       toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer, PubSubImplementation.FAST_RTPS);
       ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(createInitialConfiguration(robotModel));
    }
