@@ -396,44 +396,6 @@ public class RDXArmManager
       }
    }
 
-   public void computeTrajectoryTime(RobotSide side, double desiredLinearVelocity, double desiredAngularVelocity)
-   {
-      FramePose3D currentPoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                       syncedRobot.getReferenceFrames().getHandFrame(side).getTransformToWorldFrame());
-      FramePose3D goalPoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                    desiredRobot.getDesiredFullRobotModel().getHandControlFrame(side).getTransformToWorldFrame());
-      double positionDistance = goalPoseInWorld.getPositionDistance(currentPoseInWorld);
-      double angularDistance = goalPoseInWorld.getOrientationDistance(currentPoseInWorld);
-      // take max duration required to achieve the desired linear velocity or angular velocity
-      trajectoryTime.replace(side, Math.max(positionDistance / desiredLinearVelocity, angularDistance / desiredAngularVelocity));
-   }
-
-   public void adaptIKBasedOnReachability(RobotSide side)
-   {
-      RigidBodyTransform desiredTransformToWorld = interactableHands.get(side).getPoseGizmo().getTransformToParent();
-      RigidBodyTransform goalTransformToWorld = desiredRobot.getDesiredFullRobotModel().getHandControlFrame(side).getTransformToWorldFrame();
-      double distance = Math.sqrt(desiredTransformToWorld.getTranslation().differenceNormSquared(goalTransformToWorld.getTranslation()));
-
-      double maxDistanceThreshold = 0.05;
-      double minGain = 100;
-      double maxGain = armIKSolvers.get(side).getDefaultOrientationGain();
-      double minWeight = 1;
-      double maxWeight = armIKSolvers.get(side).getDefaultOrientationWeight();
-
-      // Interpolate based on the distance
-      double gain = maxGain - (Math.min(distance / maxDistanceThreshold, 1) * (maxGain - minGain));
-      double weight = maxWeight - (Math.min(distance / maxDistanceThreshold, 1) * (maxWeight - minWeight));
-
-      armIKSolvers.get(side).setOrientationGain(gain);
-      armIKSolvers.get(side).setOrientationWeight(weight);
-
-      if (distance < 0.005)
-      {
-         armIKSolvers.get(side).resetOrientationGain();
-         armIKSolvers.get(side).resetOrientationWeight();
-      }
-   }
-
    public double[] getDesiredJointAngles(RobotSide side)
    {
       double[] jointAngles = new double[armJointNames.get(side).length];
@@ -445,27 +407,8 @@ public class RDXArmManager
       return jointAngles;
    }
 
-   public double[] getCurrentJointAngles(RobotSide side)
+   public SideDependentList<ArmIKSolver> getArmIKSolvers()
    {
-      double[] jointAngles = new double[armJointNames.get(side).length];
-      int i = -1;
-      for (ArmJointName armJoint : armJointNames.get(side))
-      {
-         jointAngles[++i] = syncedRobot.getFullRobotModel().getArmJoint(side, armJoint).getQ();
-      }
-      return jointAngles;
-   }
-
-   public double getTrajectoryTime(RobotSide side)
-   {
-      return trajectoryTime.get(side);
-   }
-
-   public void moveHand(RobotSide side, double[] qDesireds, double[] qDDesireds)
-   {
-      ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(side, 0.0, qDesireds, qDDesireds, null);
-      message.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
-      message.getJointspaceTrajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
-      communicationHelper.publishToController(message);
+      return armIKSolvers;
    }
 }
