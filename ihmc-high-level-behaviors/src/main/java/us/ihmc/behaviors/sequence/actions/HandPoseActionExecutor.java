@@ -199,9 +199,9 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                                                                                            frameHand.getPosition(),
                                                                                                            frameHand.getOrientation(),
                                                                                                            ReferenceFrame.getWorldFrame());
-            handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setXWeight(50.0);
-            handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setYWeight(50.0);
-            handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setZWeight(50.0);
+            handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setXWeight(1.0);
+            handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setYWeight(1.0);
+            handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setZWeight(1.0);
             handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setXWeight(50.0);
             handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setYWeight(50.0);
             handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setZWeight(50.0);

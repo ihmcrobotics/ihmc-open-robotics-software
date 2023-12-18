@@ -1,7 +1,9 @@
 package us.ihmc.behaviors.simulation;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorDefinition;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
@@ -24,8 +26,8 @@ import java.util.function.Function;
 public class SimulationSceneObjectRobotBuilders
 {
    public static final double SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE = 0.01;
-   public static final double TABLE_X = -1.0;
-   public static final double TABLE_Y = 2.0;
+   public static final double TABLE_X = 0.6;
+   public static final double TABLE_Y = -0.25;
    public static final double TABLE_Z = TableModelParameters.TABLE_LEG_LENGTH + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE;
    public static final double TABLE_SURFACE_Z = TableModelParameters.TABLE_LEG_LENGTH + TableModelParameters.TABLE_THICKNESS;
 
@@ -88,6 +90,21 @@ public class SimulationSceneObjectRobotBuilders
                         TABLE_SURFACE_Z + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE));
          Robot robot = new Robot(canOfSoupDefinition, inertialFrame);
          return robot;
+      };
+   }
+
+   public static Function<ReferenceFrame, Robot> getBoxBuilder(double mass, Vector3D size)
+   {
+      return inertialFrame ->
+      {
+         BoxDefinition boxDefinition = new BoxDefinition();
+         boxDefinition.build(mass, size);
+         boxDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0),
+                                                                new Point3D(TABLE_X + 0.15,
+                                                                            TABLE_Y + 0.25,
+                                                                            TABLE_SURFACE_Z + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE));
+         boxDefinition.getInitialSixDoFState().setVelocity(new Vector3D(), new Vector3D());
+         return new Robot(boxDefinition, inertialFrame);
       };
    }
 }

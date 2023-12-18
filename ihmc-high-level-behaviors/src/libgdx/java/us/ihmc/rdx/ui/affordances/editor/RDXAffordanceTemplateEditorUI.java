@@ -79,14 +79,17 @@ public class RDXAffordanceTemplateEditorUI
    private boolean fractionalScalingEnabled = false;
    private boolean affordanceTemplateLoaded = false;
    private float[] objectScale;
+   private final SceneGraph sceneGraph;
 
    private final ImGuiInputText textInput = new ImGuiInputText("(optional) Enter additional description");
    private final ImGuiDirectory fileManagerDirectory;
 
-   public RDXAffordanceTemplateEditorUI(RDXBaseUI baseUI)
+   public RDXAffordanceTemplateEditorUI(RDXBaseUI baseUI, SceneGraph uiSceneGraph)
    {
       panel3D = baseUI.getPrimary3DPanel();
-      SceneGraph sceneGraph = getSceneGraph();
+      sceneGraph = uiSceneGraph;
+
+      addSceneNodes();
 
       objectBuilder = new RDXInteractableObjectBuilder(baseUI, sceneGraph);
       baseUI.getImGuiPanelManager().addPanel(objectBuilder.getWindowName(), objectBuilder::renderImGuiWidgets);
@@ -157,9 +160,8 @@ public class RDXAffordanceTemplateEditorUI
                                                 fileManager::setLoadingFile);
    }
 
-   private static SceneGraph getSceneGraph()
+   private void addSceneNodes()
    {
-      SceneGraph sceneGraph = new SceneGraph();
       sceneGraph.modifyTree(modificationQueue ->
                             {
                                DoorSceneNodeDefinitions.ensureRightPushDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
@@ -182,7 +184,6 @@ public class RDXAffordanceTemplateEditorUI
                                   modificationQueue.accept(new SceneGraphNodeAddition(primitiveRigidBodySceneNode, sceneGraph.getRootNode()));
                                }
                             });
-      return sceneGraph;
    }
 
    public void update()
