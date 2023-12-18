@@ -73,8 +73,7 @@ public class RDXVRModeManager
 
    public void processVRInput(RDXVRContext vrContext)
    {
-//      renderPanel = vrContext.getHeadset().isConnected() && vrContext.getController(RobotSide.LEFT).isConnected();
-      renderPanel = false;
+      renderPanel = vrContext.getHeadset().isConnected() && vrContext.getController(RobotSide.LEFT).isConnected();
 
       for (RobotSide side : RobotSide.values)
       {

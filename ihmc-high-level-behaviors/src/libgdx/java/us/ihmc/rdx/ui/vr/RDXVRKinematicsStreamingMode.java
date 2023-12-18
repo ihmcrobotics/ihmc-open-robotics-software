@@ -138,19 +138,7 @@ public class RDXVRKinematicsStreamingMode
       for (RobotSide side : RobotSide.values) {
          handFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          controllerFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
-         MutableReferenceFrame handDesiredControlFrame = new MutableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
-         {
-//            if (side == RobotSide.LEFT)
-//            {
-//               handDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.LEFT_HAND));
-//               handDesiredControlFrame.getTransformToParent().appendTranslation(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.LEFT_HAND));
-//            }
-//            else
-//            {
-//               handDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.RIGHT_HAND));
-//               handDesiredControlFrame.getTransformToParent().appendTranslation(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.RIGHT_HAND));
-//            }
-         }
+         handDesiredControlFrames.put(side, new MutableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame()));
          Pose3D ikControlFramePose = new Pose3D();
          if (side == RobotSide.LEFT)
          {
@@ -163,8 +151,6 @@ public class RDXVRKinematicsStreamingMode
             ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.RIGHT_HAND));
          }
          ikControlFramePoses.put(side, ikControlFramePose);
-         handDesiredControlFrame.getReferenceFrame().update();
-         handDesiredControlFrames.put(side, handDesiredControlFrame);
       }
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
@@ -256,8 +242,8 @@ public class RDXVRKinematicsStreamingMode
 
            // NOTE: Implement hand open close for controller trigger button.
            InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-           if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-           {
+           if (clickTriggerButton.bChanged() && !clickTriggerButton.bState() && controller.getSelectedPick() != null)
+           { // do not want to close grippers while interacting with the panel
               HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
               sendHandCommand(RobotSide.RIGHT, handConfiguration);
            }
