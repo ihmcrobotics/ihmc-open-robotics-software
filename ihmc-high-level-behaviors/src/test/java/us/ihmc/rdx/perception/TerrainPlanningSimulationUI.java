@@ -1,5 +1,6 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.Color;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
@@ -56,6 +57,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -108,6 +110,8 @@ public class TerrainPlanningSimulationUI
    private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private final SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private final SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
+   private final SideDependentList<RDXFootstepGraphic> startFootstepGraphics;
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("CameraFrame", ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame cameraZUpFrame = new PoseReferenceFrame("CameraZUpFrame", cameraFrame);
    private final RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform();
@@ -158,6 +162,11 @@ public class TerrainPlanningSimulationUI
       footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
       footstepPredictor = new FootstepPredictor();
 
+      goalFootstepGraphics = new SideDependentList<>(new RDXFootstepGraphic(PlannerTools.createFootContactPoints(0.2f, 0.1f, 0.08f), new Color(1.0f, 1.0f, 1.0f, 0.5f)),
+                                                     new RDXFootstepGraphic(PlannerTools.createFootContactPoints(0.2f, 0.1f, 0.08f), new Color(1.0f, 1.0f, 1.0f, 0.5f)));
+      startFootstepGraphics = new SideDependentList<>(new RDXFootstepGraphic(PlannerTools.createFootContactPoints(0.2f, 0.1f, 0.08f), new Color(0.0f, 0.0f, 0.0f, 1.0f)),
+                                                      new RDXFootstepGraphic(PlannerTools.createFootContactPoints(0.2f, 0.1f, 0.08f), new Color(0.0f, 0.0f, 0.0f, 1.0f)));
+
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
@@ -190,6 +199,18 @@ public class TerrainPlanningSimulationUI
             stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(stancePoseCalculator);
             baseUI.getPrimaryScene().addRenderableProvider(stancePoseSelectionPanel, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(stancePoseSelectionPanel::processImGui3DViewInput);
+
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               goalFootstepGraphics.get(robotSide).create();
+               startFootstepGraphics.get(robotSide).create();
+            }
+
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               baseUI.getPrimaryScene().addRenderableProvider(goalFootstepGraphics.get(robotSide), RDXSceneLevel.MODEL);
+               baseUI.getPrimaryScene().addRenderableProvider(startFootstepGraphics.get(robotSide), RDXSceneLevel.MODEL);
+            }
 
             baseUI.getPrimaryScene().addRenderableProvider(footstepPlanGraphic, RDXSceneLevel.MODEL);
 
@@ -257,6 +278,21 @@ public class TerrainPlanningSimulationUI
 
             stancePoseSelectionPanel.update(goalPose.get(RobotSide.LEFT), loadedMapData);
             stancePoseSelectionPanel.renderImGuiWidgets();
+
+            if (loadedMapData != null)
+            {
+               monteCarloFootstepPlanner.getDebugger().refresh(loadedMapData);
+            }
+            monteCarloFootstepPlanner.getDebugger().plotFootPoses(stancePoseCalculator.getBestPoses());
+            monteCarloFootstepPlanner.getDebugger().display(1);
+
+            if (log != null)
+            {
+               goalFootstepGraphics.get(RobotSide.LEFT).setPose(log.getRequestPacket().getGoalLeftFootPose());
+               goalFootstepGraphics.get(RobotSide.RIGHT).setPose(log.getRequestPacket().getGoalRightFootPose());
+               startFootstepGraphics.get(RobotSide.LEFT).setPose(log.getRequestPacket().getStartLeftFootPose());
+               startFootstepGraphics.get(RobotSide.RIGHT).setPose(log.getRequestPacket().getStartRightFootPose());
+            }
 
             humanoidPerceptionUI.update();
             footstepPlanGraphic.update();
@@ -770,6 +806,10 @@ public class TerrainPlanningSimulationUI
          {
             baseUI.dispose();
             footstepPlanGraphic.destroy();
+            goalFootstepGraphics.get(RobotSide.LEFT).destroy();
+            goalFootstepGraphics.get(RobotSide.RIGHT).destroy();
+            startFootstepGraphics.get(RobotSide.LEFT).destroy();
+            startFootstepGraphics.get(RobotSide.RIGHT).destroy();
             environmentBuilder.destroy();
             steppingL515Simulator.dispose();
             humanoidPerception.destroy();

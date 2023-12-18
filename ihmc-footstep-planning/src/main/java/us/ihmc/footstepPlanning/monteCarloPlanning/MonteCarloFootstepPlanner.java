@@ -17,7 +17,7 @@ public class MonteCarloFootstepPlanner
 {
    private MonteCarloFootstepPlannerStatistics statistics;
    private MonteCarloFootstepPlannerParameters parameters;
-   private MonteCarloFootstepPlanningDebugger debugger;
+   private TerrainPlanningDebugger debugger;
    private MonteCarloFootstepNode root;
 
    private MonteCarloFootstepPlannerRequest request;
@@ -31,7 +31,7 @@ public class MonteCarloFootstepPlanner
    {
       this.parameters = parameters;
       this.statistics = new MonteCarloFootstepPlannerStatistics();
-      this.debugger = new MonteCarloFootstepPlanningDebugger(this);
+      this.debugger = new TerrainPlanningDebugger(this);
    }
 
    public FootstepPlan generateFootstepPlan(MonteCarloFootstepPlannerRequest request)
@@ -49,7 +49,7 @@ public class MonteCarloFootstepPlanner
 
       planning = true;
       debugger.setRequest(request);
-      debugger.refresh();
+      debugger.refresh(request.getTerrainMapData());
 
       for (int i = 0; i < parameters.getNumberOfIterations(); i++)
       {
@@ -271,7 +271,7 @@ public class MonteCarloFootstepPlanner
       return new ArrayList<>(visitedNodes.values());
    }
 
-   public MonteCarloFootstepPlanningDebugger getDebugger()
+   public TerrainPlanningDebugger getDebugger()
    {
       return debugger;
    }

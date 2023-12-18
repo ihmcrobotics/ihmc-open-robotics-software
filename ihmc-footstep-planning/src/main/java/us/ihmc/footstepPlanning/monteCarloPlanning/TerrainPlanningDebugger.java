@@ -10,13 +10,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
-public class MonteCarloFootstepPlanningDebugger
+public class TerrainPlanningDebugger
 {
    private int offsetX = 0;
    private int offsetY = 0;
@@ -39,7 +40,7 @@ public class MonteCarloFootstepPlanningDebugger
 
    private Mat contactHeatMapImage;
 
-   public MonteCarloFootstepPlanningDebugger(MonteCarloFootstepPlanner planner)
+   public TerrainPlanningDebugger(MonteCarloFootstepPlanner planner)
    {
       this.planner = planner;
    }
@@ -49,13 +50,13 @@ public class MonteCarloFootstepPlanningDebugger
       this.request = request;
       this.offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * 50.0f);
       this.offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * 50.0f);
-      refresh();
+      refresh(request.getTerrainMapData());
    }
 
-   public void refresh()
+   public void refresh(TerrainMapData terrainMapData)
    {
-      PerceptionDebugTools.convertDepthCopyToColor(request.getTerrainMapData().getHeightMap().clone(), heightMapColorImage);
-      this.contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(request.getTerrainMapData().getContactMap().clone());
+      PerceptionDebugTools.convertDepthCopyToColor(terrainMapData.getHeightMap().clone(), heightMapColorImage);
+      this.contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(terrainMapData.getContactMap().clone());
       opencv_imgproc.cvtColor(contactHeatMapImage, contactHeatMapColorImage, opencv_imgproc.COLOR_BGRA2BGR);
 
       opencv_imgproc.resize(heightMapColorImage, heightMapColorImage, new Size(scaledWidth, scaledHeight));
@@ -84,6 +85,12 @@ public class MonteCarloFootstepPlanningDebugger
       }
    }
 
+   public void plotFootPoses(SideDependentList<Pose3D> poses)
+   {
+      plotFootPoses(contactHeatMapColorImage, poses, 1);
+      plotFootPoses(heightMapColorImage, poses, 1);
+   }
+
    public void plotFootstepPlan(FootstepPlan plan)
    {
       plotFootPoses(contactHeatMapColorImage, request.getStartFootPoses(), 2);
@@ -98,17 +105,8 @@ public class MonteCarloFootstepPlanningDebugger
 
    public void display(int delay)
    {
-      LogTools.debug(String.format("Dimensions: HeightMap(%d x %d), ContactMap(%d x %d)",
-                                   request.getTerrainMapData().getHeightMap().rows(),
-                                   request.getTerrainMapData().getHeightMap().cols(),
-                                   request.getTerrainMapData().getContactMap().rows(),
-                                   request.getTerrainMapData().getContactMap().cols()));
-
-      //MonteCarloPlannerTools.plotFootstepNodeList(planner.getVisitedNodes(), contactHeatMapColorImage);
-
       heightMapColorImage.copyTo(top);
       contactHeatMapColorImage.copyTo(bottom);
-
       PerceptionDebugTools.display("Display", stacked, delay, 1500);
    }
 

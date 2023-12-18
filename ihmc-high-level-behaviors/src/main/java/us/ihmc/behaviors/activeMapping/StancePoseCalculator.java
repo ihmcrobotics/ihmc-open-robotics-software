@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.activeMapping;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -17,6 +18,9 @@ public class StancePoseCalculator
 
    private ArrayList<FramePose3D> leftPoses = new ArrayList<>();
    private ArrayList<FramePose3D> rightPoses = new ArrayList<>();
+
+   private SideDependentList<Pose3D> bestPose3Ds = new SideDependentList<>(new Pose3D(), new Pose3D());
+   private SideDependentList<FramePose3D> bestFramePoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
    public StancePoseCalculator(float maxWidth, float maxLength, float maxYaw)
    {
@@ -60,9 +64,6 @@ public class StancePoseCalculator
       double minCost = Double.POSITIVE_INFINITY;
       double cost = 0.0f;
 
-      FramePose3D bestLeftPose = new FramePose3D();
-      FramePose3D bestRightPose = new FramePose3D();
-
       for (FramePose3D leftPose : leftPoses)
       {
          for (FramePose3D rightPose : rightPoses)
@@ -82,13 +83,13 @@ public class StancePoseCalculator
             if (cost < minCost)
             {
                minCost = cost;
-               bestLeftPose.set(leftPose);
-               bestRightPose.set(rightPose);
+               bestFramePoses.get(RobotSide.LEFT).set(leftPose);
+               bestFramePoses.get(RobotSide.RIGHT).set(rightPose);
             }
          }
       }
 
-      return new SideDependentList<>(bestLeftPose, bestRightPose);
+      return bestFramePoses;
    }
 
    public ArrayList<FramePose3D> getLeftPoses()
@@ -109,5 +110,19 @@ public class StancePoseCalculator
    public int getTotalRightPoses()
    {
       return rightPoses.size();
+   }
+
+   public SideDependentList<Pose3D> getBestPoses()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         bestPose3Ds.set(robotSide, new Pose3D(bestFramePoses.get(robotSide)));
+      }
+      return bestPose3Ds;
+   }
+
+   public SideDependentList<FramePose3D> getBestFramePoses()
+   {
+      return bestFramePoses;
    }
 }
