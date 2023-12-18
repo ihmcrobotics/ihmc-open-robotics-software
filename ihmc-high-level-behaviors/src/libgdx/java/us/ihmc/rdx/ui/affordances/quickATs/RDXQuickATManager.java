@@ -5,17 +5,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -39,7 +36,7 @@ public class RDXQuickATManager extends RDXPanel
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RDXTeleoperationManager teleoperationManager;
    private SceneGraph sceneGraph;
-   private SceneNode defaultNode = new SceneNode(100, "");
+   private final SceneNode defaultNode = new SceneNode(100, "");
    private SceneNode selectedNode = defaultNode;
 
    private final WorkspaceResourceDirectory resourceDirectory = new WorkspaceResourceDirectory(getClass(), "/quickATs");
@@ -192,8 +189,7 @@ public class RDXQuickATManager extends RDXPanel
                   soleFrame.changeFrame(ReferenceFrame.getWorldFrame());
                   footstepPlacer.createNewFootstep(RobotSide.getSideFromString(footstepNode.get("side").asText()));
                   footstepPlacer.setFootstepPose(soleFrame);
-                  footstepPlacer.forceFootstepPlacement();
-                  footstepPlacer.placeFootstep();
+                  footstepPlacer.forcePlaceFootstep();
                });
                footstepPlacer.exitPlacement();
             });

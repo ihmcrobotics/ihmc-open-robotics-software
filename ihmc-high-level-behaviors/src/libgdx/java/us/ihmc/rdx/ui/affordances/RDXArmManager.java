@@ -18,7 +18,6 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
@@ -34,9 +33,6 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class manages the UI for operating the arms of a humanoid robot.
@@ -328,14 +324,14 @@ public class RDXArmManager
 
             LogTools.info("Sending ArmTrajectoryMessage");
             ArmTrajectoryMessage armTrajectoryMessage;
-            if (trajectoryTime.get(robotSide) < 0)
-               armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide,
-                                                                                      teleoperationParameters.getTrajectoryTime(),
-                                                                                      jointAngles);
+            if (trajectoryTime.get(robotSide) < 0.0)
+            {
+               armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, teleoperationParameters.getTrajectoryTime(), jointAngles);
+            }
             else
-               armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide,
-                                                                                      trajectoryTime.get(robotSide),
-                                                                                      jointAngles);
+            {
+               armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime.get(robotSide), jointAngles);
+            }
             communicationHelper.publishToController(armTrajectoryMessage);
             // reset trajectory time
             trajectoryTime.replace(robotSide, -1.0);
@@ -391,19 +387,21 @@ public class RDXArmManager
       if (interactableHands.containsKey(side))
       {
          interactableHands.get(side).selectInteractable();
-         ReferenceFrame interactableHandFrame = interactableHands.get(side).getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame().getParent();
+         ReferenceFrame interactableHandFrame = interactableHands.get(side).getPoseGizmo().getGizmoFrame().getParent();
          desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
          interactableHands.get(side).getSyncedControlFrame().getTransformToWorldFrame().set(desiredPose);
          if (!interactableHandFrame.isWorldFrame())
             desiredPose.changeFrame(interactableHandFrame);
-         interactableHands.get(side).getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent().set(desiredPose);
+         interactableHands.get(side).getPoseGizmo().getTransformToParent().set(desiredPose);
       }
    }
 
    public void computeTrajectoryTime(RobotSide side, double desiredLinearVelocity, double desiredAngularVelocity)
    {
-      FramePose3D currentPoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(), syncedRobot.getReferenceFrames().getHandFrame(side).getTransformToWorldFrame());
-      FramePose3D goalPoseInWorld  = new FramePose3D(ReferenceFrame.getWorldFrame(), desiredRobot.getDesiredFullRobotModel().getHandControlFrame(side).getTransformToWorldFrame());
+      FramePose3D currentPoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                       syncedRobot.getReferenceFrames().getHandFrame(side).getTransformToWorldFrame());
+      FramePose3D goalPoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                    desiredRobot.getDesiredFullRobotModel().getHandControlFrame(side).getTransformToWorldFrame());
       double positionDistance = goalPoseInWorld.getPositionDistance(currentPoseInWorld);
       double angularDistance = goalPoseInWorld.getOrientationDistance(currentPoseInWorld);
       // take max duration required to achieve the desired linear velocity or angular velocity
@@ -412,7 +410,7 @@ public class RDXArmManager
 
    public void adaptIKBasedOnReachability(RobotSide side)
    {
-      RigidBodyTransform desiredTransformToWorld = interactableHands.get(side).getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent();
+      RigidBodyTransform desiredTransformToWorld = interactableHands.get(side).getPoseGizmo().getTransformToParent();
       RigidBodyTransform goalTransformToWorld = desiredRobot.getDesiredFullRobotModel().getHandControlFrame(side).getTransformToWorldFrame();
       double distance = Math.sqrt(desiredTransformToWorld.getTranslation().differenceNormSquared(goalTransformToWorld.getTranslation()));
 
@@ -423,7 +421,7 @@ public class RDXArmManager
       double maxWeight = armIKSolvers.get(side).getDefaultOrientationWeight();
 
       // Interpolate based on the distance
-      double gain = maxGain  - (Math.min(distance / maxDistanceThreshold, 1) * (maxGain - minGain));
+      double gain = maxGain - (Math.min(distance / maxDistanceThreshold, 1) * (maxGain - minGain));
       double weight = maxWeight - (Math.min(distance / maxDistanceThreshold, 1) * (maxWeight - minWeight));
 
       armIKSolvers.get(side).setOrientationGain(gain);

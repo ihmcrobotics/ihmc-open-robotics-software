@@ -144,6 +144,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          footstepBeingPlaced.processVRInput(vrContext);
       }
    }
+
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       renderTooltip = false;
@@ -244,6 +245,12 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          // If not safe print message and abort footstep placement
          LogTools.info("Footstep Rejected, too far from previous foot... not placing footstep");
       }
+   }
+
+   public void forcePlaceFootstep()
+   {
+      footstepBeingPlacedIsReachable = true;
+      placeFootstep();
    }
 
    @Override
@@ -358,10 +365,5 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       isReachable &= footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() > -MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();
 
       return isReachable;
-   }
-
-   public void forceFootstepPlacement()
-   {
-      footstepBeingPlacedIsReachable = true;
    }
 }
