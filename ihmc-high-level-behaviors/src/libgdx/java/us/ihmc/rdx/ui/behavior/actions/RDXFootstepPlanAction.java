@@ -91,14 +91,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          if (userAddedFootstep.poll())
          {
             RobotSide newSide = userAddedFootstep.read();
-            RecyclingArrayListTools.addToAll(getDefinition().getFootsteps(), state.getFootsteps());
+            RecyclingArrayListTools.addToAll(getDefinition().getFootsteps().getValue(), state.getFootsteps());
             RDXFootstepPlanActionFootstep addedFootstep = footsteps.add();
             addedFootstep.getDefinition().setSide(newSide);
+            addedFootstep.getState().update();
             FramePose3D newFootstepPose = new FramePose3D();
             if (footsteps.size() > 1)
             {
                RDXFootstepPlanActionFootstep previousFootstep = footsteps.get(footsteps.size() - 1);
-               newFootstepPose.setToZero(previousFootstep.getFootstepFrame());
+               newFootstepPose.setToZero(previousFootstep.getState().getSoleFrame().getReferenceFrame());
 
                if (previousFootstep.getDefinition().getSide() != newSide)
                {
@@ -114,23 +115,17 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             double aLittleInFront = 0.15;
             newFootstepPose.getPosition().addX(aLittleInFront);
 
-            newFootstepPose.changeFrame(referenceFrameLibrary.findFrameByName(getDefinition().getParentFrameName()));
+            newFootstepPose.changeFrame(addedFootstep.getState().getSoleFrame().getReferenceFrame());
             addedFootstep.getDefinition().getSoleToPlanFrameTransform().getValue().set(newFootstepPose);
+
+            addedFootstep.update();
          }
 
          if (userRemovedFootstep.poll())
          {
             RecyclingArrayListTools.removeLast(footsteps);
             RecyclingArrayListTools.removeLast(state.getFootsteps());
-            RecyclingArrayListTools.removeLast(getDefinition().getFootsteps());
-         }
-
-         state.getFootsteps().clear();
-         for (int i = 0; i < footsteps.size(); i++)
-         {
-            footsteps.get(i).update();
-            FootstepPlanActionFootstepState footstepState = state.getFootsteps().add();
-            footstepState.setIndex(i);
+            RecyclingArrayListTools.removeLast(getDefinition().getFootsteps().getValue());
          }
       }
    }
@@ -180,12 +175,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             if (ImGui.button(labels.get(side.getPascalCaseName())))
                userAddedFootstep.set(side);
          }
-         ImGui.sameLine();
-         ImGui.text("Remove:");
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Last")))
+         if (!getState().getFootsteps().isEmpty())
          {
-            userRemovedFootstep.set();
+            ImGui.sameLine();
+            ImGui.text("Remove:");
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Last")))
+            {
+               userRemovedFootstep.set();
+            }
          }
       }
    }

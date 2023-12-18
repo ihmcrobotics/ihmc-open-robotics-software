@@ -7,11 +7,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
-import us.ihmc.communication.crdt.CRDTUnidirectionalString;
+import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -20,7 +19,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalDouble swingDuration;
    private final CRDTUnidirectionalDouble transferDuration;
    private final CRDTUnidirectionalString parentFrameName;
-   private final RecyclingArrayList<FootstepPlanActionFootstepDefinition> footsteps;
+   private final CRDTUnidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> footsteps;
 
    public FootstepPlanActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -29,7 +28,9 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       swingDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.2);
       transferDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.8);
       parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, ReferenceFrame.getWorldFrame().getName());
-      footsteps = new RecyclingArrayList<>(() -> new FootstepPlanActionFootstepDefinition(crdtInfo));
+      footsteps = new CRDTUnidirectionalRecyclingArrayList<>(ROS2ActorDesignation.OPERATOR,
+                                                             crdtInfo,
+                                                             () -> new RecyclingArrayList<>(() -> new FootstepPlanActionFootstepDefinition(crdtInfo)));
    }
 
    @Override
@@ -42,10 +43,10 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       jsonNode.put("parentFrame", parentFrameName.getValue());
 
       ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
-      for (FootstepPlanActionFootstepDefinition footstep : footsteps)
+      for (int i = 0; i < footsteps.getSize(); i++)
       {
          ObjectNode footstepNode = foostepsArrayNode.addObject();
-         footstep.saveToFile(footstepNode);
+         footsteps.getValueReadOnly(i).saveToFile(footstepNode);
       }
    }
 
@@ -58,8 +59,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       transferDuration.setValue(jsonNode.get("transferDuration").asDouble());
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
 
-      footsteps.clear();
-      JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));
+      footsteps.getValue().clear();
+      JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.getValue().add().loadFromFile(footstepNode));
    }
 
    public void toMessage(FootstepPlanActionDefinitionMessage message)
@@ -71,9 +72,9 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       message.setParentFrameName(parentFrameName.toMessage());
 
       message.getFootsteps().clear();
-      for (FootstepPlanActionFootstepDefinition footstep : footsteps)
+      for (int i = 0; i < footsteps.getSize(); i++)
       {
-         footstep.toMessage(message.getFootsteps().add());
+         footsteps.getValueReadOnly(i).toMessage(message.getFootsteps().add());
       }
    }
 
@@ -85,11 +86,16 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       transferDuration.fromMessage(message.getTransferDuration());
       parentFrameName.fromMessage(message.getParentFrameNameAsString());
 
-      footsteps.clear();
-      for (FootstepPlanActionFootstepDefinitionMessage footstepMessage : message.getFootsteps())
+      footsteps.fromMessage(writableList ->
       {
-         footsteps.add().fromMessage(footstepMessage);
-      }
+         if (message.getFootsteps().size() != writableList.size())
+            LogTools.info("%d -> %d".formatted(writableList.size(), message.getFootsteps().size()));
+         writableList.clear();
+         for (FootstepPlanActionFootstepDefinitionMessage footstepMessage : message.getFootsteps())
+         {
+            writableList.add().fromMessage(footstepMessage);
+         }
+      });
    }
 
    public double getSwingDuration()
@@ -127,7 +133,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       return parentFrameName;
    }
 
-   public RecyclingArrayList<FootstepPlanActionFootstepDefinition> getFootsteps()
+   public CRDTUnidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> getFootsteps()
    {
       return footsteps;
    }
