@@ -14,11 +14,9 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -72,7 +70,6 @@ public class RDXArmManager
 
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
-   private final SideDependentList<Double> trajectoryTime = new SideDependentList<>();
 
    private final SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators = new SideDependentList<>();
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
@@ -104,7 +101,6 @@ public class RDXArmManager
          ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames(side);
          desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, armJointNames));
          this.armJointNames.put(side, armJointNames);
-         this.trajectoryTime.put(side, -1.0); // if negative, use default from teleoperation parameters
       }
 
       for (int i = 0; i < PresetArmConfiguration.values.length; i++)
@@ -198,7 +194,6 @@ public class RDXArmManager
 
       desiredRobot.getDesiredFullRobotModel().getRootJoint().setJointConfiguration(syncedRobot.getFullRobotModel().getRootJoint().getJointPose());
       desiredRobot.getDesiredFullRobotModel().updateFrames();
-
    }
 
    public void renderImGuiWidgets()
@@ -323,18 +318,8 @@ public class RDXArmManager
             }
 
             LogTools.info("Sending ArmTrajectoryMessage");
-            ArmTrajectoryMessage armTrajectoryMessage;
-            if (trajectoryTime.get(robotSide) < 0.0)
-            {
-               armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, teleoperationParameters.getTrajectoryTime(), jointAngles);
-            }
-            else
-            {
-               armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime.get(robotSide), jointAngles);
-            }
+            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, teleoperationParameters.getTrajectoryTime(), jointAngles);
             communicationHelper.publishToController(armTrajectoryMessage);
-            // reset trajectory time
-            trajectoryTime.replace(robotSide, -1.0);
          }
          else if (armControlMode == RDXArmControlMode.POSE_WORLD || armControlMode == RDXArmControlMode.POSE_CHEST)
          {
