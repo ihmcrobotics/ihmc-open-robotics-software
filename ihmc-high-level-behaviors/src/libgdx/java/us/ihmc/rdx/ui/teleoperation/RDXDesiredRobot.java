@@ -1,9 +1,13 @@
 package us.ihmc.rdx.ui.teleoperation;
 
+import com.badlogic.gdx.graphics.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.rdx.simulation.scs2.RDXFrameNodePart;
+import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
 import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -38,6 +42,7 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
    private boolean chestShowing = false;
    private final SideDependentList<Boolean> armShowing = new SideDependentList<>(false, false);
    private final SideDependentList<Boolean> legShowing = new SideDependentList<>(false, false);
+   private final SideDependentList<Color> currentArmColors = new SideDependentList<>();
 
    public RDXDesiredRobot(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -187,6 +192,27 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
                getMultiBody().getRigidBodiesToHide().add(legRigidBodyName);
 
          legShowing.put(side, showing);
+      }
+   }
+
+   public void setArmColor(RobotSide side, Color color)
+   {
+      if (currentArmColors.get(side) != color)
+      {
+         OneDoFJointBasics firstArmJoint = desiredFullRobotModel.getArmJoint(side, robotModel.getJointMap().getArmJointNames()[0]);
+         for (RigidBodyBasics body : firstArmJoint.getSuccessor().subtreeIterable())
+         {
+            if (body instanceof RDXRigidBody rdxRigidBody)
+            {
+               if (rdxRigidBody.getVisualGraphicsNode() != null)
+               {
+                  for (RDXFrameNodePart part : rdxRigidBody.getVisualGraphicsNode().getParts())
+                  {
+                     part.getModelInstance().setDiffuseColor(color);
+                  }
+               }
+            }
+         }
       }
    }
 }
