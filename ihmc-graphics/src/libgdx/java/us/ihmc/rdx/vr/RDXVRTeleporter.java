@@ -130,20 +130,22 @@ public class RDXVRTeleporter
 
    private void snapToCameraView(RDXVRContext vrContext)
    {
-      RigidBodyTransform leftToMidCamerasFrameTransform = new RigidBodyTransform(robotCameraReferenceFrames.get(RobotSide.LEFT).getTransformToParent());
-      leftToMidCamerasFrameTransform.getTranslation().addX( (robotCameraReferenceFrames.get(RobotSide.RIGHT).getTransformToParent().getTranslationX() - robotCameraReferenceFrames.get(RobotSide.LEFT).getTransformToParent().getTranslationX()) / 2);
-      leftToMidCamerasFrameTransform.getTranslation().addY( (robotCameraReferenceFrames.get(RobotSide.RIGHT).getTransformToParent().getTranslationY() - robotCameraReferenceFrames.get(RobotSide.LEFT).getTransformToParent().getTranslationY()) / 2);
-      leftToMidCamerasFrameTransform.getTranslation().addZ( (robotCameraReferenceFrames.get(RobotSide.RIGHT).getTransformToParent().getTranslationZ() - robotCameraReferenceFrames.get(RobotSide.LEFT).getTransformToParent().getTranslationZ()) / 2);
+      RigidBodyTransform leftCameraFrameTransform = new RigidBodyTransform(robotCameraReferenceFrames.get(RobotSide.LEFT).getTransformToParent());
+      RigidBodyTransform rightCameraFrameTransform = new RigidBodyTransform(robotCameraReferenceFrames.get(RobotSide.RIGHT).getTransformToParent());
+      RigidBodyTransform leftToMidCamerasFrameTransform = new RigidBodyTransform(leftCameraFrameTransform);
+      rightCameraFrameTransform.getTranslation().sub(leftCameraFrameTransform.getTranslation());
+      rightCameraFrameTransform.getTranslation().scale(0.5);
+      leftToMidCamerasFrameTransform.getTranslation().add(rightCameraFrameTransform.getTranslation());
       ReferenceFrame robotCameraReferenceFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(robotCameraReferenceFrames.get(RobotSide.LEFT).getParent(), leftToMidCamerasFrameTransform);
 
       vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
        {
           xyYawHeadsetToTeleportTransform.setIdentity();
           vrContext.getHeadset().runIfConnected(headset -> // Teleport such that your headset ends up where the robot eyes/cameras are
-                                                {
-                                                   headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
-                                                   xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
-                                                });
+          {
+             headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+             xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+          });
           teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
           teleportIHMCZUpToIHMCZUpWorld.invert();
 
