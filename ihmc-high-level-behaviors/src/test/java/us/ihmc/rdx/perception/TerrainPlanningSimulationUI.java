@@ -774,6 +774,7 @@ public class TerrainPlanningSimulationUI
             steppingL515Simulator.dispose();
             humanoidPerception.destroy();
             humanoidPerceptionUI.destroy();
+            stancePoseSelectionPanel.destroy();
             bytedecoDepthImage.destroy(openCLManager);
             openCLManager.destroy();
          }

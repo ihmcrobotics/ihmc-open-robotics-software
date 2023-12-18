@@ -29,6 +29,10 @@ import java.util.ArrayList;
 public class RDXStancePoseSelectionPanel implements RenderableProvider
 {
    private ModelInstance pickPointSphere;
+
+   private ArrayList<ModelInstance> leftSpheres = new ArrayList<>();
+   private ArrayList<ModelInstance> rightSpheres = new ArrayList<>();
+
    private final FramePose3D latestPose = new FramePose3D(ReferenceFrame.getWorldFrame());
    private final SideDependentList<RDXFootstepGraphic> footstepGraphics;
 
@@ -63,18 +67,6 @@ public class RDXStancePoseSelectionPanel implements RenderableProvider
       //footstepGraphics.get(RobotSide.RIGHT).setPose(poses.get(RobotSide.RIGHT));
    }
 
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      footstepGraphics.get(RobotSide.LEFT).getRenderables(renderables, pool);
-      footstepGraphics.get(RobotSide.RIGHT).getRenderables(renderables, pool);
-
-      if (selectionActive)
-      {
-         pickPointSphere.getRenderables(renderables, pool);
-      }
-   }
-
    public void renderImGuiWidgets()
    {
       boolean panel3DIsHovered = latestInput != null && latestInput.isWindowHovered();
@@ -95,15 +87,6 @@ public class RDXStancePoseSelectionPanel implements RenderableProvider
       Point3DReadOnly pickPointInWorld = input.getGroundPickPointInWorld(0.0f);
       latestPose.getTranslation().set(pickPointInWorld);
 
-      if (terrainMapData != null)
-      {
-         double height = terrainMapData.getHeightInWorld(pickPointInWorld.getX32(), pickPointInWorld.getY32());
-         latestPose.getTranslation().setZ(height);
-      }
-
-      LibGDXTools.toLibGDX(latestPose.getPosition(), pickPointSphere.transform);
-
-      // Adjust footstep yaw while placing with Ctrl + Mouse Scroll Up/Down
       double deltaYaw = 0.0;
       boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
       if (ctrlHeld)
@@ -120,9 +103,40 @@ public class RDXStancePoseSelectionPanel implements RenderableProvider
          if (deltaYaw != 0.0)
          {
             double latestFootstepYaw = latestPose.getRotation().getYaw();
-            latestPose.getOrientation().setToYawOrientation(latestFootstepYaw + deltaYaw);
+            latestPose.getOrientation().setYawPitchRoll(latestFootstepYaw + deltaYaw, 0.0, 0.0);
          }
       }
+
+      if (terrainMapData != null)
+      {
+         double height = terrainMapData.getHeightInWorld(pickPointInWorld.getX32(), pickPointInWorld.getY32());
+         latestPose.getTranslation().setZ(height);
+         SideDependentList<FramePose3D> stancePoses = stancePoseCalculator.getStancePoses(latestPose, terrainMapData);
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            footstepGraphics.get(robotSide).setPose(stancePoses.get(robotSide));
+         }
+
+         ArrayList<FramePose3D> leftPoses = stancePoseCalculator.getLeftPoses();
+         ArrayList<FramePose3D> rightPoses = stancePoseCalculator.getRightPoses();
+
+         if (leftSpheres.isEmpty())
+         {
+            for (int i = 0; i < leftPoses.size(); i++)
+            {
+               leftSpheres.add(RDXModelBuilder.createSphere(0.02f, Color.BLUE));
+               rightSpheres.add(RDXModelBuilder.createSphere(0.02f, Color.RED));
+            }
+         }
+
+         for (int i = 0; i < leftPoses.size(); i++)
+         {
+            LibGDXTools.toLibGDX(leftPoses.get(i).getPosition(), leftSpheres.get(i).transform);
+            LibGDXTools.toLibGDX(rightPoses.get(i).getPosition(), rightSpheres.get(i).transform);
+         }
+      }
+
+      LibGDXTools.toLibGDX(latestPose.getPosition(), pickPointSphere.transform);
 
       if (input.isWindowHovered() & input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
       {
@@ -139,5 +153,44 @@ public class RDXStancePoseSelectionPanel implements RenderableProvider
    private void placeFootstep()
    {
 
+   }
+
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      if (selectionActive)
+      {
+         footstepGraphics.get(RobotSide.LEFT).getRenderables(renderables, pool);
+         footstepGraphics.get(RobotSide.RIGHT).getRenderables(renderables, pool);
+
+         pickPointSphere.getRenderables(renderables, pool);
+
+         for (ModelInstance leftSphere : leftSpheres)
+         {
+            leftSphere.getRenderables(renderables, pool);
+         }
+
+         for (ModelInstance rightSphere : rightSpheres)
+         {
+            rightSphere.getRenderables(renderables, pool);
+         }
+      }
+   }
+
+   public void destroy()
+   {
+      footstepGraphics.get(RobotSide.LEFT).destroy();
+      footstepGraphics.get(RobotSide.RIGHT).destroy();
+      pickPointSphere = null;
+
+      for (ModelInstance leftSphere : leftSpheres)
+      {
+         leftSphere = null;
+      }
+
+      for (ModelInstance rightSphere : rightSpheres)
+      {
+         rightSphere = null;
+      }
    }
 }

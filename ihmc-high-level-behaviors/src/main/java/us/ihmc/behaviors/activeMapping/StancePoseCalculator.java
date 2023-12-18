@@ -34,6 +34,7 @@ public class StancePoseCalculator
 
    public void insertCandidatePoses(ArrayList<FramePose3D> poses, FramePose3D goalPose, RobotSide side)
    {
+      poses.clear();
       float multiplier = side == RobotSide.LEFT ? -1 : 1;
 
       // sample left and right poses around the provided goal pose and check if they are valid in the height map
@@ -66,10 +67,14 @@ public class StancePoseCalculator
       {
          for (FramePose3D rightPose : rightPoses)
          {
-            cost = Math.abs(0.5f - leftPose.getPositionDistance(rightPose));
-
             float heightLeft = terrainMap.getHeightInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32());
             float heightRight = terrainMap.getHeightInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32());
+
+            float contactCostLeft = Math.abs(255.0f - terrainMap.getContactScoreInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32()));
+            float contactCostRight = Math.abs(255.0f - terrainMap.getContactScoreInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32()));
+
+            cost = Math.abs(0.5f - leftPose.getPositionDistance(rightPose));
+            cost += 10.0f * (contactCostLeft + contactCostRight);
 
             leftPose.setZ(heightLeft);
             rightPose.setZ(heightRight);
@@ -84,5 +89,25 @@ public class StancePoseCalculator
       }
 
       return new SideDependentList<>(bestLeftPose, bestRightPose);
+   }
+
+   public ArrayList<FramePose3D> getLeftPoses()
+   {
+      return leftPoses;
+   }
+
+   public ArrayList<FramePose3D> getRightPoses()
+   {
+      return rightPoses;
+   }
+
+   public int getTotalLeftPoses()
+   {
+      return windowSize * windowSize;
+   }
+
+   public int getTotalRightPoses()
+   {
+      return rightPoses.size();
    }
 }
