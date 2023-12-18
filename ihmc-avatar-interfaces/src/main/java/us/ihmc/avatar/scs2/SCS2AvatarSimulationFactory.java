@@ -497,28 +497,52 @@ public class SCS2AvatarSimulationFactory
          }
       }
 
-      // Previously done in estimator thread write
-      if (simulationOutputWriter != null)
+      if (runMultiThreaded.get())
       {
+         // Previously done in estimator thread write
+         if (simulationOutputWriter != null)
+         {
+            estimatorTask.addRunnableOnSchedulerThread(() ->
+            {
+               if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
+                  simulationOutputWriter.writeAfter();
+            });
+         }
+         // Previously done in estimator thread read
+         SensorReader sensorReader = estimatorThread.getSensorReader();
          estimatorTask.addRunnableOnSchedulerThread(() ->
          {
-            if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
-               simulationOutputWriter.writeAfter();
+            long newTimestamp = sensorReader.read(masterContext.getSensorDataContext());
+            masterContext.setTimestamp(newTimestamp);
          });
-      }
-      // Previously done in estimator thread read
-      SensorReader sensorReader = estimatorThread.getSensorReader();
-      estimatorTask.addRunnableOnSchedulerThread(() ->
-      {
-         long newTimestamp = sensorReader.read(masterContext.getSensorDataContext());
-         masterContext.setTimestamp(newTimestamp);
-      });
-      if (simulationOutputWriter != null)
-      {
-         estimatorTask.addRunnableOnSchedulerThread(() ->
+         if (simulationOutputWriter != null)
          {
-            if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
-               simulationOutputWriter.writeBefore(estimatorThread.getHumanoidRobotContextData().getTimestamp());
+            estimatorTask.addRunnableOnSchedulerThread(() ->
+            {
+               if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
+                  simulationOutputWriter.writeBefore(estimatorThread.getHumanoidRobotContextData().getTimestamp());
+            });
+         }
+      }
+      else
+      {
+         // Previously done in estimator thread read
+         SensorReader sensorReader = estimatorThread.getSensorReader();
+         estimatorTask.addCallbackPreTask(() ->
+         {
+            long newTimestamp = sensorReader.read(masterContext.getSensorDataContext());
+            masterContext.setTimestamp(newTimestamp);
+         });
+         estimatorTask.addCallbackPostTask(() ->
+         {
+            if (simulationOutputWriter != null)
+            {
+               if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
+               {
+                  simulationOutputWriter.writeBefore(estimatorThread.getHumanoidRobotContextData().getTimestamp());
+                  simulationOutputWriter.writeAfter();
+               }
+            }
          });
       }
 
@@ -558,7 +582,7 @@ public class SCS2AvatarSimulationFactory
                                                                          builders,
                                                                          100000,
                                                                          robotModel.getEstimatorDT());
-         estimatorTask.addRunnableOnTaskThread(() -> intraprocessYoVariableLogger.update(estimatorThread.getHumanoidRobotContextData().getTimestamp()));
+         estimatorTask.addCallbackPostTask(() -> intraprocessYoVariableLogger.update(estimatorThread.getHumanoidRobotContextData().getTimestamp()));
       }
 
       // If running with server setup the server registries and their updates.
@@ -568,27 +592,38 @@ public class SCS2AvatarSimulationFactory
                                           estimatorThread.getFullRobotModel().getElevator(),
                                           enableSCS1YoGraphics.get() ? estimatorThread.getSCS1YoGraphicsListRegistry() : null,
                                           enableSCS2YoGraphics.get() ? estimatorThread.getSCS2YoGraphics() : null);
-         estimatorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
-                                                                             estimatorThread.getYoRegistry()));
-
+         estimatorTask.addCallbackPostTask(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                         estimatorThread.getYoRegistry()));
          yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(),
                                       enableSCS1YoGraphics.get() ? controllerThread.getSCS1YoGraphicsListRegistry() : null,
                                       enableSCS2YoGraphics.get() ? controllerThread.getSCS2YoGraphics() : null);
-         controllerTask.addRunnableOnTaskThread(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
-                                                                              controllerThread.getYoVariableRegistry()));
+         controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                          controllerThread.getYoVariableRegistry()));
          yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(),
                                       enableSCS1YoGraphics.get() ? stepGeneratorThread.getSCS1YoGraphicsListRegistry() : null,
                                       enableSCS2YoGraphics.get() ? stepGeneratorThread.getSCS2YoGraphics() : null);
-         stepGeneratorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
-                                                                                 stepGeneratorThread.getYoVariableRegistry()));
+         stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                             stepGeneratorThread.getYoVariableRegistry()));
       }
 
       List<MirroredYoVariableRegistry> mirroredRegistries = new ArrayList<>();
-      mirroredRegistries.add(setupWithMirroredRegistry(estimatorThread.getYoRegistry(), estimatorTask, robotController.getYoRegistry()));
-      mirroredRegistries.add(setupWithMirroredRegistry(controllerThread.getYoVariableRegistry(), controllerTask, robotController.getYoRegistry()));
-      mirroredRegistries.add(setupWithMirroredRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorTask, robotController.getYoRegistry()));
-      if (handControlThread != null)
-         mirroredRegistries.add(setupWithMirroredRegistry(handControlThread.getYoVariableRegistry(), handControlTask, robotController.getYoRegistry()));
+      if (runMultiThreaded.get())
+      {
+         mirroredRegistries.add(setupWithMirroredRegistry(estimatorThread.getYoRegistry(), estimatorTask, robotController.getYoRegistry()));
+         mirroredRegistries.add(setupWithMirroredRegistry(controllerThread.getYoVariableRegistry(), controllerTask, robotController.getYoRegistry()));
+         mirroredRegistries.add(setupWithMirroredRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorTask, robotController.getYoRegistry()));
+         if (handControlThread != null)
+            mirroredRegistries.add(setupWithMirroredRegistry(handControlThread.getYoVariableRegistry(), handControlTask, robotController.getYoRegistry()));
+      }
+      else
+      {
+         robotController.getYoRegistry().addChild(estimatorThread.getYoRegistry());
+         robotController.getYoRegistry().addChild(controllerThread.getYoVariableRegistry());
+         robotController.getYoRegistry().addChild(stepGeneratorThread.getYoVariableRegistry());
+         if (handControlThread != null)
+            robotController.getYoRegistry().addChild(handControlThread.getYoVariableRegistry());
+      }
+
       robot.getRegistry().addChild(robotController.getYoRegistry());
       robot.getControllerManager().addController(new Controller()
       {

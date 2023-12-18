@@ -72,9 +72,9 @@ public class SimulatedHandControlTask extends HumanoidRobotControlTask
    }
 
    @Override
-   public void addRunnableOnTaskThread(Runnable runnable)
+   public void addCallbackPostTask(Runnable callback)
    {
-      taskThreadRunnables.add(runnable);
+      taskThreadRunnables.add(callback);
    }
 
    @Override
