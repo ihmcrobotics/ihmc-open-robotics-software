@@ -53,10 +53,10 @@ public class ArmIKSolver
    public static final double GRAVITY = 9.81;
    public static final double GOOD_QUALITY_MAX = 1.0;
    private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 50;
-   private static final double DEFAULT_POSITION_GAIN = 1200.0;
-   private static final double DEFAULT_POSITION_WEIGHT = 20.0;
-   private static final double DEFAULT_ORIENTATION_GAIN = 100.0;
-   private static final double DEFAULT_ORIENTATION_WEIGHT = 1.0;
+   public static final double DEFAULT_POSITION_GAIN = 1200.0;
+   public static final double DEFAULT_POSITION_WEIGHT = 20.0;
+   public static final double DEFAULT_ORIENTATION_GAIN = 100.0;
+   public static final double DEFAULT_ORIENTATION_WEIGHT = 1.0;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final ReferenceFrame armWorldFrame = ReferenceFrame.getWorldFrame();
@@ -266,35 +266,5 @@ public class ArmIKSolver
    public OneDoFJointBasics[] getSolutionOneDoFJoints()
    {
       return workingOneDoFJoints;
-   }
-
-   public void setOrientationGain(double gain)
-   {
-      gains.setOrientationProportionalGains(gain);
-   }
-
-   public void resetOrientationGain()
-   {
-      gains.setOrientationProportionalGains(DEFAULT_ORIENTATION_GAIN);
-   }
-
-   public void setOrientationWeight(double weight)
-   {
-      weightMatrix.setAngularWeights(weight, weight, weight);
-   }
-
-   public void resetOrientationWeight()
-   {
-      weightMatrix.setAngularWeights(DEFAULT_ORIENTATION_WEIGHT, DEFAULT_ORIENTATION_WEIGHT, DEFAULT_ORIENTATION_WEIGHT);
-   }
-
-   public double getDefaultOrientationGain()
-   {
-      return DEFAULT_ORIENTATION_GAIN;
-   }
-
-   public double getDefaultOrientationWeight()
-   {
-      return DEFAULT_ORIENTATION_WEIGHT;
    }
 }
