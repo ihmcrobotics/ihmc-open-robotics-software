@@ -98,9 +98,9 @@ public class RDXVRKinematicsStreamingMode
 
    private final ImBoolean controlArmsOnly = new ImBoolean(false);
    private ReferenceFrame pelvisFrame;
-   private RigidBodyTransform pelvisTransformToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform pelvisTransformToWorld = new RigidBodyTransform();
    private ReferenceFrame chestFrame;
-   private RigidBodyTransform chestTransformToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform chestTransformToWorld = new RigidBodyTransform();
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
    private int leftIndex = -1;
@@ -135,7 +135,8 @@ public class RDXVRKinematicsStreamingMode
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
 
-      for (RobotSide side : RobotSide.values) {
+      for (RobotSide side : RobotSide.values)
+      {
          handFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          controllerFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          handDesiredControlFrames.put(side, new MutableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame()));
@@ -242,7 +243,7 @@ public class RDXVRKinematicsStreamingMode
 
            // NOTE: Implement hand open close for controller trigger button.
            InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-           if (clickTriggerButton.bChanged() && !clickTriggerButton.bState() && controller.getSelectedPick() != null)
+           if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
            { // do not want to close grippers while interacting with the panel
               HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
               sendHandCommand(RobotSide.RIGHT, handConfiguration);
