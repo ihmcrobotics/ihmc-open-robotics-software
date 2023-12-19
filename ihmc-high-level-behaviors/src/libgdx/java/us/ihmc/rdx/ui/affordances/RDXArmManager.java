@@ -318,9 +318,7 @@ public class RDXArmManager
             }
 
             LogTools.info("Sending ArmTrajectoryMessage");
-            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide,
-                                                                                                        teleoperationParameters.getTrajectoryTime(),
-                                                                                                        jointAngles);
+            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, teleoperationParameters.getTrajectoryTime(), jointAngles);
             communicationHelper.publishToController(armTrajectoryMessage);
          }
          else if (armControlMode == RDXArmControlMode.POSE_WORLD || armControlMode == RDXArmControlMode.POSE_CHEST)
@@ -359,6 +357,39 @@ public class RDXArmManager
    public RDXArmControlMode getArmControlMode()
    {
       return armControlMode;
+   }
+
+   public FramePose3D getDesiredHandFramePose(RobotSide side)
+   {
+      if (interactableHands.containsKey(side))
+         return new FramePose3D(interactableHands.get(side).getControlReferenceFrame());
+      else
+         return null;
+   }
+
+   public void setDesiredHandFramePose(RobotSide side, FramePose3D desiredPose)
+   {
+      if (interactableHands.containsKey(side))
+      {
+         interactableHands.get(side).selectInteractable();
+         ReferenceFrame interactableHandFrame = interactableHands.get(side).getPoseGizmo().getGizmoFrame().getParent();
+         desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
+         interactableHands.get(side).getSyncedControlFrame().getTransformToWorldFrame().set(desiredPose);
+         if (!interactableHandFrame.isWorldFrame())
+            desiredPose.changeFrame(interactableHandFrame);
+         interactableHands.get(side).getPoseGizmo().getTransformToParent().set(desiredPose);
+      }
+   }
+
+   public double[] getDesiredJointAngles(RobotSide side)
+   {
+      double[] jointAngles = new double[armJointNames.get(side).length];
+      int i = -1;
+      for (ArmJointName armJoint : armJointNames.get(side))
+      {
+         jointAngles[++i] = desiredRobot.getDesiredFullRobotModel().getArmJoint(side, armJoint).getQ();
+      }
+      return jointAngles;
    }
 
    public SideDependentList<ArmIKSolver> getArmIKSolvers()
