@@ -87,8 +87,7 @@ public class SteppableRegionsCalculator
             throw new RuntimeException("Should never reach this place");
          }
 
-         recursivelyAddBorderNeighbors(unexpandedCell, connections, environmentModel, maxDepth, 0,
-                                       gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
+         recursivelyAddBorderNeighbors(unexpandedCell, connections, environmentModel, maxDepth, 0, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
       }
 
       while (environmentModel.hasUnexpandedInteriorCells())
@@ -137,15 +136,15 @@ public class SteppableRegionsCalculator
    }
 
    private static List<SteppableRegion> createSteppableRegions(ConcaveHullFactoryParameters concaveHullFactoryParameters,
-                                                              PolygonizerParameters polygonizerParameters,
-                                                              SteppableRegionCalculatorParametersReadOnly steppableRegionCalculatorParameters,
-                                                              SteppableRegionDataHolder regionDataHolder,
-                                                              double gridCenterX,
-                                                              double gridCenterY,
-                                                              double gridSizeXY,
-                                                              double gridResolutionXY,
-                                                              int centerIndex,
-                                                              double footYaw)
+                                                               PolygonizerParameters polygonizerParameters,
+                                                               SteppableRegionCalculatorParametersReadOnly steppableRegionCalculatorParameters,
+                                                               SteppableRegionDataHolder regionDataHolder,
+                                                               double gridCenterX,
+                                                               double gridCenterY,
+                                                               double gridSizeXY,
+                                                               double gridResolutionXY,
+                                                               int centerIndex,
+                                                               double footYaw)
    {
       if (regionDataHolder.getMemberCells().size() < steppableRegionCalculatorParameters.getMinCellsInARegion())
          return new ArrayList<>();
@@ -160,9 +159,7 @@ public class SteppableRegionsCalculator
       if (outerRing != null)
          pointsInWorld.addAll(outerRing);
 
-      List<Point2D> interiorPoints = getInteriorPoints(regionDataHolder,
-                                                       steppableRegionCalculatorParameters.getMaxInteriorPointsToInclude(),
-                                                       new Random());
+      List<Point2D> interiorPoints = getInteriorPoints(regionDataHolder, steppableRegionCalculatorParameters.getMaxInteriorPointsToInclude(), new Random());
       if (interiorPoints != null)
          pointsInWorld.addAll(interiorPoints);
 
@@ -180,8 +177,8 @@ public class SteppableRegionsCalculator
 
       ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
       ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
-//      if (polygonizerParameters.getCutNarrowPassage())
-//         concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
+      //      if (polygonizerParameters.getCutNarrowPassage())
+      //         concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
 
       return createSteppableRegions(pose,
                                     concaveHullCollection,
@@ -268,19 +265,12 @@ public class SteppableRegionsCalculator
                                                            .parallelStream()
                                                            .map(hull -> createSteppableRegion(transformToWorld, hull, footYaw))
                                                            .toList();
-      HeightMapData regionHeightMap = createHeightMapForRegion(regionDataHolder,
-                                                               gridCenterX,
-                                                               gridCenterY,
-                                                               gridSizeXY,
-                                                               gridResolutionXY,
-                                                               centerIndex);
+      HeightMapData regionHeightMap = createHeightMapForRegion(regionDataHolder, gridCenterX, gridCenterY, gridSizeXY, gridResolutionXY, centerIndex);
       regions.forEach(region -> region.setLocalHeightMap(regionHeightMap));
       return regions;
    }
 
-   public static SteppableRegion createSteppableRegion(RigidBodyTransformReadOnly transformToWorld,
-                                                       ConcaveHull concaveHull,
-                                                       double footYaw)
+   public static SteppableRegion createSteppableRegion(RigidBodyTransformReadOnly transformToWorld, ConcaveHull concaveHull, double footYaw)
    {
       return new SteppableRegion(transformToWorld, concaveHull.getConcaveHullVertices(), footYaw);
    }
@@ -292,10 +282,7 @@ public class SteppableRegionsCalculator
                                                         double gridResolutionXY,
                                                         int centerIndex)
    {
-      HeightMapData regionHeightMap = new HeightMapData(gridResolutionXY,
-                                                        gridSizeXY,
-                                                        gridCenterX,
-                                                        gridCenterY);
+      HeightMapData regionHeightMap = new HeightMapData(gridResolutionXY, gridSizeXY, gridCenterX, gridCenterY);
 
       for (SteppableCell cell : regionDataHolder.getCells())
       {
@@ -428,7 +415,15 @@ public class SteppableRegionsCalculator
          }
 
          if (neighbor.isBorderCell() && !neighbor.cellHasBeenExpanded() && currentDepth < maxDepth && cellToExpand.cellHasBeenAssigned())
-            recursivelyAddBorderNeighbors(neighbor, connections, environmentModel, maxDepth, currentDepth + 1,gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
+            recursivelyAddBorderNeighbors(neighbor,
+                                          connections,
+                                          environmentModel,
+                                          maxDepth,
+                                          currentDepth + 1,
+                                          gridCenterX,
+                                          gridCenterY,
+                                          gridResolutionXY,
+                                          centerIndex);
       }
    }
 
@@ -443,10 +438,7 @@ public class SteppableRegionsCalculator
       int boundaryConnectionsEncodedAsOnes = connections.getInt(row, col);
       List<NeighborCell> neighbors = collectCellNeighbors(cell, environmentModel);
 
-      return neighbors.stream()
-                      .filter(neighbor -> isConnected(neighbor.getNeighborIndex(), boundaryConnectionsEncodedAsOnes))
-                      .map(NeighborCell::getCell)
-                      .toList();
+      return neighbors.stream().filter(neighbor -> isConnected(neighbor.neighborIndex(), boundaryConnectionsEncodedAsOnes)).map(NeighborCell::cell).toList();
    }
 
    private static List<NeighborCell> collectCellNeighbors(SteppableCell cell, SteppableRegionsEnvironmentModel environmentModel)
@@ -503,25 +495,7 @@ public class SteppableRegionsCalculator
       return maskedValue > 0;
    }
 
-   private static class NeighborCell
+   private record NeighborCell(int neighborIndex, SteppableCell cell)
    {
-      private final int neighborIndex;
-      private final SteppableCell cell;
-
-      public NeighborCell(int neighborIndex, SteppableCell cell)
-      {
-         this.neighborIndex = neighborIndex;
-         this.cell = cell;
-      }
-
-      public int getNeighborIndex()
-      {
-         return neighborIndex;
-      }
-
-      public SteppableCell getCell()
-      {
-         return cell;
-      }
    }
 }
