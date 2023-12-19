@@ -26,7 +26,7 @@ import java.util.function.Function;
 public class SimulationSceneObjectRobotBuilders
 {
    public static final double SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE = 0.01;
-   public static final double TABLE_X = 0.6;
+   public static final double TABLE_X = 0.4;
    public static final double TABLE_Y = -0.25;
    public static final double TABLE_Z = TableModelParameters.TABLE_LEG_LENGTH + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE;
    public static final double TABLE_SURFACE_Z = TableModelParameters.TABLE_LEG_LENGTH + TableModelParameters.TABLE_THICKNESS;
@@ -102,7 +102,7 @@ public class SimulationSceneObjectRobotBuilders
          boxDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0),
                                                                 new Point3D(TABLE_X + 0.15,
                                                                             TABLE_Y + 0.25,
-                                                                            TABLE_SURFACE_Z + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE));
+                                                                            TABLE_SURFACE_Z + 0.16/2 + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE));
          boxDefinition.getInitialSixDoFState().setVelocity(new Vector3D(), new Vector3D());
          return new Robot(boxDefinition, inertialFrame);
       };
