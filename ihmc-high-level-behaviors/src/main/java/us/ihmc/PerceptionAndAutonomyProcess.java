@@ -77,7 +77,7 @@ public class PerceptionAndAutonomyProcess
    private static final BlackflyLensProperties BLACKFLY_LENS = BlackflyLensProperties.BFS_U3_27S5C_FE185C086HA_1;
    private static final ROS2Topic<ImageMessage> BLACKFLY_IMAGE_TOPIC = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT);
 
-   private static final double SCENE_GRAPH_UPDATE_FREQUENCY = 60.0;
+   private static final double SCENE_GRAPH_UPDATE_FREQUENCY = 120.0;
 
    private ROS2DemandGraphNode zedPointCloudDemandNode;
    private ROS2DemandGraphNode zedColorDemandNode;
