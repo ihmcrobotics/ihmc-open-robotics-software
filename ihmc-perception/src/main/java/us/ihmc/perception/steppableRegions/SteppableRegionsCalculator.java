@@ -94,6 +94,9 @@ public class SteppableRegionsCalculator
       {
          // Start assuming we're expanding in a new region
          SteppableCell unexpandedCell = environmentModel.getNextUnexpandedInteriorCell();
+         if (unexpandedCell == null)
+            break;
+
          if (!unexpandedCell.cellHasBeenAssigned())
          {
             SteppableRegionDataHolder region = environmentModel.createNewSteppableRegion();
@@ -104,21 +107,6 @@ public class SteppableRegionsCalculator
       }
 
       environmentModel.getRegions().removeIf(region -> region.getCells().size() < parameters.getMinCellsInARegion());
-
-      for (SteppableCell cell : environmentModel.getAllSteppableCells())
-      {
-         int regionIdExpected = cell.getRegion().regionNumber;
-         if (!cell.isBorderCell())
-         {
-            if (cell.getValidNeighbors().size() != 8)
-               throw new RuntimeException("Bad number of neighbors.");
-         }
-         for (SteppableCell neighbor : cell.getValidNeighbors())
-         {
-            if (regionIdExpected != neighbor.getRegion().regionNumber)
-               throw new RuntimeException("Merging failed!");
-         }
-      }
 
       return environmentModel;
    }
