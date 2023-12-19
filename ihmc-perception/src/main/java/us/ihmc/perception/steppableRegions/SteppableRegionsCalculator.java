@@ -338,7 +338,7 @@ public class SteppableRegionsCalculator
             // this cell is steppable. Also remember the image x-y is switched
             if (steppability.getInt(column, row) == 0)
             {
-               boolean isBorderCell = connections.getInt(column, row) != 255;
+               boolean isBorderCell = connections.getInt(column, row) != 255; // This shows that the cell is not fully connected on all sides.
 
                double z = snappedHeight.getFloat(column, row);
                Vector3D normal = new Vector3D(snappedNormalX.getFloat(column, row), snappedNormalY.getFloat(column, row), snappedNormalZ.getFloat(column, row));
@@ -368,21 +368,28 @@ public class SteppableRegionsCalculator
 
       for (SteppableCell neighbor : collectConnectedCellNeighbors(cellToExpand, environmentModel, connections))
       {
-
          if (neighbor.cellHasBeenAssigned())
          {
+            // The neighboring cell that we're connected to has already been assigned to another region. Since these regions are connected, we should merge them.
             SteppableRegionDataHolder neighborRegion = neighbor.getRegion();
             if (cellToExpand.getRegion().mergeRegion(neighborRegion))
+            {
+               // If the regions we're successfully merged, we need to remove the other region from the environment.
+               // The only reason it wouldn't be successful is if they're the same region.
                environmentModel.getRegions().remove(neighborRegion);
+            }
          }
          else
          {
-            // the cell has not been assigned
+            // the cell has not been assigned already, so we can directly add it to the region contained by the parent cell.
             cellToExpand.getRegion().addCell(neighbor, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
          }
 
-         if (!neighbor.cellHasBeenExpanded() && currentDepth < maxDepth && cellToExpand.cellHasBeenAssigned())
+         if (!neighbor.cellHasBeenExpanded() && currentDepth < maxDepth)
          {
+            if (!cellToExpand.cellHasBeenAssigned())
+               throw new RuntimeException("Somehow the assignment operation failed.");
+
             recursivelyAddNeighbors(neighbor,
                                     connections,
                                     environmentModel,
@@ -437,7 +444,11 @@ public class SteppableRegionsCalculator
             }
          }
 
-         if (neighbor.isBorderCell() && !neighbor.cellHasBeenExpanded() && currentDepth < maxDepth && cellToExpand.cellHasBeenAssigned())
+         if (neighbor.isBorderCell() && !neighbor.cellHasBeenExpanded() && currentDepth < maxDepth)
+         {
+            if (!cellToExpand.cellHasBeenExpanded())
+               throw new RuntimeException("The parent cell hasn't been assigned.");
+
             recursivelyAddBorderNeighbors(neighbor,
                                           connections,
                                           environmentModel,
@@ -447,33 +458,31 @@ public class SteppableRegionsCalculator
                                           gridCenterY,
                                           gridResolutionXY,
                                           centerIndex);
+         }
       }
    }
 
-   private static List<SteppableCell> collectConnectedCellNeighbors(SteppableCell cell,
-                                                                    SteppableRegionsEnvironmentModel environmentModel,
-                                                                    BytedecoImage connections)
+   /**
+    * This collects a list of all the cells that are in a circle around {@param cell}, as long as they are contained within the "environment". It does not
+    * check for connection.
+    */
+   private static List<SteppableCell> collectConnectedCellNeighbors(SteppableCell cell, SteppableRegionsEnvironmentModel environmentModel, BytedecoImage connections)
    {
+      List<SteppableCell> cellNeighbors = new ArrayList<>();
       int cellsPerSide = environmentModel.getCellsPerSide();
+
+      // FIXME no clue if this is right
       int row = cellsPerSide - cell.getXIndex() - 1;
       int col = cellsPerSide - cell.getYIndex() - 1;
 
       int boundaryConnectionsEncodedAsOnes = connections.getInt(row, col);
-      List<NeighborCell> neighbors = collectCellNeighbors(cell, environmentModel);
 
-      return neighbors.stream().filter(neighbor -> isConnected(neighbor.neighborIndex(), boundaryConnectionsEncodedAsOnes)).map(NeighborCell::cell).toList();
-   }
-
-   private static List<NeighborCell> collectCellNeighbors(SteppableCell cell, SteppableRegionsEnvironmentModel environmentModel)
-   {
-      List<NeighborCell> cellNeighbors = new ArrayList<>();
-      int cellsPerSide = environmentModel.getCellsPerSide();
-
-      int counter = 0;
+      int neighborId = 0;
       for (int x_offset = -1; x_offset <= 1; x_offset++)
       {
          for (int y_offset = -1; y_offset <= 1; y_offset++)
          {
+            // we don't want to increment here, because this doesn't count.
             if (x_offset == 0 && y_offset == 0)
                continue;
 
@@ -483,20 +492,18 @@ public class SteppableRegionsCalculator
 
             if (neighborX < 0 || neighborY < 0 || neighborX >= cellsPerSide || neighborY >= cellsPerSide)
             {
-               counter++;
+               // increment the neighbor id for the next time through.
+               neighborId++;
                continue;
             }
 
             SteppableCell neighbor = environmentModel.getCellAt(neighborX, neighborY);
-            if (neighbor == null)
+            if (neighbor != null && isConnected(neighborId, boundaryConnectionsEncodedAsOnes))
             {
-               counter++;
-               continue;
+               cellNeighbors.add(neighbor);
             }
 
-            cellNeighbors.add(new NeighborCell(counter, neighbor));
-
-            counter++;
+            neighborId++;
          }
       }
 
@@ -516,9 +523,5 @@ public class SteppableRegionsCalculator
       int mask = (1 << counter);
       int maskedValue = mask & connectionValue;
       return maskedValue > 0;
-   }
-
-   private record NeighborCell(int neighborIndex, SteppableCell cell)
-   {
    }
 }
