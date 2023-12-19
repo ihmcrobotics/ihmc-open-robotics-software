@@ -59,7 +59,7 @@ public class SteppableRegionsEnvironmentModel
       return !unexpandedBorderCellsInTheEnvironment.isEmpty();
    }
 
-   public SteppableCell getNextUnexpandedInteriorCell()
+   public SteppableCell getNextUnexpandedCell()
    {
       while (activeRowIndex < cellsPerSide)
       {
@@ -74,10 +74,13 @@ public class SteppableRegionsEnvironmentModel
                cellVisitedMatrix.set(activeRowIndex, activeColumnIndex, 1.0);
                SteppableCell cell = steppableCellsGrid[activeRowIndex][activeColumnIndex];
                cell.setCellHasBeenExpanded(true);
+               activeColumnIndex++;
                return cell;
             }
+            // it's either unused (i.e. null) or we've already searched here, so advance to the next column.
             activeColumnIndex++;
          }
+         // advance to the next row.
          activeRowIndex++;
          activeColumnIndex = 0;
       }

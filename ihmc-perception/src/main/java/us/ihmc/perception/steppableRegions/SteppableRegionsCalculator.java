@@ -93,7 +93,7 @@ public class SteppableRegionsCalculator
       while (environmentModel.hasUnexpandedInteriorCells())
       {
          // Start assuming we're expanding in a new region
-         SteppableCell unexpandedCell = environmentModel.getNextUnexpandedInteriorCell();
+         SteppableCell unexpandedCell = environmentModel.getNextUnexpandedCell();
          if (unexpandedCell == null)
             break;
 
