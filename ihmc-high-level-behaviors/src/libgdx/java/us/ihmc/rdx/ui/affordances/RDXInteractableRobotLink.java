@@ -16,6 +16,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
@@ -44,7 +45,7 @@ public class RDXInteractableRobotLink
    private RDXInteractableHighlightModel highlightModel;
    private boolean modified = false;
    private RDXSelectablePose3DGizmo selectablePose3DGizmo;
-   private Runnable onSpacePressed;
+   private Runnable actionExecutor;
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private final SideDependentList<Boolean> isVRHovering = new SideDependentList<>(false, false);
@@ -166,7 +167,7 @@ public class RDXInteractableRobotLink
                   controller.setAButtonText("Execute");
                   if (aButton.bState() && aButton.bChanged())
                   {
-                     onSpacePressed.run();
+                     actionExecutor.run();
                   }
                   if (bButton.bState() && bButton.bChanged())
                   {
@@ -227,7 +228,7 @@ public class RDXInteractableRobotLink
 
       if (selectablePose3DGizmo.isSelected() && executeMotionKeyPressed)
       {
-         onSpacePressed.run();
+         actionExecutor.run();
       }
       return becomesModified;
    }
@@ -241,22 +242,22 @@ public class RDXInteractableRobotLink
       ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Modified"), !selectablePose3DGizmo.getSelected().get() && modified))
       {
-         selectablePose3DGizmo.getSelected().set(false);
-         if (!modified)
-         {
-            becomesModified.set();
-            modified = true;
-         }
+         setSelected(false);
       }
       ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Selected"), selectablePose3DGizmo.getSelected().get()))
       {
-         selectablePose3DGizmo.getSelected().set(true);
-         if (!modified)
-         {
-            becomesModified.set();
-            modified = true;
-         }
+         setSelected(true);
+      }
+   }
+
+   private void setSelected(boolean value)
+   {
+      selectablePose3DGizmo.getSelected().set(value);
+      if (!modified)
+      {
+         becomesModified.set();
+         modified = true;
       }
    }
 
@@ -315,9 +316,9 @@ public class RDXInteractableRobotLink
       return becomesModified;
    }
 
-   public void setOnSpacePressed(Runnable onSpacePressed)
+   public void setActionExecutor(Runnable actionExecutor)
    {
-      this.onSpacePressed = onSpacePressed;
+      this.actionExecutor = actionExecutor;
    }
 
    public void addAdditionalRobotCollidable(RDXRobotCollidable robotCollidable)
@@ -333,5 +334,28 @@ public class RDXInteractableRobotLink
    public Notification getGizmoModifiedByUser()
    {
       return selectablePose3DGizmo.getPoseGizmo().getGizmoModifiedByUser();
+   }
+
+   public RDXPose3DGizmo getPoseGizmo()
+   {
+      return selectablePose3DGizmo.getPoseGizmo();
+   }
+
+   public ReferenceFrame getSyncedControlFrame()
+   {
+      return syncedControlFrame;
+   }
+
+   public void selectInteractable()
+   {
+      setSelected(true);
+   }
+
+   public void executeAction()
+   {
+      if (modified)
+      {
+         actionExecutor.run();
+      }
    }
 }
