@@ -310,6 +310,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     bool failed = false;
     int snap_result = VALID;
 
+    // Fixme THIS ARGUABLy should never happen
     if (n < 0.0001f)
     {
         snap_result = SNAP_FAILED;

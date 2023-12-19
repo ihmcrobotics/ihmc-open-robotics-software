@@ -20,6 +20,7 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXImagePanel;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
@@ -41,6 +42,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
    private RDXRapidRegionsUI rapidRegionsUI;
    private RDXRemoteHeightMapPanel heightMapUI;
+
+   private RDXStoredPropertySetTuner steppableRegionsParameterTuner;
 
    private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
 
@@ -287,6 +290,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          ImGui.unindent();
       }
 
+      steppableRegionsParameterTuner.renderImGuiWidgets();
+
       if (ImGui.collapsingHeader("Map Regions", mapRegionsCollapsedHeader))
       {
          ImGui.indent();
@@ -376,6 +381,10 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
                                                           humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage().cols(),
                                                           humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage().rows(),
                                                           RDXImagePanel.FLIP_Y);
+
+         steppableRegionsParameterTuner = new RDXStoredPropertySetTuner(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionParameters().getTitle());
+         steppableRegionsParameterTuner.create(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionParameters(), true);
+
          addChild(localHeightMapPanel.getImagePanel());
          addChild(croppedHeightMapPanel.getImagePanel());
          addChild(snapNormalZMapPanel.getImagePanel());
