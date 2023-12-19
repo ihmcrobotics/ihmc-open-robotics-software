@@ -193,4 +193,9 @@ public class RDXStancePoseSelectionPanel implements RenderableProvider
          rightSphere = null;
       }
    }
+
+   public boolean isSelectionActive()
+   {
+      return selectionActive;
+   }
 }

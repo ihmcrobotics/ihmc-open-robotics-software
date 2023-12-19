@@ -72,27 +72,27 @@
     "upperBound" : 12
   },
   "Sided yaw offset" : {
-    "value" : 0.66028,
+    "value" : 0.465935,
     "lowerBound" : 0.0,
     "upperBound" : 3.14
   },
   "Search yaw band" : {
-    "value" : 0.358857,
+    "value" : 0.332715,
     "lowerBound" : 0.0,
     "upperBound" : 3.14
   },
   "Search inner radius" : {
-    "value" : 0.204061,
+    "value" : 0.3,
     "lowerBound" : 0.0,
     "upperBound" : 0.3
   },
   "Search outer radius" : {
-    "value" : 0.556122,
+    "value" : 0.751825,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Search skip size" : {
-    "value" : 2,
+    "value" : 3,
     "lowerBound" : 0,
     "upperBound" : 10
   },

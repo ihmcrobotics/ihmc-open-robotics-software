@@ -26,6 +26,7 @@ public class MonteCarloFootstepPlanner
 
    private boolean planning = false;
    private int uniqueNodeId = 0;
+   private int cellsPerMeter = 50;
 
    public MonteCarloFootstepPlanner(MonteCarloFootstepPlannerParameters parameters)
    {
@@ -37,19 +38,20 @@ public class MonteCarloFootstepPlanner
    public FootstepPlan generateFootstepPlan(MonteCarloFootstepPlannerRequest request)
    {
       this.request = request;
-      statistics.startTotalTime();
-      if (root == null)
-      {
-         Point2D position = new Point2D(request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getX() * 50,
-                                        request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getY() * 50);
-         float yaw = (float) -request.getStartFootPoses().get(RobotSide.LEFT).getYaw();
-         Point3D state = new Point3D(position.getX(), position.getY(), yaw);
-         root = new MonteCarloFootstepNode(state, null, RobotSide.LEFT, uniqueNodeId++);
-      }
 
       planning = true;
       debugger.setRequest(request);
       debugger.refresh(request.getTerrainMapData());
+      statistics.startTotalTime();
+
+      if (root == null)
+      {
+         Point2D position = new Point2D(request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getX() * cellsPerMeter,
+                                        request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getY() * cellsPerMeter);
+         float yaw = (float) request.getStartFootPoses().get(RobotSide.LEFT).getYaw();
+         Point3D state = new Point3D(position.getX(), position.getY(), yaw);
+         root = new MonteCarloFootstepNode(state, null, RobotSide.LEFT, uniqueNodeId++);
+      }
 
       for (int i = 0; i < parameters.getNumberOfIterations(); i++)
       {
@@ -59,7 +61,7 @@ public class MonteCarloFootstepPlanner
       FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root, request);
 
       statistics.stopTotalTime();
-      statistics.setNodesPerLayerString(MonteCarloPlannerTools.getLayerCountsString(root));
+      statistics.setLayerCountsString(MonteCarloPlannerTools.getLayerCountsString(root));
       statistics.logToFile(false, true);
 
       planning = false;
@@ -127,21 +129,21 @@ public class MonteCarloFootstepPlanner
          MonteCarloFootstepNode newState = (MonteCarloFootstepNode) newStateObj;
          double score = MonteCarloPlannerTools.scoreFootstepNode(node, newState, request, parameters);
 
-         //if (node.getLevel() == 0)
-         //{
-         //   debugger.plotNodes(availableStates);
-         //   //LogTools.info(String.format("Previous: %d, %d, %.2f, Node: %d, %d, %.2f, Action: %d, %d, %.2f, Score: %.2f",
-         //   //                            (int) node.getState().getX(),
-         //   //                            (int) node.getState().getY(),
-         //   //                            node.getState().getZ(),
-         //   //                            (int) newState.getState().getX(),
-         //   //                            (int) newState.getState().getY(),
-         //   //                            newState.getState().getZ(),
-         //   //                            (int) (newState.getState().getX() - node.getState().getX()),
-         //   //                            (int) (newState.getState().getY() - node.getState().getY()),
-         //   //                            newState.getState().getZ() - node.getState().getZ(),
-         //   //                            score));
-         //}
+         if (node.getLevel() == 0)
+         {
+            debugger.plotNodes(availableStates);
+            //LogTools.info(String.format("Previous: %d, %d, %.2f, Node: %d, %d, %.2f, Action: %d, %d, %.2f, Score: %.2f",
+            //                            (int) node.getState().getX(),
+            //                            (int) node.getState().getY(),
+            //                            node.getState().getZ(),
+            //                            (int) newState.getState().getX(),
+            //                            (int) newState.getState().getY(),
+            //                            newState.getState().getZ(),
+            //                            (int) (newState.getState().getX() - node.getState().getX()),
+            //                            (int) (newState.getState().getY() - node.getState().getY()),
+            //                            newState.getState().getZ() - node.getState().getZ(),
+            //                            score));
+         }
 
          if (node.getLevel() < parameters.getMaxTreeDepth() && score > parameters.getInitialValueCutoff())
          {
@@ -229,9 +231,9 @@ public class MonteCarloFootstepPlanner
       if (request == null)
          root = new MonteCarloFootstepNode(new Point3D(), null, RobotSide.LEFT, uniqueNodeId++);
       else
-         root = new MonteCarloFootstepNode(new Point3D(request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getX() * 50,
-                                                       request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getY() * 50,
-                                                       -request.getStartFootPoses().get(RobotSide.LEFT).getYaw()),
+         root = new MonteCarloFootstepNode(new Point3D(request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getX() * cellsPerMeter,
+                                                       request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getY() * cellsPerMeter,
+                                                       request.getStartFootPoses().get(RobotSide.LEFT).getYaw()),
                                            null,
                                            RobotSide.LEFT,
                                            uniqueNodeId++);

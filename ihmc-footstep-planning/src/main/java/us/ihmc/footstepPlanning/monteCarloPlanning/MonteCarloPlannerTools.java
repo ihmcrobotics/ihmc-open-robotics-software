@@ -311,34 +311,29 @@ public class MonteCarloPlannerTools
    {
       List<MonteCarloTreeNode> path = new ArrayList<>();
       MonteCarloPlannerTools.getOptimalPath(root, path);
-
-      int offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * 50);
-      int offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * 50);
+      LogTools.info("Optimal Path Size: {}", path.size());
 
       FootstepPlan footstepPlan = new FootstepPlan();
       for (MonteCarloTreeNode node : path)
       {
          MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) node;
 
-         int nodeX = (int) footstepNode.getState().getX();
-         int nodeY = (int) footstepNode.getState().getY();
+         float nodeX = footstepNode.getState().getX32() / 50.0f;
+         float nodeY = footstepNode.getState().getY32() / 50.0f;
+         float nodeZ = request.getTerrainMapData().getHeightInWorld(nodeX, nodeY);
+         float nodeYaw = footstepNode.getState().getZ32();
 
-         int rIndex = nodeX + request.getTerrainMapData().getLocalGridSize() / 2 - offsetX;
-         int cIndex = nodeY + request.getTerrainMapData().getLocalGridSize() / 2 - offsetY;
-
-         // decode height from 16-bit scaled and offset height value stored in OpenCV Mat
-         float cellHeight = request.getTerrainMapData().getHeightLocal(rIndex, cIndex);
-         FramePose3D footstepPose = getFramePose3D(cellHeight, nodeX / 50.0f, nodeY / 50.0f, footstepNode.getState().getZ());
+         FramePose3D footstepPose = getFramePose3D(nodeX, nodeY, nodeZ, nodeYaw);
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
-         LogTools.debug("Footstep Node: {}", footstepPose.getPosition());
+         LogTools.info("Footstep Node -> Position: {}, Yaw: {}", footstepPose.getPosition(), footstepPose.getYaw());
       }
       return footstepPlan;
    }
 
-   private static FramePose3D getFramePose3D(float cellHeight, double xPosition, double yPosition, double yaw)
+   private static FramePose3D getFramePose3D(double xPosition, double yPosition, float zPosition, double yaw)
    {
-      Point3D position = new Point3D(xPosition, yPosition, cellHeight);
+      Point3D position = new Point3D(xPosition, yPosition, zPosition);
       Quaternion orientation = new Quaternion(yaw, 0, 0);
       return new FramePose3D(ReferenceFrame.getWorldFrame(), position, orientation);
    }
@@ -359,7 +354,7 @@ public class MonteCarloPlannerTools
    {
       actions.clear();
 
-      float sidedYawOffset = -side * (float) parameters.getSidedYawOffset();
+      float sidedYawOffset = side * (float) parameters.getSidedYawOffset();
       float adjustedPreviousYaw = yawPrevious + sidedYawOffset;
       float yawMin = adjustedPreviousYaw - (float) parameters.getSearchYawBand();
       float yawMax = adjustedPreviousYaw + (float) parameters.getSearchYawBand();
@@ -370,7 +365,7 @@ public class MonteCarloPlannerTools
          for (int j = -30; j <= 30; j += parameters.getSearchSkipSize())
          {
             float radius = (float) Math.sqrt(i * i + j * j);
-            float yaw = (float) Math.atan2(-j, i);
+            float yaw = (float) Math.atan2(j, i);
 
             //LogTools.info(String.format("(%d, %d) Radius: %.2f (%.2f, %.2f), Yaw: %.2f (%.2f, %.2f)", i, j, radius,
             //                            parameters.getSearchInnerRadius(), parameters.getSearchOuterRadius(), yaw, yawMin, yawMax));

@@ -141,7 +141,7 @@ public class TerrainPlanningSimulationUI
 
    private int autoIncrementCounter = 0;
    private int plansLoggedSoFar = 0;
-   private int logIndex = 0;
+   private int logIndex = 22;
    private boolean planLogged = false;
    private boolean initialized = false;
    private boolean sidednessBit = false;
@@ -279,12 +279,10 @@ public class TerrainPlanningSimulationUI
             stancePoseSelectionPanel.update(goalPose.get(RobotSide.LEFT), loadedMapData);
             stancePoseSelectionPanel.renderImGuiWidgets();
 
-            if (loadedMapData != null)
-            {
-               monteCarloFootstepPlanner.getDebugger().refresh(loadedMapData);
-            }
-            monteCarloFootstepPlanner.getDebugger().plotFootPoses(stancePoseCalculator.getBestPoses());
-            monteCarloFootstepPlanner.getDebugger().display(1);
+            //if (loadedMapData != null && !footstepPlanToRenderNotificaiton.hasValue())
+            //{
+            //   monteCarloFootstepPlanner.getDebugger().refresh(loadedMapData);
+            //}
 
             if (log != null)
             {
@@ -478,10 +476,12 @@ public class TerrainPlanningSimulationUI
                executorService.clearTaskQueue();
                executorService.submit(() ->
                  {
+                    FootstepPlan plan = null;
+
                     if (USE_EXTERNAL_HEIGHT_MAP && log != null)
                     {
                        MonteCarloFootstepPlannerRequest request = createMonteCarloFootstepPlannerRequest(loadedMapData, log);
-                       FootstepPlan plan = planFootstepsMonteCarlo(request, reset);
+                       plan = planFootstepsMonteCarlo(request, reset);
                        footstepPlanToRenderNotificaiton.set(plan);
                     }
                     else if (!USE_EXTERNAL_HEIGHT_MAP)
@@ -491,9 +491,18 @@ public class TerrainPlanningSimulationUI
                        request.setTerrainMapData(terrainMap);
                        //setStartAndGoalFootPosesWithSliders(request);
                        setStartAndGoalFootPosesFromSimulation(request, cameraZUpFrame.getTransformToWorldFrame());
-                       FootstepPlan plan = planFootstepsMonteCarlo(request, reset);
+                       plan = planFootstepsMonteCarlo(request, reset);
                        footstepPlanToRenderNotificaiton.set(plan);
                     }
+
+                    if (plan != null)
+                        monteCarloFootstepPlanner.getDebugger().plotFootstepPlan(plan);
+
+                    if (stancePoseSelectionPanel.isSelectionActive())
+                    {
+                       monteCarloFootstepPlanner.getDebugger().plotFootPoses(stancePoseCalculator.getBestPoses());
+                    }
+                    monteCarloFootstepPlanner.getDebugger().display(1);
                  });
             }
          }
@@ -634,8 +643,6 @@ public class TerrainPlanningSimulationUI
 
          public FootstepPlan planFootstepsMonteCarlo(MonteCarloFootstepPlannerRequest request, boolean reset)
          {
-            LogTools.warn("Start: {}, Goal: {}, Origin: {}", request.getStartFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.LEFT),
-                           request.getTerrainMapData().getSensorOrigin());
             long timeStart = System.nanoTime();
 
             if (reset)
@@ -643,18 +650,15 @@ public class TerrainPlanningSimulationUI
                monteCarloFootstepPlanner.reset(request);
             }
 
+            LogTools.warn("Planning Now");
             FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(request);
-            long timeEnd = System.nanoTime();
 
+            long timeEnd = System.nanoTime();
             LogTools.info(String.format("Total Time: %.3f ms, Plan Size: %d, Visited: %d, Layer Counts: %s",
                                         (timeEnd - timeStart) / 1e6,
                                         plan.getNumberOfSteps(),
                                         monteCarloFootstepPlanner.getVisitedNodes().size(),
                                         MonteCarloPlannerTools.getLayerCountsString(monteCarloFootstepPlanner.getRoot())));
-
-            monteCarloFootstepPlanner.getDebugger().plotFootstepPlan(plan);
-            monteCarloFootstepPlanner.getDebugger().display(1);
-
             return plan;
          }
 

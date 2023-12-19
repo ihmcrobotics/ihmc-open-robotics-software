@@ -212,7 +212,7 @@ public class MonteCarloFootstepPlannerStatistics
       }
    }
 
-   public void setNodesPerLayerString(String nodesPerLayerString)
+   public void setLayerCountsString(String nodesPerLayerString)
    {
       this.nodesPerLayerString = nodesPerLayerString;
    }
