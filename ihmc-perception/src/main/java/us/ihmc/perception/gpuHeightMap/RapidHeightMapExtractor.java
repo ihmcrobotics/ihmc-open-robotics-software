@@ -18,6 +18,7 @@ import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
+import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersBasics;
 import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
 import us.ihmc.perception.steppableRegions.data.SteppableCell;
 import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
@@ -37,16 +38,6 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
  * */
 public class RapidHeightMapExtractor
 {
-   private static final double footSize = 0.22;
-   private static final double distanceFromCliffTops = 0.01;
-   private static final double distanceFromCliffBottoms = 0.04;
-   private static final double cliffStartHeightToAvoid = 0.08;
-   private static final double cliffEndHeightToAvoid = 1.2;
-   private static final double minSupportAreaFraction = 0.7;
-   private static final double minSnapHeightThreshold = 0.03;
-   private static final double snapHeightThresholdAtSearchEdge = 0.06;
-   private static final double inequalityAcvitationSlope =  50000.0;
-
    private int mode = 1; // 0 -> Ouster, 1 -> Realsense
    private float gridOffsetX;
    private int centerIndex;
@@ -346,16 +337,16 @@ public class RapidHeightMapExtractor
       snappingParametersBuffer.setParameter((float) cropCenterIndex);
       snappingParametersBuffer.setParameter((float) parameters.getHeightScaleFactor());
       snappingParametersBuffer.setParameter((float) parameters.getHeightOffset());
-      snappingParametersBuffer.setParameter((float) footSize);
-      snappingParametersBuffer.setParameter((float) footSize);
-      snappingParametersBuffer.setParameter((float) distanceFromCliffTops);
-      snappingParametersBuffer.setParameter((float) distanceFromCliffBottoms);
-      snappingParametersBuffer.setParameter((float) cliffStartHeightToAvoid);
-      snappingParametersBuffer.setParameter((float) cliffEndHeightToAvoid);
-      snappingParametersBuffer.setParameter((float) minSupportAreaFraction);
-      snappingParametersBuffer.setParameter((float) minSnapHeightThreshold);
-      snappingParametersBuffer.setParameter((float) snapHeightThresholdAtSearchEdge);
-      snappingParametersBuffer.setParameter((float) inequalityAcvitationSlope);
+      snappingParametersBuffer.setParameter((float) this.parameters.getFootLength());
+      snappingParametersBuffer.setParameter((float) this.parameters.getFootWidth());
+      snappingParametersBuffer.setParameter((float) this.parameters.getDistanceFromCliffTops());
+      snappingParametersBuffer.setParameter((float) this.parameters.getDistanceFromCliffBottoms());
+      snappingParametersBuffer.setParameter((float) this.parameters.getCliffStartHeightToAvoid());
+      snappingParametersBuffer.setParameter((float) this.parameters.getCliffEndHeightToAvoid());
+      snappingParametersBuffer.setParameter((float) this.parameters.getMinSupportAreaFraction());
+      snappingParametersBuffer.setParameter((float) this.parameters.getMinSnapHeightThreshold());
+      snappingParametersBuffer.setParameter((float) this.parameters.getSnapHeightThresholdAtSearchEdge());
+      snappingParametersBuffer.setParameter((float) this.parameters.getInequalityActivationSlope());
 
       snappingParametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
@@ -670,5 +661,10 @@ public class RapidHeightMapExtractor
    public static HeightMapParameters getHeightMapParameters()
    {
       return heightMapParameters;
+   }
+
+   public SteppableRegionCalculatorParametersBasics getSteppableRegionParameters()
+   {
+      return parameters;
    }
 }
