@@ -125,6 +125,12 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             state.getGoalChestToWorldTransform().getValue()
                  .set(concurrentChestOrientationAction.getState().getChestFrame().getReferenceFrame().getTransformToRoot());
          }
+         else if (concurrentChestOrientationAction == null)
+         {
+            // FIXME We are ignoring this case for now, just add a pelvis pose to get the desired result
+            //   We need to switch to a proper whole body action node
+            state.getGoalChestToWorldTransform().getValue().set(syncedRobot.getReferenceFrames().getChestFrame().getTransformToRoot());
+         }
          else // Combined case
          {
             concurrentChestOrientationAction.getState().update(); // Ensure state's frames are initialized
