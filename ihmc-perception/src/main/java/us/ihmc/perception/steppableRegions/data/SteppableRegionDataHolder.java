@@ -1,6 +1,8 @@
 package us.ihmc.perception.steppableRegions.data;
 
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -22,15 +24,10 @@ public class SteppableRegionDataHolder
    private int lastRingNumber = -1;
 
    private final List<SteppableCell> memberCells = new ArrayList<>();
-   private final List<Point3DReadOnly> memberPoints = new ArrayList<>();
+   private final List<Point2DReadOnly> memberPoints = new ArrayList<>();
    private final List<SteppableBorderRing> borderCellRings = new ArrayList<>();
 
-   private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
-
-   private final Point3D regionCentroid = new Point3D();
-   private final Vector3D regionNormal = new Vector3D();
-
-   private final Plane3D plane = new Plane3D();
+   private final Point2D regionCentroid = new Point2D();
 
    private int minX = Integer.MAX_VALUE;
    private int maxX = Integer.MIN_VALUE;
@@ -61,12 +58,12 @@ public class SteppableRegionDataHolder
       borderCellRings.remove(ring);
    }
 
-   public void addCell(SteppableCell cell, double gridCenterX, double gridCenterY, double resolutionXY, int centerIndex, HeightGridContainer heightMapData)
+   public void addCell(SteppableCell cell, double gridCenterX, double gridCenterY, double resolutionXY, int centerIndex)
    {
-      addCell(cell, SteppableRegionsCalculator.convertCellToPoint(cell, gridCenterX, gridCenterY, resolutionXY, centerIndex, heightMapData));
+      addCell(cell, SteppableRegionsCalculator.convertCellToPoint(cell, gridCenterX, gridCenterY, resolutionXY, centerIndex));
    }
 
-   public void addCell(SteppableCell cell, Point3DReadOnly point)
+   public void addCell(SteppableCell cell, Point2DReadOnly point)
    {
       markChanged();
       memberCells.add(cell);
@@ -95,18 +92,11 @@ public class SteppableRegionDataHolder
       return true;
    }
 
-   public Point3DReadOnly getCentroidInWorld()
+   public Point2DReadOnly getCentroidInWorld()
    {
       if (!isPlaneUpToDate)
          updatePlane();
       return regionCentroid;
-   }
-
-   public Vector3DReadOnly getNormalInWorld()
-   {
-      if (!isPlaneUpToDate)
-         updatePlane();
-      return regionNormal;
    }
 
    public Collection<SteppableCell> getCells()
@@ -121,10 +111,16 @@ public class SteppableRegionDataHolder
 
    private void updatePlane()
    {
-      planeFitter.fitPlaneToPoints(memberPoints, plane);
+      double sumX = 0.0, sumY = 0.0;
+      for (Point2DReadOnly memberPoint : memberPoints)
+      {
+         sumX += memberPoint.getX();
+         sumY += memberPoint.getY();
+      }
 
-      regionCentroid.set(plane.getPoint());
-      regionNormal.set(plane.getNormal());
+      // we're setting the centroid to be the average of all the points, which is how centroids works.
+      regionCentroid.set(sumX, sumY);
+      regionCentroid.scale(1.0 / memberPoints.size());
 
       isPlaneUpToDate = true;
    }
@@ -154,7 +150,7 @@ public class SteppableRegionDataHolder
       return memberCells;
    }
 
-   public List<Point3DReadOnly> getMemberPoints()
+   public List<Point2DReadOnly> getMemberPoints()
    {
       return memberPoints;
    }
