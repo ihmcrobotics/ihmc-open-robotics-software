@@ -360,4 +360,9 @@ public class RDXArmManager
    {
       return armControlMode;
    }
+
+   public SideDependentList<ArmIKSolver> getArmIKSolvers()
+   {
+      return armIKSolvers;
+   }
 }

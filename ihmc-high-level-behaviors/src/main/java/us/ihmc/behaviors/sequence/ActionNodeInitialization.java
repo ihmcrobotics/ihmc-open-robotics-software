@@ -65,7 +65,7 @@ public class ActionNodeInitialization
          else
          {
             chestOrientationAction.getDefinition().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
-            syncedRobot.getReferenceFrames().getPelvisZUpFrame()
+            syncedRobot.getReferenceFrames().getChestFrame()
                        .getTransformToDesiredFrame(chestOrientationAction.getDefinition().getChestToParentTransform().getValue(),
                                                    ReferenceFrame.getWorldFrame());
 
