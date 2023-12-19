@@ -18,6 +18,8 @@ public class CenterposeNode extends DetectableSceneNode
    private final RigidBodyTransform interpolatedTransform = new RigidBodyTransform();
    private final FramePose3D lastPose = new FramePose3D(ReferenceFrame.getWorldFrame());
 
+   private int glitchCount;
+
    public CenterposeNode(long id, String name, int markerID, Point3D[] vertices3D, Point3D[] vertices2D)
    {
       super(id, name);
@@ -32,13 +34,31 @@ public class CenterposeNode extends DetectableSceneNode
       FramePose3D detectionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), detectionTransform);
 
       double distance = lastPose.getPositionDistance(detectionPose);
-      double alpha = normalize(distance, 0.001, 1.0);
-      alpha = MathTools.clamp(alpha, 0.001, 0.4);
 
-      interpolatedTransform.interpolate(detectionTransform, alpha);
+      boolean skipUpdate = false;
+      if (distance > 0.5)
+      {
+         if (glitchCount < 5)
+         {
+            skipUpdate = true;
+            glitchCount++;
+         }
+         else
+         {
+            glitchCount = 0;
+         }
+      }
 
-      getNodeToParentFrameTransform().set(interpolatedTransform);
-      getNodeFrame().update();
+      if (!skipUpdate)
+      {
+         double alpha = normalize(distance, 0.001, 1.0);
+         alpha = MathTools.clamp(alpha, 0.001, 0.15);
+
+         interpolatedTransform.interpolate(detectionTransform, alpha);
+
+         getNodeToParentFrameTransform().set(interpolatedTransform);
+         getNodeFrame().update();
+      }
 
       lastPose.set(detectionPose);
    }
