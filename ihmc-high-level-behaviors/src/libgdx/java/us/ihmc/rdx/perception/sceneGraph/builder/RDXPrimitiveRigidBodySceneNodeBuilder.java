@@ -22,9 +22,14 @@ public class RDXPrimitiveRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<R
 
    public RDXPrimitiveRigidBodySceneNode build(PrimitiveRigidBodyShape shape)
    {
+      return build(shape,name.get());
+   }
+
+   public RDXPrimitiveRigidBodySceneNode build(PrimitiveRigidBodyShape shape, String name)
+   {
       long nextID = sceneGraph.getNextID().getAndIncrement();
       PrimitiveRigidBodySceneNode sceneNode = new PrimitiveRigidBodySceneNode(nextID,
-                                                                              name.get(),
+                                                                              name,
                                                                               sceneGraph.getIDToNodeMap(),
                                                                               parent.getID(),
                                                                               new RigidBodyTransform(),
