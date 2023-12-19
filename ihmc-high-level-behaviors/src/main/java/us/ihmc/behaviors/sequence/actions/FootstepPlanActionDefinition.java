@@ -10,7 +10,6 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -88,8 +87,6 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
 
       footsteps.fromMessage(writableList ->
       {
-         if (message.getFootsteps().size() != writableList.size())
-            LogTools.info("%d -> %d".formatted(writableList.size(), message.getFootsteps().size()));
          writableList.clear();
          for (FootstepPlanActionFootstepDefinitionMessage footstepMessage : message.getFootsteps())
          {
