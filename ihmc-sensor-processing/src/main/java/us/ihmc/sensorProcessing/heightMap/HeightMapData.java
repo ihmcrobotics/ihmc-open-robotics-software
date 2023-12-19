@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 import java.util.Arrays;
 
-public class HeightMapData implements HeightGridContainer
+public class HeightMapData
 {
    /* Unordered list of the keys of all occupied cells */
    private TIntArrayList occupiedCells = new TIntArrayList();
@@ -184,7 +184,6 @@ public class HeightMapData implements HeightGridContainer
       return Double.isNaN(height) ? estimatedGroundHeight : height;
    }
 
-   @Override
    public double getHeightAt(int xIndex, int yIndex)
    {
       if (xIndex < 0 || yIndex < 0 || xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
