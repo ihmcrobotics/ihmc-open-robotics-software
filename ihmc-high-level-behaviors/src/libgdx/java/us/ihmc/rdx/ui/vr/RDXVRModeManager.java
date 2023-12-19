@@ -11,14 +11,14 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.motionRetargeting.DefaultRetargetingParameters;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.rdx.imgui.RDX3DSituatedImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDX3DSituatedImGuiPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
-import us.ihmc.rdx.ui.processes.RestartableJavaProcess;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -29,7 +29,6 @@ import java.util.Set;
  */
 public class RDXVRModeManager
 {
-   private ROS2SyncedRobotModel syncedRobot;
    private RDXVRHandPlacedFootstepMode handPlacedFootstepMode;
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
    private RDXJoystickBasedStepping joystickBasedStepping;
@@ -44,18 +43,31 @@ public class RDXVRModeManager
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
+                      ROS2ControllerHelper controllerHelper)
+   {
+      create(baseUI, syncedRobot, controllerHelper, new DefaultRetargetingParameters(), new SceneGraph());
+   }
+
+   public void create(RDXBaseUI baseUI,
+                      ROS2SyncedRobotModel syncedRobot,
                       ROS2ControllerHelper controllerHelper,
-                      SceneGraph sceneGraph,
-                      RestartableJavaProcess kinematicsStreamingToolboxProcess,
                       RetargetingParameters retargetingParameters)
    {
-      this.syncedRobot = syncedRobot;
+      create(baseUI, syncedRobot, controllerHelper, retargetingParameters, new SceneGraph());
+   }
+
+   public void create(RDXBaseUI baseUI,
+                      ROS2SyncedRobotModel syncedRobot,
+                      ROS2ControllerHelper controllerHelper,
+                      RetargetingParameters retargetingParameters,
+                      SceneGraph sceneGraph)
+   {
       handPlacedFootstepMode = new RDXVRHandPlacedFootstepMode();
       handPlacedFootstepMode.create(syncedRobot.getRobotModel(), controllerHelper);
 
       if (syncedRobot.getRobotModel().getRobotVersion().hasBothArms())
       {
-         kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, sceneGraph, kinematicsStreamingToolboxProcess, retargetingParameters);
+         kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, retargetingParameters, sceneGraph);
          kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
       }
 
