@@ -150,7 +150,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          });
          RigidBodyBasics armOnlyMultiBody
                = MultiBodySystemMissingTools.getDetachedCopyOfSubtreeWithElevator(syncedFullRobotModel.getChest(),
-                                                                                  syncedFullRobotModel.getArmJoint(side, firstArmJointName));
+                                                                                  syncedFullRobotModel.getArmJoint(side, firstArmJointName),
+                                                                                  syncedFullRobotModel.getHand(side).getName());
          armMultiBodyGraphics.put(side,
                                   RDXMultiBodySystemFactories.toRDXMultiBodySystem(armOnlyMultiBody, armDefinition, RDXVisualTools.DESIRED_ROBOT_SCALING));
          armMultiBodyGraphics.get(side).getRigidBodiesToHide().add("elevator");
