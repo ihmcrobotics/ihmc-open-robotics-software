@@ -25,6 +25,9 @@ import java.util.Random;
 
 public class SteppableRegionsCalculator
 {
+   private static final int maxRecursionDepth = 500;
+   public enum SnapResult { SNAP_FAILED, CLIFF_TOP, CLIFF_BOTTOM, NOT_ENOUGH_AREA, VALID}
+
    public static SteppableRegionsEnvironmentModel createEnvironmentByMergingCellsIntoRegions(BytedecoImage steppability,
                                                                                              BytedecoImage snappedHeight,
                                                                                              BytedecoImage snappedNormalX,
@@ -69,25 +72,22 @@ public class SteppableRegionsCalculator
       if (steppability.getImageHeight() != steppability.getImageWidth())
          throw new RuntimeException("The input steppability should be square");
 
-      int maxDepth = 500;
       while (environmentModel.hasUnexpandedBorderCells())
       {
-         // Start assuming we're expanding in a new region
          SteppableCell unexpandedCell = environmentModel.getNextUnexpandedBorderCell();
          if (!unexpandedCell.cellHasBeenAssigned())
          {
+            // If this cell hasn't been assigned, we're expanding in a new region. Sometimes, when the depth limit of the search is reached, the cell may have
+            // already been assigned, but never got expanded.
             SteppableRegionDataHolder region = environmentModel.createNewSteppableRegion();
             region.addCell(unexpandedCell, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
 
             SteppableBorderRing borderRing = region.createNewBorderRing();
             borderRing.addCell(unexpandedCell);
          }
-         else
-         {
-            throw new RuntimeException("Should never reach this place");
-         }
 
-         recursivelyAddBorderNeighbors(unexpandedCell, connections, environmentModel, maxDepth, 0, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
+         recursivelyAddBorderNeighbors(unexpandedCell, environmentModel,
+                                       maxRecursionDepth, 0, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
       }
 
       while (environmentModel.hasUnexpandedInteriorCells())
@@ -100,10 +100,25 @@ public class SteppableRegionsCalculator
             region.addCell(unexpandedCell, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
          }
 
-         recursivelyAddNeighbors(unexpandedCell, connections, environmentModel, maxDepth, 0, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
+         recursivelyAddNeighbors(unexpandedCell, environmentModel, maxRecursionDepth, 0, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
       }
 
       environmentModel.getRegions().removeIf(region -> region.getCells().size() < parameters.getMinCellsInARegion());
+
+      for (SteppableCell cell : environmentModel.getAllSteppableCells())
+      {
+         int regionIdExpected = cell.getRegion().regionNumber;
+         if (!cell.isBorderCell())
+         {
+            if (cell.getValidNeighbors().size() != 8)
+               throw new RuntimeException("Bad number of neighbors.");
+         }
+         for (SteppableCell neighbor : cell.getValidNeighbors())
+         {
+            if (regionIdExpected != neighbor.getRegion().regionNumber)
+               throw new RuntimeException("Merging failed!");
+         }
+      }
 
       return environmentModel;
    }
@@ -330,21 +345,32 @@ public class SteppableRegionsCalculator
       {
          for (int y = 0; y < cellsPerSide; y++)
          {
-            if (x == 0 && y == 0)
-               continue;
-
-            int column = cellsPerSide - x - 1;
-            int row = cellsPerSide - y - 1;
             // this cell is steppable. Also remember the image x-y is switched
-            if (steppability.getInt(column, row) == 0)
+            if (steppability.getByteAsInteger(x, y) == SnapResult.VALID.ordinal())
             {
-               boolean isBorderCell = connections.getInt(column, row) != 255; // This shows that the cell is not fully connected on all sides.
+               boolean isBorderCell;
+               int connection = connections.getByteAsInteger(x, y);
 
-               double z = snappedHeight.getFloat(column, row);
-               Vector3D normal = new Vector3D(snappedNormalX.getFloat(column, row), snappedNormalY.getFloat(column, row), snappedNormalZ.getFloat(column, row));
+               if (Integer.bitCount(connection) != 8) // 8 bits is fully connected
+                  isBorderCell = true;
+               else
+                  isBorderCell = false;
+
+               double z = snappedHeight.getFloat(x, y);
+               Vector3D normal = new Vector3D(snappedNormalX.getFloat(x, y), snappedNormalY.getFloat(x, y), snappedNormalZ.getFloat(x, y));
                SteppableCell cell = new SteppableCell(x, y, z, normal, cellsPerSide, isBorderCell);
                steppableRegionsToConvert.addUnexpandedSteppableCell(cell);
             }
+         }
+      }
+
+      for (int x = 0; x < cellsPerSide; x++)
+      {
+         for (int y = 0; y < cellsPerSide; y++)
+         {
+            SteppableCell cell = steppableRegionsToConvert.getCellAt(x, y);
+            if (cell != null)
+               collectConnectedCellNeighbors(cell, steppableRegionsToConvert, connections);
          }
       }
 
@@ -352,7 +378,6 @@ public class SteppableRegionsCalculator
    }
 
    private static void recursivelyAddNeighbors(SteppableCell cellToExpand,
-                                               BytedecoImage connections,
                                                SteppableRegionsEnvironmentModel environmentModel,
                                                int maxDepth,
                                                int currentDepth,
@@ -366,7 +391,7 @@ public class SteppableRegionsCalculator
 
       environmentModel.markCellAsExpanded(cellToExpand);
 
-      for (SteppableCell neighbor : collectConnectedCellNeighbors(cellToExpand, environmentModel, connections))
+      for (SteppableCell neighbor : cellToExpand.getValidNeighbors())
       {
          if (neighbor.cellHasBeenAssigned())
          {
@@ -391,7 +416,6 @@ public class SteppableRegionsCalculator
                throw new RuntimeException("Somehow the assignment operation failed.");
 
             recursivelyAddNeighbors(neighbor,
-                                    connections,
                                     environmentModel,
                                     maxDepth,
                                     currentDepth + 1,
@@ -404,7 +428,6 @@ public class SteppableRegionsCalculator
    }
 
    private static void recursivelyAddBorderNeighbors(SteppableCell cellToExpand,
-                                                     BytedecoImage connections,
                                                      SteppableRegionsEnvironmentModel environmentModel,
                                                      int maxDepth,
                                                      int currentDepth,
@@ -418,27 +441,33 @@ public class SteppableRegionsCalculator
 
       environmentModel.markCellAsExpanded(cellToExpand);
 
-      for (SteppableCell neighbor : collectConnectedCellNeighbors(cellToExpand, environmentModel, connections))
+      for (SteppableCell neighbor : cellToExpand.getValidNeighbors())
       {
          if (neighbor.cellHasBeenAssigned())
          {
             SteppableRegionDataHolder neighborRegion = neighbor.getRegion();
             if (neighbor.isBorderCell())
             {
+               // If the neighbor has already been assigned, and is contained as part of a border ring, those rings should be merged together.
                SteppableBorderRing neighborRing = neighbor.getBorderRing();
                if (cellToExpand.getBorderRing().mergeRing(neighborRing))
+               {
+                  // the only reason that the merge ring operation should fail is if the rings were already the same, so we wouldn't want it to remove.
                   neighborRegion.removeBorderRing(neighborRing);
+               }
             }
 
+            // The neighbor is connected, so the regions are connected, and should be merged together.
             if (cellToExpand.getRegion().mergeRegion(neighborRegion))
                environmentModel.removeRegion(neighborRegion);
          }
          else
          {
-            // the cell has not been assigned
+            // the neighboring cell has not been assigned already. This means we should add it to the current region.
             cellToExpand.getRegion().addCell(neighbor, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
             if (neighbor.isBorderCell())
             {
+               // If the neighboring cell is a border cell, it is part of the border ring.
                cellToExpand.getBorderRing().addCell(neighbor);
                neighbor.setBorderRing(cellToExpand.getBorderRing());
             }
@@ -446,11 +475,7 @@ public class SteppableRegionsCalculator
 
          if (neighbor.isBorderCell() && !neighbor.cellHasBeenExpanded() && currentDepth < maxDepth)
          {
-            if (!cellToExpand.cellHasBeenExpanded())
-               throw new RuntimeException("The parent cell hasn't been assigned.");
-
             recursivelyAddBorderNeighbors(neighbor,
-                                          connections,
                                           environmentModel,
                                           maxDepth,
                                           currentDepth + 1,
@@ -466,29 +491,24 @@ public class SteppableRegionsCalculator
     * This collects a list of all the cells that are in a circle around {@param cell}, as long as they are contained within the "environment". It does not
     * check for connection.
     */
-   private static List<SteppableCell> collectConnectedCellNeighbors(SteppableCell cell, SteppableRegionsEnvironmentModel environmentModel, BytedecoImage connections)
+   private static void collectConnectedCellNeighbors(SteppableCell cell, SteppableRegionsEnvironmentModel environmentModel, BytedecoImage connections)
    {
-      List<SteppableCell> cellNeighbors = new ArrayList<>();
+      List<SteppableCell> cellNeighborsToPack = cell.getValidNeighbors();
       int cellsPerSide = environmentModel.getCellsPerSide();
 
-      // FIXME no clue if this is right
-      int row = cellsPerSide - cell.getXIndex() - 1;
-      int col = cellsPerSide - cell.getYIndex() - 1;
-
-      int boundaryConnectionsEncodedAsOnes = connections.getInt(row, col);
+      int boundaryConnectionsEncodedAsOnes = connections.getByteAsInteger(cell.getXIndex(), cell.getYIndex());
 
       int neighborId = 0;
       for (int x_offset = -1; x_offset <= 1; x_offset++)
       {
          for (int y_offset = -1; y_offset <= 1; y_offset++)
          {
-            // we don't want to increment here, because this doesn't count.
+            // we don't want to increment here, because this doesn't count, since it is the current row
             if (x_offset == 0 && y_offset == 0)
                continue;
 
-            // These are switched because of the difference between coordinates in the height map and image frame
-            int neighborX = cell.getXIndex() - y_offset;
-            int neighborY = cell.getYIndex() - x_offset;
+            int neighborX = cell.getXIndex() + x_offset;
+            int neighborY = cell.getYIndex() + y_offset;
 
             if (neighborX < 0 || neighborY < 0 || neighborX >= cellsPerSide || neighborY >= cellsPerSide)
             {
@@ -500,14 +520,12 @@ public class SteppableRegionsCalculator
             SteppableCell neighbor = environmentModel.getCellAt(neighborX, neighborY);
             if (neighbor != null && isConnected(neighborId, boundaryConnectionsEncodedAsOnes))
             {
-               cellNeighbors.add(neighbor);
+               cellNeighborsToPack.add(neighbor);
             }
 
             neighborId++;
          }
       }
-
-      return cellNeighbors;
    }
 
    public static Point2D convertCellToPoint(SteppableCell cell, double gridCenterX, double gridCenterY, double gridResolutionXY, int centerIndex)

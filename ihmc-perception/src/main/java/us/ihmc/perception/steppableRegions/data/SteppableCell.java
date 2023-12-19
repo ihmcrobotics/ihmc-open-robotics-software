@@ -3,6 +3,9 @@ package us.ihmc.perception.steppableRegions.data;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SteppableCell
 {
    private final int x;
@@ -16,6 +19,8 @@ public class SteppableCell
    private SteppableRegionDataHolder region;
    private boolean cellHasBeenExpanded = false;
    private SteppableBorderRing borderRing = null;
+
+   private final List<SteppableCell> validNeighbors = new ArrayList<>();
 
    public SteppableCell(int x, int y, double z, Vector3DReadOnly normal, int cellsPerSide, boolean isBorderCell)
    {
@@ -94,6 +99,11 @@ public class SteppableCell
    public boolean cellHasBeenExpanded()
    {
       return cellHasBeenExpanded;
+   }
+
+   public List<SteppableCell> getValidNeighbors()
+   {
+      return validNeighbors;
    }
 
    @Override

@@ -65,6 +65,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    *  computed based on terrain inclination and continuity) */
    private RDXBytedecoImagePanel terrainCostImagePanel;
    private RDXBytedecoImagePanel steppableRegionAssignmentMat;
+   private RDXBytedecoImagePanel steppableRegionBordersMat;
+   private RDXBytedecoImagePanel steppabilityConnectionsImage;
 
    /* Image panel to display the feasible contact map (16-bit scalar for distance transform of the terrain cost map, represents safety score
    *  for distance away from boundaries and edges for each cell). For more information on Distance Transform visit:
@@ -169,6 +171,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          croppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage());
          snapNormalZMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSnapNormalZImage().getBytedecoOpenCVMat());
          steppableRegionAssignmentMat.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionAssignmentMat());
+         steppableRegionBordersMat.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionRingMat());
+         steppabilityConnectionsImage.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppabilityConnectionsImage().getBytedecoOpenCVMat());
          internalHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat());
          snappedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppableHeightMapImage().getBytedecoOpenCVMat());
          steppabilityPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppabilityImage().getBytedecoOpenCVMat());
@@ -352,6 +356,14 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
                                                          humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionAssignmentMat().cols(),
                                                          humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionAssignmentMat().rows(),
                                                          RDXImagePanel.FLIP_Y);
+         steppableRegionBordersMat = new RDXBytedecoImagePanel("Region Borders",
+                                                                  humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionRingMat().cols(),
+                                                                  humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionRingMat().rows(),
+                                                                  RDXImagePanel.FLIP_Y);
+         steppabilityConnectionsImage = new RDXBytedecoImagePanel("Region Connections",
+                                                                  humanoidPerception.getRapidHeightMapExtractor().getSteppabilityConnectionsImage().getBytedecoOpenCVMat().cols(),
+                                                                  humanoidPerception.getRapidHeightMapExtractor().getSteppabilityConnectionsImage().getBytedecoOpenCVMat().rows(),
+                                                                  RDXImagePanel.FLIP_Y);
          //sensorCroppedHeightMapPanel = new RDXBytedecoImagePanel("Sensor Cropped Height Map",
          //                                                        humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().cols(),
          //                                                        humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().rows(),
@@ -368,6 +380,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          addChild(croppedHeightMapPanel.getImagePanel());
          addChild(snapNormalZMapPanel.getImagePanel());
          addChild(steppableRegionAssignmentMat.getImagePanel());
+         addChild(steppableRegionBordersMat.getImagePanel());
+         addChild(steppabilityConnectionsImage.getImagePanel());
          //addChild(sensorCroppedHeightMapPanel.getImagePanel());
          addChild(depthImagePanel.getImagePanel());
          addChild(internalHeightMapPanel.getImagePanel());

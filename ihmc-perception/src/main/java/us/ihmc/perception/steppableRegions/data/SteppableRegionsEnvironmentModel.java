@@ -1,5 +1,7 @@
 package us.ihmc.perception.steppableRegions.data;
 
+import org.ejml.data.DMatrixRMaj;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,6 +14,7 @@ public class SteppableRegionsEnvironmentModel
    private final List<SteppableCell> unexpandedInteriorCellsInTheEnvironment = new ArrayList<>();
    private final List<SteppableCell> unexpandedBorderCellsInTheEnvironment = new ArrayList<>();
    private final SteppableCell[][] steppableCellsGrid;
+   private final List<SteppableCell> steppableCells = new ArrayList<>();
    private final int cellsPerSide;
 
    private final List<SteppableRegionDataHolder> steppableRegions = new ArrayList<>();
@@ -85,6 +88,12 @@ public class SteppableRegionsEnvironmentModel
       else
          unexpandedInteriorCellsInTheEnvironment.add(cell);
       steppableCellsGrid[cell.getXIndex()][cell.getYIndex()] = cell;
+      steppableCells.add(cell);
+   }
+
+   public List<SteppableCell> getAllSteppableCells()
+   {
+      return steppableCells;
    }
 
    public SteppableRegionDataHolder createNewSteppableRegion()
