@@ -60,7 +60,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
       if (state.getChestFrame().isChildOfWorld())
       {
          FrameQuaternion frameChestQuaternion = new FrameQuaternion(state.getChestFrame().getReferenceFrame());
-         frameChestQuaternion.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+         frameChestQuaternion.changeFrame(ReferenceFrame.getWorldFrame());
 
          ChestTrajectoryMessage message = new ChestTrajectoryMessage();
          message.getSo3Trajectory()
