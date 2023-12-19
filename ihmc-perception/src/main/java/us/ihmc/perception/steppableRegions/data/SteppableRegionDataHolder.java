@@ -1,16 +1,8 @@
 package us.ihmc.perception.steppableRegions.data;
 
-import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
-import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
-import us.ihmc.sensorProcessing.heightMap.HeightGridContainer;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.Collection;
