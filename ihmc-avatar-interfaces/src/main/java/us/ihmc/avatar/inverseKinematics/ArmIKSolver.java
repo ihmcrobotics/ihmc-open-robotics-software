@@ -51,6 +51,7 @@ public class ArmIKSolver
    /** The gains of the solver depend on this dt, it shouldn't change based on the actual thread scheduled period. */
    public static final double CONTROL_DT = 0.001;
    public static final double GRAVITY = 9.81;
+   public static final double GOOD_QUALITY_MAX = 1.0;
    private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 50;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -89,7 +90,10 @@ public class ArmIKSolver
       sourceOneDoFJoints = FullRobotModelUtils.getArmJoints(sourceFullRobotModel, side, armJointNames);
 
       // We clone a detached chest and single arm for the WBCC to work with. We just want to find arm joint angles.
-      workChest = MultiBodySystemMissingTools.getDetachedCopyOfSubtree(sourceChest, armWorldFrame, sourceFirstArmJoint);
+      workChest = MultiBodySystemMissingTools.getDetachedCopyOfSubtree(sourceChest,
+                                                                       armWorldFrame,
+                                                                       sourceFirstArmJoint,
+                                                                       sourceFullRobotModel.getHand(side).getName());
 
       // Remove fingers
       workHand = MultiBodySystemTools.findRigidBody(workChest, robotModel.getJointMap().getHandName(side));
@@ -249,7 +253,7 @@ public class ArmIKSolver
 
       double totalRobotMass = 0.0; // We don't need this parameter
       quality = solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0);
-      if (quality > 1.0)
+      if (quality > GOOD_QUALITY_MAX)
       {
          LogTools.debug("Bad quality solution: {} Try upping the gains, giving more iteration, or setting a more acheivable goal.", quality);
       }
