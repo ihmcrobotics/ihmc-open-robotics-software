@@ -67,7 +67,7 @@ public class SteppableRegionsCalculator
                                                                                                    connections);
 
       if (steppability.getImageHeight() != steppability.getImageWidth())
-         throw new RuntimeException("Should be square");
+         throw new RuntimeException("The input steppability should be square");
 
       int maxDepth = 500;
       while (environmentModel.hasUnexpandedBorderCells())
