@@ -18,7 +18,13 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
+import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
+import us.ihmc.perception.steppableRegions.SteppableRegionsList;
+import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
 import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -55,6 +61,10 @@ public class RapidHeightMapExtractor
    private int cropCenterIndex;
    private int globalCellsPerAxis;
    public int sequenceNumber = 0;
+
+   private final ConcaveHullFactoryParameters concaveHullParameters = new ConcaveHullFactoryParameters();
+   private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+   private final SteppableRegionCalculatorParameters parameters = new SteppableRegionCalculatorParameters();
 
    private static HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
    private final RigidBodyTransform currentSensorToWorldTransform = new RigidBodyTransform();
@@ -260,8 +270,29 @@ public class RapidHeightMapExtractor
          croppedHeightMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
          //denoisedHeightMap = denoiser.denoiseHeightMap(croppedHeightMapImage, 3.2768f);
 
-         //PerceptionDebugTools.printMat("Cropped Height Map", croppedHeightMapImage, 4);
-         //PerceptionDebugTools.printMat("Cropped Snap Height Map", croppedSnappedMapImage, 4);
+
+         SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.createEnvironmentByMergingCellsIntoRegions(steppabilityImage,
+                                                                                                                              snapHeightImage,
+                                                                                                                              snapNormalXImage,
+                                                                                                                              snapNormalYImage,
+                                                                                                                              snapNormalZImage,
+                                                                                                                              steppabilityConnectionsImage,
+                                                                                                                              parameters,
+                                                                                                                              sensorOrigin.getX(),
+                                                                                                                              sensorOrigin.getY(),
+                                                                                                                              heightMapParameters.getGridResolutionXY(),
+                                                                                                                              cropCenterIndex);
+         double cropWindowSize = cropCenterIndex * getHeightMapParameters().getGridResolutionXY() * 2.0;
+         SteppableRegionsList regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters,
+                                                                                          polygonizerParameters,
+                                                                                          parameters,
+                                                                                          environment,
+                                                                                          sensorOrigin.getX(),
+                                                                                          sensorOrigin.getY(),
+                                                                                          cropWindowSize,
+                                                                                          heightMapParameters.getGridResolutionXY(),
+                                                                                          cropCenterIndex,
+                                                                                          0.0);
 
 
          sequenceNumber++;
