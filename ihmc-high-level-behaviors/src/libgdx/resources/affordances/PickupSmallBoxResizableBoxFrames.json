@@ -1,0 +1,114 @@
+{
+  "name" : "PickupSmallBoxResizableBox",
+  "preGraspFrames" : [ {
+    "side" : "left",
+    "isPoseSet" : false,
+    "x" : -0.161,
+    "y" : 0.2,
+    "z" : 0.072,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -90.0,
+    "yawInDegrees" : 0.0
+  }, {
+    "side" : "right",
+    "isPoseSet" : true,
+    "x" : -0.161,
+    "y" : -0.2,
+    "z" : 0.072,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -90.0,
+    "yawInDegrees" : 0.0
+  }, {
+    "side" : "left",
+    "isPoseSet" : true,
+    "x" : -0.161,
+    "y" : 0.2,
+    "z" : 0.072,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -90.0,
+    "yawInDegrees" : 0.0
+  }, {
+    "side" : "right",
+    "isPoseSet" : false,
+    "x" : -0.161,
+    "y" : -0.2,
+    "z" : 0.072,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -90.0,
+    "yawInDegrees" : 0.0
+  } ],
+  "graspFrames" : [ {
+    "side" : "left",
+    "isPoseSet" : true,
+    "x" : 0.03,
+    "y" : 0.1545,
+    "z" : 0.072,
+    "rollInDegrees" : 177.86,
+    "pitchInDegrees" : -90.0,
+    "yawInDegrees" : 174.82
+  }, {
+    "side" : "right",
+    "isPoseSet" : true,
+    "x" : 0.03,
+    "y" : -0.1545,
+    "z" : 0.072,
+    "rollInDegrees" : -178.9,
+    "pitchInDegrees" : -90.0,
+    "yawInDegrees" : -173.62
+  } ],
+  "postGraspFrames" : [ {
+    "side" : "left",
+    "isPoseSet" : true,
+    "x" : 0.03,
+    "y" : 0.1545,
+    "z" : 0.072,
+    "rollInDegrees" : 177.86,
+    "pitchInDegrees" : -90.0,
+    "yawInDegrees" : 174.82
+  }, {
+    "side" : "right",
+    "isPoseSet" : false,
+    "x" : 0.03,
+    "y" : -0.1545,
+    "z" : 0.072,
+    "rollInDegrees" : -178.9,
+    "pitchInDegrees" : -90.0,
+    "yawInDegrees" : -173.62
+  }, {
+    "side" : "left",
+    "isPoseSet" : false,
+    "x" : 0.03,
+    "y" : 0.1545,
+    "z" : 0.072,
+    "rollInDegrees" : 177.86,
+    "pitchInDegrees" : -90.0,
+    "yawInDegrees" : 174.82
+  }, {
+    "side" : "right",
+    "isPoseSet" : true,
+    "x" : 0.03,
+    "y" : -0.1545,
+    "z" : 0.072,
+    "rollInDegrees" : -178.9,
+    "pitchInDegrees" : -90.0,
+    "yawInDegrees" : -173.62
+  }, {
+    "side" : "left",
+    "isPoseSet" : false,
+    "x" : 0.03,
+    "y" : 0.1545,
+    "z" : 0.2265,
+    "rollInDegrees" : 177.62,
+    "pitchInDegrees" : -90.0,
+    "yawInDegrees" : 174.82
+  }, {
+    "side" : "right",
+    "isPoseSet" : true,
+    "x" : 0.03,
+    "y" : -0.1545,
+    "z" : 0.2265,
+    "rollInDegrees" : -178.9,
+    "pitchInDegrees" : -90.0,
+    "yawInDegrees" : -173.62
+  } ]
+}

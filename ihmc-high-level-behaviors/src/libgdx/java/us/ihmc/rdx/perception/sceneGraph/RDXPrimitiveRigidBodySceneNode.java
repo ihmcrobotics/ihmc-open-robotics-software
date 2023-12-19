@@ -163,4 +163,9 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    {
       return modelInstance;
    }
+
+   public void setModelInstance(RDXModelInstance modelInstance)
+   {
+      this.modelInstance = modelInstance;
+   }
 }
