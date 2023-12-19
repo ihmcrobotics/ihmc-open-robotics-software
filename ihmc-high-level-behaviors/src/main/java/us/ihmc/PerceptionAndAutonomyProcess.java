@@ -84,36 +84,36 @@ public class PerceptionAndAutonomyProcess
    private ROS2DemandGraphNode zedDepthDemandNode;
    private RawImage zedDepthImage;
    private final SideDependentList<RawImage> zedColorImages = new SideDependentList<>();
-   private ZEDColorDepthImageRetriever zedImageRetriever;
-   private ZEDColorDepthImagePublisher zedImagePublisher;
-   private RestartableThread zedProcessAndPublishThread;
+   private final ZEDColorDepthImageRetriever zedImageRetriever;
+   private final ZEDColorDepthImagePublisher zedImagePublisher;
+   private final RestartableThread zedProcessAndPublishThread;
 
    private ROS2DemandGraphNode realsenseDemandNode;
    private RawImage realsenseDepthImage;
    private RawImage realsenseColorImage;
-   private RealsenseColorDepthImageRetriever realsenseImageRetriever;
-   private RealsenseColorDepthImagePublisher realsenseImagePublisher;
-   private RestartableThread realsenseProcessAndPublishThread;
+   private final RealsenseColorDepthImageRetriever realsenseImageRetriever;
+   private final RealsenseColorDepthImagePublisher realsenseImagePublisher;
+   private final RestartableThread realsenseProcessAndPublishThread;
 
    private ROS2DemandGraphNode ousterDepthDemandNode;
    private ROS2DemandGraphNode ousterLidarScanDemandNode;
    private ROS2DemandGraphNode ousterHeightMapDemandNode;
-   private OusterNetServer ouster;
+   private final OusterNetServer ouster;
    private RawImage ousterDepthImage;
-   private OusterDepthImageRetriever ousterDepthImageRetriever;
-   private OusterDepthImagePublisher ousterDepthImagePublisher;
-   private RestartableThread ousterProcessAndPublishThread;
+   private final OusterDepthImageRetriever ousterDepthImageRetriever;
+   private final OusterDepthImagePublisher ousterDepthImagePublisher;
+   private final RestartableThread ousterProcessAndPublishThread;
 
    private final SideDependentList<Supplier<ReferenceFrame>> blackflyFrameSuppliers = new SideDependentList<>();
    private final SideDependentList<ROS2DemandGraphNode> blackflyImageDemandNodes = new SideDependentList<>();
    private final SideDependentList<RawImage> blackflyImages = new SideDependentList<>();
    private final SideDependentList<BlackflyImageRetriever> blackflyImageRetrievers = new SideDependentList<>();
    private final SideDependentList<BlackflyImagePublisher> blackflyImagePublishers = new SideDependentList<>();
-   private RestartableThread blackflyProcessAndPublishThread;
+   private final RestartableThread blackflyProcessAndPublishThread;
 
    private final Supplier<ReferenceFrame> robotPelvisFrameSupplier;
    private final ROS2SceneGraph sceneGraph;
-   private RestartableThrottledThread sceneGraphUpdateThread;
+   private final RestartableThrottledThread sceneGraphUpdateThread;
    private ROS2DemandGraphNode arUcoDetectionDemandNode;
    private final ArUcoDetectionUpdater arUcoUpdater;
 
@@ -393,10 +393,10 @@ public class PerceptionAndAutonomyProcess
       centerposeDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_CENTERPOSE);
 
       // build the graph
-      zedDepthDemandNode.addDependants(zedPointCloudDemandNode);
-      zedColorDemandNode.addDependants(zedPointCloudDemandNode, centerposeDemandNode);
+      zedDepthDemandNode.addDependents(zedPointCloudDemandNode);
+      zedColorDemandNode.addDependents(zedPointCloudDemandNode, centerposeDemandNode);
 
-      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependants(arUcoDetectionDemandNode);
+      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(arUcoDetectionDemandNode);
    }
 
    /*

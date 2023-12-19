@@ -15,7 +15,7 @@ public class ROS2DemandGraphNode
       nodeHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, heartbeatTopic);
    }
 
-   public void addDependants(ROS2DemandGraphNode... dependents)
+   public void addDependents(ROS2DemandGraphNode... dependents)
    {
       this.dependents.addAll(Arrays.stream(dependents).toList());
    }
@@ -36,8 +36,8 @@ public class ROS2DemandGraphNode
 
    public void destroy()
    {
-      for (ROS2DemandGraphNode dependant : dependents)
-         dependant.destroy();
+      for (ROS2DemandGraphNode dependent : dependents)
+         dependent.destroy();
 
       nodeHeartbeatMonitor.destroy();
    }
