@@ -8,6 +8,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import perception_msgs.msg.dds.SteppableRegionDebugImageMessage;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -21,7 +22,10 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
 import us.ihmc.perception.steppableRegions.SteppableRegionsList;
+import us.ihmc.perception.steppableRegions.data.SteppableCell;
+import us.ihmc.perception.steppableRegions.data.SteppableRegionDataHolder;
 import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
+import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
@@ -29,6 +33,8 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,6 +96,7 @@ public class RapidHeightMapExtractor
    private BytedecoImage sensorCroppedHeightMapImage;
    private BytedecoImage terrainCostImage;
    private BytedecoImage contactMapImage;
+   private Mat steppableRegionMat;
 
    private BytedecoImage steppabilityImage;
    private BytedecoImage snapHeightImage;
@@ -153,6 +160,7 @@ public class RapidHeightMapExtractor
 
       croppedHeightMapImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
       denoisedHeightMap = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
+      steppableRegionMat = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
 
       createLocalHeightMapImage(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
       createGlobalHeightMapImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
@@ -525,6 +533,11 @@ public class RapidHeightMapExtractor
       return croppedHeightMapImage;
    }
 
+   public Mat getSteppableRegionAssignmentMat()
+   {
+      return steppableRegionMat;
+   }
+
 //   public Mat getDenoisedHeightMap()
 //   {
 //      return denoisedHeightMap;
@@ -548,6 +561,25 @@ public class RapidHeightMapExtractor
    public Mat getGlobalContactImage()
    {
       return contactMapImage.getBytedecoOpenCVMat();
+   }
+
+   private void generateSteppableRegionDebugImage(SteppableRegionsEnvironmentModel environmentModel)
+   {
+      int cellsPerSide = heightMapParameters.getCropWindowSize();
+
+      // fill with black
+      steppableRegionMat.zero();
+
+      for (SteppableRegionDataHolder region : environmentModel.getRegions())
+      {
+         for (SteppableCell cell : region.getCells())
+         {
+            int x = cell.getXIndex();
+            int y = cell.getYIndex();
+
+            steppableRegionMat.ptr(x, y).putInt(region.regionNumber + 1);
+         }
+      }
    }
 
    public Mat getCroppedImage(Point3DReadOnly origin, int globalCenterIndex, Mat imageToCrop)
