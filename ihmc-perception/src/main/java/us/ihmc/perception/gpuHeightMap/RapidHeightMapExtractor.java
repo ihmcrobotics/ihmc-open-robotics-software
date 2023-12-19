@@ -1,6 +1,6 @@
 package us.ihmc.perception.gpuHeightMap;
 
-import org.apache.batik.ext.awt.image.renderable.PadRable;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
@@ -8,12 +8,10 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import perception_msgs.msg.dds.SteppableRegionDebugImageMessage;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
@@ -21,22 +19,12 @@ import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
-import us.ihmc.perception.steppableRegions.SteppableRegionsList;
 import us.ihmc.perception.steppableRegions.data.SteppableCell;
-import us.ihmc.perception.steppableRegions.data.SteppableRegionDataHolder;
 import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
-import us.ihmc.perception.tools.NativeMemoryTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Extracts height map and some other cost metric maps on the GPU using OpenCL kernels
@@ -50,11 +38,11 @@ import java.util.List;
 public class RapidHeightMapExtractor
 {
    private static final double footSize = 0.22;
-   private static final double distanceFromCliffTops = 0.02;
-   private static final double distanceFromCliffBottoms = 0.05;
+   private static final double distanceFromCliffTops = 0.01;
+   private static final double distanceFromCliffBottoms = 0.04;
    private static final double cliffStartHeightToAvoid = 0.08;
    private static final double cliffEndHeightToAvoid = 1.2;
-   private static final double minSupportAreaFraction = 0.85;
+   private static final double minSupportAreaFraction = 0.7;
    private static final double minSnapHeightThreshold = 0.03;
    private static final double snapHeightThresholdAtSearchEdge = 0.06;
    private static final double inequalityAcvitationSlope =  50000.0;
@@ -96,7 +84,9 @@ public class RapidHeightMapExtractor
    private BytedecoImage sensorCroppedHeightMapImage;
    private BytedecoImage terrainCostImage;
    private BytedecoImage contactMapImage;
-   private Mat steppableRegionMat;
+
+   private Mat steppableRegionAssignmentMat;
+   private Mat steppableRegionRingMat;
 
    private BytedecoImage steppabilityImage;
    private BytedecoImage snapHeightImage;
@@ -160,7 +150,8 @@ public class RapidHeightMapExtractor
 
       croppedHeightMapImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
       denoisedHeightMap = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
-      steppableRegionMat = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
+      steppableRegionAssignmentMat = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
+      steppableRegionRingMat = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
 
       createLocalHeightMapImage(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
       createGlobalHeightMapImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
@@ -277,7 +268,6 @@ public class RapidHeightMapExtractor
 
          croppedHeightMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
          //denoisedHeightMap = denoiser.denoiseHeightMap(croppedHeightMapImage, 3.2768f);
-
 
          SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.createEnvironmentByMergingCellsIntoRegions(steppabilityImage,
                                                                                                                               snapHeightImage,
@@ -413,6 +403,7 @@ public class RapidHeightMapExtractor
       snapNormalXImage.readOpenCLImage(openCLManager);
       snapNormalYImage.readOpenCLImage(openCLManager);
       snapNormalZImage.readOpenCLImage(openCLManager);
+      steppabilityConnectionsImage.readOpenCLImage(openCLManager);
    }
 
    public void readContactMapImage()
@@ -538,7 +529,17 @@ public class RapidHeightMapExtractor
 
    public Mat getSteppableRegionAssignmentMat()
    {
-      return steppableRegionMat;
+      return steppableRegionAssignmentMat;
+   }
+
+   public Mat getSteppableRegionRingMat()
+   {
+      return steppableRegionRingMat;
+   }
+
+   public BytedecoImage getSteppabilityConnectionsImage()
+   {
+      return steppabilityConnectionsImage;
    }
 
 //   public Mat getDenoisedHeightMap()
@@ -570,17 +571,37 @@ public class RapidHeightMapExtractor
    {
       int cellsPerSide = heightMapParameters.getCropWindowSize();
 
-      // fill with black
-      steppableRegionMat.zero();
-
-      for (SteppableRegionDataHolder region : environmentModel.getRegions())
+      for (int x = 0; x < cellsPerSide; x++)
       {
-         for (SteppableCell cell : region.getCells())
+         for (int y = 0; y < cellsPerSide; y++)
          {
-            int x = cell.getXIndex();
-            int y = cell.getYIndex();
+            SteppableCell steppableCell = environmentModel.getCellAt(x, y);
+            int value;
+            if (steppableCell == null)
+               value = 0;
+            else
+               value = steppableCell.getRegion().regionNumber + 1;
 
-            steppableRegionMat.ptr(x, y).putInt(region.regionNumber + 1);
+            steppableRegionAssignmentMat.ptr(x, y).putShort((short) value);
+
+            if (steppableCell == null)
+            {
+               if (Integer.bitCount(steppabilityConnectionsImage.getByteAsInteger(x, y)) != 0)
+                  throw new RuntimeException("Crap");
+               steppableRegionRingMat.ptr(x, y).putChar((char) 0);
+            }
+            else if (steppableCell.isBorderCell())
+            {
+               if (Integer.bitCount(steppabilityConnectionsImage.getByteAsInteger(x, y)) >= 8)
+                  throw new RuntimeException("Crap");
+               steppableRegionRingMat.ptr(x, y).putChar((char) 2); // outside, make it white
+            }
+            else
+            {
+               if (Integer.bitCount(steppabilityConnectionsImage.getByteAsInteger(x, y)) != 8)
+                  throw new RuntimeException("Crap");
+               steppableRegionRingMat.ptr(x, y).putChar((char) 1); // interior, make it gray
+            }
          }
       }
    }
