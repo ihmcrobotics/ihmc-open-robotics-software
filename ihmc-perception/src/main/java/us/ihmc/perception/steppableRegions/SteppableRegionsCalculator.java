@@ -115,6 +115,29 @@ public class SteppableRegionsCalculator
                                                              HeightMapData heightMapData,
                                                              double footYaw)
    {
+      return createSteppableRegions(concaveHullFactoryParameters,
+                                    polygonizerParameters,
+                                    steppableRegionCalculatorParameters,
+                                    environmentModel,
+                                    heightMapData.getGridCenter().getX(),
+                                    heightMapData.getGridCenter().getY(),
+                                    heightMapData.getGridSizeXY(),
+                                    heightMapData.getGridResolutionXY(),
+                                    heightMapData.getCenterIndex(),
+                                    footYaw);
+   }
+
+   public static SteppableRegionsList createSteppableRegions(ConcaveHullFactoryParameters concaveHullFactoryParameters,
+                                                             PolygonizerParameters polygonizerParameters,
+                                                             SteppableRegionCalculatorParametersReadOnly steppableRegionCalculatorParameters,
+                                                             SteppableRegionsEnvironmentModel environmentModel,
+                                                             double gridCenterX,
+                                                             double gridCenterY,
+                                                             double gridSizeXY,
+                                                             double gridResolutionXY,
+                                                             int centerIndex,
+                                                             double footYaw)
+   {
       List<SteppableRegion> listToReturn = new ArrayList<>();
       environmentModel.getRegions()
                       .stream()
@@ -122,11 +145,11 @@ public class SteppableRegionsCalculator
                                                             polygonizerParameters,
                                                             steppableRegionCalculatorParameters,
                                                             region,
-                                                            heightMapData.getGridCenter().getX(),
-                                                            heightMapData.getGridCenter().getY(),
-                                                            heightMapData.getGridSizeXY(),
-                                                            heightMapData.getGridResolutionXY(),
-                                                            heightMapData.getCenterIndex(),
+                                                            gridCenterX,
+                                                            gridCenterY,
+                                                            gridSizeXY,
+                                                            gridResolutionXY,
+                                                            centerIndex,
                                                             footYaw))
                       .forEach(listToReturn::addAll);
       for (int i = 0; i < listToReturn.size(); i++)
@@ -153,7 +176,7 @@ public class SteppableRegionsCalculator
       List<Point2D> outerRing = getOuterRingPoints(regionDataHolder,
                                                    gridCenterX,
                                                    gridCenterY,
-                                                   gridSizeXY,
+                                                   gridResolutionXY,
                                                    centerIndex,
                                                    steppableRegionCalculatorParameters.getFractionOfCellToExpandSmallRegions());
       if (outerRing != null)
