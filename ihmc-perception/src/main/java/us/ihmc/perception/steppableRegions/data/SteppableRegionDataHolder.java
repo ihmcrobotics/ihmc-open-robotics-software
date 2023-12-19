@@ -7,6 +7,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
+import us.ihmc.sensorProcessing.heightMap.HeightGridContainer;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
@@ -60,9 +61,9 @@ public class SteppableRegionDataHolder
       borderCellRings.remove(ring);
    }
 
-   public void addCell(SteppableCell cell, HeightMapData heightMapData)
+   public void addCell(SteppableCell cell, double gridCenterX, double gridCenterY, double resolutionXY, int centerIndex, HeightGridContainer heightMapData)
    {
-      addCell(cell, SteppableRegionsCalculator.convertCellToPoint(cell, heightMapData));
+      addCell(cell, SteppableRegionsCalculator.convertCellToPoint(cell, gridCenterX, gridCenterY, resolutionXY, centerIndex, heightMapData));
    }
 
    public void addCell(SteppableCell cell, Point3DReadOnly point)
@@ -73,10 +74,10 @@ public class SteppableRegionDataHolder
 
       cell.setRegion(this);
 
-      minX = Math.min(minX, cell.getX());
-      maxX = Math.max(maxX, cell.getX());
-      minY = Math.min(minY, cell.getY());
-      maxY = Math.max(maxY, cell.getY());
+      minX = Math.min(minX, cell.getXIndex());
+      maxX = Math.max(maxX, cell.getXIndex());
+      minY = Math.min(minY, cell.getYIndex());
+      maxY = Math.max(maxY, cell.getYIndex());
    }
 
    public boolean mergeRegion(SteppableRegionDataHolder other)

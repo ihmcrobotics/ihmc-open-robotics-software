@@ -84,7 +84,7 @@ public class SteppableRegionsEnvironmentModel
          unexpandedBorderCellsInTheEnvironment.add(cell);
       else
          unexpandedInteriorCellsInTheEnvironment.add(cell);
-      steppableCellsGrid[cell.getX()][cell.getY()] = cell;
+      steppableCellsGrid[cell.getXIndex()][cell.getYIndex()] = cell;
    }
 
    public SteppableRegionDataHolder createNewSteppableRegion()

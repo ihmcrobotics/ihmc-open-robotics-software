@@ -38,12 +38,12 @@ public class SteppableCell
       return isBorderCell;
    }
 
-   public int getX()
+   public int getXIndex()
    {
       return x;
    }
 
-   public int getY()
+   public int getYIndex()
    {
       return y;
    }

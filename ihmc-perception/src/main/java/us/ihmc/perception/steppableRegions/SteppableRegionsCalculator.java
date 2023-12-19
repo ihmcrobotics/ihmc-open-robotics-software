@@ -1,5 +1,7 @@
 package us.ihmc.perception.steppableRegions;
 
+import cern.colt.function.IntIntDoubleFunction;
+import cern.colt.function.IntIntFunction;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -18,6 +20,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
+import us.ihmc.sensorProcessing.heightMap.HeightGridContainer;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
@@ -25,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.function.BiFunction;
 
 public class SteppableRegionsCalculator
 {
@@ -36,6 +40,33 @@ public class SteppableRegionsCalculator
                                                                                              BytedecoImage connections,
                                                                                              SteppableRegionCalculatorParametersReadOnly parameters,
                                                                                              HeightMapData heightMapData)
+   {
+      return createEnvironmentByMergingCellsIntoRegions(steppability,
+                                                        snappedHeight,
+                                                        snappedNormalX,
+                                                        snappedNormalY,
+                                                        snappedNormalZ,
+                                                        connections,
+                                                        parameters,
+                                                        heightMapData.getGridCenter().getX(),
+                                                        heightMapData.getGridCenter().getY(),
+                                                        heightMapData.getGridResolutionXY(),
+                                                        heightMapData.getCenterIndex(),
+                                                        heightMapData);
+   }
+
+   public static SteppableRegionsEnvironmentModel createEnvironmentByMergingCellsIntoRegions(BytedecoImage steppability,
+                                                                                             BytedecoImage snappedHeight,
+                                                                                             BytedecoImage snappedNormalX,
+                                                                                             BytedecoImage snappedNormalY,
+                                                                                             BytedecoImage snappedNormalZ,
+                                                                                             BytedecoImage connections,
+                                                                                             SteppableRegionCalculatorParametersReadOnly parameters,
+                                                                                             double gridCenterX,
+                                                                                             double gridCenterY,
+                                                                                             double gridResolutionXY,
+                                                                                             int centerIndex,
+                                                                                             HeightGridContainer heightMapData)
    {
       SteppableRegionsEnvironmentModel environmentModel = createUnsortedSteppableRegionEnvironment(steppability,
                                                                                                    snappedHeight,
@@ -55,7 +86,7 @@ public class SteppableRegionsCalculator
          if (!unexpandedCell.cellHasBeenAssigned())
          {
             SteppableRegionDataHolder region = environmentModel.createNewSteppableRegion();
-            region.addCell(unexpandedCell, heightMapData);
+            region.addCell(unexpandedCell, gridCenterX, gridCenterY, gridResolutionXY, centerIndex, heightMapData);
 
             SteppableBorderRing borderRing = region.createNewBorderRing();
             borderRing.addCell(unexpandedCell);
@@ -65,7 +96,8 @@ public class SteppableRegionsCalculator
             throw new RuntimeException("Should never reach this place");
          }
 
-         recursivelyAddBorderNeighbors(unexpandedCell, connections, environmentModel, maxDepth, 0, heightMapData);
+         recursivelyAddBorderNeighbors(unexpandedCell, connections, environmentModel, maxDepth, 0,
+                                       gridCenterX, gridCenterY, gridResolutionXY, centerIndex, heightMapData);
       }
 
       while (environmentModel.hasUnexpandedInteriorCells())
@@ -75,10 +107,10 @@ public class SteppableRegionsCalculator
          if (!unexpandedCell.cellHasBeenAssigned())
          {
             SteppableRegionDataHolder region = environmentModel.createNewSteppableRegion();
-            region.addCell(unexpandedCell, heightMapData);
+            region.addCell(unexpandedCell, gridCenterX, gridCenterY, gridResolutionXY, centerIndex, heightMapData);
          }
 
-         recursivelyAddNeighbors(unexpandedCell, connections, environmentModel, maxDepth, 0, heightMapData);
+         recursivelyAddNeighbors(unexpandedCell, connections, environmentModel, maxDepth, 0, gridCenterX, gridCenterY, gridResolutionXY, centerIndex, heightMapData);
       }
 
       environmentModel.getRegions().removeIf(region -> region.getCells().size() < parameters.getMinCellsInARegion());
@@ -116,11 +148,40 @@ public class SteppableRegionsCalculator
                                                               HeightMapData heightMapData,
                                                               double footYaw)
    {
+      return createSteppableRegions(concaveHullFactoryParameters,
+                                    polygonizerParameters,
+                                    steppableRegionCalculatorParameters,
+                                    regionDataHolder,
+                                    heightMapData.getGridCenter().getX(),
+                                    heightMapData.getGridCenter().getY(),
+                                    heightMapData.getGridSizeXY(),
+                                    heightMapData.getGridResolutionXY(),
+                                    heightMapData.getCenterIndex(),
+                                    heightMapData,
+                                    footYaw);
+   }
+
+   public static List<SteppableRegion> createSteppableRegions(ConcaveHullFactoryParameters concaveHullFactoryParameters,
+                                                              PolygonizerParameters polygonizerParameters,
+                                                              SteppableRegionCalculatorParametersReadOnly steppableRegionCalculatorParameters,
+                                                              SteppableRegionDataHolder regionDataHolder,
+                                                              double gridCenterX,
+                                                              double gridCenterY,
+                                                              double gridSizeXY,
+                                                              double gridResolutionXY,
+                                                              int centerIndex,
+                                                              HeightGridContainer heightMapData,
+                                                              double footYaw)
+   {
       if (regionDataHolder.getMemberCells().size() < steppableRegionCalculatorParameters.getMinCellsInARegion())
          return new ArrayList<>();
 
       List<Point3D> pointsInWorld = new ArrayList<>();
       List<Point3D> outerRing = getOuterRingPoints(regionDataHolder,
+                                                   gridCenterX,
+                                                   gridCenterY,
+                                                   gridSizeXY,
+                                                   centerIndex,
                                                    heightMapData,
                                                    steppableRegionCalculatorParameters.getFractionOfCellToExpandSmallRegions());
       if (outerRing != null)
@@ -154,12 +215,22 @@ public class SteppableRegionsCalculator
 
       return createSteppableRegions(pose,
                                     concaveHullCollection,
-                                    heightMapData,
+                                    gridCenterX,
+                                    gridCenterY,
+                                    gridSizeXY,
+                                    gridResolutionXY,
+                                    centerIndex,
                                     regionDataHolder,
                                     footYaw);
    }
 
-   private static List<Point3D> getOuterRingPoints(SteppableRegionDataHolder regionDataHolder, HeightMapData heightMapData, double inflationFraction)
+   private static List<Point3D> getOuterRingPoints(SteppableRegionDataHolder regionDataHolder,
+                                                   double gridCenterX,
+                                                   double gridCenterY,
+                                                   double gridResolutionXY,
+                                                   int centerIndex,
+                                                   HeightGridContainer heightMapData,
+                                                   double inflationFraction)
    {
       if (regionDataHolder.getBorderRings().size() == 0)
          return null;
@@ -167,13 +238,13 @@ public class SteppableRegionsCalculator
       List<SteppableBorderRing> ringList = new ArrayList<>(regionDataHolder.getBorderRings());
       ringList.sort(Comparator.comparingInt(SteppableBorderRing::size));
 
-      double inflationSize = inflationFraction * heightMapData.getGridResolutionXY() / 2.0;
+      double inflationSize = inflationFraction * gridResolutionXY / 2.0;
 
       SteppableBorderRing longestRing = ringList.get(ringList.size() - 1);
       List<Point3D> points = new ArrayList<>();
       for (SteppableCell cell : longestRing)
       {
-         Point3D point = convertCellToPoint(cell, heightMapData);
+         Point3D point = convertCellToPoint(cell, gridCenterX, gridCenterY, gridResolutionXY, centerIndex, heightMapData);
 
          if (longestRing.size() > 100)
          {
@@ -208,7 +279,11 @@ public class SteppableRegionsCalculator
 
    public static List<SteppableRegion> createSteppableRegions(RigidBodyTransformReadOnly transformToWorld,
                                                               ConcaveHullCollection concaveHullCollection,
-                                                              HeightMapData heightMapData,
+                                                              double gridCenterX,
+                                                              double gridCenterY,
+                                                              double gridSizeXY,
+                                                              double gridResolutionXY,
+                                                              int centerIndex,
                                                               SteppableRegionDataHolder regionDataHolder,
                                                               double footYaw)
    {
@@ -216,7 +291,12 @@ public class SteppableRegionsCalculator
                                                            .parallelStream()
                                                            .map(hull -> createSteppableRegion(transformToWorld, hull, footYaw))
                                                            .toList();
-      HeightMapData regionHeightMap = createHeightMapForRegion(regionDataHolder, heightMapData);
+      HeightMapData regionHeightMap = createHeightMapForRegion(regionDataHolder,
+                                                               gridCenterX,
+                                                               gridCenterY,
+                                                               gridSizeXY,
+                                                               gridResolutionXY,
+                                                               centerIndex);
       regions.forEach(region -> region.setLocalHeightMap(regionHeightMap));
       return regions;
    }
@@ -228,18 +308,21 @@ public class SteppableRegionsCalculator
       return new SteppableRegion(transformToWorld, concaveHull.getConcaveHullVertices(), footYaw);
    }
 
-   public static HeightMapData createHeightMapForRegion(SteppableRegionDataHolder regionDataHolder, HeightMapData heightMapData)
+   public static HeightMapData createHeightMapForRegion(SteppableRegionDataHolder regionDataHolder,
+                                                        double gridCenterX,
+                                                        double gridCenterY,
+                                                        double gridSizeXY,
+                                                        double gridResolutionXY,
+                                                        int centerIndex)
    {
-      double resolution = heightMapData.getGridResolutionXY();
-
-      HeightMapData regionHeightMap = new HeightMapData(resolution,
-                                                        heightMapData.getGridSizeXY(),
-                                                        heightMapData.getGridCenter().getX(),
-                                                        heightMapData.getGridCenter().getY());
+      HeightMapData regionHeightMap = new HeightMapData(gridResolutionXY,
+                                                        gridSizeXY,
+                                                        gridCenterX,
+                                                        gridCenterY);
 
       for (SteppableCell cell : regionDataHolder.getCells())
       {
-         int key = HeightMapTools.indicesToKey(cell.getX(), cell.getY(), heightMapData.getCenterIndex());
+         int key = HeightMapTools.indicesToKey(cell.getXIndex(), cell.getYIndex(), centerIndex);
          regionHeightMap.setHeightAt(key, cell.getZ(), cell.getNormal());
       }
 
@@ -286,7 +369,11 @@ public class SteppableRegionsCalculator
                                                SteppableRegionsEnvironmentModel environmentModel,
                                                int maxDepth,
                                                int currentDepth,
-                                               HeightMapData heightMapData)
+                                               double gridCenterX,
+                                               double gridCenterY,
+                                               double gridResolutionXY,
+                                               int centerIndex,
+                                               HeightGridContainer heightMapData)
    {
       if (!cellToExpand.cellHasBeenAssigned())
          throw new RuntimeException("Should only be expanding assigned cells.");
@@ -305,11 +392,22 @@ public class SteppableRegionsCalculator
          else
          {
             // the cell has not been assigned
-            cellToExpand.getRegion().addCell(neighbor, heightMapData);
+            cellToExpand.getRegion().addCell(neighbor, gridCenterX, gridCenterY, gridResolutionXY, centerIndex, heightMapData);
          }
 
          if (!neighbor.cellHasBeenExpanded() && currentDepth < maxDepth && cellToExpand.cellHasBeenAssigned())
-            recursivelyAddNeighbors(neighbor, connections, environmentModel, maxDepth, currentDepth + 1, heightMapData);
+         {
+            recursivelyAddNeighbors(neighbor,
+                                    connections,
+                                    environmentModel,
+                                    maxDepth,
+                                    currentDepth + 1,
+                                    gridCenterX,
+                                    gridCenterY,
+                                    gridResolutionXY,
+                                    centerIndex,
+                                    heightMapData);
+         }
       }
    }
 
@@ -318,7 +416,11 @@ public class SteppableRegionsCalculator
                                                      SteppableRegionsEnvironmentModel environmentModel,
                                                      int maxDepth,
                                                      int currentDepth,
-                                                     HeightMapData heightMapData)
+                                                     double gridCenterX,
+                                                     double gridCenterY,
+                                                     double gridResolutionXY,
+                                                     int centerIndex,
+                                                     HeightGridContainer heightMapData)
    {
       if (!cellToExpand.cellHasBeenAssigned())
          throw new RuntimeException("Should only be expanding assigned cells.");
@@ -343,7 +445,7 @@ public class SteppableRegionsCalculator
          else
          {
             // the cell has not been assigned
-            cellToExpand.getRegion().addCell(neighbor, heightMapData);
+            cellToExpand.getRegion().addCell(neighbor, gridCenterX, gridCenterY, gridResolutionXY, centerIndex, heightMapData);
             if (neighbor.isBorderCell())
             {
                cellToExpand.getBorderRing().addCell(neighbor);
@@ -352,7 +454,7 @@ public class SteppableRegionsCalculator
          }
 
          if (neighbor.isBorderCell() && !neighbor.cellHasBeenExpanded() && currentDepth < maxDepth && cellToExpand.cellHasBeenAssigned())
-            recursivelyAddBorderNeighbors(neighbor, connections, environmentModel, maxDepth, currentDepth + 1, heightMapData);
+            recursivelyAddBorderNeighbors(neighbor, connections, environmentModel, maxDepth, currentDepth + 1,gridCenterX, gridCenterY, gridResolutionXY, centerIndex,  heightMapData);
       }
    }
 
@@ -361,8 +463,8 @@ public class SteppableRegionsCalculator
                                                                     BytedecoImage connections)
    {
       int cellsPerSide = environmentModel.getCellsPerSide();
-      int row = cellsPerSide - cell.getX() - 1;
-      int col = cellsPerSide - cell.getY() - 1;
+      int row = cellsPerSide - cell.getXIndex() - 1;
+      int col = cellsPerSide - cell.getYIndex() - 1;
 
       int boundaryConnectionsEncodedAsOnes = connections.getInt(row, col);
       List<NeighborCell> neighbors = collectCellNeighbors(cell, environmentModel);
@@ -387,8 +489,8 @@ public class SteppableRegionsCalculator
                continue;
 
             // These are switched because of the difference between coordinates in the height map and image frame
-            int neighborX = cell.getX() - y_offset;
-            int neighborY = cell.getY() - x_offset;
+            int neighborX = cell.getXIndex() - y_offset;
+            int neighborY = cell.getYIndex() - x_offset;
 
             if (neighborX < 0 || neighborY < 0 || neighborX >= cellsPerSide || neighborY >= cellsPerSide)
             {
@@ -414,15 +516,19 @@ public class SteppableRegionsCalculator
 
    public static Point3D convertCellToPoint(SteppableCell cell, HeightMapData heightMapData)
    {
-      double x = HeightMapTools.indexToCoordinate(cell.getX(),
-                                                  heightMapData.getGridCenter().getX(),
-                                                  heightMapData.getGridResolutionXY(),
-                                                  heightMapData.getCenterIndex());
-      double y = HeightMapTools.indexToCoordinate(cell.getY(),
-                                                  heightMapData.getGridCenter().getY(),
-                                                  heightMapData.getGridResolutionXY(),
-                                                  heightMapData.getCenterIndex());
-      double height = heightMapData.getHeightAt(cell.getX(), cell.getY());
+      return convertCellToPoint(cell,
+                                heightMapData.getGridCenter().getX(),
+                                heightMapData.getGridCenter().getY(),
+                                heightMapData.getGridResolutionXY(),
+                                heightMapData.getCenterIndex(),
+                                heightMapData);
+   }
+
+   public static Point3D convertCellToPoint(SteppableCell cell, double gridCenterX, double gridCenterY, double gridResolutionXY, int centerIndex, HeightGridContainer heightContainer)
+   {
+      double x = HeightMapTools.indexToCoordinate(cell.getXIndex(), gridCenterX, gridResolutionXY, centerIndex);
+      double y = HeightMapTools.indexToCoordinate(cell.getYIndex(), gridCenterY, gridResolutionXY, centerIndex);
+      double height = heightContainer.getHeightAt(cell.getXIndex(), cell.getYIndex());
 
       return new Point3D(x, y, height);
    }
