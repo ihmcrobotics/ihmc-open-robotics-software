@@ -9,8 +9,8 @@ public class SteppableRegionsEnvironmentModel
 {
    int planarRegionIslandIndex = 0;
 
-   private final HashSet<SteppableCell> unexpandedInteriorCellsInTheEnvironment = new HashSet<>();
-   private final HashSet<SteppableCell> unexpandedBorderCellsInTheEnvironment = new HashSet<>();
+   private final List<SteppableCell> unexpandedInteriorCellsInTheEnvironment = new ArrayList<>();
+   private final List<SteppableCell> unexpandedBorderCellsInTheEnvironment = new ArrayList<>();
    private final SteppableCell[][] steppableCellsGrid;
    private final int cellsPerSide;
 
@@ -57,14 +57,14 @@ public class SteppableRegionsEnvironmentModel
 
    public SteppableCell getNextUnexpandedInteriorCell()
    {
-      SteppableCell cell = unexpandedInteriorCellsInTheEnvironment.stream().findFirst().get();
+      SteppableCell cell = unexpandedInteriorCellsInTheEnvironment.get(0);
       cell.setCellHasBeenExpanded(true);
       return cell;
    }
 
    public SteppableCell getNextUnexpandedBorderCell()
    {
-      SteppableCell cell = unexpandedBorderCellsInTheEnvironment.stream().findFirst().get();
+      SteppableCell cell = unexpandedBorderCellsInTheEnvironment.get(0);
       cell.setCellHasBeenExpanded(true);
       return cell;
    }

@@ -160,7 +160,7 @@ public class RapidHeightMapExtractor
 
       croppedHeightMapImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
       denoisedHeightMap = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
-      steppableRegionMat = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
+      steppableRegionMat = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
 
       createLocalHeightMapImage(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
       createGlobalHeightMapImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
@@ -290,7 +290,10 @@ public class RapidHeightMapExtractor
                                                                                                                               sensorOrigin.getY(),
                                                                                                                               heightMapParameters.getGridResolutionXY(),
                                                                                                                               cropCenterIndex);
+         generateSteppableRegionDebugImage(environment);
+
          double cropWindowSize = cropCenterIndex * getHeightMapParameters().getGridResolutionXY() * 2.0;
+         /*
          SteppableRegionsList regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters,
                                                                                           polygonizerParameters,
                                                                                           parameters,
@@ -301,7 +304,7 @@ public class RapidHeightMapExtractor
                                                                                           heightMapParameters.getGridResolutionXY(),
                                                                                           cropCenterIndex,
                                                                                           0.0);
-
+          */
 
          sequenceNumber++;
       }
