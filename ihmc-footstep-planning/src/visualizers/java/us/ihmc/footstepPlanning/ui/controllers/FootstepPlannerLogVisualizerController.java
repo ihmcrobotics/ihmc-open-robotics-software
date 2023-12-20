@@ -51,6 +51,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionFootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
@@ -85,8 +86,7 @@ public class FootstepPlannerLogVisualizerController
    private List<FootstepPlannerIterationData> iterationDataList;
    private Map<GraphEdge<FootstepGraphNode>, FootstepPlannerEdgeData> edgeDataMap;
    private List<VariableDescriptor> variableDescriptors;
-   private final FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(PlannerTools.createDefaultFootPolygons());
-   private FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters(), environmentHandler); // TODO
+   private PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters()); // TODO
 
    private final AtomicBoolean loadingLog = new AtomicBoolean();
    private final List<VariableDescriptor> variablesToChart = new ArrayList<>();
@@ -281,7 +281,7 @@ public class FootstepPlannerLogVisualizerController
                                                                                    List<Point2D> footPoints = defaultContactPoints.get(side);
                                                                                    return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
                                                                                 });
-      snapper = new FootstepSnapAndWiggler(footPolygons, new DefaultFootstepPlannerParameters(), environmentHandler);
+      snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, new DefaultFootstepPlannerParameters());
    }
 
    public void loadLog(LoadRequestType loadRequestType)
@@ -403,7 +403,7 @@ public class FootstepPlannerLogVisualizerController
       this.iterationDataList = iterationData;
       this.edgeDataMap = edgeDataMap;
       this.variableDescriptors = variableDescriptors;
-      environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+      snapper.setPlanarRegionsList(planarRegionsList);
 
       parentNodeStack.clear();
       selectedRow.set(null);
