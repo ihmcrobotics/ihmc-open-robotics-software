@@ -161,18 +161,18 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
       }
    }
 
-   public void set(FootstepSnapData other)
+   public void set(FootstepSnapDataReadOnly other)
    {
-      this.snapTransform.set(other.snapTransform);
-      this.croppedFoothold.set(other.croppedFoothold);
-      this.wiggleTransformInWorld.set(other.wiggleTransformInWorld);
-      this.snappedFootstepTransform.set(other.snappedFootstepTransform);
-      this.regionIndex = other.regionIndex;
-      this.achievedInsideDelta = other.achievedInsideDelta;
-      this.snappedFootstepTransformIncludesWiggleTransform = other.snappedFootstepTransformIncludesWiggleTransform;
+      this.snapTransform.set(other.getSnapTransform());
+      this.croppedFoothold.set(other.getCroppedFoothold());
+      this.wiggleTransformInWorld.set(other.getWiggleTransformInWorld());
+//      this.snappedFootstepTransform.set(other.snappedFootstepTransform);
+      this.regionIndex = other.getRegionIndex();
+      this.achievedInsideDelta = other.getAchievedInsideDelta();
+      this.snappedFootstepTransformIncludesWiggleTransform = false;
 
-      this.heightMapSnapArea = other.heightMapSnapArea;
-      this.rmsErrorHeightMap = other.rmsErrorHeightMap;
+      this.heightMapSnapArea = other.getHeightMapArea();
+      this.rmsErrorHeightMap = other.getRMSErrorHeightMap();
    }
 
    public void clear()

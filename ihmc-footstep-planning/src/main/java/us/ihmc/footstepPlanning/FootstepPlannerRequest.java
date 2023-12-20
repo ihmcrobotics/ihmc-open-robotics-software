@@ -96,6 +96,7 @@ public class FootstepPlannerRequest
    private double horizonLength;
 
    /**
+    * todo REMOVE
     * Planar regions. May be null or empty to enable flat ground mode.
     */
    private PlanarRegionsList planarRegionsList;

@@ -11,6 +11,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionFootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -31,7 +32,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PlanarRegionCliffAvoiderTest
 {
@@ -71,11 +72,10 @@ public class PlanarRegionCliffAvoiderTest
       double footLength = 0.2;
       double footWidth = 0.1;
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       PlanarRegionCliffAvoider avoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
       avoider.setPlanarRegionsList(planarRegionsList);
-      environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+      snapper.setPlanarRegionsList(planarRegionsList);
 
       SimulationConstructionSet scs = null;
       if (visualize)
@@ -127,8 +127,7 @@ public class PlanarRegionCliffAvoiderTest
       parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
 
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       PlanarRegionCliffAvoider cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
 
       double centerX = 1.0;
@@ -146,7 +145,7 @@ public class PlanarRegionCliffAvoiderTest
 
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
       cliffAvoider.setPlanarRegionsList(planarRegionsList);
-      environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+      snapper.setPlanarRegionsList(planarRegionsList);
 
       Vector2D frontNearNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength - LatticePoint.gridSizeXY, 0.0);
       Vector2D frontFarNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength + LatticePoint.gridSizeXY, 0.0);
@@ -207,11 +206,10 @@ public class PlanarRegionCliffAvoiderTest
       double footLength = 0.2;
       double footWidth = 0.1;
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       PlanarRegionCliffAvoider avoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
       avoider.setPlanarRegionsList(planarRegionsList);
-      environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+      snapper.setPlanarRegionsList(planarRegionsList);
 
       SimulationConstructionSet scs = null;
       if (visualize)
