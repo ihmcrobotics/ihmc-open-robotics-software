@@ -59,7 +59,7 @@ public class FootstepCheckerTest
       generator.addRectangle(1.0, 2.0);
       PlanarRegionsList planarRegions = generator.getPlanarRegionsList();
 
-      FootstepSnapAndWiggler snapper = new TestSnapper();
+      PlanarRegionFootstepSnapAndWiggler snapper = new TestSnapper();
       FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, null, registry);
       checker.setPlanarRegions(planarRegions);
 
@@ -141,7 +141,7 @@ public class FootstepCheckerTest
       generator.addRectangle(1.0, bodyGroundClearance);
       PlanarRegionsList planarRegions = generator.getPlanarRegionsList();
 
-      FootstepSnapAndWiggler snapper = new TestSnapper();
+      PlanarRegionFootstepSnapAndWiggler snapper = new TestSnapper();
       FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, null, registry);
       checker.setPlanarRegions(planarRegions);
 
@@ -209,7 +209,7 @@ public class FootstepCheckerTest
    @Test
    public void testValidNode()
    {
-      FootstepSnapAndWiggler snapper = new TestSnapper();
+      PlanarRegionFootstepSnapAndWiggler snapper = new TestSnapper();
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, null, registry);
 
@@ -229,7 +229,7 @@ public class FootstepCheckerTest
    @Test
    public void testManuallyAddedSnapDataIsValid()
    {
-      FootstepSnapAndWiggler snapper = new TestSnapper();
+      PlanarRegionFootstepSnapAndWiggler snapper = new TestSnapper();
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, null, registry);
 
@@ -272,7 +272,7 @@ public class FootstepCheckerTest
          };
       };
 
-      FootstepSnapAndWiggler snapper = new TestSnapper();
+      PlanarRegionFootstepSnapAndWiggler snapper = new TestSnapper();
       FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, null, registry);
 
       // add planar regions, otherwise will always be valid
@@ -312,7 +312,7 @@ public class FootstepCheckerTest
    public void testTooSmallFoothold()
    {
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
-      FootstepSnapAndWiggler snapper = new TestSnapper();
+      PlanarRegionFootstepSnapAndWiggler snapper = new TestSnapper();
       FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, null, registry);
 
       // add planar regions, otherwise will always be valid
@@ -619,16 +619,11 @@ public class FootstepCheckerTest
       System.out.println(valid);
    }
 
-   private class TestSnapper extends FootstepSnapAndWiggler
+   private class TestSnapper extends PlanarRegionFootstepSnapAndWiggler
    {
       public TestSnapper()
       {
-         this(new FootstepPlannerEnvironmentHandler(PlannerTools.createDefaultFootPolygons()));
-      }
-
-      public TestSnapper(FootstepPlannerEnvironmentHandler environmentHandler)
-      {
-         super(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters(), environmentHandler);
+         super(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters());
       }
 
       @Override
