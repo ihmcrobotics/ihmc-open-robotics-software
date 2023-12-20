@@ -28,6 +28,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.HeightMapFootstepChecker;
 import us.ihmc.footstepPlanning.log.*;
 import us.ihmc.footstepPlanning.narrowPassage.NarrowPassageBodyPathOptimizer;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
@@ -490,7 +491,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return aStarFootstepPlanner.getSnapper();
    }
 
-   public FootstepChecker getChecker()
+   public HeightMapFootstepChecker getChecker()
    {
       return aStarFootstepPlanner.getChecker();
    }
