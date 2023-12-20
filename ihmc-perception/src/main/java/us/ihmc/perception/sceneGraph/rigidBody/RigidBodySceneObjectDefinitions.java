@@ -69,6 +69,11 @@ public class RigidBodySceneObjectDefinitions
    public static final String DEBRIS_VISUAL_MODEL_FILE_PATH = "environmentObjects/debris/2x4.g3dj";
    public static final RigidBodyTransform DEBRIS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
+   public static final String PLATFORM_NAME = "WorkPlatform";
+   public static final RigidBodyTransform PLATFORM_TRANSFORM_TO_MARKER = new RigidBodyTransform();
+   public static final String PLATFORM_VISUAL_MODEL_FILE_PATH = "environmentObjects/workPlatform/workPlatform.g3dj";
+   public static final RigidBodyTransform PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
    public static final TIntDoubleMap ARUCO_MARKER_SIZES = new TIntDoubleHashMap();
    static
    {

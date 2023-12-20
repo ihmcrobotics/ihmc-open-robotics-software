@@ -25,7 +25,6 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObject;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import javax.annotation.Nullable;
 import java.util.Set;
