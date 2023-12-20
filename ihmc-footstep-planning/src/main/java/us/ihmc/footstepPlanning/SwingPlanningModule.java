@@ -36,7 +36,6 @@ public class SwingPlanningModule
    private final WalkingControllerParameters walkingControllerParameters;
 
    private final AdaptiveSwingTrajectoryCalculator adaptiveSwingTrajectoryCalculator;
-   private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
    private final CollisionFreeSwingCalculator collisionFreeSwingCalculator;
 
    private double nominalSwingTrajectoryLength;
@@ -57,7 +56,6 @@ public class SwingPlanningModule
       if (walkingControllerParameters == null)
       {
          this.adaptiveSwingTrajectoryCalculator = null;
-         this.swingOverPlanarRegionsTrajectoryExpander = null;
          this.collisionFreeSwingCalculator = null;
       }
       else
@@ -65,9 +63,6 @@ public class SwingPlanningModule
          this.adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(swingPlannerParameters,
                                                                                         footstepPlannerParameters,
                                                                                         walkingControllerParameters);
-         this.swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters,
-                                                                                                      registry,
-                                                                                                      new YoGraphicsListRegistry());
          this.collisionFreeSwingCalculator = new CollisionFreeSwingCalculator(footstepPlannerParameters,
                                                                               swingPlannerParameters,
                                                                               walkingControllerParameters,
@@ -114,11 +109,6 @@ public class SwingPlanningModule
    public AdaptiveSwingTrajectoryCalculator getAdaptiveSwingTrajectoryCalculator()
    {
       return adaptiveSwingTrajectoryCalculator;
-   }
-
-   public SwingOverPlanarRegionsTrajectoryExpander getSwingOverPlanarRegionsTrajectoryExpander()
-   {
-      return swingOverPlanarRegionsTrajectoryExpander;
    }
 
    public CollisionFreeSwingCalculator getCollisionFreeSwingCalculator()

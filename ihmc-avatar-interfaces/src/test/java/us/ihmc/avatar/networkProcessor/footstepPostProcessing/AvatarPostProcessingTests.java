@@ -166,7 +166,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
                                                          footstepPlannerParameters);
       //      request.setRequestedPathHeading(Math.toRadians(30.0));
 
-      request.setRequestedSwingPlanner(SwingPlannerType.TWO_WAYPOINT_POSITION.toByte());
+      request.setRequestedSwingPlanner(SwingPlannerType.MULTI_WAYPOINT_POSITION.toByte());
 
       runTest(request);
    }
@@ -201,7 +201,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
                                                                goalPose,
                                                                footstepPlannerParameters);
       requestPacket.setTimeout(10.0);
-      requestPacket.setRequestedSwingPlanner(SwingPlannerType.TWO_WAYPOINT_POSITION.toByte());
+      requestPacket.setRequestedSwingPlanner(SwingPlannerType.MULTI_WAYPOINT_POSITION.toByte());
 
       runTest(requestPacket);
    }

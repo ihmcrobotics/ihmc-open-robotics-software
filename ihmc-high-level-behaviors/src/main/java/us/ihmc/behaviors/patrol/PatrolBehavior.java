@@ -267,7 +267,7 @@ public class PatrolBehavior extends LocalOnlyBehaviorTreeNodeExecutor
          defaultFootstepPlannerParameters.setMaximumStepYaw(1.1); // enable quick turn arounds
       }
 
-      SwingPlannerType swingPlannerType = swingOvers.get() ? SwingPlannerType.TWO_WAYPOINT_POSITION : SwingPlannerType.NONE;
+      SwingPlannerType swingPlannerType = swingOvers.get() ? SwingPlannerType.MULTI_WAYPOINT_POSITION : SwingPlannerType.NONE;
       footstepPlanResultNotification = footstepPlannerToolbox.requestPlan(start, goal, latestPlanarRegionList, defaultFootstepPlannerParameters, swingPlannerType);
    }
 
