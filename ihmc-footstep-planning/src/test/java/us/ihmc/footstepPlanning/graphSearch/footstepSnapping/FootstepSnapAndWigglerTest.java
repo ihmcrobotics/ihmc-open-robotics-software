@@ -278,8 +278,7 @@ public class FootstepSnapAndWigglerTest
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       parameters.setMinClearanceFromStance(0.0);
 
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
 
       FootstepSnapData snapData1 = new FootstepSnapData();
       FootstepSnapData snapData2 = new FootstepSnapData();

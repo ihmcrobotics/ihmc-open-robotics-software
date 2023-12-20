@@ -86,8 +86,7 @@ public class FootstepPoseCheckerTest
    {
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
@@ -123,8 +122,7 @@ public class FootstepPoseCheckerTest
    {
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
@@ -160,8 +158,7 @@ public class FootstepPoseCheckerTest
    {
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
@@ -213,8 +210,7 @@ public class FootstepPoseCheckerTest
    {
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
