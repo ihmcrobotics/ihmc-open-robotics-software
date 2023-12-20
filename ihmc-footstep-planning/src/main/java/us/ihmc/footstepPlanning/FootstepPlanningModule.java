@@ -588,12 +588,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return aStarFootstepPlanner.getSwingPlanningModule().getAdaptiveSwingTrajectoryCalculator();
    }
 
-   // TODO need to replace this with a different planner.
-   public SwingOverPlanarRegionsTrajectoryExpander getSwingOverPlanarRegionsTrajectoryExpander()
-   {
-      return aStarFootstepPlanner.getSwingPlanningModule().getSwingOverPlanarRegionsTrajectoryExpander();
-   }
-
    public SwingPlanningModule getSwingPlanningModule()
    {
       return aStarFootstepPlanner.getSwingPlanningModule();
