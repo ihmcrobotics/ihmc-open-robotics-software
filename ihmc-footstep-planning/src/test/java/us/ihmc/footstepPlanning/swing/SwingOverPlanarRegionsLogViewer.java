@@ -35,6 +35,10 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+/**
+ * This class doesn't really work anymore. The swing over planar regions planner has been removed from the FootstepPlanningModule. A local instance of
+ * planning for the footstep plan should be implemented for this viewer to work sufficiently well.
+ */
 public class SwingOverPlanarRegionsLogViewer
 {
    public SwingOverPlanarRegionsLogViewer(String fileName)
@@ -84,7 +88,7 @@ public class SwingOverPlanarRegionsLogViewer
       endGraphics.addExtrudedPolygon(foot, 0.02, YoAppearance.Color(Color.RED));
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-      YoGraphicsListRegistry yoGraphicsListRegistry = planningModule.getSwingOverPlanarRegionsTrajectoryExpander().getGraphicsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       YoFramePoint3D firstWaypoint = new YoFramePoint3D("firstWaypoint", ReferenceFrame.getWorldFrame(), registry);
       YoFramePoint3D secondWaypoint = new YoFramePoint3D("secondWaypoint", ReferenceFrame.getWorldFrame(), registry);
@@ -94,12 +98,11 @@ public class SwingOverPlanarRegionsLogViewer
 
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("environment", planarRegionsList, 1e-2, false);
 
-      SwingOverPlanarRegionsTrajectoryExpander expander = planningModule.getSwingOverPlanarRegionsTrajectoryExpander();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
 
-      SwingOverPlanarRegionsVisualizer visualizer = new SwingOverPlanarRegionsVisualizer(scs, registry, yoGraphicsListRegistry, foot, expander);
-      expander.attachVisualizer(visualizer::update);
+//      SwingOverPlanarRegionsVisualizer visualizer = new SwingOverPlanarRegionsVisualizer(scs, registry, yoGraphicsListRegistry, foot, expander);
+//      expander.attachVisualizer(visualizer::update);
 
       scs.setDT(1.0, 1);
       scs.addYoRegistry(registry);
@@ -110,7 +113,7 @@ public class SwingOverPlanarRegionsLogViewer
       planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getHeightMapData(),
                                                                     footstepPlan,
                                                                     request.getStartFootPoses(),
-                                                                    SwingPlannerType.TWO_WAYPOINT_POSITION);
+                                                                    SwingPlannerType.MULTI_WAYPOINT_POSITION);
 
       scs.startOnAThread();
       scs.cropBuffer();

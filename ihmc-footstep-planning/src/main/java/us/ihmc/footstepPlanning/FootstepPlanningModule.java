@@ -66,10 +66,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
-   private final NarrowPassageBodyPathOptimizer narrowPassageBodyPathOptimizer;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
    private final AStarBodyPathPlannerInterface bodyPathPlannerInterface;
-   private final List<VariableDescriptor> bodyPathVariableDescriptors;
 
    // TODO plan then snap planner needs to work for height maps.
    private final PlanThenSnapPlanner planThenSnapPlanner;
@@ -152,9 +150,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.aStarBodyPathPlannerParameters = aStarBodyPathPlannerParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
 
-      BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
-      this.narrowPassageBodyPathOptimizer = new NarrowPassageBodyPathOptimizer(footstepPlannerParameters, null);
-
       this.useGPU = useGPU;
       if (useGPU)
       {
@@ -174,7 +169,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                                            stopwatch,
                                                            statusCallbacks);
 
-      this.bodyPathVariableDescriptors = collectVariableDescriptors(bodyPathPlannerInterface.getRegistry());
       this.footstepPlanVariableDescriptors = collectVariableDescriptors(aStarFootstepPlanner.getRegistry());
    }
 
@@ -236,14 +230,12 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       // Update planar regions
       boolean flatGroundMode = request.getAssumeFlatGround() || !heightMapAvailable;
-      // TODO need to do this for height map.
-//      narrowPassageBodyPathOptimizer.setPlanarRegionsList(planarRegionsList);
 
       // record time
       output.getPlannerTimings().setTimeBeforePlanningSeconds(stopwatch.lap());
       output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());
 
-      if (request.getPlanBodyPath() && !flatGroundMode && heightMapAvailable)
+      if (request.getPlanBodyPath() && !flatGroundMode)
       {
          bodyPathPlannerInterface.handleRequest(request, output);
          List<Pose3D> bodyPathWaypoints = output.getBodyPath();
@@ -274,21 +266,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             double alphaIntermediateGoal = request.getHorizonLength() / pathLength;
             bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
          }
-      }
-      else if (visibilityGraphParameters.getOptimizeForNarrowPassage())
-      {
-         narrowPassageBodyPathOptimizer.setWaypointsFromStartAndEndPoses(startMidFootPose, goalMidFootPose);
-         List<Pose3DReadOnly> waypoints = narrowPassageBodyPathOptimizer.runNarrowPassageOptimizer();
-
-         bodyPathPlanHolder.setPoseWaypoints(waypoints);
-         double pathLength = bodyPathPlanHolder.computePathLength(0.0);
-         if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
-         {
-            double alphaIntermediateGoal = request.getHorizonLength() / pathLength;
-            bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
-         }
-
-         reportBodyPathPlan(narrowPassageBodyPathOptimizer.getBodyPathPlanningResult());
       }
       else
       {
