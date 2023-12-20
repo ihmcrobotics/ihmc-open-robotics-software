@@ -30,8 +30,6 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -96,7 +94,7 @@ public class AStarFootstepPlanner
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
       this.footPolygons = footPolygons;
-      this.plannerEnvironmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
+      this.plannerEnvironmentHandler = new FootstepPlannerEnvironmentHandler();
       this.snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters, plannerEnvironmentHandler);
       this.stopwatch = stopwatch;
       this.statusCallbacks = statusCallbacks;
@@ -166,7 +164,7 @@ public class AStarFootstepPlanner
       }
 
       snapper.clearSnapData();
-      plannerEnvironmentHandler.setFallbackHeightMap(heightMapData);
+      plannerEnvironmentHandler.setHeightMap(heightMapData);
 
       checker.setHeightMapData(heightMapData);
       stepCostCalculator.setHeightMapData(heightMapData);

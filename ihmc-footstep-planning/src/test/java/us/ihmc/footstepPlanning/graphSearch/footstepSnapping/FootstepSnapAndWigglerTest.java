@@ -331,13 +331,13 @@ public class FootstepSnapAndWigglerTest
          stepPolygon.scale(scale);
          stepPolygon.update();
 
-         double distance = FootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, false);
+         double distance = PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, false);
 
          // distance measured from step vertex to closest region edge
          double expectedDistance = (scale > 1.0) ? (- Math.sqrt(2.0) * (scale - 1.0)) : (1.0 - scale);
          double epsilon = 1e-6;
 
-         Assertions.assertTrue(Math.abs(expectedDistance - distance) < epsilon, "FootstepNodeSnapAndWiggler.computeAchievedDeltaInside failing for convex region");
+         Assertions.assertTrue(Math.abs(expectedDistance - distance) < epsilon, "PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside failing for convex region");
       }
    }
 
@@ -369,17 +369,17 @@ public class FootstepSnapAndWigglerTest
       PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(), concaveHullVertices, Arrays.asList(convexHull));
       double epsilon = 1e-6;
 
-      double distance = FootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
+      double distance = PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
       double expectedDistance = 0.0;
-      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "FootstepNodeSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
+      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
 
       double dx = 0.01, dy = 0.0;
       transform.getTranslation().set(dx, dy, 0.0);
       stepPolygon.applyTransform(transform);
 
-      distance = FootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
+      distance = PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
       expectedDistance = - dx / Math.sqrt(2.0);
-      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "FootstepNodeSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
+      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
 
       stepPolygon.applyInverseTransform(transform);
       dx = -0.01;
@@ -387,9 +387,9 @@ public class FootstepSnapAndWigglerTest
       transform.getTranslation().set(dx, dy, 0.0);
       stepPolygon.applyTransform(transform);
 
-      distance = FootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
+      distance = PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
       expectedDistance = - dx / Math.sqrt(2.0);
-      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "FootstepNodeSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
+      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
 
       stepPolygon.applyInverseTransform(transform);
       dx = 0.0;
@@ -397,9 +397,9 @@ public class FootstepSnapAndWigglerTest
       transform.getTranslation().set(dx, dy, 0.0);
       stepPolygon.applyTransform(transform);
 
-      distance = FootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
+      distance = PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
       expectedDistance = - dy / Math.sqrt(2.0);
-      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "FootstepNodeSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
+      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
 
       stepPolygon.applyInverseTransform(transform);
       dx = 0.0;
@@ -407,9 +407,9 @@ public class FootstepSnapAndWigglerTest
       transform.getTranslation().set(dx, dy, 0.0);
       stepPolygon.applyTransform(transform);
 
-      distance = FootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
+      distance = PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
       expectedDistance = - dy / Math.sqrt(2.0);
-      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "FootstepNodeSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
+      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
    }
 
    @Test
