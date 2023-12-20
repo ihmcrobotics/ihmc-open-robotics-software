@@ -129,10 +129,9 @@ public class FootstepPathCalculatorModule
          LogTools.info("Starting to compute path...");
       }
 
-      PlanarRegionsList planarRegionsList = planarRegionsReference.get();
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapReference.get());
 
-      if (planarRegionsList == null && heightMapData == null)
+      if (heightMapData == null)
          return;
 
       if (leftFootStartPose.get() == null || rightFootStartPose.get() == null)
@@ -147,7 +146,6 @@ public class FootstepPathCalculatorModule
       try
       {
          FootstepPlannerRequest request = new FootstepPlannerRequest();
-         request.setPlanarRegionsList(planarRegionsList);
          request.setHeightMapData(heightMapData);
          request.setTimeout(plannerTimeoutReference.get());
          request.setMaximumIterations(plannerMaxIterationsReference.get());

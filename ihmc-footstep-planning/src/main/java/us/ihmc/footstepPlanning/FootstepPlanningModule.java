@@ -66,7 +66,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
-   private final VisibilityGraphPathPlanner visibilityGraphPlanner;
    private final NarrowPassageBodyPathOptimizer narrowPassageBodyPathOptimizer;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
    private final AStarBodyPathPlannerInterface bodyPathPlannerInterface;
@@ -154,7 +153,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.footstepPlannerParameters = footstepPlannerParameters;
 
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
-      this.visibilityGraphPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor);
       this.narrowPassageBodyPathOptimizer = new NarrowPassageBodyPathOptimizer(footstepPlannerParameters, null);
 
       this.useGPU = useGPU;
@@ -519,11 +517,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public FootstepChecker getChecker()
    {
       return aStarFootstepPlanner.getChecker();
-   }
-
-   public VisibilityGraphPathPlanner getVisibilityGraphPlanner()
-   {
-      return visibilityGraphPlanner;
    }
 
    public BodyPathPlan getBodyPathPlan()

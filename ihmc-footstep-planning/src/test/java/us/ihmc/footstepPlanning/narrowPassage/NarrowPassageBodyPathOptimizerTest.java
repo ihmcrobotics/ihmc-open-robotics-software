@@ -17,6 +17,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
@@ -28,6 +29,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 
@@ -130,7 +132,7 @@ public class NarrowPassageBodyPathOptimizerTest
       request.setPlanBodyPath(true);
       request.setSnapGoalSteps(false);
       request.setAssumeFlatGround(false);
-      request.setPlanarRegionsList(planarRegionsList);
+      request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList)));
 
       FootstepPlannerOutput plannerOutput = module.handleRequest(request);
       assertEquals(BodyPathPlanningResult.FOUND_SOLUTION, plannerOutput.getBodyPathPlanningResult());

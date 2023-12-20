@@ -23,6 +23,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.depthData.CollisionShapeTester;
@@ -289,8 +290,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
          request.setPlanBodyPath(false);
          request.setPerformAStarSearch(true);
-         request.setHeightMapData(null);
-         request.setPlanarRegionsList(planarRegions.get());
+         request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegions.get())));
          request.setRequestedInitialStanceSide(lastStepSide);
 
          LogTools.info("Planning step");
