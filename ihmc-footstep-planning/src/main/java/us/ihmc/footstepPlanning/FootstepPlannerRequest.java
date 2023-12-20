@@ -96,12 +96,6 @@ public class FootstepPlannerRequest
    private double horizonLength;
 
    /**
-    * todo REMOVE
-    * Planar regions. May be null or empty to enable flat ground mode.
-    */
-   private PlanarRegionsList planarRegionsList;
-
-   /**
     * Height map. May be null to enable flat ground mode.
     */
    private HeightMapData heightMapData;
@@ -502,12 +496,6 @@ public class FootstepPlannerRequest
       for (int i = 0; i < bodyPathWaypoints.size(); i++)
       {
          requestPacket.getBodyPathWaypoints().add().set(bodyPathWaypoints.get(i));
-      }
-
-      if (getPlanarRegionsList() != null)
-      {
-         PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList());
-         requestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
       }
 
       if (getHeightMapData() != null)

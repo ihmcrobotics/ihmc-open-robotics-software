@@ -91,7 +91,15 @@ public class SwingPlanningModule
          return;
       }
 
-      if (swingPlannerType == SwingPlannerType.MULTI_WAYPOINT_POSITION && collisionFreeSwingCalculator != null)
+      if (swingPlannerType == SwingPlannerType.PROPORTION && adaptiveSwingTrajectoryCalculator != null && false)
+      {
+         // TODO need to make work with the height m ap.
+//         adaptiveSwingTrajectoryCalculator.setPlanarRegionsList(planarRegionsList);
+         adaptiveSwingTrajectoryCalculator.setSwingParameters(startFootPoses, footstepPlan);
+         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+            swingTrajectories.add(null);
+      }
+      else if (swingPlannerType == SwingPlannerType.MULTI_WAYPOINT_POSITION && collisionFreeSwingCalculator != null)
       {
          collisionFreeSwingCalculator.setHeightMapData(heightMapData);
          collisionFreeSwingCalculator.computeSwingTrajectories(startFootPoses, footstepPlan);

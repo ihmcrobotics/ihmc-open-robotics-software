@@ -398,7 +398,7 @@ public class SwingOverPlanarRegionsTest
       return Pair.of(request, footstepPlan);
    }
 
-   private void checkForCollisions(FootstepPlannerRequest request, FootstepPlan footstepPlan, boolean ignoreGroundSegments)
+   private void checkForCollisions(FootstepPlannerRequest request, PlanarRegionsList planarRegionsList, FootstepPlan footstepPlan, boolean ignoreGroundSegments)
    {
       SwingTrajectoryParameters swingTrajectoryParameters = getWalkingControllerParameters().getSwingTrajectoryParameters();
       TwoWaypointSwingGenerator twoWaypointSwingGenerator = new TwoWaypointSwingGenerator("",
@@ -486,7 +486,7 @@ public class SwingOverPlanarRegionsTest
             double closestDistance = Double.MAX_VALUE;
             Point3DReadOnly closestCollision = null;
 
-            for (PlanarRegion planarRegion : request.getPlanarRegionsList().getPlanarRegionsAsList())
+            for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
             {
                Point3DReadOnly collision = PlanarRegionTools.closestPointOnPlanarRegion(desiredPosition, planarRegion);
                FramePoint3D collisionRelativeToEndFoot = new FramePoint3D(ReferenceFrame.getWorldFrame(), collision);
