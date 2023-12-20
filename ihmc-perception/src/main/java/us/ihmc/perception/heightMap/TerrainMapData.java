@@ -44,6 +44,9 @@ public class TerrainMapData
       this.cellsPerMeter = data.cellsPerMeter;
       this.localGridSize = data.localGridSize;
       this.heightScaleFactor = data.heightScaleFactor;
+      this.heightOffset = data.heightOffset;
+      this.sensorOrigin.set(data.sensorOrigin);
+      this.zUpToWorldTransform.set(data.zUpToWorldTransform);
    }
 
    public TerrainMapData(int height, int width)
@@ -58,6 +61,12 @@ public class TerrainMapData
       this.heightMap = terrainMapData.getHeightMap().clone();
       this.contactMap = terrainMapData.getContactMap().clone();
       this.terrainCostMap = terrainMapData.getTerrainCostMap().clone();
+   }
+
+   public int getLocalIndex(float coordinate, float center)
+   {
+      int localIndex = (int) ((coordinate - center) * cellsPerMeter + localGridSize / 2);
+      return localIndex;
    }
 
    public float getHeightLocal(int rIndex, int cIndex)
@@ -78,17 +87,19 @@ public class TerrainMapData
       return getHeightLocal(rIndex, cIndex);
    }
 
+   public float getContactScoreLocal(int rIndex, int cIndex)
+   {
+      if (rIndex < 0 || rIndex >= localGridSize || cIndex < 0 || cIndex >= localGridSize)
+         return 0.0f;
+
+      return (float) ((heightMap.ptr(rIndex, cIndex).get() & 0xFF));
+   }
+
    public float getContactScoreInWorld(float x, float y)
    {
       int rIndex = getLocalIndex(x, sensorOrigin.getX32());
       int cIndex = getLocalIndex(y, sensorOrigin.getY32());
       return getContactScoreLocal(rIndex, cIndex);
-   }
-
-   public int getLocalIndex(float coordinate, float center)
-   {
-      int localIndex = (int) ((coordinate - center) * cellsPerMeter + localGridSize / 2);
-      return localIndex;
    }
 
    public void setHeightLocal(float height, int rIndex, int cIndex)
@@ -110,11 +121,6 @@ public class TerrainMapData
          double height = heightMapData.getHeightAt(key);
          setHeightLocal((float) height, xIndex, yIndex);
       }
-   }
-
-   public float getContactScoreLocal(int rIndex, int cIndex)
-   {
-      return (float) ((heightMap.ptr(rIndex, cIndex).get() & 0xFF));
    }
 
    public void setSensorOrigin(double originX, double originY)

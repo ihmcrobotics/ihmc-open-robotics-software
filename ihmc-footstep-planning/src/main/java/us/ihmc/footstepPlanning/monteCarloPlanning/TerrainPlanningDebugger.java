@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -19,6 +20,8 @@ import java.util.ArrayList;
 
 public class TerrainPlanningDebugger
 {
+   private boolean enabled = true;
+
    private int offsetX = 0;
    private int offsetY = 0;
    private int height = 201;
@@ -50,6 +53,9 @@ public class TerrainPlanningDebugger
 
    public void setRequest(MonteCarloFootstepPlannerRequest request)
    {
+      if (!enabled)
+         return;
+
       this.request = request;
       this.offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * 50.0f);
       this.offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * 50.0f);
@@ -58,6 +64,9 @@ public class TerrainPlanningDebugger
 
    public void refresh(TerrainMapData terrainMapData)
    {
+      if (!enabled)
+         return;
+
       this.offsetX = (int) (terrainMapData.getSensorOrigin().getX() * 50.0f);
       this.offsetY = (int) (terrainMapData.getSensorOrigin().getY() * 50.0f);
 
@@ -71,6 +80,9 @@ public class TerrainPlanningDebugger
 
    public void plotNode(MonteCarloFootstepNode node)
    {
+      if (!enabled)
+         return;
+
       PerceptionDebugTools.plotRectangleNoScale(contactHeatMapColorImage,
                                                 new Point2D((int) (node.getState().getX() - offsetX) * scale, (int) (node.getState().getY() - offsetY) * scale),
                                                 1,
@@ -83,6 +95,9 @@ public class TerrainPlanningDebugger
 
    public void plotNodes(ArrayList<?> nodes)
    {
+      if (!enabled)
+         return;
+
       for (Object node : nodes)
       {
          plotNode((MonteCarloFootstepNode) node);
@@ -91,12 +106,18 @@ public class TerrainPlanningDebugger
 
    public void plotFootPoses(SideDependentList<Pose3D> poses)
    {
+      if (!enabled)
+         return;
+
       plotFootPoses(contactHeatMapColorImage, poses, 1);
       plotFootPoses(heightMapColorImage, poses, 1);
    }
 
    public void plotFootstepPlan(FootstepPlan plan)
    {
+      if (!enabled)
+         return;
+
       plotFootPoses(contactHeatMapColorImage, request.getStartFootPoses(), 2);
       plotFootPoses(heightMapColorImage, request.getStartFootPoses(), 2);
 
@@ -109,6 +130,9 @@ public class TerrainPlanningDebugger
 
    public void display(int delay)
    {
+      if (!enabled)
+         return;
+
       heightMapColorImage.copyTo(top);
       contactHeatMapColorImage.copyTo(bottom);
       PerceptionDebugTools.display("Display", stacked, delay, 1500);
@@ -116,6 +140,9 @@ public class TerrainPlanningDebugger
 
    private void plotFootPoses(Mat image, SideDependentList<Pose3D> poses, int mode)
    {
+      if (!enabled)
+         return;
+
       for (RobotSide side : RobotSide.values)
       {
          Pose3D pose = new Pose3D(poses.get(side));
@@ -145,18 +172,45 @@ public class TerrainPlanningDebugger
       }
    }
 
+   public void printScoreStats(MonteCarloFootstepNode root, MonteCarloFootstepPlannerRequest request, MonteCarloFootstepPlannerParameters parameters)
+   {
+      if (!enabled)
+         return;
+
+      ArrayList<MonteCarloTreeNode> optimalPath = new ArrayList<>();
+      MonteCarloPlannerTools.getOptimalPath(root, optimalPath);
+
+      for (int i = 1; i<optimalPath.size(); i++)
+      {
+         MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) optimalPath.get(i);
+         MonteCarloFootstepNode previousNode = (MonteCarloFootstepNode) optimalPath.get(i-1);
+         double totalScore = MonteCarloPlannerTools.scoreFootstepNode(previousNode, footstepNode, request, parameters, true);
+      }
+   }
+
    public void printContactMap()
    {
+      if (!enabled)
+         return;
+
       PerceptionDebugTools.printMat("Contact Map", request.getTerrainMapData().getContactMap(), 4);
    }
 
    public void printHeightMap()
    {
+      if (!enabled)
+         return;
+
       PerceptionDebugTools.printMat("Height Map", request.getTerrainMapData().getHeightMap(), 4);
    }
 
    public Mat getDisplayImage()
    {
       return stacked;
+   }
+
+   public void setEnabled(boolean enabled)
+   {
+      this.enabled = enabled;
    }
 }

@@ -7,7 +7,7 @@
     "upperBound" : 400
   },
   "Number of simulations" : {
-    "value" : 81,
+    "value" : 14,
     "lowerBound" : 1,
     "upperBound" : 400
   },
@@ -17,17 +17,17 @@
     "upperBound" : 1.0
   },
   "Feasible Contact Reward" : {
-    "value" : 702.380955,
+    "value" : 36.697246,
     "lowerBound" : 0.0,
     "upperBound" : 1000.0
   },
   "Goal Reward" : {
-    "value" : 63829.785585,
+    "value" : 48.863637,
     "lowerBound" : 0.0,
-    "upperBound" : 100000.0
+    "upperBound" : 100.0
   },
   "Max number of visited nodes" : {
-    "value" : 60820,
+    "value" : 37108,
     "lowerBound" : 1000,
     "upperBound" : 1000000
   },
@@ -37,32 +37,32 @@
     "upperBound" : 1000
   },
   "Max transfer height" : {
-    "value" : 0.4,
+    "value" : 0.45,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
   "Max transfer depth" : {
-    "value" : 0.4,
+    "value" : 0.45,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
   "Max transfer yaw" : {
-    "value" : 0.5,
+    "value" : 0.01,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
   "Feasible contact cutoff" : {
-    "value" : 0.856354,
+    "value" : 0.844262,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Exploration constant" : {
-    "value" : 0.01,
+    "value" : 0.150376,
     "lowerBound" : 0.0,
     "upperBound" : 5.0
   },
   "Initial value cutoff" : {
-    "value" : 63,
+    "value" : 824,
     "lowerBound" : -1000,
     "upperBound" : 1000
   },
@@ -72,12 +72,12 @@
     "upperBound" : 12
   },
   "Sided yaw offset" : {
-    "value" : 0.465935,
+    "value" : 0.709032,
     "lowerBound" : 0.0,
     "upperBound" : 3.14
   },
   "Search yaw band" : {
-    "value" : 0.332715,
+    "value" : 0.270331,
     "lowerBound" : 0.0,
     "upperBound" : 3.14
   },
@@ -87,17 +87,17 @@
     "upperBound" : 0.3
   },
   "Search outer radius" : {
-    "value" : 0.751825,
+    "value" : 0.656934,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Search skip size" : {
-    "value" : 3,
+    "value" : 2,
     "lowerBound" : 0,
     "upperBound" : 10
   },
   "Transfer yaw cost" : {
-    "value" : 0.5,
+    "value" : 0.578231,
     "lowerBound" : 0.0,
     "upperBound" : 5.0
   },

@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -110,6 +111,10 @@ public class RDXStancePoseSelectionPanel implements RenderableProvider
       if (terrainMapData != null)
       {
          double height = terrainMapData.getHeightInWorld(pickPointInWorld.getX32(), pickPointInWorld.getY32());
+         double contactScore = terrainMapData.getContactScoreInWorld(pickPointInWorld.getX32(), pickPointInWorld.getY32());
+
+         LogTools.debug("Indices: {} -> Height: {}, Contact: {}", pickPointInWorld, height, contactScore);
+
          latestPose.getTranslation().setZ(height);
          SideDependentList<FramePose3D> stancePoses = stancePoseCalculator.getStancePoses(latestPose, terrainMapData);
          for (RobotSide robotSide : RobotSide.values)

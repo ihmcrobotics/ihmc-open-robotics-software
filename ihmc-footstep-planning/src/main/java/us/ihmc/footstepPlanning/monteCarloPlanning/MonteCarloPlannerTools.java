@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -326,7 +327,7 @@ public class MonteCarloPlannerTools
          FramePose3D footstepPose = getFramePose3D(nodeX, nodeY, nodeZ, nodeYaw);
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
-         LogTools.info("Footstep Node -> Position: {}, Yaw: {}", footstepPose.getPosition(), footstepPose.getYaw());
+         LogTools.debug("Footstep Node -> Position: {}, Yaw: {}", footstepPose.getPosition(), footstepPose.getYaw());
       }
       return footstepPlan;
    }
@@ -420,7 +421,8 @@ public class MonteCarloPlannerTools
    public static double scoreFootstepNode(MonteCarloFootstepNode oldNode,
                                           MonteCarloFootstepNode newNode,
                                           MonteCarloFootstepPlannerRequest request,
-                                          MonteCarloFootstepPlannerParameters plannerParameters)
+                                          MonteCarloFootstepPlannerParameters plannerParameters,
+                                          boolean debug)
    {
       double score = 0.0;
 
@@ -446,19 +448,32 @@ public class MonteCarloPlannerTools
       startPosition.scale(0.5f);
       startPosition.scale(50.0f);
 
+      Vector2D stepVector = new Vector2D();
+      stepVector.sub(currentPosition, previousPosition);
+
+      Vector2D goalVector = new Vector2D();
+      goalVector.sub(goalPosition, previousPosition);
+      goalVector.normalize();
+
+      double progressToGoal = goalVector.dot(stepVector);
+
       double yawFromStartToGoal = Math.atan2(goalPosition.getY() - startPosition.getY(), goalPosition.getX() - startPosition.getX());
       double yawDifferenceFromReference = Math.abs(yawFromStartToGoal - oldNode.getState().getZ());
       double distanceFromReferenceLine = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(currentPosition, startPosition, goalPosition);
-      double referenceCost = distanceFromReferenceLine * 0.01f + yawDifferenceFromReference * 0.01f;
+      double referenceCost = distanceFromReferenceLine * 10.0f + yawDifferenceFromReference * 10.0f;
 
-      double goalReward = plannerParameters.getGoalReward() / (currentPosition.distanceSquared(goalPosition));
-      double contactReward = (((int) request.getTerrainMapData().getContactScoreLocal(rIndex, cIndex) & 0xFF) / 255.0 - plannerParameters.getFeasibleContactCutoff())
-                            * plannerParameters.getFeasibleContactReward();
+      double goalReward = plannerParameters.getGoalReward() * progressToGoal;
+      double contactReward =
+            (((int) request.getTerrainMapData().getContactScoreLocal(rIndex, cIndex) & 0xFF) / 255.0 - plannerParameters.getFeasibleContactCutoff())
+            * plannerParameters.getFeasibleContactReward();
 
       double stepYawCost = Math.abs(oldNode.getState().getZ() - newNode.getState().getZ()) * 0.01f;
       double stepDistanceCost = Math.abs(previousPosition.distance(currentPosition)) * 0.01f;
       double stepHeightCost = (request.getTerrainMapData().getHeightLocal(rIndex, cIndex) - request.getTerrainMapData().getHeightLocal(rIndex, cIndex)) * 0.01f;
       double edgeCost = stepYawCost + stepDistanceCost + stepHeightCost;
+
+      if (debug)
+         LogTools.info(String.format("Rewards -> Goal: %.2f, Contact: %.2f, Edge: %.2f, Reference: %.2f", goalReward, contactReward, edgeCost, referenceCost));
 
       score = goalReward + contactReward - edgeCost - referenceCost;
       return score;

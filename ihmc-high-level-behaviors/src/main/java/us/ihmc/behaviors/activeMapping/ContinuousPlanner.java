@@ -106,6 +106,7 @@ public class ContinuousPlanner
          case INCREMENTAL_PLANNING:
             monteCarloFootstepPlannerParameters = new MonteCarloFootstepPlannerParameters();
             monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(monteCarloFootstepPlannerParameters);
+            monteCarloFootstepPlanner.getDebugger().setEnabled(false);
             collisionFreeSwingCalculator = new CollisionFreeSwingCalculator(robotModel.getFootstepPlannerParameters("ForContinuousWalking"),
                                                                             robotModel.getSwingPlannerParameters(),
                                                                             robotModel.getWalkingControllerParameters(),
@@ -554,10 +555,14 @@ public class ContinuousPlanner
       {
          case WALK_TO_GOAL ->
          {
-            LogTools.info("Setting Previously Sent Plan for Reference");
+            LogTools.warn("Setting Previously Sent Plan for Reference");
             this.previousFootstepPlan = new FootstepPlan(latestFootstepPlan);
          }
-         case INCREMENTAL_PLANNING -> monteCarloFootstepPlanner.transitionToOptimal();
+         case INCREMENTAL_PLANNING ->
+         {
+            LogTools.warn("Calling Transition Callback");
+            monteCarloFootstepPlanner.transitionToOptimal();
+         }
       }
    }
 

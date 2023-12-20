@@ -60,6 +60,8 @@ public class MonteCarloFootstepPlanner
 
       FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root, request);
 
+      debugger.printScoreStats(root, request, parameters);
+
       statistics.stopTotalTime();
       statistics.setLayerCountsString(MonteCarloPlannerTools.getLayerCountsString(root));
       statistics.logToFile(false, true);
@@ -127,23 +129,23 @@ public class MonteCarloFootstepPlanner
       for (Object newStateObj : availableStates)
       {
          MonteCarloFootstepNode newState = (MonteCarloFootstepNode) newStateObj;
-         double score = MonteCarloPlannerTools.scoreFootstepNode(node, newState, request, parameters);
+         double score = MonteCarloPlannerTools.scoreFootstepNode(node, newState, request, parameters, false);
 
-         if (node.getLevel() == 0)
-         {
-            debugger.plotNodes(availableStates);
-            //LogTools.info(String.format("Previous: %d, %d, %.2f, Node: %d, %d, %.2f, Action: %d, %d, %.2f, Score: %.2f",
-            //                            (int) node.getState().getX(),
-            //                            (int) node.getState().getY(),
-            //                            node.getState().getZ(),
-            //                            (int) newState.getState().getX(),
-            //                            (int) newState.getState().getY(),
-            //                            newState.getState().getZ(),
-            //                            (int) (newState.getState().getX() - node.getState().getX()),
-            //                            (int) (newState.getState().getY() - node.getState().getY()),
-            //                            newState.getState().getZ() - node.getState().getZ(),
-            //                            score));
-         }
+         //if (node.getLevel() == 0)
+         //{
+         //   debugger.plotNodes(availableStates);
+         //   //LogTools.info(String.format("Previous: %d, %d, %.2f, Node: %d, %d, %.2f, Action: %d, %d, %.2f, Score: %.2f",
+         //   //                            (int) node.getState().getX(),
+         //   //                            (int) node.getState().getY(),
+         //   //                            node.getState().getZ(),
+         //   //                            (int) newState.getState().getX(),
+         //   //                            (int) newState.getState().getY(),
+         //   //                            newState.getState().getZ(),
+         //   //                            (int) (newState.getState().getX() - node.getState().getX()),
+         //   //                            (int) (newState.getState().getY() - node.getState().getY()),
+         //   //                            newState.getState().getZ() - node.getState().getZ(),
+         //   //                            score));
+         //}
 
          if (node.getLevel() < parameters.getMaxTreeDepth() && score > parameters.getInitialValueCutoff())
          {
@@ -201,7 +203,7 @@ public class MonteCarloFootstepPlanner
          simulationState = nextStates.get(actionIndex);
 
          //LogTools.info(String.format("Simulation %d, Random State: %s, Actions: %d, Side:%s", i, randomState.getPosition(), nextStates.size(), randomState.getRobotSide()));
-         score += MonteCarloPlannerTools.scoreFootstepNode(node, simulationState, request, parameters);
+         score += MonteCarloPlannerTools.scoreFootstepNode(node, simulationState, request, parameters, false);
          //LogTools.info("Action Taken: {}, Score: {}", actionIndex, score);
       }
 

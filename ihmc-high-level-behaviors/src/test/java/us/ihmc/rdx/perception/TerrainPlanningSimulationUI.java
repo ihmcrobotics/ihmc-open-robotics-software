@@ -650,7 +650,6 @@ public class TerrainPlanningSimulationUI
                monteCarloFootstepPlanner.reset(request);
             }
 
-            LogTools.warn("Planning Now");
             FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(request);
 
             long timeEnd = System.nanoTime();
