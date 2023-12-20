@@ -9,17 +9,20 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import perception_msgs.msg.dds.DetectedObjectPacket;
 import perception_msgs.msg.dds.IterativeClosestPointRequest;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -49,7 +52,6 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    private final RestartableThrottledThread requestPublisherThread;
 
    private RDXModelInstance modelInstance;
-   private RDXReferenceFrameGraphic icpFrameGraphic = new RDXReferenceFrameGraphic(0.2);
 
    private final ImFloat xLength = new ImFloat(DEFAULT_DIMENSION);
    private final ImFloat yLength = new ImFloat(DEFAULT_DIMENSION);
@@ -60,6 +62,9 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
 
    private final ImBoolean runICP = new ImBoolean(false);
    private final ImBoolean useICPPose = new ImBoolean(false);
+   private final RecyclingArrayList<Point3D32> icpObjectPointCloud = new RecyclingArrayList<>(32768, Point3D32::new);
+   private final RDXPointCloudRenderer icpObjectPointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXReferenceFrameGraphic icpFrameGraphic = new RDXReferenceFrameGraphic(0.2);
 
    public RDXPrimitiveRigidBodySceneNode(PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode, RDX3DPanel panel3D)
    {
@@ -80,6 +85,9 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
                                                               ICP_REQUEST_FREQUENCY,
                                                               this::updateICP);
       icpResultSubscription = ros2Helper.subscribe(PerceptionAPI.ICP_RESULT, message -> message.getId() == getSceneNode().getID());
+
+      icpObjectPointCloudRenderer.create(100000);
+      panel3D.getScene().addRenderableProvider(icpObjectPointCloudRenderer, RDXSceneLevel.VIRTUAL);
    }
 
    private void updateICP()
@@ -101,6 +109,13 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
       if (runICP.get() && icpResultSubscription.hasReceivedFirstMessage())
       {
          icpFrameGraphic.setPoseInWorldFrame(icpResultSubscription.getLatest().getPose());
+         getModelInstance().setPoseInWorldFrame(icpResultSubscription.getLatest().getPose());
+
+         icpObjectPointCloud.clear();
+         for (Point3D32 point3D32 : icpResultSubscription.getLatest().getObjectPointCloud())
+            icpObjectPointCloud.add().set(point3D32);
+         icpObjectPointCloudRenderer.setPointsToRender(icpObjectPointCloud, Color.GOLD);
+         icpObjectPointCloudRenderer.updateMesh();
       }
    }
 
