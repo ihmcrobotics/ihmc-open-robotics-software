@@ -3,11 +3,14 @@ package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
@@ -23,18 +26,18 @@ public class ObstacleBetweenStepsChecker
    private static final boolean DEBUG = false;
 
    private PlanarRegionsList planarRegionsList;
-   private final FootstepSnapAndWiggler snapper;
+   private final FootstepSnapperReadOnly snapper;
    private final BooleanSupplier checkForPathCollisions;
    private final DoubleSupplier idealFootstepWidth;
    private final DoubleSupplier heightOffset;
    private final DoubleSupplier heightExtrusion;
 
-   public ObstacleBetweenStepsChecker(FootstepPlannerParametersReadOnly parameters, FootstepSnapAndWiggler snapper)
+   public ObstacleBetweenStepsChecker(FootstepPlannerParametersReadOnly parameters, FootstepSnapperReadOnly snapper)
    {
       this(snapper, parameters::checkForPathCollisions, parameters::getIdealFootstepWidth, parameters::getBodyBoxBaseZ, parameters::getBodyBoxHeight);
    }
 
-   public ObstacleBetweenStepsChecker(FootstepSnapAndWiggler snapper,
+   public ObstacleBetweenStepsChecker(FootstepSnapperReadOnly snapper,
                                       BooleanSupplier checkForPathCollisions,
                                       DoubleSupplier idealFootstepWidth,
                                       DoubleSupplier heightOffset,
@@ -62,16 +65,16 @@ public class ObstacleBetweenStepsChecker
       if (previousStep == null || !checkForPathCollisions.getAsBoolean() || !hasPlanarRegions())
          return true;
 
-      FootstepSnapData snapData = snapper.snapFootstep(footstep);
+      FootstepSnapDataReadOnly snapData = snapper.snapFootstep(footstep);
       if (snapData == null)
       {
          return true;
       }
 
-      RigidBodyTransform snapTransform = snapData.getSnapTransform();
+      RigidBodyTransformReadOnly snapTransform = snapData.getSnapTransform();
 
-      FootstepSnapData previousStepSnapData = snapper.snapFootstep(previousStep);
-      RigidBodyTransform previousSnapTransform = previousStepSnapData.getSnapTransform();
+      FootstepSnapDataReadOnly previousStepSnapData = snapper.snapFootstep(previousStep);
+      RigidBodyTransformReadOnly previousSnapTransform = previousStepSnapData.getSnapTransform();
 
       Point3D stepPosition = new Point3D(footstep.getOrComputeMidFootPoint(idealFootstepWidth.getAsDouble()));
       Point3D previousStepPosition = new Point3D(previousStep.getOrComputeMidFootPoint(idealFootstepWidth.getAsDouble()));

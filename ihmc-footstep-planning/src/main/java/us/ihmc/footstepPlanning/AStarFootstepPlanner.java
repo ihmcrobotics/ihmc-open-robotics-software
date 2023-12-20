@@ -154,12 +154,9 @@ public class AStarFootstepPlanner
       result = FootstepPlanningResult.PLANNING;
 
       // Update planar regions
-      boolean hasPlanarRegions = request.getPlanarRegionsList() != null && !request.getPlanarRegionsList().isEmpty();
       boolean hasHeightMap = request.getHeightMapData() != null && !request.getHeightMapData().isEmpty();
-      boolean flatGroundMode = request.getAssumeFlatGround() || (!hasPlanarRegions && !hasHeightMap);
+      boolean flatGroundMode = request.getAssumeFlatGround() || !hasHeightMap;
 
-      PlanarRegionsList planarRegionsListForStepping = flatGroundMode ? null : request.getPlanarRegionsList();
-      PlanarRegionsList planarRegionsListForCollisionChecking = request.getPlanarRegionsList();
       HeightMapData heightMapData = flatGroundMode ? null : request.getHeightMapData();
 
       if (flatGroundMode)
@@ -169,10 +166,8 @@ public class AStarFootstepPlanner
       }
 
       snapper.clearSnapData();
-      plannerEnvironmentHandler.setPrimaryPlanarRegions(planarRegionsListForStepping);
       plannerEnvironmentHandler.setFallbackHeightMap(heightMapData);
 
-      checker.setPlanarRegions(planarRegionsListForCollisionChecking);
       checker.setHeightMapData(heightMapData);
       stepCostCalculator.setHeightMapData(heightMapData);
 
@@ -303,12 +298,6 @@ public class AStarFootstepPlanner
          FootstepSnapData snapData = snapper.snapFootstep(footstepNode.getSecondStep(), footstepNode.getFirstStep(), true);
          PlannedFootstep footstep = new PlannedFootstep(footstepNode.getSecondStepSide());
          footstep.getFootstepPose().set(snapData.getSnappedStepTransform(footstepNode.getSecondStep()));
-         if (snapData.getRegionIndex() > 0)
-         {
-            PlanarRegionsList planarRegionsList = plannerEnvironmentHandler.getPlanarRegionsForFootstep(footstepNode.getSecondStep());
-            PlanarRegion regionSnappedTo = planarRegionsList.getPlanarRegion(snapData.getRegionIndex());
-            footstep.setRegionSnappedTo(regionSnappedTo.copy());
-         }
 
          if (!footstepPlannerParameters.getWiggleWhilePlanning())
          {

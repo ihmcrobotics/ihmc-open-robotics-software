@@ -6,6 +6,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepPlannerBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -32,7 +34,7 @@ public class FootstepChecker implements FootstepCheckerInterface
    private static final double traversabilityThresholdPerimeter = 0.02;
 
    private final FootstepPlannerParametersReadOnly parameters;
-   private final FootstepSnapAndWiggler snapper;
+   private final FootstepSnapperReadOnly snapper;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final ConvexPolygon2D tmpFootPolygon = new ConvexPolygon2D();
 
@@ -58,7 +60,7 @@ public class FootstepChecker implements FootstepCheckerInterface
 
    public FootstepChecker(FootstepPlannerParametersReadOnly parameters,
                           SideDependentList<ConvexPolygon2D> footPolygons,
-                          FootstepSnapAndWiggler snapper,
+                          FootstepSnapperReadOnly snapper,
                           StepReachabilityData stepReachabilityData,
                           YoRegistry parentRegistry)
    {
@@ -118,7 +120,7 @@ public class FootstepChecker implements FootstepCheckerInterface
       }
 
       // Snap footstep to height map/planar regions
-      FootstepSnapData snapData = snapper.snapFootstep(candidateStep, stanceStep, parameters.getWiggleWhilePlanning());
+      FootstepSnapDataReadOnly snapData = snapper.snapFootstep(candidateStep, stanceStep, parameters.getWiggleWhilePlanning());
       candidateStepSnapData.set(snapData);
       heuristicPoseChecker.setApproximateStepDimensions(candidateStep, stanceStep);
       achievedDeltaInside.set(snapData.getAchievedInsideDelta());
@@ -168,7 +170,7 @@ public class FootstepChecker implements FootstepCheckerInterface
       isCollisionFree(candidateStep, stanceStep, startOfSwing);
    }
 
-   private boolean doValidityCheckForHeightMap(DiscreteFootstep candidateStep, FootstepSnapData snapData)
+   private boolean doValidityCheckForHeightMap(DiscreteFootstep candidateStep, FootstepSnapDataReadOnly snapData)
    {
       if (heightMapData == null || heightMapData.isEmpty() || !snapData.getSnappedToHeightMap())
          return true;
@@ -195,7 +197,7 @@ public class FootstepChecker implements FootstepCheckerInterface
       return true;
    }
 
-   private boolean isStepPlacementValid(DiscreteFootstep candidateStep, FootstepSnapData snapData)
+   private boolean isStepPlacementValid(DiscreteFootstep candidateStep, FootstepSnapDataReadOnly snapData)
    {
       // Check valid snap
       if (candidateStepSnapData.getSnapTransform().containsNaN())
@@ -292,7 +294,7 @@ public class FootstepChecker implements FootstepCheckerInterface
 
    private boolean boundingBoxCollisionDetected(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep)
    {
-      FootstepSnapData stanceStepSnapData = snapper.snapFootstep(stanceStep, null, parameters.getWiggleWhilePlanning());
+      FootstepSnapDataReadOnly stanceStepSnapData = snapper.snapFootstep(stanceStep, null, parameters.getWiggleWhilePlanning());
       if (stanceStepSnapData == null)
       {
          return false;
@@ -314,9 +316,6 @@ public class FootstepChecker implements FootstepCheckerInterface
       collisionDetector.setPlanarRegionsList(regionsForCollisionChecking);
       obstacleBetweenStepsChecker.setPlanarRegions(regionsForCollisionChecking);
       cliffAvoider.setPlanarRegionsList(regionsForCollisionChecking);
-
-      // This should already be done elsewhere, but add this clear here for redundancy
-      snapper.clearSnapData();
    }
 
    private void clearLoggedVariables()

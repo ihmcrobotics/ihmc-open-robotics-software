@@ -14,8 +14,6 @@ import java.util.HashMap;
 
 public class FootstepPlannerEnvironmentHandler
 {
-   private PlanarRegionsList primaryPlanarRegions;
-   private PlanarRegionsList fallbackPlanarRegions;
    private HeightMapData fallbackHeightMap;
 
    public enum EnvironmentToUse
@@ -37,9 +35,6 @@ public class FootstepPlannerEnvironmentHandler
       }
    }
 
-   private final ConvexPolygon2D primaryPlanarRegionModeledWorld = new ConvexPolygon2D();
-   private final BoundingBox2D primaryPlanarRegionModeledBoundingBox = new BoundingBox2D();
-
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
 
@@ -53,17 +48,7 @@ public class FootstepPlannerEnvironmentHandler
    public void reset()
    {
       environmentDataHolder.clear();
-      primaryPlanarRegions = null;
-      fallbackPlanarRegions = null;
       fallbackHeightMap = null;
-   }
-
-   public void setPrimaryPlanarRegions(PlanarRegionsList primaryPlanarRegions)
-   {
-      this.primaryPlanarRegions = primaryPlanarRegions;
-      environmentDataHolder.clear();
-
-      computeHullOfRegions(primaryPlanarRegions, primaryPlanarRegionModeledWorld, primaryPlanarRegionModeledBoundingBox);
    }
 
    public void setFallbackHeightMap(HeightMapData fallbackHeightMap)
@@ -74,17 +59,7 @@ public class FootstepPlannerEnvironmentHandler
 
    public boolean flatGroundMode()
    {
-      return !hasPrimaryPlanarRegions() && !hasFallbackPlanarRegions() && !hasFallbackHeightMap();
-   }
-
-   public boolean hasPrimaryPlanarRegions()
-   {
-      return primaryPlanarRegions != null && !primaryPlanarRegions.isEmpty();
-   }
-
-   public boolean hasFallbackPlanarRegions()
-   {
-      return fallbackPlanarRegions != null && !fallbackPlanarRegions.isEmpty();
+      return !hasFallbackHeightMap();
    }
 
    public boolean hasFallbackHeightMap()
@@ -107,17 +82,13 @@ public class FootstepPlannerEnvironmentHandler
          {
             environmentToUseForStep = EnvironmentToUse.FLAT_GROUND;
          }
-         else if (hasPrimaryPlanarRegions() && isFootstepInRegionSet(primaryPlanarRegionModeledWorld, primaryPlanarRegionModeledBoundingBox))
-         {
-            environmentToUseForStep = EnvironmentToUse.PRIMARY_PLANAR_REGIONS;
-         }
          else if (hasFallbackHeightMap())
          {
             environmentToUseForStep = EnvironmentToUse.HEIGHT_MAP;
          }
          else
          {
-            environmentToUseForStep = EnvironmentToUse.PRIMARY_PLANAR_REGIONS;
+            environmentToUseForStep = EnvironmentToUse.FLAT_GROUND;
          }
 
          environmentDataHolder.put(footstep, environmentToUseForStep);
@@ -125,55 +96,8 @@ public class FootstepPlannerEnvironmentHandler
       }
    }
 
-   public PlanarRegionsList getPlanarRegionsForFootstep(DiscreteFootstep footstep)
-   {
-      return getPlanarRegionsForFootstep(computeForFootstep(footstep));
-   }
-
-   public PlanarRegionsList getPlanarRegionsForFootstep(EnvironmentToUse environmentToUse)
-   {
-      if (!environmentToUse.isPlanarRegion())
-         return null;
-
-      if (environmentToUse == EnvironmentToUse.PRIMARY_PLANAR_REGIONS)
-         return primaryPlanarRegions;
-      else
-         return fallbackPlanarRegions;
-   }
-
-   public PlanarRegionsList getPrimaryPlanarRegions()
-   {
-      return primaryPlanarRegions;
-   }
-
    public HeightMapData getFallbackHeightMap()
    {
       return fallbackHeightMap;
-   }
-
-   private boolean isFootstepInRegionSet(ConvexPolygon2DReadOnly modeledHull, BoundingBox2DReadOnly regionModeledBoundingBox)
-   {
-      if (!footPolygon.getPolygonVerticesView().stream().allMatch(regionModeledBoundingBox::isInsideInclusive))
-         return false;
-
-      return footPolygon.getPolygonVerticesView().stream().allMatch(modeledHull::isPointInside);
-   }
-
-   private static void computeHullOfRegions(PlanarRegionsList regions, ConvexPolygon2DBasics modeledWorldToPack, BoundingBox2DBasics boundingBoxToPack)
-   {
-      modeledWorldToPack.clearAndUpdate();
-      boundingBoxToPack.setToNaN();
-      if (regions == null)
-         return;
-
-      for (PlanarRegion region : regions.getPlanarRegionsAsList())
-      {
-         ConvexPolygon2D convexHull = new ConvexPolygon2D(region.getConvexHull());
-         convexHull.applyTransform(region.getTransformToWorld(), false);
-         modeledWorldToPack.addVertices(convexHull);
-         boundingBoxToPack.updateToIncludePoint(region.getBoundingBox3dInWorld().getMinX(), region.getBoundingBox3dInWorld().getMinY());
-         boundingBoxToPack.updateToIncludePoint(region.getBoundingBox3dInWorld().getMaxX(), region.getBoundingBox3dInWorld().getMaxY());
-      }
-      modeledWorldToPack.update();
    }
 }
