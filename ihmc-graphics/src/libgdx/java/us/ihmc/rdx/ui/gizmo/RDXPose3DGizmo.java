@@ -448,7 +448,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          framePose3D.getOrientation().setAndNormalize(axisRotations.get(axis));
          try // Getting an exception here a lot, it's not really a failure, so
          {   // prevent crashing the whole application.
-            framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+            framePose3D.changeFrame(gizmoFrame.getRootFrame());
          }
          catch (NotARotationMatrixException notARotationMatrixException)
          {
