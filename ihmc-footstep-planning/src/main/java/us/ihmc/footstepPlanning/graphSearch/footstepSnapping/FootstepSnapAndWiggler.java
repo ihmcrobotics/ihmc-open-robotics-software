@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.polygonWiggling.*;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
@@ -13,12 +12,9 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
-import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -134,12 +130,9 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    protected FootstepSnapData computeSnapTransform(DiscreteFootstep footstepToSnap, DiscreteFootstep stanceStep)
    {
-      double maximumRegionHeightToConsider = getMaximumRegionHeightToConsider(stanceStep);
       DiscreteFootstepTools.getFootPolygon(footstepToSnap, footPolygonsInSoleFrame.get(footstepToSnap.getRobotSide()), footPolygon);
       boolean snappedToPlanarReigons = false;
-      PlanarRegionsList planarRegionsListToUse = null;
-      boolean snappedToHeightMap = true;
-      RigidBodyTransform snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon, environmentHandler.getFallbackHeightMap(), parameters.getHeightMapSnapThreshold());
+      RigidBodyTransform snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon, environmentHandler.getHeightMap(), parameters.getHeightMapSnapThreshold());
 
       if (snapTransform == null)
       {
@@ -149,17 +142,9 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       {
          FootstepSnapData snapData = new FootstepSnapData(snapTransform);
 
-         if (planarRegionsListToUse != null)
-         {
-            snapData.setRegionIndex(getIndex(planarRegionToPack, planarRegionsListToUse));
-            computeCroppedFoothold(footstepToSnap, snapData);
-         }
-         if (snappedToHeightMap)
-         {
-            snapData.setRMSErrorHeightMap(heightMapSnapper.getNormalizedRMSError());
-            snapData.setHeightMapArea(heightMapSnapper.getArea());
-         }
-         snapData.setSnappedToHeightMap(snappedToHeightMap);
+         snapData.setRMSErrorHeightMap(heightMapSnapper.getNormalizedRMSError());
+         snapData.setHeightMapArea(heightMapSnapper.getArea());
+         snapData.setSnappedToHeightMap(true);
          snapData.setSnappedToPlanarRegions(snappedToPlanarReigons);
 
          return snapData;
@@ -180,27 +165,9 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       return -1;
    }
 
-   private double getMaximumRegionHeightToConsider(DiscreteFootstep stanceStep)
-   {
-      if (stanceStep == null)
-      {
-         return Double.POSITIVE_INFINITY;
-      }
-
-      FootstepSnapData snapData = snapDataHolder.get(stanceStep);
-      if (snapData == null || snapData.getSnapTransform().containsNaN())
-      {
-         return Double.POSITIVE_INFINITY;
-      }
-      else
-      {
-         return parameters.getMaximumSnapHeight() + DiscreteFootstepTools.getSnappedStepHeight(stanceStep, snapData.getSnapTransform());
-      }
-   }
-
    protected void computeWiggleTransform(DiscreteFootstep footstepToWiggle, DiscreteFootstep stanceStep, FootstepSnapData snapData)
    {
-      heightMapSnapWiggler.computeWiggleTransform(footstepToWiggle, environmentHandler.getFallbackHeightMap(), snapData, parameters.getHeightMapSnapThreshold());
+      heightMapSnapWiggler.computeWiggleTransform(footstepToWiggle, environmentHandler.getHeightMap(), snapData, parameters.getHeightMapSnapThreshold());
 
       if (stanceStep != null && snapDataHolder.containsKey(stanceStep))
       {
@@ -222,14 +189,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       }
 
       computeCroppedFoothold(footstepToWiggle, snapData);
-   }
-
-   /**
-    * Extracted to method for testing purposes
-    */
-   protected RigidBodyTransform wiggleIntoConvexHull(ConvexPolygon2D footPolygonInRegionFrame)
-   {
-      return PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegionFrame, planarRegionToPack, wiggleParameters);
    }
 
    private final RigidBodyTransform transform1 = new RigidBodyTransform();
@@ -291,41 +250,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       wiggleParameters.minY = -parameters.getMaximumXYWiggleDistance();
       wiggleParameters.maxYaw = parameters.getMaximumYawWiggle();
       wiggleParameters.minYaw = -parameters.getMaximumYawWiggle();
-   }
-
-   /**
-    * package-private for testing
-    */
-   static double computeAchievedDeltaInside(ConvexPolygon2DReadOnly footPolygon, PlanarRegion planarRegion, boolean useConcaveHull)
-   {
-      double achievedDeltaInside = Double.POSITIVE_INFINITY;
-      ToDoubleFunction<Point2DReadOnly> deltaInsideCalculator;
-
-      if (useConcaveHull)
-      {
-         Vertex2DSupplier concaveHullVertices = Vertex2DSupplier.asVertex2DSupplier(planarRegion.getConcaveHull());
-         deltaInsideCalculator = vertex ->
-         {
-            boolean pointIsInside = StepConstraintPolygonTools.isPointInsidePolygon(concaveHullVertices, vertex);
-            double distanceSquaredFromPerimeter = FootPlacementConstraintCalculator.distanceSquaredFromPerimeter(concaveHullVertices, vertex, null);
-            return (pointIsInside ? 1 : -1) * Math.sqrt(distanceSquaredFromPerimeter);
-         };
-      }
-      else
-      {
-         deltaInsideCalculator = vertex -> -planarRegion.getConvexHull().signedDistance(vertex);
-      }
-
-      for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
-      {
-         double insideDelta = deltaInsideCalculator.applyAsDouble(footPolygon.getVertex(i));
-         if (insideDelta < achievedDeltaInside)
-         {
-            achievedDeltaInside = insideDelta;
-         }
-      }
-
-      return achievedDeltaInside;
    }
 
    /**
