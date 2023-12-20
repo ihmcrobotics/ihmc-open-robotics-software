@@ -72,6 +72,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final AStarBodyPathPlannerInterface bodyPathPlannerInterface;
    private final List<VariableDescriptor> bodyPathVariableDescriptors;
 
+   // TODO plan then snap planner needs to work for height maps.
    private final PlanThenSnapPlanner planThenSnapPlanner;
    private final AStarFootstepPlanner aStarFootstepPlanner;
    private final List<VariableDescriptor> footstepPlanVariableDescriptors;
@@ -225,68 +226,26 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       requestCallbacks.forEach(callback -> callback.accept(request));
       output.setRequestId(request.getRequestId());
       output.setRequestId(request.getRequestId());
-      output.setPlanarRegionsList(request.getPlanarRegionsList());
       bodyPathPlanHolder.getPlan().clear();
 
       aStarFootstepPlanner.clearLoggedData();
       bodyPathPlannerInterface.clearLoggedData();
 
       boolean heightMapAvailable = request.getHeightMapData() != null && !request.getHeightMapData().isEmpty();
-      boolean planarRegionsAvailable = request.getPlanarRegionsList() != null && !request.getPlanarRegionsList().isEmpty();
 
       startMidFootPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
       goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
 
       // Update planar regions
-      boolean flatGroundMode = request.getAssumeFlatGround() || !(planarRegionsAvailable || heightMapAvailable);
-      PlanarRegionsList planarRegionsList = flatGroundMode ? null : request.getPlanarRegionsList();
-      visibilityGraphPlanner.setPlanarRegionsList(planarRegionsList);
-      narrowPassageBodyPathOptimizer.setPlanarRegionsList(planarRegionsList);
+      boolean flatGroundMode = request.getAssumeFlatGround() || !heightMapAvailable;
+      // TODO need to do this for height map.
+//      narrowPassageBodyPathOptimizer.setPlanarRegionsList(planarRegionsList);
 
       // record time
       output.getPlannerTimings().setTimeBeforePlanningSeconds(stopwatch.lap());
       output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());
 
-      if (request.getPlanBodyPath() && !flatGroundMode && !heightMapAvailable)
-      {
-         visibilityGraphPlanner.setStanceFootPoses(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT));
-         visibilityGraphPlanner.setGoal(goalMidFootPose);
-
-         BodyPathPlanningResult bodyPathPlannerResult = visibilityGraphPlanner.planWaypoints();
-         List<Pose3DReadOnly> waypoints = visibilityGraphPlanner.getWaypoints();
-         setNominalOrientations(waypoints);
-
-         if (visibilityGraphParameters.getOptimizeForNarrowPassage())
-         {
-            List<FramePose3D> waypointsList = visibilityGraphPlanner.getWaypointsAsFramePoseList();
-
-            narrowPassageBodyPathOptimizer.setWaypoints(waypointsList);
-            waypoints = narrowPassageBodyPathOptimizer.runNarrowPassageOptimizer();
-            bodyPathPlannerResult = narrowPassageBodyPathOptimizer.getBodyPathPlanningResult();
-         }
-
-         if ((!bodyPathPlannerResult.validForExecution() || (waypoints.size() < 2) && request.getAbortIfBodyPathPlannerFails()))
-         {
-            reportBodyPathPlan(bodyPathPlannerResult);
-            return;
-         }
-         else if (waypoints.size() < 2 && !request.getAbortIfBodyPathPlannerFails())
-         {
-            double horizonLength = Double.POSITIVE_INFINITY;
-            visibilityGraphPlanner.computeBestEffortPlan(horizonLength);
-         }
-
-         bodyPathPlanHolder.setPoseWaypoints(waypoints);
-         double pathLength = bodyPathPlanHolder.computePathLength(0.0);
-         if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
-         {
-            double alphaIntermediateGoal = request.getHorizonLength() / pathLength;
-            bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
-         }
-
-         reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
-      }
-      else if (request.getPlanBodyPath() && !flatGroundMode && heightMapAvailable)
+      if (request.getPlanBodyPath() && !flatGroundMode && heightMapAvailable)
       {
          bodyPathPlannerInterface.handleRequest(request, output);
          List<Pose3D> bodyPathWaypoints = output.getBodyPath();
@@ -361,7 +320,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          RobotSide initialStanceSide = request.getRequestedInitialStanceSide();
          FramePose3D initialStancePose = new FramePose3D(request.getStartFootPoses().get(initialStanceSide));
          planThenSnapPlanner.setInitialStanceFoot(initialStancePose, initialStanceSide);
-         planThenSnapPlanner.setPlanarRegions(planarRegionsList);
+         // TODO need to do this for the height map
+//         planThenSnapPlanner.setPlanarRegions(planarRegionsList);
 
          FootstepPlannerGoal goal = new FootstepPlannerGoal();
          goal.setGoalPoseBetweenFeet(goalMidFootPose);
@@ -636,6 +596,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return aStarFootstepPlanner.getSwingPlanningModule().getAdaptiveSwingTrajectoryCalculator();
    }
 
+   // TODO need to replace this with a different planner.
    public SwingOverPlanarRegionsTrajectoryExpander getSwingOverPlanarRegionsTrajectoryExpander()
    {
       return aStarFootstepPlanner.getSwingPlanningModule().getSwingOverPlanarRegionsTrajectoryExpander();
