@@ -91,10 +91,9 @@ public class SwingPlanningModule
          return;
       }
 
-      if (swingPlannerType == SwingPlannerType.PROPORTION && adaptiveSwingTrajectoryCalculator != null && false)
+      if (swingPlannerType == SwingPlannerType.PROPORTION && adaptiveSwingTrajectoryCalculator != null)
       {
-         // TODO need to make work with the height m ap.
-//         adaptiveSwingTrajectoryCalculator.setPlanarRegionsList(planarRegionsList);
+         adaptiveSwingTrajectoryCalculator.setHeightMapData(heightMapData);
          adaptiveSwingTrajectoryCalculator.setSwingParameters(startFootPoses, footstepPlan);
          for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
             swingTrajectories.add(null);
