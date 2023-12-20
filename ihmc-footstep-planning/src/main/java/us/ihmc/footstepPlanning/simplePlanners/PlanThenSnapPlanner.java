@@ -1,23 +1,29 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
+import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
+import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 public class PlanThenSnapPlanner
 {
    private final TurnWalkTurnPlanner turnWalkTurnPlanner;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
-   private PlanarRegionsList planarRegionsList;
-   private final SnapAndWiggleSingleStep snapAndWiggleSingleStep;
+   private HeightMapData heightMapData;
+   private final HeightMapPolygonSnapper snapper;
+   private final HeightMapSnapWiggler wiggler;
 
    public PlanThenSnapPlanner(FootstepPlannerParametersBasics footstepPlannerParameters, SideDependentList<ConvexPolygon2D> footPolygons)
    {
@@ -25,7 +31,8 @@ public class PlanThenSnapPlanner
       this.footPolygons = footPolygons;
       SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
       parameters.setWiggleInWrongDirectionThreshold(Double.NaN);
-      snapAndWiggleSingleStep = new SnapAndWiggleSingleStep(parameters);
+      snapper = new HeightMapPolygonSnapper();
+      wiggler = new HeightMapSnapWiggler(footPolygons, new WiggleParameters());
    }
 
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide stanceSide)
@@ -38,9 +45,10 @@ public class PlanThenSnapPlanner
       turnWalkTurnPlanner.setGoal(goal);
    }
 
-   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
+
+   public void setHeightMapData(HeightMapData heightMapData)
    {
-      this.planarRegionsList = planarRegionsList;
+      this.heightMapData = heightMapData;
    }
 
    private FootstepPlan footstepPlan = new FootstepPlan();
@@ -50,17 +58,23 @@ public class PlanThenSnapPlanner
       FootstepPlanningResult result = turnWalkTurnPlanner.plan();
       footstepPlan = turnWalkTurnPlanner.getPlan();
 
-      if (planarRegionsList == null)
+      if (heightMapData == null || heightMapData.isEmpty())
          return result;
-
-      snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
 
       int numberOfFootsteps = footstepPlan.getNumberOfSteps();
       for (int i = 0; i < numberOfFootsteps; i++)
       {
          PlannedFootstep footstep = footstepPlan.getFootstep(i);
          FramePose3D solePose = footstep.getFootstepPose();
-         ConvexPolygon2D footHold = snapAndWiggleSingleStep.snapAndWiggle(solePose, footPolygons.get(footstep.getRobotSide()), true);
+         ConvexPolygon2D footPolygon = footPolygons.get(footstep.getRobotSide());
+         double snapHeightThreshold = 0.04;
+         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMapData, snapHeightThreshold);
+         FootstepSnapData snapData = getAsSnapData(snapTransform);
+         DiscreteFootstep discreteFootstep = getAsDiscreteFootstep(footstep);
+         wiggler.computeWiggleTransform(discreteFootstep, heightMapData, snapData, snapHeightThreshold);
+         ConvexPolygon2D footHold = snapData.getCroppedFoothold();
+         solePose.set(snapData.getSnappedStepTransform(discreteFootstep));
+
          if (footHold != null)
          {
             footstep.getFoothold().set(footHold);
@@ -72,5 +86,18 @@ public class PlanThenSnapPlanner
    public FootstepPlan getPlan()
    {
       return footstepPlan;
+   }
+
+   private static FootstepSnapData getAsSnapData(RigidBodyTransformReadOnly snapTransform)
+   {
+      return new FootstepSnapData(snapTransform);
+   }
+
+   private static DiscreteFootstep getAsDiscreteFootstep(PlannedFootstep plannedFootstep)
+   {
+      return new DiscreteFootstep(plannedFootstep.getFootstepPose().getX(),
+                                  plannedFootstep.getFootstepPose().getY(),
+                                  plannedFootstep.getFootstepPose().getYaw(),
+                                  plannedFootstep.getRobotSide());
    }
 }
