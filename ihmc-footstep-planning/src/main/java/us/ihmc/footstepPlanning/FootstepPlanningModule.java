@@ -318,8 +318,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          RobotSide initialStanceSide = request.getRequestedInitialStanceSide();
          FramePose3D initialStancePose = new FramePose3D(request.getStartFootPoses().get(initialStanceSide));
          planThenSnapPlanner.setInitialStanceFoot(initialStancePose, initialStanceSide);
-         // TODO need to do this for the height map
-//         planThenSnapPlanner.setPlanarRegions(planarRegionsList);
+         planThenSnapPlanner.setHeightMapData(request.getHeightMapData());
 
          FootstepPlannerGoal goal = new FootstepPlannerGoal();
          goal.setGoalPoseBetweenFeet(goalMidFootPose);
