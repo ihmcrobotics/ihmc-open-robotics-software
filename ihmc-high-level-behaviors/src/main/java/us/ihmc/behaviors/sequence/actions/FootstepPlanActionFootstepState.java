@@ -9,6 +9,7 @@ public class FootstepPlanActionFootstepState
    private final FootstepPlanActionState footstepPlan;
    private final FootstepPlanActionFootstepDefinition definition;
    private final CRDTDetachableReferenceFrame soleFrame;
+   /** The index is not CRDT synced because it's a simple local calculation. */
    private int index = -1;
 
    public FootstepPlanActionFootstepState(ReferenceFrameLibrary referenceFrameLibrary,
@@ -30,12 +31,12 @@ public class FootstepPlanActionFootstepState
 
    public void toMessage(FootstepPlanActionFootstepStateMessage message)
    {
-      message.setIndex(index);
+
    }
 
    public void fromMessage(FootstepPlanActionFootstepStateMessage message)
    {
-      index = message.getIndex();
+
    }
 
    public FootstepPlanActionFootstepDefinition getDefinition()
