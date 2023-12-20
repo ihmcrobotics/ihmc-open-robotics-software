@@ -64,6 +64,7 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    private final ImBoolean useICPPose = new ImBoolean(false);
    private final RecyclingArrayList<Point3D32> icpObjectPointCloud = new RecyclingArrayList<>(32768, Point3D32::new);
    private final RDXPointCloudRenderer icpObjectPointCloudRenderer = new RDXPointCloudRenderer();
+   private boolean updateObjectPointCloudMesh;
    private final RDXReferenceFrameGraphic icpFrameGraphic = new RDXReferenceFrameGraphic(0.2);
 
    public RDXPrimitiveRigidBodySceneNode(PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode, RDX3DPanel panel3D)
@@ -115,7 +116,7 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
          for (Point3D32 point3D32 : icpResultSubscription.getLatest().getObjectPointCloud())
             icpObjectPointCloud.add().set(point3D32);
          icpObjectPointCloudRenderer.setPointsToRender(icpObjectPointCloud, Color.GOLD);
-         icpObjectPointCloudRenderer.updateMesh();
+         updateObjectPointCloudMesh = true;
       }
    }
 
@@ -237,7 +238,11 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
          modelInstance.getRenderables(renderables, pool);
 
       if (icpResultSubscription.hasReceivedFirstMessage())
+      {
+         if (updateObjectPointCloudMesh)
+            icpObjectPointCloudRenderer.updateMesh();
          icpFrameGraphic.getRenderables(renderables, pool);
+      }
    }
 
    @Override
