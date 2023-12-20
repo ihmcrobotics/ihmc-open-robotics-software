@@ -380,8 +380,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lap());
 
          aStarFootstepPlanner.getSwingPlanningModule()
-                             .computeSwingWaypoints(request.getPlanarRegionsList(),
-                                                    request.getHeightMapData(),
+                             .computeSwingWaypoints(request.getHeightMapData(),
                                                     output.getFootstepPlan(),
                                                     request.getStartFootPoses(),
                                                     request.getSwingPlannerType());
@@ -422,8 +421,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       try
       {
          swingReplanRequestCallbacks.forEach(callback -> callback.accept(swingPlannerType));
-         aStarFootstepPlanner.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(),
-                                                                             request.getHeightMapData(),
+         aStarFootstepPlanner.getSwingPlanningModule().computeSwingWaypoints(request.getHeightMapData(),
                                                                              output.getFootstepPlan(),
                                                                              request.getStartFootPoses(),
                                                                              swingPlannerType);

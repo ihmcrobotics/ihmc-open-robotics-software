@@ -151,7 +151,7 @@ public class AStarFootstepPlanner
       haltRequested.set(false);
       result = FootstepPlanningResult.PLANNING;
 
-      // Update planar regions
+      // Update what we should use for planning
       boolean hasHeightMap = request.getHeightMapData() != null && !request.getHeightMapData().isEmpty();
       boolean flatGroundMode = request.getAssumeFlatGround() || !hasHeightMap;
 
@@ -308,8 +308,7 @@ public class AStarFootstepPlanner
 
       if (!request.getAssumeFlatGround())
       {
-         swingPlanningModule.computeSwingWaypoints(request.getPlanarRegionsList(),
-                                                   request.getHeightMapData(),
+         swingPlanningModule.computeSwingWaypoints(request.getHeightMapData(),
                                                    outputToPack.getFootstepPlan(),
                                                    request.getStartFootPoses(),
                                                    request.getSwingPlannerType());

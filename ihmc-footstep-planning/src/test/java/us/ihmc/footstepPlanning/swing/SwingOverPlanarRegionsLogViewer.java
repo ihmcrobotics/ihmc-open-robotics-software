@@ -107,8 +107,7 @@ public class SwingOverPlanarRegionsLogViewer
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
 
-      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(),
-                                                                    request.getHeightMapData(),
+      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getHeightMapData(),
                                                                     footstepPlan,
                                                                     request.getStartFootPoses(),
                                                                     SwingPlannerType.TWO_WAYPOINT_POSITION);

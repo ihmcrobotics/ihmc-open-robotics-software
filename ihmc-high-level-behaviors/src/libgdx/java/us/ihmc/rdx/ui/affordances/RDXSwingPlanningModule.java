@@ -29,8 +29,6 @@ public class RDXSwingPlanningModule
 {
    private final SwingPlanningModule swingPlanningModule;
    private final ROS2SyncedRobotModel syncedRobot;
-   private PlanarRegionsListMessage planarRegionsListMessage;
-   private PlanarRegionsList planarRegionsList;
    private HeightMapMessage heightMapMessage;
    private SwingPlannerParametersReadOnly swingPlannerParameters;
 
@@ -48,11 +46,6 @@ public class RDXSwingPlanningModule
       this.syncedRobot = syncedRobot;
 
       swingPlanningModule = new SwingPlanningModule(footstepPlannerParameters, swingPlannerParameters, walkingControllerParameters, footPolygons);
-   }
-
-   public void setPlanarRegionList(PlanarRegionsList planarRegionsList)
-   {
-      this.planarRegionsList = planarRegionsList;
    }
 
    public void setHeightMapData(HeightMapMessage heightMapData)
@@ -81,14 +74,9 @@ public class RDXSwingPlanningModule
       setInitialFeet();
       FootstepPlan tempPlan = createFakeFootstepPlan(footstepPlan);
 
-      if (planarRegionsList == null && planarRegionsListMessage != null)
-      {
-         planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
-      }
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       swingPlanningModule.getSwingPlannerParameters().set(swingPlannerParameters);
-      swingPlanningModule.computeSwingWaypoints(planarRegionsList,
-                                                heightMapData,
+      swingPlanningModule.computeSwingWaypoints(heightMapData,
                                                 tempPlan,
                                                 startFootPoses,
                                                 swingPlannerType);
