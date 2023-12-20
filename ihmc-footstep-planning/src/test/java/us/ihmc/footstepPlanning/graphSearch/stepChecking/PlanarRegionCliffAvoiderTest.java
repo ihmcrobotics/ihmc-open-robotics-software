@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class PlanarRegionCliffAvoiderTest
 {
-   private boolean visualize = true;
+   private boolean visualize = false;
    private final Random random = new Random(4587L);
 
    @BeforeEach

@@ -26,7 +26,7 @@ public class FootstepSnapperTest
    public void testFootstepCacheing()
    {
       TestSnapper testSnapper = new TestSnapper();
-      testSnapper.setPlanarRegions(PlanarRegionsList.flatGround(1.0));
+      testSnapper.setPlanarRegionsList(PlanarRegionsList.flatGround(1.0));
 
       for (int i = 0; i < xIndices.length; i++)
       {
@@ -70,26 +70,13 @@ public class FootstepSnapperTest
       }
    }
 
-   private class TestSnapper extends FootstepSnapAndWiggler
+   private class TestSnapper extends PlanarRegionFootstepSnapAndWiggler
    {
       boolean dirtyBit = false;
 
-      private final FootstepPlannerEnvironmentHandler environmentHandler;
-
       public TestSnapper()
       {
-         this(new FootstepPlannerEnvironmentHandler(PlannerTools.createDefaultFootPolygons()));
-      }
-
-      public TestSnapper(FootstepPlannerEnvironmentHandler environmentHandler)
-      {
-         super(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters(), environmentHandler);
-         this.environmentHandler = environmentHandler;
-      }
-
-      public void setPlanarRegions(PlanarRegionsList planarRegionsList)
-      {
-         environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+         super(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters());
       }
 
       @Override

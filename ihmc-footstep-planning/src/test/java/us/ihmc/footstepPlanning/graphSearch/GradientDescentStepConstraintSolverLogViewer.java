@@ -8,6 +8,7 @@ import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionFootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -54,16 +55,13 @@ public class GradientDescentStepConstraintSolverLogViewer
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
-
-      FootstepSnapAndWiggler snapAndWiggler = new FootstepSnapAndWiggler(footPolygons,
-                                                                         footstepPlannerParameters,
-                                                                         scs,
-                                                                         environmentHandler,
-                                                                         graphicsListRegistry,
-                                                                         scs.getRootRegistry());
+      PlanarRegionFootstepSnapAndWiggler snapAndWiggler = new PlanarRegionFootstepSnapAndWiggler(footPolygons,
+                                                                                     footstepPlannerParameters,
+                                                                                     scs,
+                                                                                     graphicsListRegistry,
+                                                                                     scs.getRootRegistry());
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage());
-      environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+      snapAndWiggler.setPlanarRegionsList(planarRegionsList);
 
       Graphics3DObject regionsGraphic = new Graphics3DObject();
       IdMappedColorFunction colorMapper = IdMappedColorFunction.INSTANCE;
