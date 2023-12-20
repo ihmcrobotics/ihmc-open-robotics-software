@@ -360,8 +360,7 @@ public class SwingOverPlanarRegionsTest
       }
 
       planningModule.getSwingPlanningModule()
-                    .computeSwingWaypoints(request.getPlanarRegionsList(),
-                                           request.getHeightMapData(),
+                    .computeSwingWaypoints(request.getHeightMapData(),
                                            footstepPlan,
                                            request.getStartFootPoses(),
                                            SwingPlannerType.TWO_WAYPOINT_POSITION);
