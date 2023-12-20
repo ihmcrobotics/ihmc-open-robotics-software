@@ -8,4 +8,12 @@ public enum PrimitiveRigidBodyShape
    {
       return PrimitiveRigidBodyShape.valueOf(shapeString.toUpperCase());
    }
+   public static PrimitiveRigidBodyShape fromByte(byte enumAsByte)
+   {
+      return values()[enumAsByte];
+   }
+   public byte toByte()
+   {
+      return (byte) this.ordinal();
+   }
 }

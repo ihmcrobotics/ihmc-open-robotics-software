@@ -60,6 +60,17 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                       DEBRIS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             yield new RDXPredefinedRigidBodySceneNode(twoByFour, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
+         case "WorkPlatform" ->
+         {
+            PredefinedRigidBodySceneNode workPlatform = new PredefinedRigidBodySceneNode(nextID,
+                                                                                         name.get(),
+                                                                                         sceneGraph.getIDToNodeMap(),
+                                                                                         parent.getID(),
+                                                                                         PLATFORM_TRANSFORM_TO_MARKER,
+                                                                                         PLATFORM_VISUAL_MODEL_FILE_PATH,
+                                                                                         PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            yield new RDXPredefinedRigidBodySceneNode(workPlatform, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
          case "Shoe" ->
          {
             PredefinedRigidBodySceneNode shoe = new PredefinedRigidBodySceneNode(nextID,

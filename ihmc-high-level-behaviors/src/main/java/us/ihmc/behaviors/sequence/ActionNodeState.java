@@ -9,6 +9,7 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 public abstract class ActionNodeState<D extends ActionNodeDefinition> extends BehaviorTreeNodeState<D>
 {
+   /** The index is not CRDT synced because it's a simple local calculation. */
    private int actionIndex = -1;
    private final CRDTUnidirectionalBoolean isNextForExecution;
    private final CRDTUnidirectionalBoolean isToBeExecutedConcurrently;
