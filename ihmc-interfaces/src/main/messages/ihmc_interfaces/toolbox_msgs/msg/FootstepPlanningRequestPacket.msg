@@ -50,9 +50,7 @@ float64 timeout 5.0
 int32 max_iterations -1
 # Max body path length if using body path
 float64 horizon_length
-# Planar regions to use, if you don't want to assume flat ground
-perception_msgs/PlanarRegionsListMessage planar_regions_list_message
-# Height map data, optional
+# Height map data, if you don'ot want to assume flat ground.
 perception_msgs/HeightMapMessage height_map_message
 # If true, steps are snapped assuming flat ground.
 # Note that collision checks will still be performed if enabled, such as FootstepPlannerParametersPacket.checkForBodyBoxCollisions

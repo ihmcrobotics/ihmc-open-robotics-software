@@ -17,6 +17,13 @@ import java.util.List;
 
 public class PlanarRegionToHeightMapConverter
 {
+   private static final double defaultResolution = 0.02;
+
+   public static HeightMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList)
+   {
+      return convertFromPlanarRegionsToHeightMap(planarRegionsList, defaultResolution);
+   }
+
    public static HeightMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList, double resolutionXY)
    {
       return convertFromPlanarRegionsToHeightMap(planarRegionsList.getPlanarRegionsAsList(), resolutionXY);

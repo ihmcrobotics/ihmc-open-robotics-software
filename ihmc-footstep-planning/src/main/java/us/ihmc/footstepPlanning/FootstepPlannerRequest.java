@@ -148,7 +148,6 @@ public class FootstepPlannerRequest
       timeout = 5.0;
       maximumIterations = -1;
       horizonLength = Double.MAX_VALUE;
-      planarRegionsList = null;
       heightMapData = null;
       assumeFlatGround = false;
       bodyPathWaypoints.clear();
@@ -272,11 +271,6 @@ public class FootstepPlannerRequest
       this.horizonLength = horizonLength;
    }
 
-   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
-   {
-      this.planarRegionsList = planarRegionsList;
-   }
-
    public void setHeightMapData(HeightMapData heightMapData)
    {
       this.heightMapData = heightMapData;
@@ -380,11 +374,6 @@ public class FootstepPlannerRequest
       return horizonLength;
    }
 
-   public PlanarRegionsList getPlanarRegionsList()
-   {
-      return planarRegionsList;
-   }
-
    public HeightMapData getHeightMapData()
    {
       return heightMapData;
@@ -459,8 +448,6 @@ public class FootstepPlannerRequest
          bodyPathWaypoints.add(new Pose3D(requestPacket.getBodyPathWaypoints().get(i)));
       }
 
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(requestPacket.getPlanarRegionsListMessage());
-      setPlanarRegionsList(planarRegionsList);
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(requestPacket.getHeightMapMessage());
       if (!heightMapData.isEmpty())
          setHeightMapData(heightMapData);
@@ -536,11 +523,6 @@ public class FootstepPlannerRequest
       this.assumeFlatGround = other.assumeFlatGround;
       this.statusPublishPeriod = other.statusPublishPeriod;
       this.swingPlannerType = other.swingPlannerType;
-
-      if(other.planarRegionsList != null)
-      {
-         this.planarRegionsList = other.planarRegionsList.copy();
-      }
 
       for (int i = 0; i < other.bodyPathWaypoints.size(); i++)
       {
