@@ -59,7 +59,6 @@ public class IterativeClosestPointWorker
    // FIXME: Calculations of this orientation are incorrect
    private final Quaternion orientation = new Quaternion();
 
-
    public IterativeClosestPointWorker(int numberOfICPObjectPoints, ROS2Helper ros2Helper, Random random)
    {
       this.ros2Helper = ros2Helper;
@@ -236,9 +235,15 @@ public class IterativeClosestPointWorker
       CommonOps_DDRM.multTransAB(V, U, R);
 
       Quaternion quaternionRotatioin = new Quaternion();
-      quaternionRotatioin.setRotationMatrix(R.get(0, 0), R.get(0, 1), R.get(0, 2),
-                              R.get(1, 0), R.get(1, 1), R.get(1, 2),
-                              R.get(2, 0), R.get(2, 1), R.get(2, 2));
+      quaternionRotatioin.setRotationMatrix(R.get(0, 0),
+                                            R.get(0, 1),
+                                            R.get(0, 2),
+                                            R.get(1, 0),
+                                            R.get(1, 1),
+                                            R.get(1, 2),
+                                            R.get(2, 0),
+                                            R.get(2, 1),
+                                            R.get(2, 2));
       orientation.append(quaternionRotatioin);
 
       // Calculate object translation
@@ -247,10 +252,13 @@ public class IterativeClosestPointWorker
       CommonOps_DDRM.subtract(environmentCentroid, objectAdjustedLocation, objectTranslation);
 
       // Rotate and translate object points
-      for (Point3D32 objectInWorldPoint : this.objectInWorldPoints) {
-         interimPoint.set(new double[][]{{objectInWorldPoint.getX()}, {objectInWorldPoint.getY()}, {objectInWorldPoint.getZ()}});
+      for (Point3D32 objectInWorldPoint : this.objectInWorldPoints)
+      {
+         interimPoint.set(new double[][] {{objectInWorldPoint.getX()}, {objectInWorldPoint.getY()}, {objectInWorldPoint.getZ()}});
          CommonOps_DDRM.mult(R, interimPoint, movedPoint);
-         objectInWorldPoint.set(movedPoint.get(0) + objectTranslation.get(0), movedPoint.get(1) + objectTranslation.get(1), movedPoint.get(2) + objectTranslation.get(2));
+         objectInWorldPoint.set(movedPoint.get(0) + objectTranslation.get(0),
+                                movedPoint.get(1) + objectTranslation.get(1),
+                                movedPoint.get(2) + objectTranslation.get(2));
       }
 
       // TODO: Remove this cheat
@@ -280,12 +288,21 @@ public class IterativeClosestPointWorker
       for (int i = 0; i < numberOfPoints; i++)
       {
          int j = random.nextInt(6);
-         float x =(float)random.nextDouble(-halfBoxDepth, halfBoxDepth);
-         float y =(float)random.nextDouble(-halfBoxWidth, halfBoxWidth);
-         float z =(float)random.nextDouble(-halfBoxHeight, halfBoxHeight);
-         if (j==0 | j==1) {x = (-(j&1)*halfBoxDepth*2.0f)+halfBoxDepth;}
-         if (j==2 | j==3) {y = (-(j&1)*halfBoxWidth*2.0f)+halfBoxWidth;}
-         if (j==4 | j==5) {z = (-(j&1)*halfBoxHeight*2.0f)+halfBoxHeight;}
+         float x = (float) random.nextDouble(-halfBoxDepth, halfBoxDepth);
+         float y = (float) random.nextDouble(-halfBoxWidth, halfBoxWidth);
+         float z = (float) random.nextDouble(-halfBoxHeight, halfBoxHeight);
+         if (j == 0 | j == 1)
+         {
+            x = (-(j & 1) * halfBoxDepth * 2.0f) + halfBoxDepth;
+         }
+         if (j == 2 | j == 3)
+         {
+            y = (-(j & 1) * halfBoxWidth * 2.0f) + halfBoxWidth;
+         }
+         if (j == 4 | j == 5)
+         {
+            z = (-(j & 1) * halfBoxHeight * 2.0f) + halfBoxHeight;
+         }
          Point3D32 boxPoint = boxObjectPointCloud.add();
          boxPoint.set(lastCentroidPoint);
          boxPoint.add(x, y, z);
@@ -298,11 +315,12 @@ public class IterativeClosestPointWorker
    {
       RecyclingArrayList<Point3D32> coneObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
 
-      for (int i = 0; i < numberOfPoints; i++) {
-         float z = (float)random.nextDouble(0, length);
-         double phi = random.nextDouble(0, 2*Math.PI);
-         float x = (float)Math.cos(phi)*z*(radius/length);
-         float y =(float)Math.sin(phi)*z*(radius/length);
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         float z = (float) random.nextDouble(0, length);
+         double phi = random.nextDouble(0, 2 * Math.PI);
+         float x = (float) Math.cos(phi) * z * (radius / length);
+         float y = (float) Math.sin(phi) * z * (radius / length);
          Point3D32 conePoint = coneObjectPointCloud.add();
          conePoint.set(lastCentroidPoint);
          conePoint.add(x, y, z);
@@ -315,15 +333,24 @@ public class IterativeClosestPointWorker
    {
       RecyclingArrayList<Point3D32> cylinderObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
 
-      for (int i = 0; i < numberOfPoints; i++) {
+      for (int i = 0; i < numberOfPoints; i++)
+      {
          int j = random.nextInt(6);
-         float z = (float)random.nextDouble(0, length);
+         float z = (float) random.nextDouble(0, length);
          float r = radius;
-         if (j==0) {z = 0; r = (float)random.nextDouble(0, radius);}
-         if (j==1) {z = length; r = (float)random.nextDouble(0, radius);}
-         double phi = random.nextDouble(0, 2*Math.PI);
-         float x = (float)Math.cos(phi)*r;
-         float y =(float)Math.sin(phi)*r;
+         if (j == 0)
+         {
+            z = 0;
+            r = (float) random.nextDouble(0, radius);
+         }
+         if (j == 1)
+         {
+            z = length;
+            r = (float) random.nextDouble(0, radius);
+         }
+         double phi = random.nextDouble(0, 2 * Math.PI);
+         float x = (float) Math.cos(phi) * r;
+         float y = (float) Math.sin(phi) * r;
          Point3D32 cylinderPoint = cylinderObjectPointCloud.add();
          cylinderPoint.set(lastCentroidPoint);
          cylinderPoint.add(x, y, z);
@@ -342,12 +369,21 @@ public class IterativeClosestPointWorker
       for (int i = 0; i < numberOfPoints; i++)
       {
          int j = random.nextInt(6);
-         float x =(float)random.nextDouble(-halfBoxDepth, halfBoxDepth);
-         float y =(float)random.nextDouble(-halfBoxWidth, halfBoxWidth);
-         float z =(float)random.nextDouble(-halfBoxHeight, halfBoxHeight);
-         if (j==0 | j==1) {x = (-(j&1)*halfBoxDepth*2.0f)+halfBoxDepth;}
-         if (j==2 | j==3) {y = (-(j&1)*halfBoxWidth*2.0f)+halfBoxWidth;}
-         if (j==4 | j==5) {z = (-(j&1)*halfBoxHeight*2.0f)+halfBoxHeight;}
+         float x = (float) random.nextDouble(-halfBoxDepth, halfBoxDepth);
+         float y = (float) random.nextDouble(-halfBoxWidth, halfBoxWidth);
+         float z = (float) random.nextDouble(-halfBoxHeight, halfBoxHeight);
+         if (j == 0 | j == 1)
+         {
+            x = (-(j & 1) * halfBoxDepth * 2.0f) + halfBoxDepth;
+         }
+         if (j == 2 | j == 3)
+         {
+            y = (-(j & 1) * halfBoxWidth * 2.0f) + halfBoxWidth;
+         }
+         if (j == 4 | j == 5)
+         {
+            z = (-(j & 1) * halfBoxHeight * 2.0f) + halfBoxHeight;
+         }
          Point3D32 boxPoint = boxObjectPointCloud.add();
          boxPoint.set(x, y, z);
       }
