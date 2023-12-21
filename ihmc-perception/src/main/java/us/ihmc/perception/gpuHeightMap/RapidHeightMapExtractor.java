@@ -109,13 +109,16 @@ public class RapidHeightMapExtractor
    private boolean modified = true;
    private boolean processing = false;
    private boolean heightMapDataAvailable = false;
+   private boolean computeSnap = false;
 
    public RapidHeightMapExtractor(OpenCLManager openCLManager)
    {
       this.openCLManager = openCLManager;
       //      denoiser = new HeightMapAutoencoder();
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
-      snappingHeightProgram = openCLManager.loadProgram("SnappingHeightMap", "HeightMapUtils.cl");
+
+      if (computeSnap)
+         snappingHeightProgram = openCLManager.loadProgram("SnappingHeightMap", "HeightMapUtils.cl");
    }
 
    public RapidHeightMapExtractor(OpenCLManager openCLManager, HumanoidReferenceFrames referenceFrames)
@@ -133,7 +136,10 @@ public class RapidHeightMapExtractor
                                      heightMapParameters.getCropWindowSize());
 
       parametersBuffer = new OpenCLFloatParameters();
-      snappingParametersBuffer = new OpenCLFloatParameters();
+
+      if (computeSnap)
+         snappingParametersBuffer = new OpenCLFloatParameters();
+
       groundToSensorTransformBuffer = new OpenCLFloatBuffer(16);
       sensorToGroundTransformBuffer = new OpenCLFloatBuffer(16);
       worldToGroundTransformBuffer = new OpenCLFloatBuffer(16);
@@ -156,7 +162,9 @@ public class RapidHeightMapExtractor
       createTerrainCostImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
       createContactMapImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
 
-      createSteppabilityMapImages(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
+      if (computeSnap)
+         createSteppabilityMapImages(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
+
       createSensorCroppedHeightMapImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
       createSensorCroppedTerrainCostImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
       createSensorCroppedContactMapImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
@@ -166,7 +174,9 @@ public class RapidHeightMapExtractor
       terrainCostKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "terrainCostKernel");
       contactMapKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "contactMapKernel");
       croppingKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "croppingKernel");
-      computeSnappedValuesKernel = openCLManager.createKernel(snappingHeightProgram, "computeSnappedValuesKernel");
+
+      if (computeSnap)
+         computeSnappedValuesKernel = openCLManager.createKernel(snappingHeightProgram, "computeSnappedValuesKernel");
    }
 
    public void create(BytedecoImage depthImage, int mode)
@@ -264,7 +274,8 @@ public class RapidHeightMapExtractor
          computeContactMap();
 
          // compute the steppable height image
-         computeSteppabilityImage();
+         if (computeSnap)
+            computeSteppabilityImage();
 
          terrainMapStatistics.startTerrainMapDownloadTime();
 
@@ -342,25 +353,28 @@ public class RapidHeightMapExtractor
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
-      snappingParametersBuffer.setParameter((float) gridCenter.getX());
-      snappingParametersBuffer.setParameter((float) gridCenter.getY());
-      snappingParametersBuffer.setParameter((float) parameters.getGlobalCellSizeInMeters());
-      snappingParametersBuffer.setParameter(globalCenterIndex);
-      snappingParametersBuffer.setParameter((float) cropCenterIndex);
-      snappingParametersBuffer.setParameter((float) parameters.getHeightScaleFactor());
-      snappingParametersBuffer.setParameter((float) parameters.getHeightOffset());
-      snappingParametersBuffer.setParameter((float) footSize);
-      snappingParametersBuffer.setParameter((float) footSize);
-      snappingParametersBuffer.setParameter((float) distanceFromCliffTops);
-      snappingParametersBuffer.setParameter((float) distanceFromCliffBottoms);
-      snappingParametersBuffer.setParameter((float) cliffStartHeightToAvoid);
-      snappingParametersBuffer.setParameter((float) cliffEndHeightToAvoid);
-      snappingParametersBuffer.setParameter((float) minSupportAreaFraction);
-      snappingParametersBuffer.setParameter((float) minSnapHeightThreshold);
-      snappingParametersBuffer.setParameter((float) snapHeightThresholdAtSearchEdge);
-      snappingParametersBuffer.setParameter((float) inequalityAcvitationSlope);
+      if (computeSnap)
+      {
+         snappingParametersBuffer.setParameter((float) gridCenter.getX());
+         snappingParametersBuffer.setParameter((float) gridCenter.getY());
+         snappingParametersBuffer.setParameter((float) parameters.getGlobalCellSizeInMeters());
+         snappingParametersBuffer.setParameter(globalCenterIndex);
+         snappingParametersBuffer.setParameter((float) cropCenterIndex);
+         snappingParametersBuffer.setParameter((float) parameters.getHeightScaleFactor());
+         snappingParametersBuffer.setParameter((float) parameters.getHeightOffset());
+         snappingParametersBuffer.setParameter((float) footSize);
+         snappingParametersBuffer.setParameter((float) footSize);
+         snappingParametersBuffer.setParameter((float) distanceFromCliffTops);
+         snappingParametersBuffer.setParameter((float) distanceFromCliffBottoms);
+         snappingParametersBuffer.setParameter((float) cliffStartHeightToAvoid);
+         snappingParametersBuffer.setParameter((float) cliffEndHeightToAvoid);
+         snappingParametersBuffer.setParameter((float) minSupportAreaFraction);
+         snappingParametersBuffer.setParameter((float) minSnapHeightThreshold);
+         snappingParametersBuffer.setParameter((float) snapHeightThresholdAtSearchEdge);
+         snappingParametersBuffer.setParameter((float) inequalityAcvitationSlope);
 
-      snappingParametersBuffer.writeOpenCLBufferObject(openCLManager);
+         snappingParametersBuffer.writeOpenCLBufferObject(openCLManager);
+      }
 
       initialized = true;
    }
@@ -431,8 +445,13 @@ public class RapidHeightMapExtractor
 
       localHeightMapImage.writeOpenCLImage(openCLManager);
       globalHeightMapImage.writeOpenCLImage(openCLManager);
-      snapHeightImage.getBytedecoOpenCVMat().put(new Scalar(32768));
-      snapHeightImage.writeOpenCLImage(openCLManager);
+
+      if (computeSnap)
+      {
+         snapHeightImage.getBytedecoOpenCVMat().put(new Scalar(32768));
+         snapHeightImage.writeOpenCLImage(openCLManager);
+      }
+
       sequenceNumber = 0;
    }
 
@@ -664,5 +683,10 @@ public class RapidHeightMapExtractor
    public TerrainMapStatistics getTerrainMapStatistics()
    {
       return terrainMapStatistics;
+   }
+
+   public boolean getComputeSnap()
+   {
+      return computeSnap;
    }
 }
