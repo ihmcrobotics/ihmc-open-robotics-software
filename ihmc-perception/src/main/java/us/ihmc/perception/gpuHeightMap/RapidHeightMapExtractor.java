@@ -270,6 +270,8 @@ public class RapidHeightMapExtractor
          openCLManager.execute2D(heightMapUpdateKernel, localCellsPerAxis, localCellsPerAxis);
          openCLManager.execute2D(heightMapRegistrationKernel, globalCellsPerAxis, globalCellsPerAxis);
 
+         openCLManager.join();
+
          // compute and read terrain cost and contact map images
          computeContactMap();
 
@@ -397,6 +399,8 @@ public class RapidHeightMapExtractor
       // Execute kernels with length and width parameters
       openCLManager.execute2D(terrainCostKernel, globalCellsPerAxis, globalCellsPerAxis);
       openCLManager.execute2D(contactMapKernel, globalCellsPerAxis, globalCellsPerAxis);
+
+      openCLManager.join();
    }
 
    public void computeSteppabilityImage()
@@ -420,6 +424,8 @@ public class RapidHeightMapExtractor
       snapNormalXImage.readOpenCLImage(openCLManager);
       snapNormalYImage.readOpenCLImage(openCLManager);
       snapNormalZImage.readOpenCLImage(openCLManager);
+
+      openCLManager.join();
    }
 
    public void readContactMapImage()
@@ -609,6 +615,7 @@ public class RapidHeightMapExtractor
 
       openCLManager.execute2D(croppingKernel, heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
       croppedMap.readOpenCLImage(openCLManager);
+      openCLManager.join();
       return croppedMap.getBytedecoOpenCVMat().clone();
    }
 
