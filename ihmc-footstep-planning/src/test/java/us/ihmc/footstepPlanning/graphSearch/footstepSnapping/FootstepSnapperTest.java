@@ -5,9 +5,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.util.Random;
 
@@ -25,8 +28,11 @@ public class FootstepSnapperTest
    @Test
    public void testFootstepCacheing()
    {
-      TestSnapper testSnapper = new TestSnapper();
-      testSnapper.setPlanarRegionsList(PlanarRegionsList.flatGround(1.0));
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+      TestSnapper testSnapper = new TestSnapper(environmentHandler);
+      PlanarRegionsList planarRegionsList = PlanarRegionsList.flatGround(1.0);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList));
+      environmentHandler.setHeightMap(heightMapData);
 
       for (int i = 0; i < xIndices.length; i++)
       {
@@ -50,7 +56,8 @@ public class FootstepSnapperTest
    @Test
    public void testWithoutPlanarRegions()
    {
-      TestSnapper testSnapper = new TestSnapper();
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+      TestSnapper testSnapper = new TestSnapper(environmentHandler);
 
       for (int i = 0; i < xIndices.length; i++)
       {
@@ -70,13 +77,13 @@ public class FootstepSnapperTest
       }
    }
 
-   private class TestSnapper extends PlanarRegionFootstepSnapAndWiggler
+   private class TestSnapper extends FootstepSnapAndWiggler
    {
       boolean dirtyBit = false;
 
-      public TestSnapper()
+      public TestSnapper(FootstepPlannerEnvironmentHandler environmentHandler)
       {
-         super(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters());
+         super(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters(), environmentHandler);
       }
 
       @Override
