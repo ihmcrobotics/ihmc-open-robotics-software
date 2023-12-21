@@ -2,14 +2,14 @@
   "title" : "GPU Height Map Parameters",
   "Reset Height Map" : false,
   "Search window height" : {
-    "value" : 345,
-    "lowerBound" : 100,
-    "upperBound" : 800
+    "value" : 10,
+    "lowerBound" : 4,
+    "upperBound" : 100
   },
   "Search window width" : {
-    "value" : 280,
-    "lowerBound" : 100,
-    "upperBound" : 800
+    "value" : 10,
+    "lowerBound" : 4,
+    "upperBound" : 100
   },
   "Min height registration" : {
     "value" : -0.5,
@@ -116,6 +116,26 @@
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
+  "Search skip size" : {
+    "value" : 4,
+    "lowerBound" : 1,
+    "upperBound" : 16
+  },
+  "Fast search size" : {
+    "value" : 20,
+    "lowerBound" : 10,
+    "upperBound" : 100
+  },
+  "Vertical search size" : {
+    "value" : 80,
+    "lowerBound" : 10,
+    "upperBound" : 100
+  },
+  "Vertical search resolution" : {
+    "value" : 0.01,
+    "lowerBound" : 0.001,
+    "upperBound" : 0.5
+  },
   "Grid resolution XY" : {
     "value" : 0.03,
     "lowerBound" : 0.01,
@@ -168,11 +188,6 @@
     "lowerBound" : 0.01,
     "upperBound" : 0.2,
     "description" : "This is the measurement variance when the robot is moving"
-  },
-  "Search skip size" : {
-    "value": 4,
-    "lowerBound": 0,
-    "upperBound": 16
   },
   "Estimate height with kalman filter" : true,
   "Denoiser enabled" : false,

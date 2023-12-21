@@ -135,6 +135,21 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(searchSkipSize);
    }
 
+   default int getFastSearchSize()
+   {
+      return get(fastSearchSize);
+   }
+
+   default int getVerticalSearchSize()
+   {
+      return get(verticalSearchSize);
+   }
+
+   default double getVerticalSearchResolution()
+   {
+      return get(verticalSearchResolution);
+   }
+
    /**
     * Resolution of the height map grid
     */

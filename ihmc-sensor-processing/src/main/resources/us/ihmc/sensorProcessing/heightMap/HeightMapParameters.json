@@ -2,14 +2,14 @@
   "title" : "HeightMapParameters",
   "Reset Height Map" : false,
   "Search window height": {
-    "value": 250,
-    "lowerBound": 100,
-    "upperBound": 800
+    "value": 20,
+    "lowerBound": 10,
+    "upperBound": 200
   },
   "Search window width": {
-    "value": 140,
-    "lowerBound": 100,
-    "upperBound": 800
+    "value": 10,
+    "lowerBound": 10,
+    "upperBound": 200
   },
   "Min height registration": {
     "value": -1.0,
@@ -120,6 +120,21 @@
     "value": 4,
     "lowerBound": 0,
     "upperBound": 16
+  },
+  "Fast search size" : {
+    "value": 20,
+    "lowerBound": 10,
+    "upperBound": 100
+  },
+  "Vertical search size" : {
+    "value": 20,
+    "lowerBound": 10,
+    "upperBound": 100
+  },
+  "Vertical search resolution" : {
+    "value": 0.1,
+    "lowerBound": 0.01,
+    "upperBound": 0.5
   },
   "Grid resolution XY" : [ 0.03, "Resolution of the height map grid" ],
   "Grid size XY" : [ 5.0, "Length of the side of the square height map grid" ],

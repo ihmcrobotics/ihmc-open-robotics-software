@@ -133,6 +133,21 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.searchSkipSize, searchSkipSize);
    }
 
+   default void setFastSearchSize(int fastSearchSize)
+   {
+      set(HeightMapParameters.fastSearchSize, fastSearchSize);
+   }
+
+   default void setVerticalSearchSize(int verticalSearchSize)
+   {
+      set(HeightMapParameters.verticalSearchSize, verticalSearchSize);
+   }
+
+   default void setVerticalSearchResolution(double verticalSearchResolution)
+   {
+      set(HeightMapParameters.verticalSearchResolution, verticalSearchResolution);
+   }
+
    /**
     * Resolution of the height map grid
     */

@@ -32,6 +32,9 @@
 #define CONTACT_WINDOW_SIZE 31
 #define SPATIAL_ALPHA 32
 #define SEARCH_SKIP_SIZE 33
+#define VERTICAL_SEARCH_SIZE 34
+#define VERTICAL_SEARCH_RESOLUTION 35
+#define FAST_SEARCH_SIZE 36
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -192,82 +195,88 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    float minY = cellCenterInZUp.y - halfCellWidth;
    float maxY = cellCenterInZUp.y + halfCellWidth;
 
-   float3 cellCenterInSensor = transformPoint3D32_2(
-      cellCenterInZUp,
-      (float3)(zUpToSensorFrameTf[0], zUpToSensorFrameTf[1], zUpToSensorFrameTf[2]),
-      (float3)(zUpToSensorFrameTf[4], zUpToSensorFrameTf[5], zUpToSensorFrameTf[6]),
-      (float3)(zUpToSensorFrameTf[8], zUpToSensorFrameTf[9], zUpToSensorFrameTf[10]),
-      (float3)(zUpToSensorFrameTf[3], zUpToSensorFrameTf[7], zUpToSensorFrameTf[11]));
-
-   int2 projectedPoint;
-   if (params[MODE] == 0) // Spherical Projection
-   {
-      projectedPoint = spherical_projection(cellCenterInSensor, params);
-   }
-   else if (params[MODE] == 1) // Perspective Projection
-   {
-      // convert cellCenterInSensor to z-forward, x-right, y-down
-      float3 cellCenterInSensorZfwd = (float3) (-cellCenterInSensor.y, -cellCenterInSensor.z, cellCenterInSensor.x);
-
-      if (cellCenterInSensorZfwd.z < 0)
-        return;
-
-      projectedPoint = perspective_projection(cellCenterInSensorZfwd, params);
-   }
-
    int count = 0;
    int skip = (int) params[SEARCH_SKIP_SIZE];
-   for (int pitch_count_offset = - (int) (params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset <  (int) (params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=skip)
+   int search_vertical_size = (int) params[VERTICAL_SEARCH_SIZE];
+
+   for (int vertical_index = - search_vertical_size / 2; vertical_index < search_vertical_size / 2 + 1; vertical_index++)
    {
-      int pitch_count = projectedPoint.y + pitch_count_offset;
+      float3 cellCenterInZUp = (float3) (0.0f, 0.0f, params[VERTICAL_SEARCH_RESOLUTION] * (float) vertical_index);
+      cellCenterInZUp.xy = indices_to_coordinate((int2) (xIndex, yIndex),
+                                                  (float2) (0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
+                                                  params[LOCAL_CELL_SIZE],
+                                                  params[LOCAL_CENTER_INDEX]);
+      cellCenterInZUp.x += params[GRID_OFFSET_X];
 
-      for (int yaw_count_offset = - (int) (params[SEARCH_WINDOW_WIDTH] / 2); yaw_count_offset <  (int) (params[SEARCH_WINDOW_WIDTH] / 2 + 1); yaw_count_offset+=skip)
+      float3 cellCenterInSensor = transformPoint3D32_2(
+         cellCenterInZUp,
+         (float3)(zUpToSensorFrameTf[0], zUpToSensorFrameTf[1], zUpToSensorFrameTf[2]),
+         (float3)(zUpToSensorFrameTf[4], zUpToSensorFrameTf[5], zUpToSensorFrameTf[6]),
+         (float3)(zUpToSensorFrameTf[8], zUpToSensorFrameTf[9], zUpToSensorFrameTf[10]),
+         (float3)(zUpToSensorFrameTf[3], zUpToSensorFrameTf[7], zUpToSensorFrameTf[11]));
+
+      int2 projectedPoint;
+      if (params[MODE] == 0) // Spherical Projection
       {
-         int yaw_count = projectedPoint.x + yaw_count_offset;
+         projectedPoint = spherical_projection(cellCenterInSensor, params);
+      }
+      else if (params[MODE] == 1) // Perspective Projection
+      {
+         // convert cellCenterInSensor to z-forward, x-right, y-down
+         float3 cellCenterInSensorZfwd = (float3) (-cellCenterInSensor.y, -cellCenterInSensor.z, cellCenterInSensor.x);
 
-         if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
+         if (cellCenterInSensorZfwd.z < 0)
+           return;
+
+         projectedPoint = perspective_projection(cellCenterInSensorZfwd, params);
+      }
+
+      for (int pitch_count_offset = - ((int) params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset < ((int) params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=skip)
+      {
+         int pitch_count = projectedPoint.y + pitch_count_offset;
+         for (int yaw_count_offset = - ((int) params[SEARCH_WINDOW_WIDTH] / 2); yaw_count_offset <  ((int) params[SEARCH_WINDOW_WIDTH] / 2) + 1; yaw_count_offset+=skip)
          {
-            float depth = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float) 1000;
-//            if (depth > 2.0f || depth < 0.75f)
-//            {
-//               continue;
-//            }
-
-            float3 queryPointInSensor;
-            float3 queryPointInZUp;
-            if (params[MODE] == 0) // Spherical
+            int yaw_count = projectedPoint.x + yaw_count_offset;
+            if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
             {
-               queryPointInSensor = back_project_spherical(yaw_count, pitch_count, depth, params);
-            }
-            else if (params[MODE] == 1) // Perspective
-            {
-               queryPointInSensor = back_project_perspective((int2) (yaw_count, pitch_count), depth, params);
-            }
-
-            queryPointInZUp = transformPoint3D32_2(
-            queryPointInSensor,
-            (float3)(sensorToZUpFrameTf[0], sensorToZUpFrameTf[1], sensorToZUpFrameTf[2]),
-            (float3)(sensorToZUpFrameTf[4], sensorToZUpFrameTf[5], sensorToZUpFrameTf[6]),
-            (float3)(sensorToZUpFrameTf[8], sensorToZUpFrameTf[9], sensorToZUpFrameTf[10]),
-            (float3)(sensorToZUpFrameTf[3], sensorToZUpFrameTf[7], sensorToZUpFrameTf[11]));
-
-            if (queryPointInZUp.x > minX && queryPointInZUp.x < maxX && queryPointInZUp.y > minY && queryPointInZUp.y < maxY)
-            {
-               // remove outliers before averaging for a single cell
-               if (count > 1)
+               float depth = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float) 1000;
+               float3 queryPointInSensor;
+               float3 queryPointInZUp;
+               if (params[MODE] == 0) // Spherical
                {
-                  currentAverageHeight = averageHeightZ / (float)(count);
-                  if (fabs(queryPointInZUp.z - currentAverageHeight) > 0.05)
-                  {
-                     continue;
-                  }
+                  queryPointInSensor = back_project_spherical(yaw_count, pitch_count, depth, params);
                }
-               count++;
-               averageHeightZ += queryPointInZUp.z;
+               else if (params[MODE] == 1) // Perspective
+               {
+                  queryPointInSensor = back_project_perspective((int2) (yaw_count, pitch_count), depth, params);
+               }
+
+               queryPointInZUp = transformPoint3D32_2(
+               queryPointInSensor,
+               (float3)(sensorToZUpFrameTf[0], sensorToZUpFrameTf[1], sensorToZUpFrameTf[2]),
+               (float3)(sensorToZUpFrameTf[4], sensorToZUpFrameTf[5], sensorToZUpFrameTf[6]),
+               (float3)(sensorToZUpFrameTf[8], sensorToZUpFrameTf[9], sensorToZUpFrameTf[10]),
+               (float3)(sensorToZUpFrameTf[3], sensorToZUpFrameTf[7], sensorToZUpFrameTf[11]));
+
+               if (queryPointInZUp.x > minX && queryPointInZUp.x < maxX && queryPointInZUp.y > minY && queryPointInZUp.y < maxY)
+               {
+                  // remove outliers before averaging for a single cell
+                  if (count > 1)
+                  {
+                     currentAverageHeight = averageHeightZ / (float)(count);
+                     if (fabs(queryPointInZUp.z - currentAverageHeight) > 0.05)
+                     {
+                        continue;
+                     }
+                  }
+                  count++;
+                  averageHeightZ += queryPointInZUp.z;
+               }
             }
          }
       }
    }
+
 
    int cellsPerAxis = (int)params[LOCAL_CELLS_PER_AXIS];
 

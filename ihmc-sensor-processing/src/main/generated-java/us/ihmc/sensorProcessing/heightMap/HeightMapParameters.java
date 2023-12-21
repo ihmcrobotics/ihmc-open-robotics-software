@@ -43,6 +43,9 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final IntegerStoredPropertyKey contactWindowSize = keys.addIntegerKey("Contact window size");
    public static final DoubleStoredPropertyKey steppingCosineThreshold = keys.addDoubleKey("Stepping cosine threshold");
    public static final IntegerStoredPropertyKey searchSkipSize = keys.addIntegerKey("Search skip size");
+   public static final IntegerStoredPropertyKey fastSearchSize = keys.addIntegerKey("Fast search size");
+   public static final IntegerStoredPropertyKey verticalSearchSize = keys.addIntegerKey("Vertical search size");
+   public static final DoubleStoredPropertyKey verticalSearchResolution = keys.addDoubleKey("Vertical search resolution");
    /**
     * Resolution of the height map grid
     */
