@@ -1,12 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-
-import java.util.HashMap;
 
 public class FootstepPlannerEnvironmentHandler
 {

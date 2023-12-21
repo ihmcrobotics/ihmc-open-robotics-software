@@ -60,7 +60,8 @@ public class GradientDescentStepConstraintSolverLogViewer
                                                                                      scs,
                                                                                      graphicsListRegistry,
                                                                                      scs.getRootRegistry());
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage());
+      // FIXME
+      PlanarRegionsList planarRegionsList = null; //PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage());
       snapAndWiggler.setPlanarRegionsList(planarRegionsList);
 
       Graphics3DObject regionsGraphic = new Graphics3DObject();

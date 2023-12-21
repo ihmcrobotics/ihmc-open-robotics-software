@@ -14,7 +14,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FootstepSnapperTest
 {
