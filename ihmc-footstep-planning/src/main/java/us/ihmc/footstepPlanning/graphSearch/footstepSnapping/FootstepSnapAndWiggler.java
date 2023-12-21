@@ -151,20 +151,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       }
    }
 
-   private static int getIndex(PlanarRegion planarRegion, PlanarRegionsList planarRegionsList)
-   {
-      double epsilon = 1e-7;
-      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
-      {
-         if (planarRegionsList.getPlanarRegion(i).epsilonEquals(planarRegion, epsilon))
-         {
-            return i;
-         }
-      }
-
-      return -1;
-   }
-
    protected void computeWiggleTransform(DiscreteFootstep footstepToWiggle, DiscreteFootstep stanceStep, FootstepSnapData snapData)
    {
       heightMapSnapWiggler.computeWiggleTransform(footstepToWiggle, environmentHandler.getHeightMap(), snapData, parameters.getHeightMapSnapThreshold());
