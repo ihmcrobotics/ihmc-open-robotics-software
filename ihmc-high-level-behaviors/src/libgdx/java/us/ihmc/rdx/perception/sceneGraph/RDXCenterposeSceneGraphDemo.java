@@ -1,5 +1,6 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
+import com.badlogic.gdx.graphics.Color;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -10,6 +11,7 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2DetectedObjectBoundingBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
@@ -30,6 +32,7 @@ public class RDXCenterposeSceneGraphDemo
    private ReferenceFrameLibrary referenceFrameLibrary;
    private RDXSceneGraphUI sceneGraphUI;
    private final Throttler perceptionThottler = new Throttler().setFrequency(30.0);
+   private RDXReferenceFrameGraphic messageAquisitionFrameGraphic;
 
    public RDXCenterposeSceneGraphDemo()
    {
@@ -76,6 +79,9 @@ public class RDXCenterposeSceneGraphDemo
             baseUI.getPrimaryScene().addRenderableProvider(sceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(sceneGraphUI.getPanel());
 
+            messageAquisitionFrameGraphic = new RDXReferenceFrameGraphic(0.1, Color.ORANGE);
+            baseUI.getPrimaryScene().addRenderableProvider(messageAquisitionFrameGraphic);
+
             referenceFrameLibrary = new ReferenceFrameLibrary();
             referenceFrameLibrary.addDynamicCollection(sceneGraphUI.getSceneGraph().asNewDynamicReferenceFrameCollection());
 
@@ -94,6 +100,7 @@ public class RDXCenterposeSceneGraphDemo
             {
                onRobotSceneGraph.updateSubscription();
                centerposeProcess.updateSceneGraph(onRobotSceneGraph);
+               messageAquisitionFrameGraphic.setTransformToWorldFrame(centerposeProcess.getImageAquisitionSensorFrameTransformToRoot());
                onRobotSceneGraph.updateOnRobotOnly(ReferenceFrame.getWorldFrame());
                onRobotSceneGraph.updatePublication();
             }

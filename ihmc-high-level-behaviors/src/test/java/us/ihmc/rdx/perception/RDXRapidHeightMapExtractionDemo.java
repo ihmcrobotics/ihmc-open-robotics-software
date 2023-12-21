@@ -134,6 +134,7 @@ public class RDXRapidHeightMapExtractionDemo
             cameraIntrinsics = new CameraIntrinsics(depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89);
             humanoidPerception.initializeRealsenseDepthImage(depthHeight, depthWidth);
             humanoidPerception.initializeHeightMapExtractor(null, cameraIntrinsics);
+            humanoidPerception.getRapidHeightMapExtractor().getTerrainMapStatistics().setPrintToConsole(true);
 
             perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer, 10);
             perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer, 10);

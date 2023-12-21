@@ -27,6 +27,8 @@ public class TerrainMapStatistics
    private static final String CPU_PROCESSING_TIME = "cpu_processing_time";
    private static final String GPU_PROCESSING_TIME = "gpu_processing_time";
 
+   private boolean printToConsole = false;
+
    public TerrainMapStatistics()
    {
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
@@ -119,7 +121,7 @@ public class TerrainMapStatistics
       statistics.put(GPU_PROCESSING_TIME, ((System.nanoTime() * 1e-6f) - statistics.get(GPU_PROCESSING_TIME)));
    }
 
-   public void logToFile(boolean logToFile, boolean printToConsole)
+   public void logToFile(boolean logToFile)
    {
       if (logToFile || printToConsole)
       {
@@ -140,9 +142,14 @@ public class TerrainMapStatistics
       builder.append("TerrainMapStatistics: [");
       for (String key : statistics.keySet())
       {
-         builder.append(key).append(":").append(statistics.get(key)).append(", ");
+         builder.append(key).append(":").append(String.format("%.3f", statistics.get(key))).append(", ");
       }
       builder.append("]\n");
       return builder.toString();
+   }
+
+   public void setPrintToConsole(boolean printToConsole)
+   {
+      this.printToConsole = printToConsole;
    }
 }

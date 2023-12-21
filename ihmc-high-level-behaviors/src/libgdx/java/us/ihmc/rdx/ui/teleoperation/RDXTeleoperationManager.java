@@ -217,7 +217,7 @@ public class RDXTeleoperationManager extends RDXPanel
                                             syncedRobot.getReferenceFrames().getChestFrame(),
                                             modelFileName,
                                             baseUI.getPrimary3DPanel());
-                  interactableChest.setOnSpacePressed(() ->
+                  interactableChest.setActionExecutor(() ->
                   {
                      ros2Helper.publishToController(HumanoidMessageTools.createChestTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
                                                                                                      interactableChest.getPose().getOrientation()));
@@ -238,7 +238,7 @@ public class RDXTeleoperationManager extends RDXPanel
                                             syncedRobot.getReferenceFrames().getPelvisFrame(),
                                             modelFileName,
                                             baseUI.getPrimary3DPanel());
-                  interactablePelvis.setOnSpacePressed(() ->
+                  interactablePelvis.setActionExecutor(() ->
                   {
                      ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
                                                                                                        interactablePelvis.getPose()));
@@ -257,7 +257,7 @@ public class RDXTeleoperationManager extends RDXPanel
                   if (!interactableFeet.containsKey(side))
                   {
                      RDXInteractableFoot interactableFoot = new RDXInteractableFoot(side, baseUI, robotCollidable, robotModel, fullRobotModel);
-                     interactableFoot.setOnSpacePressed(() ->
+                     interactableFoot.setActionExecutor(() ->
                              ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side,
                                                                                                              teleoperationParameters.getTrajectoryTime(),
                                                                                                              interactableFoot.getPose())));
@@ -292,7 +292,7 @@ public class RDXTeleoperationManager extends RDXPanel
             {
                // TODO this should probably not handle the space event!
                // This sends a command to the controller.
-               interactableHands.get(side).setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
+               interactableHands.get(side).setActionExecutor(armManager.getSubmitDesiredArmSetpointsCallback(side));
                interactableHands.get(side).setOpenHand(() -> armManager.getHandManager().publishHandCommand(side, HandConfiguration.OPEN));
                interactableHands.get(side).setCloseHand(() -> armManager.getHandManager().publishHandCommand(side, HandConfiguration.CLOSE));
                interactableHands.get(side).setGotoDoorAvoidanceArmAngles(() -> armManager.executeDoorAvoidanceArmAngles(side));
@@ -355,6 +355,7 @@ public class RDXTeleoperationManager extends RDXPanel
                   for (RobotSide side : interactableHands.sides())
                   {
                      desiredRobot.setArmShowing(side, !interactableHands.get(side).isDeleted() && armManager.getArmControlMode() == RDXArmControlMode.JOINT_ANGLES);
+                     desiredRobot.setArmColor(side, RDXIKSolverColors.getColor(armManager.getArmIKSolvers().get(side).getQuality()));
                   }
                }
             }
@@ -673,5 +674,10 @@ public class RDXTeleoperationManager extends RDXPanel
    public RDXLocomotionManager getLocomotionManager()
    {
       return locomotionManager;
+   }
+
+   public RDXArmManager getArmManager()
+   {
+      return armManager;
    }
 }

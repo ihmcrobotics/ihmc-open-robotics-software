@@ -617,9 +617,9 @@ public class TerrainPlanningSimulationUI
             humanoidPerception.getRapidHeightMapExtractor().getSensorOrigin().set(terrainMap.getSensorOrigin());
             humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
             humanoidPerception.getRapidHeightMapExtractor()
-                              .populateParameterBuffer(RapidHeightMapExtractor.getHeightMapParameters(),
-                                                       steppingL515Simulator.getCopyOfCameraParameters(),
-                                                       new Point3D());
+                              .populateParameterBuffers(RapidHeightMapExtractor.getHeightMapParameters(),
+                                                        steppingL515Simulator.getCopyOfCameraParameters(),
+                                                        new Point3D());
             humanoidPerception.getRapidHeightMapExtractor().computeContactMap();
             humanoidPerception.getRapidHeightMapExtractor().readContactMapImage();
 

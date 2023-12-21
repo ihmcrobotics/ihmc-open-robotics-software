@@ -225,9 +225,9 @@ public class PerceptionDebugTools
       LogTools.info(matToString(name, image, 0, 0, image.rows(), image.cols(), skip));
    }
 
-   public static void printMat(String name, Mat image, int row, int col, int nRows, int nCols, int skip)
+   public static void printMat(String name, Mat image, int rowBegin, int colBegin, int rowEnd, int colEnd, int skip)
    {
-      LogTools.info(matToString(name, image, row, col, nRows, nCols, skip));
+      LogTools.info(matToString(name, image, rowBegin, colBegin, rowEnd, colEnd, skip));
    }
 
    public static void printMatVector(String name, MatVector matVector)
@@ -263,13 +263,15 @@ public class PerceptionDebugTools
       return matString.toString();
    }
 
-   public static String matToString(String name, Mat image, int row, int col, int nRows, int nCols, int skip)
+   public static String matToString(String name, Mat image, int rowBegin, int colBegin, int rowEnd, int colEnd, int skip)
    {
-      StringBuilder matString = new StringBuilder("Mat: [" + name + "], Type: [" + getTypeString(image.type()) + "], Channels: [" + image.channels() + "]\n");
+      StringBuilder matString = new StringBuilder("Mat: [" + name + "], Type: [" + getTypeString(image.type()) + "], Channels: [" + image.channels() + "], ");
+      matString.append("Dims: [").append(image.rows()).append(", ").append(image.cols()).append("], ");
+      matString.append("Crop: [").append(rowBegin).append(", ").append(colBegin).append(", ").append(rowEnd).append(", ").append(colEnd).append("]\n");
 
-      for (int i = row; i < nRows; i += skip)
+      for (int i = rowBegin; i < rowEnd; i += skip)
       {
-         for (int j = col; j < nCols; j += skip)
+         for (int j = colBegin; j < colEnd; j += skip)
          {
             if (image.type() == opencv_core.CV_8UC1)
                matString.append(image.ptr(i, j).get() & 0xFF).append(" ");

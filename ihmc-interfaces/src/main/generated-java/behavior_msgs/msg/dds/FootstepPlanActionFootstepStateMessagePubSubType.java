@@ -15,7 +15,7 @@ public class FootstepPlanActionFootstepStateMessagePubSubType implements us.ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "66a13f9b6ceccadd9e9a08b3320426e39e954981db3565c620627d9d39153f4c";
+   		return "c1054031a2f6d8b8f6bfd40839662d152694e6206552d15a45bbdfbc63df771f";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class FootstepPlanActionFootstepStateMessagePubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       return current_alignment - initial_alignment;
@@ -67,7 +67,7 @@ public class FootstepPlanActionFootstepStateMessagePubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
 
@@ -76,13 +76,13 @@ public class FootstepPlanActionFootstepStateMessagePubSubType implements us.ihmc
 
    public static void write(behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_3(data.getIndex());
+      cdr.write_type_7(data.getUnusedPlaceholderField());
 
    }
 
    public static void read(behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setIndex(cdr.read_type_3());
+      data.setUnusedPlaceholderField(cdr.read_type_7());
       	
 
    }
@@ -90,13 +90,13 @@ public class FootstepPlanActionFootstepStateMessagePubSubType implements us.ihmc
    @Override
    public final void serialize(behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_3("index", data.getIndex());
+      ser.write_type_7("unused_placeholder_field", data.getUnusedPlaceholderField());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage data)
    {
-      data.setIndex(ser.read_type_3("index"));   }
+      data.setUnusedPlaceholderField(ser.read_type_7("unused_placeholder_field"));   }
 
    public static void staticCopy(behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage src, behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage dest)
    {
