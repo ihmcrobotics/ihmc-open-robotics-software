@@ -10,6 +10,7 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -31,6 +32,7 @@ import us.ihmc.scs2.simulation.physicsEngine.DoNothingPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.contactPointBased.ContactPointBasedPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEngine;
 import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.thread.StatelessNotification;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,6 +65,8 @@ public class RDXSCS2Session
    private final RDXRenderableAdapter renderables = new RDXRenderableAdapter(this::getRenderables);
    private final ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
    private final ArrayList<Runnable> additionalImGuiWidgets = new ArrayList<>();
+   private boolean stoppingSession = false;
+   private final StatelessNotification sessionStoppedNotification = new StatelessNotification();
 
    public RDXSCS2Session(RDXBaseUI baseUI)
    {
@@ -390,11 +394,23 @@ public class RDXSCS2Session
 
    public void endSession()
    {
-      session.stopSessionThread();
+      stoppingSession = true;
+      ThreadTools.startAsDaemon(() ->
+      {
+         session.stopSessionThread();
+         stoppingSession = false;
+         sessionStoppedNotification.notifyOtherThread();
+      }, getClass().getSimpleName() + "Destroy");
       robots.clear();
       terrainObjects.clear();
       showRobotPairs.clear();
       showRobotMap.clear();
+   }
+
+   public void waitForSessionToBeStopped()
+   {
+      if (stoppingSession)
+         sessionStoppedNotification.blockingWait();
    }
 
    public void destroy(RDXBaseUI baseUI)
@@ -460,5 +476,10 @@ public class RDXSCS2Session
    public ArrayList<Runnable> getAdditionalImGuiWidgets()
    {
       return additionalImGuiWidgets;
+   }
+
+   public boolean isSessionThreadRunning()
+   {
+      return session.hasSessionStarted() && !session.isSessionShutdown();
    }
 }

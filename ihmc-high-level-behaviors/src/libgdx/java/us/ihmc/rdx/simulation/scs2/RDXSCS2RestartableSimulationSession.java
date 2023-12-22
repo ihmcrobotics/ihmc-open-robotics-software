@@ -1,11 +1,9 @@
 package us.ihmc.rdx.simulation.scs2;
 
 import imgui.ImGui;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.scs2.simulation.SimulationSession;
-import us.ihmc.tools.thread.StatelessNotification;
 
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -17,9 +15,7 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
    private final ArrayList<String> robotsToHide = new ArrayList<>();
    private final ArrayList<String> variableWidgets = new ArrayList<>();
    private volatile boolean starting = false;
-   private volatile boolean started = false;
    private final ArrayList<Runnable> destroyables = new ArrayList<>();
-   private final StatelessNotification destroyedNotification = new StatelessNotification();
 
    public RDXSCS2RestartableSimulationSession(RDXBaseUI baseUI)
    {
@@ -34,19 +30,19 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
    @Override
    public void renderImGuiWidgets()
    {
-      if (!starting && !started)
+      if (!starting && !isSessionThreadRunning())
       {
          if (ImGui.button(labels.get("Build simulation")))
          {
             buildSimulation();
          }
       }
-      if (started)
+      if (isSessionThreadRunning())
       {
          if (ImGui.button(labels.get("Rebuild simulation")))
          {
             destroySessionForRebuild();
-            buildSimulation(true);
+            buildSimulation();
          }
          ImGui.sameLine();
          if (ImGui.button(labels.get("Destroy")))
@@ -59,7 +55,7 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
          ImGui.text("Starting...");
       }
 
-      if (started)
+      if (isSessionThreadRunning())
       {
          super.renderImGuiWidgets();
       }
@@ -67,14 +63,8 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
 
    public void buildSimulation()
    {
-      buildSimulation(false);
-   }
-
-   public void buildSimulation(boolean waitForDestroy)
-   {
       starting = true;
-      if (waitForDestroy)
-         destroyedNotification.blockingWait();
+      waitForSessionToBeStopped();
 
       startSession(sessionBuilder.get());
 
@@ -89,12 +79,11 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
       }
 
       starting = false;
-      started = true;
    }
 
    public void update()
    {
-      if (started)
+      if (isSessionThreadRunning())
       {
          super.update();
       }
@@ -102,20 +91,14 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
 
    public void destroySessionForRebuild()
    {
-      if (started)
+      if (isSessionThreadRunning())
       {
-         started = false;
-         ThreadTools.startAsDaemon(() ->
+         endSession();
+
+         for (Runnable destroyable : destroyables)
          {
-            endSession();
-
-            for (Runnable destroyable : destroyables)
-            {
-               destroyable.run();
-            }
-
-            destroyedNotification.notifyOtherThread();
-         }, getClass().getSimpleName() + "Destroy");
+            destroyable.run();
+         }
       }
    }
 
