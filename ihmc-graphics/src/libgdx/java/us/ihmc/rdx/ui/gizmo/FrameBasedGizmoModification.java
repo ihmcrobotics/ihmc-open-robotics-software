@@ -97,7 +97,7 @@ public class FrameBasedGizmoModification
    {
       if (translation.normSquared() > TRANSLATION_EPSILON)
       {
-         adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
+         adjustmentPose3D.changeFrame(adjustmentPose3D.getReferenceFrame().getRootFrame());
          adjustmentPose3D.getPosition().add(translation);
          adjustmentNeedsToBeApplied = true;
       }
@@ -107,7 +107,7 @@ public class FrameBasedGizmoModification
    {
       if (Math.abs(rotationInWorld.angle()) > ROTATION_EPSILON)
       {
-         adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
+         adjustmentPose3D.changeFrame(adjustmentPose3D.getReferenceFrame().getRootFrame());
          rotationInWorld.transform(adjustmentPose3D.getOrientation());
          adjustmentNeedsToBeApplied = true;
       }
