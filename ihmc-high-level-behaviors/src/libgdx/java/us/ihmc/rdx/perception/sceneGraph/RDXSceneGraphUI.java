@@ -141,11 +141,23 @@ public class RDXSceneGraphUI
                      modificationQueue.accept(new SceneGraphNodeAddition(twoByFour.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(twoByFour);
                   }
+                  if (ImGui.button(labels.get("Add Work Platform")))
+                  {
+                     RDXPredefinedRigidBodySceneNode workPlatform = predefinedRigidBodySceneNodeBuilder.build("WorkPlatform");
+                     modificationQueue.accept(new SceneGraphNodeAddition(workPlatform.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(workPlatform);
+                  }
                   if (ImGui.button(labels.get("Add Shoe")))
                   {
                      RDXPredefinedRigidBodySceneNode shoe = predefinedRigidBodySceneNodeBuilder.build("Shoe");
                      modificationQueue.accept(new SceneGraphNodeAddition(shoe.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(shoe);
+                  }
+                  if (ImGui.button(labels.get("Add ThinkPad")))
+                  {
+                     RDXPredefinedRigidBodySceneNode thinkpad = predefinedRigidBodySceneNodeBuilder.build("ThinkPad");
+                     modificationQueue.accept(new SceneGraphNodeAddition(thinkpad.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(thinkpad);
                   }
                   ImGui.endTable();
                }

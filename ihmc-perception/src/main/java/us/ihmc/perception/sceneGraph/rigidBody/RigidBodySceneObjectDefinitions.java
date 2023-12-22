@@ -69,6 +69,11 @@ public class RigidBodySceneObjectDefinitions
    public static final String DEBRIS_VISUAL_MODEL_FILE_PATH = "environmentObjects/debris/2x4.g3dj";
    public static final RigidBodyTransform DEBRIS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
+   public static final String PLATFORM_NAME = "WorkPlatform";
+   public static final RigidBodyTransform PLATFORM_TRANSFORM_TO_MARKER = new RigidBodyTransform();
+   public static final String PLATFORM_VISUAL_MODEL_FILE_PATH = "environmentObjects/workPlatform/workPlatform.g3dj";
+   public static final RigidBodyTransform PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
    public static final TIntDoubleMap ARUCO_MARKER_SIZES = new TIntDoubleHashMap();
    static
    {
@@ -82,6 +87,20 @@ public class RigidBodySceneObjectDefinitions
    public static final double SHOE_HEIGHT = 0.245;
    public static final String SHOE_VISUAL_MODEL_FILE_PATH = "environmentObjects/shoe/shoe.g3dj";
    public static final RigidBodyTransform SHOE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
+   public static final String THINKPAD_NAME = "ThinkPad";
+   public static final double THINKPAD_WIDTH = 0.34;
+   public static final double THINKPAD_DEPTH = 0.23;
+   public static final double THINKPAD_HEIGHT = 0.05;
+   public static final String THINKPAD_VISUAL_MODEL_FILE_PATH = "environmentObjects/thinkpad/thinkpad.g3dj";
+   public static final RigidBodyTransform THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      EuclidCoreMissingTools.setYawPitchRollDegrees(THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 180, 0, 90);
+      THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(0.5);
+      THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addX(0.5);
+      THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.15);
+   }
 
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
@@ -164,5 +183,17 @@ public class RigidBodySceneObjectDefinitions
                                                              SHOE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       LogTools.info("Adding Shoe to scene graph.");
       modificationQueue.accept(new SceneGraphNodeAddition(shoe, parentNode));
+   }
+
+   public static void ensureThinkPadNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   {
+      SceneNode thinkpad = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                        THINKPAD_NAME,
+                                                        sceneGraph.getIDToNodeMap(),
+                                                        parentNode.getID(),
+                                                        new RigidBodyTransform(), THINKPAD_VISUAL_MODEL_FILE_PATH,
+                                                        THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      LogTools.info("Adding ThinkPad to scene graph.");
+      modificationQueue.accept(new SceneGraphNodeAddition(thinkpad, parentNode));
    }
 }
