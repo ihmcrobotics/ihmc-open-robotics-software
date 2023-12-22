@@ -27,10 +27,8 @@ public class RDXSCS2BulletSimulationDemos
 
             baseUI.getImGuiPanelManager().addPanel("Session Selection", this::renderSessionSelectionPanelImGuiWidgets);
 
-            scs2SimulationSession = new RDXSCS2SimulationSession();
-            scs2SimulationSession.create(baseUI);
+            scs2SimulationSession = new RDXSCS2SimulationSession(baseUI);
             scs2SimulationSession.startSession(FallingBoxBulletSimulation.createSession());
-            baseUI.getImGuiPanelManager().addPanel(scs2SimulationSession.getControlPanel());
          }
 
          @Override
