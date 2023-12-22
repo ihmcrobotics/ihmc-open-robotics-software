@@ -35,7 +35,7 @@ public class BoxDefinition extends RobotDefinition
       RigidBodyDefinition boxBody = new RigidBodyDefinition("boxBody");
 
       VisualDefinitionFactory factory = new VisualDefinitionFactory();
-      factory.addBox(size.getX(), size.getY(), size.getZ(), new MaterialDefinition(ColorDefinitions.Red()));
+      factory.addBox(size.getX(), size.getY(), size.getZ(), new MaterialDefinition(ColorDefinitions.Gray()));
       boxBody.addVisualDefinitions(factory.getVisualDefinitions());
 
       CollisionShapeDefinition collisionShapeDefinition = new CollisionShapeDefinition(new Box3DDefinition(size.getX(), size.getY(), size.getZ()));

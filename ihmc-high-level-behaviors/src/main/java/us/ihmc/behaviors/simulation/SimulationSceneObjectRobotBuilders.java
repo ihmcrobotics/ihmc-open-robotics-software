@@ -101,7 +101,7 @@ public class SimulationSceneObjectRobotBuilders
          boxDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0),
                                                                 new Point3D(TABLE_X + 0.15,
                                                                             TABLE_Y + 0.25,
-                                                                            TABLE_SURFACE_Z + 0.16/2 + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE));
+                                                                            TABLE_SURFACE_Z + size.getZ()/2 + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE));
          boxDefinition.getInitialSixDoFState().setVelocity(new Vector3D(), new Vector3D());
          return new Robot(boxDefinition, inertialFrame);
       };
