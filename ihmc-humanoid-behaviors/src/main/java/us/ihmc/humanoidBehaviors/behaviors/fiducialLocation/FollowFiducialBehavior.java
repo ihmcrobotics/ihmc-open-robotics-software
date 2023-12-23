@@ -449,8 +449,6 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
                                                                                                               idealStanceWidth,
                                                                                                               planBodyPath);
 
-      if (planarRegions.get() != null)
-         request.getPlanarRegionsListMessage().set(planarRegions.get());
       request.setTimeout(swingTime.getDoubleValue() - 0.25);
       request.setPlannerRequestId(planId.getIntegerValue());
       request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());

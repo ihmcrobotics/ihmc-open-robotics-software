@@ -221,8 +221,6 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       }
 
 
-
-
       // Check for obstacle collisions (vertically extruded line between steps)
       if (parameters.checkForPathCollisions())
       {
@@ -273,8 +271,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
    public void setPlanarRegions(PlanarRegionsList regionsForCollisionChecking)
    {
-      collisionDetector.setPlanarRegionsList(regionsForCollisionChecking);
-      obstacleBetweenStepsChecker.setPlanarRegions(regionsForCollisionChecking);
+      // FIXME remove the other uses of planar regions.
       cliffAvoider.setPlanarRegionsList(regionsForCollisionChecking);
    }
 
@@ -297,6 +294,8 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    public void setHeightMapData(HeightMapData heightMapData)
    {
       this.heightMapData = heightMapData;
+      collisionDetector.setHeightMapData(heightMapData);
+      obstacleBetweenStepsChecker.setHeightMapData(heightMapData);
    }
 
    private static void checkWiggleParameters(FootstepPlannerParametersReadOnly parameters)

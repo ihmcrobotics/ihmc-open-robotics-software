@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityDa
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepPlannerBodyCollisionDetector;
+import us.ihmc.footstepPlanning.graphSearch.collision.PlanarRegionFootstepPlannerBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
@@ -39,8 +40,8 @@ public class FootstepChecker implements FootstepCheckerInterface
    private final ConvexPolygon2D tmpFootPolygon = new ConvexPolygon2D();
 
    private final PlanarRegionCliffAvoider cliffAvoider;
-   private final ObstacleBetweenStepsChecker obstacleBetweenStepsChecker;
-   private final FootstepPlannerBodyCollisionDetector collisionDetector;
+   private final PlanarRegionObstacleBetweenStepsChecker obstacleBetweenStepsChecker;
+   private final PlanarRegionFootstepPlannerBodyCollisionDetector collisionDetector;
    private final FootstepPoseHeuristicChecker heuristicPoseChecker;
    private final FootstepPoseReachabilityChecker reachabilityChecker;
 
@@ -67,8 +68,8 @@ public class FootstepChecker implements FootstepCheckerInterface
       this.snapper = snapper;
       this.footPolygons = footPolygons;
       this.cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
-      this.obstacleBetweenStepsChecker = new ObstacleBetweenStepsChecker(parameters, snapper);
-      this.collisionDetector = new FootstepPlannerBodyCollisionDetector(parameters);
+      this.obstacleBetweenStepsChecker = new PlanarRegionObstacleBetweenStepsChecker(parameters, snapper);
+      this.collisionDetector = new PlanarRegionFootstepPlannerBodyCollisionDetector(parameters);
       this.heuristicPoseChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
       this.reachabilityChecker = new FootstepPoseReachabilityChecker(parameters, snapper, stepReachabilityData, registry);
       parentRegistry.addChild(registry);
