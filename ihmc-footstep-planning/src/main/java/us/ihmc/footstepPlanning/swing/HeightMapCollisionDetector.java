@@ -27,6 +27,7 @@ public class HeightMapCollisionDetector
       double centerX = heightMap.getGridCenter().getX();
       double centerY = heightMap.getGridCenter().getY();
       // get the indices of the corners of the box drawn on the ground
+      // TODO switch to using the pose of the body box
       Point3DReadOnly minPoint = collisionBox.getBoundingBox().getMinPoint();
       Point3DReadOnly maxPoint = collisionBox.getBoundingBox().getMaxPoint();
       int minXIndex = HeightMapTools.coordinateToIndex(minPoint.getX(), centerX, resolution, centerIndex);
@@ -55,6 +56,9 @@ public class HeightMapCollisionDetector
             double groundHeight = heightMap.getHeightAt(xIndex, yIndex);
             double xQuery = HeightMapTools.indexToCoordinate(xIndex, centerX, resolution, centerIndex);
             double yQuery = HeightMapTools.indexToCoordinate(yIndex, centerY, resolution, centerIndex);
+
+            // TODO check to see if this is within the body box 2D, which should account for the yaw.
+
 
             // find the penetration depth at this point
             double heightOnFootAtPoint = getLowestHeightOnBoxAtPoint(collisionBox, xQuery, yQuery);
