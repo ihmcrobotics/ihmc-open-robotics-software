@@ -80,7 +80,7 @@ public class FootstepCheckerTest
          Point3D nodeA = new Point3D(step1.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
          Point3D nodeB = new Point3D(step2.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
 
-         PlanarRegion bodyRegion = ObstacleBetweenStepsChecker.createBodyRegionFromSteps(nodeA, nodeB, parameters.getBodyBoxBaseZ(), 2.0);
+         PlanarRegion bodyRegion = PlanarRegionObstacleBetweenStepsChecker.createBodyRegionFromSteps(nodeA, nodeB, parameters.getBodyBoxBaseZ(), 2.0);
          Graphics3DObjectTools.addPlanarRegionsList(graphics, new PlanarRegionsList(bodyRegion), YoAppearance.White());
 
          for (PlanarRegion region : planarRegions.getPlanarRegionsAsList())
@@ -161,7 +161,7 @@ public class FootstepCheckerTest
 
          Point3D nodeA = new Point3D(step1.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
          Point3D nodeB = new Point3D(step2.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
-         PlanarRegion bodyRegion = ObstacleBetweenStepsChecker.createBodyRegionFromSteps(nodeA, nodeB, bodyGroundClearance, 2.0);
+         PlanarRegion bodyRegion = PlanarRegionObstacleBetweenStepsChecker.createBodyRegionFromSteps(nodeA, nodeB, bodyGroundClearance, 2.0);
          Graphics3DObjectTools.addPlanarRegionsList(graphics, new PlanarRegionsList(bodyRegion), YoAppearance.White());
 
          for (PlanarRegion region : planarRegions.getPlanarRegionsAsList())
