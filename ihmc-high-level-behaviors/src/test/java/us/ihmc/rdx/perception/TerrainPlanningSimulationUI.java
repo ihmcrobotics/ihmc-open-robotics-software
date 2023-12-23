@@ -120,10 +120,11 @@ public class TerrainPlanningSimulationUI
 
    private final StancePoseCalculator stancePoseCalculator = new StancePoseCalculator(0.5f, 0.5f, 0.1f);
 
-   private final File logFile = new File(IHMCCommonPaths.PLANNING_DIRECTORY.resolve("NadiaPlannerLogs").toString());
-   //private final File logFile = new File(IHMCCommonPaths.LOGS_DIRECTORY.toString());
+   private final File planningLogDirectory = new File(IHMCCommonPaths.PLANNING_DIRECTORY.resolve("NadiaPlannerLogs").toString());
+   private final File logsDirectory = new File(IHMCCommonPaths.LOGS_DIRECTORY.toString());
+
    private final FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-   private final File[] files = logFile.listFiles(name -> name.toString().contains("FootstepPlannerLog"));
+   private final File[] files = planningLogDirectory.listFiles(name -> name.toString().contains("FootstepPlannerLog"));
    private final Random random = new Random(System.currentTimeMillis());
    private final Pose3D cameraPose = new Pose3D();
 
@@ -199,6 +200,7 @@ public class TerrainPlanningSimulationUI
             stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(stancePoseCalculator);
             baseUI.getPrimaryScene().addRenderableProvider(stancePoseSelectionPanel, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(stancePoseSelectionPanel::processImGui3DViewInput);
+            baseUI.getImGuiPanelManager().addPanel(stancePoseSelectionPanel.getPanelName(), stancePoseSelectionPanel::renderImGuiWidgets);
 
             for (RobotSide robotSide : RobotSide.values)
             {
@@ -277,7 +279,6 @@ public class TerrainPlanningSimulationUI
             l515PoseGizmo.update();
 
             stancePoseSelectionPanel.update(goalPose.get(RobotSide.LEFT), loadedMapData);
-            stancePoseSelectionPanel.renderImGuiWidgets();
 
             //if (loadedMapData != null && !footstepPlanToRenderNotificaiton.hasValue())
             //{
@@ -454,7 +455,7 @@ public class TerrainPlanningSimulationUI
          public void loadFootstepPlannerLog()
          {
             if (files == null)
-               throw new RuntimeException("No log files found in " + logFile.getAbsolutePath());
+               throw new RuntimeException("No log files found in " + planningLogDirectory.getAbsolutePath());
 
             File file = files[logIndex];
             LogTools.info("Loading log: {}", file.getName());
@@ -619,7 +620,7 @@ public class TerrainPlanningSimulationUI
             humanoidPerception.getRapidHeightMapExtractor()
                               .populateParameterBuffers(RapidHeightMapExtractor.getHeightMapParameters(),
                                                         steppingL515Simulator.getCopyOfCameraParameters(),
-                                                        new Point3D());
+                                                        new Point3D(terrainMap.getSensorOrigin()));
             humanoidPerception.getRapidHeightMapExtractor().computeContactMap();
             humanoidPerception.getRapidHeightMapExtractor().readContactMapImage();
 

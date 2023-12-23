@@ -260,7 +260,13 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
             {
                PerceptionDebugTools.printMat("Internal Height Map",
                                              humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat(),
-                                             32);
+                                             4);
+            }
+            if (ImGui.button("Print Internal Contact Map"))
+            {
+               PerceptionDebugTools.printMat("Internal Contact Map",
+                                             humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage(),
+                                             4);
             }
             if (ImGui.button("Print Terrain Cost Image"))
             {

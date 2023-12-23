@@ -464,7 +464,7 @@ public class MonteCarloPlannerTools
 
       double goalReward = plannerParameters.getGoalReward() * progressToGoal;
       double contactReward =
-            (((int) request.getTerrainMapData().getContactScoreLocal(rIndex, cIndex) & 0xFF) / 255.0 - plannerParameters.getFeasibleContactCutoff())
+            ((request.getTerrainMapData().getContactScoreLocal(rIndex, cIndex)) / 255.0 - plannerParameters.getFeasibleContactCutoff())
             * plannerParameters.getFeasibleContactReward();
 
       double stepYawCost = Math.abs(oldNode.getState().getZ() - newNode.getState().getZ()) * 0.01f;

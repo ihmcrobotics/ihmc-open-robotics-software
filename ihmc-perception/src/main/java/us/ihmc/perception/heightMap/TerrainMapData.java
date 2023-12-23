@@ -92,7 +92,7 @@ public class TerrainMapData
       if (rIndex < 0 || rIndex >= localGridSize || cIndex < 0 || cIndex >= localGridSize)
          return 0.0f;
 
-      return (float) ((heightMap.ptr(rIndex, cIndex).get() & 0xFF));
+      return (float) ((contactMap.ptr(rIndex, cIndex).get() & 0xFF));
    }
 
    public float getContactScoreInWorld(float x, float y)
