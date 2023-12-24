@@ -67,7 +67,8 @@ public class SwingOverPlanarRegionsLogViewer
       SwingPlannerParametersBasics parameters = new DefaultSwingPlannerParameters();
       parameters.set(log.getSwingPlannerParametersPacket());
 
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getStatusPacket().getPlanarRegionsList());
+      // FIXME need to load this some other way.
+      PlanarRegionsList planarRegionsList = null;//PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getStatusPacket().getPlanarRegionsList());
 
       WalkingControllerParameters walkingControllerParameters = new ProxyAtlasWalkingControllerParameters();
       ConvexPolygon2D foot = ProxyAtlasWalkingControllerParameters.getProxyAtlasFootPolygon();
