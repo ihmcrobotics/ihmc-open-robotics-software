@@ -80,8 +80,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       clearLoggedVariables();
       doValidityCheck(candidateStep, stanceStep, startOfSwing);
 
-      throw new RuntimeException("Need to fix all the collision checks");
-//      return rejectionReason.getValue() == null;
+      return rejectionReason.getValue() == null;
    }
 
    // TODO compute step index
