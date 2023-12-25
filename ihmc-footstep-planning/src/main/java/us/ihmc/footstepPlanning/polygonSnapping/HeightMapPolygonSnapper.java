@@ -12,6 +12,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.robotics.EuclidGeometryPolygonMissingTools;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -28,6 +31,7 @@ public class HeightMapPolygonSnapper
    private final List<Point3D> footPointsInEnvironment = new ArrayList<>();
    private final Plane3D bestFitPlane = new Plane3D();
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
+   private final ConvexPolygon2D snappedPolygon = new ConvexPolygon2D();
 
    private double maxPossibleRMSError;
    private double rootMeanSquaredError;
@@ -38,6 +42,22 @@ public class HeightMapPolygonSnapper
    public void setSnapAreaResolution(double snapAreaResolution)
    {
       this.snapAreaResolution = snapAreaResolution;
+   }
+
+   public static void populateSnapData(HeightMapPolygonSnapper snapper, DiscreteFootstep footstep, FootstepSnapData snapDataToPack)
+   {
+      populateSnapData(snapper, footstep.getX(), footstep.getY(), footstep.getYaw(), snapDataToPack);
+   }
+
+   public static void populateSnapData(HeightMapPolygonSnapper snapper, double x, double y, double yaw, FootstepSnapData snapDataToPack)
+   {
+      snapDataToPack.setRMSErrorHeightMap(snapper.getNormalizedRMSError());
+
+      // get the cropped polygon back in sole frame.
+      snapDataToPack.getCroppedFoothold().set(snapper.getSnappedPolygonInWorld());
+      RigidBodyTransform footstepTransform = new RigidBodyTransform();
+      DiscreteFootstepTools.getStepTransform(x, y, yaw, footstepTransform);
+      snapDataToPack.getCroppedFoothold().applyInverseTransform(footstepTransform);
    }
 
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap)
@@ -124,7 +144,7 @@ public class HeightMapPolygonSnapper
          return null;
       }
       // TODO do something with this snapped polygon, maybe
-      ConvexPolygon2D snappedPolygon = new ConvexPolygon2D(Vertex3DSupplier.asVertex3DSupplier(footPointsInEnvironment));
+      snappedPolygon.set(Vertex3DSupplier.asVertex3DSupplier(footPointsInEnvironment));
       area = snappedPolygon.getArea();
 
       planeFitter.fitPlaneToPoints(footPointsInEnvironment, bestFitPlane);
@@ -178,5 +198,10 @@ public class HeightMapPolygonSnapper
    public double getArea()
    {
       return area;
+   }
+
+   public ConvexPolygon2DReadOnly getSnappedPolygonInWorld()
+   {
+      return snappedPolygon;
    }
 }

@@ -151,14 +151,10 @@ public class PlanarRegionFootstepSnapAndWiggler implements FootstepSnapperReadOn
       double maximumRegionHeightToConsider = getMaximumRegionHeightToConsider(stanceStep);
       DiscreteFootstepTools.getFootPolygon(footstepToSnap, footPolygonsInSoleFrame.get(footstepToSnap.getRobotSide()), footPolygon);
 
-      boolean snappedToPlanarReigons = false;
-
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon,
                                                                                                         planarRegionsList,
                                                                                                         maximumRegionHeightToConsider,
                                                                                                         planarRegionToPack);
-      if (snapTransform != null)
-         snappedToPlanarReigons = true;
 
       if (snapTransform == null)
       {
@@ -173,7 +169,6 @@ public class PlanarRegionFootstepSnapAndWiggler implements FootstepSnapperReadOn
             snapData.setRegionIndex(getIndex(planarRegionToPack, planarRegionsList));
             computeCroppedFoothold(footstepToSnap, snapData);
          }
-         snapData.setSnappedToPlanarRegions(snappedToPlanarReigons);
 
          return snapData;
       }

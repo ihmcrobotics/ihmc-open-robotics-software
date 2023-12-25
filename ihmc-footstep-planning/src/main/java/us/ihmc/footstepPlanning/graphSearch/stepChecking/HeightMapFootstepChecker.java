@@ -11,7 +11,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -92,7 +91,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       heuristicPoseChecker.setApproximateStepDimensions(candidateStep, stanceStep);
       achievedDeltaInside.set(snapData.getAchievedInsideDelta());
 
-      if (!doValidityCheckForHeightMap(candidateStep, snapData))
+      if (!doValidityCheckForHeightMap(candidateStep))
          return;
 
       // Check step placement
@@ -131,14 +130,18 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       isCollisionFree(candidateStep, stanceStep, startOfSwing);
    }
 
-   private boolean doValidityCheckForHeightMap(DiscreteFootstep candidateStep, FootstepSnapDataReadOnly snapData)
+   private boolean doValidityCheckForHeightMap(DiscreteFootstep candidateStep)
    {
-      if (heightMapData == null || heightMapData.isEmpty() || !snapData.getSnappedToHeightMap())
+      if (heightMapData == null || heightMapData.isEmpty())
          return true;
 
       // Area
       double fullFootArea = footPolygons.get(candidateStep.getRobotSide()).getArea();
-      footAreaPercentage.set(candidateStepSnapData.getHeightMapArea() / fullFootArea);
+      double area = candidateStepSnapData.getCroppedFoothold().getArea();
+      if (Double.isFinite(area))
+         footAreaPercentage.set(candidateStepSnapData.getCroppedFoothold().getArea() / fullFootArea);
+      else
+         footAreaPercentage.set(1.0);
 
       double epsilonAreaPercentage = 1e-4;
       if (footAreaPercentage.getValue() < (parameters.getMinimumFootholdPercent() - epsilonAreaPercentage))
@@ -148,8 +151,8 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       }
 
       // Root-mean-squared error
-      rmsError.set(candidateStepSnapData.getRMSErrorHeightMap());
-      if (candidateStepSnapData.getRMSErrorHeightMap() > parameters.getRMSErrorThreshold())
+      rmsError.set(candidateStepSnapData.getSnapRMSError());
+      if (candidateStepSnapData.getSnapRMSError() > parameters.getRMSErrorThreshold())
       {
          rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.RMS_ERROR_TOO_HIGH);
          return false;
