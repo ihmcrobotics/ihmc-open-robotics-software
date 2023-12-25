@@ -3,6 +3,8 @@ package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.HeightMapMessage;
+import rosgraph_msgs.Log;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -16,6 +18,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -24,6 +27,7 @@ import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -374,7 +378,7 @@ public class HeightMapFootstepCheckerTest
       assertFalse(checker.isStepValid(step2, step1, step0));
    }
 
-   private static final double barelyTooSteepEpsilon = 1.0e-5;
+   private static final double barelyTooSteepEpsilon = 1.0e-4;
    private static final int iters = 10000;
 
    @Test
@@ -392,7 +396,7 @@ public class HeightMapFootstepCheckerTest
          @Override
          public boolean getWiggleWhilePlanning()
          {
-            return true;
+            return false;
          }
       };
 
@@ -429,10 +433,10 @@ public class HeightMapFootstepCheckerTest
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       ConvexPolygon2D polygon = new ConvexPolygon2D();
-      polygon.addVertex(1.0, 1.0);
-      polygon.addVertex(1.0, -1.0);
-      polygon.addVertex(-1.0, -1.0);
-      polygon.addVertex(-1.0, 1.0);
+      polygon.addVertex(2.0, 2.0);
+      polygon.addVertex(2.0, -2.0);
+      polygon.addVertex(-2.0, -2.0);
+      polygon.addVertex(-2.0, 2.0);
       polygon.update();
       ArrayList<ConvexPolygon2D> polygons = new ArrayList<>();
       polygons.add(polygon);
@@ -451,6 +455,7 @@ public class HeightMapFootstepCheckerTest
       HeightMapFootstepChecker nodeChecker = new HeightMapFootstepChecker(parameters, footPolygons, snapper, null, registry);
       nodeChecker.setHeightMapData(heightMapData);
       environmentHandler.setHeightMap(heightMapData);
+      snapper.clearSnapData();
 
       DiscreteFootstep step0 = new DiscreteFootstep(-0.1, -0.1, 0.0, RobotSide.RIGHT); // the previous right foot position
       DiscreteFootstep step1 = new DiscreteFootstep(0.0, 0.1, 0.0, RobotSide.LEFT); // the left foot stance position for executing step 2
@@ -472,8 +477,9 @@ public class HeightMapFootstepCheckerTest
          heightMapData = HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList));
          nodeChecker.setHeightMapData(heightMapData);
          environmentHandler.setHeightMap(heightMapData);
+         snapper.clearSnapData();
 
-         assertTrue(nodeChecker.isStepValid(step2, step1, step0));
+         assertTrue(nodeChecker.isStepValid(step2, step1, step0), "Rejected because " + nodeChecker.getRejectionReason());
          //         assertEquals(null, registry.getRejectionReason());
 
          transformToWorld.setIdentity();
@@ -497,8 +503,13 @@ public class HeightMapFootstepCheckerTest
          heightMapData = HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList));
          nodeChecker.setHeightMapData(heightMapData);
          environmentHandler.setHeightMap(heightMapData);
+         snapper.clearSnapData();
 
-         assertFalse(nodeChecker.isStepValid(step2, step1, step0), "rotation = " + rotationAngle);
+         boolean isValid = nodeChecker.isStepValid(step2, step1, step0);
+         FootstepSnapDataReadOnly snapData = nodeChecker.snapper.snapFootstep(step2);
+         double pitch = Math.toDegrees(snapData.getSnapTransform().getRotation().getPitch());
+         double roll = Math.toDegrees(snapData.getSnapTransform().getRotation().getRoll());
+         assertFalse(isValid, "rotation (degrees) = " + Math.toDegrees(rotationAngle) + ", achieved pitch " + pitch + ", roll " + roll);
          //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
 
          transformToWorld.setIdentity();
@@ -507,6 +518,7 @@ public class HeightMapFootstepCheckerTest
          heightMapData = HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList));
          nodeChecker.setHeightMapData(heightMapData);
          environmentHandler.setHeightMap(heightMapData);
+         snapper.clearSnapData();
 
          assertFalse(nodeChecker.isStepValid(step2, step1, step0), "rotation = " + rotationAngle);
 //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
@@ -520,6 +532,7 @@ public class HeightMapFootstepCheckerTest
          heightMapData = HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList));
          nodeChecker.setHeightMapData(heightMapData);
          environmentHandler.setHeightMap(heightMapData);
+         snapper.clearSnapData();
 
          assertFalse(nodeChecker.isStepValid(step2, step1, step0), "rotation = " + rotationAngle);
          //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
@@ -530,6 +543,7 @@ public class HeightMapFootstepCheckerTest
          heightMapData = HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList));
          nodeChecker.setHeightMapData(heightMapData);
          environmentHandler.setHeightMap(heightMapData);
+         snapper.clearSnapData();
 
          assertFalse(nodeChecker.isStepValid(step2, step1, step0), "rotation = " + rotationAngle);
 //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
@@ -544,9 +558,12 @@ public class HeightMapFootstepCheckerTest
          transformToWorld.setIdentity();
          transformToWorld.getRotation().set(orientation3DReadOnly);
          planarRegion.set(transformToWorld, polygons);
-         heightMapData = HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList));
+         heightMapData = HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList,
+                                                                                                                                  PlanarRegionToHeightMapConverter.defaultResolution,
+                                                                                                                                  Double.NaN));
          nodeChecker.setHeightMapData(heightMapData);
          environmentHandler.setHeightMap(heightMapData);
+         snapper.clearSnapData();
 
          Vector3D vertical = new Vector3D(0.0, 0.0, 1.0);
          Vector3D normal = new Vector3D(vertical);

@@ -1,16 +1,17 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
-import com.esotericsoftware.minlog.Log;
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.log.LogTools;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -23,7 +24,8 @@ import static us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionPolygonSnappe
 
 public class HeightMapPolygonSnapper
 {
-   private final List<Point3D> pointsInsidePolyon = new ArrayList<>();
+   private final List<Point2D> footPointsInEnvironment = new ArrayList<>();
+   private final List<Point3D> heightMapPointsInPolygon = new ArrayList<>();
    private final Plane3D bestFitPlane = new Plane3D();
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
 
@@ -40,12 +42,15 @@ public class HeightMapPolygonSnapper
 
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap)
    {
-      return snapPolygonToHeightMap(polygonToSnap, heightMap, Double.MAX_VALUE, -Double.MAX_VALUE);
+      return snapPolygonToHeightMap(polygonToSnap, heightMap, Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE);
    }
 
-   public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap, double snapHeightThreshold)
+   public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap,
+                                                    HeightMapData heightMap,
+                                                    double snapHeightThreshold,
+                                                    double minimumSurfaceInclineRadians)
    {
-      return snapPolygonToHeightMap(polygonToSnap, heightMap, snapHeightThreshold, -Double.MAX_VALUE);
+      return snapPolygonToHeightMap(polygonToSnap, heightMap, snapHeightThreshold, minimumSurfaceInclineRadians, -Double.MAX_VALUE);
    }
 
    /**
@@ -54,14 +59,81 @@ public class HeightMapPolygonSnapper
     * - Any cells with heights below minimumHeightToConsider are ignored.
     * - Any cells with heights below maxZ - snapHeightThreshold are ignored, where maxZ is the max height within the polygon
     */
-   public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap, double snapHeightThreshold, double minimumHeightToConsider)
+   public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap,
+                                                    HeightMapData heightMap,
+                                                    double snapHeightThreshold,
+                                                    double minimumSurfaceInclineRadians,
+                                                    double minimumHeightToConsider)
    {
-      pointsInsidePolyon.clear();
+      footPointsInEnvironment.clear();
+      heightMapPointsInPolygon.clear();
       bestFitPlane.setToNaN();
 
-      // collect all the points in the foot that are valid under the foothold
       if (polygonToSnap.getNumberOfVertices() != 4)
          throw new RuntimeException("We aren't set up to use this");
+
+      // Here, we want to go through the grid under the foot and record the points that may be in contact with the foot. This is better for plane fitting
+      // the actual values. If we used the other points, it would be likely to oversample.
+      double epsilonDistance = Math.sqrt(0.5) * heightMap.getGridResolutionXY();
+      Point2DReadOnly gridCenter = heightMap.getGridCenter();
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMap.getGridSizeXY(), heightMap.getGridResolutionXY());
+      int minIndexX = HeightMapTools.coordinateToIndex(polygonToSnap.getMinX(), gridCenter.getX(), heightMap.getGridResolutionXY(), centerIndex);
+      int maxIndexX = HeightMapTools.coordinateToIndex(polygonToSnap.getMaxX(), gridCenter.getX(), heightMap.getGridResolutionXY(), centerIndex);
+      int minIndexY = HeightMapTools.coordinateToIndex(polygonToSnap.getMinY(), gridCenter.getY(), heightMap.getGridResolutionXY(), centerIndex);
+      int maxIndexY = HeightMapTools.coordinateToIndex(polygonToSnap.getMaxY(), gridCenter.getY(), heightMap.getGridResolutionXY(), centerIndex);
+
+      Point3D maxPoint = new Point3D(0.0, 0.0, Double.NEGATIVE_INFINITY);
+
+      for (int xIndex = minIndexX; xIndex <= maxIndexX; xIndex++)
+      {
+         for (int yIndex = minIndexY; yIndex <= maxIndexY; yIndex++)
+         {
+            double height = heightMap.getHeightAt(xIndex, yIndex);
+
+            double x = HeightMapTools.indexToCoordinate(xIndex, gridCenter.getX(), heightMap.getGridResolutionXY(), centerIndex);
+            double y = HeightMapTools.indexToCoordinate(yIndex, gridCenter.getY(), heightMap.getGridResolutionXY(), centerIndex);
+
+            if (Double.isNaN(height) || height < minimumHeightToConsider)
+            {
+               continue;
+            }
+
+            Point3D point = new Point3D(x, y, height);
+            double signedDistance = polygonToSnap.signedDistance(new Point2D(x, y));
+
+            if (signedDistance > epsilonDistance)
+            {
+               continue;
+            }
+
+            if (height > maxPoint.getZ())
+               maxPoint.set(point);
+
+            heightMapPointsInPolygon.add(point);
+         }
+      }
+
+      // Here, we're going to filter out the points that are below a certain distance. We want to increase this distance from MinZ so as to account for a
+      // possible max slope.
+      // FIXME It's worth noting that if a single point is significantly far enough above all the other points, this will remove the other points, making it an
+      // FIXME invalid snap. That may or may not be what we actually want.
+      double minZ = maxPoint.getZ() - snapHeightThreshold;
+      double slope = Math.tan(minimumSurfaceInclineRadians);
+      heightMapPointsInPolygon.removeIf(point ->
+                                        {
+                                           double distance = point.distanceXY(maxPoint);
+                                           double extraHeight = distance * slope;
+                                           return point.getZ() < minZ - extraHeight;
+                                        });
+
+      if (heightMapPointsInPolygon.isEmpty())
+      {
+         area = Double.NaN;
+         return null;
+      }
+
+      // Here we want to collect all the points in the foot that are valid under the foothold, as an approximation of the foot area. This is much better than
+      // trying to use other points, which don't provide a good estimate of the foot area.
       Point2DReadOnly corner0 = polygonToSnap.getVertex(0);
       Point2DReadOnly corner1 = polygonToSnap.getVertex(1);
       Point2DReadOnly corner2 = polygonToSnap.getVertex(2);
@@ -80,40 +152,36 @@ public class HeightMapPolygonSnapper
             point.interpolate(pointOnEdge1, pointOnEdge2, interiorAlpha);
 
             double height = heightMap.getHeightAt(point.getX(), point.getY());
-            if (Double.isNaN(height) || height < minimumHeightToConsider)
+
+            double distance = point.distanceXY(maxPoint);
+            double extraHeightFromSlope = slope * distance;
+            double minHeight = maxPoint.getZ() - snapHeightThreshold - extraHeightFromSlope;
+            minHeight = Math.max(minimumHeightToConsider, minHeight);
+
+            if (Double.isNaN(height) || height < minHeight)
             {
                continue;
             }
 
-            pointsInsidePolyon.add(new Point3D(point.getX(), point.getY(), height));
+            footPointsInEnvironment.add(new Point2D(point.getX(), point.getY()));
          }
       }
 
-      if (pointsInsidePolyon.isEmpty())
-      {
-         return null;
-      }
-
-      // FIXME It's worth noting that if a single point is significantly far enough above all the other points, this will remove the other points, making it an
-      // FIXME invalid snap. That may or may not be what we actually want.
-      double maxZ = pointsInsidePolyon.stream().mapToDouble(Point3D::getZ).max().getAsDouble();
-      double minZ = maxZ - snapHeightThreshold;
-      pointsInsidePolyon.removeIf(point -> point.getZ() < minZ);
-      if (pointsInsidePolyon.size() < 3)
+      if (footPointsInEnvironment.size() < 3)
       {
          area = Double.NaN;
          return null;
       }
-      ConvexPolygon2D snappedPolygon = new ConvexPolygon2D(Vertex3DSupplier.asVertex3DSupplier(pointsInsidePolyon));
+      ConvexPolygon2D snappedPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPointsInEnvironment));
       area = snappedPolygon.getArea();
 
-      planeFitter.fitPlaneToPoints(pointsInsidePolyon, bestFitPlane);
+      planeFitter.fitPlaneToPoints(heightMapPointsInPolygon, bestFitPlane);
       rootMeanSquaredError = 0.0;
 
-      for (int i = 0; i < pointsInsidePolyon.size(); i++)
+      for (Point3DReadOnly heightMapPoint : heightMapPointsInPolygon)
       {
-         double predictedHeight = bestFitPlane.getZOnPlane(pointsInsidePolyon.get(i).getX(), pointsInsidePolyon.get(i).getY());
-         rootMeanSquaredError += MathTools.square(predictedHeight - pointsInsidePolyon.get(i).getZ());
+         double predictedHeight = bestFitPlane.getZOnPlane(heightMapPoint.getX(), heightMapPoint.getY());
+         rootMeanSquaredError += MathTools.square(predictedHeight - heightMapPoint.getZ());
       }
       maxPossibleRMSError = MathTools.square(1.0 / snapAreaResolution) * MathTools.square(0.5 * snapHeightThreshold);
 
@@ -122,7 +190,7 @@ public class HeightMapPolygonSnapper
          return null;
       }
 
-      rootMeanSquaredError = Math.sqrt(rootMeanSquaredError / pointsInsidePolyon.size());
+      rootMeanSquaredError = Math.sqrt(rootMeanSquaredError / heightMapPointsInPolygon.size());
 
       RigidBodyTransform transformToReturn = createTransformToMatchSurfaceNormalPreserveX(bestFitPlane.getNormal());
 

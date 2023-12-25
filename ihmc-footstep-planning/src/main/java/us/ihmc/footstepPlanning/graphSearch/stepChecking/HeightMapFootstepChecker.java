@@ -28,7 +28,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    public static final String rejectionReasonVariable = "rejectionReason";
 
    private final FootstepPlannerParametersReadOnly parameters;
-   private final FootstepSnapperReadOnly snapper;
+   final FootstepSnapperReadOnly snapper;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
 
    private final ObstacleBetweenStepsChecker obstacleBetweenStepsChecker;
@@ -301,6 +301,11 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    public void attachCustomFootstepChecker(CustomFootstepChecker customFootstepChecker)
    {
       customFootstepCheckers.add(customFootstepChecker);
+   }
+
+   public BipedalFootstepPlannerNodeRejectionReason getRejectionReason()
+   {
+      return rejectionReason.getValue();
    }
 
    public static void main(String[] args)
