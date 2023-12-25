@@ -139,6 +139,8 @@ public class TerrainPlanningSimulationUI
    private final ImFloat goalYaw = new ImFloat(0.0f);
 
    private final ImBoolean enableSliders = new ImBoolean(false);
+   private final ImBoolean renderStartPoses = new ImBoolean(false);
+   private final ImBoolean renderGoalPoses = new ImBoolean(false);
 
    private int autoIncrementCounter = 0;
    private int plansLoggedSoFar = 0;
@@ -279,6 +281,12 @@ public class TerrainPlanningSimulationUI
             l515PoseGizmo.update();
 
             stancePoseSelectionPanel.update(goalPose.get(RobotSide.LEFT), loadedMapData);
+
+            for (RobotSide side : RobotSide.values)
+            {
+               startFootstepGraphics.get(side).setRender(renderStartPoses.get());
+               goalFootstepGraphics.get(side).setRender(renderGoalPoses.get());
+            }
 
             //if (loadedMapData != null && !footstepPlanToRenderNotificaiton.hasValue())
             //{
@@ -426,6 +434,8 @@ public class TerrainPlanningSimulationUI
                loadFootstepPlannerLog();
             }
             ImGui.popStyleColor();
+            ImGui.checkbox("Render Start Poses", renderStartPoses);
+            ImGui.checkbox("Render Goal Poses", renderGoalPoses);
             ImGui.sliderFloat("Start Mid X", startMidX.getData(), -4.0f, 4.0f);
             ImGui.sliderFloat("Start Mid Y", startMidY.getData(), -4.0f, 4.0f);
             ImGui.sliderFloat("Start Mid Z", startMidZ.getData(), -3.0f, 3.0f);
