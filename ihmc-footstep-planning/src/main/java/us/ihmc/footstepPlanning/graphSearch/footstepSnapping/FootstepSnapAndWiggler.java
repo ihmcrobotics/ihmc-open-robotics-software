@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
+import rosgraph_msgs.Log;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.*;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -13,13 +14,17 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.function.ToDoubleFunction;
 
 public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
@@ -32,7 +37,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
    private double flatGroundHeight = 0.0;
 
-   private final HashMap<DiscreteFootstep, FootstepSnapData> snapDataHolder = new HashMap<>();
+   private final HashSet<DiscreteFootstep> snappedFootsteps = new HashSet<>();
 
    private final FootstepPlannerEnvironmentHandler environmentHandler;
 
@@ -73,7 +78,8 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    public void clearSnapData()
    {
-      snapDataHolder.clear();
+      snappedFootsteps.forEach(DiscreteFootstep::clearSnapData);
+      snappedFootsteps.clear();
    }
 
    public FootstepSnapData snapFootstep(DiscreteFootstep footstep)
@@ -84,9 +90,9 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    @Override
    public FootstepSnapData snapFootstep(DiscreteFootstep footstep, DiscreteFootstep stanceStep, boolean computeWiggleTransform)
    {
-      if (snapDataHolder.containsKey(footstep))
+      if (footstep.hasSnapData())
       {
-         FootstepSnapData snapData = snapDataHolder.get(footstep);
+         FootstepSnapData snapData = footstep.getSnapData();
          if (snapData.getSnapTransform().containsNaN())
          {
             return snapData;
@@ -105,7 +111,8 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       else
       {
          FootstepSnapData snapData = computeSnapTransform(footstep, stanceStep);
-         snapDataHolder.put(footstep, snapData);
+         footstep.setSnapData(snapData);
+         snappedFootsteps.add(footstep);
 
          if (snapData.getSnapTransform().containsNaN())
          {
@@ -125,14 +132,17 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
     */
    public void addSnapData(DiscreteFootstep footstep, FootstepSnapData snapData)
    {
-      snapDataHolder.put(footstep, snapData);
+      footstep.setSnapData(snapData);
+      snappedFootsteps.add(footstep);
    }
 
    protected FootstepSnapData computeSnapTransform(DiscreteFootstep footstepToSnap, DiscreteFootstep stanceStep)
    {
       DiscreteFootstepTools.getFootPolygon(footstepToSnap, footPolygonsInSoleFrame.get(footstepToSnap.getRobotSide()), footPolygon);
-      boolean snappedToPlanarReigons = false;
-      RigidBodyTransform snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon, environmentHandler.getHeightMap(), parameters.getHeightMapSnapThreshold());
+      RigidBodyTransform snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon,
+                                                                                 environmentHandler.getHeightMap(),
+                                                                                 parameters.getHeightMapSnapThreshold(),
+                                                                                 parameters.getMinimumSurfaceInclineRadians());
 
       if (snapTransform == null)
       {
@@ -145,7 +155,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
          snapData.setRMSErrorHeightMap(heightMapSnapper.getNormalizedRMSError());
          snapData.setHeightMapArea(heightMapSnapper.getArea());
          snapData.setSnappedToHeightMap(true);
-         snapData.setSnappedToPlanarRegions(snappedToPlanarReigons);
+         snapData.setSnappedToPlanarRegions(false);
 
          return snapData;
       }
@@ -153,11 +163,15 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    protected void computeWiggleTransform(DiscreteFootstep footstepToWiggle, DiscreteFootstep stanceStep, FootstepSnapData snapData)
    {
-      heightMapSnapWiggler.computeWiggleTransform(footstepToWiggle, environmentHandler.getHeightMap(), snapData, parameters.getHeightMapSnapThreshold());
+      heightMapSnapWiggler.computeWiggleTransform(footstepToWiggle,
+                                                  environmentHandler.getHeightMap(),
+                                                  snapData,
+                                                  parameters.getHeightMapSnapThreshold(),
+                                                  parameters.getMinimumSurfaceInclineRadians());
 
-      if (stanceStep != null && snapDataHolder.containsKey(stanceStep))
+      if (stanceStep != null && stanceStep.hasSnapData())
       {
-         FootstepSnapData stanceStepSnapData = snapDataHolder.get(stanceStep);
+         FootstepSnapData stanceStepSnapData = stanceStep.getSnapData();
 
          // check for overlap
          boolean overlapDetected = stepsAreTooClose(footstepToWiggle, snapData, stanceStep, stanceStepSnapData);
@@ -243,6 +257,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
     */
    public void reset()
    {
-      snapDataHolder.clear();
+      clearSnapData();
    }
 }

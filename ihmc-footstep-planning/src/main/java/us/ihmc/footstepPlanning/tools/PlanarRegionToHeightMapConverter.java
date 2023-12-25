@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -17,7 +18,8 @@ import java.util.List;
 
 public class PlanarRegionToHeightMapConverter
 {
-   private static final double defaultResolution = 0.02;
+   public static final double defaultResolution = 0.02;
+   public static final double defaultEstimatedGroundHeight = 0.0;
 
    public static HeightMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList)
    {
@@ -30,6 +32,16 @@ public class PlanarRegionToHeightMapConverter
    }
 
    public static HeightMapMessage convertFromPlanarRegionsToHeightMap(List<PlanarRegion> planarRegionList, double resolutionXY)
+   {
+      return convertFromPlanarRegionsToHeightMap(planarRegionList, resolutionXY, defaultEstimatedGroundHeight);
+   }
+
+   public static HeightMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList, double resolutionXY, double estimatedGroundHeight)
+   {
+      return convertFromPlanarRegionsToHeightMap(planarRegionsList.getPlanarRegionsAsList(), resolutionXY, estimatedGroundHeight);
+   }
+
+   public static HeightMapMessage convertFromPlanarRegionsToHeightMap(List<PlanarRegion> planarRegionList, double resolutionXY, double estimatedGroundHeight)
    {
       BoundingBox2D occupiedArea = new BoundingBox2D();
       planarRegionList.forEach(planarRegion ->
@@ -54,7 +66,7 @@ public class PlanarRegionToHeightMapConverter
       message.setXyResolution(resolutionXY);
       message.setGridCenterX(gridCenterX);
       message.setGridCenterY(gridCenterY);
-      message.setEstimatedGroundHeight(0.0);
+      message.setEstimatedGroundHeight(estimatedGroundHeight);
 
       int centerIndex = HeightMapTools.computeCenterIndex(sideLength, resolutionXY);
       int cellsPerAxis = 2 * centerIndex + 1;
@@ -70,7 +82,7 @@ public class PlanarRegionToHeightMapConverter
             Point3D pointToProject = new Point3D(xPosition, yPosition, 0.0);
             Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(pointToProject, planarRegionList);
 
-            if (projectedPoint != null && Double.isFinite(projectedPoint.getZ()) && !MathTools.epsilonEquals(projectedPoint.getZ(), 0.0, 1e-2))
+            if (projectedPoint != null && Double.isFinite(projectedPoint.getZ()) && !MathTools.epsilonEquals(projectedPoint.getZ(), estimatedGroundHeight, 1e-2))
             {
                message.getKeys().add(key);
                message.getHeights().add((float) projectedPoint.getZ());

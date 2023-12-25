@@ -68,10 +68,11 @@ public class PlanThenSnapPlanner
          FramePose3D solePose = footstep.getFootstepPose();
          ConvexPolygon2D footPolygon = footPolygons.get(footstep.getRobotSide());
          double snapHeightThreshold = 0.04;
-         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMapData, snapHeightThreshold);
+         double minSurfaceIncline = Math.toRadians(45.0);
+         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMapData, snapHeightThreshold, minSurfaceIncline);
          FootstepSnapData snapData = getAsSnapData(snapTransform);
          DiscreteFootstep discreteFootstep = getAsDiscreteFootstep(footstep);
-         wiggler.computeWiggleTransform(discreteFootstep, heightMapData, snapData, snapHeightThreshold);
+         wiggler.computeWiggleTransform(discreteFootstep, heightMapData, snapData, snapHeightThreshold, minSurfaceIncline);
          ConvexPolygon2D footHold = snapData.getCroppedFoothold();
          solePose.set(snapData.getSnappedStepTransform(discreteFootstep));
 
