@@ -53,6 +53,7 @@ public class RapidHeightMapExtractor
 
    private static HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
    private final RigidBodyTransform currentSensorToWorldTransform = new RigidBodyTransform();
+   private final RigidBodyTransform currentGroundToWorldTransform = new RigidBodyTransform();
    private final Point3D sensorOrigin = new Point3D();
    private final TerrainMapStatistics terrainMapStatistics = new TerrainMapStatistics();
 
@@ -209,6 +210,7 @@ public class RapidHeightMapExtractor
       {
          terrainMapStatistics.startTotalTime();
 
+         currentGroundToWorldTransform.set(groundToWorldTransform);
          currentSensorToWorldTransform.set(sensorToWorldTransform);
          sensorToGroundTransform.getTranslation().setZ(sensorToWorldTransform.getTranslationZ());
 
@@ -693,6 +695,11 @@ public class RapidHeightMapExtractor
    public TerrainMapStatistics getTerrainMapStatistics()
    {
       return terrainMapStatistics;
+   }
+
+   public RigidBodyTransform getCurrentGroundToWorldTransform()
+   {
+      return currentGroundToWorldTransform;
    }
 
    public boolean getComputeSnap()

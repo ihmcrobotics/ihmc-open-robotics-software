@@ -72,6 +72,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
     *  https://en.wikipedia.org/wiki/Distance_transform */
    private RDXBytedecoImagePanel contactMapImagePanel;
 
+   private RDXTerrainGridGraphic terrainGridGraphic;
+
    private final ImBoolean rapidRegionsCollapsedHeader = new ImBoolean(true);
    private final ImBoolean sphericalRegionsCollapsedHeader = new ImBoolean(true);
    private final ImBoolean heightMapCollapsedHeader = new ImBoolean(true);
@@ -89,6 +91,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       super(WINDOW_NAME);
       setRenderMethod(this::renderImGuiWidgets);
       this.remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper, this);
+      this.terrainGridGraphic = new RDXTerrainGridGraphic();
 
       if (humanoidPerception != null)
       {
@@ -135,6 +138,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
    public void initializeHeightMapVisualizer(ROS2Helper ros2Helper)
    {
+      terrainGridGraphic.create();
       RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer();
       heightMapVisualizer.setActive(true);
       if (ros2Helper != null)
@@ -173,6 +177,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
                snappedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppableHeightMapImage().getBytedecoOpenCVMat());
                steppabilityPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppabilityImage().getBytedecoOpenCVMat());
             }
+
+            terrainGridGraphic.update(humanoidPerception.getRapidHeightMapExtractor().getCurrentGroundToWorldTransform());
          }
       }
 
@@ -239,6 +245,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       {
          ImGui.indent();
          ImGui.checkbox("Enable GPU Height Map", enableGPUHeightMap);
+         terrainGridGraphic.renderImGuiWidgets();
          RDXHeightMapVisualizer heightMapVisualizer = (RDXHeightMapVisualizer) visualizers.get("HeightMap");
          if (heightMapVisualizer != null)
          {
@@ -409,6 +416,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
+      terrainGridGraphic.getRenderables(renderables, pool);
       for (RDXVisualizer visualizer : visualizers.values())
       {
          if (visualizer.isActive())
