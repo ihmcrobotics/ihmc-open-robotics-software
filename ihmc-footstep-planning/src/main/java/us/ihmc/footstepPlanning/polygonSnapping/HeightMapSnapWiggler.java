@@ -14,12 +14,9 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-
-import java.util.HashMap;
 
 public class HeightMapSnapWiggler
 {
@@ -75,14 +72,16 @@ public class HeightMapSnapWiggler
 
             FootstepSnapData footstepSnapData = computeSnapData(offsetPosition, footstepToWiggle.getYaw(), robotSide, heightMapData, snapHeightThreshold, minSurfaceInclineRadians);
 
-            wiggleAreas[wiggleIndex] = Double.isNaN(footstepSnapData.getHeightMapArea()) ? 0.0 : Math.min(footstepSnapData.getHeightMapArea() / maxArea, 1.0);
-            wiggleRMSErrors[wiggleIndex] = Double.isNaN(footstepSnapData.getRMSErrorHeightMap()) ? 1.0 : footstepSnapData.getRMSErrorHeightMap();
+            double area = footstepSnapData.getCroppedFoothold().getArea();
+            wiggleAreas[wiggleIndex] = Double.isNaN(area) ? 0.0 : Math.min(area / maxArea, 1.0);
+            wiggleRMSErrors[wiggleIndex] = Double.isNaN(footstepSnapData.getSnapRMSError()) ? 1.0 : footstepSnapData.getSnapRMSError();
          }
 
          FootstepSnapData currentSnapData = computeSnapData(currentPosition, footstepToWiggle.getYaw(), robotSide, heightMapData, snapHeightThreshold, minSurfaceInclineRadians);
 
-         double normalizedArea = Math.min(currentSnapData.getHeightMapArea() / maxArea, 1.0);
-         computeGradientMagnitudes(normalizedArea, currentSnapData.getRMSErrorHeightMap());
+         double area = currentSnapData.getCroppedFoothold().getArea();
+         double normalizedArea = Math.min(area / maxArea, 1.0);
+         computeGradientMagnitudes(normalizedArea, currentSnapData.getSnapRMSError());
 
          Vector2D wiggleGradient = computeWiggleGradient();
          if (wiggleGradient.normSquared() < MathTools.square(0.01))
@@ -117,6 +116,7 @@ public class HeightMapSnapWiggler
       wiggledPose.applyTransform(wiggledSnapData.getSnapTransform());
 
       wiggledPose.changeFrame(originalFrame);
+
 
       // TODO need to do a wiggle rotation
       snapData.getWiggleTransformInWorld().getTranslation().set(wiggledPose.getPosition());
@@ -158,11 +158,7 @@ public class HeightMapSnapWiggler
       {
          FootstepSnapData snapData = new FootstepSnapData(snapTransform);
 
-         if (heightMapData != null)
-         {
-            snapData.setRMSErrorHeightMap(heightMapSnapper.getNormalizedRMSError());
-            snapData.setHeightMapArea(heightMapSnapper.getArea());
-         }
+         HeightMapPolygonSnapper.populateSnapData(heightMapSnapper, position.getX(), position.getY(), yaw, snapData);
 
          return snapData;
       }

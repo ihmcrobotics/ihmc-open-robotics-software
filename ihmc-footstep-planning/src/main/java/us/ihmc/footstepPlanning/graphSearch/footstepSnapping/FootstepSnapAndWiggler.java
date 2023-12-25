@@ -1,12 +1,9 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
-import rosgraph_msgs.Log;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.*;
+import us.ihmc.commonWalkingControlModules.polygonWiggling.StepConstraintPolygonTools;
+import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
@@ -14,18 +11,11 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.function.ToDoubleFunction;
 
 public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 {
@@ -33,7 +23,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    private final FootstepPlannerParametersReadOnly parameters;
 
    private final WiggleParameters wiggleParameters = new WiggleParameters();
-   private final PlanarRegion planarRegionToPack = new PlanarRegion();
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
    private double flatGroundHeight = 0.0;
 
@@ -43,8 +32,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    private final HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
    private final HeightMapSnapWiggler heightMapSnapWiggler;
-
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    // Use this by default
    public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters, FootstepPlannerEnvironmentHandler environmentHandler)
@@ -152,10 +139,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       {
          FootstepSnapData snapData = new FootstepSnapData(snapTransform);
 
-         snapData.setRMSErrorHeightMap(heightMapSnapper.getNormalizedRMSError());
-         snapData.setHeightMapArea(heightMapSnapper.getArea());
-         snapData.setSnappedToHeightMap(true);
-         snapData.setSnappedToPlanarRegions(false);
+         HeightMapPolygonSnapper.populateSnapData(heightMapSnapper, footstepToSnap, snapData);
 
          return snapData;
       }
@@ -187,8 +171,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
             stanceStepSnapData.getWiggleTransformInWorld().setIdentity();
          }
       }
-
-      computeCroppedFoothold(footstepToWiggle, snapData);
    }
 
    private final RigidBodyTransform transform1 = new RigidBodyTransform();
@@ -218,27 +200,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
       double distance = StepConstraintPolygonTools.distanceBetweenPolygons(polygon1, polygon2);
       return distance < parameters.getMinClearanceFromStance();
-   }
-
-   protected void computeCroppedFoothold(DiscreteFootstep footstep, FootstepSnapData snapData)
-   {
-      if (environmentHandler.flatGroundMode())
-      {
-         snapData.getCroppedFoothold().clearAndUpdate();
-         return;
-      }
-
-      DiscreteFootstepTools.getFootPolygon(footstep, footPolygonsInSoleFrame.get(footstep.getRobotSide()), footPolygon);
-
-      snapData.packSnapAndWiggleTransform(tempTransform);
-      ConvexPolygon2D snappedPolygonInWorld = FootstepSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
-      ConvexPolygon2D croppedFootPolygon = FootstepSnappingTools.computeRegionIntersection(planarRegionToPack, snappedPolygonInWorld);
-
-      if (!croppedFootPolygon.isEmpty())
-      {
-         FootstepSnappingTools.changeFromPlanarRegionToSoleFrame(planarRegionToPack, footstep, tempTransform, croppedFootPolygon);
-         snapData.getCroppedFoothold().set(croppedFootPolygon);
-      }
    }
 
    private static void updateWiggleParameters(WiggleParameters wiggleParameters, FootstepPlannerParametersReadOnly parameters)
