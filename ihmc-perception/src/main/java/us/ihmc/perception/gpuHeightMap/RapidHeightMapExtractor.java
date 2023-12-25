@@ -283,8 +283,7 @@ public class RapidHeightMapExtractor
 
          terrainMapStatistics.startTerrainMapDownloadTime();
 
-         terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(),
-                                        groundToWorldTransform.getTranslationY());
+         terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(), groundToWorldTransform.getTranslationY());
          terrainMapData.setHeightMap(getCroppedImage_OpenCL(globalHeightMapImage, sensorCroppedHeightMapImage, parametersBuffer));
          terrainMapData.setContactMap(getCroppedImage_OpenCL(contactMapImage, sensorCroppedContactMapImage, parametersBuffer));
          //terrainMapData.setTerrainCostMap(getCroppedImageOnKernel(terrainCostImage, sensorCroppedTerrainCostImage, parametersBuffer));
@@ -705,5 +704,15 @@ public class RapidHeightMapExtractor
    public boolean getComputeSnap()
    {
       return computeSnap;
+   }
+
+   public void setModeSpherical()
+   {
+      mode = 0;
+   }
+
+   public void setModePerspective()
+   {
+      mode = 1;
    }
 }
