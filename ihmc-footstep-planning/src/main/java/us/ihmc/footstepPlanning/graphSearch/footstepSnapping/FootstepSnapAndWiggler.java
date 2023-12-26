@@ -114,6 +114,15 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       }
    }
 
+   protected FootstepSnapData computeSnapTransform(DiscreteFootstep footstepToSnap, DiscreteFootstep stanceStep)
+   {
+      return heightMapSnapper.computeSnapData(footstepToSnap,
+                                              footPolygonsInSoleFrame.get(footstepToSnap.getRobotSide()),
+                                              environmentHandler.getHeightMap(),
+                                              parameters.getHeightMapSnapThreshold(),
+                                              parameters.getMinimumSurfaceInclineRadians());
+   }
+
    /**
     * Can manually add snap data for a footstep to bypass the snapper.
     */
@@ -121,28 +130,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    {
       footstep.setSnapData(snapData);
       snappedFootsteps.add(footstep);
-   }
-
-   protected FootstepSnapData computeSnapTransform(DiscreteFootstep footstepToSnap, DiscreteFootstep stanceStep)
-   {
-      DiscreteFootstepTools.getFootPolygon(footstepToSnap, footPolygonsInSoleFrame.get(footstepToSnap.getRobotSide()), footPolygon);
-      RigidBodyTransform snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon,
-                                                                                 environmentHandler.getHeightMap(),
-                                                                                 parameters.getHeightMapSnapThreshold(),
-                                                                                 parameters.getMinimumSurfaceInclineRadians());
-
-      if (snapTransform == null)
-      {
-         return FootstepSnapData.emptyData();
-      }
-      else
-      {
-         FootstepSnapData snapData = new FootstepSnapData(snapTransform);
-
-         HeightMapPolygonSnapper.populateSnapData(heightMapSnapper, footstepToSnap, snapData);
-
-         return snapData;
-      }
    }
 
    protected void computeWiggleTransform(DiscreteFootstep footstepToWiggle, DiscreteFootstep stanceStep, FootstepSnapData snapData)
