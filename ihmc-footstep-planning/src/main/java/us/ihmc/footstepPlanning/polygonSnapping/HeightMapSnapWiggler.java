@@ -137,8 +137,6 @@ public class HeightMapSnapWiggler
       }
    }
 
-   private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
-
    private FootstepSnapData computeSnapData(Point2DReadOnly position,
                                             double yaw,
                                             RobotSide robotSide,
@@ -146,22 +144,13 @@ public class HeightMapSnapWiggler
                                             double snapHeightThreshold,
                                             double minSurfaceInclineRadians)
    {
-      DiscreteFootstepTools.getFootPolygon(position.getX(), position.getY(), yaw, footPolygonsInSoleFrame.get(robotSide), footPolygon);
-
-      RigidBodyTransform snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon, heightMapData, snapHeightThreshold, minSurfaceInclineRadians);
-
-      if (snapTransform == null)
-      {
-         return FootstepSnapData.emptyData();
-      }
-      else
-      {
-         FootstepSnapData snapData = new FootstepSnapData(snapTransform);
-
-         HeightMapPolygonSnapper.populateSnapData(heightMapSnapper, position.getX(), position.getY(), yaw, snapData);
-
-         return snapData;
-      }
+      return heightMapSnapper.computeSnapData(position.getX(),
+                                              position.getY(),
+                                              yaw,
+                                              footPolygonsInSoleFrame.get(robotSide),
+                                              heightMapData,
+                                              snapHeightThreshold,
+                                              minSurfaceInclineRadians);
    }
 
    private Vector2D computeWiggleGradient()

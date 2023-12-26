@@ -44,20 +44,94 @@ public class HeightMapPolygonSnapper
       this.snapAreaResolution = snapAreaResolution;
    }
 
-   public static void populateSnapData(HeightMapPolygonSnapper snapper, DiscreteFootstep footstep, FootstepSnapData snapDataToPack)
+   public FootstepSnapData computeSnapData(DiscreteFootstep footstep,
+                                           ConvexPolygon2DReadOnly polygonInStepFrame,
+                                           HeightMapData heightMap,
+                                           double snapHeightThreshold,
+                                           double minimumSurfaceInclineRadians)
    {
-      populateSnapData(snapper, footstep.getX(), footstep.getY(), footstep.getYaw(), snapDataToPack);
+      return computeSnapData(footstep.getX(),
+                             footstep.getY(),
+                             footstep.getYaw(),
+                             polygonInStepFrame,
+                             heightMap,
+                             snapHeightThreshold,
+                             minimumSurfaceInclineRadians,
+                             -Double.MAX_VALUE);
    }
 
-   public static void populateSnapData(HeightMapPolygonSnapper snapper, double x, double y, double yaw, FootstepSnapData snapDataToPack)
+   public FootstepSnapData computeSnapData(double stepX,
+                                           double stepY,
+                                           double stepYaw,
+                                           ConvexPolygon2DReadOnly polygonInStepFrame,
+                                           HeightMapData heightMap,
+                                           double snapHeightThreshold,
+                                           double minimumSurfaceInclineRadians)
    {
-      snapDataToPack.setRMSErrorHeightMap(snapper.getNormalizedRMSError());
+      return computeSnapData(stepX,
+                             stepY,
+                             stepYaw,
+                             polygonInStepFrame,
+                             heightMap,
+                             snapHeightThreshold,
+                             minimumSurfaceInclineRadians,
+                             -Double.MAX_VALUE);
+   }
 
-      // get the cropped polygon back in sole frame.
-      snapDataToPack.getCroppedFoothold().set(snapper.getSnappedPolygonInWorld());
+   public FootstepSnapData computeSnapData(DiscreteFootstep footstep,
+                                           ConvexPolygon2DReadOnly polygonInStepFrame,
+                                           HeightMapData heightMap,
+                                           double snapHeightThreshold,
+                                           double minimumSurfaceInclineRadians,
+                                           double minimumHeightToConsider)
+   {
+      return computeSnapData(footstep.getX(),
+                             footstep.getY(),
+                             footstep.getYaw(),
+                             polygonInStepFrame,
+                             heightMap,
+                             snapHeightThreshold,
+                             minimumSurfaceInclineRadians,
+                             minimumHeightToConsider);
+   }
+
+   public FootstepSnapData computeSnapData(double stepX,
+                                           double stepY,
+                                           double yaw,
+                                           ConvexPolygon2DReadOnly polygonInStepFrame,
+                                           HeightMapData heightMap,
+                                           double snapHeightThreshold,
+                                           double minimumSurfaceInclineRadians,
+                                           double minimumHeightToConsider)
+   {
       RigidBodyTransform footstepTransform = new RigidBodyTransform();
-      DiscreteFootstepTools.getStepTransform(x, y, yaw, footstepTransform);
-      snapDataToPack.getCroppedFoothold().applyInverseTransform(footstepTransform);
+      DiscreteFootstepTools.getStepTransform(stepX, stepY, yaw, footstepTransform);
+
+      ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(polygonInStepFrame);
+      footPolygonInWorld.applyTransform(footstepTransform);
+
+      RigidBodyTransform snapTransform = snapPolygonToHeightMap(footPolygonInWorld,
+                                                                heightMap,
+                                                                snapHeightThreshold,
+                                                                minimumSurfaceInclineRadians,
+                                                                minimumHeightToConsider);
+
+      if (snapTransform == null)
+      {
+         return FootstepSnapData.emptyData();
+      }
+      else
+      {
+         FootstepSnapData snapData = new FootstepSnapData(snapTransform);
+
+         snapData.setRMSErrorHeightMap(rootMeanSquaredError / maxPossibleRMSError);
+
+         // get the cropped polygon back in sole frame.
+         snapData.getCroppedFoothold().set(snappedPolygon);
+         snapData.getCroppedFoothold().applyInverseTransform(footstepTransform);
+
+         return snapData;
+      }
    }
 
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap)
@@ -75,7 +149,7 @@ public class HeightMapPolygonSnapper
 
    /**
     * Snaps the given polygon to the height map by a least-squares plane fit.
-    *
+    * <p>
     * - Any cells with heights below minimumHeightToConsider are ignored.
     * - Any cells with heights below maxZ - snapHeightThreshold are ignored, where maxZ is the max height within the polygon
     */
@@ -132,18 +206,17 @@ public class HeightMapPolygonSnapper
       double minZ = maxPoint.getZ() - snapHeightThreshold;
       double slope = Math.tan(minimumSurfaceInclineRadians);
       footPointsInEnvironment.removeIf(point ->
-                                        {
-                                           double distance = point.distanceXY(maxPoint);
-                                           double extraHeight = distance * slope;
-                                           return point.getZ() < minZ - extraHeight;
-                                        });
+                                       {
+                                          double distance = point.distanceXY(maxPoint);
+                                          double extraHeight = distance * slope;
+                                          return point.getZ() < minZ - extraHeight;
+                                       });
 
       if (footPointsInEnvironment.size() < 3)
       {
          area = Double.NaN;
          return null;
       }
-      // TODO do something with this snapped polygon, maybe
       snappedPolygon.set(Vertex3DSupplier.asVertex3DSupplier(footPointsInEnvironment));
       area = snappedPolygon.getArea();
 

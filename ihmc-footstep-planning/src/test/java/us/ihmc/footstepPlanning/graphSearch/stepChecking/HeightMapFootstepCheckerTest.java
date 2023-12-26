@@ -576,18 +576,10 @@ public class HeightMapFootstepCheckerTest
             normal.negate();
 
          double angleFromFlat = vertical.angle(normal);
-         double minimumSurfaceNormalZ = Math.cos(parameters.getMinimumSurfaceInclineRadians());
 
          if (Math.abs(angleFromFlat) > parameters.getMinimumSurfaceInclineRadians())
          {
-            if (Math.abs(normal.getZ()) > minimumSurfaceNormalZ)
-               LogTools.info("Huh? This should have been too steep!");
             String message = "actual rotation = " + angleFromFlat + ", allowed rotation = " + parameters.getMinimumSurfaceInclineRadians();
-            if (MathTools.epsilonCompare(angleFromFlat, 2.58241, 1e-5))
-            {
-               Vector3DReadOnly heightMapNormal = PlanarRegionToHeightMapConverterTest.getNormalOfHeightMap(heightMapData);
-               LogTools.info("Oh no" + heightMapNormal);
-            }
             assertFalse(nodeChecker.isStepValid(step2, step1, step0), message);
 //            boolean correctRejection = BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP == registry.getRejectionReason() ||
 //                                       BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP == registry.getRejectionReason();

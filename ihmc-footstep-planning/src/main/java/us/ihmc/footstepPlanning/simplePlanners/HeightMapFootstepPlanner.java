@@ -4,11 +4,13 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.log.LogTools;
@@ -41,17 +43,20 @@ public class HeightMapFootstepPlanner
          footstepTransform.getTranslation().setZ(0.0);
          footstepTransform.getRotation().setToYawOrientation(pose.getYaw());
 
-         ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(RobotSide.LEFT));
-         footPolygon.applyTransform(footstepTransform);
+         FootstepSnapData snapData = snapper.computeSnapData(pose.getX(),
+                                                             pose.getY(),
+                                                             pose.getYaw(),
+                                                             footPolygons.get(RobotSide.LEFT),
+                                                             heightMap,
+                                                             0.06,
+                                                             Math.toRadians(45.0));
 
-         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMap, 0.06, Math.toRadians(45.0));
+         RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
          if (snapTransform != null)
          {
-            snapTransform.transform(footstepTransform);
-
-            FramePose3D step = new FramePose3D();
-            step.set(footstepTransform);
+            FramePose3D step = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepTransform);
+            step.applyTransform(snapTransform);
 
             System.out.println("step translation: " + step.getPosition());
             System.out.println("step ypr: " + step.getOrientation().getYaw() + ", " + step.getOrientation().getPitch() + ", " + step.getRoll());
@@ -90,20 +95,19 @@ public class HeightMapFootstepPlanner
          footstepTransform.getTranslation().set(pose.getPosition());
          footstepTransform.getRotation().setToYawOrientation(pose.getYaw());
 
-         ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(stepSide));
-         footPolygon.applyTransform(footstepTransform);
+         FootstepSnapData snapData = snapper.computeSnapData(pose.getX(),
+                                                             pose.getY(),
+                                                             pose.getYaw(),
+                                                             footPolygons.get(RobotSide.LEFT),
+                                                             heightMap,
+                                                             parameters.getHeightMapSnapThreshold(),
+                                                             parameters.getMinimumSurfaceInclineRadians());
 
-         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon,
-                                                                           heightMap,
-                                                                           parameters.getHeightMapSnapThreshold(),
-                                                                           parameters.getMinimumSurfaceInclineRadians());
-         if (snapTransform != null)
+         FramePose3D step = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepTransform);
+         if (snapData.getSnapTransform() != null)
          {
-            snapTransform.transform(footstepTransform);
+            step.applyTransform(snapData.getSnapTransform());
          }
-
-         FramePose3D step = new FramePose3D();
-         step.set(footstepTransform);
          footstepPlan.addFootstep(stepSide, step);
          stepSide = stepSide.getOppositeSide();
       }
