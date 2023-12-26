@@ -298,7 +298,6 @@ public class SwingOverPlanarRegionsTest
       SwingPlannerParametersBasics swingPlannerParameters = getParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side -> getFootPolygon());
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(),
-                                                                         new DefaultVisibilityGraphParameters(),
                                                                          new AStarBodyPathPlannerParameters(),
                                                                          new DefaultFootstepPlannerParameters(),
                                                                          swingPlannerParameters,

@@ -75,7 +75,6 @@ public class SwingOverPlanarRegionsLogViewer
 
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(ProxyAtlasWalkingControllerParameters::getProxyAtlasFootPolygon);
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(),
-                                                                         new DefaultVisibilityGraphParameters(),
                                                                          new AStarBodyPathPlannerParameters(),
                                                                          new DefaultFootstepPlannerParameters(),
                                                                          parameters,

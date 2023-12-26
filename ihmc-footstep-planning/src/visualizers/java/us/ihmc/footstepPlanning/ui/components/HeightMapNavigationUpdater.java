@@ -140,7 +140,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
                                              });
 
       footstepPlannerParameters.setIdealFootstepLength(0.28);
-      planningModule = new FootstepPlanningModule("HeightMap", new DefaultVisibilityGraphParameters(), new AStarBodyPathPlannerParameters(), footstepPlannerParameters, new DefaultSwingPlannerParameters(), walkingControllerParameters, footPolygons, null);
+      planningModule = new FootstepPlanningModule("HeightMap", new AStarBodyPathPlannerParameters(), footstepPlannerParameters, new DefaultSwingPlannerParameters(), walkingControllerParameters, footPolygons, null);
       logger = new FootstepPlannerLogger(planningModule);
       planningModule.addCustomTerminationCondition((plannerTime, iterations, bestFinalStep, bestSecondToLastStep, bestPathSize) -> iterations > 1);
 
