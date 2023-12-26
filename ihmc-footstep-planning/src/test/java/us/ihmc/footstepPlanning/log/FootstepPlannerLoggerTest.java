@@ -52,8 +52,6 @@ public class FootstepPlannerLoggerTest
       planningModule.getFootstepPlannerParameters().setYawWeight(0.17);
       planningModule.getFootstepPlannerParameters().setMaximumStepZWhenSteppingUp(0.4);
       planningModule.getFootstepPlannerParameters().setMaximumZPenetrationOnValleyRegions(1.0);
-      planningModule.getVisibilityGraphParameters().setNavigableExtrusionDistance(0.01);
-      planningModule.getVisibilityGraphParameters().setExplorationDistanceFromStartGoal(50.0);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
 
@@ -74,7 +72,6 @@ public class FootstepPlannerLoggerTest
 
       request.setPacket(expectedRequestPacket);
       FootstepPlannerMessageTools.copyParametersToPacket(expectedFootstepParameters, planningModule.getFootstepPlannerParameters());
-      FootstepPlannerMessageTools.copyParametersToPacket(expectedBodyPathParameters, planningModule.getVisibilityGraphParameters());
       plannerOutput.setPacket(expectedOutputStatusPacket);
 
       Assertions.assertTrue(expectedRequestPacket.epsilonEquals(log.getRequestPacket(), 1e-5));

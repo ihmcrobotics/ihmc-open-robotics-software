@@ -63,7 +63,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final String name;
    private ROS2NodeInterface ros2Node;
    private boolean manageROS2Node = false;
-   private final VisibilityGraphsParametersBasics visibilityGraphParameters;
    private final AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
@@ -94,7 +93,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public FootstepPlanningModule(String name)
    {
       this(name,
-           new DefaultVisibilityGraphParameters(),
            new AStarBodyPathPlannerParameters(),
            new DefaultFootstepPlannerParameters(),
            new DefaultSwingPlannerParameters(),
@@ -106,7 +104,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public FootstepPlanningModule(String name, boolean useGPU)
    {
       this(name,
-           new DefaultVisibilityGraphParameters(),
            new AStarBodyPathPlannerParameters(),
            new DefaultFootstepPlannerParameters(),
            new DefaultSwingPlannerParameters(),
@@ -117,7 +114,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    }
 
    public FootstepPlanningModule(String name,
-                                 VisibilityGraphsParametersBasics visibilityGraphParameters,
                                  AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters,
                                  FootstepPlannerParametersBasics footstepPlannerParameters,
                                  SwingPlannerParametersBasics swingPlannerParameters,
@@ -126,7 +122,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                  StepReachabilityData stepReachabilityData)
    {
       this(name,
-           visibilityGraphParameters,
            aStarBodyPathPlannerParameters,
            footstepPlannerParameters,
            swingPlannerParameters,
@@ -137,7 +132,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    }
 
    public FootstepPlanningModule(String name,
-                                 VisibilityGraphsParametersBasics visibilityGraphParameters,
                                  AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters,
                                  FootstepPlannerParametersBasics footstepPlannerParameters,
                                  SwingPlannerParametersBasics swingPlannerParameters,
@@ -147,7 +141,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                  boolean useGPU)
    {
       this.name = name;
-      this.visibilityGraphParameters = visibilityGraphParameters;
       this.aStarBodyPathPlannerParameters = aStarBodyPathPlannerParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
 
@@ -469,11 +462,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public AStarBodyPathPlannerParametersBasics getAStarBodyPathPlannerParameters()
    {
       return aStarBodyPathPlannerParameters;
-   }
-
-   public VisibilityGraphsParametersBasics getVisibilityGraphParameters()
-   {
-      return visibilityGraphParameters;
    }
 
    public SwingPlannerParametersBasics getSwingPlannerParameters()

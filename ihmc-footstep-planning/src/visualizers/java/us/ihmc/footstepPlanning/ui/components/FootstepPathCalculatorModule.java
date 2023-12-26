@@ -55,7 +55,6 @@ public class FootstepPathCalculatorModule
 
    private final AtomicReference<FootstepPlannerParametersReadOnly> parameters;
    private final AtomicReference<AStarBodyPathPlannerParametersReadOnly> pathPlannerParameters;
-   private final AtomicReference<VisibilityGraphsParametersReadOnly> visibilityGraphsParameters;
 
    private final Messager messager;
    private final FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
@@ -73,7 +72,6 @@ public class FootstepPathCalculatorModule
       rightFootGoalPose = messager.createInput(RightFootGoalPose);
 
       parameters = messager.createInput(PlannerParameters, new DefaultFootstepPlannerParameters());
-      visibilityGraphsParameters = messager.createInput(VisibilityGraphsParameters, new DefaultVisibilityGraphParameters());
       pathPlannerParameters = messager.createInput(AStarBodyPathPlannerParameters, new AStarBodyPathPlannerParameters());
       performAStarSearch = messager.createInput(PerformAStarSearch, false);
       planBodyPath = messager.createInput(PlanBodyPath, true);
@@ -159,7 +157,6 @@ public class FootstepPathCalculatorModule
          request.setAbortIfGoalStepSnappingFails(abortIfGoalStepSnapFails.get());
 
          planningModule.getFootstepPlannerParameters().set(parameters.get());
-         planningModule.getVisibilityGraphParameters().set(visibilityGraphsParameters.get());
          planningModule.getAStarBodyPathPlannerParameters().set(pathPlannerParameters.get());
 
          planningModule.addStatusCallback(status -> messager.submitMessage(FootstepPlanningResultTopic, status.getFootstepPlanningResult()));
