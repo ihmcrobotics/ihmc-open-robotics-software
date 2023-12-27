@@ -30,7 +30,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * such as an arm's joints. It also triages the default and user submitted weights and gains,
  * packing them into the whole body controller commands.
  *
- * This class also generated cubic spline trajectories for the joints from user submitted
+ * This class also generates cubic spline trajectories for the joints from user submitted
  * waypoints. It supports passing joint desired position, velocity, and feedforward accelerations
  * along to the whole body controller core.
  *
