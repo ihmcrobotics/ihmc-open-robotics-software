@@ -7,10 +7,18 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.rotationConversion.QuaternionConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -18,7 +26,10 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
+import us.ihmc.robotics.MatrixMissingTools;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -34,7 +45,7 @@ public class RDXIterativeClosestPointBasicDemo
 
    private final ImBoolean icpGuiOnOffToggle = new ImBoolean(true);
    private final ImBoolean icpGuiResetEnv = new ImBoolean(false);
-   private final ImBoolean icpGuiAutoMoveEnv = new ImBoolean(true);
+   private final ImBoolean icpGuiAutoMoveEnv = new ImBoolean(false);
    private final float[] icpGuiEnvSetPostionX = {0.0f};
    private final float[] icpGuiEnvSetPostionY = {0.0f};
    private final float[] icpGuiEnvSetPostionZ = {0.0f};
@@ -56,6 +67,13 @@ public class RDXIterativeClosestPointBasicDemo
 
    private final RigidBodyTransform objectTransform = new RigidBodyTransform();
    private final ReferenceFrame objectReferenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), objectTransform);
+   private final FramePose3D objectPose = new FramePose3D(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D objectPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
+   private final FrameQuaternion objectOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
+   private final YawPitchRoll objectYawPitchRoll = new YawPitchRoll();
+   private final RotationMatrix objectRotationMatrix = new RotationMatrix();
+   private final RotationMatrix objectDeltaMatrix = new RotationMatrix();
+   private final Quaternion objectQuaternion = new Quaternion();
    private final FramePoint3D pointA = new FramePoint3D(objectReferenceFrame);
    private final RigidBodyTransform envTransform = new RigidBodyTransform();
    private final ReferenceFrame envReferenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), envTransform);
@@ -90,10 +108,10 @@ public class RDXIterativeClosestPointBasicDemo
             envPointCloudRenderer.create(envSize);
 
             // Create Shape
-//            createICPPointCloudBox();
+            createICPPointCloudBox();
 //            createICPPointCloudCone();
 //            createICPPointCloudCylinder();
-            createICPPointCloudCSV();
+//            createICPPointCloudCSV();
 
             // Create Renderables for Object
             baseUI.getPrimaryScene().addRenderableProvider(objectPointCloudRenderer, RDXSceneLevel.VIRTUAL);
@@ -122,11 +140,14 @@ public class RDXIterativeClosestPointBasicDemo
             float halfBoxWidth = (float) RigidBodySceneObjectDefinitions.BOX_WIDTH/2.0f;
             float halfBoxDepth = (float)RigidBodySceneObjectDefinitions.BOX_DEPTH/2.0f;
             float halfBoxHeight = (float)RigidBodySceneObjectDefinitions.BOX_HEIGHT/2.0f;
+            // Initialize object points within the box, then change a coordinate to force them to a face.
             for (int i = 0; i < envSize; i++) {
                int j = random.nextInt(6);
+               // Initialize the point within the box
                float x =(float)random.nextDouble(-halfBoxDepth, halfBoxDepth);
                float y =(float)random.nextDouble(-halfBoxWidth, halfBoxWidth);
                float z =(float)random.nextDouble(-halfBoxHeight, halfBoxHeight);
+               // Alter x, y, or z so that the point lies on a face (and not inside the box)
                if (j==0 | j==1) {x = (-(j&1)*halfBoxDepth*2.0f)+halfBoxDepth;}
                if (j==2 | j==3) {y = (-(j&1)*halfBoxWidth*2.0f)+halfBoxWidth;}
                if (j==4 | j==5) {z = (-(j&1)*halfBoxHeight*2.0f)+halfBoxHeight;}
@@ -136,11 +157,14 @@ public class RDXIterativeClosestPointBasicDemo
                worldFramePoint.setIncludingFrame(pointA);
             }
             for (int i = 0; i < envSize; i++) {
+               //TODO j is always 0, 2, 4 by the time it's used, is that intentional? Wouldn't this put all points on only the 3 "positive" faces?
                int j = random.nextInt(3);
                j=j*2;
+               // Initialize the point within the box
                float x =(float)random.nextDouble(-halfBoxDepth, halfBoxDepth);
                float y =(float)random.nextDouble(-halfBoxWidth, halfBoxWidth);
                float z =(float)random.nextDouble(-halfBoxHeight, halfBoxHeight);
+               // Alter x, y, or z so that the point lies on a face (and not inside the box)
                if (j==0 | j==1) {x = (-(j&1)*halfBoxDepth*2.0f)+halfBoxDepth;}
                if (j==2 | j==3) {y = (-(j&1)*halfBoxWidth*2.0f)+halfBoxWidth;}
                if (j==4 | j==5) {z = (-(j&1)*halfBoxHeight*2.0f)+halfBoxHeight;}
@@ -269,6 +293,20 @@ public class RDXIterativeClosestPointBasicDemo
             ImGui.text("Obj Centroid: " + df.format(objectCentroid.get(0, 0)) + " y: " + df.format(objectCentroid.get(0, 1)) + " z: " + df.format(objectCentroid.get(0, 2)));
             ImGui.text("diff Centroid: " + df.format(envCentroid.get(0, 0)-objectCentroid.get(0, 0)) + " y: " + df.format(envCentroid.get(0, 1)-objectCentroid.get(0, 1)) + " z: " + df.format(envCentroid.get(0, 2)-objectCentroid.get(0, 2)));
             ImGui.text(" ");
+            ImGui.text(
+                  "Object pos. X: " + df.format(objectPose.getPosition().getX()) + "  Y: " + df.format(objectPose.getPosition().getY()) + "  Z: " + df.format(
+                        objectPose.getPosition().getZ()));
+            ImGui.text("Object quat. X: " + df.format(objectPose.getOrientation().getX()) + "  Y: " + df.format(objectPose.getOrientation().getY()) + "  Z: "
+                       + df.format(objectPose.getOrientation().getZ()) + "  S: " + df.format(objectPose.getOrientation().getS()));
+            ImGui.text(" ");
+            ImGui.text("Object rot. X: " + df.format(objectRotationMatrix.getM00()) + " " + df.format(objectRotationMatrix.getM01()) + " " + df.format(objectRotationMatrix.getM02()));
+            ImGui.text("Object rot. X: " + df.format(objectRotationMatrix.getM10()) + " " + df.format(objectRotationMatrix.getM11()) + " " + df.format(objectRotationMatrix.getM12()));
+            ImGui.text("Object rot. X: " + df.format(objectRotationMatrix.getM20()) + " " + df.format(objectRotationMatrix.getM21()) + " " + df.format(objectRotationMatrix.getM22()));
+            ImGui.text(" ");
+            ImGui.text("Object Roll:  " + df.format(objectYawPitchRoll.getRoll()));
+            ImGui.text("Object Pitch: " + df.format(objectYawPitchRoll.getPitch()));
+            ImGui.text("Object Yaw:   " + df.format(objectYawPitchRoll.getYaw()));
+            ImGui.text(" ");
             ImGui.sliderFloat("X Position", icpGuiEnvSetPostionX, -2.0f, 2.0f);
             ImGui.sliderFloat("Y Position", icpGuiEnvSetPostionY, -2.0f, 2.0f);
             ImGui.sliderFloat("Z Position", icpGuiEnvSetPostionZ, -2.0f, 2.0f);
@@ -379,6 +417,18 @@ public class RDXIterativeClosestPointBasicDemo
                      CommonOps_DDRM.mult(R, interimPoint, movedPoint);
                      objectInWorldPoint.set(movedPoint.get(0) + objTranslation.get(0), movedPoint.get(1) + objTranslation.get(1), movedPoint.get(2) + objTranslation.get(2));
                   }
+
+                  //TODO I think the prior logic and the following logic assume the box starts at the "zero" orientation. To make this robust, it would be
+                  // good to include an explicit initial condition. Then you could initialize objectRotationMatrix to that orientation.
+
+                  // Update object pose
+                  objectPosition.set(objectCentroid.get(0, 0), objectCentroid.get(0, 1), objectCentroid.get(0, 2));
+                  objectDeltaMatrix.set(R); // save the incremental change in rotation to a rotation matrix
+                  objectRotationMatrix.append(objectDeltaMatrix); // append the rotation to the total rotation of the body relative to world
+                  QuaternionConversion.convertMatrixToQuaternion(objectRotationMatrix, objectQuaternion);
+                  objectOrientation.set(objectQuaternion);
+                  objectYawPitchRoll.set(objectQuaternion);
+                  objectPose.set(objectPosition, objectOrientation);
                }
             }
          }
