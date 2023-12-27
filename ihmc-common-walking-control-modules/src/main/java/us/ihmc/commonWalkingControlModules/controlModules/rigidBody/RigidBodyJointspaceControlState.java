@@ -31,16 +31,19 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Manages control of a rigid body by controlling a number of joint ancestors
- * in joint space.
+ * in joint space through jointspace feedback control commands.
+ *
+ * When robot hardware requires direct position control instead of
+ * torque control, this class supports disabling acceleration integration on those
+ * joints and instead provides joint desired output data for those joints to
+ * the controller core, which will bypass the optimizer. The user
+ * specifies this via {@link ArmTrajectoryCommand.RequestedMode}.
  *
  * This class is also responsible for commanding the "home" configuration
  * to the whole body controller when requested by the user.
  *
- * When robot hardware requires direct position control instead of
- * torque controlled, this class supports disabling acceleration integration on those
- * joints and instead provides joint desired output data for those joints to
- * the controller core, which will bypass the optimizer. The user
- * specifies this via {@link ArmTrajectoryCommand.RequestedMode}.
+ * Finally, this class reports status messages with the current and desired
+ * joint positions.
  */
 public class RigidBodyJointspaceControlState extends RigidBodyControlState
 {
