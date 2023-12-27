@@ -29,16 +29,19 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * Manages providing jointspace feedback control commands for the ancestor joints of a rigid body,
  * such as an arm's joints. It also triages the default and user submitted weights and gains,
  * packing them into the whole body controller commands.
- *
+ * <p>
  * This class also generates cubic spline trajectories for the joints from user submitted
  * waypoints. It supports passing joint desired position, velocity, and feedforward accelerations
  * along to the whole body controller core.
- *
+ * </p>
+ * <p>
  * This class also supports kinematics streaming by accommodating for network
  * delay when using {@link ExecutionMode#STREAM}.
- *
+ * </p>
+ * <p>
  * Additionally, it supports the use of function generators to inject noise into the
  * desireds given to the inverse dynamics solver.
+ * </p>
  */
 public class RigidBodyJointControlHelper
 {

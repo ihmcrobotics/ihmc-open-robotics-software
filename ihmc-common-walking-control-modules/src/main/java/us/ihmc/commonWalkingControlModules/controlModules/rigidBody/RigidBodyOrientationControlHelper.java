@@ -33,9 +33,23 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * The base functionality of the taskspace orientation control state for a rigid body.
+ * <p>
+ * This class triages QP weights and PD control gains, user selection of rotation axes,
+ * and reference frames. It generates a cubic orientation trajectory for user provided
+ * waypoints and packs the desireds into an orientation feedback control command for
+ * submission to the whole body controller core.
+ * </p>
+ * <p>
+ * This class also supports kinematics streaming by accommodating for network
+ * delay when using {@link ExecutionMode#STREAM}.
+ * </p>
+ * <p>
+ * Additionally, it supports the use of function generators to inject noise into the
+ * desireds given to the inverse dynamics solver.
+ * </p>
+ */
 public class RigidBodyOrientationControlHelper
 {
    private final OrientationFeedbackControlCommand feedbackControlCommand = new OrientationFeedbackControlCommand();
