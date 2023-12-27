@@ -34,6 +34,15 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.Map;
 
+/**
+ * Manages a rigid body as part of the whole body controller core.
+ *
+ * This class triages user commands and computes inverse dynamics, feedback control commands,
+ * and joint desired output data that are provided to the whole body controller core.
+ *
+ * As part of this class, a rigid body can be in one of the four {@link RigidBodyControlMode
+ * rigid body control modes}.
+ */
 public class RigidBodyControlManager implements SCS2YoGraphicHolder
 {
    public static final double INITIAL_GO_HOME_TIME = 2.0;
