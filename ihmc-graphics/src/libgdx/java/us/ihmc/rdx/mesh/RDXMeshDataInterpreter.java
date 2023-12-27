@@ -37,7 +37,20 @@ public class RDXMeshDataInterpreter
       return meshBuilder.end();
    }
 
-   // TODO: Support changing the number of vertices, too, which involves the indices buffer
+   public static void reorderMeshVertices(MeshDataHolder meshData, Mesh meshToPack)
+   {
+      meshToPack.getIndicesBuffer().clear();
+
+      for (int i = 0; i < meshData.getTriangleIndices().length; i += 3)
+      {
+         meshToPack.getIndicesBuffer().put((short) meshData.getTriangleIndices()[i]);
+         meshToPack.getIndicesBuffer().put((short) meshData.getTriangleIndices()[i + 1]);
+         meshToPack.getIndicesBuffer().put((short) meshData.getTriangleIndices()[i + 2]);
+      }
+
+      meshToPack.getIndicesBuffer().flip();
+   }
+
    public static void repositionMeshVertices(MeshDataHolder meshData, Mesh meshToPack, Color color)
    {
       meshToPack.getVerticesBuffer().clear();
@@ -65,5 +78,7 @@ public class RDXMeshDataInterpreter
          meshToPack.getVerticesBuffer().put(textureLocation[0]);
          meshToPack.getVerticesBuffer().put(textureLocation[1]);
       }
+
+      meshToPack.getVerticesBuffer().flip();
    }
 }
