@@ -299,9 +299,9 @@ public class RDXIterativeClosestPointBasicDemo
             ImGui.text("Object quat. X: " + df.format(objectPose.getOrientation().getX()) + "  Y: " + df.format(objectPose.getOrientation().getY()) + "  Z: "
                        + df.format(objectPose.getOrientation().getZ()) + "  S: " + df.format(objectPose.getOrientation().getS()));
             ImGui.text(" ");
-            ImGui.text("Object rot. X: " + df.format(objectRotationMatrix.getM00()) + " " + df.format(objectRotationMatrix.getM01()) + " " + df.format(objectRotationMatrix.getM02()));
-            ImGui.text("Object rot. X: " + df.format(objectRotationMatrix.getM10()) + " " + df.format(objectRotationMatrix.getM11()) + " " + df.format(objectRotationMatrix.getM12()));
-            ImGui.text("Object rot. X: " + df.format(objectRotationMatrix.getM20()) + " " + df.format(objectRotationMatrix.getM21()) + " " + df.format(objectRotationMatrix.getM22()));
+            ImGui.text("Object rot: " + df.format(objectRotationMatrix.getM00()) + " " + df.format(objectRotationMatrix.getM01()) + " " + df.format(objectRotationMatrix.getM02()));
+            ImGui.text("Object rot: " + df.format(objectRotationMatrix.getM10()) + " " + df.format(objectRotationMatrix.getM11()) + " " + df.format(objectRotationMatrix.getM12()));
+            ImGui.text("Object rot: " + df.format(objectRotationMatrix.getM20()) + " " + df.format(objectRotationMatrix.getM21()) + " " + df.format(objectRotationMatrix.getM22()));
             ImGui.text(" ");
             ImGui.text("Object Roll:  " + df.format(objectYawPitchRoll.getRoll()));
             ImGui.text("Object Pitch: " + df.format(objectYawPitchRoll.getPitch()));
