@@ -203,6 +203,7 @@ public class RDXAffordanceTemplateFileManager
                   else
                      actionNode.put("executeWithNextAction", graspFrame.getHandConfiguration(side) != null ? true : false);
                   actionNode.put("holdPoseInWorldLater", true);
+                  actionNode.put("jointSpaceControl", true);
 
                   double[] dataTrajectories = new double[16];
                   transformToParent.get(dataTrajectories);
@@ -269,6 +270,7 @@ public class RDXAffordanceTemplateFileManager
                      else
                         actionNode.put("executeWithNextAction", postGraspHandConfigurations.get(side).get(i) != null ? true : false);
                      actionNode.put("holdPoseInWorldLater", (i != numberOfPostGraspFrames - 1));
+                     actionNode.put("jointSpaceControl", true);
 
                      double[] dataTrajectories = new double[16];
                      transformToParent.get(dataTrajectories);
