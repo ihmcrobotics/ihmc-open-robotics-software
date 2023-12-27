@@ -16,7 +16,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
@@ -26,6 +25,21 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * Manages providing jointspace feedback control commands for the ancestor joints of a rigid body,
+ * such as an arm's joints. It also triages the default and user submitted weights and gains,
+ * packing them into the whole body controller commands.
+ *
+ * This class also generated cubic spline trajectories for the joints from user submitted
+ * waypoints. It supports passing joint desired position, velocity, and feedforward accelerations
+ * along to the whole body controller core.
+ *
+ * This class also supports kinematics streaming by accommodating for network
+ * delay when using {@link ExecutionMode#STREAM}.
+ *
+ * Additionally, it supports the use of function generators to inject noise into the
+ * desireds given to the inverse dynamics solver.
+ */
 public class RigidBodyJointControlHelper
 {
    public static final String shortName = "JointControlHelper";
