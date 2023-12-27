@@ -36,12 +36,14 @@ import java.util.Map;
 
 /**
  * Manages a rigid body as part of the whole body controller core.
- *
+ * <p>
  * This class triages user commands and computes inverse dynamics, feedback control commands,
  * and joint desired output data that are provided to the whole body controller core.
- *
+ * </p>
+ * <p>
  * As part of this class, a rigid body can be in one of the four {@link RigidBodyControlMode
  * rigid body control modes}.
+ * </p>
  */
 public class RigidBodyControlManager implements SCS2YoGraphicHolder
 {

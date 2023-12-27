@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
- * Used to generate a one degree of freedom trajectory as a cubic spline through a series
+ * A tool to generate a one degree of freedom trajectory as a cubic spline through a series
  * of provided waypoints. Given a query time, it provides the corresponding position,
  * velocity, and acceleration.
  */
