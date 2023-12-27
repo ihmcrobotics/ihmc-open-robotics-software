@@ -112,16 +112,16 @@ public class RDXChestOrientationSlider
 
    private boolean renderImGuiSliderAndReturnChanged()
    {
-      if (yawPitchRollAxis == YawPitchRollAxis.PITCH)
-      {
-         minAngle = teleoperationParameters.getChestMinimumPitch();
-         maxAngle = teleoperationParameters.getChestMaximumPitch();
-      }
-      else if (yawPitchRollAxis == YawPitchRollAxis.YAW)
-      {
-         minAngle = teleoperationParameters.getChestMinimumYaw();
-         maxAngle = teleoperationParameters.getChestMaximumYaw();
-      }
+//      if (yawPitchRollAxis == YawPitchRollAxis.PITCH)
+//      {
+//         minAngle = teleoperationParameters.getChestMinimumPitch();
+//         maxAngle = teleoperationParameters.getChestMaximumPitch();
+//      }
+//      else if (yawPitchRollAxis == YawPitchRollAxis.YAW)
+//      {
+//         minAngle = teleoperationParameters.getChestMinimumYaw();
+//         maxAngle = teleoperationParameters.getChestMaximumYaw();
+//      }
 
       float previousValue = sliderValue[0];
       ImGui.sliderFloat(labels.get(sliderName), sliderValue, (float) minAngle, (float) maxAngle);

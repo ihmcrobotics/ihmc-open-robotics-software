@@ -103,8 +103,9 @@ public class RDXPelvisHeightSlider
 
    private boolean renderImGuiSliderAndReturnChanged()
    {
-      minHeight = teleoperationParameters.getPelvisMinimumHeight();
-      maxHeight = teleoperationParameters.getPelvisMaximumHeight();
+      
+//      minHeight = teleoperationParameters.getPelvisMinimumHeight();
+//      maxHeight = teleoperationParameters.getPelvisMaximumHeight();
       float previousValue = sliderValue[0];
       ImGui.sliderFloat(labels.get(sliderName), sliderValue, (float) minHeight, (float) maxHeight);
       float currentValue = sliderValue[0];

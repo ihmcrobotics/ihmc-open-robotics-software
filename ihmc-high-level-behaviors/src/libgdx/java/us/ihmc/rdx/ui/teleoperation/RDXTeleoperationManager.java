@@ -292,11 +292,17 @@ public class RDXTeleoperationManager extends RDXPanel
             {
                // TODO this should probably not handle the space event!
                // This sends a command to the controller.
+               
                interactableHands.get(side).setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
-               interactableHands.get(side).setOpenHand(() -> armManager.getHandManager().publishHandCommand(side, HandConfiguration.OPEN));
-               interactableHands.get(side).setCloseHand(() -> armManager.getHandManager().publishHandCommand(side, HandConfiguration.CLOSE));
                interactableHands.get(side).setGotoDoorAvoidanceArmAngles(() -> armManager.executeDoorAvoidanceArmAngles(side));
                interactableHands.get(side).setGotoArmHome(() -> armManager.executeArmHome(side));
+               
+               RDXHandConfigurationManager handManager = armManager.getHandManager();
+               if(handManager != null)
+               {
+                  interactableHands.get(side).setOpenHand(() -> handManager.publishHandCommand(side, HandConfiguration.OPEN));
+                  interactableHands.get(side).setCloseHand(() -> handManager.publishHandCommand(side, HandConfiguration.CLOSE));
+               }
             }
          }
 

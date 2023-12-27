@@ -98,7 +98,8 @@ public class RDXArmManager
          desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, robotModel.getJointMap().getArmJointNames()));
       }
 
-      handManager = new RDXHandConfigurationManager();
+//      handManager = new RDXHandConfigurationManager();
+      handManager = null;
    }
 
    public void create(RDXBaseUI baseUI)
@@ -109,13 +110,15 @@ public class RDXArmManager
          if (indicateWrenchOnScreen.get())
             panelHandWrenchIndicator.renderImGuiOverlay();
       });
-
-      handManager.create(baseUI, communicationHelper, syncedRobot);
+      
+      if(handManager != null)
+         handManager.create(baseUI, communicationHelper, syncedRobot);
    }
 
    public void update()
    {
-      handManager.update();
+      if(handManager != null)
+         handManager.update();
 
       boolean desiredHandPoseChanged = false;
       for (RobotSide side : interactableHands.sides())
@@ -188,7 +191,8 @@ public class RDXArmManager
 
    public void renderImGuiWidgets()
    {
-      handManager.renderImGuiWidgets();
+      if(handManager != null)
+         handManager.renderImGuiWidgets();
 
       ImGui.text("Arms Home:");
       for (RobotSide side : RobotSide.values)
