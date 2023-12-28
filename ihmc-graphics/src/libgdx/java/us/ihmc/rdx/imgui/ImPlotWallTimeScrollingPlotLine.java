@@ -2,6 +2,7 @@ package us.ihmc.rdx.imgui;
 
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotCol;
+import imgui.flag.ImGuiCond;
 import us.ihmc.commons.time.Stopwatch;
 
 /**
@@ -18,10 +19,10 @@ public abstract class ImPlotWallTimeScrollingPlotLine implements ImPlotPlotLine
    private final String variableName;
    private String labelID;
    private ImPlotPlotLineSwapBuffer swapBuffer;
-   private double history = 3.0;
+   private final double history;
    private final Stopwatch stopwatch = new Stopwatch();
    private final int bufferSize;
-   private double timeForOneBufferEntry;
+   private final double timeForOneBufferEntry;
    private long lastTickIndex = 0;
    private long tickIndex = 0;
    private final double[] xValues;
@@ -33,6 +34,7 @@ public abstract class ImPlotWallTimeScrollingPlotLine implements ImPlotPlotLine
    {
       this.variableName = variableName;
       this.bufferSize = bufferSize;
+      this.history = history;
       timeForOneBufferEntry = history / bufferSize;
       variableNameBase = variableName + " ";
       variableNamePostfix = "###" + variableName;
@@ -143,5 +145,20 @@ public abstract class ImPlotWallTimeScrollingPlotLine implements ImPlotPlotLine
    public void setColor(int color)
    {
       this.color = color;
+   }
+
+   public double getHistory()
+   {
+      return history;
+   }
+
+   public int getBufferSize()
+   {
+      return bufferSize;
+   }
+
+   public double[] getXValues()
+   {
+      return xValues;
    }
 }
