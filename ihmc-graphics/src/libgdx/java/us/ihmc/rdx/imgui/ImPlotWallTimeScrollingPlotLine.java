@@ -1,6 +1,7 @@
 package us.ihmc.rdx.imgui;
 
 import imgui.extension.implot.ImPlot;
+import imgui.extension.implot.flag.ImPlotCol;
 import us.ihmc.commons.time.Stopwatch;
 
 /**
@@ -26,6 +27,7 @@ public abstract class ImPlotWallTimeScrollingPlotLine implements ImPlotPlotLine
    private final double[] xValues;
    private boolean isA = true;
    private int filledIndex = 0;
+   private int color = -1;
 
    public ImPlotWallTimeScrollingPlotLine(String variableName, String initialValueString, int bufferSize, double history)
    {
@@ -108,8 +110,14 @@ public abstract class ImPlotWallTimeScrollingPlotLine implements ImPlotPlotLine
    @Override
    public boolean render()
    {
+      if (color != -1)
+         ImPlot.pushStyleColor(ImPlotCol.Line, color);
+
       int offset = 0; // This is believed to be the index in the array we are passing in which implot will start reading
       swapBuffer.plot(labelID, xValues, offset);
+
+      if (color != -1)
+         ImPlot.popStyleColor();
 
       boolean showingLegendPopup = false;
       if (legendPopupImGuiRenderer != null && ImPlot.beginLegendPopup(labelID))
@@ -130,5 +138,10 @@ public abstract class ImPlotWallTimeScrollingPlotLine implements ImPlotPlotLine
    public String getVariableName()
    {
       return variableName;
+   }
+
+   public void setColor(int color)
+   {
+      this.color = color;
    }
 }

@@ -4,7 +4,7 @@ import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotPoint;
 import imgui.extension.implot.flag.*;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;

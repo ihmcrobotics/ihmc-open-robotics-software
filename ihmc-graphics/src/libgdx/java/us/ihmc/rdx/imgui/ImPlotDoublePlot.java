@@ -26,4 +26,14 @@ public class ImPlotDoublePlot
    {
       plot.render();
    }
+
+   public void renderImGuiWidgets(float plotWidth, float plotHeight)
+   {
+      plot.render(plotWidth, plotHeight);
+   }
+
+   public ImPlotDoublePlotLine getPlotLine()
+   {
+      return plotLine;
+   }
 }
