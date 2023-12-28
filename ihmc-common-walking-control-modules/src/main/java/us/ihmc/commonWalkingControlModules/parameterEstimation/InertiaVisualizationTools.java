@@ -27,7 +27,7 @@ import java.util.List;
 //TODO Relocate this, maybe the ellipsoid stuff to scs2 and the colormap stuff to open robotics
 public class InertiaVisualizationTools
 {
-   public static YoGraphicDefinition addInertialEllipsoidsToVisualizer(RigidBodyReadOnly rootBody, RobotDefinition robotDefinition, boolean colorBasedOnDensity)
+   public static YoGraphicDefinition addInertialEllipsoidsToGroup(RigidBodyReadOnly rootBody, RobotDefinition robotDefinition, boolean colorBasedOnDensity)
    {
       YoGraphicGroupDefinition inertiaEllipsoids = new YoGraphicGroupDefinition("Inertia Ellipsoids");
       List<RigidBodyDefinition> allRigidBodies = robotDefinition.getAllRigidBodies();
