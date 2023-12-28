@@ -32,6 +32,11 @@ public class ImPlotDoublePlot
       plot.render(plotWidth, plotHeight);
    }
 
+   public ImPlotPlot getPlot()
+   {
+      return plot;
+   }
+
    public ImPlotDoublePlotLine getPlotLine()
    {
       return plotLine;

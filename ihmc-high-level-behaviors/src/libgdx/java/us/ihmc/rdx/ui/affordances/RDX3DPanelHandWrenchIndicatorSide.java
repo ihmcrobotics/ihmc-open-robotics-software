@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.affordances;
 import imgui.ImGui;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImPlotDoublePlot;
-import us.ihmc.rdx.ui.teleoperation.RDXIKSolverColors;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDX3DPanelHandWrenchIndicatorSide
@@ -22,9 +21,10 @@ public class RDX3DPanelHandWrenchIndicatorSide
       this.side = side;
       forcePlot = new ImPlotDoublePlot(side.getPascalCaseName() + " Force");
       torquePlot = new ImPlotDoublePlot(side.getPascalCaseName() + " Torque");
-
       forcePlot.getPlotLine().setColor(side == RobotSide.LEFT ? ImGuiTools.DARK_RED : ImGuiTools.DARK_GREEN);
       torquePlot.getPlotLine().setColor(side == RobotSide.LEFT ? ImGuiTools.DARK_RED : ImGuiTools.DARK_GREEN);
+      forcePlot.getPlot().setCustomBeforePlotLogic(() -> forcePlot.getPlotLine().setLimitYMin(80.0));
+      torquePlot.getPlot().setCustomBeforePlotLogic(() -> torquePlot.getPlotLine().setLimitYMin(15.0));
    }
 
    public void update(double force, double torque)
