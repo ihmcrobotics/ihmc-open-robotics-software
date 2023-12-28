@@ -241,8 +241,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                                                ORIENTATION_TOLERANCE,
                                                                getDefinition().getTrajectoryDuration(),
                                                                executionTimer,
-                                                               BehaviorActionCompletionComponent.TRANSLATION,
-                                                               BehaviorActionCompletionComponent.ORIENTATION));
+                                                               BehaviorActionCompletionComponent.TRANSLATION));
 
          state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
          state.setElapsedExecutionTime(executionTimer.getElapsedTime());
