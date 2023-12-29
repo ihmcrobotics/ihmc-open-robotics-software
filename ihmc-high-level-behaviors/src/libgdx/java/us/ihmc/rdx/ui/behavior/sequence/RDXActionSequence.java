@@ -24,6 +24,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ActionSequenceState state;
    private final ImBooleanWrapper automaticExecutionCheckbox;
+   private final ImBooleanWrapper reversedExecutionCheckBox;
    private final ImVec2 calcDescriptionTextSize = new ImVec2();
    private final ImVec2 expandButtonSize = new ImVec2();
    private float longestDescriptionLength;
@@ -44,6 +45,10 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       automaticExecutionCheckbox = new ImBooleanWrapper(state::getAutomaticExecution,
                                                         state::setAutomaticExecution,
                                                         imBoolean -> ImGui.checkbox(labels.get("Autonomously"), imBoolean));
+
+      reversedExecutionCheckBox = new ImBooleanWrapper(state::getInvertExecution,
+                                                       state::setInvertExecution,
+                                                       imBoolean -> ImGui.checkbox(labels.get("Invert Action Sequence"), imBoolean));
    }
 
    @Override
@@ -107,6 +112,10 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
             getState().freeze();
          if (!canExecuteNextAction)
             ImGui.endDisabled();
+
+         reversedExecutionCheckBox.renderImGuiWidget();
+         if (reversedExecutionCheckBox.changed())
+            getState().freeze();
 
          ImGuiTools.previousWidgetTooltip("Enables autonomous execution. Will immediately start executing when checked.");
          if (!getState().getAutomaticExecution())

@@ -32,6 +32,10 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
             * Request manual execution of the next action
             */
    public boolean manual_execution_requested_;
+   /**
+            * Request action sequence inversion
+            */
+   public boolean invert_action_sequence_;
 
    public ActionSequenceStateMessage()
    {
@@ -58,6 +62,8 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
       next_action_rejection_tooltip_.append(other.next_action_rejection_tooltip_);
 
       manual_execution_requested_ = other.manual_execution_requested_;
+
+      invert_action_sequence_ = other.invert_action_sequence_;
 
    }
 
@@ -148,6 +154,21 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
       return manual_execution_requested_;
    }
 
+   /**
+            * Request action sequence inversion
+            */
+   public void setInvertActionSequence(boolean invert_action_sequence)
+   {
+      invert_action_sequence_ = invert_action_sequence;
+   }
+   /**
+            * Request action sequence inversion
+            */
+   public boolean getInvertActionSequence()
+   {
+      return invert_action_sequence_;
+   }
+
 
    public static Supplier<ActionSequenceStateMessagePubSubType> getPubSubType()
    {
@@ -176,6 +197,8 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.manual_execution_requested_, other.manual_execution_requested_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.invert_action_sequence_, other.invert_action_sequence_, epsilon)) return false;
+
 
       return true;
    }
@@ -199,6 +222,8 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
 
       if(this.manual_execution_requested_ != otherMyClass.manual_execution_requested_) return false;
 
+      if(this.invert_action_sequence_ != otherMyClass.invert_action_sequence_) return false;
+
 
       return true;
    }
@@ -220,7 +245,9 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
       builder.append("next_action_rejection_tooltip=");
       builder.append(this.next_action_rejection_tooltip_);      builder.append(", ");
       builder.append("manual_execution_requested=");
-      builder.append(this.manual_execution_requested_);
+      builder.append(this.manual_execution_requested_);      builder.append(", ");
+      builder.append("invert_action_sequence=");
+      builder.append(this.invert_action_sequence_);
       builder.append("}");
       return builder.toString();
    }

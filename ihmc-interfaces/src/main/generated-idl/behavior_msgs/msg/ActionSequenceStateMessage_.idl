@@ -37,6 +37,10 @@ module behavior_msgs
          * Request manual execution of the next action
          */
         boolean manual_execution_requested;
+        /**
+         * Request action sequence inversion
+         */
+        boolean invert_action_sequence;
       };
     };
   };
