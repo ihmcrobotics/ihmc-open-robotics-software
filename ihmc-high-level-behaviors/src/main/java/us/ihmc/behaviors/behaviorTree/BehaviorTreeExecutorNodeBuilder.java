@@ -62,7 +62,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == ArmJointAnglesActionDefinition.class)
       {
-         return new ArmJointAnglesActionExecutor(id, crdtInfo, saveFileDirectory, robotModel, ros2ControllerHelper);
+         return new ArmJointAnglesActionExecutor(id, crdtInfo, saveFileDirectory, robotModel, ros2ControllerHelper, syncedRobot);
       }
       if (nodeType == ChestOrientationActionDefinition.class)
       {
@@ -97,7 +97,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == WaitDurationActionDefinition.class)
       {
-         return new WaitDurationActionExecutor(id, crdtInfo, saveFileDirectory);
+         return new WaitDurationActionExecutor(id, crdtInfo, saveFileDirectory, syncedRobot);
       }
       if (nodeType == WalkActionDefinition.class)
       {
