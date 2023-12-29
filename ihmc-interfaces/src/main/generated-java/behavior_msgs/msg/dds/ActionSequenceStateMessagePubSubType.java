@@ -15,7 +15,7 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6c6aae623e8281fa3ed0920fbd089cdd7e5cb3af830d4a5fa367af98acc45584";
+   		return "6964e91e6b5bcd0c7e9e9ae690b2f6ab8bbdfbbb697ecee394d9cfcdaf018fe3";
    }
    
    @Override
@@ -63,6 +63,8 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -91,6 +93,9 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -109,6 +114,8 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       cdr.write_type_7(data.getManualExecutionRequested());
 
+      cdr.write_type_7(data.getInvertActionSequence());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ActionSequenceStateMessage data, us.ihmc.idl.CDR cdr)
@@ -121,6 +128,8 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
       	
       cdr.read_type_d(data.getNextActionRejectionTooltip());	
       data.setManualExecutionRequested(cdr.read_type_7());
+      	
+      data.setInvertActionSequence(cdr.read_type_7());
       	
 
    }
@@ -136,6 +145,7 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.write_type_3("execution_next_index", data.getExecutionNextIndex());
       ser.write_type_d("next_action_rejection_tooltip", data.getNextActionRejectionTooltip());
       ser.write_type_7("manual_execution_requested", data.getManualExecutionRequested());
+      ser.write_type_7("invert_action_sequence", data.getInvertActionSequence());
    }
 
    @Override
@@ -149,6 +159,7 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
       data.setExecutionNextIndex(ser.read_type_3("execution_next_index"));
       ser.read_type_d("next_action_rejection_tooltip", data.getNextActionRejectionTooltip());
       data.setManualExecutionRequested(ser.read_type_7("manual_execution_requested"));
+      data.setInvertActionSequence(ser.read_type_7("invert_action_sequence"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ActionSequenceStateMessage src, behavior_msgs.msg.dds.ActionSequenceStateMessage dest)

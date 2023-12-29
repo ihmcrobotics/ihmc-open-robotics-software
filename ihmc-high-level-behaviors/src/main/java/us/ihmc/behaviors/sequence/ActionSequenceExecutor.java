@@ -133,7 +133,10 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       actionToExecute.triggerActionExecution();
       actionToExecute.updateCurrentlyExecuting();
       currentlyExecutingActions.add(actionToExecute);
-      getState().stepForwardNextExecutionIndex();
+      if (getState().getInvertExecution())
+         getState().stepBackNextExecutionIndex();
+      else
+         getState().stepForwardNextExecutionIndex();
    }
 
    private ActionNodeExecutor<?, ?> getLastExecutingAction()

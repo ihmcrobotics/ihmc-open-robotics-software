@@ -15,3 +15,6 @@ string next_action_rejection_tooltip
 
 # Request manual execution of the next action
 bool manual_execution_requested
+
+# Request action sequence inversion
+bool invert_action_sequence
