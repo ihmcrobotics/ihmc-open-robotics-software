@@ -52,14 +52,26 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
          executorChildren.get(i).getState().setIsToBeExecutedConcurrently(isToBeExecutedConcurrently);
       }
 
+      boolean anyActionExecutionFailed = false;
       for (ActionNodeExecutor<?, ?> currentlyExecutingAction : currentlyExecutingActions)
       {
          currentlyExecutingAction.updateCurrentlyExecuting();
+         anyActionExecutionFailed |= currentlyExecutingAction.getExecutionFailedNotification().poll();
+      }
+
+      if (anyActionExecutionFailed)
+      {
+         int earliestIndex = Integer.MAX_VALUE;
+         for (ActionNodeExecutor<?, ?> currentlyExecutingAction : currentlyExecutingActions)
+            if (currentlyExecutingAction.getState().getActionIndex() < earliestIndex)
+               earliestIndex = currentlyExecutingAction.getState().getActionIndex();
+
+         getState().setExecutionNextIndex(earliestIndex); // Back up to evaluate and/or re-execute the action(s)
       }
 
       if (getState().getAutomaticExecution())
       {
-         if (isEndOfSequence())
+         if (isEndOfSequence() || anyActionExecutionFailed)
          {
             getState().setAutomaticExecution(false);
          }
