@@ -167,6 +167,8 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    @Override
    public void triggerActionExecution()
    {
+      super.triggerActionExecution();
+
       if (state.getPalmFrame().isChildOfWorld())
       {
          ArmIKSolver armIKSolver = armIKSolvers.get(getDefinition().getSide());
@@ -241,6 +243,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                                                ORIENTATION_TOLERANCE,
                                                                getDefinition().getTrajectoryDuration(),
                                                                executionTimer,
+                                                               getState(),
                                                                BehaviorActionCompletionComponent.TRANSLATION,
                                                                BehaviorActionCompletionComponent.ORIENTATION));
 

@@ -77,6 +77,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    @Override
    public void triggerActionExecution()
    {
+      super.triggerActionExecution();
+
       if (referenceFrameLibrary.containsFrame(state.getDefinition().getParentFrameName()))
       {
          footstepPlanToExecute.clear();
@@ -159,6 +161,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                                        ORIENTATION_TOLERANCE,
                                                        nominalExecutionDuration,
                                                        executionTimer,
+                                                       getState(),
                                                        BehaviorActionCompletionComponent.TRANSLATION,
                                                        BehaviorActionCompletionComponent.ORIENTATION);
       }
