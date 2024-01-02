@@ -1,8 +1,7 @@
 #ifndef __controller_msgs__msg__LoadBearingMessage__idl__
 #define __controller_msgs__msg__LoadBearingMessage__idl__
 
-#include "geometry_msgs/msg/./Point_.idl"
-#include "geometry_msgs/msg/./Vector3_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
 module controller_msgs
 {
   module msg
@@ -31,13 +30,10 @@ module controller_msgs
          */
         double coefficient_of_friction;
         /**
-         * Sets the pose of the contact frame in the frame of the end effector body.
+         * Pose of the contact frame, expressed in the frame of the end effector body.
+         * The contact frame origin is the contact point and the z-axis of contact frame is the contact normal (points into the environment)
          */
-        geometry_msgs::msg::dds::Point contact_point_in_body_frame;
-        /**
-         * Sets the contact normal used by the controller to load the contact point.
-         */
-        geometry_msgs::msg::dds::Vector3 contact_normal_in_world_frame;
+        geometry_msgs::msg::dds::Pose contact_pose_in_body_frame;
       };
     };
   };

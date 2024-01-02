@@ -17,7 +17,10 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -103,16 +106,15 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       success = simulationTestHelper.simulateNow(1.5);
       assertTrue(success);
 
-      // Activate load bearing
-      Pose3D transformToContactFrame = new Pose3D();
-      transformToContactFrame.getPosition().set(0.0, 0.09, 0.0);
-      transformToContactFrame.appendRollRotation(Math.PI);
-
       HandLoadBearingMessage loadBearingMessage = HumanoidMessageTools.createHandLoadBearingMessage(RobotSide.LEFT);
       loadBearingMessage.getLoadBearingMessage().setLoad(true);
       loadBearingMessage.getLoadBearingMessage().setCoefficientOfFriction(0.8);
-      loadBearingMessage.getLoadBearingMessage().getContactNormalInWorldFrame().set(0.0, 0.0, 1.0);
-      loadBearingMessage.getLoadBearingMessage().getBodyFrameToContactFrame().set(transformToContactFrame);
+      loadBearingMessage.getLoadBearingMessage().getContactPoseInBodyFrame().getPosition().set(0.0, 0.09, 0.0);
+
+      FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
+      contactNormal.changeFrame(simulationTestHelper.getControllerFullRobotModel().getHand(RobotSide.LEFT).getBodyFixedFrame());
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, contactNormal, loadBearingMessage.getLoadBearingMessage().getContactPoseInBodyFrame().getRotation());
+
       simulationTestHelper.publishToController(loadBearingMessage);
       success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);

@@ -26,18 +26,14 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
             */
    public double coefficient_of_friction_;
    /**
-            * Sets the pose of the contact frame in the frame of the end effector body.
+            * Pose of the contact frame, expressed in the frame of the end effector body.
+            * The contact frame origin is the contact point and the z-axis of contact frame is the contact normal (points into the environment)
             */
-   public us.ihmc.euclid.tuple3D.Point3D contact_point_in_body_frame_;
-   /**
-            * Sets the contact normal used by the controller to load the contact point.
-            */
-   public us.ihmc.euclid.tuple3D.Vector3D contact_normal_in_world_frame_;
+   public us.ihmc.euclid.geometry.Pose3D contact_pose_in_body_frame_;
 
    public LoadBearingMessage()
    {
-      contact_point_in_body_frame_ = new us.ihmc.euclid.tuple3D.Point3D();
-      contact_normal_in_world_frame_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      contact_pose_in_body_frame_ = new us.ihmc.euclid.geometry.Pose3D();
    }
 
    public LoadBearingMessage(LoadBearingMessage other)
@@ -54,8 +50,7 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
 
       coefficient_of_friction_ = other.coefficient_of_friction_;
 
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.contact_point_in_body_frame_, contact_point_in_body_frame_);
-      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.contact_normal_in_world_frame_, contact_normal_in_world_frame_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.contact_pose_in_body_frame_, contact_pose_in_body_frame_);
    }
 
    /**
@@ -105,20 +100,12 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
 
 
    /**
-            * Sets the pose of the contact frame in the frame of the end effector body.
+            * Pose of the contact frame, expressed in the frame of the end effector body.
+            * The contact frame origin is the contact point and the z-axis of contact frame is the contact normal (points into the environment)
             */
-   public us.ihmc.euclid.tuple3D.Point3D getContactPointInBodyFrame()
+   public us.ihmc.euclid.geometry.Pose3D getContactPoseInBodyFrame()
    {
-      return contact_point_in_body_frame_;
-   }
-
-
-   /**
-            * Sets the contact normal used by the controller to load the contact point.
-            */
-   public us.ihmc.euclid.tuple3D.Vector3D getContactNormalInWorldFrame()
-   {
-      return contact_normal_in_world_frame_;
+      return contact_pose_in_body_frame_;
    }
 
 
@@ -145,8 +132,7 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.coefficient_of_friction_, other.coefficient_of_friction_, epsilon)) return false;
 
-      if (!this.contact_point_in_body_frame_.epsilonEquals(other.contact_point_in_body_frame_, epsilon)) return false;
-      if (!this.contact_normal_in_world_frame_.epsilonEquals(other.contact_normal_in_world_frame_, epsilon)) return false;
+      if (!this.contact_pose_in_body_frame_.epsilonEquals(other.contact_pose_in_body_frame_, epsilon)) return false;
 
       return true;
    }
@@ -166,8 +152,7 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
 
       if(this.coefficient_of_friction_ != otherMyClass.coefficient_of_friction_) return false;
 
-      if (!this.contact_point_in_body_frame_.equals(otherMyClass.contact_point_in_body_frame_)) return false;
-      if (!this.contact_normal_in_world_frame_.equals(otherMyClass.contact_normal_in_world_frame_)) return false;
+      if (!this.contact_pose_in_body_frame_.equals(otherMyClass.contact_pose_in_body_frame_)) return false;
 
       return true;
    }
@@ -184,10 +169,8 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
       builder.append(this.load_);      builder.append(", ");
       builder.append("coefficient_of_friction=");
       builder.append(this.coefficient_of_friction_);      builder.append(", ");
-      builder.append("contact_point_in_body_frame=");
-      builder.append(this.contact_point_in_body_frame_);      builder.append(", ");
-      builder.append("contact_normal_in_world_frame=");
-      builder.append(this.contact_normal_in_world_frame_);
+      builder.append("contact_pose_in_body_frame=");
+      builder.append(this.contact_pose_in_body_frame_);
       builder.append("}");
       return builder.toString();
    }

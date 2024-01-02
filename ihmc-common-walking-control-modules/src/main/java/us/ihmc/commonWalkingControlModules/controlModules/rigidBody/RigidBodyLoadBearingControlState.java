@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -90,8 +89,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    /* Reference frames */
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame elevatorFrame;
-   private final FramePose3D contactFrameInBodyFrame = new FramePose3D();
-   private final FramePose3D contactFrameInWorldFrame = new FramePose3D();
+   private final FramePose3D contactPoseInBodyFrame = new FramePose3D();
+   private final FramePose3D contactPoseInWorldFrame = new FramePose3D();
    private final PoseReferenceFrame contactFrame;
 
    /* Yo-Contact frame components */
@@ -211,10 +210,10 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       contactPoint.setToZero();
 
       // Update YoVariables for contact visualization
-      currentContactPointInWorld.setMatchingFrame(contactFrameInBodyFrame.getPosition());
-      currentContactOrientationInWorld.setMatchingFrame(contactFrameInBodyFrame.getOrientation());
-      desiredContactPointInWorld.setMatchingFrame(contactFrameInWorldFrame.getPosition());
-      desiredContactOrientationInWorld.setMatchingFrame(contactFrameInWorldFrame.getOrientation());
+      currentContactPointInWorld.setMatchingFrame(contactPoseInBodyFrame.getPosition());
+      currentContactOrientationInWorld.setMatchingFrame(contactPoseInBodyFrame.getOrientation());
+      desiredContactPointInWorld.setMatchingFrame(contactPoseInWorldFrame.getPosition());
+      desiredContactOrientationInWorld.setMatchingFrame(contactPoseInWorldFrame.getOrientation());
 
       if (controllerCoreOutput.getDesiredExternalWrench(controllerDesiredWrench, bodyToControl))
       { // Determine load status from controller core desired, assume it tracks
@@ -241,7 +240,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       orientationError.setMatchingFrame(desiredContactOrientationInWorld);
 
       // assemble spatial feedback command
-      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(contactFrameInBodyFrame);
+      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(contactPoseInBodyFrame);
 //      spatialFeedbackControlCommand.setInverseDynamics(contactFrameInWorldFrame.getOrientation(), contactFrameInWorldFrame.getPosition(), zeroInWorld, zeroInWorld, zeroInWorld, zeroInWorld);
 
       zeroInWorld.setToZero(contactFrame);
@@ -283,25 +282,18 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       updateGraphics();
    }
 
-   public boolean handleLoadbearingCommand(LoadBearingCommand command)
+   public boolean handleLoadBearingCommand(LoadBearingCommand command)
    {
       coefficientOfFriction.set(command.getCoefficientOfFriction());
-      contactNormal.set(command.getContactNormalInWorldFrame());
 
-      // Initialize body-frame position
-      contactFrameInBodyFrame.setToZero(bodyFrame);
-      contactFrameInBodyFrame.getPosition().set(command.getContactPointInBodyFrame());
+      // Initialize contact in body-frame
+      contactPoseInBodyFrame.setIncludingFrame(bodyFrame, command.getContactPoseInBodyFrame());
+      contactFrame.setPoseAndUpdate(contactPoseInBodyFrame);
 
-      // Initialize world-frame orientation
-      contactFrameInWorldFrame.setToZero(worldFrame);
-      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, contactNormal, contactFrameInWorldFrame.getOrientation());
-
-      // Copy position and orientation
-      contactFrameInWorldFrame.getPosition().setMatchingFrame(contactFrameInBodyFrame.getPosition());
-      contactFrameInBodyFrame.getOrientation().setMatchingFrame(contactFrameInWorldFrame.getOrientation());
-
-      // Update contact frame
-      contactFrame.setPoseAndUpdate(contactFrameInBodyFrame);
+      // Initialize contact in world-frame
+      contactPoseInWorldFrame.setMatchingFrame(contactPoseInBodyFrame);
+      contactPoseInWorldFrame.changeFrame(worldFrame);
+      contactNormal.setMatchingFrame(contactFrame, Axis3D.Z);
 
       return true;
    }

@@ -9,7 +9,6 @@ uint32 sequence_id
 bool load false
 # Sets the coefficient of friction that the controller will use for the contact point.
 float64 coefficient_of_friction 0
-# Sets the pose of the contact frame in the frame of the end effector body.
-geometry_msgs/Point contact_point_in_body_frame
-# Sets the contact normal used by the controller to load the contact point.
-geometry_msgs/Vector3 contact_normal_in_world_frame
+# Pose of the contact frame, expressed in the frame of the end effector body.
+# The contact frame origin is the contact point and the z-axis of contact frame is the contact normal (points into the environment)
+geometry_msgs/Pose contact_pose_in_body_frame

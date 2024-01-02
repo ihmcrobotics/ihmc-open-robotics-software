@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import controller_msgs.msg.dds.LoadBearingMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -15,11 +16,9 @@ public final class LoadBearingCommand implements Command<LoadBearingCommand, Loa
    /** Sets the coefficient of friction that the controller will use for the contact point. */
    private double coefficientOfFriction = 0.0;
 
-   /** Sets the transform of the contact frame in the frame of the end effector body. */
-   public final Point3D contactPointInBodyFrame = new Point3D();
-
-   /** Sets the contact normal used by the controller to load the contact point. */
-   private final Vector3D contactNormalInWorldFrame = new Vector3D();
+   /** Pose of the contact frame, expressed in the frame of the end effector body
+    * The contact frame origin is the contact point and the z-axis of contact frame is the contact normal (points into the environment) */
+   public final Pose3D contactPoseInBodyFrame = new Pose3D();
 
    public boolean getLoad()
    {
@@ -31,14 +30,9 @@ public final class LoadBearingCommand implements Command<LoadBearingCommand, Loa
       return coefficientOfFriction;
    }
 
-   public Point3D getContactPointInBodyFrame()
+   public Pose3D getContactPoseInBodyFrame()
    {
-      return contactPointInBodyFrame;
-   }
-
-   public Vector3D getContactNormalInWorldFrame()
-   {
-      return contactNormalInWorldFrame;
+      return contactPoseInBodyFrame;
    }
 
    @Override
@@ -47,8 +41,7 @@ public final class LoadBearingCommand implements Command<LoadBearingCommand, Loa
       sequenceId = other.sequenceId;
       load = other.getLoad();
       coefficientOfFriction = other.getCoefficientOfFriction();
-      contactPointInBodyFrame.set(other.getContactPointInBodyFrame());
-      contactNormalInWorldFrame.set(other.getContactNormalInWorldFrame());
+      contactPoseInBodyFrame.set(other.contactPoseInBodyFrame);
    }
 
    @Override
@@ -57,8 +50,7 @@ public final class LoadBearingCommand implements Command<LoadBearingCommand, Loa
       sequenceId = message.getSequenceId();
       load = message.getLoad();
       coefficientOfFriction = message.getCoefficientOfFriction();
-      contactPointInBodyFrame.set(message.getContactPointInBodyFrame());
-      contactNormalInWorldFrame.set(message.getContactNormalInWorldFrame());
+      contactPoseInBodyFrame.set(message.getContactPoseInBodyFrame());
    }
 
    @Override
@@ -67,8 +59,7 @@ public final class LoadBearingCommand implements Command<LoadBearingCommand, Loa
       sequenceId = 0;
       load = false;
       coefficientOfFriction = 0.0;
-      contactPointInBodyFrame.setToZero();
-      contactNormalInWorldFrame.setToZero();
+      contactPoseInBodyFrame.setToZero();
    }
 
    @Override
@@ -76,9 +67,7 @@ public final class LoadBearingCommand implements Command<LoadBearingCommand, Loa
    {
       if (coefficientOfFriction <= 0.0)
          return false;
-      if (contactPointInBodyFrame.containsNaN())
-         return false;
-      if (contactNormalInWorldFrame.containsNaN())
+      if (contactPoseInBodyFrame.containsNaN())
          return false;
       return true;
    }
