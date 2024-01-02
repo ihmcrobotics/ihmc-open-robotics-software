@@ -15,7 +15,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c5a32d178bd5ca3076f7f5fffeceaa2339013016e0666003a84f9e7640754833";
+   		return "9bb09776ce7aeffb91cac8ce851a2760cf122935d52987926ed4e07eaad4e6ad";
    }
    
    @Override
@@ -59,9 +59,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
-
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += behavior_msgs.msg.dds.FootstepPlanActionStateBasicsMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -85,11 +83,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       {
           current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessagePubSubType.getCdrSerializedSize(data.getFootsteps().get(i0), current_alignment);}
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
-
-
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
-
+      current_alignment += behavior_msgs.msg.dds.FootstepPlanActionStateBasicsMessagePubSubType.getCdrSerializedSize(data.getFootstepPlanStateBasics(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -103,10 +97,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       cdr.write_type_e(data.getFootsteps());else
           throw new RuntimeException("footsteps field exceeds the maximum length");
 
-      cdr.write_type_3(data.getTotalNumberOfFootsteps());
-
-      cdr.write_type_3(data.getNumberOfIncompleteFootsteps());
-
+      behavior_msgs.msg.dds.FootstepPlanActionStateBasicsMessagePubSubType.write(data.getFootstepPlanStateBasics(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.FootstepPlanActionStateMessage data, us.ihmc.idl.CDR cdr)
@@ -114,10 +105,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       cdr.read_type_e(data.getFootsteps());	
-      data.setTotalNumberOfFootsteps(cdr.read_type_3());
-      	
-      data.setNumberOfIncompleteFootsteps(cdr.read_type_3());
-      	
+      behavior_msgs.msg.dds.FootstepPlanActionStateBasicsMessagePubSubType.read(data.getFootstepPlanStateBasics(), cdr);	
 
    }
 
@@ -129,8 +117,8 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       ser.write_type_a("definition", new behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_e("footsteps", data.getFootsteps());
-      ser.write_type_3("total_number_of_footsteps", data.getTotalNumberOfFootsteps());
-      ser.write_type_3("number_of_incomplete_footsteps", data.getNumberOfIncompleteFootsteps());
+      ser.write_type_a("footstep_plan_state_basics", new behavior_msgs.msg.dds.FootstepPlanActionStateBasicsMessagePubSubType(), data.getFootstepPlanStateBasics());
+
    }
 
    @Override
@@ -141,8 +129,8 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       ser.read_type_a("definition", new behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.read_type_e("footsteps", data.getFootsteps());
-      data.setTotalNumberOfFootsteps(ser.read_type_3("total_number_of_footsteps"));
-      data.setNumberOfIncompleteFootsteps(ser.read_type_3("number_of_incomplete_footsteps"));
+      ser.read_type_a("footstep_plan_state_basics", new behavior_msgs.msg.dds.FootstepPlanActionStateBasicsMessagePubSubType(), data.getFootstepPlanStateBasics());
+
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.FootstepPlanActionStateMessage src, behavior_msgs.msg.dds.FootstepPlanActionStateMessage dest)

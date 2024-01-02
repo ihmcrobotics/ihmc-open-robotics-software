@@ -195,6 +195,8 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
    @Override
    public void triggerActionExecution()
    {
+      super.triggerActionExecution();
+
       if (state.getGoalFrame().isChildOfWorld())
       {
          plan();
@@ -232,6 +234,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
                                                           ORIENTATION_TOLERANCE,
                                                           nominalExecutionDuration,
                                                           executionTimer,
+                                                          getState(),
                                                           BehaviorActionCompletionComponent.TRANSLATION,
                                                           BehaviorActionCompletionComponent.ORIENTATION);
          }

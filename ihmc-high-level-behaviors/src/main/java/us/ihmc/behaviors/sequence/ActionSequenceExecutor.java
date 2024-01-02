@@ -56,12 +56,12 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       for (ActionNodeExecutor<?, ?> currentlyExecutingAction : currentlyExecutingActions)
       {
          currentlyExecutingAction.updateCurrentlyExecuting();
-         anyActionExecutionFailed |= currentlyExecutingAction.getExecutionFailedNotification().poll();
+         anyActionExecutionFailed |= currentlyExecutingAction.getState().getFailed();
       }
 
       if (anyActionExecutionFailed)
       {
-         int earliestIndex = Integer.MAX_VALUE;
+         int earliestIndex = getState().getExecutionNextIndex();
          for (ActionNodeExecutor<?, ?> currentlyExecutingAction : currentlyExecutingActions)
             if (currentlyExecutingAction.getState().getActionIndex() < earliestIndex)
                earliestIndex = currentlyExecutingAction.getState().getActionIndex();

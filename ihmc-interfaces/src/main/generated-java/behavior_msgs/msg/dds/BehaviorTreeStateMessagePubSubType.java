@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c0afee9109ac3ff2ca3bf5c9f24aaec083030cdfd0f2feff5dfed43d05f5403d";
+   		return "c4238a54f1c3fa9bc0385a2f85ce6ceda94e6ebc7b035877ecde60ecd459c1dd";
    }
    
    @Override
@@ -84,6 +84,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.HandWrenchActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -160,6 +163,11 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
           current_alignment += behavior_msgs.msg.dds.HandWrenchActionStateMessagePubSubType.getCdrSerializedSize(data.getHandWrenchActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getScrewPrimitiveActions().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessagePubSubType.getCdrSerializedSize(data.getScrewPrimitiveActions().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getPelvisHeightActions().size(); ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessagePubSubType.getCdrSerializedSize(data.getPelvisHeightActions().get(i0), current_alignment);}
@@ -223,6 +231,10 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getHandWrenchActions());else
           throw new RuntimeException("hand_wrench_actions field exceeds the maximum length");
 
+      if(data.getScrewPrimitiveActions().size() <= 200)
+      cdr.write_type_e(data.getScrewPrimitiveActions());else
+          throw new RuntimeException("screw_primitive_actions field exceeds the maximum length");
+
       if(data.getPelvisHeightActions().size() <= 200)
       cdr.write_type_e(data.getPelvisHeightActions());else
           throw new RuntimeException("pelvis_height_actions field exceeds the maximum length");
@@ -252,6 +264,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.read_type_e(data.getSakeHandCommandActions());	
       cdr.read_type_e(data.getHandPoseActions());	
       cdr.read_type_e(data.getHandWrenchActions());	
+      cdr.read_type_e(data.getScrewPrimitiveActions());	
       cdr.read_type_e(data.getPelvisHeightActions());	
       cdr.read_type_e(data.getWaitDurationActions());	
       cdr.read_type_e(data.getWalkActions());	
@@ -274,6 +287,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_e("sake_hand_command_actions", data.getSakeHandCommandActions());
       ser.write_type_e("hand_pose_actions", data.getHandPoseActions());
       ser.write_type_e("hand_wrench_actions", data.getHandWrenchActions());
+      ser.write_type_e("screw_primitive_actions", data.getScrewPrimitiveActions());
       ser.write_type_e("pelvis_height_actions", data.getPelvisHeightActions());
       ser.write_type_e("wait_duration_actions", data.getWaitDurationActions());
       ser.write_type_e("walk_actions", data.getWalkActions());
@@ -295,6 +309,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_e("sake_hand_command_actions", data.getSakeHandCommandActions());
       ser.read_type_e("hand_pose_actions", data.getHandPoseActions());
       ser.read_type_e("hand_wrench_actions", data.getHandWrenchActions());
+      ser.read_type_e("screw_primitive_actions", data.getScrewPrimitiveActions());
       ser.read_type_e("pelvis_height_actions", data.getPelvisHeightActions());
       ser.read_type_e("wait_duration_actions", data.getWaitDurationActions());
       ser.read_type_e("walk_actions", data.getWalkActions());

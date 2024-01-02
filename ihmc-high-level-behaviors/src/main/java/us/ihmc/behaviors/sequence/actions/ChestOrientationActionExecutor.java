@@ -57,6 +57,8 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    @Override
    public void triggerActionExecution()
    {
+      super.triggerActionExecution();
+
       if (state.getChestFrame().isChildOfWorld())
       {
          FrameQuaternion frameChestQuaternion = new FrameQuaternion(state.getChestFrame().getReferenceFrame());
@@ -99,6 +101,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
                                                                ORIENTATION_TOLERANCE,
                                                                getDefinition().getTrajectoryDuration(),
                                                                executionTimer,
+                                                               getState(),
                                                                BehaviorActionCompletionComponent.ORIENTATION));
 
          state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
