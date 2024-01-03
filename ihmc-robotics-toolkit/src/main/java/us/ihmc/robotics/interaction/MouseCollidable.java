@@ -43,6 +43,11 @@ public class MouseCollidable
       {
          boxRayIntersection = new BoxRayIntersection();
       }
+      else if (shape instanceof FrameRamp3DReadOnly)
+      {
+         // TODO: Implement for ramp
+         boxRayIntersection = new BoxRayIntersection();
+      }
       else if (shape instanceof FramePointShape3DReadOnly)
       {
          // We're not colliding with points as they have no volume
@@ -98,6 +103,18 @@ public class MouseCollidable
          if (boxRayIntersection.intersect(box.getSizeX(),
                                           box.getSizeY(),
                                           box.getSizeZ(),
+                                          shapePoseFrame.getTransformToRoot(),
+                                          pickRayInWorld))
+         {
+            return boxRayIntersection.getFirstIntersectionToPack().distance(pickRayInWorld.getPoint());
+         }
+      }
+      else if (shape instanceof Ramp3DReadOnly ramp)
+      {
+         // TODO: Finish implementing RampRayIntersection
+         if (boxRayIntersection.intersect(ramp.getSizeX(),
+                                          ramp.getSizeY(),
+                                          ramp.getSizeZ(),
                                           shapePoseFrame.getTransformToRoot(),
                                           pickRayInWorld))
          {

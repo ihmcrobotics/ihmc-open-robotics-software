@@ -33,6 +33,7 @@ public class BehaviorTreeModule
    private volatile boolean running = true;
    private final ROS2Node ros2Node;
    private final ROS2ControllerHelper ros2ControllerHelper;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2SceneGraph sceneGraph;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final Throttler throttler = new Throttler();
@@ -44,8 +45,7 @@ public class BehaviorTreeModule
    {
       ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "behavior_tree");
       ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
-
-      ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2NodeInterface());
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2NodeInterface());
 
       sceneGraph = new ROS2SceneGraph(ros2ControllerHelper);
       referenceFrameLibrary = new ReferenceFrameLibrary();
@@ -80,6 +80,8 @@ public class BehaviorTreeModule
       while (running)
       {
          throttler.waitAndRun(PERIOD);
+
+         syncedRobot.update();
 
          sceneGraph.updateSubscription();
 
