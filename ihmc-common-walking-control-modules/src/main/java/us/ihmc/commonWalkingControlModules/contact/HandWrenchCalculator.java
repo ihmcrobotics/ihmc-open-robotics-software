@@ -70,7 +70,8 @@ public class HandWrenchCalculator
                                                           () -> alpha,
                                                           unfilteredWrench.getAngularPart(),
                                                           unfilteredWrench.getLinearPart());
-      parentRegistry.addChild(registry);
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
    }
 
    public void compute()
