@@ -396,4 +396,14 @@ public class RDXArmManager
    {
       return armIKSolvers;
    }
+
+   public void setIndicateWrenchOnScreen(boolean indicateWrenchOnScreen)
+   {
+      this.indicateWrenchOnScreen.set(indicateWrenchOnScreen);
+   }
+
+   public RDX3DPanelHandWrenchIndicator getPanelHandWrenchIndicator()
+   {
+      return panelHandWrenchIndicator;
+   }
 }
