@@ -26,6 +26,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -59,6 +60,7 @@ public class RDXIterativeClosestPointBasicDemo
 
    private final RDXPointCloudRenderer envPointCloudRenderer = new RDXPointCloudRenderer();
    private final RDXPointCloudRenderer objectPointCloudRenderer = new RDXPointCloudRenderer();
+   private RDXReferenceFrameGraphic referenceFrameGraphic;
 
    private final RecyclingArrayList<Point3D32> envPointCloud = new RecyclingArrayList<>(Point3D32::new);
    private final RecyclingArrayList<FramePoint3D> objectModelPointCloud = new RecyclingArrayList<>(FramePoint3D::new);
@@ -127,6 +129,9 @@ public class RDXIterativeClosestPointBasicDemo
             // create extra 3d panel
             RDX3DPanel panel3D = new RDX3DPanel("3D View 2", true);
             baseUI.add3DPanel(panel3D);
+
+            referenceFrameGraphic = new RDXReferenceFrameGraphic(0.5);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(referenceFrameGraphic);
 
             getObjectPoints();
           }
@@ -429,6 +434,7 @@ public class RDXIterativeClosestPointBasicDemo
                   objectOrientation.set(objectQuaternion);
                   objectYawPitchRoll.set(objectQuaternion);
                   objectPose.set(objectPosition, objectOrientation);
+                  referenceFrameGraphic.setPoseInWorldFrame(objectPose);
                }
             }
          }
