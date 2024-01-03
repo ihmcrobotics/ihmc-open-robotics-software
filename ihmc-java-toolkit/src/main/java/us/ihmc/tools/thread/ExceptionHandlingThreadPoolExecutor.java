@@ -99,9 +99,9 @@ public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
       // super is probably a no-op
       super.afterExecute(runnableFuture, throwable);
 
+      ExceptionHandler handler = afterExecuteHandlers.remove(runnableFuture);
       if (throwable != null) // Throwable is null if execution completed normally
       {
-         ExceptionHandler handler = afterExecuteHandlers.remove(runnableFuture);
          handler.handleException(throwable);
       }
    }
