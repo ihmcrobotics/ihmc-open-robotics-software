@@ -13,7 +13,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.MessageTools;
@@ -74,7 +73,6 @@ public class RDXArmManager
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
 
-   private final SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators = new SideDependentList<>();
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
 
@@ -99,7 +97,6 @@ public class RDXArmManager
 
       for (RobotSide side : RobotSide.values)
       {
-         handWrenchCalculators.put(side, new ROS2HandWrenchCalculator(side, syncedRobot));
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
          ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames(side);
          desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, armJointNames));
@@ -133,7 +130,6 @@ public class RDXArmManager
       boolean desiredHandPoseChanged = false;
       for (RobotSide side : interactableHands.sides())
       {
-         handWrenchCalculators.get(side).compute();
          armIKSolvers.get(side).update(syncedRobot.getReferenceFrames().getChestFrame(),
                                        interactableHands.get(side).getControlReferenceFrame());
 
@@ -141,7 +137,7 @@ public class RDXArmManager
          boolean showWrench = indicateWrenchOnScreen.get();
          if (interactableHands.get(side).getEstimatedHandWrenchArrows().getShow() != showWrench)
             interactableHands.get(side).getEstimatedHandWrenchArrows().setShow(showWrench);
-         interactableHands.get(side).updateEstimatedWrench(handWrenchCalculators.get(side).getFilteredWrench());
+         interactableHands.get(side).updateEstimatedWrench(syncedRobot.getHandWrenchCalculators().get(side).getFilteredWrench());
 
          // Check if the desired hand pose changed and we need to run the solver again.
          // We only want to evaluate this when we are going to take action on it
@@ -154,8 +150,8 @@ public class RDXArmManager
          if (showWrench)
          {
             panelHandWrenchIndicator.update(side,
-                                            handWrenchCalculators.get(side).getLinearWrenchMagnitude(true),
-                                            handWrenchCalculators.get(side).getAngularWrenchMagnitude(true));
+                                            syncedRobot.getHandWrenchCalculators().get(side).getLinearWrenchMagnitude(true),
+                                            syncedRobot.getHandWrenchCalculators().get(side).getAngularWrenchMagnitude(true));
          }
       }
 
