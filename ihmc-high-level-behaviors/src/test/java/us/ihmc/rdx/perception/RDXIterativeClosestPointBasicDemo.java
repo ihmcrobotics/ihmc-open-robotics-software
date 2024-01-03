@@ -84,8 +84,10 @@ public class RDXIterativeClosestPointBasicDemo
    private final int envSize = 1000;
 
    private final DMatrixRMaj objectCentroid = new DMatrixRMaj(1, 3);
+   private final DMatrixRMaj actualObjectCentroid = new DMatrixRMaj(1, 3);
    private final DMatrixRMaj envCentroid = new DMatrixRMaj(1, 3);
    private final DMatrixRMaj objectCentroidSubtractedPoints = new DMatrixRMaj(envSize, 3);
+   private final DMatrixRMaj actualObjectCentroidSubtractedPoints= new DMatrixRMaj(envSize, 3);
    private final DMatrixRMaj envCentroidSubtractedPoints= new DMatrixRMaj(envSize, 3);
    private final DMatrixRMaj envToObjectCorrespondencePoints = new DMatrixRMaj(envSize, 3);
    private final DMatrixRMaj zeroMatrixPoint = new DMatrixRMaj(1,3);
@@ -374,6 +376,23 @@ public class RDXIterativeClosestPointBasicDemo
                      objectCentroidSubtractedPoints.set(i, 2, envToObjectCorrespondencePoints.get(i, 2) - objectCentroid.get(0, 2));
                   }
 
+                  // TODO: Not sure what the centroid above is for, its not for the object. This calculates the object centroid. We can rename variables.
+                  actualObjectCentroid.set(zeroMatrixPoint);
+                  for (int i = 0; i < objectInWorldPoints.size(); i++) {
+                     actualObjectCentroid.add(0, 0, objectInWorldPoints.get(i).getX());
+                     actualObjectCentroid.add(0, 1, objectInWorldPoints.get(i).getY());
+                     actualObjectCentroid.add(0, 2, objectInWorldPoints.get(i).getZ());
+                  }
+                  actualObjectCentroid.set(0, 0, actualObjectCentroid.get(0, 0) / envSize);
+                  actualObjectCentroid.set(0, 1, actualObjectCentroid.get(0, 1) / envSize);
+                  actualObjectCentroid.set(0, 2, actualObjectCentroid.get(0, 2) / envSize);
+                  // Subtract env centroid from env point cloud
+                  for (int i = 0; i < objectInWorldPoints.size(); i++) {
+                     actualObjectCentroidSubtractedPoints.set(i, 0, objectInWorldPoints.get(i).getX() - actualObjectCentroid.get(0, 0));
+                     actualObjectCentroidSubtractedPoints.set(i, 1, objectInWorldPoints.get(i).getY() - actualObjectCentroid.get(0, 1));
+                     actualObjectCentroidSubtractedPoints.set(i, 2, objectInWorldPoints.get(i).getZ() - actualObjectCentroid.get(0, 2));
+                  }
+
                   // Calculate env centroid
                   envCentroid.set(zeroMatrixPoint);
                   for (int i = 0; i < envSize; i++) {
@@ -427,7 +446,8 @@ public class RDXIterativeClosestPointBasicDemo
                   // good to include an explicit initial condition. Then you could initialize objectRotationMatrix to that orientation.
 
                   // Update object pose
-                  objectPosition.set(objectCentroid.get(0, 0), objectCentroid.get(0, 1), objectCentroid.get(0, 2));
+                  objectPosition.set(actualObjectCentroid.get(0, 0), actualObjectCentroid.get(0, 1), actualObjectCentroid.get(0, 2));
+                  objectPosition.set(actualObjectCentroid.get(0, 0), actualObjectCentroid.get(0, 1), actualObjectCentroid.get(0, 2));
                   objectDeltaMatrix.set(R); // save the incremental change in rotation to a rotation matrix
                   objectRotationMatrix.append(objectDeltaMatrix); // append the rotation to the total rotation of the body relative to world
                   QuaternionConversion.convertMatrixToQuaternion(objectRotationMatrix, objectQuaternion);
