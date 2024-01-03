@@ -48,6 +48,7 @@ import java.util.List;
  */
 public class CenterOfMassStabilityMarginOptimizationModule
 {
+   private static final boolean DEBUG = false;
    static final double GRAVITY = 9.81;
    static final int NUM_BASIS_VECTORS = 4;
    static final int MAX_CONTACT_POINTS = 12;
@@ -131,7 +132,7 @@ public class CenterOfMassStabilityMarginOptimizationModule
          }
       }
 
-      if (graphicsListRegistry != null)
+      if (DEBUG && graphicsListRegistry != null)
       {
          YoGraphicsList graphicsList = new YoGraphicsList(getClass().getSimpleName());
          for (int contactIdx = 0; contactIdx < MAX_CONTACT_POINTS; contactIdx++)

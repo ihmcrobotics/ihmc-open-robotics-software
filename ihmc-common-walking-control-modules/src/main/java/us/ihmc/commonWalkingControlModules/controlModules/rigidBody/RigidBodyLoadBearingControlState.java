@@ -14,6 +14,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -147,8 +148,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       bodyBarelyLoaded = new YoBoolean(bodyName + "BarelyLoaded", registry);
       yoControllerDesiredForce = new YoFrameVector3D(bodyName + "DesiredForce", ReferenceFrame.getWorldFrame(), parentRegistry);
 
-      positionError = new YoFramePoint3D(bodyName + "PositionErrorDebug", contactFrame, registry);
-      orientationError = new YoFrameQuaternion(bodyName + "OrientationErrorDebug", contactFrame, registry);
+      positionError = new YoFramePoint3D(bodyName + "PositionError", contactFrame, registry);
+      orientationError = new YoFrameQuaternion(bodyName + "OrientationError", contactFrame, registry);
 
       planeContactStateCommand.setContactingRigidBody(bodyToControl);
 
@@ -161,16 +162,6 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
          isAngularAxisFeedbackControlled[i] = new YoBoolean("isAngular" + Axis3D.values[i] + "FeedbackControlled", registry);
          isLinearAxisFeedbackControlled[i] = new YoBoolean("isLinear" + Axis3D.values[i] + "FeedbackControlled", registry);
       }
-
-
-      // set axis control strategies
-      isLinearAxisFeedbackControlled[0].set(bodyBarelyLoaded.getValue());
-      isLinearAxisFeedbackControlled[1].set(bodyBarelyLoaded.getValue());
-      isLinearAxisFeedbackControlled[2].set(false);
-
-      isAngularAxisFeedbackControlled[0].set(false);
-      isAngularAxisFeedbackControlled[1].set(false);
-      isAngularAxisFeedbackControlled[2].set(true);
 
       setupViz(graphicsListRegistry, bodyName);
    }
@@ -190,13 +181,22 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       graphicsListRegistry.registerYoGraphic(listName, contactPoint);
       graphics.add(contactPoint);
 
-      YoGraphicVector controllerDesiredForce = new YoGraphicVector(bodyName + "DesiredForceGraphic", currentContactPointInWorld, yoControllerDesiredForce, 0.015, YoAppearance.Red());
+      YoGraphicVector controllerDesiredForce = new YoGraphicVector(bodyName + "DesiredForceGraphic",
+                                                                   currentContactPointInWorld,
+                                                                   yoControllerDesiredForce,
+                                                                   0.015,
+                                                                   YoAppearance.Red());
       graphicsListRegistry.registerYoGraphic(listName, controllerDesiredForce);
       graphics.add(controllerDesiredForce);
 
       YoGraphicCoordinateSystem controlFrame = new YoGraphicCoordinateSystem(bodyName + "LoadBearingControlFrame", currentContactPointInWorld,
-                                                                             currentContactOrientationInWorld, 0.2);
+                                                                             currentContactOrientationInWorld, 0.2, YoAppearance.DarkGray());
       graphicsListRegistry.registerYoGraphic(listName, controlFrame);
+      graphics.add(controlFrame);
+
+      YoGraphicCoordinateSystem desiredFrame = new YoGraphicCoordinateSystem(bodyName + "LoadBearingDesiredFrame", desiredContactPointInWorld,
+                                                                             desiredContactOrientationInWorld, 0.17, YoAppearance.LightGray());
+      graphicsListRegistry.registerYoGraphic(listName, desiredFrame);
       graphics.add(controlFrame);
 
       hideGraphics();
@@ -241,7 +241,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
       // assemble spatial feedback command
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(contactPoseInBodyFrame);
-//      spatialFeedbackControlCommand.setInverseDynamics(contactFrameInWorldFrame.getOrientation(), contactFrameInWorldFrame.getPosition(), zeroInWorld, zeroInWorld, zeroInWorld, zeroInWorld);
+      //      spatialFeedbackControlCommand.setInverseDynamics(contactFrameInWorldFrame.getOrientation(), contactFrameInWorldFrame.getPosition(), zeroInWorld, zeroInWorld, zeroInWorld, zeroInWorld);
 
       zeroInWorld.setToZero(contactFrame);
       spatialFeedbackControlCommand.setInverseDynamics(orientationError, positionError, zeroInWorld, zeroInWorld, zeroInWorld, zeroInWorld);
@@ -253,6 +253,15 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       bodyAcceleration.setToZero(contactFrame, elevatorFrame, contactFrame);
       bodyAcceleration.setBodyFrame(bodyFrame);
       spatialAccelerationCommand.setSpatialAcceleration(contactFrame, bodyAcceleration);
+
+      // set axis control strategies
+      isLinearAxisFeedbackControlled[0].set(bodyBarelyLoaded.getValue());
+      isLinearAxisFeedbackControlled[1].set(bodyBarelyLoaded.getValue());
+      isLinearAxisFeedbackControlled[2].set(false);
+
+      isAngularAxisFeedbackControlled[0].set(false);
+      isAngularAxisFeedbackControlled[1].set(false);
+      isAngularAxisFeedbackControlled[2].set(true);
 
       // Selection matrices
       for (int axisIdx = 0; axisIdx < 3; axisIdx++)
@@ -373,6 +382,16 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    {
       hideGraphics();
       controlMode.set(loadBearingParameters.getDefaultControlMode());
+
+      desiredContactPointInWorld.setToNaN();
+      desiredContactOrientationInWorld.setToNaN();
+      currentContactPointInWorld.setToNaN();
+      currentContactOrientationInWorld.setToNaN();
+
+      // from RigidBodyJointspaceControlState.holdCurrent
+      jointControlHelper.overrideTrajectory();
+      jointControlHelper.setWeightsToDefaults();
+      jointControlHelper.queueInitialPointsAtCurrent();
    }
 
    @Override
@@ -388,7 +407,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       feedbackControlCommandList.clear();
-//      feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
+      feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
       feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
       return feedbackControlCommandList;
 
@@ -401,7 +420,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
    {
       feedbackControlCommandList.clear();
-//      feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
+      feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
       feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
       return feedbackControlCommandList;
 
@@ -431,24 +450,36 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    }
 
    @Override
+   public boolean isDone(double time)
+   {
+      double positionErrorSquared = EuclidCoreTools.normSquared(positionError.getX(), positionError.getY(), positionError.getZ());
+      double linearTrackingSlipThresholdSquared = EuclidCoreTools.square(loadBearingParameters.getLinearTrackingSlipThreshold());
+      return positionErrorSquared > linearTrackingSlipThresholdSquared;
+   }
+
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D(contactPoint.getNamePrefix(), currentContactPointInWorld, 0.01, ColorDefinitions.Black()));
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(contactNormal.getNamePrefix(),
                                                                     currentContactPointInWorld,
-                                                                    contactNormal, 0.1, ColorDefinitions.Black()));
+                                                                    contactNormal,
+                                                                    0.1,
+                                                                    ColorDefinitions.Black()));
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(bodyToControl.getName() + "ControllerForce",
                                                                     currentContactPointInWorld,
                                                                     yoControllerDesiredForce,
                                                                     0.01,
                                                                     ColorDefinitions.Red()));
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D(bodyToControl.getName() + "ControlFrame",
-                                                                               currentContactPointInWorld, currentContactOrientationInWorld,
+                                                                               currentContactPointInWorld,
+                                                                               currentContactOrientationInWorld,
                                                                                0.15,
                                                                                ColorDefinitions.DarkGray()));
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D(bodyToControl.getName() + "DesiredControlFrame",
-                                                                               desiredContactPointInWorld, desiredContactOrientationInWorld,
+                                                                               desiredContactPointInWorld,
+                                                                               desiredContactOrientationInWorld,
                                                                                0.13,
                                                                                ColorDefinitions.LightGray()));
       return group;

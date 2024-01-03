@@ -10,6 +10,7 @@ public class LoadBearingParameters
 {
    private final EnumParameter<LoadBearingControlMode> defaultControlMode;
    private final DoubleParameter normalForceThresholdForLoaded;
+   private final DoubleParameter linearSlippingThreshold;
 
    private final BooleanParameter[] angularAxisSelection = new BooleanParameter[3];
    private final BooleanParameter[] linearAxisSelection = new BooleanParameter[3];
@@ -20,12 +21,18 @@ public class LoadBearingParameters
 
       defaultControlMode = new EnumParameter<>(prefix + "DefaultControlMode", registry, LoadBearingControlMode.class, false, LoadBearingControlMode.JOINTSPACE);
       normalForceThresholdForLoaded = new DoubleParameter(prefix + "ForceThreshold", registry, 1000.0); // 10.0);
+      linearSlippingThreshold = new DoubleParameter(prefix + "LinearTrackingSlipThreshold", registry, 0.04);
 
       for (int i = 0; i < 3; i++)
       {
          angularAxisSelection[i] = new BooleanParameter(prefix + "Angular" + Axis3D.values[i].name() + "Enabled", registry, i == Axis3D.Z.ordinal());
          linearAxisSelection[i] = new BooleanParameter(prefix + "Linear" + Axis3D.values[i].name() + "Enabled", registry, true);
       }
+   }
+
+   public double getLinearTrackingSlipThreshold()
+   {
+      return linearSlippingThreshold.getValue();
    }
 
    public LoadBearingControlMode getDefaultControlMode()

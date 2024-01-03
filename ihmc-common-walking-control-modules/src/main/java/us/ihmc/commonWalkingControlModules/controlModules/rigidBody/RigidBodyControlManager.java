@@ -205,11 +205,11 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
             + "DefaultControlMode", description, registry, RigidBodyControlMode.class, false, defaultControlMode);
       this.defaultControlMode.addListener(parameter -> checkDefaultControlMode(this.defaultControlMode.getValue(), this.homePose, bodyName));
 
-      stateMachine = setupStateMachine(namePrefix, yoTime);
+      stateMachine = setupStateMachine(namePrefix, yoTime, defaultControlMode);
       parentRegistry.addChild(registry);
    }
 
-   private StateMachine<RigidBodyControlMode, RigidBodyControlState> setupStateMachine(String namePrefix, DoubleProvider timeProvider)
+   private StateMachine<RigidBodyControlMode, RigidBodyControlState> setupStateMachine(String namePrefix, DoubleProvider timeProvider, RigidBodyControlMode defaultControlMode)
    {
       StateMachineFactory<RigidBodyControlMode, RigidBodyControlState> factory = new StateMachineFactory<>(RigidBodyControlMode.class);
       factory.setNamePrefix(namePrefix).setRegistry(registry).buildYoClock(timeProvider);
@@ -218,7 +218,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       factory.addState(RigidBodyControlMode.TASKSPACE, taskspaceControlState);
       factory.addState(RigidBodyControlMode.USER, userControlState);
       if (loadBearingControlState != null)
-         factory.addState(RigidBodyControlMode.LOADBEARING, loadBearingControlState);
+         factory.addStateAndDoneTransition(RigidBodyControlMode.LOADBEARING, loadBearingControlState, defaultControlMode);
 
       for (RigidBodyControlMode from : factory.getRegisteredStateKeys())
       {

@@ -342,7 +342,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          }
       }
 
-      multiContactRegionCalculator = new CenterOfMassStaticStabilityRegionCalculator(fullRobotModel.getTotalMass(), 18, registry, yoGraphicsListRegistry);
+      multiContactRegionCalculator = new CenterOfMassStaticStabilityRegionCalculator(fullRobotModel.getTotalMass(), registry, yoGraphicsListRegistry);
       wholeBodyContactState = new WholeBodyContactState(controlledOneDoFJoints, fullRobotModel.getRootJoint());
 
       String graphicListName = getClass().getSimpleName();

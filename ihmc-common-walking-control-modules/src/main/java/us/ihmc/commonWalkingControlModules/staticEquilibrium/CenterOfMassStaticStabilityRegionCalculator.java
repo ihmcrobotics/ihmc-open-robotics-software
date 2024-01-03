@@ -25,6 +25,7 @@ import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMass
 public class CenterOfMassStaticStabilityRegionCalculator implements SCS2YoGraphicHolder
 {
    private static final int DEFAULT_DIRECTIONS_TO_OPTIMIZE = 18;
+   private static final boolean DEBUG = false;
 
    // TODO optimize how this is computed. Could use Bretls iterative projection algorithm,
    // For the case of roughly level feet + one hand, there might be a way to rule out query directions.
@@ -51,6 +52,11 @@ public class CenterOfMassStaticStabilityRegionCalculator implements SCS2YoGraphi
       this(robotMass, directionsToOptimize, null, null);
    }
 
+   public CenterOfMassStaticStabilityRegionCalculator(double robotMass, YoRegistry parentRegistry)
+   {
+      this(robotMass, DEFAULT_DIRECTIONS_TO_OPTIMIZE, parentRegistry, null);
+   }
+
    public CenterOfMassStaticStabilityRegionCalculator(double robotMass, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this(robotMass, DEFAULT_DIRECTIONS_TO_OPTIMIZE, parentRegistry, graphicsListRegistry);
@@ -72,7 +78,7 @@ public class CenterOfMassStaticStabilityRegionCalculator implements SCS2YoGraphi
          resolvedForces[i] = new YoFrameVector3D("resolvedForce" + i, ReferenceFrame.getWorldFrame(), registry);
       }
 
-      if (parentRegistry != null)
+      if (DEBUG && graphicsListRegistry != null)
       {
          for (int contactIdx = 0; contactIdx < resolvedForces.length; contactIdx++)
          {
@@ -89,7 +95,7 @@ public class CenterOfMassStaticStabilityRegionCalculator implements SCS2YoGraphi
 
       if (graphicsListRegistry != null)
       {
-         YoArtifactPolygon multiContactCoMRegionArtifact = new YoArtifactPolygon("Multi-Contact CoM Region", feasibleCoMRegion, Color.BLACK, true);
+         YoArtifactPolygon multiContactCoMRegionArtifact = new YoArtifactPolygon("Multi-Contact CoM Region", feasibleCoMRegion, Color.BLACK, false);
          graphicsListRegistry.registerArtifact(getClass().getSimpleName(), multiContactCoMRegionArtifact);
       }
    }
