@@ -4,7 +4,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor;
-import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
@@ -18,8 +17,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.Throttler;
 
@@ -54,9 +51,6 @@ public class BehaviorTreeModule
       referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
 
       WalkingFootstepTracker footstepTracker = new WalkingFootstepTracker(ros2Node, robotModel.getSimpleRobotName());
-      SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators = new SideDependentList<>();
-      for (RobotSide side : RobotSide.values)
-         handWrenchCalculators.put(side, new ROS2HandWrenchCalculator(side, syncedRobot));
       FootstepPlanningModule footstepPlanner = new FootstepPlanningModule(FootstepPlanningModule.class.getSimpleName());
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       WalkingControllerParameters walkingContollerParameters = robotModel.getWalkingControllerParameters();
@@ -66,7 +60,6 @@ public class BehaviorTreeModule
                                                           syncedRobot,
                                                           referenceFrameLibrary,
                                                           footstepTracker,
-                                                          handWrenchCalculators,
                                                           footstepPlanner,
                                                           footstepPlannerParameters,
                                                           walkingContollerParameters);
