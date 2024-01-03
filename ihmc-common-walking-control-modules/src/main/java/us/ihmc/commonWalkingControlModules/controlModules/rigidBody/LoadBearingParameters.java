@@ -19,11 +19,11 @@ public class LoadBearingParameters
       String prefix = bodyName + "LoadBearing";
 
       defaultControlMode = new EnumParameter<>(prefix + "DefaultControlMode", registry, LoadBearingControlMode.class, false, LoadBearingControlMode.JOINTSPACE);
-      normalForceThresholdForLoaded = new DoubleParameter(prefix + "ForceThreshold", registry, 10.0);
+      normalForceThresholdForLoaded = new DoubleParameter(prefix + "ForceThreshold", registry, 1000.0); // 10.0);
 
       for (int i = 0; i < 3; i++)
       {
-         angularAxisSelection[i] = new BooleanParameter(prefix + "Angular" + Axis3D.values[i].name() + "Enabled", registry, i == 2);
+         angularAxisSelection[i] = new BooleanParameter(prefix + "Angular" + Axis3D.values[i].name() + "Enabled", registry, i == Axis3D.Z.ordinal());
          linearAxisSelection[i] = new BooleanParameter(prefix + "Linear" + Axis3D.values[i].name() + "Enabled", registry, true);
       }
    }

@@ -164,8 +164,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
 
       // set axis control strategies
-      isLinearAxisFeedbackControlled[0].set(true); // bodyBarelyLoaded.getValue());
-      isLinearAxisFeedbackControlled[1].set(true); // bodyBarelyLoaded.getValue());
+      isLinearAxisFeedbackControlled[0].set(bodyBarelyLoaded.getValue());
+      isLinearAxisFeedbackControlled[1].set(bodyBarelyLoaded.getValue());
       isLinearAxisFeedbackControlled[2].set(false);
 
       isAngularAxisFeedbackControlled[0].set(false);
