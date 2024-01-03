@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class StancePoseCalculator
 {
    private int windowSize = 5;
-   private float resolution = 0.1f;
+   private float resolution = 0.08f;
    private float maxWidth = 0.5f;
    private float maxLength = 0.5f;
    private float maxYaw = 0.1f;
@@ -33,7 +33,7 @@ public class StancePoseCalculator
    {
       insertCandidatePoses(leftPoses, goalPose, RobotSide.LEFT);
       insertCandidatePoses(rightPoses, goalPose, RobotSide.RIGHT);
-      return searchForOptimalGoalStance(leftPoses, rightPoses, terrainMap);
+      return searchForOptimalGoalStance(leftPoses, rightPoses, goalPose, terrainMap);
    }
 
    public void insertCandidatePoses(ArrayList<FramePose3D> poses, FramePose3D goalPose, RobotSide side)
@@ -59,6 +59,7 @@ public class StancePoseCalculator
 
    public SideDependentList<FramePose3D> searchForOptimalGoalStance(ArrayList<FramePose3D> leftPoses,
                                                                     ArrayList<FramePose3D> rightPoses,
+                                                                    FramePose3D goalPose,
                                                                     TerrainMapData terrainMap)
    {
       double minCost = Double.POSITIVE_INFINITY;

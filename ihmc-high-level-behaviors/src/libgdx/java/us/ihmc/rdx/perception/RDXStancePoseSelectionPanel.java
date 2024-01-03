@@ -61,7 +61,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       footstepGraphics.get(RobotSide.LEFT).create();
       footstepGraphics.get(RobotSide.RIGHT).create();
 
-      pickPointSphere = RDXModelBuilder.createSphere(0.05f, Color.CYAN);
+      pickPointSphere = RDXModelBuilder.createSphere(0.04f, Color.CYAN);
    }
 
    public void update(FramePose3D goalPose, TerrainMapData terrainMapData)
@@ -160,8 +160,8 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
             {
                for (int i = 0; i < leftPoses.size(); i++)
                {
-                  leftSpheres.add(RDXModelBuilder.createSphere(0.02f, Color.BLUE));
-                  rightSpheres.add(RDXModelBuilder.createSphere(0.02f, Color.RED));
+                  leftSpheres.add(RDXModelBuilder.createSphere(0.015f, Color.BLUE));
+                  rightSpheres.add(RDXModelBuilder.createSphere(0.015f, Color.RED));
                }
             }
 
