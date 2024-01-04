@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.HeightMapTerrainGeneratorTools;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
@@ -24,7 +25,7 @@ public class MonteCarloFootstepPlanningTest
 
    private OpenCLManager openCLManager = new OpenCLManager();
    private MonteCarloFootstepPlannerParameters plannerParameters = new MonteCarloFootstepPlannerParameters();
-   private MonteCarloFootstepPlanner planner = new MonteCarloFootstepPlanner(plannerParameters);
+   private MonteCarloFootstepPlanner planner = new MonteCarloFootstepPlanner(plannerParameters, PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
    private RapidHeightMapExtractor heightMapExtractor = new RapidHeightMapExtractor(openCLManager);
 

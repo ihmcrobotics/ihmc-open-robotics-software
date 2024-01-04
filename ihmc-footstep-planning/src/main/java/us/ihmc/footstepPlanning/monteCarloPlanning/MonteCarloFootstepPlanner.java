@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.monteCarloPlanning;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -7,6 +8,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,14 +25,16 @@ public class MonteCarloFootstepPlanner
    private MonteCarloFootstepPlannerRequest request;
    private final HashMap<MonteCarloFootstepNode, MonteCarloFootstepNode> visitedNodes = new HashMap<>();
    private final Random random = new Random();
+   private SideDependentList<ConvexPolygon2D> footPolygons;
 
    private boolean planning = false;
    private int uniqueNodeId = 0;
    private int cellsPerMeter = 50;
 
-   public MonteCarloFootstepPlanner(MonteCarloFootstepPlannerParameters parameters)
+   public MonteCarloFootstepPlanner(MonteCarloFootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.parameters = parameters;
+      this.footPolygons = footPolygons;
       this.statistics = new MonteCarloFootstepPlannerStatistics();
       this.debugger = new TerrainPlanningDebugger(this);
    }
@@ -58,7 +62,7 @@ public class MonteCarloFootstepPlanner
          updateTree(root, request);
       }
 
-      FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root, request);
+      FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root, request, footPolygons);
 
       debugger.printScoreStats(root, request, parameters);
 

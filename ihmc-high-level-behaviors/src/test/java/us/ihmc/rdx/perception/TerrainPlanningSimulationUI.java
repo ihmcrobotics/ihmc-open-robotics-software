@@ -160,7 +160,7 @@ public class TerrainPlanningSimulationUI
       ros2Helper = new ROS2Helper(ros2Node);
 
       monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
-      monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(monteCarloPlannerParameters);
+      monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(monteCarloPlannerParameters, PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
       footstepPlanningModule = new FootstepPlanningModule("HeightMapFootstepPlanner");
       footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
       footstepPredictor = new FootstepPredictor();

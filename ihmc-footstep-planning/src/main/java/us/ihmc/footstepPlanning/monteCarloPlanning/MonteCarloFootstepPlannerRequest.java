@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 public class MonteCarloFootstepPlannerRequest
 {
@@ -53,9 +54,20 @@ public class MonteCarloFootstepPlannerRequest
    private int maximumIterations;
 
    /**
+    * Height map polygon snapper snap height threshold
+    */
+   private float snapHeightThreshold = 0.05f;
+
+   /**
     * Height Map image in OpenCV format
     */
    private TerrainMapData terrainMapData;
+
+   /**
+    * TODO: Remove this variable
+    * Height Map data for legacy support
+    */
+   private HeightMapData heightMapData;
 
    public MonteCarloFootstepPlannerRequest()
    {
@@ -194,14 +206,29 @@ public class MonteCarloFootstepPlannerRequest
       return maximumIterations;
    }
 
+   public float getSnapHeightThreshold()
+   {
+      return snapHeightThreshold;
+   }
+
    public void setTerrainMapData(TerrainMapData terrainMap)
    {
       this.terrainMapData = terrainMap;
    }
 
+   public void setHeightMapData(HeightMapData heightMapData)
+   {
+      this.heightMapData = heightMapData;
+   }
+
    public TerrainMapData getTerrainMapData()
    {
       return terrainMapData;
+   }
+
+   public HeightMapData getHeightMapData()
+   {
+      return heightMapData;
    }
 
    public void setPacket(MonteCarloFootstepPlannerRequest requestPacket)

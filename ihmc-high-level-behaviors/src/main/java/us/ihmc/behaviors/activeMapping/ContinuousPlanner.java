@@ -45,7 +45,7 @@ public class ContinuousPlanner
    }
 
    private PlanningMode mode;
-
+   private DRCRobotModel robotModel;
    private ContinuousGoalGenerator goalGenerator = new ContinuousGoalGenerator(0.0, 5.0, 0.0, 5.0);
    private FramePose3D walkingStartMidPose = new FramePose3D();
    private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
@@ -90,6 +90,7 @@ public class ContinuousPlanner
    {
       this.referenceFrames = humanoidReferenceFrames;
       this.mode = mode;
+      this.robotModel = robotModel;
       this.swingPlannerParameters = robotModel.getSwingPlannerParameters();
 
       active = true;
@@ -105,7 +106,8 @@ public class ContinuousPlanner
             break;
          case INCREMENTAL_PLANNING:
             monteCarloFootstepPlannerParameters = new MonteCarloFootstepPlannerParameters();
-            monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(monteCarloFootstepPlannerParameters);
+            monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(monteCarloFootstepPlannerParameters,
+                                                                      FootstepPlanningModuleLauncher.createFootPolygons(robotModel));
             monteCarloFootstepPlanner.getDebugger().setEnabled(false);
             collisionFreeSwingCalculator = new CollisionFreeSwingCalculator(robotModel.getFootstepPlannerParameters("ForContinuousWalking"),
                                                                             robotModel.getSwingPlannerParameters(),
@@ -229,6 +231,7 @@ public class ContinuousPlanner
       request.setGoalFootPose(RobotSide.LEFT, goalStancePose.get(RobotSide.LEFT));
       request.setGoalFootPose(RobotSide.RIGHT, goalStancePose.get(RobotSide.RIGHT));
       request.setTerrainMapData(terrainMap);
+      request.setHeightMapData(heightMapData);
 
       long timeStart = System.nanoTime();
 

@@ -5,9 +5,11 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -17,8 +19,11 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
+import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -308,11 +313,16 @@ public class MonteCarloPlannerTools
       return output.toString();
    }
 
-   public static FootstepPlan getFootstepPlanFromTree(MonteCarloFootstepNode root, MonteCarloFootstepPlannerRequest request)
+   public static FootstepPlan getFootstepPlanFromTree(MonteCarloFootstepNode root,
+                                                      MonteCarloFootstepPlannerRequest request,
+                                                      SideDependentList<ConvexPolygon2D> footPolygons)
    {
       List<MonteCarloTreeNode> path = new ArrayList<>();
       MonteCarloPlannerTools.getOptimalPath(root, path);
       LogTools.info("Optimal Path Size: {}", path.size());
+
+      HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
+      heightMapSnapper.setSnapAreaResolution(0.05);
 
       FootstepPlan footstepPlan = new FootstepPlan();
       for (MonteCarloTreeNode node : path)
@@ -324,6 +334,13 @@ public class MonteCarloPlannerTools
          float nodeZ = request.getTerrainMapData().getHeightInWorld(nodeX, nodeY);
          float nodeYaw = footstepNode.getState().getZ32();
 
+         ConvexPolygon2D footPolygon = new ConvexPolygon2D();
+         DiscreteFootstepTools.getFootPolygon(nodeX, nodeY, nodeYaw, footPolygons.get(footstepNode.getRobotSide()), footPolygon);
+         RigidBodyTransform snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon, request.getHeightMapData(), request.getSnapHeightThreshold());
+
+         LogTools.warn("Snap Transform: {}", snapTransform);
+
+         //FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), snapTransform);
          FramePose3D footstepPose = getFramePose3D(nodeX, nodeY, nodeZ, nodeYaw);
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
