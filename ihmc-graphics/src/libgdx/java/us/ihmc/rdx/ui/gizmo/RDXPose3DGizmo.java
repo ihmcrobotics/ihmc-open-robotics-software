@@ -570,7 +570,7 @@ public class RDXPose3DGizmo implements RenderableProvider
       }
       else
       {
-         pickAndDragSphereModel.setMaterial(new Material());
+         pickAndDragSphereModel.setMaterial(normalMaterials[0]);
       }
 
       for (Axis3D axis : Axis3D.values)
