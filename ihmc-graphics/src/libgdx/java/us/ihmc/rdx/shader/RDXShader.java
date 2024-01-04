@@ -29,7 +29,7 @@ public class RDXShader implements ShaderProvider
       String fragmentShader = shaderStrings.getRight();
       shaderProgram = new ShaderProgram(vertexShader, fragmentShader);
 
-      LogTools.info("OpenGL shader compilation output for {}:\n{}", path, shaderProgram.getLog());
+//      LogTools.info("OpenGL shader compilation output for {}:\n{}", path, shaderProgram.getLog());
 //      LibGDXTools.printShaderLog(shaderProgram);
 
       baseShader = new RDXDefaultBaseShader()
