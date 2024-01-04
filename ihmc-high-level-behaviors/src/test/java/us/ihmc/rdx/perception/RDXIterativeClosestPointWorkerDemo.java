@@ -11,7 +11,6 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -133,7 +132,7 @@ public class RDXIterativeClosestPointWorkerDemo
          segmentedPointCloudRenderer.setPointsToRender(segmentedPtCld, Color.GRAY);
       }
 
-      referenceFrameGraphic.setPoseInWorldFrame(new Pose3D(icpWorker.getCentroid(), icpWorker.getOrientation()));
+      referenceFrameGraphic.setPoseInWorldFrame(icpWorker.getResultPose());
 
       zedImagePublisher.setNextColorImage(zedLeftColorImage.get(), RobotSide.LEFT);
       zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
