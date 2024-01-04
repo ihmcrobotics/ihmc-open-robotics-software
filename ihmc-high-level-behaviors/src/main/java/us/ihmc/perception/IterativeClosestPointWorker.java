@@ -293,9 +293,10 @@ public class IterativeClosestPointWorker
       switch (shape)
       {
          case BOX -> objectPointCloud = createBoxPointCloud(xLength, yLength, zLength, numberOfICPObjectPoints, random);
-         case CONE -> objectPointCloud = createConePointCloud(zLength, xRadius, numberOfICPObjectPoints, random);
          case PRISM -> objectPointCloud = createPrismPointCloud(xLength, yLength, zLength, numberOfICPObjectPoints, random);
          case CYLINDER -> objectPointCloud = createCylinderPointCloud(zLength, xRadius, numberOfICPObjectPoints, random);
+         case ELLIPSOID -> objectPointCloud = createEllipsoidPointCloud(xRadius, yRadius, zRadius, numberOfICPObjectPoints, random);
+         case CONE -> objectPointCloud = createConePointCloud(zLength, xRadius, numberOfICPObjectPoints, random);
          default -> objectPointCloud = createDefaultBoxPointCloud(numberOfICPObjectPoints, random);
       }
 
@@ -396,6 +397,26 @@ public class IterativeClosestPointWorker
       return cylinderObjectPointCloud;
    }
 
+   private RecyclingArrayList<Point3D32> createEllipsoidPointCloud(float xRadius, float yRadius, float zRadius, int numberOfPoints, Random random)
+   {
+      RecyclingArrayList<Point3D32> ellipsoidObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
+
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         double phi = random.nextDouble(0, 2.0 * Math.PI);
+         double theta = random.nextDouble(0, 2.0 * Math.PI);
+         float x = (float) (Math.sin(phi) * Math.cos(theta) * xRadius);
+         float y = (float) (Math.sin(phi) * Math.sin(theta) * yRadius);
+         float z = (float) Math.cos(phi) * zRadius;
+
+         Point3D32 ellipsoidPoint = ellipsoidObjectPointCloud.add();
+         ellipsoidPoint.set(lastCentroidPoint);
+         ellipsoidPoint.add(x, y, z);
+      }
+
+      return ellipsoidObjectPointCloud;
+   }
+
    private RecyclingArrayList<Point3D32> createConePointCloud(float zLength, float xRadius, int numberOfPoints, Random random)
    {
       RecyclingArrayList<Point3D32> coneObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
@@ -403,7 +424,7 @@ public class IterativeClosestPointWorker
       for (int i = 0; i < numberOfPoints; i++)
       {
          float z = random.nextFloat(0, zLength);
-         double phi = random.nextDouble(0, 2 * Math.PI);
+         double phi = random.nextDouble(0, 2.0 * Math.PI);
          float x = (float) Math.cos(phi) * (zLength - z) * (xRadius / zLength);
          float y = (float) Math.sin(phi) * (zLength - z) * (xRadius / zLength);
          Point3D32 conePoint = coneObjectPointCloud.add();
