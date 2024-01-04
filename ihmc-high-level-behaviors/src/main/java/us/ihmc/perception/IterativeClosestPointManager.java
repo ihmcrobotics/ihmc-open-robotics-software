@@ -193,7 +193,7 @@ public class IterativeClosestPointManager
          case PRISM -> surfaceArea = (xLength * zLength) + (2.0 * Math.sqrt(xLength * xLength + zLength * zLength));
          case CYLINDER -> surfaceArea = 2.0 * Math.PI * xRadius * (zLength + xRadius);
          case CONE -> surfaceArea = Math.PI * xRadius * zLength;
-         default -> {return 1000;}
+         default -> surfaceArea = 0.5;
       }
 
       return (int) (surfaceArea * 2000.0);
