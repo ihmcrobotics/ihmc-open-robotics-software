@@ -77,7 +77,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final YoBoolean[] isLinearAxisFeedbackControlled = new YoBoolean[3];
    private final PIDSE3GainsReadOnly holdHandPositionGains;
    private final Vector3DReadOnly handLoadedLinearWeight = new Vector3D(5.0, 5.0, 5.0);
-   private final Vector3DReadOnly handLoadedAngularWeight = new Vector3D(3.0, 3.0, 3.0);
+   private final Vector3DReadOnly handLoadedAngularWeight = new Vector3D(0.2, 0.2, 0.2);
    private final YoEnum<LoadBearingControlMode> controlMode;
 
    /* Hand load status */
@@ -355,7 +355,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    {
       double kpXYZ = 150.0;
       double zetaXYZ = 0.7;
-      double kpXYZOrientation = 150.0;
+
+      double kpXYZOrientation = 50.0; // 150.0;
       double zetaOrientation = 0.8;
       double maxAcceleration = 8.0;
       double maxJerk = 100.0;
