@@ -141,8 +141,8 @@ public class IterativeClosestPointWorker
          resultMessage.getPose().set(orientation, lastCentroidPoint);
          for (Point3D32 point3D32 : getObjectPointCloud())
             resultMessage.getObjectPointCloud().add().set(point3D32);
-         for (Point3D32 point3D32 : getSegmentedPointCloud())
-            resultMessage.getSegmentedPointCloud().add().set(point3D32);
+         for (int i = 0; i < numberOfICPObjectPoints; i++)
+            resultMessage.getSegmentedPointCloud().add().set(segmentedPointCloud.get(i));
          ros2Helper.publish(PerceptionAPI.ICP_RESULT, resultMessage);
       }
    }
