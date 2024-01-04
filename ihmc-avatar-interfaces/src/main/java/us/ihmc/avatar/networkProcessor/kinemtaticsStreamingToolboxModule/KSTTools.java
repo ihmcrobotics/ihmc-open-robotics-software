@@ -564,6 +564,17 @@ public class KSTTools
       linearVelocityToPack.scale(1.0 / dt);
    }
 
+   public static void computeAcceleration(double dt,
+                                            FrameVector3DReadOnly previousVelocity,
+                                                FrameVector3DReadOnly currentVelocity,
+                                            FixedFrameVector3DBasics accelerationToPack)
+   {
+      accelerationToPack.sub(currentVelocity, previousVelocity);
+      accelerationToPack.scale(1.0 / dt);
+   }
+
+
+
    /**
     * Computes the angular velocity from finite difference. The result is the angular velocity
     * expressed in the local frame described by {@code currentOrientation}.
@@ -601,6 +612,24 @@ public class KSTTools
       finalPosition.scaleAdd(dt, linearVelocity, initialPosition);
    }
 
+   public static void integrateAcceleration(double dt,
+                                            FrameVector3DReadOnly initialVelocity,
+                                            FrameVector3DReadOnly acceleration,
+                                            FixedFrameVector3DBasics finalVelocity)
+   {
+      finalVelocity.scaleAdd(dt, acceleration, initialVelocity);
+   }
+
+   public static void integrateLinearVelocityAndAcceleration(double dt,
+                                                             FramePoint3DReadOnly initialPosition,
+                                                             FrameVector3DReadOnly linearVelocity,
+                                                             FrameVector3DReadOnly linearAcceleration,
+                                                             FixedFramePoint3DBasics finalPosition)
+   {
+      finalPosition.scaleAdd(dt, linearVelocity, initialPosition);
+      finalPosition.scaleAdd(dt * dt, linearAcceleration, initialPosition);
+   }
+
    public static void integrateAngularVelocity(double dt,
                                                FrameQuaternionReadOnly initialOrientation,
                                                FrameVector3DReadOnly angularVelocity,
@@ -614,6 +643,35 @@ public class KSTTools
       double x = angularVelocity.getX() * dt;
       double y = angularVelocity.getY() * dt;
       double z = angularVelocity.getZ() * dt;
+      finalOrientation.setRotationVector(x, y, z);
+
+      double qInt_x = finalOrientation.getX();
+      double qInt_y = finalOrientation.getY();
+      double qInt_z = finalOrientation.getZ();
+      double qInt_s = finalOrientation.getS();
+
+      double qFinal_x = qInit_s * qInt_x + qInit_x * qInt_s + qInit_y * qInt_z - qInit_z * qInt_y;
+      double qFinal_y = qInit_s * qInt_y - qInit_x * qInt_z + qInit_y * qInt_s + qInit_z * qInt_x;
+      double qFinal_z = qInit_s * qInt_z + qInit_x * qInt_y - qInit_y * qInt_x + qInit_z * qInt_s;
+      double qFinal_s = qInit_s * qInt_s - qInit_x * qInt_x - qInit_y * qInt_y - qInit_z * qInt_z;
+      finalOrientation.set(qFinal_x, qFinal_y, qFinal_z, qFinal_s);
+   }
+
+   public static void integrateAngularVelocityAndAcceleration(double dt,
+                                                              FrameQuaternionReadOnly initialOrientation,
+                                                              FrameVector3DReadOnly angularVelocity,
+                                                              FrameVector3DReadOnly angularAcceleration,
+                                                              FixedFrameQuaternionBasics finalOrientation)
+   {
+      double qInit_x = initialOrientation.getX();
+      double qInit_y = initialOrientation.getY();
+      double qInit_z = initialOrientation.getZ();
+      double qInit_s = initialOrientation.getS();
+
+      double dt2 = dt * dt;
+      double x = angularVelocity.getX() * dt + 0.5 * angularAcceleration.getX() * dt2;
+      double y = angularVelocity.getY() * dt + 0.5 * angularAcceleration.getY() * dt2;
+      double z = angularVelocity.getZ() * dt + 0.5 * angularAcceleration.getZ() * dt2;
       finalOrientation.setRotationVector(x, y, z);
 
       double qInt_x = finalOrientation.getX();

@@ -20,6 +20,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
@@ -160,11 +161,17 @@ public class KSTStreamingState implements State
    private final Map<RigidBodyBasics, AlphaFilteredYoFramePoint> filteredExtrapolatedInputPositionMap = new HashMap<>();
    private final Map<RigidBodyBasics, AlphaFilteredYoFrameQuaternion> filteredExtrapolatedInputOrientationMap = new HashMap<>();
    private final YoFixedFrameSpatialVector[] rawInputSpatialVelocityArray;
+   private final YoFixedFrameSpatialVector[] rawInputSpatialAccelerationArray;
    private final Map<RigidBodyBasics, YoFixedFrameSpatialVector> rawInputSpatialVelocityMap = new HashMap<>();
+   private final Map<RigidBodyBasics, YoFixedFrameSpatialVector> rawInputSpatialAccelerationMap = new HashMap<>();
    private final YoFixedFrameSpatialVector[] decayingInputSpatialVelocityArray;
+   private final YoFixedFrameSpatialVector[] decayingInputSpatialAccelerationArray;
    private final Map<RigidBodyBasics, YoFixedFrameSpatialVector> decayingInputSpatialVelocityMap = new HashMap<>();
+   private final Map<RigidBodyBasics, YoFixedFrameSpatialVector> decayingInputSpatialAccelerationMap = new HashMap<>();
    private final YoDouble inputVelocityDecayFactor = new YoDouble("inputVelocityDecayFactor", registry);
    private final YoDouble inputVelocityDecayDuration = new YoDouble("inputVelocityDecayDuration", registry);
+   private final YoDouble inputAccelerationDecayFactor = new YoDouble("inputAccelerationDecayFactor", registry);
+   private final YoDouble inputAccelerationDecayDuration = new YoDouble("inputAccelerationDecayDuration", registry);
 
    public KSTStreamingState(KSTTools tools)
    {
@@ -273,6 +280,7 @@ public class KSTStreamingState implements State
                                                                                                                  toolboxControllerPeriod);
       inputsFilterBreakFrequency.set(parameters.getInputPoseLPFBreakFrequency());
       inputVelocityDecayDuration.set(parameters.getInputVelocityDecayDuration());
+      inputAccelerationDecayDuration.set(parameters.getInputAccelerationDecayDuration());
 
       for (RigidBodyBasics rigidBody : controllableRigidBodies)
       {
@@ -300,6 +308,8 @@ public class KSTStreamingState implements State
                                                                                    registry);
          YoFixedFrameSpatialVector rawInputSpatialVelocity = new YoFixedFrameSpatialVector(namePrefix + "RawVelocity", worldFrame, registry);
          YoFixedFrameSpatialVector decayingInputSpatialVelocity = new YoFixedFrameSpatialVector(namePrefix + "DecayingVelocity", worldFrame, registry);
+         YoFixedFrameSpatialVector rawInputSpatialAcceleration = new YoFixedFrameSpatialVector(namePrefix + "RawAcceleration", worldFrame, registry);
+         YoFixedFrameSpatialVector decayingInputSpatialAcceleration = new YoFixedFrameSpatialVector(namePrefix + "DecayingAcceleration", worldFrame, registry);
          rawInputPositionMap.put(rigidBody, rawInputPosition);
          rawInputOrientationMap.put(rigidBody, rawInputOrientation);
          rawExtrapolatedInputPositionMap.put(rigidBody, rawExtrapolatedInputPosition);
@@ -307,14 +317,18 @@ public class KSTStreamingState implements State
          filteredExtrapolatedInputPositionMap.put(rigidBody, filteredExtrapolatedInputPosition);
          filteredExtrapolatedInputOrientationMap.put(rigidBody, filteredExtrapolatedInputOrientation);
          rawInputSpatialVelocityMap.put(rigidBody, rawInputSpatialVelocity);
+         rawInputSpatialAccelerationMap.put(rigidBody, rawInputSpatialAcceleration);
          decayingInputSpatialVelocityMap.put(rigidBody, decayingInputSpatialVelocity);
+         decayingInputSpatialAccelerationMap.put(rigidBody, decayingInputSpatialAcceleration);
 
          YoDouble rigidBodyControlStartTime = new YoDouble(rigidBody.getName() + "ControlStartTime", registry);
          rigidBodyControlStartTimeMap.put(rigidBody, rigidBodyControlStartTime);
       }
 
       rawInputSpatialVelocityArray = new YoFixedFrameSpatialVector[controllableRigidBodies.size()];
+      rawInputSpatialAccelerationArray = new YoFixedFrameSpatialVector[controllableRigidBodies.size()];
       decayingInputSpatialVelocityArray = new YoFixedFrameSpatialVector[controllableRigidBodies.size()];
+      decayingInputSpatialAccelerationArray = new YoFixedFrameSpatialVector[controllableRigidBodies.size()];
       rigidBodyControlStartTimeArray = new YoDouble[controllableRigidBodies.size()];
 
       int index = 0;
@@ -322,7 +336,9 @@ public class KSTStreamingState implements State
       for (RigidBodyBasics rigidBody : controllableRigidBodies)
       {
          rawInputSpatialVelocityArray[index] = rawInputSpatialVelocityMap.get(rigidBody);
+         rawInputSpatialAccelerationArray[index] = rawInputSpatialAccelerationMap.get(rigidBody);
          decayingInputSpatialVelocityArray[index] = decayingInputSpatialVelocityMap.get(rigidBody);
+         decayingInputSpatialAccelerationArray[index] = decayingInputSpatialAccelerationMap.get(rigidBody);
          rigidBodyControlStartTimeArray[index] = rigidBodyControlStartTimeMap.get(rigidBody);
          index++;
       }
@@ -500,18 +516,24 @@ public class KSTStreamingState implements State
       for (YoDouble rigidBodyControlStartTime : rigidBodyControlStartTimeArray)
          rigidBodyControlStartTime.setToNaN();
 
-      resetEstimatedInputVelocities();
+      resetEstimatedInputs();
 
       System.gc();
    }
 
-   private void resetEstimatedInputVelocities()
+   private void resetEstimatedInputs()
    {
       for (YoFixedFrameSpatialVector rawInputSpatialVelocity : rawInputSpatialVelocityArray)
          rawInputSpatialVelocity.setToZero();
 
       for (YoFixedFrameSpatialVector decayingInputSpatialVelocity : decayingInputSpatialVelocityArray)
          decayingInputSpatialVelocity.setToZero();
+
+      for (YoFixedFrameSpatialVector rawInputSpatialAcceleration : rawInputSpatialAccelerationArray)
+         rawInputSpatialAcceleration.setToZero();
+
+      for (YoFixedFrameSpatialVector decayingInputSpatialAcceleration : decayingInputSpatialAccelerationArray)
+         decayingInputSpatialAcceleration.setToZero();
    }
 
    private final KinematicsStreamingToolboxInputCommand rawInputs = new KinematicsStreamingToolboxInputCommand();
@@ -624,7 +646,7 @@ public class KSTStreamingState implements State
          }
          else
          {
-            extrapolateInputPositions(rawInputs, toolboxControllerPeriod);
+            extrapolateInputs(rawInputs, toolboxControllerPeriod);
          }
 
          filteredInputs.set(rawInputs);
@@ -829,13 +851,13 @@ public class KSTStreamingState implements State
    {
       if (!tools.hasPreviousInput())
       {
-         resetEstimatedInputVelocities();
+         resetEstimatedInputs();
          return;
       }
 
       if (!tools.hasNewInputCommand())
       {
-         decayEstimatedInputVelocity();
+         decayEstimatedInputs();
          return;
       }
 
@@ -845,7 +867,7 @@ public class KSTStreamingState implements State
 
       if (latestInput.getNumberOfInputs() != previousInput.getNumberOfInputs())
       {
-         resetEstimatedInputVelocities();
+         resetEstimatedInputs();
          return;
       }
 
@@ -857,7 +879,7 @@ public class KSTStreamingState implements State
       if (timeInterval <= 0.0)
       {
          LogTools.warn("Got a negative or zero time interval between 2 inputs: " + timeInterval);
-         decayEstimatedInputVelocity();
+         decayEstimatedInputs();
          return;
       }
 
@@ -885,38 +907,72 @@ public class KSTStreamingState implements State
          YoFrameVector3D rawLinearVelocity = rawSpatialVelocity.getLinearPart();
          YoFrameVector3D rawAngularVelocity = rawSpatialVelocity.getAngularPart();
 
+         previousLinearVelocity.setIncludingFrame(rawLinearVelocity);
+         previousAngularVelocity.setIncludingFrame(rawAngularVelocity);
+
          KSTTools.computeLinearVelocity(timeInterval, previousInputPosition, latestInputPosition, rawLinearVelocity);
          KSTTools.computeAngularVelocity(timeInterval, previousInputOrientation, latestInputOrientation, rawAngularVelocity);
 
          decayingInputSpatialVelocityMap.get(endEffector).set(rawSpatialVelocity);
          inputVelocityDecayFactor.set(0.0);
+
+         YoFixedFrameSpatialVector rawSpatialAcceleration = rawInputSpatialAccelerationMap.get(endEffector);
+
+         if (rawSpatialAcceleration == null)
+            continue;
+
+         YoFrameVector3D rawLinearAcceleration = rawSpatialAcceleration.getLinearPart();
+         YoFrameVector3D rawAngularAcceleration = rawSpatialAcceleration.getAngularPart();
+
+         KSTTools.computeAcceleration(timeInterval, previousLinearVelocity, rawLinearVelocity, rawLinearAcceleration);
+         KSTTools.computeAcceleration(timeInterval, previousAngularVelocity, rawAngularVelocity, rawAngularAcceleration);
+
+         decayingInputSpatialAccelerationMap.get(endEffector).set(rawSpatialAcceleration);
+         inputAccelerationDecayFactor.set(0.0);
       }
    }
 
-   private void decayEstimatedInputVelocity()
+   private final FrameVector3D previousLinearVelocity = new FrameVector3D();
+   private final FrameVector3D previousAngularVelocity = new FrameVector3D();
+
+   private void decayEstimatedInputs()
    {
-      double alpha = Math.min(1.0, inputVelocityDecayFactor.getValue() + toolboxControllerPeriod / inputVelocityDecayDuration.getValue());
-      inputVelocityDecayFactor.set(alpha);
+      double velocityAlpha = Math.min(1.0, inputVelocityDecayFactor.getValue() + toolboxControllerPeriod / inputVelocityDecayDuration.getValue());
+      inputVelocityDecayFactor.set(velocityAlpha);
+      double accelerationAlpha = Math.min(1.0, inputAccelerationDecayFactor.getValue() + toolboxControllerPeriod / inputAccelerationDecayDuration.getValue());
+      inputAccelerationDecayFactor.set(accelerationAlpha);
 
       for (int i = 0; i < decayingInputSpatialVelocityArray.length; i++)
       {
          YoFixedFrameSpatialVector rawVelocity = rawInputSpatialVelocityArray[i];
          YoFixedFrameSpatialVector decayingVelocity = decayingInputSpatialVelocityArray[i];
-         decayingVelocity.getLinearPart().interpolate(rawVelocity.getLinearPart(), EuclidCoreTools.zeroVector3D, alpha);
-         decayingVelocity.getAngularPart().interpolate(rawVelocity.getAngularPart(), EuclidCoreTools.zeroVector3D, alpha);
+         decayingVelocity.getLinearPart().interpolate(rawVelocity.getLinearPart(), EuclidCoreTools.zeroVector3D, velocityAlpha);
+         decayingVelocity.getAngularPart().interpolate(rawVelocity.getAngularPart(), EuclidCoreTools.zeroVector3D, velocityAlpha);
+
+         YoFixedFrameSpatialVector rawAcceleration = rawInputSpatialAccelerationArray[i];
+         YoFixedFrameSpatialVector decayingAcceleration = decayingInputSpatialAccelerationArray[i];
+         decayingAcceleration.getLinearPart().interpolate(rawAcceleration.getLinearPart(), EuclidCoreTools.zeroVector3D, accelerationAlpha);
+         decayingAcceleration.getAngularPart().interpolate(rawAcceleration.getAngularPart(), EuclidCoreTools.zeroVector3D, accelerationAlpha);
       }
    }
 
-   private void extrapolateInputPositions(KinematicsStreamingToolboxInputCommand inputs, double integrationDT)
+   private void extrapolateInputs(KinematicsStreamingToolboxInputCommand inputs, double integrationDT)
    {
       for (int i = 0; i < inputs.getNumberOfInputs(); i++)
       {
          KinematicsToolboxRigidBodyCommand input = inputs.getInput(i);
          YoFixedFrameSpatialVector inputVelocity = decayingInputSpatialVelocityMap.get(input.getEndEffector());
+         YoFixedFrameSpatialVector inputAcceleration = decayingInputSpatialAccelerationMap.get(input.getEndEffector());
 
          FramePose3D desiredPose = input.getDesiredPose();
-         KSTTools.integrateLinearVelocity(integrationDT, desiredPose.getPosition(), inputVelocity.getLinearPart(), desiredPose.getPosition());
-         KSTTools.integrateAngularVelocity(integrationDT, desiredPose.getOrientation(), inputVelocity.getLinearPart(), desiredPose.getOrientation());
+
+         // integrate the position using the input velocity and acceleration
+         KSTTools.integrateLinearVelocityAndAcceleration(integrationDT, desiredPose.getPosition(), inputVelocity.getLinearPart(), inputAcceleration.getLinearPart(), desiredPose.getPosition());
+         KSTTools.integrateAngularVelocityAndAcceleration(integrationDT, desiredPose.getOrientation(), inputVelocity.getLinearPart(), inputAcceleration.getAngularPart(), desiredPose.getOrientation());
+
+         // integrate the input velocity using the acceleration
+         KSTTools.integrateAcceleration(integrationDT, inputVelocity.getLinearPart(), inputAcceleration.getLinearPart(), inputVelocity.getLinearPart());
+         KSTTools.integrateAcceleration(integrationDT, inputVelocity.getAngularPart(), inputAcceleration.getAngularPart(), inputVelocity.getAngularPart());
       }
    }
 
