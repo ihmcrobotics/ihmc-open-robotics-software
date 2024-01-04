@@ -150,7 +150,7 @@ public class IterativeClosestPointManager
          if (!worker.isUsingTargetPoint())
          {
             SceneNode node = sceneGraph.getIDToNodeMap().get(id);
-            RigidBodyTransform centroidToWorldTransform = new RigidBodyTransform(worker.getOrientation(), worker.getCentroid());
+            RigidBodyTransform centroidToWorldTransform = new RigidBodyTransform(worker.getResultPose());
             node.getNodeToParentFrameTransform().set(centroidToWorldTransform);
             node.getNodeFrame().update();
          }
