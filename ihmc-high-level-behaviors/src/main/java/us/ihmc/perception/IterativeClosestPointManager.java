@@ -186,20 +186,16 @@ public class IterativeClosestPointManager
    // FIXME: Maybe just allow the user to select number of points instead of trying to calculate it using the dimensions
    private int approximateNumberOfPoints(PrimitiveRigidBodyShape shape, float xLength, float yLength, float zLength, float xRadius, float yRadius, float zRadius)
    {
+      double surfaceArea;
       switch (shape)
       {
-         case BOX ->
-         {
-            return (int) (5000.0 * (xLength * yLength + xLength * zLength + yLength * zLength));
-         }
-         case CONE, CYLINDER ->
-         {
-            return (int) (5000.0 * (Math.PI * xRadius * zLength)); // dumb way of figuring out number of points
-         }
-         default ->
-         {
-            return 1000;
-         }
+         case BOX -> surfaceArea = 2.0 * (xLength * yLength + xLength * zLength + yLength * zLength);
+         case PRISM -> surfaceArea = (xLength * zLength) + (2.0 * Math.sqrt(xLength * xLength + zLength * zLength));
+         case CYLINDER -> surfaceArea = 2.0 * Math.PI * xRadius * (zLength + xRadius);
+         case CONE -> surfaceArea = Math.PI * xRadius * zLength;
+         default -> {return 1000;}
       }
+
+      return (int) (surfaceArea * 2000.0);
    }
 }
