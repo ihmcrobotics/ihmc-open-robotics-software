@@ -7,12 +7,13 @@ import perception_msgs.msg.dds.DetectedObjectPacket;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
 import java.util.List;
@@ -54,10 +55,8 @@ public class IterativeClosestPointWorker
    private final AtomicBoolean useTargetPoint = new AtomicBoolean(true);
    // Point around which ICP will segment the environment point cloud
    private final FramePoint3D targetPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
-   // This is the centroid of the ICP object point cloud, updated after each iteration
-   private final FramePoint3D lastCentroidPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
-   // FIXME: Calculations of this orientation are incorrect
-   private final Quaternion orientation = new Quaternion();
+
+   private final FramePose3D resultPose = new FramePose3D(ReferenceFrame.getWorldFrame());
 
    public IterativeClosestPointWorker(int numberOfICPObjectPoints, ROS2Helper ros2Helper, Random random)
    {
@@ -113,7 +112,7 @@ public class IterativeClosestPointWorker
       if (useTargetPoint.get())
          detectionPoint = new FramePoint3D(targetPoint);
       else
-         detectionPoint = new FramePoint3D(lastCentroidPoint);
+         detectionPoint = new FramePoint3D(resultPose.getPosition());
 
       // Segment the point cloud
       synchronized (environmentPointCloudSynchronizer) // synchronize as to avoid changes to environment point cloud while segmenting it
@@ -138,7 +137,7 @@ public class IterativeClosestPointWorker
       {
          DetectedObjectPacket resultMessage = new DetectedObjectPacket();
          resultMessage.setId((int) sceneNodeID);
-         resultMessage.getPose().set(orientation, lastCentroidPoint);
+         resultMessage.getPose().set(resultPose);
          for (Point3D32 point3D32 : getObjectPointCloud())
             resultMessage.getObjectPointCloud().add().set(point3D32);
          for (int i = 0; i < numberOfICPObjectPoints; i++)
@@ -238,17 +237,12 @@ public class IterativeClosestPointWorker
       svdSolver.getV(V, true);
       CommonOps_DDRM.multTransAB(V, U, R);
 
-      Quaternion quaternionRotatioin = new Quaternion();
-      quaternionRotatioin.setRotationMatrix(R.get(0, 0),
-                                            R.get(0, 1),
-                                            R.get(0, 2),
-                                            R.get(1, 0),
-                                            R.get(1, 1),
-                                            R.get(1, 2),
-                                            R.get(2, 0),
-                                            R.get(2, 1),
-                                            R.get(2, 2));
-      orientation.append(quaternionRotatioin);
+      // Correct any negative rotation matrices which come out of SVD its positive counterpart (fixes NotARotationMatrix issues)
+      if (CommonOps_DDRM.det(R) < 0.0) {
+         CommonOps_DDRM.scale(-1.0, R);
+      }
+
+      RotationMatrix deltaRotation = new RotationMatrix(R);
 
       // Calculate object translation
       CommonOps_DDRM.multTransB(R, objectCentroid, objectAdjustedLocation);
@@ -279,7 +273,9 @@ public class IterativeClosestPointWorker
       objectPointCloudCentroid.set(0, 0, objectPointCloudCentroid.get(0, 0) / numberOfICPObjectPoints);
       objectPointCloudCentroid.set(0, 1, objectPointCloudCentroid.get(0, 1) / numberOfICPObjectPoints);
       objectPointCloudCentroid.set(0, 2, objectPointCloudCentroid.get(0, 2) / numberOfICPObjectPoints);
-      lastCentroidPoint.set(objectPointCloudCentroid.get(0, 0), objectPointCloudCentroid.get(0, 1), objectPointCloudCentroid.get(0, 2));
+
+      resultPose.prependRotation(deltaRotation);
+      resultPose.getPosition().set(objectPointCloudCentroid.get(0, 0), objectPointCloudCentroid.get(0, 1), objectPointCloudCentroid.get(0, 2));
    }
 
    private RecyclingArrayList<Point3D32> createICPObjectPointCloudBox(float width, float height, float depth, int numberOfPoints, Random random)
@@ -308,7 +304,7 @@ public class IterativeClosestPointWorker
             z = (-(j & 1) * halfBoxHeight * 2.0f) + halfBoxHeight;
          }
          Point3D32 boxPoint = boxObjectPointCloud.add();
-         boxPoint.set(lastCentroidPoint);
+         boxPoint.set(resultPose.getPosition());
          boxPoint.add(x, y, z);
       }
 
@@ -326,7 +322,7 @@ public class IterativeClosestPointWorker
          float x = (float) Math.cos(phi) * z * (radius / length);
          float y = (float) Math.sin(phi) * z * (radius / length);
          Point3D32 conePoint = coneObjectPointCloud.add();
-         conePoint.set(lastCentroidPoint);
+         conePoint.set(resultPose.getPosition());
          conePoint.add(x, y, z);
       }
 
@@ -356,7 +352,7 @@ public class IterativeClosestPointWorker
          float x = (float) Math.cos(phi) * r;
          float y = (float) Math.sin(phi) * r;
          Point3D32 cylinderPoint = cylinderObjectPointCloud.add();
-         cylinderPoint.set(lastCentroidPoint);
+         cylinderPoint.set(resultPose.getPosition());
          cylinderPoint.add(x, y, z);
       }
 
@@ -463,14 +459,9 @@ public class IterativeClosestPointWorker
       return segmentedPointCloud;
    }
 
-   public FixedFramePoint3DBasics getCentroid()
+   public FixedFramePose3DBasics getResultPose()
    {
-      return lastCentroidPoint;
-   }
-
-   public Quaternion getOrientation()
-   {
-      return orientation;
+      return resultPose;
    }
 
    public List<Point3D32> getObjectPointCloud()
