@@ -69,7 +69,8 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final ImFloat torusRadius = new ImFloat(0.5f);
    private final ImFloat torusCameraSize = new ImFloat(0.067f);
    private final ImFloat torusTubeRadiusRatio = new ImFloat(0.074f);
-   private final ImFloat pickAndDragSphereRadius = new ImFloat();
+   private final ImFloat centerSphereRadius = new ImFloat();
+   private final ImFloat centerSphereToTorusRatio = new ImFloat(1.0f / 8.0f);
    private final ImFloat arrowLengthRatio = new ImFloat(0.431f);
    private final ImFloat arrowHeadBodyLengthRatio = new ImFloat(0.480f);
    private final ImFloat arrowHeadBodyRadiusRatio = new ImFloat(2.0f);
@@ -84,7 +85,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final Material[] normalMaterials = new Material[3];
    private final Material[] highlightedMaterials = new Material[3];
    private final Axis3DRotations axisRotations = new Axis3DRotations();
-   private final DynamicLibGDXModel pickAndDragSphereModel = new DynamicLibGDXModel();
+   private final DynamicLibGDXModel centerSphereModel = new DynamicLibGDXModel();
    private final DynamicLibGDXModel[] arrowModels = new DynamicLibGDXModel[3];
    private final DynamicLibGDXModel[] torusModels = new DynamicLibGDXModel[3];
    private final Point3D closestCollision = new Point3D();
@@ -94,7 +95,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    private boolean isGizmoHovered = false;
    private boolean isBeingManipulated = false;
    private final SphereRayIntersection boundingSphereIntersection = new SphereRayIntersection();
-   private final SphereRayIntersection pickAndDragSphereIntersection = new SphereRayIntersection();
+   private final SphereRayIntersection centerSphereIntersection = new SphereRayIntersection();
    private final DiscreteTorusRayIntersection torusIntersection = new DiscreteTorusRayIntersection();
    private final DiscreteArrowRayIntersection arrowIntersection = new DiscreteArrowRayIntersection();
    /** The main, source, true, base transform that this thing represents. */
@@ -109,6 +110,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    /** For being able to tell if the user moved the gizmo. */
    private final Notification gizmoModifiedByUser = new Notification();
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
+   private final Plane3DMouseDragAlgorithm planeDragAlgorithm = new Plane3DMouseDragAlgorithm();
    private final Line3DMouseDragAlgorithm lineDragAlgorithm = new Line3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
    private RDXFocusBasedCamera camera3D;
@@ -117,7 +119,6 @@ public class RDXPose3DGizmo implements RenderableProvider
    private double lastDistanceToCamera = -1.0;
    private final double translateSpeedFactor = 0.5;
    private boolean queuePopupToOpen = false;
-   private final Random random = new Random();
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
 
@@ -225,7 +226,7 @@ public class RDXPose3DGizmo implements RenderableProvider
       frameBasedGizmoModification = new FrameBasedGizmoModification(this::getGizmoFrame, () -> gizmoFrame.getParent(), camera3D);
       panel3D.addImGuiOverlayAddition(this::renderTooltipAndContextMenu);
 
-      pickAndDragSphereModel.setMesh(meshBuilder -> meshBuilder.addSphere(pickAndDragSphereRadius.get(), RDXGizmoTools.CENTER_DEFAULT_COLOR));
+      centerSphereModel.setMesh(meshBuilder -> meshBuilder.addSphere(centerSphereRadius.get(), RDXGizmoTools.CENTER_DEFAULT_COLOR));
 
       for (Axis3D axis : Axis3D.values)
       {
@@ -290,7 +291,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          queuePopupToOpen = true;
       }
 
-      if ((isGizmoHovered) && manipulationDragData.getDragJustStarted())
+      if (isGizmoHovered && manipulationDragData.getDragJustStarted())
       {
          clockFaceDragAlgorithm.reset();
          manipulationDragData.setObjectBeingDragged(this);
@@ -305,13 +306,9 @@ public class RDXPose3DGizmo implements RenderableProvider
 
          if (closestCollisionSelection.isCenter())
          {
-            Vector3DReadOnly motionY = lineDragAlgorithm.calculate(pickRay, closestCollision, axisRotations.get(Axis3D.Y), transformToWorld);
-            frameBasedGizmoModification.translateInWorld(motionY);
-            closestCollision.add(motionY);
-
-            Vector3DReadOnly motionX = lineDragAlgorithm.calculate(pickRay, closestCollision, axisRotations.get(Axis3D.X), transformToWorld);
-            frameBasedGizmoModification.translateInWorld(motionX);
-            closestCollision.add(motionX);
+            Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
+            frameBasedGizmoModification.translateInWorld(planarMotion);
+            closestCollision.add(planarMotion);
          }
          else if (closestCollisionSelection.isLinear())
          {
@@ -494,7 +491,7 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    private void updateGraphicTransforms()
    {
-      LibGDXTools.toLibGDX(transformToWorld, pickAndDragSphereModel.getOrCreateModelInstance().transform);
+      LibGDXTools.toLibGDX(transformToWorld, centerSphereModel.getOrCreateModelInstance().transform);
       for (Axis3D axis : Axis3D.values)
       {
          LibGDXTools.toLibGDX(axisTransformToWorlds[axis.ordinal()], arrowModels[axis.ordinal()].getOrCreateModelInstance().transform);
@@ -511,12 +508,22 @@ public class RDXPose3DGizmo implements RenderableProvider
       boundingSphereIntersection.update(1.5 * torusRadius.get(), transformToWorld);
       if (boundingSphereIntersection.intersect(pickRay))
       {
+         centerSphereIntersection.update(centerSphereRadius.get(), transformToWorld);
+         boolean hoveringCenterSphere = centerSphereIntersection.intersect(pickRay);
+         double distance = centerSphereIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
+         if (hoveringCenterSphere && distance < closestCollisionDistance)
+         {
+            closestCollisionDistance = distance;
+            closestCollisionSelection = SixDoFSelection.CENTER;
+            closestCollision.set(centerSphereIntersection.getFirstIntersectionToPack());
+         }
+
          // collide tori
          for (Axis3D axis : Axis3D.values)
          {
             // TODO: Only update when shape changes?
             torusIntersection.update(torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), axisTransformToWorlds[axis.ordinal()]);
-            double distance = torusIntersection.intersect(pickRay, 100);
+            distance = torusIntersection.intersect(pickRay, 100);
             if (!Double.isNaN(distance) && distance < closestCollisionDistance)
             {
                closestCollisionDistance = distance;
@@ -533,7 +540,7 @@ public class RDXPose3DGizmo implements RenderableProvider
                double zOffset = side.negateIfRightSide(0.5 * arrowSpacing + 0.5 * arrowBodyLength);
                // TODO: Only update when shape changes?
                arrowIntersection.update(arrowBodyLength, arrowBodyRadius, arrowHeadRadius, arrowHeadLength, zOffset, axisTransformToWorlds[axis.ordinal()]);
-               double distance = arrowIntersection.intersect(pickRay, 100, side == RobotSide.LEFT); // only show the cones in the positive direction
+               distance = arrowIntersection.intersect(pickRay, 100, side == RobotSide.LEFT); // only show the cones in the positive direction
 
                if (!Double.isNaN(distance) && distance < closestCollisionDistance)
                {
@@ -542,18 +549,6 @@ public class RDXPose3DGizmo implements RenderableProvider
                   closestCollision.set(arrowIntersection.getIntersection());
                }
             }
-         }
-
-         pickAndDragSphereIntersection.update(pickAndDragSphereRadius.get(), transformToWorld);
-         double distance = pickAndDragSphereIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
-         boolean hoveringPickAndDragSphere = pickAndDragSphereIntersection.intersect(pickRay);
-         boolean somethingOccludingPickAndDragSphere = closestCollisionSelection != null && hoveringPickAndDragSphere && (distance > closestCollisionDistance);
-         boolean pickAndDragSphereSelected = hoveringPickAndDragSphere && !somethingOccludingPickAndDragSphere;
-
-         if (pickAndDragSphereSelected)
-         {
-            closestCollisionSelection = SixDoFSelection.CENTER;
-            closestCollision.set(pickAndDragSphereIntersection.getFirstIntersectionToPack());
          }
       }
    }
@@ -566,11 +561,11 @@ public class RDXPose3DGizmo implements RenderableProvider
 
       if (highlightingPrior && closestCollisionSelection.isCenter())
       {
-         pickAndDragSphereModel.setMaterial(highlightedMaterials[0]);
+         centerSphereModel.setMaterial(highlightedMaterials[0]);
       }
       else
       {
-         pickAndDragSphereModel.setMaterial(normalMaterials[0]);
+         centerSphereModel.setMaterial(normalMaterials[0]);
       }
 
       for (Axis3D axis : Axis3D.values)
@@ -622,6 +617,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          ImGui.popItemWidth();
          ImGui.separator();
          ImGui.pushItemWidth(100.00f);
+         proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Center sphere to torus ratio"), centerSphereToTorusRatio.getData(), 0.05f);
          proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Torus tube radius ratio"), torusTubeRadiusRatio.getData(), 0.001f);
          proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Arrow length ratio"), arrowLengthRatio.getData(), 0.05f);
          proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Arrow head body length ratio"), arrowHeadBodyLengthRatio.getData(), 0.05f);
@@ -640,8 +636,8 @@ public class RDXPose3DGizmo implements RenderableProvider
          else
             torusRadius.set(torusCameraSize.get());
       }
-      pickAndDragSphereRadius.set(torusRadius.get() / 8.0f);
-      arrowBodyRadius = (float) torusTubeRadiusRatio.get() * torusRadius.get();
+      centerSphereRadius.set(torusRadius.get() * centerSphereToTorusRatio.get());
+      arrowBodyRadius = torusTubeRadiusRatio.get() * torusRadius.get();
       arrowLength = arrowLengthRatio.get() * torusRadius.get();
       arrowBodyLength = (1.0 - arrowHeadBodyLengthRatio.get()) * arrowLength;
       arrowHeadRadius = arrowHeadBodyRadiusRatio.get() * arrowBodyRadius;
@@ -650,7 +646,7 @@ public class RDXPose3DGizmo implements RenderableProvider
 
       updateMaterialHighlighting();
 
-      pickAndDragSphereModel.invalidateMesh();
+      centerSphereModel.invalidateMesh();
       for (Axis3D axis : Axis3D.values)
       {
          arrowModels[axis.ordinal()].invalidateMesh();
@@ -662,7 +658,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      pickAndDragSphereModel.getOrCreateModelInstance().getRenderables(renderables, pool);
+      centerSphereModel.getOrCreateModelInstance().getRenderables(renderables, pool);
       for (Axis3D axis : Axis3D.values)
       {
          arrowModels[axis.ordinal()].getOrCreateModelInstance().getRenderables(renderables, pool);
