@@ -14,6 +14,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
    private final List<ActionNodeExecutor<?, ?>> executorChildren = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> currentlyExecutingActions = new ArrayList<>();
    private int lastIndexOfConcurrentSetToExecute;
+   private boolean prevInvertExecution = false;
 
    public ActionSequenceExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -41,6 +42,12 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       executorChildren.clear();
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
+
+      if (getState().getInvertExecution() && currentlyExecutingActions.isEmpty() && state.getInvertExecution() != prevInvertExecution)
+      {
+         getState().updateExecuteNextIndex();
+      }
+      prevInvertExecution = state.getInvertExecution();
 
       lastIndexOfConcurrentSetToExecute = findLastIndexOfConcurrentSetToExecute(executorChildren, getState().getExecutionNextIndex());
       for (int i = 0; i < executorChildren.size(); i++)
@@ -133,9 +140,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       actionToExecute.triggerActionExecution();
       actionToExecute.updateCurrentlyExecuting();
       currentlyExecutingActions.add(actionToExecute);
-      if (getState().getInvertExecution())
-         getState().stepBackNextExecutionIndex();
-      else
+      if (getState().getExecutionNextIndex() < getState().getChildren().size()-1)
          getState().stepForwardNextExecutionIndex();
    }
 
