@@ -88,7 +88,6 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final DynamicLibGDXModel[] arrowModels = new DynamicLibGDXModel[3];
    private final DynamicLibGDXModel[] torusModels = new DynamicLibGDXModel[3];
    private final Point3D closestCollision = new Point3D();
-   private boolean pickAndDragSphereSelected = false;
    private SixDoFSelection closestCollisionSelection = null;
    private double closestCollisionDistance;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
@@ -291,7 +290,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          queuePopupToOpen = true;
       }
 
-      if ((isGizmoHovered || pickAndDragSphereSelected) && manipulationDragData.getDragJustStarted())
+      if ((isGizmoHovered) && manipulationDragData.getDragJustStarted())
       {
          clockFaceDragAlgorithm.reset();
          manipulationDragData.setObjectBeingDragged(this);
@@ -300,11 +299,11 @@ public class RDXPose3DGizmo implements RenderableProvider
 
       updateMaterialHighlighting();
 
-      if (isBeingManipulated)
+      if (isBeingManipulated && closestCollisionSelection != null)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
 
-         if (pickAndDragSphereSelected)
+         if (closestCollisionSelection.isCenter())
          {
             Vector3DReadOnly motionY = lineDragAlgorithm.calculate(pickRay, closestCollision, axisRotations.get(Axis3D.Y), transformToWorld);
             frameBasedGizmoModification.translateInWorld(motionY);
@@ -314,7 +313,7 @@ public class RDXPose3DGizmo implements RenderableProvider
             frameBasedGizmoModification.translateInWorld(motionX);
             closestCollision.add(motionX);
          }
-         else if (closestCollisionSelection != null && closestCollisionSelection.isLinear())
+         else if (closestCollisionSelection.isLinear())
          {
             Vector3DReadOnly linearMotion = lineDragAlgorithm.calculate(pickRay,
                                                                         closestCollision,
@@ -323,7 +322,7 @@ public class RDXPose3DGizmo implements RenderableProvider
             frameBasedGizmoModification.translateInWorld(linearMotion);
             closestCollision.add(linearMotion);
          }
-         else if (closestCollisionSelection != null && closestCollisionSelection.isAngular())
+         else if (closestCollisionSelection.isAngular())
          {
             if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, axisRotations.get(closestCollisionSelection.toAxis3D()), transformToWorld))
             {
@@ -505,7 +504,6 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
    {
-      pickAndDragSphereSelected = false;
       closestCollisionSelection = null;
       closestCollisionDistance = Double.POSITIVE_INFINITY;
 
@@ -550,11 +548,11 @@ public class RDXPose3DGizmo implements RenderableProvider
          double distance = pickAndDragSphereIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
          boolean hoveringPickAndDragSphere = pickAndDragSphereIntersection.intersect(pickRay);
          boolean somethingOccludingPickAndDragSphere = closestCollisionSelection != null && hoveringPickAndDragSphere && (distance > closestCollisionDistance);
-         pickAndDragSphereSelected = hoveringPickAndDragSphere && !somethingOccludingPickAndDragSphere;
+         boolean pickAndDragSphereSelected = hoveringPickAndDragSphere && !somethingOccludingPickAndDragSphere;
 
          if (pickAndDragSphereSelected)
          {
-            closestCollisionSelection = null;
+            closestCollisionSelection = SixDoFSelection.CENTER;
             closestCollision.set(pickAndDragSphereIntersection.getFirstIntersectionToPack());
          }
       }
@@ -566,13 +564,13 @@ public class RDXPose3DGizmo implements RenderableProvider
       boolean highlightingPrior = (isGizmoHovered || isBeingManipulated) && closestCollisionSelection != null;
       // could only do this when selection changed
 
-      if (pickAndDragSphereSelected)
+      if (highlightingPrior && closestCollisionSelection.isCenter())
       {
-         pickAndDragSphereModel.setMaterial(new Material());
+         pickAndDragSphereModel.setMaterial(highlightedMaterials[0]);
       }
       else
       {
-         pickAndDragSphereModel.setMaterial(highlightedMaterials[0]);
+         pickAndDragSphereModel.setMaterial(new Material());
       }
 
       for (Axis3D axis : Axis3D.values)
