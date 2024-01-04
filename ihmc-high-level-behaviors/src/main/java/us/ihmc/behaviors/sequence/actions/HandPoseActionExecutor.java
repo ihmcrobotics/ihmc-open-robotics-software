@@ -8,7 +8,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.*;
-import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -33,7 +32,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
-   private final SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators;
    private final Timer executionTimer = new Timer();
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
@@ -48,8 +46,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                  ROS2ControllerHelper ros2ControllerHelper,
                                  ReferenceFrameLibrary referenceFrameLibrary,
                                  DRCRobotModel robotModel,
-                                 ROS2SyncedRobotModel syncedRobot,
-                                 SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators)
+                                 ROS2SyncedRobotModel syncedRobot)
    {
       super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
@@ -57,7 +54,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
-      this.handWrenchCalculators = handWrenchCalculators;
 
       for (RobotSide side : RobotSide.values)
       {
@@ -124,6 +120,12 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             concurrentChestOrientationAction.getState().update(); // Ensure state's frames are initialized
             state.getGoalChestToWorldTransform().getValue()
                  .set(concurrentChestOrientationAction.getState().getChestFrame().getReferenceFrame().getTransformToRoot());
+         }
+         else if (concurrentChestOrientationAction == null)
+         {
+            // FIXME We are ignoring this case for now, just add a pelvis pose to get the desired result
+            //   We need to switch to a proper whole body action node
+            state.getGoalChestToWorldTransform().getValue().set(syncedRobot.getReferenceFrames().getChestFrame().getTransformToRoot());
          }
          else // Combined case
          {
@@ -246,7 +248,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          state.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
          state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
          state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-         state.setHandWrenchMagnitudeLinear(handWrenchCalculators.get(getDefinition().getSide()).getLinearWrenchMagnitude(true));
+         state.setHandWrenchMagnitudeLinear(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getLinearWrenchMagnitude(true));
          if (!state.getIsExecuting() && wasExecuting && !getDefinition().getJointSpaceControl() && !getDefinition().getHoldPoseInWorldLater())
          {
             disengageHoldPoseInWorld();

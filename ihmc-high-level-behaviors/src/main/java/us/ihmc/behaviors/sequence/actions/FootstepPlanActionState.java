@@ -26,13 +26,13 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       footsteps = new RecyclingArrayList<>(() ->
          new FootstepPlanActionFootstepState(referenceFrameLibrary,
                                              this,
-                                             RecyclingArrayListTools.getUnsafe(getDefinition().getFootsteps(), numberOfAllocatedFootsteps++)));
+                                             RecyclingArrayListTools.getUnsafe(getDefinition().getFootsteps().getValueUnsafe(), numberOfAllocatedFootsteps++)));
    }
 
    @Override
    public void update()
    {
-      RecyclingArrayListTools.synchronizeSize(footsteps, getDefinition().getFootsteps());
+      RecyclingArrayListTools.synchronizeSize(footsteps, getDefinition().getFootsteps().getSize());
 
       for (int i = 0; i < footsteps.size(); i++)
       {

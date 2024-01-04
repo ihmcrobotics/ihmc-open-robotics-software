@@ -5,7 +5,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
-import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -13,7 +12,6 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class BehaviorTreeExecutor
 {
@@ -27,7 +25,6 @@ public class BehaviorTreeExecutor
                                ROS2SyncedRobotModel syncedRobot,
                                ReferenceFrameLibrary referenceFrameLibrary,
                                WalkingFootstepTracker footstepTracker,
-                               SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators,
                                FootstepPlanningModule footstepPlanner,
                                FootstepPlannerParametersBasics footstepPlannerParameters,
                                WalkingControllerParameters walkingControllerParameters,
@@ -37,7 +34,6 @@ public class BehaviorTreeExecutor
                                                         syncedRobot,
                                                         referenceFrameLibrary,
                                                         footstepTracker,
-                                                        handWrenchCalculators,
                                                         footstepPlanner,
                                                         footstepPlannerParameters,
                                                         walkingControllerParameters,
@@ -71,7 +67,7 @@ public class BehaviorTreeExecutor
 
    public void destroy()
    {
-      if (rootNode!= null)
+      if (rootNode != null)
       {
          behaviorTreeState.modifyTreeTopology(topologyOperationQueue -> topologyOperationQueue.queueDestroySubtree(rootNode));
       }
