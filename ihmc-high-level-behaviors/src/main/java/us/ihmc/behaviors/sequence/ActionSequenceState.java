@@ -24,6 +24,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
    private transient final MutableInt actionIndex = new MutableInt();
    private final List<ActionNodeState<?>> actionChildren = new ArrayList<>();
    private boolean prevInvertExecution = false;
+   private int firstIndexOfLastConcurrentActions = 0;
 
    public ActionSequenceState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -44,22 +45,19 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       actionIndex.setValue(0);
       actionChildren.clear();
       updateActionSubtree(this, actionIndex);
+   }
 
-      if (getInvertExecution() && (getInvertExecution() != prevInvertExecution))
+   public void updateExecuteNextIndex()
+   {
+      for (int i = getActionChildren().size() - 1 - firstIndexOfLastConcurrentActions; i >= 0; i--)
       {
-         for (int i = getActionChildren().size() - 1; i >= 0; i--)
-            if (getActionChildren().get(i).getDefinition().getExecuteWithNextAction())
-            {
-               executionNextIndex.setValue(i);
-               break;
-            }
+         firstIndexOfLastConcurrentActions += 1;
+         if (getActionChildren().get(i).getDefinition().getExecuteWithNextAction())
+         {
+            executionNextIndex.setValue(i);
+            break;
+         }
       }
-      else if (!getInvertExecution() && (getInvertExecution() != prevInvertExecution))
-      {
-         executionNextIndex.setValue(0);
-      }
-
-      prevInvertExecution = getInvertExecution();
    }
 
    public void updateActionSubtree(BehaviorTreeNodeState<?> node, MutableInt actionIndex)

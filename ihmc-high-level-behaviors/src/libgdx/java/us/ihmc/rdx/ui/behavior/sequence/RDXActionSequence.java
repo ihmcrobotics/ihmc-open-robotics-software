@@ -33,6 +33,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
    private final List<RDXActionNode<?, ?>> currentlyExecutingActions = new ArrayList<>();
    private final RDXMultipleActionProgressBars multipleActionProgressBars = new RDXMultipleActionProgressBars();
+   private boolean prevInvertExecution = true;
 
    public RDXActionSequence(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -94,6 +95,15 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
          getState().stepForwardNextExecutionIndex();
       }
       ImGuiTools.previousWidgetTooltip("Go to next action");
+
+      if (getState().getInvertExecution() && currentlyExecutingActions.isEmpty() && state.getInvertExecution() != prevInvertExecution)
+      {
+         System.out.println(" ");
+      }
+      prevInvertExecution = state.getInvertExecution();
+
+//      if (getState().getExecutionNextIndex() <=15 && getState().getExecutionNextIndex() > 0)
+//         System.out.println(getState().getExecutionNextIndex());
 
       boolean endOfSequence = getState().getExecutionNextIndex() >= getState().getActionChildren().size();
       if (!endOfSequence)
