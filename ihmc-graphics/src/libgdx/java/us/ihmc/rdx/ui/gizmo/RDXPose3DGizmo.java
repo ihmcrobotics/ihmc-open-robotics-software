@@ -642,7 +642,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          else
             torusRadius.set(torusCameraSize.get());
 
-         pickAndDragSphereRadius.set(torusRadius.get() / 8.0);
+         pickAndDragSphereRadius.set(torusRadius.get() / 8.0f);
       }
       arrowBodyRadius = (float) torusTubeRadiusRatio.get() * torusRadius.get();
       arrowLength = arrowLengthRatio.get() * torusRadius.get();
