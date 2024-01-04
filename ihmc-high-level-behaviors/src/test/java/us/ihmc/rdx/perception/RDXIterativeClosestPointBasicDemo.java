@@ -8,13 +8,10 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.rotationConversion.QuaternionConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -27,10 +24,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
-import us.ihmc.robotics.MatrixMissingTools;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -46,7 +40,7 @@ public class RDXIterativeClosestPointBasicDemo
 
    private final ImBoolean icpGuiOnOffToggle = new ImBoolean(true);
    private final ImBoolean icpGuiResetEnv = new ImBoolean(false);
-   private final ImBoolean icpGuiAutoMoveEnv = new ImBoolean(false);
+   private final ImBoolean icpGuiAutoMoveEnv = new ImBoolean(true);
    private final float[] icpGuiEnvSetPostionX = {0.0f};
    private final float[] icpGuiEnvSetPostionY = {0.0f};
    private final float[] icpGuiEnvSetPostionZ = {0.0f};
@@ -75,7 +69,6 @@ public class RDXIterativeClosestPointBasicDemo
    private final YawPitchRoll objectYawPitchRoll = new YawPitchRoll();
    private final RotationMatrix objectRotationMatrix = new RotationMatrix();
    private final RotationMatrix objectDeltaMatrix = new RotationMatrix();
-   private final Quaternion objectQuaternion = new Quaternion();
    private final FramePoint3D pointA = new FramePoint3D(objectReferenceFrame);
    private final RigidBodyTransform envTransform = new RigidBodyTransform();
    private final ReferenceFrame envReferenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), envTransform);
@@ -300,15 +293,8 @@ public class RDXIterativeClosestPointBasicDemo
             ImGui.text("Obj Centroid: " + df.format(objectCentroid.get(0, 0)) + " y: " + df.format(objectCentroid.get(0, 1)) + " z: " + df.format(objectCentroid.get(0, 2)));
             ImGui.text("diff Centroid: " + df.format(envCentroid.get(0, 0)-objectCentroid.get(0, 0)) + " y: " + df.format(envCentroid.get(0, 1)-objectCentroid.get(0, 1)) + " z: " + df.format(envCentroid.get(0, 2)-objectCentroid.get(0, 2)));
             ImGui.text(" ");
-            ImGui.text(
-                  "Object pos. X: " + df.format(objectPose.getPosition().getX()) + "  Y: " + df.format(objectPose.getPosition().getY()) + "  Z: " + df.format(
-                        objectPose.getPosition().getZ()));
-            ImGui.text("Object quat. X: " + df.format(objectPose.getOrientation().getX()) + "  Y: " + df.format(objectPose.getOrientation().getY()) + "  Z: "
-                       + df.format(objectPose.getOrientation().getZ()) + "  S: " + df.format(objectPose.getOrientation().getS()));
-            ImGui.text(" ");
-            ImGui.text("Object rot: " + df.format(objectRotationMatrix.getM00()) + " " + df.format(objectRotationMatrix.getM01()) + " " + df.format(objectRotationMatrix.getM02()));
-            ImGui.text("Object rot: " + df.format(objectRotationMatrix.getM10()) + " " + df.format(objectRotationMatrix.getM11()) + " " + df.format(objectRotationMatrix.getM12()));
-            ImGui.text("Object rot: " + df.format(objectRotationMatrix.getM20()) + " " + df.format(objectRotationMatrix.getM21()) + " " + df.format(objectRotationMatrix.getM22()));
+            ImGui.text("Object pos. X: " + df.format(objectPose.getPosition().getX()) + "  Y: " + df.format(objectPose.getPosition().getY()) + "  Z: " + df.format(objectPose.getPosition().getZ()));
+            ImGui.text("Object quat. X: " + df.format(objectPose.getOrientation().getX()) + "  Y: " + df.format(objectPose.getOrientation().getY()) + "  Z: " + df.format(objectPose.getOrientation().getZ()) + "  S: " + df.format(objectPose.getOrientation().getS()));
             ImGui.text(" ");
             ImGui.text("Object Roll:  " + df.format(objectYawPitchRoll.getRoll()));
             ImGui.text("Object Pitch: " + df.format(objectYawPitchRoll.getPitch()));
@@ -376,7 +362,9 @@ public class RDXIterativeClosestPointBasicDemo
                      objectCentroidSubtractedPoints.set(i, 2, envToObjectCorrespondencePoints.get(i, 2) - objectCentroid.get(0, 2));
                   }
 
-                  // TODO: Not sure what the centroid above is for, its not for the object. This calculates the object centroid. We can rename variables.
+                  // TODO: The centroid above is the centroid of the model/object points which correspond to scene points. The following centroid is the
+                  //  centroid of ALL the object points. Should we rename something here? Is there a simpler way to grab actualObjectCentroid from the math
+                  //  above?
                   actualObjectCentroid.set(zeroMatrixPoint);
                   for (int i = 0; i < objectInWorldPoints.size(); i++) {
                      actualObjectCentroid.add(0, 0, objectInWorldPoints.get(i).getX());
@@ -447,12 +435,10 @@ public class RDXIterativeClosestPointBasicDemo
 
                   // Update object pose
                   objectPosition.set(actualObjectCentroid.get(0, 0), actualObjectCentroid.get(0, 1), actualObjectCentroid.get(0, 2));
-                  objectPosition.set(actualObjectCentroid.get(0, 0), actualObjectCentroid.get(0, 1), actualObjectCentroid.get(0, 2));
-                  objectDeltaMatrix.set(R); // save the incremental change in rotation to a rotation matrix
-                  objectRotationMatrix.append(objectDeltaMatrix); // append the rotation to the total rotation of the body relative to world
-                  QuaternionConversion.convertMatrixToQuaternion(objectRotationMatrix, objectQuaternion);
-                  objectOrientation.set(objectQuaternion);
-                  objectYawPitchRoll.set(objectQuaternion);
+                  objectDeltaMatrix.set(R); // save the incremental change in rotation to a RotationMatrix
+                  objectRotationMatrix.prepend(objectDeltaMatrix); // *prepend* the rotation to the total rotation of the body relative to world
+                  objectOrientation.set(objectRotationMatrix);
+                  objectYawPitchRoll.set(objectRotationMatrix);
                   objectPose.set(objectPosition, objectOrientation);
                   referenceFrameGraphic.setPoseInWorldFrame(objectPose);
                }
