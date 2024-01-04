@@ -416,6 +416,10 @@ public class RDXIterativeClosestPointBasicDemo
                   svdSolver.getU(U, false);
                   svdSolver.getV(V, true);
                   CommonOps_DDRM.multTransAB(V, U, R);
+                  // Correct any negative rotation matrices which come out of SVD its positive counterpart (fixes NotARotationMatrix issues)
+                  if (CommonOps_DDRM.det(R) < 0) {
+                     CommonOps_DDRM.scale(-1, R);
+                  }
 
                   // Calculate object translation
                   CommonOps_DDRM.multTransB(R, objectCentroid, objAdjustedLocation);
