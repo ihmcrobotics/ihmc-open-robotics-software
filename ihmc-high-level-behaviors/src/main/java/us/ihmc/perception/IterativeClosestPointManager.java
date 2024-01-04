@@ -62,33 +62,32 @@ public class IterativeClosestPointManager
 
             // Check if size changed
             PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.fromByte(requestMessage.getShape());
-            float requestWidth = requestMessage.getYLength();
-            float requestHeight = requestMessage.getZLength();
-            float requestDepth = requestMessage.getXLength();
-            float requestLength = requestMessage.getZLength();
-            float requestRadius = requestMessage.getXRadius();
+            float requestXLength = requestMessage.getXLength();
+            float requestYLength = requestMessage.getYLength();
+            float requestZLength = requestMessage.getZLength();
+            float requestXRadius = requestMessage.getXRadius();
+            float requestYRadius = requestMessage.getYRadius();
+            float requestZRadius = requestMessage.getZRadius();
 
             boolean sizeChanged = false;
-            switch (shape)
-            {
-               case BOX ->
-               {
-                  sizeChanged |= !MathTools.epsilonEquals(worker.getWidth(), requestWidth, EPSILON);
-                  sizeChanged |= !MathTools.epsilonEquals(worker.getHeight(), requestHeight, EPSILON);
-                  sizeChanged |= !MathTools.epsilonEquals(worker.getDepth(), requestDepth, EPSILON);
-               }
-               case CONE, CYLINDER ->
-               {
-                  sizeChanged |= !MathTools.epsilonEquals(worker.getLength(), requestLength, EPSILON);
-                  sizeChanged |= !MathTools.epsilonEquals(worker.getRadius(), requestRadius, EPSILON);
-               }
-            }
+            sizeChanged |= !MathTools.epsilonEquals(worker.getXLength(), requestXLength, EPSILON);
+            sizeChanged |= !MathTools.epsilonEquals(worker.getYLength(), requestYLength, EPSILON);
+            sizeChanged |= !MathTools.epsilonEquals(worker.getZLength(), requestZLength, EPSILON);
+            sizeChanged |= !MathTools.epsilonEquals(worker.getXRadius(), requestXRadius, EPSILON);
+            sizeChanged |= !MathTools.epsilonEquals(worker.getYRadius(), requestYRadius, EPSILON);
+            sizeChanged |= !MathTools.epsilonEquals(worker.getZRadius(), requestZRadius, EPSILON);
 
             // Update worker size if changed
             if (sizeChanged)
             {
-               int newNumberOfPoints = approximateNumberOfPoints(shape, requestWidth, requestHeight, requestDepth, requestLength, requestRadius);
-               worker.changeSize(requestWidth, requestHeight, requestDepth, requestLength, requestRadius, newNumberOfPoints);
+               int newNumberOfPoints = approximateNumberOfPoints(shape,
+                                                                 requestXLength,
+                                                                 requestYLength,
+                                                                 requestZLength,
+                                                                 requestXRadius,
+                                                                 requestYRadius,
+                                                                 requestZRadius);
+               worker.changeSize(requestXLength, requestYLength, requestZLength, requestXRadius, requestYRadius, requestZRadius, newNumberOfPoints);
             }
 
             // Update worker
@@ -162,46 +161,40 @@ public class IterativeClosestPointManager
    {
       PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.fromByte(requestMessage.getShape());
 
-      float width = 0.0f;
-      float height = 0.0f;
-      float depth = 0.0f;
-      float length = 0.0f;
-      float radius = 0.0f;
+      float xLength = requestMessage.getXLength();
+      float yLength = requestMessage.getYLength();
+      float zLength = requestMessage.getZLength();
+      float xRadius = requestMessage.getXRadius();
+      float yRadius = requestMessage.getYRadius();
+      float zRadius = requestMessage.getZRadius();
 
-      switch (shape)
-      {
-         case BOX ->
-         {
-            width = requestMessage.getYLength();
-            height = requestMessage.getZLength();
-            depth = requestMessage.getXLength();
-         }
-         case CONE, CYLINDER ->
-         {
-            length = requestMessage.getZLength();
-            radius = requestMessage.getXRadius();
-         }
-         default -> throw new RuntimeException("Unsupperted Shape"); // FIXME: Probably do something else here
-      }
-
-      int numberOfPoints = approximateNumberOfPoints(shape, width, height, depth, length, radius);
-      IterativeClosestPointWorker worker = new IterativeClosestPointWorker(shape, width, height, depth, length, radius, numberOfPoints, ros2Helper, random);
+      int numberOfPoints = approximateNumberOfPoints(shape, xLength, yLength, zLength, xRadius, yRadius, zRadius);
+      IterativeClosestPointWorker worker = new IterativeClosestPointWorker(shape,
+                                                                           xLength,
+                                                                           yLength,
+                                                                           zLength,
+                                                                           xRadius,
+                                                                           yRadius,
+                                                                           zRadius,
+                                                                           numberOfPoints,
+                                                                           ros2Helper,
+                                                                           random);
       worker.setSceneNodeID(requestMessage.getNodeId());
       nodeIDToWorkerMap.putIfAbsent(requestMessage.getNodeId(), worker);
    }
 
    // FIXME: Maybe just allow the user to select number of points instead of trying to calculate it using the dimensions
-   private int approximateNumberOfPoints(PrimitiveRigidBodyShape shape, float width, float height, float depth, float length, float radius)
+   private int approximateNumberOfPoints(PrimitiveRigidBodyShape shape, float xLength, float yLength, float zLength, float xRadius, float yRadius, float zRadius)
    {
       switch (shape)
       {
          case BOX ->
          {
-            return (int) (5000.0 * (width * height + width * depth + height * depth));
+            return (int) (5000.0 * (xLength * yLength + xLength * zLength + yLength * zLength));
          }
          case CONE, CYLINDER ->
          {
-            return (int) (5000.0 * (Math.PI * radius * length)); // dumb way of figuring out number of points
+            return (int) (5000.0 * (Math.PI * xRadius * zLength)); // dumb way of figuring out number of points
          }
          default ->
          {

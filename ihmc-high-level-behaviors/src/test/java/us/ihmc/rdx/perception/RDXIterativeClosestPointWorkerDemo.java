@@ -19,6 +19,7 @@ import us.ihmc.perception.IterativeClosestPointWorker;
 import us.ihmc.perception.OpenCLPointCloudExtractor;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -36,6 +37,7 @@ import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 import us.ihmc.tools.thread.RestartableThread;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -53,8 +55,7 @@ public class RDXIterativeClosestPointWorkerDemo
    private final ZEDColorDepthImagePublisher zedImagePublisher;
    private RawImage zedDepthImage;
    private RawImage zedLeftColorImage;
-   private final IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(MAX_ENVIRONMENT_SIZE, ros2Helper, random);
-
+   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(MAX_ENVIRONMENT_SIZE, ros2Helper, random);
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
@@ -72,9 +73,15 @@ public class RDXIterativeClosestPointWorkerDemo
 
    private boolean mouseTrackingToggle = true;
 
+   private PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.BOX;
+   private final ImInt shapeIndex = new ImInt();
+   private final String[] shapeValues = new String[PrimitiveRigidBodyShape.values().length];
+   private final ImFloat depth = new ImFloat(0.19f);
    private final ImFloat width = new ImFloat(0.405f);
    private final ImFloat height = new ImFloat(0.31f);
-   private final ImFloat depth = new ImFloat(0.19f);
+   private final ImFloat xRadius = new ImFloat(0.1f);
+   private final ImFloat yRadius = new ImFloat(0.1f);
+   private final ImFloat zRadius = new ImFloat(0.1f);
    private final ImInt numberOfPoints = new ImInt(1000);
    private final ImFloat segmentationRadius = new ImFloat(0.2f);
 
@@ -85,6 +92,14 @@ public class RDXIterativeClosestPointWorkerDemo
                                                           new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_DEPTH),
                                                           new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR));
       zedImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH);
+
+      PrimitiveRigidBodyShape[] shapeArray = new PrimitiveRigidBodyShape[PrimitiveRigidBodyShape.values().length];
+      Arrays.stream(PrimitiveRigidBodyShape.values()).toList().toArray(shapeArray);
+
+      for (int i = 0; i < PrimitiveRigidBodyShape.values().length; ++i)
+      {
+         shapeValues[i] = shapeArray[i].name();
+      }
 
       RestartableThread zedPublishThread = new RestartableThread("ZedPublish", this::readAndPublishZED);
       zedPublishThread.start();
@@ -207,13 +222,30 @@ public class RDXIterativeClosestPointWorkerDemo
 
          private void renderSettings()
          {
+            if (ImGui.combo("Shape", shapeIndex, shapeValues))
+            {
+               shape = PrimitiveRigidBodyShape.valueOf(shapeValues[shapeIndex.get()]);
+               icpWorker = new IterativeClosestPointWorker(shape,
+                                                           depth.get(),
+                                                           width.get(),
+                                                           height.get(),
+                                                           xRadius.get(),
+                                                           yRadius.get(),
+                                                           zRadius.get(),
+                                                           MAX_ENVIRONMENT_SIZE,
+                                                           ros2Helper,
+                                                           random);
+            }
+            ImGui.sliderFloat("Depth", depth.getData(), 0.0f, 1.0f);
             ImGui.sliderFloat("Width", width.getData(), 0.0f, 1.0f);
             ImGui.sliderFloat("Height", height.getData(), 0.0f, 1.0f);
-            ImGui.sliderFloat("Depth", depth.getData(), 0.0f, 1.0f);
+            ImGui.sliderFloat("xRadius", xRadius.getData(), 0.0f, 1.0f);
+            ImGui.sliderFloat("yRadius", yRadius.getData(), 0.0f, 1.0f);
+            ImGui.sliderFloat("zRadius", zRadius.getData(), 0.0f, 1.0f);
             ImGui.sliderInt("Num Points", numberOfPoints.getData(), 0, 10000);
             if (ImGui.button("Apply Size"))
             {
-               icpWorker.changeSize(width.get(), height.get(), depth.get(), 0.0f, 0.0f, numberOfPoints.get());
+               icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get(), numberOfPoints.get());
             }
             ImGui.sliderFloat("Segmentation Radisu", segmentationRadius.getData(), 0.0f, 1.0f);
          }
