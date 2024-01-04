@@ -157,7 +157,7 @@ public class RDXIterativeClosestPointBasicDemo
                worldFramePoint.setIncludingFrame(pointA);
             }
             for (int i = 0; i < envSize; i++) {
-               //TODO j is always 0, 2, 4 by the time it's used, is that intentional? Wouldn't this put all points on only the 3 "positive" faces?
+               // We grab only 3 faces of the box here to simulate what the camera would see.
                int j = random.nextInt(3);
                j=j*2;
                // Initialize the point within the box
