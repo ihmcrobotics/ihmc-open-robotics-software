@@ -4,10 +4,10 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFWaypointBas
 
 public interface OneDoFTrajectoryPointBasics extends OneDoFTrajectoryPointReadOnly, TrajectoryPointBasics, OneDoFWaypointBasics
 {
-   default void set(double time, double position, double velocity)
+   default void set(double time, double position, double velocity, double acceleration)
    {
       setTime(time);
-      set(position, velocity);
+      set(position, velocity, acceleration);
    }
 
    default void set(OneDoFTrajectoryPointBasics other)

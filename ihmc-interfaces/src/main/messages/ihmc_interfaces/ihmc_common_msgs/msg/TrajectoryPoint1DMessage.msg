@@ -14,3 +14,5 @@ float64 time
 float64 position
 # Define the desired 1D velocity to be reached at this trajectory point.
 float64 velocity
+# Define the desired 1D acceleration to be reached at this trajectory point.
+float64 acceleration

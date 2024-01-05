@@ -35,6 +35,10 @@ module ihmc_common_msgs
          * Define the desired 1D velocity to be reached at this trajectory point.
          */
         double velocity;
+        /**
+         * Define the desired 1D acceleration to be reached at this trajectory point.
+         */
+        double acceleration;
       };
     };
   };

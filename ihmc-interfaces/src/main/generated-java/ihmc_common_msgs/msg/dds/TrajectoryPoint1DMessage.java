@@ -32,6 +32,10 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
             * Define the desired 1D velocity to be reached at this trajectory point.
             */
    public double velocity_;
+   /**
+            * Define the desired 1D acceleration to be reached at this trajectory point.
+            */
+   public double acceleration_;
 
    public TrajectoryPoint1DMessage()
    {
@@ -52,6 +56,8 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
       position_ = other.position_;
 
       velocity_ = other.velocity_;
+
+      acceleration_ = other.acceleration_;
 
    }
 
@@ -115,6 +121,21 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
       return velocity_;
    }
 
+   /**
+            * Define the desired 1D acceleration to be reached at this trajectory point.
+            */
+   public void setAcceleration(double acceleration)
+   {
+      acceleration_ = acceleration;
+   }
+   /**
+            * Define the desired 1D acceleration to be reached at this trajectory point.
+            */
+   public double getAcceleration()
+   {
+      return acceleration_;
+   }
+
 
    public static Supplier<TrajectoryPoint1DMessagePubSubType> getPubSubType()
    {
@@ -141,6 +162,8 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.velocity_, other.velocity_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.acceleration_, other.acceleration_, epsilon)) return false;
+
 
       return true;
    }
@@ -162,6 +185,8 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
 
       if(this.velocity_ != otherMyClass.velocity_) return false;
 
+      if(this.acceleration_ != otherMyClass.acceleration_) return false;
+
 
       return true;
    }
@@ -179,7 +204,9 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
       builder.append("position=");
       builder.append(this.position_);      builder.append(", ");
       builder.append("velocity=");
-      builder.append(this.velocity_);
+      builder.append(this.velocity_);      builder.append(", ");
+      builder.append("acceleration=");
+      builder.append(this.acceleration_);
       builder.append("}");
       return builder.toString();
    }

@@ -1,7 +1,5 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
@@ -11,6 +9,8 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectory
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MultipleWaypointsTrajectoryGeneratorTest
 {
@@ -50,8 +50,9 @@ public class MultipleWaypointsTrajectoryGeneratorTest
          simpleTrajectory.compute(timeAtWaypoint);
          double waypointPosition = simpleTrajectory.getValue();
          double waypointVelocity = simpleTrajectory.getVelocity();
-         
-         multipleWaypointsTrajectory.appendWaypoint(timeAtWaypoint , waypointPosition, waypointVelocity);
+         double waypointAcceleration = simpleTrajectory.getAcceleration();
+
+         multipleWaypointsTrajectory.appendWaypoint(timeAtWaypoint , waypointPosition, waypointVelocity, waypointAcceleration);
 
       }
       
@@ -83,7 +84,8 @@ public class MultipleWaypointsTrajectoryGeneratorTest
       
       double[] positions = new double[numberOfWaypoints];
       double[] velocities = new double[numberOfWaypoints];
-      
+      double[] accelerations = new double[numberOfWaypoints];
+
       for (int i = 0; i < numberOfWaypoints; i++)
       {
          double timeAtWaypoint = i * trajectoryTime / (numberOfWaypoints - 1.0);
@@ -92,8 +94,11 @@ public class MultipleWaypointsTrajectoryGeneratorTest
          
          double waypointVelocity = random.nextDouble();
          velocities[i] = waypointVelocity;
+
+         double waypointAcceleration = random.nextDouble();
+         accelerations[i] = waypointAcceleration;
          
-         multipleWaypointsTrajectory.appendWaypoint(timeAtWaypoint , waypointPosition, waypointVelocity);
+         multipleWaypointsTrajectory.appendWaypoint(timeAtWaypoint , waypointPosition, waypointVelocity, waypointAcceleration);
       }
       
       multipleWaypointsTrajectory.initialize();
@@ -104,6 +109,7 @@ public class MultipleWaypointsTrajectoryGeneratorTest
          
          assertEquals(positions[i], multipleWaypointsTrajectory.getValue(), EPSILON );
          assertEquals(velocities[i], multipleWaypointsTrajectory.getVelocity(), EPSILON );
+         assertEquals(accelerations[i], multipleWaypointsTrajectory.getAcceleration(), EPSILON );
       }
    }
 
@@ -119,7 +125,8 @@ public class MultipleWaypointsTrajectoryGeneratorTest
       double timeAtWaypoint = 0.0406;
       double positionAtWaypoint = 0.47;
       double velocityAtWaypoint = 0.10;
-      trajectory.appendWaypoint(timeAtWaypoint, positionAtWaypoint, velocityAtWaypoint);
+      double accelerationAtWaypoint = 0.20;
+      trajectory.appendWaypoint(timeAtWaypoint, positionAtWaypoint, velocityAtWaypoint, accelerationAtWaypoint);
       trajectory.initialize();
 
       trajectory.compute(0.036);
@@ -147,8 +154,8 @@ public class MultipleWaypointsTrajectoryGeneratorTest
       MultipleWaypointsTrajectoryGenerator trajectory = new MultipleWaypointsTrajectoryGenerator("testedTraj", maxNumberOfWaypoints, registry);
       trajectory.clear();
 
-      trajectory.appendWaypoint(0.0, 0.0, 0.0);
-      trajectory.appendWaypoint(0.5, 0.026337062843167836, 0.0);
+      trajectory.appendWaypoint(0.0, 0.0, 0.0, 0.0);
+      trajectory.appendWaypoint(0.5, 0.026337062843167836, 0.0, 0.0);
       trajectory.initialize();
 
       trajectory.compute(0.0);

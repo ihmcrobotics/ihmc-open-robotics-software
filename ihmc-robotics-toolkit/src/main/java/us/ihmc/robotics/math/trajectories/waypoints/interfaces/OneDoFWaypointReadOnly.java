@@ -8,6 +8,8 @@ public interface OneDoFWaypointReadOnly
 
    double getVelocity();
 
+   double getAcceleration();
+
    default void get(OneDoFWaypointBasics otherToPack)
    {
       otherToPack.set(this);
@@ -15,18 +17,21 @@ public interface OneDoFWaypointReadOnly
 
    default boolean equals(OneDoFWaypointReadOnly other)
    {
-      return EuclidCoreTools.equals(getPosition(), other.getPosition()) && EuclidCoreTools.equals(getVelocity(), other.getVelocity());
+      return EuclidCoreTools.equals(getPosition(), other.getPosition())
+             && EuclidCoreTools.equals(getVelocity(), other.getVelocity())
+             && EuclidCoreTools.equals(getAcceleration(), other.getAcceleration());
    }
 
    default boolean epsilonEquals(OneDoFWaypointReadOnly other, double epsilon)
    {
       return EuclidCoreTools.epsilonEquals(getPosition(), other.getPosition(), epsilon)
-            && EuclidCoreTools.epsilonEquals(getVelocity(), other.getVelocity(), epsilon);
+            && EuclidCoreTools.epsilonEquals(getVelocity(), other.getVelocity(), epsilon)
+            && EuclidCoreTools.epsilonEquals(getAcceleration(), other.getAcceleration(), epsilon);
    }
 
    default boolean containsNaN()
    {
-      return Double.isNaN(getPosition()) || Double.isNaN(getVelocity());
+      return Double.isNaN(getPosition()) || Double.isNaN(getVelocity()) || Double.isNaN(getAcceleration());
    }
 
 }

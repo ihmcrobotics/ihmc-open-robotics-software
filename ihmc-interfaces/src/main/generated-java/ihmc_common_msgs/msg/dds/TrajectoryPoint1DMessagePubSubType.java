@@ -15,7 +15,7 @@ public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6581462b3cc4a8092bac9c9a4f04b20aea254465914055999ba442e4a6f8c557";
+   		return "cde9a21a3657fa654d23bca4c6ab9cc3948cb91cbba8ecc4b1827c0d0e0ce9d3";
    }
    
    @Override
@@ -60,6 +60,8 @@ public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -85,6 +87,9 @@ public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -99,6 +104,8 @@ public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       cdr.write_type_6(data.getVelocity());
 
+      cdr.write_type_6(data.getAcceleration());
+
    }
 
    public static void read(ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage data, us.ihmc.idl.CDR cdr)
@@ -111,6 +118,8 @@ public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicD
       	
       data.setVelocity(cdr.read_type_6());
       	
+      data.setAcceleration(cdr.read_type_6());
+      	
 
    }
 
@@ -121,6 +130,7 @@ public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_6("time", data.getTime());
       ser.write_type_6("position", data.getPosition());
       ser.write_type_6("velocity", data.getVelocity());
+      ser.write_type_6("acceleration", data.getAcceleration());
    }
 
    @Override
@@ -130,6 +140,7 @@ public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicD
       data.setTime(ser.read_type_6("time"));
       data.setPosition(ser.read_type_6("position"));
       data.setVelocity(ser.read_type_6("velocity"));
+      data.setAcceleration(ser.read_type_6("acceleration"));
    }
 
    public static void staticCopy(ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage src, ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage dest)

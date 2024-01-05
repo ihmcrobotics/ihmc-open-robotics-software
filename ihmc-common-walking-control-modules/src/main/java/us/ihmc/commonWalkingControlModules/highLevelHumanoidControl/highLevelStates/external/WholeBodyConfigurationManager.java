@@ -108,7 +108,7 @@ public class WholeBodyConfigurationManager
       for (int i = 0; i < jointTrajectories.length; i++)
       {
          jointTrajectories[i].clear();
-         jointTrajectories[i].appendWaypoint(0.0, controlledJoints[i].getQ(), 0.0);
+         jointTrajectories[i].appendWaypointWithZeroAcceleration(0.0, controlledJoints[i].getQ(), 0.0);
          jointTrajectories[i].initialize();
       }
 
@@ -234,7 +234,7 @@ public class WholeBodyConfigurationManager
          DMatrixRMaj jointVelocities = state.getJointVelocities();
 
          for (int jointIndex = 0; jointIndex < jointTrajectories.length; jointIndex++)
-            jointTrajectories[jointIndex].appendWaypoint(currentTime, jointPositions.get(jointIndex, 0), jointVelocities.get(jointIndex, 0));
+            jointTrajectories[jointIndex].appendWaypointWithZeroAcceleration(currentTime, jointPositions.get(jointIndex, 0), jointVelocities.get(jointIndex, 0));
 
          tempDesiredPelvisFrame.setPoseAndUpdate(state.getBasePoseInWorld());
          pelvisTwist.setToZero(tempDesiredPelvisFrame);

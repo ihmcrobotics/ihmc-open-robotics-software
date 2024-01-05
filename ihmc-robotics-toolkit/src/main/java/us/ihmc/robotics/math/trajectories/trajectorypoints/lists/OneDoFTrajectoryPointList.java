@@ -20,9 +20,9 @@ public class OneDoFTrajectoryPointList implements TrajectoryPointListBasics<OneD
       trajectoryPoints.add().set(trajectoryPoint);
    }
 
-   public void addTrajectoryPoint(double time, double position, double velocity)
+   public void addTrajectoryPoint(double time, double position, double velocity, double acceleration)
    {
-      trajectoryPoints.add().set(time, position, velocity);
+      trajectoryPoints.add().set(time, position, velocity, acceleration);
    }
 
    @Override

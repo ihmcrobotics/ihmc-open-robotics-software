@@ -15,7 +15,7 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "01a6479612d8f89a0a0e56035c3795a1f17f9b38bc2d9644aee7c18009935433";
+   		return "7f5d237c96d9cfbdfb0bd5cfad6b94baf5426e679ba725cf83cfba644528ada9";
    }
    
    @Override
