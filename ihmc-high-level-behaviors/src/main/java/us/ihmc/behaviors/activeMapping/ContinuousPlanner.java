@@ -308,7 +308,7 @@ public class ContinuousPlanner
 
             double stepDuration = continuousWalkingParameters.getSwingTime() + continuousWalkingParameters.getTransferTime();
             double referencePlanTimeout = stepDuration * continuousWalkingParameters.getPlanningReferenceTimeout();
-            LogTools.warn("TIMEOUT WITH REFERENCE PLAN - " + referencePlanTimeout);
+            LogTools.warn("Using Reference Plan: {}, Timeout: {}", this.previousFootstepPlan.getNumberOfSteps(), referencePlanTimeout);
             request.setTimeout(referencePlanTimeout);
          }
       }
