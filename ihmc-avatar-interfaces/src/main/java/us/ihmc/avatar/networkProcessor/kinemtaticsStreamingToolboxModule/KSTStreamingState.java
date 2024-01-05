@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyStreamingMessagePublisher;
@@ -142,9 +143,11 @@ public class KSTStreamingState implements State
    private final YoDouble streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
    private final YoDouble solutionFilterBreakFrequency = new YoDouble("solutionFilterBreakFrequency", registry);
    private final YoKinematicsToolboxOutputStatus initialRobotState, blendedRobotState;
-   private final YoKinematicsToolboxOutputStatus ikRobotState, filteredRobotState, outputRobotState;
-   private final YoKinematicsToolboxOutputStatus ikFutureRobotState, futureFilteredRobotState, outputFutureRobotState;
+   private final YoKinematicsToolboxOutputStatus ikRobotState, previousRobotState, filteredRobotState, outputRobotState;
+   private final YoDouble[] filteredJointAccelerations;
+   private final YoDouble[] outputJointAccelerations;
    private final YoDouble outputJointVelocityScale = new YoDouble("outputJointVelocityScale", registry);
+   private final YoDouble outputJointAccelerationScale = new YoDouble("outputJointAccelerationScale", registry);
 
    private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
    private final YoDouble timeSinceLastInput = new YoDouble("timeSinceLastInput", registry);
@@ -260,10 +263,18 @@ public class KSTStreamingState implements State
       blendedRobotState = new YoKinematicsToolboxOutputStatus("Blended", rootJoint, oneDoFJoints, registry);
       ikRobotState = new YoKinematicsToolboxOutputStatus("IK", rootJoint, oneDoFJoints, registry);
       filteredRobotState = new YoKinematicsToolboxOutputStatus("Filtered", rootJoint, oneDoFJoints, registry);
+      previousRobotState = new YoKinematicsToolboxOutputStatus("Previous", rootJoint, oneDoFJoints, registry);
       outputRobotState = new YoKinematicsToolboxOutputStatus("FD", rootJoint, oneDoFJoints, registry);
-      ikFutureRobotState = new YoKinematicsToolboxOutputStatus("IKFuture", rootJoint, oneDoFJoints, registry);
-      futureFilteredRobotState = new YoKinematicsToolboxOutputStatus("FutureFiltered", rootJoint, oneDoFJoints, registry);
-      outputFutureRobotState = new YoKinematicsToolboxOutputStatus("FutureFD", rootJoint, oneDoFJoints, registry);
+
+      filteredJointAccelerations = new YoDouble[oneDoFJoints.length];
+      outputJointAccelerations = new YoDouble[oneDoFJoints.length];
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         OneDoFJointBasics joint = oneDoFJoints[i];
+         String jointName = joint.getName();
+         filteredJointAccelerations[i] = new YoDouble("qdd_d_Filtered_" + jointName, registry);
+         outputJointAccelerations[i] = new YoDouble("qdd_d_FD_" + jointName, registry);
+      }
 
       { // Filter for locking
          DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(lockPoseFilterBreakFrequency.getValue(),
@@ -475,13 +486,11 @@ public class KSTStreamingState implements State
       streamingStartTime.set(Double.NaN);
 
       ikRobotState.setToNaN();
-      ikFutureRobotState.setToNaN();
       initialRobotState.setToNaN();
       blendedRobotState.setToNaN();
+      previousRobotState.setToNaN();
       filteredRobotState.setToNaN();
-      futureFilteredRobotState.setToNaN();
       outputRobotState.setToNaN();
-      outputFutureRobotState.setToNaN();
 
       timeOfLastInput.set(Double.NaN);
       timeSinceLastInput.set(Double.NaN);
@@ -700,27 +709,6 @@ public class KSTStreamingState implements State
       ikRobotState.set(ikController.getSolution());
 
       /*
-       * Submit the same set of commands, but integrated forward in time according to the estimated input velocity and acceleration, with their decay. Then
-       * compute the kinematic waypoints at this configuration, and use it as the future robot state.
-       */
-      if (tools.hasPreviousInput())
-      {
-         // Technically this null check is redundant. If we don't have a "latest" input, we definitely don't have a previous input.
-         if (latestInput != null)
-         {
-            submitInputCommands(futureFilteredInputs);
-            submitNecessaryDefaultMessages(latestInput);
-            ikCommandInputManager.submitCommands(decayingInputs);
-         }
-         ikController.updateInternal();
-         ikFutureRobotState.set(ikController.getSolution());
-      }
-      else
-      {
-         ikFutureRobotState.set(ikRobotState);
-      }
-
-      /*
        * Updating the desired default position for the arms and/or neck only if the corresponding
        * end-effector is controlled. This allows to improve continuity in case the user stops controlling
        * a hand/head.
@@ -746,10 +734,11 @@ public class KSTStreamingState implements State
          }
       }
 
+      previousRobotState.set(filteredRobotState);
+
       if (resetFilter)
       {
          filteredRobotState.set(ikRobotState);
-         futureFilteredRobotState.set(ikFutureRobotState);
          resetFilter = false;
       }
       else
@@ -757,8 +746,9 @@ public class KSTStreamingState implements State
          double alphaFilter = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(solutionFilterBreakFrequency.getValue(),
                                                                                               tools.getToolboxControllerPeriod());
          filteredRobotState.interpolate(ikRobotState.getStatus(), filteredRobotState.getStatus(), alphaFilter);
-         futureFilteredRobotState.interpolate(ikFutureRobotState.getStatus(), futureFilteredRobotState.getStatus(), alphaFilter);
       }
+
+      setAccelerationsByFiniteDifference(previousRobotState, filteredRobotState, tools.getToolboxControllerPeriod(), filteredJointAccelerations);
 
       if (isStreaming.getValue())
       {
@@ -777,8 +767,7 @@ public class KSTStreamingState implements State
             outputRobotState.set(filteredRobotState);
             outputRobotState.scaleVelocities(outputJointVelocityScale.getValue());
 
-            outputFutureRobotState.set(futureFilteredRobotState);
-            outputFutureRobotState.scaleVelocities(outputJointVelocityScale.getValue());
+            scaleAccelerations(filteredJointAccelerations, outputJointAccelerations, outputJointAccelerationScale.getValue());
 
             if (timeInBlending < streamingBlendingDuration.getValue())
             {
@@ -816,9 +805,6 @@ public class KSTStreamingState implements State
          {
             outputRobotState.set(filteredRobotState);
             outputRobotState.scaleVelocities(outputJointVelocityScale.getValue());
-
-            outputFutureRobotState.set(futureFilteredRobotState);
-            outputFutureRobotState.scaleVelocities(outputJointVelocityScale.getValue());
 
             // TODO use the future robot state with the messages for the ingration duration.
             trajectoryMessagePublisher.publish(tools.setupFinalizeTrajectoryMessage(outputRobotState.getStatus()));
@@ -1126,6 +1112,27 @@ public class KSTStreamingState implements State
          if (Double.isNaN(weightMatrix.getZ()) || weightMatrix.getZ() <= 0.0)
             weightMatrix.setZAxisWeight(defaultWeight);
       }
+   }
+
+   private static void setAccelerationsByFiniteDifference(YoKinematicsToolboxOutputStatus previous, YoKinematicsToolboxOutputStatus current, double duration, YoDouble[] accelerationsToPack)
+   {
+      for (int i = 0; i < accelerationsToPack.length; i++)
+      {
+         double qdd = (current.getDesiredJointVelocities().get(i) - previous.getDesiredJointVelocities().get(i)) / duration;
+         accelerationsToPack[i].set(qdd);
+      }
+
+      // TODO root acceleration
+   }
+
+   public static void scaleAccelerations(YoDouble[] accelerationsToScale, YoDouble[] scaledAccelerationsToPack, double scaleFactor)
+   {
+      for (int i = 0; i < accelerationsToScale.length; i++)
+      {
+         scaledAccelerationsToPack[i].set(accelerationsToScale[i].getValue() * scaleFactor);
+      }
+//      desiredRootJointVelocity.scale(scaleFactor);
+      // TODO root acceleration
    }
 
    @Override
