@@ -59,7 +59,7 @@ public class RDXTrajectoryGraphic
    private void updateInternal(double lineWidth)
    {
       positionTrajectoryGraphic.update(positions, lineWidth, Color.WHITE);
-      positionTrajectoryGraphic.getModelInstance().setOpacity(OPACITY);
+      positionTrajectoryGraphic.accessModelIfExists(modelInstance -> modelInstance.setOpacity(OPACITY));
 
       if (referenceFrameGraphics == null)
       {
