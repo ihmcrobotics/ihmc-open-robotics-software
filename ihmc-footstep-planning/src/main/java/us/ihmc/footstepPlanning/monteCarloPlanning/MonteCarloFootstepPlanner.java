@@ -187,7 +187,10 @@ public class MonteCarloFootstepPlanner
       //return (MonteCarloFootstepNode) node.getMaxQueueNode();
 
       // return a random node
-      return (MonteCarloFootstepNode) node.getChildren().get(random.nextInt(0, node.getChildren().size() - 1));
+      if (!node.getChildren().isEmpty())
+         return (MonteCarloFootstepNode) node.getChildren().get(random.nextInt(0, node.getChildren().size() - 1));
+      else
+         return null;
    }
 
    public double simulate(MonteCarloFootstepNode node, MonteCarloFootstepPlannerRequest request)
