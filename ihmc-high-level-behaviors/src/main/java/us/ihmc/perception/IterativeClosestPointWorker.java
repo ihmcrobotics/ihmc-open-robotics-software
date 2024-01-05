@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -157,19 +158,19 @@ public class IterativeClosestPointWorker
       for (int i = 0; i < numberOfICPObjectPoints; ++i)
       {
          Point3D32 environmentPoint = segmentedEnvironmentPointCloud.get(i);
-         float minDistance = Float.MAX_VALUE;
-         int minIndex = Integer.MAX_VALUE;
+         double minDistance = Double.POSITIVE_INFINITY;
+         int minIndex = -1;
 
          for (int j = 0; j < objectInWorldPoints.size(); ++j)
          {
-            float distance = (float) environmentPoint.distance(objectInWorldPoints.get(j));
-            if (distance <= minDistance)
+            double distanceSquared = environmentPoint.distanceSquared(objectInWorldPoints.get(j));
+            if (distanceSquared < minDistance)
             {
-               minDistance = distance;
+               minDistance = distanceSquared;
                minIndex = j;
             }
          }
-         if (minIndex == Integer.MAX_VALUE)
+         if (minIndex == -1)
             return;
 
          environmentToObjectCorrespondencePoints.set(i, 0, objectInWorldPoints.get(minIndex).getX());
@@ -178,19 +179,11 @@ public class IterativeClosestPointWorker
       }
 
       // Calculate object centroid
-      objectCentroid.set(0, 0, 0);
-      objectCentroid.set(0, 1, 0);
-      objectCentroid.set(0, 2, 0);
-      for (int i = 0; i < numberOfICPObjectPoints; ++i)
-      {
-         objectCentroid.add(0, 0, environmentToObjectCorrespondencePoints.get(i, 0));
-         objectCentroid.add(0, 1, environmentToObjectCorrespondencePoints.get(i, 1));
-         objectCentroid.add(0, 2, environmentToObjectCorrespondencePoints.get(i, 2));
-      }
-      objectCentroid.set(0, 0, objectCentroid.get(0, 0) / numberOfICPObjectPoints);
-      objectCentroid.set(0, 1, objectCentroid.get(0, 1) / numberOfICPObjectPoints);
-      objectCentroid.set(0, 2, objectCentroid.get(0, 2) / numberOfICPObjectPoints);
+      objectCentroid.zero();
+      CommonOps_DDRM.sumCols(environmentToObjectCorrespondencePoints, objectCentroid);
+      CommonOps_DDRM.scale(1.0 / numberOfICPObjectPoints, objectCentroid);
 
+      // TODO I bet there's an element-wise operation for this.
       for (int i = 0; i < numberOfICPObjectPoints; ++i)
       {
          objectCentroidSubtractedPoints.set(i, 0, environmentToObjectCorrespondencePoints.get(i, 0) - objectCentroid.get(0, 0));
@@ -199,18 +192,15 @@ public class IterativeClosestPointWorker
       }
 
       // Calculate environment centroid
-      environmentCentroid.set(0, 0, 0);
-      environmentCentroid.set(0, 1, 0);
-      environmentCentroid.set(0, 2, 0);
+      environmentCentroid.zero();
+      // FIXME this is a super gross way of doing this, but may be unavoidable.
       for (int i = 0; i < numberOfICPObjectPoints; ++i)
       {
          environmentCentroid.add(0, 0, segmentedEnvironmentPointCloud.get(i).getX());
          environmentCentroid.add(0, 1, segmentedEnvironmentPointCloud.get(i).getY());
          environmentCentroid.add(0, 2, segmentedEnvironmentPointCloud.get(i).getZ());
       }
-      environmentCentroid.set(0, 0, environmentCentroid.get(0, 0) / numberOfICPObjectPoints);
-      environmentCentroid.set(0, 1, environmentCentroid.get(0, 1) / numberOfICPObjectPoints);
-      environmentCentroid.set(0, 2, environmentCentroid.get(0, 2) / numberOfICPObjectPoints);
+      CommonOps_DDRM.scale(1.0 / numberOfICPObjectPoints, environmentCentroid);
 
       for (int i = 0; i < numberOfICPObjectPoints; ++i)
       {
