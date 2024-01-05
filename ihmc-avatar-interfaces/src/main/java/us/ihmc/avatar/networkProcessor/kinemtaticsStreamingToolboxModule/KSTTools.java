@@ -528,6 +528,11 @@ public class KSTTools
       return toolboxControllerPeriod;
    }
 
+   public double getStreamIntegrationDuration()
+   {
+      return streamIntegrationDuration.getDoubleValue();
+   }
+
    public static void updateFullRobotModel(RobotConfigurationData robotConfigurationData, FullHumanoidRobotModel fullRobotModelToUpdate)
    {
       OneDoFJointBasics[] joints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModelToUpdate);
