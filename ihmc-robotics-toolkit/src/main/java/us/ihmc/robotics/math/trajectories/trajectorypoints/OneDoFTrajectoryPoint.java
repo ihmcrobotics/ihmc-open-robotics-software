@@ -15,9 +15,9 @@ public class OneDoFTrajectoryPoint implements OneDoFTrajectoryPointBasics
    {
    }
 
-   public OneDoFTrajectoryPoint(double time, double position, double velocity)
+   public OneDoFTrajectoryPoint(double time, double position, double velocity, double acceleration)
    {
-      set(time, position, velocity);
+      set(time, position, velocity, acceleration);
    }
 
    @Override
@@ -33,6 +33,12 @@ public class OneDoFTrajectoryPoint implements OneDoFTrajectoryPointBasics
    }
 
    @Override
+   public void setAcceleration(double acceleration)
+   {
+      oneDoFWaypoint.setAcceleration(acceleration);
+   }
+
+   @Override
    public double getPosition()
    {
       return oneDoFWaypoint.getPosition();
@@ -42,6 +48,12 @@ public class OneDoFTrajectoryPoint implements OneDoFTrajectoryPointBasics
    public double getVelocity()
    {
       return oneDoFWaypoint.getVelocity();
+   }
+
+   @Override
+   public double getAcceleration()
+   {
+      return oneDoFWaypoint.getAcceleration();
    }
 
    @Override

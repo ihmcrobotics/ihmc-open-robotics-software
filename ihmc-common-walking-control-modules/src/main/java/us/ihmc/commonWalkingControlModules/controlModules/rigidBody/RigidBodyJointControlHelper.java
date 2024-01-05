@@ -435,15 +435,18 @@ public class RigidBodyJointControlHelper
             double t0 = Double.isNaN(streamTimestampOffset) ? 0.0 : streamTimestampOffset - streamTimeOffset;
             double q0 = trajectoryPoint.getPosition();
             double qd0 = trajectoryPoint.getVelocity();
+            double qdd0 = trajectoryPoint.getAcceleration();
 
-            if (!queuePoint(q0, qd0, t0, jointIdx))
+            if (!queuePoint(q0, qd0, qdd0, t0, jointIdx))
                return false;
 
-            double t1 = command.getStreamIntegrationDuration() + t0;
+            double tDelta = command.getStreamIntegrationDuration();
+            double t1 = tDelta + t0;
             double qd1 = trajectoryPoint.getVelocity();
-            double q1 = trajectoryPoint.getPosition() + command.getStreamIntegrationDuration() * qd1;
+            double qdd1 = trajectoryPoint.getAcceleration();
+            double q1 = trajectoryPoint.getPosition() + tDelta * qd1 + 0.5 * qdd1 * tDelta * tDelta;
 
-            if (!queuePoint(q1, qd1, t1, jointIdx))
+            if (!queuePoint(q1, qd1, qdd1, t1, jointIdx))
                return false;
          }
          else
@@ -472,7 +475,7 @@ public class RigidBodyJointControlHelper
    {
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         queuePoint(jointPositions[jointIdx], 0.0, time, jointIdx);
+         queuePoint(jointPositions[jointIdx], 0.0, 0.0, time, jointIdx);
       }
    }
 
@@ -485,7 +488,7 @@ public class RigidBodyJointControlHelper
    {
       RecyclingArrayDeque<OneDoFTrajectoryPoint> pointQueue = pointQueues.get(jointIdx);
       OneDoFTrajectoryPoint point = pointQueue.addLast();
-      point.set(0.0, initialPosition, 0.0);
+      point.set(0.0, initialPosition, 0.0, 0.0);
    }
 
    private boolean queuePoint(OneDoFTrajectoryPoint trajectoryPoint, int jointIdx)
@@ -501,7 +504,7 @@ public class RigidBodyJointControlHelper
       return true;
    }
 
-   private boolean queuePoint(double q, double qd, double t, int jointIdx)
+   private boolean queuePoint(double q, double qd, double qdd, double t, int jointIdx)
    {
       RecyclingArrayDeque<OneDoFTrajectoryPoint> pointQueue = pointQueues.get(jointIdx);
       if (atCapacityLimit(pointQueue))
@@ -510,7 +513,7 @@ public class RigidBodyJointControlHelper
       }
 
       OneDoFTrajectoryPoint point = pointQueue.addLast();
-      point.set(t, q, qd);
+      point.set(t, q, qd, qdd);
       return true;
    }
 

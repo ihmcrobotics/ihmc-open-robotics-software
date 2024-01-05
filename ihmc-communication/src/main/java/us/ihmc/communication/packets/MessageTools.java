@@ -32,6 +32,7 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.math.QuaternionCalculus;
@@ -788,13 +789,18 @@ public class MessageTools
          jointsToUpdate[i].setQ(kinematicsToolboxOutputStatus.getDesiredJointAngles().get(i));
       for (int i = 0; i < kinematicsToolboxOutputStatus.getDesiredJointVelocities().size(); i++)
          jointsToUpdate[i].setQd(kinematicsToolboxOutputStatus.getDesiredJointVelocities().get(i));
+      for (int i = 0 ; i < kinematicsToolboxOutputStatus.getDesiredJointAccelerations().size(); i++)
+         jointsToUpdate[i].setQdd(kinematicsToolboxOutputStatus.getDesiredJointAccelerations().get(i));
 
       Point3D desiredRootPosition = kinematicsToolboxOutputStatus.getDesiredRootPosition();
       Quaternion desiredRootOrientation = kinematicsToolboxOutputStatus.getDesiredRootOrientation();
       Vector3D desiredRootLinearVelocity = kinematicsToolboxOutputStatus.getDesiredRootLinearVelocity();
       Vector3D desiredRootAngularVelocity = kinematicsToolboxOutputStatus.getDesiredRootAngularVelocity();
+      Vector3D desiredRootLinearAcceleration = kinematicsToolboxOutputStatus.getDesiredRootLinearAcceleration();
+      Vector3D desiredRootAngularAcceleration = kinematicsToolboxOutputStatus.getDesiredRootAngularAcceleration();
       rootJointToUpdate.getJointPose().set(desiredRootPosition, desiredRootOrientation);
       rootJointToUpdate.getJointTwist().set(desiredRootAngularVelocity, desiredRootLinearVelocity);
+      rootJointToUpdate.getJointAcceleration().set(desiredRootAngularAcceleration, desiredRootLinearAcceleration);
    }
 
    /**
@@ -820,28 +826,35 @@ public class MessageTools
 
       kinematicsToolboxOutputStatusToPack.getDesiredJointAngles().reset();
       kinematicsToolboxOutputStatusToPack.getDesiredJointVelocities().reset();
+      kinematicsToolboxOutputStatusToPack.getDesiredJointAccelerations().reset();
 
       for (int i = 0; i < newJointData.length; i++)
       {
          OneDoFJointReadOnly joint = newJointData[i];
          kinematicsToolboxOutputStatusToPack.getDesiredJointAngles().add((float) joint.getQ());
          kinematicsToolboxOutputStatusToPack.getDesiredJointVelocities().add((float) joint.getQd());
+         kinematicsToolboxOutputStatusToPack.getDesiredJointAccelerations().add((float) joint.getQdd());
       }
 
       Point3D desiredRootTranslation = kinematicsToolboxOutputStatusToPack.getDesiredRootPosition();
       Quaternion desiredRootOrientation = kinematicsToolboxOutputStatusToPack.getDesiredRootOrientation();
       Vector3D desiredRootLinearVelocity = kinematicsToolboxOutputStatusToPack.getDesiredRootLinearVelocity();
       Vector3D desiredRootAngularVelocity = kinematicsToolboxOutputStatusToPack.getDesiredRootAngularVelocity();
+      Vector3D desiredRootLinearAcceleration = kinematicsToolboxOutputStatusToPack.getDesiredRootLinearAcceleration();
+      Vector3D desiredRootAngularAcceleration = kinematicsToolboxOutputStatusToPack.getDesiredRootAngularAcceleration();
 
       if (rootJoint != null)
       {
          Pose3DReadOnly jointPose = rootJoint.getJointPose();
          TwistReadOnly jointTwist = rootJoint.getJointTwist();
+         SpatialAccelerationReadOnly jointAcceleration = rootJoint.getJointAcceleration();
 
          desiredRootTranslation.set(jointPose.getPosition());
          desiredRootOrientation.set(jointPose.getOrientation());
          desiredRootLinearVelocity.set(jointTwist.getLinearPart());
          desiredRootAngularVelocity.set(jointTwist.getAngularPart());
+         desiredRootLinearAcceleration.set(jointAcceleration.getLinearPart());
+         desiredRootAngularAcceleration.set(jointAcceleration.getAngularPart());
       }
       else
       {
@@ -849,6 +862,8 @@ public class MessageTools
          desiredRootOrientation.setToZero();
          desiredRootLinearVelocity.setToZero();
          desiredRootAngularVelocity.setToZero();
+         desiredRootLinearAcceleration.setToZero();
+         desiredRootAngularAcceleration.setToZero();
       }
    }
 
@@ -873,11 +888,14 @@ public class MessageTools
       TFloatArrayList jointAngles2 = outputStatusTwo.getDesiredJointAngles();
       TFloatArrayList jointVelocities1 = outputStatusOne.getDesiredJointVelocities();
       TFloatArrayList jointVelocities2 = outputStatusTwo.getDesiredJointVelocities();
+      TFloatArrayList jointAccelerations1 = outputStatusOne.getDesiredJointAccelerations();
+      TFloatArrayList jointAccelerations2 = outputStatusTwo.getDesiredJointAccelerations();
 
       for (int i = 0; i < jointAngles1.size(); i++)
       {
          interpolatedToPack.getDesiredJointAngles().add((float) EuclidCoreTools.interpolate(jointAngles1.get(i), jointAngles2.get(i), alpha));
          interpolatedToPack.getDesiredJointVelocities().add((float) EuclidCoreTools.interpolate(jointVelocities1.get(i), jointVelocities2.get(i), alpha));
+         interpolatedToPack.getDesiredJointAccelerations().add((float) EuclidCoreTools.interpolate(jointAccelerations1.get(i), jointAccelerations2.get(i), alpha));
       }
 
       Point3D rootPosition1 = outputStatusOne.getDesiredRootPosition();
@@ -888,11 +906,17 @@ public class MessageTools
       Vector3D rootLinearVelocity2 = outputStatusTwo.getDesiredRootLinearVelocity();
       Vector3D rootAngularVelocity1 = outputStatusOne.getDesiredRootAngularVelocity();
       Vector3D rootAngularVelocity2 = outputStatusTwo.getDesiredRootAngularVelocity();
+      Vector3D rootLinearAcceleration1 = outputStatusOne.getDesiredRootLinearAcceleration();
+      Vector3D rootLinearAcceleration2 = outputStatusTwo.getDesiredRootLinearAcceleration();
+      Vector3D rootAngularAcceleration1 = outputStatusOne.getDesiredRootAngularAcceleration();
+      Vector3D rootAngularAcceleration2 = outputStatusTwo.getDesiredRootAngularAcceleration();
 
       interpolatedToPack.getDesiredRootPosition().interpolate(rootPosition1, rootPosition2, alpha);
       interpolatedToPack.getDesiredRootOrientation().interpolate(rootOrientation1, rootOrientation2, alpha);
       interpolatedToPack.getDesiredRootLinearVelocity().interpolate(rootLinearVelocity1, rootLinearVelocity2, alpha);
       interpolatedToPack.getDesiredRootAngularVelocity().interpolate(rootAngularVelocity1, rootAngularVelocity2, alpha);
+      interpolatedToPack.getDesiredRootLinearAcceleration().interpolate(rootLinearAcceleration1, rootLinearAcceleration2, alpha);
+      interpolatedToPack.getDesiredRootAngularAcceleration().interpolate(rootAngularAcceleration1, rootAngularAcceleration2, alpha);
 
       interpolatedToPack.setJointNameHash(outputStatusOne.getJointNameHash());
    }
@@ -938,12 +962,16 @@ public class MessageTools
       Float jointVelocitiesStart = start.getDesiredJointVelocities();
       Float jointVelocitiesEnd = end.getDesiredJointVelocities();
       Float jointVelocitiesInterpolated = interpolatedToPack.getDesiredJointVelocities();
+      Float jointAccelerationsStart = start.getDesiredJointAccelerations();
+      Float jointAccelerationsEnd = end.getDesiredJointAccelerations();
+      Float jointAccelerationsInterpolated = interpolatedToPack.getDesiredJointAccelerations();
 
-      if (jointAnglesStart.size() != jointAnglesEnd.size() || jointVelocitiesStart.size() != jointVelocitiesEnd.size())
+      if (jointAnglesStart.size() != jointAnglesEnd.size() || jointVelocitiesStart.size() != jointVelocitiesEnd.size() || jointAccelerationsStart.size() != jointAccelerationsEnd.size())
          throw new IllegalArgumentException("start and end are not compatible");
 
       jointAnglesInterpolated.reset();
       jointVelocitiesInterpolated.reset();
+      jointAccelerationsInterpolated.reset();
 
       for (int i = 0; i < jointAnglesStart.size(); i++)
       {
@@ -957,6 +985,15 @@ public class MessageTools
          qDot += EuclidCoreTools.interpolate(jointVelocitiesStart.get(i), jointVelocitiesEnd.get(i), alpha);
          jointVelocitiesInterpolated.add((float) qDot);
       }
+
+      // FIXME check this.
+      for (int i = 0; i < jointAccelerationsStart.size(); i++)
+      {
+         double qDdot = alphaDot * (jointVelocitiesEnd.get(i) - jointVelocitiesStart.get(i));
+         qDdot += EuclidCoreTools.interpolate(jointAccelerationsStart.get(i), jointAccelerationsEnd.get(i), alpha);
+         jointAnglesInterpolated.add((float) qDdot);
+      }
+
 
       // Root joint:
       Quaternion orientationStart = start.getDesiredRootOrientation();
@@ -972,6 +1009,13 @@ public class MessageTools
       Vector3D linearVelocityEnd = end.getDesiredRootLinearVelocity();
       Vector3D linearVelocityStart = start.getDesiredRootLinearVelocity();
       Vector3D linearVelocityInterpolated = interpolatedToPack.getDesiredRootLinearVelocity();
+
+      Vector3D angularAccelerationStart = start.getDesiredRootAngularAcceleration();
+      Vector3D angularAccelerationEnd = end.getDesiredRootAngularAcceleration();
+      Vector3D angularAccelerationInterpolated = interpolatedToPack.getDesiredRootAngularAcceleration();
+      Vector3D linearAccelerationEnd = end.getDesiredRootLinearAcceleration();
+      Vector3D linearAccelerationStart = start.getDesiredRootLinearAcceleration();
+      Vector3D linearAccelerationInterpolated = interpolatedToPack.getDesiredRootLinearAcceleration();
 
       // Do configuration
       orientationInterpolated.interpolate(orientationStart, orientationEnd, alpha);
@@ -991,6 +1035,17 @@ public class MessageTools
       orientationInterpolated.inverseTransform(linearVelocityInterpolated);
       linearVelocityInterpolated.scaleAdd(1.0 - alpha, linearVelocityStart, linearVelocityInterpolated);
       linearVelocityInterpolated.scaleAdd(alpha, linearVelocityEnd, linearVelocityInterpolated);
+
+      // FIXME check this.
+      // Root joint acceleration
+      linearAccelerationInterpolated.sub(linearVelocityEnd, linearVelocityStart);
+      linearAccelerationInterpolated.scale(alphaDot);
+      linearAccelerationInterpolated.scaleAdd(1.0 - alpha, linearAccelerationStart, linearAccelerationInterpolated);
+      linearAccelerationInterpolated.scaleAdd(alpha, linearAccelerationEnd, linearAccelerationInterpolated);
+      angularAccelerationInterpolated.sub(angularVelocityEnd, angularVelocityStart);
+      angularAccelerationInterpolated.scale(alphaDot);
+      angularAccelerationInterpolated.scaleAdd(1.0 - alpha, angularAccelerationStart, angularAccelerationInterpolated);
+      angularAccelerationInterpolated.scaleAdd(alpha, angularAccelerationEnd, angularAccelerationInterpolated);
    }
 
    /**

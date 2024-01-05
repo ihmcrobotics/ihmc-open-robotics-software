@@ -65,6 +65,15 @@ module toolbox_msgs
         geometry_msgs::msg::dds::Vector3 desired_root_linear_velocity;
         geometry_msgs::msg::dds::Vector3 desired_root_angular_velocity;
         /**
+         * Desired joint accelerations might be empty.
+         */
+        sequence<float> desired_joint_accelerations;
+        /**
+         * Desired acceleration of root might be empty
+         */
+        geometry_msgs::msg::dds::Vector3 desired_root_linear_acceleration;
+        geometry_msgs::msg::dds::Vector3 desired_root_angular_acceleration;
+        /**
          * Support region used by the toolbox
          */
         sequence<geometry_msgs::msg::dds::Point, 32> support_region;

@@ -15,6 +15,7 @@ public class YoOneDoFWaypoint implements OneDoFWaypointBasics
 
    private final YoDouble position;
    private final YoDouble velocity;
+   private final YoDouble acceleration;
 
    public YoOneDoFWaypoint(String namePrefix, String nameSuffix, YoRegistry registry)
    {
@@ -23,6 +24,7 @@ public class YoOneDoFWaypoint implements OneDoFWaypointBasics
 
       position = new YoDouble(YoGeometryNameTools.assembleName(namePrefix, "position", nameSuffix), registry);
       velocity = new YoDouble(YoGeometryNameTools.assembleName(namePrefix, "velocity", nameSuffix), registry);
+      acceleration = new YoDouble(YoGeometryNameTools.assembleName(namePrefix, "acceleration", nameSuffix), registry);
    }
 
    @Override
@@ -38,6 +40,12 @@ public class YoOneDoFWaypoint implements OneDoFWaypointBasics
    }
 
    @Override
+   public void setAcceleration(double acceleration)
+   {
+      this.acceleration.set(acceleration);
+   }
+
+   @Override
    public double getPosition()
    {
       return position.getDoubleValue();
@@ -47,6 +55,12 @@ public class YoOneDoFWaypoint implements OneDoFWaypointBasics
    public double getVelocity()
    {
       return velocity.getDoubleValue();
+   }
+
+   @Override
+   public double getAcceleration()
+   {
+      return acceleration.getDoubleValue();
    }
 
    public String getNamePrefix()

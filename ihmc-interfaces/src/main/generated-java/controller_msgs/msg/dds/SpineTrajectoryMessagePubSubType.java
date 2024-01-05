@@ -15,7 +15,7 @@ public class SpineTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b5141bbe62f228fe4d223086a329424f8e375011d718d4da75573a5c3838f7ea";
+   		return "2f00b5c20517cd72dd0623992e004276e47114f23e083711f03c79b297a370ba";
    }
    
    @Override

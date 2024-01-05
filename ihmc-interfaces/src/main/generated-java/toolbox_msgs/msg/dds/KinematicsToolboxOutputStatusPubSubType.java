@@ -15,7 +15,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "443abdd5def709ca0f81420d0a8d5fc23c95c455ba185951a6ed16a1e73c394f";
+   		return "0cacd2ed6635e87b311f9cef0f6b5877e4be44cf679fb40536df9f3bda811ec0";
    }
    
    @Override
@@ -70,6 +70,12 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 32; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -114,6 +120,14 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredRootAngularVelocity(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getDesiredJointAccelerations().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredRootLinearAcceleration(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredRootAngularAcceleration(), current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getSupportRegion().size(); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getSupportRegion().get(i0), current_alignment);}
@@ -145,6 +159,12 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootLinearVelocity(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootAngularVelocity(), cdr);
+      if(data.getDesiredJointAccelerations().size() <= 100)
+      cdr.write_type_e(data.getDesiredJointAccelerations());else
+          throw new RuntimeException("desired_joint_accelerations field exceeds the maximum length");
+
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootLinearAcceleration(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootAngularAcceleration(), cdr);
       if(data.getSupportRegion().size() <= 32)
       cdr.write_type_e(data.getSupportRegion());else
           throw new RuntimeException("support_region field exceeds the maximum length");
@@ -167,6 +187,9 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       cdr.read_type_e(data.getDesiredJointVelocities());	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootLinearVelocity(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootAngularVelocity(), cdr);	
+      cdr.read_type_e(data.getDesiredJointAccelerations());	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootLinearAcceleration(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootAngularAcceleration(), cdr);	
       cdr.read_type_e(data.getSupportRegion());	
       data.setSolutionQuality(cdr.read_type_6());
       	
@@ -189,6 +212,11 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       ser.write_type_a("desired_root_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularVelocity());
 
+      ser.write_type_e("desired_joint_accelerations", data.getDesiredJointAccelerations());
+      ser.write_type_a("desired_root_linear_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootLinearAcceleration());
+
+      ser.write_type_a("desired_root_angular_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularAcceleration());
+
       ser.write_type_e("support_region", data.getSupportRegion());
       ser.write_type_6("solution_quality", data.getSolutionQuality());
    }
@@ -208,6 +236,11 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       ser.read_type_a("desired_root_linear_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootLinearVelocity());
 
       ser.read_type_a("desired_root_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularVelocity());
+
+      ser.read_type_e("desired_joint_accelerations", data.getDesiredJointAccelerations());
+      ser.read_type_a("desired_root_linear_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootLinearAcceleration());
+
+      ser.read_type_a("desired_root_angular_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularAcceleration());
 
       ser.read_type_e("support_region", data.getSupportRegion());
       data.setSolutionQuality(ser.read_type_6("solution_quality"));

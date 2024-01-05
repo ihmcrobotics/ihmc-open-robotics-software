@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.trajectories.trajectorypoints;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import us.ihmc.robotics.alphaToAlpha.RampedClippedAlphaToAlpha;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.YoOneDoFWaypoint;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -39,6 +40,12 @@ public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointBasics
    }
 
    @Override
+   public void setAcceleration(double acceleration)
+   {
+      waypoint.setAcceleration(acceleration);
+   }
+
+   @Override
    public double getPosition()
    {
       return waypoint.getPosition();
@@ -48,6 +55,12 @@ public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointBasics
    public double getVelocity()
    {
       return waypoint.getVelocity();
+   }
+
+   @Override
+   public double getAcceleration()
+   {
+      return waypoint.getAcceleration();
    }
 
    @Override

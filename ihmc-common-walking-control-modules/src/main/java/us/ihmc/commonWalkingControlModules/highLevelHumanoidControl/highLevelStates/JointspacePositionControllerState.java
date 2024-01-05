@@ -465,7 +465,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
 
       private void queueInitialPoint(double initialPosition)
       {
-         pointQueue.addLast().set(0.0, initialPosition, 0.0);
+         pointQueue.addLast().set(0.0, initialPosition, 0.0, 0.0);
       }
 
       private boolean queuePoint(OneDoFTrajectoryPoint trajectoryPoint)
@@ -482,10 +482,10 @@ public class JointspacePositionControllerState extends HighLevelControllerState
 
       public void queuePointAtTimeWithZeroVelocity(double time, double jointPosition)
       {
-         queuePoint(jointPosition, 0.0, time);
+         queuePoint(jointPosition, 0.0, 0.0, time);
       }
 
-      private boolean queuePoint(double q, double qd, double t)
+      private boolean queuePoint(double q, double qd, double qdd, double t)
       {
          if (atCapacityLimit(pointQueue))
          {
@@ -493,7 +493,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
          }
 
          OneDoFTrajectoryPoint point = pointQueue.addLast();
-         point.set(t, q, qd);
+         point.set(t, q, qd, qdd);
          return true;
       }
 

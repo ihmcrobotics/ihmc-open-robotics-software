@@ -66,10 +66,10 @@ public class HeightOffsetHandler
             offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
             double previous = offsetHeightTrajectoryGenerator.getValue();
             offsetHeightTrajectoryGenerator.clear();
-            offsetHeightTrajectoryGenerator.appendWaypoint(0.0, previous, 0.0);
-            offsetHeightTrajectoryGenerator.appendWaypoint(offsetHeightAboveGroundTrajectoryTimeProvider.getValue(),
-                                                           offsetHeightAboveGround.getDoubleValue(),
-                                                           0.0);
+            offsetHeightTrajectoryGenerator.appendWaypointWithZeroAcceleration(0.0, previous, 0.0);
+            offsetHeightTrajectoryGenerator.appendWaypointWithZeroAcceleration(offsetHeightAboveGroundTrajectoryTimeProvider.getValue(),
+                                                                               offsetHeightAboveGround.getDoubleValue(),
+                                                                               0.0);
             offsetHeightTrajectoryGenerator.initialize();
          }
       });
@@ -98,7 +98,7 @@ public class HeightOffsetHandler
       offsetHeightAboveGround.set(0.0, false);
       offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
       offsetHeightTrajectoryGenerator.clear();
-      offsetHeightTrajectoryGenerator.appendWaypoint(0.0, 0.0, 0.0);
+      offsetHeightTrajectoryGenerator.appendWaypointWithZeroAcceleration(0.0, 0.0, 0.0);
       offsetHeightTrajectoryGenerator.initialize();
    }
 
@@ -135,7 +135,7 @@ public class HeightOffsetHandler
       offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
 
       offsetHeightTrajectoryGenerator.clear();
-      offsetHeightTrajectoryGenerator.appendWaypoint(0.0, currentHeightOffset, 0.0);
+      offsetHeightTrajectoryGenerator.appendWaypointWithZeroAcceleration(0.0, currentHeightOffset, 0.0);
       offsetHeightTrajectoryGenerator.initialize();
       isTrajectoryOffsetStopped.set(false);
    }
@@ -185,7 +185,7 @@ public class HeightOffsetHandler
             isReadyToHandleQueuedCommands.set(false);
             clearCommandQueue(INVALID_MESSAGE_ID);
             offsetHeightTrajectoryGenerator.clear();
-            offsetHeightTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
+            offsetHeightTrajectoryGenerator.appendWaypointWithZeroAcceleration(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
             offsetHeightTrajectoryGenerator.initialize();
          }
          return success;
@@ -215,11 +215,11 @@ public class HeightOffsetHandler
          double time = trajectoryPoint.getTime();
          double z = fromAbsoluteToOffset(trajectoryPoint.getPositionZ(), currentDesiredHeight);
          double zDot = trajectoryPoint.getLinearVelocityZ();
-         offsetHeightTrajectoryGenerator.appendWaypoint(time, z, zDot);
+         offsetHeightTrajectoryGenerator.appendWaypointWithZeroAcceleration(time, z, zDot);
 
          time = euclideanTrajectory.getStreamIntegrationDuration();
          z += time * zDot;
-         offsetHeightTrajectoryGenerator.appendWaypoint(time, z, zDot);
+         offsetHeightTrajectoryGenerator.appendWaypointWithZeroAcceleration(time, z, zDot);
 
          offsetHeightTrajectoryGenerator.initialize();
          isTrajectoryOffsetStopped.set(false);
@@ -271,7 +271,7 @@ public class HeightOffsetHandler
 
       if (command.getEuclideanTrajectory().getTrajectoryPoint(0).getTime() > firstTrajectoryPointTime + 1.0e-5)
       {
-         offsetHeightTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
+         offsetHeightTrajectoryGenerator.appendWaypointWithZeroAcceleration(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
       }
 
       int numberOfTrajectoryPoints = queueExceedingTrajectoryPointsIfNeeded(command);
@@ -296,7 +296,7 @@ public class HeightOffsetHandler
       tempPoint.changeFrame(worldFrame);
       double z = fromAbsoluteToOffset(tempPoint.getZ(), currentDesiredHeight);
       double zDot = trajectoryPoint.getLinearVelocityZ();
-      offsetHeightTrajectoryGenerator.appendWaypoint(time, z, zDot);
+      offsetHeightTrajectoryGenerator.appendWaypointWithZeroAcceleration(time, z, zDot);
    }
 
    private double fromAbsoluteToOffset(double zInWorld, double currentDesiredHeight)
@@ -347,8 +347,8 @@ public class HeightOffsetHandler
    {
       offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
       offsetHeightTrajectoryGenerator.clear();
-      offsetHeightTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
-      offsetHeightTrajectoryGenerator.appendWaypoint(trajectoryTime, 0.0, 0.0);
+      offsetHeightTrajectoryGenerator.appendWaypointWithZeroAcceleration(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
+      offsetHeightTrajectoryGenerator.appendWaypointWithZeroAcceleration(trajectoryTime, 0.0, 0.0);
       offsetHeightTrajectoryGenerator.initialize();
       isTrajectoryOffsetStopped.set(false);
    }

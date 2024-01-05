@@ -15,7 +15,7 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9cad471fd69c8ef4e2ac5d2ea44270d4423cf566d3cec4849f4b0f8385a1a781";
+   		return "0c63a0abd12fa5f45b0cc8bd5ff82a1929ce9f91401a9a907630117e4acdb53d";
    }
    
    @Override

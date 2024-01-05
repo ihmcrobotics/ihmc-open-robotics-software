@@ -5,9 +5,12 @@ import java.util.Arrays;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialVectorBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
@@ -48,8 +51,10 @@ public class YoKinematicsToolboxOutputStatus
    private final YoInteger jointNameHash;
    private final YoDouble[] desiredJointAngles;
    private final YoDouble[] desiredJointVelocities;
+   private final YoDouble[] desiredJointAccelerations;
    private final YoFramePose3D desiredRootJointPose;
    private final YoFixedFrameSpatialVector desiredRootJointVelocity;
+   private final YoFixedFrameSpatialVector desiredRootJointAcceleration;
 
    public YoKinematicsToolboxOutputStatus(String namePrefix, FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints, YoRegistry parentRegistry)
    {
@@ -64,16 +69,19 @@ public class YoKinematicsToolboxOutputStatus
       numberOfJoints = oneDoFJoints.length;
       desiredJointAngles = new YoDouble[numberOfJoints];
       desiredJointVelocities = new YoDouble[numberOfJoints];
+      desiredJointAccelerations = new YoDouble[numberOfJoints];
 
       for (int i = 0; i < numberOfJoints; i++)
       {
          String jointName = oneDoFJoints[i].getName();
          desiredJointAngles[i] = new YoDouble("q_d_" + namePrefix + "_" + jointName, registry);
          desiredJointVelocities[i] = new YoDouble("qd_d_" + namePrefix + "_" + jointName, registry);
+         desiredJointAccelerations[i] = new YoDouble("qdd_d_" + namePrefix + "_" + jointName, registry);
       }
 
       desiredRootJointPose = new YoFramePose3D(namePrefix + "Desired" + rootJoint.getName(), ReferenceFrame.getWorldFrame(), registry);
       desiredRootJointVelocity = new YoFixedFrameSpatialVector(namePrefix + "DesiredVelocity" + rootJoint.getName(), ReferenceFrame.getWorldFrame(), registry);
+      desiredRootJointAcceleration = new YoFixedFrameSpatialVector(namePrefix + "DesiredAcceleration" + rootJoint.getName(), ReferenceFrame.getWorldFrame(), registry);
    }
 
    public void setToNaN()
@@ -83,8 +91,31 @@ public class YoKinematicsToolboxOutputStatus
          desiredJointAngle.setToNaN();
       for (YoDouble desiredJointVelocity : desiredJointVelocities)
          desiredJointVelocity.setToNaN();
+      for (YoDouble desiredJointAcceleration : desiredJointAccelerations)
+         desiredJointAcceleration.setToNaN();
       desiredRootJointPose.setToNaN();
       desiredRootJointVelocity.setToNaN();
+      desiredRootJointAcceleration.setToNaN();
+   }
+
+   public int getJointNameHash()
+   {
+      return jointNameHash.getIntegerValue();
+   }
+
+   public double getDesiredJointVelocity(int i)
+   {
+      return desiredJointVelocities[i].getValue();
+   }
+
+   public FrameVector3DReadOnly getDesiredRootLinearVelocity()
+   {
+      return desiredRootJointVelocity.getLinearPart();
+   }
+
+   public FrameVector3DReadOnly getDesiredRootAngularVelocity()
+   {
+      return desiredRootJointVelocity.getAngularPart();
    }
 
    public void set(KinematicsToolboxOutputStatus status)
@@ -102,6 +133,7 @@ public class YoKinematicsToolboxOutputStatus
 
       desiredRootJointPose.set(status.getDesiredRootPosition(), status.getDesiredRootOrientation());
       desiredRootJointVelocity.set(status.getDesiredRootAngularVelocity(), status.getDesiredRootLinearVelocity());
+      desiredRootJointAcceleration.set(status.getDesiredRootAngularAcceleration(), status.getDesiredRootLinearAcceleration());
    }
 
    public void set(YoKinematicsToolboxOutputStatus other)
@@ -113,9 +145,11 @@ public class YoKinematicsToolboxOutputStatus
       {
          desiredJointAngles[i].set(other.desiredJointAngles[i].getValue());
          desiredJointVelocities[i].set(other.desiredJointVelocities[i].getValue());
+         desiredJointAccelerations[i].set(other.desiredJointAccelerations[i].getValue());
       }
       desiredRootJointPose.set(other.desiredRootJointPose);
       desiredRootJointVelocity.set(other.desiredRootJointVelocity);
+      desiredRootJointAcceleration.set(other.desiredRootJointAcceleration);
    }
 
    private final KinematicsToolboxOutputStatus interpolationStatus = new KinematicsToolboxOutputStatus();
@@ -146,6 +180,16 @@ public class YoKinematicsToolboxOutputStatus
       desiredRootJointVelocity.scale(scaleFactor);
    }
 
+   public void scaleAccelerations(double scaleFactor)
+   {
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         desiredJointAccelerations[i].set(desiredJointAccelerations[i].getValue() * scaleFactor);
+      }
+      desiredRootJointAcceleration.scale(scaleFactor);
+   }
+
+
    private final Vector4D quaternionDot = new Vector4D();
    private final QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
 
@@ -170,6 +214,22 @@ public class YoKinematicsToolboxOutputStatus
                                                                 desiredRootJointVelocity.getAngularPart());
    }
 
+   public void setDesiredAccelerationsByFiniteDifference(YoKinematicsToolboxOutputStatus previous, YoKinematicsToolboxOutputStatus current, double duration)
+   {
+      if (previous.getJointNameHash() != current.getJointNameHash())
+         throw new RuntimeException("Output status are not compatible.");
+
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         double qdd = (current.getDesiredJointVelocity(i) - previous.getDesiredJointVelocity(i)) / duration;
+         desiredJointAccelerations[i].set(qdd);
+      }
+
+      desiredRootJointAcceleration.getLinearPart().sub(current.getDesiredRootLinearVelocity(), previous.getDesiredRootLinearVelocity());
+      desiredRootJointAcceleration.getAngularPart().sub(current.getDesiredRootAngularVelocity(), previous.getDesiredRootAngularVelocity());
+      desiredRootJointAcceleration.scale(1.0 / duration);
+   }
+
    private final KinematicsToolboxOutputStatus status = new KinematicsToolboxOutputStatus();
 
    public KinematicsToolboxOutputStatus getStatus()
@@ -179,17 +239,21 @@ public class YoKinematicsToolboxOutputStatus
 
       status.getDesiredJointAngles().reset();
       status.getDesiredJointVelocities().reset();
+      status.getDesiredJointAccelerations().reset();
 
       for (int i = 0; i < numberOfJoints; i++)
       {
          status.getDesiredJointAngles().add((float) desiredJointAngles[i].getValue());
          status.getDesiredJointVelocities().add((float) desiredJointVelocities[i].getValue());
+         status.getDesiredJointAccelerations().add((float) desiredJointAccelerations[i].getValue());
       }
 
       status.getDesiredRootPosition().set(desiredRootJointPose.getPosition());
       status.getDesiredRootOrientation().set(desiredRootJointPose.getOrientation());
       status.getDesiredRootLinearVelocity().set(desiredRootJointVelocity.getLinearPart());
       status.getDesiredRootAngularVelocity().set(desiredRootJointVelocity.getAngularPart());
+      status.getDesiredRootLinearAcceleration().set(desiredRootJointAcceleration.getLinearPart());
+      status.getDesiredRootAngularAcceleration().set(desiredRootJointAcceleration.getAngularPart());
       return status;
    }
 }

@@ -36,6 +36,14 @@ geometry_msgs/Vector3 desired_root_linear_velocity
 
 geometry_msgs/Vector3 desired_root_angular_velocity
 
+# Desired joint accelerations might be empty.
+float32[] desired_joint_accelerations
+
+# Desired acceleration of root might be empty
+geometry_msgs/Vector3 desired_root_linear_acceleration
+
+geometry_msgs/Vector3 desired_root_angular_acceleration
+
 # Support region used by the toolbox
 geometry_msgs/Point[] support_region
 

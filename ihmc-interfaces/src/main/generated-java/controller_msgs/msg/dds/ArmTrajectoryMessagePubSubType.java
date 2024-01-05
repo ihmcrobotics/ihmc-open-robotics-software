@@ -15,7 +15,7 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f280f8abbb3e79c8f1b46b98a20fe9c1f0decdfbe4c011456f9b25906010fc5d";
+   		return "80f0e8d765e8a1d50c652294fdf398c918eb43fc7905472613c36e0bd2eb9d5a";
    }
    
    @Override

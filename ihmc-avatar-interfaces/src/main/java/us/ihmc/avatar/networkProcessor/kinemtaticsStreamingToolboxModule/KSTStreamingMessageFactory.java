@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -43,6 +44,9 @@ public class KSTStreamingMessageFactory
 
    private final OneDoFJointBasics[] neckJoints;
    private final SideDependentList<OneDoFJointBasics[]> armJoints = new SideDependentList<>();
+
+   private boolean enableVelocity = false;
+   private boolean enableAcceleration = false;
 
    public KSTStreamingMessageFactory(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
@@ -79,11 +83,14 @@ public class KSTStreamingMessageFactory
       output = message;
    }
 
-   private boolean enableVelocity = false;
-
    public void setEnableVelocity(boolean enable)
    {
       enableVelocity = enable;
+   }
+
+   public void setEnableAcceleration(boolean enable)
+   {
+      enableAcceleration = enable;
    }
 
    public void computeArmStreamingMessages()
@@ -104,12 +111,14 @@ public class KSTStreamingMessageFactory
 
       armStreamingMessage.getPositions().reset();
       armStreamingMessage.getVelocities().reset();
+      armStreamingMessage.getAccelerations().reset();
 
       for (int i = 0; i < numberOfArmJoints; i++)
       {
          OneDoFJointBasics joint = joints[i];
          armStreamingMessage.getPositions().add(getJointPosition(joint));
          armStreamingMessage.getVelocities().add((float) (enableVelocity ? joint.getQd() : 0.0));
+         armStreamingMessage.getAccelerations().add((float) (enableAcceleration ? joint.getQdd() : 0.0));
       }
 
       if (robotSide == RobotSide.LEFT)
@@ -126,6 +135,8 @@ public class KSTStreamingMessageFactory
 
    private final FramePose3D desiredPose = new FramePose3D(worldFrame);
    private final SpatialVector desiredSpatialVelocity = new SpatialVector();
+   private final SpatialVector desiredSpatialAcceleration = new SpatialVector();
+   private final SpatialVector currentSpatialAcceleration = new SpatialVector();
 
    public void computeHandStreamingMessage(RobotSide robotSide)
    {
@@ -140,13 +151,17 @@ public class KSTStreamingMessageFactory
       MovingReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
       desiredPose.setToZero(handControlFrame);
       desiredPose.changeFrame(worldFrame);
+
+      // FIXME we likely want to use a non-zero acceleration here.
+      currentSpatialAcceleration.setToZero(handControlFrame);
       spatialVelocity(handControlFrame, worldFrame, enableVelocity, desiredSpatialVelocity);
+      spatialAcceleration(currentSpatialAcceleration, worldFrame, enableAcceleration, desiredSpatialAcceleration);
       SE3StreamingMessage handStreamingMessage = select(robotSide, output.getLeftHandStreamingMessage(), output.getRightHandStreamingMessage());
       packCustomControlFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame(), handControlFrame, handStreamingMessage);
       handStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.getFrameNameHashCode());
       handStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
-      packSE3TrajectoryPointMessage(desiredPose, desiredSpatialVelocity, handStreamingMessage);
+      packSE3TrajectoryPointMessage(desiredPose, desiredSpatialVelocity, desiredSpatialAcceleration, handStreamingMessage);
 
       if (robotSide == RobotSide.LEFT)
          output.setHasLeftHandStreamingMessage(true);
@@ -164,19 +179,23 @@ public class KSTStreamingMessageFactory
 
       neckStreamingMessage.getPositions().reset();
       neckStreamingMessage.getVelocities().reset();
+      neckStreamingMessage.getAccelerations().reset();
 
       for (int i = 0; i < numberOfJoints; i++)
       {
          OneDoFJointBasics joint = neckJoints[i];
          neckStreamingMessage.getPositions().add((float) getJointPosition(joint));
          neckStreamingMessage.getVelocities().add((float) (enableVelocity ? joint.getQd() : 0.0));
+         neckStreamingMessage.getAccelerations().add((float) (enableAcceleration ? joint.getQdd() : 0.0));
       }
 
       output.setHasNeckStreamingMessage(true);
    }
 
+   private final FrameVector3D currentAngularAcceleration = new FrameVector3D();
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
+   private final FrameVector3D desiredAngularAcceleration = new FrameVector3D();
 
    public void computeChestStreamingMessage()
    {
@@ -192,11 +211,15 @@ public class KSTStreamingMessageFactory
       desiredOrientation.changeFrame(worldFrame);
       angularVelocity(chestFrame, worldFrame, enableVelocity, desiredAngularVelocity);
 
+      // FIXME we likely want to use a non-zero acceleration here.
+      currentAngularAcceleration.setToZero(fullRobotModel.getChest().getBodyFixedFrame());
+      angularAcceleration(currentAngularAcceleration, worldFrame, enableAcceleration, desiredAngularAcceleration);
+
       SO3StreamingMessage chestStreamingMessage = output.getChestStreamingMessage();
       chestStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.getFrameNameHashCode());
       chestStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
-      packSO3TrajectoryPointMessage(desiredOrientation, desiredAngularVelocity, chestStreamingMessage);
+      packSO3TrajectoryPointMessage(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration, chestStreamingMessage);
 
       output.setHasChestStreamingMessage(true);
    }
@@ -215,11 +238,15 @@ public class KSTStreamingMessageFactory
       desiredPose.changeFrame(worldFrame);
       spatialVelocity(pelvisFrame, worldFrame, enableVelocity, desiredSpatialVelocity);
 
+      // FIXME we likely want to use a non-zero acceleration here.
+      currentSpatialAcceleration.setToZero(fullRobotModel.getChest().getBodyFixedFrame());
+      spatialAcceleration(currentSpatialAcceleration, worldFrame, enableAcceleration, desiredSpatialAcceleration);
+
       SE3StreamingMessage pelvisStreamingMessage = output.getPelvisStreamingMessage();
       pelvisStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.getFrameNameHashCode());
       pelvisStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
-      packSE3TrajectoryPointMessage(desiredPose, desiredSpatialVelocity, pelvisStreamingMessage);
+      packSE3TrajectoryPointMessage(desiredPose, desiredSpatialVelocity, desiredSpatialAcceleration, pelvisStreamingMessage);
 
       output.setHasPelvisStreamingMessage(true);
    }
@@ -245,6 +272,22 @@ public class KSTStreamingMessageFactory
       }
    }
 
+   private static void angularAcceleration(FrameVector3DReadOnly angularAcceleration,
+                                           ReferenceFrame outputFrame,
+                                           boolean enableAcceleration,
+                                           FrameVector3DBasics angularAccelerationToPack)
+   {
+      if (!enableAcceleration)
+      {
+         angularAccelerationToPack.setToZero(outputFrame);
+      }
+      else
+      {
+         angularAccelerationToPack.setIncludingFrame(angularAcceleration);
+         angularAccelerationToPack.changeFrame(outputFrame);
+      }
+   }
+
    private static void spatialVelocity(MovingReferenceFrame movingFrame,
                                        ReferenceFrame outputFrame,
                                        boolean enableVelocity,
@@ -261,6 +304,22 @@ public class KSTStreamingMessageFactory
       }
    }
 
+   private static void spatialAcceleration(SpatialVectorReadOnly spatialAcceleration,
+                                           ReferenceFrame outputFrame,
+                                           boolean enableAcceleration,
+                                           SpatialVectorBasics spatialAccelerationToPack)
+   {
+      if (!enableAcceleration)
+      {
+         spatialAccelerationToPack.setToZero(outputFrame);
+      }
+      else
+      {
+         spatialAccelerationToPack.setIncludingFrame(spatialAcceleration);
+         spatialAccelerationToPack.changeFrame(outputFrame);
+      }
+   }
+
    public static float getJointPosition(OneDoFJointReadOnly joint)
    {
       return (float) MathTools.clamp((float) joint.getQ(), joint.getJointLimitLower() + 1.0e-7, joint.getJointLimitUpper() - 1.0e-7);
@@ -274,18 +333,24 @@ public class KSTStreamingMessageFactory
       controlFrame.transformFromThisToDesiredFrame(endEffectorFrame, controlFramePose);
    }
 
-   public static void packSO3TrajectoryPointMessage(Orientation3DReadOnly orientation, Vector3DReadOnly angularVelocity, SO3StreamingMessage messageToPack)
+   public static void packSO3TrajectoryPointMessage(Orientation3DReadOnly orientation, Vector3DReadOnly angularVelocity, Vector3DReadOnly angularAcceleration, SO3StreamingMessage messageToPack)
    {
       messageToPack.getOrientation().set(orientation);
       messageToPack.getAngularVelocity().set(angularVelocity);
+      messageToPack.getAngularAcceleration().set(angularAcceleration);
    }
 
-   public static void packSE3TrajectoryPointMessage(Pose3DReadOnly pose, SpatialVectorReadOnly spatialVelocity, SE3StreamingMessage messageToPack)
+   public static void packSE3TrajectoryPointMessage(Pose3DReadOnly pose,
+                                                    SpatialVectorReadOnly spatialVelocity,
+                                                    SpatialVectorReadOnly spatialAcceleration,
+                                                    SE3StreamingMessage messageToPack)
    {
       messageToPack.getPosition().set(pose.getPosition());
       messageToPack.getOrientation().set(pose.getOrientation());
       messageToPack.getLinearVelocity().set(spatialVelocity.getLinearPart());
       messageToPack.getAngularVelocity().set(spatialVelocity.getAngularPart());
+      messageToPack.getLinearAcceleration().set(spatialAcceleration.getLinearPart());
+      messageToPack.getAngularAcceleration().set(spatialAcceleration.getAngularPart());
    }
 
    public FullHumanoidRobotModel getFullRobotModel()

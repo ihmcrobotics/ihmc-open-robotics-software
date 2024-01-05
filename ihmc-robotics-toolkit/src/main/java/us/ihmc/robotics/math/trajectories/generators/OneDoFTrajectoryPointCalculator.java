@@ -17,6 +17,7 @@ public class OneDoFTrajectoryPointCalculator
 
    private final TDoubleArrayList positions = new TDoubleArrayList();
    private final TDoubleArrayList velocities = new TDoubleArrayList();
+   private final TDoubleArrayList accelerations = new TDoubleArrayList();
    private final TDoubleArrayList times = new TDoubleArrayList();
 
    public void clear()
@@ -24,6 +25,7 @@ public class OneDoFTrajectoryPointCalculator
       positions.clear();
       times.clear();
       velocities.clear();
+      accelerations.clear();
       trajectory.clear();
    }
 
@@ -71,22 +73,26 @@ public class OneDoFTrajectoryPointCalculator
       times.clear();
       times.add(0.0);
       velocities.add(0.0);
+      accelerations.add(0.0);
       TDoubleArrayList velocityToPack = new TDoubleArrayList();
       for (int i = 0; i < waypoints.size(); i++)
       {
          times.add(trajectoryPointOptimizer.getWaypointTime(i) * trajectoryTime);
          trajectoryPointOptimizer.getWaypointVelocity(velocityToPack, i);
          velocities.add(velocityToPack.get(0) / trajectoryTime);
+         accelerations.add(0.0);
       }
       times.add(trajectoryTime);
       velocities.add(0.0);
+      accelerations.add(0.0);
 
       for (int i = 0; i < positions.size(); i++)
       {
          double time = times.get(i);
          double position = positions.get(i);
          double velocity = velocities.get(i);
-         trajectory.addTrajectoryPoint(time, position, velocity);
+         double acceleration = accelerations.get(i);
+         trajectory.addTrajectoryPoint(time, position, velocity, acceleration);
       }
    }
 

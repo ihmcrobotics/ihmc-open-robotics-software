@@ -26,6 +26,7 @@ public class KinematicsStreamingToolboxParameters
    private double defaultLinearRateLimit;
    private double defaultAngularRateLimit;
    private double outputJointVelocityScale;
+   private double outputJointAccelerationScale;
 
    private boolean minimizeAngularMomentum;
    private boolean minimizeLinearMomentum;
@@ -37,6 +38,7 @@ public class KinematicsStreamingToolboxParameters
    private double inputPoseLPFBreakFrequency;
    private double inputWeightDecayDuration;
    private double inputVelocityDecayDuration;
+   private double inputAccelerationDecayDuration;
    private boolean useStreamingPublisher;
    private double publishingPeriod;
 
@@ -69,6 +71,7 @@ public class KinematicsStreamingToolboxParameters
       defaultLinearRateLimit = 1.5;
       defaultAngularRateLimit = 10.0;
       outputJointVelocityScale = 0.75;
+      outputJointAccelerationScale = 0.6;
 
       minimizeAngularMomentum = true;
       minimizeLinearMomentum = false;
@@ -80,6 +83,7 @@ public class KinematicsStreamingToolboxParameters
       inputPoseLPFBreakFrequency = 4.0;
       inputWeightDecayDuration = 3.0;
       inputVelocityDecayDuration = 0.5;
+      inputAccelerationDecayDuration = 0.1;
 
       useStreamingPublisher = true;
       publishingPeriod = 5.0 * 0.006;
@@ -174,6 +178,11 @@ public class KinematicsStreamingToolboxParameters
       return outputJointVelocityScale;
    }
 
+   public double getOutputJointAccelerationScale()
+   {
+      return outputJointAccelerationScale;
+   }
+
    public boolean isMinimizeAngularMomentum()
    {
       return minimizeAngularMomentum;
@@ -212,6 +221,11 @@ public class KinematicsStreamingToolboxParameters
    public double getInputVelocityDecayDuration()
    {
       return inputVelocityDecayDuration;
+   }
+
+   public double getInputAccelerationDecayDuration()
+   {
+      return inputAccelerationDecayDuration;
    }
 
    public boolean getUseStreamingPublisher()
@@ -337,6 +351,11 @@ public class KinematicsStreamingToolboxParameters
    public void setInputVelocityDecayDuration(double inputVelocityDecayDuration)
    {
       this.inputVelocityDecayDuration = inputVelocityDecayDuration;
+   }
+
+   public void setInputAccelerationDecayDuration(double inputAccelerationDecayDuration)
+   {
+      this.inputAccelerationDecayDuration = inputAccelerationDecayDuration;
    }
 
    public void setUseStreamingPublisher(boolean useStreamingPublisher)

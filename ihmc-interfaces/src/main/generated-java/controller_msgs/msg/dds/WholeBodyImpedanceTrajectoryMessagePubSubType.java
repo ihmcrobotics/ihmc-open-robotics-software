@@ -15,7 +15,7 @@ public class WholeBodyImpedanceTrajectoryMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ccdefb882d522754c1c0ac47585d5b57c7d0306e1d0b4f19ec5e784acb8c01d0";
+   		return "daf7832898e190114007c783b5d5064fdfbbc23f7c9d493e0ac00ed83e752358";
    }
    
    @Override

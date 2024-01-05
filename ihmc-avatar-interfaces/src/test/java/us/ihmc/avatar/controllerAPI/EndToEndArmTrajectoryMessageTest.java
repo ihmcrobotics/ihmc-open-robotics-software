@@ -1196,7 +1196,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       double velocity = ((YoDouble) scs.findVariable(trajectoryName, velocityName)).getDoubleValue();
 
       OneDoFTrajectoryPoint trajectoryPoint = new OneDoFTrajectoryPoint();
-      trajectoryPoint.set(time, position, velocity);
+      trajectoryPoint.set(time, position, velocity, 0.0);
       return trajectoryPoint;
    }
 

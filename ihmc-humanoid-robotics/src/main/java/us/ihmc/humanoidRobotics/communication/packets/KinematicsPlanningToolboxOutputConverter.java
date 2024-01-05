@@ -215,8 +215,9 @@ public class KinematicsPlanningToolboxOutputConverter
             OneDoFJointBasics oneDoFJoint = converter.getFullRobotModel().getOneDoFJointByName(jointName);
             double desiredPosition = MathTools.clamp(oneDoFJoint.getQ(), oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
             double desiredVelocity = oneDoFJoint.getQd();
+            double desiredAcceleration = oneDoFJoint.getQdd();
 
-            trajectoryPoints.addTrajectoryPoint(keyFrameTimes.get(i), desiredPosition, desiredVelocity);
+            trajectoryPoints.addTrajectoryPoint(keyFrameTimes.get(i), desiredPosition, desiredVelocity, desiredAcceleration);
          }
          OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = HumanoidMessageTools.createOneDoFJointTrajectoryMessage(trajectoryPoints);
 

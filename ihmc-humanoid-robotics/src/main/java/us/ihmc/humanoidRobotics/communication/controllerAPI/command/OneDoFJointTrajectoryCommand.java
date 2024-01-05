@@ -22,7 +22,7 @@ public class OneDoFJointTrajectoryCommand extends OneDoFTrajectoryPointList impl
    {
       for (int i = 0; i < 10; i++)
       {
-         addTrajectoryPoint(i + random.nextDouble(), random.nextDouble() * 2.0 * Math.PI, random.nextDouble() * random.nextInt(20));
+         addTrajectoryPoint(i + random.nextDouble(), random.nextDouble() * 2.0 * Math.PI, random.nextDouble() * random.nextInt(20), random.nextDouble() * random.nextInt(40));
       }
       weight = random.nextDouble() * random.nextInt(1000);
    }
@@ -56,7 +56,7 @@ public class OneDoFJointTrajectoryCommand extends OneDoFTrajectoryPointList impl
       for (int i = 0; i < numberOfPoints; i++)
       {
          TrajectoryPoint1DMessage trajectoryPoint1DMessage = trajectoryPointMessages.get(i);
-         this.addTrajectoryPoint(trajectoryPoint1DMessage.getTime(), trajectoryPoint1DMessage.getPosition(), trajectoryPoint1DMessage.getVelocity());
+         this.addTrajectoryPoint(trajectoryPoint1DMessage.getTime(), trajectoryPoint1DMessage.getPosition(), trajectoryPoint1DMessage.getVelocity(), trajectoryPoint1DMessage.getAcceleration());
       }
       setWeight(message.getWeight());
    }

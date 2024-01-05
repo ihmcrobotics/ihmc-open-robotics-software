@@ -8,6 +8,8 @@ public interface OneDoFWaypointBasics extends OneDoFWaypointReadOnly, Clearable
 
    void setVelocity(double velocity);
 
+   void setAcceleration(double acceleration);
+
    default void setPositionToZero()
    {
       setPosition(0.0);
@@ -16,6 +18,11 @@ public interface OneDoFWaypointBasics extends OneDoFWaypointReadOnly, Clearable
    default void setVelocityToZero()
    {
       setVelocity(0.0);
+   }
+
+   default void setAccelerationToZero()
+   {
+      setAcceleration(0.0);
    }
 
    default void setPositionToNaN()
@@ -28,16 +35,23 @@ public interface OneDoFWaypointBasics extends OneDoFWaypointReadOnly, Clearable
       setVelocity(Double.NaN);
    }
 
-   default void set(double position, double velocity)
+   default void setAccelerationToNaN()
+   {
+      setAcceleration(Double.NaN);
+   }
+
+   default void set(double position, double velocity, double acceleration)
    {
       setPosition(position);
       setVelocity(velocity);
+      setAcceleration(acceleration);
    }
 
    default void set(OneDoFWaypointReadOnly other)
    {
       setPosition(other.getPosition());
       setVelocity(other.getVelocity());
+      setAcceleration(other.getAcceleration());
    }
 
    @Override
@@ -45,6 +59,7 @@ public interface OneDoFWaypointBasics extends OneDoFWaypointReadOnly, Clearable
    {
       setPositionToNaN();
       setVelocityToNaN();
+      setAccelerationToNaN();
    }
 
    @Override
@@ -52,6 +67,7 @@ public interface OneDoFWaypointBasics extends OneDoFWaypointReadOnly, Clearable
    {
       setPositionToZero();
       setVelocityToZero();
+      setAccelerationToZero();
    }
 
    @Override
