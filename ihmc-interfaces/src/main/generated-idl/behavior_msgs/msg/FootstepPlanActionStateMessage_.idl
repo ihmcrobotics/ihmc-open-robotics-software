@@ -4,6 +4,7 @@
 #include "behavior_msgs/msg/./ActionNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionFootstepStateMessage_.idl"
+#include "behavior_msgs/msg/./FootstepPlanActionStateBasicsMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -26,14 +27,7 @@ module behavior_msgs
          * The footsteps, with a maximum of 50
          */
         sequence<behavior_msgs::msg::dds::FootstepPlanActionFootstepStateMessage, 50> footsteps;
-        /**
-         * Total number of footsteps; used for walking actions
-         */
-        unsigned short total_number_of_footsteps;
-        /**
-         * Incomplete footsteps; used for walking actions
-         */
-        unsigned short number_of_incomplete_footsteps;
+        behavior_msgs::msg::dds::FootstepPlanActionStateBasicsMessage footstep_plan_state_basics;
       };
     };
   };

@@ -12,10 +12,7 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
             * Parent definition fields
             */
    public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
-   /**
-            * Name of the frame the this action is expressed in
-            */
-   public java.lang.StringBuilder parent_frame_name_;
+   public behavior_msgs.msg.dds.FootstepPlanActionDefinitionBasicsMessage definition_basics_;
    /**
             * Transform that expresses the walk gizmo pose in the parent frame
             */
@@ -28,19 +25,11 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
             * Right goal foot transform to the walk gizmo
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage right_goal_foot_transform_to_gizmo_;
-   /**
-            * Swing duration
-            */
-   public double swing_duration_;
-   /**
-            * Transfer duration
-            */
-   public double transfer_duration_;
 
    public WalkActionDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
-      parent_frame_name_ = new java.lang.StringBuilder(255);
+      definition_basics_ = new behavior_msgs.msg.dds.FootstepPlanActionDefinitionBasicsMessage();
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
       left_goal_foot_transform_to_gizmo_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
       right_goal_foot_transform_to_gizmo_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
@@ -55,16 +44,10 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
    public void set(WalkActionDefinitionMessage other)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
-      parent_frame_name_.setLength(0);
-      parent_frame_name_.append(other.parent_frame_name_);
-
+      behavior_msgs.msg.dds.FootstepPlanActionDefinitionBasicsMessagePubSubType.staticCopy(other.definition_basics_, definition_basics_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.left_goal_foot_transform_to_gizmo_, left_goal_foot_transform_to_gizmo_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.right_goal_foot_transform_to_gizmo_, right_goal_foot_transform_to_gizmo_);
-      swing_duration_ = other.swing_duration_;
-
-      transfer_duration_ = other.transfer_duration_;
-
    }
 
 
@@ -76,28 +59,10 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
       return definition_;
    }
 
-   /**
-            * Name of the frame the this action is expressed in
-            */
-   public void setParentFrameName(java.lang.String parent_frame_name)
-   {
-      parent_frame_name_.setLength(0);
-      parent_frame_name_.append(parent_frame_name);
-   }
 
-   /**
-            * Name of the frame the this action is expressed in
-            */
-   public java.lang.String getParentFrameNameAsString()
+   public behavior_msgs.msg.dds.FootstepPlanActionDefinitionBasicsMessage getDefinitionBasics()
    {
-      return getParentFrameName().toString();
-   }
-   /**
-            * Name of the frame the this action is expressed in
-            */
-   public java.lang.StringBuilder getParentFrameName()
-   {
-      return parent_frame_name_;
+      return definition_basics_;
    }
 
 
@@ -127,36 +92,6 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
       return right_goal_foot_transform_to_gizmo_;
    }
 
-   /**
-            * Swing duration
-            */
-   public void setSwingDuration(double swing_duration)
-   {
-      swing_duration_ = swing_duration;
-   }
-   /**
-            * Swing duration
-            */
-   public double getSwingDuration()
-   {
-      return swing_duration_;
-   }
-
-   /**
-            * Transfer duration
-            */
-   public void setTransferDuration(double transfer_duration)
-   {
-      transfer_duration_ = transfer_duration;
-   }
-   /**
-            * Transfer duration
-            */
-   public double getTransferDuration()
-   {
-      return transfer_duration_;
-   }
-
 
    public static Supplier<WalkActionDefinitionMessagePubSubType> getPubSubType()
    {
@@ -176,15 +111,10 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.parent_frame_name_, other.parent_frame_name_, epsilon)) return false;
-
+      if (!this.definition_basics_.epsilonEquals(other.definition_basics_, epsilon)) return false;
       if (!this.transform_to_parent_.epsilonEquals(other.transform_to_parent_, epsilon)) return false;
       if (!this.left_goal_foot_transform_to_gizmo_.epsilonEquals(other.left_goal_foot_transform_to_gizmo_, epsilon)) return false;
       if (!this.right_goal_foot_transform_to_gizmo_.epsilonEquals(other.right_goal_foot_transform_to_gizmo_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_duration_, other.swing_duration_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_duration_, other.transfer_duration_, epsilon)) return false;
-
 
       return true;
    }
@@ -199,15 +129,10 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
       WalkActionDefinitionMessage otherMyClass = (WalkActionDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
-      if (!us.ihmc.idl.IDLTools.equals(this.parent_frame_name_, otherMyClass.parent_frame_name_)) return false;
-
+      if (!this.definition_basics_.equals(otherMyClass.definition_basics_)) return false;
       if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
       if (!this.left_goal_foot_transform_to_gizmo_.equals(otherMyClass.left_goal_foot_transform_to_gizmo_)) return false;
       if (!this.right_goal_foot_transform_to_gizmo_.equals(otherMyClass.right_goal_foot_transform_to_gizmo_)) return false;
-      if(this.swing_duration_ != otherMyClass.swing_duration_) return false;
-
-      if(this.transfer_duration_ != otherMyClass.transfer_duration_) return false;
-
 
       return true;
    }
@@ -220,18 +145,14 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
       builder.append("WalkActionDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
-      builder.append("parent_frame_name=");
-      builder.append(this.parent_frame_name_);      builder.append(", ");
+      builder.append("definition_basics=");
+      builder.append(this.definition_basics_);      builder.append(", ");
       builder.append("transform_to_parent=");
       builder.append(this.transform_to_parent_);      builder.append(", ");
       builder.append("left_goal_foot_transform_to_gizmo=");
       builder.append(this.left_goal_foot_transform_to_gizmo_);      builder.append(", ");
       builder.append("right_goal_foot_transform_to_gizmo=");
-      builder.append(this.right_goal_foot_transform_to_gizmo_);      builder.append(", ");
-      builder.append("swing_duration=");
-      builder.append(this.swing_duration_);      builder.append(", ");
-      builder.append("transfer_duration=");
-      builder.append(this.transfer_duration_);
+      builder.append(this.right_goal_foot_transform_to_gizmo_);
       builder.append("}");
       return builder.toString();
    }
