@@ -2,6 +2,7 @@
 #define __behavior_msgs__msg__WalkActionDefinitionMessage__idl__
 
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./FootstepPlanActionDefinitionBasicsMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 module behavior_msgs
 {
@@ -17,10 +18,7 @@ module behavior_msgs
          * Parent definition fields
          */
         behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
-        /**
-         * Name of the frame the this action is expressed in
-         */
-        string parent_frame_name;
+        behavior_msgs::msg::dds::FootstepPlanActionDefinitionBasicsMessage definition_basics;
         /**
          * Transform that expresses the walk gizmo pose in the parent frame
          */
@@ -33,14 +31,6 @@ module behavior_msgs
          * Right goal foot transform to the walk gizmo
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage right_goal_foot_transform_to_gizmo;
-        /**
-         * Swing duration
-         */
-        double swing_duration;
-        /**
-         * Transfer duration
-         */
-        double transfer_duration;
       };
     };
   };
