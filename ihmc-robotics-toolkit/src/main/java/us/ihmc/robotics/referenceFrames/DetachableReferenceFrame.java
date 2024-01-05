@@ -3,6 +3,7 @@ package us.ihmc.robotics.referenceFrames;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
 /**
  * This class provides support for having a reference frame that
@@ -16,23 +17,14 @@ public class DetachableReferenceFrame
 {
    private transient final ReferenceFrameLibrary referenceFrameLibrary;
 
-   private final RigidBodyTransform transformToParent;
+   private final RigidBodyTransformReadOnly transformToParent;
    /** Never null, but does change. */
    private ReferenceFrame referenceFrame;
 
-   public DetachableReferenceFrame(ReferenceFrameLibrary referenceFrameLibrary, RigidBodyTransform transformToParent)
+   public DetachableReferenceFrame(ReferenceFrameLibrary referenceFrameLibrary, RigidBodyTransformReadOnly transformToParent)
    {
       this.transformToParent = transformToParent;
       this.referenceFrameLibrary = referenceFrameLibrary;
-   }
-
-   /**
-    * Note: Given frame's parent must be in the ReferenceFrameLibrary.
-    */
-   public void setToReferenceFrameIncludingParent(ReferenceFrame referenceFrame)
-   {
-      referenceFrame.getTransformToDesiredFrame(transformToParent, referenceFrame.getParent());
-      update(referenceFrame.getParent().getName());
    }
 
    public void update(String parentFrameName)
@@ -69,9 +61,38 @@ public class DetachableReferenceFrame
       }
    }
 
+   /**
+    * Changes the parent frame of this reference frame while
+    * keeping it in the same place w.r.t. a common ancestors.
+    *
+    * @param parentFrameName The new parent frame's name
+    * @param transformToParent Should be the same instance as the read-only one passed in
+    *                          the constructor.
+    */
+   public void changeFrame(String parentFrameName, RigidBodyTransform transformToParent)
+   {
+      if (referenceFrame != null)
+      {
+         ReferenceFrame parentFrame = referenceFrameLibrary.findFrameByName(parentFrameName);
+         RigidBodyTransform newTransformToParent = new RigidBodyTransform();
+
+         if (parentFrame != null && referenceFrame.getRootFrame() == parentFrame.getRootFrame()) // Attached to world frame tree
+         {
+            referenceFrame.getTransformToDesiredFrame(newTransformToParent, parentFrame);
+            transformToParent.set(newTransformToParent);
+         }
+         else // switch over to new root
+         {
+            parentFrame = ReferenceFrameTools.constructARootFrame(parentFrameName);
+         }
+
+         referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transformToParent);
+      }
+   }
+
    public boolean isChildOfWorld()
    {
-      return ReferenceFrameMissingTools.checkIsAncestorOfWorld(referenceFrame);
+      return referenceFrame.getRootFrame() == ReferenceFrame.getWorldFrame();
    }
 
    public ReferenceFrame getReferenceFrame()

@@ -72,7 +72,7 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
 
       if (offsetPoseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
       {
-         rigidBodySceneNode.freezeFromModification();
+         rigidBodySceneNode.freeze();
       }
 
       nodePose.setToZero(rigidBodySceneNode.getNodeFrame());
@@ -103,7 +103,7 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
       if (ImGui.button(labels.get("Clear Offset")))
       {
          rigidBodySceneNode.clearOffset();
-         rigidBodySceneNode.freezeFromModification();
+         rigidBodySceneNode.freeze();
       }
    }
 

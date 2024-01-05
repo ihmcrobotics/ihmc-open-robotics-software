@@ -32,10 +32,19 @@ public class RecyclingArrayListTools
     */
    public static void synchronizeSize(RecyclingArrayList listToModify, RecyclingArrayList source)
    {
-      while (listToModify.size() < source.size())
+      synchronizeSize(listToModify, source.size());
+   }
+
+   /**
+    * This makes sure the pre-allocated internal size of listToModify is the same as source.
+    * This is important for {@link #getUnsafe} to work.
+    */
+   public static void synchronizeSize(RecyclingArrayList listToModify, int sourceSize)
+   {
+      while (listToModify.size() < sourceSize)
          listToModify.add();
 
-      while (listToModify.size() > source.size())
+      while (listToModify.size() > sourceSize)
          removeLast(listToModify);
    }
 

@@ -68,10 +68,18 @@ mainDependencies {
    api("org.bytedeco:librealsense2:$librealsense2Version:windows-x86_64")
    // Spinnaker released under us.ihmc for arm64 support
    val spinnakerVersion = "3.0.0.118-1.5.9-ihmc1"
-   api("us.ihmc:spinnaker:$spinnakerVersion")
-   api("us.ihmc:spinnaker:$spinnakerVersion:linux-x86_64")
-   api("us.ihmc:spinnaker:$spinnakerVersion:linux-arm64")
-   api("us.ihmc:spinnaker:$spinnakerVersion:windows-x86_64")
+   api("us.ihmc:spinnaker:$spinnakerVersion") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
+   api("us.ihmc:spinnaker:$spinnakerVersion:linux-x86_64") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
+   api("us.ihmc:spinnaker:$spinnakerVersion:linux-arm64") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
+   api("us.ihmc:spinnaker:$spinnakerVersion:windows-x86_64") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
    val hdf5Version = "1.14.1-1.5.9"
    api("org.bytedeco:hdf5:$hdf5Version")
    api("org.bytedeco:hdf5:$hdf5Version:linux-x86_64")
@@ -91,7 +99,7 @@ mainDependencies {
    }
 
    api("us.ihmc:euclid:0.21.0")
-   api("us.ihmc:simulation-construction-set:0.24.3")
+   api("us.ihmc:simulation-construction-set:0.25.0")
    api("us.ihmc:ihmc-native-library-loader:2.0.2")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
