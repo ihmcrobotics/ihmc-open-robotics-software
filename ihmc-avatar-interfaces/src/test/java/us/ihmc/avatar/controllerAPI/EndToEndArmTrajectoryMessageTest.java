@@ -316,6 +316,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), epsilon);
                assertEquals(expectedTrajectoryPoint.getPosition(), controllerTrajectoryPoint.getPosition(), epsilon);
                assertEquals(expectedTrajectoryPoint.getVelocity(), controllerTrajectoryPoint.getVelocity(), epsilon);
+               assertEquals(expectedTrajectoryPoint.getAcceleration(), controllerTrajectoryPoint.getAcceleration(), epsilon);
             }
          }
 
@@ -1247,7 +1248,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
             jointTrajectoryMessage.getTrajectoryPoints().add()
                                   .set(HumanoidMessageTools.createTrajectoryPoint1DMessage(trajectoryPoint.getTime(),
                                                                                            trajectoryPoint.getPosition(),
-                                                                                           trajectoryPoint.getVelocity()));
+                                                                                           trajectoryPoint.getVelocity(),
+                                                                                           trajectoryPoint.getAcceleration()));
          }
       }
       return armTrajectoryMessage;

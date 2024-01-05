@@ -129,6 +129,7 @@ public class YoKinematicsToolboxOutputStatus
       {
          desiredJointAngles[i].set(status.getDesiredJointAngles().get(i));
          desiredJointVelocities[i].set(status.getDesiredJointVelocities().get(i));
+         desiredJointAccelerations[i].set(status.getDesiredJointAccelerations().get(i));
       }
 
       desiredRootJointPose.set(status.getDesiredRootPosition(), status.getDesiredRootOrientation());

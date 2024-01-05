@@ -833,7 +833,10 @@ public class MessageTools
          OneDoFJointReadOnly joint = newJointData[i];
          kinematicsToolboxOutputStatusToPack.getDesiredJointAngles().add((float) joint.getQ());
          kinematicsToolboxOutputStatusToPack.getDesiredJointVelocities().add((float) joint.getQd());
-         kinematicsToolboxOutputStatusToPack.getDesiredJointAccelerations().add((float) joint.getQdd());
+         double qdd = joint.getQdd();
+         if (Double.isNaN(qdd))
+            qdd = 0.0;
+         kinematicsToolboxOutputStatusToPack.getDesiredJointAccelerations().add((float) qdd);
       }
 
       Point3D desiredRootTranslation = kinematicsToolboxOutputStatusToPack.getDesiredRootPosition();
@@ -853,8 +856,16 @@ public class MessageTools
          desiredRootOrientation.set(jointPose.getOrientation());
          desiredRootLinearVelocity.set(jointTwist.getLinearPart());
          desiredRootAngularVelocity.set(jointTwist.getAngularPart());
-         desiredRootLinearAcceleration.set(jointAcceleration.getLinearPart());
-         desiredRootAngularAcceleration.set(jointAcceleration.getAngularPart());
+         if (jointAcceleration.containsNaN())
+         {
+            desiredRootLinearAcceleration.setToZero();
+            desiredRootAngularAcceleration.setToZero();
+         }
+         else
+         {
+            desiredRootLinearAcceleration.set(jointAcceleration.getLinearPart());
+            desiredRootAngularAcceleration.set(jointAcceleration.getAngularPart());
+         }
       }
       else
       {
@@ -883,6 +894,7 @@ public class MessageTools
 
       interpolatedToPack.getDesiredJointAngles().reset();
       interpolatedToPack.getDesiredJointVelocities().reset();
+      interpolatedToPack.getDesiredJointAccelerations().reset();
 
       TFloatArrayList jointAngles1 = outputStatusOne.getDesiredJointAngles();
       TFloatArrayList jointAngles2 = outputStatusTwo.getDesiredJointAngles();
@@ -991,7 +1003,7 @@ public class MessageTools
       {
          double qDdot = alphaDot * (jointVelocitiesEnd.get(i) - jointVelocitiesStart.get(i));
          qDdot += EuclidCoreTools.interpolate(jointAccelerationsStart.get(i), jointAccelerationsEnd.get(i), alpha);
-         jointAnglesInterpolated.add((float) qDdot);
+         jointAccelerationsInterpolated.add((float) qDdot);
       }
 
 

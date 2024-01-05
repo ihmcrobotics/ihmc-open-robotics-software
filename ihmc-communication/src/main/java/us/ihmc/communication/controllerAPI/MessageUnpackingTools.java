@@ -315,6 +315,7 @@ public final class MessageUnpackingTools
 
             IDLSequence.Float positions = source.getPositions();
             IDLSequence.Float velocities = source.getVelocities();
+            IDLSequence.Float accelerations = source.getAccelerations();
 
             for (int i = 0; i < Math.min(positions.size(), velocities.size()); i++)
             {
@@ -328,6 +329,7 @@ public final class MessageUnpackingTools
                trajectoryPoint.setTime(0.0);
                trajectoryPoint.setPosition(positions.get(i));
                trajectoryPoint.setVelocity(velocities.get(i));
+               trajectoryPoint.setAcceleration(accelerations.get(i));
                jointTrajectoryMessage.setWeight(-1.0);
             }
 
