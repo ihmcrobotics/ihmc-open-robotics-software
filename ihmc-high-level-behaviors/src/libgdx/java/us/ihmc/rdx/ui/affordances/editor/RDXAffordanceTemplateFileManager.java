@@ -506,7 +506,7 @@ public class RDXAffordanceTemplateFileManager
                   gripArray.put("type", postGraspHandConfigurations.get(side).get(i) == null ? "" : postGraspHandConfigurations.get(side).get(i).toString());
                }
             }
-            if (!objectBuilder.getSelectedObject().getShape().toString().equals("NULL"))
+            if (!(objectBuilder.getSelectedObject().getShape()==null))
             {
                jsonNode.put("resizablePrimitiveShape", objectBuilder.getSelectedObject().getShape().toString());
                jsonNode.put("xLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(0));
