@@ -8,7 +8,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.*;
-import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,7 +19,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.Timer;
+import us.ihmc.tools.NonWallTimer;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionState, HandPoseActionDefinition>
@@ -33,8 +33,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
-   private final SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators;
-   private final Timer executionTimer = new Timer();
+   private final NonWallTimer executionTimer = new NonWallTimer();
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
@@ -48,8 +47,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                  ROS2ControllerHelper ros2ControllerHelper,
                                  ReferenceFrameLibrary referenceFrameLibrary,
                                  DRCRobotModel robotModel,
-                                 ROS2SyncedRobotModel syncedRobot,
-                                 SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators)
+                                 ROS2SyncedRobotModel syncedRobot)
    {
       super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
@@ -57,7 +55,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
-      this.handWrenchCalculators = handWrenchCalculators;
 
       for (RobotSide side : RobotSide.values)
       {
@@ -74,6 +71,8 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    public void update()
    {
       super.update();
+
+      executionTimer.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
       state.setCanExecute(state.getPalmFrame().isChildOfWorld());
 
@@ -255,7 +254,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          state.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
          state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
          state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-         state.setHandWrenchMagnitudeLinear(handWrenchCalculators.get(getDefinition().getSide()).getLinearWrenchMagnitude(true));
+         state.setHandWrenchMagnitudeLinear(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getLinearWrenchMagnitude(true));
          if (!state.getIsExecuting() && wasExecuting && !getDefinition().getJointSpaceControl() && !getDefinition().getHoldPoseInWorldLater())
          {
             disengageHoldPoseInWorld();
