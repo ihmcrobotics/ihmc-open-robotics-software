@@ -38,9 +38,10 @@ public class TransferFunctionDiscretizer {
 	private double output;
 	private int n;
 	private int m;
+	private String name;
 	
-	public TransferFunctionDiscretizer(double k, double numerator[], double denominator[], double sampleFrequency) {
-		this("", k, numerator, denominator, sampleFrequency);
+	public TransferFunctionDiscretizer(ContinuousTransferFunction tf, double sampleFrequency) {
+		this(tf.getName(), tf, sampleFrequency);
 	}
 	
 	/*
@@ -50,9 +51,12 @@ public class TransferFunctionDiscretizer {
 	 * @param demoninator Order of continuous polynomial coefficients from largest to smallest order, i.e. [a_0, a_1, ..., a_{n-1}, a_n].
 	 * @param sampleFrequency Frequency [Hz] which this variable will be updated. Filter performance will be worse if this is not accurate.
 	 */
-	public TransferFunctionDiscretizer(String name, double k, double numerator[], double denominator[], double sampleFrequency) {
-		m = numerator.length;
-		n = denominator.length;
+	public TransferFunctionDiscretizer(String name, ContinuousTransferFunction tf, double sampleFrequency) {
+		
+		this.name = name;
+		
+		m = tf.getNumerator().length;
+		n = tf.getDenominator().length;
 		
 		// Handles multiple cases of m and n for matrix sizes.
 		if (m > n) {
@@ -60,16 +64,16 @@ public class TransferFunctionDiscretizer {
 		}
 		else if (m < n) {
 			double []d = new double[n];
-			System.arraycopy(numerator, 0, d, n-m, m);
+			System.arraycopy(tf.getNumerator(), 0, d, n-m, m);
 			this.numerator 		= new DMatrixRMaj(1, d.length, false, d);
 		}
 		else {
-			this.numerator 		= new DMatrixRMaj(1, numerator.length, false, numerator);
+			this.numerator 		= new DMatrixRMaj(1, m, false, tf.getNumerator());
 		}
 		
-		this.denominator 	= new DMatrixRMaj(1, denominator.length, false, denominator);
+		this.denominator 	= new DMatrixRMaj(1, n, false, tf.getDenominator());
 		
-		this.k = k;
+		this.k = tf.getGain();
 		this.fs = sampleFrequency;
 		this.p = 1/(2*this.fs);
 		
@@ -175,6 +179,10 @@ public class TransferFunctionDiscretizer {
 	
 	public DMatrixRMaj getOutputCoefficients() {
 		return outputCoefficients.copy();
+	}
+	
+	public String getName() {
+		return name;
 	}
 
 }
