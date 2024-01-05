@@ -130,19 +130,19 @@ public class IterativeClosestPointWorker
          {
             runICPIteration(segmentedPointCloud);
          }
-      }
 
-      // Send result message
-      if (sceneNodeID != -1L)
-      {
-         DetectedObjectPacket resultMessage = new DetectedObjectPacket();
-         resultMessage.setId((int) sceneNodeID);
-         resultMessage.getPose().set(resultPose);
-         for (Point3D32 point3D32 : getObjectPointCloud())
-            resultMessage.getObjectPointCloud().add().set(point3D32);
-         for (int i = 0; i < numberOfICPObjectPoints; i++)
-            resultMessage.getSegmentedPointCloud().add().set(segmentedPointCloud.get(i));
-         ros2Helper.publish(PerceptionAPI.ICP_RESULT, resultMessage);
+         // Send result message
+         if (sceneNodeID != -1L)
+         {
+            DetectedObjectPacket resultMessage = new DetectedObjectPacket();
+            resultMessage.setId((int) sceneNodeID);
+            resultMessage.getPose().set(resultPose);
+            for (Point3D32 point3D32 : getObjectPointCloud())
+               resultMessage.getObjectPointCloud().add().set(point3D32);
+            for (int i = 0; i < numberOfICPObjectPoints; i++)
+               resultMessage.getSegmentedPointCloud().add().set(segmentedPointCloud.get(i));
+            ros2Helper.publish(PerceptionAPI.ICP_RESULT, resultMessage);
+         }
       }
    }
 
