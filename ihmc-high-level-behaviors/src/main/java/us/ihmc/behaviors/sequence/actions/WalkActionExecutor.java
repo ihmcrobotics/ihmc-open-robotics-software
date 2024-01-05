@@ -8,6 +8,7 @@ import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -24,7 +25,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.Timer;
+import us.ihmc.tools.NonWallTimer;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.UUID;
@@ -45,7 +46,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
    private final WalkingControllerParameters walkingControllerParameters;
    private FootstepDataListMessage footstepDataListMessage;
    private final Object footstepMessageSynchronizer = new Object();
-   private final Timer executionTimer = new Timer();
+   private final NonWallTimer executionTimer = new NonWallTimer();
    private final WalkingFootstepTracker footstepTracker;
    private double nominalExecutionDuration;
    private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
@@ -79,6 +80,8 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
    public void update()
    {
       super.update();
+
+      executionTimer.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
       state.setCanExecute(state.getGoalFrame().isChildOfWorld());
 
