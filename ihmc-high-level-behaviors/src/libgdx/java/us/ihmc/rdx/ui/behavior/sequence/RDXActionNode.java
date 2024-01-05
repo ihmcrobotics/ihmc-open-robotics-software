@@ -10,6 +10,7 @@ import us.ihmc.rdx.imgui.ImGuiHollowArrowRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
+import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeTools;
 
 /**
  * The UI representation of a robot behavior action. It provides a base
@@ -36,27 +37,11 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    {
       if (hollowArrowRenderer.render(getState().getIsNextForExecution()))
       {
-         RDXActionSequence actionSequence = findSequenceParent(this);
+         RDXActionSequence actionSequence = RDXBehaviorTreeTools.findActionSequenceAncestor(this);
          if (actionSequence != null)
          {
             actionSequence.getState().setExecutionNextIndex(getState().getActionIndex());
          }
-      }
-   }
-
-   private RDXActionSequence findSequenceParent(RDXBehaviorTreeNode<?, ?> node)
-   {
-      if (node.getParent() == null)
-      {
-         return null;
-      }
-      else if (node.getParent() instanceof RDXActionSequence actionSequence)
-      {
-         return actionSequence;
-      }
-      else
-      {
-         return findSequenceParent(node.getParent());
       }
    }
 

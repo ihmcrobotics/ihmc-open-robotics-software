@@ -354,7 +354,8 @@ public class RDXTeleoperationManager extends RDXPanel
                {
                   for (RobotSide side : interactableHands.sides())
                   {
-                     desiredRobot.setArmShowing(side, !interactableHands.get(side).isDeleted() && armManager.getArmControlMode() == RDXArmControlMode.JOINT_ANGLES);
+                     desiredRobot.setArmShowing(side, !interactableHands.get(side).isDeleted() 
+                        && (armManager.getArmControlMode() == RDXArmControlMode.JOINTSPACE || armManager.getArmControlMode() == RDXArmControlMode.HYBRID));
                      desiredRobot.setArmColor(side, RDXIKSolverColors.getColor(armManager.getArmIKSolvers().get(side).getQuality()));
                   }
                }
