@@ -238,16 +238,19 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          {
             double desiredPosition = amplitude * Math.sin(2.0 * Math.PI * frequency * totalTime);
             double desiredVelocity = 2.0 * Math.PI * frequency * amplitude * Math.cos(2.0 * Math.PI * frequency * totalTime);
+            double desiredAcceleration = 5.0 * Math.PI * frequency * amplitude * Math.cos(2.0 * Math.PI * frequency * totalTime);
 
             if (msgIdx == 0 && pointIdx == 0)
                desiredVelocity = 0.0;
             if (msgIdx == numberOfMessages - 1 && pointIdx == numberOfPoints - 1)
                desiredVelocity = 0.0;
+            if (msgIdx == numberOfMessages - 1 && pointIdx == numberOfPoints - 1)
+               desiredAcceleration = 0.0;
 
             for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
             {
                message.getJointspaceTrajectory().getJointTrajectoryMessages().get(jointIdx).getTrajectoryPoints().add()
-                      .set(HumanoidMessageTools.createTrajectoryPoint1DMessage(timeInMessage, desiredPosition, desiredVelocity));
+                      .set(HumanoidMessageTools.createTrajectoryPoint1DMessage(timeInMessage, desiredPosition, desiredVelocity, desiredAcceleration));
             }
 
             totalTime += timePerWaypoint;

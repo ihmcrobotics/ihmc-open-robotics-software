@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValid
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
@@ -444,6 +445,7 @@ public class RigidBodyJointControlHelper
             double t1 = tDelta + t0;
             double qd1 = trajectoryPoint.getVelocity();
             double qdd1 = trajectoryPoint.getAcceleration();
+
             double q1 = trajectoryPoint.getPosition() + tDelta * qd1 + 0.5 * qdd1 * tDelta * tDelta;
 
             if (!queuePoint(q1, qd1, qdd1, t1, jointIdx))

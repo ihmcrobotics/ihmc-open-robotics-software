@@ -71,7 +71,7 @@ public class KinematicsStreamingToolboxParameters
       defaultLinearRateLimit = 1.5;
       defaultAngularRateLimit = 10.0;
       outputJointVelocityScale = 0.75;
-      outputJointAccelerationScale = 0.6;
+      outputJointAccelerationScale = 0.25;
 
       minimizeAngularMomentum = true;
       minimizeLinearMomentum = false;

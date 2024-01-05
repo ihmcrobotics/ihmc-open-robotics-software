@@ -1285,10 +1285,16 @@ public class HumanoidMessageTools
 
    public static TrajectoryPoint1DMessage createTrajectoryPoint1DMessage(double time, double position, double velocity)
    {
+      return createTrajectoryPoint1DMessage(time, position, velocity, 0.0);
+   }
+
+   public static TrajectoryPoint1DMessage createTrajectoryPoint1DMessage(double time, double position, double velocity, double acceleration)
+   {
       TrajectoryPoint1DMessage message = new TrajectoryPoint1DMessage();
       message.setTime(time);
       message.setPosition(position);
       message.setVelocity(velocity);
+      message.setAcceleration(acceleration);
       return message;
    }
 
