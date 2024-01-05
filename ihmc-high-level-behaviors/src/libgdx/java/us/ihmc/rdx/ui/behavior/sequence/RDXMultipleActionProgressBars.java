@@ -97,13 +97,13 @@ public class RDXMultipleActionProgressBars
          String overlay = "N/A";
          if (actionProgressBar.getAction() instanceof RDXWalkAction walkAction)
          {
-            incompleteFootsteps = walkAction.getState().getNumberOfIncompleteFootsteps();
-            totalFootsteps = walkAction.getState().getTotalNumberOfFootsteps();
+            incompleteFootsteps = walkAction.getState().getBasics().getNumberOfIncompleteFootsteps();
+            totalFootsteps = walkAction.getState().getBasics().getTotalNumberOfFootsteps();
          }
          if (actionProgressBar.getAction() instanceof RDXFootstepPlanAction footstepPlanAction)
          {
-            incompleteFootsteps = footstepPlanAction.getState().getNumberOfIncompleteFootsteps();
-            totalFootsteps = footstepPlanAction.getState().getTotalNumberOfFootsteps();
+            incompleteFootsteps = footstepPlanAction.getState().getBasics().getNumberOfIncompleteFootsteps();
+            totalFootsteps = footstepPlanAction.getState().getBasics().getTotalNumberOfFootsteps();
          }
          if (totalFootsteps > 0)
          {
