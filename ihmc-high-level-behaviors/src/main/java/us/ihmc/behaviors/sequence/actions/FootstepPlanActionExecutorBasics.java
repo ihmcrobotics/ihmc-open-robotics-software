@@ -133,6 +133,7 @@ public class FootstepPlanActionExecutorBasics
                                                           ORIENTATION_TOLERANCE,
                                                           nominalExecutionDuration,
                                                           executionTimer,
+                                                          actionNodeExecutor.getState(),
                                                           BehaviorActionCompletionComponent.TRANSLATION,
                                                           BehaviorActionCompletionComponent.ORIENTATION);
          }
