@@ -886,6 +886,7 @@ public class KSTStreamingState implements State
          YoFrameVector3D rawLinearAcceleration = rawSpatialAcceleration.getLinearPart();
          YoFrameVector3D rawAngularAcceleration = rawSpatialAcceleration.getAngularPart();
 
+         // todo determine if we want to apply an alpha filter here.
          KSTTools.computeAcceleration(timeInterval, previousLinearVelocity, rawLinearVelocity, rawLinearAcceleration);
          KSTTools.computeAcceleration(timeInterval, previousAngularVelocity, rawAngularVelocity, rawAngularAcceleration);
 
