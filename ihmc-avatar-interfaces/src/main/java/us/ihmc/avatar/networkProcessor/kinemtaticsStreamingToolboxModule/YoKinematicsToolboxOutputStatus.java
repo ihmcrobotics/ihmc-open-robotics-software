@@ -103,6 +103,11 @@ public class YoKinematicsToolboxOutputStatus
       return jointNameHash.getIntegerValue();
    }
 
+   public double getDesiredJointAngle(int i)
+   {
+      return desiredJointAngles[i].getValue();
+   }
+
    public double getDesiredJointVelocity(int i)
    {
       return desiredJointVelocities[i].getValue();
@@ -222,7 +227,12 @@ public class YoKinematicsToolboxOutputStatus
 
       for (int i = 0; i < numberOfJoints; i++)
       {
-         double qdd = (current.getDesiredJointVelocity(i) - previous.getDesiredJointVelocity(i)) / duration;
+         // average the instantaneous velocity estimate vs the acceleration that would have been necessary to hit the new current value from the previous one.
+         double qExpectedFromPrevious = previous.getDesiredJointAngle(i) + duration * previous.getDesiredJointVelocity(i);
+         double qddFromPosition = 2.0 * (current.getDesiredJointAngle(i) - qExpectedFromPrevious) / (duration * duration);
+         double qddFromVelocity = (current.getDesiredJointVelocity(i) - previous.getDesiredJointVelocity(i)) / duration;
+
+         double qdd = 0.5 * (qddFromPosition + qddFromVelocity);
          desiredJointAccelerations[i].set(qdd);
       }
 
