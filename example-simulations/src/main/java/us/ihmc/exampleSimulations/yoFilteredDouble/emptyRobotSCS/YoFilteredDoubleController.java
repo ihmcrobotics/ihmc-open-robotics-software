@@ -1,5 +1,6 @@
-package us.ihmc.exampleSimulations.yoFilteredDouble;
+package us.ihmc.exampleSimulations.yoFilteredDouble.emptyRobotSCS;
 
+import us.ihmc.robotics.math.filters.ContinuousTransferFunction;
 import us.ihmc.robotics.math.filters.TransferFunctionDiscretizer;
 import us.ihmc.robotics.math.filters.YoFilteredDouble;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryGenerator;
@@ -47,7 +48,7 @@ public class YoFilteredDoubleController implements RobotController {
 	
 	// Notch Filter Parameters
 	private final double wn 	= 60*2*Math.PI;
-	private final double Q 		= 5.0;
+	private final double Q 		= 1.0;
 	
 	// PID Parameters
 	private final double Kp 	= 15.0;
@@ -66,30 +67,45 @@ public class YoFilteredDoubleController implements RobotController {
 		this.controllerTime = new YoDouble("controllerTime", registry);
 		
 		// 2.0 Build Filter Objects.
-		TransferFunctionDiscretizer FOLPFilter 						= 	new TransferFunctionDiscretizer(1.0, 				
-																										new double[] {1.0},
-																										new double[] { 1/Tau_folp, 1.0},
-																										(1000000000.0 / ((double) dt_ns)));
-		TransferFunctionDiscretizer LP_2nd_Order_Butter_Filter 		= 	new TransferFunctionDiscretizer(1.0, 				
-																										new double[] {wc*wc},
-																										new double[] { 1.0, Math.sqrt(2)*wc, wc*wc},
-																										(1000000000.0 / ((double) dt_ns)));
-		TransferFunctionDiscretizer Notch_Filter 					= 	new TransferFunctionDiscretizer(1.0,
-																										new double[] { 1.0, 0.0, wn*wn},
-																										new double[] { 1.0, wn/Q, wn*wn},
-																										(1000000000.0 / ((double) dt_ns)));
-		TransferFunctionDiscretizer MultiorderComplex_Filter 		= 	new TransferFunctionDiscretizer(1.0,
-																										new double[] { 196.919515374308, 21033.790696845190, 427573.897431703983, 18317222.932339027524 },
-																										new double[] { 1.000000000000, 382.156022138851, 60851.343857079330, 3875784.585037478711 },
-																										(1000000000.0 / ((double) dt_ns)));
-		TransferFunctionDiscretizer PID_Filter 						= 	new TransferFunctionDiscretizer(1.0, 				
-																										new double[] {(Kp + Tau*Kd), (Tau*Kp + Ki), Ki*Tau},
-																										new double[] { 1.0, Tau, 0.0},
-																										(1000000000.0 / ((double) dt_ns)));
-		TransferFunctionDiscretizer Lead_Lag_Compensator_Filter 	= 	new TransferFunctionDiscretizer(k, 				
-																										new double[] {1.0, z},
-																										new double[] { 1.0, p},
-																										(1000000000.0 / ((double) dt_ns)));
+		ContinuousTransferFunction tf1 = new ContinuousTransferFunction("First Order Low-Pass Filter", 
+																		1.0,
+																		new double[] {1.0},
+																		new double[] { 1/Tau_folp, 1.0});
+		TransferFunctionDiscretizer FOLPFilter 					= 	new TransferFunctionDiscretizer(tf1, 1000.0);
+
+		ContinuousTransferFunction tf2 = new ContinuousTransferFunction("Second Order Low-Pass Butterworth Filter",
+																		1.0,
+																		new double[] {wc*wc},
+																		new double[] { 1.0, Math.sqrt(2)*wc, wc*wc});
+		
+		TransferFunctionDiscretizer LP_2nd_Order_Butter_Filter 	= 	new TransferFunctionDiscretizer(tf2, 1000.0);
+
+		ContinuousTransferFunction tf3 = new ContinuousTransferFunction("Second Order Notch Filter", 
+																		1.0,
+																		new double[] { 1.0, 0.0, wn*wn},
+																		new double[] { 1.0, wn/Q, wn*wn});
+		
+		TransferFunctionDiscretizer Notch_Filter 				= 	new TransferFunctionDiscretizer(tf3, 1000.0);
+		
+		ContinuousTransferFunction tf4 = new ContinuousTransferFunction("Complex Multi-Order Filter", 
+																		1.0,
+																		new double[] { 196.919515374308, 21033.790696845190, 427573.897431703983, 18317222.932339027524 },
+																		new double[] { 1.000000000000, 382.156022138851, 60851.343857079330, 3875784.585037478711 });
+		TransferFunctionDiscretizer MultiorderComplex_Filter 	= 	new TransferFunctionDiscretizer(tf4, 1000.0);
+			
+		ContinuousTransferFunction tf5 = new ContinuousTransferFunction("PID Controller", 
+																		1.0,
+																		new double[] {(Kp + Tau*Kd), (Tau*Kp + Ki), Ki*Tau},
+																		new double[] { 1.0, Tau, 0.0});
+		
+		TransferFunctionDiscretizer PID_Filter 					= 	new TransferFunctionDiscretizer(tf5, 1000.0);
+		
+		ContinuousTransferFunction tf6 = new ContinuousTransferFunction("Lead-Lag Controller", 
+																		k,
+																		new double[] {1.0, z},
+																		new double[] { 1.0, p});
+		
+		TransferFunctionDiscretizer Lead_Lag_Compensator_Filter 	= 	new TransferFunctionDiscretizer(tf6, 1000.0);
 		
 		
 		// 3.0 Create new filtered doubles based on the Filter objects.
@@ -103,7 +119,6 @@ public class YoFilteredDoubleController implements RobotController {
 		RefTraj_nonjump_Filtered_Var 		= new YoFilteredDouble("RefTraj_nonjump_Filtered_Var", registry, LP_2nd_Order_Butter_Filter, false); // Set false to avoid jump
 		RefTraj2_jump_Filtered_Var 			= new YoFilteredDouble("RefTraj2_jump_Filtered_Var", registry, Lead_Lag_Compensator_Filter, true);
 		RefTraj2_nonjump_Filtered_Var 		= new YoFilteredDouble("RefTraj2_nonjump_Filtered_Var", registry, Lead_Lag_Compensator_Filter, false); // Set false to avoid jump
-
 		
 		System.out.println("1st Order LP Input Coeffs: " + FOLPFilter.getInputCoefficients().toString());
 		System.out.println("1st Order LP Output Coeffs: " + FOLPFilter.getOutputCoefficients().toString());
@@ -124,9 +139,9 @@ public class YoFilteredDoubleController implements RobotController {
 		System.out.println("Lead-Lag Controller Output Coeffs: " + Lead_Lag_Compensator_Filter.getOutputCoefficients().toString());
 		
 		// 4.0 Initialize Input Chirp Trajectory.
-		chirp 			= new TrajectoryGenerator("chirpSignal", registry, Trajectory.CHIRP, ChirpType.EXPONENTIAL, 100.0, 1.0, 0.00001, 500.0);
-		chirp_lin 		= new TrajectoryGenerator("chirpSignal_lin", registry, Trajectory.CHIRP, ChirpType.LINEAR, 		10.0, 1.0, 0.01, 2.5);
-		chirp_exp 		= new TrajectoryGenerator("chirpSignal_exp", registry, Trajectory.CHIRP, ChirpType.EXPONENTIAL, 10.0, 1.0, 0.01, 2.5);
+		chirp 			= new TrajectoryGenerator("chirpSignal", registry, Trajectory.CHIRP, ChirpType.EXPONENTIAL, 20.0, 1.0, 0.00001, 	100.0);
+		chirp_lin 		= new TrajectoryGenerator("chirpSignal_lin", registry, Trajectory.CHIRP, ChirpType.LINEAR, 		20.0, 1.0, 0.00001, 2.5);
+		chirp_exp 		= new TrajectoryGenerator("chirpSignal_exp", registry, Trajectory.CHIRP, ChirpType.EXPONENTIAL, 20.0, 1.0, 0.00001, 2.5);
 		sinusoid 		= new TrajectoryGenerator("sinusoid", registry, Trajectory.SINE, 1.0, 100, 0.0, 0.0, 5.0);
 		input_lin 		= new YoDouble("input_lin",registry);
 		
@@ -136,6 +151,7 @@ public class YoFilteredDoubleController implements RobotController {
 		input 			= new YoDouble("input",registry);
 		chirpFreqHz 	= new YoDouble("chirpFreqHz", registry);
 		sinusoid_input 	= new YoDouble("sinusoid_input", registry);
+
 	}
 	
 	@Override
@@ -169,8 +185,7 @@ public class YoFilteredDoubleController implements RobotController {
 		RefTraj_nonjump_Filtered_Var.set(sinusoid_input.getDoubleValue());
 		RefTraj2_jump_Filtered_Var.set(sinusoid_input.getDoubleValue());
 		RefTraj2_nonjump_Filtered_Var.set(sinusoid_input.getDoubleValue());
-		chirpFreqHz.set(chirp.getFreqCheckRad()/(2*Math.PI));
-		
+		chirpFreqHz.set(chirp.getFreqCheckRad()/(2*Math.PI));		
 	}
 
 }
