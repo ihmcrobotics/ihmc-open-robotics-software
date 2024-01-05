@@ -795,9 +795,16 @@ public class KSTStreamingState implements State
             {
                // TODO use the future robot state with the messages for the ingration duration.
                if (streamingMessagePublisher == null || !useStreamingPublisher.getValue())
+               {
                   trajectoryMessagePublisher.publish(tools.setupTrajectoryMessage(outputRobotState.getStatus()));
+//                  trajectoryMessagePublisher.publish(tools.setupTrajectoryMessage(outputRobotState.getStatus(),
+//                                                                                  outputFutureRobotState.getStatus(),
+//                                                                                  tools.getStreamIntegrationDuration()));
+               }
                else
+               {
                   streamingMessagePublisher.publish(tools.setupStreamingMessage(outputRobotState.getStatus()));
+               }
             }
 
             timeOfLastMessageSentToController.set(timeInState);

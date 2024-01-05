@@ -341,6 +341,63 @@ public class KSTTools
       return wholeBodyStreamingMessage;
    }
 
+   public WholeBodyTrajectoryMessage setupTrajectoryMessage(KinematicsToolboxOutputStatus solutionToConvert,
+                                                            KinematicsToolboxOutputStatus futureSolutionToConvert,
+                                                            double timeOfFutureSolution)
+   {
+      // update the factory to work on the current message
+      HumanoidMessageTools.resetWholeBodyTrajectoryToolboxMessage(wholeBodyTrajectoryMessage);
+      trajectoryMessageFactory.setMessageToCreate(wholeBodyTrajectoryMessage);
+      trajectoryMessageFactory.setEnableVelocity(true);
+      wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(true);
+      HumanoidMessageTools.configureForOverriding(wholeBodyTrajectoryMessage); // FIXME is this configured correctly?
+
+
+      // do the computation for the current state.
+      trajectoryMessageFactory.updateFullRobotModel(solutionToConvert);
+      trajectoryMessageFactory.setTrajectoryTime(0.0);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
+            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide, configurationCommand.getHandTrajectoryFrame(robotSide));
+
+         if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
+            trajectoryMessageFactory.computeArmTrajectoryMessage(robotSide);
+      }
+
+      if (isNeckJointspaceOutputEnabled.getValue())
+         trajectoryMessageFactory.computeNeckTrajectoryMessage();
+      if (isChestTaskspaceOutputEnabled.getValue())
+         trajectoryMessageFactory.computeChestTrajectoryMessage(configurationCommand.getChestTrajectoryFrame());
+      if (isPelvisTaskspaceOutputEnabled.getValue())
+         trajectoryMessageFactory.computePelvisTrajectoryMessage(configurationCommand.getPelvisTrajectoryFrame());
+
+      // do the computation for the future state.
+      trajectoryMessageFactory.updateFullRobotModel(futureSolutionToConvert);
+      trajectoryMessageFactory.setTrajectoryTime(timeOfFutureSolution);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
+            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide, configurationCommand.getHandTrajectoryFrame(robotSide));
+
+         if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
+            trajectoryMessageFactory.computeArmTrajectoryMessage(robotSide);
+      }
+
+      if (isNeckJointspaceOutputEnabled.getValue())
+         trajectoryMessageFactory.computeNeckTrajectoryMessage();
+      if (isChestTaskspaceOutputEnabled.getValue())
+         trajectoryMessageFactory.computeChestTrajectoryMessage(configurationCommand.getChestTrajectoryFrame());
+      if (isPelvisTaskspaceOutputEnabled.getValue())
+         trajectoryMessageFactory.computePelvisTrajectoryMessage(configurationCommand.getPelvisTrajectoryFrame());
+
+      // TODO what configuration needs to be done for streaming?
+      setAllIDs(wholeBodyTrajectoryMessage, currentMessageId++);
+      return wholeBodyTrajectoryMessage;
+   }
+
    public WholeBodyTrajectoryMessage setupTrajectoryMessage(KinematicsToolboxOutputStatus solutionToConvert)
    {
       HumanoidMessageTools.resetWholeBodyTrajectoryToolboxMessage(wholeBodyTrajectoryMessage);
