@@ -142,6 +142,7 @@ public class KSTStreamingState implements State
    private final YoDouble streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
    private final YoDouble solutionFilterBreakFrequency = new YoDouble("solutionFilterBreakFrequency", registry);
    private final YoKinematicsToolboxOutputStatus ikRobotState, initialRobotState, blendedRobotState, filteredRobotState, outputRobotState;
+   private final YoKinematicsToolboxOutputStatus ikFutureRobotState;
    private final YoDouble outputJointVelocityScale = new YoDouble("outputJointVelocityScale", registry);
 
    private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
@@ -255,6 +256,7 @@ public class KSTStreamingState implements State
       FloatingJointBasics rootJoint = desiredFullRobotModel.getRootJoint();
       OneDoFJointBasics[] oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
       ikRobotState = new YoKinematicsToolboxOutputStatus("IK", rootJoint, oneDoFJoints, registry);
+      ikFutureRobotState = new YoKinematicsToolboxOutputStatus("IKFuture", rootJoint, oneDoFJoints, registry);
       initialRobotState = new YoKinematicsToolboxOutputStatus("Initial", rootJoint, oneDoFJoints, registry);
       blendedRobotState = new YoKinematicsToolboxOutputStatus("Blended", rootJoint, oneDoFJoints, registry);
       filteredRobotState = new YoKinematicsToolboxOutputStatus("Filtered", rootJoint, oneDoFJoints, registry);
@@ -470,6 +472,7 @@ public class KSTStreamingState implements State
       streamingStartTime.set(Double.NaN);
 
       ikRobotState.setToNaN();
+      ikFutureRobotState.setToNaN();
       initialRobotState.setToNaN();
       blendedRobotState.setToNaN();
       filteredRobotState.setToNaN();
@@ -605,6 +608,9 @@ public class KSTStreamingState implements State
             filteredInputs.set(latestInput);
          }
 
+         // If we just received a new input, use those directly as the raw inputs. If not, this IK streaming state is running a faster rate than its data
+         // source. This means we need to integrate the last received input forward in time using the estimated velocities and accelerations, which also
+         // decay to zero to prevent a runaway integrator.
          if (tools.hasNewInputCommand())
          {
             for (int i = 0; i < latestInput.getNumberOfInputs(); i++)
@@ -626,43 +632,24 @@ public class KSTStreamingState implements State
          }
          else
          {
-            extrapolateInputs(rawInputs, toolboxControllerPeriod);
+            extrapolateInputsIntoTheFuture(rawInputs, toolboxControllerPeriod);
          }
 
          filteredInputs.set(rawInputs);
 
-         // apply an alpha filter to the inputs
+         // apply an alpha filter to the inputs, and then submit it to the IK input manager.
          filterInputs(filteredInputs, extrapolatedPoseDataMap);
-
-         for (int i = 0; i < filteredInputs.getNumberOfInputs(); i++)
-         {
-            /*
-             * Submit these filtered inputs to the IK controller.
-             */
-            KinematicsToolboxRigidBodyCommand filteredInput = filteredInputs.getInput(i);
-            RigidBodyBasics endEffector = filteredInput.getEndEffector();
-
-            if (lockPelvis.getValue() && endEffector == pelvis)
-               continue;
-            if (lockChest.getValue() && endEffector == chest)
-               continue;
-
-            if (!extrapolatedPoseDataMap.containsKey(endEffector))
-               continue;
-
-            ikCommandInputManager.submitCommand(filteredInput);
-         }
+         submitInputCommands(filteredInputs);
 
          // integrate the current inputs forward in time using the estimated velocities and accelerations.
          futureInputs.set(rawInputs);
-         // TODO this extrapolation doesn't account for the future decay that we're allowing to take place!
-         extrapolateInputs(futureInputs, tools.getStreamIntegrationDuration());
+         extrapolateInputsIntoTheFuture(futureInputs, tools.getStreamIntegrationDuration());
          // apply an alpha filter to these future inputs.
          futureFilteredInputs.set(futureInputs);
          filterInputs(futureFilteredInputs, futurePoseDataMap);
 
          // add default messages to the IK, if the input doesn't contain them.
-         populateDefaultMessages(latestInput);
+         submitNecessaryDefaultMessages(latestInput);
 
          isStreaming.set(latestInput.getStreamToController());
          if (latestInput.getStreamInitialBlendDuration() > 0.0)
@@ -680,8 +667,7 @@ public class KSTStreamingState implements State
 
          if (tools.hasPreviousInput())
          {
-            handleInputsDecay(latestInput, tools.getPreviousInput());
-            // TODO figure out how to project these decaying inputs into the future.
+            decayInputsNoLongerBeingProvided(latestInput, tools.getPreviousInput());
             ikCommandInputManager.submitCommands(decayingInputs);
          }
       }
@@ -708,12 +694,26 @@ public class KSTStreamingState implements State
       ikController.updateInternal();
       ikRobotState.set(ikController.getSolution());
 
-      // TODO populate the ikCommandInputManager again with the future commands.
-      // TODO run a for loop to populate the input manager with the futureFilteredInputs.
-      // TODO populate the default messages again.
-      // TODO figure out htge future decaying inputs, and send those.
-      // TODO run the ikController.updateInternal();
-      // TODO set the ikFutureRobotState from the ikController.
+      /*
+       * Submit the same set of commands, but integrated forward in time according to the estimated input velocity and acceleration, with their decay. Then
+       * compute the kinematic waypoints at this configuration, and use it as the future robot state.
+       */
+      if (tools.hasPreviousInput())
+      {
+         // Technically this null check is redundant. If we don't have a "latest" input, we definitely don't have a previous input.
+         if (latestInput != null)
+         {
+            submitInputCommands(futureFilteredInputs);
+            submitNecessaryDefaultMessages(latestInput);
+            ikCommandInputManager.submitCommands(decayingInputs);
+         }
+         ikController.updateInternal();
+         ikFutureRobotState.set(ikController.getSolution());
+      }
+      else
+      {
+         ikFutureRobotState.set(ikRobotState);
+      }
 
       /*
        * Updating the desired default position for the arms and/or neck only if the corresponding
@@ -811,19 +811,21 @@ public class KSTStreamingState implements State
 
    private void estimateInputsRates()
    {
+      // If we don't have a previous input, the estimated rates are zero.
       if (!tools.hasPreviousInput())
       {
          resetEstimatedInputs();
          return;
       }
 
+      // If we don't have a new input, we should decay the rate estimate that we were using previously to prevent it from running away.
       if (!tools.hasNewInputCommand())
       {
          decayEstimatedInputs();
          return;
       }
 
-      // The inputs just got updated, need to recompute velocities.
+      // The inputs just got updated, need to recompute velocities and accelerations
       KinematicsStreamingToolboxInputCommand latestInput = tools.getLatestInput();
       KinematicsStreamingToolboxInputCommand previousInput = tools.getPreviousInput();
 
@@ -886,7 +888,7 @@ public class KSTStreamingState implements State
          YoFrameVector3D rawLinearAcceleration = rawSpatialAcceleration.getLinearPart();
          YoFrameVector3D rawAngularAcceleration = rawSpatialAcceleration.getAngularPart();
 
-         // todo determine if we want to apply an alpha filter here.
+         // TODO determine if we want to apply an alpha filter here.
          KSTTools.computeAcceleration(timeInterval, previousLinearVelocity, rawLinearVelocity, rawLinearAcceleration);
          KSTTools.computeAcceleration(timeInterval, previousAngularVelocity, rawAngularVelocity, rawAngularAcceleration);
 
@@ -919,8 +921,10 @@ public class KSTStreamingState implements State
       }
    }
 
-   private void extrapolateInputs(KinematicsStreamingToolboxInputCommand inputs, double integrationDT)
+   private void extrapolateInputsIntoTheFuture(KinematicsStreamingToolboxInputCommand inputs, double integrationDT)
    {
+      // FIXME this extrapolation doesn't account for the future decay that we're allowing to take place!
+
       for (int i = 0; i < inputs.getNumberOfInputs(); i++)
       {
          KinematicsToolboxRigidBodyCommand input = inputs.getInput(i);
@@ -939,7 +943,10 @@ public class KSTStreamingState implements State
       }
    }
 
-   private void handleInputsDecay(KinematicsStreamingToolboxInputCommand latestInputs, KinematicsStreamingToolboxInputCommand previousInputs)
+   /**
+    * This method works differently than the extrapolation method. This is meant to handle inputs that we were previously tracking, but aren't anymore.
+    */
+   private void decayInputsNoLongerBeingProvided(KinematicsStreamingToolboxInputCommand latestInputs, KinematicsStreamingToolboxInputCommand previousInputs)
    {
       // 1- Forget inputs for end-effectors that are once again being controlled.
       for (int i = decayingInputs.size() - 1; i >= 0; i--)
@@ -971,7 +978,7 @@ public class KSTStreamingState implements State
          }
       }
 
-      // 3- Decay inputs by reducing their, if it reaches a low threshold then the input is dropped.
+      // 3- Decay inputs by reducing their weight, if it reaches a low threshold then the input is dropped.
       for (int i = decayingInputs.size() - 1; i >= 0; i--)
       {
          KinematicsToolboxRigidBodyCommand decayingInput = decayingInputs.get(i);
@@ -982,6 +989,8 @@ public class KSTStreamingState implements State
       }
 
       numberOfDecayingInputs.set(decayingInputs.size());
+
+      // TODO should those decaying inputs be extrapolated into the future, as well? Probably so.
    }
 
    private void filterInputs(KinematicsStreamingToolboxInputCommand inputsToFilter, Map<RigidBodyBasics, ExtrapolatedInputPoseData> poseDataMap)
@@ -1013,7 +1022,29 @@ public class KSTStreamingState implements State
       }
    }
 
-   private void populateDefaultMessages(KinematicsStreamingToolboxInputCommand latestInput)
+   private void submitInputCommands(KinematicsStreamingToolboxInputCommand inputCommand)
+   {
+      for (int i = 0; i < inputCommand.getNumberOfInputs(); i++)
+      {
+         /*
+          * Submit these filtered inputs to the IK controller.
+          */
+         KinematicsToolboxRigidBodyCommand filteredInput = inputCommand.getInput(i);
+         RigidBodyBasics endEffector = filteredInput.getEndEffector();
+
+         if (lockPelvis.getValue() && endEffector == pelvis)
+            continue;
+         if (lockChest.getValue() && endEffector == chest)
+            continue;
+
+         if (!extrapolatedPoseDataMap.containsKey(endEffector))
+            continue;
+
+         ikCommandInputManager.submitCommand(filteredInput);
+      }
+   }
+
+   private void submitNecessaryDefaultMessages(KinematicsStreamingToolboxInputCommand latestInput)
    {
       if (!latestInput.hasInputFor(head))
          ikCommandInputManager.submitMessages(defaultNeckJointMessages);
