@@ -15,7 +15,7 @@ public class WalkActionStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "25eb7dba6be78e0aed37dfa77e08a69afaa884ad59f1ea71f1fafbaa5b8ea5e9";
+   		return "44282900693a04661e7fcd85445cdb9669006cc828fc8c53291de8820c67bb8e";
    }
    
    @Override
