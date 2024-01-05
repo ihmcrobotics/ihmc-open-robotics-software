@@ -5,6 +5,9 @@ import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
+import us.ihmc.robotics.math.YoReferencePose;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.List;
 
@@ -12,15 +15,17 @@ public class ReferenceBasedStepExpansion implements FootstepExpansion
 {
    private final ReferenceBasedIdealStepCalculator idealStepCalculator;
    private final FootstepExpansion nominalExpansion;
+   private final YoBoolean isPerformingReferenceBasedExpansion;
 
    private final TIntArrayList referenceXOffsets = new TIntArrayList();
    private final TIntArrayList referenceYOffsets = new TIntArrayList();
    private final TIntArrayList referenceYawOffsets = new TIntArrayList();
 
-   public ReferenceBasedStepExpansion(ReferenceBasedIdealStepCalculator idealStepCalculator, FootstepExpansion nominalExpansion)
+   public ReferenceBasedStepExpansion(ReferenceBasedIdealStepCalculator idealStepCalculator, FootstepExpansion nominalExpansion, YoRegistry registry)
    {
       this.idealStepCalculator = idealStepCalculator;
       this.nominalExpansion = nominalExpansion;
+      this.isPerformingReferenceBasedExpansion = new YoBoolean("isPerformingReferenceBasedExpansion", registry);
 
       // Reference Offsets
       referenceXOffsets.add(-1);
@@ -43,9 +48,11 @@ public class ReferenceBasedStepExpansion implements FootstepExpansion
       if (referenceStep == null)
       {
          nominalExpansion.doFullExpansion(nodeToExpand, expansionToPack);
+         isPerformingReferenceBasedExpansion.set(false);
       }
       else
       {
+         isPerformingReferenceBasedExpansion.set(true);
          expansionToPack.clear();
 
          DiscreteFootstep referenceDiscreteFootstep = new DiscreteFootstep(referenceStep.getFootstepPose().getX(),
