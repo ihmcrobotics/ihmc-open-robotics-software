@@ -16,4 +16,7 @@ geometry_msgs/Quaternion orientation
 # Define the desired 3D angular velocity to be reached.
 geometry_msgs/Vector3 angular_velocity
 
+# Define the desired 3D angular acceleration to be reached.
+geometry_msgs/Vector3 angular_acceleration
+
 
