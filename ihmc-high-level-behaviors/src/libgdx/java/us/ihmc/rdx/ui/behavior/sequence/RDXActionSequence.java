@@ -90,7 +90,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       }
       ImGuiTools.previousWidgetTooltip("Go to next action");
 
-      boolean endOfSequence = getState().getExecutionNextIndex() >= getChildren().size();
+      boolean endOfSequence = getState().getExecutionNextIndex() >= getState().getActionChildren().size();
       if (!endOfSequence)
       {
          String nextActionRejectionTooltip = getState().getNextActionRejectionTooltip();

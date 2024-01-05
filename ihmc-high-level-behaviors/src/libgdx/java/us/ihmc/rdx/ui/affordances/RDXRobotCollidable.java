@@ -134,6 +134,16 @@ public class RDXRobotCollidable implements RenderableProvider
                                box.getSizeZ(),
                                color);
          }
+         else if (shape instanceof FrameRamp3DReadOnly ramp)
+         {
+            collisionToLinkFrameTransform.getTranslation().addZ(ramp.getSizeZ());
+            collisionToLinkFrameTransform.appendTranslation(ramp.getPosition());
+            collisionToLinkFrameTransform.appendOrientation(ramp.getOrientation());
+            meshBuilder.addWedge(ramp.getSizeX(),
+                                 ramp.getSizeY(),
+                                 ramp.getSizeZ(),
+                                 color);
+         }
          else if (shape instanceof FramePointShape3DReadOnly pointShape)
          {
             meshBuilder.addSphere((float) 0.01, pointShape, color);
