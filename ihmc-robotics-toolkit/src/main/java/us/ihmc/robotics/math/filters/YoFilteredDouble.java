@@ -38,6 +38,10 @@ public class YoFilteredDouble {
 	private double newFilteredValue;
 	private boolean safeStartup;
 
+	public YoFilteredDouble(YoRegistry registry, TransferFunctionDiscretizer filter) {
+		this(filter.getName(), registry, filter, true);
+	}
+	
 	public YoFilteredDouble(String name, YoRegistry registry, TransferFunctionDiscretizer filter) {
 		this(name, registry, filter, true);
 	}
