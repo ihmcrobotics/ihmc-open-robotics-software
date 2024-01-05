@@ -210,7 +210,8 @@ public class ContinuousPlanner
       {
          case WALK_TO_GOAL, RANDOM_WALK ->
          {
-            FootstepPlan monteCarloFootstepPlan = planWithMonteCarloPlanner(heightMapData, terrainMap, false);
+//            FootstepPlan monteCarloFootstepPlan = planWithMonteCarloPlanner(heightMapData, terrainMap, false);
+            FootstepPlan monteCarloFootstepPlan = null;
             planWithAStarPlanner(heightMapData, usePreviousPlan, monteCarloFootstepPlan);
          }
       }
