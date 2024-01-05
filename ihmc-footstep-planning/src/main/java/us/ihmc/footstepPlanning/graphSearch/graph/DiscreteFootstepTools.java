@@ -115,8 +115,6 @@ public class DiscreteFootstepTools
       RigidBodyTransform footstepTransform = new RigidBodyTransform();
       DiscreteFootstepTools.getStepTransform(stepX, stepY, stepYaw, footstepTransform);
 
-      LogTools.warn("Snap Transform: {} {} {}", stepX, stepY, footstepTransform);
-
       footPolygonToPack.applyTransform(footstepTransform);
    }
 

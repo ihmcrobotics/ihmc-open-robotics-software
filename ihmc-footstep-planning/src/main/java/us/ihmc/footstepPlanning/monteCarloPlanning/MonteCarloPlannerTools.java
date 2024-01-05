@@ -338,8 +338,6 @@ public class MonteCarloPlannerTools
          DiscreteFootstepTools.getFootPolygon(nodeX, nodeY, nodeYaw, footPolygons.get(footstepNode.getRobotSide()), footPolygon);
          RigidBodyTransform snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon, request.getHeightMapData(), request.getSnapHeightThreshold());
 
-         LogTools.warn("Snap Transform: {}", snapTransform);
-
          //FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), snapTransform);
          FramePose3D footstepPose = getFramePose3D(nodeX, nodeY, nodeZ, nodeYaw);
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
