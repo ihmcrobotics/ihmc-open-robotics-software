@@ -72,16 +72,16 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                getDefinition()::getParentFrameName,
+                                                                getDefinition().getBasics()::getParentFrameName,
                                                                 getState().getGoalFrame()::changeFrame);
       executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
                                                           getDefinition()::setExecuteWithNextAction,
                                                           imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
-      swingDurationWidget = new ImDoubleWrapper(getDefinition()::getSwingDuration,
-                                                getDefinition()::setSwingDuration,
+      swingDurationWidget = new ImDoubleWrapper(getDefinition().getBasics()::getSwingDuration,
+                                                getDefinition().getBasics()::setSwingDuration,
                                                 imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
-      transferDurationWidget = new ImDoubleWrapper(getDefinition()::getTransferDuration,
-                                                   getDefinition()::setTransferDuration,
+      transferDurationWidget = new ImDoubleWrapper(getDefinition().getBasics()::getTransferDuration,
+                                                   getDefinition().getBasics()::setTransferDuration,
                                                    imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
 
       for (RobotSide side : RobotSide.values)
