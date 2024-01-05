@@ -141,8 +141,9 @@ public class KSTStreamingState implements State
    private final YoDouble streamingStartTime = new YoDouble("streamingStartTime", registry);
    private final YoDouble streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
    private final YoDouble solutionFilterBreakFrequency = new YoDouble("solutionFilterBreakFrequency", registry);
-   private final YoKinematicsToolboxOutputStatus ikRobotState, initialRobotState, blendedRobotState, filteredRobotState, outputRobotState;
-   private final YoKinematicsToolboxOutputStatus ikFutureRobotState;
+   private final YoKinematicsToolboxOutputStatus initialRobotState, blendedRobotState;
+   private final YoKinematicsToolboxOutputStatus ikRobotState, filteredRobotState, outputRobotState;
+   private final YoKinematicsToolboxOutputStatus ikFutureRobotState, futureFilteredRobotState, outputFutureRobotState;
    private final YoDouble outputJointVelocityScale = new YoDouble("outputJointVelocityScale", registry);
 
    private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
@@ -255,12 +256,14 @@ public class KSTStreamingState implements State
       solutionFilterBreakFrequency.set(Double.POSITIVE_INFINITY);
       FloatingJointBasics rootJoint = desiredFullRobotModel.getRootJoint();
       OneDoFJointBasics[] oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
-      ikRobotState = new YoKinematicsToolboxOutputStatus("IK", rootJoint, oneDoFJoints, registry);
-      ikFutureRobotState = new YoKinematicsToolboxOutputStatus("IKFuture", rootJoint, oneDoFJoints, registry);
       initialRobotState = new YoKinematicsToolboxOutputStatus("Initial", rootJoint, oneDoFJoints, registry);
       blendedRobotState = new YoKinematicsToolboxOutputStatus("Blended", rootJoint, oneDoFJoints, registry);
+      ikRobotState = new YoKinematicsToolboxOutputStatus("IK", rootJoint, oneDoFJoints, registry);
       filteredRobotState = new YoKinematicsToolboxOutputStatus("Filtered", rootJoint, oneDoFJoints, registry);
       outputRobotState = new YoKinematicsToolboxOutputStatus("FD", rootJoint, oneDoFJoints, registry);
+      ikFutureRobotState = new YoKinematicsToolboxOutputStatus("IKFuture", rootJoint, oneDoFJoints, registry);
+      futureFilteredRobotState = new YoKinematicsToolboxOutputStatus("FutureFiltered", rootJoint, oneDoFJoints, registry);
+      outputFutureRobotState = new YoKinematicsToolboxOutputStatus("FutureFD", rootJoint, oneDoFJoints, registry);
 
       { // Filter for locking
          DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(lockPoseFilterBreakFrequency.getValue(),
@@ -476,7 +479,9 @@ public class KSTStreamingState implements State
       initialRobotState.setToNaN();
       blendedRobotState.setToNaN();
       filteredRobotState.setToNaN();
+      futureFilteredRobotState.setToNaN();
       outputRobotState.setToNaN();
+      outputFutureRobotState.setToNaN();
 
       timeOfLastInput.set(Double.NaN);
       timeSinceLastInput.set(Double.NaN);
@@ -741,10 +746,10 @@ public class KSTStreamingState implements State
          }
       }
 
-      // TODO do all this filtering for the future robot state, as well.
       if (resetFilter)
       {
          filteredRobotState.set(ikRobotState);
+         futureFilteredRobotState.set(ikFutureRobotState);
          resetFilter = false;
       }
       else
@@ -752,6 +757,7 @@ public class KSTStreamingState implements State
          double alphaFilter = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(solutionFilterBreakFrequency.getValue(),
                                                                                               tools.getToolboxControllerPeriod());
          filteredRobotState.interpolate(ikRobotState.getStatus(), filteredRobotState.getStatus(), alphaFilter);
+         futureFilteredRobotState.interpolate(ikFutureRobotState.getStatus(), futureFilteredRobotState.getStatus(), alphaFilter);
       }
 
       if (isStreaming.getValue())
@@ -770,6 +776,9 @@ public class KSTStreamingState implements State
          {
             outputRobotState.set(filteredRobotState);
             outputRobotState.scaleVelocities(outputJointVelocityScale.getValue());
+
+            outputFutureRobotState.set(futureFilteredRobotState);
+            outputFutureRobotState.scaleVelocities(outputJointVelocityScale.getValue());
 
             if (timeInBlending < streamingBlendingDuration.getValue())
             {
@@ -800,6 +809,11 @@ public class KSTStreamingState implements State
          {
             outputRobotState.set(filteredRobotState);
             outputRobotState.scaleVelocities(outputJointVelocityScale.getValue());
+
+            outputFutureRobotState.set(futureFilteredRobotState);
+            outputFutureRobotState.scaleVelocities(outputJointVelocityScale.getValue());
+
+            // TODO use the future robot state with the messages for the ingration duration.
             trajectoryMessagePublisher.publish(tools.setupFinalizeTrajectoryMessage(outputRobotState.getStatus()));
          }
 
