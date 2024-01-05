@@ -83,6 +83,9 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
 
    public PlannedFootstep getReferenceStep(FootstepGraphNode graphNode)
    {
+      if (referenceFootstepPlan == null)
+         return null;
+
       List<FootstepGraphNode> pathFromStart = footstepGraph.getPathFromStart(graphNode);
       int stepIndexInPlan = pathFromStart.size() - 1;
       if (stepIndexInPlan < referenceFootstepPlan.getNumberOfSteps())
