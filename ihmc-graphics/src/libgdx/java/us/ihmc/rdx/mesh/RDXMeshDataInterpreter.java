@@ -49,6 +49,11 @@ public class RDXMeshDataInterpreter
       }
 
       meshToPack.getIndicesBuffer().flip();
+
+      if (meshToPack.getVerticesBuffer().limit() == 0)
+      {
+         throw new RuntimeException("Mesh must have data. The application will SIGSEV on rendering if this continued.");
+      }
    }
 
    public static void repositionMeshVertices(MeshDataHolder meshData, Mesh meshToPack, Color color)
@@ -80,5 +85,10 @@ public class RDXMeshDataInterpreter
       }
 
       meshToPack.getVerticesBuffer().flip();
+
+      if (meshToPack.getVerticesBuffer().limit() == 0)
+      {
+         throw new RuntimeException("Mesh must have data. The application will SIGSEV on rendering if this continued.");
+      }
    }
 }

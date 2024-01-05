@@ -61,10 +61,7 @@ public class RDXMutableMultiLineModel extends RDXMutableMeshModel
          }
 
          lineWidth = lineWidthUpdate;
-      }
 
-      if (outOfDate)
-      {
          updateMesh(meshDataSupplier.get());
       }
    }

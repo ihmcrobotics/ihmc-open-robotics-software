@@ -9,6 +9,8 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 
+import java.util.function.Consumer;
+
 /**
  * A performance optimization to help avoid rebuilding meshes unecessarily
  * and also to do this minimum amount required when necessary.
@@ -28,32 +30,45 @@ public class RDXMutableMeshModel
 
    protected void updateMesh(MeshDataHolder meshDataHolder)
    {
-      boolean needToRebuildModel = modelInstance == null;
+      boolean emptyModel = meshDataHolder.getTriangleIndices().length == 0;
+      emptyModel |= meshDataHolder.getVertices().length == 0;
 
-      Mesh mesh = null;
-      if (!needToRebuildModel)
+      if (emptyModel)
       {
-         mesh = modelInstance.model.nodes.get(0).parts.get(0).meshPart.mesh;
-
-         // These buffer capacities are final, so the Mesh needs to be recreated if there's not enough space
-         needToRebuildModel |= mesh.getIndicesBuffer().capacity() < meshDataHolder.getTriangleIndices().length;
-         needToRebuildModel |= mesh.getVerticesBuffer().capacity() < meshDataHolder.getVertices().length;
-      }
-
-      if (needToRebuildModel)
-      {
-         modelInstance = new RDXModelInstance(RDXModelBuilder.buildModelInstance(meshBuilder -> meshBuilder.addMesh(meshDataHolder, color)));
+         modelInstance = null;
       }
       else
       {
-         RDXMeshDataInterpreter.reorderMeshVertices(meshDataHolder, mesh);
-         RDXMeshDataInterpreter.repositionMeshVertices(meshDataHolder, mesh, color);
+         boolean initialOrLargerModelNeeded = modelInstance == null;
+
+         Mesh mesh = null;
+         if (!initialOrLargerModelNeeded)
+         {
+            mesh = modelInstance.model.nodes.get(0).parts.get(0).meshPart.mesh;
+
+            // These buffer capacities are final, so the Mesh needs to be recreated if there's not enough space
+            initialOrLargerModelNeeded |= mesh.getIndicesBuffer().capacity() < meshDataHolder.getTriangleIndices().length;
+            initialOrLargerModelNeeded |= mesh.getVerticesBuffer().capacity() < meshDataHolder.getVertices().length;
+         }
+
+         if (initialOrLargerModelNeeded)
+         {
+            modelInstance = new RDXModelInstance(RDXModelBuilder.buildModelInstance(meshBuilder -> meshBuilder.addMesh(meshDataHolder, color)));
+         }
+         else
+         {
+            RDXMeshDataInterpreter.reorderMeshVertices(meshDataHolder, mesh);
+            RDXMeshDataInterpreter.repositionMeshVertices(meshDataHolder, mesh, color);
+         }
       }
    }
 
-   public RDXModelInstance getModelInstance()
+   public void accessModelIfExists(Consumer<RDXModelInstance> modelInstanceAccessor)
    {
-      return modelInstance;
+      if (modelInstance != null)
+      {
+         modelInstanceAccessor.accept(modelInstance);
+      }
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
