@@ -5,17 +5,29 @@ import java.util.function.BooleanSupplier;
 /**
  * A behavior tree action that draws from a boolean supplier.
  */
-public class BehaviorTreeCondition extends BehaviorTreeAction implements BehaviorTreeConditionBasics
+public abstract class BehaviorTreeCondition extends LocalOnlyBehaviorTreeNodeExecutor
 {
    private final BooleanSupplier conditionSupplier;
+
+   public BehaviorTreeNodeStatus determineStatus()
+   {
+      boolean success = checkCondition();
+
+      if (success)
+      {
+         return BehaviorTreeNodeStatus.SUCCESS;
+      }
+      else
+      {
+         return BehaviorTreeNodeStatus.FAILURE;
+      }
+   }
 
    public BehaviorTreeCondition(BooleanSupplier conditionSupplier)
    {
       this.conditionSupplier = conditionSupplier;
-      setType(BehaviorTreeCondition.class);
    }
 
-   @Override
    public boolean checkCondition()
    {
       return conditionSupplier.getAsBoolean();

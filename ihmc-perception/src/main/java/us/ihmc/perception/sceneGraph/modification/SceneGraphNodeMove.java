@@ -27,6 +27,6 @@ public class SceneGraphNodeMove extends SceneGraphNodeAddition implements SceneG
       previousParent.getChildren().remove(nodeToMove);
       nodeToMove.changeFrame(newParent.getNodeFrame());
       super.performOperation();
-      previousParent.freezeFromModification();
+      previousParent.freeze();
    }
 }

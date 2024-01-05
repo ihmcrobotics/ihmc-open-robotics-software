@@ -11,10 +11,7 @@ module behavior_msgs
       @TypeCode(type="behavior_msgs::msg::dds_::FootstepPlanActionFootstepStateMessage_")
       struct FootstepPlanActionFootstepStateMessage
       {
-        /**
-         * Index of the footstep
-         */
-        unsigned short index;
+        boolean unused_placeholder_field;
       };
     };
   };
