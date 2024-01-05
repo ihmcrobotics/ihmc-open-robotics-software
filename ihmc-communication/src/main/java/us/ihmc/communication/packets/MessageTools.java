@@ -966,7 +966,7 @@ public class MessageTools
       Float jointAccelerationsEnd = end.getDesiredJointAccelerations();
       Float jointAccelerationsInterpolated = interpolatedToPack.getDesiredJointAccelerations();
 
-      if (jointAnglesStart.size() != jointAnglesEnd.size() || jointVelocitiesStart.size() != jointVelocitiesEnd.size())
+      if (jointAnglesStart.size() != jointAnglesEnd.size() || jointVelocitiesStart.size() != jointVelocitiesEnd.size() || jointAccelerationsStart.size() != jointAccelerationsEnd.size())
          throw new IllegalArgumentException("start and end are not compatible");
 
       jointAnglesInterpolated.reset();

@@ -26,6 +26,7 @@ public class KinematicsStreamingToolboxParameters
    private double defaultLinearRateLimit;
    private double defaultAngularRateLimit;
    private double outputJointVelocityScale;
+   private double outputJointAccelerationScale;
 
    private boolean minimizeAngularMomentum;
    private boolean minimizeLinearMomentum;
@@ -70,6 +71,7 @@ public class KinematicsStreamingToolboxParameters
       defaultLinearRateLimit = 1.5;
       defaultAngularRateLimit = 10.0;
       outputJointVelocityScale = 0.75;
+      outputJointAccelerationScale = 0.6;
 
       minimizeAngularMomentum = true;
       minimizeLinearMomentum = false;
@@ -174,6 +176,11 @@ public class KinematicsStreamingToolboxParameters
    public double getOutputJointVelocityScale()
    {
       return outputJointVelocityScale;
+   }
+
+   public double getOutputJointAccelerationScale()
+   {
+      return outputJointAccelerationScale;
    }
 
    public boolean isMinimizeAngularMomentum()

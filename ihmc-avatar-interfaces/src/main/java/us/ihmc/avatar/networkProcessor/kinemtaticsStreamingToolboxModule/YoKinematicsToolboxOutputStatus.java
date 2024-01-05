@@ -239,6 +239,7 @@ public class YoKinematicsToolboxOutputStatus
 
       status.getDesiredJointAngles().reset();
       status.getDesiredJointVelocities().reset();
+      status.getDesiredJointAccelerations().reset();
 
       for (int i = 0; i < numberOfJoints; i++)
       {

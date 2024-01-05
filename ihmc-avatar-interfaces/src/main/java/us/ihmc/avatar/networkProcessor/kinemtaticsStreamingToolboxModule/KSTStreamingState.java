@@ -252,6 +252,7 @@ public class KSTStreamingState implements State
       defaultLinearRateLimit.set(parameters.getDefaultLinearRateLimit());
       defaultAngularRateLimit.set(parameters.getDefaultAngularRateLimit());
       outputJointVelocityScale.set(parameters.getOutputJointVelocityScale());
+      outputJointAccelerationScale.set(parameters.getOutputJointAccelerationScale());
 
       streamingBlendingDuration.set(parameters.getDefaultStreamingBlendingDuration());
       solutionFilterBreakFrequency.set(Double.POSITIVE_INFINITY);
