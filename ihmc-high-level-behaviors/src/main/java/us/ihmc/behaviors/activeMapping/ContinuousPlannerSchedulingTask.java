@@ -150,7 +150,7 @@ public class ContinuousPlannerSchedulingTask
    {
       continuousPlanner.initialize();
       continuousPlanner.setGoalWaypointPoses(parameters);
-      continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, terrainMap, false);
+      continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, terrainMap, false, true);
 
       if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION
           || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
@@ -182,7 +182,7 @@ public class ContinuousPlannerSchedulingTask
 
          publishStartAndGoalForVisualization();
          continuousPlanner.setGoalWaypointPoses(parameters);
-         continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, terrainMap, true);
+         continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, terrainMap, true, true);
 
          if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION
              || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
