@@ -738,6 +738,7 @@ public class KSTStreamingState implements State
       }
 
       filteredRobotState.setDesiredAccelerationsByFiniteDifference(previousRobotState, filteredRobotState, tools.getToolboxControllerPeriod());
+      // TODO need to apply the acceleration filter here. 
 
       if (isStreaming.getValue())
       {
