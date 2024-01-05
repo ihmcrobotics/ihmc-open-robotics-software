@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.sequence;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.tools.Timer;
+import us.ihmc.tools.NonWallTimer;
 
 /**
  * This class will probably change a lot as actions have
@@ -18,7 +18,7 @@ public class BehaviorActionCompletionCalculator
                              double translationTolerance,
                              double rotationTolerance,
                              double actionNominalDuration,
-                             Timer executionTimer,
+                             NonWallTimer executionTimer,
                              BehaviorActionCompletionComponent... components)
    {
       boolean timeIsUp = !executionTimer.isRunning(actionNominalDuration);
