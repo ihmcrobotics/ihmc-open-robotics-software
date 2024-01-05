@@ -28,11 +28,12 @@ public class IterativeClosestPointWorker
    private long sceneNodeID = -1L;
 
    private final PrimitiveRigidBodyShape detectionShape;
-   private float width = 0.0f;
-   private float height = 0.0f;
-   private float depth = 0.0f;
-   private float length = 0.0f;
-   private float radius = 0.0f;
+   private float xLength = 0.0f;
+   private float yLength = 0.0f;
+   private float zLength = 0.0f;
+   private float xRadius = 0.0f;
+   private float yRadius = 0.0f;
+   private float zRadius = 0.0f;
    private int numberOfICPObjectPoints;
 
    private final DMatrixRMaj objectCentroid = new DMatrixRMaj(1, 3);
@@ -72,21 +73,23 @@ public class IterativeClosestPointWorker
    }
 
    public IterativeClosestPointWorker(PrimitiveRigidBodyShape objectShape,
-                                      float width,
-                                      float height,
-                                      float depth,
-                                      float length,
-                                      float radius,
+                                      float xLength,
+                                      float yLength,
+                                      float zLength,
+                                      float xRadius,
+                                      float yRadius,
+                                      float zRadius,
                                       int numberOfICPObjectPoints,
                                       ROS2Helper ros2Helper,
                                       Random random)
    {
       this.ros2Helper = ros2Helper;
-      this.width = width;
-      this.height = height;
-      this.depth = depth;
-      this.length = length;
-      this.radius = radius;
+      this.xLength = xLength;
+      this.yLength = yLength;
+      this.zLength = zLength;
+      this.xRadius = xRadius;
+      this.yRadius = yRadius;
+      this.zRadius = zRadius;
       this.numberOfICPObjectPoints = numberOfICPObjectPoints;
       this.random = random;
       detectionShape = objectShape;
@@ -95,13 +98,7 @@ public class IterativeClosestPointWorker
       environmentCentroidSubtractedPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
       environmentToObjectCorrespondencePoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
 
-      switch (detectionShape)
-      {
-         case BOX -> objectInWorldPoints = createICPObjectPointCloudBox(width, height, depth, numberOfICPObjectPoints, random);
-         case CONE -> objectInWorldPoints = createICPObjectPointCloudCone(length, radius, numberOfICPObjectPoints, random);
-         case CYLINDER -> objectInWorldPoints = createICPObjectPointCloudCylinder(length, radius, numberOfICPObjectPoints, random);
-         default -> objectInWorldPoints = createDefaultBoxPointCloud(numberOfICPObjectPoints, random);
-      }
+      objectInWorldPoints = createICPObjectPointCloud(detectionShape, xLength, yLength, zLength, xRadius, yRadius, zRadius, numberOfICPObjectPoints);
    }
 
    public void runICP(int numberOfIterations)
@@ -278,19 +275,43 @@ public class IterativeClosestPointWorker
       resultPose.getPosition().set(objectPointCloudCentroid.get(0, 0), objectPointCloudCentroid.get(0, 1), objectPointCloudCentroid.get(0, 2));
    }
 
-   private RecyclingArrayList<Point3D32> createICPObjectPointCloudBox(float width, float height, float depth, int numberOfPoints, Random random)
+   private RecyclingArrayList<Point3D32> createICPObjectPointCloud(PrimitiveRigidBodyShape shape,
+                                                                   float xLength,
+                                                                   float yLength,
+                                                                   float zLength,
+                                                                   float xRadius,
+                                                                   float yRadius,
+                                                                   float zRadius,
+                                                                   int numberOfICPObjectPoints)
+   {
+      RecyclingArrayList<Point3D32> objectPointCloud;
+
+      switch (shape)
+      {
+         case BOX -> objectPointCloud = createBoxPointCloud(xLength, yLength, zLength, numberOfICPObjectPoints, random);
+         case PRISM -> objectPointCloud = createPrismPointCloud(xLength, yLength, zLength, numberOfICPObjectPoints, random);
+         case CYLINDER -> objectPointCloud = createCylinderPointCloud(zLength, xRadius, numberOfICPObjectPoints, random);
+         case ELLIPSOID -> objectPointCloud = createEllipsoidPointCloud(xRadius, yRadius, zRadius, numberOfICPObjectPoints, random);
+         case CONE -> objectPointCloud = createConePointCloud(zLength, xRadius, numberOfICPObjectPoints, random);
+         default -> objectPointCloud = createDefaultBoxPointCloud(numberOfICPObjectPoints, random);
+      }
+
+      return objectPointCloud;
+   }
+
+   private RecyclingArrayList<Point3D32> createBoxPointCloud(float xLength, float yLength, float zLength, int numberOfPoints, Random random)
    {
       RecyclingArrayList<Point3D32> boxObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
 
-      float halfBoxWidth = width / 2.0f;
-      float halfBoxDepth = height / 2.0f;
-      float halfBoxHeight = depth / 2.0f;
+      float halfBoxHeight = xLength / 2.0f;
+      float halfBoxWidth = yLength / 2.0f;
+      float halfBoxDepth = zLength / 2.0f;
       for (int i = 0; i < numberOfPoints; i++)
       {
          int j = random.nextInt(6);
-         float x = (float) random.nextDouble(-halfBoxDepth, halfBoxDepth);
-         float y = (float) random.nextDouble(-halfBoxWidth, halfBoxWidth);
-         float z = (float) random.nextDouble(-halfBoxHeight, halfBoxHeight);
+         float x = random.nextFloat(-halfBoxDepth, halfBoxDepth);
+         float y = random.nextFloat(-halfBoxWidth, halfBoxWidth);
+         float z = random.nextFloat(-halfBoxHeight, halfBoxHeight);
          if (j == 0 | j == 1)
          {
             x = (-(j & 1) * halfBoxDepth * 2.0f) + halfBoxDepth;
@@ -311,42 +332,55 @@ public class IterativeClosestPointWorker
       return boxObjectPointCloud;
    }
 
-   private RecyclingArrayList<Point3D32> createICPObjectPointCloudCone(float length, float radius, int numberOfPoints, Random random)
+   private RecyclingArrayList<Point3D32> createPrismPointCloud(float xLength, float yLength, float zLength, int numberOfPoints, Random random)
    {
-      RecyclingArrayList<Point3D32> coneObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
+      RecyclingArrayList<Point3D32> prismObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
+
+      float halfPrismDepth = xLength / 2.0f;
+      float halfPrismWidth = yLength / 2.0f;
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         float z = (float) random.nextDouble(0, length);
-         double phi = random.nextDouble(0, 2 * Math.PI);
-         float x = (float) Math.cos(phi) * z * (radius / length);
-         float y = (float) Math.sin(phi) * z * (radius / length);
-         Point3D32 conePoint = coneObjectPointCloud.add();
-         conePoint.set(resultPose.getPosition());
-         conePoint.add(x, y, z);
+         int side = random.nextInt(0, 4);
+         float x = random.nextFloat(-halfPrismDepth, halfPrismDepth);
+         float y = random.nextFloat(-halfPrismWidth, halfPrismWidth);
+         float z = random.nextFloat(0, zLength);
+         if (side == 0 || side == 1) // triangular faces
+         {
+            x = (1.0f - (z / zLength)) * x;
+            y = (-(side & 1) * halfPrismWidth * 2.0f) + halfPrismWidth;
+         }
+         else if (side == 2 || side == 3) // rectangular faces
+         {
+            x = (1.0f - (z / zLength)) * ((-(side & 1) * halfPrismDepth * 2.0f) + halfPrismDepth);
+         }
+
+         Point3D32 prismPoint = prismObjectPointCloud.add();
+         prismPoint.set(resultPose.getPosition());
+         prismPoint.add(x, y, z);
       }
 
-      return coneObjectPointCloud;
+      return prismObjectPointCloud;
    }
 
-   private RecyclingArrayList<Point3D32> createICPObjectPointCloudCylinder(float length, float radius, int numberOfPoints, Random random)
+   private RecyclingArrayList<Point3D32> createCylinderPointCloud(float zLength, float xRadius, int numberOfPoints, Random random)
    {
       RecyclingArrayList<Point3D32> cylinderObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
 
       for (int i = 0; i < numberOfPoints; i++)
       {
          int j = random.nextInt(6);
-         float z = (float) random.nextDouble(0, length);
-         float r = radius;
+         float z = random.nextFloat(0, zLength);
+         float r = xRadius;
          if (j == 0)
          {
             z = 0;
-            r = (float) random.nextDouble(0, radius);
+            r = random.nextFloat(0, xRadius);
          }
          if (j == 1)
          {
-            z = length;
-            r = (float) random.nextDouble(0, radius);
+            z = zLength;
+            r = random.nextFloat(0, xRadius);
          }
          double phi = random.nextDouble(0, 2 * Math.PI);
          float x = (float) Math.cos(phi) * r;
@@ -359,6 +393,44 @@ public class IterativeClosestPointWorker
       return cylinderObjectPointCloud;
    }
 
+   private RecyclingArrayList<Point3D32> createEllipsoidPointCloud(float xRadius, float yRadius, float zRadius, int numberOfPoints, Random random)
+   {
+      RecyclingArrayList<Point3D32> ellipsoidObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
+
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         double phi = random.nextDouble(0, 2.0 * Math.PI);
+         double theta = random.nextDouble(0, 2.0 * Math.PI);
+         float x = (float) (Math.sin(phi) * Math.cos(theta) * xRadius);
+         float y = (float) (Math.sin(phi) * Math.sin(theta) * yRadius);
+         float z = (float) Math.cos(phi) * zRadius;
+
+         Point3D32 ellipsoidPoint = ellipsoidObjectPointCloud.add();
+         ellipsoidPoint.set(resultPose.getPosition());
+         ellipsoidPoint.add(x, y, z);
+      }
+
+      return ellipsoidObjectPointCloud;
+   }
+
+   private RecyclingArrayList<Point3D32> createConePointCloud(float zLength, float xRadius, int numberOfPoints, Random random)
+   {
+      RecyclingArrayList<Point3D32> coneObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
+
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         float z = random.nextFloat(0, zLength);
+         double phi = random.nextDouble(0, 2.0 * Math.PI);
+         float x = (float) Math.cos(phi) * (zLength - z) * (xRadius / zLength);
+         float y = (float) Math.sin(phi) * (zLength - z) * (xRadius / zLength);
+         Point3D32 conePoint = coneObjectPointCloud.add();
+         conePoint.set(resultPose.getPosition());
+         conePoint.add(x, y, z);
+      }
+
+      return coneObjectPointCloud;
+   }
+
    private RecyclingArrayList<Point3D32> createDefaultBoxPointCloud(int numberOfPoints, Random random)
    {
       RecyclingArrayList<Point3D32> boxObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
@@ -369,9 +441,9 @@ public class IterativeClosestPointWorker
       for (int i = 0; i < numberOfPoints; i++)
       {
          int j = random.nextInt(6);
-         float x = (float) random.nextDouble(-halfBoxDepth, halfBoxDepth);
-         float y = (float) random.nextDouble(-halfBoxWidth, halfBoxWidth);
-         float z = (float) random.nextDouble(-halfBoxHeight, halfBoxHeight);
+         float x = random.nextFloat(-halfBoxDepth, halfBoxDepth);
+         float y = random.nextFloat(-halfBoxWidth, halfBoxWidth);
+         float z = random.nextFloat(-halfBoxHeight, halfBoxHeight);
          if (j == 0 | j == 1)
          {
             x = (-(j & 1) * halfBoxDepth * 2.0f) + halfBoxDepth;
@@ -438,20 +510,16 @@ public class IterativeClosestPointWorker
       sceneNodeID = id;
    }
 
-   public void changeSize(float width, float height, float depth, float length, float radius, int numberOfICPObjectPoints)
+   public void changeSize(float xLength, float yLength, float zLength, float xRadius, float yRadius, float zRadius, int numberOfICPObjectPoints)
    {
-      this.width = width;
-      this.height = height;
-      this.depth = depth;
-      this.length = length;
-      this.radius = radius;
+      this.xLength = xLength;
+      this.yLength = yLength;
+      this.zLength = zLength;
+      this.xRadius = xRadius;
+      this.yRadius = yRadius;
+      this.zRadius = zRadius;
       this.numberOfICPObjectPoints = numberOfICPObjectPoints;
-      switch (detectionShape)
-      {
-         case BOX -> objectInWorldPoints = createICPObjectPointCloudBox(width, height, depth, numberOfICPObjectPoints, random);
-         case CYLINDER -> objectInWorldPoints = createICPObjectPointCloudCylinder(length, radius, numberOfICPObjectPoints, random);
-         case CONE -> objectInWorldPoints = createICPObjectPointCloudCone(length, radius, numberOfICPObjectPoints, random);
-      }
+      objectInWorldPoints = createICPObjectPointCloud(detectionShape, xLength, yLength, zLength, xRadius, yRadius, zRadius, numberOfICPObjectPoints);
    }
 
    public List<Point3D32> getSegmentedPointCloud()
@@ -469,29 +537,34 @@ public class IterativeClosestPointWorker
       return objectInWorldPoints;
    }
 
-   public float getWidth()
+   public float getXLength()
    {
-      return width;
+      return xLength;
    }
 
-   public float getHeight()
+   public float getYLength()
    {
-      return height;
+      return yLength;
    }
 
-   public float getDepth()
+   public float getZLength()
    {
-      return depth;
+      return zLength;
    }
 
-   public float getLength()
+   public float getXRadius()
    {
-      return length;
+      return xRadius;
    }
 
-   public float getRadius()
+   public float getYRadius()
    {
-      return radius;
+      return yRadius;
+   }
+
+   public float getZRadius()
+   {
+      return zRadius;
    }
 
    public int getNumberOfICPObjectPoints()
