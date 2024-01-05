@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.yoFilteredDouble;
+package us.ihmc.exampleSimulations.yoFilteredDouble.emptyRobotSCS;
 
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
