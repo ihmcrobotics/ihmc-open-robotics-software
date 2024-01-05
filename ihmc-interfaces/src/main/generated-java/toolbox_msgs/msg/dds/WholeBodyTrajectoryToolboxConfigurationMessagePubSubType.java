@@ -15,7 +15,7 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType implements
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "42605e13cd0f54e38ac3a1e2aeb5ca43df62c9846ab4125012d4a248efd562a3";
+   		return "3c9acd47fcc8735572ecf9b7b38062a10ba50f0c51d738a9c46359aa8b1117a2";
    }
    
    @Override

@@ -51,6 +51,15 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    public us.ihmc.euclid.tuple3D.Vector3D desired_root_linear_velocity_;
    public us.ihmc.euclid.tuple3D.Vector3D desired_root_angular_velocity_;
    /**
+            * Desired joint accelerations might be empty.
+            */
+   public us.ihmc.idl.IDLSequence.Float  desired_joint_accelerations_;
+   /**
+            * Desired acceleration of root might be empty
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D desired_root_linear_acceleration_;
+   public us.ihmc.euclid.tuple3D.Vector3D desired_root_angular_acceleration_;
+   /**
             * Support region used by the toolbox
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  support_region_;
@@ -66,6 +75,10 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       desired_root_linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       desired_root_angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      desired_joint_accelerations_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
+
+      desired_root_linear_acceleration_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      desired_root_angular_acceleration_ = new us.ihmc.euclid.tuple3D.Vector3D();
       support_region_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (32, new geometry_msgs.msg.dds.PointPubSubType());
 
    }
@@ -90,6 +103,9 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       desired_joint_velocities_.set(other.desired_joint_velocities_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_linear_velocity_, desired_root_linear_velocity_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_angular_velocity_, desired_root_angular_velocity_);
+      desired_joint_accelerations_.set(other.desired_joint_accelerations_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_linear_acceleration_, desired_root_linear_acceleration_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_angular_acceleration_, desired_root_angular_acceleration_);
       support_region_.set(other.support_region_);
       solution_quality_ = other.solution_quality_;
 
@@ -178,6 +194,30 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
 
    /**
+            * Desired joint accelerations might be empty.
+            */
+   public us.ihmc.idl.IDLSequence.Float  getDesiredJointAccelerations()
+   {
+      return desired_joint_accelerations_;
+   }
+
+
+   /**
+            * Desired acceleration of root might be empty
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getDesiredRootLinearAcceleration()
+   {
+      return desired_root_linear_acceleration_;
+   }
+
+
+   public us.ihmc.euclid.tuple3D.Vector3D getDesiredRootAngularAcceleration()
+   {
+      return desired_root_angular_acceleration_;
+   }
+
+
+   /**
             * Support region used by the toolbox
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getSupportRegion()
@@ -226,6 +266,10 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       if (!this.desired_root_linear_velocity_.epsilonEquals(other.desired_root_linear_velocity_, epsilon)) return false;
       if (!this.desired_root_angular_velocity_.epsilonEquals(other.desired_root_angular_velocity_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.desired_joint_accelerations_, other.desired_joint_accelerations_, epsilon)) return false;
+
+      if (!this.desired_root_linear_acceleration_.epsilonEquals(other.desired_root_linear_acceleration_, epsilon)) return false;
+      if (!this.desired_root_angular_acceleration_.epsilonEquals(other.desired_root_angular_acceleration_, epsilon)) return false;
       if (this.support_region_.size() != other.support_region_.size()) { return false; }
       else
       {
@@ -260,6 +304,9 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       if (!this.desired_joint_velocities_.equals(otherMyClass.desired_joint_velocities_)) return false;
       if (!this.desired_root_linear_velocity_.equals(otherMyClass.desired_root_linear_velocity_)) return false;
       if (!this.desired_root_angular_velocity_.equals(otherMyClass.desired_root_angular_velocity_)) return false;
+      if (!this.desired_joint_accelerations_.equals(otherMyClass.desired_joint_accelerations_)) return false;
+      if (!this.desired_root_linear_acceleration_.equals(otherMyClass.desired_root_linear_acceleration_)) return false;
+      if (!this.desired_root_angular_acceleration_.equals(otherMyClass.desired_root_angular_acceleration_)) return false;
       if (!this.support_region_.equals(otherMyClass.support_region_)) return false;
       if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
 
@@ -291,6 +338,12 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       builder.append(this.desired_root_linear_velocity_);      builder.append(", ");
       builder.append("desired_root_angular_velocity=");
       builder.append(this.desired_root_angular_velocity_);      builder.append(", ");
+      builder.append("desired_joint_accelerations=");
+      builder.append(this.desired_joint_accelerations_);      builder.append(", ");
+      builder.append("desired_root_linear_acceleration=");
+      builder.append(this.desired_root_linear_acceleration_);      builder.append(", ");
+      builder.append("desired_root_angular_acceleration=");
+      builder.append(this.desired_root_angular_acceleration_);      builder.append(", ");
       builder.append("support_region=");
       builder.append(this.support_region_);      builder.append(", ");
       builder.append("solution_quality=");
