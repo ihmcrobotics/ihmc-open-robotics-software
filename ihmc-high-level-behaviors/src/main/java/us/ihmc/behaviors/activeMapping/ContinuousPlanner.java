@@ -282,7 +282,9 @@ public class ContinuousPlanner
       request.setHeightMapData(heightMapData);
       request.setSnapGoalSteps(true);
       request.setAbortIfGoalStepSnappingFails(true);
-      request.setReferencePlan(monteCarloFootstepPlan);
+      //request.setReferencePlan(monteCarloFootstepPlan);
+
+      //LogTools.warn("MonteCarloPlan: {}", monteCarloFootstepPlan);
 
       if (useReferencePlan)
       {
