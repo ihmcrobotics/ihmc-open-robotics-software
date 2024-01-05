@@ -39,7 +39,7 @@ public class RDXOpenCVColorByteOrderDemo
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            environmentBuilder.loadEnvironment("DepthSensorZeroTest.json");
+            environmentBuilder.loadEnvironment("FlatGround.json");
 
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
             sensorPoseGizmo.setResizeAutomatically(true);
