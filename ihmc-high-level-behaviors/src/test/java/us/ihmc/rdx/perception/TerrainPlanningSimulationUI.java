@@ -64,6 +64,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -76,7 +77,7 @@ import java.util.Random;
 
 public class TerrainPlanningSimulationUI
 {
-   private final boolean USE_EXTERNAL_HEIGHT_MAP = true;
+   private final boolean USE_EXTERNAL_HEIGHT_MAP = false;
    private final double MAXIMUM_NUMBER_OF_ITERATIONS = 100000;
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
@@ -106,6 +107,8 @@ public class TerrainPlanningSimulationUI
    private final MonteCarloFootstepPlanner monteCarloFootstepPlanner;
 
    private final RDXStoredPropertySetTuner monteCarloPlannerParametersTuner = new RDXStoredPropertySetTuner("Planner Parameters (Monte-Carlo)");
+   private final RDXStoredPropertySetTuner heightMapParametersTuner = new RDXStoredPropertySetTuner("Height Map Parameters (Active Mapper)");
+
    private final TypedNotification<FootstepPlan> footstepPlanToRenderNotificaiton = new TypedNotification<>();
    private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private final SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
@@ -138,7 +141,7 @@ public class TerrainPlanningSimulationUI
    private final ImFloat goalMidY = new ImFloat(0.0f);
    private final ImFloat goalYaw = new ImFloat(0.0f);
 
-   private final ImBoolean enableSliders = new ImBoolean(false);
+   private final ImBoolean enablePoseSliders = new ImBoolean(false);
    private final ImBoolean renderStartPoses = new ImBoolean(false);
    private final ImBoolean renderGoalPoses = new ImBoolean(false);
 
@@ -218,6 +221,8 @@ public class TerrainPlanningSimulationUI
 
             baseUI.getPrimaryScene().addRenderableProvider(footstepPlanGraphic, RDXSceneLevel.MODEL);
 
+            environmentBuilder.loadEnvironment("HarderTerrain.json");
+
             navigationPanel.setRenderMethod(this::renderNavigationPanel);
          }
 
@@ -275,10 +280,13 @@ public class TerrainPlanningSimulationUI
                footstepPlanGraphic.update();
             }
 
-            l515PoseGizmo.getTransformToParent().getTranslation().setX(startMidX.get());
-            l515PoseGizmo.getTransformToParent().getTranslation().setY(startMidY.get());
-            l515PoseGizmo.getTransformToParent().getTranslation().setZ(startMidZ.get());
-            l515PoseGizmo.update();
+            if (enablePoseSliders.get())
+            {
+               l515PoseGizmo.getTransformToParent().getTranslation().setX(startMidX.get());
+               l515PoseGizmo.getTransformToParent().getTranslation().setY(startMidY.get());
+               l515PoseGizmo.getTransformToParent().getTranslation().setZ(startMidZ.get());
+               l515PoseGizmo.update();
+            }
 
             stancePoseSelectionPanel.update(goalPose.get(RobotSide.LEFT), loadedMapData);
 
@@ -436,6 +444,7 @@ public class TerrainPlanningSimulationUI
             ImGui.popStyleColor();
             ImGui.checkbox("Render Start Poses", renderStartPoses);
             ImGui.checkbox("Render Goal Poses", renderGoalPoses);
+            ImGui.checkbox("Use Slider Pose", enablePoseSliders);
             ImGui.sliderFloat("Start Mid X", startMidX.getData(), -4.0f, 4.0f);
             ImGui.sliderFloat("Start Mid Y", startMidY.getData(), -4.0f, 4.0f);
             ImGui.sliderFloat("Start Mid Z", startMidZ.getData(), -3.0f, 3.0f);
@@ -773,7 +782,6 @@ public class TerrainPlanningSimulationUI
 
          private void initializePerceptionModule()
          {
-
             humanoidPerception = new HumanoidPerceptionModule(openCLManager);
             humanoidPerception.initializeRealsenseDepthImage(steppingL515Simulator.getCopyOfCameraParameters().getHeight(),
                                                              steppingL515Simulator.getCopyOfCameraParameters().getWidth());
@@ -785,10 +793,6 @@ public class TerrainPlanningSimulationUI
                RapidHeightMapExtractor.getHeightMapParameters().setInternalGlobalCellSizeInMeters(0.02);
                humanoidPerception.getRapidHeightMapExtractor().initialize();
                humanoidPerception.getRapidHeightMapExtractor().reset();
-            }
-            else
-            {
-               environmentBuilder.loadEnvironment("HarderTerrain.json");
             }
          }
 
@@ -803,6 +807,11 @@ public class TerrainPlanningSimulationUI
             LogTools.info("Planner Parameters Save File " + monteCarloPlannerParameters.findSaveFileDirectory().getFileName().toString());
             monteCarloPlannerParametersTuner.create(monteCarloPlannerParameters, false);
             humanoidPerceptionUI.addChild(monteCarloPlannerParametersTuner);
+
+            HeightMapParameters heightMapParameters = RapidHeightMapExtractor.getHeightMapParameters();
+            LogTools.info("Height Map Parameters Save File " + heightMapParameters.findSaveFileDirectory().getFileName().toString());
+            heightMapParametersTuner.create(heightMapParameters, false);
+            humanoidPerceptionUI.addChild(heightMapParametersTuner);
          }
 
          public void logInternalHeightMap()
