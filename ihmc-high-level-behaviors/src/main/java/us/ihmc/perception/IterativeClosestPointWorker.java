@@ -8,6 +8,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -61,6 +62,7 @@ public class IterativeClosestPointWorker
    private List<Point3D32> segmentedPointCloud;
    private double segmentSphereRadius = 1.0;
 
+   private List<Point3D32> localObjectPoints;
    private List<Point3D32> objectInWorldPoints;
 
    private final AtomicBoolean useTargetPoint = new AtomicBoolean(true);
@@ -79,6 +81,7 @@ public class IterativeClosestPointWorker
       measurementRelativeToCentroidPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
       detectionShape = PrimitiveRigidBodyShape.BOX;
 
+      localObjectPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape, new Pose3D(), xLength, yLength, zLength, xRadius, yRadius, zRadius, numberOfICPObjectPoints, random);
       setPoseGuess(resultPose);
    }
 
@@ -110,6 +113,7 @@ public class IterativeClosestPointWorker
       objectRelativeToCentroidPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
       measurementRelativeToCentroidPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
 
+      localObjectPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape, new Pose3D(), xLength, yLength, zLength, xRadius, yRadius, zRadius, numberOfICPObjectPoints, random);
       setPoseGuess(initialPose);
    }
 
@@ -333,6 +337,7 @@ public class IterativeClosestPointWorker
       objectRelativeToCentroidPoints.reshape(numberOfICPObjectPoints, 3);
       measurementRelativeToCentroidPoints.reshape(numberOfICPObjectPoints, 3);
 
+      localObjectPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape, new Pose3D(), xLength, yLength, zLength, xRadius, yRadius, zRadius, numberOfICPObjectPoints, random);
       setPoseGuess(resultPose);
    }
 
@@ -344,8 +349,20 @@ public class IterativeClosestPointWorker
    public void setPoseGuess(Pose3DReadOnly pose)
    {
       resultPose.set(pose);
-      objectInWorldPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape, resultPose, xLength, yLength, zLength, xRadius, yRadius, zRadius, numberOfICPObjectPoints, random);
+      updateObjectInWorldPoints();
    }
+
+   private void updateObjectInWorldPoints()
+   {
+      Stream<Point3D32> localPointsStream = useParallelStreams ? localObjectPoints.parallelStream() : localObjectPoints.stream();
+      objectInWorldPoints = localPointsStream.map(localPoint ->
+                                                  {
+                                                     Point3D32 pointInWorld = new Point3D32(localPoint);
+                                                     resultPose.transform(pointInWorld);
+                                                     return pointInWorld;
+                                                  }).collect(Collectors.toList());
+   }
+
 
    public FramePose3DReadOnly getResultPose()
    {
