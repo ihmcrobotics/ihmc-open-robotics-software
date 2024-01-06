@@ -135,11 +135,11 @@ public class IterativeClosestPointWorker
    {
       // Determine around where the point cloud should be segmented
       // (user provided point or last centroid)
-      Point3D detectionPoint;
+      Pose3D detectionPoint = new Pose3D();
       if (useTargetPoint.get())
-         detectionPoint = new Point3D(targetPoint);
+         detectionPoint.getPosition().set(targetPoint);
       else
-         detectionPoint = new Point3D(resultPose.getPosition());
+         detectionPoint.set(resultPose);
 
       // Segment the point cloud
       synchronized (measurementPointCloudSynchronizer) // synchronize as to avoid changes to environment point cloud while segmenting it
@@ -248,13 +248,21 @@ public class IterativeClosestPointWorker
       objectInWorldPointsIsUpToDate = false;
    }
 
-   private void segmentPointCloud(List<Point3D32> measurementPointCloud, Point3DReadOnly virtualObjectPointInWorld, double cutoffRange)
+   private void segmentPointCloud(List<Point3D32> measurementPointCloud, Pose3DReadOnly virtualObjectPointInWorld, double cutoffRange)
    {
       double cutoffSquare = MathTools.square(cutoffRange);
 
       Stream<Point3D32> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
-      segmentedPointCloud = measurementStream.filter(point -> virtualObjectPointInWorld.distanceSquared(point) <= cutoffSquare).collect(Collectors.toList());
-      segmentedPointCloud.addAll(measurementPointCloud);
+
+      segmentedPointCloud = measurementStream.filter(point -> IterativeClosestPointTools.distanceSquaredFromShape(detectionShape,
+                                                                                                                  virtualObjectPointInWorld,
+                                                                                                                  point,
+                                                                                                                  xLength,
+                                                                                                                  yLength,
+                                                                                                                  zLength,
+                                                                                                                  xRadius,
+                                                                                                                  yRadius,
+                                                                                                                  zRadius) <= cutoffSquare).collect(Collectors.toList());
    }
 
    private void computeCorrespondingPointsBetweenMeasurementAndObjectPointCloud(List<Point3D32> measurementPoints,
