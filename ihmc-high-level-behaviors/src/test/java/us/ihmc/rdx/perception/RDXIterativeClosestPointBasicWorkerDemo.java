@@ -97,6 +97,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
    // These are the speed at which the input shape is moving.
    private final float[] icpGuiEnvAutoMoveSpeed = {1.0f};
    private final int[] icpGuiNumICPIterations = {1};
+   private double icpGuiICPRunTimeInSeconds = 0;
 
    private final float[] icpGuiEnvGaussianNoiseScale = {0.0f};
 
@@ -145,7 +146,11 @@ public class RDXIterativeClosestPointBasicWorkerDemo
       icpWorker.setTargetPoint(pickFramePoint);
       icpWorker.useProvidedTargetPoint(mouseTrackingToggle);
       icpWorker.setSegmentSphereRadius(segmentationRadius.get());
+
+      long startTimeNanos = System.nanoTime();
       icpWorker.runICP(icpGuiNumICPIterations[0]);
+      long stopTimeNanos = System.nanoTime();
+      calculateICPTime(startTimeNanos, stopTimeNanos);
 
       List<Point3D32> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
       segmentedPtCld.clear();
@@ -160,6 +165,12 @@ public class RDXIterativeClosestPointBasicWorkerDemo
       }
 
       referenceFrameGraphic.setPoseInWorldFrame(icpWorker.getResultPose());
+   }
+
+   private void calculateICPTime(long time1, long time2)
+   {
+      long timeDiffNanos = time2-time1;
+      icpGuiICPRunTimeInSeconds = (timeDiffNanos/1e9)/icpGuiNumICPIterations[0];
    }
 
    private void moveInputShape()
@@ -305,8 +316,12 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             ImGui.sliderFloat("Segmentation Radisu", segmentationRadius.getData(), 0.0f, 1.0f);
 
             DecimalFormat df = new DecimalFormat("#.###");
+            DecimalFormat tf = new DecimalFormat("#.#########");
 
             ImGui.text(" ");
+            ImGui.text("ICP Time: " + tf.format(icpGuiICPRunTimeInSeconds));
+            ImGui.text(" ");
+
             ImGui.text("Input Centroid: " + df.format(shapeInputPose.getX()) + " y: " + df.format(shapeInputPose.getY()) + " z: " + df.format(shapeInputPose.getZ()));
             ImGui.text("Res Centroid: " + df.format(icpWorker.getResultPose().getX()) + " y: " + df.format(icpWorker.getResultPose().getY()) + " z: " + df.format(icpWorker.getResultPose().getZ()));
             ImGui.text("diff Centroid: " + df.format(shapeInputPose.getX() - icpWorker.getResultPose().getX()) + " y: " + df.format(shapeInputPose.getY()- icpWorker.getResultPose().getY()) + " z: " + df.format(shapeInputPose.getZ()-icpWorker.getResultPose().getZ()));
@@ -326,6 +341,9 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             ImGui.sliderInt("# iterations / tick", icpGuiNumICPIterations,1, 10);
             ImGui.checkbox("Auto Move", icpGuiAutoMoveEnv);
          }
+
+
+
 
          private void calculatePickPoint(us.ihmc.rdx.input.ImGui3DViewInput input)
          {
