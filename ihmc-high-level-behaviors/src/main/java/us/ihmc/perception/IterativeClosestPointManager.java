@@ -148,7 +148,7 @@ public class IterativeClosestPointManager
       {
          IterativeClosestPointWorker worker = nodeIDToWorkerMap.get(id);
          if (worker.runICP(2))
-            worker.publishResults();
+            ros2Helper.publish(PerceptionAPI.ICP_RESULT, worker.getResult());
 
          // If ICP isn't using the provided target pose, it'll update the SceneNode to the ICP worker's centroid
          if (!worker.isUsingTargetPoint())
@@ -183,7 +183,6 @@ public class IterativeClosestPointManager
                                                                            numberOfPoints,
                                                                            NUMBER_OF_CORRESPONDENCES,
                                                                            new FramePose3D(requestMessage.getProvidedPose()),
-                                                                           ros2Helper,
                                                                            random);
       worker.setSceneNodeID(requestMessage.getNodeId());
       nodeIDToWorkerMap.putIfAbsent(requestMessage.getNodeId(), worker);
