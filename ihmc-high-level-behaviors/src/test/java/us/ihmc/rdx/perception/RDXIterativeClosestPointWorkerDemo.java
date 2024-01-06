@@ -57,7 +57,7 @@ public class RDXIterativeClosestPointWorkerDemo
    private final ZEDColorDepthImagePublisher zedImagePublisher;
    private RawImage zedDepthImage;
    private RawImage zedLeftColorImage;
-   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(MAX_ENVIRONMENT_SIZE, CORRESPONDENCES, ros2Helper, random);
+   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(MAX_ENVIRONMENT_SIZE, CORRESPONDENCES, random);
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
@@ -122,7 +122,7 @@ public class RDXIterativeClosestPointWorkerDemo
       icpWorker.useProvidedTargetPoint(mouseTrackingToggle);
       icpWorker.setSegmentSphereRadius(segmentationRadius.get());
       if (icpWorker.runICP(1))
-         icpWorker.publishResults();
+         ros2Helper.publish(PerceptionAPI.ICP_RESULT, icpWorker.getResult());
 
       List<Point3D32> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
       segmentedPtCld.clear();
@@ -238,7 +238,6 @@ public class RDXIterativeClosestPointWorkerDemo
                                                            MAX_ENVIRONMENT_SIZE,
                                                            CORRESPONDENCES,
                                                            new FramePose3D(ReferenceFrame.getWorldFrame(), pickFramePoint, new RotationMatrix()),
-                                                           ros2Helper,
                                                            random);
             }
             ImGui.sliderFloat("Depth", depth.getData(), 0.0f, 1.0f);

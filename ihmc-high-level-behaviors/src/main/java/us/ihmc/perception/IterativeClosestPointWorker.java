@@ -1,5 +1,6 @@
 package us.ihmc.perception;
 
+import geometry_msgs.Pose;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
@@ -15,8 +16,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
 import java.util.ArrayList;
@@ -36,10 +39,10 @@ public class IterativeClosestPointWorker
    private static final float defaultYRadius = 0.1f;
    private static final float defaultZRadius = 0.1f;
    private static final PrimitiveRigidBodyShape defaultDetectionShape = PrimitiveRigidBodyShape.BOX;
+   private static boolean useParallelStreams = false;
 
    private final Random random;
 
-   private final ROS2Helper ros2Helper;
    private long sceneNodeID = -1L;
 
    private final PrimitiveRigidBodyShape detectionShape;
@@ -51,7 +54,6 @@ public class IterativeClosestPointWorker
    private float zRadius = 0.1f;
    private int numberOfCorrespondences;
 
-   private boolean useParallelStreams = false;
 
    private final DMatrixRMaj objectRelativeToCentroidPoints;
    private final DMatrixRMaj measurementRelativeToCentroidPoints;
@@ -70,11 +72,11 @@ public class IterativeClosestPointWorker
 
    private final AtomicBoolean useTargetPoint = new AtomicBoolean(true);
    // Point around which ICP will segment the measurement point cloud
-   private final FramePoint3D targetPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
+   private final Point3D targetPoint = new Point3D();
 
-   private final FramePose3D resultPose = new FramePose3D(ReferenceFrame.getWorldFrame());
+   private final Pose3D resultPose = new Pose3D();
 
-   public IterativeClosestPointWorker(int numberOfObjectSamples, int numberOfCorrespondences, ROS2Helper ros2Helper, Random random)
+   public IterativeClosestPointWorker(int numberOfObjectSamples, int numberOfCorrespondences, Random random)
    {
       this(defaultDetectionShape,
            defaultXLength,
@@ -86,7 +88,6 @@ public class IterativeClosestPointWorker
            numberOfObjectSamples,
            numberOfCorrespondences,
            new Pose3D(),
-           ros2Helper,
            random);
    }
 
@@ -100,7 +101,6 @@ public class IterativeClosestPointWorker
                                       int numberOfObjectSamples,
                                       int numberOfCorrespondences,
                                       Pose3DReadOnly initialPose,
-                                      ROS2Helper ros2Helper,
                                       Random random)
    {
       detectionShape = objectShape;
@@ -111,7 +111,6 @@ public class IterativeClosestPointWorker
       this.yRadius = yRadius;
       this.zRadius = zRadius;
       this.numberOfCorrespondences = numberOfCorrespondences;
-      this.ros2Helper = ros2Helper;
       this.random = random;
 
       targetPoint.set(initialPose.getPosition());
@@ -136,11 +135,11 @@ public class IterativeClosestPointWorker
    {
       // Determine around where the point cloud should be segmented
       // (user provided point or last centroid)
-      FramePoint3D detectionPoint;
+      Point3D detectionPoint;
       if (useTargetPoint.get())
-         detectionPoint = new FramePoint3D(targetPoint);
+         detectionPoint = new Point3D(targetPoint);
       else
-         detectionPoint = new FramePoint3D(resultPose.getPosition());
+         detectionPoint = new Point3D(resultPose.getPosition());
 
       // Segment the point cloud
       synchronized (measurementPointCloudSynchronizer) // synchronize as to avoid changes to environment point cloud while segmenting it
@@ -165,21 +164,17 @@ public class IterativeClosestPointWorker
       return false;
    }
 
-   public void publishResults()
+   public DetectedObjectPacket getResult()
    {
-      // FIXME this should not be in here.
-      // Send result message
-      if (sceneNodeID != -1L)
-      {
-         DetectedObjectPacket resultMessage = new DetectedObjectPacket();
-         resultMessage.setId((int) sceneNodeID);
-         resultMessage.getPose().set(resultPose);
-         for (Point3D32 point3D32 : getObjectPointCloud())
-            resultMessage.getObjectPointCloud().add().set(point3D32);
-         for (int i = 0; i < segmentedPointCloud.size(); i++)
-            resultMessage.getSegmentedPointCloud().add().set(segmentedPointCloud.get(i));
-         ros2Helper.publish(PerceptionAPI.ICP_RESULT, resultMessage);
-      }
+      DetectedObjectPacket resultMessage = new DetectedObjectPacket();
+      resultMessage.setId((int) sceneNodeID);
+      resultMessage.getPose().set(resultPose);
+      for (Point3D32 point3D32 : getObjectPointCloud())
+         resultMessage.getObjectPointCloud().add().set(point3D32);
+      for (int i = 0; i < segmentedPointCloud.size(); i++)
+         resultMessage.getSegmentedPointCloud().add().set(segmentedPointCloud.get(i));
+
+      return resultMessage;
    }
 
    // TODO: Pass in a Pose to transform (all object points define WRT the pose of object)
@@ -253,7 +248,7 @@ public class IterativeClosestPointWorker
       objectInWorldPointsIsUpToDate = false;
    }
 
-   private void segmentPointCloud(List<Point3D32> measurementPointCloud, FramePoint3D virtualObjectPointInWorld, double cutoffRange)
+   private void segmentPointCloud(List<Point3D32> measurementPointCloud, Point3DReadOnly virtualObjectPointInWorld, double cutoffRange)
    {
       double cutoffSquare = MathTools.square(cutoffRange);
 
@@ -400,7 +395,7 @@ public class IterativeClosestPointWorker
       objectInWorldPointsIsUpToDate = true;
    }
 
-   public FramePose3DReadOnly getResultPose()
+   public Pose3DReadOnly getResultPose()
    {
       return resultPose;
    }

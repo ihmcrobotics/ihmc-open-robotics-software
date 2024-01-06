@@ -8,6 +8,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -47,7 +48,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
 
    private final ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "icp_worker_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(node);
-   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(SHAPE_SAMPLE_POINTS, CORRESPONDENCE_POINTS, ros2Helper, random);
+   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(SHAPE_SAMPLE_POINTS, CORRESPONDENCE_POINTS, random);
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
@@ -151,7 +152,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
       long stopTimeNanos = System.nanoTime();
       calculateICPTime(startTimeNanos, stopTimeNanos);
       if (success)
-         icpWorker.publishResults();
+         ros2Helper.publish(PerceptionAPI.ICP_RESULT, icpWorker.getResult());
 
       List<Point3D32> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
       segmentedPtCld.clear();
@@ -300,7 +301,6 @@ public class RDXIterativeClosestPointBasicWorkerDemo
                                                            SHAPE_SAMPLE_POINTS,
                                                            CORRESPONDENCE_POINTS,
                                                            new FramePose3D(ReferenceFrame.getWorldFrame(), pickFramePoint, new RotationMatrix()),
-                                                           ros2Helper,
                                                            random);
             }
             ImGui.sliderFloat("Depth", depth.getData(), 0.0f, 1.0f);
