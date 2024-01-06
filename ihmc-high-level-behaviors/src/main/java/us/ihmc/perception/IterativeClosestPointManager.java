@@ -145,7 +145,8 @@ public class IterativeClosestPointManager
       for (long id : nodeIDToWorkerMap.keySet())
       {
          IterativeClosestPointWorker worker = nodeIDToWorkerMap.get(id);
-         worker.runICP(2);
+         if (worker.runICP(2))
+            worker.publishResults();
 
          // If ICP isn't using the provided target pose, it'll update the SceneNode to the ICP worker's centroid
          if (!worker.isUsingTargetPoint())

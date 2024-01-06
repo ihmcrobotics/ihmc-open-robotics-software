@@ -148,9 +148,11 @@ public class RDXIterativeClosestPointBasicWorkerDemo
       icpWorker.setSegmentSphereRadius(segmentationRadius.get());
 
       long startTimeNanos = System.nanoTime();
-      icpWorker.runICP(icpGuiNumICPIterations[0]);
+      boolean success = icpWorker.runICP(icpGuiNumICPIterations[0]);
       long stopTimeNanos = System.nanoTime();
       calculateICPTime(startTimeNanos, stopTimeNanos);
+      if (success)
+         icpWorker.publishResults();
 
       List<Point3D32> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
       segmentedPtCld.clear();
