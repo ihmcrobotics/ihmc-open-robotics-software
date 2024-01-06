@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalPoseList;
+import us.ihmc.communication.crdt.CRDTUnidirectionalVector3D;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -13,6 +14,8 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
 {
    private final DetachableReferenceFrame screwFrame;
    private final CRDTUnidirectionalPoseList trajectory;
+   private final CRDTUnidirectionalVector3D force;
+   private final CRDTUnidirectionalVector3D torque;
 
    public ScrewPrimitiveActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -20,6 +23,8 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
 
       screwFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getScrewAxisPoseInObjectFrame().getValueReadOnly());
       trajectory = new CRDTUnidirectionalPoseList(ROS2ActorDesignation.ROBOT, crdtInfo);
+      force = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
+      torque = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
    }
 
    @Override
@@ -35,6 +40,8 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
       super.toMessage(message.getState());
 
       trajectory.toMessage(message.getTrajectory());
+      force.toMessage(message.getForce());
+      torque.toMessage(message.getTorque());
    }
 
    public void fromMessage(ScrewPrimitiveActionStateMessage message)
@@ -44,6 +51,8 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
       getDefinition().fromMessage(message.getDefinition());
 
       trajectory.fromMessage(message.getTrajectory());
+      force.fromMessage(message.getForce());
+      torque.fromMessage(message.getTorque());
    }
 
    public DetachableReferenceFrame getScrewFrame()
@@ -54,5 +63,15 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
    public CRDTUnidirectionalPoseList getTrajectory()
    {
       return trajectory;
+   }
+
+   public CRDTUnidirectionalVector3D getForce()
+   {
+      return force;
+   }
+
+   public CRDTUnidirectionalVector3D getTorque()
+   {
+      return torque;
    }
 }

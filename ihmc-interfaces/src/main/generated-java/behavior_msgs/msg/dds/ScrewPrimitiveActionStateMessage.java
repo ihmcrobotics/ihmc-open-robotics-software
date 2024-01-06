@@ -17,12 +17,22 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
             */
    public behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage definition_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  trajectory_;
+   /**
+            * Hand force
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D force_;
+   /**
+            * Hand torque
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D torque_;
 
    public ScrewPrimitiveActionStateMessage()
    {
       state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage();
       trajectory_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (200, new geometry_msgs.msg.dds.PosePubSubType());
+      force_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      torque_ = new us.ihmc.euclid.tuple3D.Vector3D();
 
    }
 
@@ -37,6 +47,8 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       trajectory_.set(other.trajectory_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.force_, force_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.torque_, torque_);
    }
 
 
@@ -61,6 +73,24 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getTrajectory()
    {
       return trajectory_;
+   }
+
+
+   /**
+            * Hand force
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getForce()
+   {
+      return force_;
+   }
+
+
+   /**
+            * Hand torque
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getTorque()
+   {
+      return torque_;
    }
 
 
@@ -90,6 +120,8 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
          {  if (!this.trajectory_.get(i).epsilonEquals(other.trajectory_.get(i), epsilon)) return false; }
       }
 
+      if (!this.force_.epsilonEquals(other.force_, epsilon)) return false;
+      if (!this.torque_.epsilonEquals(other.torque_, epsilon)) return false;
 
       return true;
    }
@@ -106,6 +138,8 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if (!this.trajectory_.equals(otherMyClass.trajectory_)) return false;
+      if (!this.force_.equals(otherMyClass.force_)) return false;
+      if (!this.torque_.equals(otherMyClass.torque_)) return false;
 
       return true;
    }
@@ -121,7 +155,11 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
       builder.append("trajectory=");
-      builder.append(this.trajectory_);
+      builder.append(this.trajectory_);      builder.append(", ");
+      builder.append("force=");
+      builder.append(this.force_);      builder.append(", ");
+      builder.append("torque=");
+      builder.append(this.torque_);
       builder.append("}");
       return builder.toString();
    }

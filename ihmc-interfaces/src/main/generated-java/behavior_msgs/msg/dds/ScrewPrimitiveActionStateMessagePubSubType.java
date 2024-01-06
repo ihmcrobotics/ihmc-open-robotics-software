@@ -15,7 +15,7 @@ public class ScrewPrimitiveActionStateMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "154ac82c16ced033658fd887bae3081faa67f719159de33010e2471f2b11d08d";
+   		return "fa489d1fff0ed5c6b8f408fda727ffe0716e55f424fd452035cdd15d50913542";
    }
    
    @Override
@@ -59,6 +59,10 @@ public class ScrewPrimitiveActionStateMessagePubSubType implements us.ihmc.pubsu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -81,6 +85,10 @@ public class ScrewPrimitiveActionStateMessagePubSubType implements us.ihmc.pubsu
       {
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getTrajectory().get(i0), current_alignment);}
 
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getForce(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getTorque(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -93,6 +101,8 @@ public class ScrewPrimitiveActionStateMessagePubSubType implements us.ihmc.pubsu
       cdr.write_type_e(data.getTrajectory());else
           throw new RuntimeException("trajectory field exceeds the maximum length");
 
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getForce(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getTorque(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage data, us.ihmc.idl.CDR cdr)
@@ -100,6 +110,8 @@ public class ScrewPrimitiveActionStateMessagePubSubType implements us.ihmc.pubsu
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       cdr.read_type_e(data.getTrajectory());	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getForce(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getTorque(), cdr);	
 
    }
 
@@ -111,6 +123,10 @@ public class ScrewPrimitiveActionStateMessagePubSubType implements us.ihmc.pubsu
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_e("trajectory", data.getTrajectory());
+      ser.write_type_a("force", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getForce());
+
+      ser.write_type_a("torque", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getTorque());
+
    }
 
    @Override
@@ -121,6 +137,10 @@ public class ScrewPrimitiveActionStateMessagePubSubType implements us.ihmc.pubsu
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.read_type_e("trajectory", data.getTrajectory());
+      ser.read_type_a("force", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getForce());
+
+      ser.read_type_a("torque", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getTorque());
+
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage src, behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage dest)

@@ -5,12 +5,14 @@ import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
 import imgui.internal.ImGui;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionStateBasics;
+import us.ihmc.communication.crdt.CRDTUnidirectionalVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.ui.behavior.actions.RDXFootstepPlanAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXHandPoseAction;
+import us.ihmc.rdx.ui.behavior.actions.RDXScrewPrimitiveAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXWalkAction;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
@@ -88,7 +90,7 @@ public class RDXActionProgressWidgets
             double plotMaxY = plotLine.getMaxYValue();
             max = Double.isNaN(max) ? plotMaxY : Math.max(plotMaxY, max);
          }
-         ImPlot.setNextPlotLimitsY(0.0, Double.isNaN(max) ? limitYMin : max, ImGuiCond.Always);
+         ImPlot.setNextPlotLimitsY(0.0, Double.isNaN(max) ? limitYMin : Double.max(limitYMin, max), ImGuiCond.Always);
       });
    }
 
@@ -96,8 +98,8 @@ public class RDXActionProgressWidgets
    {
       emptyPlotIndex = 0;
       double newElapsedExecutionTime = action.getState().getElapsedExecutionTime();
-      elapsedExecutionTime = newElapsedExecutionTime;
       newlyExecuting = newElapsedExecutionTime < elapsedExecutionTime;
+      elapsedExecutionTime = newElapsedExecutionTime;
       elapsedTimeIsValid = !Double.isNaN(elapsedExecutionTime);
 
       if (newlyExecuting)
@@ -243,10 +245,16 @@ public class RDXActionProgressWidgets
 
    public void renderHandForce(float dividedBarWidth, boolean renderAsPlots)
    {
+      CRDTUnidirectionalVector3D forceCRDT = null;
       if (action instanceof RDXHandPoseAction handPoseAction)
+         forceCRDT = handPoseAction.getState().getForce();
+      else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)
+         forceCRDT = screwPrimitiveAction.getState().getForce();
+
+      if (forceCRDT != null)
       {
          double limit = 20.0;
-         double force = handPoseAction.getState().getForce().getValueReadOnly().norm();
+         double force = forceCRDT.getValueReadOnly().norm();
          int dataColor = force < limit ? ImGuiTools.GREEN : ImGuiTools.RED;
 
          if (action.getState().getIsExecuting())
@@ -271,10 +279,16 @@ public class RDXActionProgressWidgets
 
    public void renderHandTorque(float dividedBarWidth, boolean renderAsPlots)
    {
+      CRDTUnidirectionalVector3D torqueCRDT = null;
       if (action instanceof RDXHandPoseAction handPoseAction)
+         torqueCRDT = handPoseAction.getState().getTorque();
+      else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)
+         torqueCRDT = screwPrimitiveAction.getState().getTorque();
+
+      if (torqueCRDT != null)
       {
          double limit = 20.0;
-         double torque = handPoseAction.getState().getTorque().getValueReadOnly().norm();
+         double torque = torqueCRDT.getValueReadOnly().norm();
          int dataColor = torque < limit ? ImGuiTools.GREEN : ImGuiTools.RED;
 
          if (action.getState().getIsExecuting())

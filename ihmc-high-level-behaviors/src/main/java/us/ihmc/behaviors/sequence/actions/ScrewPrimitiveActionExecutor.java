@@ -12,6 +12,8 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
+import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
@@ -24,10 +26,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.NonWallTimer;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimitiveActionState, ScrewPrimitiveActionDefinition>
@@ -54,6 +58,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final FramePoint3D frameRotationVectorEnd = new FramePoint3D();
    private final MutableReferenceFrame previousPoseFrame = new MutableReferenceFrame();
    private final MutableReferenceFrame nextPoseFrame = new MutableReferenceFrame();
+   private final NonWallTimer executionTimer = new NonWallTimer();
 
    public ScrewPrimitiveActionExecutor(long id,
                                        CRDTInfo crdtInfo,
@@ -78,6 +83,8 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    public void update()
    {
       super.update();
+
+      executionTimer.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
       getState().setCanExecute(getState().getScrewFrame().isChildOfWorld());
 
@@ -144,6 +151,8 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       if (getState().getScrewFrame().isChildOfWorld())
       {
+         getState().getDesiredTrajectory().getValue().clear();
+
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
 
          handHybridTrajectoryMessage.setRobotSide(getDefinition().getSide().toByte());
@@ -288,10 +297,14 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                                angularVelocity,
                                force,
                                torque));
+
+            getState().getDesiredTrajectory().addTrajectoryPoint(nextPose, time);
          }
          ros2ControllerHelper.publishToController(handHybridTrajectoryMessage);
          if (getDefinition().getMaxForce() > 0.0 || getDefinition().getMaxTorque() > 0.0)
             ros2ControllerHelper.publishToController(handWrenchTrajectoryMessage);
+
+         executionTimer.reset();
       }
       else
       {
@@ -304,16 +317,34 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    {
       if (getState().getScrewFrame().isChildOfWorld())
       {
-//         desiredHandControlPose.setFromReferenceFrame(getState().getPalmFrame().getReferenceFrame());
+         SE3TrajectoryPointReadOnly lastTrajectoryPose = getState().getDesiredTrajectory().getLastValueReadOnly();
+         desiredHandControlPose.set(lastTrajectoryPose.getPosition(), lastTrajectoryPose.getOrientation());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
 
+         boolean wasExecuting = getState().getIsExecuting();
+         boolean isExecuting = !completionCalculator.isComplete(desiredHandControlPose,
+                                                                syncedHandControlPose,
+                                                                POSITION_TOLERANCE,
+                                                                ORIENTATION_TOLERANCE,
+                                                                lastTrajectoryPose.getTime(),
+                                                                executionTimer,
+                                                                getState(),
+                                                                BehaviorActionCompletionComponent.TRANSLATION,
+                                                                BehaviorActionCompletionComponent.ORIENTATION);
+         getState().setIsExecuting(isExecuting);
 
-         // TODO: Completion criteria
-//         getState().setIsExecuting();
-
-
+         getState().setNominalExecutionDuration(lastTrajectoryPose.getTime());
+         getState().setElapsedExecutionTime(executionTimer.getElapsedTime());
+         getState().getCurrentPose().getValue().set(syncedHandControlPose);
+         getState().getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getLinearPart());
+         getState().getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getAngularPart());
          getState().setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
          getState().setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+
+         if (!getState().getIsExecuting() && wasExecuting)
+         {
+            completionCalculator.reset();
+         }
       }
    }
 }

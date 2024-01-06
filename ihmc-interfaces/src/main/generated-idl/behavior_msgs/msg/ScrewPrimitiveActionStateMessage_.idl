@@ -4,6 +4,7 @@
 #include "behavior_msgs/msg/./ActionNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./ScrewPrimitiveActionDefinitionMessage_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
 module behavior_msgs
 {
   module msg
@@ -23,6 +24,14 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::ScrewPrimitiveActionDefinitionMessage definition;
         sequence<geometry_msgs::msg::dds::Pose, 200> trajectory;
+        /**
+         * Hand force
+         */
+        geometry_msgs::msg::dds::Vector3 force;
+        /**
+         * Hand torque
+         */
+        geometry_msgs::msg::dds::Vector3 torque;
       };
     };
   };
