@@ -64,6 +64,7 @@ public class IterativeClosestPointWorker
 
    private List<Point3D32> localObjectPoints;
    private List<Point3D32> objectInWorldPoints;
+   private boolean objectInWorldPointsIsUpToDate = false;
 
    private final AtomicBoolean useTargetPoint = new AtomicBoolean(true);
    // Point around which ICP will segment the measurement point cloud
@@ -117,7 +118,7 @@ public class IterativeClosestPointWorker
       setPoseGuess(initialPose);
    }
 
-   public void runICP(int numberOfIterations)
+   public boolean runICP(int numberOfIterations)
    {
       // Determine around where the point cloud should be segmented
       // (user provided point or last centroid)
@@ -131,7 +132,7 @@ public class IterativeClosestPointWorker
       synchronized (measurementPointCloudSynchronizer) // synchronize as to avoid changes to environment point cloud while segmenting it
       {
          if (measurementPointCloud == null)
-            return;
+            return false;
 
          segmentPointCloud(measurementPointCloud, detectionPoint, segmentSphereRadius);
       }
@@ -144,18 +145,26 @@ public class IterativeClosestPointWorker
             runICPIteration(segmentedPointCloud);
          }
 
-         // Send result message
-         if (sceneNodeID != -1L)
-         {
-            DetectedObjectPacket resultMessage = new DetectedObjectPacket();
-            resultMessage.setId((int) sceneNodeID);
-            resultMessage.getPose().set(resultPose);
-            for (Point3D32 point3D32 : getObjectPointCloud())
-               resultMessage.getObjectPointCloud().add().set(point3D32);
-            for (int i = 0; i < numberOfICPObjectPoints; i++)
-               resultMessage.getSegmentedPointCloud().add().set(segmentedPointCloud.get(i));
-            ros2Helper.publish(PerceptionAPI.ICP_RESULT, resultMessage);
-         }
+         return true;
+      }
+
+      return false;
+   }
+
+   public void publishResults()
+   {
+      // FIXME this should not be in here.
+      // Send result message
+      if (sceneNodeID != -1L)
+      {
+         DetectedObjectPacket resultMessage = new DetectedObjectPacket();
+         resultMessage.setId((int) sceneNodeID);
+         resultMessage.getPose().set(resultPose);
+         for (Point3D32 point3D32 : getObjectPointCloud())
+            resultMessage.getObjectPointCloud().add().set(point3D32);
+         for (int i = 0; i < numberOfICPObjectPoints; i++)
+            resultMessage.getSegmentedPointCloud().add().set(segmentedPointCloud.get(i));
+         ros2Helper.publish(PerceptionAPI.ICP_RESULT, resultMessage);
       }
    }
 
@@ -226,10 +235,11 @@ public class IterativeClosestPointWorker
       objectToMeasurementTransform.getTranslation().set(objectTranslation);
 
       // Rotate and translate object points
-      Stream<Point3D32> pointsStream = useParallelStreams ? objectInWorldPoints.parallelStream() : objectInWorldPoints.stream();
-      pointsStream.forEach(objectInWorldPoint -> objectInWorldPoint.applyTransform(objectToMeasurementTransform));
 
       resultPose.applyTransform(objectToMeasurementTransform);
+      objectInWorldPointsIsUpToDate = false;
+
+//      updateObjectInWorldPoints();
    }
 
    private void segmentPointCloud(List<Point3D32> measurementPointCloud, FramePoint3D virtualObjectPointInWorld, double cutoffRange)
@@ -248,6 +258,7 @@ public class IterativeClosestPointWorker
       int measurementIdx = 0;
       int iteration = 0;
       int maxIterations = 2 * numberOfICPObjectPoints;
+      List<Point3D32> objectInWorldPoints = getObjectPointCloud();
 
       while (correspondingMeasurementPointsToPack.size() < numberOfICPObjectPoints && measurementIdx < measurementPoints.size() && iteration < maxIterations)
       {
@@ -349,11 +360,15 @@ public class IterativeClosestPointWorker
    public void setPoseGuess(Pose3DReadOnly pose)
    {
       resultPose.set(pose);
-      updateObjectInWorldPoints();
+      objectInWorldPointsIsUpToDate = false;
+//      updateObjectInWorldPoints();
    }
 
    private void updateObjectInWorldPoints()
    {
+      if (objectInWorldPointsIsUpToDate)
+         return;
+
       Stream<Point3D32> localPointsStream = useParallelStreams ? localObjectPoints.parallelStream() : localObjectPoints.stream();
       objectInWorldPoints = localPointsStream.map(localPoint ->
                                                   {
@@ -361,6 +376,7 @@ public class IterativeClosestPointWorker
                                                      resultPose.transform(pointInWorld);
                                                      return pointInWorld;
                                                   }).collect(Collectors.toList());
+      objectInWorldPointsIsUpToDate = true;
    }
 
 
@@ -371,6 +387,8 @@ public class IterativeClosestPointWorker
 
    public List<Point3D32> getObjectPointCloud()
    {
+      if (!objectInWorldPointsIsUpToDate)
+         updateObjectInWorldPoints();
       return objectInWorldPoints;
    }
 

@@ -120,7 +120,8 @@ public class RDXIterativeClosestPointWorkerDemo
       icpWorker.setTargetPoint(pickFramePoint);
       icpWorker.useProvidedTargetPoint(mouseTrackingToggle);
       icpWorker.setSegmentSphereRadius(segmentationRadius.get());
-      icpWorker.runICP(1);
+      if (icpWorker.runICP(1))
+         icpWorker.publishResults();
 
       List<Point3D32> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
       segmentedPtCld.clear();
