@@ -166,7 +166,7 @@ public class IterativeClosestPointWorker
 
       computeCorrespondingPointsBetweenMeasurementAndObjectPointCloud(segmentedMeasurementPointCloud, correspondingMeasurementPoints, correspondingObjectPoints);
 
-      // Calculate object centroid
+      // Calculate object corresponce centroid
       Point3D32 objectCentroid = computeCentroidOfPointCloud(correspondingObjectPoints);
 
       // TODO I bet there's an element-wise operation for this.
@@ -182,9 +182,9 @@ public class IterativeClosestPointWorker
 
       for (int i = 0; i < numberOfICPObjectPoints; ++i)
       {
-         measurementRelativeToCentroidPoints.set(i, 0, segmentedMeasurementPointCloud.get(i).getX() - measurementCentroid.getX());
-         measurementRelativeToCentroidPoints.set(i, 1, segmentedMeasurementPointCloud.get(i).getY() - measurementCentroid.getY());
-         measurementRelativeToCentroidPoints.set(i, 2, segmentedMeasurementPointCloud.get(i).getZ() - measurementCentroid.getZ());
+         measurementRelativeToCentroidPoints.set(i, 0, correspondingMeasurementPoints.get(i).getX() - measurementCentroid.getX());
+         measurementRelativeToCentroidPoints.set(i, 1, correspondingMeasurementPoints.get(i).getY() - measurementCentroid.getY());
+         measurementRelativeToCentroidPoints.set(i, 2, correspondingMeasurementPoints.get(i).getZ() - measurementCentroid.getZ());
       }
 
       // Initialize matrix variables
@@ -211,26 +211,21 @@ public class IterativeClosestPointWorker
 
       /* Calculate object transform */
       // Create the transform, and set the rotation, so it's a pure rotation transform
-      RigidBodyTransform worldToPointsTransform = new RigidBodyTransform();
-      worldToPointsTransform.getRotation().set(optimalRotation);
+      RigidBodyTransform objectToMeasurementTransform = new RigidBodyTransform();
+      objectToMeasurementTransform.getRotation().set(optimalRotation);
 
       // Calcualte the necessary translation
-      worldToPointsTransform.transform(objectCentroid, objectAdjustedLocation);
+      objectToMeasurementTransform.transform(objectCentroid, objectAdjustedLocation);
       objectTranslation.sub(measurementCentroid, objectAdjustedLocation);
 
       // set that translation into the transform
-      worldToPointsTransform.getTranslation().set(objectTranslation);
+      objectToMeasurementTransform.getTranslation().set(objectTranslation);
 
       // Rotate and translate object points
       Stream<Point3D32> pointsStream = useParallelStreams ? objectInWorldPoints.parallelStream() : objectInWorldPoints.stream();
-      pointsStream.forEach(objectInWorldPoint -> objectInWorldPoint.applyTransform(worldToPointsTransform));
+      pointsStream.forEach(objectInWorldPoint -> objectInWorldPoint.applyTransform(objectToMeasurementTransform));
 
-      // TODO: Remove this cheat
-      // Calculate object centroid from the corrected points
-      Point3D32 objectPointCloudCentroid = computeCentroidOfPointCloud(objectInWorldPoints, numberOfICPObjectPoints);
-
-      resultPose.prependRotation(worldToPointsTransform.getRotation());
-      resultPose.getPosition().set(objectPointCloudCentroid);
+      resultPose.applyTransform(objectToMeasurementTransform);
    }
 
    private void segmentPointCloud(List<Point3D32> measurementPointCloud, FramePoint3D virtualObjectPointInWorld, double cutoffRange)
@@ -255,7 +250,6 @@ public class IterativeClosestPointWorker
          Point3D32 measurementPoint = measurementPoints.get(measurementIdx++);
          double minDistance = Double.POSITIVE_INFINITY;
          Point3D32 correspondingObjectPoint = null;
-         int minIndex = -1;
 
          for (int j = 0; j < objectInWorldPoints.size(); ++j)
          {
