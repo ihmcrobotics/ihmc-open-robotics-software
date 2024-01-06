@@ -5,12 +5,10 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import perception_msgs.msg.dds.DetectedObjectPacket;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,7 +17,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
 import java.util.ArrayList;
@@ -27,12 +24,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class IterativeClosestPointWorker
 {
+   private static final float defaultXLength = 0.2f;
+   private static final float defaultYLength = 0.4f;
+   private static final float defaultZLength = 0.3f;
+   private static final float defaultXRadius = 0.1f;
+   private static final float defaultYRadius = 0.1f;
+   private static final float defaultZRadius = 0.1f;
+   private static final PrimitiveRigidBodyShape defaultDetectionShape = PrimitiveRigidBodyShape.BOX;
+
    private final Random random;
 
    private final ROS2Helper ros2Helper;
@@ -45,14 +49,12 @@ public class IterativeClosestPointWorker
    private float xRadius = 0.1f;
    private float yRadius = 0.1f;
    private float zRadius = 0.1f;
-   private int numberOfICPObjectPoints;
+   private int numberOfCorrespondences;
 
    private boolean useParallelStreams = false;
 
-
    private final DMatrixRMaj objectRelativeToCentroidPoints;
    private final DMatrixRMaj measurementRelativeToCentroidPoints;
-
 
    private final SvdImplicitQrDecompose_DDRM svdSolver = new SvdImplicitQrDecompose_DDRM(false, true, true, false);
 
@@ -72,18 +74,20 @@ public class IterativeClosestPointWorker
 
    private final FramePose3D resultPose = new FramePose3D(ReferenceFrame.getWorldFrame());
 
-   public IterativeClosestPointWorker(int numberOfICPObjectPoints, ROS2Helper ros2Helper, Random random)
+   public IterativeClosestPointWorker(int numberOfObjectSamples, int numberOfCorrespondences, ROS2Helper ros2Helper, Random random)
    {
-      this.ros2Helper = ros2Helper;
-      this.numberOfICPObjectPoints = numberOfICPObjectPoints;
-      this.random = random;
-
-      objectRelativeToCentroidPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
-      measurementRelativeToCentroidPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
-      detectionShape = PrimitiveRigidBodyShape.BOX;
-
-      localObjectPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape, new Pose3D(), xLength, yLength, zLength, xRadius, yRadius, zRadius, numberOfICPObjectPoints, random);
-      setPoseGuess(resultPose);
+      this(defaultDetectionShape,
+           defaultXLength,
+           defaultYLength,
+           defaultZLength,
+           defaultXRadius,
+           defaultYRadius,
+           defaultZRadius,
+           numberOfObjectSamples,
+           numberOfCorrespondences,
+           new Pose3D(),
+           ros2Helper,
+           random);
    }
 
    public IterativeClosestPointWorker(PrimitiveRigidBodyShape objectShape,
@@ -93,8 +97,9 @@ public class IterativeClosestPointWorker
                                       float xRadius,
                                       float yRadius,
                                       float zRadius,
-                                      int numberOfICPObjectPoints,
-                                      FramePose3DBasics initialPose,
+                                      int numberOfObjectSamples,
+                                      int numberOfCorrespondences,
+                                      Pose3DReadOnly initialPose,
                                       ROS2Helper ros2Helper,
                                       Random random)
    {
@@ -105,16 +110,25 @@ public class IterativeClosestPointWorker
       this.xRadius = xRadius;
       this.yRadius = yRadius;
       this.zRadius = zRadius;
-      this.numberOfICPObjectPoints = numberOfICPObjectPoints;
+      this.numberOfCorrespondences = numberOfCorrespondences;
       this.ros2Helper = ros2Helper;
       this.random = random;
 
       targetPoint.set(initialPose.getPosition());
 
-      objectRelativeToCentroidPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
-      measurementRelativeToCentroidPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
+      objectRelativeToCentroidPoints = new DMatrixRMaj(numberOfCorrespondences, 3);
+      measurementRelativeToCentroidPoints = new DMatrixRMaj(numberOfCorrespondences, 3);
 
-      localObjectPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape, new Pose3D(), xLength, yLength, zLength, xRadius, yRadius, zRadius, numberOfICPObjectPoints, random);
+      localObjectPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape,
+                                                                               new Pose3D(),
+                                                                               xLength,
+                                                                               yLength,
+                                                                               zLength,
+                                                                               xRadius,
+                                                                               yRadius,
+                                                                               zRadius,
+                                                                               numberOfObjectSamples,
+                                                                               random);
       setPoseGuess(initialPose);
    }
 
@@ -138,7 +152,7 @@ public class IterativeClosestPointWorker
       }
 
       // Only run ICP iteration if segmented point cloud has enough points
-      if (segmentedPointCloud.size() >= numberOfICPObjectPoints)
+      if (segmentedPointCloud.size() >= numberOfCorrespondences)
       {
          for (int i = 0; i < numberOfIterations; ++i)
          {
@@ -162,7 +176,7 @@ public class IterativeClosestPointWorker
          resultMessage.getPose().set(resultPose);
          for (Point3D32 point3D32 : getObjectPointCloud())
             resultMessage.getObjectPointCloud().add().set(point3D32);
-         for (int i = 0; i < numberOfICPObjectPoints; i++)
+         for (int i = 0; i < segmentedPointCloud.size(); i++)
             resultMessage.getSegmentedPointCloud().add().set(segmentedPointCloud.get(i));
          ros2Helper.publish(PerceptionAPI.ICP_RESULT, resultMessage);
       }
@@ -177,13 +191,15 @@ public class IterativeClosestPointWorker
       List<Point3D32> correspondingObjectPoints = new ArrayList<>();
       List<Point3D32> correspondingMeasurementPoints = new ArrayList<>();
 
-      computeCorrespondingPointsBetweenMeasurementAndObjectPointCloud(segmentedMeasurementPointCloud, correspondingMeasurementPoints, correspondingObjectPoints);
+      computeCorrespondingPointsBetweenMeasurementAndObjectPointCloud(segmentedMeasurementPointCloud,
+                                                                      correspondingMeasurementPoints,
+                                                                      correspondingObjectPoints);
 
       // Calculate object corresponce centroid
       Point3D32 objectCentroid = computeCentroidOfPointCloud(correspondingObjectPoints);
+      int foundCorrespondences = correspondingMeasurementPoints.size();
 
-      // TODO I bet there's an element-wise operation for this.
-      for (int i = 0; i < numberOfICPObjectPoints; ++i)
+      for (int i = 0; i < foundCorrespondences; ++i)
       {
          objectRelativeToCentroidPoints.set(i, 0, correspondingObjectPoints.get(i).getX() - objectCentroid.getX());
          objectRelativeToCentroidPoints.set(i, 1, correspondingObjectPoints.get(i).getY() - objectCentroid.getY());
@@ -193,7 +209,7 @@ public class IterativeClosestPointWorker
       // Calculate measurement centroid
       Point3D32 measurementCentroid = computeCentroidOfPointCloud(correspondingMeasurementPoints);
 
-      for (int i = 0; i < numberOfICPObjectPoints; ++i)
+      for (int i = 0; i < foundCorrespondences; ++i)
       {
          measurementRelativeToCentroidPoints.set(i, 0, correspondingMeasurementPoints.get(i).getX() - measurementCentroid.getX());
          measurementRelativeToCentroidPoints.set(i, 1, correspondingMeasurementPoints.get(i).getY() - measurementCentroid.getY());
@@ -218,9 +234,7 @@ public class IterativeClosestPointWorker
 
       // Correct any negative rotation matrices which come out of SVD its positive counterpart (fixes NotARotationMatrix issues)
       if (CommonOps_DDRM.det(optimalRotation) < 0.0)
-      {
          CommonOps_DDRM.scale(-1.0, optimalRotation);
-      }
 
       /* Calculate object transform */
       // Create the transform, and set the rotation, so it's a pure rotation transform
@@ -234,12 +248,9 @@ public class IterativeClosestPointWorker
       // set that translation into the transform
       objectToMeasurementTransform.getTranslation().set(objectTranslation);
 
-      // Rotate and translate object points
-
+      // Rotate and translate the resulting pose according to the correction transform.
       resultPose.applyTransform(objectToMeasurementTransform);
       objectInWorldPointsIsUpToDate = false;
-
-//      updateObjectInWorldPoints();
    }
 
    private void segmentPointCloud(List<Point3D32> measurementPointCloud, FramePoint3D virtualObjectPointInWorld, double cutoffRange)
@@ -257,18 +268,17 @@ public class IterativeClosestPointWorker
    {
       int measurementIdx = 0;
       int iteration = 0;
-      int maxIterations = 2 * numberOfICPObjectPoints;
       List<Point3D32> objectInWorldPoints = getObjectPointCloud();
+      int maxIterations = 2 * objectInWorldPoints.size();
 
-      while (correspondingMeasurementPointsToPack.size() < numberOfICPObjectPoints && measurementIdx < measurementPoints.size() && iteration < maxIterations)
+      while (correspondingMeasurementPointsToPack.size() < numberOfCorrespondences && measurementIdx < measurementPoints.size() && iteration < maxIterations)
       {
          Point3D32 measurementPoint = measurementPoints.get(measurementIdx++);
          double minDistance = Double.POSITIVE_INFINITY;
          Point3D32 correspondingObjectPoint = null;
 
-         for (int j = 0; j < objectInWorldPoints.size(); ++j)
+         for (Point3D32 objectPoint : objectInWorldPoints)
          {
-            Point3D32 objectPoint = objectInWorldPoints.get(j);
             double distanceSquared = measurementPoint.distanceSquared(objectPoint);
             if (distanceSquared < minDistance)
             {
@@ -302,7 +312,6 @@ public class IterativeClosestPointWorker
       return centroid;
    }
 
-
    // TODO: Color filtering could go here
    // pass in depth and color image -> cut out invalid pixels of depth image based on color image ->
    // -> create "environmentPointCloud" based off the color-filtered depth image ->
@@ -335,7 +344,14 @@ public class IterativeClosestPointWorker
       sceneNodeID = id;
    }
 
-   public void changeSize(float xLength, float yLength, float zLength, float xRadius, float yRadius, float zRadius, int numberOfICPObjectPoints)
+   public void setNumberOfCorrespondences(int numberOfCorrespondences)
+   {
+      this.numberOfCorrespondences = numberOfCorrespondences;
+      objectRelativeToCentroidPoints.reshape(numberOfCorrespondences, 3);
+      measurementRelativeToCentroidPoints.reshape(numberOfCorrespondences, 3);
+   }
+
+   public void changeSize(float xLength, float yLength, float zLength, float xRadius, float yRadius, float zRadius, int numberOfObjectSamples)
    {
       this.xLength = xLength;
       this.yLength = yLength;
@@ -343,12 +359,17 @@ public class IterativeClosestPointWorker
       this.xRadius = xRadius;
       this.yRadius = yRadius;
       this.zRadius = zRadius;
-      this.numberOfICPObjectPoints = numberOfICPObjectPoints;
 
-      objectRelativeToCentroidPoints.reshape(numberOfICPObjectPoints, 3);
-      measurementRelativeToCentroidPoints.reshape(numberOfICPObjectPoints, 3);
-
-      localObjectPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape, new Pose3D(), xLength, yLength, zLength, xRadius, yRadius, zRadius, numberOfICPObjectPoints, random);
+      localObjectPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape,
+                                                                               new Pose3D(),
+                                                                               xLength,
+                                                                               yLength,
+                                                                               zLength,
+                                                                               xRadius,
+                                                                               yRadius,
+                                                                               zRadius,
+                                                                               numberOfObjectSamples,
+                                                                               random);
       setPoseGuess(resultPose);
    }
 
@@ -361,7 +382,7 @@ public class IterativeClosestPointWorker
    {
       resultPose.set(pose);
       objectInWorldPointsIsUpToDate = false;
-//      updateObjectInWorldPoints();
+      //      updateObjectInWorldPoints();
    }
 
    private void updateObjectInWorldPoints()
@@ -378,7 +399,6 @@ public class IterativeClosestPointWorker
                                                   }).collect(Collectors.toList());
       objectInWorldPointsIsUpToDate = true;
    }
-
 
    public FramePose3DReadOnly getResultPose()
    {
@@ -420,11 +440,6 @@ public class IterativeClosestPointWorker
    public float getZRadius()
    {
       return zRadius;
-   }
-
-   public int getNumberOfICPObjectPoints()
-   {
-      return numberOfICPObjectPoints;
    }
 
    public boolean isUsingTargetPoint()

@@ -8,7 +8,6 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -29,9 +28,6 @@ import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.RestartableThread;
 
@@ -43,13 +39,15 @@ import java.util.Random;
 public class RDXIterativeClosestPointBasicWorkerDemo
 {
    private static final int MAX_ENVIRONMENT_SIZE = 1000;
+   private static final int SHAPE_SAMPLE_POINTS = 1000;
+   private static final int CORRESPONDENCE_POINTS = 750;
    private final int environmentSize = 2000;
 
    private final Random random = new Random(System.nanoTime());
 
    private final ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "icp_worker_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(node);
-   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(MAX_ENVIRONMENT_SIZE, ros2Helper, random);
+   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(SHAPE_SAMPLE_POINTS, CORRESPONDENCE_POINTS, ros2Helper, random);
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
@@ -81,7 +79,8 @@ public class RDXIterativeClosestPointBasicWorkerDemo
    private final ImFloat xRadius = new ImFloat(0.1f);
    private final ImFloat yRadius = new ImFloat(0.1f);
    private final ImFloat zRadius = new ImFloat(0.1f);
-   private final ImInt numberOfPoints = new ImInt(1000);
+   private final ImInt numberOfShapeSamples = new ImInt(SHAPE_SAMPLE_POINTS);
+   private final ImInt numberOfCorrespondences = new ImInt(CORRESPONDENCE_POINTS);
    private final ImFloat segmentationRadius = new ImFloat(0.6f);
 
    private final ImBoolean icpGuiAutoMoveEnv = new ImBoolean(true);
@@ -298,7 +297,8 @@ public class RDXIterativeClosestPointBasicWorkerDemo
                                                            xRadius.get(),
                                                            yRadius.get(),
                                                            zRadius.get(),
-                                                           MAX_ENVIRONMENT_SIZE,
+                                                           SHAPE_SAMPLE_POINTS,
+                                                           CORRESPONDENCE_POINTS,
                                                            new FramePose3D(ReferenceFrame.getWorldFrame(), pickFramePoint, new RotationMatrix()),
                                                            ros2Helper,
                                                            random);
@@ -309,13 +309,15 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             ImGui.sliderFloat("xRadius", xRadius.getData(), 0.0f, 1.0f);
             ImGui.sliderFloat("yRadius", yRadius.getData(), 0.0f, 1.0f);
             ImGui.sliderFloat("zRadius", zRadius.getData(), 0.0f, 1.0f);
-            ImGui.sliderInt("Num Points", numberOfPoints.getData(), 0, 10000);
+            ImGui.sliderInt("Num Shape Samples", numberOfShapeSamples.getData(), 0, 10000);
+            ImGui.sliderInt("Num Correspondences", numberOfCorrespondences.getData(), 0, 10000);
 
             if (ImGui.button("Apply Size"))
             {
-               icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get(), numberOfPoints.get());
+               icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get(), numberOfShapeSamples.get());
             }
-            ImGui.sliderFloat("Segmentation Radisu", segmentationRadius.getData(), 0.0f, 1.0f);
+            icpWorker.setNumberOfCorrespondences(numberOfCorrespondences.get());
+            ImGui.sliderFloat("Segmentation Radius", segmentationRadius.getData(), 0.0f, 1.0f);
 
             DecimalFormat df = new DecimalFormat("#.###");
             DecimalFormat tf = new DecimalFormat("#.#########");

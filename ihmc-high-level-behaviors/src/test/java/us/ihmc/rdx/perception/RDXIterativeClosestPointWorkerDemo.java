@@ -45,6 +45,7 @@ import java.util.Random;
 public class RDXIterativeClosestPointWorkerDemo
 {
    private static final int MAX_ENVIRONMENT_SIZE = 1000;
+   private static final int CORRESPONDENCES = 1000;
 
    private final OpenCLManager openCLManager = new OpenCLManager();
    private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor(openCLManager);
@@ -56,7 +57,7 @@ public class RDXIterativeClosestPointWorkerDemo
    private final ZEDColorDepthImagePublisher zedImagePublisher;
    private RawImage zedDepthImage;
    private RawImage zedLeftColorImage;
-   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(MAX_ENVIRONMENT_SIZE, ros2Helper, random);
+   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(MAX_ENVIRONMENT_SIZE, CORRESPONDENCES, ros2Helper, random);
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
@@ -235,6 +236,7 @@ public class RDXIterativeClosestPointWorkerDemo
                                                            yRadius.get(),
                                                            zRadius.get(),
                                                            MAX_ENVIRONMENT_SIZE,
+                                                           CORRESPONDENCES,
                                                            new FramePose3D(ReferenceFrame.getWorldFrame(), pickFramePoint, new RotationMatrix()),
                                                            ros2Helper,
                                                            random);
