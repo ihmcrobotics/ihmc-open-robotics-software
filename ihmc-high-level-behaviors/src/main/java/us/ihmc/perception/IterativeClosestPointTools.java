@@ -3,9 +3,8 @@ package us.ihmc.perception;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.tools.EuclidShapeTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -29,10 +28,24 @@ public class IterativeClosestPointTools
                                                  float zRadius)
    {
       double distanceSquared;
-      switch (shape)
+      float maxRadius = Math.max(xRadius, Math.max(yRadius, zRadius));
+      double maxLength = Math.sqrt(2 * MathTools.square(Math.max(xLength, Math.max(yLength, zLength))));
+      float biggestDistance = Math.max((float) maxLength, maxRadius);
+      if (shape == null)
       {
-         case BOX -> distanceSquared = distanceSquaredFromBox(shapePose, pointQuery, xLength, yLength, zLength);
-         default -> distanceSquared = distanceSquaredFromSphere(shapePose, pointQuery, Math.min(xRadius, Math.min(yRadius, zRadius)));
+         distanceSquared = distanceSquaredFromSphere(shapePose, pointQuery, biggestDistance);
+      }
+      else
+      {
+         switch (shape)
+         {
+            case BOX -> distanceSquared = distanceSquaredFromBox(shapePose, pointQuery, xLength, yLength, zLength);
+            case CYLINDER -> distanceSquared = distanceSquaredFromCylinder(shapePose, pointQuery, zLength, xRadius);
+            case ELLIPSOID -> distanceSquared = distanceSquaredFromEllipsoid(shapePose, pointQuery, xRadius, yRadius, zRadius);
+            // case PRISM // TODO
+            // case CONE // TODO
+            default -> distanceSquared = distanceSquaredFromSphere(shapePose, pointQuery, biggestDistance);
+         }
       }
 
       return distanceSquared;
@@ -48,15 +61,142 @@ public class IterativeClosestPointTools
       return MathTools.square(EuclidShapeTools.signedDistanceBetweenPoint3DAndBox3D(pointRelativeToBox, boxSize));
    }
 
-   public static double distanceSquaredFromSphere(Pose3DReadOnly boxPose, Point3DReadOnly query, float radius)
+   public static double distanceSquaredFromSphere(Pose3DReadOnly spherePose, Point3DReadOnly query, float radius)
+   {
+      return MathTools.square(EuclidShapeTools.signedDistanceBetweenPoint3DAndSphere3D(query, spherePose.getPosition(), radius));
+   }
+
+   public static double distanceSquaredFromCylinder(Pose3DReadOnly cylinderPose, Point3DReadOnly query, float zLength, float radius)
    {
       // first, transform the query to box frame.
+      Point3D pointRelativeToCylinder = new Point3D(query);
+      pointRelativeToCylinder.applyInverseTransform(cylinderPose);
+
+      Vector3D axis = new Vector3D(0.0, 0.0, 1.0);
+      return MathTools.square(EuclidShapeTools.signedDistanceBetweenPoint3DAndCylinder3D(pointRelativeToCylinder, new Point3D(), axis, zLength, radius));
+   }
+
+   public static double distanceSquaredFromEllipsoid(Pose3DReadOnly ellipsePose, Point3DReadOnly query, float xRadius, float yRadius, float zRadius)
+   {
+      Point3D pointRelativeToCylinder = new Point3D(query);
+      pointRelativeToCylinder.applyInverseTransform(ellipsePose);
+
+      return MathTools.square(EuclidShapeTools.signedDistanceBetweenPoint3DAndEllipsoid3D(pointRelativeToCylinder, new Vector3D(xRadius, yRadius, zRadius)));
+   }
+
+   public static boolean canComputeCorrespondencesOnShape(PrimitiveRigidBodyShape shape)
+   {
+      return switch (shape)
+            {
+               case BOX, CYLINDER, ELLIPSOID -> true;
+               default -> false;
+            };
+   }
+
+   public static void computeCorrespondencesOnShape(PrimitiveRigidBodyShape shape,
+                                                    Pose3DReadOnly shapePose,
+                                                    List<Point3D32> measurementPoints,
+                                                    List<Point3D32> correspondingMeasurementPointsToPack,
+                                                    List<Point3D32> correspondingObjectPointsToPack,
+                                                    float xLength,
+                                                    float yLength,
+                                                    float zLength,
+                                                    float xRadius,
+                                                    float yRadius,
+                                                    float zRadius,
+                                                    int numberOfCorrespondences)
+   {
+      if (!canComputeCorrespondencesOnShape(shape))
+         throw new RuntimeException("You can't compute shape correspondences for this shape type!");
+
+      for (int i = 0; i < Math.min(measurementPoints.size(), numberOfCorrespondences); i++)
+      {
+         Point3D32 measurementPoint = measurementPoints.get(i);
+         Point3D32 correspondingObjectPoint = computeCorrespondenceOnShape(shape, shapePose, measurementPoint, xLength, yLength, zLength, xRadius, yRadius, zRadius);
+
+         // record
+         correspondingMeasurementPointsToPack.add(measurementPoint);
+         correspondingObjectPointsToPack.add(correspondingObjectPoint);
+      }
+   }
+
+   private static Point3D32 computeCorrespondenceOnShape(PrimitiveRigidBodyShape shape,
+                                                         Pose3DReadOnly shapePose,
+                                                         Point3D32 point,
+                                                         float xLength,
+                                                         float yLength,
+                                                         float zLength,
+                                                         float xRadius,
+                                                         float yRadius,
+                                                         float zRadius)
+   {
+      Point3D32 correspondingPointOnShape;
+      switch (shape)
+      {
+         case BOX -> correspondingPointOnShape = computeCorrespondingPointOnBox(shapePose, point, xLength, yLength, zLength);
+         case CYLINDER -> correspondingPointOnShape = computeCorrespondingPointOnCylinder(shapePose, point, zLength, xRadius);
+         case ELLIPSOID -> correspondingPointOnShape = computeCorrespondingPointOnEllipse(shapePose, point, xRadius, yRadius, zRadius);
+         // case PRISM // TODO
+         // case CONE // TODO
+         default -> throw new RuntimeException("Invalid shape for computing a correspondence.");
+      }
+
+      return correspondingPointOnShape;
+   }
+
+   static Point3D32 computeCorrespondingPointOnBox(Pose3DReadOnly boxPose, Point3D32 query, float xLength, float yLength, float zLength)
+   {
       Point3D pointRelativeToBox = new Point3D(query);
       pointRelativeToBox.applyInverseTransform(boxPose);
 
-      double distanceFromOrigin = pointRelativeToBox.distanceFromOrigin();
-      return MathTools.square(distanceFromOrigin - radius);
+      Point3D32 correspondingPoint = new Point3D32();
+
+      // Note that we can't use the EuclidShapeTools definition here. That approach doesn't project points onto the edge if they're inside.
+      double halfSizeX = 0.5 * xLength;
+      double halfSizeY = 0.5 * yLength;
+      double halfSizeZ = 0.5 * zLength;
+
+      double xLocal = pointRelativeToBox.getX();
+      double yLocal = pointRelativeToBox.getY();
+      double zLocal = pointRelativeToBox.getZ();
+
+      double xLocalClamped = EuclidCoreTools.clamp(xLocal, halfSizeX);
+      double yLocalClamped = EuclidCoreTools.clamp(yLocal, halfSizeY);
+      double zLocalClamped = EuclidCoreTools.clamp(zLocal, halfSizeZ);
+
+      correspondingPoint.set(xLocalClamped, yLocalClamped, zLocalClamped);
+      correspondingPoint.applyTransform(boxPose);
+
+      return correspondingPoint;
    }
+
+   private static Point3D32 computeCorrespondingPointOnCylinder(Pose3DReadOnly cylinderPose, Point3D32 query, float zLength, float radius)
+   {
+      Point3D pointRelativeToCylinder = new Point3D(query);
+      pointRelativeToCylinder.applyInverseTransform(cylinderPose);
+
+      Vector3D axis = new Vector3D(0.0, 0.0, 1.0);
+      Point3D32 correspondingPoint = new Point3D32();
+      EuclidShapeTools.orthogonalProjectionOntoCylinder3D(pointRelativeToCylinder, new Point3D(), axis, zLength, radius, correspondingPoint);
+
+      correspondingPoint.applyTransform(cylinderPose);
+
+      return correspondingPoint;
+   }
+
+   private static Point3D32 computeCorrespondingPointOnEllipse(Pose3DReadOnly ellipsePose, Point3D32 query, float xRadius, float yRadius, float zRadius)
+   {
+      Point3D pointRelativeToCylinder = new Point3D(query);
+      pointRelativeToCylinder.applyInverseTransform(ellipsePose);
+
+      Point3D32 correspondingPoint = new Point3D32();
+      EuclidShapeTools.orthogonalProjectionOntoEllipsoid3D(pointRelativeToCylinder, new Vector3D(xRadius, yRadius, zRadius), correspondingPoint);
+
+      correspondingPoint.applyTransform(ellipsePose);
+
+      return correspondingPoint;
+   }
+
 
    public static List<Point3D32> createICPObjectPointCloud(PrimitiveRigidBodyShape shape,
                                                            Pose3DReadOnly shapePose,

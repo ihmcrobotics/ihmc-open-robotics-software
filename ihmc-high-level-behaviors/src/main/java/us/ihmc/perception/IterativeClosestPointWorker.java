@@ -45,7 +45,7 @@ public class IterativeClosestPointWorker
 
    private long sceneNodeID = -1L;
 
-   private final PrimitiveRigidBodyShape detectionShape;
+   private PrimitiveRigidBodyShape detectionShape;
    private float xLength = 0.19f;
    private float yLength = 0.4f;
    private float zLength = 0.31f;
@@ -186,9 +186,27 @@ public class IterativeClosestPointWorker
       List<Point3D32> correspondingObjectPoints = new ArrayList<>();
       List<Point3D32> correspondingMeasurementPoints = new ArrayList<>();
 
-      computeCorrespondingPointsBetweenMeasurementAndObjectPointCloud(segmentedMeasurementPointCloud,
-                                                                      correspondingMeasurementPoints,
-                                                                      correspondingObjectPoints);
+      if (IterativeClosestPointTools.canComputeCorrespondencesOnShape(detectionShape))
+      {
+         IterativeClosestPointTools.computeCorrespondencesOnShape(detectionShape,
+                                                                  resultPose,
+                                                                  segmentedMeasurementPointCloud,
+                                                                  correspondingMeasurementPoints,
+                                                                  correspondingObjectPoints,
+                                                                  xLength,
+                                                                  yLength,
+                                                                  zLength,
+                                                                  xRadius,
+                                                                  yRadius,
+                                                                  zRadius,
+                                                                  numberOfCorrespondences);
+      }
+      else
+      {
+         computeCorrespondingPointsBetweenMeasurementAndObjectPointCloud(segmentedMeasurementPointCloud,
+                                                                         correspondingMeasurementPoints,
+                                                                         correspondingObjectPoints);
+      }
 
       // Calculate object corresponce centroid
       Point3D32 objectCentroid = computeCentroidOfPointCloud(correspondingObjectPoints);
@@ -352,6 +370,12 @@ public class IterativeClosestPointWorker
       this.numberOfCorrespondences = numberOfCorrespondences;
       objectRelativeToCentroidPoints.reshape(numberOfCorrespondences, 3);
       measurementRelativeToCentroidPoints.reshape(numberOfCorrespondences, 3);
+   }
+
+   public void setDetectionShape(PrimitiveRigidBodyShape shape)
+   {
+      detectionShape = shape;
+      changeSize(xLength, yLength, zLength, xRadius, yRadius, zRadius, localObjectPoints.size());
    }
 
    public void changeSize(float xLength, float yLength, float zLength, float xRadius, float yRadius, float zRadius, int numberOfObjectSamples)

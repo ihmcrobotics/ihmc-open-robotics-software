@@ -7,6 +7,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -71,14 +72,14 @@ public class RDXIterativeClosestPointBasicWorkerDemo
    private boolean firstTick = true;
 
    private final Pose3D shapeInputPose = new Pose3D();
-   private PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.BOX;
+   private PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.ELLIPSOID;
    private final ImInt shapeIndex = new ImInt();
    private final String[] shapeValues = new String[PrimitiveRigidBodyShape.values().length];
    private final ImFloat depth = new ImFloat(0.19f);
    private final ImFloat width = new ImFloat(0.405f);
    private final ImFloat height = new ImFloat(0.31f);
-   private final ImFloat xRadius = new ImFloat(0.1f);
-   private final ImFloat yRadius = new ImFloat(0.1f);
+   private final ImFloat xRadius = new ImFloat(0.3f);
+   private final ImFloat yRadius = new ImFloat(0.2f);
    private final ImFloat zRadius = new ImFloat(0.1f);
    private final ImInt numberOfShapeSamples = new ImInt(SHAPE_SAMPLE_POINTS);
    private final ImInt numberOfCorrespondences = new ImInt(CORRESPONDENCE_POINTS);
@@ -137,6 +138,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
 
       if (firstTick)
       {
+         icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get(), numberOfShapeSamples.get());
          icpWorker.setPoseGuess(shapeInputPose);
          firstTick = false;
       }
@@ -172,7 +174,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
    private void calculateICPTime(long time1, long time2)
    {
       long timeDiffNanos = time2-time1;
-      icpGuiICPRunTimeInSeconds = (timeDiffNanos/1e9)/icpGuiNumICPIterations[0];
+      icpGuiICPRunTimeInSeconds = Conversions.nanosecondsToSeconds(timeDiffNanos);
    }
 
    private void moveInputShape()
@@ -221,6 +223,8 @@ public class RDXIterativeClosestPointBasicWorkerDemo
          @Override
          public void create()
          {
+            icpWorker.setDetectionShape(shape);
+
             mousePickSphere = RDXModelBuilder.createSphere(0.03f, Color.RED);
             baseUI.getPrimaryScene().addRenderableProvider(mousePickSphere, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculatePickPoint);
