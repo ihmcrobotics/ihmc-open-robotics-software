@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
@@ -21,6 +22,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 public class IterativeClosestPointWorker
 {
@@ -37,6 +39,8 @@ public class IterativeClosestPointWorker
    private float yRadius = 0.0f;
    private float zRadius = 0.0f;
    private int numberOfICPObjectPoints;
+
+   private boolean useParallelStreams = true;
 
    private final DMatrixRMaj objectCentroid = new DMatrixRMaj(1, 3);
    private final DMatrixRMaj environmentCentroid = new DMatrixRMaj(1, 3);
@@ -154,7 +158,7 @@ public class IterativeClosestPointWorker
    {
       segmentedEnvironmentPointCloud.shuffle(random);
 
-      // Calculate nearest neighbor (environment to object)
+      // Calculate nearest neighbor for each point (environment to object)
       for (int i = 0; i < numberOfICPObjectPoints; ++i)
       {
          Point3D32 environmentPoint = segmentedEnvironmentPointCloud.get(i);
@@ -173,6 +177,7 @@ public class IterativeClosestPointWorker
          if (minIndex == -1)
             return;
 
+         // record
          environmentToObjectCorrespondencePoints.set(i, 0, objectInWorldPoints.get(minIndex).getX());
          environmentToObjectCorrespondencePoints.set(i, 1, objectInWorldPoints.get(minIndex).getY());
          environmentToObjectCorrespondencePoints.set(i, 2, objectInWorldPoints.get(minIndex).getZ());
@@ -213,13 +218,11 @@ public class IterativeClosestPointWorker
       DMatrixRMaj H = new DMatrixRMaj(3, 3);
       DMatrixRMaj U = new DMatrixRMaj(3, 3);
       DMatrixRMaj V = new DMatrixRMaj(3, 3);
-      DMatrixRMaj R = new DMatrixRMaj(3, 3);
+      DMatrixRMaj R = new DMatrixRMaj(3, 3); // This is the optimized rotation matrix to rotate the environment to match the point cloud.
       DMatrixRMaj objectAdjustedLocation = new DMatrixRMaj(3, 1);
       DMatrixRMaj objectTranslation = new DMatrixRMaj(1, 3);
       DMatrixRMaj T = new DMatrixRMaj(4, 4);
       CommonOps_DDRM.setIdentity(T);
-      DMatrixRMaj interimPoint = new DMatrixRMaj(1, 3);
-      DMatrixRMaj movedPoint = new DMatrixRMaj(1, 3);
 
       // TODO: Get new translation every iteration, append to last, modify object pose using the translation
       // Solve for Best Fit Transformation
@@ -230,41 +233,36 @@ public class IterativeClosestPointWorker
       CommonOps_DDRM.multTransAB(V, U, R);
 
       // Correct any negative rotation matrices which come out of SVD its positive counterpart (fixes NotARotationMatrix issues)
-      if (CommonOps_DDRM.det(R) < 0.0) {
+      if (CommonOps_DDRM.det(R) < 0.0)
+      {
          CommonOps_DDRM.scale(-1.0, R);
       }
-
-      RotationMatrix deltaRotation = new RotationMatrix(R);
 
       // Calculate object translation
       CommonOps_DDRM.multTransB(R, objectCentroid, objectAdjustedLocation);
       CommonOps_DDRM.transpose(objectAdjustedLocation);
       CommonOps_DDRM.subtract(environmentCentroid, objectAdjustedLocation, objectTranslation);
 
+      RotationMatrix deltaRotation = new RotationMatrix(R);
+      RigidBodyTransform worldToPointsTransform = new RigidBodyTransform();
+      worldToPointsTransform.getRotation().set(R);
+      worldToPointsTransform.getTranslation().set(objectTranslation);
+
       // Rotate and translate object points
-      for (Point3D32 objectInWorldPoint : this.objectInWorldPoints)
-      {
-         interimPoint.set(new double[][] {{objectInWorldPoint.getX()}, {objectInWorldPoint.getY()}, {objectInWorldPoint.getZ()}});
-         CommonOps_DDRM.mult(R, interimPoint, movedPoint);
-         objectInWorldPoint.set(movedPoint.get(0) + objectTranslation.get(0),
-                                movedPoint.get(1) + objectTranslation.get(1),
-                                movedPoint.get(2) + objectTranslation.get(2));
-      }
+      // TODO why is this all the points? We only need to transform the points that will be used in to compute the centroid.
+      Stream<Point3D32> pointsStream = useParallelStreams ? objectInWorldPoints.parallelStream() : objectInWorldPoints.stream();
+      pointsStream.forEach(objectInWorldPoint -> objectInWorldPoint.applyTransform(worldToPointsTransform));
 
       // TODO: Remove this cheat
       // Calculate object centroid
-      objectPointCloudCentroid.set(0, 0, 0);
-      objectPointCloudCentroid.set(0, 1, 0);
-      objectPointCloudCentroid.set(0, 2, 0);
+      objectPointCloudCentroid.zero();
       for (int i = 0; i < numberOfICPObjectPoints; ++i)
       {
          objectPointCloudCentroid.add(0, 0, objectInWorldPoints.get(i).getX());
          objectPointCloudCentroid.add(0, 1, objectInWorldPoints.get(i).getY());
          objectPointCloudCentroid.add(0, 2, objectInWorldPoints.get(i).getZ());
       }
-      objectPointCloudCentroid.set(0, 0, objectPointCloudCentroid.get(0, 0) / numberOfICPObjectPoints);
-      objectPointCloudCentroid.set(0, 1, objectPointCloudCentroid.get(0, 1) / numberOfICPObjectPoints);
-      objectPointCloudCentroid.set(0, 2, objectPointCloudCentroid.get(0, 2) / numberOfICPObjectPoints);
+      CommonOps_DDRM.scale(1.0 / numberOfICPObjectPoints, objectPointCloudCentroid);
 
       resultPose.prependRotation(deltaRotation);
       resultPose.getPosition().set(objectPointCloudCentroid.get(0, 0), objectPointCloudCentroid.get(0, 1), objectPointCloudCentroid.get(0, 2));
