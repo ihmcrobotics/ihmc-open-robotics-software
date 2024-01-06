@@ -1,8 +1,15 @@
 package us.ihmc.perception;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.shape.tools.EuclidShapeTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
 import java.util.ArrayList;
@@ -11,15 +18,55 @@ import java.util.Random;
 
 public class IterativeClosestPointTools
 {
+   public static double distanceSquaredFromShape(PrimitiveRigidBodyShape shape,
+                                                 Pose3DReadOnly shapePose,
+                                                 Point3DReadOnly pointQuery,
+                                                 float xLength,
+                                                 float yLength,
+                                                 float zLength,
+                                                 float xRadius,
+                                                 float yRadius,
+                                                 float zRadius)
+   {
+      double distanceSquared;
+      switch (shape)
+      {
+         case BOX -> distanceSquared = distanceSquaredFromBox(shapePose, pointQuery, xLength, yLength, zLength);
+         default -> distanceSquared = distanceSquaredFromSphere(shapePose, pointQuery, Math.min(xRadius, Math.min(yRadius, zRadius)));
+      }
+
+      return distanceSquared;
+   }
+
+   public static double distanceSquaredFromBox(Pose3DReadOnly boxPose, Point3DReadOnly query, float xLength, float yLength, float zLength)
+   {
+      // first, transform the query to box frame.
+      Point3D pointRelativeToBox = new Point3D(query);
+      pointRelativeToBox.applyInverseTransform(boxPose);
+
+      Vector3D boxSize = new Vector3D(xLength, yLength, zLength);
+      return MathTools.square(EuclidShapeTools.signedDistanceBetweenPoint3DAndBox3D(pointRelativeToBox, boxSize));
+   }
+
+   public static double distanceSquaredFromSphere(Pose3DReadOnly boxPose, Point3DReadOnly query, float radius)
+   {
+      // first, transform the query to box frame.
+      Point3D pointRelativeToBox = new Point3D(query);
+      pointRelativeToBox.applyInverseTransform(boxPose);
+
+      double distanceFromOrigin = pointRelativeToBox.distanceFromOrigin();
+      return MathTools.square(distanceFromOrigin - radius);
+   }
+
    public static List<Point3D32> createICPObjectPointCloud(PrimitiveRigidBodyShape shape,
-                                                     Pose3DReadOnly shapePose,
-                                                     float xLength,
-                                                     float yLength,
-                                                     float zLength,
-                                                     float xRadius,
-                                                     float yRadius,
-                                                     float zRadius,
-                                                     int numberOfICPObjectPoints,
+                                                           Pose3DReadOnly shapePose,
+                                                           float xLength,
+                                                           float yLength,
+                                                           float zLength,
+                                                           float xRadius,
+                                                           float yRadius,
+                                                           float zRadius,
+                                                           int numberOfICPObjectPoints,
                                                            Random random)
    {
       List<Point3D32> objectPointCloud;
@@ -27,9 +74,11 @@ public class IterativeClosestPointTools
       switch (shape)
       {
          case BOX -> objectPointCloud = IterativeClosestPointTools.createBoxPointCloud(shapePose, xLength, yLength, zLength, numberOfICPObjectPoints, random);
-         case PRISM -> objectPointCloud = IterativeClosestPointTools.createPrismPointCloud(shapePose, xLength, yLength, zLength, numberOfICPObjectPoints, random);
+         case PRISM ->
+               objectPointCloud = IterativeClosestPointTools.createPrismPointCloud(shapePose, xLength, yLength, zLength, numberOfICPObjectPoints, random);
          case CYLINDER -> objectPointCloud = IterativeClosestPointTools.createCylinderPointCloud(shapePose, zLength, xRadius, numberOfICPObjectPoints, random);
-         case ELLIPSOID -> objectPointCloud = IterativeClosestPointTools.createEllipsoidPointCloud(shapePose, xRadius, yRadius, zRadius, numberOfICPObjectPoints, random);
+         case ELLIPSOID ->
+               objectPointCloud = IterativeClosestPointTools.createEllipsoidPointCloud(shapePose, xRadius, yRadius, zRadius, numberOfICPObjectPoints, random);
          case CONE -> objectPointCloud = IterativeClosestPointTools.createConePointCloud(shapePose, zLength, xRadius, numberOfICPObjectPoints, random);
          default -> objectPointCloud = IterativeClosestPointTools.createDefaultBoxPointCloud(shapePose, numberOfICPObjectPoints, random);
       }
