@@ -161,45 +161,24 @@ public class IterativeClosestPointWorker
       Collections.shuffle(segmentedMeasurementPointCloud, random);
 
       // Calculate nearest neighbor for each point (environment to object)
-      List<Point3D32> objectCorrespondingPoints = new ArrayList<>();
-      List<Point3D32> measurementPoints = new ArrayList<>();
+      List<Point3D32> correspondingObjectPoints = new ArrayList<>();
+      List<Point3D32> correspondingMeasurementPoints = new ArrayList<>();
 
-      for (int i = 0; i < numberOfICPObjectPoints; ++i)
-      {
-         Point3D32 measurementPoint = segmentedMeasurementPointCloud.get(i);
-         double minDistance = Double.POSITIVE_INFINITY;
-         int minIndex = -1;
-
-         for (int j = 0; j < objectInWorldPoints.size(); ++j)
-         {
-            double distanceSquared = measurementPoint.distanceSquared(objectInWorldPoints.get(j));
-            if (distanceSquared < minDistance)
-            {
-               minDistance = distanceSquared;
-               minIndex = j;
-            }
-         }
-         if (minIndex == -1)
-            return;
-
-          // record
-         measurementPoints.add(measurementPoint);
-         objectCorrespondingPoints.add(objectInWorldPoints.get(minIndex));
-      }
+      computeCorrespondingPointsBetweenMeasurementAndObjectPointCloud(segmentedMeasurementPointCloud, correspondingMeasurementPoints, correspondingObjectPoints);
 
       // Calculate object centroid
-      Point3D32 objectCentroid = computeCentroidOfPointCloud(objectCorrespondingPoints);
+      Point3D32 objectCentroid = computeCentroidOfPointCloud(correspondingObjectPoints);
 
       // TODO I bet there's an element-wise operation for this.
       for (int i = 0; i < numberOfICPObjectPoints; ++i)
       {
-         objectRelativeToCentroidPoints.set(i, 0, objectCorrespondingPoints.get(i).getX() - objectCentroid.getX());
-         objectRelativeToCentroidPoints.set(i, 1, objectCorrespondingPoints.get(i).getY() - objectCentroid.getY());
-         objectRelativeToCentroidPoints.set(i, 2, objectCorrespondingPoints.get(i).getZ() - objectCentroid.getZ());
+         objectRelativeToCentroidPoints.set(i, 0, correspondingObjectPoints.get(i).getX() - objectCentroid.getX());
+         objectRelativeToCentroidPoints.set(i, 1, correspondingObjectPoints.get(i).getY() - objectCentroid.getY());
+         objectRelativeToCentroidPoints.set(i, 2, correspondingObjectPoints.get(i).getZ() - objectCentroid.getZ());
       }
 
       // Calculate measurement centroid
-      Point3D32 measurementCentroid = computeCentroidOfPointCloud(measurementPoints);
+      Point3D32 measurementCentroid = computeCentroidOfPointCloud(correspondingMeasurementPoints);
 
       for (int i = 0; i < numberOfICPObjectPoints; ++i)
       {
@@ -261,6 +240,42 @@ public class IterativeClosestPointWorker
       Stream<Point3D32> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
       segmentedPointCloud = measurementStream.filter(point -> virtualObjectPointInWorld.distanceSquared(point) <= cutoffSquare).collect(Collectors.toList());
       segmentedPointCloud.addAll(measurementPointCloud);
+   }
+
+   private void computeCorrespondingPointsBetweenMeasurementAndObjectPointCloud(List<Point3D32> measurementPoints,
+                                                                                List<Point3D32> correspondingMeasurementPointsToPack,
+                                                                                List<Point3D32> correspondingObjectPointsToPack)
+   {
+      int measurementIdx = 0;
+      int iteration = 0;
+      int maxIterations = 2 * numberOfICPObjectPoints;
+
+      while (correspondingMeasurementPointsToPack.size() < numberOfICPObjectPoints && measurementIdx < measurementPoints.size() && iteration < maxIterations)
+      {
+         Point3D32 measurementPoint = measurementPoints.get(measurementIdx++);
+         double minDistance = Double.POSITIVE_INFINITY;
+         Point3D32 correspondingObjectPoint = null;
+         int minIndex = -1;
+
+         for (int j = 0; j < objectInWorldPoints.size(); ++j)
+         {
+            Point3D32 objectPoint = objectInWorldPoints.get(j);
+            double distanceSquared = measurementPoint.distanceSquared(objectPoint);
+            if (distanceSquared < minDistance)
+            {
+               minDistance = distanceSquared;
+               correspondingObjectPoint = objectPoint;
+            }
+         }
+         if (correspondingObjectPoint == null)
+            continue;
+
+         // record
+         correspondingMeasurementPointsToPack.add(measurementPoint);
+         correspondingObjectPointsToPack.add(correspondingObjectPoint);
+
+         iteration++;
+      }
    }
 
    private static Point3D32 computeCentroidOfPointCloud(List<Point3D32> pointCloud)
