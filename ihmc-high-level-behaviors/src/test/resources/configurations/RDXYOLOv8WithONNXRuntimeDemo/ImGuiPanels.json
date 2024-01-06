@@ -1,12 +1,15 @@
 {
   "dockspacePanels" : { },
   "windows" : {
-    "3D View" : true,
+    "3D View" : false,
     "Blackfly Fisheye Simulator###java.lang.Integer:Blackfly Fisheye Simulator" : false,
-    "Blackfly Fisheye Color###GlobalWidgetIndex:1:Blackfly Fisheye Color" : true,
+    "Blackfly Fisheye Color###GlobalWidgetIndex:1:Blackfly Fisheye Color" : false,
     "Blackfly Fisheye Depth###GlobalWidgetIndex:0:Blackfly Fisheye Depth" : false,
-    "Environment###java.lang.Class:Environment" : true,
+    "Environment###java.lang.Class:Environment" : false,
+    "Perception Visualizers" : false,
     "VR Settings" : false,
-    "VR Thread Debugger" : false
+    "VR Thread Debugger" : false,
+    "YOLO Demo" : false,
+    "YOLO Demo Img" : true
   }
 }
