@@ -8,6 +8,7 @@
     "Contact Map Image" : false,
     "Cropped Height Map" : false,
     "Depth Image" : false,
+    "Height Map Parameters (Active Mapper)" : true,
     "Local Height Map" : false,
     "Planner Parameters (Monte-Carlo)" : true,
     "Terrain Cost Image" : false,
