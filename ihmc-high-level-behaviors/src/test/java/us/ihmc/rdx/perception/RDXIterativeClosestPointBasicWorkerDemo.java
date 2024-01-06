@@ -136,7 +136,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
 
       if (firstTick)
       {
-         icpWorker.getResultPose().set(shapeInputPose);
+         icpWorker.setPoseGuess(shapeInputPose);
          firstTick = false;
       }
 
@@ -307,8 +307,9 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             DecimalFormat df = new DecimalFormat("#.###");
 
             ImGui.text(" ");
-            ImGui.text("Env Centroid: " + df.format(shapeInputPose.getX()) + " y: " + df.format(shapeInputPose.getY()) + " z: " + df.format(shapeInputPose.getZ()));
-            ImGui.text("Obj Centroid: " + df.format(icpWorker.getResultPose().getX()) + " y: " + df.format(icpWorker.getResultPose().getY()) + " z: " + df.format(icpWorker.getResultPose().getZ()));
+            ImGui.text("Input Centroid: " + df.format(shapeInputPose.getX()) + " y: " + df.format(shapeInputPose.getY()) + " z: " + df.format(shapeInputPose.getZ()));
+            ImGui.text("Res Centroid: " + df.format(icpWorker.getResultPose().getX()) + " y: " + df.format(icpWorker.getResultPose().getY()) + " z: " + df.format(icpWorker.getResultPose().getZ()));
+            ImGui.text("diff Centroid: " + df.format(shapeInputPose.getX() - icpWorker.getResultPose().getX()) + " y: " + df.format(shapeInputPose.getY()- icpWorker.getResultPose().getY()) + " z: " + df.format(shapeInputPose.getZ()-icpWorker.getResultPose().getZ()));
 
             ImGui.text(" ");
             ImGui.sliderFloat("X Position", icpGuiShapeSetPostionX, -2.0f, 2.0f);
