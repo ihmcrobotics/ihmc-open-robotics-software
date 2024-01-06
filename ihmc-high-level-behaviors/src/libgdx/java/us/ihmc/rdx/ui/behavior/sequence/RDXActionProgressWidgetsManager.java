@@ -19,7 +19,7 @@ public class RDXActionProgressWidgetsManager
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
    private final SortedSet<RDXActionNode<?, ?>> sortedActionNodesToRender = new TreeSet<>(Comparator.comparingInt(node -> node.getState().getActionIndex()));
    private final ArrayList<RDXActionNode<?, ?>> actionNodesToRender = new ArrayList<>();
-   private boolean renderAsPlots = false;
+   private boolean renderAsPlots = true;
    private int emptyPlotIndex;
 
    public void render()
