@@ -4,12 +4,12 @@
   "Search window height": {
     "value": 20,
     "lowerBound": 10,
-    "upperBound": 200
+    "upperBound": 400
   },
   "Search window width": {
     "value": 10,
     "lowerBound": 10,
-    "upperBound": 200
+    "upperBound": 400
   },
   "Min height registration": {
     "value": -1.0,
