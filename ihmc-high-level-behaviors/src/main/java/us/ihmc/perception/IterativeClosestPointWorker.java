@@ -13,7 +13,6 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,7 +20,6 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
-import us.ihmc.tools.lists.PairList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,17 +53,16 @@ public class IterativeClosestPointWorker
    };
 
    private final DMatrixRMaj objectCentroid = new DMatrixRMaj(1, 3);
-   private final DMatrixRMaj environmentCentroid = new DMatrixRMaj(1, 3);
+   private final DMatrixRMaj measurementCentroid = new DMatrixRMaj(1, 3);
    private final DMatrixRMaj objectPointCloudCentroid = new DMatrixRMaj(1, 3);
-   private final DMatrixRMaj objectCentroidSubtractedPoints;
-   private final DMatrixRMaj environmentCentroidSubtractedPoints;
-   private final DMatrixRMaj environmentToObjectCorrespondencePoints;
+   private final DMatrixRMaj objectRelativeToCentroidPoints;
+   private final DMatrixRMaj measurementRelativeToCentroidPoints;
 
 
    private final SvdImplicitQrDecompose_DDRM svdSolver = new SvdImplicitQrDecompose_DDRM(false, true, true, false);
 
-   private List<Point3D32> environmentPointCloud;
-   private final Object environmentPointCloudSynchronizer = new Object();
+   private List<Point3D32> measurementPointCloud;
+   private final Object measurementPointCloudSynchronizer = new Object();
 
    private final RecyclingArrayList<Point3D32> segmentedPointCloud = new RecyclingArrayList<>(Point3D32::new);
    private double segmentSphereRadius = 1.0;
@@ -73,7 +70,7 @@ public class IterativeClosestPointWorker
    private List<Point3D32> objectInWorldPoints;
 
    private final AtomicBoolean useTargetPoint = new AtomicBoolean(true);
-   // Point around which ICP will segment the environment point cloud
+   // Point around which ICP will segment the measurement point cloud
    private final FramePoint3D targetPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
    private final FramePose3D resultPose = new FramePose3D(ReferenceFrame.getWorldFrame());
@@ -84,9 +81,8 @@ public class IterativeClosestPointWorker
       this.numberOfICPObjectPoints = numberOfICPObjectPoints;
       this.random = random;
 
-      objectCentroidSubtractedPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
-      environmentCentroidSubtractedPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
-      environmentToObjectCorrespondencePoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
+      objectRelativeToCentroidPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
+      measurementRelativeToCentroidPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
       detectionShape = PrimitiveRigidBodyShape.BOX;
 
       setPoseGuess(resultPose);
@@ -117,9 +113,8 @@ public class IterativeClosestPointWorker
 
       targetPoint.set(initialPose.getPosition());
 
-      objectCentroidSubtractedPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
-      environmentCentroidSubtractedPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
-      environmentToObjectCorrespondencePoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
+      objectRelativeToCentroidPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
+      measurementRelativeToCentroidPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
 
       setPoseGuess(initialPose);
    }
@@ -135,12 +130,12 @@ public class IterativeClosestPointWorker
          detectionPoint = new FramePoint3D(resultPose.getPosition());
 
       // Segment the point cloud
-      synchronized (environmentPointCloudSynchronizer) // synchronize as to avoid changes to environment point cloud while segmenting it
+      synchronized (measurementPointCloudSynchronizer) // synchronize as to avoid changes to environment point cloud while segmenting it
       {
-         if (environmentPointCloud == null)
+         if (measurementPointCloud == null)
             return;
 
-         segmentPointCloud(environmentPointCloud, detectionPoint, segmentSphereRadius);
+         segmentPointCloud(measurementPointCloud, detectionPoint, segmentSphereRadius);
       }
 
       // Only run ICP iteration if segmented point cloud has enough points
@@ -167,20 +162,23 @@ public class IterativeClosestPointWorker
    }
 
    // TODO: Pass in a Pose to transform (all object points define WRT the pose of object)
-   private void runICPIteration(RecyclingArrayList<Point3D32> segmentedEnvironmentPointCloud)
+   private void runICPIteration(RecyclingArrayList<Point3D32> segmentedMeasurementPointCloud)
    {
-      segmentedEnvironmentPointCloud.shuffle(random);
+      segmentedMeasurementPointCloud.shuffle(random);
 
       // Calculate nearest neighbor for each point (environment to object)
+      List<Point3D32> objectCorrespondingPoints = new ArrayList<>();
+      List<Point3D32> measurementPoints = new ArrayList<>();
+
       for (int i = 0; i < numberOfICPObjectPoints; ++i)
       {
-         Point3D32 environmentPoint = segmentedEnvironmentPointCloud.get(i);
+         Point3D32 measurementPoint = segmentedMeasurementPointCloud.get(i);
          double minDistance = Double.POSITIVE_INFINITY;
          int minIndex = -1;
 
          for (int j = 0; j < objectInWorldPoints.size(); ++j)
          {
-            double distanceSquared = environmentPoint.distanceSquared(objectInWorldPoints.get(j));
+            double distanceSquared = measurementPoint.distanceSquared(objectInWorldPoints.get(j));
             if (distanceSquared < minDistance)
             {
                minDistance = distanceSquared;
@@ -191,47 +189,36 @@ public class IterativeClosestPointWorker
             return;
 
           // record
-         environmentToObjectCorrespondencePoints.set(i, 0, objectInWorldPoints.get(minIndex).getX());
-         environmentToObjectCorrespondencePoints.set(i, 1, objectInWorldPoints.get(minIndex).getY());
-         environmentToObjectCorrespondencePoints.set(i, 2, objectInWorldPoints.get(minIndex).getZ());
+         measurementPoints.add(measurementPoint);
+         objectCorrespondingPoints.add(objectInWorldPoints.get(minIndex));
       }
 
       // Calculate object centroid
-      objectCentroid.zero();
-      CommonOps_DDRM.sumCols(environmentToObjectCorrespondencePoints, objectCentroid);
-      CommonOps_DDRM.scale(1.0 / numberOfICPObjectPoints, objectCentroid);
+      Point3D32 objectCentroid = computeCentroidOfPointCloud(objectCorrespondingPoints);
 
       // TODO I bet there's an element-wise operation for this.
       for (int i = 0; i < numberOfICPObjectPoints; ++i)
       {
-         objectCentroidSubtractedPoints.set(i, 0, environmentToObjectCorrespondencePoints.get(i, 0) - objectCentroid.get(0, 0));
-         objectCentroidSubtractedPoints.set(i, 1, environmentToObjectCorrespondencePoints.get(i, 1) - objectCentroid.get(0, 1));
-         objectCentroidSubtractedPoints.set(i, 2, environmentToObjectCorrespondencePoints.get(i, 2) - objectCentroid.get(0, 2));
+         objectRelativeToCentroidPoints.set(i, 0, objectCorrespondingPoints.get(i).getX() - objectCentroid.getX());
+         objectRelativeToCentroidPoints.set(i, 1, objectCorrespondingPoints.get(i).getY() - objectCentroid.getY());
+         objectRelativeToCentroidPoints.set(i, 2, objectCorrespondingPoints.get(i).getZ() - objectCentroid.getZ());
       }
 
-      // Calculate environment centroid
-      environmentCentroid.zero();
-      // FIXME this is a super gross way of doing this, but may be unavoidable.
-      for (int i = 0; i < numberOfICPObjectPoints; ++i)
-      {
-         environmentCentroid.add(0, 0, segmentedEnvironmentPointCloud.get(i).getX());
-         environmentCentroid.add(0, 1, segmentedEnvironmentPointCloud.get(i).getY());
-         environmentCentroid.add(0, 2, segmentedEnvironmentPointCloud.get(i).getZ());
-      }
-      CommonOps_DDRM.scale(1.0 / numberOfICPObjectPoints, environmentCentroid);
+      // Calculate measurement centroid
+      Point3D32 measurementCentroid = computeCentroidOfPointCloud(measurementPoints);
 
       for (int i = 0; i < numberOfICPObjectPoints; ++i)
       {
-         environmentCentroidSubtractedPoints.set(i, 0, segmentedEnvironmentPointCloud.get(i).getX() - environmentCentroid.get(0, 0));
-         environmentCentroidSubtractedPoints.set(i, 1, segmentedEnvironmentPointCloud.get(i).getY() - environmentCentroid.get(0, 1));
-         environmentCentroidSubtractedPoints.set(i, 2, segmentedEnvironmentPointCloud.get(i).getZ() - environmentCentroid.get(0, 2));
+         measurementRelativeToCentroidPoints.set(i, 0, segmentedMeasurementPointCloud.get(i).getX() - measurementCentroid.getX());
+         measurementRelativeToCentroidPoints.set(i, 1, segmentedMeasurementPointCloud.get(i).getY() - measurementCentroid.getY());
+         measurementRelativeToCentroidPoints.set(i, 2, segmentedMeasurementPointCloud.get(i).getZ() - measurementCentroid.getZ());
       }
 
       // Initialize matrix variables
       DMatrixRMaj H = new DMatrixRMaj(3, 3);
       DMatrixRMaj U = new DMatrixRMaj(3, 3);
       DMatrixRMaj V = new DMatrixRMaj(3, 3);
-      DMatrixRMaj R = new DMatrixRMaj(3, 3); // This is the optimized rotation matrix to rotate the environment to match the point cloud.
+      DMatrixRMaj R = new DMatrixRMaj(3, 3); // This is the optimized rotation matrix to rotate the measurement to match the point cloud.
       DMatrixRMaj objectAdjustedLocation = new DMatrixRMaj(3, 1);
       DMatrixRMaj objectTranslation = new DMatrixRMaj(1, 3);
       // TODO this isn't anything
@@ -240,7 +227,7 @@ public class IterativeClosestPointWorker
 
       // TODO: Get new translation every iteration, append to last, modify object pose using the translation
       // Solve for Best Fit Transformation
-      CommonOps_DDRM.multTransA(objectCentroidSubtractedPoints, environmentCentroidSubtractedPoints, H);
+      CommonOps_DDRM.multTransA(objectRelativeToCentroidPoints, measurementRelativeToCentroidPoints, H);
       svdSolver.decompose(H);
       svdSolver.getU(U, false);
       svdSolver.getV(V, true);
@@ -254,9 +241,15 @@ public class IterativeClosestPointWorker
 
       /* Calculate object transform */
       // Create the transform, and set the rotation, so it's a pure rotation transform
-      CommonOps_DDRM.multTransB(R, objectCentroid, objectAdjustedLocation);
+      this.objectCentroid.set(0, objectCentroid.getX());
+      this.objectCentroid.set(1, objectCentroid.getY());
+      this.objectCentroid.set(2, objectCentroid.getZ());
+      this.measurementCentroid.set(0, measurementCentroid.getX());
+      this.measurementCentroid.set(1, measurementCentroid.getY());
+      this.measurementCentroid.set(2, measurementCentroid.getZ());
+      CommonOps_DDRM.multTransB(R, this.objectCentroid, objectAdjustedLocation);
       CommonOps_DDRM.transpose(objectAdjustedLocation);
-      CommonOps_DDRM.subtract(environmentCentroid, objectAdjustedLocation, objectTranslation);
+      CommonOps_DDRM.subtract(this.measurementCentroid, objectAdjustedLocation, objectTranslation);
 
       RotationMatrix deltaRotation = new RotationMatrix(R);
       RigidBodyTransform worldToPointsTransform = new RigidBodyTransform();
@@ -270,26 +263,19 @@ public class IterativeClosestPointWorker
 
       // TODO: Remove this cheat
       // Calculate object centroid from the corrected points
-      objectPointCloudCentroid.zero();
-      for (int i = 0; i < numberOfICPObjectPoints; ++i)
-      {
-         objectPointCloudCentroid.add(0, 0, objectInWorldPoints.get(i).getX());
-         objectPointCloudCentroid.add(0, 1, objectInWorldPoints.get(i).getY());
-         objectPointCloudCentroid.add(0, 2, objectInWorldPoints.get(i).getZ());
-      }
-      CommonOps_DDRM.scale(1.0 / numberOfICPObjectPoints, objectPointCloudCentroid);
+      Point3D32 objectPointCloudCentroid = computeCentroidOfPointCloud(objectInWorldPoints, numberOfICPObjectPoints);
 
       resultPose.prependRotation(deltaRotation);
-      resultPose.getPosition().set(objectPointCloudCentroid.get(0, 0), objectPointCloudCentroid.get(0, 1), objectPointCloudCentroid.get(0, 2));
+      resultPose.getPosition().set(objectPointCloudCentroid);
    }
 
-   private void segmentPointCloud(List<Point3D32> environmentPointCloud, FramePoint3D virtualObjectPointInWorld, double cutoffRange)
+   private void segmentPointCloud(List<Point3D32> measurementPointCloud, FramePoint3D virtualObjectPointInWorld, double cutoffRange)
    {
       // TODO use array streams and filtered points.
       segmentedPointCloud.clear();
 
       double cutoffSquare = MathTools.square(cutoffRange);
-      for (Point3D32 point : environmentPointCloud)
+      for (Point3D32 point : measurementPointCloud)
       {
          double distanceFromVirtualObjectCentroid = virtualObjectPointInWorld.distanceSquared(point);
          if (distanceFromVirtualObjectCentroid <= cutoffSquare)
@@ -306,10 +292,15 @@ public class IterativeClosestPointWorker
 
    private static Point3D32 computeCentroidOfPointCloud(List<Point3D32> pointCloud)
    {
+      return computeCentroidOfPointCloud(pointCloud, pointCloud.size());
+   }
+
+   private static Point3D32 computeCentroidOfPointCloud(List<Point3D32> pointCloud, int pointsToAverage)
+   {
       Point3D32 centroid = new Point3D32();
-      for (int i = 0; i < pointCloud.size(); i++)
+      for (int i = 0; i < pointsToAverage; i++)
          centroid.add(pointCloud.get(i));
-      centroid.scale(1.0 / pointCloud.size());
+      centroid.scale(1.0 / pointsToAverage);
 
       return centroid;
    }
@@ -321,9 +312,9 @@ public class IterativeClosestPointWorker
    // -> set the segmentation radius to be large (1.0~1.5?)
    public void setEnvironmentPointCloud(List<Point3D32> pointCloud)
    {
-      synchronized (environmentPointCloudSynchronizer)
+      synchronized (measurementPointCloudSynchronizer)
       {
-         environmentPointCloud = pointCloud;
+         measurementPointCloud = pointCloud;
       }
    }
 
@@ -357,9 +348,8 @@ public class IterativeClosestPointWorker
       this.zRadius = zRadius;
       this.numberOfICPObjectPoints = numberOfICPObjectPoints;
 
-      objectCentroidSubtractedPoints.reshape(numberOfICPObjectPoints, 3);
-      environmentCentroidSubtractedPoints.reshape(numberOfICPObjectPoints, 3);
-      environmentToObjectCorrespondencePoints.reshape(numberOfICPObjectPoints, 3);
+      objectRelativeToCentroidPoints.reshape(numberOfICPObjectPoints, 3);
+      measurementRelativeToCentroidPoints.reshape(numberOfICPObjectPoints, 3);
 
       setPoseGuess(resultPose);
    }
