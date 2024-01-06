@@ -72,7 +72,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
    private boolean firstTick = true;
 
    private final Pose3D shapeInputPose = new Pose3D();
-   private PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.ELLIPSOID;
+   private PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.BOX;
    private final ImInt shapeIndex = new ImInt();
    private final String[] shapeValues = new String[PrimitiveRigidBodyShape.values().length];
    private final ImFloat depth = new ImFloat(0.19f);
