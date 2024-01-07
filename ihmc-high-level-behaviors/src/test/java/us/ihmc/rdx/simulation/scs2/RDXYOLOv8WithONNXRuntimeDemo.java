@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
+import org.bytedeco.javacpp.indexer.FloatRawIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_dnn;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
@@ -50,7 +51,6 @@ import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.string.StringTools;
-import us.ihmc.perception.PerceptionInternalDatasets;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -84,6 +84,9 @@ public class RDXYOLOv8WithONNXRuntimeDemo
         private Size imageSize;
         private final Scalar scalarZero = new Scalar(0.0);
         private final MatVector outputBlobs = new MatVector();
+
+        private float confidenceThreshold = 0.1f;
+
 
         RDXROS2ImageMessageVisualizer zedLeftColorVisualizer;
 
@@ -184,21 +187,45 @@ public class RDXYOLOv8WithONNXRuntimeDemo
                             blob = opencv_dnn.blobFromImage(rgb8Mat, 1 / 255.0, imageSize, scalarZero, true, true, opencv_core.CV_32F);
                             net.setInput(blob);
                             outputBlobs.resize(outNames.size());
+
                             net.forward(outputBlobs, outNames);
 
-                            int resultSize = outputBlobs.get().length;
-                            Mat result = outputBlobs.get(0);
-                            FloatIndexer data = result.createIndexer();
+                            postprocess(outputBlobs);
 
 
 
-                            int a =1;
+
+
+
+//                            data0.get(0,0,0);
+//                            data1.get(0,0,0,0);
+
                         }
                         catch(Exception exception){
                             exception.printStackTrace();
                         }
 
                     }
+                }
+
+                public void postprocess(MatVector outputs){
+                    Mat output0 = outputs.get(0);
+                    FloatIndexer data0 = output0.createIndexer();
+                    Mat output1 = outputs.get(1);
+                    FloatIndexer data1 = output1.createIndexer();
+
+                    for (long i = 0; i < 4800; i++) {
+                        for (long j = 0; j < 80; j++) {
+                            float confidence = data0.get(0,4+j, i);
+                            if (confidence >= confidenceThreshold){
+                                int a =1;
+                            }
+
+                        }
+
+                    }
+
+
                 }
 
 
