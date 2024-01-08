@@ -13,6 +13,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
+import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -21,7 +22,6 @@ import us.ihmc.rdx.ui.interactable.RDXInteractableAffordanceTemplateHand;
 import us.ihmc.rdx.ui.interactable.RDXInteractableNub;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
-import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
@@ -80,6 +80,8 @@ public class RDXAffordanceTemplateEditorUI
                                RigidBodySceneObjectDefinitions.ensureDebrisNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
                                RigidBodySceneObjectDefinitions.ensureShoeNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
                                RigidBodySceneObjectDefinitions.ensureThinkPadNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureBookNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureCerealNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
                             });
 
       objectBuilder = new RDXInteractableObjectBuilder(baseUI, sceneGraph);
