@@ -194,7 +194,6 @@ public class PerceptionAndAutonomyProcess
       behaviorTreeReferenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
 
       behaviorTreeExecutor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
-                                                          ROS2ActorDesignation.ROBOT,
                                                           robotModel,
                                                           behaviorTreeSyncedRobot,
                                                           behaviorTreeReferenceFrameLibrary);

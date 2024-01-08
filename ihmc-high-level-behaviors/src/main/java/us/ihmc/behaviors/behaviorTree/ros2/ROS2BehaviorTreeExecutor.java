@@ -4,7 +4,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 /**
@@ -15,7 +14,6 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    private final ROS2BehaviorTreeState ros2BehaviorTreeState;
 
    public ROS2BehaviorTreeExecutor(ROS2ControllerHelper ros2ControllerHelper,
-                                   ROS2ActorDesignation ros2ActorDesignation,
                                    DRCRobotModel robotModel,
                                    ROS2SyncedRobotModel syncedRobot,
                                    ReferenceFrameLibrary referenceFrameLibrary)
