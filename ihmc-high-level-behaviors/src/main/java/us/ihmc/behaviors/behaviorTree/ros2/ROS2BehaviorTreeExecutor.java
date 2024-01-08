@@ -4,11 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
-import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 /**
@@ -22,20 +18,9 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
                                    ROS2ActorDesignation ros2ActorDesignation,
                                    DRCRobotModel robotModel,
                                    ROS2SyncedRobotModel syncedRobot,
-                                   ReferenceFrameLibrary referenceFrameLibrary,
-                                   WalkingFootstepTracker footstepTracker,
-                                   FootstepPlanningModule footstepPlanner,
-                                   FootstepPlannerParametersBasics footstepPlannerParameters,
-                                   WalkingControllerParameters walkingControllerParameters)
+                                   ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(robotModel,
-            syncedRobot,
-            referenceFrameLibrary,
-            footstepTracker,
-            footstepPlanner,
-            footstepPlannerParameters,
-            walkingControllerParameters,
-            ros2ControllerHelper);
+      super(robotModel, syncedRobot, referenceFrameLibrary, ros2ControllerHelper);
 
       ros2BehaviorTreeState = new ROS2BehaviorTreeState(getState(), this::setRootNode, ros2ControllerHelper);
    }
