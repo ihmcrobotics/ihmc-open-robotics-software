@@ -33,6 +33,10 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
             */
    public boolean is_executing_;
    /**
+            * If the node had a failure during it's last execution
+            */
+   public boolean failed_;
+   /**
             * Nominal execution duration
             */
    public double nominal_execution_duration_;
@@ -88,6 +92,8 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       can_execute_ = other.can_execute_;
 
       is_executing_ = other.is_executing_;
+
+      failed_ = other.failed_;
 
       nominal_execution_duration_ = other.nominal_execution_duration_;
 
@@ -189,6 +195,21 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
    public boolean getIsExecuting()
    {
       return is_executing_;
+   }
+
+   /**
+            * If the node had a failure during it's last execution
+            */
+   public void setFailed(boolean failed)
+   {
+      failed_ = failed;
+   }
+   /**
+            * If the node had a failure during it's last execution
+            */
+   public boolean getFailed()
+   {
+      return failed_;
    }
 
    /**
@@ -340,6 +361,8 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_executing_, other.is_executing_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.failed_, other.failed_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.nominal_execution_duration_, other.nominal_execution_duration_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.elapsed_execution_time_, other.elapsed_execution_time_, epsilon)) return false;
@@ -380,6 +403,8 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
 
       if(this.is_executing_ != otherMyClass.is_executing_) return false;
 
+      if(this.failed_ != otherMyClass.failed_) return false;
+
       if(this.nominal_execution_duration_ != otherMyClass.nominal_execution_duration_) return false;
 
       if(this.elapsed_execution_time_ != otherMyClass.elapsed_execution_time_) return false;
@@ -418,6 +443,8 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       builder.append(this.can_execute_);      builder.append(", ");
       builder.append("is_executing=");
       builder.append(this.is_executing_);      builder.append(", ");
+      builder.append("failed=");
+      builder.append(this.failed_);      builder.append(", ");
       builder.append("nominal_execution_duration=");
       builder.append(this.nominal_execution_duration_);      builder.append(", ");
       builder.append("elapsed_execution_time=");

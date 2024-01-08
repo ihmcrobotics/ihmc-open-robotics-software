@@ -7,6 +7,8 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.*;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 
 public class RDXBehaviorTreeWidgetsVerticalLayout
 {
@@ -43,7 +45,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          node.renderContextMenuItems();
 
          ImGui.separator();
-         if (!node.isRootNode())
+         if (!node.isRootNode() && !(node instanceof RDXActionSequence))
          {
             if (ImGui.menuItem(labels.get("Insert Node Before...")))
             {
@@ -54,7 +56,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
                queuePopupModal.set(() -> popNodeCreationModalDialog(node, BehaviorTreeNodeInsertionType.INSERT_AFTER));
             }
          }
-         if (node.getChildren().isEmpty())
+         if (node.getChildren().isEmpty() && !(node instanceof RDXActionNode<?, ?>))
          {
             if (ImGui.menuItem(labels.get("Add Child Node...")))
             {
@@ -157,15 +159,16 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
    private void renderMoveRelativeItems(RDXBehaviorTreeNode<?, ?> nodeToMove, BehaviorTreeNodeInsertionType insertionType)
    {
-      for (RDXBehaviorTreeNode<?, ?> child : nodeToMove.getParent().getChildren())
+      RDXBehaviorTreeNode<?, ?> rootNode = RDXBehaviorTreeTools.findRootNode(nodeToMove);
+      RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, relativeNode ->
       {
-         if (child != nodeToMove)
+         if (relativeNode != nodeToMove && relativeNode != rootNode)
          {
-            if (ImGui.menuItem(child.getDefinition().getDescription()))
+            if (ImGui.menuItem(relativeNode.getDefinition().getDescription()))
             {
-               topologyOperationQueue.queueMoveAndFreezeNode(nodeToMove, nodeToMove.getParent(), child, insertionType);
+               topologyOperationQueue.queueMoveAndFreezeNode(nodeToMove, nodeToMove.getParent(), relativeNode.getParent(), relativeNode, insertionType);
             }
          }
-      }
+      });
    }
 }

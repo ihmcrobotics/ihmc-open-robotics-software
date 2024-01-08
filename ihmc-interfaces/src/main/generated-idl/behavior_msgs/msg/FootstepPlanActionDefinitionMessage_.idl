@@ -2,6 +2,7 @@
 #define __behavior_msgs__msg__FootstepPlanActionDefinitionMessage__idl__
 
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./FootstepPlanActionDefinitionBasicsMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionFootstepDefinitionMessage_.idl"
 module behavior_msgs
 {
@@ -17,18 +18,7 @@ module behavior_msgs
          * Parent definition fields
          */
         behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
-        /**
-         * Name of the parent frame the footsteps are expressed in
-         */
-        string parent_frame_name;
-        /**
-         * Swing duration
-         */
-        double swing_duration;
-        /**
-         * Transfer duration
-         */
-        double transfer_duration;
+        behavior_msgs::msg::dds::FootstepPlanActionDefinitionBasicsMessage definition_basics;
         /**
          * The footsteps, with a maximum of 50
          */

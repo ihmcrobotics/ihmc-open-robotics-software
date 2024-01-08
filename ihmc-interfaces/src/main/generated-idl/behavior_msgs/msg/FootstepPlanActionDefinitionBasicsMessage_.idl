@@ -1,0 +1,31 @@
+#ifndef __behavior_msgs__msg__FootstepPlanActionDefinitionBasicsMessage__idl__
+#define __behavior_msgs__msg__FootstepPlanActionDefinitionBasicsMessage__idl__
+
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::FootstepPlanActionDefinitionBasicsMessage_")
+      struct FootstepPlanActionDefinitionBasicsMessage
+      {
+        /**
+         * Name of the parent frame the footsteps are expressed in
+         */
+        string parent_frame_name;
+        /**
+         * Swing duration
+         */
+        double swing_duration;
+        /**
+         * Transfer duration
+         */
+        double transfer_duration;
+      };
+    };
+  };
+};
+
+#endif

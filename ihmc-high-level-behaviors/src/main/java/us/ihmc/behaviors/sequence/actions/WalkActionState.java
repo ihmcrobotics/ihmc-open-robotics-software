@@ -2,9 +2,7 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.WalkActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalInteger;
+import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -12,16 +10,18 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class WalkActionState extends ActionNodeState<WalkActionDefinition>
 {
    private final CRDTDetachableReferenceFrame goalFrame;
-   private final CRDTUnidirectionalInteger totalNumberOfFootsteps;
-   private final CRDTUnidirectionalInteger numberOfIncompleteFootsteps;
+   private final FootstepPlanActionStateBasics footstepPlanStateBasics;
+   private final CRDTUnidirectionalEnumField<WalkActionExecutionState> executionState;
 
    public WalkActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(id, new WalkActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      goalFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary, getDefinition().getCRDTParentFrameName(), getDefinition().getGoalToParentTransform());
-      totalNumberOfFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
-      numberOfIncompleteFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
+      goalFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
+                                                   getDefinition().getBasics().getCRDTParentFrameName(),
+                                                   getDefinition().getGoalToParentTransform());
+      executionState = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.ROBOT, crdtInfo, WalkActionExecutionState.PLAN_EXECUTION_COMPLETE);
+      footstepPlanStateBasics = new FootstepPlanActionStateBasics(crdtInfo);
    }
 
    @Override
@@ -36,8 +36,8 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
 
       super.toMessage(message.getState());
 
-      message.setTotalNumberOfFootsteps(totalNumberOfFootsteps.toMessage());
-      message.setNumberOfIncompleteFootsteps(numberOfIncompleteFootsteps.toMessage());
+      message.setExecutionState(executionState.toMessage().toByte());
+      footstepPlanStateBasics.toMessage(message.getFootstepPlanStateBasics());
    }
 
    public void fromMessage(WalkActionStateMessage message)
@@ -46,8 +46,8 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
 
       getDefinition().fromMessage(message.getDefinition());
 
-      totalNumberOfFootsteps.fromMessage(message.getTotalNumberOfFootsteps());
-      numberOfIncompleteFootsteps.fromMessage(message.getNumberOfIncompleteFootsteps());
+      executionState.fromMessage(WalkActionExecutionState.fromByte(message.getExecutionState()));
+      footstepPlanStateBasics.fromMessage(message.getFootstepPlanStateBasics());
    }
 
    public CRDTDetachableReferenceFrame getGoalFrame()
@@ -55,23 +55,13 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
       return goalFrame;
    }
 
-   public int getTotalNumberOfFootsteps()
+   public CRDTUnidirectionalEnumField<WalkActionExecutionState> getExecutionState()
    {
-      return totalNumberOfFootsteps.getValue();
+      return executionState;
    }
 
-   public void setTotalNumberOfFootsteps(int totalNumberOfFootsteps)
+   public FootstepPlanActionStateBasics getBasics()
    {
-      this.totalNumberOfFootsteps.setValue(totalNumberOfFootsteps);
-   }
-
-   public int getNumberOfIncompleteFootsteps()
-   {
-      return numberOfIncompleteFootsteps.getValue();
-   }
-
-   public void setNumberOfIncompleteFootsteps(int numberOfIncompleteFootsteps)
-   {
-      this.numberOfIncompleteFootsteps.setValue(numberOfIncompleteFootsteps);
+      return footstepPlanStateBasics;
    }
 }

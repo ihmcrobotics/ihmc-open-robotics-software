@@ -28,10 +28,10 @@ import org.lwjgl.openvr.HmdMatrix34;
 import org.lwjgl.openvr.HmdMatrix44;
 import org.lwjgl.system.Callback;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -331,7 +331,7 @@ public class LibGDXTools
     * @param tempTransform temporary rigid body transform. Modified.
     * @param gdxAffine Matrix4 representation. Modified.
     */
-   public static void toLibGDX(Pose3DReadOnly euclidPose, RigidBodyTransform tempTransform, Matrix4 gdxAffine)
+   public static void toLibGDX(RigidBodyTransformReadOnly euclidPose, RigidBodyTransform tempTransform, Matrix4 gdxAffine)
    {
       tempTransform.set(euclidPose);
       toLibGDX(tempTransform, gdxAffine);

@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -32,6 +33,7 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXIKSolverColors;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -75,6 +77,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final SideDependentList<OneDoFJointBasics[]> armGraphicOneDoFJoints = new SideDependentList<>();
    private final SideDependentList<Color> currentColor = new SideDependentList<>();
    private final RDX3DPanelTooltip tooltip;
+   private final RDXTrajectoryGraphic trajectoryGraphic = new RDXTrajectoryGraphic();
 
    public RDXHandPoseAction(long id,
                             CRDTInfo crdtInfo,
@@ -197,6 +200,20 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          // IK solution visualization via ghost arms
          if (state.getIsNextForExecution())
             visualizeIK();
+
+         if (getParent().getState() instanceof ActionSequenceState parent)
+         {
+            HandPoseActionState previousHandPose = parent.findNextPreviousAction(HandPoseActionState.class,
+                                                                                 getState().getActionIndex(),
+                                                                                 getDefinition().getSide());
+            if (previousHandPose != null)
+            {
+               double lineWidth = 0.01;
+               trajectoryGraphic.update(lineWidth,
+                                        previousHandPose.getPalmFrame().getReferenceFrame().getTransformToRoot(),
+                                        getState().getPalmFrame().getReferenceFrame().getTransformToRoot());
+            }
+         }
       }
    }
 
@@ -307,6 +324,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
          if (state.getIsNextForExecution())
             armMultiBodyGraphics.get(getDefinition().getSide()).getVisualRenderables(renderables, pool);
+
+         trajectoryGraphic.getRenderables(renderables, pool);
       }
    }
 
