@@ -14,24 +14,27 @@ import us.ihmc.scs2.definition.geometry.Ellipsoid3DDefinition;
 import us.ihmc.scs2.definition.robot.MomentOfInertiaDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.visual.ColorDefinition;
-import us.ihmc.scs2.definition.visual.PaintDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoComposite.YoColorRGBASingleDefinition;
 import us.ihmc.scs2.definition.yoComposite.YoQuaternionDefinition;
 import us.ihmc.scs2.definition.yoComposite.YoTuple3DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicEllipsoid3DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 
+import java.util.ArrayList;
 import java.util.List;
 
 //TODO Relocate this, maybe the ellipsoid stuff to scs2 and the colormap stuff to open robotics
 public class InertiaVisualizationTools
 {
-   public static YoGraphicDefinition addInertialEllipsoidsToGroup(RigidBodyReadOnly rootBody, RobotDefinition robotDefinition, boolean colorBasedOnDensity)
+   public static ArrayList<YoGraphicEllipsoid3DDefinition> getInertiaEllipsoidList(RigidBodyReadOnly rootBody,
+                                                                                   RobotDefinition robotDefinition,
+                                                                                   boolean colorBasedOnDensity)
    {
-      YoGraphicGroupDefinition inertiaEllipsoids = new YoGraphicGroupDefinition("Inertia Ellipsoids");
+      ArrayList<YoGraphicEllipsoid3DDefinition> ellipsoidList = new ArrayList<>();
       List<RigidBodyDefinition> allRigidBodies = robotDefinition.getAllRigidBodies();
-      allRigidBodies.remove(0); // Remove the elevator
+      allRigidBodies.remove(0); // We remove the elevator
 
       if (colorBasedOnDensity)
       {
@@ -48,16 +51,19 @@ public class InertiaVisualizationTools
             double scale = calculateEllipsoidDensity(rigidBodyDefinition) / maxLinkDensity;
             // Change from linear scale to emphasize lower densities (pelvis is disproportionately dense)
             int[] rgbColor = getRGBForViridisColorMap(Math.pow(1 - scale, 2.5)); // purple is denser
-            //         int[] rgbColor = getRGBForViridisColorMap(Math.pow(scale, 0.4)); // yellow is denser
-            double opacityAlpha = (Math.pow(scale, 0.4) + 1.0) * 0.5;
-            PaintDefinition paintDefinition = new ColorDefinition(rgbColor[0], rgbColor[1], rgbColor[2], opacityAlpha);
+            //         int[] rgbColor = getRGBForViridisColorMap(Math.pow(scale, 0.4 * 255)); // yellow is denser
+            int opacityAlpha = (int) ((Math.pow(scale, 0.4) + 1.0) * 0.5 * 255);
+            //TODO convert to int from 0-255
+            int rgbInt = ColorDefinitions.toRGBA(rgbColor[0], rgbColor[1], rgbColor[2], opacityAlpha);
+            //TODO: verify the input is correct
+            YoColorRGBASingleDefinition color = new YoColorRGBASingleDefinition(Integer.toString(rgbInt));
 
             /* Create the ellipsoid */
-            YoGraphicEllipsoid3DDefinition ellipsoid = convertRobotMassPropertiesToInertiaEllipsoids(rootBody, rigidBodyDefinition, paintDefinition);
+            YoGraphicEllipsoid3DDefinition ellipsoid = convertRobotMassPropertiesToInertiaEllipsoids(rootBody, rigidBodyDefinition, color);
             if (ellipsoid == null)
                continue;
 
-            inertiaEllipsoids.addChild(ellipsoid);
+            ellipsoidList.add(ellipsoid);
          }
       }
       else
@@ -65,15 +71,27 @@ public class InertiaVisualizationTools
          // Else, just use one color for all ellipsoids
          for (RigidBodyDefinition rigidBodyDefinition : allRigidBodies)
          {
-            PaintDefinition paintDefinition = new ColorDefinition(40, 150, 75, 0.6);
+            int rgbInt = ColorDefinitions.toRGBA(40, 150, 75, 153);
+            //TODO: verify the input is correct
+            YoColorRGBASingleDefinition color = new YoColorRGBASingleDefinition(Integer.toString(rgbInt));
 
             /* Create the ellipsoid */
-            YoGraphicEllipsoid3DDefinition ellipsoid = convertRobotMassPropertiesToInertiaEllipsoids(rootBody, rigidBodyDefinition, paintDefinition);
+            YoGraphicEllipsoid3DDefinition ellipsoid = convertRobotMassPropertiesToInertiaEllipsoids(rootBody, rigidBodyDefinition, color);
             if (ellipsoid == null)
                continue;
 
-            inertiaEllipsoids.addChild(ellipsoid);
+            ellipsoidList.add(ellipsoid);
          }
+      }
+      return ellipsoidList;
+   }
+
+   public static YoGraphicDefinition getEllipsoidGraphicGroup(ArrayList<YoGraphicEllipsoid3DDefinition> ellipsoidList)
+   {
+      YoGraphicGroupDefinition inertiaEllipsoids = new YoGraphicGroupDefinition("Inertia Ellipsoids");
+      for (YoGraphicEllipsoid3DDefinition ellipsoid : ellipsoidList)
+      {
+         inertiaEllipsoids.addChild(ellipsoid);
       }
       return inertiaEllipsoids;
    }
@@ -84,7 +102,7 @@ public class InertiaVisualizationTools
     */
    public static YoGraphicEllipsoid3DDefinition convertRobotMassPropertiesToInertiaEllipsoids(RigidBodyReadOnly rootBody,
                                                                                               RigidBodyDefinition rigidBodyDefinition,
-                                                                                              PaintDefinition paintDefinition)
+                                                                                              YoColorRGBASingleDefinition color)
    {
       // It is up to the user to handle when null is returned outside this method
       if (rigidBodyDefinition.getInertiaPose() == null)
@@ -108,7 +126,7 @@ public class InertiaVisualizationTools
       Vector3D radii = computeInertiaEllipsoidRadii(svd.getW(), rigidBodyDefinition.getMass());
       YoGraphicEllipsoid3DDefinition ellipsoid = convertEllipsoid3DDefinition(referenceFrame, ellipsoidPose, new Ellipsoid3DDefinition(radii));
       ellipsoid.setName(rigidBody.getName() + " inertia");
-      ellipsoid.setColor(paintDefinition);
+      ellipsoid.setColor(color);
 
       return ellipsoid;
    }
@@ -159,7 +177,7 @@ public class InertiaVisualizationTools
       double Iyy = principalMomentsOfInertia.getY();
       double Izz = principalMomentsOfInertia.getZ();
 
-      //    http://en.wikipedia.org/wiki/Ellipsoid#Mass_properties
+      // http://en.wikipedia.org/wiki/Ellipsoid#Mass_properties
       Vector3D radii = new Vector3D();
       radii.setX(Math.sqrt(5.0 / 2.0 * (Iyy + Izz - Ixx) / mass));
       radii.setY(Math.sqrt(5.0 / 2.0 * (Izz + Ixx - Iyy) / mass));
