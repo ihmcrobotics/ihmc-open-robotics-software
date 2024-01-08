@@ -16,13 +16,15 @@ public class CenterposeNode extends DetectableSceneNode
    private double confidence;
    private final RigidBodyTransform interpolatedModelTransform = new RigidBodyTransform();
    private int glitchCount;
+   private boolean enableTracking;
 
-   public CenterposeNode(long id, String name, int markerID, Point3D[] vertices3D, Point3D[] vertices2D)
+   public CenterposeNode(long id, String name, int markerID, Point3D[] vertices3D, Point3D[] vertices2D, boolean enableTracking)
    {
       super(id, name);
       this.objectID = markerID;
       this.vertices3D = vertices3D;
       this.vertices2D = vertices2D;
+      this.enableTracking = enableTracking;
    }
 
    public void update()
@@ -47,7 +49,7 @@ public class CenterposeNode extends DetectableSceneNode
          }
       }
 
-      if (!skipUpdate)
+      if (!skipUpdate && enableTracking)
       {
          double alpha = normalize(distance, 0.001, 1.0);
          alpha = MathTools.clamp(alpha, 0.001, 1);
@@ -110,5 +112,15 @@ public class CenterposeNode extends DetectableSceneNode
    public void setConfidence(double confidence)
    {
       this.confidence = confidence;
+   }
+
+   public boolean isEnableTracking()
+   {
+      return enableTracking;
+   }
+
+   public void setEnableTracking(boolean enableTracking)
+   {
+      this.enableTracking = enableTracking;
    }
 }
