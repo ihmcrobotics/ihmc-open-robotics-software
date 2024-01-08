@@ -66,6 +66,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -74,17 +75,21 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class TerrainPlanningSimulationUI
 {
-   private final boolean USE_EXTERNAL_HEIGHT_MAP = false;
+   private final boolean USE_EXTERNAL_HEIGHT_MAP = true;
    private final double MAXIMUM_NUMBER_OF_ITERATIONS = 100000;
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ROS2Helper ros2Helper;
    private final ROS2Node ros2Node;
 
-   private ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+   private ScheduledExecutorService scheduledExecutor = ExecutorServiceTools.newScheduledThreadPool(4,
+                                                                                                    getClass(),
+                                                                                                    ExecutorServiceTools.ExceptionHandling.CANCEL_AND_REPORT);
    private PerceptionDataLogger perceptionDataLogger;
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
@@ -132,6 +137,7 @@ public class TerrainPlanningSimulationUI
    private final Pose3D cameraPose = new Pose3D();
 
    private final ImBoolean enableMonteCarloPlanner = new ImBoolean(false);
+   private final ImBoolean resetMonteCarloPlanner = new ImBoolean(true);
    private final ImFloat startMidX = new ImFloat(0.0f);
    private final ImFloat startMidY = new ImFloat(0.0f);
    private final ImFloat startMidZ = new ImFloat(0.0f);
@@ -168,10 +174,14 @@ public class TerrainPlanningSimulationUI
       footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
       footstepPredictor = new FootstepPredictor();
 
-      goalFootstepGraphics = new SideDependentList<>(new RDXFootstepGraphic(PlannerTools.createFootContactPoints(0.2f, 0.1f, 0.08f), new Color(1.0f, 1.0f, 1.0f, 0.5f)),
-                                                     new RDXFootstepGraphic(PlannerTools.createFootContactPoints(0.2f, 0.1f, 0.08f), new Color(1.0f, 1.0f, 1.0f, 0.5f)));
-      startFootstepGraphics = new SideDependentList<>(new RDXFootstepGraphic(PlannerTools.createFootContactPoints(0.2f, 0.1f, 0.08f), new Color(0.0f, 0.0f, 0.0f, 1.0f)),
-                                                      new RDXFootstepGraphic(PlannerTools.createFootContactPoints(0.2f, 0.1f, 0.08f), new Color(0.0f, 0.0f, 0.0f, 1.0f)));
+      goalFootstepGraphics = new SideDependentList<>(new RDXFootstepGraphic(PlannerTools.createFootContactPoints(0.2f, 0.1f, 0.08f),
+                                                                            new Color(1.0f, 1.0f, 1.0f, 0.5f)),
+                                                     new RDXFootstepGraphic(PlannerTools.createFootContactPoints(0.2f, 0.1f, 0.08f),
+                                                                            new Color(1.0f, 1.0f, 1.0f, 0.5f)));
+      startFootstepGraphics = new SideDependentList<>(new RDXFootstepGraphic(PlannerTools.createFootContactPoints(0.2f, 0.1f, 0.08f),
+                                                                             new Color(0.0f, 0.0f, 0.0f, 1.0f)),
+                                                      new RDXFootstepGraphic(PlannerTools.createFootContactPoints(0.2f, 0.1f, 0.08f),
+                                                                             new Color(0.0f, 0.0f, 0.0f, 1.0f)));
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -224,6 +234,8 @@ public class TerrainPlanningSimulationUI
             environmentBuilder.loadEnvironment("HarderTerrain.json");
 
             navigationPanel.setRenderMethod(this::renderNavigationPanel);
+
+            scheduledExecutor.scheduleAtFixedRate(this::updateMonteCarloPlanner, 0, 50, TimeUnit.MILLISECONDS);
          }
 
          @Override
@@ -265,11 +277,6 @@ public class TerrainPlanningSimulationUI
                                                 cameraFrame,
                                                 cameraZUpFrame,
                                                 true);
-            }
-
-            if (enableMonteCarloPlanner.get())
-            {
-               updateMonteCarloPlanner(true);
             }
 
             if (footstepPlanToRenderNotificaiton.poll())
@@ -455,7 +462,7 @@ public class TerrainPlanningSimulationUI
             ImGui.separator();
             if (ImGui.button("Plan Steps"))
             {
-               updateMonteCarloPlanner(false);
+               updateMonteCarloPlanner();
             }
             ImGui.sameLine();
             ImGui.pushStyleColor(ImGuiCol.Button, 0.5f, 0.5f, 0.5f, 0.5f);
@@ -468,6 +475,7 @@ public class TerrainPlanningSimulationUI
                                   new Quaternion(l515PoseGizmo.getGizmoFrame().getTransformToWorldFrame().getRotation()));
             }
             ImGui.popStyleColor();
+            ImGui.checkbox("Reset Monte Carlo Planner", resetMonteCarloPlanner);
             ImGui.checkbox("Enable Monte Carlo Planning", enableMonteCarloPlanner);
          }
 
@@ -486,44 +494,45 @@ public class TerrainPlanningSimulationUI
             log = logLoader.getLog();
             loadedMapData = getTerrainMapData(log);
 
-            LogTools.warn("Footstep Planner Request: Start: {}, Goal: {}", log.getRequestPacket().getStartLeftFootPose(), log.getRequestPacket().getGoalLeftFootPose());
+            LogTools.warn("Footstep Planner Request: Start: {}, Goal: {}",
+                          log.getRequestPacket().getStartLeftFootPose(),
+                          log.getRequestPacket().getGoalLeftFootPose());
          }
 
-         public void updateMonteCarloPlanner(boolean reset)
+         public void updateMonteCarloPlanner()
          {
+            if (!enableMonteCarloPlanner.get())
+               return;
+
             if (!monteCarloFootstepPlanner.isPlanning())
             {
-               executorService.clearTaskQueue();
-               executorService.submit(() ->
-                 {
-                    FootstepPlan plan = null;
+               FootstepPlan plan = null;
 
-                    if (USE_EXTERNAL_HEIGHT_MAP && log != null)
-                    {
-                       MonteCarloFootstepPlannerRequest request = createMonteCarloFootstepPlannerRequest(loadedMapData, log);
-                       plan = planFootstepsMonteCarlo(request, reset);
-                       footstepPlanToRenderNotificaiton.set(plan);
-                    }
-                    else if (!USE_EXTERNAL_HEIGHT_MAP)
-                    {
-                       TerrainMapData terrainMap = humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData();
-                       MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
-                       request.setTerrainMapData(terrainMap);
-                       //setStartAndGoalFootPosesWithSliders(request);
-                       setStartAndGoalFootPosesFromSimulation(request, cameraZUpFrame.getTransformToWorldFrame());
-                       plan = planFootstepsMonteCarlo(request, reset);
-                       footstepPlanToRenderNotificaiton.set(plan);
-                    }
+               if (USE_EXTERNAL_HEIGHT_MAP && log != null)
+               {
+                  MonteCarloFootstepPlannerRequest request = createMonteCarloFootstepPlannerRequest(loadedMapData, log);
+                  plan = planFootstepsMonteCarlo(request, resetMonteCarloPlanner.get());
+                  footstepPlanToRenderNotificaiton.set(plan);
+               }
+               else if (!USE_EXTERNAL_HEIGHT_MAP)
+               {
+                  TerrainMapData terrainMap = humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData();
+                  MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
+                  request.setTerrainMapData(terrainMap);
+                  //setStartAndGoalFootPosesWithSliders(request);
+                  setStartAndGoalFootPosesFromSimulation(request, cameraZUpFrame.getTransformToWorldFrame());
+                  plan = planFootstepsMonteCarlo(request, resetMonteCarloPlanner.get());
+                  footstepPlanToRenderNotificaiton.set(plan);
+               }
 
-                    if (plan != null)
-                        monteCarloFootstepPlanner.getDebugger().plotFootstepPlan(plan);
+               if (plan != null)
+                  monteCarloFootstepPlanner.getDebugger().plotFootstepPlan(plan);
 
-                    if (stancePoseSelectionPanel.isSelectionActive())
-                    {
-                       monteCarloFootstepPlanner.getDebugger().plotFootPoses(stancePoseCalculator.getBestPoses());
-                    }
-                    monteCarloFootstepPlanner.getDebugger().display(1);
-                 });
+               if (stancePoseSelectionPanel.isSelectionActive())
+               {
+                  monteCarloFootstepPlanner.getDebugger().plotFootPoses(stancePoseCalculator.getBestPoses());
+               }
+               monteCarloFootstepPlanner.getDebugger().display(1);
             }
          }
 
@@ -619,11 +628,11 @@ public class TerrainPlanningSimulationUI
                                                       new Point3D(startPosition.getX(), startPosition.getY() - 0.1, 0.0),
                                                       new Quaternion()));
             request.setGoalFootPoses(new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                       new Point3D(goalPosition.getX(), goalPosition.getY() + 0.1, 0.0),
-                                                       new Quaternion(0, 0, 0)),
-                                        new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                       new Point3D(goalPosition.getX(), goalPosition.getY() - 0.1, 0.0),
-                                                       new Quaternion()));
+                                                     new Point3D(goalPosition.getX(), goalPosition.getY() + 0.1, 0.0),
+                                                     new Quaternion(0, 0, 0)),
+                                     new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                     new Point3D(goalPosition.getX(), goalPosition.getY() - 0.1, 0.0),
+                                                     new Quaternion()));
          }
 
          public TerrainMapData getTerrainMapData(FootstepPlannerLog footstepPlannerLog)
@@ -655,7 +664,9 @@ public class TerrainPlanningSimulationUI
             request.setGoalFootPose(RobotSide.LEFT, footstepPlannerLog.getRequestPacket().getGoalLeftFootPose());
             request.setGoalFootPose(RobotSide.RIGHT, footstepPlannerLog.getRequestPacket().getGoalRightFootPose());
 
-            LogTools.debug("Start: {}, Goal: {}, Origin: {}", request.getStartFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.LEFT),
+            LogTools.debug("Start: {}, Goal: {}, Origin: {}",
+                           request.getStartFootPoses().get(RobotSide.LEFT),
+                           request.getGoalFootPoses().get(RobotSide.LEFT),
                            request.getTerrainMapData().getSensorOrigin());
 
             return request;
@@ -827,6 +838,7 @@ public class TerrainPlanningSimulationUI
          @Override
          public void dispose()
          {
+            scheduledExecutor.shutdown();
             baseUI.dispose();
             footstepPlanGraphic.destroy();
             goalFootstepGraphics.get(RobotSide.LEFT).destroy();

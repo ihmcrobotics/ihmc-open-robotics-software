@@ -3,12 +3,12 @@
   "Reset Height Map" : false,
   "Search window height" : {
     "value" : 350,
-    "lowerBound" : 4,
+    "lowerBound" : 10,
     "upperBound" : 400
   },
   "Search window width" : {
-    "value" : 350,
-    "lowerBound" : 4,
+    "value" : 200,
+    "lowerBound" : 10,
     "upperBound" : 400
   },
   "Min height registration" : {
@@ -118,7 +118,7 @@
   },
   "Search skip size" : {
     "value" : 4,
-    "lowerBound" : 1,
+    "lowerBound" : 0,
     "upperBound" : 16
   },
   "Fast search size" : {
@@ -133,7 +133,7 @@
   },
   "Vertical search resolution" : {
     "value" : 0.01,
-    "lowerBound" : 0.001,
+    "lowerBound" : 0.01,
     "upperBound" : 0.5
   },
   "Grid resolution XY" : {
