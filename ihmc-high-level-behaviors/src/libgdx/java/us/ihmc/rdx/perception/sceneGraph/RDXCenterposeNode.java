@@ -119,7 +119,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
       }
       else
       {
-         if (centerposeNode.getCurrentlyDetected())
+         if (centerposeNode.getCurrentlyDetected() && centerposeNode.isEnableTracking())
          {
             interactableObject.setPose(centerposeNode.getNodeToParentFrameTransform());
             LibGDXTools.setOpacity(interactableObject.getModelInstance(), (float) centerposeNode.getConfidence());
