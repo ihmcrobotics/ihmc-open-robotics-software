@@ -111,13 +111,14 @@ public class ContinuousPlanner
             monteCarloPathPlanner = new MonteCarloPathPlanner(offset);
             break;
          case WALK_TO_GOAL, RANDOM_WALK:
-            footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel, "ForContinuousWalking");
-            logger = new FootstepPlannerLogger(footstepPlanner);
 
             FootstepPlannerParametersReadOnly footstepPlannerParameters = robotModel.getFootstepPlannerParameters("FotContinuousWalking");
-            monteCarloFootstepPlannerParameters.setSearchOuterRadius(footstepPlannerParameters.getMaximumStepReach());
-
+            footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel, "ForContinuousWalking");
+            logger = new FootstepPlannerLogger(footstepPlanner);
             monteCarloFootstepPlannerParameters = new MonteCarloFootstepPlannerParameters();
+            monteCarloFootstepPlannerParameters.setSearchOuterRadius(footstepPlannerParameters.getMaximumStepReach());
+            monteCarloFootstepPlannerParameters.setMaximumStepWidth(footstepPlannerParameters.getMaximumStepWidth());
+
             monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(monteCarloFootstepPlannerParameters,
                                                                       FootstepPlanningModuleLauncher.createFootPolygons(robotModel));
             monteCarloFootstepPlanner.getDebugger().setEnabled(false);
