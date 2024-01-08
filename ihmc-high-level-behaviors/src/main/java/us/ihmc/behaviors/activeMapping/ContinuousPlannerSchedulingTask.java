@@ -294,11 +294,13 @@ public class ContinuousPlannerSchedulingTask
    public void setLatestHeightMapData(HeightMapData heightMapData)
    {
       this.latestHeightMapData = new HeightMapData(heightMapData);
+      this.continuousPlanner.setLatestHeightMapData(heightMapData);
    }
 
    public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      terrainMap = new TerrainMapData(terrainMapData);
+      this.terrainMap = new TerrainMapData(terrainMapData);
+      this.continuousPlanner.setLatestTerrainMapData(terrainMapData);
    }
 
    public ContinuousPlanner getContinuousPlanner()

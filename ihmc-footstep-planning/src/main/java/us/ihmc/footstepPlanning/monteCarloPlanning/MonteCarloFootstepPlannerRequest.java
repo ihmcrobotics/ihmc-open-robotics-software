@@ -255,4 +255,20 @@ public class MonteCarloFootstepPlannerRequest
       this.timeout = other.timeout;
       this.maximumIterations = other.maximumIterations;
    }
+
+   public String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("Monte-Carlo Footstep Planner Request: [")
+             .append("Stance Side: ").append(this.requestedInitialStanceSide).append(", ")
+             .append("Start Pose (Left): Position: ").append(startFootPoses.get(RobotSide.LEFT).getPosition()).append(", ")
+             .append("Start Pose (Right): Position: ").append(startFootPoses.get(RobotSide.RIGHT).getPosition()).append(", ")
+             .append("Goal Pose (Left): Position: ").append(goalFootPoses.get(RobotSide.LEFT).getPosition()).append(", ")
+             .append("Goal Pose (Right): Position: ").append(goalFootPoses.get(RobotSide.RIGHT).getPosition()).append(", ")
+             .append("Timeout: ").append(this.timeout);
+
+      builder.append("]\n");
+      return builder.toString();
+   }
 }
