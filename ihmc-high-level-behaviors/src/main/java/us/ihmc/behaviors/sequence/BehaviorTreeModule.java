@@ -8,7 +8,6 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -47,7 +46,6 @@ public class BehaviorTreeModule
       referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
 
       behaviorTreeExecutor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
-                                                          ROS2ActorDesignation.ROBOT,
                                                           robotModel,
                                                           syncedRobot,
                                                           referenceFrameLibrary);
