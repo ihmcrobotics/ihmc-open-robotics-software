@@ -193,8 +193,14 @@ public class InertiaVisualizationTools
    }
 
    /**
-    * This method uses coefficients from a polynomial fit of the RGB values of the Viridis colormap from Python. The coefficients were computed externally in a
-    * Python script. For a higher or lower order fit, the coefficients would need to be regenerated.
+    * Takes a scale between 0 and 1 and returns the RGB values for the Viridis colormap at that scale.
+    * <p>
+    * NOTE: This method uses coefficients from a polynomial fit of the RGB values of the Viridis colormap from Python. The coefficients were computed externally
+    * in a Python script. For a higher or lower order fit, the coefficients would need to be regenerated.
+    * </p>
+    *
+    * @param scale Number between 0 and 1, determines the location on the colormap.
+    * @return RGB values for the colormap at the given scale.
     */
    private static int[] getRGBForViridisColorMap(double scale)
    {
@@ -214,6 +220,14 @@ public class InertiaVisualizationTools
       return new int[] {red, green, blue};
    }
 
+   /**
+    * Helper method for {@link #getRGBForViridisColorMap(double)}. Evaluates a polynomial for one color (R, G, or B) with the given
+    * coefficients at the given scale.
+    *
+    * @param colorCoefficients Coefficients of the polynomial, in order of increasing degree.
+    * @param scale             Scale at which to evaluate the polynomial.
+    * @return Value of the polynomial at the given scale.
+    */
    private static int evaluateRGBPolynomial(double[] colorCoefficients, double scale)
    {
       double rgbValue = 0.0;
