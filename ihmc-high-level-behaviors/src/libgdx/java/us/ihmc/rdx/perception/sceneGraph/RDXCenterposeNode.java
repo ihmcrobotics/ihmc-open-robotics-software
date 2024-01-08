@@ -1,7 +1,9 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
@@ -41,6 +43,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    private final RDX3DPanel panel3D;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ImBoolean showBoundingBox = new ImBoolean(false);
+   private final ImBoolean enableTracking = new ImBoolean(true);
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
@@ -73,6 +76,11 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    public void update(SceneGraphModificationQueue modificationQueue)
    {
       super.update(modificationQueue);
+
+      if (centerposeNode.isEnableTracking() != enableTracking.get())
+      {
+         centerposeNode.setEnableTracking(enableTracking.get());
+      }
 
       Point3D[] vertices = centerposeNode.getVertices3D();
       for (int i = 0; i < vertices.length; i++)
@@ -158,6 +166,8 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
       ImGui.checkbox(labels.get("Show bounding box"), showBoundingBox);
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Enable tracking"), enableTracking);
       ImGui.text("ID: %d".formatted(centerposeNode.getObjectID()));
       ImGui.sameLine();
    }
