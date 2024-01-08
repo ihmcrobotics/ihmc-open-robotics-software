@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.yo;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.rdx.imgui.RDXPanel;
 
-public class RDXYoVariableClientPanel extends  RDXPanel
+public class RDXYoVariableClientPanel extends RDXPanel
 {
    private final YoVariableClientHelper yoVariableClientHelper;
    private final ImGuiYoVariableClientManagerWidget managerWidget;
