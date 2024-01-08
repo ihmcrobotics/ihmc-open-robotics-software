@@ -41,6 +41,8 @@ public class MonteCarloFootstepPlannerParameters extends StoredPropertySet imple
    public static final DoubleStoredPropertyKey transferYawCost = keys.addDoubleKey("Transfer yaw cost");
    public static final IntegerStoredPropertyKey transferHeightCost = keys.addIntegerKey("Transfer height cost");
    public static final DoubleStoredPropertyKey transferDistanceCost = keys.addDoubleKey("Transfer distance cost");
+   public static final DoubleStoredPropertyKey maximumStepWidth = keys.addDoubleKey("Maximum step width");
+   public static final DoubleStoredPropertyKey maximumStepLength = keys.addDoubleKey("Maximum step length");
 
    /**
     * Loads this property set.

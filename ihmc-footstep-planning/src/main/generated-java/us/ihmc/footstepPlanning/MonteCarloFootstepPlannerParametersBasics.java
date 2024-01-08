@@ -122,4 +122,14 @@ public interface MonteCarloFootstepPlannerParametersBasics extends MonteCarloFoo
    {
       set(MonteCarloFootstepPlannerParameters.transferDistanceCost, transferDistanceCost);
    }
+
+   default void setMaximumStepWidth(double maximumStepWidth)
+   {
+      set(MonteCarloFootstepPlannerParameters.maximumStepWidth, maximumStepWidth);
+   }
+
+   default void setMaximumStepLength(double maximumStepLength)
+   {
+      set(MonteCarloFootstepPlannerParameters.maximumStepLength, maximumStepLength);
+   }
 }

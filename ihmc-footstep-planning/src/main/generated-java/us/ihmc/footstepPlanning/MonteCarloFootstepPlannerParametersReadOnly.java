@@ -124,4 +124,14 @@ public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPrope
    {
       return get(transferDistanceCost);
    }
+
+   default double getMaximumStepWidth()
+   {
+      return get(maximumStepWidth);
+   }
+
+   default double getMaximumStepLength()
+   {
+      return get(maximumStepLength);
+   }
 }
