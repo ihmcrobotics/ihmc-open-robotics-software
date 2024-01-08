@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.graphicsDescription.MeshDataBuilder;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
@@ -20,6 +21,8 @@ public class RDXMutableMeshModel
 {
    private Color color = null;
    private RDXModelInstance modelInstance;
+
+   private transient final MeshDataHolder emptyMeshDataHolder = new MeshDataBuilder().generateMeshDataHolder();
 
    public boolean isColorOutOfDate(Color color)
    {
@@ -61,6 +64,11 @@ public class RDXMutableMeshModel
             RDXMeshDataInterpreter.repositionMeshVertices(meshDataHolder, mesh, color);
          }
       }
+   }
+
+   public void clear()
+   {
+      updateMesh(emptyMeshDataHolder);
    }
 
    public void accessModelIfExists(Consumer<RDXModelInstance> modelInstanceAccessor)

@@ -88,7 +88,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
                                       saveFileDirectory,
                                       panel3D,
                                       robotModel,
-                                      syncedRobot.getFullRobotModel(),
+                                      syncedRobot,
                                       selectionCollisionModel,
                                       referenceFrameLibrary);
       }
