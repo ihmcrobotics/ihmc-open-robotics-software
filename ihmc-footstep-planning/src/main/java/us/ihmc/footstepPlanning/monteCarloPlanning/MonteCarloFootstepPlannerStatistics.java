@@ -61,8 +61,15 @@ public class MonteCarloFootstepPlannerStatistics
 
       try
       {
-         Files.createFile(Paths.get(filePath));
-         file = new File(filePath);
+         if(!Files.exists(IHMCCommonPaths.PLANNING_DIRECTORY))
+         {
+            Files.createDirectory(IHMCCommonPaths.PLANNING_DIRECTORY);
+         }
+         if (!Files.exists(IHMCCommonPaths.PLANNING_DIRECTORY.resolve(logFileName)))
+         {
+            Files.createFile(Paths.get(filePath));
+            file = new File(filePath);
+         }
       }
       catch (IOException e)
       {

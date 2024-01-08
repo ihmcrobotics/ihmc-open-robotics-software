@@ -284,14 +284,14 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
                PerceptionDebugTools.printMat("Contact Map Image", humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData().getContactMap(), 4);
             }
 
-            if (humanoidPerception.getRapidHeightMapExtractor().getComputeSnap())
-            {
-               if (ImGui.button("Print Cropped Snapped Height Map"))
-               {
-                  PerceptionDebugTools.printMat("Cropped Snapped Height Map",
-                                                humanoidPerception.getRapidHeightMapExtractor().getSnapNormalZImage().getBytedecoOpenCVMat(),4);
-               }
-            }
+//            if (humanoidPerception.getRapidHeightMapExtractor().getComputeSnap())
+//            {
+//               if (ImGui.button("Print Cropped Snapped Height Map"))
+//               {
+//                  PerceptionDebugTools.printMat("Cropped Snapped Height Map",
+//                                                humanoidPerception.getRapidHeightMapExtractor().getSnapNormalZImage().getBytedecoOpenCVMat(),4);
+//               }
+//            }
          }
 
          ImGui.unindent();
