@@ -92,7 +92,7 @@ public class FootstepPlanningModuleLauncher
                                         swingPlannerParameters,
                                         walkingControllerParameters,
                                         footPolygons,
-                                        stepReachabilityData);
+                                        stepReachabilityData, false);
    }
 
    /**
