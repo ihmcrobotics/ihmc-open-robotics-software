@@ -141,27 +141,29 @@ public class IterativeClosestPointWorker
       else
          detectionPoint.set(resultPose);
 
-      // Segment the point cloud
-      synchronized (measurementPointCloudSynchronizer) // synchronize as to avoid changes to environment point cloud while segmenting it
-      {
-         if (measurementPointCloud == null)
-            return false;
 
-         segmentPointCloud(measurementPointCloud, detectionPoint, segmentSphereRadius);
-      }
-
-      // Only run ICP iteration if segmented point cloud has enough points
-      if (segmentedPointCloud.size() >= numberOfCorrespondences)
+      boolean ranICPSuccessfully = false;
+      for (int i = 0; i < numberOfIterations; ++i)
       {
-         for (int i = 0; i < numberOfIterations; ++i)
+         // Segment the point cloud
+         synchronized (measurementPointCloudSynchronizer) // synchronize as to avoid changes to environment point cloud while segmenting it
          {
-            runICPIteration(segmentedPointCloud);
+            if (measurementPointCloud == null)
+               return false;
+
+            segmentPointCloud(measurementPointCloud, detectionPoint, segmentSphereRadius);
          }
 
-         return true;
+         // Only run ICP iteration if segmented point cloud has enough points
+         if (segmentedPointCloud.size() >= numberOfCorrespondences)
+         {
+            runICPIteration(segmentedPointCloud);
+
+            ranICPSuccessfully = true;
+         }
       }
 
-      return false;
+      return ranICPSuccessfully;
    }
 
    public DetectedObjectPacket getResult()
