@@ -35,7 +35,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import java.util.Map;
 
 /**
- * Manages a rigid body as part of the whole body controller core.
+ * Manages a rigid body as part of the realtime control process.
  * <p>
  * This class triages user commands and computes inverse dynamics, feedback control commands,
  * and joint desired output data that are provided to the whole body controller core.
