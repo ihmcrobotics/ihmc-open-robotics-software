@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  */
 public class ROS2BehaviorTreeState
 {
-   public static final double SYNC_FREQUENCY = 30.0;
+   public static final double SYNC_FREQUENCY = 60.0;
 
    private final BehaviorTreeState behaviorTreeState;
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;

@@ -4,6 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor;
+import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
@@ -29,7 +30,7 @@ public class BehaviorTreeModule
    private final ROS2SceneGraph sceneGraph;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final Throttler throttler = new Throttler();
-   private final double PERIOD = Conversions.hertzToSeconds(30.0);
+   private final double PERIOD = Conversions.hertzToSeconds(ROS2BehaviorTreeState.SYNC_FREQUENCY);
    private final ROS2BehaviorTreeExecutor behaviorTreeExecutor;
    private final Notification stopped = new Notification();
 
