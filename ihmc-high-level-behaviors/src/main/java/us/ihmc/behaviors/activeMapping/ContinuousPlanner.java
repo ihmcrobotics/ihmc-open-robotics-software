@@ -319,11 +319,14 @@ public class ContinuousPlanner
       request.setAbortIfGoalStepSnappingFails(true);
       LogTools.info("AStar {}", request);
 
-      if (useMonteCarloPlanAsReference && monteCarloFootstepPlan.get() != null)
+      if (useMonteCarloPlanAsReference && monteCarloFootstepPlan.get() != null && monteCarloFootstepPlan.get().getNumberOfSteps() > 0)
       {
          FootstepPlan monteCarloReferencePlan = new FootstepPlan(monteCarloFootstepPlan.getAndSet(null));
          request.setReferencePlan(monteCarloReferencePlan);
          LogTools.warn("Using MonteCarloPlan As Reference");
+
+         if (previousFootstepPlan != null && previousFootstepPlan.getNumberOfSteps() > 0)
+            this.previousFootstepPlan.remove(0);
       }
       else if (usePreviousPlanAsReference)
       {
