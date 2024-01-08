@@ -93,9 +93,6 @@ public class RigidBodySceneObjectDefinitions
    public static final RigidBodyTransform SHOE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
    public static final String THINKPAD_NAME = "ThinkPad";
-   public static final double THINKPAD_WIDTH = 0.34;
-   public static final double THINKPAD_DEPTH = 0.23;
-   public static final double THINKPAD_HEIGHT = 0.05;
    public static final String THINKPAD_VISUAL_MODEL_FILE_PATH = "environmentObjects/thinkpad/thinkpad.g3dj";
    public static final RigidBodyTransform THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
    static
@@ -105,6 +102,23 @@ public class RigidBodySceneObjectDefinitions
       THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addX(0.5);
       THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.15);
    }
+
+   public static final String BOOK_NAME = "Book";
+   public static final String BOOK_VISUAL_MODEL_FILE_PATH = "environmentObjects/book/book.g3dj";
+   public static final RigidBodyTransform BOOK_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      EuclidCoreMissingTools.setYawPitchRollDegrees(BOOK_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 90, 90, 0);
+   }
+
+   public static final String CEREAL_NAME = "Cereal";
+   public static final String CEREAL_VISUAL_MODEL_FILE_PATH = "environmentObjects/cereal/cereal.g3dj";
+   public static final RigidBodyTransform CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      EuclidCoreMissingTools.setYawPitchRollDegrees(CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 90, 90, 0);
+   }
+
 
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
@@ -199,5 +213,29 @@ public class RigidBodySceneObjectDefinitions
                                                         THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       LogTools.info("Adding ThinkPad to scene graph.");
       modificationQueue.accept(new SceneGraphNodeAddition(thinkpad, parentNode));
+   }
+
+   public static void ensureBookNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   {
+      SceneNode book = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                            BOOK_NAME,
+                                                            sceneGraph.getIDToNodeMap(),
+                                                            parentNode.getID(),
+                                                            new RigidBodyTransform(), BOOK_VISUAL_MODEL_FILE_PATH,
+                                                            BOOK_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      LogTools.info("Adding Book to scene graph.");
+      modificationQueue.accept(new SceneGraphNodeAddition(book, parentNode));
+   }
+
+   public static void ensureCerealNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   {
+      SceneNode cereal = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                        CEREAL_NAME,
+                                                        sceneGraph.getIDToNodeMap(),
+                                                        parentNode.getID(),
+                                                        new RigidBodyTransform(), CEREAL_VISUAL_MODEL_FILE_PATH,
+                                                        CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      LogTools.info("Adding Cereal to scene graph.");
+      modificationQueue.accept(new SceneGraphNodeAddition(cereal, parentNode));
    }
 }

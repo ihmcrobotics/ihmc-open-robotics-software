@@ -92,6 +92,16 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                  THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             yield new RDXPredefinedRigidBodySceneNode(thinkpad, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
+         case "Book" ->
+         {
+            PredefinedRigidBodySceneNode book = new PredefinedRigidBodySceneNode(nextID,
+                                                                                     name.get(),
+                                                                                     sceneGraph.getIDToNodeMap(),
+                                                                                     parent.getID(),
+                                                                                     new RigidBodyTransform(), BOOK_VISUAL_MODEL_FILE_PATH,
+                                                                                     BOOK_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            yield new RDXPredefinedRigidBodySceneNode(book, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
          default -> throw new IllegalStateException("Unexpected value: " + name);
       };
    }

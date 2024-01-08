@@ -130,7 +130,6 @@ public class ROS2SceneGraphSubscription
             centerposeNode.setVertices3D(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices());
             centerposeNode.setVertices2D(subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices());
             centerposeNode.setEnableTracking(subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
-            System.out.println("subscriptionNode.getCenterposeNodeMessage().getEnableTracking() " + subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
          }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {
