@@ -20,20 +20,14 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
             * The footsteps, with a maximum of 50
             */
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage>  footsteps_;
-   /**
-            * Total number of footsteps; used for walking actions
-            */
-   public int total_number_of_footsteps_;
-   /**
-            * Incomplete footsteps; used for walking actions
-            */
-   public int number_of_incomplete_footsteps_;
+   public behavior_msgs.msg.dds.FootstepPlanActionStateBasicsMessage footstep_plan_state_basics_;
 
    public FootstepPlanActionStateMessage()
    {
       state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage();
       footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage> (50, new behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessagePubSubType());
+      footstep_plan_state_basics_ = new behavior_msgs.msg.dds.FootstepPlanActionStateBasicsMessage();
 
    }
 
@@ -48,10 +42,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       footsteps_.set(other.footsteps_);
-      total_number_of_footsteps_ = other.total_number_of_footsteps_;
-
-      number_of_incomplete_footsteps_ = other.number_of_incomplete_footsteps_;
-
+      behavior_msgs.msg.dds.FootstepPlanActionStateBasicsMessagePubSubType.staticCopy(other.footstep_plan_state_basics_, footstep_plan_state_basics_);
    }
 
 
@@ -81,34 +72,10 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       return footsteps_;
    }
 
-   /**
-            * Total number of footsteps; used for walking actions
-            */
-   public void setTotalNumberOfFootsteps(int total_number_of_footsteps)
-   {
-      total_number_of_footsteps_ = total_number_of_footsteps;
-   }
-   /**
-            * Total number of footsteps; used for walking actions
-            */
-   public int getTotalNumberOfFootsteps()
-   {
-      return total_number_of_footsteps_;
-   }
 
-   /**
-            * Incomplete footsteps; used for walking actions
-            */
-   public void setNumberOfIncompleteFootsteps(int number_of_incomplete_footsteps)
+   public behavior_msgs.msg.dds.FootstepPlanActionStateBasicsMessage getFootstepPlanStateBasics()
    {
-      number_of_incomplete_footsteps_ = number_of_incomplete_footsteps;
-   }
-   /**
-            * Incomplete footsteps; used for walking actions
-            */
-   public int getNumberOfIncompleteFootsteps()
-   {
-      return number_of_incomplete_footsteps_;
+      return footstep_plan_state_basics_;
    }
 
 
@@ -138,10 +105,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
          {  if (!this.footsteps_.get(i).epsilonEquals(other.footsteps_.get(i), epsilon)) return false; }
       }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.total_number_of_footsteps_, other.total_number_of_footsteps_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_incomplete_footsteps_, other.number_of_incomplete_footsteps_, epsilon)) return false;
-
+      if (!this.footstep_plan_state_basics_.epsilonEquals(other.footstep_plan_state_basics_, epsilon)) return false;
 
       return true;
    }
@@ -158,10 +122,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if (!this.footsteps_.equals(otherMyClass.footsteps_)) return false;
-      if(this.total_number_of_footsteps_ != otherMyClass.total_number_of_footsteps_) return false;
-
-      if(this.number_of_incomplete_footsteps_ != otherMyClass.number_of_incomplete_footsteps_) return false;
-
+      if (!this.footstep_plan_state_basics_.equals(otherMyClass.footstep_plan_state_basics_)) return false;
 
       return true;
    }
@@ -178,10 +139,8 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       builder.append(this.definition_);      builder.append(", ");
       builder.append("footsteps=");
       builder.append(this.footsteps_);      builder.append(", ");
-      builder.append("total_number_of_footsteps=");
-      builder.append(this.total_number_of_footsteps_);      builder.append(", ");
-      builder.append("number_of_incomplete_footsteps=");
-      builder.append(this.number_of_incomplete_footsteps_);
+      builder.append("footstep_plan_state_basics=");
+      builder.append(this.footstep_plan_state_basics_);
       builder.append("}");
       return builder.toString();
    }

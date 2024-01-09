@@ -35,6 +35,13 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
    private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
    private final YoDouble idealStepHeuristicCost = new YoDouble("idealStepHeuristicCost", registry);
 
+   private final YoDouble xOffset = new YoDouble("xOffset", registry);
+   private final YoDouble yOffset = new YoDouble("yOffset", registry);
+   private final YoDouble zOffset = new YoDouble("zOffset", registry);
+   private final YoDouble yawOffset = new YoDouble("yawOffset", registry);
+   private final YoDouble pitchOffset = new YoDouble("pitchOffset", registry);
+   private final YoDouble rollOffset = new YoDouble("rollOffset", registry);
+
    private final FootstepPlannerEnvironmentHandler environmentHandler;
 
    public FootstepCostCalculator(FootstepPlannerParametersReadOnly parameters,
@@ -71,20 +78,20 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       idealStepTransform.preMultiplyInvertOther(stanceStepTransform);
       candidateStepTransform.preMultiplyInvertOther(stanceStepTransform);
 
-      double xOffset = candidateStepTransform.getTranslationX() - idealStepTransform.getTranslationX();
-      double yOffset = candidateStepTransform.getTranslationY() - idealStepTransform.getTranslationY();
-      double zOffset = candidateStepTransform.getTranslationZ() - idealStepTransform.getTranslationZ();
-      double yawOffset = AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getYaw(), idealStepTransform.getRotation().getYaw());
-      double pitchOffset = AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getPitch(), idealStepTransform.getRotation().getPitch());
-      double rollOffset = AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getRoll(), idealStepTransform.getRotation().getRoll());
+      xOffset.set(candidateStepTransform.getTranslationX() - idealStepTransform.getTranslationX());
+      yOffset.set(candidateStepTransform.getTranslationY() - idealStepTransform.getTranslationY());
+      zOffset.set(candidateStepTransform.getTranslationZ() - idealStepTransform.getTranslationZ());
+      yawOffset.set(AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getYaw(), idealStepTransform.getRotation().getYaw()));
+      pitchOffset.set(AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getPitch(), idealStepTransform.getRotation().getPitch()));
+      rollOffset.set(AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getRoll(), idealStepTransform.getRotation().getRoll()));
 
       edgeCost.set(0.0);
-      edgeCost.add(Math.abs(xOffset * parameters.getForwardWeight()));
-      edgeCost.add(Math.abs(yOffset * parameters.getLateralWeight()));
-      edgeCost.add(Math.abs(zOffset * (zOffset > 0.0 ? parameters.getStepUpWeight() : parameters.getStepDownWeight())));
-      edgeCost.add(Math.abs(yawOffset * parameters.getYawWeight()));
-      edgeCost.add(Math.abs(pitchOffset * parameters.getPitchWeight()));
-      edgeCost.add(Math.abs(rollOffset * parameters.getRollWeight()));
+      edgeCost.add(Math.abs(xOffset.getValue() * parameters.getForwardWeight()));
+      edgeCost.add(Math.abs(yOffset.getValue() * parameters.getLateralWeight()));
+      edgeCost.add(Math.abs(zOffset.getValue() * (zOffset.getValue() > 0.0 ? parameters.getStepUpWeight() : parameters.getStepDownWeight())));
+      edgeCost.add(Math.abs(yawOffset.getValue() * parameters.getYawWeight()));
+      edgeCost.add(Math.abs(pitchOffset.getValue() * parameters.getPitchWeight()));
+      edgeCost.add(Math.abs(rollOffset.getValue() * parameters.getRollWeight()));
 
       if (environmentHandler.hasFallbackHeightMap() && candidateSnapData.getSnappedToHeightMap())
       {
