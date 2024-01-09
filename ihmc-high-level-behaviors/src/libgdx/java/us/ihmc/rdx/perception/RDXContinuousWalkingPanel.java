@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
@@ -46,7 +47,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RDXContinuousPlanningPanel extends RDXPanel implements RenderableProvider
+public class RDXContinuousWalkingPanel extends RDXPanel implements RenderableProvider
 {
    private ContinuousWalkingCommandMessage commandMessage = new ContinuousWalkingCommandMessage();
    private final IHMCROS2Publisher<ContinuousWalkingCommandMessage> commandPublisher;
@@ -55,6 +56,7 @@ public class RDXContinuousPlanningPanel extends RDXPanel implements RenderablePr
    private final SideDependentList<RDXFootstepGraphic> startFootstepGraphics;
    private final ImBoolean renderEnabled = new ImBoolean(true);
    private final ImBoolean localRenderMode = new ImBoolean(false);
+   private final ImBoolean useMonteCarloReference = new ImBoolean(true);
 
    private final AtomicReference<FootstepDataListMessage> footstepDataListMessage = new AtomicReference<>(null);
    private final SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
@@ -73,12 +75,12 @@ public class RDXContinuousPlanningPanel extends RDXPanel implements RenderablePr
    private Controller currentController;
    private boolean currentControllerConnected;
 
-   public RDXContinuousPlanningPanel(ROS2Helper ros2Helper,
-                                     HumanoidActivePerceptionModule activePerceptionModule,
-                                     ROS2SyncedRobotModel syncedRobot,
-                                     ContinuousWalkingParameters continuousWalkingParameters,
-                                     SwingPlannerParametersBasics swingPlannerParameters,
-                                     SwingTrajectoryParameters swingTrajectoryParameters)
+   public RDXContinuousWalkingPanel(ROS2Helper ros2Helper,
+                                    HumanoidActivePerceptionModule activePerceptionModule,
+                                    ROS2SyncedRobotModel syncedRobot,
+                                    ContinuousWalkingParameters continuousWalkingParameters,
+                                    SwingPlannerParametersBasics swingPlannerParameters,
+                                    SwingTrajectoryParameters swingTrajectoryParameters)
    {
       super("Continuous Planning");
       setRenderMethod(this::renderImGuiWidgets);
@@ -117,6 +119,11 @@ public class RDXContinuousPlanningPanel extends RDXPanel implements RenderablePr
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()), this::onControllerFootstepsReceived);
 
       commandPublisher = ROS2Tools.createPublisher(ros2Helper.getROS2NodeInterface(), ContinuousPlanningAPI.CONTINUOUS_WALKING_COMMAND);
+
+      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()), message ->
+      {
+         reset();
+      });
    }
 
    public void generateStartAndGoalFootstepGraphics()
@@ -174,6 +181,7 @@ public class RDXContinuousPlanningPanel extends RDXPanel implements RenderablePr
 
    public void renderImGuiWidgets()
    {
+      ImGui.checkbox("Use Monte-Carlo Reference", useMonteCarloReference);
       ImGui.checkbox("Local Render Mode", localRenderMode);
       ImGui.checkbox("Render", renderEnabled);
 
@@ -212,6 +220,17 @@ public class RDXContinuousPlanningPanel extends RDXPanel implements RenderablePr
       startStancePose.get(RobotSide.RIGHT).set(poses.get(1));
       goalStancePose.get(RobotSide.LEFT).set(poses.get(2));
       goalStancePose.get(RobotSide.RIGHT).set(poses.get(3));
+   }
+
+   public void reset()
+   {
+      footstepPlanGraphic.clear();
+      footstepPlanGraphic.update();
+
+      goalFootstepGraphics.get(RobotSide.LEFT).setPose(new FramePose3D());
+      goalFootstepGraphics.get(RobotSide.RIGHT).setPose(new FramePose3D());
+      startFootstepGraphics.get(RobotSide.LEFT).setPose(new FramePose3D());
+      startFootstepGraphics.get(RobotSide.RIGHT).setPose(new FramePose3D());
    }
 
    public void destroy()
