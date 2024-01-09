@@ -93,7 +93,7 @@ public class RigidBodySceneObjectDefinitions
    public static final RigidBodyTransform SHOE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
    public static final String LAPTOP_NAME = "Laptop";
-   public static final String LAPTOP_VISUAL_MODEL_FILE_PATH = "environmentObjects/laptop/laptop.g3dj";
+   public static final String LAPTOP_VISUAL_MODEL_FILE_PATH = "environmentObjects/laptop/thinkpad.g3dj";
    public static final RigidBodyTransform LAPTOP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
    static
    {
