@@ -5,6 +5,8 @@ import imgui.internal.ImGui;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.javacpp.indexer.FloatRawIndexer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -13,7 +15,11 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_dnn.Net;
+import org.bytedeco.opencv.opencv_text.FloatVector;
+import org.bytedeco.opencv.opencv_text.IntVector;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
@@ -54,9 +60,10 @@ import us.ihmc.tools.string.StringTools;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2RGBA;
-import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_RGBA2BGR;
+import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
 public class RDXYOLOv8WithONNXRuntimeDemo
     {
@@ -72,6 +79,7 @@ public class RDXYOLOv8WithONNXRuntimeDemo
         private RDXBytedecoImagePanel YOLOv8ImagePanel;
         private final ImageMessage imageMessage = new ImageMessage();
         private final SampleInfo sampleInfo = new SampleInfo();
+        private double icpGuiICPRunTimeInSeconds;
         private Mat decompressedImage;
         private Mat rgba8Mat;
         private Mat rgb8Mat;
@@ -85,7 +93,24 @@ public class RDXYOLOv8WithONNXRuntimeDemo
         private final Scalar scalarZero = new Scalar(0.0);
         private final MatVector outputBlobs = new MatVector();
 
+        private Mat blob;
+        private StringVector outNames;
+
+        private final IntVector detectedClassIds = new IntVector();
+        private final FloatVector detectedConfidences = new FloatVector();
+        private final RectVector detectedBoxes = new RectVector();
+        private IntPointer reducedIndices = new IntPointer();
+        private FloatPointer confidencesPointer = new FloatPointer();
+        private final RecyclingArrayList<ObjectDetectionResult> detections = new RecyclingArrayList<>();
+        private List<String> classNames;
+
+        private final Point pointTopLeft = new Point();
+        private final Point pointBottomRight = new Point();
+
         private float confidenceThreshold = 0.1f;
+        private float nmsThreshold = 0.1f;
+        private final boolean plotBoundingBoxes = true;
+
 
 
         RDXROS2ImageMessageVisualizer zedLeftColorVisualizer;
@@ -148,6 +173,17 @@ public class RDXYOLOv8WithONNXRuntimeDemo
                         net.setPreferableTarget(opencv_dnn.DNN_TARGET_CPU);
                     }
 
+                    classNames = Arrays.asList("person", "bicycle", "car", "motorcycle", "airplane", "bus",
+                        "train", "truck", "boat", "traffic light", "fire hydrant", "stop sign", "parking meter",
+                        "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe",
+                        "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard",
+                        "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
+                        "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana",
+                        "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake",
+                        "chair", "couch", "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse",
+                        "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator",
+                        "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush");
+
 
                 }
 
@@ -179,34 +215,31 @@ public class RDXYOLOv8WithONNXRuntimeDemo
 
                 public void updateYOLORender(){
                     if (rgba8Mat != null) {
-                        YOLOv8ImagePanel.drawColorImage(rgba8Mat);
-
                         try{
-                            StringVector outNames = net.getUnconnectedOutLayersNames();
-                            Mat blob;
+                            outNames = net.getUnconnectedOutLayersNames();
                             blob = opencv_dnn.blobFromImage(rgb8Mat, 1 / 255.0, imageSize, scalarZero, true, true, opencv_core.CV_32F);
                             net.setInput(blob);
                             outputBlobs.resize(outNames.size());
 
+                            long time1 = System.nanoTime();
                             net.forward(outputBlobs, outNames);
-
+                            long time2 = System.nanoTime();
                             postprocess(outputBlobs);
+                            long time3 = System.nanoTime();
+                            rgba8Mat = detectInFrame(rgba8Mat);
 
-
-
-
-
-
-//                            data0.get(0,0,0);
-//                            data1.get(0,0,0,0);
-
+                            calculateICPTime(time1, time2);
+                            calculateICPTime(time2, time3);
+                            blob.release();
                         }
                         catch(Exception exception){
                             exception.printStackTrace();
                         }
 
+                        YOLOv8ImagePanel.drawColorImage(rgba8Mat);
                     }
                 }
+
 
                 public void postprocess(MatVector outputs){
                     Mat output0 = outputs.get(0);
@@ -214,18 +247,68 @@ public class RDXYOLOv8WithONNXRuntimeDemo
                     Mat output1 = outputs.get(1);
                     FloatIndexer data1 = output1.createIndexer();
 
+                    detectedConfidences.clear();
+                    detectedClassIds.clear();
+                    detectedBoxes.clear();
                     for (long i = 0; i < 4800; i++) {
+                        float maxConfidence = 0;
+                        long maxConfidenceClass = 0;
                         for (long j = 0; j < 80; j++) {
                             float confidence = data0.get(0,4+j, i);
-                            if (confidence >= confidenceThreshold){
-                                int a =1;
+                            if (confidence > maxConfidence){
+                                maxConfidence = confidence;
+                                maxConfidenceClass = j;
                             }
+                        }
+                        if(maxConfidence >= confidenceThreshold){
+                            int centerX = (int) (data0.get(0, 0, i));
+                            int centerY = (int) (data0.get(0, 1, i));
+                            int width   = (int) (data0.get(0, 2, i));
+                            int height  = (int) (data0.get(0, 3, i));
+                            int left = centerX - width / 2;
+                            int top = centerY - height / 2;
+
+                            detectedClassIds.push_back((int)maxConfidenceClass);
+                            detectedConfidences.push_back(maxConfidence);
+                            detectedBoxes.push_back(new Rect(left, top, width, height));
 
                         }
 
                     }
+                    if (detectedBoxes.size() > 0 ){
+                        System.out.println(detectedClassIds);
+                        // remove overlapping bounding boxes with NMS
+                        reducedIndices = new IntPointer(detectedConfidences.size());
+                        confidencesPointer = new FloatPointer(detectedConfidences.size());
+                        confidencesPointer.put(detectedConfidences.get());
+                        opencv_dnn.NMSBoxes(detectedBoxes, confidencesPointer, confidenceThreshold, nmsThreshold, reducedIndices, 1.f, 0);
+                    }
+                    detections.clear();
+                    for (int i = 0; i < reducedIndices.limit(); i++) {
+                        final int finalIdx = reducedIndices.get(i);
+                        final Rect finalBox = detectedBoxes.get(finalIdx);
+                        final int finalClassId = detectedClassIds.get(finalIdx);
+                        final float finalConfidence = detectedConfidences.get(finalIdx);
+                        final String finalClassName = classNames.get(finalIdx);
+                        detections.add(new ObjectDetectionResult(finalClassId, finalClassName, finalConfidence, finalBox.x(), finalBox.y(), finalBox.width(), finalBox.height()));
+                        finalBox.releaseReference();
 
+                    }
 
+                }
+
+                public Mat detectInFrame(Mat frame){
+                    if (plotBoundingBoxes == true) {
+                        for (int index = 0; index < detections.size(); index++) {
+                            pointTopLeft.x(detections.get(index).x);
+                            pointTopLeft.y(detections.get(index).y);
+                            pointBottomRight.x(detections.get(index).x + detections.get(index).width);
+                            pointBottomRight.y(detections.get(index).y + detections.get(index).height);
+                            opencv_imgproc.rectangle(frame, pointTopLeft, pointBottomRight, Scalar.MAGENTA, 2, LINE_8, 0);
+                            opencv_imgproc.putText(frame, detections.get(index).className, pointTopLeft, opencv_imgproc.CV_FONT_HERSHEY_PLAIN, 2, Scalar.GREEN);
+                        }
+                    }
+                    return frame;
                 }
 
 
@@ -253,6 +336,12 @@ public class RDXYOLOv8WithONNXRuntimeDemo
                         rgb8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, rgba8888BytePointer);
                         needNewTexture = true;
                     }
+                }
+
+                private void calculateICPTime(long time1, long time2)
+                {
+                    long timeDiffNanos = time2-time1;
+                    icpGuiICPRunTimeInSeconds = Conversions.nanosecondsToSeconds(timeDiffNanos);
                 }
 
 
@@ -289,3 +378,56 @@ public class RDXYOLOv8WithONNXRuntimeDemo
             new RDXYOLOv8WithONNXRuntimeDemo();
         }
     }
+
+
+
+
+
+
+class ObjectDetectionResult {
+    public int classId;
+    public String className;
+    public float confidence;
+    public int x;
+    public int y;
+    public int width;
+    public int height;
+
+    public ObjectDetectionResult(int classId, String className, float confidence, int x, int y, int width, int height) {
+        this.classId = classId;
+        this.className = className;
+        this.confidence = confidence;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+    }
+
+    public void setClassId(int classId) {
+        this.classId = classId;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public void setConfidence(float confidence) {
+        this.confidence = confidence;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+}
