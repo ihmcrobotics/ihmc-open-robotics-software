@@ -19,9 +19,15 @@ public class BehaviorActionCompletionCalculator
                              double rotationTolerance,
                              double actionNominalDuration,
                              NonWallTimer executionTimer,
+                             ActionNodeState<?> state,
                              BehaviorActionCompletionComponent... components)
    {
       boolean timeIsUp = !executionTimer.isRunning(actionNominalDuration);
+      // Don't allow it to go more than 50% longer
+      boolean hitTimeLimit = !executionTimer.isRunning(actionNominalDuration * 1.5);
+      if (hitTimeLimit)
+         state.setFailed(true); // This is a failure which should abort automatic execution
+
       boolean desiredPoseAchieved = timeIsUp;
       for (BehaviorActionCompletionComponent component : components)
       {
