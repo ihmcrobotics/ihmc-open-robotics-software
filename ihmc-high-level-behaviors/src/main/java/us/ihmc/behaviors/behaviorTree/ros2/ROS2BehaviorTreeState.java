@@ -3,7 +3,6 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.tools.thread.Throttler;
 
 import java.util.function.Consumer;
 
@@ -19,8 +18,6 @@ public class ROS2BehaviorTreeState
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final ROS2BehaviorTreePublisher behaviorTreePublisher;
    private final ROS2BehaviorTreeSubscription behaviorTreeSubscription;
-
-   private final Throttler publishThrottler = new Throttler().setFrequency(SYNC_FREQUENCY);
 
    /**
     * The complexity of this constructor is to support the UI having nodes that extend the base
@@ -59,8 +56,7 @@ public class ROS2BehaviorTreeState
     */
    public void updatePublication()
    {
-      if (publishThrottler.run())
-         behaviorTreePublisher.publish();
+      behaviorTreePublisher.publish();
    }
 
    public void destroy()
