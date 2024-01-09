@@ -63,6 +63,8 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
    @Override
    public void triggerActionExecution()
    {
+      super.triggerActionExecution();
+
       if (state.getPelvisFrame().isChildOfWorld())
       {
          FramePose3D framePose = new FramePose3D(state.getPelvisFrame().getReferenceFrame());
@@ -114,6 +116,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
                                                                Double.NaN,
                                                                definition.getTrajectoryDuration(),
                                                                executionTimer,
+                                                               getState(),
                                                                BehaviorActionCompletionComponent.TRANSLATION));
 
          state.setNominalExecutionDuration(definition.getTrajectoryDuration());

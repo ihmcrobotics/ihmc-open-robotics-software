@@ -5,7 +5,6 @@ import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
-import us.ihmc.robotics.math.YoReferencePose;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -16,7 +15,6 @@ public class ReferenceBasedStepExpansion implements FootstepExpansion
    private final ReferenceBasedIdealStepCalculator idealStepCalculator;
    private final FootstepExpansion nominalExpansion;
    private final YoBoolean isPerformingReferenceBasedExpansion;
-
    private final TIntArrayList referenceXOffsets = new TIntArrayList();
    private final TIntArrayList referenceYOffsets = new TIntArrayList();
    private final TIntArrayList referenceYawOffsets = new TIntArrayList();

@@ -33,6 +33,8 @@ public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationA
    @Override
    public void triggerActionExecution()
    {
+      super.triggerActionExecution();
+
       executionTimer.reset();
    }
 

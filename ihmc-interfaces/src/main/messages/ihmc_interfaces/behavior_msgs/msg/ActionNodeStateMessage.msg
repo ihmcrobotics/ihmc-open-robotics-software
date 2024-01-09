@@ -16,6 +16,9 @@ bool can_execute
 # If the node is currently executing
 bool is_executing
 
+# If the node had a failure during it's last execution
+bool failed
+
 # Nominal execution duration
 float64 nominal_execution_duration
 

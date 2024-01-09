@@ -3,14 +3,16 @@ package us.ihmc;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.colorVision.BlackflyImagePublisher;
 import us.ihmc.avatar.colorVision.BlackflyImageRetriever;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor;
+import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ros2.ROS2DemandGraphNode;
-import us.ihmc.communication.ros2.ROS2Heartbeat;
-import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.*;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
@@ -23,6 +25,7 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectionUpdater;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -34,6 +37,7 @@ import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 import us.ihmc.tools.thread.RestartableThread;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
+import java.util.Collections;
 import java.util.function.Supplier;
 
 /**
@@ -77,8 +81,6 @@ public class PerceptionAndAutonomyProcess
    private static final BlackflyLensProperties BLACKFLY_LENS = BlackflyLensProperties.BFS_U3_27S5C_FE185C086HA_1;
    private static final ROS2Topic<ImageMessage> BLACKFLY_IMAGE_TOPIC = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT);
 
-   private static final double SCENE_GRAPH_UPDATE_FREQUENCY = 120.0;
-
    private ROS2DemandGraphNode zedPointCloudDemandNode;
    private ROS2DemandGraphNode zedColorDemandNode;
    private ROS2DemandGraphNode zedDepthDemandNode;
@@ -119,6 +121,10 @@ public class PerceptionAndAutonomyProcess
 
    private final CenterposeDetectionManager centerposeDetectionManager;
    private ROS2DemandGraphNode centerposeDemandNode;
+
+   private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
+   private ReferenceFrameLibrary behaviorTreeReferenceFrameLibrary;
+   private ROS2BehaviorTreeExecutor behaviorTreeExecutor;
 
    // Sensor heartbeats to run main method without UI
    private ROS2Heartbeat zedHeartbeat;
@@ -168,12 +174,32 @@ public class PerceptionAndAutonomyProcess
 
       this.robotPelvisFrameSupplier = robotPelvisFrameSupplier;
       sceneGraph = new ROS2SceneGraph(ros2Helper);
-      sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", SCENE_GRAPH_UPDATE_FREQUENCY, this::updateSceneGraph);
+      sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", ROS2BehaviorTreeState.SYNC_FREQUENCY, this::updateSceneGraph);
 
       arUcoUpdater = new ArUcoDetectionUpdater(ros2Helper, sceneGraph, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2Helper, zed2iLeftCameraFrame);
+   }
 
+   /** Needs to be a separate method to allow constructing test bench version. */
+   public void addBehaviorTree(ROS2Node ros2Node, DRCRobotModel robotModel)
+   {
+      ROS2ControllerHelper ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
+      behaviorTreeSyncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2NodeInterface());
+
+      behaviorTreeReferenceFrameLibrary = new ReferenceFrameLibrary();
+      behaviorTreeReferenceFrameLibrary.addAll(Collections.singleton(ReferenceFrame.getWorldFrame()));
+      behaviorTreeReferenceFrameLibrary.addAll(behaviorTreeSyncedRobot.getReferenceFrames().getCommonReferenceFrames());
+      behaviorTreeReferenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
+
+      behaviorTreeExecutor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
+                                                          robotModel,
+                                                          behaviorTreeSyncedRobot,
+                                                          behaviorTreeReferenceFrameLibrary);
+   }
+
+   public void startAutonomyThread()
+   {
       sceneGraphUpdateThread.start(); // scene graph runs at all times
    }
 
@@ -205,6 +231,12 @@ public class PerceptionAndAutonomyProcess
       }
 
       sceneGraphUpdateThread.stop();
+
+      if (behaviorTreeExecutor != null)
+      {
+         behaviorTreeExecutor.destroy();
+         behaviorTreeSyncedRobot.destroy();
+      }
 
       if (blackflyProcessAndPublishThread != null)
          blackflyProcessAndPublishThread.stop();
@@ -351,6 +383,12 @@ public class PerceptionAndAutonomyProcess
       // Update general stuff
       sceneGraph.updateOnRobotOnly(robotPelvisFrameSupplier.get());
       sceneGraph.updatePublication();
+
+      if (behaviorTreeExecutor != null)
+      {
+         behaviorTreeSyncedRobot.update();
+         behaviorTreeExecutor.update();
+      }
    }
 
    private void initializeBlackfly(RobotSide side)
@@ -434,6 +472,7 @@ public class PerceptionAndAutonomyProcess
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame.getWorldFrame());
+      perceptionAndAutonomyProcess.startAutonomyThread();
 
       // To run a sensor without the UI, uncomment the below line.
       // perceptionAndAutonomyProcess.forceEnableAllSensors(ros2Helper);

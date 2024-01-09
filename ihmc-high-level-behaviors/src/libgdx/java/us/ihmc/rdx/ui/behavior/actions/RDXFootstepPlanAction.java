@@ -61,13 +61,13 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                getDefinition()::getParentFrameName,
+                                                                getDefinition().getBasics()::getParentFrameName,
                                                                 this::changeParentFrame);
-      swingDurationWidget = new ImDoubleWrapper(getDefinition()::getSwingDuration,
-                                                getDefinition()::setSwingDuration,
+      swingDurationWidget = new ImDoubleWrapper(getDefinition().getBasics()::getSwingDuration,
+                                                getDefinition().getBasics()::setSwingDuration,
                                                 imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
-      transferDurationWidget = new ImDoubleWrapper(getDefinition()::getTransferDuration,
-                                                   getDefinition()::setTransferDuration,
+      transferDurationWidget = new ImDoubleWrapper(getDefinition().getBasics()::getTransferDuration,
+                                                   getDefinition().getBasics()::setTransferDuration,
                                                    imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
 
       footsteps = new RecyclingArrayList<>(() ->
@@ -84,7 +84,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
       RecyclingArrayListTools.synchronizeSize(footsteps, state.getFootsteps());
 
-      frameIsChildOfWorld = referenceFrameLibrary.containsFrame(getDefinition().getParentFrameName());
+      frameIsChildOfWorld = referenceFrameLibrary.containsFrame(getDefinition().getBasics().getParentFrameName());
       if (frameIsChildOfWorld)
       {
          // Add a footstep to the action data only
@@ -211,7 +211,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
    public void changeParentFrame(String newParentFrameName)
    {
-      getDefinition().setParentFrameName(newParentFrameName);
+      getDefinition().getBasics().setParentFrameName(newParentFrameName);
       for (FootstepPlanActionFootstepState footstepState : getState().getFootsteps())
       {
          footstepState.getSoleFrame().changeFrame(newParentFrameName);

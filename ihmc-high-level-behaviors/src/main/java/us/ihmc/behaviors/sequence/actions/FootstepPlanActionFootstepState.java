@@ -20,7 +20,7 @@ public class FootstepPlanActionFootstepState
       this.definition = definition;
 
       soleFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
-                                                   footstepPlan.getDefinition().getCRDTParentFrameName(),
+                                                   footstepPlan.getDefinition().getBasics().getCRDTParentFrameName(),
                                                    definition.getSoleToPlanFrameTransform());
    }
 

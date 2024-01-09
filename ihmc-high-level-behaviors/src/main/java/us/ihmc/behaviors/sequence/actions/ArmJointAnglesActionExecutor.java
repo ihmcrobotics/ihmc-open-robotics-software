@@ -46,6 +46,8 @@ public class ArmJointAnglesActionExecutor extends ActionNodeExecutor<ArmJointAng
    @Override
    public void triggerActionExecution()
    {
+      super.triggerActionExecution();
+
       double[] jointAngleArray;
       if (state.getDefinition().getPreset() == null)
       {
