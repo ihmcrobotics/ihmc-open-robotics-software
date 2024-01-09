@@ -6,11 +6,13 @@ import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -38,6 +40,7 @@ import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 import us.ihmc.tools.thread.RestartableThread;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -75,6 +78,7 @@ public class RDXIterativeClosestPointWorkerDemo
 
    private boolean mouseTrackingToggle = true;
 
+   private final Pose3D shapeInputPose = new Pose3D();
    private PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.BOX;
    private final ImInt shapeIndex = new ImInt();
    private final String[] shapeValues = new String[PrimitiveRigidBodyShape.values().length];
@@ -84,9 +88,11 @@ public class RDXIterativeClosestPointWorkerDemo
    private final ImFloat xRadius = new ImFloat(0.1f);
    private final ImFloat yRadius = new ImFloat(0.1f);
    private final ImFloat zRadius = new ImFloat(0.1f);
-   private final ImInt numberOfPoints = new ImInt(1000);
+   private final ImInt numberOfShapeSamples = new ImInt(1000);
+   private final ImInt numberOfCorespondences = new ImInt(1000);
    private final ImFloat segmentationRadius = new ImFloat(0.2f);
    private final ImInt numberOfIterations = new ImInt(1);
+   private double icpGuiICPRunTimeInSeconds;
 
    public RDXIterativeClosestPointWorkerDemo()
    {
@@ -111,6 +117,12 @@ public class RDXIterativeClosestPointWorkerDemo
       uiThread.start();
    }
 
+   private void calculateICPTime(long time1, long time2)
+   {
+      long timeDiffNanos = time2-time1;
+      icpGuiICPRunTimeInSeconds = Conversions.nanosecondsToSeconds(timeDiffNanos);
+   }
+
    private void readAndPublishZED()
    {
       zedDepthImage = zedImageRetriever.getLatestRawDepthImage();
@@ -119,10 +131,20 @@ public class RDXIterativeClosestPointWorkerDemo
       if (zedDepthImage != null && !zedDepthImage.isEmpty())
          icpWorker.setEnvironmentPointCloud(pointCloudExtractor.extractPointCloud(zedDepthImage));
 
-      icpWorker.setTargetPoint(pickFramePoint);
+      if (mouseTrackingToggle)
+         shapeInputPose.set(pickFramePoint, icpWorker.getResultPose().getOrientation());
+      else
+         shapeInputPose.set(icpWorker.getResultPose());
+
+      icpWorker.setTargetPoint(shapeInputPose.getPosition());
       icpWorker.useProvidedTargetPoint(mouseTrackingToggle);
       icpWorker.setSegmentSphereRadius(segmentationRadius.get());
-      if (icpWorker.runICP(numberOfIterations.get()))
+
+      long startTimeNanos = System.nanoTime();
+      boolean success = icpWorker.runICP(numberOfIterations.get());
+      long stopTimeNanos = System.nanoTime();
+      calculateICPTime(startTimeNanos, stopTimeNanos);
+      if (success)
          ros2Helper.publish(PerceptionAPI.ICP_RESULT, icpWorker.getResult());
 
       List<Point3D32> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
@@ -247,13 +269,26 @@ public class RDXIterativeClosestPointWorkerDemo
             ImGui.sliderFloat("xRadius", xRadius.getData(), 0.0f, 1.0f);
             ImGui.sliderFloat("yRadius", yRadius.getData(), 0.0f, 1.0f);
             ImGui.sliderFloat("zRadius", zRadius.getData(), 0.0f, 1.0f);
-            ImGui.sliderInt("Num Points", numberOfPoints.getData(), 0, 10000);
+            ImGui.sliderInt("Num Shape Samples", numberOfShapeSamples.getData(), 0, 10000);
+            ImGui.sliderInt("Num Correspondences", numberOfCorespondences.getData(), 0, 10000);
             if (ImGui.button("Apply Size"))
             {
-               icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get(), numberOfPoints.get());
+               icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get(), numberOfShapeSamples.get());
+               icpWorker.setNumberOfCorrespondences(numberOfCorespondences.get());
             }
             ImGui.sliderFloat("Segmentation Radius", segmentationRadius.getData(), 0.0f, 1.0f);
             ImGui.sliderInt("Number of Iterations", numberOfIterations.getData(), 1, 10);
+
+            ImGui.separator();
+
+            DecimalFormat df = new DecimalFormat("#.###");
+            DecimalFormat tf = new DecimalFormat("#.#########");
+
+            ImGui.text("ICP Time: " + tf.format(icpGuiICPRunTimeInSeconds));
+
+            ImGui.text("Input Centroid: " + df.format(shapeInputPose.getX()) + " y: " + df.format(shapeInputPose.getY()) + " z: " + df.format(shapeInputPose.getZ()));
+            ImGui.text("Res Centroid: " + df.format(icpWorker.getResultPose().getX()) + " y: " + df.format(icpWorker.getResultPose().getY()) + " z: " + df.format(icpWorker.getResultPose().getZ()));
+            ImGui.text("diff Centroid: " + df.format(shapeInputPose.getX() - icpWorker.getResultPose().getX()) + " y: " + df.format(shapeInputPose.getY()- icpWorker.getResultPose().getY()) + " z: " + df.format(shapeInputPose.getZ()-icpWorker.getResultPose().getZ()));
          }
 
          private void calculatePickPoint(us.ihmc.rdx.input.ImGui3DViewInput input)
