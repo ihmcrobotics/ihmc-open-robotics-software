@@ -86,6 +86,7 @@ public class RDXIterativeClosestPointWorkerDemo
    private final ImFloat zRadius = new ImFloat(0.1f);
    private final ImInt numberOfPoints = new ImInt(1000);
    private final ImFloat segmentationRadius = new ImFloat(0.2f);
+   private final ImInt numberOfIterations = new ImInt(1);
 
    public RDXIterativeClosestPointWorkerDemo()
    {
@@ -121,7 +122,7 @@ public class RDXIterativeClosestPointWorkerDemo
       icpWorker.setTargetPoint(pickFramePoint);
       icpWorker.useProvidedTargetPoint(mouseTrackingToggle);
       icpWorker.setSegmentSphereRadius(segmentationRadius.get());
-      if (icpWorker.runICP(1))
+      if (icpWorker.runICP(numberOfIterations.get()))
          ros2Helper.publish(PerceptionAPI.ICP_RESULT, icpWorker.getResult());
 
       List<Point3D32> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
@@ -251,7 +252,8 @@ public class RDXIterativeClosestPointWorkerDemo
             {
                icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get(), numberOfPoints.get());
             }
-            ImGui.sliderFloat("Segmentation Radisu", segmentationRadius.getData(), 0.0f, 1.0f);
+            ImGui.sliderFloat("Segmentation Radius", segmentationRadius.getData(), 0.0f, 1.0f);
+            ImGui.sliderInt("Number of Iterations", numberOfIterations.getData(), 1, 10);
          }
 
          private void calculatePickPoint(us.ihmc.rdx.input.ImGui3DViewInput input)
