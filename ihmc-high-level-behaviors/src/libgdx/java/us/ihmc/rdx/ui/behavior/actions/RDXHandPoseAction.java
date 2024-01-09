@@ -263,6 +263,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       parentFrameComboBox.render();
       ImGui.pushItemWidth(80.0f);
       trajectoryDurationWidget.renderImGuiWidget();
+      ImGui.text("IK Solution Quality: %.2f".formatted(state.getSolutionQuality()));
       ImGui.popItemWidth();
    }
 
