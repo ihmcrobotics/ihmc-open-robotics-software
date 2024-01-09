@@ -123,7 +123,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
          // We want the text to stay highlighted when the context menu is showing to help the operator
          // know which node they're operating on.
          boolean highlightText = textHovered || nodeContextMenuShowing;
-         ImGui.textColored(highlightText ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Text), descriptionText);
+         ImGui.textColored(highlightText ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : getDescriptionColor(), descriptionText);
          nodeContextMenuShowing = false;
          ImGui.popFont();
       }
@@ -212,6 +212,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public boolean getDescriptionBeingEdited()
    {
       return isDescriptionBeingEdited;
+   }
+
+   public int getDescriptionColor()
+   {
+      return ImGui.getColorU32(ImGuiCol.Text);
    }
 
    public void setTreeWidgetExpanded(boolean treeWidgetExpanded)

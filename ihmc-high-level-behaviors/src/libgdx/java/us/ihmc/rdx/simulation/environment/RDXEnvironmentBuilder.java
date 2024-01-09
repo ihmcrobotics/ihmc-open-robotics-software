@@ -1,6 +1,5 @@
 package us.ihmc.rdx.simulation.environment;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -185,22 +184,14 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    public void update()
    {
-      bulletPhysicsManager.simulate(Gdx.graphics.getDeltaTime());
       for (RDXEnvironmentObject allObject : allObjects)
       {
-         if (bulletPhysicsManager.getSimulate().get())
-         {
-            allObject.copyBulletTransformToThisMultiBody();
-            allObject.afterSimulate(bulletPhysicsManager);
-         }
          allObject.update(bulletPhysicsManager);
       }
    }
 
    public void renderImGuiWidgets()
    {
-      bulletPhysicsManager.renderImGuiWidgets();
-
       ImGui.separator();
 
       ImGui.checkbox(labels.get("Inputs enabled"), inputsEnabled);
@@ -304,7 +295,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
    {
       loadedFilesOnce = true;
       selectedEnvironmentFile = environmentFileName;
-      bulletPhysicsManager.getSimulate().set(false);
       for (RDXEnvironmentObject object : allObjects.toArray(new RDXEnvironmentObject[0]))
       {
          removeObject(object);

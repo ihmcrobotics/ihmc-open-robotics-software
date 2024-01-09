@@ -2,6 +2,7 @@
 #define __behavior_msgs__msg__WalkActionStateMessage__idl__
 
 #include "behavior_msgs/msg/./ActionNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./FootstepPlanActionStateBasicsMessage_.idl"
 #include "behavior_msgs/msg/./WalkActionDefinitionMessage_.idl"
 module behavior_msgs
 {
@@ -9,6 +10,24 @@ module behavior_msgs
   {
     module dds
     {
+      const octet TRIGGERED =
+      0;
+
+      const octet FOOTSTEP_PLANNING =
+      1;
+
+      const octet PLANNING_FAILED =
+      2;
+
+      const octet PLANNING_SUCCEEDED =
+      3;
+
+      const octet PLAN_COMMANDED =
+      4;
+
+      const octet PLAN_EXECUTION_COMPLETE =
+      5;
+
 
       @TypeCode(type="behavior_msgs::msg::dds_::WalkActionStateMessage_")
       struct WalkActionStateMessage
@@ -21,14 +40,8 @@ module behavior_msgs
          * Definition
          */
         behavior_msgs::msg::dds::WalkActionDefinitionMessage definition;
-        /**
-         * Total number of footsteps; used for walking actions
-         */
-        unsigned short total_number_of_footsteps;
-        /**
-         * Incomplete footsteps; used for walking actions
-         */
-        unsigned short number_of_incomplete_footsteps;
+        octet execution_state;
+        behavior_msgs::msg::dds::FootstepPlanActionStateBasicsMessage footstep_plan_state_basics;
       };
     };
   };

@@ -38,6 +38,8 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    @Override
    public void triggerActionExecution()
    {
+      super.triggerActionExecution();
+
       // FIXME: Needs major work
       if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.GOTO)
       {
