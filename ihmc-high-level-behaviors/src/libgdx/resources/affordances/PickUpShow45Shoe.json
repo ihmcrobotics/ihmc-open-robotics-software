@@ -1,0 +1,143 @@
+{
+  "type" : "ActionSequenceDefinition",
+  "description" : "PickUpShow45Shoe",
+  "children" : [ {
+    "type" : "HandPoseActionDefinition",
+    "description" : "Pre-grasp Left Hand Pose",
+    "parentFrame" : "Shoe",
+    "side" : "left",
+    "trajectoryDuration" : 1.0,
+    "x" : -0.217,
+    "y" : 0.142,
+    "z" : 0.1355,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -90.0,
+    "yawInDegrees" : 0.0,
+    "executeWithNextAction" : true,
+    "holdPoseInWorldLater" : true,
+    "jointSpaceControl" : true
+  }, {
+    "type" : "SakeHandCommandActionDefinition",
+    "description" : "Pre-grasp Left Hand Configuration",
+    "side" : "left",
+    "configuration" : "CLOSE",
+    "position" : 0.1,
+    "torque" : 0.3,
+    "executeWithNextAction" : false
+  }, {
+    "type" : "HandPoseActionDefinition",
+    "description" : "Pre-grasp Left Hand Pose",
+    "parentFrame" : "Shoe",
+    "side" : "left",
+    "trajectoryDuration" : 1.5016550026836,
+    "x" : -0.12,
+    "y" : 0.032,
+    "z" : 0.169,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -35.92,
+    "yawInDegrees" : -0.26,
+    "executeWithNextAction" : true,
+    "holdPoseInWorldLater" : true,
+    "jointSpaceControl" : true
+  }, {
+    "type" : "SakeHandCommandActionDefinition",
+    "description" : "Pre-grasp Left Hand Configuration",
+    "side" : "left",
+    "configuration" : "OPEN",
+    "position" : 0.5,
+    "torque" : 0.3,
+    "executeWithNextAction" : false
+  }, {
+    "type" : "HandPoseActionDefinition",
+    "description" : "Grasp Left Hand Pose",
+    "parentFrame" : "Shoe",
+    "side" : "left",
+    "trajectoryDuration" : 0.8863877771621133,
+    "x" : -0.0835,
+    "y" : 0.032,
+    "z" : 0.0885,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -38.04,
+    "yawInDegrees" : -0.26,
+    "executeWithNextAction" : true,
+    "holdPoseInWorldLater" : true,
+    "jointSpaceControl" : true
+  }, {
+    "type" : "SakeHandCommandActionDefinition",
+    "description" : "Grasp Left Hand Configuration",
+    "side" : "left",
+    "configuration" : "CLOSE",
+    "position" : 0.1,
+    "torque" : 0.3,
+    "executeWithNextAction" : false
+  }, {
+    "type" : "HandPoseActionDefinition",
+    "description" : "Post-grasp Left Hand Pose",
+    "parentFrame" : "Shoe",
+    "side" : "left",
+    "trajectoryDuration" : 0.15819800054254124,
+    "x" : -0.083,
+    "y" : 0.032,
+    "z" : 0.0725,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -45.18,
+    "yawInDegrees" : -0.26,
+    "executeWithNextAction" : true,
+    "holdPoseInWorldLater" : true,
+    "jointSpaceControl" : true
+  }, {
+    "type" : "SakeHandCommandActionDefinition",
+    "description" : "Post-grasp Left Hand Configuration",
+    "side" : "left",
+    "configuration" : "GRIP_HARD",
+    "position" : 0.0,
+    "torque" : 1.0,
+    "executeWithNextAction" : false
+  }, {
+    "type" : "HandPoseActionDefinition",
+    "description" : "Post-grasp Left Hand Pose",
+    "parentFrame" : "Shoe",
+    "side" : "left",
+    "trajectoryDuration" : 0.4478406613632993,
+    "x" : -0.083,
+    "y" : 0.032,
+    "z" : 0.1175,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -45.18,
+    "yawInDegrees" : -0.26,
+    "executeWithNextAction" : true,
+    "holdPoseInWorldLater" : true,
+    "jointSpaceControl" : true
+  }, {
+    "type" : "SakeHandCommandActionDefinition",
+    "description" : "Post-grasp Left Hand Configuration",
+    "side" : "left",
+    "configuration" : "GRIP_HARD",
+    "position" : 0.0,
+    "torque" : 1.0,
+    "executeWithNextAction" : false
+  }, {
+    "type" : "HandPoseActionDefinition",
+    "description" : "Post-grasp Left Hand Pose",
+    "parentFrame" : "Shoe",
+    "side" : "left",
+    "trajectoryDuration" : 1.2035440950777456,
+    "x" : -0.083,
+    "y" : 0.032,
+    "z" : 0.2375,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -45.18,
+    "yawInDegrees" : -0.26,
+    "executeWithNextAction" : true,
+    "holdPoseInWorldLater" : false,
+    "jointSpaceControl" : true
+  }, {
+    "type" : "SakeHandCommandActionDefinition",
+    "description" : "Post-grasp Left Hand Configuration",
+    "side" : "left",
+    "configuration" : "GRIP_HARD",
+    "position" : 0.0,
+    "torque" : 1.0,
+    "executeWithNextAction" : false
+  } ]
+}
