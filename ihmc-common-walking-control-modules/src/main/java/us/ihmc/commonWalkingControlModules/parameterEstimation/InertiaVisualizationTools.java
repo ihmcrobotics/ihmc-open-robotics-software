@@ -21,6 +21,7 @@ import us.ihmc.scs2.definition.yoComposite.YoTuple3DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicEllipsoid3DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +29,62 @@ import java.util.List;
 //TODO Relocate this, maybe the ellipsoid stuff to scs2 and the colormap stuff to open robotics
 public class InertiaVisualizationTools
 {
-   public static ArrayList<YoGraphicEllipsoid3DDefinition> getInertiaEllipsoidList(RigidBodyReadOnly rootBody,
-                                                                                   RobotDefinition robotDefinition,
-                                                                                   boolean colorBasedOnDensity)
+   public static ArrayList<YoInertiaEllipsoid> createYoInertiaEllipsoids(RigidBodyReadOnly rootBody, YoRegistry registry)
+   {
+      ArrayList<YoInertiaEllipsoid> yoInertiaEllipsoids = new ArrayList<>();
+      RigidBodyReadOnly[] bodies = rootBody.subtreeArray();
+      for (int i = 0; i < bodies.length; i++)
+      {
+         if (bodies[i].isRootBody())
+            continue;
+
+         YoInertiaEllipsoid yoInertiaEllipsoid = new YoInertiaEllipsoid(bodies[i].getName(), registry);
+         yoInertiaEllipsoids.add(yoInertiaEllipsoid);
+      }
+      return yoInertiaEllipsoids;
+   }
+
+   public static YoGraphicDefinition getInertiaEllipsoidGroup(RigidBodyReadOnly rootBody, ArrayList<YoInertiaEllipsoid> yoInertiaEllipsoids)
+   {
+      YoGraphicGroupDefinition ellipsoidGroup = new YoGraphicGroupDefinition("Inertia Ellipsoids");
+
+      RigidBodyReadOnly[] bodies = rootBody.subtreeArray();
+      for (int i = 0; i < bodies.length; i++)
+      {
+         if (bodies[i].isRootBody())
+            continue;
+
+         // TODO: move this to a method or change all methods to work with RigidBodyBasics
+         RigidBodyDefinition rigidBodyDefinition = new RigidBodyDefinition(bodies[i].getName());
+         rigidBodyDefinition.setMass(bodies[i].getInertia().getMass());
+         rigidBodyDefinition.setMomentOfInertia(bodies[i].getInertia().getMomentOfInertia());
+         RigidBodyTransform inertiaPose = new RigidBodyTransform();
+         inertiaPose.set(bodies[i].getBodyFixedFrame().getTransformToParent());
+         rigidBodyDefinition.setInertiaPose(inertiaPose);
+
+         //Initialize to the middle of the colormap
+         int[] rgbColor = getRGBForViridisColorMap(0.5);
+         int opacityAlpha = (int) (0.5 * 255);
+         int rgbInt = ColorDefinitions.toRGBA(rgbColor[0], rgbColor[1], rgbColor[2], opacityAlpha);
+         yoInertiaEllipsoids.get(i).setColor(rgbInt);
+
+         /* Create the ellipsoid */
+         YoGraphicEllipsoid3DDefinition ellipsoid = convertRobotMassPropertiesToInertiaEllipsoids(rootBody,
+                                                                                                  rigidBodyDefinition,
+                                                                                                  yoInertiaEllipsoids.get(i));
+         if (ellipsoid == null)
+            continue;
+
+         ellipsoidGroup.addChild(ellipsoid);
+      }
+
+      return ellipsoidGroup;
+   }
+
+   //TODO: this is a testing method which can be called in the simulation constructor, should remove eventually
+   public static ArrayList<YoGraphicEllipsoid3DDefinition> getInertiaEllipsoidListTesting(RigidBodyReadOnly rootBody,
+                                                                                          RobotDefinition robotDefinition,
+                                                                                          boolean colorBasedOnDensity)
    {
       ArrayList<YoGraphicEllipsoid3DDefinition> ellipsoidList = new ArrayList<>();
       List<RigidBodyDefinition> allRigidBodies = robotDefinition.getAllRigidBodies();
@@ -51,15 +105,14 @@ public class InertiaVisualizationTools
             double scale = calculateEllipsoidDensity(rigidBodyDefinition) / maxLinkDensity;
             // Change from linear scale to emphasize lower densities (pelvis is disproportionately dense)
             int[] rgbColor = getRGBForViridisColorMap(Math.pow(1 - scale, 2.5)); // purple is denser
-            //         int[] rgbColor = getRGBForViridisColorMap(Math.pow(scale, 0.4 * 255)); // yellow is denser
+            //                     int[] rgbColor = getRGBForViridisColorMap(Math.pow(scale, 0.4 * 255)); // yellow is denser
             int opacityAlpha = (int) ((Math.pow(scale, 0.4) + 1.0) * 0.5 * 255);
-            //TODO convert to int from 0-255
             int rgbInt = ColorDefinitions.toRGBA(rgbColor[0], rgbColor[1], rgbColor[2], opacityAlpha);
             //TODO: verify the input is correct
             YoColorRGBASingleDefinition color = new YoColorRGBASingleDefinition(Integer.toString(rgbInt));
 
             /* Create the ellipsoid */
-            YoGraphicEllipsoid3DDefinition ellipsoid = convertRobotMassPropertiesToInertiaEllipsoids(rootBody, rigidBodyDefinition, color);
+            YoGraphicEllipsoid3DDefinition ellipsoid = convertRobotMassPropertiesToInertiaEllipsoidsTesting(rootBody, rigidBodyDefinition, color);
             if (ellipsoid == null)
                continue;
 
@@ -76,7 +129,7 @@ public class InertiaVisualizationTools
             YoColorRGBASingleDefinition color = new YoColorRGBASingleDefinition(Integer.toString(rgbInt));
 
             /* Create the ellipsoid */
-            YoGraphicEllipsoid3DDefinition ellipsoid = convertRobotMassPropertiesToInertiaEllipsoids(rootBody, rigidBodyDefinition, color);
+            YoGraphicEllipsoid3DDefinition ellipsoid = convertRobotMassPropertiesToInertiaEllipsoidsTesting(rootBody, rigidBodyDefinition, color);
             if (ellipsoid == null)
                continue;
 
@@ -96,13 +149,58 @@ public class InertiaVisualizationTools
       return inertiaEllipsoids;
    }
 
+   public static void updateEllipsoid(YoInertiaEllipsoid inertiaEllipsoid, double scale)
+   {
+      //FIXME: nothing updates in simulation
+      int[] rgbColor = getRGBForViridisColorMap(scale);
+      int opacityAlpha = (int) (0.6 * 255);
+      int rgbInt = ColorDefinitions.toRGBA(rgbColor[0], rgbColor[1], rgbColor[2], opacityAlpha);
+      inertiaEllipsoid.setColor(rgbInt);
+   }
+
    /**
     * Copies functionality from a simimlar method in YoGraphicTools. Exposes more of the method so that the color of the inertial ellipsoids can be set
     * individually.
     */
-   public static YoGraphicEllipsoid3DDefinition convertRobotMassPropertiesToInertiaEllipsoids(RigidBodyReadOnly rootBody,
-                                                                                              RigidBodyDefinition rigidBodyDefinition,
-                                                                                              YoColorRGBASingleDefinition color)
+   private static YoGraphicEllipsoid3DDefinition convertRobotMassPropertiesToInertiaEllipsoids(RigidBodyReadOnly rootBody,
+                                                                                               RigidBodyDefinition rigidBodyDefinition,
+                                                                                               YoInertiaEllipsoid yoEllipsoid)
+   {
+      // It is up to the user to handle when null is returned outside this method
+      if (rigidBodyDefinition.getInertiaPose() == null)
+         return null;
+      if (rigidBodyDefinition.getMomentOfInertia() == null)
+         return null;
+
+      SingularValueDecomposition3D svd = new SingularValueDecomposition3D();
+      if (!svd.decompose(rigidBodyDefinition.getMomentOfInertia()))
+         return null;
+
+      RigidBodyReadOnly rigidBody = MultiBodySystemTools.findRigidBody(rootBody, rigidBodyDefinition.getName());
+
+      if (rigidBody.isRootBody())
+         return null;
+
+      ReferenceFrame referenceFrame = rigidBody.getParentJoint().getFrameAfterJoint();
+
+      RigidBodyTransform ellipsoidPose = new RigidBodyTransform(rigidBodyDefinition.getInertiaPose());
+      ellipsoidPose.appendOrientation(svd.getU());
+      Vector3D radii = computeInertiaEllipsoidRadii(svd.getW(), rigidBodyDefinition.getMass());
+      yoEllipsoid.setRadii(radii);
+      YoGraphicEllipsoid3DDefinition ellipsoid = convertEllipsoid3DDefinition(referenceFrame, ellipsoidPose, new Ellipsoid3DDefinition(yoEllipsoid.getRadii()));
+      ellipsoid.setName(rigidBody.getName() + " inertia");
+      ellipsoid.setColor(yoEllipsoid.getColor());
+
+      return ellipsoid;
+   }
+
+   /**
+    * Copies functionality from a simimlar method in YoGraphicTools. Exposes more of the method so that the color of the inertial ellipsoids can be set
+    * individually.
+    */
+   private static YoGraphicEllipsoid3DDefinition convertRobotMassPropertiesToInertiaEllipsoidsTesting(RigidBodyReadOnly rootBody,
+                                                                                                      RigidBodyDefinition rigidBodyDefinition,
+                                                                                                      YoColorRGBASingleDefinition color)
    {
       // It is up to the user to handle when null is returned outside this method
       if (rigidBodyDefinition.getInertiaPose() == null)
@@ -131,9 +229,9 @@ public class InertiaVisualizationTools
       return ellipsoid;
    }
 
-   public static YoGraphicEllipsoid3DDefinition convertEllipsoid3DDefinition(ReferenceFrame referenceFrame,
-                                                                             RigidBodyTransformReadOnly originPose,
-                                                                             Ellipsoid3DDefinition geometryDefinition)
+   private static YoGraphicEllipsoid3DDefinition convertEllipsoid3DDefinition(ReferenceFrame referenceFrame,
+                                                                              RigidBodyTransformReadOnly originPose,
+                                                                              Ellipsoid3DDefinition geometryDefinition)
    {
       YoGraphicEllipsoid3DDefinition ellipsoid = new YoGraphicEllipsoid3DDefinition();
 
@@ -171,7 +269,7 @@ public class InertiaVisualizationTools
     * @param mass                      mass of the link
     * @return the three radii of the inertia ellipsoid
     */
-   public static Vector3D computeInertiaEllipsoidRadii(Vector3DReadOnly principalMomentsOfInertia, double mass)
+   private static Vector3D computeInertiaEllipsoidRadii(Vector3DReadOnly principalMomentsOfInertia, double mass)
    {
       double Ixx = principalMomentsOfInertia.getX();
       double Iyy = principalMomentsOfInertia.getY();
