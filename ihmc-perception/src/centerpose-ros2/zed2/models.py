@@ -41,7 +41,7 @@ class CenterPoseModels(ArgTypeMixin, Enum):
     BOOK = CenterposeObjectClass(1, "/book_v1_140.pth", "", 20.0)
     BOTTLE = CenterposeObjectClass(2, "/bottle_v1_sym_12_140.pth", "", 1.0)
     CAMERA = CenterposeObjectClass(3, "/camera_v1_140.pth", "", 1.0)
-    CEREAL = CenterposeObjectClass(4, "/cereal_box_v1_140.pth", "", 2.5)
+    CEREAL = CenterposeObjectClass(4, "/cereal_box_v1_140.pth", "", 2.8)
     CHAIR = CenterposeObjectClass(5, "/chair_v1_140.pth", "", 1.27)
     CUP = CenterposeObjectClass(6, "/cup_cup_v1_sym_12_140", "", 1.0)
     MUG = CenterposeObjectClass(7, "/cup_mug_v1_140.pth", "/cup_mug_15.pth", 10.0)
