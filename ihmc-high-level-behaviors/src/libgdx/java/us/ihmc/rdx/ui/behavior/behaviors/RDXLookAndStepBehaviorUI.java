@@ -282,8 +282,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       impassibilityDetectedPlot.setNextValue(impassibilityDetected.getLatest().getData() ? 1.0f : 0.0f);
       impassibilityDetectedPlot.calculate(impassibilityDetected.getLatest().getData() ? "OBSTRUCTED" : "ALL CLEAR");
 
-      ImGui.text(ReferenceBasedIdealStepCalculator.statusMessage);
-
       referenceAlpha.renderImGuiWidget();
 
 //      footholdVolumePlot.render();
