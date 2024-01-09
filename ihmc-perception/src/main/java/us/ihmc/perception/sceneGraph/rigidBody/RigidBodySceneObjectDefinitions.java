@@ -92,15 +92,15 @@ public class RigidBodySceneObjectDefinitions
    public static final String SHOE_VISUAL_MODEL_FILE_PATH = "environmentObjects/shoe/shoe.g3dj";
    public static final RigidBodyTransform SHOE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
-   public static final String THINKPAD_NAME = "ThinkPad";
-   public static final String THINKPAD_VISUAL_MODEL_FILE_PATH = "environmentObjects/thinkpad/thinkpad.g3dj";
-   public static final RigidBodyTransform THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   public static final String LAPTOP_NAME = "Laptop";
+   public static final String LAPTOP_VISUAL_MODEL_FILE_PATH = "environmentObjects/laptop/laptop.g3dj";
+   public static final RigidBodyTransform LAPTOP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
    static
    {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 180, 0, 90);
-      THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(0.5);
-      THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addX(0.5);
-      THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.15);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(LAPTOP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 180, 0, 90);
+      LAPTOP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(0.5);
+      LAPTOP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addX(0.5);
+      LAPTOP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.15);
    }
 
    public static final String BOOK_NAME = "Book";
@@ -203,16 +203,16 @@ public class RigidBodySceneObjectDefinitions
       modificationQueue.accept(new SceneGraphNodeAddition(shoe, parentNode));
    }
 
-   public static void ensureThinkPadNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   public static void ensureLaptopNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
    {
-      SceneNode thinkpad = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                        THINKPAD_NAME,
+      SceneNode laptop = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                        LAPTOP_NAME,
                                                         sceneGraph.getIDToNodeMap(),
                                                         parentNode.getID(),
-                                                        new RigidBodyTransform(), THINKPAD_VISUAL_MODEL_FILE_PATH,
-                                                        THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      LogTools.info("Adding ThinkPad to scene graph.");
-      modificationQueue.accept(new SceneGraphNodeAddition(thinkpad, parentNode));
+                                                        new RigidBodyTransform(), LAPTOP_VISUAL_MODEL_FILE_PATH,
+                                                        LAPTOP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      LogTools.info("Adding Laptop to scene graph.");
+      modificationQueue.accept(new SceneGraphNodeAddition(laptop, parentNode));
    }
 
    public static void ensureBookNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
