@@ -22,6 +22,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
@@ -101,7 +102,7 @@ public class RDXYOLOv8WithONNXRuntimeDemo
         private final RectVector detectedBoxes = new RectVector();
         private IntPointer reducedIndices = new IntPointer();
         private FloatPointer confidencesPointer = new FloatPointer();
-        private final RecyclingArrayList<ObjectDetectionResult> detections = new RecyclingArrayList<>();
+        private final RecyclingArrayList<ObjectDetectionResult> detections = new RecyclingArrayList<>(ObjectDetectionResult::new);
         private List<String> classNames;
 
         private final Point pointTopLeft = new Point();
@@ -392,6 +393,10 @@ class ObjectDetectionResult {
     public int y;
     public int width;
     public int height;
+
+    public ObjectDetectionResult(){
+
+    }
 
     public ObjectDetectionResult(int classId, String className, float confidence, int x, int y, int width, int height) {
         this.classId = classId;
