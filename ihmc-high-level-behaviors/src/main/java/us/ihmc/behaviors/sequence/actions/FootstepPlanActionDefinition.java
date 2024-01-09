@@ -5,21 +5,26 @@ import behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
+import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.communication.crdt.*;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.JSONTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class FootstepPlanActionDefinition extends BehaviorActionDefinition
+public class FootstepPlanActionDefinition extends ActionNodeDefinition
 {
-   private double swingDuration = 1.2;
-   private double transferDuration = 0.8;
-   private String parentFrameName;
-   private final RecyclingArrayList<FootstepPlanActionFootstepDefinition> footsteps = new RecyclingArrayList<>(FootstepPlanActionFootstepDefinition::new);
+   private final FootstepPlanActionDefinitionBasics footstepPlanDefinitionBasics;
+   private final CRDTUnidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> footsteps;
 
-   public FootstepPlanActionDefinition()
+   public FootstepPlanActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super("Footstep plan");
+      super(crdtInfo, saveFileDirectory);
+
+      footstepPlanDefinitionBasics = new FootstepPlanActionDefinitionBasics(crdtInfo);
+      footsteps = new CRDTUnidirectionalRecyclingArrayList<>(ROS2ActorDesignation.OPERATOR,
+                                                             crdtInfo,
+                                                             () -> new RecyclingArrayList<>(() -> new FootstepPlanActionFootstepDefinition(crdtInfo)));
    }
 
    @Override
@@ -27,15 +32,13 @@ public class FootstepPlanActionDefinition extends BehaviorActionDefinition
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("swingDuration", swingDuration);
-      jsonNode.put("transferDuration", transferDuration);
-      jsonNode.put("parentFrame", parentFrameName);
+      footstepPlanDefinitionBasics.saveToFile(jsonNode);
 
       ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
-      for (FootstepPlanActionFootstepDefinition footstep : footsteps)
+      for (int i = 0; i < footsteps.getSize(); i++)
       {
          ObjectNode footstepNode = foostepsArrayNode.addObject();
-         footstep.saveToFile(footstepNode);
+         footsteps.getValueReadOnly(i).saveToFile(footstepNode);
       }
    }
 
@@ -44,79 +47,47 @@ public class FootstepPlanActionDefinition extends BehaviorActionDefinition
    {
       super.loadFromFile(jsonNode);
 
-      swingDuration = jsonNode.get("swingDuration").asDouble();
-      transferDuration = jsonNode.get("transferDuration").asDouble();
-      parentFrameName = jsonNode.get("parentFrame").textValue();
+      footstepPlanDefinitionBasics.loadFromFile(jsonNode);
 
-      footsteps.clear();
-      JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));
+      footsteps.getValue().clear();
+      JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.getValue().add().loadFromFile(footstepNode));
    }
 
    public void toMessage(FootstepPlanActionDefinitionMessage message)
    {
-      super.toMessage(message.getActionDefinition());
+      super.toMessage(message.getDefinition());
 
-      message.setSwingDuration(swingDuration);
-      message.setTransferDuration(transferDuration);
-      message.setParentFrameName(parentFrameName);
+      footstepPlanDefinitionBasics.toMessage(message.getDefinitionBasics());
 
       message.getFootsteps().clear();
-      for (FootstepPlanActionFootstepDefinition footstep : footsteps)
+      for (int i = 0; i < footsteps.getSize(); i++)
       {
-         FootstepPlanActionFootstepDefinitionMessage footstepMessage = message.getFootsteps().add();
-         footstepMessage.setRobotSide(footstep.getSide().toByte());
-         footstepMessage.getSolePose().set(footstep.getSoleToPlanFrameTransform());
+         footsteps.getValueReadOnly(i).toMessage(message.getFootsteps().add());
       }
    }
 
    public void fromMessage(FootstepPlanActionDefinitionMessage message)
    {
-      super.fromMessage(message.getActionDefinition());
+      super.fromMessage(message.getDefinition());
 
-      swingDuration = message.getSwingDuration();
-      transferDuration = message.getTransferDuration();
-      parentFrameName = message.getParentFrameNameAsString();
+      footstepPlanDefinitionBasics.fromMessage(message.getDefinitionBasics());
 
-      footsteps.clear();
-      for (FootstepPlanActionFootstepDefinitionMessage footstepMessage : message.getFootsteps())
+      footsteps.fromMessage(writableList ->
       {
-         FootstepPlanActionFootstepDefinition footstep = footsteps.add();
-         footstep.setSide(RobotSide.fromByte(footstepMessage.getRobotSide()));
-         footstep.getSoleToPlanFrameTransform().set(footstepMessage.getSolePose());
-      }
+         writableList.clear();
+         for (FootstepPlanActionFootstepDefinitionMessage footstepMessage : message.getFootsteps())
+         {
+            writableList.add().fromMessage(footstepMessage);
+         }
+      });
    }
 
-   public double getSwingDuration()
+   public FootstepPlanActionDefinitionBasics getBasics()
    {
-      return swingDuration;
+      return footstepPlanDefinitionBasics;
    }
 
-   public void setSwingDuration(double swingDuration)
-   {
-      this.swingDuration = swingDuration;
-   }
-
-   public double getTransferDuration()
-   {
-      return transferDuration;
-   }
-
-   public void setTransferDuration(double transferDuration)
-   {
-      this.transferDuration = transferDuration;
-   }
-
-   public String getParentFrameName()
-   {
-      return parentFrameName;
-   }
-
-   public void setParentFrameName(String parentFrameName)
-   {
-      this.parentFrameName = parentFrameName;
-   }
-
-   public RecyclingArrayList<FootstepPlanActionFootstepDefinition> getFootsteps()
+   public CRDTUnidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> getFootsteps()
    {
       return footsteps;
    }

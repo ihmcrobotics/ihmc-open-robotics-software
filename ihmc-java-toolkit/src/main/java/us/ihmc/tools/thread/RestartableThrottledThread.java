@@ -5,6 +5,8 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class RestartableThrottledThread
 {
    private final String name;
@@ -14,7 +16,7 @@ public class RestartableThrottledThread
    private final RunnableThatThrows runnable;
 
    private Thread thread;
-   private boolean running = false;
+   private final AtomicBoolean running = new AtomicBoolean(false);
 
    public RestartableThrottledThread(String name, double runFrequency, RunnableThatThrows runnable)
    {
@@ -41,26 +43,28 @@ public class RestartableThrottledThread
     */
    public void start()
    {
-      running = true;
-      thread = new Thread(() ->
+      if (running.compareAndSet(false, true))
       {
-         try
+         thread = new Thread(() ->
          {
-            while (running)
+            try
             {
-               throttler.waitAndRun();
+               while (running.get())
+               {
+                  throttler.waitAndRun();
 
-               ExceptionTools.handle(runnable, exceptionHandler);
+                  ExceptionTools.handle(runnable, exceptionHandler);
+               }
             }
-         }
-         finally
-         {
-            running = false;
-         }
-      }, name);
+            finally
+            {
+               running.set(false);
+            }
+         }, name);
 
-      thread.setDaemon(runAsDaemon);
-      thread.start();
+         thread.setDaemon(runAsDaemon);
+         thread.start();
+      }
    }
 
    /**
@@ -68,12 +72,22 @@ public class RestartableThrottledThread
     */
    public void stop()
    {
-      running = false;
+      running.set(false);
+   }
+
+   /**
+    * Request the thread to stop and waits until the thread finishes
+    */
+   public void blockingStop()
+   {
+      stop();
+      if (thread != null)
+         ExceptionTools.handle((RunnableThatThrows) thread::join, exceptionHandler);
    }
 
    public boolean isRunning()
    {
-      return running;
+      return running.getPlain();
    }
 
    // only used for testing

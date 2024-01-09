@@ -23,7 +23,7 @@ public class RDXArUcoMarkerNode extends RDXDetectableSceneNode
                                                            5.0,
                                                            arUcoMarkerNode::getBreakFrequency,
                                                            arUcoMarkerNode::setBreakFrequency,
-                                                           arUcoMarkerNode::freezeFromModification);
+                                                           arUcoMarkerNode::freeze);
       alphaFilterValueSlider.setWidgetWidth(100.0f);
    }
 

@@ -512,6 +512,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
    {
       this.controllerCoreOutput = controllerCoreOutput;
+
+      for (int i = 0; i < bodyManagers.size(); i++)
+      { // Controller core output informs load-bearing state of load status
+         bodyManagers.get(i).setControllerCoreOutput(controllerCoreOutput);
+      }
    }
 
    public void setLinearMomentumRateControlModuleOutput(LinearMomentumRateControlModuleOutput output)

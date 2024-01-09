@@ -1,29 +1,22 @@
 package us.ihmc.rdx.ui.behavior.sequence;
 
-import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
 
+// FIXME: This needs to be redone
 public class RDXSingleActionProgressBars
 {
-   private RDXBehaviorAction action;
-   private ActionExecutionStatusMessage actionExecutionStatusMessage;
+   private RDXActionNode<?, ?> action;
+   private FootstepPlanActionState footstepPlanActionState;
+   private HandPoseActionState handPoseActionState;
 
-   public void setAction(RDXBehaviorAction action)
+   public void setAction(RDXActionNode<?, ?> action)
    {
       this.action = action;
    }
 
-   public RDXBehaviorAction getAction()
+   public RDXActionNode<?, ?> getAction()
    {
       return action;
-   }
-
-   public void setActionExecutionStatusMessage(ActionExecutionStatusMessage actionExecutionStatusMessage)
-   {
-      this.actionExecutionStatusMessage = actionExecutionStatusMessage;
-   }
-
-   public ActionExecutionStatusMessage getActionExecutionStatusMessage()
-   {
-      return actionExecutionStatusMessage;
    }
 }

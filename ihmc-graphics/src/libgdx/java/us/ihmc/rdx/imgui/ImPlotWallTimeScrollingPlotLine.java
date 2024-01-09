@@ -1,6 +1,8 @@
 package us.ihmc.rdx.imgui;
 
 import imgui.extension.implot.ImPlot;
+import imgui.extension.implot.flag.ImPlotCol;
+import imgui.flag.ImGuiCond;
 import us.ihmc.commons.time.Stopwatch;
 
 /**
@@ -17,20 +19,22 @@ public abstract class ImPlotWallTimeScrollingPlotLine implements ImPlotPlotLine
    private final String variableName;
    private String labelID;
    private ImPlotPlotLineSwapBuffer swapBuffer;
-   private double history = 3.0;
+   private final double history;
    private final Stopwatch stopwatch = new Stopwatch();
    private final int bufferSize;
-   private double timeForOneBufferEntry;
+   private final double timeForOneBufferEntry;
    private long lastTickIndex = 0;
    private long tickIndex = 0;
    private final double[] xValues;
    private boolean isA = true;
    private int filledIndex = 0;
+   private int color = -1;
 
    public ImPlotWallTimeScrollingPlotLine(String variableName, String initialValueString, int bufferSize, double history)
    {
       this.variableName = variableName;
       this.bufferSize = bufferSize;
+      this.history = history;
       timeForOneBufferEntry = history / bufferSize;
       variableNameBase = variableName + " ";
       variableNamePostfix = "###" + variableName;
@@ -108,8 +112,14 @@ public abstract class ImPlotWallTimeScrollingPlotLine implements ImPlotPlotLine
    @Override
    public boolean render()
    {
+      if (color != -1)
+         ImPlot.pushStyleColor(ImPlotCol.Line, color);
+
       int offset = 0; // This is believed to be the index in the array we are passing in which implot will start reading
       swapBuffer.plot(labelID, xValues, offset);
+
+      if (color != -1)
+         ImPlot.popStyleColor();
 
       boolean showingLegendPopup = false;
       if (legendPopupImGuiRenderer != null && ImPlot.beginLegendPopup(labelID))
@@ -130,5 +140,25 @@ public abstract class ImPlotWallTimeScrollingPlotLine implements ImPlotPlotLine
    public String getVariableName()
    {
       return variableName;
+   }
+
+   public void setColor(int color)
+   {
+      this.color = color;
+   }
+
+   public double getHistory()
+   {
+      return history;
+   }
+
+   public int getBufferSize()
+   {
+      return bufferSize;
+   }
+
+   public double[] getXValues()
+   {
+      return xValues;
    }
 }

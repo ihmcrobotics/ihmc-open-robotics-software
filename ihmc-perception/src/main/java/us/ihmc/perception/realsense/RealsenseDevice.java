@@ -76,26 +76,26 @@ public class RealsenseDevice
       this.depthHeight = depthHeight;
       this.fps = fps;
       pipeline = realsense2.rs2_create_pipeline(context, error);
-      checkError(true, "Failed to create pipeline.");
+      checkError("Failed to create pipeline.");
       config = realsense2.rs2_create_config(error);
-      checkError(true, "Failed to create config.");
+      checkError("Failed to create config.");
 
       realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_DEPTH, DEPTH_STREAM_INDEX, depthWidth, depthHeight, realsense2.RS2_FORMAT_Z16, fps, error);
-      checkError(true, "Failed to enable stream.");
+      checkError("Failed to enable stream.");
 
       realsense2.rs2_config_enable_device(config, serialNumber, error);
-      checkError(true, "Failed to enable device.");
+      checkError("Failed to enable device.");
 
       rs2_sensor_list sensorList = realsense2.rs2_query_sensors(device, error);
-      checkError(true, "Failed to query sensors.");
+      checkError("Failed to query sensors.");
       int numberOfSensors = realsense2.rs2_get_sensors_count(sensorList, error);
-      checkError(true, "Failed to get sensors count.");
+      checkError("Failed to get sensors count.");
       LogTools.info("{} Realsense sensors detected.", numberOfSensors);
 
       for (int i = 0; i < numberOfSensors; i++)
       {
          rs2_sensor sensor = realsense2.rs2_create_sensor(sensorList, i, error);
-         checkError(true, "Failed to create sensor.");
+         checkError("Failed to create sensor.");
 
          int sensorType = -1;
          if (checkSensorType(sensor, realsense2.RS2_EXTENSION_DEPTH_SENSOR))
@@ -150,7 +150,7 @@ public class RealsenseDevice
       // so I didn't know a way to make this any better without testing all kinds of Realsenses.
       // Just keep in mind, maybe the first sensor is not always the depth sensor.
       depthSensor = realsense2.rs2_create_sensor(sensorList, 0, error);
-      checkError(true, "Failed to create sensor.");
+      checkError("Failed to create sensor.");
 
       realsense2.rs2_delete_sensor_list(sensorList);
 
@@ -160,7 +160,7 @@ public class RealsenseDevice
    private boolean checkSensorType(rs2_sensor sensor, int sensorType)
    {
       int isSensorOfType = realsense2.rs2_is_sensor_extendable_to(sensor, sensorType, error);
-      checkError(true, "Failed to check sensor extendable to " + sensorType);
+      checkError("Failed to check sensor extendable to " + sensorType);
       return isSensorOfType == 1;
    }
 
@@ -174,14 +174,14 @@ public class RealsenseDevice
       this.colorWidth = colorWidth;
       this.colorHeight = colorHeight;
 
-      realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_COLOR, COLOR_STREAM_INDEX, colorWidth, colorHeight, realsense2.RS2_FORMAT_RGB8, fps, error);
-      checkError(true, "Failed to enable stream.");
+      realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_COLOR, COLOR_STREAM_INDEX, colorWidth, colorHeight, realsense2.RS2_FORMAT_BGR8, fps, error);
+      checkError("Failed to enable stream.");
 
       colorAlignProcessingBlock = realsense2.rs2_create_align(realsense2.RS2_STREAM_COLOR, error);
-      checkError(true, "");
+      checkError("");
 
       colorFrameQueue = realsense2.rs2_create_frame_queue(1, error);
-      checkError(true, "");
+      checkError("");
    }
 
    /**
@@ -192,19 +192,19 @@ public class RealsenseDevice
    {
       rs2_options options = new rs2_options(depthSensor);
       realsense2.rs2_set_option(options, realsense2.RS2_OPTION_INTER_CAM_SYNC_MODE, 1.0f, error);
-      checkError(true, "Failed to set sync mode.");
+      checkError("Failed to set sync mode.");
    }
 
    public void initialize()
    {
       pipelineProfile = realsense2.rs2_pipeline_start_with_config(pipeline, config, error);
-      checkError(true, "Error starting pipeline.");
+      checkError("Error starting pipeline.");
 
       colorEnabled = colorAlignProcessingBlock != null;
       if (colorEnabled)
       {
          realsense2.rs2_start_processing_queue(colorAlignProcessingBlock, colorFrameQueue, error);
-         checkError(true, "");
+         checkError("");
       }
 
       LogTools.info("Started processing queue");
@@ -214,7 +214,7 @@ public class RealsenseDevice
    {
       boolean dataWasRead = false;
       boolean frameAvailable = realsense2.rs2_pipeline_poll_for_frames(pipeline, syncedFrames, error) == 1;
-      checkError(false, "");
+      checkError("");
 
       if (frameAvailable)
       {
@@ -225,12 +225,12 @@ public class RealsenseDevice
          }
 
          depthFrameDataSize = realsense2.rs2_get_frame_data_size(syncedFrames, error);
-         checkError(false, "");
+         checkError("");
 
          if (colorEnabled)
          {
             colorFrameDataSize = realsense2.rs2_get_frame_data_size(extractedColorFrame, error);
-            checkError(false, "");
+            checkError("");
          }
 
          if (depthFrameDataSize > 0)
@@ -241,7 +241,7 @@ public class RealsenseDevice
             {
                depthFrameStreamProfile = realsense2.rs2_get_frame_stream_profile(syncedFrames, error);
                realsense2.rs2_get_video_stream_intrinsics(depthFrameStreamProfile, depthStreamIntrinsics, error);
-               checkError(false, "Failed to get depth stream intrinsics.");
+               checkError("Failed to get depth stream intrinsics.");
 
                LogTools.info("Depth intrinsics: {}", String.format("Depth: fx: %.4f, fy: %.4f, cx: %.4f, cy: %.4f, h: %d, w: %d",
                                                                    depthStreamIntrinsics.fx(),
@@ -262,7 +262,7 @@ public class RealsenseDevice
                {
                   colorFrameStreamProfile = realsense2.rs2_get_frame_stream_profile(extractedColorFrame, error);
                   realsense2.rs2_get_video_stream_intrinsics(colorFrameStreamProfile, colorStreamIntrinsics, error);
-                  checkError(false, "Failed to get color stream intrinsics.");
+                  checkError("Failed to get color stream intrinsics.");
 
                   LogTools.info("Color intrinsics: {}", String.format("Color: fx: %.4f, fy: %.4f, cx: %.4f, cy: %.4f, h: %d, w: %d",
                                                                       colorStreamIntrinsics.fx(),
@@ -348,14 +348,14 @@ public class RealsenseDevice
    {
       rs2_options options = new rs2_options(depthSensor);
       realsense2.rs2_set_option(options, realsense2.RS2_OPTION_LASER_POWER, laserPower, error);
-      checkError(true, "Failed to set laser power.");
+      checkError("Failed to set laser power.");
    }
 
    public void setDigitalGain(int digitalGain)
    {
       rs2_options options = new rs2_options(depthSensor);
       realsense2.rs2_set_option(options, realsense2.RS2_OPTION_DIGITAL_GAIN, digitalGain, error);
-      checkError(true, "Failed to set digital gain");
+      checkError( "Failed to set digital gain");
    }
 
    public void deleteDevice()
@@ -363,7 +363,7 @@ public class RealsenseDevice
       // LogTools/log4j2 is no longer operational during JVM shutdown
       System.out.println("Stopping pipeline...");
       realsense2.rs2_pipeline_stop(pipeline, error);
-      checkError(false, "Error stopping pipeline.");
+      checkError("Error stopping pipeline.");
 
       System.out.println("Deleting pipeline profile...");
       realsense2.rs2_delete_pipeline_profile(pipelineProfile);
@@ -397,7 +397,7 @@ public class RealsenseDevice
       realsense2.rs2_delete_device(device);
    }
 
-   private void checkError(boolean throwRuntimeException, String extraMessage)
+   private void checkError(String extraMessage)
    {
       if (!error.isNull())
       {
@@ -407,10 +407,6 @@ public class RealsenseDevice
                                                             realsense2.rs2_get_failed_args(error).getString(),
                                                             realsense2.rs2_get_error_message(error).getString());
          LogTools.error(errorMessage);
-         if (throwRuntimeException)
-         {
-            throw new RuntimeException(errorMessage.get());
-         }
       }
    }
 

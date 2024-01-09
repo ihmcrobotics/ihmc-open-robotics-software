@@ -7,8 +7,8 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import std_msgs.msg.dds.Bool;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.LocalOnlyBehaviorTreeNodeExecutor;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
@@ -25,12 +25,13 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 /**
  * A simple example behavior.
  */
-public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
+public class StepInPlaceBehavior extends LocalOnlyBehaviorTreeNodeExecutor implements Destroyable
 {
    private final BehaviorHelper helper;
 
@@ -58,7 +59,7 @@ public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements 
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       return BehaviorTreeNodeStatus.SUCCESS;
    }

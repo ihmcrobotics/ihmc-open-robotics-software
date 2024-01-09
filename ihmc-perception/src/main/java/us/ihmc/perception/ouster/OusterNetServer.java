@@ -8,6 +8,7 @@ import io.netty.buffer.Unpooled;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
+import us.ihmc.tools.thread.RestartableThread;
 
 import java.io.*;
 import java.net.*;
@@ -85,6 +86,8 @@ public class OusterNetServer
    public static final int MEASUREMENT_BLOCK_STATUS_BITS = 32;
    public static final int MEASUREMENT_BLOCK_STATUS_BYTES = MEASUREMENT_BLOCK_STATUS_BITS / BITS_PER_BYTE;
 
+   private static final int RECEIVE_PACKET_TIMEOUT = 3000;
+
    // Lidar frames are composed of N UDP datagrams (data packets) containing 16 measurement blocks each
    // Example: For a OS0-128 running at 2048x10Hz, there will be N = 2048 / 16 = 128 UDP datagrams / scan
    // The frequency of UDP datagrams in this case would be 128 * 10Hz = 1280 Hz UDP datagram processing.
@@ -122,84 +125,89 @@ public class OusterNetServer
 
    private DatagramSocket udpSocket;
    private byte[] udpBuffer = new byte[0];
-   private final Thread udpServerThread;
-   private volatile boolean udpServerRunning = false;
+   private final RestartableThread udpServerThread;
+   private volatile boolean initialized = false;
 
    public OusterNetServer()
    {
-      udpServerThread = new Thread(this::run, getClass().getSimpleName());
+      udpServerThread = new RestartableThread(getClass().getSimpleName(), this::run);
    }
 
    public void run()
    {
+      if (!initialized)
+      {
+         try
+         {
+            LogTools.info("Binding to UDP port: " + UDP_PORT);
+            udpSocket = new DatagramSocket(UDP_PORT);
+            udpSocket.setSoTimeout(RECEIVE_PACKET_TIMEOUT);
+            initialized = true;
+         }
+         catch (SocketException e)
+         {
+            LogTools.error(e);
+         }
+      }
+
+      DatagramPacket packet = new DatagramPacket(udpBuffer, udpBuffer.length);
       try
       {
-         LogTools.info("Binding to UDP port: " + UDP_PORT);
-         udpSocket = new DatagramSocket(UDP_PORT);
+         udpSocket.receive(packet);
       }
-      catch (SocketException e)
+      catch (SocketTimeoutException timeoutException)
+      {
+         LogTools.warn("Ouster socket did not receive a packet.");
+         return;
+      }
+      catch (IOException e)
       {
          LogTools.error(e);
       }
 
-      while (udpServerRunning)
+      if (!tcpInitialized)
       {
-         DatagramPacket packet = new DatagramPacket(udpBuffer, udpBuffer.length);
-         try
-         {
-            udpSocket.receive(packet);
-         }
-         catch (IOException e)
-         {
-            LogTools.error(e);
-         }
+         // Address looks like "/192.168.x.x" so we just discard the '/'
+         sanitizededHostAddress = packet.getAddress().toString().substring(1);
 
-         if (!tcpInitialized)
-         {
-            // Address looks like "/192.168.x.x" so we just discard the '/'
-            sanitizededHostAddress = packet.getAddress().toString().substring(1);
+         // Blocking
+         configureTCP();
 
-            // Blocking
-            configureTCP();
+         int bufferSize = measurementBlockSize * columnsPerFrame;
+         udpBuffer = new byte[bufferSize];
 
-            int bufferSize = measurementBlockSize * columnsPerFrame;
-            udpBuffer = new byte[bufferSize];
+         lidarFrameByteBuffer = ByteBuffer.allocateDirect(bufferSize);
 
-            lidarFrameByteBuffer = ByteBuffer.allocateDirect(bufferSize);
-
-            // Ignore the current packet and keep moving since we recreated the buffer
-            continue;
-         }
-
-         aquisitionInstant = Instant.now();
-
-         ByteBuf content = Unpooled.wrappedBuffer(packet.getData());
-
-         // Ouster data is little endian
-         int measurementID = content.getUnsignedShortLE(TIMESTAMP_BYTES);
-         if (nextExpectedMeasurementID > 0 && measurementID != nextExpectedMeasurementID && !printedWarning)
-         {
-            printedWarning = true;
-            LogTools.warn("UDP datagram skipped! Expected measurement ID {} but was {}. Skipping this warning in the future",
-                          nextExpectedMeasurementID,
-                          measurementID);
-         }
-         nextExpectedMeasurementID = (measurementID + MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM) % columnsPerFrame;
-
-         // Copying UDP datagram content into correct position in whole frame buffer.
-         lidarFrameByteBuffer.position(measurementID * measurementBlockSize);
-         content.getBytes(0, lidarFrameByteBuffer);
-
-         boolean isLastBlockInFrame = measurementID == (columnsPerFrame - MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM);
-         if (isLastBlockInFrame && onFrameReceived != null)
-         {
-            onFrameReceived.run();
-         }
-
-         content.release();
+         // Ignore the current packet and keep moving since we recreated the buffer
+         return;
       }
 
-      udpSocket.close();
+      aquisitionInstant = Instant.now();
+
+      ByteBuf content = Unpooled.wrappedBuffer(packet.getData());
+
+      // Ouster data is little endian
+      int measurementID = content.getUnsignedShortLE(TIMESTAMP_BYTES);
+      if (nextExpectedMeasurementID > 0 && measurementID != nextExpectedMeasurementID && !printedWarning)
+      {
+         printedWarning = true;
+         LogTools.warn("UDP datagram skipped! Expected measurement ID {} but was {}. Skipping this warning in the future",
+                       nextExpectedMeasurementID,
+                       measurementID);
+      }
+      nextExpectedMeasurementID = (measurementID + MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM) % columnsPerFrame;
+
+      // Copying UDP datagram content into correct position in whole frame buffer.
+      lidarFrameByteBuffer.position(measurementID * measurementBlockSize);
+      content.getBytes(0, lidarFrameByteBuffer);
+
+      boolean isLastBlockInFrame = measurementID == (columnsPerFrame - MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM);
+      if (isLastBlockInFrame && onFrameReceived != null)
+      {
+         onFrameReceived.run();
+      }
+
+      content.release();
    }
 
    private void configureTCP()
@@ -293,6 +301,7 @@ public class OusterNetServer
       LogTools.info("Binding to TCP port: " + TCP_PORT);
       try (Socket socket = new Socket(sanitizededHostAddress, TCP_PORT))
       {
+         socket.setSoTimeout(RECEIVE_PACKET_TIMEOUT);
          OutputStream output = socket.getOutputStream();
          PrintWriter writer = new PrintWriter(output, true);
          writer.println(command);
@@ -330,25 +339,20 @@ public class OusterNetServer
 
    public void start()
    {
-      udpServerRunning = true;
-
       udpServerThread.start();
+   }
+
+   public void stop()
+   {
+      udpServerThread.stop();
    }
 
    public void destroy()
    {
-      udpServerRunning = false;
+      udpServerThread.blockingStop();
 
-      try
-      {
-         udpServerThread.join();
-      }
-      catch (InterruptedException e)
-      {
-         LogTools.error(e);
-      }
-
-      udpSocket.close();
+      if (udpSocket != null)
+         udpSocket.close();
    }
 
    public boolean isInitialized()

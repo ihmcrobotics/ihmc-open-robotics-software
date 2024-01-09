@@ -3,25 +3,34 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.HandPoseActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.behaviors.sequence.ActionNodeDefinition;
+import us.ihmc.communication.crdt.*;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.JSONTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class HandPoseActionDefinition extends BehaviorActionDefinition implements SidedObject
+public class HandPoseActionDefinition extends ActionNodeDefinition implements SidedObject
 {
-   private RobotSide side = RobotSide.LEFT;
-   private double trajectoryDuration = 4.0;
-   private boolean holdPoseInWorldLater = false;
-   private boolean jointSpaceControl = true;
-   private String palmParentFrameName;
-   private final RigidBodyTransform palmTransformToParent = new RigidBodyTransform();
+   private final CRDTUnidirectionalEnumField<RobotSide> side;
+   private final CRDTUnidirectionalDouble trajectoryDuration;
+   private final CRDTUnidirectionalBoolean holdPoseInWorldLater;
+   private final CRDTUnidirectionalBoolean jointSpaceControl;
+   private final CRDTUnidirectionalString palmParentFrameName;
+   private final CRDTUnidirectionalRigidBodyTransform palmTransformToParent;
 
-   public HandPoseActionDefinition()
+   public HandPoseActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super("Hand pose");
+      super(crdtInfo, saveFileDirectory);
+
+      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
+      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 4.0);
+      holdPoseInWorldLater = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, true);
+      jointSpaceControl = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, true);
+      palmParentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, ReferenceFrame.getWorldFrame().getName());
+      palmTransformToParent = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
    }
 
    @Override
@@ -29,12 +38,12 @@ public class HandPoseActionDefinition extends BehaviorActionDefinition implement
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("parentFrame", palmParentFrameName);
-      JSONTools.toJSON(jsonNode, palmTransformToParent);
-      jsonNode.put("side", side.getLowerCaseName());
-      jsonNode.put("trajectoryDuration", trajectoryDuration);
-      jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater);
-      jsonNode.put("jointSpaceControl", jointSpaceControl);
+      jsonNode.put("parentFrame", palmParentFrameName.getValue());
+      JSONTools.toJSON(jsonNode, palmTransformToParent.getValueReadOnly());
+      jsonNode.put("side", side.getValue().getLowerCaseName());
+      jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
+      jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater.getValue());
+      jsonNode.put("jointSpaceControl", jointSpaceControl.getValue());
    }
 
    @Override
@@ -42,92 +51,95 @@ public class HandPoseActionDefinition extends BehaviorActionDefinition implement
    {
       super.loadFromFile(jsonNode);
 
-      side = RobotSide.getSideFromString(jsonNode.get("side").asText());
-      trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      palmParentFrameName = jsonNode.get("parentFrame").textValue();
-      JSONTools.toEuclid(jsonNode, palmTransformToParent);
-      holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
-      jointSpaceControl = jsonNode.get("jointSpaceControl").asBoolean();
+      side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
+      trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
+      palmParentFrameName.setValue(jsonNode.get("parentFrame").textValue());
+      JSONTools.toEuclid(jsonNode, palmTransformToParent.getValue());
+      holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
+      jointSpaceControl.setValue(jsonNode.get("jointSpaceControl").asBoolean());
    }
 
    public void toMessage(HandPoseActionDefinitionMessage message)
    {
-      super.toMessage(message.getActionDefinition());
+      super.toMessage(message.getDefinition());
 
-      message.setParentFrameName(palmParentFrameName);
-      MessageTools.toMessage(palmTransformToParent, message.getTransformToParent());
-      message.setRobotSide(side.toByte());
-      message.setTrajectoryDuration(trajectoryDuration);
-      message.setExecuteWithNextAction(getExecuteWithNextAction());
-      message.setHoldPoseInWorld(holdPoseInWorldLater);
-      message.setJointSpaceControl(jointSpaceControl);
+      message.setParentFrameName(palmParentFrameName.toMessage());
+      palmTransformToParent.toMessage(message.getTransformToParent());
+      message.setRobotSide(side.toMessage().toByte());
+      message.setTrajectoryDuration(trajectoryDuration.toMessage());
+      message.setHoldPoseInWorld(holdPoseInWorldLater.toMessage());
+      message.setJointSpaceControl(jointSpaceControl.toMessage());
    }
 
    public void fromMessage(HandPoseActionDefinitionMessage message)
    {
-      super.fromMessage(message.getActionDefinition());
+      super.fromMessage(message.getDefinition());
 
-      palmParentFrameName = message.getParentFrameNameAsString();
-      MessageTools.toEuclid(message.getTransformToParent(), palmTransformToParent);
-      side = RobotSide.fromByte(message.getRobotSide());
-      trajectoryDuration = message.getTrajectoryDuration();
-      setExecuteWithNextAction(message.getExecuteWithNextAction());
-      holdPoseInWorldLater = message.getHoldPoseInWorld();
-      jointSpaceControl = message.getJointSpaceControl();
+      palmParentFrameName.fromMessage(message.getParentFrameNameAsString());
+      palmTransformToParent.fromMessage(message.getTransformToParent());
+      side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
+      trajectoryDuration.fromMessage(message.getTrajectoryDuration());
+      holdPoseInWorldLater.fromMessage(message.getHoldPoseInWorld());
+      jointSpaceControl.fromMessage(message.getJointSpaceControl());
    }
 
    @Override
    public RobotSide getSide()
    {
-      return side;
+      return side.getValue();
    }
 
    public void setSide(RobotSide side)
    {
-      this.side = side;
+      this.side.setValue(side);
    }
 
    public double getTrajectoryDuration()
    {
-      return trajectoryDuration;
+      return trajectoryDuration.getValue();
    }
 
    public void setTrajectoryDuration(double trajectoryDuration)
    {
-      this.trajectoryDuration = trajectoryDuration;
+      this.trajectoryDuration.setValue(trajectoryDuration);
    }
 
    public boolean getHoldPoseInWorldLater()
    {
-      return holdPoseInWorldLater;
+      return holdPoseInWorldLater.getValue();
    }
 
    public void setHoldPoseInWorldLater(boolean holdPoseInWorldLater)
    {
-      this.holdPoseInWorldLater = holdPoseInWorldLater;
+      this.holdPoseInWorldLater.setValue(holdPoseInWorldLater);
    }
 
    public boolean getJointSpaceControl()
    {
-      return jointSpaceControl;
+      return jointSpaceControl.getValue();
    }
 
    public void setJointSpaceControl(boolean jointSpaceControl)
    {
-      this.jointSpaceControl = jointSpaceControl;
+      this.jointSpaceControl.setValue(jointSpaceControl);
    }
 
    public String getPalmParentFrameName()
    {
-      return palmParentFrameName;
+      return palmParentFrameName.getValue();
    }
 
    public void setPalmParentFrameName(String palmParentFrameName)
    {
-      this.palmParentFrameName = palmParentFrameName;
+      this.palmParentFrameName.setValue(palmParentFrameName);
    }
 
-   public RigidBodyTransform getPalmTransformToParent()
+   public CRDTUnidirectionalString getCRDTPalmParentFrameName()
+   {
+      return palmParentFrameName;
+   }
+
+   public CRDTUnidirectionalRigidBodyTransform getPalmTransformToParent()
    {
       return palmTransformToParent;
    }

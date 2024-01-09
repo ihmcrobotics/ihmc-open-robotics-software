@@ -23,7 +23,7 @@ public class RDXStaticRelativeSceneNode extends RDXPredefinedRigidBodySceneNode
                                                                    0.5,
                                                                    staticRelativeSceneNode::getDistanceToDisableTracking,
                                                                    staticRelativeSceneNode::setDistanceToDisableTracking,
-                                                                   staticRelativeSceneNode::freezeFromModification);
+                                                                   staticRelativeSceneNode::freeze);
       distanceToDisableTrackingInput.setWidgetWidth(100.0f);
    }
 

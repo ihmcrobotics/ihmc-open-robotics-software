@@ -1,77 +1,37 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import us.ihmc.robotics.time.TimeTools;
-
-import java.time.Instant;
+import javax.annotation.Nullable;
+import java.util.List;
 
 /**
- * The core interface of a Behavior Tree: the node that can be ticked.
+ * Base interface for a behavior tree node. It is implemented by
+ * several layers of node abstractions, including:
+ * - Definition
+ * - State
+ * - Executor
+ * - Graphical user interface
+ *
+ * A node has a list of children and a reference to the parent.
  */
-public abstract class BehaviorTreeNode implements BehaviorTreeNodeBasics
+public interface BehaviorTreeNode<T extends BehaviorTreeNode<T>>
 {
-   private BehaviorTreeNodeStatus previousStatus = null;
-   private Instant lastTickInstant = null;
-   private String name = getClass().getSimpleName();
-   private Class<?> type = BehaviorTreeNode.class;
+   /**
+    * @return The node's children in order
+    */
+   List<T> getChildren();
 
-   @Override
-   public BehaviorTreeNodeStatus getPreviousStatus()
-   {
-      return previousStatus;
-   }
+   /**
+    * @param parent Sets the parent node or null if this is the root node
+    */
+   void setParent(@Nullable T parent);
 
-   @Override
-   public void setPreviousStatus(BehaviorTreeNodeStatus previousStatus)
-   {
-      this.previousStatus = previousStatus;
-   }
+   /**
+    * @return The parent node or null if this is the root node
+    */
+   @Nullable T getParent();
 
-   @Override
-   public Instant getLastTickInstant()
+   default boolean isRootNode()
    {
-      return lastTickInstant;
-   }
-
-   public double getTimeSinceLastTick()
-   {
-      if (hasBeenTicked())
-         return TimeTools.calculateDelay(lastTickInstant);
-      else
-         return Double.NaN;
-   }
-
-   public boolean wasTickedRecently(double maxTimeSince)
-   {
-      return hasBeenTicked() && TimeTools.calculateDelay(lastTickInstant) < maxTimeSince;
-   }
-
-   @Override
-   public String getName()
-   {
-      return name;
-   }
-
-   @Override
-   public void setName(String name)
-   {
-      this.name = name;
-   }
-
-   @Override
-   public void setLastTickInstant(Instant lastTickInstant)
-   {
-      this.lastTickInstant = lastTickInstant;
-   }
-
-   @Override
-   public void setType(Class<?> type)
-   {
-      this.type = type;
-   }
-
-   @Override
-   public Class<?> getType()
-   {
-      return type;
+      return getParent() == null;
    }
 }

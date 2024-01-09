@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -19,6 +20,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3Trajector
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
@@ -29,6 +31,10 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RigidBodyOrientationControlHelper
 {
@@ -52,6 +58,8 @@ public class RigidBodyOrientationControlHelper
    private final WeightMatrix3D defaultWeightMatrix = new WeightMatrix3D();
    private final WeightMatrix3D messageWeightMatrix = new WeightMatrix3D();
    private final YoFrameVector3D currentWeight;
+   private final YoFunctionGeneratorNew functionGenerator;
+   private final YoEnum<Axis3D> functionGeneratorAxis;
 
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
 
@@ -78,9 +86,17 @@ public class RigidBodyOrientationControlHelper
 
    private final DoubleProvider time;
 
-   public RigidBodyOrientationControlHelper(String warningPrefix, RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator,
-                                            ReferenceFrame controlFrame, ReferenceFrame baseFrame, BooleanProvider useBaseFrameForControl,
-                                            BooleanProvider useWeightFromMessage, DoubleProvider time, YoRegistry registry)
+   public RigidBodyOrientationControlHelper(String warningPrefix,
+                                            RigidBodyBasics bodyToControl,
+                                            RigidBodyBasics baseBody,
+                                            RigidBodyBasics elevator,
+                                            ReferenceFrame controlFrame,
+                                            ReferenceFrame baseFrame,
+                                            BooleanProvider useBaseFrameForControl,
+                                            BooleanProvider useWeightFromMessage,
+                                            boolean enableFunctionGenerators,
+                                            DoubleProvider time,
+                                            YoRegistry registry)
    {
       this.warningPrefix = warningPrefix;
       this.useBaseFrameForControl = useBaseFrameForControl;
@@ -112,6 +128,17 @@ public class RigidBodyOrientationControlHelper
       streamTimestampOffset.setToNaN();
       streamTimestampSource = new YoDouble(prefix + "StreamTimestampSource", registry);
       streamTimestampSource.setToNaN();
+
+      if (enableFunctionGenerators)
+      {
+         functionGenerator = new YoFunctionGeneratorNew(prefix + "_FG", time, registry);
+         functionGeneratorAxis = new YoEnum<>(prefix + "_FGAxis", registry, Axis3D.class);
+      }
+      else
+      {
+         functionGenerator = null;
+         functionGeneratorAxis = null;
+      }
    }
 
    public void setGains(PID3DGainsReadOnly gains)
@@ -224,6 +251,7 @@ public class RigidBodyOrientationControlHelper
 
       trajectoryGenerator.compute(timeInTrajectory);
       trajectoryGenerator.getAngularData(desiredOrientation, desiredVelocity, feedForwardAcceleration);
+      updateFunctionGenerators();
 
       desiredOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       desiredVelocity.changeFrame(ReferenceFrame.getWorldFrame());
@@ -431,6 +459,33 @@ public class RigidBodyOrientationControlHelper
       }
 
       return true;
+   }
+
+   private void updateFunctionGenerators()
+   {
+      if (functionGenerator == null)
+         return;
+
+      functionGenerator.update();
+
+      if (functionGeneratorAxis.getValue() == Axis3D.X)
+      {
+         desiredOrientation.appendRollRotation(functionGenerator.getValue());
+         desiredVelocity.addX(functionGenerator.getValueDot());
+         feedForwardAcceleration.addX(functionGenerator.getValueDDot());
+      }
+      else if (functionGeneratorAxis.getValue() == Axis3D.Y)
+      {
+         desiredOrientation.appendPitchRotation(functionGenerator.getValue());
+         desiredVelocity.addY(functionGenerator.getValueDot());
+         feedForwardAcceleration.addY(functionGenerator.getValueDDot());
+      }
+      else
+      {
+         desiredOrientation.appendYawRotation(functionGenerator.getValue());
+         desiredVelocity.addZ(functionGenerator.getValueDot());
+         feedForwardAcceleration.addZ(functionGenerator.getValueDDot());
+      }
    }
 
    public boolean isMessageWeightValid()

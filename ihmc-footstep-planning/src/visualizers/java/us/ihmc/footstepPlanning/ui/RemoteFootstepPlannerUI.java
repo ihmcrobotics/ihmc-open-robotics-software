@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.ui;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -30,7 +29,7 @@ public class RemoteFootstepPlannerUI extends ApplicationNoModule
       messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
       messageConverter = RemoteUIMessageConverter.createConverter(messager, "", PubSubImplementation.INTRAPROCESS);
 
-      heightMapHeartbeat = new ROS2Heartbeat(new ROS2Helper(PubSubImplementation.FAST_RTPS, "height_map_heartbeat"), PerceptionAPI.PUBLISH_HEIGHT_MAP);
+      heightMapHeartbeat = new ROS2Heartbeat(new ROS2Helper(PubSubImplementation.FAST_RTPS, "height_map_heartbeat"), PerceptionAPI.REQUEST_HEIGHT_MAP);
       heightMapHeartbeat.setAlive(true);
 
       messager.startMessager();

@@ -1,2 +1,1 @@
-# Index of the footstep
-uint16 index
+# Footsteps don't have a state currently

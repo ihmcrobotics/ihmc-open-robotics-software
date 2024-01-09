@@ -1,5 +1,5 @@
 # Parent definition fields
-behavior_msgs/BehaviorActionDefinitionMessage action_definition
+behavior_msgs/ActionNodeDefinitionMessage definition
 
 # Name of the frame the this action is expressed in
 string parent_frame_name

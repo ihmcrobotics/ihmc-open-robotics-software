@@ -58,8 +58,11 @@ public class ImGuiTools
    public static int WHITE = Color.WHITE.toIntBits();
    public static int RED = Color.RED.toIntBits();
    public static int GREEN = Color.GREEN.toIntBits();
+   public static int DARK_RED = new Color(0.7f, 0.0f, 0.0f, 1.0f).toIntBits();
    public static int DARK_GREEN = new Color(0.0f, 0.7f, 0.0f, 1.0f).toIntBits();
    public static int LIGHT_BLUE = new Color(0.4f, 0.4f, 0.8f, 1.0f).toIntBits();
+
+   private static final ImVec2 calcTextSize = new ImVec2();
 
    public static long createContext()
    {
@@ -290,17 +293,71 @@ public class ImGuiTools
    public static void markedProgressBar(float barHeight, float barWidth, int color, double percent, double markPercent, String text)
    {
       float markPosition = (float) (barWidth * markPercent);
-      float windowPositionX = ImGui.getWindowPosX();
-      float windowPositionY = ImGui.getWindowPosY();
+      float actualCursorX = ImGui.getWindowPosX() + ImGui.getCursorPosX() - ImGui.getScrollX();
+      float actualCursorY = ImGui.getWindowPosY() + ImGui.getCursorPosY() - ImGui.getScrollY();
       float verticalExtents = 3.0f;
-      ImGui.getWindowDrawList().addRectFilled(windowPositionX + ImGui.getCursorPosX() + markPosition,
-                                              windowPositionY + ImGui.getCursorPosY() - verticalExtents,
-                                              windowPositionX + ImGui.getCursorPosX() + markPosition + 2.0f,
-                                              windowPositionY + ImGui.getCursorPosY() + barHeight + verticalExtents,
+      ImGui.getWindowDrawList().addRectFilled(actualCursorX + markPosition,
+                                              actualCursorY - verticalExtents,
+                                              actualCursorX + markPosition + 2.0f,
+                                              actualCursorY + barHeight + verticalExtents,
                                               ImGuiTools.BLACK, 1.0f);
       ImGui.pushStyleColor(ImGuiCol.PlotHistogram, color);
       ImGui.progressBar((float) percent, barWidth, barHeight, text);
       ImGui.popStyleColor();
+   }
+
+   /**
+    * Useful for custom widgets.
+    * @return Whether the area of the current custom item is hovered.
+    */
+   public static boolean isItemHovered(float itemWidth)
+   {
+      float mousePosXInDesktopFrame = ImGui.getMousePosX();
+      float mousePosYInDesktopFrame = ImGui.getMousePosY();
+      // Widget frame is the top-left of the start of the widgets, which is not the same as window
+      // frame in the case the window is scrolled.
+      float mousePosXInWidgetFrame = mousePosXInDesktopFrame - ImGui.getWindowPosX() + ImGui.getScrollX();
+      float mousePosYInWidgetFrame = mousePosYInDesktopFrame - ImGui.getWindowPosY() + ImGui.getScrollY();
+
+      boolean isHovered = mousePosXInWidgetFrame >= ImGui.getCursorPosX();
+      isHovered &= mousePosXInWidgetFrame <= ImGui.getCursorPosX() + itemWidth + ImGui.getStyle().getFramePaddingX();
+      isHovered &= mousePosYInWidgetFrame >= ImGui.getCursorPosY();
+      isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + ImGui.getFontSize() + ImGui.getStyle().getFramePaddingY();
+      isHovered &= ImGui.isWindowHovered();
+
+      return isHovered;
+   }
+
+   /** ImGui doesn't support underlined text so this is the best we can do. */
+   public static boolean textWithUnderlineOnHover(String text)
+   {
+      ImGui.calcTextSize(calcTextSize, text);
+
+      // We must store the cursor position before rendering the text
+      float cursorPosXInDesktopFrame = ImGui.getCursorScreenPosX();
+      float cursorPosYInDesktopFrame = ImGui.getCursorScreenPosY();
+
+      ImGui.text(text);
+
+      boolean isHovered = ImGui.isItemHovered();
+
+      if (isHovered)
+      {
+         ImGui.getWindowDrawList()
+              .addRectFilled(cursorPosXInDesktopFrame,
+                             cursorPosYInDesktopFrame + calcTextSize.y,
+                             cursorPosXInDesktopFrame + calcTextSize.x,
+                             cursorPosYInDesktopFrame + calcTextSize.y + 1.0f,
+                             ImGui.getColorU32(ImGuiCol.Text));
+      }
+
+      return isHovered;
+   }
+
+   public static float calcTextSizeX(String text)
+   {
+      ImGui.calcTextSize(calcTextSize, text);
+      return calcTextSize.x;
    }
 
    /** @deprecated Use ImGuiUniqueLabelMap instead. */

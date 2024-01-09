@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -114,6 +115,11 @@ public class RDXFootstepGraphic implements RenderableProvider
    public void setPose(Pose3DReadOnly pose)
    {
       LibGDXTools.toLibGDX(pose, tempTransform, modelInstance.transform);
+   }
+
+   public void setPoseFromReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      modelInstance.setTransformToReferenceFrame(referenceFrame);
    }
 
    @Override

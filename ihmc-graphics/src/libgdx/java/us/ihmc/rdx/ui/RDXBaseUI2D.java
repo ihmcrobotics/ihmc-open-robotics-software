@@ -14,7 +14,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
-import us.ihmc.rdx.imgui.ImGuiPanelManager;
+import us.ihmc.rdx.imgui.RDXPanelManager;
 import us.ihmc.rdx.imgui.RDXPanelSizeHandler;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.RDXInputMode;
@@ -277,7 +277,7 @@ public class RDXBaseUI2D
       Gdx.graphics.setForegroundFPS(foregroundFPS);
    }
 
-   public ImGuiPanelManager getImGuiPanelManager()
+   public RDXPanelManager getImGuiPanelManager()
    {
       return imGuiWindowAndDockSystem.getPanelManager();
    }

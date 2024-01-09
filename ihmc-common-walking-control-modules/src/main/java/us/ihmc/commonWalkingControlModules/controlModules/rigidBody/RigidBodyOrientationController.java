@@ -44,6 +44,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
                                          ReferenceFrame baseFrame,
                                          YoDouble yoTime,
                                          RigidBodyJointControlHelper jointControlHelper,
+                                         boolean enableFunctionGenerators,
                                          YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
@@ -67,6 +68,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
                                                                 baseFrame,
                                                                 useBaseFrameForControl,
                                                                 usingWeightFromMessage,
+                                                                enableFunctionGenerators,
                                                                 yoTime,
                                                                 registry);
 

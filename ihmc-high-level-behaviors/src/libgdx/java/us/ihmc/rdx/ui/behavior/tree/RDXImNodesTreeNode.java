@@ -14,6 +14,9 @@ import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
+/**
+ * @deprecated Here for reference. We are going for a newer design.
+ */
 public class RDXImNodesTreeNode
 {
    private final RDXBehaviorUIInterface behaviorNodeUI;
@@ -39,22 +42,24 @@ public class RDXImNodesTreeNode
 
    public void render(int parentPinIndex, ArrayList<Pair<Integer, Integer>> links)
    {
-      double timeSinceLastTick = behaviorNodeUI.getTimeSinceLastTick();
-      boolean isTickRecent = behaviorNodeUI.hasBeenTicked() && timeSinceLastTick < 5.0;
+//      double timeSinceLastTick = behaviorNodeUI.getState().getTimeSinceLastTick();
+//      boolean isTickRecent = behaviorNodeUI.getState().hasBeenTicked() && timeSinceLastTick < 5.0;
+      double timeSinceLastTick = 1.0; // FIXME
+      boolean isTickRecent = false;
 
       int color;
-      if (behaviorNodeUI.getPreviousStatus() == BehaviorTreeNodeStatus.SUCCESS && isTickRecent)
-      {
-         color = ImColor.floatToColor(0.19607843f, 0.658823529412f, 0.321568627451f);
-      }
-      else if (behaviorNodeUI.getPreviousStatus() == BehaviorTreeNodeStatus.FAILURE && isTickRecent)
-      {
-         color = ImColor.floatToColor(0.658823529412f, 0.19607843f, 0.19607843f);
-      }
-      else
-      {
+//      if (behaviorNodeUI.getState().getStatus() == BehaviorTreeNodeStatus.SUCCESS && isTickRecent)
+//      {
+//         color = ImColor.floatToColor(0.19607843f, 0.658823529412f, 0.321568627451f);
+//      }
+//      else if (behaviorNodeUI.getState().getStatus() == BehaviorTreeNodeStatus.FAILURE && isTickRecent)
+//      {
+//         color = ImColor.floatToColor(0.658823529412f, 0.19607843f, 0.19607843f);
+//      }
+//      else
+//      {
          color = ImColor.floatToColor(0.19607843f, 0.321568627451f, 0.921568627451f);
-      }
+//      }
 
       ImNodes.pushColorStyle(ImNodesColorStyle.NodeOutline, color);
 
@@ -63,43 +68,44 @@ public class RDXImNodesTreeNode
       String nodeName;
       String nodeType;
 
-      String name = behaviorNodeUI.getName();
-      if (behaviorNodeUI.getType().equals(SequenceNode.class))
-      {
-         nodeName = (name != null ? name : "Sequence Node");
-         nodeType = "[->]";
-      }
-      else if (behaviorNodeUI.getType().equals(FallbackNode.class))
-      {
-         nodeName = (name != null ? name : "Fallback Node");
-         nodeType = "[?]";
-      }
-      else if (behaviorNodeUI.getType().equals(AsynchronousActionNode.class))
-      {
-         nodeName = (name != null ? name : "Asynchronous Node");
-         nodeType = "[Async]";
-      }
-      else if (behaviorNodeUI.getType().equals(BehaviorTreeAction.class))
-      {
-         nodeName = (name != null ? name : "Action");
-         nodeType = "[Action]";
-      }
-      else if (behaviorNodeUI.getType().equals(BehaviorTreeCondition.class))
-      {
-         nodeName = (name != null ? name : "Condition");
-         nodeType = "[Condition]";
-      }
-      else if (behaviorNodeUI.getType().equals(OneShotAction.class))
-      {
-         nodeName = (name != null ? name : "One Shot Action");
-         nodeType = "[OneShot]";
-      }
-      else if (behaviorNodeUI.getType().equals(AlwaysSuccessfulAction.class))
-      {
-         nodeName = (name != null ? name : "Always Successful Action");
-         nodeType = "[Success]";
-      }
-      else
+      String name = behaviorNodeUI.getDefinition().getDescription();
+      // TODO: Fix or delete
+//      if (behaviorNodeUI instanceof SequenceNode)
+//      {
+//         nodeName = (name != null ? name : "Sequence Node");
+//         nodeType = "[->]";
+//      }
+//      else if (behaviorNodeUI instanceof FallbackNode)
+//      {
+//         nodeName = (name != null ? name : "Fallback Node");
+//         nodeType = "[?]";
+//      }
+//      else if (behaviorNodeUI instanceof AsynchronousActionNode)
+//      {
+//         nodeName = (name != null ? name : "Asynchronous Node");
+//         nodeType = "[Async]";
+//      }
+//      else if (behaviorNodeUI instanceof BehaviorTreeNodeState)
+//      {
+//         nodeName = (name != null ? name : "Node");
+//         nodeType = "[Action]";
+//      }
+//      else if (behaviorNodeUI instanceof BehaviorTreeCondition)
+//      {
+//         nodeName = (name != null ? name : "Condition");
+//         nodeType = "[Condition]";
+//      }
+//      else if (behaviorNodeUI instanceof OneShotAction)
+//      {
+//         nodeName = (name != null ? name : "One Shot Action");
+//         nodeType = "[OneShot]";
+//      }
+//      else if (behaviorNodeUI instanceof AlwaysSuccessfulAction)
+//      {
+//         nodeName = (name != null ? name : "Always Successful Action");
+//         nodeType = "[Success]";
+//      }
+//      else
       {
          nodeName = (name != null ? name : "Behavior " + nodeID);
          nodeType = "[*]";
@@ -130,9 +136,11 @@ public class RDXImNodesTreeNode
 
       double tickPeriod = 0.2;
       double recentTickWindow = tickPeriod * 0.75;
-      boolean tickedThisFrame = behaviorNodeUI.hasBeenTicked() && timeSinceLastTick < recentTickWindow;
-      boolean tickedRecently = behaviorNodeUI.hasBeenTicked() && timeSinceLastTick < 1.0;
-      BehaviorTreeNodeStatus status = behaviorNodeUI.getPreviousStatus();
+//      boolean tickedThisFrame = behaviorNodeUI.getState().hasBeenTicked() && timeSinceLastTick < recentTickWindow;
+//      boolean tickedRecently = behaviorNodeUI.getState().hasBeenTicked() && timeSinceLastTick < 1.0;
+      boolean tickedThisFrame = behaviorNodeUI.getState().getIsActive();
+      boolean tickedRecently = behaviorNodeUI.getState().getIsActive();
+      BehaviorTreeNodeStatus status = null;
       tickPlot.setNextValue(tickedThisFrame && status != null ? (float) (status.ordinal()) : Float.NaN);
       tickPlot.calculate(status != null && tickedRecently ? status.name() : "", true);
 

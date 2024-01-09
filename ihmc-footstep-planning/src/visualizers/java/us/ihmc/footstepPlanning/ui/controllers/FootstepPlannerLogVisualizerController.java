@@ -10,6 +10,7 @@ import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -43,6 +44,8 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
@@ -60,6 +63,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadRequestType;
 import us.ihmc.footstepPlanning.log.VariableDescriptor;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
@@ -376,6 +380,19 @@ public class FootstepPlannerLogVisualizerController
                              Triple.of(footstepPlannerLog.getBodyPathEdgeDataMap(),
                                        footstepPlannerLog.getBodyPathIterationData(),
                                        footstepPlannerLog.getBodyPathVariableDescriptors()));
+
+      // Update swing planner type
+      messager.submitMessage(FootstepPlannerMessagerAPI.RequestedSwingPlannerType, SwingPlannerType.fromByte(footstepPlannerLog.getRequestPacket().getRequestedSwingPlanner()));
+
+      FootstepDataListMessage referencePlan = footstepPlannerLog.getRequestPacket().getReferencePlan();
+      if (!referencePlan.getFootstepDataList().isEmpty())
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.ReferencePlan, new FootstepPlan());
+      }
+      else
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.ReferencePlan, FootstepDataMessageConverter.convertToFootstepPlan(referencePlan));
+      }
    }
 
    private void updateGraphData(PlanarRegionsList planarRegionsList,

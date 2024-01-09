@@ -4,20 +4,27 @@ import behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
-import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
+import us.ihmc.behaviors.sequence.ActionNodeDefinition;
+import us.ihmc.communication.crdt.*;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class SakeHandCommandActionDefinition extends BehaviorActionDefinition
+public class SakeHandCommandActionDefinition extends ActionNodeDefinition
 {
-   private RobotSide side = RobotSide.LEFT;
-   private int handConfigurationIndex = SakeHandCommandOption.GOTO.ordinal();
-   private double goalPosition = 1.0;  // default to open
-   private double goalTorque = 0.0;    // default to none
-   private boolean executeWitNextAction = false;
+   private final CRDTUnidirectionalEnumField<RobotSide> side;
+   private final CRDTUnidirectionalInteger handConfigurationIndex;
+   private final CRDTUnidirectionalDouble goalPosition;
+   private final CRDTUnidirectionalDouble goalTorque;
 
-   public SakeHandCommandActionDefinition()
+   public SakeHandCommandActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super("Hand configuration");
+      super(crdtInfo, saveFileDirectory);
+
+      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
+      handConfigurationIndex = new CRDTUnidirectionalInteger(ROS2ActorDesignation.OPERATOR, crdtInfo, SakeHandCommandOption.GOTO.ordinal());
+      goalPosition = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.0); // default to open
+      goalTorque = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0); // default to none
    }
 
    @Override
@@ -25,11 +32,10 @@ public class SakeHandCommandActionDefinition extends BehaviorActionDefinition
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("side", side.getLowerCaseName());
-      jsonNode.put("configuration", SakeHandCommandOption.values[handConfigurationIndex].name());
-      jsonNode.put("position", goalPosition);
-      jsonNode.put("torque", goalTorque);
-      jsonNode.put("executeWithNextAction", executeWitNextAction);
+      jsonNode.put("side", side.getValue().getLowerCaseName());
+      jsonNode.put("configuration", SakeHandCommandOption.values[handConfigurationIndex.getValue()].name());
+      jsonNode.put("position", goalPosition.getValue());
+      jsonNode.put("torque", goalTorque.getValue());
    }
 
    @Override
@@ -37,82 +43,74 @@ public class SakeHandCommandActionDefinition extends BehaviorActionDefinition
    {
       super.loadFromFile(jsonNode);
 
-      side = RobotSide.getSideFromString(jsonNode.get("side").asText());
-      handConfigurationIndex = SakeHandCommandOption.valueOf(jsonNode.get("configuration").asText()).ordinal();
-      goalPosition = jsonNode.get("position").asDouble();
-      goalTorque = jsonNode.get("torque").asDouble();
-      executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
+      side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
+      handConfigurationIndex.setValue(SakeHandCommandOption.valueOf(jsonNode.get("configuration").asText()).ordinal());
+      goalPosition.setValue(jsonNode.get("position").asDouble());
+      goalTorque.setValue(jsonNode.get("torque").asDouble());
    }
 
    public void toMessage(SakeHandCommandActionDefinitionMessage message)
    {
-      super.toMessage(message.getActionDefinition());
+      super.toMessage(message.getDefinition());
 
-      message.setRobotSide(side.toByte());
-      message.setConfiguration(SakeHandCommandOption.values[handConfigurationIndex].getCommandNumber());
-      message.setPositionRatio(goalPosition);
-      message.setTorqueRatio(goalTorque);
-      message.setExecuteWithNextAction(executeWitNextAction);
+      message.setRobotSide(side.toMessage().toByte());
+      message.setConfiguration(SakeHandCommandOption.values[handConfigurationIndex.toMessage()].getCommandNumber());
+      message.setPositionRatio(goalPosition.toMessage());
+      message.setTorqueRatio(goalTorque.toMessage());
    }
 
    public void fromMessage(SakeHandCommandActionDefinitionMessage message)
    {
-      super.fromMessage(message.getActionDefinition());
+      super.fromMessage(message.getDefinition());
 
-      side = RobotSide.fromByte(message.getRobotSide());
-      handConfigurationIndex = (int) message.getConfiguration();
-      goalPosition = message.getPositionRatio();
-      goalTorque = message.getTorqueRatio();
-      executeWitNextAction = message.getExecuteWithNextAction();
+      side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
+      handConfigurationIndex.fromMessage((int) message.getConfiguration());
+      goalPosition.fromMessage(message.getPositionRatio());
+      goalTorque.fromMessage(message.getTorqueRatio());
    }
 
    public RobotSide getSide()
    {
-      return side;
+      return side.getValue();
    }
 
    public void setSide(RobotSide side)
    {
-      this.side = side;
+      this.side.setValue(side);
    }
 
    public int getHandConfigurationIndex()
    {
-      return handConfigurationIndex;
+      return handConfigurationIndex.getValue();
+   }
+
+   public SakeHandCommandOption getSakeCommandOption()
+   {
+      return SakeHandCommandOption.values[handConfigurationIndex.getValue()];
    }
 
    public void setHandConfigurationIndex(int handConfigurationIndex)
    {
-      this.handConfigurationIndex = handConfigurationIndex;
+      this.handConfigurationIndex.setValue(handConfigurationIndex);
    }
 
    public double getGoalPosition()
    {
-      return goalPosition;
+      return goalPosition.getValue();
    }
 
    public double getGoalTorque()
    {
-      return goalTorque;
+      return goalTorque.getValue();
    }
 
    public void setGoalPosition(double goalPosition)
    {
-      this.goalPosition = goalPosition;
+      this.goalPosition.setValue(goalPosition);
    }
 
    public void setGoalTorque(double goalTorque)
    {
-      this.goalTorque = goalTorque;
-   }
-
-   public boolean getExecuteWithNextAction()
-   {
-      return executeWitNextAction;
-   }
-
-   public void setExecuteWithNextAction(boolean executeWitNextAction)
-   {
-      this.executeWitNextAction = executeWitNextAction;
+      this.goalTorque.setValue(goalTorque);
    }
 }

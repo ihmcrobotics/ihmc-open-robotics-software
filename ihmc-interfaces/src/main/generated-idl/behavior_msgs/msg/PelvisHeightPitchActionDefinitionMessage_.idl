@@ -1,7 +1,7 @@
 #ifndef __behavior_msgs__msg__PelvisHeightPitchActionDefinitionMessage__idl__
 #define __behavior_msgs__msg__PelvisHeightPitchActionDefinitionMessage__idl__
 
-#include "behavior_msgs/msg/./BehaviorActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 module behavior_msgs
 {
@@ -16,7 +16,7 @@ module behavior_msgs
         /**
          * Parent definition fields
          */
-        behavior_msgs::msg::dds::BehaviorActionDefinitionMessage action_definition;
+        behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
         /**
          * Name of the frame the this action is expressed in
          */

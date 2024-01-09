@@ -11,7 +11,7 @@ public class HandWrenchActionDefinitionMessage extends Packet<HandWrenchActionDe
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
    /**
             * Specifies the side of the robot that this message refers to.
             */
@@ -27,7 +27,7 @@ public class HandWrenchActionDefinitionMessage extends Packet<HandWrenchActionDe
 
    public HandWrenchActionDefinitionMessage()
    {
-      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
    }
 
    public HandWrenchActionDefinitionMessage(HandWrenchActionDefinitionMessage other)
@@ -38,7 +38,7 @@ public class HandWrenchActionDefinitionMessage extends Packet<HandWrenchActionDe
 
    public void set(HandWrenchActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       robot_side_ = other.robot_side_;
 
       trajectory_duration_ = other.trajectory_duration_;
@@ -51,9 +51,9 @@ public class HandWrenchActionDefinitionMessage extends Packet<HandWrenchActionDe
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getDefinition()
    {
-      return action_definition_;
+      return definition_;
    }
 
    /**
@@ -119,7 +119,7 @@ public class HandWrenchActionDefinitionMessage extends Packet<HandWrenchActionDe
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_definition_.epsilonEquals(other.action_definition_, epsilon)) return false;
+      if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
@@ -139,7 +139,7 @@ public class HandWrenchActionDefinitionMessage extends Packet<HandWrenchActionDe
 
       HandWrenchActionDefinitionMessage otherMyClass = (HandWrenchActionDefinitionMessage) other;
 
-      if (!this.action_definition_.equals(otherMyClass.action_definition_)) return false;
+      if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
@@ -156,8 +156,8 @@ public class HandWrenchActionDefinitionMessage extends Packet<HandWrenchActionDe
       StringBuilder builder = new StringBuilder();
 
       builder.append("HandWrenchActionDefinitionMessage {");
-      builder.append("action_definition=");
-      builder.append(this.action_definition_);      builder.append(", ");
+      builder.append("definition=");
+      builder.append(this.definition_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("trajectory_duration=");

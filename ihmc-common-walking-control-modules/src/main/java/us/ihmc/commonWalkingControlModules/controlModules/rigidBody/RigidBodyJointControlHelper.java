@@ -57,7 +57,7 @@ public class RigidBodyJointControlHelper
 
    private final YoBoolean hasWeights;
    private final YoBoolean hasHighLevelGains;
-   private final YoBoolean hasLowLevelGains;
+   private final YoBoolean[] hasLowLevelGains;
 
    private final OneDoFTrajectoryPoint lastPointAdded = new OneDoFTrajectoryPoint();
    private final JointspaceFeedbackControlCommand feedbackControlCommand = new JointspaceFeedbackControlCommand();
@@ -80,7 +80,7 @@ public class RigidBodyJointControlHelper
       String prefix = bodyName + "Jointspace";
       hasWeights = new YoBoolean(prefix + "HasWeights", registry);
       hasHighLevelGains = new YoBoolean(prefix + "HasHighLevelGains", registry);
-      hasLowLevelGains = new YoBoolean(prefix + "HasLowLevelGains", registry);
+      hasLowLevelGains = new YoBoolean[jointsToControl.length];
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
 
       for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
@@ -106,8 +106,10 @@ public class RigidBodyJointControlHelper
 
          if (enableFunctionGenerators)
          {
-            functionGenerators.add(new YoFunctionGeneratorNew(prefix + "_" + jointName + "_FuncGen", time, registry));
+            functionGenerators.add(new YoFunctionGeneratorNew(prefix + "_" + jointName + "_FG", time, registry));
          }
+
+         hasLowLevelGains[jointIdx] = new YoBoolean(joint.getName() + "HasLowLevelGains", registry);
       }
 
       streamTimestampOffset = new YoDouble(prefix + "StreamTimestampOffset", registry);
@@ -169,24 +171,20 @@ public class RigidBodyJointControlHelper
          }
       }
 
-      hasLowLevelGains.set(lowLevelGains != null);
-      if (lowLevelGains == null)
-         return;
-
       this.lowLevelGains.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
+         hasLowLevelGains[jointIdx].set(false);
+      }
+
+      if (lowLevelGains == null)
+         return;
+
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      {
          OneDoFJointBasics joint = joints[jointIdx];
-         if (lowLevelGains.containsKey(joint.getName()))
-         {
-            this.lowLevelGains.add(lowLevelGains.get(joint.getName()));
-         }
-         else
-         {
-            this.lowLevelGains.clear();
-            hasLowLevelGains.set(false);
-            return;
-         }
+         this.lowLevelGains.add(jointIdx, lowLevelGains.get(joint.getName()));
+         hasLowLevelGains[jointIdx].set(lowLevelGains.containsKey(joint.getName()));
       }
    }
 
@@ -631,9 +629,9 @@ public class RigidBodyJointControlHelper
       }
    }
 
-   public boolean hasLowLevelJointGains()
+   public boolean hasLowLevelJointGains(int jointIdx)
    {
-      return hasLowLevelGains.getValue();
+      return hasLowLevelGains[jointIdx].getValue();
    }
    
    public PIDGainsReadOnly getLowLevelJointGain(int jointIdx)

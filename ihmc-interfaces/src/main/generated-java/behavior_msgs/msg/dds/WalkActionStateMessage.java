@@ -8,19 +8,28 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class WalkActionStateMessage extends Packet<WalkActionStateMessage> implements Settable<WalkActionStateMessage>, EpsilonComparable<WalkActionStateMessage>
 {
+   public static final byte TRIGGERED = (byte) 0;
+   public static final byte FOOTSTEP_PLANNING = (byte) 1;
+   public static final byte PLANNING_FAILED = (byte) 2;
+   public static final byte PLANNING_SUCCEEDED = (byte) 3;
+   public static final byte PLAN_COMMANDED = (byte) 4;
+   public static final byte PLAN_EXECUTION_COMPLETE = (byte) 5;
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionStateMessage action_state_;
+   public behavior_msgs.msg.dds.ActionNodeStateMessage state_;
    /**
             * Definition
             */
    public behavior_msgs.msg.dds.WalkActionDefinitionMessage definition_;
+   public byte execution_state_;
+   public behavior_msgs.msg.dds.FootstepPlanActionStateBasicsMessage footstep_plan_state_basics_;
 
    public WalkActionStateMessage()
    {
-      action_state_ = new behavior_msgs.msg.dds.BehaviorActionStateMessage();
+      state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.WalkActionDefinitionMessage();
+      footstep_plan_state_basics_ = new behavior_msgs.msg.dds.FootstepPlanActionStateBasicsMessage();
    }
 
    public WalkActionStateMessage(WalkActionStateMessage other)
@@ -31,17 +40,20 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
 
    public void set(WalkActionStateMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.staticCopy(other.action_state_, action_state_);
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.WalkActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      execution_state_ = other.execution_state_;
+
+      behavior_msgs.msg.dds.FootstepPlanActionStateBasicsMessagePubSubType.staticCopy(other.footstep_plan_state_basics_, footstep_plan_state_basics_);
    }
 
 
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionStateMessage getActionState()
+   public behavior_msgs.msg.dds.ActionNodeStateMessage getState()
    {
-      return action_state_;
+      return state_;
    }
 
 
@@ -51,6 +63,21 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
    public behavior_msgs.msg.dds.WalkActionDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+   public void setExecutionState(byte execution_state)
+   {
+      execution_state_ = execution_state;
+   }
+   public byte getExecutionState()
+   {
+      return execution_state_;
+   }
+
+
+   public behavior_msgs.msg.dds.FootstepPlanActionStateBasicsMessage getFootstepPlanStateBasics()
+   {
+      return footstep_plan_state_basics_;
    }
 
 
@@ -71,8 +98,11 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_state_.epsilonEquals(other.action_state_, epsilon)) return false;
+      if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_state_, other.execution_state_, epsilon)) return false;
+
+      if (!this.footstep_plan_state_basics_.epsilonEquals(other.footstep_plan_state_basics_, epsilon)) return false;
 
       return true;
    }
@@ -86,8 +116,11 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
 
       WalkActionStateMessage otherMyClass = (WalkActionStateMessage) other;
 
-      if (!this.action_state_.equals(otherMyClass.action_state_)) return false;
+      if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if(this.execution_state_ != otherMyClass.execution_state_) return false;
+
+      if (!this.footstep_plan_state_basics_.equals(otherMyClass.footstep_plan_state_basics_)) return false;
 
       return true;
    }
@@ -98,10 +131,14 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
       StringBuilder builder = new StringBuilder();
 
       builder.append("WalkActionStateMessage {");
-      builder.append("action_state=");
-      builder.append(this.action_state_);      builder.append(", ");
+      builder.append("state=");
+      builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");
-      builder.append(this.definition_);
+      builder.append(this.definition_);      builder.append(", ");
+      builder.append("execution_state=");
+      builder.append(this.execution_state_);      builder.append(", ");
+      builder.append("footstep_plan_state_basics=");
+      builder.append(this.footstep_plan_state_basics_);
       builder.append("}");
       return builder.toString();
    }
