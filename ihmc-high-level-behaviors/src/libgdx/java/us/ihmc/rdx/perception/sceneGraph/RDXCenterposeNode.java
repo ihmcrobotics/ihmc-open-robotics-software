@@ -13,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
@@ -28,7 +27,6 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObject;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -151,25 +149,32 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
          interactableObject.clear();
       }
 
-      if (centerposeNode.getObjectType().equals("SHOE"))
+      switch (centerposeNode.getObjectType())
       {
-         interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
-         interactableObject.load(RigidBodySceneObjectDefinitions.SHOE_VISUAL_MODEL_FILE_PATH, RigidBodySceneObjectDefinitions.SHOE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      }
-      else if (centerposeNode.getObjectType().equals("LAPTOP"))
-      {
-         interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
-         interactableObject.load(RigidBodySceneObjectDefinitions.LAPTOP_VISUAL_MODEL_FILE_PATH, RigidBodySceneObjectDefinitions.LAPTOP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      }
-      else if (centerposeNode.getObjectType().equals("BOOK"))
-      {
-         interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
-         interactableObject.load(RigidBodySceneObjectDefinitions.BOOK_VISUAL_MODEL_FILE_PATH, RigidBodySceneObjectDefinitions.BOOK_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      }
-      else if (centerposeNode.getObjectType().equals("CEREAL"))
-      {
-         interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
-         interactableObject.load(RigidBodySceneObjectDefinitions.CEREAL_VISUAL_MODEL_FILE_PATH, RigidBodySceneObjectDefinitions.CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         case "SHOE" ->
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(RigidBodySceneObjectDefinitions.SHOE_VISUAL_MODEL_FILE_PATH,
+                                    RigidBodySceneObjectDefinitions.SHOE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         }
+         case "LAPTOP" ->
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(RigidBodySceneObjectDefinitions.LAPTOP_VISUAL_MODEL_FILE_PATH,
+                                    RigidBodySceneObjectDefinitions.LAPTOP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         }
+         case "BOOK" ->
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(RigidBodySceneObjectDefinitions.BOOK_VISUAL_MODEL_FILE_PATH,
+                                    RigidBodySceneObjectDefinitions.BOOK_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         }
+         case "CEREAL" ->
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(RigidBodySceneObjectDefinitions.CEREAL_VISUAL_MODEL_FILE_PATH,
+                                    RigidBodySceneObjectDefinitions.CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         }
       }
    }
 
