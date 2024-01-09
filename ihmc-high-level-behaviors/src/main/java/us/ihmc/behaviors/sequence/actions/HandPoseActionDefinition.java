@@ -16,6 +16,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
 {
    private final CRDTUnidirectionalEnumField<RobotSide> side;
    private final CRDTUnidirectionalDouble trajectoryDuration;
+   private final CRDTUnidirectionalDouble minimumIKSolutionQuality;
    private final CRDTUnidirectionalBoolean holdPoseInWorldLater;
    private final CRDTUnidirectionalBoolean jointSpaceControl;
    private final CRDTUnidirectionalString palmParentFrameName;
@@ -27,6 +28,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
 
       side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
       trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 4.0);
+      minimumIKSolutionQuality = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.0);
       holdPoseInWorldLater = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, true);
       jointSpaceControl = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, true);
       palmParentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, ReferenceFrame.getWorldFrame().getName());
@@ -42,6 +44,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       JSONTools.toJSON(jsonNode, palmTransformToParent.getValueReadOnly());
       jsonNode.put("side", side.getValue().getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
+      jsonNode.put("minimumIKSolutionQuality", minimumIKSolutionQuality.getValue());
       jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater.getValue());
       jsonNode.put("jointSpaceControl", jointSpaceControl.getValue());
    }
@@ -53,6 +56,9 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
+      JsonNode minimumIKSolutionQualityNode = jsonNode.get("minimumIKSolutionQuality");
+      if (minimumIKSolutionQualityNode != null)
+         minimumIKSolutionQuality.setValue(minimumIKSolutionQualityNode.asDouble());
       palmParentFrameName.setValue(jsonNode.get("parentFrame").textValue());
       JSONTools.toEuclid(jsonNode, palmTransformToParent.getValue());
       holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
@@ -67,6 +73,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       palmTransformToParent.toMessage(message.getTransformToParent());
       message.setRobotSide(side.toMessage().toByte());
       message.setTrajectoryDuration(trajectoryDuration.toMessage());
+      message.setMinimumIkSolutionQuality(minimumIKSolutionQuality.toMessage());
       message.setHoldPoseInWorld(holdPoseInWorldLater.toMessage());
       message.setJointSpaceControl(jointSpaceControl.toMessage());
    }
@@ -79,6 +86,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       palmTransformToParent.fromMessage(message.getTransformToParent());
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
       trajectoryDuration.fromMessage(message.getTrajectoryDuration());
+      minimumIKSolutionQuality.fromMessage(message.getMinimumIkSolutionQuality());
       holdPoseInWorldLater.fromMessage(message.getHoldPoseInWorld());
       jointSpaceControl.fromMessage(message.getJointSpaceControl());
    }
@@ -102,6 +110,16 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    public void setTrajectoryDuration(double trajectoryDuration)
    {
       this.trajectoryDuration.setValue(trajectoryDuration);
+   }
+
+   public double getMinimumIKSolutionQuality()
+   {
+      return minimumIKSolutionQuality.getValue();
+   }
+
+   public void setMinimumIKSolutionQuality(double minimumIKSolutionQuality)
+   {
+      this.minimumIKSolutionQuality.setValue(minimumIKSolutionQuality);
    }
 
    public boolean getHoldPoseInWorldLater()

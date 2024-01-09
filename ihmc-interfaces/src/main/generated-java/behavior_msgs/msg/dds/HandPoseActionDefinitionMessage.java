@@ -28,6 +28,7 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
             * The trajectory duration
             */
    public double trajectory_duration_;
+   public double minimum_ik_solution_quality_;
    /**
             * Whether maintaining the rigid body controlled in world after the action is complete
             */
@@ -60,6 +61,8 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
       trajectory_duration_ = other.trajectory_duration_;
+
+      minimum_ik_solution_quality_ = other.minimum_ik_solution_quality_;
 
       hold_pose_in_world_ = other.hold_pose_in_world_;
 
@@ -139,6 +142,15 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       return trajectory_duration_;
    }
 
+   public void setMinimumIkSolutionQuality(double minimum_ik_solution_quality)
+   {
+      minimum_ik_solution_quality_ = minimum_ik_solution_quality;
+   }
+   public double getMinimumIkSolutionQuality()
+   {
+      return minimum_ik_solution_quality_;
+   }
+
    /**
             * Whether maintaining the rigid body controlled in world after the action is complete
             */
@@ -195,6 +207,8 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       if (!this.transform_to_parent_.epsilonEquals(other.transform_to_parent_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_ik_solution_quality_, other.minimum_ik_solution_quality_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_pose_in_world_, other.hold_pose_in_world_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.joint_space_control_, other.joint_space_control_, epsilon)) return false;
@@ -220,6 +234,8 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
       if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
 
+      if(this.minimum_ik_solution_quality_ != otherMyClass.minimum_ik_solution_quality_) return false;
+
       if(this.hold_pose_in_world_ != otherMyClass.hold_pose_in_world_) return false;
 
       if(this.joint_space_control_ != otherMyClass.joint_space_control_) return false;
@@ -244,6 +260,8 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       builder.append(this.transform_to_parent_);      builder.append(", ");
       builder.append("trajectory_duration=");
       builder.append(this.trajectory_duration_);      builder.append(", ");
+      builder.append("minimum_ik_solution_quality=");
+      builder.append(this.minimum_ik_solution_quality_);      builder.append(", ");
       builder.append("hold_pose_in_world=");
       builder.append(this.hold_pose_in_world_);      builder.append(", ");
       builder.append("joint_space_control=");
