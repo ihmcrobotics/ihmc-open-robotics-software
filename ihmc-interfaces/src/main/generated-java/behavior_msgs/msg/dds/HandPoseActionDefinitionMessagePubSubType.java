@@ -15,7 +15,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5416513dbc729b33b11814397bea9c39eb3d2c155ae1ca1880c04616df26205c";
+   		return "55f3601a8984778ff7b16edd22e77d7db7b6e3748bc7de5cef1eb44353233894";
    }
    
    @Override
@@ -61,6 +61,8 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -90,6 +92,9 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -112,6 +117,8 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToParent(), cdr);
       cdr.write_type_6(data.getTrajectoryDuration());
 
+      cdr.write_type_6(data.getMinimumIkSolutionQuality());
+
       cdr.write_type_7(data.getHoldPoseInWorld());
 
       cdr.write_type_7(data.getJointSpaceControl());
@@ -126,6 +133,8 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       cdr.read_type_d(data.getParentFrameName());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToParent(), cdr);	
       data.setTrajectoryDuration(cdr.read_type_6());
+      	
+      data.setMinimumIkSolutionQuality(cdr.read_type_6());
       	
       data.setHoldPoseInWorld(cdr.read_type_7());
       	
@@ -144,6 +153,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
+      ser.write_type_6("minimum_ik_solution_quality", data.getMinimumIkSolutionQuality());
       ser.write_type_7("hold_pose_in_world", data.getHoldPoseInWorld());
       ser.write_type_7("joint_space_control", data.getJointSpaceControl());
    }
@@ -158,6 +168,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
+      data.setMinimumIkSolutionQuality(ser.read_type_6("minimum_ik_solution_quality"));
       data.setHoldPoseInWorld(ser.read_type_7("hold_pose_in_world"));
       data.setJointSpaceControl(ser.read_type_7("joint_space_control"));
    }

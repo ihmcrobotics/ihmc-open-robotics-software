@@ -15,6 +15,8 @@ controller_msgs/RigidBodyTransformMessage transform_to_parent
 # The trajectory duration
 float64 trajectory_duration
 
+float64 minimum_ik_solution_quality
+
 # Whether maintaining the rigid body controlled in world after the action is complete
 bool hold_pose_in_world
 

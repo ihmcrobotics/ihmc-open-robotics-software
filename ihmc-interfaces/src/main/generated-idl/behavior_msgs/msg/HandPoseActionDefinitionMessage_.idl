@@ -34,6 +34,7 @@ module behavior_msgs
          * The trajectory duration
          */
         double trajectory_duration;
+        double minimum_ik_solution_quality;
         /**
          * Whether maintaining the rigid body controlled in world after the action is complete
          */
