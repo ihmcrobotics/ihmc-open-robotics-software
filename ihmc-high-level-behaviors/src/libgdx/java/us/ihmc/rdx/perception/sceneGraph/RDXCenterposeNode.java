@@ -169,14 +169,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
       else if (centerposeNode.getObjectType().equals("CEREAL"))
       {
          interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
-         RigidBodyTransform transform = new RigidBodyTransform();
-         EuclidCoreMissingTools.setYawPitchRollDegrees(transform.getRotation(), 90, 90, 0);
-//         transform.getTranslation().addZ(-0.1);
-//         transform.getTranslation().addX(-0.03);
-         transform.getTranslation().addY(-0.2);
-         transform.getTranslation().addZ(-0.05);
-
-         interactableObject.load(RigidBodySceneObjectDefinitions.CEREAL_VISUAL_MODEL_FILE_PATH, transform);
+         interactableObject.load(RigidBodySceneObjectDefinitions.CEREAL_VISUAL_MODEL_FILE_PATH, RigidBodySceneObjectDefinitions.CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       }
    }
 
