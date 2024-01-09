@@ -72,7 +72,7 @@ public class MonteCarloFootstepPlanner
       debugger.printScoreStats(root, request, parameters);
       statistics.stopTotalTime();
       statistics.setLayerCountsString(MonteCarloPlannerTools.getLayerCountsString(root));
-      statistics.logToFile(false, true);
+      statistics.logToFile(true, true);
 
       planning = false;
       return plan;
