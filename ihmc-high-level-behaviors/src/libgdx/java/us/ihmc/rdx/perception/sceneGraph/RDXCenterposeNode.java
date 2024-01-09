@@ -157,7 +157,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
       else if (centerposeNode.getObjectType().equals("LAPTOP"))
       {
          interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
-         interactableObject.load(RigidBodySceneObjectDefinitions.THINKPAD_VISUAL_MODEL_FILE_PATH, RigidBodySceneObjectDefinitions.THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         interactableObject.load(RigidBodySceneObjectDefinitions.LAPTOP_VISUAL_MODEL_FILE_PATH, RigidBodySceneObjectDefinitions.LAPTOP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       }
       else if (centerposeNode.getObjectType().equals("BOOK"))
       {
