@@ -1,0 +1,81 @@
+{
+  "name" : "PickUpShow45Shoe",
+  "object" : "Shoe",
+  "x" : 0.0,
+  "y" : 0.0,
+  "z" : 0.0,
+  "rollInDegrees" : 0.0,
+  "pitchInDegrees" : 0.0,
+  "yawInDegrees" : 0.0,
+  "frames" : [ {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "configuration" : [ {
+      "side" : "left",
+      "type" : "CLOSE"
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "configuration" : [ {
+      "side" : "left",
+      "type" : "OPEN"
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "configuration" : [ {
+      "side" : "left",
+      "type" : "CLOSE"
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "configuration" : [ {
+      "side" : "left",
+      "type" : "GRIP_HARD"
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.045,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "configuration" : [ {
+      "side" : "left",
+      "type" : "GRIP_HARD"
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.165,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "configuration" : [ {
+      "side" : "left",
+      "type" : "GRIP_HARD"
+    } ]
+  } ],
+  "activeSides" : 1,
+  "numberPreGraspFrames" : 2,
+  "numberPostGraspFrames" : 3,
+  "resizablePrimitiveShape" : "NULL"
+}
