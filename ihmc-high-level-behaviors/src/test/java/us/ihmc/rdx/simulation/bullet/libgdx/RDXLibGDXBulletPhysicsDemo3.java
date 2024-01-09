@@ -1,6 +1,5 @@
 package us.ihmc.rdx.simulation.bullet.libgdx;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
@@ -84,11 +83,6 @@ public class RDXLibGDXBulletPhysicsDemo3
          @Override
          public void render()
          {
-            if (simulate.get())
-            {
-               bulletPhysicsManager.simulate(Gdx.graphics.getDeltaTime());
-            }
-
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }

@@ -1,7 +1,9 @@
 package us.ihmc.rdx.mesh;
 
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.graphicsDescription.MeshDataBuilder;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
 
@@ -106,5 +108,17 @@ public class MeshDataGeneratorMissing
       }
 
       return new MeshDataHolder(points, textPoints, triangleIndices, normals);
+   }
+
+   public static MeshDataHolder Arrow(double arrowBodyLength)
+   {
+      double arrowHeadBodyRadiusRatio = 2.0;
+      double arrowBodyRadius = 0.02;
+      double arrowHeadRadius = arrowHeadBodyRadiusRatio * arrowBodyRadius;
+      double arrowHeadLength = 0.08;
+      MeshDataBuilder meshDataBuilder = new MeshDataBuilder();
+      meshDataBuilder.addCylinder(arrowBodyLength, arrowBodyRadius, new Point3D());
+      meshDataBuilder.addCone(arrowHeadLength, arrowHeadRadius, new Point3D(0.0, 0.0, arrowBodyLength));
+      return meshDataBuilder.generateMeshDataHolder();
    }
 }
