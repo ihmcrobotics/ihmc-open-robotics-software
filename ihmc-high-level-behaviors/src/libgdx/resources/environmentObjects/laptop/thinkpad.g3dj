@@ -11317,7 +11317,12 @@
 			"emissive": [ 0.000000,  0.000000,  0.000000], 
 			"opacity":  1.000000, 
 			"specular": [ 0.000000,  0.000000,  0.000000], 
-			"shininess":  56.250000}, 
+			"shininess":  56.250000, 
+			"textures": [
+				{"id": "base_color_texture", 
+					"filename": "laptop-base.jpg", 
+					"type": "DIFFUSE"}
+			]}, 
 		{"id": "logo", 
 			"ambient": [ 0.050876,  0.050876,  0.050876], 
 			"diffuse": [ 0.321300,  0.321300,  0.321300], 
@@ -11345,7 +11350,12 @@
 			"emissive": [ 0.000000,  0.000000,  0.000000], 
 			"opacity":  1.000000, 
 			"specular": [ 0.000000,  0.000000,  0.000000], 
-			"shininess":  25.000000}, 
+			"shininess":  25.000000, 
+			"textures": [
+				{"id": "base_color_texture", 
+					"filename": "laptop-base.jpg", 
+					"type": "DIFFUSE"}
+			]}, 
 		{"id": "slots_2", 
 			"ambient": [ 0.050876,  0.050876,  0.050876], 
 			"diffuse": [ 0.321300,  0.321300,  0.321300], 
