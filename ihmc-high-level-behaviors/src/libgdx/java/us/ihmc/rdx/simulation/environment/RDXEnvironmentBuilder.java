@@ -59,7 +59,7 @@ public class RDXEnvironmentBuilder extends RDXPanel
    private final Quaternion tempOrientation = new Quaternion();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ImFloat ambientLightAmount = new ImFloat(0.4f);
-   private final ImBoolean inputsEnabled = new ImBoolean(true);
+   private final ImBoolean inputsEnabled = new ImBoolean(false);
    private final ImString saveString = new ImString(256);
 
    private boolean loadedFilesOnce = false;
@@ -190,7 +190,7 @@ public class RDXEnvironmentBuilder extends RDXPanel
       {
          if (bulletPhysicsManager.getSimulate().get())
          {
-            allObject.copyBulletTransformToThisMultiBody();
+               allObject.copyBulletTransformToThisMultiBody();
             allObject.afterSimulate(bulletPhysicsManager);
          }
          allObject.update(bulletPhysicsManager);
@@ -475,10 +475,5 @@ public class RDXEnvironmentBuilder extends RDXPanel
    public ArrayList<RDXEnvironmentObject> getAllObjects()
    {
       return allObjects;
-   }
-
-   public ImBoolean getInputsEnabled()
-   {
-      return inputsEnabled;
    }
 }
