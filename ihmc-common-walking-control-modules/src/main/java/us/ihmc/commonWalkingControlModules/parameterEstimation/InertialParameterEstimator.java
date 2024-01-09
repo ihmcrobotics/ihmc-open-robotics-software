@@ -17,19 +17,23 @@ import us.ihmc.parameterEstimation.inertial.LeastSquaresL2PriorInertialParameter
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.MatrixMissingTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.filters.AlphaFilteredElementwiseMatrix;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicEllipsoid3DDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.*;
 
-public class InertialParameterEstimator
+public class InertialParameterEstimator implements SCS2YoGraphicHolder
 {
    private final YoBoolean enableEstimator;
 
@@ -41,6 +45,9 @@ public class InertialParameterEstimator
    private final FullHumanoidRobotModel actualRobotModel;
    private final FullHumanoidRobotModel estimateRobotModel;
    private final JointTorqueRegressorCalculator jointTorqueRegressorCalculator;
+
+   private final ArrayList<YoInertiaEllipsoid> yoInertiaEllipsoids;
+   private final YoGraphicDefinition ellipsoidGraphicGroup;
 
    private final DMatrixRMaj knownParameters;
    private final DMatrixRMaj estimateParameters;
@@ -171,6 +178,9 @@ public class InertialParameterEstimator
 
       ghostEstimate = new AlphaFilteredElementwiseMatrix("ghostEstimate", estimateParameterSize, 1, inertialEstimatorParameters.getEstimateFilteringAlpha(), registry);
       filteredGhostEstimate = new YoMatrix("filteredGhostEstimate", estimateParameterSize, 1, registry);
+
+      yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(estimateRobotModel.getRootBody(), registry);
+      ellipsoidGraphicGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(estimateRobotModel.getRootBody(), yoInertiaEllipsoids);
    }
 
    private void fillKnownParameterVector(FullHumanoidRobotModel model, Map<RigidBodyReadOnly, ArrayList<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>> parametersToEstimateByBody,
@@ -217,6 +227,7 @@ public class InertialParameterEstimator
          updateContactJacobians();
          updateContactWrenches();
          updateWholeSystemTorques();
+         updateInertiaEllipsoids();
 
          jointTorqueRegressorCalculator.compute();
 
@@ -309,6 +320,30 @@ public class InertialParameterEstimator
       {
          compactContactJacobians.get(side).compute();
          jointIndexHandler.compactBlockToFullBlock(legJoints.get(side), compactContactJacobians.get(side).getJacobianMatrix(), fullContactJacobians.get(side));
+      }
+   }
+
+   //TODO: adjust this to be smarter and only update the ellipsoids that are being estimated
+   private void updateInertiaEllipsoids()
+   {
+      RigidBodyBasics[] estimateBodies = estimateRobotModel.getRootBody().subtreeArray();
+      RigidBodyBasics[] actualBodies = actualRobotModel.getRootBody().subtreeArray();
+      for (int i = 0; i < estimateBodies.length; i++)
+      {
+         RigidBodyBasics estimateBody = estimateBodies[i];
+         RigidBodyBasics actualBody = actualBodies[i];
+         if(estimateBody.isRootBody())
+            continue;
+
+         double estimateBodyMass = estimateBody.getInertia().getMass();
+         double actualBodyMass = actualBody.getInertia().getMass();
+         double massRatio = (estimateBodyMass - actualBodyMass) / actualBodyMass;
+         // This assumes that the highest mass we will see is 2x the actual mass, we can normalize to something else if we want
+         double massNormalizedScale = massRatio/2.0 + 0.5;
+         // We enforce that the scale is in the range [0, 1]
+         massNormalizedScale = Math.max(0.0, Math.min(1.0, massNormalizedScale));
+
+         InertiaVisualizationTools.updateEllipsoid(yoInertiaEllipsoids.get(i), massNormalizedScale);
       }
    }
 
@@ -415,5 +450,13 @@ public class InertialParameterEstimator
       {
          return isSorted;
       }
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(ellipsoidGraphicGroup);
+      return group;
    }
 }
