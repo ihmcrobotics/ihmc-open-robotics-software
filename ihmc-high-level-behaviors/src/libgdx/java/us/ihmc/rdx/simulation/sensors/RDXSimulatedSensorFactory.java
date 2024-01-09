@@ -183,7 +183,7 @@ public class RDXSimulatedSensorFactory
 
    public static RDXHighLevelDepthSensorSimulator createBlackflyFisheye(ROS2SyncedRobotModel syncedRobot)
    {
-      return createBlackflyFisheye(syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame(), syncedRobot::getTimestamp);
+      return createBlackflyFisheye(syncedRobot.getReferenceFrames().getSituationalAwarenessCameraFrame(RobotSide.RIGHT), syncedRobot::getTimestamp);
    }
 
    public static RDXHighLevelDepthSensorSimulator createBlackflyFisheyeImageOnlyNoComms(ReferenceFrame sensorFrame)
@@ -225,7 +225,7 @@ public class RDXSimulatedSensorFactory
       double maxRange = 5.0;
       RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = new RDXHighLevelDepthSensorSimulator("Blackfly Right for Object Detection",
                                                                                                             syncedRobot.getReferenceFrames()
-                                                                                                                       .getObjectDetectionCameraFrame(),
+                                                                                                                       .getSituationalAwarenessCameraFrame(RobotSide.RIGHT),
                                                                                                             syncedRobot::getTimestamp,
                                                                                                             verticalFOV,
                                                                                                             imageWidth,

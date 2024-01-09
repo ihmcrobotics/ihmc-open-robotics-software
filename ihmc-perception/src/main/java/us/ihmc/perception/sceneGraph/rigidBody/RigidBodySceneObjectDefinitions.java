@@ -52,13 +52,17 @@ public class RigidBodySceneObjectDefinitions
    {
       CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(CAN_OF_SOUP_HEIGHT / 2.0);
    }
-   public static final double MARKER_TO_CAN_OF_SOUP_X = 0.5;
+   public static final double MARKER_TO_CAN_OF_SOUP_X_WORLD = 0.5;
+   public static final double CAN_OF_SOUP_FROM_TABLE_EDGE = 0.03;
    public static final RigidBodyTransform MARKER_TO_CAN_OF_SOUP_TRANSFORM = new RigidBodyTransform();
    public static final RigidBodyTransform CAN_OF_SOUP_TO_MARKER_TRANSFORM = new RigidBodyTransform();
    static
    {
       EuclidCoreMissingTools.setYawPitchRollDegrees(MARKER_TO_CAN_OF_SOUP_TRANSFORM.getRotation(), 0.0, -90.0, 0.0);
-      MARKER_TO_CAN_OF_SOUP_TRANSFORM.getTranslation().set(0.0, -MARKER_TO_CAN_OF_SOUP_X, 0.0);
+      double canDistanceFromMarker = CAN_OF_SOUP_FROM_TABLE_EDGE - TableModelParameters.TABLE_ARUCO_MARKER_FROM_FRONT_EDGE;
+      MARKER_TO_CAN_OF_SOUP_TRANSFORM.getTranslation().set(canDistanceFromMarker,
+                                                           -MARKER_TO_CAN_OF_SOUP_X_WORLD,
+                                                           0.0);
       CAN_OF_SOUP_TO_MARKER_TRANSFORM.setAndInvert(MARKER_TO_CAN_OF_SOUP_TRANSFORM);
    }
 

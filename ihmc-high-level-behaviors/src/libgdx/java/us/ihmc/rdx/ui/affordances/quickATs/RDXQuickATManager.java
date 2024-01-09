@@ -47,7 +47,7 @@ public class RDXQuickATManager extends RDXPanel
    private final ImBoolean saveArms = new ImBoolean(false);
    private final ImBoolean saveFootsteps = new ImBoolean(false);
    private final SideDependentList<ImBoolean> saveArmsSide = new SideDependentList<>();
-   private RDXArmControlMode armControlMode = RDXArmControlMode.POSE_WORLD;
+   private RDXArmControlMode armControlMode = RDXArmControlMode.TASKSPACE;
 
    private List<String> nodeNames;
    private transient String[] selectableNodeNameArray = new String[0];
@@ -133,13 +133,13 @@ public class RDXQuickATManager extends RDXPanel
                   ImGui.sameLine();
                   ImGui.checkbox(labels.get(side.getLowerCaseName()), saveArmsSide.get(side));
                }
-               if (ImGui.radioButton(labels.get("Joint angles"), armControlMode == RDXArmControlMode.JOINT_ANGLES))
+               if (ImGui.radioButton(labels.get("Joint angles"), armControlMode == RDXArmControlMode.JOINTSPACE))
                {
-                  armControlMode = RDXArmControlMode.JOINT_ANGLES;
+                  armControlMode = RDXArmControlMode.JOINTSPACE;
                }
-               if (ImGui.radioButton(labels.get("Hands Pose"), armControlMode == RDXArmControlMode.POSE_WORLD))
+               if (ImGui.radioButton(labels.get("Hands Pose"), armControlMode == RDXArmControlMode.TASKSPACE))
                {
-                  armControlMode = RDXArmControlMode.POSE_WORLD;
+                  armControlMode = RDXArmControlMode.TASKSPACE;
                }
             }
             ImGui.checkbox(labels.get("Footsteps"), saveFootsteps);
@@ -220,7 +220,7 @@ public class RDXQuickATManager extends RDXPanel
                {
                   if (saveArmsSide.get(side).get())
                   {
-                     if (armControlMode == RDXArmControlMode.JOINT_ANGLES)
+                     if (armControlMode == RDXArmControlMode.JOINTSPACE)
                      {
                         ObjectNode armNode = armsArrayNode.addObject();
                         armNode.put("side", side.getLowerCaseName());

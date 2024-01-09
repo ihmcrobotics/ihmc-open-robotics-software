@@ -52,7 +52,7 @@ public class ArmIKSolver
    public static final double CONTROL_DT = 0.001;
    public static final double GRAVITY = 9.81;
    public static final double GOOD_QUALITY_MAX = 1.0;
-   private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 50;
+   private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 70;
    public static final double DEFAULT_POSITION_GAIN = 1200.0;
    public static final double DEFAULT_POSITION_WEIGHT = 20.0;
    public static final double DEFAULT_ORIENTATION_GAIN = 100.0;

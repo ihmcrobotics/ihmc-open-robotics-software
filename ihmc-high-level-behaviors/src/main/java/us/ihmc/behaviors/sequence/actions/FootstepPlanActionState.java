@@ -11,22 +11,20 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionDefinition>
 {
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<FootstepPlanActionFootstepState> footsteps;
-   private int totalNumberOfFootsteps;
-   private int numberOfIncompleteFootsteps;
+   private final FootstepPlanActionStateBasics footstepPlanStateBasics;
 
    public FootstepPlanActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(id, new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      this.referenceFrameLibrary = referenceFrameLibrary;
-
       footsteps = new RecyclingArrayList<>(() ->
          new FootstepPlanActionFootstepState(referenceFrameLibrary,
                                              this,
                                              RecyclingArrayListTools.getUnsafe(getDefinition().getFootsteps().getValueUnsafe(), numberOfAllocatedFootsteps++)));
+
+      footstepPlanStateBasics = new FootstepPlanActionStateBasics(crdtInfo);
    }
 
    @Override
@@ -47,8 +45,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       super.toMessage(message.getState());
 
-      message.setTotalNumberOfFootsteps(totalNumberOfFootsteps);
-      message.setNumberOfIncompleteFootsteps(numberOfIncompleteFootsteps);
+      footstepPlanStateBasics.toMessage(message.getFootstepPlanStateBasics());
 
       message.getFootsteps().clear();
       for (FootstepPlanActionFootstepState footstep : footsteps)
@@ -63,8 +60,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       getDefinition().fromMessage(message.getDefinition());
 
-      totalNumberOfFootsteps = message.getTotalNumberOfFootsteps();
-      numberOfIncompleteFootsteps = message.getNumberOfIncompleteFootsteps();
+      footstepPlanStateBasics.fromMessage(message.getFootstepPlanStateBasics());
 
       footsteps.clear();
       for (FootstepPlanActionFootstepStateMessage footstep : message.getFootsteps())
@@ -78,23 +74,8 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       return footsteps;
    }
 
-   public int getTotalNumberOfFootsteps()
+   public FootstepPlanActionStateBasics getBasics()
    {
-      return totalNumberOfFootsteps;
-   }
-
-   public void setTotalNumberOfFootsteps(int totalNumberOfFootsteps)
-   {
-      this.totalNumberOfFootsteps = totalNumberOfFootsteps;
-   }
-
-   public int getNumberOfIncompleteFootsteps()
-   {
-      return numberOfIncompleteFootsteps;
-   }
-
-   public void setNumberOfIncompleteFootsteps(int numberOfIncompleteFootsteps)
-   {
-      this.numberOfIncompleteFootsteps = numberOfIncompleteFootsteps;
+      return footstepPlanStateBasics;
    }
 }

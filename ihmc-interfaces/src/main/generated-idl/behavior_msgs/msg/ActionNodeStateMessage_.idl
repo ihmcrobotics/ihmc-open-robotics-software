@@ -37,6 +37,10 @@ module behavior_msgs
          */
         boolean is_executing;
         /**
+         * If the node had a failure during it's last execution
+         */
+        boolean failed;
+        /**
          * Nominal execution duration
          */
         double nominal_execution_duration;
