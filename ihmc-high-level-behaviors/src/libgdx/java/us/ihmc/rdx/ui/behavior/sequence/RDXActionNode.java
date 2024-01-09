@@ -9,6 +9,7 @@ import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiHollowArrowRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeTools;
 
@@ -26,10 +27,23 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    private final ImString rejectionTooltip = new ImString();
    private final ImGuiHollowArrowRenderer hollowArrowRenderer = new ImGuiHollowArrowRenderer();
    private final ImGuiFlashingText flashingDescriptionColor = new ImGuiFlashingText(ImGuiTools.RED);
+   private boolean wasFailed = false;
 
    public RDXActionNode(S state)
    {
       super(state);
+   }
+
+   @Override
+   public void update()
+   {
+      super.update();
+
+      if (!wasFailed && getState().getFailed())
+      {
+         RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("%s failed".formatted(getDefinition().getDescription()));
+      }
+      wasFailed = getState().getFailed();
    }
 
    @Override
