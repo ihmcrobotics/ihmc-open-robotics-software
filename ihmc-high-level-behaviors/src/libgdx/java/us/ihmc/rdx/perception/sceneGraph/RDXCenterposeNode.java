@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
@@ -27,6 +28,7 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObject;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -167,7 +169,14 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
       else if (centerposeNode.getObjectType().equals("CEREAL"))
       {
          interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
-         interactableObject.load(RigidBodySceneObjectDefinitions.CEREAL_VISUAL_MODEL_FILE_PATH, RigidBodySceneObjectDefinitions.CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         RigidBodyTransform transform = new RigidBodyTransform();
+         EuclidCoreMissingTools.setYawPitchRollDegrees(transform.getRotation(), 90, 90, 0);
+//         transform.getTranslation().addZ(-0.1);
+//         transform.getTranslation().addX(-0.03);
+         transform.getTranslation().addY(-0.2);
+         transform.getTranslation().addZ(-0.05);
+
+         interactableObject.load(RigidBodySceneObjectDefinitions.CEREAL_VISUAL_MODEL_FILE_PATH, transform);
       }
    }
 
