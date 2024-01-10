@@ -215,6 +215,11 @@ public class RigidBodyJointControlHelper
       if (functionGeneratorErrorCalculator != null)
          functionGeneratorErrorCalculator.update();
 
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      {
+         functionGenerators.get(jointIdx).update();
+      }
+
       feedbackControlCommand.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
@@ -241,17 +246,9 @@ public class RigidBodyJointControlHelper
          }
 
          generator.compute(timeInTrajectory);
-         double desiredPosition = generator.getValue();
-         double desiredVelocity = generator.getVelocity();
-         double feedForwardAcceleration = generator.getAcceleration();
-
-         if (!functionGenerators.isEmpty())
-         {
-            functionGenerators.get(jointIdx).update();
-            desiredPosition += functionGenerators.get(jointIdx).getValue();
-            desiredVelocity += functionGenerators.get(jointIdx).getValueDot();
-            feedForwardAcceleration += functionGenerators.get(jointIdx).getValueDDot();
-         }
+         double desiredPosition = getJointDesiredPosition(jointIdx);
+         double desiredVelocity = getJointDesiredVelocity(jointIdx);
+         double feedForwardAcceleration = getJointDesiredAcceleration(jointIdx);
 
          OneDoFJointBasics joint = joints[jointIdx];
          PIDGainsReadOnly gain = gains.get(jointIdx);
@@ -599,7 +596,12 @@ public class RigidBodyJointControlHelper
 
    public double getJointDesiredPosition(int jointIdx)
    {
-      return jointTrajectoryGenerators.get(jointIdx).getValue();
+      double desiredPosition = jointTrajectoryGenerators.get(jointIdx).getValue();
+      if (!functionGenerators.isEmpty())
+      {
+         desiredPosition += functionGenerators.get(jointIdx).getValue();
+      }
+      return desiredPosition;
    }
 
    public void queueInitialPointsAtCurrentDesired()
@@ -612,7 +614,22 @@ public class RigidBodyJointControlHelper
 
    public double getJointDesiredVelocity(int jointIdx)
    {
-      return jointTrajectoryGenerators.get(jointIdx).getVelocity();
+      double desiredVelocity = jointTrajectoryGenerators.get(jointIdx).getVelocity();
+      if (!functionGenerators.isEmpty())
+      {
+         desiredVelocity += functionGenerators.get(jointIdx).getValueDot();
+      }
+      return desiredVelocity;
+   }
+
+   public double getJointDesiredAcceleration(int jointIdx)
+   {
+      double desiredAcceleration = jointTrajectoryGenerators.get(jointIdx).getAcceleration();
+      if (!functionGenerators.isEmpty())
+      {
+         desiredAcceleration += functionGenerators.get(jointIdx).getValueDDot();
+      }
+      return desiredAcceleration;
    }
 
    public JointspaceFeedbackControlCommand getJointspaceCommand()
