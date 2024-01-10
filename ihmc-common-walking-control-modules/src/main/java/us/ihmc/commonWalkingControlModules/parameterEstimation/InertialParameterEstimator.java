@@ -335,6 +335,7 @@ public class InertialParameterEstimator implements SCS2YoGraphicHolder
          if(estimateBody.isRootBody())
             continue;
 
+         //FIXME (CD): estimateRobotModel is not updated after the first tick, we need to grab the mass another way
          double estimateBodyMass = estimateBody.getInertia().getMass();
          double actualBodyMass = actualBody.getInertia().getMass();
          double massRatio = (estimateBodyMass - actualBodyMass) / actualBodyMass;
