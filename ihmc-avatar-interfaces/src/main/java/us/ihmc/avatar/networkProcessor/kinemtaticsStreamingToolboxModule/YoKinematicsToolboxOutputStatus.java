@@ -158,6 +158,15 @@ public class YoKinematicsToolboxOutputStatus
       desiredRootJointAcceleration.set(other.desiredRootJointAcceleration);
    }
 
+   public void zeroAccelerations()
+   {
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         desiredJointAccelerations[i].set(0.0);
+      }
+      desiredRootJointAcceleration.setToZero();
+   }
+
    private final KinematicsToolboxOutputStatus interpolationStatus = new KinematicsToolboxOutputStatus();
 
    public void interpolate(KinematicsToolboxOutputStatus end, double alpha)
@@ -168,6 +177,13 @@ public class YoKinematicsToolboxOutputStatus
    public void interpolate(KinematicsToolboxOutputStatus start, KinematicsToolboxOutputStatus end, double alpha)
    {
       MessageTools.interpolateMessages(start, end, alpha, interpolationStatus);
+      set(interpolationStatus);
+   }
+
+   public void interpolateAcceleration(KinematicsToolboxOutputStatus start, KinematicsToolboxOutputStatus end, double alpha)
+   {
+      interpolationStatus.set(end);
+      MessageTools.interpolateMessagesAccelerations(start, end, alpha, interpolationStatus);
       set(interpolationStatus);
    }
 
