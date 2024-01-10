@@ -75,7 +75,7 @@ public class OpenCVArUcoMarkerDetectionOutput
       corners.clear();
       corners.put(detection.getCorners());
 
-      ids.copyTo(ids);
+      detection.getIDs().copyTo(ids);
 
       rejectedImagePoints.clear();
       rejectedImagePoints.put(detection.getRejectedImagePoints());
