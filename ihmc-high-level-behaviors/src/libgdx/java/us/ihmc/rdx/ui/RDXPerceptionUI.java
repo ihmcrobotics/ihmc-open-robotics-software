@@ -15,7 +15,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXBuildingConstructor;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.ui.graphics.ros2.*;
-import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.RDXGeneralToolsPanel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 
@@ -26,7 +26,7 @@ public class RDXPerceptionUI
    private final PerceptionDataLoader perceptionDataLoader = new PerceptionDataLoader();
 
    private RDXBaseUI baseUI;
-   private RDXGlobalVisualizersPanel globalVisualizersUI;
+   private RDXGeneralToolsPanel globalVisualizersUI;
 
    private RDXPerceptionDataLoaderPanel perceptionLogLoaderPanel;
    private RDXPerceptionDataLoggerPanel perceptionLoggingPanel;
@@ -43,7 +43,7 @@ public class RDXPerceptionUI
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "perception_ui_node");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      globalVisualizersUI = new RDXGlobalVisualizersPanel();
+      globalVisualizersUI = new RDXGeneralToolsPanel();
       baseUI = new RDXBaseUI("Perception UI");
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()

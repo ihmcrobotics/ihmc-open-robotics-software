@@ -9,7 +9,7 @@ import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.RDXGeneralToolsPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2DetectedObjectBoundingBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
@@ -24,7 +24,7 @@ public class RDXCenterposeSceneGraphDemo
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
-   private RDXGlobalVisualizersPanel globalVisualizersPanel;
+   private RDXGeneralToolsPanel globalVisualizersPanel;
    private CenterposeDetectionManager centerposeProcess;
    private ROS2SceneGraph onRobotSceneGraph;
    private ReferenceFrameLibrary referenceFrameLibrary;
@@ -43,7 +43,7 @@ public class RDXCenterposeSceneGraphDemo
             ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "centerpose_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);
 
-            globalVisualizersPanel = new RDXGlobalVisualizersPanel();
+            globalVisualizersPanel = new RDXGeneralToolsPanel();
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersPanel);
 

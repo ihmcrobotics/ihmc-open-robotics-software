@@ -9,7 +9,7 @@ import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BigVideoVisualizer;
-import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.RDXGeneralToolsPanel;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class RDXROS2VideoSensorDemo
@@ -25,7 +25,7 @@ public class RDXROS2VideoSensorDemo
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
 
-         private RDXGlobalVisualizersPanel globalVisualizersPanel;
+         private RDXGeneralToolsPanel globalVisualizersPanel;
 
          @Override
          public void create()
@@ -44,7 +44,7 @@ public class RDXROS2VideoSensorDemo
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
             PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
-            globalVisualizersPanel = new RDXGlobalVisualizersPanel();
+            globalVisualizersPanel = new RDXGeneralToolsPanel();
 
             RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video",
                                                                                       pubSubImplementation,
