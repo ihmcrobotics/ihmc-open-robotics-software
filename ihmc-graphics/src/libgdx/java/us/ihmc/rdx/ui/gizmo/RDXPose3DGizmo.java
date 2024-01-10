@@ -47,9 +47,13 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRDragData;
+import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.Random;
 
@@ -121,6 +125,10 @@ public class RDXPose3DGizmo implements RenderableProvider
    private boolean queuePopupToOpen = false;
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
+   private final SideDependentList<SixDoFSelection> closestVRCollisionSelection = new SideDependentList<>(null, null);
+   private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
+   private final SideDependentList<Boolean> vrAngular = new SideDependentList<>(false, false);
+   private final SideDependentList<Boolean> vrLinear = new SideDependentList<>(false, false);
 
    public RDXPose3DGizmo()
    {
@@ -256,6 +264,75 @@ public class RDXPose3DGizmo implements RenderableProvider
       recreateGraphics();
    }
 
+   public void calculateVRViewPick(RDXVRContext vrContext)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            if (!controller.getTriggerDragData().isDraggingSomething())
+            {
+               Line3DReadOnly pickRay = controller.getPickRay();
+               closestVRCollisionSelection.put(side, determineCurrentSelectionFromPickRay(pickRay));
+            }
+            if (closestVRCollisionSelection.get(side) != null)
+            {
+               vrPickResult.get(side).setDistanceToControllerPickPoint(closestCollisionDistance);
+               controller.addPickResult(vrPickResult.get(side));
+            }
+         });
+      }
+   }
+
+   public void processVRViewInput(RDXVRContext vrContext)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            RDXVRDragData triggerDragData = controller.getTriggerDragData();
+
+            if (triggerDragData.getDragJustStarted())
+            {
+               clockFaceDragAlgorithm.reset();
+               triggerDragData.setObjectBeingDragged(this);
+            }
+            updateMaterialHighlighting();
+            if (triggerDragData.isBeingDragged(this))
+            {
+               Line3DReadOnly pickRay = controller.getPickRay();
+
+               if (closestVRCollisionSelection.get(side) != null)
+               {
+                  if (closestVRCollisionSelection.get(side).isLinear())
+                  {
+                     Vector3DReadOnly linearMotion = lineDragAlgorithm.calculate(pickRay,
+                                                                                 closestCollision,
+                                                                                 axisRotations.get(closestVRCollisionSelection.get(side).toAxis3D()),
+                                                                                 transformToWorld);
+                     frameBasedGizmoModification.translateInWorld(linearMotion);
+                     closestCollision.add(linearMotion);
+                     controller.setPickRayColliding(pickRay.getPoint().distance(closestCollision));
+                  }
+                  else if (closestVRCollisionSelection.get(side).isAngular())
+                  {
+                     if (clockFaceDragAlgorithm.calculate(pickRay,
+                                                          closestCollision,
+                                                          axisRotations.get(closestVRCollisionSelection.get(side).toAxis3D()),
+                                                          transformToWorld))
+                     {
+                        frameBasedGizmoModification.rotateInWorld(clockFaceDragAlgorithm.getMotion());
+                        controller.setPickRayColliding(pickRay.getPoint().distance(closestCollision));
+                     }
+                  }
+                  frameBasedGizmoModification.setAdjustmentNeedsToBeApplied();
+               }
+            }
+         });
+      }
+      update();
+   }
+
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       boolean isWindowHovered = ImGui.isWindowHovered();
@@ -269,7 +346,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          // on this gizmo at any time
 
          Line3DReadOnly pickRay = input.getPickRayInWorld();
-         determineCurrentSelectionFromPickRay(pickRay);
+         closestCollisionSelection = determineCurrentSelectionFromPickRay(pickRay);
 
          if (closestCollisionSelection != null)
          {
@@ -499,9 +576,9 @@ public class RDXPose3DGizmo implements RenderableProvider
       }
    }
 
-   private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
+   private SixDoFSelection determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
    {
-      closestCollisionSelection = null;
+      SixDoFSelection closestCollisionSelection = null;
       closestCollisionDistance = Double.POSITIVE_INFINITY;
 
       // Optimization: Do one large sphere collision to avoid completely far off picks
@@ -551,12 +628,14 @@ public class RDXPose3DGizmo implements RenderableProvider
             }
          }
       }
+      return closestCollisionSelection;
    }
 
    private void updateMaterialHighlighting()
    {
       // closestCollisionSelection can be null if the the 3D panel is zoomed in or out without the mouse hovering
       boolean highlightingPrior = (isGizmoHovered || isBeingManipulated) && closestCollisionSelection != null;
+
       // could only do this when selection changed
 
       if (highlightingPrior && closestCollisionSelection.isCenter())
@@ -570,7 +649,18 @@ public class RDXPose3DGizmo implements RenderableProvider
 
       for (Axis3D axis : Axis3D.values)
       {
-         if (highlightingPrior && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
+         if (closestVRCollisionSelection.get(RobotSide.RIGHT) != null)
+         {
+            vrLinear.put(RobotSide.RIGHT, closestVRCollisionSelection.get(RobotSide.RIGHT).isLinear() && closestVRCollisionSelection.get(RobotSide.RIGHT).toAxis3D() == axis);
+            vrAngular.put(RobotSide.RIGHT, closestVRCollisionSelection.get(RobotSide.RIGHT).isAngular() && closestVRCollisionSelection.get(RobotSide.RIGHT).toAxis3D() == axis);
+         }
+         if (closestVRCollisionSelection.get(RobotSide.LEFT) != null)
+         {
+            vrAngular.put(RobotSide.LEFT, closestVRCollisionSelection.get(RobotSide.LEFT).isAngular() && closestVRCollisionSelection.get(RobotSide.LEFT).toAxis3D() == axis);
+            vrLinear.put(RobotSide.LEFT, closestVRCollisionSelection.get(RobotSide.LEFT).isLinear() && closestVRCollisionSelection.get(RobotSide.LEFT).toAxis3D() == axis);
+         }
+         if (highlightingPrior && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis ||
+             vrAngular.get(RobotSide.RIGHT)||vrAngular.get(RobotSide.LEFT))
          {
             torusModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
@@ -579,7 +669,8 @@ public class RDXPose3DGizmo implements RenderableProvider
             torusModels[axis.ordinal()].setMaterial(normalMaterials[axis.ordinal()]);
          }
 
-         if (highlightingPrior && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
+         if (highlightingPrior && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis ||
+             vrLinear.get(RobotSide.RIGHT) || vrLinear.get(RobotSide.LEFT))
          {
             arrowModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }

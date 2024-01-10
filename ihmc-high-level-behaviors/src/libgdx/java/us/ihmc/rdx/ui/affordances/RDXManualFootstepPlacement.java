@@ -141,7 +141,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    {
       if (footstepBeingPlaced != null)
       {
-         footstepBeingPlaced.processVRInput(vrContext);
+         footstepBeingPlaced.processVRInput(vrContext, true);
       }
    }
 
