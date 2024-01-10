@@ -309,10 +309,10 @@ public class InertiaVisualizationTools
    }
 
    /**
-    * Takes a scale between 0 and 1 and returns the RGB values for the PiYG colormap at that scale.
+    * Takes a scale between 0 and 1 and returns the RGB values for the Coolwarm colormap at that scale.
     * <p>
-    * NOTE: This method uses coefficients from a polynomial fit of the RGB values of the PiYG colormap from Python. The coefficients were computed externally
-    * in a Python script. For a higher or lower order fit, the coefficients would need to be regenerated.
+    * NOTE: This method uses coefficients from a polynomial fit of the RGB values of the Coolwarm colormap from Python. The coefficients were computed
+    * externally in a Python script. For a higher or lower order fit, the coefficients would need to be regenerated.
     * </p>
     *
     * @param scale Number between 0 and 1, determines the location on the colormap.
