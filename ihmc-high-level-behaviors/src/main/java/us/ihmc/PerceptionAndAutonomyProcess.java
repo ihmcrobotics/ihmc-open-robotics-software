@@ -380,7 +380,7 @@ public class PerceptionAndAutonomyProcess
          if (!arUcoUpdater.isInitialized())
             arUcoUpdater.initializeArUcoDetection(blackflyImages.get(RobotSide.RIGHT).getImageWidth(), blackflyImages.get(RobotSide.RIGHT).getImageHeight());
          arUcoUpdater.undistortAndUpdateArUco(blackflyImages.get(RobotSide.RIGHT).get());
-         sharedArUcoDetectionOutput.getForThreadOne().copyOutput(arUcoUpdater.getArUcoMarkerDetection());
+         sharedArUcoDetectionOutput.getForThreadOne().set(arUcoUpdater.getArUcoMarkerDetection());
          sharedArUcoDetectionOutput.swap();
       }
       else

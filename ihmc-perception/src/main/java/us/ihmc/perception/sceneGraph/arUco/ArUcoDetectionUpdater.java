@@ -59,7 +59,7 @@ public class ArUcoDetectionUpdater
          undistortedImageRGB.download(arUcoBytedecoImage.getBytedecoOpenCVMat());
 
          arUcoMarkerDetection.update();
-         arUcoMarkerDetectionOutput.copyOutput(arUcoMarkerDetection);
+         arUcoMarkerDetectionOutput.set(arUcoMarkerDetection);
          arUcoMarkerPublisher.update();
 
          // Close stuff
