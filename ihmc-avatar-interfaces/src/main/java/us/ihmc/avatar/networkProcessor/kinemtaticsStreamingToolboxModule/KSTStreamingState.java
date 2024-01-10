@@ -142,6 +142,7 @@ public class KSTStreamingState implements State
    private final YoDouble streamingStartTime = new YoDouble("streamingStartTime", registry);
    private final YoDouble streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
    private final YoDouble solutionFilterBreakFrequency = new YoDouble("solutionFilterBreakFrequency", registry);
+   private final YoDouble solutionAccelerationFilterBreakFrequency = new YoDouble("solutionAccelerationFilterBreakFrequency", registry);
    private final YoKinematicsToolboxOutputStatus initialRobotState, blendedRobotState;
    private final YoKinematicsToolboxOutputStatus ikRobotState, previousRobotState, filteredRobotState, outputRobotState;
    private final YoDouble outputJointVelocityScale = new YoDouble("outputJointVelocityScale", registry);
@@ -256,6 +257,7 @@ public class KSTStreamingState implements State
 
       streamingBlendingDuration.set(parameters.getDefaultStreamingBlendingDuration());
       solutionFilterBreakFrequency.set(Double.POSITIVE_INFINITY);
+      solutionAccelerationFilterBreakFrequency.set(70.0);
       FloatingJointBasics rootJoint = desiredFullRobotModel.getRootJoint();
       OneDoFJointBasics[] oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
       initialRobotState = new YoKinematicsToolboxOutputStatus("Initial", rootJoint, oneDoFJoints, registry);
@@ -728,6 +730,7 @@ public class KSTStreamingState implements State
       if (resetFilter)
       {
          filteredRobotState.set(ikRobotState);
+         filteredRobotState.zeroAccelerations();
          resetFilter = false;
       }
       else
@@ -735,10 +738,11 @@ public class KSTStreamingState implements State
          double alphaFilter = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(solutionFilterBreakFrequency.getValue(),
                                                                                               tools.getToolboxControllerPeriod());
          filteredRobotState.interpolate(ikRobotState.getStatus(), filteredRobotState.getStatus(), alphaFilter);
+         filteredRobotState.setDesiredAccelerationsByFiniteDifference(previousRobotState, filteredRobotState, tools.getToolboxControllerPeriod());
+         double accelerationAlphaFilter = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(solutionAccelerationFilterBreakFrequency.getValue(),
+                                                                                              tools.getToolboxControllerPeriod());
+         filteredRobotState.interpolateAcceleration(ikRobotState.getStatus(), filteredRobotState.getStatus(), accelerationAlphaFilter);
       }
-
-      filteredRobotState.setDesiredAccelerationsByFiniteDifference(previousRobotState, filteredRobotState, tools.getToolboxControllerPeriod());
-      // TODO need to apply the acceleration filter here. 
 
       if (isStreaming.getValue())
       {

@@ -933,6 +933,33 @@ public class MessageTools
       interpolatedToPack.setJointNameHash(outputStatusOne.getJointNameHash());
    }
 
+   public static void interpolateMessagesAccelerations(KinematicsToolboxOutputStatus outputStatusOne, KinematicsToolboxOutputStatus outputStatusTwo, double alpha,
+                                          KinematicsToolboxOutputStatus interpolatedToPack)
+   {
+      if (outputStatusOne.getJointNameHash() != outputStatusTwo.getJointNameHash())
+         throw new RuntimeException("Output status are not compatible.");
+
+      interpolatedToPack.getDesiredJointAccelerations().reset();
+
+      TFloatArrayList jointAccelerations1 = outputStatusOne.getDesiredJointAccelerations();
+      TFloatArrayList jointAccelerations2 = outputStatusTwo.getDesiredJointAccelerations();
+
+      for (int i = 0; i < jointAccelerations1.size(); i++)
+      {
+         interpolatedToPack.getDesiredJointAccelerations().add((float) EuclidCoreTools.interpolate(jointAccelerations1.get(i), jointAccelerations2.get(i), alpha));
+      }
+
+      Vector3D rootLinearAcceleration1 = outputStatusOne.getDesiredRootLinearAcceleration();
+      Vector3D rootLinearAcceleration2 = outputStatusTwo.getDesiredRootLinearAcceleration();
+      Vector3D rootAngularAcceleration1 = outputStatusOne.getDesiredRootAngularAcceleration();
+      Vector3D rootAngularAcceleration2 = outputStatusTwo.getDesiredRootAngularAcceleration();
+
+      interpolatedToPack.getDesiredRootLinearAcceleration().interpolate(rootLinearAcceleration1, rootLinearAcceleration2, alpha);
+      interpolatedToPack.getDesiredRootAngularAcceleration().interpolate(rootAngularAcceleration1, rootAngularAcceleration2, alpha);
+
+      interpolatedToPack.setJointNameHash(outputStatusOne.getJointNameHash());
+   }
+
    /**
     * Interpolates from {@code start} to {@code end} given {@code alpha} &in;[0,1].
     *
