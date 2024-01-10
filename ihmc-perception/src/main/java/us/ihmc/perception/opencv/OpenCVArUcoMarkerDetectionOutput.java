@@ -20,6 +20,11 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 
+/**
+ * This class provides support for copying the full output from
+ * the ArUco marker detector so that subsequent operations can
+ * happen on different threads.
+ */
 public class OpenCVArUcoMarkerDetectionOutput
 {
    private final BytedecoImage inputImage;
