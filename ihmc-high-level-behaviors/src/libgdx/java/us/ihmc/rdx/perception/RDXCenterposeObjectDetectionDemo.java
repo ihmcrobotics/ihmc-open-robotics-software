@@ -9,7 +9,7 @@ import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.RDXGeneralToolsPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2DetectedObjectBoundingBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
@@ -20,7 +20,7 @@ import us.ihmc.sensors.ZEDModelData;
 public class RDXCenterposeObjectDetectionDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("Centerpose Object Detection Demo");
-   private final RDXGlobalVisualizersPanel globalVisualizersPanel = new RDXGlobalVisualizersPanel();
+   private final RDXGeneralToolsPanel globalVisualizersPanel = new RDXGeneralToolsPanel();
    private final ROS2Helper ros2Helper;
 
    public RDXCenterposeObjectDetectionDemo()

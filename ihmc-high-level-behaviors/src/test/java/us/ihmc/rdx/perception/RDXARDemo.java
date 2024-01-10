@@ -10,7 +10,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDX3DSituatedImagePanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BigVideoVisualizer;
-import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.RDXGeneralToolsPanel;
 import us.ihmc.pubsub.DomainFactory;
 
 public class RDXARDemo
@@ -19,7 +19,7 @@ public class RDXARDemo
    private RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
-   private RDXGlobalVisualizersPanel globalVisualizersPanel;
+   private RDXGeneralToolsPanel globalVisualizersPanel;
    private RDX3DPanel arPanel;
    private RDX3DSituatedImagePanel situatedImage3DPanel;
 
@@ -45,7 +45,7 @@ public class RDXARDemo
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
             DomainFactory.PubSubImplementation pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
-            globalVisualizersPanel = new RDXGlobalVisualizersPanel();
+            globalVisualizersPanel = new RDXGeneralToolsPanel();
 
             RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video",
                                                                                       pubSubImplementation,

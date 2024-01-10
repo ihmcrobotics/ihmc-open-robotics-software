@@ -21,7 +21,7 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXSteppableRegionsVisualizer;
-import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.RDXGeneralToolsPanel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.RealtimeROS2Node;
 
@@ -37,7 +37,7 @@ public class RDXSteppableRegionCalculatorDemo
    private final RemoteSteppableRegionsUpdater steppableRegionsUpdater;
    private final RDXRemoteHeightMapPanel heightMapUI;
    private final RDXSteppableRegionsPanel steppableRegionsUI;
-   private final RDXGlobalVisualizersPanel globalVisualizersUI;
+   private final RDXGeneralToolsPanel globalVisualizersUI;
 
    public RDXSteppableRegionCalculatorDemo()
    {
@@ -60,7 +60,7 @@ public class RDXSteppableRegionCalculatorDemo
       baseUI.getImGuiPanelManager().addPanel(heightMapUI.getPanel());
 
       // Configure the height map visualizer
-      globalVisualizersUI = new RDXGlobalVisualizersPanel();
+      globalVisualizersUI = new RDXGeneralToolsPanel();
 
       RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer();
       heightMapVisualizer.setActive(true);

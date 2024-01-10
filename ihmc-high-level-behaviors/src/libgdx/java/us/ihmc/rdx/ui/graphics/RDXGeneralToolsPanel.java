@@ -12,13 +12,13 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class RDXGlobalVisualizersPanel extends RDXPanel implements RDXRenderableProvider
+public class RDXGeneralToolsPanel extends RDXPanel implements RDXRenderableProvider
 {
    private final ArrayList<RDXVisualizer> visualizers = new ArrayList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private boolean created = false;
 
-   public RDXGlobalVisualizersPanel()
+   public RDXGeneralToolsPanel()
    {
       super("General Tools");
       setRenderMethod(this::renderImGuiWidgets);

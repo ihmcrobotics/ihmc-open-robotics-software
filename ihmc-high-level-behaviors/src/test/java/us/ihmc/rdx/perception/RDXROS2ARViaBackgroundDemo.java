@@ -13,7 +13,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BigVideoVisualizer;
-import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.RDXGeneralToolsPanel;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -32,7 +32,7 @@ public class RDXROS2ARViaBackgroundDemo
    private RDXEnvironmentBuilder environmentBuilder;
    private Pixmap pixmap;
    private RDX3DPanel arPanel;
-   private RDXGlobalVisualizersPanel globalVisualizersPanel;
+   private RDXGeneralToolsPanel globalVisualizersPanel;
 
    public RDXROS2ARViaBackgroundDemo()
    {
@@ -56,7 +56,7 @@ public class RDXROS2ARViaBackgroundDemo
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
             PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
-            globalVisualizersPanel = new RDXGlobalVisualizersPanel();
+            globalVisualizersPanel = new RDXGeneralToolsPanel();
 
             RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video",
                                                                                       pubSubImplementation,
