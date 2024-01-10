@@ -1,6 +1,6 @@
 package us.ihmc.perception.sceneGraph.multiBodies.door;
 
-import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
+import us.ihmc.perception.sceneGraph.SceneObjectDefinitions;
 
 /**
  * The parameters for the real and simulated door.
@@ -48,7 +48,7 @@ public class DoorModelParameters
    public static final double DOOR_BOLT_TRAVEL = 0.015;
 
    /** This refers to the edges of the black parts with no margin. The margins included will be wider than this. */
-   public static final double DOOR_ARUCO_MARKER_WIDTH = RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH;
+   public static final double DOOR_ARUCO_MARKER_WIDTH = SceneObjectDefinitions.LARGE_MARKER_WIDTH;
    public static final int LEFT_PULL_DOOR_MARKER_ID = 0;
    public static final int RIGHT_PUSH_DOOR_MARKER_ID = 1;
    public static final int RIGHT_PULL_DOOR_MARKER_ID = 10;
