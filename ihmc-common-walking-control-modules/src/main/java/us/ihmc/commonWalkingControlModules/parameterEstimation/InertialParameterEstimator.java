@@ -179,8 +179,8 @@ public class InertialParameterEstimator implements SCS2YoGraphicHolder
       ghostEstimate = new AlphaFilteredElementwiseMatrix("ghostEstimate", estimateParameterSize, 1, inertialEstimatorParameters.getEstimateFilteringAlpha(), registry);
       filteredGhostEstimate = new YoMatrix("filteredGhostEstimate", estimateParameterSize, 1, registry);
 
-      yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(estimateRobotModel.getRootBody(), registry);
-      ellipsoidGraphicGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(estimateRobotModel.getRootBody(), yoInertiaEllipsoids);
+      yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(actualRobotModel.getRootBody(), registry);
+      ellipsoidGraphicGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(actualRobotModel.getRootBody(), yoInertiaEllipsoids);
    }
 
    private void fillKnownParameterVector(FullHumanoidRobotModel model, Map<RigidBodyReadOnly, ArrayList<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>> parametersToEstimateByBody,

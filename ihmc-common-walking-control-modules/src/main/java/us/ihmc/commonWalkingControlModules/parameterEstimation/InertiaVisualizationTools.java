@@ -63,7 +63,7 @@ public class InertiaVisualizationTools
          rigidBodyDefinition.setInertiaPose(inertiaPose);
 
          //Initialize to the middle of the colormap
-         int[] rgbColor = getRGBForViridisColorMap(0.5);
+         int[] rgbColor = getRGBForCoolwarmColorMap(0.5);
          int opacityAlpha = (int) (0.5 * 255);
          int rgbInt = ColorDefinitions.toRGBA(rgbColor[0], rgbColor[1], rgbColor[2], opacityAlpha);
          yoInertiaEllipsoids.get(i).setColor(rgbInt);
@@ -152,7 +152,7 @@ public class InertiaVisualizationTools
    public static void updateEllipsoid(YoInertiaEllipsoid inertiaEllipsoid, double scale)
    {
       //FIXME: nothing updates in simulation
-      int[] rgbColor = getRGBForViridisColorMap(scale);
+      int[] rgbColor = getRGBForCoolwarmColorMap(scale);
       int opacityAlpha = (int) (0.6 * 255);
       int rgbInt = ColorDefinitions.toRGBA(rgbColor[0], rgbColor[1], rgbColor[2], opacityAlpha);
       inertiaEllipsoid.setColor(rgbInt);
@@ -306,6 +306,62 @@ public class InertiaVisualizationTools
       }
 
       return mass / volume;
+   }
+
+   /**
+    * Takes a scale between 0 and 1 and returns the RGB values for the PiYG colormap at that scale.
+    * <p>
+    * NOTE: This method uses coefficients from a polynomial fit of the RGB values of the PiYG colormap from Python. The coefficients were computed externally
+    * in a Python script. For a higher or lower order fit, the coefficients would need to be regenerated.
+    * </p>
+    *
+    * @param scale Number between 0 and 1, determines the location on the colormap.
+    * @return RGB values for the colormap at the given scale.
+    */
+   private static int[] getRGBForCoolwarmColorMap(double scale)
+   {
+      double[] redCoefficients = {0.22799943, 1.17622677, -0.05769346, 3.08415998, -6.81520504, 3.1203027};
+      double[] greenCoefficients = {0.30822069, 1.26972463, 3.09837548, -10.38670071, 7.89978329, -2.06379977};
+      double[] blueCoefficients = {0.7571628, 1.33148599, 0.18877437, -9.27125131, 10.77877482, -3.61308895};
+
+      if (scale < 0 || scale > 1)
+      {
+         throw new IllegalArgumentException("Value must be between 0 and 1");
+      }
+
+      int red = evaluateRGBPolynomial(redCoefficients, scale);
+      int green = evaluateRGBPolynomial(greenCoefficients, scale);
+      int blue = evaluateRGBPolynomial(blueCoefficients, scale);
+
+      return new int[] {red, green, blue};
+   }
+
+   /**
+    * Takes a scale between 0 and 1 and returns the RGB values for the PiYG colormap at that scale.
+    * <p>
+    * NOTE: This method uses coefficients from a polynomial fit of the RGB values of the PiYG colormap from Python. The coefficients were computed externally
+    * in a Python script. For a higher or lower order fit, the coefficients would need to be regenerated.
+    * </p>
+    *
+    * @param scale Number between 0 and 1, determines the location on the colormap.
+    * @return RGB values for the colormap at the given scale.
+    */
+   private static int[] getRGBForPiYGColorMap(double scale)
+   {
+      double[] redCoefficients = {0.55542857, 2.55793281, -7.64547912, 17.59694419, -23.94099841, 11.07570777};
+      double[] greenCoefficients = {-4.52665027e-03, 2.96292190e-01, 1.57697343e+01, -4.01222209e+01, 3.60874809e+01, -1.16116188e+01};
+      double[] blueCoefficients = {0.33713237, 0.8968716, 6.34398907, -12.82119389, 0.03361242, 5.35789659};
+
+      if (scale < 0 || scale > 1)
+      {
+         throw new IllegalArgumentException("Value must be between 0 and 1");
+      }
+
+      int red = evaluateRGBPolynomial(redCoefficients, scale);
+      int green = evaluateRGBPolynomial(greenCoefficients, scale);
+      int blue = evaluateRGBPolynomial(blueCoefficients, scale);
+
+      return new int[] {red, green, blue};
    }
 
    /**
