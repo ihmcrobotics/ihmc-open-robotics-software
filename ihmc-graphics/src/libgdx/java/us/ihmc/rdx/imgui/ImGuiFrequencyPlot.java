@@ -19,8 +19,6 @@ public class ImGuiFrequencyPlot
 
    public void renderImGuiWidgets()
    {
-      ImGui.text("# " + receivedCount);
-      ImGui.sameLine();
       receivedPlot.render((float) UnitConversions.secondsToHertz(elapsedSinceReceived));
    }
 
