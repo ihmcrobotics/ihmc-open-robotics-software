@@ -18,15 +18,17 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
 
 public class OpenCVArUcoMarkerDetectionOutput
 {
-   private final TIntArrayList detectedIDs = new TIntArrayList();
+   private final BytedecoImage inputImage;
    private final MatVector corners;
    private final Mat ids;
    private final MatVector rejectedImagePoints;
    private final Mat cameraMatrix;
    private final Mat distortionCoefficients;
+   private final TIntArrayList detectedIDs = new TIntArrayList();
    private final TIntIntHashMap markerIDToCornersIndexMap = new TIntIntHashMap();
    private double timeTakenToDetect = 0.0;
 
@@ -42,6 +44,7 @@ public class OpenCVArUcoMarkerDetectionOutput
 
    public OpenCVArUcoMarkerDetectionOutput()
    {
+      inputImage = new BytedecoImage(100, 100, opencv_core.CV_8UC3);
       cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
       distortionCoefficients = new Mat(1, 4, opencv_core.CV_32FC1);
       distortionCoefficients.ptr(0, 0).putFloat(0.0f);
@@ -64,8 +67,11 @@ public class OpenCVArUcoMarkerDetectionOutput
     * Gets a thread safe copy of all information necessary to make use of the
     * detection results in another thread.
     */
-   public void copyOutput(OpenCVArUcoMarkerDetection detection)
+   public void set(OpenCVArUcoMarkerDetection detection)
    {
+      inputImage.ensureDimensionsMatch(detection.getRGB8ImageForDetection());
+      detection.getRGB8ImageForDetection().getBytedecoOpenCVMat().copyTo(inputImage.getBytedecoOpenCVMat());
+
       corners.clear();
       corners.put(detection.getCorners());
 
@@ -236,9 +242,9 @@ public class OpenCVArUcoMarkerDetectionOutput
       opencv_objdetect.drawDetectedMarkers(imageForDrawing, rejectedImagePoints);
    }
 
-   public TIntArrayList getDetectedIDs()
+   public BytedecoImage getInputImage()
    {
-      return detectedIDs;
+      return inputImage;
    }
 
    public Mat getCameraMatrix()
@@ -261,6 +267,11 @@ public class OpenCVArUcoMarkerDetectionOutput
       return rejectedImagePoints;
    }
 
+   public int getNumberOfRejectedPoints()
+   {
+      return (int) rejectedImagePoints.size();
+   }
+
    public Mat getObjectPoints()
    {
       return objectPoints;
@@ -269,6 +280,11 @@ public class OpenCVArUcoMarkerDetectionOutput
    public Mat getDistortionCoefficients()
    {
       return distortionCoefficients;
+   }
+
+   public TIntArrayList getDetectedIDs()
+   {
+      return detectedIDs;
    }
 
    public TIntIntHashMap getMarkerIDToCornersIndexMap()

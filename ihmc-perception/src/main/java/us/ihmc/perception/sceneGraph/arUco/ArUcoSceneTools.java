@@ -3,7 +3,6 @@ package us.ihmc.perception.sceneGraph.arUco;
 import gnu.trove.iterator.TIntIterator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionOutput;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
@@ -80,13 +79,5 @@ public class ArUcoSceneTools
             }
          }
       }
-   }
-
-   @Deprecated
-   public static void updateSceneGraph(OpenCVArUcoMarkerDetection arUcoMarkerDetection, ReferenceFrame sensorFrame, ROS2SceneGraph sceneGraph)
-   {
-      OpenCVArUcoMarkerDetectionOutput output = new OpenCVArUcoMarkerDetectionOutput();
-      output.copyOutput(arUcoMarkerDetection);
-      updateSceneGraph(output, sensorFrame, sceneGraph);
    }
 }

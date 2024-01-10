@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVArUcoMarker;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionOutput;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
@@ -129,6 +130,7 @@ public class RDXBlackflyCalibrationSuite
    private Mat newCameraMatrixEstimate;
    private final Throttler undistortionThrottler = new Throttler().setFrequency(60.0);
    private OpenCVArUcoMarkerDetection openCVArUcoMarkerDetection;
+   private OpenCVArUcoMarkerDetectionOutput openCVArUcoMarkerDetectionOutput;
    private Mat spareRGBMatForArUcoDrawing;
    private RDXOpenCVArUcoMarkerDetectionUI arUcoMarkerDetectionUI;
    private final RDXNettyOusterUI nettyOusterUI = new RDXNettyOusterUI();
@@ -175,8 +177,9 @@ public class RDXBlackflyCalibrationSuite
 
             openCVArUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
             blackflySensorFrame = interactableBlackflyFujinon.getInteractableFrameModel().getReferenceFrame();
-            openCVArUcoMarkerDetection.create(blackflySensorFrame);
+            openCVArUcoMarkerDetection.create();
             SensorHeadParameters.setArUcoMarkerDetectionParameters(openCVArUcoMarkerDetection.getDetectorParameters());
+            openCVArUcoMarkerDetectionOutput = new OpenCVArUcoMarkerDetectionOutput();
             arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI();
             ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
             double sideLength = 0.1982;
@@ -186,7 +189,7 @@ public class RDXBlackflyCalibrationSuite
             markersToTrack.add(new OpenCVArUcoMarker(3, sideLength));
             markersToTrack.add(new OpenCVArUcoMarker(4, sideLength));
             // TODO: Use frame from openCVArUcoMarkerDetection? i.e. remove redudant parameter
-            arUcoMarkerDetectionUI.create(openCVArUcoMarkerDetection);
+            arUcoMarkerDetectionUI.create(openCVArUcoMarkerDetection.getDetectorParameters());
             arUcoMarkerDetectionUI.setupForRenderingDetectedPosesIn3D(markersToTrack, blackflySensorFrame);
             baseUI.getImGuiPanelManager().addPanel(arUcoMarkerDetectionUI.getMainPanel());
             baseUI.getPrimaryScene().addRenderableProvider(arUcoMarkerDetectionUI::getRenderables, RDXSceneLevel.VIRTUAL);
@@ -405,16 +408,15 @@ public class RDXBlackflyCalibrationSuite
                                  opencv_core.BORDER_CONSTANT,
                                  undistortionRemapBorderValue);
 
-            synchronized (openCVArUcoMarkerDetection.getSyncObject())
-            {
-               newCameraMatrixEstimate.copyTo(openCVArUcoMarkerDetection.getCameraMatrix());
-               openCVArUcoMarkerDetection.update(texture.getRGBA8Image());
+            newCameraMatrixEstimate.copyTo(openCVArUcoMarkerDetection.getCameraMatrix());
+            openCVArUcoMarkerDetection.update(texture.getRGBA8Image());
+            arUcoMarkerDetectionUI.setOutput(openCVArUcoMarkerDetection);
+            openCVArUcoMarkerDetectionOutput.set(openCVArUcoMarkerDetection);
 
-               opencv_imgproc.cvtColor(texture.getRGBA8Mat(), spareRGBMatForArUcoDrawing, opencv_imgproc.COLOR_RGBA2RGB);
+            opencv_imgproc.cvtColor(texture.getRGBA8Mat(), spareRGBMatForArUcoDrawing, opencv_imgproc.COLOR_RGBA2RGB);
 
-               openCVArUcoMarkerDetection.drawDetectedMarkers(spareRGBMatForArUcoDrawing);
-               openCVArUcoMarkerDetection.drawRejectedPoints(spareRGBMatForArUcoDrawing);
-            }
+            openCVArUcoMarkerDetectionOutput.drawDetectedMarkers(spareRGBMatForArUcoDrawing);
+            openCVArUcoMarkerDetectionOutput.drawRejectedPoints(spareRGBMatForArUcoDrawing);
 
             opencv_imgproc.cvtColor(spareRGBMatForArUcoDrawing, texture.getRGBA8Mat(), opencv_imgproc.COLOR_RGB2RGBA);
 

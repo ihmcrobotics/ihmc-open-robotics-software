@@ -82,6 +82,13 @@ public class OpenCVArUcoMarkerDetection
          rgb8ImageForDetection = new BytedecoImage(sourceColorImage.getImageWidth(), sourceColorImage.getImageHeight(), opencv_core.CV_8UC3);
       }
 
+      convertOrCopyToRGB(sourceColorImage, rgb8ImageForDetection);
+
+      performDetection(rgb8ImageForDetection);
+   }
+
+   public static void convertOrCopyToRGB(BytedecoImage sourceColorImage, BytedecoImage rgb8ImageForDetection)
+   {
       rgb8ImageForDetection.ensureDimensionsMatch(sourceColorImage);
 
       if (sourceColorImage.getBytedecoOpenCVMat().type() == opencv_core.CV_8UC4)
@@ -95,7 +102,11 @@ public class OpenCVArUcoMarkerDetection
       {
          sourceColorImage.getBytedecoOpenCVMat().copyTo(rgb8ImageForDetection.getBytedecoOpenCVMat());
       }
+   }
 
+   /** For use if the user already has a valid image. */
+   public void performDetection(BytedecoImage rgb8ImageForDetection)
+   {
       arucoDetector.setDetectorParameters(detectorParameters);
       // detectMarkers is the big slow thing, so we put it on an async thread.
       stopwatch.start();
@@ -103,10 +114,9 @@ public class OpenCVArUcoMarkerDetection
       stopwatch.suspend();
    }
 
-   public void getCopyOfSourceRGBImage(BytedecoImage imageToPack)
+   public BytedecoImage getRGB8ImageForDetection()
    {
-      imageToPack.ensureDimensionsMatch(rgb8ImageForDetection);
-      rgb8ImageForDetection.getBytedecoOpenCVMat().copyTo(imageToPack.getBytedecoOpenCVMat());
+      return rgb8ImageForDetection;
    }
 
    public MatVector getCorners()
