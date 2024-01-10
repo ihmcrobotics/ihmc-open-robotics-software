@@ -113,6 +113,8 @@ public class PerceptionAndAutonomyProcess
    private final SideDependentList<BlackflyImagePublisher> blackflyImagePublishers = new SideDependentList<>();
    private final RestartableThread blackflyProcessAndPublishThread;
 
+   private final RestartableThread arUcoMarkerDetectionThread;
+
    private final Supplier<ReferenceFrame> robotPelvisFrameSupplier;
    private final ROS2SceneGraph sceneGraph;
    private final RestartableThrottledThread sceneGraphUpdateThread;
@@ -171,6 +173,9 @@ public class PerceptionAndAutonomyProcess
       blackflyFrameSuppliers.put(RobotSide.RIGHT, rightBlackflyFrameSupplier);
       blackflyProcessAndPublishThread = new RestartableThread("BlackflyProcessAndPublish", this::processAndPublishBlackfly);
       blackflyProcessAndPublishThread.start();
+
+      arUcoMarkerDetectionThread = new RestartableThread("ArUcoMarkerDetection", this::detectAndPublishArUcoMarkers);
+      arUcoMarkerDetectionThread.start();
 
       this.robotPelvisFrameSupplier = robotPelvisFrameSupplier;
       sceneGraph = new ROS2SceneGraph(ros2Helper);
@@ -362,6 +367,18 @@ public class PerceptionAndAutonomyProcess
 
       if (!atLeastOneDemanded)
          ThreadTools.sleep(500);
+   }
+
+   private void detectAndPublishArUcoMarkers()
+   {
+      if (arUcoDetectionDemandNode.isDemanded())
+      {
+
+      }
+      else
+      {
+         ThreadTools.sleep(500);
+      }
    }
 
    private void updateSceneGraph()
