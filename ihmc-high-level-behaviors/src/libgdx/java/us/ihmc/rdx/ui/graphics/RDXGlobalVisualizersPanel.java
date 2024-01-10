@@ -14,15 +14,13 @@ import java.util.Set;
 
 public class RDXGlobalVisualizersPanel extends RDXPanel implements RDXRenderableProvider
 {
-   private static final String WINDOW_NAME = "Global Visualizers";
-
    private final ArrayList<RDXVisualizer> visualizers = new ArrayList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private boolean created = false;
 
    public RDXGlobalVisualizersPanel()
    {
-      super(WINDOW_NAME);
+      super("General Tools");
       setRenderMethod(this::renderImGuiWidgets);
    }
 
