@@ -26,7 +26,6 @@ import java.util.List;
  */
 public class RDXDesiredRobot extends RDXMultiBodyGraphic
 {
-   private final ROS2SyncedRobotModel syncedRobotModel;
    private final DRCRobotModel robotModel;
    private RobotDefinition robotDefinition;
    private final FullHumanoidRobotModel desiredFullRobotModel;
@@ -44,7 +43,6 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
       super(robotModel.getSimpleRobotName() + " Desired Robot Visualizer");
 
       this.robotModel = robotModel;
-      this.syncedRobotModel = syncedRobotModel;
       desiredFullRobotModel = robotModel.createFullRobotModel();
 
       pelvisRigidBodyName = robotModel.getJointMap().getPelvisName();
