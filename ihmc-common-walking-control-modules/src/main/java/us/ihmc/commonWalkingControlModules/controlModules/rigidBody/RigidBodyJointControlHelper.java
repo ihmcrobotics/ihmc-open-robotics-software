@@ -31,8 +31,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * packing them into the whole body controller commands.
  * <p>
  * This class also generates cubic spline trajectories for the joints from user submitted
- * waypoints. It supports passing joint desired position, velocity, and feedforward accelerations
- * along to the whole body controller core.
+ * waypoints. This provides joint desired position, velocity, and feedforward accelerations.
  * </p>
  * <p>
  * This class also supports kinematics streaming by accommodating for network
