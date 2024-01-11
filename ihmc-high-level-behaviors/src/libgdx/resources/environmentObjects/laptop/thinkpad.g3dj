@@ -9307,7 +9307,7 @@
 			], 
 			"parts": [
 				{
-					"id": "Cube.003_part5", 
+					"id": "Cube_part5", 
 					"type": "TRIANGLES", 
 					"indices": [
 						 32,  33,  34,  32,  35,  36,  35,  32,  34,  36,  37,  38, 
@@ -9526,12 +9526,12 @@
 					]
 				}, 
 				{
-					"id": "Cube.003_part4", 
+					"id": "Cube_part4", 
 					"type": "TRIANGLES", 
 					"indices": [ 423,  424,  425,  424,  423,  426,  622,  624,  625,  627,  625,  624]
 				}, 
 				{
-					"id": "Cube.003_part3", 
+					"id": "Cube_part3", 
 					"type": "TRIANGLES", 
 					"indices": [
 						 707,  708,  709,  708,  707,  710,  711,  712,  713,  712,  711,  714, 
@@ -9553,7 +9553,7 @@
 					]
 				}, 
 				{
-					"id": "Cube.003_part2", 
+					"id": "Cube_part2", 
 					"type": "TRIANGLES", 
 					"indices": [
 						  0,   1,   2,   3,   4,   5,   6,   7,   8,   7,   9,   1, 
@@ -9625,7 +9625,7 @@
 					]
 				}, 
 				{
-					"id": "Cube.003_part1", 
+					"id": "Cube_part1", 
 					"type": "TRIANGLES", 
 					"indices": [
 						 1304,  1305,  1306,  1305,  1304,  1307,  1308,  1309,  1310,  1309,  1308,  1311, 
@@ -9641,7 +9641,7 @@
 					]
 				}, 
 				{
-					"id": "Cube.001_part3", 
+					"id": "Cube.001_part2", 
 					"type": "TRIANGLES", 
 					"indices": [
 						 1384,  1385,  1386,  1386,  1387,  1384,  1387,  1386,  1388,  1387,  1389,  1384, 
@@ -9674,12 +9674,12 @@
 						 1496,  1497,  1498,  1496,  1498,  1499,  1504,  1505,  1506,  1505,  1504,  1507, 
 						 1508,  1509,  1510,  1508,  1510,  1511,  1512,  1513,  1514,  1512,  1514,  1515, 
 						 1413,  1574,  1412,  1412,  1574,  1575,  1576,  1574,  1413,  1577,  1574,  1576, 
-						 1574,  1577,  1578,  1580,  1581,  1410,  1580,  1410,  1409,  1581,  1582,  1583, 
-						 1581,  1580,  1582,  1580,  1409,  1579
+						 1574,  1577,  1578,  1412,  1579,  1409,  1579,  1412,  1575,  1580,  1581,  1410, 
+						 1580,  1410,  1409,  1581,  1582,  1583,  1581,  1580,  1582,  1580,  1409,  1579
 					]
 				}, 
 				{
-					"id": "Cube.001_part2", 
+					"id": "Cube.001_part1", 
 					"type": "TRIANGLES", 
 					"indices": [
 						 1500,  1501,  1502,  1503,  1502,  1501,  1516,  1517,  1518,  1519,  1518,  1517, 
@@ -9696,11 +9696,6 @@
 						 1570,  1571,  1572,  1570,  1572,  1573,  1517,  1516,  1571,  1517,  1571,  1570, 
 						 1566,  1562,  1567,  1562,  1566,  1563
 					]
-				}, 
-				{
-					"id": "Cube.001_part1", 
-					"type": "TRIANGLES", 
-					"indices": [ 1412,  1579,  1409,  1579,  1412,  1575]
 				}, 
 				{
 					"id": "Cylinder_part1", 
@@ -11310,7 +11305,12 @@
 			"emissive": [ 0.000000,  0.000000,  0.000000], 
 			"opacity":  1.000000, 
 			"specular": [ 0.036228,  0.036228,  0.036228], 
-			"shininess":  25.000000}, 
+			"shininess":  25.000000, 
+			"textures": [
+				{"id": "base_color_texture", 
+					"filename": "laptop-base.jpg", 
+					"type": "DIFFUSE"}
+			]}, 
 		{"id": "display", 
 			"ambient": [ 0.050876,  0.050876,  0.050876], 
 			"diffuse": [ 0.000000,  0.000000,  0.000000], 
@@ -11323,20 +11323,18 @@
 					"filename": "laptop-base.jpg", 
 					"type": "DIFFUSE"}
 			]}, 
-		{"id": "logo", 
-			"ambient": [ 0.050876,  0.050876,  0.050876], 
-			"diffuse": [ 0.321300,  0.321300,  0.321300], 
-			"emissive": [ 0.000000,  0.000000,  0.000000], 
-			"opacity":  1.000000, 
-			"specular": [ 0.321300,  0.321300,  0.321300], 
-			"shininess":  25.000000}, 
 		{"id": "power_button", 
 			"ambient": [ 0.050876,  0.050876,  0.050876], 
 			"diffuse": [ 0.800000,  0.800000,  0.800000], 
 			"emissive": [ 0.000000,  0.000000,  0.000000], 
 			"opacity":  1.000000, 
 			"specular": [ 0.800000,  0.800000,  0.800000], 
-			"shininess":  25.000000}, 
+			"shininess":  25.000000, 
+			"textures": [
+				{"id": "base_color_texture", 
+					"filename": "laptop-base.jpg", 
+					"type": "DIFFUSE"}
+			]}, 
 		{"id": "red_plastic", 
 			"ambient": [ 0.050876,  0.050876,  0.050876], 
 			"diffuse": [ 0.500000,  0.000000,  0.000000], 
@@ -11362,26 +11360,31 @@
 			"emissive": [ 0.000000,  0.000000,  0.000000], 
 			"opacity":  1.000000, 
 			"specular": [ 0.321300,  0.321300,  0.321300], 
-			"shininess":  25.000000}
+			"shininess":  25.000000, 
+			"textures": [
+				{"id": "base_color_texture", 
+					"filename": "laptop-base.jpg", 
+					"type": "DIFFUSE"}
+			]}
 	], 
 	"nodes": [
 		{"id": "Cube", 
 			"scale": [ 0.049268,  0.049268,  0.049268], 
 			"translation": [ 0.455327, -0.498205,  0.022368], 
 			"parts": [
-				{"meshpartid": "Cube.003_part5", 
+				{"meshpartid": "Cube_part5", 
 					"materialid": "body", 
 					"uvMapping": [[]]}, 
-				{"meshpartid": "Cube.003_part4", 
+				{"meshpartid": "Cube_part4", 
 					"materialid": "red_plastic", 
 					"uvMapping": [[]]}, 
-				{"meshpartid": "Cube.003_part3", 
+				{"meshpartid": "Cube_part3", 
 					"materialid": "power_button", 
 					"uvMapping": [[]]}, 
-				{"meshpartid": "Cube.003_part2", 
+				{"meshpartid": "Cube_part2", 
 					"materialid": "slots", 
 					"uvMapping": [[]]}, 
-				{"meshpartid": "Cube.003_part1", 
+				{"meshpartid": "Cube_part1", 
 					"materialid": "slots_2", 
 					"uvMapping": [[]]}
 			]}, 
@@ -11396,14 +11399,11 @@
 			"scale": [ 0.049268,  0.049268,  0.049268], 
 			"translation": [ 0.455327, -0.610043,  0.022760], 
 			"parts": [
-				{"meshpartid": "Cube.001_part3", 
+				{"meshpartid": "Cube.001_part2", 
 					"materialid": "body", 
 					"uvMapping": [[]]}, 
-				{"meshpartid": "Cube.001_part2", 
-					"materialid": "display", 
-					"uvMapping": [[]]}, 
 				{"meshpartid": "Cube.001_part1", 
-					"materialid": "logo", 
+					"materialid": "display", 
 					"uvMapping": [[]]}
 			]}, 
 		{"id": "Cylinder", 
