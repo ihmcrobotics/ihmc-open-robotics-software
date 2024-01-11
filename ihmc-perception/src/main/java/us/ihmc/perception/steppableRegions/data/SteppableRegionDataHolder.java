@@ -74,12 +74,17 @@ public class SteppableRegionDataHolder
       if (this == other)
          return false;
 
-      for (int i = 0; i < other.memberCells.size(); i++)
-      {
-         addCell(other.memberCells.get(i), other.memberPoints.get(i));
-      }
+      markChanged();
 
-      this.borderCellRings.addAll(other.borderCellRings);
+      minX = Math.min(minX, other.minX);
+      maxX = Math.max(maxX, other.maxX);
+      minY = Math.min(minY, other.minY);
+      maxY = Math.max(maxY, other.maxY);
+
+      other.memberCells.forEach(cell -> cell.setRegion(this));
+      memberCells.addAll(other.memberCells);
+      memberPoints.addAll(other.memberPoints);
+      borderCellRings.addAll(other.borderCellRings);
 
       return true;
    }
