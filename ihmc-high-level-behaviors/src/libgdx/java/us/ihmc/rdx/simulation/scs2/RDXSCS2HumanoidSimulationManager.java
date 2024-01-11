@@ -24,7 +24,6 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
    private final RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
    private final HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters;
    private final boolean useVelocityAndHeadingScript;
-   private final int recordFrequency;
    private final DRCRobotModel robotModel;
    private final CommunicationMode ros2CommunicationMode;
    private final ArrayList<Function<ReferenceFrame, Robot>> secondaryRobots = new ArrayList<>();
@@ -37,7 +36,12 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
       this(baseUI, robotModel, ros2CommunicationMode, 0.3, 0.0, 0.0);
    }
 
-   public RDXSCS2HumanoidSimulationManager(RDXBaseUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode, double initialYaw, double initialX, double initialY)
+   public RDXSCS2HumanoidSimulationManager(RDXBaseUI baseUI,
+                                           DRCRobotModel robotModel,
+                                           CommunicationMode ros2CommunicationMode,
+                                           double initialYaw,
+                                           double initialX,
+                                           double initialY)
    {
       super(baseUI);
 
@@ -56,9 +60,6 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
       });
 
       robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, initialYaw, initialX, initialY);
-
-      //      recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
-      recordFrequency = 1;
 
       useVelocityAndHeadingScript = true;
       walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
@@ -82,7 +83,6 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
          avatarSimulationFactory.addSecondaryRobot(secondaryRobot.apply(SimulationSession.DEFAULT_INERTIAL_FRAME));
       }
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
-      avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
       avatarSimulationFactory.setCreateYoVariableServer(true);
       avatarSimulationFactory.setUseBulletPhysicsEngine(true);
       avatarSimulationFactory.setUseRobotDefinitionCollisions(false);
