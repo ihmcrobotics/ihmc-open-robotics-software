@@ -4,16 +4,12 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor;
-import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -34,7 +30,7 @@ public class BehaviorTreeModule
    private final ROS2SceneGraph sceneGraph;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final Throttler throttler = new Throttler();
-   private final double PERIOD = Conversions.hertzToSeconds(30.0);
+   private final double PERIOD = Conversions.hertzToSeconds(ROS2BehaviorTreeState.SYNC_FREQUENCY);
    private final ROS2BehaviorTreeExecutor behaviorTreeExecutor;
    private final Notification stopped = new Notification();
 
@@ -50,19 +46,10 @@ public class BehaviorTreeModule
       referenceFrameLibrary.addAll(syncedRobot.getReferenceFrames().getCommonReferenceFrames());
       referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
 
-      WalkingFootstepTracker footstepTracker = new WalkingFootstepTracker(ros2Node, robotModel.getSimpleRobotName());
-      FootstepPlanningModule footstepPlanner = new FootstepPlanningModule(FootstepPlanningModule.class.getSimpleName());
-      FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
-      WalkingControllerParameters walkingContollerParameters = robotModel.getWalkingControllerParameters();
       behaviorTreeExecutor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
-                                                          ROS2ActorDesignation.ROBOT,
                                                           robotModel,
                                                           syncedRobot,
-                                                          referenceFrameLibrary,
-                                                          footstepTracker,
-                                                          footstepPlanner,
-                                                          footstepPlannerParameters,
-                                                          walkingContollerParameters);
+                                                          referenceFrameLibrary);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
       ThreadTools.startAThread(this::actionThread, "ActionThread");

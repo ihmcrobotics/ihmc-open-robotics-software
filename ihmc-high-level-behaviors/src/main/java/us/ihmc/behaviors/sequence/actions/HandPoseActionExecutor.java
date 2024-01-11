@@ -5,6 +5,9 @@ import ihmc_common_msgs.msg.dds.QueueableMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
@@ -41,6 +44,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final RigidBodyTransform chestToPelvisZeroAngles = new RigidBodyTransform();
    private final FramePose3D chestInPelvis = new FramePose3D();
    private final FramePose3D goalChestFrame = new FramePose3D();
+   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
    public HandPoseActionExecutor(long id,
                                  CRDTInfo crdtInfo,
@@ -186,6 +190,14 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    @Override
    public void updateCurrentlyExecuting()
    {
+      if (executionTimer.isExpired(getState().getNominalExecutionDuration() * 1.5))
+      {
+         state.setIsExecuting(false);
+         state.setFailed(true);
+         ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+         return;
+      }
+
       if (state.getPalmFrame().isChildOfWorld())
       {
          desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());

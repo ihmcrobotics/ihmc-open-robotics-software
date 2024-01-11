@@ -64,6 +64,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
    private final SideDependentList<String> handNames = new SideDependentList<>();
+   private final SideDependentList<RigidBodyTransformReadOnly> handGraphicToControlFrameTransforms = new SideDependentList<>();
    private final MutableReferenceFrame graphicFrame = new MutableReferenceFrame();
    private final MutableReferenceFrame collisionShapeFrame = new MutableReferenceFrame();
    private boolean isMouseHovering = false;
@@ -125,11 +126,9 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       {
          handNames.put(side, syncedFullRobotModel.getHand(side).getName());
 
-         RigidBodyTransformReadOnly graphicToControlFrameTransform = HandTransformTools.getHandGraphicToControlFrameTransform(syncedFullRobotModel,
-                                                                                                                              robotModel.getUIParameters(),
-                                                                                                                              side);
-         graphicFrame.update(transformToParent -> transformToParent.set(graphicToControlFrameTransform));
-
+         handGraphicToControlFrameTransforms.put(side, HandTransformTools.getHandGraphicToControlFrameTransform(syncedFullRobotModel,
+                                                                                                                robotModel.getUIParameters(),
+                                                                                                                side));
          String handBodyName = handNames.get(side);
          String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(handBodyName));
          highlightModels.put(side, new RDXInteractableHighlightModel(modelFileName));
@@ -189,6 +188,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             graphicFrame.setParentFrame(state.getPalmFrame().getReferenceFrame());
             collisionShapeFrame.setParentFrame(state.getPalmFrame().getReferenceFrame());
          }
+
+         graphicFrame.update(transformToParent -> transformToParent.set(handGraphicToControlFrameTransforms.get(getDefinition().getSide())));
 
          poseGizmo.getPoseGizmo().update();
          highlightModels.get(getDefinition().getSide()).setPose(graphicFrame.getReferenceFrame());
@@ -291,6 +292,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       parentFrameComboBox.render();
       ImGui.pushItemWidth(80.0f);
       trajectoryDurationWidget.renderImGuiWidget();
+      ImGui.text("IK Solution Quality: %.2f".formatted(state.getSolutionQuality()));
       ImGui.popItemWidth();
    }
 
