@@ -340,6 +340,8 @@ public class RDXLocomotionManager
 
       manualFootstepPlacement.renderImGuiWidgets();
 
+      imgui.internal.ImGui.text("Goal Planning");
+      imgui.internal.ImGui.sameLine();
       if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
 
