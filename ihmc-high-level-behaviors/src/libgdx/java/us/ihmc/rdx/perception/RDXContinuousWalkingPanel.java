@@ -225,7 +225,6 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    public void reset()
    {
       footstepPlanGraphic.clear();
-      footstepPlanGraphic.update();
 
       goalFootstepGraphics.get(RobotSide.LEFT).setPose(new FramePose3D());
       goalFootstepGraphics.get(RobotSide.RIGHT).setPose(new FramePose3D());
