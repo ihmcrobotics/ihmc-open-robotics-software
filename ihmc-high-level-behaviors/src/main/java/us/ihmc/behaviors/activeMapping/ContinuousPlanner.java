@@ -323,14 +323,14 @@ public class ContinuousPlanner
       {
          FootstepPlan monteCarloReferencePlan = new FootstepPlan(monteCarloFootstepPlan.getAndSet(null));
          request.setReferencePlan(monteCarloReferencePlan);
-         LogTools.warn("Using MonteCarloPlan As Reference");
+         statistics.appendString("Using Monte-Carlo Plan As Reference: Total Steps: " + monteCarloReferencePlan.getNumberOfSteps());
 
          if (previousFootstepPlan != null && previousFootstepPlan.getNumberOfSteps() > 0)
             this.previousFootstepPlan.remove(0);
       }
       else if (usePreviousPlanAsReference)
       {
-         LogTools.warn("Using Previous Plan As Reference: Total Steps: {}", previousFootstepPlan.getNumberOfSteps());
+         statistics.appendString("Using Previous Plan As Reference: Total Steps: " + previousFootstepPlan.getNumberOfSteps());
 
          // Sets the previous footstep plan to be a reference for the current plan
          if (latestFootstepPlan.getNumberOfSteps() >= continuousWalkingParameters.getNumberOfStepsToSend())
@@ -338,7 +338,7 @@ public class ContinuousPlanner
 
          if (previousFootstepPlan.getNumberOfSteps() < continuousWalkingParameters.getNumberOfStepsToSend())
          {
-            LogTools.error("Previous Plan for Reference: Not Enough Steps: {}!", previousFootstepPlan.getNumberOfSteps());
+            statistics.appendString("[ERROR]: Previous Plan for Reference: Not Enough Steps: " + previousFootstepPlan.getNumberOfSteps() + "!");
          }
          else
          {
@@ -353,8 +353,8 @@ public class ContinuousPlanner
             double stepDuration = continuousWalkingParameters.getSwingTime() + continuousWalkingParameters.getTransferTime();
             double referencePlanTimeout = stepDuration * continuousWalkingParameters.getPlanningReferenceTimeout();
 
-            LogTools.warn("Using Reference Plan: {}, Timeout: {}", this.previousFootstepPlan.getNumberOfSteps(), referencePlanTimeout);
-            System.out.println(previousFootstepPlan);
+            statistics.appendString("Using Reference Plan: " + this.previousFootstepPlan.getNumberOfSteps() + "Timeout: " + referencePlanTimeout);
+            statistics.appendString("Previous Footstep Plan: " + previousFootstepPlan);
             request.setTimeout(referencePlanTimeout);
          }
       }
@@ -537,7 +537,7 @@ public class ContinuousPlanner
 
    public FootstepDataListMessage getFootstepDataListMessage()
    {
-      LogTools.info("Sending Plan to Controller: {}", latestFootstepPlan);
+      statistics.appendString("Sending Plan to Controller: " + latestFootstepPlan);
       return FootstepDataMessageConverter.createFootstepDataListFromPlan(latestFootstepPlan, 2.0, 1.0);
    }
 
@@ -610,7 +610,7 @@ public class ContinuousPlanner
       {
          case WALK_TO_GOAL ->
          {
-            LogTools.warn("Setting Previously Sent Plan for Reference");
+            statistics.appendString("[TRANSITION]: Resetting Previous Plan Reference");
             this.previousFootstepPlan = new FootstepPlan(latestFootstepPlan);
             monteCarloFootstepPlanner.transitionToOptimal();
          }
