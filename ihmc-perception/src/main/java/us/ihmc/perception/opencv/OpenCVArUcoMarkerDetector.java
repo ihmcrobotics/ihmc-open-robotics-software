@@ -13,7 +13,15 @@ import org.bytedeco.opencv.opencv_objdetect.RefineParameters;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.perception.BytedecoImage;
 
-public class OpenCVArUcoMarkerDetection
+/**
+ * Thin wrapper over OpenCV's {@link ArucoDetector} to make it
+ * easier to use in our context.
+ *
+ * This class should be limited to detection only and should not
+ * contain any threading related functionality or functionality
+ * related to computing the results.
+ */
+public class OpenCVArUcoMarkerDetector
 {
    public static final int DEFAULT_DICTIONARY = opencv_objdetect.DICT_4X4_100;
 

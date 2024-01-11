@@ -22,10 +22,10 @@ import us.ihmc.perception.BytedecoImage;
 
 /**
  * This class provides support for copying the full output from
- * the ArUco marker detector so that subsequent operations can
+ * {@link OpenCVArUcoMarkerDetector} so that subsequent operations can
  * happen on different threads.
  */
-public class OpenCVArUcoMarkerDetectionOutput
+public class OpenCVArUcoMarkerDetectionResults
 {
    private final BytedecoImage inputImage;
    private final MatVector corners;
@@ -47,7 +47,7 @@ public class OpenCVArUcoMarkerDetectionOutput
    private transient final FramePose3D markerPose = new FramePose3D();
    private transient final Scalar defaultBorderColor;
 
-   public OpenCVArUcoMarkerDetectionOutput()
+   public OpenCVArUcoMarkerDetectionResults()
    {
       inputImage = new BytedecoImage(100, 100, opencv_core.CV_8UC3);
       cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
@@ -72,21 +72,21 @@ public class OpenCVArUcoMarkerDetectionOutput
     * Gets a thread safe copy of all information necessary to make use of the
     * detection results in another thread.
     */
-   public void set(OpenCVArUcoMarkerDetection detection)
+   public void copyOutputData(OpenCVArUcoMarkerDetector detector)
    {
-      inputImage.ensureDimensionsMatch(detection.getRGB8ImageForDetection());
-      detection.getRGB8ImageForDetection().getBytedecoOpenCVMat().copyTo(inputImage.getBytedecoOpenCVMat());
+      inputImage.ensureDimensionsMatch(detector.getRGB8ImageForDetection());
+      detector.getRGB8ImageForDetection().getBytedecoOpenCVMat().copyTo(inputImage.getBytedecoOpenCVMat());
 
       corners.clear();
-      corners.put(detection.getCorners());
+      corners.put(detector.getCorners());
 
-      detection.getIDs().copyTo(ids);
+      detector.getIDs().copyTo(ids);
 
       rejectedImagePoints.clear();
-      rejectedImagePoints.put(detection.getRejectedImagePoints());
+      rejectedImagePoints.put(detector.getRejectedImagePoints());
 
-      detection.getCameraMatrix().copyTo(cameraMatrix);
-      detection.getDistortionCoefficients().copyTo(distortionCoefficients);
+      detector.getCameraMatrix().copyTo(cameraMatrix);
+      detector.getDistortionCoefficients().copyTo(distortionCoefficients);
 
       detectedIDs.clear();
       markerIDToCornersIndexMap.clear();
@@ -97,7 +97,7 @@ public class OpenCVArUcoMarkerDetectionOutput
          markerIDToCornersIndexMap.put(markerID, i);
       }
 
-      timeTakenToDetect = detection.getDetectionDuration();
+      timeTakenToDetect = detector.getDetectionDuration();
    }
 
    public boolean isDetected(int markerID)

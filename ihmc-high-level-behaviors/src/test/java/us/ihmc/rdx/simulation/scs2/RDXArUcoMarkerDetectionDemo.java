@@ -5,7 +5,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencv.OpenCVArUcoMarker;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.perception.RDXOpenCVArUcoMarkerDetectionUI;
@@ -27,9 +27,9 @@ public class RDXArUcoMarkerDetectionDemo
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
    private RDXHighLevelDepthSensorSimulator cameraSensor;
    private BytedecoImage testRGB888ColorImage;
-   private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
+   private OpenCVArUcoMarkerDetector arUcoMarkerDetector;
    private RDXOpenCVArUcoMarkerDetectionUI arUcoMarkerDetectionUI;
-   private OpenCVArUcoMarkerDetection testImageArUcoMarkerDetection;
+   private OpenCVArUcoMarkerDetector testImageArUcoMarkerDetector;
    private RDXOpenCVArUcoMarkerDetectionUI testImageArUcoMarkerDetectionUI;
 
    public RDXArUcoMarkerDetectionDemo()
@@ -59,28 +59,28 @@ public class RDXArUcoMarkerDetectionDemo
             baseUI.getImGuiPanelManager().addPanel(cameraSensor);
             baseUI.getPrimaryScene().addRenderableProvider(cameraSensor::getRenderables);
 
-            arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-            arUcoMarkerDetection.create();
-            arUcoMarkerDetection.setSourceImageForDetection(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage());
-            arUcoMarkerDetection.setCameraInstrinsics(cameraSensor.getDepthCameraIntrinsics());
+            arUcoMarkerDetector = new OpenCVArUcoMarkerDetector();
+            arUcoMarkerDetector.create();
+            arUcoMarkerDetector.setSourceImageForDetection(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage());
+            arUcoMarkerDetector.setCameraInstrinsics(cameraSensor.getDepthCameraIntrinsics());
             arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI(" from Sensor");
             ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
             markersToTrack.add(new OpenCVArUcoMarker(0, 0.2032));
             markersToTrack.add(new OpenCVArUcoMarker(1, 0.2032));
-            arUcoMarkerDetectionUI.create(arUcoMarkerDetection.getDetectorParameters());
+            arUcoMarkerDetectionUI.create(arUcoMarkerDetector.getDetectorParameters());
             arUcoMarkerDetectionUI.setupForRenderingDetectedPosesIn3D(markersToTrack, sensorPoseGizmo.getGizmoFrame());
             baseUI.getImGuiPanelManager().addPanel(arUcoMarkerDetectionUI.getMainPanel());
             baseUI.getPrimaryScene().addRenderableProvider(arUcoMarkerDetectionUI::getRenderables, RDXSceneLevel.VIRTUAL);
 
             loadTestImage();
 
-            testImageArUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-            testImageArUcoMarkerDetection.create();
-            arUcoMarkerDetection.getDetectorParameters().markerBorderBits(2);
-            testImageArUcoMarkerDetection.setSourceImageForDetection(testRGB888ColorImage);
-            testImageArUcoMarkerDetection.setCameraInstrinsics(cameraSensor.getDepthCameraIntrinsics());
+            testImageArUcoMarkerDetector = new OpenCVArUcoMarkerDetector();
+            testImageArUcoMarkerDetector.create();
+            arUcoMarkerDetector.getDetectorParameters().markerBorderBits(2);
+            testImageArUcoMarkerDetector.setSourceImageForDetection(testRGB888ColorImage);
+            testImageArUcoMarkerDetector.setCameraInstrinsics(cameraSensor.getDepthCameraIntrinsics());
             testImageArUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI(" Test");
-            testImageArUcoMarkerDetectionUI.create(testImageArUcoMarkerDetection.getDetectorParameters());
+            testImageArUcoMarkerDetectionUI.create(testImageArUcoMarkerDetector.getDetectorParameters());
             testImageArUcoMarkerDetectionUI.setupForRenderingDetectedPosesIn3D(new ArrayList<>(), sensorPoseGizmo.getGizmoFrame());
             RDXPanel testUIPanel = new RDXPanel("Test image detection", this::renderTestUIImGuiWidgets);
             testUIPanel.addChild(testImageArUcoMarkerDetectionUI.getMarkerImagePanel());
@@ -94,11 +94,11 @@ public class RDXArUcoMarkerDetectionDemo
 
             cameraSensor.render(baseUI.getPrimaryScene());
 
-            arUcoMarkerDetection.update();
-            arUcoMarkerDetectionUI.setOutput(arUcoMarkerDetection);
+            arUcoMarkerDetector.update();
+            arUcoMarkerDetectionUI.copyOutputData(arUcoMarkerDetector);
             arUcoMarkerDetectionUI.update();
-            testImageArUcoMarkerDetection.update();
-            testImageArUcoMarkerDetectionUI.setOutput(testImageArUcoMarkerDetection);
+            testImageArUcoMarkerDetector.update();
+            testImageArUcoMarkerDetectionUI.copyOutputData(testImageArUcoMarkerDetector);
             testImageArUcoMarkerDetectionUI.update();
 
             baseUI.renderBeforeOnScreenUI();

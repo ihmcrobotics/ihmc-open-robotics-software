@@ -3,7 +3,7 @@ package us.ihmc.perception.sceneGraph.arUco;
 import gnu.trove.iterator.TIntIterator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionOutput;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.filters.DetectionFilter;
@@ -17,13 +17,13 @@ import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
  */
 public class ArUcoSceneTools
 {
-   public static void updateSceneGraph(OpenCVArUcoMarkerDetectionOutput arUcoDetectionOutput, ReferenceFrame sensorFrame, ROS2SceneGraph sceneGraph)
+   public static void updateSceneGraph(OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults, ReferenceFrame sensorFrame, ROS2SceneGraph sceneGraph)
    {
-      if (!arUcoDetectionOutput.getDetectedIDs().isEmpty())
+      if (!arUcoMarkerDetectionResults.getDetectedIDs().isEmpty())
       {
          sceneGraph.modifyTree(modificationQueue ->
          {
-            for (TIntIterator iterator = arUcoDetectionOutput.getDetectedIDs().iterator(); iterator.hasNext(); )
+            for (TIntIterator iterator = arUcoMarkerDetectionResults.getDetectedIDs().iterator(); iterator.hasNext(); )
             {
                int detectedID = iterator.next();
                ArUcoMarkerNode arUcoMarkerNode = sceneGraph.getArUcoMarkerIDToNodeMap().get(detectedID);
@@ -64,11 +64,11 @@ public class ArUcoSceneTools
          {
             if (child instanceof ArUcoMarkerNode arUcoMarkerNode)
             {
-               boolean isDetected = arUcoDetectionOutput.isDetected(arUcoMarkerNode.getMarkerID());
+               boolean isDetected = arUcoMarkerDetectionResults.isDetected(arUcoMarkerNode.getMarkerID());
                arUcoMarkerNode.setCurrentlyDetected(isDetected);
                if (isDetected)
                {
-                  arUcoDetectionOutput.getPose(arUcoMarkerNode.getMarkerID(),
+                  arUcoMarkerDetectionResults.getPose(arUcoMarkerNode.getMarkerID(),
                                                arUcoMarkerNode.getMarkerSize(),
                                                sensorFrame,
                                                arUcoMarkerNode.getNodeFrame().getParent(),
