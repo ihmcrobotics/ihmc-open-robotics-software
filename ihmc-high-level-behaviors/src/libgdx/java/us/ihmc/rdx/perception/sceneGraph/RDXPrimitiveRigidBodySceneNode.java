@@ -17,6 +17,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
@@ -62,6 +63,7 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
 
    private final ImBoolean runICP = new ImBoolean(false);
    private final ImBoolean useICPPose = new ImBoolean(false);
+   private final ImBoolean showICPPointCloud = new ImBoolean(false);
    private final RecyclingArrayList<Point3D32> icpObjectPointCloud = new RecyclingArrayList<>(32768, Point3D32::new);
    private final RDXPointCloudRenderer icpObjectPointCloudRenderer = new RDXPointCloudRenderer();
    private boolean updateObjectPointCloudMesh;
@@ -69,16 +71,28 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
 
    public RDXPrimitiveRigidBodySceneNode(PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode, RDX3DPanel panel3D)
    {
+      this(new Vector3D32(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION),
+           new Vector3D32(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION),
+           primitiveRigidBodySceneNode,
+           panel3D);
+   }
+
+   public RDXPrimitiveRigidBodySceneNode(Vector3D32 lengths, Vector3D32 radii, PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode, RDX3DPanel panel3D)
+   {
       super(primitiveRigidBodySceneNode, new RigidBodyTransform(), panel3D);
+
+      if (lengths == null)
+         lengths = new Vector3D32(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION);
+      if (radii == null)
+         radii = new Vector3D32(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION);
 
       switch (primitiveRigidBodySceneNode.getShape())
       {
-         case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBox(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
-         case PRISM -> modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
-         case CYLINDER -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
-         case ELLIPSOID ->
-               modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
-         case CONE -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
+         case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBox(lengths.getX32(), lengths.getY32(), lengths.getZ32(), Color.WHITE));
+         case PRISM -> modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(lengths.getX32(), lengths.getY32(), lengths.getZ32(), Color.WHITE));
+         case CYLINDER -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(lengths.getZ32(), radii.getX32(), Color.WHITE));
+         case ELLIPSOID -> modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(radii.getX32(), radii.getY32(), radii.getZ32(), Color.WHITE));
+         case CONE -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(lengths.getZ32(), radii.getX32(), Color.WHITE));
       }
       modelInstance.setColor(GHOST_COLOR);
 
@@ -107,17 +121,20 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
       requestMessage.setUseProvidedPose(!useICPPose.get());
       requestPublisher.publish(requestMessage);
 
+      icpObjectPointCloud.clear();
       if (runICP.get() && icpResultSubscription.hasReceivedFirstMessage())
       {
          icpFrameGraphic.setPoseInWorldFrame(icpResultSubscription.getLatest().getPose());
          getModelInstance().setPoseInWorldFrame(icpResultSubscription.getLatest().getPose());
 
-         icpObjectPointCloud.clear();
-         for (Point3D32 point3D32 : icpResultSubscription.getLatest().getObjectPointCloud())
-            icpObjectPointCloud.add().set(point3D32);
-         icpObjectPointCloudRenderer.setPointsToRender(icpObjectPointCloud, Color.GOLD);
+         if (showICPPointCloud.get())
+         {
+            for (Point3D32 point3D32 : icpResultSubscription.getLatest().getObjectPointCloud())
+               icpObjectPointCloud.add().set(point3D32);
+         }
          updateObjectPointCloudMesh = true;
       }
+      icpObjectPointCloudRenderer.setPointsToRender(icpObjectPointCloud, Color.GOLD);
    }
 
    @Override
@@ -133,11 +150,15 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
             requestPublisherThread.stop();
       }
 
-      if (runICP.get())
-      {
-         ImGui.sameLine();
-         ImGui.checkbox(labels.get("Use ICP Pose"), useICPPose);
-      }
+      ImGui.beginDisabled(!runICP.get());
+
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Use ICP Pose"), useICPPose);
+
+      ImGui.endDisabled();
+
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Show ICP Point Cloud"), showICPPointCloud);
 
       ImGui.text("Modify shape:");
 
@@ -249,5 +270,22 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    public RDXModelInstance getModelInstance()
    {
       return modelInstance;
+   }
+
+   @Override
+   public void remove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   {
+      super.remove(modificationQueue, sceneGraph);
+      requestPublisherThread.blockingStop();
+
+      showICPPointCloud.set(false);
+      useICPPose.set(false);
+      runICP.set(false);
+
+      // send message to ICP manager to remove this node
+      updateICP();
+
+      requestPublisher.destroy();
+      ros2Node.destroy();
    }
 }

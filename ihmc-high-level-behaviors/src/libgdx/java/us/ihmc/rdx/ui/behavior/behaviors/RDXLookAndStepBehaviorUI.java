@@ -14,7 +14,6 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import std_msgs.msg.dds.Bool;
 import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonMessage;
 import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonsMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
@@ -24,7 +23,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
-import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedIdealStepCalculator;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -281,8 +279,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       stopForImpassibilities.renderImGuiWidget();
       impassibilityDetectedPlot.setNextValue(impassibilityDetected.getLatest().getData() ? 1.0f : 0.0f);
       impassibilityDetectedPlot.calculate(impassibilityDetected.getLatest().getData() ? "OBSTRUCTED" : "ALL CLEAR");
-
-      ImGui.text(ReferenceBasedIdealStepCalculator.statusMessage);
 
       referenceAlpha.renderImGuiWidget();
 
