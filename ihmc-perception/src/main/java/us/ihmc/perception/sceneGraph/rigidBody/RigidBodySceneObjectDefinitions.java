@@ -121,6 +121,20 @@ public class RigidBodySceneObjectDefinitions
       CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(-0.05);
    }
 
+   public static final String MUG_NAME = "Mug";
+   public static final String MUG_VISUAL_MODEL_FILE_PATH = "environmentObjects/mug/mug.g3dj";
+   public static final RigidBodyTransform MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
+   public static final String BIKE_NAME = "Bike";
+   public static final String BIKE_VISUAL_MODEL_FILE_PATH = "environmentObjects/bike/bike.g3dj";
+   public static final RigidBodyTransform BIKE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+//      EuclidCoreMissingTools.setYawPitchRollDegrees(CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 90, 90, 0);
+//      CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.2);
+//      CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(-0.05);
+   }
+
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
       ArUcoMarkerNode boxArUcoMarker = sceneGraph.getArUcoMarkerIDToNodeMap().get(BOX_MARKER_ID);
@@ -238,5 +252,29 @@ public class RigidBodySceneObjectDefinitions
                                                         CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       LogTools.info("Adding Cereal to scene graph.");
       modificationQueue.accept(new SceneGraphNodeAddition(cereal, parentNode));
+   }
+
+   public static void ensureMugNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   {
+      SceneNode mug = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                          MUG_NAME,
+                                                          sceneGraph.getIDToNodeMap(),
+                                                          parentNode.getID(),
+                                                          new RigidBodyTransform(), MUG_VISUAL_MODEL_FILE_PATH,
+                                                          MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      LogTools.info("Adding Mug to scene graph.");
+      modificationQueue.accept(new SceneGraphNodeAddition(mug, parentNode));
+   }
+
+   public static void ensureBikeNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   {
+      SceneNode bike = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                       BIKE_NAME,
+                                                       sceneGraph.getIDToNodeMap(),
+                                                       parentNode.getID(),
+                                                       new RigidBodyTransform(), BIKE_VISUAL_MODEL_FILE_PATH,
+                                                       BIKE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      LogTools.info("Adding Bike to scene graph.");
+      modificationQueue.accept(new SceneGraphNodeAddition(bike, parentNode));
    }
 }

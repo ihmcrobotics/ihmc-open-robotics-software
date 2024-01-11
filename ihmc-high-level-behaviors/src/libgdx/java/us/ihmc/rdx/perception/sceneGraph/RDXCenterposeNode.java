@@ -175,6 +175,18 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
             interactableObject.load(RigidBodySceneObjectDefinitions.CEREAL_VISUAL_MODEL_FILE_PATH,
                                     RigidBodySceneObjectDefinitions.CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
          }
+         case "MUG" ->
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(RigidBodySceneObjectDefinitions.MUG_VISUAL_MODEL_FILE_PATH,
+                                    RigidBodySceneObjectDefinitions.MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         }
+         case "BIKE" ->
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(RigidBodySceneObjectDefinitions.BIKE_VISUAL_MODEL_FILE_PATH,
+                                    RigidBodySceneObjectDefinitions.BIKE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         }
       }
    }
 

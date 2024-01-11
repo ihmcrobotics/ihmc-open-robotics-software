@@ -112,6 +112,26 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                  CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             yield new RDXPredefinedRigidBodySceneNode(cereal, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
+         case "Mug" ->
+         {
+            PredefinedRigidBodySceneNode mug = new PredefinedRigidBodySceneNode(nextID,
+                                                                                   name.get(),
+                                                                                   sceneGraph.getIDToNodeMap(),
+                                                                                   parent.getID(),
+                                                                                   new RigidBodyTransform(), MUG_VISUAL_MODEL_FILE_PATH,
+                                                                                   MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            yield new RDXPredefinedRigidBodySceneNode(mug, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
+         case "Bike" ->
+         {
+            PredefinedRigidBodySceneNode bike = new PredefinedRigidBodySceneNode(nextID,
+                                                                                name.get(),
+                                                                                sceneGraph.getIDToNodeMap(),
+                                                                                parent.getID(),
+                                                                                new RigidBodyTransform(), BIKE_VISUAL_MODEL_FILE_PATH,
+                                                                                BIKE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            yield new RDXPredefinedRigidBodySceneNode(bike, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
          default -> throw new IllegalStateException("Unexpected value: " + name);
       };
    }
