@@ -324,6 +324,7 @@ public class ContinuousPlanner
          FootstepPlan monteCarloReferencePlan = new FootstepPlan(monteCarloFootstepPlan.getAndSet(null));
          request.setReferencePlan(monteCarloReferencePlan);
          statistics.appendString("Using Monte-Carlo Plan As Reference: Total Steps: " + monteCarloReferencePlan.getNumberOfSteps());
+         statistics.appendString("Monte-Carlo Footstep Plan: " + monteCarloReferencePlan);
 
          if (previousFootstepPlan != null && previousFootstepPlan.getNumberOfSteps() > 0)
             this.previousFootstepPlan.remove(0);

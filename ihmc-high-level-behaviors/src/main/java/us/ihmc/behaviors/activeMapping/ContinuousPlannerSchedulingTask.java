@@ -126,7 +126,7 @@ public class ContinuousPlannerSchedulingTask
 
       if (!continuousPlanner.isInitialized())
       {
-         LogTools.info("Restarting State Machine");
+         statistics.appendString("Restarting State Machine");
          initializeContinuousPlanner();
       }
       else
