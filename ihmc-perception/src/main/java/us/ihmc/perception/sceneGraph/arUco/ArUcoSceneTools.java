@@ -17,6 +17,11 @@ import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
  */
 public class ArUcoSceneTools
 {
+   /**
+    * Takes results from ArUco marker detection and using the predefined object
+    * definitions, add detected objects to the scene graph and keeps their poses
+    * up to date.
+    */
    public static void updateSceneGraph(OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults, ReferenceFrame sensorFrame, ROS2SceneGraph sceneGraph)
    {
       if (!arUcoMarkerDetectionResults.getDetectedIDs().isEmpty())
