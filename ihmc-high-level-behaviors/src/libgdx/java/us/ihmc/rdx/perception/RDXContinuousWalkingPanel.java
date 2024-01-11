@@ -52,13 +52,17 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    private ContinuousWalkingCommandMessage commandMessage = new ContinuousWalkingCommandMessage();
    private final IHMCROS2Publisher<ContinuousWalkingCommandMessage> commandPublisher;
    private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
+   private final RDXFootstepPlanGraphic monteCarloPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private final SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
    private final SideDependentList<RDXFootstepGraphic> startFootstepGraphics;
    private final ImBoolean renderEnabled = new ImBoolean(true);
+   private final ImBoolean showMonteCarloPlan = new ImBoolean(false);
+   private final ImBoolean showContinuousWalkingPlan = new ImBoolean(true);
    private final ImBoolean localRenderMode = new ImBoolean(false);
    private final ImBoolean useMonteCarloReference = new ImBoolean(true);
 
    private final AtomicReference<FootstepDataListMessage> footstepDataListMessage = new AtomicReference<>(null);
+   private final AtomicReference<FootstepDataListMessage> monteCarloPlanDataListMessage = new AtomicReference<>(null);
    private final SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
@@ -114,8 +118,12 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       footstepPlanGraphic.setColor(RobotSide.LEFT, Color.GRAY);
       footstepPlanGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
 
+      monteCarloPlanGraphic.setColor(RobotSide.LEFT, Color.TEAL);
+      monteCarloPlanGraphic.setColor(RobotSide.RIGHT, Color.GREEN);
+
       ros2Helper.subscribeViaCallback(ContinuousPlanningAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Helper.subscribeViaCallback(ContinuousPlanningAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
+      ros2Helper.subscribeViaCallback(ContinuousPlanningAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()), this::onControllerFootstepsReceived);
 
       commandPublisher = ROS2Tools.createPublisher(ros2Helper.getROS2NodeInterface(), ContinuousPlanningAPI.CONTINUOUS_WALKING_COMMAND);
@@ -145,9 +153,14 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
 
    public void generateFootstepPlanGraphic(FootstepDataListMessage message)
    {
-      LogTools.warn("Generating footstep plan graphic: {}", message.getFootstepDataList().size());
       footstepPlanGraphic.generateMeshesAsync(message, "Continuous Walking");
       footstepPlanGraphic.update();
+   }
+
+   public void generateMonteCarloPlanGraphic(FootstepDataListMessage message)
+   {
+      monteCarloPlanGraphic.generateMeshesAsync(message, "Monte-Carlo Plan");
+      monteCarloPlanGraphic.update();
    }
 
    public void update()
@@ -176,14 +189,22 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
          footstepDataListMessage.set(null);
       }
 
+      if (monteCarloPlanDataListMessage.get() != null)
+      {
+         generateMonteCarloPlanGraphic(monteCarloPlanDataListMessage.get());
+         monteCarloPlanDataListMessage.set(null);
+      }
+
       generateStartAndGoalFootstepGraphics();
    }
 
    public void renderImGuiWidgets()
    {
+      ImGui.checkbox("Render", renderEnabled);
       ImGui.checkbox("Use Monte-Carlo Reference", useMonteCarloReference);
       ImGui.checkbox("Local Render Mode", localRenderMode);
-      ImGui.checkbox("Render", renderEnabled);
+      ImGui.checkbox("Show Monte-Carlo Plan", showMonteCarloPlan);
+      ImGui.checkbox("Show Continuous Walking Plan", showContinuousWalkingPlan);
 
       publishInputCommandMessage();
    }
@@ -193,7 +214,12 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    {
       if (renderEnabled.get())
       {
-         footstepPlanGraphic.getRenderables(renderables, pool);
+         if (showMonteCarloPlan.get())
+            monteCarloPlanGraphic.getRenderables(renderables, pool);
+
+         if (showContinuousWalkingPlan.get())
+            footstepPlanGraphic.getRenderables(renderables, pool);
+
          goalFootstepGraphics.get(RobotSide.LEFT).getRenderables(renderables, pool);
          goalFootstepGraphics.get(RobotSide.RIGHT).getRenderables(renderables, pool);
          startFootstepGraphics.get(RobotSide.LEFT).getRenderables(renderables, pool);
@@ -205,6 +231,12 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    {
       LogTools.warn("Received footstep plan: {}", message.getFootstepDataList().size());
       this.footstepDataListMessage.set(message);
+   }
+
+   public void onMonteCarloPlanReceived(FootstepDataListMessage message)
+   {
+      LogTools.warn("Received Monte-Carlo Plan: {}", message.getFootstepDataList().size());
+      this.monteCarloPlanDataListMessage.set(message);
    }
 
    public void onControllerFootstepsReceived(FootstepDataListMessage message)
@@ -225,6 +257,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    public void reset()
    {
       footstepPlanGraphic.clear();
+      monteCarloPlanGraphic.clear();
 
       goalFootstepGraphics.get(RobotSide.LEFT).setPose(new FramePose3D());
       goalFootstepGraphics.get(RobotSide.RIGHT).setPose(new FramePose3D());
@@ -235,6 +268,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    public void destroy()
    {
       footstepPlanGraphic.destroy();
+      monteCarloPlanGraphic.destroy();
       goalFootstepGraphics.get(RobotSide.LEFT).destroy();
       goalFootstepGraphics.get(RobotSide.RIGHT).destroy();
       startFootstepGraphics.get(RobotSide.LEFT).destroy();

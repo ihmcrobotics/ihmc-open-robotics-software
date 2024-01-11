@@ -50,6 +50,7 @@ public class ContinuousPlannerSchedulingTask
    private final AtomicReference<ContinuousWalkingCommandMessage> commandMessage = new AtomicReference<>(new ContinuousWalkingCommandMessage());
    private final ROS2Topic controllerFootstepDataTopic;
    private final IHMCROS2Publisher<FootstepDataListMessage> publisherForUI;
+   private final IHMCROS2Publisher<FootstepDataListMessage> monteCarloPlanPublisherForUI;
    private final IHMCROS2Publisher<PoseListMessage> startAndGoalPublisherForUI;
    private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
    private final ROS2PublisherMap publisherMap;
@@ -83,6 +84,7 @@ public class ContinuousPlannerSchedulingTask
 
       ROS2Topic<?> inputTopic = ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName());
       publisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.PLANNED_FOOTSTEPS);
+      monteCarloPlanPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.MONTE_CARLO_FOOTSTEP_PLAN);
       startAndGoalPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.START_AND_GOAL_FOOTSTEPS);
       pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, inputTopic);
 
@@ -206,6 +208,7 @@ public class ContinuousPlannerSchedulingTask
          FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(parameters, controllerQueue);
 
          publisherForUI.publish(footstepDataList);
+         monteCarloPlanPublisherForUI.publish(continuousPlanner.getMonteCarloFootstepDataListMessage());
          if (parameters.getStepPublisherEnabled())
          {
             LogTools.info(message = String.format("State: [%s]: Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller", state));
