@@ -26,22 +26,19 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
    private final ROS2ControllerHelper ros2ControllerHelper;
 
    public BehaviorTreeExecutorNodeBuilder(DRCRobotModel robotModel,
+                                          ROS2ControllerHelper ros2ControllerHelper,
                                           ROS2SyncedRobotModel syncedRobot,
-                                          ReferenceFrameLibrary referenceFrameLibrary,
-                                          WalkingFootstepTracker footstepTracker,
-                                          FootstepPlanningModule footstepPlanner,
-                                          FootstepPlannerParametersBasics footstepPlannerParameters,
-                                          WalkingControllerParameters walkingControllerParameters,
-                                          ROS2ControllerHelper ros2ControllerHelper)
+                                          ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
-      this.footstepTracker = footstepTracker;
-      this.footstepPlanner = footstepPlanner;
-      this.footstepPlannerParameters = footstepPlannerParameters;
-      this.walkingControllerParameters = walkingControllerParameters;
       this.ros2ControllerHelper = ros2ControllerHelper;
+
+      footstepTracker = new WalkingFootstepTracker(ros2ControllerHelper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
+      footstepPlanner = new FootstepPlanningModule(FootstepPlanningModule.class.getSimpleName());
+      footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      walkingControllerParameters = robotModel.getWalkingControllerParameters();
    }
 
    @Override
