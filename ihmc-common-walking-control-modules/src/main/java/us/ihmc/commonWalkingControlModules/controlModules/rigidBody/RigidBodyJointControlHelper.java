@@ -39,8 +39,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * delay when using {@link ExecutionMode#STREAM}.
  * </p>
  * <p>
- * Additionally, it supports the use of function generators to inject noise into the
- * desireds given to the inverse dynamics solver.
+ * Additionally, it supports the use of function generators to perform diagnostic trajectories.
  * </p>
  */
 public class RigidBodyJointControlHelper
