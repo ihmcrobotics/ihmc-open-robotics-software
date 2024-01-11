@@ -19,6 +19,14 @@ import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+/**
+ * This class orchestrates:
+ * - Undistorting the fisheye input images
+ * - Performing ArUco marker detection
+ * - Filtering and publishing the results on the ROS 2 visualizer topic
+ *
+ * This class should not access or have reference to the scene graph.
+ */
 public class ArUcoDetectionUpdater
 {
    private final ROS2Helper ros2Helper;
