@@ -59,7 +59,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
 
    public void create(Consumer<Pose3D> placedPoseConsumer, Color color)
    {
-      create(placedPoseConsumer, color, null, null);
+      create(placedPoseConsumer, color, startPlacementButtonText, startPlacementButtonDisabledText);
    }
 
    public void create(Consumer<Pose3D> placedPoseConsumer, Color color, String startPlacementButtonText, String startPlacementButtonDisabledText)
@@ -97,10 +97,8 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
             onEndPositionPlacement.run();
       });
 
-      if (startPlacementButtonText != null)
-         this.startPlacementButtonText = startPlacementButtonText;
-      if (startPlacementButtonDisabledText != null)
-         this.startPlacementButtonDisabledText = startPlacementButtonDisabledText;
+      this.startPlacementButtonText = startPlacementButtonText;
+      this.startPlacementButtonDisabledText = startPlacementButtonDisabledText;
 
       clear();
    }
