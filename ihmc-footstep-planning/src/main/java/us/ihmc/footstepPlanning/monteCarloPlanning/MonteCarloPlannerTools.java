@@ -397,6 +397,36 @@ public class MonteCarloPlannerTools
       }
    }
 
+   public static void getFootstepActionSet(MonteCarloFootstepPlannerParameters parameters, ArrayList<Vector3D> actions, float yawPrevious, int side)
+   {
+      actions.clear();
+
+      float sidedYawOffset = side * (float) parameters.getSidedYawOffset();
+      float adjustedPreviousYaw = yawPrevious + sidedYawOffset;
+      float yawMin = adjustedPreviousYaw - (float) parameters.getSearchYawBand();
+      float yawMax = adjustedPreviousYaw + (float) parameters.getSearchYawBand();
+      float minRadius = (float) parameters.getSearchInnerRadius() * 50.0f;
+      float maxRadius = (float) parameters.getSearchOuterRadius() * 50.0f;
+      for (int i = -30; i <= 30; i += parameters.getSearchSkipSize())
+      {
+         for (int j = -30; j <= 30; j += parameters.getSearchSkipSize())
+         {
+            float radius = (float) Math.sqrt(i * i + j * j);
+            float yaw = (float) Math.atan2(j, i);
+
+            //LogTools.info(String.format("(%d, %d) Radius: %.2f (%.2f, %.2f), Yaw: %.2f (%.2f, %.2f)", i, j, radius,
+            //                            parameters.getSearchInnerRadius(), parameters.getSearchOuterRadius(), yaw, yawMin, yawMax));
+
+            if (radius >= minRadius && radius <= maxRadius && yaw >= yawMin && yaw <= yawMax)
+            {
+               actions.add(new Vector3D(i, j, -0.1));
+               actions.add(new Vector3D(i, j, 0));
+               actions.add(new Vector3D(i, j, 0.1));
+            }
+         }
+      }
+   }
+
    public static MonteCarloTreeNode getBestNode(MonteCarloFootstepNode root)
    {
       float bestScore = 0;

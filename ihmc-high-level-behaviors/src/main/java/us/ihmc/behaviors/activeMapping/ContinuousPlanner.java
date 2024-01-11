@@ -67,6 +67,7 @@ public class ContinuousPlanner
    private final Point2D robotLocationIndices = new Point2D();
 
    private AtomicReference<FootstepPlan> monteCarloFootstepPlan = new AtomicReference<>(null);
+   private FootstepPlan monteCarloReferencePlan;
    private final HumanoidReferenceFrames referenceFrames;
    private CollisionFreeSwingCalculator collisionFreeSwingCalculator;
    private ContinuousWalkingParameters continuousWalkingParameters;
@@ -321,7 +322,7 @@ public class ContinuousPlanner
 
       if (useMonteCarloPlanAsReference && monteCarloFootstepPlan.get() != null && monteCarloFootstepPlan.get().getNumberOfSteps() > 0)
       {
-         FootstepPlan monteCarloReferencePlan = new FootstepPlan(monteCarloFootstepPlan.getAndSet(null));
+         monteCarloReferencePlan = new FootstepPlan(monteCarloFootstepPlan.getAndSet(null));
          request.setReferencePlan(monteCarloReferencePlan);
          statistics.appendString("Using Monte-Carlo Plan As Reference: Total Steps: " + monteCarloReferencePlan.getNumberOfSteps());
          statistics.appendString("Monte-Carlo Footstep Plan: " + monteCarloReferencePlan);
@@ -529,6 +530,20 @@ public class ContinuousPlanner
       for (int i = index; i < totalNumberOfSteps; i++)
       {
          PlannedFootstep footstep = latestFootstepPlan.getFootstep(i);
+         footstep.limitFootholdVertices();
+         footstepDataListMessage.getFootstepDataList().add().set(footstep.getAsMessage());
+      }
+
+      return footstepDataListMessage;
+   }
+
+   public FootstepDataListMessage getMonteCarloFootstepDataListMessage()
+   {
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+
+      for (int i = 0; i < monteCarloReferencePlan.getNumberOfSteps(); i++)
+      {
+         PlannedFootstep footstep = monteCarloReferencePlan.getFootstep(i);
          footstep.limitFootholdVertices();
          footstepDataListMessage.getFootstepDataList().add().set(footstep.getAsMessage());
       }
