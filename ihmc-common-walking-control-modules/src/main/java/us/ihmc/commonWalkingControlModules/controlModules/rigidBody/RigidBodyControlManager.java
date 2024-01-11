@@ -74,6 +74,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   RigidBodyControlMode defaultControlMode,
                                   boolean enableFunctionGenerators,
                                   YoDouble yoTime,
+                                  double controlDT,
                                   YoGraphicsListRegistry graphicsListRegistry,
                                   YoRegistry parentRegistry)
    {
@@ -90,7 +91,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
       initialJointPositions = new double[jointsToControl.length];
 
-      RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, yoTime, enableFunctionGenerators, parentRegistry);
+      RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, yoTime, controlDT, enableFunctionGenerators, parentRegistry);
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, jointControlHelper, registry);
 
