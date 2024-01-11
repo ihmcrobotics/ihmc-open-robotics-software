@@ -77,10 +77,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    {
       super.update(modificationQueue);
 
-      if (centerposeNode.isEnableTracking() != enableTracking.get())
-      {
-         centerposeNode.setEnableTracking(enableTracking.get());
-      }
+      centerposeNode.setEnableTracking(enableTracking.get());
 
       Point3D[] vertices = centerposeNode.getVertices3D();
       for (int i = 0; i < vertices.length; i++)
