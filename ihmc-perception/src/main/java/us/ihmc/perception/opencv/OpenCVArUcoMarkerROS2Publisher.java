@@ -28,7 +28,7 @@ import java.util.function.Function;
  */
 public class OpenCVArUcoMarkerROS2Publisher
 {
-   private final OpenCVArUcoMarkerDetectionOutput arUcoMarkerDetectionOutput;
+   private final OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults;
    private final ArUcoMarkerPoses arUcoMarkerPoses = new ArUcoMarkerPoses();
    private final ROS2PublishSubscribeAPI ros2;
    private final Function<Integer, Double> markerSizes;
@@ -36,12 +36,12 @@ public class OpenCVArUcoMarkerROS2Publisher
    private final TIntObjectMap<DetectionFilter> detectionFilters = new TIntObjectHashMap<>();
    private final TIntHashSet stableIDs = new TIntHashSet();
 
-   public OpenCVArUcoMarkerROS2Publisher(OpenCVArUcoMarkerDetectionOutput arUcoMarkerDetectionOutput,
+   public OpenCVArUcoMarkerROS2Publisher(OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults,
                                          ROS2PublishSubscribeAPI ros2,
                                          Function<Integer, Double> markerSizes,
                                          ReferenceFrame sensorFrame)
    {
-      this.arUcoMarkerDetectionOutput = arUcoMarkerDetectionOutput;
+      this.arUcoMarkerDetectionResults = arUcoMarkerDetectionResults;
       this.ros2 = ros2;
       this.markerSizes = markerSizes;
       this.sensorFrame = sensorFrame;
@@ -49,7 +49,7 @@ public class OpenCVArUcoMarkerROS2Publisher
 
    public void update()
    {
-      Mat ids = arUcoMarkerDetectionOutput.getIDs();
+      Mat ids = arUcoMarkerDetectionResults.getIDs();
       arUcoMarkerPoses.getMarkerId().clear();
       arUcoMarkerPoses.getOrientation().clear();
       arUcoMarkerPoses.getPosition().clear();
@@ -75,12 +75,12 @@ public class OpenCVArUcoMarkerROS2Publisher
             arUcoMarkerPoses.getMarkerId().add(markerID);
 
             double markerSize = markerSizes.apply(markerID);
-            arUcoMarkerDetectionOutput.getPose(markerID,
-                                               markerSize,
-                                               sensorFrame,
-                                               ReferenceFrame.getWorldFrame(),
-                                               arUcoMarkerPoses.getPosition().add(),
-                                               arUcoMarkerPoses.getOrientation().add());
+            arUcoMarkerDetectionResults.getPose(markerID,
+                                                markerSize,
+                                                sensorFrame,
+                                                ReferenceFrame.getWorldFrame(),
+                                                arUcoMarkerPoses.getPosition().add(),
+                                                arUcoMarkerPoses.getOrientation().add());
          }
       }
       ros2.publish(PerceptionAPI.ARUCO_MARKER_POSES, arUcoMarkerPoses);

@@ -9,8 +9,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionOutput;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
 import us.ihmc.perception.sceneGraph.SceneObjectDefinitions;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
@@ -23,8 +23,8 @@ public class ArUcoDetectionUpdater
 {
    private final ROS2Helper ros2Helper;
 
-   private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
-   private OpenCVArUcoMarkerDetectionOutput arUcoMarkerDetectionOutput;
+   private OpenCVArUcoMarkerDetector arUcoMarkerDetector;
+   private OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private BytedecoImage arUcoBytedecoImage;
    private final Supplier<ReferenceFrame> blackflyFrameSupplier;
@@ -58,8 +58,8 @@ public class ArUcoDetectionUpdater
          // Update the Bytedeco image
          undistortedImageRGB.download(arUcoBytedecoImage.getBytedecoOpenCVMat());
 
-         arUcoMarkerDetection.update();
-         arUcoMarkerDetectionOutput.set(arUcoMarkerDetection);
+         arUcoMarkerDetector.update();
+         arUcoMarkerDetectionResults.copyOutputData(arUcoMarkerDetector);
          arUcoMarkerPublisher.update();
 
          // Close stuff
@@ -81,13 +81,13 @@ public class ArUcoDetectionUpdater
 
       initializeImageUndistortion(imageWidth, imageHeight);
       arUcoBytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
-      arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-      arUcoMarkerDetection.create();
-      arUcoMarkerDetection.setSourceImageForDetection(arUcoBytedecoImage);
-      cameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
-      arUcoMarkerDetectionOutput = new OpenCVArUcoMarkerDetectionOutput();
+      arUcoMarkerDetector = new OpenCVArUcoMarkerDetector();
+      arUcoMarkerDetector.create();
+      arUcoMarkerDetector.setSourceImageForDetection(arUcoBytedecoImage);
+      cameraMatrixEstimate.copyTo(arUcoMarkerDetector.getCameraMatrix());
+      arUcoMarkerDetectionResults = new OpenCVArUcoMarkerDetectionResults();
 
-      arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetectionOutput,
+      arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetectionResults,
                                                                 ros2Helper,
                                                                 SceneObjectDefinitions.ARUCO_MARKER_SIZES,
                                                                 blackflyFrameSupplier.get());
@@ -155,8 +155,8 @@ public class ArUcoDetectionUpdater
       cameraMatrix.close();
    }
 
-   public OpenCVArUcoMarkerDetection getArUcoMarkerDetection()
+   public OpenCVArUcoMarkerDetector getArUcoMarkerDetector()
    {
-      return arUcoMarkerDetection;
+      return arUcoMarkerDetector;
    }
 }

@@ -16,7 +16,7 @@ import us.ihmc.communication.ros2.*;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionOutput;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
 import us.ihmc.perception.ouster.OusterNetServer;
@@ -118,7 +118,7 @@ public class PerceptionAndAutonomyProcess
 
    private final RestartableThread arUcoMarkerDetectionThread;
    private final ArUcoDetectionUpdater arUcoUpdater;
-   private final SwapReference<OpenCVArUcoMarkerDetectionOutput> sharedArUcoDetectionOutput = new SwapReference<>(OpenCVArUcoMarkerDetectionOutput::new);
+   private final SwapReference<OpenCVArUcoMarkerDetectionResults> sharedArUcoDetectionResults = new SwapReference<>(OpenCVArUcoMarkerDetectionResults::new);
 
    private final Supplier<ReferenceFrame> robotPelvisFrameSupplier;
    private final ROS2SceneGraph sceneGraph;
@@ -380,8 +380,8 @@ public class PerceptionAndAutonomyProcess
          if (!arUcoUpdater.isInitialized())
             arUcoUpdater.initializeArUcoDetection(blackflyImages.get(RobotSide.RIGHT).getImageWidth(), blackflyImages.get(RobotSide.RIGHT).getImageHeight());
          arUcoUpdater.undistortAndUpdateArUco(blackflyImages.get(RobotSide.RIGHT).get());
-         sharedArUcoDetectionOutput.getForThreadOne().set(arUcoUpdater.getArUcoMarkerDetection());
-         sharedArUcoDetectionOutput.swap();
+         sharedArUcoDetectionResults.getForThreadOne().copyOutputData(arUcoUpdater.getArUcoMarkerDetector());
+         sharedArUcoDetectionResults.swap();
       }
       else
       {
@@ -392,9 +392,9 @@ public class PerceptionAndAutonomyProcess
    private void updateSceneGraph()
    {
       sceneGraph.updateSubscription();
-      synchronized (sharedArUcoDetectionOutput)
+      synchronized (sharedArUcoDetectionResults)
       {
-         ArUcoSceneTools.updateSceneGraph(sharedArUcoDetectionOutput.getForThreadTwo(), blackflyFrameSuppliers.get(RobotSide.RIGHT).get(), sceneGraph);
+         ArUcoSceneTools.updateSceneGraph(sharedArUcoDetectionResults.getForThreadTwo(), blackflyFrameSuppliers.get(RobotSide.RIGHT).get(), sceneGraph);
       }
 
       // Update CenterPose stuff
