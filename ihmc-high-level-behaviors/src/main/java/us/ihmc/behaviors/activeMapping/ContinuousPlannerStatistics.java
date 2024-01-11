@@ -212,6 +212,7 @@ public class ContinuousPlannerStatistics
 
    public void appendString(String string)
    {
+      LogTools.warn("Additional String: {}", string);
       additionalString.append(String.format("[%s]: (", new SimpleDateFormat("HH:mm:ss.SSS").format(new Date())));
       additionalString.append(string);
       additionalString.append(")\n");
