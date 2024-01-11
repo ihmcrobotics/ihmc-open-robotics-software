@@ -11,7 +11,9 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.IterativeClosestPointWorker;
@@ -232,6 +234,7 @@ public class RDXIterativeClosestPointWorkerDemo
                                                            yRadius.get(),
                                                            zRadius.get(),
                                                            MAX_ENVIRONMENT_SIZE,
+                                                           new FramePose3D(ReferenceFrame.getWorldFrame(), pickFramePoint, new RotationMatrix()),
                                                            ros2Helper,
                                                            random);
             }
