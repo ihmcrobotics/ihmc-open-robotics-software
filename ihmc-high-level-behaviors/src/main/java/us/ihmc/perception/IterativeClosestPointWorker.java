@@ -143,12 +143,15 @@ public class IterativeClosestPointWorker
             if (measurementPointCloud == null)
                return false;
 
-            if (numberOfIterations > 1 && i == 0)  // Running multiple iterations, on first iteration segment & find neighbors
-               segmentPointCloudAndFindNeighbors(measurementPointCloud, detectionPoint, segmentSphereRadius);
-            else if (numberOfIterations > 1)       // Running multiple iterations, on following iterations use neighbor points for segmentation (faster)
-               segmentPointCloud(neighborPointCloud, detectionPoint, segmentSphereRadius);
-            else                                   // Running only one iteration, don't bother finding neighbors
-               segmentPointCloud(measurementPointCloud, detectionPoint, segmentSphereRadius);
+            segmentPointCloudUsingSphere(measurementPointCloud, detectionPoint, segmentSphereRadius);
+
+            // TODO: find way to make shape segmentation not suck ICP into ground (without side effects)
+//            if (numberOfIterations > 1 && i == 0)  // Running multiple iterations, on first iteration segment & find neighbors
+//               segmentPointCloudAndFindNeighbors(measurementPointCloud, detectionPoint, segmentSphereRadius);
+//            else if (numberOfIterations > 1)       // Running multiple iterations, on following iterations use neighbor points for segmentation (faster)
+//               segmentPointCloud(neighborPointCloud, detectionPoint, segmentSphereRadius);
+//            else                                   // Running only one iteration, don't bother finding neighbors
+//               segmentPointCloud(measurementPointCloud, detectionPoint, segmentSphereRadius);
          }
 
          // Only run ICP iteration if segmented point cloud has enough points
@@ -315,7 +318,12 @@ public class IterativeClosestPointWorker
       });
    }
 
-
+   public void segmentPointCloudUsingSphere(List<Point3D32> measurementPointCloud, Pose3DReadOnly virtualObjectPointInWorld, double cutoffRange)
+   {
+      Stream<Point3D32> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
+      segmentedPointCloud = measurementStream.filter(point -> point.distance(virtualObjectPointInWorld.getPosition()) < cutoffRange)
+                                             .collect(Collectors.toList());
+   }
 
    private void computeCorrespondingPointsBetweenMeasurementAndObjectPointCloud(List<Point3D32> measurementPoints,
                                                                                 List<Point3D32> correspondingMeasurementPointsToPack,
