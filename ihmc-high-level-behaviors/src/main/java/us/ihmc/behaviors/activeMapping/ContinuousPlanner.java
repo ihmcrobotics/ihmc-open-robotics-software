@@ -540,11 +540,14 @@ public class ContinuousPlanner
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
 
-      for (int i = 0; i < monteCarloReferencePlan.getNumberOfSteps(); i++)
+      if (monteCarloReferencePlan != null)
       {
-         PlannedFootstep footstep = monteCarloReferencePlan.getFootstep(i);
-         footstep.limitFootholdVertices();
-         footstepDataListMessage.getFootstepDataList().add().set(footstep.getAsMessage());
+         for (int i = 0; i < monteCarloReferencePlan.getNumberOfSteps(); i++)
+         {
+            PlannedFootstep footstep = monteCarloReferencePlan.getFootstep(i);
+            footstep.limitFootholdVertices();
+            footstepDataListMessage.getFootstepDataList().add().set(footstep.getAsMessage());
+         }
       }
 
       return footstepDataListMessage;

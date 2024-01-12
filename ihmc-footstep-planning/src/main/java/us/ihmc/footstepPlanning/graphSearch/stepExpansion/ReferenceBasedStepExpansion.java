@@ -26,17 +26,17 @@ public class ReferenceBasedStepExpansion implements FootstepExpansion
       this.isPerformingReferenceBasedExpansion = new YoBoolean("isPerformingReferenceBasedExpansion", registry);
 
       // Reference Offsets
-      referenceXOffsets.add(-1);
+      referenceXOffsets.add(-2);
       referenceXOffsets.add(0);
-      referenceXOffsets.add(1);
+      referenceXOffsets.add(2);
 
-      referenceYOffsets.add(-1);
+      referenceYOffsets.add(-2);
       referenceYOffsets.add(0);
-      referenceYOffsets.add(1);
+      referenceYOffsets.add(2);
 
-      referenceYawOffsets.add(-1);
+      referenceYawOffsets.add(-2);
       referenceYawOffsets.add(0);
-      referenceYawOffsets.add(1);
+      referenceYawOffsets.add(2);
    }
 
    @Override
