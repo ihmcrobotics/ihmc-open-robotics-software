@@ -13,6 +13,7 @@ public class RDXSCS2EnvironmentObjectLibrary
 //      objectFactories.add(RDXMediumCinderBlockRoughed.FACTORY);
 //      objectFactories.add(RDXLargeCinderBlockRoughed.FACTORY);
 //      objectFactories.add(RDXLabFloorObject.FACTORY);
+//      objectFactories.add(RDXPalletObject.FACTORY);
 //      objectFactories.add(RDXStairsObject.FACTORY);
 //      objectFactories.add(RDXDoorFrameObject.FACTORY);
 //      objectFactories.add(RDXDoorPanelObject.FACTORY);
