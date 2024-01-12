@@ -150,14 +150,14 @@ public class RapidHeightMapExtractor
       createSensorCroppedHeightMapImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
       createTerrainCostImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
       createContactMapImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
-      createSteppabilityMapImages(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
+      createSteppabilityMapImages(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
 
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
       heightMapRegistrationKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapRegistrationKernel");
       terrainCostKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "terrainCostKernel");
       contactMapKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "contactMapKernel");
-      computeSnappedValuesKernel = openCLManager.createKernel(snappingHeightProgram, "computeSnappedValuesKernel");
-      computeSteppabilityConnectionsKernel = openCLManager.createKernel(snappingHeightProgram, "computeSteppabilityConnectionsKernel");
+      computeSnappedValuesKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "computeSnappedValuesKernel");
+      computeSteppabilityConnectionsKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "computeSteppabilityConnectionsKernel");
    }
 
    public void create(BytedecoImage depthImage, int mode)
@@ -368,6 +368,13 @@ public class RapidHeightMapExtractor
       openCLManager.execute2D(contactMapKernel, globalCellsPerAxis, globalCellsPerAxis);
    }
 
+   public void readContactMapImage()
+   {
+      // Read height map image into CPU memory
+      terrainCostImage.readOpenCLImage(openCLManager);
+      contactMapImage.readOpenCLImage(openCLManager);
+   }
+
    public void computeSteppabilityImage()
    {
       yaw.setParameter(0.0f); // we're only doing a single discretization, and then assuming the foot is a big rectangle
@@ -382,6 +389,11 @@ public class RapidHeightMapExtractor
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 6, snapNormalYImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 7, snapNormalZImage.getOpenCLImageObject());
 
+      snapHeightImage.readOpenCLImage(openCLManager);
+      snapNormalXImage.readOpenCLImage(openCLManager);
+      snapNormalYImage.readOpenCLImage(openCLManager);
+      snapNormalZImage.readOpenCLImage(openCLManager);
+
       openCLManager.setKernelArgument(computeSteppabilityConnectionsKernel, 0, snappingParametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeSteppabilityConnectionsKernel, 1, steppabilityImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(computeSteppabilityConnectionsKernel, 2, steppabilityConnectionsImage.getOpenCLImageObject());
@@ -390,18 +402,7 @@ public class RapidHeightMapExtractor
       openCLManager.execute2D(computeSteppabilityConnectionsKernel, heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
 
       steppabilityImage.readOpenCLImage(openCLManager);
-      snapHeightImage.readOpenCLImage(openCLManager);
-      snapNormalXImage.readOpenCLImage(openCLManager);
-      snapNormalYImage.readOpenCLImage(openCLManager);
-      snapNormalZImage.readOpenCLImage(openCLManager);
       steppabilityConnectionsImage.readOpenCLImage(openCLManager);
-   }
-
-   public void readContactMapImage()
-   {
-      // Read height map image into CPU memory
-      terrainCostImage.readOpenCLImage(openCLManager);
-      contactMapImage.readOpenCLImage(openCLManager);
    }
 
    public void reset()
@@ -451,13 +452,13 @@ public class RapidHeightMapExtractor
       contactMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
    }
 
-   public void createSteppabilityMapImages(int height, int width, int type)
+   public void createSteppabilityMapImages(int height, int width)
    {
       steppabilityImage = new BytedecoImage(width, height, opencv_core.CV_8UC1);
-      snapHeightImage = new BytedecoImage(width, height, type);
-      snapNormalXImage = new BytedecoImage(width, height, type);
-      snapNormalYImage = new BytedecoImage(width, height, type);
-      snapNormalZImage = new BytedecoImage(width, height, type);
+      snapHeightImage = new BytedecoImage(width, height, opencv_core.CV_16UC1);
+      snapNormalXImage = new BytedecoImage(width, height, opencv_core.CV_16UC1);
+      snapNormalYImage = new BytedecoImage(width, height, opencv_core.CV_16UC1);
+      snapNormalZImage = new BytedecoImage(width, height, opencv_core.CV_16UC1);
       steppabilityConnectionsImage = new BytedecoImage(width, height, opencv_core.CV_8UC1);
 
       steppabilityImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
