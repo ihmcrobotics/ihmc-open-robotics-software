@@ -217,7 +217,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             boolean weAreAfterIt = previousHandActionExists && parent.getExecutionNextIndex() > previousHandAction.getActionIndex();
 
             boolean previousIsExecuting = previousHandActionExists && previousHandAction.getIsExecuting();
-            boolean showFromPreviousHand = previousHandActionExists && !weAreAfterIt && !previousIsExecuting;
+            boolean showFromPreviousHand = previousHandActionExists;
             boolean showFromCurrentHand = !showFromPreviousHand && state.getIsNextForExecution() && ! previousIsExecuting;
 
             ReferenceFrame fromFrame = null;
