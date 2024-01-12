@@ -135,6 +135,62 @@ public class MatrixMissingTools
       }
    }
 
+   public static void setMatrixRows(DMatrixRMaj dest,
+                                       int destStartRow,
+                                       DMatrixRMaj src,
+                                       int srcStartRow,
+                                       int numberOfRows)
+   {
+      if (numberOfRows == 0)
+         return;
+
+      if (dest.getNumCols() != src.getNumCols())
+         throw new IllegalArgumentException("dest and src must have the same number of columns, was: [dest cols: " + dest.getNumCols() + ", src cols: "
+                                            + src.getNumCols() + "]");
+      if (dest.getNumRows() < numberOfRows + destStartRow)
+         throw new IllegalArgumentException("dest is too small, min size: [rows: " + (numberOfRows + destStartRow) + "], was: [rows: "
+                                            + dest.getNumRows() + "]");
+      if (src.getNumRows() < numberOfRows + srcStartRow)
+         throw new IllegalArgumentException("src is too small, min size: [rows: " + (numberOfRows + srcStartRow) + "], was: [rows: "
+                                            + src.getNumRows() + "]");
+
+      for (int i = 0; i < numberOfRows; i++)
+      {
+         for (int j = 0; j < dest.getNumCols(); j++)
+         {
+            dest.unsafe_set(destStartRow + i, j, src.unsafe_get(srcStartRow + i, j));
+         }
+      }
+   }
+
+   public static void setMatrixColumns(DMatrixRMaj dest,
+                                       int destStartColumn,
+                                       DMatrixRMaj src,
+                                       int srcStartColumn,
+                                       int numberOfColumns)
+   {
+      if (numberOfColumns == 0)
+         return;
+
+      if (dest.getNumRows() != src.getNumRows())
+         throw new IllegalArgumentException("dest and src must have the same number of rows, was: [dest rows: " + dest.getNumRows() + ", src rows: "
+                                            + src.getNumRows() + "]");
+      if (dest.getNumCols() < numberOfColumns + destStartColumn)
+         throw new IllegalArgumentException("dest is too small, min size: [cols: " + (numberOfColumns + destStartColumn) + "], was: [cols: "
+                                            + dest.getNumCols() + "]");
+      if (src.getNumCols() < numberOfColumns + srcStartColumn)
+         throw new IllegalArgumentException("src is too small, min size: [cols: " + (numberOfColumns + srcStartColumn) + "], was: [cols: "
+                                            + src.getNumCols() + "]");
+
+      for (int i = 0; i < dest.getNumRows(); i++)
+      {
+         for (int j = 0; j < numberOfColumns; j++)
+         {
+            dest.unsafe_set(i, destStartColumn + j, src.unsafe_get(i, srcStartColumn + j));
+         }
+      }
+   }
+
    public static DMatrixRMaj createVector(int size, double fillValue)
    {
       DMatrixRMaj vector = new DMatrixRMaj(size, 1);
