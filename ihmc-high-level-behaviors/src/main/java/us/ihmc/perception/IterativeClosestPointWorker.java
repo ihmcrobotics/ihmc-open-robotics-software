@@ -299,10 +299,6 @@ public class IterativeClosestPointWorker
 
    private void segmentPointCloudAndFindNeighbors(List<? extends Point3DReadOnly> measurementPointCloud, Pose3DReadOnly virtualObjectPointInWorld, double cutoffRange)
    {
-      // The below two lists should be synchronized to allow use of parallel streams
-      segmentedPointCloud = Collections.synchronizedList(new ArrayList<>());
-      neighborPointCloud.clear();
-
       Stream<? extends Point3DReadOnly> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
       List<DistancedPoint> distancedPoints = measurementStream.map(point ->
                                                                    {
