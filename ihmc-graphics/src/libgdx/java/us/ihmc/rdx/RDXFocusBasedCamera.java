@@ -197,6 +197,11 @@ public class RDXFocusBasedCamera extends Camera
       focusPointPose.getPosition().set(translation);
    }
 
+   public void setCameraZoom(double zoom)
+   {
+      this.zoom = zoom;
+   }
+
    public void updateCameraPose()
    {
       zoom = MathTools.clamp(zoom, 0.1, 100.0);
