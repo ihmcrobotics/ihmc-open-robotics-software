@@ -87,7 +87,7 @@
     "upperBound" : 0.3
   },
   "Search outer radius" : {
-    "value" : 0.656934,
+    "value" : 0.625,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -112,7 +112,7 @@
     "upperBound" : 5.0
   },
   "Maximum step width" : {
-    "value" : 0.38,
+    "value" : 0.4,
     "lowerBound" : 0.2,
     "upperBound" : 0.5
   },
