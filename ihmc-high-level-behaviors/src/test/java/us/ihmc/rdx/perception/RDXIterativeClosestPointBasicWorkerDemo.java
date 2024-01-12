@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.IterativeClosestPointTools;
 import us.ihmc.perception.IterativeClosestPointWorker;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
@@ -138,7 +139,9 @@ public class RDXIterativeClosestPointBasicWorkerDemo
 
       if (firstTick)
       {
-         icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get(), numberOfShapeSamples.get());
+         icpWorker.changeSize(new Vector3D(depth.get(), width.get(), height.get()),
+                              new Vector3D(xRadius.get(), yRadius.get(), zRadius.get()),
+                              numberOfShapeSamples.get());
          icpWorker.setPoseGuess(shapeInputPose);
          firstTick = false;
       }
@@ -296,12 +299,8 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             {
                shape = PrimitiveRigidBodyShape.valueOf(shapeValues[shapeIndex.get()]);
                icpWorker = new IterativeClosestPointWorker(shape,
-                                                           depth.get(),
-                                                           width.get(),
-                                                           height.get(),
-                                                           xRadius.get(),
-                                                           yRadius.get(),
-                                                           zRadius.get(),
+                                                           new Vector3D(depth.get(), width.get(), height.get()),
+                                                           new Vector3D(xRadius.get(), yRadius.get(), zRadius.get()),
                                                            SHAPE_SAMPLE_POINTS,
                                                            CORRESPONDENCE_POINTS,
                                                            new FramePose3D(ReferenceFrame.getWorldFrame(), pickFramePoint, new RotationMatrix()),
@@ -318,7 +317,9 @@ public class RDXIterativeClosestPointBasicWorkerDemo
 
             if (ImGui.button("Apply Size"))
             {
-               icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get(), numberOfShapeSamples.get());
+               icpWorker.changeSize(new Vector3D(depth.get(), width.get(), height.get()),
+                                    new Vector3D(xRadius.get(), yRadius.get(), zRadius.get()),
+                                    numberOfShapeSamples.get());
             }
             icpWorker.setNumberOfCorrespondences(numberOfCorrespondences.get());
             ImGui.sliderFloat("Segmentation Radius", segmentationRadius.getData(), 0.0f, 1.0f);

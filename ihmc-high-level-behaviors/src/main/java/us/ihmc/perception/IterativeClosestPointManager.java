@@ -1,7 +1,6 @@
 package us.ihmc.perception;
 
 import perception_msgs.msg.dds.IterativeClosestPointRequest;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
@@ -9,6 +8,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -45,7 +45,7 @@ public class IterativeClosestPointManager
       requestMessageSubscription = ros2Helper.subscribe(PerceptionAPI.ICP_REQUEST);
 
       // Each time a request message is received, we update the corresponding worker accordingly
-      // TODO: Find out whether messages can be skipped, resulting in updates being misseed
+      // TODO: Find out whether messages can be skipped, resulting in updates being missed
       requestMessageSubscription.addCallback(requestMessage ->
       {
          long nodeID = requestMessage.getNodeId();
@@ -64,32 +64,18 @@ public class IterativeClosestPointManager
 
             // Check if size changed
             PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.fromByte(requestMessage.getShape());
-            float requestXLength = requestMessage.getXLength();
-            float requestYLength = requestMessage.getYLength();
-            float requestZLength = requestMessage.getZLength();
-            float requestXRadius = requestMessage.getXRadius();
-            float requestYRadius = requestMessage.getYRadius();
-            float requestZRadius = requestMessage.getZRadius();
+            Vector3D lengths = requestMessage.getLengths();
+            Vector3D radii = requestMessage.getRadii();
 
             boolean sizeChanged = false;
-            sizeChanged |= !MathTools.epsilonEquals(worker.getXLength(), requestXLength, EPSILON);
-            sizeChanged |= !MathTools.epsilonEquals(worker.getYLength(), requestYLength, EPSILON);
-            sizeChanged |= !MathTools.epsilonEquals(worker.getZLength(), requestZLength, EPSILON);
-            sizeChanged |= !MathTools.epsilonEquals(worker.getXRadius(), requestXRadius, EPSILON);
-            sizeChanged |= !MathTools.epsilonEquals(worker.getYRadius(), requestYRadius, EPSILON);
-            sizeChanged |= !MathTools.epsilonEquals(worker.getZRadius(), requestZRadius, EPSILON);
+            sizeChanged |= !lengths.epsilonEquals(worker.getLengths(), EPSILON);
+            sizeChanged |= !radii.epsilonEquals(worker.getRadii(), EPSILON);
 
             // Update worker size if changed
             if (sizeChanged)
             {
-               int newNumberOfPoints = approximateNumberOfPoints(shape,
-                                                                 requestXLength,
-                                                                 requestYLength,
-                                                                 requestZLength,
-                                                                 requestXRadius,
-                                                                 requestYRadius,
-                                                                 requestZRadius);
-               worker.changeSize(requestXLength, requestYLength, requestZLength, requestXRadius, requestYRadius, requestZRadius, newNumberOfPoints);
+               int newNumberOfPoints = approximateNumberOfPoints(shape, lengths, radii);
+               worker.changeSize(lengths, radii, newNumberOfPoints);
             }
 
             // Update worker
@@ -165,21 +151,13 @@ public class IterativeClosestPointManager
    {
       PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.fromByte(requestMessage.getShape());
 
-      float xLength = requestMessage.getXLength();
-      float yLength = requestMessage.getYLength();
-      float zLength = requestMessage.getZLength();
-      float xRadius = requestMessage.getXRadius();
-      float yRadius = requestMessage.getYRadius();
-      float zRadius = requestMessage.getZRadius();
+      Vector3D lengths = requestMessage.getLengths();
+      Vector3D radii = requestMessage.getRadii();
 
-      int numberOfPoints = approximateNumberOfPoints(shape, xLength, yLength, zLength, xRadius, yRadius, zRadius);
+      int numberOfPoints = approximateNumberOfPoints(shape, lengths, radii);
       IterativeClosestPointWorker worker = new IterativeClosestPointWorker(shape,
-                                                                           xLength,
-                                                                           yLength,
-                                                                           zLength,
-                                                                           xRadius,
-                                                                           yRadius,
-                                                                           zRadius,
+                                                                           lengths,
+                                                                           radii,
                                                                            numberOfPoints,
                                                                            NUMBER_OF_CORRESPONDENCES,
                                                                            new FramePose3D(requestMessage.getProvidedPose()),
@@ -189,15 +167,15 @@ public class IterativeClosestPointManager
    }
 
    // FIXME: Maybe just allow the user to select number of points instead of trying to calculate it using the dimensions
-   private int approximateNumberOfPoints(PrimitiveRigidBodyShape shape, float xLength, float yLength, float zLength, float xRadius, float yRadius, float zRadius)
+   private int approximateNumberOfPoints(PrimitiveRigidBodyShape shape, Vector3D lengths, Vector3D radii)
    {
       double surfaceArea;
       switch (shape)
       {
-         case BOX -> surfaceArea = 2.0 * (xLength * yLength + xLength * zLength + yLength * zLength);
-         case PRISM -> surfaceArea = (xLength * zLength) + (2.0 * Math.sqrt(xLength * xLength + zLength * zLength));
-         case CYLINDER -> surfaceArea = 2.0 * Math.PI * xRadius * (zLength + xRadius);
-         case CONE -> surfaceArea = Math.PI * xRadius * zLength;
+         case BOX -> surfaceArea = 2.0 * (lengths.getX() * lengths.getY() + lengths.getX() * lengths.getZ() + lengths.getY() * lengths.getZ());
+         case PRISM -> surfaceArea = (lengths.getX() * lengths.getZ()) + (2.0 * Math.sqrt(lengths.getX() * lengths.getX() + lengths.getZ() * lengths.getZ()));
+         case CYLINDER -> surfaceArea = 2.0 * Math.PI * radii.getX() * (lengths.getZ() + radii.getX());
+         case CONE -> surfaceArea = Math.PI * radii.getX() * lengths.getZ();
          default -> surfaceArea = 0.5;
       }
 
