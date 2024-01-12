@@ -7,11 +7,13 @@ import perception_msgs.msg.dds.DetectedObjectPacket;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
@@ -27,6 +29,8 @@ import static us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBo
 
 public class IterativeClosestPointWorker
 {
+   private static final double discountFactor = 0.9;
+
    private static final boolean ignoreShapeTypeWhenSegmenting = false;
    private static final float defaultXLength = 0.2f;
    private static final float defaultYLength = 0.4f;
@@ -51,16 +55,16 @@ public class IterativeClosestPointWorker
 
    private final SvdImplicitQrDecompose_DDRM svdSolver = new SvdImplicitQrDecompose_DDRM(false, true, true, false);
 
-   private List<Point3D32> measurementPointCloud;
+   private List<? extends Point3DReadOnly> measurementPointCloud;
    private final Object measurementPointCloudSynchronizer = new Object();
 
-   private List<Point3D32> segmentedPointCloud = Collections.synchronizedList(new ArrayList<>());
+   private List<Point3DReadOnly> segmentedPointCloud;
    private double segmentSphereRadius = 1.0;
 
-   private final List<Point3D32> neighborPointCloud = Collections.synchronizedList(new ArrayList<>());
+   private List<? extends Point3DReadOnly> neighborPointCloud;
 
-   private List<Point3D32> correspondingObjectPoints;
-   private List<Point3D32> correspondingMeasurementPoints ;
+   private List<Point3DReadOnly> correspondingObjectPoints;
+   private List<Point3DReadOnly> correspondingMeasurementPoints;
 
    private List<Point3D32> localObjectPoints;
    private List<Point3D32> objectInWorldPoints;
@@ -149,7 +153,7 @@ public class IterativeClosestPointWorker
          if (segmentedPointCloud.size() >= numberOfCorrespondences)
          {
             System.out.println("\tSuccess!");
-            runICPIteration(segmentedPointCloud);
+            runICPIteration();
 
             ranICPSuccessfully = true;
          }
@@ -173,9 +177,9 @@ public class IterativeClosestPointWorker
    }
 
    // TODO: Pass in a Pose to transform (all object points define WRT the pose of object)
-   private void runICPIteration(List<Point3D32> segmentedMeasurementPointCloud)
+   private void runICPIteration()
    {
-      Collections.shuffle(segmentedMeasurementPointCloud, random);
+      Collections.shuffle(segmentedPointCloud, random);
 
       // Calculate nearest neighbor for each point (environment to object)
       correspondingObjectPoints = new ArrayList<>();
@@ -185,7 +189,7 @@ public class IterativeClosestPointWorker
       {
          IterativeClosestPointTools.computeCorrespondencesOnShape(detectionShape,
                                                                   resultPose,
-                                                                  segmentedMeasurementPointCloud,
+                                                                  segmentedPointCloud,
                                                                   correspondingMeasurementPoints,
                                                                   correspondingObjectPoints,
                                                                   lengths.getX32(),
@@ -198,7 +202,7 @@ public class IterativeClosestPointWorker
       }
       else
       {
-         computeCorrespondingPointsBetweenMeasurementAndObjectPointCloud(segmentedMeasurementPointCloud,
+         computeCorrespondingPointsBetweenMeasurementAndObjectPointCloud(segmentedPointCloud,
                                                                          correspondingMeasurementPoints,
                                                                          correspondingObjectPoints);
       }
@@ -228,6 +232,7 @@ public class IterativeClosestPointWorker
       DMatrixRMaj H = new DMatrixRMaj(3, 3);
       DMatrixRMaj U = new DMatrixRMaj(3, 3);
       DMatrixRMaj V = new DMatrixRMaj(3, 3);
+      RotationMatrix optimalRotationMatrix = new RotationMatrix();
       DMatrixRMaj optimalRotation = new DMatrixRMaj(3, 3); // This is the optimized rotation matrix to rotate the measurement to match the point cloud.
       Point3D32 objectAdjustedLocation = new Point3D32();
       Point3D32 objectTranslation = new Point3D32();
@@ -246,26 +251,27 @@ public class IterativeClosestPointWorker
 
       /* Calculate object transform */
       // Create the transform, and set the rotation, so it's a pure rotation transform
+      optimalRotationMatrix.set(optimalRotation);
       RigidBodyTransform objectToMeasurementTransform = new RigidBodyTransform();
-      objectToMeasurementTransform.getRotation().set(optimalRotation);
+      objectToMeasurementTransform.getRotation().interpolate(optimalRotationMatrix, discountFactor);
 
       // Calcualte the necessary translation
       objectToMeasurementTransform.transform(objectCentroid, objectAdjustedLocation);
       objectTranslation.sub(measurementCentroid, objectAdjustedLocation);
 
       // set that translation into the transform
-      objectToMeasurementTransform.getTranslation().set(objectTranslation);
+      objectToMeasurementTransform.getTranslation().setAndScale(discountFactor, objectTranslation);
 
       // Rotate and translate the resulting pose according to the correction transform.
       resultPose.applyTransform(objectToMeasurementTransform);
       objectInWorldPointsIsUpToDate = false;
    }
 
-   private void segmentPointCloud(List<Point3D32> measurementPointCloud, Pose3DReadOnly virtualObjectPointInWorld, double cutoffRange)
+   private void segmentPointCloud(List<? extends Point3DReadOnly> measurementPointCloud, Pose3DReadOnly virtualObjectPointInWorld, double cutoffRange)
    {
       double cutoffSquare = MathTools.square(cutoffRange);
 
-      Stream<Point3D32> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
+      Stream<? extends Point3DReadOnly> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
 
       segmentedPointCloud = measurementStream.filter(point -> IterativeClosestPointTools.distanceSquaredFromShape(detectionShape,
                                                                                                                   virtualObjectPointInWorld,
@@ -280,74 +286,76 @@ public class IterativeClosestPointWorker
                                                               <= cutoffSquare).collect(Collectors.toList());
    }
 
-   private void segmentPointCloudAndFindNeighbors(List<Point3D32> measurementPointCloud, Pose3DReadOnly virtualObjectPointInWorld, double cutoffRange)
+   private void segmentPointCloudAndFindNeighbors(List<? extends Point3DReadOnly> measurementPointCloud, Pose3DReadOnly virtualObjectPointInWorld, double cutoffRange)
    {
-      double cutoffSquare = MathTools.square(cutoffRange);
-      double neighborCutoff = 2.0 * cutoffSquare; // TODO: Maybe a better way of finding this value?
+      Stream<? extends Point3DReadOnly> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
+      List<DistancedPoint> distancedPoints = measurementStream.map(point ->
+                                                                   {
+                                                                      double distance = IterativeClosestPointTools.distanceSquaredFromShape(detectionShape,
+                                                                                                                                            virtualObjectPointInWorld,
+                                                                                                                                            point,
+                                                                                                                                            lengths.getX32(),
+                                                                                                                                            lengths.getY32(),
+                                                                                                                                            lengths.getZ32(),
+                                                                                                                                            radii.getX32(),
+                                                                                                                                            radii.getY32(),
+                                                                                                                                            radii.getZ32(),
+                                                                                                                                            ignoreShapeTypeWhenSegmenting);
+                                                                      return new DistancedPoint(point, distance);
+                                                                   }).toList();
 
-      // The below two lists should be synchronized to allow use of parallel streams
-      segmentedPointCloud = Collections.synchronizedList(new ArrayList<>());
-      neighborPointCloud.clear();
-
-      Stream<Point3D32> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
-      measurementStream.forEach(point ->
-      {
-         double distance = IterativeClosestPointTools.distanceSquaredFromShape(detectionShape,
-                                                                               virtualObjectPointInWorld,
-                                                                               point,
-                                                                               lengths.getX32(),
-                                                                               lengths.getY32(),
-                                                                               lengths.getZ32(),
-                                                                               radii.getX32(),
-                                                                               radii.getY32(),
-                                                                               radii.getZ32(),
-                                                                               ignoreShapeTypeWhenSegmenting);
-
-         if (distance < neighborCutoff)
-         {
-            neighborPointCloud.add(point);
-            if (distance < cutoffSquare)
-            {
-               segmentedPointCloud.add(point);
-            }
-         }
-      });
+      segmentPointCloudUsingSphereAndFindNeighbors(distancedPoints, cutoffRange);
    }
 
-   public void segmentPointCloudUsingSphere(List<Point3D32> measurementPointCloud, Pose3DReadOnly virtualObjectPointInWorld, double cutoffRange)
+   public void segmentPointCloudUsingSphere(List<Point3DReadOnly> measurementPointCloud, Pose3DReadOnly virtualObjectPointInWorld, double cutoffRange)
    {
-      Stream<Point3D32> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
-      segmentedPointCloud = measurementStream.filter(point -> point.distance(virtualObjectPointInWorld.getPosition()) < cutoffRange)
+      double cutoffRangeSquared = cutoffRange * cutoffRange;
+      Stream<Point3DReadOnly> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
+      segmentedPointCloud = measurementStream.filter(point -> point.distanceSquared(virtualObjectPointInWorld.getPosition()) < cutoffRangeSquared)
                                              .collect(Collectors.toList());
    }
 
-   public void segmentPointCloudUsingSphereAndFindNeighbors(List<Point3D32> measurementPointCloud, Pose3DReadOnly virtualObjectPointInWorld, double cutoffRange)
+   public void segmentPointCloudUsingSphereAndFindNeighbors(List<Point3DReadOnly> measurementPointCloud, Pose3DReadOnly virtualObjectPointInWorld, double cutoffRange)
    {
-      double neighborCutoff = 2.0 * cutoffRange;
+      Stream<Point3DReadOnly> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
+      List<DistancedPoint> distancedPoints = measurementStream.map(point -> new DistancedPoint(point, point.distanceSquared(virtualObjectPointInWorld.getPosition()))).toList();
 
-      // The below two lists should be synchronized to allow use of parallel streams
-      segmentedPointCloud = Collections.synchronizedList(new ArrayList<>());
-      neighborPointCloud.clear();
-
-      Stream<Point3D32> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
-      measurementStream.forEach(point ->
-      {
-         double distance = point.distance(virtualObjectPointInWorld.getPosition());
-
-         if (distance < neighborCutoff)
-         {
-            neighborPointCloud.add(point);
-            if (distance < cutoffRange)
-            {
-               segmentedPointCloud.add(point);
-            }
-         }
-      });
+      segmentPointCloudUsingSphereAndFindNeighbors(distancedPoints, cutoffRange);
    }
 
-   private void computeCorrespondingPointsBetweenMeasurementAndObjectPointCloud(List<Point3D32> measurementPoints,
-                                                                                List<Point3D32> correspondingMeasurementPointsToPack,
-                                                                                List<Point3D32> correspondingObjectPointsToPack)
+   public void segmentPointCloudUsingSphereAndFindNeighbors(List<DistancedPoint> distancedPoints, double cutoffRange)
+   {
+      double neighborCutoff = 2.0 * cutoffRange;
+      double cutoffRangeSquared = cutoffRange * cutoffRange;
+      double neighborCutoffRangeSquared = neighborCutoff * neighborCutoff;
+
+      Stream<DistancedPoint> distancedPointsStream = useParallelStreams ? distancedPoints.parallelStream() : distancedPoints.stream();
+      List<DistancedPoint> neighborPointCloud = distancedPointsStream.filter(point -> point.getDistanceSquared() < neighborCutoffRangeSquared).collect(Collectors.toList());
+      this.neighborPointCloud = neighborPointCloud;
+
+      Stream<DistancedPoint> neighborPointsStream = useParallelStreams ? neighborPointCloud.parallelStream() : neighborPointCloud.stream();
+      segmentedPointCloud = neighborPointsStream.filter(point -> point.getDistanceSquared() < cutoffRangeSquared).collect(Collectors.toList());
+   }
+
+   private static class DistancedPoint extends Point3D32
+   {
+      private final double distanceSquared;
+
+      public DistancedPoint(Point3DReadOnly point, double distanceSquared)
+      {
+         super(point);
+         this.distanceSquared = distanceSquared;
+      }
+
+      public double getDistanceSquared()
+      {
+         return distanceSquared;
+      }
+   }
+
+   private void computeCorrespondingPointsBetweenMeasurementAndObjectPointCloud(List<Point3DReadOnly> measurementPoints,
+                                                                                List<Point3DReadOnly> correspondingMeasurementPointsToPack,
+                                                                                List<Point3DReadOnly> correspondingObjectPointsToPack)
    {
       int measurementIdx = 0;
       int iteration = 0;
@@ -356,7 +364,7 @@ public class IterativeClosestPointWorker
 
       while (correspondingMeasurementPointsToPack.size() < numberOfCorrespondences && measurementIdx < measurementPoints.size() && iteration < maxIterations)
       {
-         Point3D32 measurementPoint = measurementPoints.get(measurementIdx++);
+         Point3DReadOnly measurementPoint = measurementPoints.get(measurementIdx++);
          double minDistance = Double.POSITIVE_INFINITY;
          Point3D32 correspondingObjectPoint = null;
 
@@ -380,12 +388,12 @@ public class IterativeClosestPointWorker
       }
    }
 
-   private static Point3D32 computeCentroidOfPointCloud(List<Point3D32> pointCloud)
+   private static Point3D32 computeCentroidOfPointCloud(List<Point3DReadOnly> pointCloud)
    {
       return computeCentroidOfPointCloud(pointCloud, pointCloud.size());
    }
 
-   private static Point3D32 computeCentroidOfPointCloud(List<Point3D32> pointCloud, int pointsToAverage)
+   private static Point3D32 computeCentroidOfPointCloud(List<Point3DReadOnly> pointCloud, int pointsToAverage)
    {
       Point3D32 centroid = new Point3D32();
       for (int i = 0; i < pointsToAverage; i++)
@@ -399,7 +407,7 @@ public class IterativeClosestPointWorker
    // pass in depth and color image -> cut out invalid pixels of depth image based on color image ->
    // -> create "environmentPointCloud" based off the color-filtered depth image ->
    // -> set the segmentation radius to be large (1.0~1.5?)
-   public void setEnvironmentPointCloud(List<Point3D32> pointCloud)
+   public void setEnvironmentPointCloud(List<? extends Point3DReadOnly> pointCloud)
    {
       synchronized (measurementPointCloudSynchronizer)
       {
@@ -458,17 +466,17 @@ public class IterativeClosestPointWorker
       setPoseGuess(resultPose);
    }
 
-   public List<Point3D32> getSegmentedPointCloud()
+   public List<Point3DReadOnly> getSegmentedPointCloud()
    {
       return segmentedPointCloud;
    }
 
-   public List<Point3D32> getCorrespondingMeasurementPoints()
+   public List<Point3DReadOnly> getCorrespondingMeasurementPoints()
    {
       return correspondingMeasurementPoints;
    }
 
-   public List<Point3D32> getCorrespondingObjectPoints()
+   public List<Point3DReadOnly> getCorrespondingObjectPoints()
    {
       return correspondingObjectPoints;
    }

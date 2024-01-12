@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.IterativeClosestPointWorker;
 import us.ihmc.perception.OpenCLPointCloudExtractor;
 import us.ihmc.perception.RawImage;
@@ -152,7 +153,7 @@ public class RDXIterativeClosestPointWorkerDemo
       if (success)
          ros2Helper.publish(PerceptionAPI.ICP_RESULT, icpWorker.getResult());
 
-      List<Point3D32> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
+      List<Point3DReadOnly> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
       segmentedPtCld.clear();
       if (segmentedPointCloud != null && !segmentedPointCloud.isEmpty())
       {
@@ -164,7 +165,7 @@ public class RDXIterativeClosestPointWorkerDemo
          segmentedPointCloudRenderer.setPointsToRender(segmentedPtCld, Color.GRAY);
       }
       correspondingObjectPtCld.clear();
-      List<Point3D32> correspondingObjectPointCLoud = icpWorker.getCorrespondingObjectPoints();
+      List<Point3DReadOnly> correspondingObjectPointCLoud = icpWorker.getCorrespondingObjectPoints();
       if (correspondingObjectPointCLoud != null && !correspondingObjectPointCLoud.isEmpty())
       {
          for (int i = 0; i < MAX_ENVIRONMENT_SIZE * 10 && i < correspondingObjectPointCLoud.size(); ++i)
@@ -175,7 +176,7 @@ public class RDXIterativeClosestPointWorkerDemo
          correspondingObjectPointCloudRenderer.setPointsToRender(correspondingObjectPtCld, Color.RED);
       }
       correspondingMeasurementPtCld.clear();
-      List<Point3D32> correspondingMeasurementPointCloud = icpWorker.getCorrespondingMeasurementPoints();
+      List<Point3DReadOnly> correspondingMeasurementPointCloud = icpWorker.getCorrespondingMeasurementPoints();
       if (correspondingMeasurementPointCloud != null && !correspondingMeasurementPointCloud.isEmpty())
       {
          for (int i = 0; i < MAX_ENVIRONMENT_SIZE * 10 && i < correspondingMeasurementPointCloud.size(); ++i)
