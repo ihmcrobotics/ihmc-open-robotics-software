@@ -74,7 +74,11 @@ public class RDXIterativeClosestPointWorkerDemo
    private final RecyclingArrayList<Point3D32> icpBoxPointCloud = new RecyclingArrayList<>(Point3D32::new);
 
    private final RDXPointCloudRenderer segmentedPointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRenderer correspondingObjectPointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRenderer correspondingMeasurementPointCloudRenderer = new RDXPointCloudRenderer();
    private final RecyclingArrayList<Point3D32> segmentedPtCld = new RecyclingArrayList<>(Point3D32::new);
+   private final RecyclingArrayList<Point3D32> correspondingObjectPtCld = new RecyclingArrayList<>(Point3D32::new);
+   private final RecyclingArrayList<Point3D32> correspondingMeasurementPtCld = new RecyclingArrayList<>(Point3D32::new);
 
    private boolean mouseTrackingToggle = true;
 
@@ -158,6 +162,29 @@ public class RDXIterativeClosestPointWorkerDemo
          }
          segmentedPointCloudRenderer.setPointsToRender(segmentedPtCld, Color.GRAY);
       }
+      correspondingObjectPtCld.clear();
+      List<Point3D32> correspondingObjectPointCLoud = icpWorker.getCorrespondingObjectPoints();
+      if (correspondingObjectPointCLoud != null && !correspondingObjectPointCLoud.isEmpty())
+      {
+         for (int i = 0; i < MAX_ENVIRONMENT_SIZE * 10 && i < correspondingObjectPointCLoud.size(); ++i)
+         {
+            Point3D32 newPoint = correspondingObjectPtCld.add();
+            newPoint.set(correspondingObjectPointCLoud.get(i));
+         }
+         correspondingObjectPointCloudRenderer.setPointsToRender(correspondingObjectPtCld, Color.RED);
+      }
+      correspondingMeasurementPtCld.clear();
+      List<Point3D32> correspondingMeasurementPointCloud = icpWorker.getCorrespondingMeasurementPoints();
+      if (correspondingMeasurementPointCloud != null && !correspondingMeasurementPointCloud.isEmpty())
+      {
+         for (int i = 0; i < MAX_ENVIRONMENT_SIZE * 10 && i < correspondingMeasurementPointCloud.size(); ++i)
+         {
+            Point3D32 newPoint = correspondingMeasurementPtCld.add();
+            newPoint.set(correspondingMeasurementPointCloud.get(i));
+         }
+         correspondingMeasurementPointCloudRenderer.setPointsToRender(correspondingMeasurementPtCld, Color.BLUE);
+      }
+
 
       referenceFrameGraphic.setPoseInWorldFrame(icpWorker.getResultPose());
 
@@ -184,7 +211,11 @@ public class RDXIterativeClosestPointWorkerDemo
             baseUI.getPrimaryScene().addRenderableProvider(icpBoxRenderer, RDXSceneLevel.VIRTUAL);
 
             segmentedPointCloudRenderer.create(MAX_ENVIRONMENT_SIZE * 10);
+            correspondingMeasurementPointCloudRenderer.create(MAX_ENVIRONMENT_SIZE * 10);
+            correspondingObjectPointCloudRenderer.create(MAX_ENVIRONMENT_SIZE * 10);
             baseUI.getPrimaryScene().addRenderableProvider(segmentedPointCloudRenderer);
+            baseUI.getPrimaryScene().addRenderableProvider(correspondingMeasurementPointCloudRenderer);
+            baseUI.getPrimaryScene().addRenderableProvider(correspondingObjectPointCloudRenderer);
 
             RDXROS2ImageMessageVisualizer zedDepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED2 Depth Image",
                                                                                                       DomainFactory.PubSubImplementation.FAST_RTPS,
@@ -231,6 +262,8 @@ public class RDXIterativeClosestPointWorkerDemo
             icpBoxRenderer.updateMesh();
 
             segmentedPointCloudRenderer.updateMesh();
+            correspondingMeasurementPointCloudRenderer.updateMesh();
+            correspondingObjectPointCloudRenderer.updateMesh();
 
             perceptionVisualizerPanel.update();
 
