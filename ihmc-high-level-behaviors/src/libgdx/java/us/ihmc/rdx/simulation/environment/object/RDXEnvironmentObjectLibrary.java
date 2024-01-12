@@ -14,19 +14,8 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXMediumCinderBlockRoughed.FACTORY);
       objectFactories.add(RDXLargeCinderBlockRoughed.FACTORY);
       objectFactories.add(RDXLabFloorObject.FACTORY);
-      objectFactories.add(RDXPalletObject.FACTORY);
-      objectFactories.add(RDXStairsObject.FACTORY);
-      objectFactories.add(RDXDoorFrameObject.FACTORY);
-      objectFactories.add(RDXDoorPanelObject.FACTORY);
-      objectFactories.add(RDXDoorLeverHandleObject.FACTORY);
-      objectFactories.add(RDXDoorObject.FACTORY);
       objectFactories.add(RDXArUcoBoxObject.FACTORY);
-      objectFactories.add(RDXPointLightObject.FACTORY);
-      objectFactories.add(RDXDirectionalLightObject.FACTORY);
       objectFactories.add(RDXL515SensorObject.FACTORY);
-      objectFactories.add(RDXMultiBodySnakeObject.FACTORY);
-      objectFactories.add(RDXRightJerseyBarrierObject.FACTORY);
-      objectFactories.add(RDXLeftJerseyBarrierObject.FACTORY);
    }
 
    public static ArrayList<RDXEnvironmentObjectFactory> getObjectFactories()

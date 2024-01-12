@@ -13,16 +13,7 @@ public class RDXSCS2EnvironmentObjectLibrary
 //      objectFactories.add(RDXMediumCinderBlockRoughed.FACTORY);
 //      objectFactories.add(RDXLargeCinderBlockRoughed.FACTORY);
 //      objectFactories.add(RDXLabFloorObject.FACTORY);
-//      objectFactories.add(RDXPalletObject.FACTORY);
-//      objectFactories.add(RDXStairsObject.FACTORY);
-//      objectFactories.add(RDXDoorFrameObject.FACTORY);
-//      objectFactories.add(RDXDoorPanelObject.FACTORY);
-//      objectFactories.add(RDXDoorLeverHandleObject.FACTORY);
-//      objectFactories.add(RDXDoorObject.FACTORY);
-//      objectFactories.add(RDXPointLightObject.FACTORY);
-//      objectFactories.add(RDXDirectionalLightObject.FACTORY);
 //      objectFactories.add(RDXL515SensorObject.FACTORY);
-//      objectFactories.add(RDXMultiBodySnakeObject.FACTORY);
    }
 
    public static ArrayList<RDXSCS2EnvironmentObjectFactory> getObjectFactories()
