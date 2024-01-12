@@ -27,11 +27,15 @@ public class ReferenceBasedStepExpansion implements FootstepExpansion
 
       // Reference Offsets
       referenceXOffsets.add(-2);
+      referenceXOffsets.add(-1);
       referenceXOffsets.add(0);
+      referenceXOffsets.add(1);
       referenceXOffsets.add(2);
 
       referenceYOffsets.add(-2);
+      referenceYOffsets.add(-1);
       referenceYOffsets.add(0);
+      referenceYOffsets.add(1);
       referenceYOffsets.add(2);
 
       referenceYawOffsets.add(-2);
