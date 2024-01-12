@@ -24,6 +24,5 @@ public class RDXSCS2SmallCinderBlockRoughed extends RDXSCS2EnvironmentObject
       setMass(5.0f);
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
       setCollisionGeometryObject(collisionBox);
-//      setBtCollisionShape(new btBoxShape(new Vector3((float) sizeX / 2.0f, (float) sizeY / 2.0f, (float) sizeZ / 2.0f)));
    }
 }
