@@ -36,7 +36,7 @@ public class RDXARDemo
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
             baseUI.getPrimaryScene().getSceneLevelsToRender().remove(RDXSceneLevel.MODEL);
-            environmentBuilder.loadEnvironment("LookAndStepHard.json");
+            environmentBuilder.loadEnvironment("FlatGround.json");
 
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
             sensorPoseGizmo.setResizeAutomatically(true);
