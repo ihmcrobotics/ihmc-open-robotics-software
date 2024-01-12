@@ -129,11 +129,9 @@ public class IterativeClosestPointWorker
       else
          detectionPoint.set(resultPose);
 
-
       boolean ranICPSuccessfully = false;
       for (int i = 0; i < numberOfIterations; ++i)
       {
-         System.out.println("Running iteration " + i);
          // Segment the point cloud
          synchronized (measurementPointCloudSynchronizer) // synchronize as to avoid changes to environment point cloud while segmenting it
          {
@@ -152,7 +150,6 @@ public class IterativeClosestPointWorker
          // Only run ICP iteration if segmented point cloud has enough points
          if (segmentedPointCloud.size() >= numberOfCorrespondences)
          {
-            System.out.println("\tSuccess!");
             runICPIteration();
 
             ranICPSuccessfully = true;
@@ -164,7 +161,6 @@ public class IterativeClosestPointWorker
 
    public DetectedObjectPacket getResult()
    {
-      System.out.println("Sending result!");
       DetectedObjectPacket resultMessage = new DetectedObjectPacket();
       resultMessage.setId((int) sceneNodeID);
       resultMessage.getPose().set(resultPose);
