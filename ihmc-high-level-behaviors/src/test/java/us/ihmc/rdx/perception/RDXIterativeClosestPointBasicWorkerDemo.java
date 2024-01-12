@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.IterativeClosestPointTools;
 import us.ihmc.perception.IterativeClosestPointWorker;
@@ -159,7 +160,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
       if (success)
          ros2Helper.publish(PerceptionAPI.ICP_RESULT, icpWorker.getResult());
 
-      List<Point3D32> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
+      List<Point3DReadOnly> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
       segmentedPtCld.clear();
       if (segmentedPointCloud != null && !segmentedPointCloud.isEmpty())
       {
