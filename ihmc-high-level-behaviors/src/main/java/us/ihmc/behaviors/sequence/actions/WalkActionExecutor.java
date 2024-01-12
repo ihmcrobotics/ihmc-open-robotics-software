@@ -194,6 +194,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
          case PLANNING_FAILED ->
          {
             state.setIsExecuting(false);
+            state.setFailed(true);
             state.getExecutionState().setValue(WalkActionExecutionState.PLAN_EXECUTION_COMPLETE);
          }
          case PLANNING_SUCCEEDED ->
