@@ -9,6 +9,7 @@ import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
@@ -45,6 +46,7 @@ public class RDXSceneGraphUI
 
    private final RDXPredefinedRigidBodySceneNodeBuilder predefinedRigidBodySceneNodeBuilder;
    private final RDXPrimitiveRigidBodySceneNodeBuilder primitiveRigidBodySceneNodeBuilder;
+   private final RDXPrimitiveRigidBodySceneNodeBuilder predefinedPrimitiveRigidBodySceneNodeBuilder;
 
    public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D)
    {
@@ -64,6 +66,7 @@ public class RDXSceneGraphUI
 
       predefinedRigidBodySceneNodeBuilder = new RDXPredefinedRigidBodySceneNodeBuilder(sceneGraph);
       primitiveRigidBodySceneNodeBuilder = new RDXPrimitiveRigidBodySceneNodeBuilder(sceneGraph);
+      predefinedPrimitiveRigidBodySceneNodeBuilder = new RDXPrimitiveRigidBodySceneNodeBuilder(sceneGraph);
    }
 
    public void addUISceneNode(RDXSceneNode uiSceneNode)
@@ -115,10 +118,7 @@ public class RDXSceneGraphUI
                ImGui.tableNextRow();
                ImGui.tableSetColumnIndex(0);
 
-               if (!predefinedRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
-               {
-                  ImGui.beginDisabled();
-               }
+               ImGui.beginDisabled(!predefinedRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty());
                if (ImGui.beginTable("##predefinedRigidBodyTableModel", 1))
                {
                   ImGui.tableNextRow();
@@ -161,10 +161,8 @@ public class RDXSceneGraphUI
                   }
                   ImGui.endTable();
                }
-               if (!predefinedRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
-               {
-                  ImGui.endDisabled();
-               }
+               ImGui.endDisabled();
+
 
                ImGui.tableSetColumnIndex(1);
                predefinedRigidBodySceneNodeBuilder.renderImGuiWidgets();
@@ -186,10 +184,7 @@ public class RDXSceneGraphUI
                ImGui.tableNextRow();
                ImGui.tableSetColumnIndex(0);
 
-               if (!primitiveRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
-               {
-                  ImGui.beginDisabled();
-               }
+               ImGui.beginDisabled(!primitiveRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty());
                if (ImGui.beginTable("##primitiveRigidBodyTableModel", 1))
                {
                   ImGui.tableNextRow();
@@ -205,10 +200,7 @@ public class RDXSceneGraphUI
                   }
                   ImGui.endTable();
                }
-               if (!primitiveRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
-               {
-                  ImGui.endDisabled();
-               }
+               ImGui.endDisabled();
 
                ImGui.tableSetColumnIndex(1);
                primitiveRigidBodySceneNodeBuilder.renderImGuiWidgets();
@@ -218,6 +210,58 @@ public class RDXSceneGraphUI
             if (!primitiveRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
             {
                ImGuiTools.previousWidgetTooltip(primitiveRigidBodySceneNodeBuilder.getRejectionTooltip());
+            }
+
+            // Predefined primitives
+            if (ImGui.beginTable("##predefinedPrimitiveRigidBodyTable", 2))
+            {
+               ImGui.tableSetupColumn(labels.get("Predefined primitive"), ImGuiTableColumnFlags.WidthFixed, 150f);
+               ImGui.tableSetupColumn(labels.get("Options"), ImGuiTableColumnFlags.WidthFixed, 200f);
+               ImGui.tableHeadersRow();
+
+               ImGui.tableNextRow();
+               ImGui.tableSetColumnIndex(0);
+
+               ImGui.beginDisabled(!predefinedPrimitiveRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty());
+               if (ImGui.beginTable("##primitiveRigidBodyTableModel", 1))
+               {
+                  ImGui.tableNextRow();
+                  ImGui.tableSetColumnIndex(0);
+
+                  if (ImGui.button(labels.get("Add small box")))
+                  {
+                     Vector3D32 smallBoxLengths = new Vector3D32(0.206f, 0.254f, 0.165f);
+                     RDXPrimitiveRigidBodySceneNode smallBox = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.BOX, smallBoxLengths, null);
+                     modificationQueue.accept(new SceneGraphNodeAddition(smallBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(smallBox);
+                  }
+                  if (ImGui.button(labels.get("Add medium box")))
+                  {
+                     Vector3D32 mediumBoxLengths = new Vector3D32(0.3f, 0.4f, 0.2f);
+                     RDXPrimitiveRigidBodySceneNode mediumBox = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.BOX, mediumBoxLengths, null);
+                     modificationQueue.accept(new SceneGraphNodeAddition(mediumBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(mediumBox);
+                  }
+                  if (ImGui.button(labels.get("Add large box")))
+                  {
+                     Vector3D32 largeBoxLengths = new Vector3D32(0.314f, 0.394f, 0.26f);
+                     RDXPrimitiveRigidBodySceneNode largeBox = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.BOX, largeBoxLengths, null);
+                     modificationQueue.accept(new SceneGraphNodeAddition(largeBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(largeBox);
+                  }
+                  ImGui.endTable();
+               }
+
+               ImGui.endDisabled();
+
+               ImGui.tableSetColumnIndex(1);
+               predefinedPrimitiveRigidBodySceneNodeBuilder.renderImGuiWidgets();
+
+               ImGui.endTable();
+            }
+            if (!predefinedPrimitiveRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
+            {
+               ImGuiTools.previousWidgetTooltip(predefinedPrimitiveRigidBodySceneNodeBuilder.getRejectionTooltip());
             }
 
             ImGui.endMenu();
