@@ -8,6 +8,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
@@ -106,9 +107,9 @@ public class IterativeClosestPointTools
 
    public static void computeCorrespondencesOnShape(PrimitiveRigidBodyShape shape,
                                                     Pose3DReadOnly shapePose,
-                                                    List<Point3D32> measurementPoints,
-                                                    List<Point3D32> correspondingMeasurementPointsToPack,
-                                                    List<Point3D32> correspondingObjectPointsToPack,
+                                                    List<? extends Point3DReadOnly> measurementPoints,
+                                                    List<Point3DReadOnly> correspondingMeasurementPointsToPack,
+                                                    List<Point3DReadOnly> correspondingObjectPointsToPack,
                                                     float xLength,
                                                     float yLength,
                                                     float zLength,
@@ -122,7 +123,8 @@ public class IterativeClosestPointTools
 
       for (int i = 0; i < Math.min(measurementPoints.size(), numberOfCorrespondences); i++)
       {
-         Point3D32 measurementPoint = measurementPoints.get(i);
+         // Get a copy of the measurement point, so that things don't get modified.
+         Point3D32 measurementPoint = new Point3D32(measurementPoints.get(i));
          Point3D32 correspondingObjectPoint = computeCorrespondenceOnShape(shape,
                                                                            shapePose,
                                                                            measurementPoint,
