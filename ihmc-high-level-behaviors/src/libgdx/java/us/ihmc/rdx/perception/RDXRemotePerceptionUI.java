@@ -4,6 +4,7 @@ import us.ihmc.avatar.colorVision.DualBlackflyComms;
 import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.video.ContinuousPlanningAPI;
+import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.comms.PerceptionComms;
@@ -30,6 +31,7 @@ public class RDXRemotePerceptionUI
    private SwingPlannerParametersBasics swingPlannerParameters;
    private FootstepPlannerParametersBasics footstepPlannerParameters;
 
+   private final MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters = new MonteCarloFootstepPlannerParameters();
    private final RapidRegionsExtractorParameters rapidRegionsExtractorParameters = new RapidRegionsExtractorParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
@@ -127,5 +129,10 @@ public class RDXRemotePerceptionUI
    {
       this.swingPlannerParameters = parameters;
       remotePropertySets.registerRemotePropertySet(swingPlannerParameters, ContinuousPlanningAPI.SWING_PLANNING_PARAMETERS);
+   }
+
+   public MonteCarloFootstepPlannerParameters getMonteCarloFootstepPlannerParameters()
+   {
+      return monteCarloFootstepPlannerParameters;
    }
 }

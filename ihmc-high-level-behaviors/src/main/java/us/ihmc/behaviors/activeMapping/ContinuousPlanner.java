@@ -361,6 +361,7 @@ public class ContinuousPlanner
       }
       else
       {
+         statistics.appendString("[PLANNER] No Reference Plan");
          request.setTimeout(continuousWalkingParameters.getPlanningWithoutReferenceTimeout());
       }
 
