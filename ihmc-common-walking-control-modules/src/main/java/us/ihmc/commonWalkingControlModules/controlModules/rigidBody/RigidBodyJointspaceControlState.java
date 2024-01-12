@@ -258,13 +258,11 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
       for (int jointIdx = 0; jointIdx < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); jointIdx++)
       {
-         if (bypassAccelerationIntegration[jointIdx].getValue())
-         {
-            accelerationIntegrationCommand.addJointToComputeDesiredPositionFor(jointsToControl[jointIdx]).setDisableAccelerationIntegration(true);
-         }
+         accelerationIntegrationCommand.addJointToComputeDesiredPositionFor(jointsToControl[jointIdx])
+                                       .setDisableAccelerationIntegration(bypassAccelerationIntegration[jointIdx].getValue());
       }
 
-      return accelerationIntegrationCommand.getNumberOfJointsToComputeDesiredPositionFor() > 0 ? accelerationIntegrationCommand : null;
+      return accelerationIntegrationCommand;
    }
 
    @Override
