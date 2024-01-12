@@ -52,7 +52,7 @@
     "upperBound" : 1.0
   },
   "Feasible contact cutoff" : {
-    "value" : 0.844262,
+    "value" : 0.869565,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -62,7 +62,7 @@
     "upperBound" : 5.0
   },
   "Initial value cutoff" : {
-    "value" : 824,
+    "value" : 925,
     "lowerBound" : -1000,
     "upperBound" : 1000
   },
@@ -72,12 +72,12 @@
     "upperBound" : 12
   },
   "Sided yaw offset" : {
-    "value" : 0.709032,
+    "value" : 1.100619,
     "lowerBound" : 0.0,
     "upperBound" : 3.14
   },
   "Search yaw band" : {
-    "value" : 0.270331,
+    "value" : 0.578421,
     "lowerBound" : 0.0,
     "upperBound" : 3.14
   },
@@ -87,7 +87,7 @@
     "upperBound" : 0.3
   },
   "Search outer radius" : {
-    "value" : 0.625,
+    "value" : 0.806818,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
