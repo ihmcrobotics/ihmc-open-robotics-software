@@ -87,6 +87,13 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
       if (radii == null)
          radii = new Vector3D32(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION);
 
+      xLength.set(lengths.getX32());
+      yLength.set(lengths.getY32());
+      zLength.set(lengths.getZ32());
+      xRadius.set(radii.getX32());
+      yRadius.set(radii.getY32());
+      zRadius.set(radii.getZ32());
+
       switch (primitiveRigidBodySceneNode.getShape())
       {
          case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBox(lengths.getX32(), lengths.getY32(), lengths.getZ32(), Color.WHITE));

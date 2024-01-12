@@ -55,7 +55,7 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
       this.visualModelToNodeTransform.set(visualModelToNodeTransform);
       this.panel3D = panel3D;
 
-      posePlacement.create(Color.YELLOW);
+      posePlacement.create(Color.YELLOW, "Place Node Pose", "Placing Node", "Stop Placement");
       RDXBaseUI.getInstance().getPrimary3DPanel().addImGui3DViewInputProcessor(posePlacement::processImGui3DViewInput);
       posePlacement.setOnEndPositionPlacement(() ->
       {
@@ -127,17 +127,16 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
       ImGui.sameLine();
       ImGui.text(" Parent: " + rigidBodySceneNode.getNodeFrame().getParent().getName());
 
-      trackDetectedPoseWrapper.renderImGuiWidget();
-      ImGui.sameLine();
-      ImGui.checkbox(labels.get("Show Offset Gizmo"), offsetPoseGizmo.getSelected());
+      posePlacement.renderPlaceGoalButton();
       ImGui.sameLine();
       if (ImGui.button(labels.get("Clear Offset")))
       {
          rigidBodySceneNode.clearOffset();
          rigidBodySceneNode.freeze();
       }
-
-      posePlacement.renderPlaceGoalButton();
+      trackDetectedPoseWrapper.renderImGuiWidget();
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Show Offset Gizmo"), offsetPoseGizmo.getSelected());
    }
 
    @Override
