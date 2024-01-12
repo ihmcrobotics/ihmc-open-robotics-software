@@ -15,7 +15,7 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "77db85bc8ba4c24e96daf2a8f5925b75f998efec26b000fa05eff7e7432eba9d";
+   		return "8a61b79a90e825a68849576fd961f364a96c8f040edb234350b0bab01ae49e0a";
    }
    
    @Override
@@ -70,6 +70,8 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -111,6 +113,9 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -132,9 +137,11 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLengths(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRadii(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getProvidedPose(), cdr);
-      cdr.write_type_4(data.getNumberOfShapeSamples());
+      cdr.write_type_2(data.getNumberOfShapeSamples());
 
-      cdr.write_type_4(data.getNumberOfCorrespondences());
+      cdr.write_type_2(data.getNumberOfCorrespondences());
+
+      cdr.write_type_2(data.getNumberOfIterations());
 
       cdr.write_type_5(data.getSegmentationRadius());
 
@@ -155,9 +162,11 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLengths(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRadii(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getProvidedPose(), cdr);	
-      data.setNumberOfShapeSamples(cdr.read_type_4());
+      data.setNumberOfShapeSamples(cdr.read_type_2());
       	
-      data.setNumberOfCorrespondences(cdr.read_type_4());
+      data.setNumberOfCorrespondences(cdr.read_type_2());
+      	
+      data.setNumberOfIterations(cdr.read_type_2());
       	
       data.setSegmentationRadius(cdr.read_type_5());
       	
@@ -180,8 +189,9 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
 
       ser.write_type_a("provided_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getProvidedPose());
 
-      ser.write_type_4("number_of_shape_samples", data.getNumberOfShapeSamples());
-      ser.write_type_4("number_of_correspondences", data.getNumberOfCorrespondences());
+      ser.write_type_2("number_of_shape_samples", data.getNumberOfShapeSamples());
+      ser.write_type_2("number_of_correspondences", data.getNumberOfCorrespondences());
+      ser.write_type_2("number_of_iterations", data.getNumberOfIterations());
       ser.write_type_5("segmentation_radius", data.getSegmentationRadius());
       ser.write_type_7("run_icp", data.getRunIcp());
       ser.write_type_7("use_provided_pose", data.getUseProvidedPose());
@@ -199,8 +209,9 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
 
       ser.read_type_a("provided_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getProvidedPose());
 
-      data.setNumberOfShapeSamples(ser.read_type_4("number_of_shape_samples"));
-      data.setNumberOfCorrespondences(ser.read_type_4("number_of_correspondences"));
+      data.setNumberOfShapeSamples(ser.read_type_2("number_of_shape_samples"));
+      data.setNumberOfCorrespondences(ser.read_type_2("number_of_correspondences"));
+      data.setNumberOfIterations(ser.read_type_2("number_of_iterations"));
       data.setSegmentationRadius(ser.read_type_5("segmentation_radius"));
       data.setRunIcp(ser.read_type_7("run_icp"));
       data.setUseProvidedPose(ser.read_type_7("use_provided_pose"));

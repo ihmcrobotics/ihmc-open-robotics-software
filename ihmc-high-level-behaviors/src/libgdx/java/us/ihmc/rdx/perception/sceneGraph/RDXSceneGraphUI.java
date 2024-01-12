@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiTableColumnFlags;
+import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.SceneGraphMessage;
@@ -304,10 +305,13 @@ public class RDXSceneGraphUI
          {
             for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
             {
+
                if (uiSceneNodes.containsKey(sceneNode))
                {
-                  ImGuiTools.textBold(sceneNode.getName());
-                  uiSceneNodes.get(sceneNode).renderImGuiWidgets(modificationQueue, sceneGraph);
+                  if (ImGui.collapsingHeader(labels.get(sceneNode.getName()), ImGuiTreeNodeFlags.DefaultOpen))
+                  {
+                     uiSceneNodes.get(sceneNode).renderImGuiWidgets(modificationQueue, sceneGraph);
+                  }
                   ImGui.separator();
                }
             }

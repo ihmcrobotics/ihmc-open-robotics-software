@@ -55,8 +55,9 @@ module perception_msgs
         /**
          * ICP parameters
          */
-        unsigned long number_of_shape_samples;
-        unsigned long number_of_correspondences;
+        long number_of_shape_samples;
+        long number_of_correspondences;
+        long number_of_iterations;
         float segmentation_radius;
         /**
          * Start/stop flag (true = run, false = stop)

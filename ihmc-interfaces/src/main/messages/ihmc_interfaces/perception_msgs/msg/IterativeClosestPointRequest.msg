@@ -22,8 +22,9 @@ geometry_msgs/Vector3 radii
 geometry_msgs/Pose provided_pose
 
 # ICP parameters
-uint32 number_of_shape_samples
-uint32 number_of_correspondences
+int32 number_of_shape_samples
+int32 number_of_correspondences
+int32 number_of_iterations
 float32 segmentation_radius
 
 # Start/stop flag (true = run, false = stop)

@@ -129,6 +129,7 @@ public class IterativeClosestPointWorker
       boolean ranICPSuccessfully = false;
       for (int i = 0; i < numberOfIterations; ++i)
       {
+         System.out.println("Running iteration " + i);
          // Segment the point cloud
          synchronized (measurementPointCloudSynchronizer) // synchronize as to avoid changes to environment point cloud while segmenting it
          {
@@ -147,6 +148,7 @@ public class IterativeClosestPointWorker
          // Only run ICP iteration if segmented point cloud has enough points
          if (segmentedPointCloud.size() >= numberOfCorrespondences)
          {
+            System.out.println("\tSuccess!");
             runICPIteration(segmentedPointCloud);
 
             ranICPSuccessfully = true;
@@ -158,12 +160,13 @@ public class IterativeClosestPointWorker
 
    public DetectedObjectPacket getResult()
    {
+      System.out.println("Sending result!");
       DetectedObjectPacket resultMessage = new DetectedObjectPacket();
       resultMessage.setId((int) sceneNodeID);
       resultMessage.getPose().set(resultPose);
       for (Point3D32 point3D32 : getObjectPointCloud())
          resultMessage.getObjectPointCloud().add().set(point3D32);
-      for (int i = 0; i < segmentedPointCloud.size(); i++)
+      for (int i = 0; i < Math.min(segmentedPointCloud.size(), numberOfCorrespondences); i++)
          resultMessage.getSegmentedPointCloud().add().set(segmentedPointCloud.get(i));
 
       return resultMessage;
@@ -507,6 +510,11 @@ public class IterativeClosestPointWorker
    public boolean isUsingTargetPoint()
    {
       return useTargetPoint.get();
+   }
+
+   public int getNumberOfShapeSamples()
+   {
+      return getObjectPointCloud().size();
    }
 
    public Vector3DReadOnly getLengths()
