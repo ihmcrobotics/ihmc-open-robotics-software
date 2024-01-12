@@ -65,6 +65,8 @@ public class IterativeClosestPointWorker
 
    private List<Point3DReadOnly> correspondingObjectPoints;
    private List<Point3DReadOnly> correspondingMeasurementPoints;
+   private final Point3D32 measurementCentroid = new Point3D32();
+   private final Point3D32 objectCentroid = new Point3D32();
 
    private List<Point3D32> localObjectPoints;
    private List<Point3D32> objectInWorldPoints;
@@ -148,7 +150,7 @@ public class IterativeClosestPointWorker
          }
 
          // Only run ICP iteration if segmented point cloud has enough points
-         if (segmentedPointCloud.size() >= numberOfCorrespondences)
+         if (segmentedPointCloud.size() >= 0.25 * numberOfCorrespondences)
          {
             runICPIteration();
 
@@ -204,8 +206,11 @@ public class IterativeClosestPointWorker
       }
 
       // Calculate object corresponce centroid
-      Point3D32 objectCentroid = computeCentroidOfPointCloud(correspondingObjectPoints);
+      objectCentroid.set(computeCentroidOfPointCloud(correspondingObjectPoints));
       int foundCorrespondences = correspondingMeasurementPoints.size();
+
+      objectRelativeToCentroidPoints.reshape(foundCorrespondences, 3);
+      measurementRelativeToCentroidPoints.reshape(foundCorrespondences, 3);
 
       for (int i = 0; i < foundCorrespondences; ++i)
       {
@@ -215,7 +220,7 @@ public class IterativeClosestPointWorker
       }
 
       // Calculate measurement centroid
-      Point3D32 measurementCentroid = computeCentroidOfPointCloud(correspondingMeasurementPoints);
+      measurementCentroid.set(computeCentroidOfPointCloud(correspondingMeasurementPoints));
 
       for (int i = 0; i < foundCorrespondences; ++i)
       {
@@ -475,6 +480,16 @@ public class IterativeClosestPointWorker
    public List<Point3DReadOnly> getCorrespondingObjectPoints()
    {
       return correspondingObjectPoints;
+   }
+
+   public Point3DReadOnly getMeasurementCentroid()
+   {
+      return measurementCentroid;
+   }
+
+   public Point3DReadOnly getObjectCentroid()
+   {
+      return objectCentroid;
    }
 
    public void setPoseGuess(Pose3DReadOnly pose)

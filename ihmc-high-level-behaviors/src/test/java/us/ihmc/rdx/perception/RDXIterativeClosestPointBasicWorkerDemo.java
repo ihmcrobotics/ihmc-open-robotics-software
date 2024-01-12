@@ -8,6 +8,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -66,7 +67,11 @@ public class RDXIterativeClosestPointBasicWorkerDemo
 
    private final RDXPointCloudRenderer environmentPointCloudRenderer = new RDXPointCloudRenderer();
    private final RDXPointCloudRenderer segmentedPointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRenderer correspondingObjectPointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRenderer correspondingMeasurementPointCloudRenderer = new RDXPointCloudRenderer();
    private final RecyclingArrayList<Point3D32> segmentedPtCld = new RecyclingArrayList<>(Point3D32::new);
+   private final RecyclingArrayList<Point3D32> correspondingObjectPtCld = new RecyclingArrayList<>(Point3D32::new);
+   private final RecyclingArrayList<Point3D32> correspondingMeasurementPtCld = new RecyclingArrayList<>(Point3D32::new);
 
    private boolean mouseTrackingToggle = false;
 
@@ -88,6 +93,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
    private final ImFloat segmentationRadius = new ImFloat(0.6f);
 
    private final ImBoolean icpGuiAutoMoveEnv = new ImBoolean(true);
+   private final ImBoolean addGround = new ImBoolean(false);
 
    // These are the actual shape pose
    private final float[] icpGuiShapeSetPostionX = {0.0f};
@@ -98,7 +104,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
    private final float[] icpGuiShapeSetRoll = {0.0f};
 
    // These are the speed at which the input shape is moving.
-   private final float[] icpGuiEnvAutoMoveSpeed = {1.0f};
+   private final float[] icpGuiEnvAutoMoveSpeed = {0.0f};
    private final int[] icpGuiNumICPIterations = {1};
    private double icpGuiICPRunTimeInSeconds = 0;
 
@@ -135,7 +141,13 @@ public class RDXIterativeClosestPointBasicWorkerDemo
                                                                                                    zRadius.get(),
                                                                                                    environmentSize,
                                                                                                    random);
+
       addNoiseToPoints(environmentPointCloud);
+
+      if (addGround.get())
+      {
+         addGroundToPointCloud(environmentPointCloud);
+      }
       environmentPointCloudRenderer.setPointsToRender(environmentPointCloud, Color.BLUE);
 
       if (firstTick)
@@ -169,10 +181,43 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             Point3D32 newPoint = segmentedPtCld.add();
             newPoint.set(segmentedPointCloud.get(i));
          }
-         segmentedPointCloudRenderer.setPointsToRender(segmentedPtCld, Color.GRAY);
+         segmentedPointCloudRenderer.setPointsToRender(segmentedPtCld, Color.ORANGE);
+      }
+      correspondingObjectPtCld.clear();
+      List<Point3DReadOnly> correspondingObjectPointCLoud = icpWorker.getCorrespondingObjectPoints();
+      if (correspondingObjectPointCLoud != null && !correspondingObjectPointCLoud.isEmpty())
+      {
+         for (int i = 0; i < MAX_ENVIRONMENT_SIZE * 10 && i < correspondingObjectPointCLoud.size(); ++i)
+         {
+            Point3D32 newPoint = correspondingObjectPtCld.add();
+            newPoint.set(correspondingObjectPointCLoud.get(i));
+         }
+         correspondingObjectPointCloudRenderer.setPointsToRender(correspondingObjectPtCld, Color.RED);
+      }
+      correspondingMeasurementPtCld.clear();
+      List<Point3DReadOnly> correspondingMeasurementPointCloud = icpWorker.getCorrespondingMeasurementPoints();
+      if (correspondingMeasurementPointCloud != null && !correspondingMeasurementPointCloud.isEmpty())
+      {
+         for (int i = 0; i < MAX_ENVIRONMENT_SIZE * 10 && i < correspondingMeasurementPointCloud.size(); ++i)
+         {
+            Point3D32 newPoint = correspondingMeasurementPtCld.add();
+            newPoint.set(correspondingMeasurementPointCloud.get(i));
+         }
+         correspondingMeasurementPointCloudRenderer.setPointsToRender(correspondingMeasurementPtCld, Color.BLUE);
       }
 
       referenceFrameGraphic.setPoseInWorldFrame(icpWorker.getResultPose());
+   }
+
+   private void addGroundToPointCloud(List<Point3D32> pointsToAdd)
+   {
+      double groundHeight = shapeInputPose.getZ() - height.get() / 2.0;
+      for (int i = 0; i < 500; i++)
+      {
+         double xDistance = RandomNumbers.nextDouble(random, 0.75) + shapeInputPose.getX();
+         double yDistance = RandomNumbers.nextDouble(random, 0.75) + shapeInputPose.getY();
+         pointsToAdd.add(new Point3D32((float) xDistance, (float) yDistance, (float) groundHeight));
+      }
    }
 
    private void calculateICPTime(long time1, long time2)
@@ -237,8 +282,12 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             baseUI.getPrimaryScene().addRenderableProvider(icpBoxRenderer, RDXSceneLevel.VIRTUAL);
 
             segmentedPointCloudRenderer.create(MAX_ENVIRONMENT_SIZE * 10);
+            correspondingMeasurementPointCloudRenderer.create(MAX_ENVIRONMENT_SIZE * 10);
+            correspondingObjectPointCloudRenderer.create(MAX_ENVIRONMENT_SIZE * 10);
             environmentPointCloudRenderer.create(MAX_ENVIRONMENT_SIZE * 10);
             baseUI.getPrimaryScene().addRenderableProvider(segmentedPointCloudRenderer);
+            baseUI.getPrimaryScene().addRenderableProvider(correspondingMeasurementPointCloudRenderer);
+            baseUI.getPrimaryScene().addRenderableProvider(correspondingObjectPointCloudRenderer);
             baseUI.getPrimaryScene().addRenderableProvider(environmentPointCloudRenderer);
 
             baseUI.getImGuiPanelManager().addPanel("ICP Settings", this::renderSettings);
@@ -350,6 +399,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             ImGui.sliderFloat("Move Speed", icpGuiEnvAutoMoveSpeed, 0.0f, 10.0f);
             ImGui.sliderInt("# iterations / tick", icpGuiNumICPIterations,1, 10);
             ImGui.checkbox("Auto Move", icpGuiAutoMoveEnv);
+            ImGui.checkbox("Add ground", addGround);
          }
 
 

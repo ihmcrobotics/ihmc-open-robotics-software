@@ -182,11 +182,57 @@ public class IterativeClosestPointTools
       double yLocal = pointRelativeToBox.getY();
       double zLocal = pointRelativeToBox.getZ();
 
-      double xLocalClamped = EuclidCoreTools.clamp(xLocal, halfSizeX);
-      double yLocalClamped = EuclidCoreTools.clamp(yLocal, halfSizeY);
-      double zLocalClamped = EuclidCoreTools.clamp(zLocal, halfSizeZ);
+      double xDistance = Math.abs(xLocal) - halfSizeX;
+      double yDistance = Math.abs(yLocal) - halfSizeY;
+      double zDistance = Math.abs(zLocal) - halfSizeZ;
 
-      correspondingPoint.set(xLocalClamped, yLocalClamped, zLocalClamped);
+      if (xDistance > 0.0 || yDistance > 0.0 || zDistance > 0.0)
+      {
+         // the point is outside, becuase one of these poitns is outside
+         double xLocalClamped = EuclidCoreTools.clamp(xLocal, halfSizeX);
+         double yLocalClamped = EuclidCoreTools.clamp(yLocal, halfSizeY);
+         double zLocalClamped = EuclidCoreTools.clamp(zLocal, halfSizeZ);
+
+         correspondingPoint.set(xLocalClamped, yLocalClamped, zLocalClamped);
+      }
+      else
+      {
+         double xLocalClamped = xLocal;
+         double yLocalClamped = yLocal;
+         double zLocalClamped = zLocal;
+
+         // the point is inside the box, and all the distances are negative. We want to define the dimension that is LEAST inside the box, which is the greatest
+         // value.
+         if (xDistance > yDistance)
+         {
+            if (xDistance > zDistance)
+            {
+               // we're closest to the x edge
+               xLocalClamped = Math.signum(xLocal) * halfSizeX;
+            }
+            else
+            {
+               // we're closest to the z edge
+               zLocalClamped = Math.signum(zLocal) * halfSizeZ;
+            }
+         }
+         else
+         {
+            if (yDistance > zDistance)
+            {
+               // we're closest to the y edge
+               yLocalClamped = Math.signum(yLocalClamped) * halfSizeY;
+            }
+            else
+            {
+               // we're closest to the z edge
+               zLocalClamped = Math.signum(zLocal) * halfSizeZ;
+            }
+         }
+         correspondingPoint.set(xLocalClamped, yLocalClamped, zLocalClamped);
+
+      }
+
       correspondingPoint.applyTransform(boxPose);
 
       return correspondingPoint;
