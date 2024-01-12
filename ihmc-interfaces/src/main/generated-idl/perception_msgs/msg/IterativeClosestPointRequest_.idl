@@ -2,6 +2,7 @@
 #define __perception_msgs__msg__IterativeClosestPointRequest__idl__
 
 #include "geometry_msgs/msg/./Pose_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
 module perception_msgs
 {
   module msg
@@ -45,16 +46,18 @@ module perception_msgs
         /**
          * Dimensions of the object
          */
-        float x_length;
-        float y_length;
-        float z_length;
-        float x_radius;
-        float y_radius;
-        float z_radius;
+        geometry_msgs::msg::dds::Vector3 lengths;
+        geometry_msgs::msg::dds::Vector3 radii;
         /**
          * User defined pose of virtual object
          */
         geometry_msgs::msg::dds::Pose provided_pose;
+        /**
+         * ICP parameters
+         */
+        unsigned long number_of_shape_samples;
+        unsigned long number_of_correspondences;
+        float segmentation_radius;
         /**
          * Start/stop flag (true = run, false = stop)
          */
