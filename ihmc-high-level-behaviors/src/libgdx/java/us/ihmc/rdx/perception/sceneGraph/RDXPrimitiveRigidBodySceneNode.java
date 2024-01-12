@@ -118,12 +118,8 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
       IterativeClosestPointRequest requestMessage = new IterativeClosestPointRequest();
       requestMessage.setNodeId(getSceneNode().getID());
       requestMessage.setShape(((PrimitiveRigidBodySceneNode) getSceneNode()).getShape().toByte());
-      requestMessage.setXLength(xLength.get());
-      requestMessage.setYLength(yLength.get());
-      requestMessage.setZLength(zLength.get());
-      requestMessage.setXRadius(xRadius.get());
-      requestMessage.setYRadius(yRadius.get());
-      requestMessage.setZRadius(zRadius.get());
+      requestMessage.getLengths().set(xLength.get(), yLength.get(), zLength.get());
+      requestMessage.getRadii().set(xRadius.get(), yRadius.get(), zRadius.get());
       requestMessage.getProvidedPose().set(getSceneNode().getNodeFrame().getTransformToWorldFrame());
       requestMessage.setRunIcp(runICP.get());
       requestMessage.setUseProvidedPose(!useICPPose.get());
