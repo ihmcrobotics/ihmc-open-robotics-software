@@ -174,6 +174,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       super.triggerActionExecution();
 
       hasSentCommand = false;
+      executionTimer.reset();
 
       if (state.getPalmFrame().isChildOfWorld())
       {
