@@ -3,6 +3,7 @@ package us.ihmc.perception;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.tools.EuclidShapeTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -10,6 +11,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
 import java.util.ArrayList;
@@ -142,7 +144,7 @@ public class IterativeClosestPointTools
 
    private static Point3D32 computeCorrespondenceOnShape(PrimitiveRigidBodyShape shape,
                                                          Pose3DReadOnly shapePose,
-                                                         Point3D32 point,
+                                                         Point3DReadOnly point,
                                                          float xLength,
                                                          float yLength,
                                                          float zLength,
@@ -164,7 +166,7 @@ public class IterativeClosestPointTools
       return correspondingPointOnShape;
    }
 
-   static Point3D32 computeCorrespondingPointOnBox(Pose3DReadOnly boxPose, Point3D32 query, float xLength, float yLength, float zLength)
+   static Point3D32 computeCorrespondingPointOnBox(Pose3DReadOnly boxPose, Point3DReadOnly query, float xLength, float yLength, float zLength)
    {
       Point3D pointRelativeToBox = new Point3D(query);
       pointRelativeToBox.applyInverseTransform(boxPose);
@@ -190,22 +192,87 @@ public class IterativeClosestPointTools
       return correspondingPoint;
    }
 
-   private static Point3D32 computeCorrespondingPointOnCylinder(Pose3DReadOnly cylinderPose, Point3D32 query, float zLength, float radius)
+   private static Point3D32 computeCorrespondingPointOnCylinder(Pose3DReadOnly cylinderPose, Point3DReadOnly query, float zLength, float radius)
    {
       Point3D pointRelativeToCylinder = new Point3D(query);
       pointRelativeToCylinder.applyInverseTransform(cylinderPose);
 
-      Vector3D axis = new Vector3D(0.0, 0.0, 1.0);
-      Point3D32 correspondingPoint = new Point3D32();
-      // FIXME this needs to be replaced, because we need the projection whether or not its inside.
-      EuclidShapeTools.orthogonalProjectionOntoCylinder3D(pointRelativeToCylinder, new Point3D(), axis, zLength, radius, correspondingPoint);
+      Point3D32 correspondingPoint = orthogonalProjectionOntoCylinder3D(pointRelativeToCylinder, zLength, radius);
 
       correspondingPoint.applyTransform(cylinderPose);
 
       return correspondingPoint;
    }
 
-   private static Point3D32 computeCorrespondingPointOnEllipse(Pose3DReadOnly ellipsePose, Point3D32 query, float xRadius, float yRadius, float zRadius)
+   /**
+    * We're assuming the axis is z up, and centered about zero.
+    */
+   private static Point3D32 orthogonalProjectionOntoCylinder3D(Point3DReadOnly pointToProject,
+                                                             double cylinder3DLength,
+                                                             double cylinder3DRadius)
+   {
+      Point3D32 projection = new Point3D32();
+      if (cylinder3DRadius <= 0.0 || cylinder3DLength <= 0.0)
+      {
+         projection.setToNaN();
+         return projection;
+      }
+
+      double positionOnAxis = pointToProject.getZ();
+
+      double axisToQueryX = pointToProject.getX();
+      double axisToQueryY = pointToProject.getY();
+      double distanceSquaredFromAxis = EuclidCoreTools.normSquared(axisToQueryX, axisToQueryY);
+
+      double halfLength = 0.5 * cylinder3DLength;
+
+      if (distanceSquaredFromAxis <= cylinder3DRadius * cylinder3DRadius)
+      {
+         if (positionOnAxis < -halfLength)
+         { // The query is directly below the cylinder
+            projection.set(pointToProject);
+            projection.setZ(-halfLength);
+            return projection;
+         }
+
+         if (positionOnAxis > halfLength)
+         { // The query is directly above the cylinder
+            projection.set(pointToProject);
+            projection.setZ(halfLength);
+            return projection;
+         }
+
+         // The query is inside the cylinder, so we need to project it to the closest edge.
+         double distanceFromEnd = halfLength - Math.abs(positionOnAxis);
+         if (MathTools.square(distanceFromEnd) < distanceSquaredFromAxis)
+         {
+            // The query is closer to the ends that the side
+            projection.set(axisToQueryX, axisToQueryY, Math.signum(positionOnAxis) * halfLength);
+            return projection;
+         }
+         else
+         {
+            double distanceFromAxis = EuclidCoreTools.squareRoot(distanceSquaredFromAxis);
+            double toCylinderScale = cylinder3DRadius / distanceFromAxis;
+            projection.set(axisToQueryX * toCylinderScale, axisToQueryY * toCylinderScale, Math.signum(positionOnAxis) * halfLength);
+            return projection;
+         }
+      }
+      else
+      { // The query is outside and closest to the cylinder's side.
+         double distanceFromAxis = EuclidCoreTools.squareRoot(distanceSquaredFromAxis);
+
+         double positionOnAxisClamped = MathTools.clamp(positionOnAxis, halfLength);
+         double toCylinderScale = cylinder3DRadius / distanceFromAxis;
+
+         double closestX = axisToQueryX * toCylinderScale;
+         double closestY = axisToQueryY * toCylinderScale;
+         projection.set(closestX, closestY, positionOnAxisClamped);
+         return projection;
+      }
+   }
+
+   private static Point3D32 computeCorrespondingPointOnEllipse(Pose3DReadOnly ellipsePose, Point3DReadOnly query, float xRadius, float yRadius, float zRadius)
    {
       Point3D pointRelativeToCylinder = new Point3D(query);
       pointRelativeToCylinder.applyInverseTransform(ellipsePose);
