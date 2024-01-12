@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
@@ -80,10 +81,11 @@ public class IterativeClosestPointWorker
                                       float yRadius,
                                       float zRadius,
                                       int numberOfICPObjectPoints,
+                                      FramePose3DBasics initialPose,
                                       ROS2Helper ros2Helper,
                                       Random random)
    {
-      this.ros2Helper = ros2Helper;
+      detectionShape = objectShape;
       this.xLength = xLength;
       this.yLength = yLength;
       this.zLength = zLength;
@@ -91,8 +93,11 @@ public class IterativeClosestPointWorker
       this.yRadius = yRadius;
       this.zRadius = zRadius;
       this.numberOfICPObjectPoints = numberOfICPObjectPoints;
+      this.ros2Helper = ros2Helper;
       this.random = random;
-      detectionShape = objectShape;
+
+      targetPoint.set(initialPose.getPosition());
+      resultPose.set(initialPose);
 
       objectCentroidSubtractedPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
       environmentCentroidSubtractedPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
@@ -302,10 +307,11 @@ public class IterativeClosestPointWorker
    private RecyclingArrayList<Point3D32> createBoxPointCloud(float xLength, float yLength, float zLength, int numberOfPoints, Random random)
    {
       RecyclingArrayList<Point3D32> boxObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
+      FramePose3D boxPointPose = new FramePose3D();
 
-      float halfBoxHeight = xLength / 2.0f;
+      float halfBoxDepth = xLength / 2.0f;
       float halfBoxWidth = yLength / 2.0f;
-      float halfBoxDepth = zLength / 2.0f;
+      float halfBoxHeight = zLength / 2.0f;
       for (int i = 0; i < numberOfPoints; i++)
       {
          int j = random.nextInt(6);
@@ -324,9 +330,12 @@ public class IterativeClosestPointWorker
          {
             z = (-(j & 1) * halfBoxHeight * 2.0f) + halfBoxHeight;
          }
+
+         boxPointPose.set(resultPose);
+         boxPointPose.appendTranslation(x, y, z);
+
          Point3D32 boxPoint = boxObjectPointCloud.add();
-         boxPoint.set(resultPose.getPosition());
-         boxPoint.add(x, y, z);
+         boxPoint.set(boxPointPose.getPosition());
       }
 
       return boxObjectPointCloud;
@@ -335,6 +344,7 @@ public class IterativeClosestPointWorker
    private RecyclingArrayList<Point3D32> createPrismPointCloud(float xLength, float yLength, float zLength, int numberOfPoints, Random random)
    {
       RecyclingArrayList<Point3D32> prismObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
+      FramePose3D prismPointPose = new FramePose3D();
 
       float halfPrismDepth = xLength / 2.0f;
       float halfPrismWidth = yLength / 2.0f;
@@ -355,9 +365,11 @@ public class IterativeClosestPointWorker
             x = (1.0f - (z / zLength)) * ((-(side & 1) * halfPrismDepth * 2.0f) + halfPrismDepth);
          }
 
+         prismPointPose.set(resultPose);
+         prismPointPose.appendTranslation(x, y, z);
+
          Point3D32 prismPoint = prismObjectPointCloud.add();
-         prismPoint.set(resultPose.getPosition());
-         prismPoint.add(x, y, z);
+         prismPoint.set(prismPointPose.getPosition());
       }
 
       return prismObjectPointCloud;
@@ -366,6 +378,7 @@ public class IterativeClosestPointWorker
    private RecyclingArrayList<Point3D32> createCylinderPointCloud(float zLength, float xRadius, int numberOfPoints, Random random)
    {
       RecyclingArrayList<Point3D32> cylinderObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
+      FramePose3D cylinderPointPose = new FramePose3D();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
@@ -385,9 +398,12 @@ public class IterativeClosestPointWorker
          double phi = random.nextDouble(0, 2 * Math.PI);
          float x = (float) Math.cos(phi) * r;
          float y = (float) Math.sin(phi) * r;
+
+         cylinderPointPose.set(resultPose);
+         cylinderPointPose.appendTranslation(x, y, z);
+
          Point3D32 cylinderPoint = cylinderObjectPointCloud.add();
-         cylinderPoint.set(resultPose.getPosition());
-         cylinderPoint.add(x, y, z);
+         cylinderPoint.set(cylinderPointPose.getPosition());
       }
 
       return cylinderObjectPointCloud;
@@ -396,6 +412,7 @@ public class IterativeClosestPointWorker
    private RecyclingArrayList<Point3D32> createEllipsoidPointCloud(float xRadius, float yRadius, float zRadius, int numberOfPoints, Random random)
    {
       RecyclingArrayList<Point3D32> ellipsoidObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
+      FramePose3D ellipsoidPointPose = new FramePose3D();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
@@ -405,9 +422,11 @@ public class IterativeClosestPointWorker
          float y = (float) (Math.sin(phi) * Math.sin(theta) * yRadius);
          float z = (float) Math.cos(phi) * zRadius;
 
+         ellipsoidPointPose.set(resultPose);
+         ellipsoidPointPose.appendTranslation(x, y, z);
+
          Point3D32 ellipsoidPoint = ellipsoidObjectPointCloud.add();
-         ellipsoidPoint.set(resultPose.getPosition());
-         ellipsoidPoint.add(x, y, z);
+         ellipsoidPoint.set(ellipsoidPointPose.getPosition());
       }
 
       return ellipsoidObjectPointCloud;
@@ -416,6 +435,7 @@ public class IterativeClosestPointWorker
    private RecyclingArrayList<Point3D32> createConePointCloud(float zLength, float xRadius, int numberOfPoints, Random random)
    {
       RecyclingArrayList<Point3D32> coneObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
+      FramePose3D conePointPose = new FramePose3D();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
@@ -423,9 +443,12 @@ public class IterativeClosestPointWorker
          double phi = random.nextDouble(0, 2.0 * Math.PI);
          float x = (float) Math.cos(phi) * (zLength - z) * (xRadius / zLength);
          float y = (float) Math.sin(phi) * (zLength - z) * (xRadius / zLength);
+
+         conePointPose.set(resultPose);
+         conePointPose.appendTranslation(x, y, z);
+
          Point3D32 conePoint = coneObjectPointCloud.add();
-         conePoint.set(resultPose.getPosition());
-         conePoint.add(x, y, z);
+         conePoint.set(conePointPose.getPosition());
       }
 
       return coneObjectPointCloud;
@@ -434,6 +457,7 @@ public class IterativeClosestPointWorker
    private RecyclingArrayList<Point3D32> createDefaultBoxPointCloud(int numberOfPoints, Random random)
    {
       RecyclingArrayList<Point3D32> boxObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
+      FramePose3D boxPointPose = new FramePose3D();
 
       float halfBoxWidth = 0.405f / 2.0f;
       float halfBoxDepth = 0.31f / 2.0f;
@@ -456,8 +480,12 @@ public class IterativeClosestPointWorker
          {
             z = (-(j & 1) * halfBoxHeight * 2.0f) + halfBoxHeight;
          }
+
+         boxPointPose.set(resultPose);
+         boxPointPose.appendTranslation(x, y, z);
+
          Point3D32 boxPoint = boxObjectPointCloud.add();
-         boxPoint.set(x, y, z);
+         boxPoint.set(boxPointPose.getPosition());
       }
 
       return boxObjectPointCloud;
@@ -519,6 +547,11 @@ public class IterativeClosestPointWorker
       this.yRadius = yRadius;
       this.zRadius = zRadius;
       this.numberOfICPObjectPoints = numberOfICPObjectPoints;
+
+      objectCentroidSubtractedPoints.reshape(numberOfICPObjectPoints, 3);
+      environmentCentroidSubtractedPoints.reshape(numberOfICPObjectPoints, 3);
+      environmentToObjectCorrespondencePoints.reshape(numberOfICPObjectPoints, 3);
+
       objectInWorldPoints = createICPObjectPointCloud(detectionShape, xLength, yLength, zLength, xRadius, yRadius, zRadius, numberOfICPObjectPoints);
    }
 
