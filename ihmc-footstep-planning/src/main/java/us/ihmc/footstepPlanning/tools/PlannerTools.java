@@ -269,9 +269,24 @@ public class PlannerTools
                                                                    double defaultTransferDuration,
                                                                    double defaultFinalTransferDuration)
    {
+      return calculateFootstepCompletionTime(footstepPlan,
+                                             defaultSwingDuration,
+                                             defaultInitialTransferDuration,
+                                             defaultTransferDuration,
+                                             defaultFinalTransferDuration,
+                                             footstepPlan.getNumberOfSteps());
+   }
+
+   public static double calculateFootstepCompletionTime(FootstepPlan footstepPlan,
+                                                        double defaultSwingDuration,
+                                                        double defaultInitialTransferDuration,
+                                                        double defaultTransferDuration,
+                                                        double defaultFinalTransferDuration,
+                                                        int numberOfFootstepsToAddUp)
+   {
       int numberOfSteps = footstepPlan.getNumberOfSteps();
       double planExecutionTime = 0.0;
-      for (int i = 0; i < numberOfSteps; i++)
+      for (int i = 0; i < numberOfFootstepsToAddUp; i++)
       {
          PlannedFootstep footstep = footstepPlan.getFootstep(i);
          double transferDuration = footstep.getTransferDuration();

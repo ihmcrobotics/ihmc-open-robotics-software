@@ -25,20 +25,14 @@ float64 nominal_execution_duration
 # Time since execution started
 float64 elapsed_execution_time
 
-# Current position distance to goal
-float64 current_position_distance_to_goal
+# Desired trajectory
+ihmc_common_msgs/SE3TrajectoryPointMessage[<=500] desired_trajectory
 
-# Start position distance to goal
-float64 start_position_distance_to_goal
+# Current pose
+geometry_msgs/Pose current_pose
 
 # Position distance to goal tolerance
 float64 position_distance_to_goal_tolerance
-
-# Current orientation distance to goal
-float64 current_orientation_distance_to_goal
-
-# Start orientation distance to goal
-float64 start_orientation_distance_to_goal
 
 # Orientation distance to goal tolerance
 float64 orientation_distance_to_goal_tolerance
