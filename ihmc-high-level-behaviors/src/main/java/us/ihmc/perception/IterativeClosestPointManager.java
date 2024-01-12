@@ -21,7 +21,6 @@ import java.util.Random;
 public class IterativeClosestPointManager
 {
    private static final double ICP_WORK_FREQUENCY = 20.0;
-   private static final int NUMBER_OF_CORRESPONDENCES = 1000; // TODO extract to request message
    private static final double EPSILON = 0.001;
 
    private final ROS2Helper ros2Helper;
@@ -32,6 +31,7 @@ public class IterativeClosestPointManager
 
    private final Random random = new Random(System.nanoTime());
    private final HashMap<Long, IterativeClosestPointWorker> nodeIDToWorkerMap = new HashMap<>();
+   private final HashMap<IterativeClosestPointWorker, Integer> workerToIterationsMap = new HashMap<>();
    private final IHMCROS2Input<IterativeClosestPointRequest> requestMessageSubscription;
    private final RestartableThrottledThread workerThread;
 
@@ -56,6 +56,7 @@ public class IterativeClosestPointManager
          }
          else if (!requestMessage.getRunIcp())           // ICP Worker no longer needed (remove)
          {
+            workerToIterationsMap.remove(nodeIDToWorkerMap.get(nodeID));
             nodeIDToWorkerMap.remove(nodeID);
          }
          else                                            // ICP Worker exists (update it)
@@ -66,23 +67,25 @@ public class IterativeClosestPointManager
             PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.fromByte(requestMessage.getShape());
             Vector3D lengths = requestMessage.getLengths();
             Vector3D radii = requestMessage.getRadii();
+            int numberOfShapeSamples = requestMessage.getNumberOfShapeSamples();
 
             boolean sizeChanged = false;
             sizeChanged |= !lengths.epsilonEquals(worker.getLengths(), EPSILON);
             sizeChanged |= !radii.epsilonEquals(worker.getRadii(), EPSILON);
+            sizeChanged |= numberOfShapeSamples != worker.getNumberOfShapeSamples();
 
             // Update worker size if changed
             if (sizeChanged)
             {
-               int newNumberOfPoints = approximateNumberOfPoints(shape, lengths, radii);
-               worker.changeSize(lengths, radii, newNumberOfPoints);
+               worker.changeSize(lengths, radii, numberOfShapeSamples);
             }
 
             // Update worker
-            worker.setNumberOfCorrespondences(NUMBER_OF_CORRESPONDENCES);             // TODO extract to request message
+            worker.setNumberOfCorrespondences(requestMessage.getNumberOfCorrespondences());
             worker.setTargetPoint(requestMessage.getProvidedPose().getPosition());
             worker.useProvidedTargetPoint(requestMessage.getUseProvidedPose());
-            worker.setSegmentSphereRadius(requestMessage.getUseProvidedPose() ? 0.3 : 0.2);
+            worker.setSegmentSphereRadius(requestMessage.getSegmentationRadius());
+            workerToIterationsMap.replace(worker, requestMessage.getNumberOfIterations());
          }
       });
 
@@ -133,7 +136,7 @@ public class IterativeClosestPointManager
       for (long id : nodeIDToWorkerMap.keySet())
       {
          IterativeClosestPointWorker worker = nodeIDToWorkerMap.get(id);
-         if (worker.runICP(2))
+         if (worker.runICP(workerToIterationsMap.get(worker)))
             ros2Helper.publish(PerceptionAPI.ICP_RESULT, worker.getResult());
 
          // If ICP isn't using the provided target pose, it'll update the SceneNode to the ICP worker's centroid
@@ -154,31 +157,15 @@ public class IterativeClosestPointManager
       Vector3D lengths = requestMessage.getLengths();
       Vector3D radii = requestMessage.getRadii();
 
-      int numberOfPoints = approximateNumberOfPoints(shape, lengths, radii);
       IterativeClosestPointWorker worker = new IterativeClosestPointWorker(shape,
                                                                            lengths,
                                                                            radii,
-                                                                           numberOfPoints,
-                                                                           NUMBER_OF_CORRESPONDENCES,
+                                                                           requestMessage.getNumberOfShapeSamples(),
+                                                                           requestMessage.getNumberOfCorrespondences(),
                                                                            new FramePose3D(requestMessage.getProvidedPose()),
                                                                            random);
       worker.setSceneNodeID(requestMessage.getNodeId());
       nodeIDToWorkerMap.putIfAbsent(requestMessage.getNodeId(), worker);
-   }
-
-   // FIXME: Maybe just allow the user to select number of points instead of trying to calculate it using the dimensions
-   private int approximateNumberOfPoints(PrimitiveRigidBodyShape shape, Vector3D lengths, Vector3D radii)
-   {
-      double surfaceArea;
-      switch (shape)
-      {
-         case BOX -> surfaceArea = 2.0 * (lengths.getX() * lengths.getY() + lengths.getX() * lengths.getZ() + lengths.getY() * lengths.getZ());
-         case PRISM -> surfaceArea = (lengths.getX() * lengths.getZ()) + (2.0 * Math.sqrt(lengths.getX() * lengths.getX() + lengths.getZ() * lengths.getZ()));
-         case CYLINDER -> surfaceArea = 2.0 * Math.PI * radii.getX() * (lengths.getZ() + radii.getX());
-         case CONE -> surfaceArea = Math.PI * radii.getX() * lengths.getZ();
-         default -> surfaceArea = 0.5;
-      }
-
-      return (int) (surfaceArea * 2000.0);
+      workerToIterationsMap.putIfAbsent(worker, requestMessage.getNumberOfIterations());
    }
 }

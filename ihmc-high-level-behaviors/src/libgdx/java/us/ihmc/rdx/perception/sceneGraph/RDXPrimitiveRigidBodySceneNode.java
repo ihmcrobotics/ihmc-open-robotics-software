@@ -7,8 +7,10 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
+import imgui.type.ImInt;
 import perception_msgs.msg.dds.DetectedObjectPacket;
 import perception_msgs.msg.dds.IterativeClosestPointRequest;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -24,6 +26,7 @@ import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyScene
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -45,6 +48,7 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
 
    private static final float DEFAULT_DIMENSION = 0.1F;
    private static final double ICP_REQUEST_FREQUENCY = 5.0;
+   private static final int ICP_MAX_POINTS = 10000;
 
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "primitive_scene_node_" + getSceneNode().getID());
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
@@ -64,6 +68,13 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    private final ImBoolean runICP = new ImBoolean(false);
    private final ImBoolean useICPPose = new ImBoolean(false);
    private final ImBoolean showICPPointCloud = new ImBoolean(false);
+
+   private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
+   private boolean showICPParameters = false;
+   private final ImInt numberOfShapeSamples = new ImInt(1000);
+   private final ImInt numberOfCorrespondences = new ImInt(1000);
+   private final ImInt numberOfIterations = new ImInt(1);
+   private final ImFloat segmentationRadius = new ImFloat(0.2f);
 
    private final RecyclingArrayList<Point3D32> icpObjectPointCloud = new RecyclingArrayList<>(32768, Point3D32::new);
    private final RDXPointCloudRenderer icpObjectPointCloudRenderer = new RDXPointCloudRenderer();
@@ -121,6 +132,9 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
       requestMessage.getLengths().set(xLength.get(), yLength.get(), zLength.get());
       requestMessage.getRadii().set(xRadius.get(), yRadius.get(), zRadius.get());
       requestMessage.getProvidedPose().set(getSceneNode().getNodeFrame().getTransformToWorldFrame());
+      requestMessage.setNumberOfCorrespondences(numberOfCorrespondences.get());
+      requestMessage.setNumberOfShapeSamples(numberOfShapeSamples.get());
+      requestMessage.setNumberOfIterations(numberOfIterations.get());
       requestMessage.setRunIcp(runICP.get());
       requestMessage.setUseProvidedPose(!useICPPose.get());
       requestPublisher.publish(requestMessage);
@@ -128,6 +142,9 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
       icpObjectPointCloud.clear();
       if (runICP.get() && icpResultSubscription.hasReceivedFirstMessage())
       {
+         if (icpResultSubscription.getMessageNotification().poll())
+            System.out.println("Received update: " + icpResultSubscription.getLatest().getPose());
+
          icpFrameGraphic.setPoseInWorldFrame(icpResultSubscription.getLatest().getPose());
          getModelInstance().setPoseInWorldFrame(icpResultSubscription.getLatest().getPose());
 
@@ -164,6 +181,24 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
 
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Show ICP Point Cloud"), showICPPointCloud);
+
+      if (expandCollapseRenderer.render(showICPParameters))
+      {
+         showICPParameters = !showICPParameters;
+      }
+      ImGui.sameLine();
+      ImGui.text("ICP Parameters");
+      if (showICPParameters)
+      {
+         if (ImGuiTools.volatileInputInt(labels.get("Num Shape Samples"), numberOfShapeSamples))
+            numberOfShapeSamples.set(MathTools.clamp(numberOfShapeSamples.get(), 1, ICP_MAX_POINTS));
+         if (ImGuiTools.volatileInputInt(labels.get("Num Correspondences"), numberOfCorrespondences))
+            numberOfCorrespondences.set(MathTools.clamp(numberOfCorrespondences.get(), 1, ICP_MAX_POINTS));
+         if (ImGuiTools.volatileInputInt(labels.get("Num Iterations"), numberOfIterations))
+            numberOfIterations.set(MathTools.clamp(numberOfIterations.get(), 1, 10));
+         if (ImGuiTools.volatileInputFloat(labels.get("Segmentation Radius"), segmentationRadius))
+            segmentationRadius.set((float) MathTools.clamp(segmentationRadius.get(), 0.0f, Float.MAX_VALUE));
+      }
 
       ImGui.text("Modify shape:");
 

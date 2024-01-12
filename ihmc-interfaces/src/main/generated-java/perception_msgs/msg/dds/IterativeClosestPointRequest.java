@@ -40,8 +40,9 @@ public class IterativeClosestPointRequest extends Packet<IterativeClosestPointRe
    /**
             * ICP parameters
             */
-   public long number_of_shape_samples_;
-   public long number_of_correspondences_;
+   public int number_of_shape_samples_;
+   public int number_of_correspondences_;
+   public int number_of_iterations_;
    public float segmentation_radius_;
    /**
             * Start/stop flag (true = run, false = stop)
@@ -79,6 +80,8 @@ public class IterativeClosestPointRequest extends Packet<IterativeClosestPointRe
       number_of_shape_samples_ = other.number_of_shape_samples_;
 
       number_of_correspondences_ = other.number_of_correspondences_;
+
+      number_of_iterations_ = other.number_of_iterations_;
 
       segmentation_radius_ = other.segmentation_radius_;
 
@@ -160,25 +163,34 @@ public class IterativeClosestPointRequest extends Packet<IterativeClosestPointRe
    /**
             * ICP parameters
             */
-   public void setNumberOfShapeSamples(long number_of_shape_samples)
+   public void setNumberOfShapeSamples(int number_of_shape_samples)
    {
       number_of_shape_samples_ = number_of_shape_samples;
    }
    /**
             * ICP parameters
             */
-   public long getNumberOfShapeSamples()
+   public int getNumberOfShapeSamples()
    {
       return number_of_shape_samples_;
    }
 
-   public void setNumberOfCorrespondences(long number_of_correspondences)
+   public void setNumberOfCorrespondences(int number_of_correspondences)
    {
       number_of_correspondences_ = number_of_correspondences;
    }
-   public long getNumberOfCorrespondences()
+   public int getNumberOfCorrespondences()
    {
       return number_of_correspondences_;
+   }
+
+   public void setNumberOfIterations(int number_of_iterations)
+   {
+      number_of_iterations_ = number_of_iterations;
+   }
+   public int getNumberOfIterations()
+   {
+      return number_of_iterations_;
    }
 
    public void setSegmentationRadius(float segmentation_radius)
@@ -251,6 +263,8 @@ public class IterativeClosestPointRequest extends Packet<IterativeClosestPointRe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_correspondences_, other.number_of_correspondences_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_iterations_, other.number_of_iterations_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.segmentation_radius_, other.segmentation_radius_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.run_icp_, other.run_icp_, epsilon)) return false;
@@ -282,6 +296,8 @@ public class IterativeClosestPointRequest extends Packet<IterativeClosestPointRe
       if(this.number_of_shape_samples_ != otherMyClass.number_of_shape_samples_) return false;
 
       if(this.number_of_correspondences_ != otherMyClass.number_of_correspondences_) return false;
+
+      if(this.number_of_iterations_ != otherMyClass.number_of_iterations_) return false;
 
       if(this.segmentation_radius_ != otherMyClass.segmentation_radius_) return false;
 
@@ -315,6 +331,8 @@ public class IterativeClosestPointRequest extends Packet<IterativeClosestPointRe
       builder.append(this.number_of_shape_samples_);      builder.append(", ");
       builder.append("number_of_correspondences=");
       builder.append(this.number_of_correspondences_);      builder.append(", ");
+      builder.append("number_of_iterations=");
+      builder.append(this.number_of_iterations_);      builder.append(", ");
       builder.append("segmentation_radius=");
       builder.append(this.segmentation_radius_);      builder.append(", ");
       builder.append("run_icp=");
