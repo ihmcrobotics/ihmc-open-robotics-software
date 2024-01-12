@@ -6,6 +6,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.opencl.OpenCLManager;
@@ -177,6 +178,7 @@ public class IterativeClosestPointManager
                                                                            yRadius,
                                                                            zRadius,
                                                                            numberOfPoints,
+                                                                           new FramePose3D(requestMessage.getProvidedPose()),
                                                                            ros2Helper,
                                                                            random);
       worker.setSceneNodeID(requestMessage.getNodeId());
