@@ -78,6 +78,8 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
 
    private final RecyclingArrayList<Point3D32> icpObjectPointCloud = new RecyclingArrayList<>(32768, Point3D32::new);
    private final RDXPointCloudRenderer icpObjectPointCloudRenderer = new RDXPointCloudRenderer();
+   private final RecyclingArrayList<Point3D32> icpSegmentedPointCloud = new RecyclingArrayList<>(32768, Point3D32::new);
+   private final RDXPointCloudRenderer icpSegmentationRednerer = new RDXPointCloudRenderer();
    private boolean updateObjectPointCloudMesh;
    private final RDXReferenceFrameGraphic icpFrameGraphic = new RDXReferenceFrameGraphic(0.2);
 
@@ -120,8 +122,11 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
                                                               this::updateICP);
       icpResultSubscription = ros2Helper.subscribe(PerceptionAPI.ICP_RESULT, message -> message.getId() == getSceneNode().getID());
 
-      icpObjectPointCloudRenderer.create(100000);
+      icpObjectPointCloudRenderer.create(10000);
       panel3D.getScene().addRenderableProvider(icpObjectPointCloudRenderer, RDXSceneLevel.VIRTUAL);
+
+      icpSegmentationRednerer.create(10000);
+      panel3D.getScene().addRenderableProvider(icpSegmentationRednerer, RDXSceneLevel.VIRTUAL);
    }
 
    private void updateICP()
@@ -141,23 +146,24 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
       requestPublisher.publish(requestMessage);
 
       icpObjectPointCloud.clear();
+      icpSegmentedPointCloud.clear();
       if (runICP.get() && icpResultSubscription.hasReceivedFirstMessage())
       {
-         if (icpResultSubscription.getMessageNotification().poll())
-            System.out.println("Received update: " + icpResultSubscription.getLatest().getPose());
-
          icpFrameGraphic.setPoseInWorldFrame(icpResultSubscription.getLatest().getPose());
          getModelInstance().setPoseInWorldFrame(icpResultSubscription.getLatest().getPose());
 
          if (showICPPointCloud.get())
          {
-            for (Point3D32 point3D32 : icpResultSubscription.getLatest().getObjectPointCloud())
-               icpObjectPointCloud.add().set(point3D32);
+            for (Point3D32 point : icpResultSubscription.getLatest().getObjectPointCloud())
+               icpObjectPointCloud.add().set(point);
+
+            for (Point3D32 point : icpResultSubscription.getLatest().getSegmentedPointCloud())
+               icpSegmentedPointCloud.add().set(point);
          }
          updateObjectPointCloudMesh = true;
       }
       icpObjectPointCloudRenderer.setPointsToRender(icpObjectPointCloud, Color.GOLD);
-
+      icpSegmentationRednerer.setPointsToRender(icpSegmentedPointCloud, Color.LIGHT_GRAY);
    }
 
    @Override
@@ -302,7 +308,10 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
       if (icpResultSubscription.hasReceivedFirstMessage())
       {
          if (updateObjectPointCloudMesh)
+         {
             icpObjectPointCloudRenderer.updateMesh();
+            icpSegmentationRednerer.updateMesh();
+         }
          icpFrameGraphic.getRenderables(renderables, pool);
       }
    }
