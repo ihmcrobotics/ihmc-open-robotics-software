@@ -25,8 +25,14 @@ public class IterativeClosestPointTools
                                                  float zLength,
                                                  float xRadius,
                                                  float yRadius,
-                                                 float zRadius)
+                                                 float zRadius,
+                                                 boolean ignoreShapeType)
    {
+      if (ignoreShapeType)
+      {
+         return pointQuery.distanceSquared(shapePose.getPosition());
+      }
+
       double distanceSquared;
       float maxRadius = Math.max(xRadius, Math.max(yRadius, zRadius));
       double maxLength = Math.sqrt(2 * MathTools.square(Math.max(xLength, Math.max(yLength, zLength))));
@@ -58,12 +64,12 @@ public class IterativeClosestPointTools
       pointRelativeToBox.applyInverseTransform(boxPose);
 
       Vector3D boxSize = new Vector3D(xLength, yLength, zLength);
-      return MathTools.square(EuclidShapeTools.signedDistanceBetweenPoint3DAndBox3D(pointRelativeToBox, boxSize));
+      return MathTools.square(Math.max(0.0, EuclidShapeTools.signedDistanceBetweenPoint3DAndBox3D(pointRelativeToBox, boxSize)));
    }
 
    public static double distanceSquaredFromSphere(Pose3DReadOnly spherePose, Point3DReadOnly query, float radius)
    {
-      return MathTools.square(EuclidShapeTools.signedDistanceBetweenPoint3DAndSphere3D(query, spherePose.getPosition(), radius));
+      return MathTools.square(Math.max(0.0, EuclidShapeTools.signedDistanceBetweenPoint3DAndSphere3D(query, spherePose.getPosition(), radius)));
    }
 
    public static double distanceSquaredFromCylinder(Pose3DReadOnly cylinderPose, Point3DReadOnly query, float zLength, float radius)
@@ -73,7 +79,11 @@ public class IterativeClosestPointTools
       pointRelativeToCylinder.applyInverseTransform(cylinderPose);
 
       Vector3D axis = new Vector3D(0.0, 0.0, 1.0);
-      return MathTools.square(EuclidShapeTools.signedDistanceBetweenPoint3DAndCylinder3D(pointRelativeToCylinder, new Point3D(), axis, zLength, radius));
+      return MathTools.square(Math.max(EuclidShapeTools.signedDistanceBetweenPoint3DAndCylinder3D(pointRelativeToCylinder,
+                                                                                                  new Point3D(),
+                                                                                                  axis,
+                                                                                                  zLength,
+                                                                                                  radius), 0.0f));
    }
 
    public static double distanceSquaredFromEllipsoid(Pose3DReadOnly ellipsePose, Point3DReadOnly query, float xRadius, float yRadius, float zRadius)
@@ -81,16 +91,17 @@ public class IterativeClosestPointTools
       Point3D pointRelativeToCylinder = new Point3D(query);
       pointRelativeToCylinder.applyInverseTransform(ellipsePose);
 
-      return MathTools.square(EuclidShapeTools.signedDistanceBetweenPoint3DAndEllipsoid3D(pointRelativeToCylinder, new Vector3D(xRadius, yRadius, zRadius)));
+      return MathTools.square(Math.max(EuclidShapeTools.signedDistanceBetweenPoint3DAndEllipsoid3D(pointRelativeToCylinder,
+                                                                                                   new Vector3D(xRadius, yRadius, zRadius)), 0.0));
    }
 
    public static boolean canComputeCorrespondencesOnShape(PrimitiveRigidBodyShape shape)
    {
       return switch (shape)
-            {
-               case BOX, CYLINDER, ELLIPSOID -> true;
-               default -> false;
-            };
+      {
+         case BOX, CYLINDER, ELLIPSOID -> true;
+         default -> false;
+      };
    }
 
    public static void computeCorrespondencesOnShape(PrimitiveRigidBodyShape shape,
@@ -112,8 +123,15 @@ public class IterativeClosestPointTools
       for (int i = 0; i < Math.min(measurementPoints.size(), numberOfCorrespondences); i++)
       {
          Point3D32 measurementPoint = measurementPoints.get(i);
-         Point3D32 correspondingObjectPoint = computeCorrespondenceOnShape(shape, shapePose, measurementPoint, xLength, yLength, zLength, xRadius, yRadius, zRadius);
-
+         Point3D32 correspondingObjectPoint = computeCorrespondenceOnShape(shape,
+                                                                           shapePose,
+                                                                           measurementPoint,
+                                                                           xLength,
+                                                                           yLength,
+                                                                           zLength,
+                                                                           xRadius,
+                                                                           yRadius,
+                                                                           zRadius);
          // record
          correspondingMeasurementPointsToPack.add(measurementPoint);
          correspondingObjectPointsToPack.add(correspondingObjectPoint);
@@ -177,6 +195,7 @@ public class IterativeClosestPointTools
 
       Vector3D axis = new Vector3D(0.0, 0.0, 1.0);
       Point3D32 correspondingPoint = new Point3D32();
+      // FIXME this needs to be replaced, because we need the projection whether or not its inside.
       EuclidShapeTools.orthogonalProjectionOntoCylinder3D(pointRelativeToCylinder, new Point3D(), axis, zLength, radius, correspondingPoint);
 
       correspondingPoint.applyTransform(cylinderPose);
@@ -190,13 +209,13 @@ public class IterativeClosestPointTools
       pointRelativeToCylinder.applyInverseTransform(ellipsePose);
 
       Point3D32 correspondingPoint = new Point3D32();
+      // FIXME this needs to be replaced, because we need the projection whether or not its inside.
       EuclidShapeTools.orthogonalProjectionOntoEllipsoid3D(pointRelativeToCylinder, new Vector3D(xRadius, yRadius, zRadius), correspondingPoint);
 
       correspondingPoint.applyTransform(ellipsePose);
 
       return correspondingPoint;
    }
-
 
    public static List<Point3D32> createICPObjectPointCloud(PrimitiveRigidBodyShape shape,
                                                            Pose3DReadOnly shapePose,
@@ -300,19 +319,20 @@ public class IterativeClosestPointTools
       List<Point3D32> cylinderObjectPointCloud = new ArrayList<>();
       Pose3D cylinderPointPose = new Pose3D();
 
+      float halfZLength = 0.5f * zLength;
       for (int i = 0; i < numberOfPoints; i++)
       {
          int j = random.nextInt(6);
-         float z = random.nextFloat(0, zLength);
+         float z = random.nextFloat(-halfZLength, halfZLength);
          float r = xRadius;
          if (j == 0)
          {
-            z = 0;
+            z = -halfZLength;
             r = random.nextFloat(0, xRadius);
          }
          if (j == 1)
          {
-            z = zLength;
+            z = halfZLength;
             r = random.nextFloat(0, xRadius);
          }
          double phi = random.nextDouble(0, 2 * Math.PI);
