@@ -1,7 +1,6 @@
 package us.ihmc.rdx.simulation.environment.object;
 
 import us.ihmc.rdx.simulation.environment.object.objects.*;
-import us.ihmc.rdx.simulation.environment.object.objects.door.*;
 
 import java.util.ArrayList;
 
