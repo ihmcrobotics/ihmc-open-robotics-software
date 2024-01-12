@@ -35,7 +35,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import java.util.Map;
 
 /**
- * Manages a rigid body as part of the whole body controller core.
+ * Manages a rigid body as part of a high level controller.
  * <p>
  * This class triages user commands and computes inverse dynamics, feedback control commands,
  * and joint desired output data that are provided to the whole body controller core.
@@ -85,6 +85,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   RigidBodyControlMode defaultControlMode,
                                   boolean enableFunctionGenerators,
                                   YoDouble yoTime,
+                                  double controlDT,
                                   YoGraphicsListRegistry graphicsListRegistry,
                                   YoRegistry parentRegistry)
    {
@@ -101,7 +102,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
       initialJointPositions = new double[jointsToControl.length];
 
-      RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, yoTime, enableFunctionGenerators, parentRegistry);
+      RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, yoTime, controlDT, enableFunctionGenerators, parentRegistry);
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, jointControlHelper, registry);
 

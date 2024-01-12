@@ -39,7 +39,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 /**
  * A tool to generate a point trajectory as a cubic 3D spline through a series
  * of provided waypoints. Given a query time, it provides the corresponding position,
- * spatial velocity, and spatial acceleration.
+ * velocity, and acceleration.
  */
 public class MultipleWaypointsPositionTrajectoryGenerator implements FramePositionTrajectoryGenerator, YoMutableFrameObject
 {
