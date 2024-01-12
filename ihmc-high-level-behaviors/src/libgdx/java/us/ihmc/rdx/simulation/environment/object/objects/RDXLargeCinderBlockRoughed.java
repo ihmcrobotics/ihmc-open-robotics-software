@@ -1,8 +1,6 @@
 package us.ihmc.rdx.simulation.environment.object.objects;
 
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
@@ -26,6 +24,5 @@ public class RDXLargeCinderBlockRoughed extends RDXEnvironmentObject
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
       setCollisionGeometryObject(collisionBox);
       setMass(9.0f);
-      setBtCollisionShape(new btBoxShape(new Vector3((float) sizeX / 2.0f, (float) sizeY / 2.0f, (float) sizeZ / 2.0f)));
    }
 }
