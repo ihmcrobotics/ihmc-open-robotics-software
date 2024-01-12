@@ -17,7 +17,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.math.functionGenerator.FunctionGeneratorErrorCalculator;
-import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
@@ -27,6 +26,22 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * Manages providing jointspace feedback control commands for the ancestor joints of a rigid body,
+ * such as an arm's joints. It also triages the default and user submitted weights and gains,
+ * packing them into the whole body controller commands.
+ * <p>
+ * This class also generates cubic spline trajectories for the joints from user submitted
+ * waypoints. This provides joint desired position, velocity, and feedforward accelerations.
+ * </p>
+ * <p>
+ * This class also supports kinematics streaming by accommodating for network
+ * delay when using {@link ExecutionMode#STREAM}.
+ * </p>
+ * <p>
+ * Additionally, it supports the use of function generators to perform diagnostic trajectories.
+ * </p>
+ */
 public class RigidBodyJointControlHelper
 {
    public static final String shortName = "JointControlHelper";
