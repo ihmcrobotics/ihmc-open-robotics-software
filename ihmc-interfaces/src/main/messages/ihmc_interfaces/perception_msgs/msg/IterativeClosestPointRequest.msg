@@ -15,15 +15,16 @@ uint32 node_id
 byte shape 
 
 # Dimensions of the object
-float32 x_length
-float32 y_length
-float32 z_length
-float32 x_radius
-float32 y_radius
-float32 z_radius
+geometry_msgs/Vector3 lengths
+geometry_msgs/Vector3 radii
 
 # User defined pose of virtual object
 geometry_msgs/Pose provided_pose
+
+# ICP parameters
+uint32 number_of_shape_samples
+uint32 number_of_correspondences
+float32 segmentation_radius
 
 # Start/stop flag (true = run, false = stop)
 bool run_icp
