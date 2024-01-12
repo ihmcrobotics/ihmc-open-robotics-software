@@ -5,7 +5,10 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.Axis2D;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,6 +17,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D32;
@@ -407,6 +411,14 @@ public class MonteCarloPlannerTools
       float yawMax = adjustedPreviousYaw + (float) parameters.getSearchYawBand();
       float minRadius = (float) parameters.getSearchInnerRadius() * 50.0f;
       float maxRadius = (float) parameters.getSearchOuterRadius() * 50.0f;
+      float maxWidth = (float) parameters.getMaximumStepWidth();
+
+      RigidBodyTransform yawTransform = new RigidBodyTransform(new Quaternion(yawPrevious, 0, 0), new Vector3D());
+      Vector3D forwardVector = new Vector3D(Axis3D.X);
+      forwardVector.applyTransform(yawTransform);
+
+      Line2D midLine = new Line2D(new Point2D(), new Vector2D(forwardVector));
+
       for (int i = -30; i <= 30; i += parameters.getSearchSkipSize())
       {
          for (int j = -30; j <= 30; j += parameters.getSearchSkipSize())
@@ -417,7 +429,11 @@ public class MonteCarloPlannerTools
             //LogTools.info(String.format("(%d, %d) Radius: %.2f (%.2f, %.2f), Yaw: %.2f (%.2f, %.2f)", i, j, radius,
             //                            parameters.getSearchInnerRadius(), parameters.getSearchOuterRadius(), yaw, yawMin, yawMax));
 
-            if (radius >= minRadius && radius <= maxRadius && yaw >= yawMin && yaw <= yawMax)
+            // compute distance of point to midline
+            Point2D point = new Point2D((float) i / 50.0f, (float) j / 50.0f);
+            double distanceToMidline = midLine.distance(point);
+
+            if (radius >= minRadius && radius <= maxRadius && yaw >= yawMin && yaw <= yawMax && distanceToMidline <= maxWidth)
             {
                actions.add(new Vector3D(i, j, -0.1));
                actions.add(new Vector3D(i, j, 0));

@@ -289,7 +289,6 @@ public class ContinuousPlanner
                                   MonteCarloPlannerTools.getLayerCountsString(monteCarloFootstepPlanner.getRoot())));
 
       monteCarloFootstepPlanner.getDebugger().plotFootstepPlan(latestMonteCarloPlan);
-      monteCarloFootstepPlanner.getDebugger().display(1);
    }
 
    public List<EnumMap<Axis3D, List<PolynomialReadOnly>>> computeSwingTrajectories(HeightMapData heightMapData, FootstepPlan footstepPlan)

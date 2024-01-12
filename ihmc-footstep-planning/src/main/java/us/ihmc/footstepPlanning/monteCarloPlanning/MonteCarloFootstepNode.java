@@ -33,7 +33,7 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
       ArrayList<MonteCarloFootstepNode> availableStates = new ArrayList<>();
 
       //MonteCarloPlannerTools.getFootstepActionGrid(actions, robotSide == RobotSide.LEFT ? -1 : 1);
-      MonteCarloPlannerTools.getFootstepRadialActionSet(parameters, actions, state.getZ32(), robotSide == RobotSide.LEFT ? -1 : 1);
+      MonteCarloPlannerTools.getFootstepActionSet(parameters, actions, state.getZ32(), robotSide == RobotSide.LEFT ? -1 : 1);
 
       for (Vector3D action : actions)
       {

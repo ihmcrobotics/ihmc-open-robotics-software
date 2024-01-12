@@ -3,7 +3,6 @@ package us.ihmc.behaviors.activeMapping;
 import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
 import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -15,7 +14,6 @@ import us.ihmc.communication.video.ContinuousPlanningAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -153,9 +151,9 @@ public class ContinuousPlannerSchedulingTask
       continuousPlanner.initialize();
       continuousPlanner.setGoalWaypointPoses(parameters);
       continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, terrainMap, false, true);
+      monteCarloPlanPublisherForUI.publish(continuousPlanner.getMonteCarloFootstepDataListMessage());
 
-      if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION
-          || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
+      if (continuousPlanner.isPlanAvailable())
       {
          state = ContinuousWalkingState.PLAN_AVAILABLE;
       }
@@ -186,8 +184,7 @@ public class ContinuousPlannerSchedulingTask
          continuousPlanner.setGoalWaypointPoses(parameters);
          continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, terrainMap, true, true);
 
-         if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION
-             || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
+         if (continuousPlanner.isPlanAvailable())
          {
             state = ContinuousWalkingState.PLAN_AVAILABLE;
          }
