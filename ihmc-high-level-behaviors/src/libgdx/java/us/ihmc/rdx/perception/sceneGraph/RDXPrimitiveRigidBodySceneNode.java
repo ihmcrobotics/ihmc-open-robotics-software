@@ -135,6 +135,7 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
       requestMessage.setNumberOfCorrespondences(numberOfCorrespondences.get());
       requestMessage.setNumberOfShapeSamples(numberOfShapeSamples.get());
       requestMessage.setNumberOfIterations(numberOfIterations.get());
+      requestMessage.setSegmentationRadius(segmentationRadius.get());
       requestMessage.setRunIcp(runICP.get());
       requestMessage.setUseProvidedPose(!useICPPose.get());
       requestPublisher.publish(requestMessage);
