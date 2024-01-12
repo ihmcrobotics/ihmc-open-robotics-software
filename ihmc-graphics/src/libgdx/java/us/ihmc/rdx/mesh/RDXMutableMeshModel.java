@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 public class RDXMutableMeshModel
 {
    private Color color = null;
-   private RDXModelInstance modelInstance;
+   protected RDXModelInstance modelInstance;
 
    private transient final MeshDataHolder emptyMeshDataHolder = new MeshDataBuilder().generateMeshDataHolder();
 
