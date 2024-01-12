@@ -75,8 +75,8 @@ public class FrequencyStatisticPrinter
       }
       else
       {
-         LogTools.info("%saverate rate: %.3f (Hz)\n        min: %.3f (s) max: %.3f (s) std dev: %.3f (s) window: %d"
-                             .formatted(prefix, averageRate, minDelay, maxDelay, standardDeviation, window));
+         LogTools.info(2, "%saverate rate: %.3f (Hz)\n        min: %.3f (s) max: %.3f (s) std dev: %.3f (s) window: %d"
+                               .formatted(prefix, averageRate, minDelay, maxDelay, standardDeviation, window));
       }
    }
 
