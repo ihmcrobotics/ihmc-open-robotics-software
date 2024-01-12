@@ -7,6 +7,7 @@ import perception_msgs.msg.dds.DetectedObjectPacket;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -26,6 +27,8 @@ import static us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBo
 
 public class IterativeClosestPointWorker
 {
+   private static final double discountFactor = 0.9;
+
    private static final boolean ignoreShapeTypeWhenSegmenting = false;
    private static final float defaultXLength = 0.2f;
    private static final float defaultYLength = 0.4f;
@@ -240,6 +243,7 @@ public class IterativeClosestPointWorker
       DMatrixRMaj H = new DMatrixRMaj(3, 3);
       DMatrixRMaj U = new DMatrixRMaj(3, 3);
       DMatrixRMaj V = new DMatrixRMaj(3, 3);
+      RotationMatrix optimalRotationMatrix = new RotationMatrix();
       DMatrixRMaj optimalRotation = new DMatrixRMaj(3, 3); // This is the optimized rotation matrix to rotate the measurement to match the point cloud.
       Point3D32 objectAdjustedLocation = new Point3D32();
       Point3D32 objectTranslation = new Point3D32();
@@ -258,15 +262,16 @@ public class IterativeClosestPointWorker
 
       /* Calculate object transform */
       // Create the transform, and set the rotation, so it's a pure rotation transform
+      optimalRotationMatrix.set(optimalRotation);
       RigidBodyTransform objectToMeasurementTransform = new RigidBodyTransform();
-      objectToMeasurementTransform.getRotation().set(optimalRotation);
+      objectToMeasurementTransform.getRotation().interpolate(optimalRotationMatrix, discountFactor);
 
       // Calcualte the necessary translation
       objectToMeasurementTransform.transform(objectCentroid, objectAdjustedLocation);
       objectTranslation.sub(measurementCentroid, objectAdjustedLocation);
 
       // set that translation into the transform
-      objectToMeasurementTransform.getTranslation().set(objectTranslation);
+      objectToMeasurementTransform.getTranslation().setAndScale(discountFactor, objectTranslation);
 
       // Rotate and translate the resulting pose according to the correction transform.
       resultPose.applyTransform(objectToMeasurementTransform);

@@ -205,7 +205,8 @@ public class IterativeClosestPointTools
    }
 
    /**
-    * We're assuming the axis is z up, and centered about zero.
+    * We're assuming the axis is z up, and centered about zero. This custom implementation assumes that the cylinder is Z Up and the point is in the frame of
+    * the cylinder. It also does the projection onto the surface, even if the point is inside.
     */
    private static Point3D32 orthogonalProjectionOntoCylinder3D(Point3DReadOnly pointToProject,
                                                              double cylinder3DLength,
