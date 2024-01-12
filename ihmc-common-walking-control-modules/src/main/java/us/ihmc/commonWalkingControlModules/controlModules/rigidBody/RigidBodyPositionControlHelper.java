@@ -43,6 +43,22 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * The base functionality of the taskspace position control state for a rigid body.
+ * <p>
+ * This class triages QP weights and PD control gains, user selection of translation axes,
+ * and reference frames. It generates a cubic position trajectory for user provided
+ * waypoints and packs the desireds into an point feedback control command for
+ * submission to the whole body controller core.
+ * </p>
+ * <p>
+ * This class also supports kinematics streaming by accommodating for network
+ * delay when using {@link ExecutionMode#STREAM}.
+ * </p>
+ * <p>
+ * Additionally, it supports the use of function generators to perform diagnostic trajectories.
+ * </p>
+ */
 public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 {
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
