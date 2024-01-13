@@ -30,6 +30,7 @@ public class ContinuousPlanningAPI
 
     public static final ROS2Topic<FootstepDataListMessage> PLANNED_FOOTSTEPS = IHMC_ROOT.withModule("continuous_planning").withType(FootstepDataListMessage.class).withSuffix("planned_footsteps");
     public static final ROS2Topic<PoseListMessage> START_AND_GOAL_FOOTSTEPS = IHMC_ROOT.withModule("continuous_planning").withType(PoseListMessage.class).withSuffix("start_and_goal");
+    public static final ROS2Topic<PoseListMessage> MONTE_CARLO_TREE_NODES = IHMC_ROOT.withModule("continuous_planning").withType(PoseListMessage.class).withSuffix("monte_carlo_tree_nodes");
     public static final ROS2Topic<FootstepDataListMessage> MONTE_CARLO_FOOTSTEP_PLAN = IHMC_ROOT.withModule("continuous_planning").withType(FootstepDataListMessage.class).withSuffix("monte_carlo_footstep_plan");
 
     public static final StoredPropertySetROS2TopicPair CONTINUOUS_PLANNING_PARAMETERS

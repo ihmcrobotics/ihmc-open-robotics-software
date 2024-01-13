@@ -516,9 +516,13 @@ void kernel contactMapKernel(read_write image2d_t terrainCost,
                // Euclidean distance
                uint distance = sqrt((float)(i * i + j * j));
 
-               if (distance < closestDistance)
+               if (distance < closestDistance && distance > 3.0f)
                {
                   closestDistance = distance;
+               }
+               else if (distance < 3.0f)
+               {
+                  closestDistance = 0;
                }
             }
 //            score += read_imageui(terrainCost, (int2) (xIndex + i, yIndex + j)).x;

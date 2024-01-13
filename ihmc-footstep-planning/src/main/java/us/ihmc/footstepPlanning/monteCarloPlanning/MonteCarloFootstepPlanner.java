@@ -31,12 +31,12 @@ public class MonteCarloFootstepPlanner
    private int uniqueNodeId = 0;
    private int cellsPerMeter = 50;
 
-   public MonteCarloFootstepPlanner(MonteCarloFootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons)
+   public MonteCarloFootstepPlanner(MonteCarloFootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons, TerrainPlanningDebugger debugger)
    {
       this.parameters = parameters;
       this.footPolygons = footPolygons;
       this.statistics = new MonteCarloFootstepPlannerStatistics();
-      this.debugger = new TerrainPlanningDebugger(this);
+      this.debugger = debugger;
    }
 
    public FootstepPlan generateFootstepPlan(MonteCarloFootstepPlannerRequest request)
@@ -261,11 +261,6 @@ public class MonteCarloFootstepPlanner
    public List<MonteCarloFootstepNode> getVisitedNodes()
    {
       return new ArrayList<>(visitedNodes.values());
-   }
-
-   public TerrainPlanningDebugger getDebugger()
-   {
-      return debugger;
    }
 
    public boolean isPlanning()

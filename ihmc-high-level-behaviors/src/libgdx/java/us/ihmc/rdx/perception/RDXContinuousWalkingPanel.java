@@ -56,7 +56,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    private final SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
    private final SideDependentList<RDXFootstepGraphic> startFootstepGraphics;
    private final ImBoolean renderEnabled = new ImBoolean(true);
-   private final ImBoolean showMonteCarloPlan = new ImBoolean(false);
+   private final ImBoolean showMonteCarloPlan = new ImBoolean(true);
    private final ImBoolean showContinuousWalkingPlan = new ImBoolean(true);
    private final ImBoolean localRenderMode = new ImBoolean(false);
    private final ImBoolean useMonteCarloReference = new ImBoolean(true);
@@ -77,6 +77,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    private SwingTrajectoryParameters swingTrajectoryParameters;
    private ContinuousWalkingParameters continuousWalkingParameters;
    private Controller currentController;
+
    private boolean currentControllerConnected;
 
    public RDXContinuousWalkingPanel(ROS2Helper ros2Helper,
@@ -253,6 +254,8 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       goalStancePose.get(RobotSide.LEFT).set(poses.get(2));
       goalStancePose.get(RobotSide.RIGHT).set(poses.get(3));
    }
+
+
 
    public void reset()
    {

@@ -236,6 +236,7 @@ public class MonteCarloPlannerTools
 
       if (maxNode != null)
       {
+         LogTools.warn("Optimal Node: {} {} {}", maxNode.getId(), maxNode.getChildren().size(), maxNode.getLevel());
          path.add(maxNode);
          getOptimalPath(maxNode, path);
       }
