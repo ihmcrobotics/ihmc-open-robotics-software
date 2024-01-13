@@ -17,6 +17,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -48,6 +49,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                  WorkspaceResourceDirectory saveFileDirectory,
                                  ROS2ControllerHelper ros2ControllerHelper,
                                  ReferenceFrameLibrary referenceFrameLibrary,
+                                 SceneGraph sceneGraph,
                                  DRCRobotModel robotModel,
                                  ROS2SyncedRobotModel syncedRobot)
    {

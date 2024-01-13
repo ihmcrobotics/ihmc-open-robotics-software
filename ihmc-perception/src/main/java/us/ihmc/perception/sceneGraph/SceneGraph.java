@@ -12,11 +12,9 @@ import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * A scene graph implementation that is really a scene tree. There
@@ -189,15 +187,5 @@ public class SceneGraph
    public SortedSet<SceneNode> getSceneNodesByID()
    {
       return sceneNodesByID;
-   }
-
-   public ReferenceFrameDynamicCollection asNewDynamicReferenceFrameCollection()
-   {
-      Function<String, ReferenceFrame> frameLookup = nodeName ->
-      {
-         SceneNode sceneNode = namesToNodesMap.get(nodeName);
-         return sceneNode == null ? null : sceneNode.getNodeFrame();
-      };
-      return new ReferenceFrameDynamicCollection(nodeNameList, frameLookup);
    }
 }
