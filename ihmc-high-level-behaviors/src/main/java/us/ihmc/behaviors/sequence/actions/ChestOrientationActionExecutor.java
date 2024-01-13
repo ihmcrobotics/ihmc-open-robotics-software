@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.NonWallTimer;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -37,7 +38,8 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
                                          WorkspaceResourceDirectory saveFileDirectory,
                                          ROS2ControllerHelper ros2ControllerHelper,
                                          ROS2SyncedRobotModel syncedRobot,
-                                         ReferenceFrameLibrary referenceFrameLibrary)
+                                         ReferenceFrameLibrary referenceFrameLibrary,
+                                         SceneGraph sceneGraph)
    {
       super(new ChestOrientationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 

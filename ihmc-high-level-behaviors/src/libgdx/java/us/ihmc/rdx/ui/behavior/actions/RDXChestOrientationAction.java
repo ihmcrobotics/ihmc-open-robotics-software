@@ -11,6 +11,7 @@ import us.ihmc.behaviors.sequence.actions.ChestOrientationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
@@ -61,7 +62,8 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
                                     DRCRobotModel robotModel,
                                     FullHumanoidRobotModel syncedFullRobotModel,
                                     RobotCollisionModel selectionCollisionModel,
-                                    ReferenceFrameLibrary referenceFrameLibrary)
+                                    ReferenceFrameLibrary referenceFrameLibrary,
+                                    SceneGraph sceneGraph)
    {
       super(new ChestOrientationActionState(id, crdtInfo,saveFileDirectory, referenceFrameLibrary));
 

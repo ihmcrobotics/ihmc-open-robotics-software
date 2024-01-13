@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.NonWallTimer;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -38,6 +39,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
                                           WorkspaceResourceDirectory saveFileDirectory,
                                           ROS2ControllerHelper ros2ControllerHelper,
                                           ReferenceFrameLibrary referenceFrameLibrary,
+                                          SceneGraph sceneGraph,
                                           ROS2SyncedRobotModel syncedRobot)
    {
       super(new PelvisHeightPitchActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));

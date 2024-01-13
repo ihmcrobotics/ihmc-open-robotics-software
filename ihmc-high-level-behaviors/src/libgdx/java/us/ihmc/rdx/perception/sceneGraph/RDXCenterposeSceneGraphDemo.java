@@ -15,7 +15,6 @@ import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2DetectedObjectBoundingBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ZEDModelData;
@@ -29,7 +28,6 @@ public class RDXCenterposeSceneGraphDemo
    private RDXGlobalVisualizersPanel globalVisualizersPanel;
    private CenterposeDetectionManager centerposeProcess;
    private ROS2SceneGraph onRobotSceneGraph;
-   private ReferenceFrameLibrary referenceFrameLibrary;
    private RDXSceneGraphUI sceneGraphUI;
    private final Throttler perceptionThottler = new Throttler().setFrequency(30.0);
    private RDXReferenceFrameGraphic messageAquisitionFrameGraphic;
@@ -81,9 +79,6 @@ public class RDXCenterposeSceneGraphDemo
 
             messageAquisitionFrameGraphic = new RDXReferenceFrameGraphic(0.1, Color.ORANGE);
             baseUI.getPrimaryScene().addRenderableProvider(messageAquisitionFrameGraphic);
-
-            referenceFrameLibrary = new ReferenceFrameLibrary();
-            referenceFrameLibrary.addDynamicCollection(sceneGraphUI.getSceneGraph().asNewDynamicReferenceFrameCollection());
 
             onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
             centerposeProcess = new CenterposeDetectionManager(ros2Helper, ZEDModelData.createCameraReferenceFrame(RobotSide.LEFT, ReferenceFrame.getWorldFrame()));

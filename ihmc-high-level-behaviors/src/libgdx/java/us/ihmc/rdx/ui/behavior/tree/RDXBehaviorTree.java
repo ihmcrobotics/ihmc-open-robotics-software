@@ -16,6 +16,7 @@ import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -56,6 +57,7 @@ public class RDXBehaviorTree
                           RDXBaseUI baseUI,
                           RDX3DPanel panel3D,
                           ReferenceFrameLibrary referenceFrameLibrary,
+                          SceneGraph sceneGraph,
                           FootstepPlannerParametersBasics footstepPlannerParametersBasics)
    {
       this.treeFilesDirectory = treeFilesDirectory;
@@ -66,6 +68,7 @@ public class RDXBehaviorTree
                                                    baseUI,
                                                    panel3D,
                                                    referenceFrameLibrary,
+                                                   sceneGraph,
                                                    footstepPlannerParametersBasics);
       treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode, crdtInfo);
       fileMenu = new RDXBehaviorTreeFileMenu(treeFilesDirectory);

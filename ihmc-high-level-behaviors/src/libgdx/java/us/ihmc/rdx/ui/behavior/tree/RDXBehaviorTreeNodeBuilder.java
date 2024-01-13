@@ -9,6 +9,7 @@ import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.actions.*;
@@ -29,6 +30,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
    private final RDXBaseUI baseUI;
    private final RDX3DPanel panel3D;
    private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final SceneGraph sceneGraph;
    private final FootstepPlannerParametersBasics footstepPlannerParametersBasics;
 
    public RDXBehaviorTreeNodeBuilder(DRCRobotModel robotModel,
@@ -37,6 +39,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
                                      RDXBaseUI baseUI,
                                      RDX3DPanel panel3D,
                                      ReferenceFrameLibrary referenceFrameLibrary,
+                                     SceneGraph sceneGraph,
                                      FootstepPlannerParametersBasics footstepPlannerParametersBasics)
    {
       this.robotModel = robotModel;
@@ -45,6 +48,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       this.baseUI = baseUI;
       this.panel3D = panel3D;
       this.referenceFrameLibrary = referenceFrameLibrary;
+      this.sceneGraph = sceneGraph;
       this.footstepPlannerParametersBasics = footstepPlannerParametersBasics;
    }
 
@@ -75,7 +79,8 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
                                               robotModel,
                                               syncedRobot.getFullRobotModel(),
                                               selectionCollisionModel,
-                                              referenceFrameLibrary);
+                                              referenceFrameLibrary,
+                                              sceneGraph);
       }
       if (nodeType == FootstepPlanActionDefinition.class)
       {
@@ -90,7 +95,8 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
                                       robotModel,
                                       syncedRobot.getFullRobotModel(),
                                       selectionCollisionModel,
-                                      referenceFrameLibrary);
+                                      referenceFrameLibrary,
+                                      sceneGraph);
       }
       if (nodeType == HandWrenchActionDefinition.class)
       {
@@ -105,7 +111,8 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
                                                robotModel,
                                                syncedRobot.getFullRobotModel(),
                                                selectionCollisionModel,
-                                               referenceFrameLibrary);
+                                               referenceFrameLibrary,
+                                               sceneGraph);
       }
       if (nodeType == SakeHandCommandActionDefinition.class)
       {
@@ -117,7 +124,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       }
       if (nodeType == WalkActionDefinition.class)
       {
-         return new RDXWalkAction(id, crdtInfo, saveFileDirectory, panel3D, robotModel, referenceFrameLibrary, footstepPlannerParametersBasics);
+         return new RDXWalkAction(id, crdtInfo, saveFileDirectory, panel3D, robotModel, referenceFrameLibrary, sceneGraph, footstepPlannerParametersBasics);
       }
       else
       {

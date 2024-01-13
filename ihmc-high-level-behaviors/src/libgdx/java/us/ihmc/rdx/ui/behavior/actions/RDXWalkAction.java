@@ -11,6 +11,7 @@ import us.ihmc.behaviors.sequence.actions.WalkActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
@@ -50,6 +51,7 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
                         RDX3DPanel panel3D,
                         DRCRobotModel robotModel,
                         ReferenceFrameLibrary referenceFrameLibrary,
+                        SceneGraph sceneGraph,
                         FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       super(new WalkActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
