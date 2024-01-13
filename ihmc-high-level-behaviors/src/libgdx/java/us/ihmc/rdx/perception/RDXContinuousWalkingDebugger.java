@@ -22,6 +22,7 @@ import java.util.List;
 
 public class RDXContinuousWalkingDebugger implements RenderableProvider
 {
+   private ArrayList<ModelInstance> expansionSpheres = new ArrayList<>();
    private ArrayList<ModelInstance> stateSpheres = new ArrayList<>();
    private ArrayList<ModelInstance> stepCylinders = new ArrayList<>();
    private ImGui3DViewInput latestInput;
