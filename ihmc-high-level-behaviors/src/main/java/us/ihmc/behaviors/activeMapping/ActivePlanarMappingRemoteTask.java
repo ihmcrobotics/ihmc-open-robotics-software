@@ -7,6 +7,7 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
+import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -30,6 +31,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
    private ContinuousPlanner activeMappingModule;
    private final ContinuousWalkingParameters continuousPlanningParameters;
    private final SwingPlannerParametersBasics swingFootPlannerParameters;
+   private TerrainPlanningDebugger terrainPlanningDebugger;
 
 
    public ActivePlanarMappingRemoteTask(String simpleRobotName,
@@ -45,12 +47,12 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
       super(simpleRobotName, terrainRegionsTopic, structuralRegionsTopic, ros2Node, referenceFrames, referenceFramesUpdater, smoothing);
 
       this.walkingStatusMessage.get().setWalkingStatus(WalkingStatus.COMPLETED.toByte());
-
+      this.terrainPlanningDebugger = new TerrainPlanningDebugger(ros2Node);
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
       this.continuousPlanningParameters = continuousPlanningParameters;
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
 
-      activeMappingModule = new ContinuousPlanner(robotModel, referenceFrames, ContinuousPlanner.PlanningMode.FRONTIER_EXPANSION);
+      activeMappingModule = new ContinuousPlanner(robotModel, referenceFrames, ContinuousPlanner.PlanningMode.FRONTIER_EXPANSION, terrainPlanningDebugger);
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);

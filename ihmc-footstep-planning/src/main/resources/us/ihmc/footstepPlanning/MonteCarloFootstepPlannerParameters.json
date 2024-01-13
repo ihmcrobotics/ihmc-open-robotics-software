@@ -112,7 +112,7 @@
     "upperBound" : 5.0
   },
   "Maximum step width" : {
-    "value" : 0.401015,
+    "value" : 0.4,
     "lowerBound" : 0.2,
     "upperBound" : 0.5
   },

@@ -83,9 +83,9 @@ public class ContinuousPlanner
    private MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters;
    private MonteCarloFootstepPlanner monteCarloFootstepPlanner;
    private MonteCarloFootstepPlannerRequest monteCarloFootstepPlannerRequest;
-
    private TerrainMapData latestTerrainMapData;
    private HeightMapData latestHeightMapData;
+   private TerrainPlanningDebugger debugger;
 
    private boolean initialized = false;
    private boolean planAvailable = false;
@@ -97,8 +97,9 @@ public class ContinuousPlanner
    private float gridResolution = 10.0f;
    private int offset = 70;
 
-   public ContinuousPlanner(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames, PlanningMode mode)
+   public ContinuousPlanner(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames, PlanningMode mode, TerrainPlanningDebugger debugger)
    {
+      this.debugger = debugger;
       this.referenceFrames = humanoidReferenceFrames;
       this.mode = mode;
       this.robotModel = robotModel;
@@ -121,8 +122,8 @@ public class ContinuousPlanner
             monteCarloFootstepPlannerParameters.setMaximumStepWidth(footstepPlannerParameters.getMaximumStepWidth());
 
             monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(monteCarloFootstepPlannerParameters,
-                                                                      FootstepPlanningModuleLauncher.createFootPolygons(robotModel));
-            monteCarloFootstepPlanner.getDebugger().setEnabled(false);
+                                                                      FootstepPlanningModuleLauncher.createFootPolygons(robotModel),
+                                                                      debugger);
             break;
       }
 
@@ -282,13 +283,13 @@ public class ContinuousPlanner
 
       long timeEnd = System.nanoTime();
 
-      LogTools.info(String.format("Total Time: %.3f ms, Plan Size: %d, Visited: %d, Layer Counts: %s",
+      statistics.appendString(String.format("Total Time: %.3f ms, Plan Size: %d, Visited: %d, Layer Counts: %s",
                                   (timeEnd - timeStart) / 1e6,
                                   latestMonteCarloPlan.getNumberOfSteps(),
                                   monteCarloFootstepPlanner.getVisitedNodes().size(),
                                   MonteCarloPlannerTools.getLayerCountsString(monteCarloFootstepPlanner.getRoot())));
 
-      monteCarloFootstepPlanner.getDebugger().plotFootstepPlan(latestMonteCarloPlan);
+      //debugger.plotFootstepPlan(latestMonteCarloPlan);
    }
 
    public List<EnumMap<Axis3D, List<PolynomialReadOnly>>> computeSwingTrajectories(HeightMapData heightMapData, FootstepPlan footstepPlan)
@@ -634,6 +635,11 @@ public class ContinuousPlanner
             monteCarloFootstepPlanner.transitionToOptimal();
          }
       }
+   }
+
+   public MonteCarloFootstepPlanner getMonteCarloFootstepPlanner()
+   {
+      return monteCarloFootstepPlanner;
    }
 
    public FootstepPlanningResult getFootstepPlanningResult()

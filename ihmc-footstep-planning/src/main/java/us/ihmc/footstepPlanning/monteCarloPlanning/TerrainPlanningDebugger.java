@@ -1,10 +1,17 @@
 package us.ihmc.footstepPlanning.monteCarloPlanning;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import ihmc_common_msgs.msg.dds.PoseListMessage;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.video.ContinuousPlanningAPI;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -15,8 +22,10 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TerrainPlanningDebugger
 {
@@ -41,14 +50,24 @@ public class TerrainPlanningDebugger
                                                                        contactHeatMapColorImage.rows()));
 
    private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
-   private MonteCarloFootstepPlanner planner;
+
+   private IHMCROS2Publisher<FootstepDataListMessage> publisherForUI;
+   private IHMCROS2Publisher<FootstepDataListMessage> monteCarloPlanPublisherForUI;
+   private IHMCROS2Publisher<PoseListMessage> startAndGoalPublisherForUI;
+   private IHMCROS2Publisher<PoseListMessage> monteCarloNodesPublisherForUI;
    private MonteCarloFootstepPlannerRequest request;
 
    private Mat contactHeatMapImage;
 
-   public TerrainPlanningDebugger(MonteCarloFootstepPlanner planner)
+   public TerrainPlanningDebugger(ROS2Node ros2Node)
    {
-      this.planner = planner;
+      if (ros2Node != null)
+      {
+         publisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.PLANNED_FOOTSTEPS);
+         monteCarloPlanPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.MONTE_CARLO_FOOTSTEP_PLAN);
+         startAndGoalPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.START_AND_GOAL_FOOTSTEPS);
+         monteCarloNodesPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.MONTE_CARLO_TREE_NODES);
+      }
    }
 
    public void setRequest(MonteCarloFootstepPlannerRequest request)
@@ -186,6 +205,59 @@ public class TerrainPlanningDebugger
          MonteCarloFootstepNode previousNode = (MonteCarloFootstepNode) optimalPath.get(i-1);
          double totalScore = MonteCarloPlannerTools.scoreFootstepNode(previousNode, footstepNode, request, parameters, true);
       }
+   }
+
+   public void publishStartAndGoalForVisualization(SideDependentList<FramePose3D> startPoses, SideDependentList<FramePose3D> goalPoses)
+   {
+      List<Pose3D> poses = new ArrayList<>();
+      poses.add(new Pose3D(startPoses.get(RobotSide.LEFT)));
+      poses.add(new Pose3D(startPoses.get(RobotSide.RIGHT)));
+      poses.add(new Pose3D(goalPoses.get(RobotSide.LEFT)));
+      poses.add(new Pose3D(goalPoses.get(RobotSide.RIGHT)));
+
+      PoseListMessage poseListMessage = new PoseListMessage();
+      MessageTools.packPoseListMessage(poses, poseListMessage);
+
+      startAndGoalPublisherForUI.publish(poseListMessage);
+   }
+
+   public void publishMonteCarloNodesForVisualization(MonteCarloTreeNode root, TerrainMapData terrainMap)
+   {
+      List<Pose3D> poses = new ArrayList<>();
+
+      ArrayList<MonteCarloTreeNode> optimalPath = new ArrayList<>();
+      MonteCarloPlannerTools.getOptimalPath(root, optimalPath);
+
+      for (MonteCarloTreeNode node : optimalPath)
+      {
+         for (MonteCarloTreeNode child : node.getChildren())
+         {
+            MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) child;
+
+            float x = footstepNode.getState().getX32() / 50.0f;
+            float y = footstepNode.getState().getY32() / 50.0f;
+            float z = terrainMap.getHeightInWorld(x, y);
+
+            //LogTools.warn("X: " + x + ", Y: " + y + ", Z: " + z + ", Value: " + footstepNode.getValue() + ", Level: " + footstepNode.getLevel() + ", Side: " + footstepNode.getRobotSide());
+
+            poses.add(new Pose3D(x, y, z, footstepNode.getValue(), footstepNode.getLevel(), footstepNode.getRobotSide() == RobotSide.LEFT ? 0 : 1));
+         }
+      }
+
+      PoseListMessage poseListMessage = new PoseListMessage();
+      MessageTools.packPoseListMessage(poses, poseListMessage);
+
+      monteCarloNodesPublisherForUI.publish(poseListMessage);
+   }
+
+   public void publishMonteCarloPlan(FootstepDataListMessage monteCarloPlanMessage)
+   {
+      monteCarloPlanPublisherForUI.publish(monteCarloPlanMessage);
+   }
+
+   public void publishPlannedFootsteps(FootstepDataListMessage plannedFootstepsMessage)
+   {
+      publisherForUI.publish(plannedFootstepsMessage);
    }
 
    public void printContactMap()

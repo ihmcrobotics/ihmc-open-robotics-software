@@ -4,6 +4,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -17,7 +18,9 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Node;
 
 public class MonteCarloFootstepPlanningTest
 {
@@ -25,7 +28,8 @@ public class MonteCarloFootstepPlanningTest
 
    private OpenCLManager openCLManager = new OpenCLManager();
    private MonteCarloFootstepPlannerParameters plannerParameters = new MonteCarloFootstepPlannerParameters();
-   private MonteCarloFootstepPlanner planner = new MonteCarloFootstepPlanner(plannerParameters, PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
+   private TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(null);
+   private MonteCarloFootstepPlanner planner = new MonteCarloFootstepPlanner(plannerParameters, PlannerTools.createFootPolygons(0.2, 0.1, 0.08), debugger);
    private CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
    private RapidHeightMapExtractor heightMapExtractor = new RapidHeightMapExtractor(openCLManager);
 
