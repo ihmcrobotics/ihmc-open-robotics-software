@@ -120,6 +120,9 @@ public class ContinuousPlanner
             monteCarloFootstepPlannerParameters = new MonteCarloFootstepPlannerParameters();
             monteCarloFootstepPlannerParameters.setSearchOuterRadius(footstepPlannerParameters.getMaximumStepReach());
             monteCarloFootstepPlannerParameters.setMaximumStepWidth(footstepPlannerParameters.getMaximumStepWidth());
+            monteCarloFootstepPlannerParameters.setMinimumStepLength(footstepPlannerParameters.getMinimumStepLength());
+            monteCarloFootstepPlannerParameters.setMinimumStepWidth(footstepPlannerParameters.getMinimumStepWidth());
+            monteCarloFootstepPlannerParameters.setMaximumStepLength(footstepPlannerParameters.getMaximumStepReach());
 
             monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(monteCarloFootstepPlannerParameters,
                                                                       FootstepPlanningModuleLauncher.createFootPolygons(robotModel),

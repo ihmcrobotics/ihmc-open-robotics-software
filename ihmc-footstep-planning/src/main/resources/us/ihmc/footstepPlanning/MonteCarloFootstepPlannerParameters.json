@@ -17,7 +17,7 @@
     "upperBound" : 1.0
   },
   "Feasible Contact Reward" : {
-    "value" : 66.265061,
+    "value" : 239.999995,
     "lowerBound" : 0.0,
     "upperBound" : 1000.0
   },
@@ -120,5 +120,15 @@
     "value" : 0.7,
     "lowerBound" : 0.2,
     "upperBound" : 0.7
+  },
+  "Minimum step width" : {
+    "value" : 0.1,
+    "lowerBound" : 0.1,
+    "upperBound" : 0.3
+  },
+  "Minimum step length" : {
+    "value" : 0.1,
+    "lowerBound" : 0.1,
+    "upperBound" : 0.3
   }
 }

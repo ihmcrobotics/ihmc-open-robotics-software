@@ -134,4 +134,14 @@ public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPrope
    {
       return get(maximumStepLength);
    }
+
+   default double getMinimumStepWidth()
+   {
+      return get(minimumStepWidth);
+   }
+
+   default double getMinimumStepLength()
+   {
+      return get(minimumStepLength);
+   }
 }

@@ -406,19 +406,27 @@ public class MonteCarloPlannerTools
    {
       actions.clear();
 
-      float sidedYawOffset = side * (float) parameters.getSidedYawOffset();
+      float sidedYawOffset = side * (float) Math.PI / 4.0f;
       float adjustedPreviousYaw = yawPrevious + sidedYawOffset;
-      float yawMin = adjustedPreviousYaw - (float) parameters.getSearchYawBand();
-      float yawMax = adjustedPreviousYaw + (float) parameters.getSearchYawBand();
+      float yawMin = (float) (adjustedPreviousYaw - Math.PI / 4.0f);
+      float yawMax = (float) (adjustedPreviousYaw + Math.PI / 4.0f);
       float minRadius = (float) parameters.getSearchInnerRadius() * 50.0f;
       float maxRadius = (float) parameters.getSearchOuterRadius() * 50.0f;
       float maxWidth = (float) parameters.getMaximumStepWidth();
+      float minWidth = (float) parameters.getMinimumStepWidth();
+      float maxLength = (float) parameters.getMaximumStepLength();
+      float minLength = (float) parameters.getMinimumStepLength();
 
       RigidBodyTransform yawTransform = new RigidBodyTransform(new Quaternion(yawPrevious, 0, 0), new Vector3D());
+
       Vector3D forwardVector = new Vector3D(Axis3D.X);
       forwardVector.applyTransform(yawTransform);
 
+      Vector3D leftVector = new Vector3D(Axis3D.Y);
+      leftVector.applyTransform(yawTransform);
+
       Line2D midLine = new Line2D(new Point2D(), new Vector2D(forwardVector));
+      Line2D baseLine = new Line2D(new Point2D(), new Vector2D(leftVector));
 
       for (int i = -30; i <= 30; i += parameters.getSearchSkipSize())
       {
@@ -432,13 +440,17 @@ public class MonteCarloPlannerTools
 
             // compute distance of point to midline
             Point2D point = new Point2D((float) i / 50.0f, (float) j / 50.0f);
-            double distanceToMidline = midLine.distance(point);
+            double orthogonalDistanceToMidline = midLine.distance(point);
+            double orthogonalDistanceToBaseLine = baseLine.distance(point);
 
-            if (radius >= minRadius && radius <= maxRadius && yaw >= yawMin && yaw <= yawMax && distanceToMidline <= maxWidth)
+            if (radius >= minRadius && radius <= maxRadius
+                && yaw >= yawMin && yaw <= yawMax
+                && orthogonalDistanceToMidline <= maxWidth && orthogonalDistanceToMidline >= minWidth
+                && orthogonalDistanceToBaseLine <= maxLength && orthogonalDistanceToBaseLine >= minLength)
             {
-               actions.add(new Vector3D(i, j, -0.1));
+               //actions.add(new Vector3D(i, j, -0.1));
                actions.add(new Vector3D(i, j, 0));
-               actions.add(new Vector3D(i, j, 0.1));
+               //actions.add(new Vector3D(i, j, 0.1));
             }
          }
       }
@@ -526,9 +538,8 @@ public class MonteCarloPlannerTools
       double referenceCost = distanceFromReferenceLine * 10.0f + yawDifferenceFromReference * 10.0f;
 
       double goalReward = plannerParameters.getGoalReward() * progressToGoal;
-      double contactReward =
-            ((request.getTerrainMapData().getContactScoreLocal(rIndex, cIndex)) / 255.0 - plannerParameters.getFeasibleContactCutoff())
-            * plannerParameters.getFeasibleContactReward();
+      double contactReward = ((request.getTerrainMapData().getContactScoreLocal(rIndex, cIndex)) / 255.0 - plannerParameters.getFeasibleContactCutoff())
+                             * plannerParameters.getFeasibleContactReward();
 
       double stepYawCost = Math.abs(oldNode.getState().getZ() - newNode.getState().getZ()) * 0.01f;
       double stepDistanceCost = Math.abs(previousPosition.distance(currentPosition)) * 0.01f;
