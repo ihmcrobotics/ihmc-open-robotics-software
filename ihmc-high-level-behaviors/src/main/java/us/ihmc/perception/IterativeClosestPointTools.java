@@ -547,4 +547,19 @@ public class IterativeClosestPointTools
 
       return boxObjectPointCloud;
    }
+
+   public static Point3D32 computeCentroidOfPointCloud(List<Point3DReadOnly> pointCloud)
+   {
+      return computeCentroidOfPointCloud(pointCloud, pointCloud.size());
+   }
+
+   public static Point3D32 computeCentroidOfPointCloud(List<Point3DReadOnly> pointCloud, int pointsToAverage)
+   {
+      Point3D32 centroid = new Point3D32();
+      for (int i = 0; i < pointsToAverage; i++)
+         centroid.add(pointCloud.get(i));
+      centroid.scale(1.0 / pointsToAverage);
+
+      return centroid;
+   }
 }

@@ -169,7 +169,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
       if (success)
          ros2Helper.publish(PerceptionAPI.ICP_RESULT, icpWorker.getResult());
 
-      List<Point3DReadOnly> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
+      List<? extends Point3DReadOnly> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
       segmentedPtCld.clear();
       if (segmentedPointCloud != null && !segmentedPointCloud.isEmpty())
       {
