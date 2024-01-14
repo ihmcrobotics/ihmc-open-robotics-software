@@ -80,6 +80,7 @@ public class ContinuousPlanner
    private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> latestSwingTrajectories;
    private FootstepPlannerLogger logger;
    private MonteCarloPathPlanner monteCarloPathPlanner;
+   private FootstepPlannerParametersBasics footstepPlannerParameters;
    private MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters;
    private MonteCarloFootstepPlanner monteCarloFootstepPlanner;
    private MonteCarloFootstepPlannerRequest monteCarloFootstepPlannerRequest;
@@ -114,15 +115,11 @@ public class ContinuousPlanner
             break;
          case WALK_TO_GOAL, RANDOM_WALK:
 
-            FootstepPlannerParametersReadOnly footstepPlannerParameters = robotModel.getFootstepPlannerParameters("FotContinuousWalking");
+            footstepPlannerParameters = robotModel.getFootstepPlannerParameters("ForContinuousWalking");
             footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel, "ForContinuousWalking");
             logger = new FootstepPlannerLogger(footstepPlanner);
             monteCarloFootstepPlannerParameters = new MonteCarloFootstepPlannerParameters();
-            monteCarloFootstepPlannerParameters.setSearchOuterRadius(footstepPlannerParameters.getMaximumStepReach());
-            monteCarloFootstepPlannerParameters.setMaximumStepWidth(footstepPlannerParameters.getMaximumStepWidth());
-            monteCarloFootstepPlannerParameters.setMinimumStepLength(footstepPlannerParameters.getMinimumStepLength());
-            monteCarloFootstepPlannerParameters.setMinimumStepWidth(footstepPlannerParameters.getMinimumStepWidth());
-            monteCarloFootstepPlannerParameters.setMaximumStepLength(footstepPlannerParameters.getMaximumStepReach());
+            syncPlannerParameters(footstepPlannerParameters, monteCarloFootstepPlannerParameters);
 
             monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(monteCarloFootstepPlannerParameters,
                                                                       FootstepPlanningModuleLauncher.createFootPolygons(robotModel),
@@ -241,7 +238,7 @@ public class ContinuousPlanner
          case WALK_TO_GOAL, RANDOM_WALK ->
          {
             monteCarloFootstepPlannerEnabled = true;
-
+            syncPlannerParameters(footstepPlannerParameters, monteCarloFootstepPlannerParameters);
             planWithMonteCarloPlanner();
             planWithAStarPlanner(heightMapData, usePreviousPlanAsReference, useMonteCarloPlanAsReference);
          }
@@ -638,6 +635,15 @@ public class ContinuousPlanner
             monteCarloFootstepPlanner.transitionToOptimal();
          }
       }
+   }
+
+   public void syncPlannerParameters(FootstepPlannerParametersBasics footstepPlannerParameters, MonteCarloFootstepPlannerParameters monteCarloParameters)
+   {
+      monteCarloParameters.setSearchOuterRadius(footstepPlannerParameters.getMaximumStepReach());
+      monteCarloParameters.setMaximumStepWidth(footstepPlannerParameters.getMaximumStepWidth());
+      monteCarloParameters.setMinimumStepLength(footstepPlannerParameters.getMinimumStepLength());
+      monteCarloParameters.setMinimumStepWidth(footstepPlannerParameters.getMinimumStepWidth());
+      monteCarloParameters.setMaximumStepLength(footstepPlannerParameters.getMaximumStepReach());
    }
 
    public MonteCarloFootstepPlanner getMonteCarloFootstepPlanner()

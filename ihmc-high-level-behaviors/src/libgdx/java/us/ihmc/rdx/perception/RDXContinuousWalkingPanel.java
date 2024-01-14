@@ -23,7 +23,6 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.communication.video.ContinuousPlanningAPI;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -31,6 +30,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
@@ -38,7 +38,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
@@ -130,15 +129,15 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       footstepPlanGraphic.setColor(RobotSide.LEFT, Color.GRAY);
       footstepPlanGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
 
-      monteCarloPlanGraphic.setColor(RobotSide.LEFT, Color.TEAL);
-      monteCarloPlanGraphic.setColor(RobotSide.RIGHT, Color.GREEN);
+      monteCarloPlanGraphic.setColor(RobotSide.LEFT, Color.CYAN);
+      monteCarloPlanGraphic.setColor(RobotSide.RIGHT, Color.RED);
 
-      ros2Helper.subscribeViaCallback(ContinuousPlanningAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
-      ros2Helper.subscribeViaCallback(ContinuousPlanningAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
-      ros2Helper.subscribeViaCallback(ContinuousPlanningAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
+      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
+      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
+      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()), this::onControllerFootstepsReceived);
 
-      commandPublisher = ROS2Tools.createPublisher(ros2Helper.getROS2NodeInterface(), ContinuousPlanningAPI.CONTINUOUS_WALKING_COMMAND);
+      commandPublisher = ROS2Tools.createPublisher(ros2Helper.getROS2NodeInterface(), ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND);
 
       stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(stancePoseCalculator);
       terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Helper, monteCarloPlannerParameters);
@@ -168,14 +167,24 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
 
    public void generateFootstepPlanGraphic(FootstepDataListMessage message)
    {
-      footstepPlanGraphic.clear();
+      FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(message);
+      for (int i = 0; i<plan.getNumberOfSteps(); i++)
+      {
+         LogTools.info("({})[A* Footstep: {}, {}]", i, plan.getFootstep(i).getRobotSide(), plan.getFootstep(i).getFootstepPose());
+      }
+
       footstepPlanGraphic.generateMeshesAsync(message, "Continuous Walking");
       footstepPlanGraphic.update();
    }
 
    public void generateMonteCarloPlanGraphic(FootstepDataListMessage message)
    {
-      monteCarloPlanGraphic.clear();
+      FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(message);
+      for (int i = 0; i<plan.getNumberOfSteps(); i++)
+      {
+         LogTools.info("({})[Monte-Carlo Footstep: {}, {}]", i, plan.getFootstep(i).getRobotSide(), plan.getFootstep(i).getFootstepPose());
+      }
+
       monteCarloPlanGraphic.generateMeshesAsync(message, "Monte-Carlo Plan");
       monteCarloPlanGraphic.update();
    }
@@ -208,6 +217,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
 
       if (monteCarloPlanDataListMessage.get() != null)
       {
+         LogTools.warn("Generating Monte-Carlo Plan Graphic");
          generateMonteCarloPlanGraphic(monteCarloPlanDataListMessage.get());
          monteCarloPlanDataListMessage.set(null);
       }

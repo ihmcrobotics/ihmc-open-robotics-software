@@ -8,9 +8,9 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
-import us.ihmc.communication.video.ContinuousPlanningAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
 import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -83,7 +83,7 @@ public class ContinuousPlannerSchedulingTask
                                       this::footstepStatusReceived);
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepQueueStatusMessage.class, robotModel.getSimpleRobotName()),
                                       this::footstepQueueStatusReceived);
-      ros2Helper.subscribeViaCallback(ContinuousPlanningAPI.CONTINUOUS_WALKING_COMMAND, commandMessage::set);
+      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND, commandMessage::set);
 
       continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, mode, debugger);
 
