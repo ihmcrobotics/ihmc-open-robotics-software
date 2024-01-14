@@ -7,7 +7,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.communication.video.ContinuousPlanningAPI;
+import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.headless.TerrainPerceptionProcessWithDriver;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
@@ -56,9 +56,9 @@ public class PerceptionBasedContinuousWalking
       activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters(), continuousPlanningParameters);
       activePerceptionModule.initializeContinuousPlannerSchedulingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames(), mode);
 
-      ros2PropertySetGroup.registerStoredPropertySet(ContinuousPlanningAPI.CONTINUOUS_PLANNING_PARAMETERS, continuousPlanningParameters);
-      ros2PropertySetGroup.registerStoredPropertySet(ContinuousPlanningAPI.FOOTSTEP_PLANNING_PARAMETERS, activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getFootstepPlannerParameters());
-      ros2PropertySetGroup.registerStoredPropertySet(ContinuousPlanningAPI.SWING_PLANNING_PARAMETERS, activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getSwingPlannerParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS, continuousPlanningParameters);
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.FOOTSTEP_PLANNING_PARAMETERS, activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getFootstepPlannerParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.SWING_PLANNING_PARAMETERS, activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getSwingPlannerParameters());
 
       perceptionTask.run();
 

@@ -11,17 +11,16 @@ import ihmc_common_msgs.msg.dds.PoseListMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.communication.video.ContinuousPlanningAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -49,8 +48,8 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
    public RDXTerrainPlanningDebugger(ROS2Helper ros2Helper, MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters)
    {
       this.monteCarloFootstepPlannerParameters = monteCarloFootstepPlannerParameters;
-      ros2Helper.subscribeViaCallback(ContinuousPlanningAPI.MONTE_CARLO_TREE_NODES, this::onMonteCarloTreeNodesReceived);
-      ros2Helper.subscribeViaCallback(ContinuousPlanningAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
+      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_TREE_NODES, this::onMonteCarloTreeNodesReceived);
+      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
 
       for (int i = 0; i < 500; i++)
       {

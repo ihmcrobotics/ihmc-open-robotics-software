@@ -3,8 +3,8 @@ package us.ihmc.rdx.perception;
 import us.ihmc.avatar.colorVision.DualBlackflyComms;
 import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.communication.video.ContinuousPlanningAPI;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.comms.PerceptionComms;
@@ -57,7 +57,7 @@ public class RDXRemotePerceptionUI
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
 
       remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);
-      remotePropertySets.registerRemotePropertySet(continuousWalkingParameters, ContinuousPlanningAPI.CONTINUOUS_PLANNING_PARAMETERS);
+      remotePropertySets.registerRemotePropertySet(continuousWalkingParameters, ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(heightMapParameters, PerceptionComms.HEIGHT_MAP_PARAMETERS);
    }
 
@@ -122,13 +122,13 @@ public class RDXRemotePerceptionUI
    public void setFootstepPlannerParameters(FootstepPlannerParametersBasics parameters)
    {
       this.footstepPlannerParameters = parameters;
-      remotePropertySets.registerRemotePropertySet(footstepPlannerParameters, ContinuousPlanningAPI.FOOTSTEP_PLANNING_PARAMETERS);
+      remotePropertySets.registerRemotePropertySet(footstepPlannerParameters, ContinuousWalkingAPI.FOOTSTEP_PLANNING_PARAMETERS);
    }
 
    public void setSwingPlannerParameters(SwingPlannerParametersBasics parameters)
    {
       this.swingPlannerParameters = parameters;
-      remotePropertySets.registerRemotePropertySet(swingPlannerParameters, ContinuousPlanningAPI.SWING_PLANNING_PARAMETERS);
+      remotePropertySets.registerRemotePropertySet(swingPlannerParameters, ContinuousWalkingAPI.SWING_PLANNING_PARAMETERS);
    }
 
    public MonteCarloFootstepPlannerParameters getMonteCarloFootstepPlannerParameters()

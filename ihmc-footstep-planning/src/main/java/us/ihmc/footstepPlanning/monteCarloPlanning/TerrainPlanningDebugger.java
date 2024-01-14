@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.monteCarloPlanning;
 
+import behavior_msgs.msg.dds.ContinuousWalkingStatusMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import org.bytedeco.opencv.global.opencv_core;
@@ -9,13 +10,13 @@ import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.video.ContinuousPlanningAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -50,8 +51,10 @@ public class TerrainPlanningDebugger
                                                                        contactHeatMapColorImage.rows()));
 
    private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
+   private ContinuousWalkingStatusMessage statusMessage = new ContinuousWalkingStatusMessage();
 
    private IHMCROS2Publisher<FootstepDataListMessage> publisherForUI;
+   private IHMCROS2Publisher<ContinuousWalkingStatusMessage> statusPublisher;
    private IHMCROS2Publisher<FootstepDataListMessage> monteCarloPlanPublisherForUI;
    private IHMCROS2Publisher<PoseListMessage> startAndGoalPublisherForUI;
    private IHMCROS2Publisher<PoseListMessage> monteCarloNodesPublisherForUI;
@@ -63,10 +66,11 @@ public class TerrainPlanningDebugger
    {
       if (ros2Node != null)
       {
-         publisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.PLANNED_FOOTSTEPS);
-         monteCarloPlanPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.MONTE_CARLO_FOOTSTEP_PLAN);
-         startAndGoalPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.START_AND_GOAL_FOOTSTEPS);
-         monteCarloNodesPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.MONTE_CARLO_TREE_NODES);
+         publisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousWalkingAPI.PLANNED_FOOTSTEPS);
+         statusPublisher = ROS2Tools.createPublisher(ros2Node, ContinuousWalkingAPI.CONTINUOUS_WALKING_STATUS);
+         monteCarloPlanPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN);
+         startAndGoalPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS);
+         monteCarloNodesPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousWalkingAPI.MONTE_CARLO_TREE_NODES);
       }
    }
 
@@ -276,6 +280,11 @@ public class TerrainPlanningDebugger
          return;
 
       PerceptionDebugTools.printMat("Height Map", request.getTerrainMapData().getHeightMap(), 4);
+   }
+
+   public void publishContinuousWalkingStatusMessage()
+   {
+
    }
 
    public Mat getDisplayImage()
