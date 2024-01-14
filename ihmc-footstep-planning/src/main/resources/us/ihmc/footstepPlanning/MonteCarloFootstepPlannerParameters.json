@@ -17,12 +17,12 @@
     "upperBound" : 1.0
   },
   "Feasible Contact Reward" : {
-    "value" : 204.819277,
+    "value" : 240.963861,
     "lowerBound" : 0.0,
     "upperBound" : 1000.0
   },
   "Goal Reward" : {
-    "value" : 36.480686,
+    "value" : 28.755364,
     "lowerBound" : 0.0,
     "upperBound" : 100.0
   },
@@ -32,7 +32,7 @@
     "upperBound" : 1000000
   },
   "Max number of child nodes" : {
-    "value" : 10,
+    "value" : 8,
     "lowerBound" : 5,
     "upperBound" : 1000
   },
