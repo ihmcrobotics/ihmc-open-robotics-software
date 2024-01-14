@@ -31,6 +31,7 @@ public class IterativeClosestPointManager
    private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor(openCLManager);
 
    private final Random random = new Random(System.nanoTime());
+   private final HashMap<Long, IterativeClosestPointObjectTrack> nodeIDToTrackMap = new HashMap<>();
    private final HashMap<Long, IterativeClosestPointWorker> nodeIDToWorkerMap = new HashMap<>();
    private final IHMCROS2Input<IterativeClosestPointRequest> requestMessageSubscription;
    private final RestartableThrottledThread workerThread;
@@ -53,14 +54,17 @@ public class IterativeClosestPointManager
          if (!nodeIDToWorkerMap.containsKey(nodeID))     // ICP Worker requested (add new)
          {
             addWorker(requestMessage);
+            addTrack(requestMessage);
          }
          else if (!requestMessage.getRunIcp())           // ICP Worker no longer needed (remove)
          {
             nodeIDToWorkerMap.remove(nodeID);
+            nodeIDToTrackMap.remove(nodeID);
          }
          else                                            // ICP Worker exists (update it)
          {
             IterativeClosestPointWorker worker = nodeIDToWorkerMap.get(nodeID);
+            IterativeClosestPointObjectTrack track = nodeIDToTrackMap.get(nodeID);
 
             // Check if size changed
             PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.fromByte(requestMessage.getShape());
@@ -96,7 +100,15 @@ public class IterativeClosestPointManager
             worker.setNumberOfCorrespondences(NUMBER_OF_CORRESPONDENCES);             // TODO extract to request message
             worker.setTargetPoint(requestMessage.getProvidedPose().getPosition());
             worker.useProvidedTargetPoint(requestMessage.getUseProvidedPose());
-            worker.setSegmentSphereRadius(requestMessage.getUseProvidedPose() ? 0.3 : 0.2);
+            if (requestMessage.getUseProvidedPose())
+            {
+               track.setObjectPose(requestMessage.getProvidedPose());
+               worker.setSegmentSphereRadius(0.3);
+            }
+            else
+            {
+               worker.setSegmentSphereRadius(0.2);
+            }
          }
       });
 
@@ -147,9 +159,16 @@ public class IterativeClosestPointManager
       for (long id : nodeIDToWorkerMap.keySet())
       {
          IterativeClosestPointWorker worker = nodeIDToWorkerMap.get(id);
+         IterativeClosestPointObjectTrack track = nodeIDToTrackMap.get(id);
+
+         worker.setPoseGuess(track.predictObjectPoseNow());
+
          if (worker.runICP(2))
             ros2Helper.publish(PerceptionAPI.ICP_RESULT, worker.getResult());
 
+         track.updateWithMeasurement(worker.getResultPose());
+
+         // TODO do we want to use the track instead of the ICP to update the scene node? Probably.
          // If ICP isn't using the provided target pose, it'll update the SceneNode to the ICP worker's centroid
          if (!worker.isUsingTargetPoint())
          {
@@ -159,6 +178,12 @@ public class IterativeClosestPointManager
             node.getNodeFrame().update();
          }
       }
+   }
+
+   private void addTrack(IterativeClosestPointRequest requestMessage)
+   {
+      IterativeClosestPointObjectTrack track = new IterativeClosestPointObjectTrack();
+      nodeIDToTrackMap.putIfAbsent(requestMessage.getNodeId(), track);
    }
 
    private void addWorker(IterativeClosestPointRequest requestMessage)
