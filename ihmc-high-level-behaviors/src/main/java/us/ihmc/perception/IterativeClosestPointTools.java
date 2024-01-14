@@ -327,6 +327,7 @@ public class IterativeClosestPointTools
          { // The query is directly below the cylinder
             projection.set(pointToProject);
             projection.setZ(-halfLength);
+            correspondingNormalToPack.set(0.0, 0.0, -1.0);
             return projection;
          }
 
@@ -334,6 +335,7 @@ public class IterativeClosestPointTools
          { // The query is directly above the cylinder
             projection.set(pointToProject);
             projection.setZ(halfLength);
+            correspondingNormalToPack.set(0.0, 0.0, 1.0);
             return projection;
          }
 
@@ -342,7 +344,9 @@ public class IterativeClosestPointTools
          if (MathTools.square(distanceFromEnd) < distanceSquaredFromAxis)
          {
             // The query is closer to the ends that the side
-            projection.set(axisToQueryX, axisToQueryY, Math.signum(positionOnAxis) * halfLength);
+            double zSign = Math.signum(positionOnAxis);
+            projection.set(axisToQueryX, axisToQueryY, zSign * halfLength);
+            correspondingNormalToPack.set(0.0, 0.0, zSign);
             return projection;
          }
          else
@@ -350,6 +354,7 @@ public class IterativeClosestPointTools
             double distanceFromAxis = EuclidCoreTools.squareRoot(distanceSquaredFromAxis);
             double toCylinderScale = cylinder3DRadius / distanceFromAxis;
             projection.set(axisToQueryX * toCylinderScale, axisToQueryY * toCylinderScale, Math.signum(positionOnAxis) * halfLength);
+            correspondingNormalToPack.set(axisToQueryX / distanceFromAxis, axisToQueryY / distanceFromAxis, 0.0);
             return projection;
          }
       }
@@ -363,6 +368,11 @@ public class IterativeClosestPointTools
          double closestX = axisToQueryX * toCylinderScale;
          double closestY = axisToQueryY * toCylinderScale;
          projection.set(closestX, closestY, positionOnAxisClamped);
+
+         if (Math.abs(positionOnAxis) > halfLength)
+            correspondingNormalToPack.setToNaN();
+         else
+            correspondingNormalToPack.set(axisToQueryX / distanceFromAxis, axisToQueryY / distanceFromAxis, 0.0);
          return projection;
       }
    }
