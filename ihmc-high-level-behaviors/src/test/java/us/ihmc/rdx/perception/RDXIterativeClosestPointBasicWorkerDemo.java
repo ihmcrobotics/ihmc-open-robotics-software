@@ -280,9 +280,9 @@ public class RDXIterativeClosestPointBasicWorkerDemo
          double xRate = 1.5 * Math.sin(t * 0.0005 * icpGuiEnvAutoTranslationSpeed[0]);
          double yRate = 1.0 * Math.sin(t * 0.001 * icpGuiEnvAutoTranslationSpeed[0]);
          double zRate = 0.5 * Math.sin(t * 0.004 * icpGuiEnvAutoTranslationSpeed[0]);
-         double rollRate = Math.PI * Math.sin(t * 0.002 * icpGuiEnvAutoRotationSpeed[0]);
-         double pitchRate = Math.PI * Math.sin(t * 0.0023 * icpGuiEnvAutoRotationSpeed[0]);
-         double yawRate = Math.PI * Math.sin(t * 0.00275 * icpGuiEnvAutoRotationSpeed[0]);
+         double rollRate = Math.PI * Math.sin(t * 0.02 * icpGuiEnvAutoRotationSpeed[0]);
+         double pitchRate = Math.PI * Math.sin(t * 0.03 * icpGuiEnvAutoRotationSpeed[0]);
+         double yawRate = Math.PI * Math.sin(t * 0.01 * icpGuiEnvAutoRotationSpeed[0]);
 
          // TODO need delta t
          double x = shapeInputPose.getX() + xRate * deltaT;
