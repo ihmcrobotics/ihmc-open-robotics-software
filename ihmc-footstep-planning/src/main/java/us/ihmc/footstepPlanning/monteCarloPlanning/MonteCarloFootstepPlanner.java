@@ -189,7 +189,7 @@ public class MonteCarloFootstepPlanner
          if (nextStates.isEmpty())
             break;
 
-         int actionIndex = random.nextInt(0, nextStates.size() - 1);
+         int actionIndex = random.nextInt(0, nextStates.size());
          simulationState = nextStates.get(actionIndex);
 
          score += MonteCarloPlannerTools.scoreFootstepNode(node, simulationState, request, parameters, false);

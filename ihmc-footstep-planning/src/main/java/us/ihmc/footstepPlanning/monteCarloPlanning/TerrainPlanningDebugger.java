@@ -223,31 +223,35 @@ public class TerrainPlanningDebugger
 
    public void publishMonteCarloNodesForVisualization(MonteCarloTreeNode root, TerrainMapData terrainMap)
    {
-      List<Pose3D> poses = new ArrayList<>();
+      ArrayList<Pose3D> poses = new ArrayList<>();
 
+      addChildPosesToList(root, terrainMap, poses);
       ArrayList<MonteCarloTreeNode> optimalPath = new ArrayList<>();
       MonteCarloPlannerTools.getOptimalPath(root, optimalPath);
-
       for (MonteCarloTreeNode node : optimalPath)
       {
-         for (MonteCarloTreeNode child : node.getChildren())
-         {
-            MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) child;
-
-            float x = footstepNode.getState().getX32() / 50.0f;
-            float y = footstepNode.getState().getY32() / 50.0f;
-            float z = terrainMap.getHeightInWorld(x, y);
-
-            //LogTools.warn("X: " + x + ", Y: " + y + ", Z: " + z + ", Value: " + footstepNode.getValue() + ", Level: " + footstepNode.getLevel() + ", Side: " + footstepNode.getRobotSide());
-
-            poses.add(new Pose3D(x, y, z, footstepNode.getValue(), footstepNode.getLevel(), footstepNode.getRobotSide() == RobotSide.LEFT ? 0 : 1));
-         }
+         addChildPosesToList(node, terrainMap, poses);
       }
-
       PoseListMessage poseListMessage = new PoseListMessage();
       MessageTools.packPoseListMessage(poses, poseListMessage);
 
       monteCarloNodesPublisherForUI.publish(poseListMessage);
+   }
+
+   public void addChildPosesToList(MonteCarloTreeNode node, TerrainMapData terrainMapData, ArrayList<Pose3D> poses)
+   {
+      for (MonteCarloTreeNode child : node.getChildren())
+      {
+         MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) child;
+
+         float x = footstepNode.getState().getX32() / 50.0f;
+         float y = footstepNode.getState().getY32() / 50.0f;
+         float z = terrainMapData.getHeightInWorld(x, y);
+
+         //LogTools.warn("X: " + x + ", Y: " + y + ", Z: " + z + ", Value: " + footstepNode.getValue() + ", Level: " + footstepNode.getLevel() + ", Side: " + footstepNode.getRobotSide());
+
+         poses.add(new Pose3D(x, y, z, footstepNode.getValue(), footstepNode.getLevel(), footstepNode.getRobotSide() == RobotSide.LEFT ? 0 : 1));
+      }
    }
 
    public void publishMonteCarloPlan(FootstepDataListMessage monteCarloPlanMessage)

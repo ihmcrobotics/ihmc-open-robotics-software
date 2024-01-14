@@ -15,7 +15,7 @@ public class PoseListMessage extends Packet<PoseListMessage> implements Settable
 
    public PoseListMessage()
    {
-      poses_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, new geometry_msgs.msg.dds.PosePubSubType());
+      poses_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (500, new geometry_msgs.msg.dds.PosePubSubType());
 
    }
 

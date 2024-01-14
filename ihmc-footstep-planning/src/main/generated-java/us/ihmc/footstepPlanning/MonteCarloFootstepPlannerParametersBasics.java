@@ -63,11 +63,6 @@ public interface MonteCarloFootstepPlannerParametersBasics extends MonteCarloFoo
       set(MonteCarloFootstepPlannerParameters.maxTransferYaw, maxTransferYaw);
    }
 
-   default void setFeasibleContactCutoff(double feasibleContactCutoff)
-   {
-      set(MonteCarloFootstepPlannerParameters.feasibleContactCutoff, feasibleContactCutoff);
-   }
-
    default void setExplorationConstant(double explorationConstant)
    {
       set(MonteCarloFootstepPlannerParameters.explorationConstant, explorationConstant);
@@ -83,16 +78,6 @@ public interface MonteCarloFootstepPlannerParametersBasics extends MonteCarloFoo
       set(MonteCarloFootstepPlannerParameters.maxTreeDepth, maxTreeDepth);
    }
 
-   default void setSidedYawOffset(double sidedYawOffset)
-   {
-      set(MonteCarloFootstepPlannerParameters.sidedYawOffset, sidedYawOffset);
-   }
-
-   default void setSearchYawBand(double searchYawBand)
-   {
-      set(MonteCarloFootstepPlannerParameters.searchYawBand, searchYawBand);
-   }
-
    default void setSearchInnerRadius(double searchInnerRadius)
    {
       set(MonteCarloFootstepPlannerParameters.searchInnerRadius, searchInnerRadius);
@@ -106,21 +91,6 @@ public interface MonteCarloFootstepPlannerParametersBasics extends MonteCarloFoo
    default void setSearchSkipSize(int searchSkipSize)
    {
       set(MonteCarloFootstepPlannerParameters.searchSkipSize, searchSkipSize);
-   }
-
-   default void setTransferYawCost(double transferYawCost)
-   {
-      set(MonteCarloFootstepPlannerParameters.transferYawCost, transferYawCost);
-   }
-
-   default void setTransferHeightCost(int transferHeightCost)
-   {
-      set(MonteCarloFootstepPlannerParameters.transferHeightCost, transferHeightCost);
-   }
-
-   default void setTransferDistanceCost(double transferDistanceCost)
-   {
-      set(MonteCarloFootstepPlannerParameters.transferDistanceCost, transferDistanceCost);
    }
 
    default void setMaximumStepWidth(double maximumStepWidth)

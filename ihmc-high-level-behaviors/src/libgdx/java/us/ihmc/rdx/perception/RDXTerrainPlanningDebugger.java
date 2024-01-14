@@ -18,7 +18,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -39,10 +38,11 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
    private SideDependentList<ArrayList<ModelInstance>> expansionSpheres = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private ArrayList<ModelInstance> stateSpheres = new ArrayList<>();
    private ArrayList<ModelInstance> stepCylinders = new ArrayList<>();
-   private ImGui3DViewInput latestInput;
    private List<Pose3D> monteCarloTreeNodeStates;
    private TerrainMapData terrainMapData;
 
+   private int leftIndex = 0;
+   private int rightIndex = 0;
    private boolean showStateSpheres = true;
    private boolean showExpansionSpheres = true;
 
@@ -54,7 +54,7 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
 
       for (int i = 0; i < 500; i++)
       {
-         expansionSpheres.get(RobotSide.LEFT).add(RDXModelBuilder.createSphere(0.015f, Color.BLUE));
+         expansionSpheres.get(RobotSide.LEFT).add(RDXModelBuilder.createSphere(0.015f, Color.CYAN));
          expansionSpheres.get(RobotSide.RIGHT).add(RDXModelBuilder.createSphere(0.015f, Color.RED));
       }
    }
@@ -76,7 +76,6 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
 
    public void render(TerrainMapData terrainMapData, boolean showStateSpheres, boolean showExpansionSpheres)
    {
-      this.terrainMapData = terrainMapData;
       this.showStateSpheres = showStateSpheres;
       this.showExpansionSpheres = showExpansionSpheres;
 
@@ -88,51 +87,69 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
 
       if (monteCarloPlanDataListMessage.get() != null && showExpansionSpheres)
       {
-         updateExpansionSpheres(monteCarloPlanDataListMessage.getAndSet(null));
+         updateExpansionSpheres(monteCarloPlanDataListMessage.getAndSet(null), terrainMapData);
       }
    }
 
-   public void updateExpansionSpheres(FootstepDataListMessage monteCarloFootstepsMessage)
+   public void updateExpansionSpheres(FootstepDataListMessage monteCarloFootstepsMessage, TerrainMapData terrainMapData)
    {
       FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(monteCarloFootstepsMessage);
 
-      int leftIndex = 0;
-      int rightIndex = 0;
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {
-         FramePose3D footstepPose = footstepPlan.getFootstep(i).getFootstepPose();
+         addExpansionSpheresFromActionSet(footstepPlan.getFootstep(i).getFootstepPose(), footstepPlan.getFootstep(i).getRobotSide(), terrainMapData);
+      }
 
-         ArrayList<Vector3D> actions = new ArrayList<>();
-         MonteCarloPlannerTools.getFootstepActionSet(monteCarloFootstepPlannerParameters,
-                                                     actions,
-                                                     (float) footstepPose.getYaw(),
-                                                     footstepPlan.getFootstep(i).getRobotSide() == RobotSide.LEFT ? -1 : 1);
+      leftIndex = 0;
+      rightIndex = 0;
+   }
 
-         PlannedFootstep footstep = footstepPlan.getFootstep(i);
+   public void updateExpansionSpheres(FramePose3D footstepPose, RobotSide side, TerrainMapData terrainMapData)
+   {
+      addExpansionSpheresFromActionSet(footstepPose, side, terrainMapData);
+   }
 
-         Vector3D footstepPosition = new Vector3D(footstepPose.getX(), footstepPose.getY(), footstepPose.getZ());
+   public void addExpansionSpheresFromActionSet(FramePose3D footstepPose, RobotSide side, TerrainMapData terrainMapData)
+   {
+      ArrayList<Vector3D> actions = new ArrayList<>();
+      MonteCarloPlannerTools.getFootstepActionSet(monteCarloFootstepPlannerParameters, actions, (float) footstepPose.getYaw(), side == RobotSide.LEFT ? -1 : 1);
 
-         for (Vector3D action : actions)
+      Vector3D footstepPosition = new Vector3D(footstepPose.getX(), footstepPose.getY(), 0.0f);
+
+      for (Vector3D action : actions)
+      {
+         Vector3D spherePosition = new Vector3D(footstepPosition);
+         action.scale(1 / 50.0f);
+         spherePosition.add(action);
+
+         float height = terrainMapData.getHeightInWorld((float) spherePosition.getX(), (float) spherePosition.getY());
+         spherePosition.setZ(height + 0.01);
+
+         if (side == RobotSide.LEFT && leftIndex < expansionSpheres.get(side).size())
          {
-            Vector3D spherePosition = new Vector3D(footstepPosition);
-            action.scale(1/50.0f);
-            spherePosition.add(action);
-
-            float height = terrainMapData.getHeightInWorld((float) spherePosition.getX(), (float) spherePosition.getY());
-            spherePosition.setZ(height + 0.01);
-
-            if (footstep.getRobotSide() == RobotSide.LEFT && leftIndex < expansionSpheres.get(footstep.getRobotSide()).size())
-            {
-               ModelInstance sphere = expansionSpheres.get(footstep.getRobotSide().getOppositeSide()).get(leftIndex++);
-               sphere.transform.setTranslation((float) spherePosition.getX(), (float) spherePosition.getY(), (float) spherePosition.getZ());
-            }
-            else if (footstep.getRobotSide() == RobotSide.RIGHT && rightIndex < expansionSpheres.get(footstep.getRobotSide()).size())
-            {
-               ModelInstance sphere = expansionSpheres.get(footstep.getRobotSide().getOppositeSide()).get(rightIndex++);
-               sphere.transform.setTranslation((float) spherePosition.getX(), (float) spherePosition.getY(), (float) spherePosition.getZ());
-            }
+            ModelInstance sphere = expansionSpheres.get(side).get(leftIndex++);
+            sphere.transform.setTranslation((float) spherePosition.getX(), (float) spherePosition.getY(), (float) spherePosition.getZ());
+         }
+         else if (side == RobotSide.RIGHT && rightIndex < expansionSpheres.get(side).size())
+         {
+            ModelInstance sphere = expansionSpheres.get(side).get(rightIndex++);
+            sphere.transform.setTranslation((float) spherePosition.getX(), (float) spherePosition.getY(), (float) spherePosition.getZ());
          }
       }
+   }
+
+   public void resetExpansionSpherePositions()
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         for (ModelInstance expansionSphere : expansionSpheres.get(side))
+         {
+            expansionSphere.transform.setTranslation(0.0f, 0.0f, 0.0f);
+         }
+      }
+
+      leftIndex = 0;
+      rightIndex = 0;
    }
 
    public void updateStateSpheres(List<Pose3D> poses)
@@ -181,6 +198,8 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
             }
          }
       }
+
+      resetExpansionSpherePositions();
    }
 
    public void destroy()
