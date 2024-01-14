@@ -367,7 +367,7 @@ public class RapidHeightMapExtractor
 
    public void readContactMapImage()
    {
-      // Read height map image into CPU memory
+      // Read height map image into CPU memoryn
       terrainCostImage.readOpenCLImage(openCLManager);
       contactMapImage.readOpenCLImage(openCLManager);
    }
