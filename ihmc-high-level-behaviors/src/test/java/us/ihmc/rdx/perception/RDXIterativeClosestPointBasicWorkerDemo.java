@@ -48,7 +48,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
    private static final int MAX_ENVIRONMENT_SIZE = 1000;
    private static final int SHAPE_SAMPLE_POINTS = 1000;
    private static final int CORRESPONDENCE_POINTS = 750;
-   private final int environmentSize = 2000;
+   private final int environmentSize = 5000;
 
    private final Random random = new Random(System.nanoTime());
 

@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -60,6 +61,7 @@ public class IterativeClosestPointWorker
    private float zRadius = 0.1f;
    private int numberOfCorrespondences;
 
+   private final DMatrixRMaj crossCovarianceMatrix = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj objectRelativeToCentroidPoints;
    private final DMatrixRMaj measurementRelativeToCentroidPoints;
 
@@ -154,8 +156,16 @@ public class IterativeClosestPointWorker
          detectionPoint.set(resultPose);
 
       boolean ranICPSuccessfully = false;
+      RigidBodyTransformReadOnly objectTransformToPointCloud = null;
+
       for (int i = 0; i < numberOfIterations; ++i)
       {
+         if (objectTransformToPointCloud != null)
+         {
+            // Update the object pose to fit the point cloud. Use the discount factor to represent the fact that this is an interative algorithm.
+            updateObjectPose(objectTransformToPointCloud, discountFactor);
+         }
+
          // Segment the point cloud
          synchronized (measurementPointCloudSynchronizer) // synchronize as to avoid changes to environment point cloud while segmenting it
          {
@@ -174,11 +184,22 @@ public class IterativeClosestPointWorker
          // Only run ICP iteration if segmented point cloud has enough points
          if (segmentedPointCloud.size() >= 0.25 * numberOfCorrespondences)
          {
-            runICPIteration();
-
+            objectTransformToPointCloud = computeTransformOfObjectToPointCloud();
             ranICPSuccessfully = true;
          }
+         else
+         {
+            break;
+         }
       }
+
+      if (objectTransformToPointCloud != null)
+      {
+         // Update the object pose to fit the point cloud. Use the full value, since this is the final solution, not an interation.
+         updateObjectPose(objectTransformToPointCloud, 1.0);
+      }
+
+      // TODO compute covariance
 
       return ranICPSuccessfully;
    }
@@ -196,8 +217,21 @@ public class IterativeClosestPointWorker
       return resultMessage;
    }
 
+   private void updateObjectPose(RigidBodyTransformReadOnly optimizedPoseTransform, double discountFactor)
+   {
+      RigidBodyTransform poseTransform = new RigidBodyTransform();
+      RotationMatrix fullRotation = new RotationMatrix(optimizedPoseTransform.getRotation());
+      // scale the values of the transform.
+      poseTransform.getTranslation().setAndScale(discountFactor, optimizedPoseTransform.getTranslation());
+      poseTransform.getRotation().interpolate(fullRotation, discountFactor);
+
+      resultPose.applyTransform(poseTransform);
+      objectInWorldPointsIsUpToDate = false;
+   }
+
+
    // TODO: Pass in a Pose to transform (all object points define WRT the pose of object)
-   private void runICPIteration()
+   private RigidBodyTransformReadOnly computeTransformOfObjectToPointCloud()
    {
       if (sortByDistanceNotRandom)
          segmentedPointCloud.sort(distanceComparator);
@@ -255,7 +289,6 @@ public class IterativeClosestPointWorker
       }
 
       // Initialize matrix variables
-      DMatrixRMaj H = new DMatrixRMaj(3, 3);
       DMatrixRMaj U = new DMatrixRMaj(3, 3);
       DMatrixRMaj V = new DMatrixRMaj(3, 3);
       RotationMatrix optimalRotationMatrix = new RotationMatrix();
@@ -265,8 +298,8 @@ public class IterativeClosestPointWorker
 
       // TODO: Get new translation every iteration, append to last, modify object pose using the translation
       // Solve for Best Fit Transformation
-      CommonOps_DDRM.multTransA(objectRelativeToCentroidPoints, measurementRelativeToCentroidPoints, H);
-      svdSolver.decompose(H);
+      CommonOps_DDRM.multTransA(objectRelativeToCentroidPoints, measurementRelativeToCentroidPoints, crossCovarianceMatrix);
+      svdSolver.decompose(crossCovarianceMatrix);
       svdSolver.getU(U, false);
       svdSolver.getV(V, true);
       CommonOps_DDRM.multTransAB(V, U, optimalRotation);
@@ -289,8 +322,7 @@ public class IterativeClosestPointWorker
       objectToMeasurementTransform.getTranslation().setAndScale(discountFactor, objectTranslation);
 
       // Rotate and translate the resulting pose according to the correction transform.
-      resultPose.applyTransform(objectToMeasurementTransform);
-      objectInWorldPointsIsUpToDate = false;
+      return objectToMeasurementTransform;
    }
 
    private List<DistancedPoint> segmentPointCloud(List<? extends Point3DReadOnly> measurementPointCloud,
