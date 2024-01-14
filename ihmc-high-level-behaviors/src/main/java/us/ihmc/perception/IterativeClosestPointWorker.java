@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
 import java.util.*;
@@ -30,6 +31,7 @@ public class IterativeClosestPointWorker
    private static final boolean ignoreShapeTypeWhenSegmenting = false;
    private static final boolean useParallelStreams = false;
    private static final boolean sortByDistanceNotRandom = false;
+   private static final boolean ignoreCorrespondencesOnEdges = true;
 
    private static final float defaultXLength = 0.2f;
    private static final float defaultYLength = 0.4f;
@@ -255,7 +257,8 @@ public class IterativeClosestPointWorker
                                                                   xRadius,
                                                                   yRadius,
                                                                   zRadius,
-                                                                  numberOfCorrespondences);
+                                                                  numberOfCorrespondences,
+                                                                  ignoreCorrespondencesOnEdges);
       }
       else
       {

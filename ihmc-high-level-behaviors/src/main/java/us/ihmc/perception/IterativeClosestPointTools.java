@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
@@ -118,7 +119,8 @@ public class IterativeClosestPointTools
                                                     float xRadius,
                                                     float yRadius,
                                                     float zRadius,
-                                                    int numberOfCorrespondences)
+                                                    int numberOfCorrespondences,
+                                                    boolean ignoreCorrespondencesOnEdges)
    {
       if (!canComputeCorrespondencesOnShape(shape))
          throw new RuntimeException("You can't compute shape correspondences for this shape type!");
@@ -127,15 +129,21 @@ public class IterativeClosestPointTools
       {
          // Get a copy of the measurement point, so that things don't get modified.
          Point3D32 measurementPoint = new Point3D32(measurementPoints.get(i));
+         Vector3D correspondingNormal = new Vector3D();
          Point3D32 correspondingObjectPoint = computeCorrespondenceOnShape(shape,
                                                                            shapePose,
                                                                            measurementPoint,
+                                                                           correspondingNormal,
                                                                            xLength,
                                                                            yLength,
                                                                            zLength,
                                                                            xRadius,
                                                                            yRadius,
                                                                            zRadius);
+
+         if (ignoreCorrespondencesOnEdges && correspondingNormal.containsNaN())
+            continue;
+
          // record
          correspondingMeasurementPointsToPack.add(measurementPoint);
          correspondingObjectPointsToPack.add(correspondingObjectPoint);
@@ -145,6 +153,7 @@ public class IterativeClosestPointTools
    private static Point3D32 computeCorrespondenceOnShape(PrimitiveRigidBodyShape shape,
                                                          Pose3DReadOnly shapePose,
                                                          Point3DReadOnly point,
+                                                         Vector3D correspondingNormalToPack,
                                                          float xLength,
                                                          float yLength,
                                                          float zLength,
@@ -153,11 +162,12 @@ public class IterativeClosestPointTools
                                                          float zRadius)
    {
       Point3D32 correspondingPointOnShape;
+      correspondingNormalToPack.setToZero();
       switch (shape)
       {
-         case BOX -> correspondingPointOnShape = computeCorrespondingPointOnBox(shapePose, point, xLength, yLength, zLength);
-         case CYLINDER -> correspondingPointOnShape = computeCorrespondingPointOnCylinder(shapePose, point, zLength, xRadius);
-         case ELLIPSOID -> correspondingPointOnShape = computeCorrespondingPointOnEllipse(shapePose, point, xRadius, yRadius, zRadius);
+         case BOX -> correspondingPointOnShape = computeCorrespondingPointOnBox(shapePose, point, correspondingNormalToPack, xLength, yLength, zLength);
+         case CYLINDER -> correspondingPointOnShape = computeCorrespondingPointOnCylinder(shapePose, point, correspondingNormalToPack, zLength, xRadius);
+         case ELLIPSOID -> correspondingPointOnShape = computeCorrespondingPointOnEllipse(shapePose, point, correspondingNormalToPack, xRadius, yRadius, zRadius);
          // case PRISM // TODO
          // case CONE // TODO
          default -> throw new RuntimeException("Invalid shape for computing a correspondence.");
@@ -166,7 +176,7 @@ public class IterativeClosestPointTools
       return correspondingPointOnShape;
    }
 
-   static Point3D32 computeCorrespondingPointOnBox(Pose3DReadOnly boxPose, Point3DReadOnly query, float xLength, float yLength, float zLength)
+   static Point3D32 computeCorrespondingPointOnBox(Pose3DReadOnly boxPose, Point3DReadOnly query, Vector3DBasics correspondingNormalToPack, float xLength, float yLength, float zLength)
    {
       Point3D pointRelativeToBox = new Point3D(query);
       pointRelativeToBox.applyInverseTransform(boxPose);
@@ -186,14 +196,35 @@ public class IterativeClosestPointTools
       double yDistance = Math.abs(yLocal) - halfSizeY;
       double zDistance = Math.abs(zLocal) - halfSizeZ;
 
-      if (xDistance > 0.0 || yDistance > 0.0 || zDistance > 0.0)
+      boolean xIsOutside = xDistance > 0.0;
+      boolean yIsOutside = yDistance > 0.0;
+      boolean zIsOutside = zDistance > 0.0;
+
+      int dimensionsOutside = 0;
+      if (xIsOutside)
+         dimensionsOutside++;
+      if (yIsOutside)
+         dimensionsOutside++;
+      if (zIsOutside)
+         dimensionsOutside++;
+
+      if (dimensionsOutside > 0)
       {
-         // the point is outside, becuase one of these poitns is outside
+         // the point is outside, because one of these points is outside
          double xLocalClamped = EuclidCoreTools.clamp(xLocal, halfSizeX);
          double yLocalClamped = EuclidCoreTools.clamp(yLocal, halfSizeY);
          double zLocalClamped = EuclidCoreTools.clamp(zLocal, halfSizeZ);
 
          correspondingPoint.set(xLocalClamped, yLocalClamped, zLocalClamped);
+
+         if (dimensionsOutside > 1)
+            correspondingNormalToPack.setToNaN();
+         else if (xIsOutside)
+            correspondingNormalToPack.set(Math.signum(xLocalClamped), 0.0, 0.0);
+         else if (yIsOutside)
+            correspondingNormalToPack.set(0.0, Math.signum(yLocalClamped), 0.0);
+         else
+            correspondingNormalToPack.set(0.0, 0.0, Math.signum(zLocalClamped));
       }
       else
       {
@@ -208,12 +239,16 @@ public class IterativeClosestPointTools
             if (xDistance > zDistance)
             {
                // we're closest to the x edge
-               xLocalClamped = Math.signum(xLocal) * halfSizeX;
+               double sign = Math.signum(xLocal);
+               xLocalClamped = sign * halfSizeX;
+               correspondingNormalToPack.set(sign, 0.0, 0.0);
             }
             else
             {
                // we're closest to the z edge
-               zLocalClamped = Math.signum(zLocal) * halfSizeZ;
+               double sign = Math.signum(zLocal);
+               zLocalClamped = sign * halfSizeZ;
+               correspondingNormalToPack.set(0.0, 0.0, sign);
             }
          }
          else
@@ -221,31 +256,40 @@ public class IterativeClosestPointTools
             if (yDistance > zDistance)
             {
                // we're closest to the y edge
-               yLocalClamped = Math.signum(yLocalClamped) * halfSizeY;
+               double sign = Math.signum(yLocal);
+               yLocalClamped = sign * halfSizeY;
+               correspondingNormalToPack.set(0.0, sign, 0.0);
             }
             else
             {
                // we're closest to the z edge
-               zLocalClamped = Math.signum(zLocal) * halfSizeZ;
+               double sign = Math.signum(zLocal);
+               zLocalClamped = sign * halfSizeZ;
+               correspondingNormalToPack.set(0.0, 0.0, sign);
             }
          }
          correspondingPoint.set(xLocalClamped, yLocalClamped, zLocalClamped);
-
       }
 
       correspondingPoint.applyTransform(boxPose);
+      correspondingNormalToPack.applyTransform(boxPose);
 
       return correspondingPoint;
    }
 
-   private static Point3D32 computeCorrespondingPointOnCylinder(Pose3DReadOnly cylinderPose, Point3DReadOnly query, float zLength, float radius)
+   private static Point3D32 computeCorrespondingPointOnCylinder(Pose3DReadOnly cylinderPose,
+                                                                Point3DReadOnly query,
+                                                                Vector3DBasics correspondingNormalToPack,
+                                                                float zLength,
+                                                                float radius)
    {
       Point3D pointRelativeToCylinder = new Point3D(query);
       pointRelativeToCylinder.applyInverseTransform(cylinderPose);
 
-      Point3D32 correspondingPoint = orthogonalProjectionOntoCylinder3D(pointRelativeToCylinder, zLength, radius);
+      Point3D32 correspondingPoint = orthogonalProjectionOntoCylinder3D(pointRelativeToCylinder, correspondingNormalToPack, zLength, radius);
 
       correspondingPoint.applyTransform(cylinderPose);
+      correspondingNormalToPack.applyTransform(cylinderPose);
 
       return correspondingPoint;
    }
@@ -255,13 +299,17 @@ public class IterativeClosestPointTools
     * the cylinder. It also does the projection onto the surface, even if the point is inside.
     */
    private static Point3D32 orthogonalProjectionOntoCylinder3D(Point3DReadOnly pointToProject,
-                                                             double cylinder3DLength,
-                                                             double cylinder3DRadius)
+                                                               Vector3DBasics correspondingNormalToPack,
+                                                               double cylinder3DLength,
+                                                               double cylinder3DRadius)
    {
+      // TODO compute the normal to pack.
+
       Point3D32 projection = new Point3D32();
       if (cylinder3DRadius <= 0.0 || cylinder3DLength <= 0.0)
       {
          projection.setToNaN();
+         correspondingNormalToPack.setToNaN();
          return projection;
       }
 
@@ -319,8 +367,14 @@ public class IterativeClosestPointTools
       }
    }
 
-   private static Point3D32 computeCorrespondingPointOnEllipse(Pose3DReadOnly ellipsePose, Point3DReadOnly query, float xRadius, float yRadius, float zRadius)
+   private static Point3D32 computeCorrespondingPointOnEllipse(Pose3DReadOnly ellipsePose,
+                                                               Point3DReadOnly query,
+                                                               Vector3DBasics correspondingNormalToPack,
+                                                               float xRadius,
+                                                               float yRadius,
+                                                               float zRadius)
    {
+      // TODO need to do the corresponding normal to pack
       Point3D pointRelativeToCylinder = new Point3D(query);
       pointRelativeToCylinder.applyInverseTransform(ellipsePose);
 
