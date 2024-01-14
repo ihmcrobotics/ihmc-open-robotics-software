@@ -58,6 +58,8 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    private final ImBoolean renderEnabled = new ImBoolean(true);
    private final ImBoolean showMonteCarloPlan = new ImBoolean(true);
    private final ImBoolean showContinuousWalkingPlan = new ImBoolean(true);
+   private final ImBoolean showStateSpheres = new ImBoolean(true);
+   private final ImBoolean showExpansionSpheres = new ImBoolean(true);
    private final ImBoolean localRenderMode = new ImBoolean(false);
    private final ImBoolean useMonteCarloReference = new ImBoolean(true);
 
@@ -154,12 +156,14 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
 
    public void generateFootstepPlanGraphic(FootstepDataListMessage message)
    {
+      footstepPlanGraphic.clear();
       footstepPlanGraphic.generateMeshesAsync(message, "Continuous Walking");
       footstepPlanGraphic.update();
    }
 
    public void generateMonteCarloPlanGraphic(FootstepDataListMessage message)
    {
+      monteCarloPlanGraphic.clear();
       monteCarloPlanGraphic.generateMeshesAsync(message, "Monte-Carlo Plan");
       monteCarloPlanGraphic.update();
    }
@@ -206,6 +210,8 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       ImGui.checkbox("Local Render Mode", localRenderMode);
       ImGui.checkbox("Show Monte-Carlo Plan", showMonteCarloPlan);
       ImGui.checkbox("Show Continuous Walking Plan", showContinuousWalkingPlan);
+      ImGui.checkbox("Show State Spheres", showStateSpheres);
+      ImGui.checkbox("Show Expansion Spheres", showExpansionSpheres);
 
       publishInputCommandMessage();
    }
@@ -254,8 +260,6 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       goalStancePose.get(RobotSide.LEFT).set(poses.get(2));
       goalStancePose.get(RobotSide.RIGHT).set(poses.get(3));
    }
-
-
 
    public void reset()
    {
@@ -306,5 +310,15 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
          commandMessage.setTurningValue(turningJoystickValue);
          commandPublisher.publish(commandMessage);
       }
+   }
+
+   public boolean getShowStateSpheres()
+   {
+      return showStateSpheres.get();
+   }
+
+   public boolean getShowExpansionSpheres()
+   {
+      return showExpansionSpheres.get();
    }
 }

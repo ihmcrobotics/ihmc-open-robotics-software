@@ -530,26 +530,31 @@ public class MonteCarloPlannerTools
       goalVector.sub(goalPosition, previousPosition);
       goalVector.normalize();
 
-      double progressToGoal = goalVector.dot(stepVector);
+      double progressToGoal = goalVector.dot(stepVector) / goalVector.norm();
 
-      double yawFromStartToGoal = Math.atan2(goalPosition.getY() - startPosition.getY(), goalPosition.getX() - startPosition.getX());
-      double yawDifferenceFromReference = Math.abs(yawFromStartToGoal - oldNode.getState().getZ());
-      double distanceFromReferenceLine = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(currentPosition, startPosition, goalPosition);
-      double referenceCost = distanceFromReferenceLine * 10.0f + yawDifferenceFromReference * 10.0f;
+//      double yawFromStartToGoal = Math.atan2(goalPosition.getY() - startPosition.getY(), goalPosition.getX() - startPosition.getX());
+//      double yawDifferenceFromReference = Math.abs(yawFromStartToGoal - oldNode.getState().getZ());
+//      double distanceFromReferenceLine = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(currentPosition, startPosition, goalPosition);
+//      double referenceCost = distanceFromReferenceLine * 10.0f + yawDifferenceFromReference * 10.0f;
 
       double goalReward = plannerParameters.getGoalReward() * progressToGoal;
-      double contactReward = ((request.getTerrainMapData().getContactScoreLocal(rIndex, cIndex)) / 255.0 - plannerParameters.getFeasibleContactCutoff())
-                             * plannerParameters.getFeasibleContactReward();
 
-      double stepYawCost = Math.abs(oldNode.getState().getZ() - newNode.getState().getZ()) * 0.01f;
-      double stepDistanceCost = Math.abs(previousPosition.distance(currentPosition)) * 0.01f;
-      double stepHeightCost = (request.getTerrainMapData().getHeightLocal(rIndex, cIndex) - request.getTerrainMapData().getHeightLocal(rIndex, cIndex)) * 0.01f;
-      double edgeCost = stepYawCost + stepDistanceCost + stepHeightCost;
+      double contactValue = request.getTerrainMapData().getContactScoreLocal(rIndex, cIndex);
+      contactValue = MathTools.clamp(contactValue, 3.0f, 8.0f) / 8.0f;
+      double contactReward = (contactValue) * plannerParameters.getFeasibleContactReward();
+
+      if (contactValue < 0.38)
+         contactReward = 0.0f;
+
+//      double stepYawCost = Math.abs(oldNode.getState().getZ() - newNode.getState().getZ()) * 0.01f;
+//      double stepDistanceCost = Math.abs(previousPosition.distance(currentPosition)) * 0.01f;
+//      double stepHeightCost = (request.getTerrainMapData().getHeightLocal(rIndex, cIndex) - request.getTerrainMapData().getHeightLocal(rIndex, cIndex)) * 0.01f;
+//      double edgeCost = stepYawCost + stepDistanceCost + stepHeightCost;
 
       if (debug)
-         LogTools.info(String.format("Rewards -> Goal: %.2f, Contact: %.2f, Edge: %.2f, Reference: %.2f", goalReward, contactReward, edgeCost, referenceCost));
+         LogTools.info(String.format("Rewards -> Goal: %.2f, Contact: %.2f", goalReward, contactReward));
 
-      score = goalReward + contactReward - edgeCost - referenceCost;
+      score = goalReward + contactReward;
       return score;
    }
 
