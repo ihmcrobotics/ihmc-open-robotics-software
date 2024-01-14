@@ -11,6 +11,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
@@ -48,7 +49,8 @@ public class IterativeClosestPointToolsTest
             // TODO figure this out.
          }
 
-         Point3D32 correspondance = IterativeClosestPointTools.computeCorrespondingPointOnBox(boxPose, pointToProject, xLength, yLength, zLength);
+         Vector3D normal = new Vector3D();
+         Point3D32 correspondance = IterativeClosestPointTools.computeCorrespondingPointOnBox(boxPose, pointToProject, normal, xLength, yLength, zLength);
 
          assertEquals(0.0, box.signedDistance(correspondance), 1e-6);
          assertNotEquals(0.0, box.signedDistance(pointToProject), 1e-6);
@@ -88,7 +90,8 @@ public class IterativeClosestPointToolsTest
                                                                   0.1f,
                                                                   0.1f,
                                                                   0.1f,
-                                                                  250);
+                                                                  250,
+                                                                  false);
 
          // check all the lengths are right.
          assertEquals(250, correspondingPoints.size());
@@ -137,10 +140,15 @@ public class IterativeClosestPointToolsTest
          for (int pointIter = 0; pointIter < pointsInEachBoxToCheck; pointIter++)
          {
             Point3D point = EuclidCoreRandomTools.nextPoint3D(random, 0.5 * xLength, 0.5 * yLength, 0.5 * zLength);
+            Vector3D normal = new Vector3D();
             boxPose.transform(point);
 
-            Point3D32 correspondingPoint = IterativeClosestPointTools.computeCorrespondingPointOnBox(boxPose, point,
-                                                                                                     xLength, yLength, zLength);
+            Point3D32 correspondingPoint = IterativeClosestPointTools.computeCorrespondingPointOnBox(boxPose,
+                                                                                                     point,
+                                                                                                     normal,
+                                                                                                     xLength,
+                                                                                                     yLength,
+                                                                                                     zLength);
 
             // both points should be inside, although the corresponding one maybe not.
             assertTrue(box.isPointInside(point));
@@ -167,14 +175,20 @@ public class IterativeClosestPointToolsTest
       float zPoint = 0.15f;
       Point3D32 correspondance = IterativeClosestPointTools.computeCorrespondingPointOnBox(boxPose,
                                                                                            new Point3D(xPoint, yPoint, zPoint),
-                                                                                           xLength, yLength, zLength);
+                                                                                           new Vector3D(),
+                                                                                           xLength,
+                                                                                           yLength,
+                                                                                           zLength);
       EuclidCoreTestTools.assertEquals(new Point3D(xLength / 2.0f, yPoint, zPoint), correspondance, 1e-5);
 
       // test closest to backward x edge
       xPoint = -xPoint;
       correspondance = IterativeClosestPointTools.computeCorrespondingPointOnBox(boxPose,
                                                                                  new Point3D(xPoint, yPoint, zPoint),
-                                                                                 xLength, yLength, zLength);
+                                                                                 new Vector3D(),
+                                                                                 xLength,
+                                                                                 yLength,
+                                                                                 zLength);
       EuclidCoreTestTools.assertEquals(new Point3D(-xLength / 2.0f, yPoint, zPoint), correspondance, 1e-5);
 
       // test closest to positive y edge
@@ -182,8 +196,11 @@ public class IterativeClosestPointToolsTest
       yPoint = 0.35f;
       zPoint = 0.15f;
       correspondance = IterativeClosestPointTools.computeCorrespondingPointOnBox(boxPose,
-                                                                                           new Point3D(xPoint, yPoint, zPoint),
-                                                                                           xLength, yLength, zLength);
+                                                                                 new Point3D(xPoint, yPoint, zPoint),
+                                                                                 new Vector3D(),
+                                                                                 xLength,
+                                                                                 yLength,
+                                                                                 zLength);
       EuclidCoreTestTools.assertEquals(new Point3D(xPoint, yLength / 2.0, zPoint), correspondance, 1e-5);
       // test closest to negative y edge
       xPoint = 0.4f;
@@ -191,7 +208,10 @@ public class IterativeClosestPointToolsTest
       zPoint = 0.15f;
       correspondance = IterativeClosestPointTools.computeCorrespondingPointOnBox(boxPose,
                                                                                  new Point3D(xPoint, yPoint, zPoint),
-                                                                                 xLength, yLength, zLength);
+                                                                                 new Vector3D(),
+                                                                                 xLength,
+                                                                                 yLength,
+                                                                                 zLength);
       EuclidCoreTestTools.assertEquals(new Point3D(xPoint, -yLength / 2.0, zPoint), correspondance, 1e-5);
 
       // test closest to positive z edge
@@ -200,7 +220,10 @@ public class IterativeClosestPointToolsTest
       zPoint = 0.22f;
       correspondance = IterativeClosestPointTools.computeCorrespondingPointOnBox(boxPose,
                                                                                  new Point3D(xPoint, yPoint, zPoint),
-                                                                                 xLength, yLength, zLength);
+                                                                                 new Vector3D(),
+                                                                                 xLength,
+                                                                                 yLength,
+                                                                                 zLength);
       EuclidCoreTestTools.assertEquals(new Point3D(xPoint, yPoint, zLength / 2.0), correspondance, 1e-5);
       // test closest to negative z edge
       xPoint = 0.4f;
@@ -208,7 +231,10 @@ public class IterativeClosestPointToolsTest
       zPoint = -0.22f;
       correspondance = IterativeClosestPointTools.computeCorrespondingPointOnBox(boxPose,
                                                                                  new Point3D(xPoint, yPoint, zPoint),
-                                                                                 xLength, yLength, zLength);
+                                                                                 new Vector3D(),
+                                                                                 xLength,
+                                                                                 yLength,
+                                                                                 zLength);
       EuclidCoreTestTools.assertEquals(new Point3D(xPoint, yPoint, -zLength / 2.0), correspondance, 1e-5);
 
 
@@ -227,7 +253,12 @@ public class IterativeClosestPointToolsTest
          Box3D box = new Box3D(boxPose, xLength, yLength, zLength);
 
 
-         correspondance = IterativeClosestPointTools.computeCorrespondingPointOnBox(boxPose, new Point3D(xPoint, yPoint, zPoint), xLength, yLength, zLength);
+         correspondance = IterativeClosestPointTools.computeCorrespondingPointOnBox(boxPose,
+                                                                                    new Point3D(xPoint, yPoint, zPoint),
+                                                                                    new Vector3D(),
+                                                                                    xLength,
+                                                                                    yLength,
+                                                                                    zLength);
 
          assertEquals(0.0, box.signedDistance(correspondance), 1e-5);
       }
