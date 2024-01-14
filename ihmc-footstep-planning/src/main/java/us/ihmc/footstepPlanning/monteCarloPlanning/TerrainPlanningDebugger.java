@@ -243,14 +243,12 @@ public class TerrainPlanningDebugger
       for (MonteCarloTreeNode child : node.getChildren())
       {
          MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) child;
-
          float x = footstepNode.getState().getX32() / 50.0f;
          float y = footstepNode.getState().getY32() / 50.0f;
          float z = terrainMapData.getHeightInWorld(x, y);
 
-         //LogTools.warn("X: " + x + ", Y: " + y + ", Z: " + z + ", Value: " + footstepNode.getValue() + ", Level: " + footstepNode.getLevel() + ", Side: " + footstepNode.getRobotSide());
-
-         poses.add(new Pose3D(x, y, z, footstepNode.getValue(), footstepNode.getLevel(), footstepNode.getRobotSide() == RobotSide.LEFT ? 0 : 1));
+         if (poses.size() < 100)
+            poses.add(new Pose3D(x, y, z, footstepNode.getValue(), footstepNode.getLevel(), footstepNode.getRobotSide() == RobotSide.LEFT ? 0 : 1));
       }
    }
 
