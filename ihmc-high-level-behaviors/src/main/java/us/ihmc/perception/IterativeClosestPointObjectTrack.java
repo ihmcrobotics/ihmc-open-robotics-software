@@ -2,6 +2,7 @@ package us.ihmc.perception;
 
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTools;
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -22,16 +23,16 @@ public class IterativeClosestPointObjectTrack
    public IterativeClosestPointObjectTrack()
    {}
 
-   public void setObjectPose(FramePose3DReadOnly objectPose)
+   public void setObjectPose(Pose3DReadOnly objectPose)
    {
-      this.objectPose.setMatchingFrame(objectPose);
+      this.objectPose.set(objectPose);
       objectLinearVelocity.setToZero();
       objectAngularVelocity.setToZero();
 
       mostRecentMeasurementTime = Conversions.nanosecondsToSeconds(System.nanoTime());
    }
 
-   public void updateWithMeasurement(FramePose3DReadOnly measuredObjectPose)
+   public void updateWithMeasurement(Pose3DReadOnly measuredObjectPose)
    {
       double oldTime = mostRecentMeasurementTime;
       mostRecentMeasurementTime = Conversions.nanosecondsToSeconds(System.nanoTime());
@@ -53,7 +54,18 @@ public class IterativeClosestPointObjectTrack
       this.objectPose.set(fusedPose);
    }
 
-   public FramePose3DReadOnly predictObjectPoseCurrentVelocities(double timeDelta)
+   public FramePose3DReadOnly getMostRecentFusedPose()
+   {
+      return objectPose;
+   }
+
+   public FramePose3DReadOnly predictObjectPoseNow()
+   {
+      double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+      return predictObjectPoseCurrentVelocities(currentTime - mostRecentMeasurementTime);
+   }
+
+   private FramePose3DReadOnly predictObjectPoseCurrentVelocities(double timeDelta)
    {
       FramePose3D posePrediction = new FramePose3D(objectPose);
       KSTTools.integrateLinearVelocity(timeDelta, objectPose.getPosition(), objectLinearVelocity, posePrediction.getPosition());
@@ -62,7 +74,7 @@ public class IterativeClosestPointObjectTrack
       return posePrediction;
    }
 
-   private FramePose3DReadOnly fuseMeasuredAndPredictedPose(FramePose3DReadOnly measuredObjectPose, FramePose3DReadOnly predictedObjectPose, double timeDelta)
+   private FramePose3DReadOnly fuseMeasuredAndPredictedPose(Pose3DReadOnly measuredObjectPose, FramePose3DReadOnly predictedObjectPose, double timeDelta)
    {
       double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(observationFusingFrequency, timeDelta);
 
