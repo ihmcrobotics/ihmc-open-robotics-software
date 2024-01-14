@@ -26,9 +26,9 @@ public class IterativeClosestPointWorker
 {
    private static final double discountFactor = 1.0;
 
-   private static final boolean ignoreShapeTypeWhenSegmenting = true;
+   private static final boolean ignoreShapeTypeWhenSegmenting = false;
    private static final boolean useParallelStreams = false;
-   private static final boolean sortByDistanceNotRandom = true;
+   private static final boolean sortByDistanceNotRandom = false;
 
    private static final float defaultXLength = 0.2f;
    private static final float defaultYLength = 0.4f;
@@ -37,7 +37,6 @@ public class IterativeClosestPointWorker
    private static final float defaultYRadius = 0.1f;
    private static final float defaultZRadius = 0.1f;
    private static final PrimitiveRigidBodyShape defaultDetectionShape = BOX;
-
 
    private final Comparator<DistancedPoint> distanceComparator = new Comparator<DistancedPoint>()
    {
@@ -153,7 +152,6 @@ public class IterativeClosestPointWorker
          detectionPoint.getPosition().set(targetPoint);
       else
          detectionPoint.set(resultPose);
-
 
       boolean ranICPSuccessfully = false;
       for (int i = 0; i < numberOfIterations; ++i)
@@ -318,13 +316,15 @@ public class IterativeClosestPointWorker
                                    }).filter(point -> point.getDistanceSquared() <= cutoffSquare).collect(Collectors.toList());
    }
 
-   private List<DistancedPoint> segmentPointCloudAndFindNeighbors(List<? extends Point3DReadOnly> measurementPointCloud, Pose3DReadOnly virtualObjectPointInWorld, double cutoffRange)
+   private List<DistancedPoint> segmentPointCloudAndFindNeighbors(List<? extends Point3DReadOnly> measurementPointCloud,
+                                                                  Pose3DReadOnly virtualShapeLocation,
+                                                                  double cutoffRange)
    {
       Stream<? extends Point3DReadOnly> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
       List<DistancedPoint> distancedPoints = measurementStream.map(point ->
                                                                    {
                                                                       double distance = IterativeClosestPointTools.distanceSquaredFromShape(detectionShape,
-                                                                                                                                            virtualObjectPointInWorld,
+                                                                                                                                            virtualShapeLocation,
                                                                                                                                             point,
                                                                                                                                             xLength,
                                                                                                                                             yLength,
@@ -346,7 +346,7 @@ public class IterativeClosestPointWorker
       double cutoffRangeSquared = cutoffRange * cutoffRange;
       Stream<Point3DReadOnly> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
       return measurementStream.map(point -> new DistancedPoint(point, point.distanceSquared(virtualObjectPointInWorld.getPosition())))
-                              .filter(point -> point.getDistanceSquared() < cutoffRangeSquared)
+                              .filter(point -> point.getDistanceSquared() <= cutoffRangeSquared)
                               .collect(Collectors.toList());
    }
 
@@ -369,12 +369,12 @@ public class IterativeClosestPointWorker
       double neighborCutoffRangeSquared = neighborCutoff * neighborCutoff;
 
       Stream<DistancedPoint> distancedPointsStream = useParallelStreams ? distancedPoints.parallelStream() : distancedPoints.stream();
-      List<DistancedPoint> neighborPointCloud = distancedPointsStream.filter(point -> point.getDistanceSquared() < neighborCutoffRangeSquared)
+      List<DistancedPoint> neighborPointCloud = distancedPointsStream.filter(point -> point.getDistanceSquared() <= neighborCutoffRangeSquared)
                                                                      .collect(Collectors.toList());
       this.neighborPointCloud = neighborPointCloud;
 
       Stream<DistancedPoint> neighborPointsStream = useParallelStreams ? neighborPointCloud.parallelStream() : neighborPointCloud.stream();
-      return neighborPointsStream.filter(point -> point.getDistanceSquared() < cutoffRangeSquared).collect(Collectors.toList());
+      return neighborPointsStream.filter(point -> point.getDistanceSquared() <= cutoffRangeSquared).collect(Collectors.toList());
    }
 
    private static class DistancedPoint extends Point3D32
