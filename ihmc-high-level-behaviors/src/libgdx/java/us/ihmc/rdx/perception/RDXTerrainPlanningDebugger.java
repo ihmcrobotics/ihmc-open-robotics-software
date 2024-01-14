@@ -93,15 +93,13 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
 
    public void updateExpansionSpheres(FootstepDataListMessage monteCarloFootstepsMessage, TerrainMapData terrainMapData)
    {
+      resetExpansionSpherePositions();
       FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(monteCarloFootstepsMessage);
 
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {
          addExpansionSpheresFromActionSet(footstepPlan.getFootstep(i).getFootstepPose(), footstepPlan.getFootstep(i).getRobotSide(), terrainMapData);
       }
-
-      leftIndex = 0;
-      rightIndex = 0;
    }
 
    public void updateExpansionSpheres(FramePose3D footstepPose, RobotSide side, TerrainMapData terrainMapData)
@@ -198,8 +196,6 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
             }
          }
       }
-
-      resetExpansionSpherePositions();
    }
 
    public void destroy()
