@@ -17,12 +17,12 @@
     "upperBound" : 1.0
   },
   "Feasible Contact Reward" : {
-    "value" : 239.999995,
+    "value" : 204.819277,
     "lowerBound" : 0.0,
     "upperBound" : 1000.0
   },
   "Goal Reward" : {
-    "value" : 42.14876,
+    "value" : 36.480686,
     "lowerBound" : 0.0,
     "upperBound" : 100.0
   },
@@ -32,7 +32,7 @@
     "upperBound" : 1000000
   },
   "Max number of child nodes" : {
-    "value" : 11,
+    "value" : 10,
     "lowerBound" : 5,
     "upperBound" : 1000
   },
@@ -51,11 +51,6 @@
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
-  "Feasible contact cutoff" : {
-    "value" : 0.849162,
-    "lowerBound" : 0.0,
-    "upperBound" : 1.0
-  },
   "Exploration constant" : {
     "value" : 0.301508,
     "lowerBound" : 0.0,
@@ -71,23 +66,13 @@
     "lowerBound" : 2,
     "upperBound" : 12
   },
-  "Sided yaw offset" : {
-    "value" : 1.193484,
-    "lowerBound" : 0.0,
-    "upperBound" : 3.14
-  },
-  "Search yaw band" : {
-    "value" : 1.012903,
-    "lowerBound" : 0.0,
-    "upperBound" : 3.14
-  },
   "Search inner radius" : {
-    "value" : 0.241176,
+    "value" : 0.203077,
     "lowerBound" : 0.0,
     "upperBound" : 0.3
   },
   "Search outer radius" : {
-    "value" : 0.70936,
+    "value" : 0.680412,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -96,23 +81,8 @@
     "lowerBound" : 0,
     "upperBound" : 10
   },
-  "Transfer yaw cost" : {
-    "value" : 0.578231,
-    "lowerBound" : 0.0,
-    "upperBound" : 5.0
-  },
-  "Transfer height cost" : {
-    "value" : 0,
-    "lowerBound" : 0,
-    "upperBound" : 5
-  },
-  "Transfer distance cost" : {
-    "value" : 0.192308,
-    "lowerBound" : 0.0,
-    "upperBound" : 5.0
-  },
   "Maximum step width" : {
-    "value" : 0.4,
+    "value" : 0.6,
     "lowerBound" : 0.2,
     "upperBound" : 0.5
   },
@@ -122,7 +92,7 @@
     "upperBound" : 0.7
   },
   "Minimum step width" : {
-    "value" : 0.1,
+    "value" : 0.157292,
     "lowerBound" : 0.1,
     "upperBound" : 0.3
   },

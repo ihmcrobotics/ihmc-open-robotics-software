@@ -372,44 +372,10 @@ public class MonteCarloPlannerTools
       }
    }
 
-   public static void getFootstepRadialActionSet(MonteCarloFootstepPlannerParameters parameters, ArrayList<Vector3D> actions, float yawPrevious, int side)
+   public static void getFootstepActionSet(MonteCarloFootstepPlannerParameters parameters, ArrayList<Vector3D> actions, float yawPrevious, int stanceSide)
    {
       actions.clear();
 
-      float sidedYawOffset = side * (float) parameters.getSidedYawOffset();
-      float adjustedPreviousYaw = yawPrevious + sidedYawOffset;
-      float yawMin = adjustedPreviousYaw - (float) parameters.getSearchYawBand();
-      float yawMax = adjustedPreviousYaw + (float) parameters.getSearchYawBand();
-      float minRadius = (float) parameters.getSearchInnerRadius() * 50.0f;
-      float maxRadius = (float) parameters.getSearchOuterRadius() * 50.0f;
-      for (int i = -30; i <= 30; i += parameters.getSearchSkipSize())
-      {
-         for (int j = -30; j <= 30; j += parameters.getSearchSkipSize())
-         {
-            float radius = (float) Math.sqrt(i * i + j * j);
-            float yaw = (float) Math.atan2(j, i);
-
-            //LogTools.info(String.format("(%d, %d) Radius: %.2f (%.2f, %.2f), Yaw: %.2f (%.2f, %.2f)", i, j, radius,
-            //                            parameters.getSearchInnerRadius(), parameters.getSearchOuterRadius(), yaw, yawMin, yawMax));
-
-            if (radius >= minRadius && radius <= maxRadius && yaw >= yawMin && yaw <= yawMax)
-            {
-               actions.add(new Vector3D(i, j, -0.1));
-               actions.add(new Vector3D(i, j, 0));
-               actions.add(new Vector3D(i, j, 0.1));
-            }
-         }
-      }
-   }
-
-   public static void getFootstepActionSet(MonteCarloFootstepPlannerParameters parameters, ArrayList<Vector3D> actions, float yawPrevious, int side)
-   {
-      actions.clear();
-
-      float sidedYawOffset = side * (float) Math.PI / 4.0f;
-      float adjustedPreviousYaw = yawPrevious + sidedYawOffset;
-      float yawMin = (float) (adjustedPreviousYaw - Math.PI / 4.0f);
-      float yawMax = (float) (adjustedPreviousYaw + Math.PI / 4.0f);
       float minRadius = (float) parameters.getSearchInnerRadius() * 50.0f;
       float maxRadius = (float) parameters.getSearchOuterRadius() * 50.0f;
       float maxWidth = (float) parameters.getMaximumStepWidth();
@@ -418,6 +384,8 @@ public class MonteCarloPlannerTools
       float minLength = (float) parameters.getMinimumStepLength();
 
       RigidBodyTransform yawTransform = new RigidBodyTransform(new Quaternion(yawPrevious, 0, 0), new Vector3D());
+
+
 
       Vector3D forwardVector = new Vector3D(Axis3D.X);
       forwardVector.applyTransform(yawTransform);
@@ -428,25 +396,29 @@ public class MonteCarloPlannerTools
       Line2D midLine = new Line2D(new Point2D(), new Vector2D(forwardVector));
       Line2D baseLine = new Line2D(new Point2D(), new Vector2D(leftVector));
 
-      for (int i = -30; i <= 30; i += parameters.getSearchSkipSize())
+      for (int i = -60; i <= 60; i += parameters.getSearchSkipSize())
       {
-         for (int j = -30; j <= 30; j += parameters.getSearchSkipSize())
+         for (int j = -60; j <= 60; j += parameters.getSearchSkipSize())
          {
-            float radius = (float) Math.sqrt(i * i + j * j);
-            float yaw = (float) Math.atan2(j, i);
+            Vector3D stepVector = new Vector3D(i, j, 0);
 
-            //LogTools.info(String.format("(%d, %d) Radius: %.2f (%.2f, %.2f), Yaw: %.2f (%.2f, %.2f)", i, j, radius,
-            //                            parameters.getSearchInnerRadius(), parameters.getSearchOuterRadius(), yaw, yawMin, yawMax));
+            //compute dot product of stepVector and forwardVector
+            float dotProduct = (float) stepVector.dot(forwardVector);
+
+            // compute dot product with left vector
+            float dotProductLeft = (float) stepVector.dot(leftVector);
+
+            float radius = (float) Math.sqrt(i * i + j * j);
 
             // compute distance of point to midline
             Point2D point = new Point2D((float) i / 50.0f, (float) j / 50.0f);
             double orthogonalDistanceToMidline = midLine.distance(point);
             double orthogonalDistanceToBaseLine = baseLine.distance(point);
 
-            if (radius >= minRadius && radius <= maxRadius
-                && yaw >= yawMin && yaw <= yawMax
+            if (radius >= minRadius && radius <= maxRadius && dotProduct > 0 && stanceSide * dotProductLeft > 0
                 && orthogonalDistanceToMidline <= maxWidth && orthogonalDistanceToMidline >= minWidth
-                && orthogonalDistanceToBaseLine <= maxLength && orthogonalDistanceToBaseLine >= minLength)
+                && orthogonalDistanceToBaseLine <= maxLength && orthogonalDistanceToBaseLine >= minLength
+            )
             {
                //actions.add(new Vector3D(i, j, -0.1));
                actions.add(new Vector3D(i, j, 0));
@@ -532,10 +504,10 @@ public class MonteCarloPlannerTools
 
       double progressToGoal = goalVector.dot(stepVector) / goalVector.norm();
 
-//      double yawFromStartToGoal = Math.atan2(goalPosition.getY() - startPosition.getY(), goalPosition.getX() - startPosition.getX());
-//      double yawDifferenceFromReference = Math.abs(yawFromStartToGoal - oldNode.getState().getZ());
-//      double distanceFromReferenceLine = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(currentPosition, startPosition, goalPosition);
-//      double referenceCost = distanceFromReferenceLine * 10.0f + yawDifferenceFromReference * 10.0f;
+      //      double yawFromStartToGoal = Math.atan2(goalPosition.getY() - startPosition.getY(), goalPosition.getX() - startPosition.getX());
+      //      double yawDifferenceFromReference = Math.abs(yawFromStartToGoal - oldNode.getState().getZ());
+      //      double distanceFromReferenceLine = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(currentPosition, startPosition, goalPosition);
+      //      double referenceCost = distanceFromReferenceLine * 10.0f + yawDifferenceFromReference * 10.0f;
 
       double goalReward = plannerParameters.getGoalReward() * progressToGoal;
 
@@ -546,10 +518,10 @@ public class MonteCarloPlannerTools
       if (contactValue < 0.38)
          contactReward = 0.0f;
 
-//      double stepYawCost = Math.abs(oldNode.getState().getZ() - newNode.getState().getZ()) * 0.01f;
-//      double stepDistanceCost = Math.abs(previousPosition.distance(currentPosition)) * 0.01f;
-//      double stepHeightCost = (request.getTerrainMapData().getHeightLocal(rIndex, cIndex) - request.getTerrainMapData().getHeightLocal(rIndex, cIndex)) * 0.01f;
-//      double edgeCost = stepYawCost + stepDistanceCost + stepHeightCost;
+      //      double stepYawCost = Math.abs(oldNode.getState().getZ() - newNode.getState().getZ()) * 0.01f;
+      //      double stepDistanceCost = Math.abs(previousPosition.distance(currentPosition)) * 0.01f;
+      //      double stepHeightCost = (request.getTerrainMapData().getHeightLocal(rIndex, cIndex) - request.getTerrainMapData().getHeightLocal(rIndex, cIndex)) * 0.01f;
+      //      double edgeCost = stepYawCost + stepDistanceCost + stepHeightCost;
 
       if (debug)
          LogTools.info(String.format("Rewards -> Goal: %.2f, Contact: %.2f", goalReward, contactReward));

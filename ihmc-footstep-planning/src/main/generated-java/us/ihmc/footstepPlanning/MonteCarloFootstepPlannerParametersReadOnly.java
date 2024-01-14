@@ -65,11 +65,6 @@ public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPrope
       return get(maxTransferYaw);
    }
 
-   default double getFeasibleContactCutoff()
-   {
-      return get(feasibleContactCutoff);
-   }
-
    default double getExplorationConstant()
    {
       return get(explorationConstant);
@@ -85,16 +80,6 @@ public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPrope
       return get(maxTreeDepth);
    }
 
-   default double getSidedYawOffset()
-   {
-      return get(sidedYawOffset);
-   }
-
-   default double getSearchYawBand()
-   {
-      return get(searchYawBand);
-   }
-
    default double getSearchInnerRadius()
    {
       return get(searchInnerRadius);
@@ -108,21 +93,6 @@ public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPrope
    default int getSearchSkipSize()
    {
       return get(searchSkipSize);
-   }
-
-   default double getTransferYawCost()
-   {
-      return get(transferYawCost);
-   }
-
-   default int getTransferHeightCost()
-   {
-      return get(transferHeightCost);
-   }
-
-   default double getTransferDistanceCost()
-   {
-      return get(transferDistanceCost);
    }
 
    default double getMaximumStepWidth()
