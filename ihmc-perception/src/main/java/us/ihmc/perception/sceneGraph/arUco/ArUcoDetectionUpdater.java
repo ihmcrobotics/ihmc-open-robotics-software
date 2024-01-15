@@ -90,7 +90,6 @@ public class ArUcoDetectionUpdater
       initializeImageUndistortion(imageWidth, imageHeight);
       arUcoBytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
       arUcoMarkerDetector = new OpenCVArUcoMarkerDetector();
-      arUcoMarkerDetector.create();
       arUcoMarkerDetector.setSourceImageForDetection(arUcoBytedecoImage);
       cameraMatrixEstimate.copyTo(arUcoMarkerDetector.getCameraMatrix());
       arUcoMarkerDetectionResults = new OpenCVArUcoMarkerDetectionResults();
