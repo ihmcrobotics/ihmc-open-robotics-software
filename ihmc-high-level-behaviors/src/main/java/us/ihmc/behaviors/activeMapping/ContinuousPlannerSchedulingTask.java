@@ -93,18 +93,11 @@ public class ContinuousPlannerSchedulingTask
       executorService.scheduleWithFixedDelay(this::tickStateMachine, 1500, CONTINUOUS_PLANNING_DELAY_MS, TimeUnit.MILLISECONDS);
    }
 
-   FramePose3D rightRobotFoot;
-   FramePose3D leftRobotFoot;
-
    /**
     * Runs the continuous planner state machine every ACTIVE_MAPPING_UPDATE_TICK_MS milliseconds. The state is stored in the ContinuousWalkingState
     */
    private void tickStateMachine()
    {
-      // Sets the planner timeout to be a percentage of the total step duration
-      //      double stepDuration = continuousWalkingParameters.getSwingTime() + continuousWalkingParameters.getTransferTime();
-      //      continuousWalkingParameters.setPlanningReferenceTimeout(stepDuration * continuousWalkingParameters.getPlannerTimeoutFraction());
-
       if (!parameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
       {
          state = ContinuousWalkingState.NOT_STARTED;
@@ -144,7 +137,7 @@ public class ContinuousPlannerSchedulingTask
    {
       continuousPlanner.initialize();
       continuousPlanner.setGoalWaypointPoses(parameters);
-      continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, terrainMap, false, true);
+      continuousPlanner.planToGoalWithHybridPlanner(false, true);
       debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
       debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
 
@@ -177,7 +170,7 @@ public class ContinuousPlannerSchedulingTask
 
          debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
          continuousPlanner.setGoalWaypointPoses(parameters);
-         continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, terrainMap, true, true);
+         continuousPlanner.planToGoalWithHybridPlanner(true, true);
          debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
          debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
 
@@ -223,7 +216,9 @@ public class ContinuousPlannerSchedulingTask
       }
    }
 
-   // This receives a message each time there is a change in the FootstepStatusMessage
+   /*
+    * Callback to receive a message each time there is a change in the FootstepStatusMessage
+    */
    private void footstepStatusReceived(FootstepStatusMessage footstepStatusMessage)
    {
       if (!parameters.getEnableContinuousWalking())

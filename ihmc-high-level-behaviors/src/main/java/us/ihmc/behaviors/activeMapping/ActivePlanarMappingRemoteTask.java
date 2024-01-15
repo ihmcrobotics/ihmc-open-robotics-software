@@ -28,7 +28,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
    private final ROS2PublisherMap publisherMap;
    private final ROS2Topic controllerFootstepDataTopic;
 
-   private ContinuousPlanner activeMappingModule;
+   private ContinuousPlannerForPlanarRegions continuousPlanner;
    private final ContinuousWalkingParameters continuousPlanningParameters;
    private final SwingPlannerParametersBasics swingFootPlannerParameters;
    private TerrainPlanningDebugger terrainPlanningDebugger;
@@ -52,7 +52,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
       this.continuousPlanningParameters = continuousPlanningParameters;
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
 
-      activeMappingModule = new ContinuousPlanner(robotModel, referenceFrames, ContinuousPlanner.PlanningMode.FRONTIER_EXPANSION, terrainPlanningDebugger);
+      continuousPlanner = new ContinuousPlannerForPlanarRegions(referenceFrames);
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
@@ -97,26 +97,26 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
       {
          if (walkingStatusMessage.get() != null)
          {
-            if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !activeMappingModule.isPlanAvailable())
+            if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !continuousPlanner.isPlanAvailable())
             {
-               activeMappingModule.planToGoalWithPlanarRegionMap(planarRegionMap);
+               continuousPlanner.planBodyPathWithPlanarRegionMap(planarRegionMap);
             }
          }
 
-         if (activeMappingModule.isPlanAvailable())
+         if (continuousPlanner.isPlanAvailable())
          {
             // Publishing Plan Result
-            FootstepDataListMessage footstepDataList = activeMappingModule.getFootstepDataListMessage();
+            FootstepDataListMessage footstepDataList = continuousPlanner.getFootstepDataListMessage();
             publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
 
-            activeMappingModule.setPlanAvailable(false);
+            continuousPlanner.setPlanAvailable(false);
          }
 //         configurationParameters.setActiveMapping(false);
       }
    }
 
-   public ContinuousPlanner getActiveMappingModule()
+   public ContinuousPlannerForPlanarRegions getContinuousPlanner()
    {
-      return activeMappingModule;
+      return continuousPlanner;
    }
 }
