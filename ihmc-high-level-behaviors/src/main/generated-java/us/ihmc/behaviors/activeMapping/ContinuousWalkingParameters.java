@@ -28,7 +28,6 @@ public class ContinuousWalkingParameters extends StoredPropertySet implements Co
    public static final DoubleStoredPropertyKey swingTime = keys.addDoubleKey("Swing time");
    public static final DoubleStoredPropertyKey transferTime = keys.addDoubleKey("Transfer time");
    public static final DoubleStoredPropertyKey plannerTimeoutFraction = keys.addDoubleKey("Planner timeout fraction");
-   public static final DoubleStoredPropertyKey planningReferenceTimeout = keys.addDoubleKey("Planning reference timeout");
    public static final DoubleStoredPropertyKey planningWithoutReferenceTimeout = keys.addDoubleKey("Planning without reference timeout");
    public static final BooleanStoredPropertyKey logFootstepPlans = keys.addBooleanKey("Log footstep plans");
 

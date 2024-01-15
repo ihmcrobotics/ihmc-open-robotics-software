@@ -85,7 +85,7 @@ public class ContinuousPlannerSchedulingTask
                                       this::footstepQueueStatusReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND, commandMessage::set);
 
-      continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, mode, debugger);
+      continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, mode, parameters, debugger);
 
       statistics = new ContinuousPlannerStatistics();
       continuousPlanner.setContinuousPlannerStatistics(statistics);
@@ -136,8 +136,8 @@ public class ContinuousPlannerSchedulingTask
    public void initializeContinuousPlanner()
    {
       continuousPlanner.initialize();
-      continuousPlanner.setGoalWaypointPoses(parameters);
-      continuousPlanner.planToGoalWithHybridPlanner(false, true);
+      continuousPlanner.setGoalWaypointPoses();
+      continuousPlanner.planToGoal(commandMessage.get());
       debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
       debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
 
@@ -169,8 +169,8 @@ public class ContinuousPlannerSchedulingTask
             continuousPlanner.getImminentStanceFromLatestStatus(footstepStatusMessage, controllerQueue);
 
          debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
-         continuousPlanner.setGoalWaypointPoses(parameters);
-         continuousPlanner.planToGoalWithHybridPlanner(true, true);
+         continuousPlanner.setGoalWaypointPoses();
+         continuousPlanner.planToGoal(commandMessage.get());
          debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
          debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
 

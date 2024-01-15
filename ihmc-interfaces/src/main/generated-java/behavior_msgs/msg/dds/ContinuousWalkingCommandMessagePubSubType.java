@@ -15,7 +15,7 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0c997ddb04139b7ebbdc0f41ae14e427e5d37bd90365220adf611138fa40f6d6";
+   		return "4304d7d1f3d085775dbc937aa2ea130429ffe98743441ddad23bf3d546060544";
    }
    
    @Override
@@ -64,6 +64,16 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -95,6 +105,21 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -113,6 +138,16 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getTurningValue());
 
+      cdr.write_type_7(data.getUseHybridPlanner());
+
+      cdr.write_type_7(data.getUseAstarFootstepPlanner());
+
+      cdr.write_type_7(data.getUseMonteCarloFootstepPlanner());
+
+      cdr.write_type_7(data.getUsePreviousPlanAsReference());
+
+      cdr.write_type_7(data.getUseMonteCarloPlanAsReference());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ContinuousWalkingCommandMessage data, us.ihmc.idl.CDR cdr)
@@ -129,6 +164,16 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
       	
       data.setTurningValue(cdr.read_type_6());
       	
+      data.setUseHybridPlanner(cdr.read_type_7());
+      	
+      data.setUseAstarFootstepPlanner(cdr.read_type_7());
+      	
+      data.setUseMonteCarloFootstepPlanner(cdr.read_type_7());
+      	
+      data.setUsePreviousPlanAsReference(cdr.read_type_7());
+      	
+      data.setUseMonteCarloPlanAsReference(cdr.read_type_7());
+      	
 
    }
 
@@ -141,6 +186,11 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
       ser.write_type_6("forward_value", data.getForwardValue());
       ser.write_type_6("lateral_value", data.getLateralValue());
       ser.write_type_6("turning_value", data.getTurningValue());
+      ser.write_type_7("use_hybrid_planner", data.getUseHybridPlanner());
+      ser.write_type_7("use_astar_footstep_planner", data.getUseAstarFootstepPlanner());
+      ser.write_type_7("use_monte_carlo_footstep_planner", data.getUseMonteCarloFootstepPlanner());
+      ser.write_type_7("use_previous_plan_as_reference", data.getUsePreviousPlanAsReference());
+      ser.write_type_7("use_monte_carlo_plan_as_reference", data.getUseMonteCarloPlanAsReference());
    }
 
    @Override
@@ -152,6 +202,11 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
       data.setForwardValue(ser.read_type_6("forward_value"));
       data.setLateralValue(ser.read_type_6("lateral_value"));
       data.setTurningValue(ser.read_type_6("turning_value"));
+      data.setUseHybridPlanner(ser.read_type_7("use_hybrid_planner"));
+      data.setUseAstarFootstepPlanner(ser.read_type_7("use_astar_footstep_planner"));
+      data.setUseMonteCarloFootstepPlanner(ser.read_type_7("use_monte_carlo_footstep_planner"));
+      data.setUsePreviousPlanAsReference(ser.read_type_7("use_previous_plan_as_reference"));
+      data.setUseMonteCarloPlanAsReference(ser.read_type_7("use_monte_carlo_plan_as_reference"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ContinuousWalkingCommandMessage src, behavior_msgs.msg.dds.ContinuousWalkingCommandMessage dest)

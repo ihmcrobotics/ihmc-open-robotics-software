@@ -32,6 +32,26 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
             * turning joystick value
             */
    public double turning_value_;
+   /**
+            * flag to enable/disable hybrid planning
+            */
+   public boolean use_hybrid_planner_;
+   /**
+            * flag to enable/disable planning with astar planner
+            */
+   public boolean use_astar_footstep_planner_;
+   /**
+            * flag to enable/disable planning with monte-carlo footstep planner
+            */
+   public boolean use_monte_carlo_footstep_planner_;
+   /**
+            * flag to enable/disable using previous plan as reference
+            */
+   public boolean use_previous_plan_as_reference_;
+   /**
+            * flag to enable/disable using monte-carlo plan as reference
+            */
+   public boolean use_monte_carlo_plan_as_reference_;
 
    public ContinuousWalkingCommandMessage()
    {
@@ -56,6 +76,16 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
       lateral_value_ = other.lateral_value_;
 
       turning_value_ = other.turning_value_;
+
+      use_hybrid_planner_ = other.use_hybrid_planner_;
+
+      use_astar_footstep_planner_ = other.use_astar_footstep_planner_;
+
+      use_monte_carlo_footstep_planner_ = other.use_monte_carlo_footstep_planner_;
+
+      use_previous_plan_as_reference_ = other.use_previous_plan_as_reference_;
+
+      use_monte_carlo_plan_as_reference_ = other.use_monte_carlo_plan_as_reference_;
 
    }
 
@@ -149,6 +179,81 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
       return turning_value_;
    }
 
+   /**
+            * flag to enable/disable hybrid planning
+            */
+   public void setUseHybridPlanner(boolean use_hybrid_planner)
+   {
+      use_hybrid_planner_ = use_hybrid_planner;
+   }
+   /**
+            * flag to enable/disable hybrid planning
+            */
+   public boolean getUseHybridPlanner()
+   {
+      return use_hybrid_planner_;
+   }
+
+   /**
+            * flag to enable/disable planning with astar planner
+            */
+   public void setUseAstarFootstepPlanner(boolean use_astar_footstep_planner)
+   {
+      use_astar_footstep_planner_ = use_astar_footstep_planner;
+   }
+   /**
+            * flag to enable/disable planning with astar planner
+            */
+   public boolean getUseAstarFootstepPlanner()
+   {
+      return use_astar_footstep_planner_;
+   }
+
+   /**
+            * flag to enable/disable planning with monte-carlo footstep planner
+            */
+   public void setUseMonteCarloFootstepPlanner(boolean use_monte_carlo_footstep_planner)
+   {
+      use_monte_carlo_footstep_planner_ = use_monte_carlo_footstep_planner;
+   }
+   /**
+            * flag to enable/disable planning with monte-carlo footstep planner
+            */
+   public boolean getUseMonteCarloFootstepPlanner()
+   {
+      return use_monte_carlo_footstep_planner_;
+   }
+
+   /**
+            * flag to enable/disable using previous plan as reference
+            */
+   public void setUsePreviousPlanAsReference(boolean use_previous_plan_as_reference)
+   {
+      use_previous_plan_as_reference_ = use_previous_plan_as_reference;
+   }
+   /**
+            * flag to enable/disable using previous plan as reference
+            */
+   public boolean getUsePreviousPlanAsReference()
+   {
+      return use_previous_plan_as_reference_;
+   }
+
+   /**
+            * flag to enable/disable using monte-carlo plan as reference
+            */
+   public void setUseMonteCarloPlanAsReference(boolean use_monte_carlo_plan_as_reference)
+   {
+      use_monte_carlo_plan_as_reference_ = use_monte_carlo_plan_as_reference;
+   }
+   /**
+            * flag to enable/disable using monte-carlo plan as reference
+            */
+   public boolean getUseMonteCarloPlanAsReference()
+   {
+      return use_monte_carlo_plan_as_reference_;
+   }
+
 
    public static Supplier<ContinuousWalkingCommandMessagePubSubType> getPubSubType()
    {
@@ -179,6 +284,16 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.turning_value_, other.turning_value_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_hybrid_planner_, other.use_hybrid_planner_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_astar_footstep_planner_, other.use_astar_footstep_planner_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_monte_carlo_footstep_planner_, other.use_monte_carlo_footstep_planner_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_previous_plan_as_reference_, other.use_previous_plan_as_reference_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_monte_carlo_plan_as_reference_, other.use_monte_carlo_plan_as_reference_, epsilon)) return false;
+
 
       return true;
    }
@@ -204,6 +319,16 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
 
       if(this.turning_value_ != otherMyClass.turning_value_) return false;
 
+      if(this.use_hybrid_planner_ != otherMyClass.use_hybrid_planner_) return false;
+
+      if(this.use_astar_footstep_planner_ != otherMyClass.use_astar_footstep_planner_) return false;
+
+      if(this.use_monte_carlo_footstep_planner_ != otherMyClass.use_monte_carlo_footstep_planner_) return false;
+
+      if(this.use_previous_plan_as_reference_ != otherMyClass.use_previous_plan_as_reference_) return false;
+
+      if(this.use_monte_carlo_plan_as_reference_ != otherMyClass.use_monte_carlo_plan_as_reference_) return false;
+
 
       return true;
    }
@@ -225,7 +350,17 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
       builder.append("lateral_value=");
       builder.append(this.lateral_value_);      builder.append(", ");
       builder.append("turning_value=");
-      builder.append(this.turning_value_);
+      builder.append(this.turning_value_);      builder.append(", ");
+      builder.append("use_hybrid_planner=");
+      builder.append(this.use_hybrid_planner_);      builder.append(", ");
+      builder.append("use_astar_footstep_planner=");
+      builder.append(this.use_astar_footstep_planner_);      builder.append(", ");
+      builder.append("use_monte_carlo_footstep_planner=");
+      builder.append(this.use_monte_carlo_footstep_planner_);      builder.append(", ");
+      builder.append("use_previous_plan_as_reference=");
+      builder.append(this.use_previous_plan_as_reference_);      builder.append(", ");
+      builder.append("use_monte_carlo_plan_as_reference=");
+      builder.append(this.use_monte_carlo_plan_as_reference_);
       builder.append("}");
       return builder.toString();
    }
