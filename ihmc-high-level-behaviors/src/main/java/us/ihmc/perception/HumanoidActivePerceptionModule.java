@@ -87,8 +87,8 @@ public class HumanoidActivePerceptionModule
       {
          LogTools.warn("Initializing Occupancy Grid from Active Mapping Remote Process");
 
-         world = activePlaneMappingRemoteThread.getActiveMappingModule().getPlanner().getWorld();
-         agent = activePlaneMappingRemoteThread.getActiveMappingModule().getPlanner().getAgent();
+         world = activePlaneMappingRemoteThread.getContinuousPlanner().getPlanner().getWorld();
+         agent = activePlaneMappingRemoteThread.getContinuousPlanner().getPlanner().getAgent();
       }
       else
       {
