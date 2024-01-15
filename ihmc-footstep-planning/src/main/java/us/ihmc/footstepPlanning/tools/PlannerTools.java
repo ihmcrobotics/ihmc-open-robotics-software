@@ -263,6 +263,10 @@ public class PlannerTools
       bodyPathPlanHolder.getPointAlongPath(alphaToQuery, poseToPack);
    }
 
+   /**
+    * Calculates the total expected duration of a footstep plan, which depends
+    * on parameters outside of {@link FootstepPlannerParametersReadOnly}.
+    */
    public static double calculateNominalTotalPlanExecutionDuration(FootstepPlan footstepPlan,
                                                                    double defaultSwingDuration,
                                                                    double defaultInitialTransferDuration,
@@ -277,6 +281,11 @@ public class PlannerTools
                                              footstepPlan.getNumberOfSteps());
    }
 
+   /**
+    * Calculates as per {@link #calculateNominalTotalPlanExecutionDuration},
+    * however only adds up the durations of the first n footsteps as specified
+    * by the numberOfFootstepsToAddUp parameter.
+    */
    public static double calculateFootstepCompletionTime(FootstepPlan footstepPlan,
                                                         double defaultSwingDuration,
                                                         double defaultInitialTransferDuration,
