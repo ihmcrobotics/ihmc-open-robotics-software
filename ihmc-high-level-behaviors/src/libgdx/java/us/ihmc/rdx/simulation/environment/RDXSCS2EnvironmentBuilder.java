@@ -43,6 +43,7 @@ public class RDXSCS2EnvironmentBuilder extends RDXPanel
 {
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(RDXSCS2EnvironmentBuilder.class, "Environment");
    private final ArrayList<RDXSCS2EnvironmentObject> allObjects = new ArrayList<>();
+   private final ArrayList<RDXSCS2EnvironmentObject> lightObjects = new ArrayList<>();
    private boolean loadedFilesOnce = false;
    private Path selectedEnvironmentFile = null;
    private final TreeSet<Path> environmentFiles = new TreeSet<>(Comparator.comparing(path -> path.getFileName().toString()));
@@ -348,11 +349,37 @@ public class RDXSCS2EnvironmentBuilder extends RDXPanel
    public void addObject(RDXSCS2EnvironmentObject environmentObject)
    {
       allObjects.add(environmentObject);
+
+//      if (environmentObject instanceof RDXPointLightObject)
+//      {
+//         RDXPointLightObject pointLightObject = (RDXPointLightObject) environmentObject;
+//         sceneManager.getscene().addPointLight(pointLightObject.getLight());
+//         lightObjects.add(pointLightObject);
+//      }
+//      else if (environmentObject instanceof RDXDirectionalLightObject)
+//      {
+//         RDXDirectionalLightObject directionalLightObject = (RDXDirectionalLightObject) environmentObject;
+//         sceneManager.getscene().addDirectionalLight(directionalLightObject.getLight());
+//         lightObjects.add(directionalLightObject);
+//      }
    }
 
    public void removeObject(RDXSCS2EnvironmentObject environmentObject)
    {
       allObjects.remove(environmentObject);
+
+//      if (environmentObject instanceof RDXPointLightObject)
+//      {
+//         RDXPointLightObject lightObject = (RDXPointLightObject) environmentObject;
+//         sceneManager.getscene().removePointLight(lightObject.getLight());
+//         lightObjects.remove(environmentObject);
+//      }
+//      else if (environmentObject instanceof RDXDirectionalLightObject)
+//      {
+//         RDXDirectionalLightObject lightObject = (RDXDirectionalLightObject) environmentObject;
+//         sceneManager.getscene().removeDirectionalLight(lightObject.getLight());
+//         lightObjects.remove(environmentObject);
+//      }
    }
 
    private void reindexScripts()
@@ -375,12 +402,17 @@ public class RDXSCS2EnvironmentBuilder extends RDXPanel
    {
       for (RDXSCS2EnvironmentObject object : allObjects)
       {
-         object.getRealRenderables(renderables, pool);
+//         if (!(object instanceof RDXPointLightObject) && !(object instanceof RDXDirectionalLightObject))
+            object.getRealRenderables(renderables, pool);
       }
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      for (RDXSCS2EnvironmentObject object : lightObjects)
+      {
+         object.getRealRenderables(renderables, pool);
+      }
       if (selectedObject != null)
       {
          selectedObject.getCollisionMeshRenderables(renderables, pool);
