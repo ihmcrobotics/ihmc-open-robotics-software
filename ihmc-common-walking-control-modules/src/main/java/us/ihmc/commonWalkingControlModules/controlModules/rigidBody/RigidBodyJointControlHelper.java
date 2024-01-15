@@ -16,7 +16,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
+import us.ihmc.robotics.math.functionGenerator.FunctionGeneratorErrorCalculator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
@@ -26,6 +26,22 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * Manages providing jointspace feedback control commands for the ancestor joints of a rigid body,
+ * such as an arm's joints. It also triages the default and user submitted weights and gains,
+ * packing them into the whole body controller commands.
+ * <p>
+ * This class also generates cubic spline trajectories for the joints from user submitted
+ * waypoints. This provides joint desired position, velocity, and feedforward accelerations.
+ * </p>
+ * <p>
+ * This class also supports kinematics streaming by accommodating for network
+ * delay when using {@link ExecutionMode#STREAM}.
+ * </p>
+ * <p>
+ * Additionally, it supports the use of function generators to perform diagnostic trajectories.
+ * </p>
+ */
 public class RigidBodyJointControlHelper
 {
    public static final String shortName = "JointControlHelper";
@@ -54,6 +70,7 @@ public class RigidBodyJointControlHelper
    private final List<PIDGainsReadOnly> highLevelGains = new ArrayList<>();
    private final List<PIDGainsReadOnly> lowLevelGains = new ArrayList<>();
    private final List<YoFunctionGeneratorNew> functionGenerators = new ArrayList<>();
+   private final FunctionGeneratorErrorCalculator functionGeneratorErrorCalculator;
 
    private final YoBoolean hasWeights;
    private final YoBoolean hasHighLevelGains;
@@ -67,7 +84,7 @@ public class RigidBodyJointControlHelper
 
    private final DoubleProvider time;
 
-   public RigidBodyJointControlHelper(String bodyName, OneDoFJointBasics[] jointsToControl, DoubleProvider time, boolean enableFunctionGenerators, YoRegistry parentRegistry)
+   public RigidBodyJointControlHelper(String bodyName, OneDoFJointBasics[] jointsToControl, DoubleProvider time, double controlDT, boolean enableFunctionGenerators, YoRegistry parentRegistry)
    {
       warningPrefix = shortName + " for " + bodyName + ": ";
       registry = new YoRegistry(bodyName + shortName);
@@ -82,6 +99,7 @@ public class RigidBodyJointControlHelper
       hasHighLevelGains = new YoBoolean(prefix + "HasHighLevelGains", registry);
       hasLowLevelGains = new YoBoolean[jointsToControl.length];
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
+      functionGeneratorErrorCalculator = enableFunctionGenerators ? new FunctionGeneratorErrorCalculator(bodyName, controlDT, registry) : null;
 
       for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
       {
@@ -107,6 +125,7 @@ public class RigidBodyJointControlHelper
          if (enableFunctionGenerators)
          {
             functionGenerators.add(new YoFunctionGeneratorNew(prefix + "_" + jointName + "_FG", time, registry));
+            functionGeneratorErrorCalculator.addTrajectorySignal(functionGenerators.get(jointIdx), jointsToControl[jointIdx]);
          }
 
          hasLowLevelGains[jointIdx] = new YoBoolean(joint.getName() + "HasLowLevelGains", registry);
@@ -214,6 +233,8 @@ public class RigidBodyJointControlHelper
       boolean allDone = true;
 
       List<? extends DoubleProvider> weights = usingWeightFromMessage.getBooleanValue() ? messageWeights : defaultWeights;
+      if (functionGeneratorErrorCalculator != null)
+         functionGeneratorErrorCalculator.update();
 
       feedbackControlCommand.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)

@@ -26,6 +26,11 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * Manages an external wrench trajectory through waypoints submitted by the user
+ * and provided as external wrench commands to be submitted to the whole body controller core.
+ * This class is to be used in combination with one of the primary {@link RigidBodyControlMode rigid body control modes}.
+ */
 public class RigidBodyExternalWrenchManager extends RigidBodyControlState
 {
    private final ExternalWrenchCommand externalWrenchCommand = new ExternalWrenchCommand();
