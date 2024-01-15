@@ -2,8 +2,12 @@ package us.ihmc.rdx.imgui;
 
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotCol;
-import imgui.flag.ImGuiCond;
 
+/**
+ * A basic way to plot a variable number of data points.
+ * There's no contant buffer size or "scrolling" with time
+ * functionality.
+ */
 public class ImPlotBasicDoublePlotLine implements ImPlotPlotLine
 {
    private int size = 0;
@@ -83,12 +87,6 @@ public class ImPlotBasicDoublePlotLine implements ImPlotPlotLine
    public String getValueString(int bufferIndex)
    {
       return "%.2f".formatted(yValues[bufferIndex]);
-   }
-
-   public void setLimitYMin(double minLimitY)
-   {
-      double plotMaxY = getMaxYValue();
-      ImPlot.setNextPlotLimitsY(0.0, Double.isNaN(plotMaxY) ? minLimitY : plotMaxY, ImGuiCond.Always);
    }
 
    public double getMaxYValue()
