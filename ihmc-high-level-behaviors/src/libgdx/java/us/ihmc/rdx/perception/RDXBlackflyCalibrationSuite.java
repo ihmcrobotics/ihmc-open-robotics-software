@@ -177,7 +177,6 @@ public class RDXBlackflyCalibrationSuite
 
             arUcoMarkerDetector = new OpenCVArUcoMarkerDetector();
             blackflySensorFrame = interactableBlackflyFujinon.getInteractableFrameModel().getReferenceFrame();
-            arUcoMarkerDetector.create();
             SensorHeadParameters.setArUcoMarkerDetectionParameters(arUcoMarkerDetector.getDetectorParameters());
             arUcoMarkerDetectionResults = new OpenCVArUcoMarkerDetectionResults();
             arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI();

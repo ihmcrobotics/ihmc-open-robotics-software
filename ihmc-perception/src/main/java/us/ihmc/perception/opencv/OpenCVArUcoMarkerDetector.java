@@ -25,19 +25,19 @@ public class OpenCVArUcoMarkerDetector
 {
    public static final int DEFAULT_DICTIONARY = opencv_objdetect.DICT_4X4_100;
 
-   private ArucoDetector arucoDetector;
-   private Dictionary dictionary;
-   private BytedecoImage rgb8ImageForDetection;
-   private MatVector corners;
-   private Mat ids;
-   private MatVector rejectedImagePoints;
-   private DetectorParameters detectorParameters;
-   private Mat cameraMatrix;
-   private Mat distortionCoefficients;
-   private BytedecoImage optionalSourceColorImage;
+   private final ArucoDetector arucoDetector;
+   private final Dictionary dictionary;
+   private final MatVector corners;
+   private final Mat ids;
+   private final MatVector rejectedImagePoints;
+   private final DetectorParameters detectorParameters;
+   private final Mat cameraMatrix;
+   private final Mat distortionCoefficients;
    private final Stopwatch stopwatch = new Stopwatch();
+   private BytedecoImage rgb8ImageForDetection;
+   private BytedecoImage optionalSourceColorImage;
 
-   public void create()
+   public OpenCVArUcoMarkerDetector()
    {
       dictionary = opencv_objdetect.getPredefinedDictionary(DEFAULT_DICTIONARY);
       corners = new MatVector();

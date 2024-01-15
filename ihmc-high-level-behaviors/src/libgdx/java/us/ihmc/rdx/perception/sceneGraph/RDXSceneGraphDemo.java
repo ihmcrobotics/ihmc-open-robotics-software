@@ -80,7 +80,6 @@ public class RDXSceneGraphDemo
             baseUI.getPrimaryScene().addRenderableProvider(simulatedCamera::getRenderables);
 
             arUcoMarkerDetector = new OpenCVArUcoMarkerDetector();
-            arUcoMarkerDetector.create();
             arUcoMarkerDetector.setSourceImageForDetection(simulatedCamera.getLowLevelSimulator().getRGBA8888ColorImage());
             arUcoMarkerDetector.setCameraInstrinsics(simulatedCamera.getDepthCameraIntrinsics());
             arUcoMarkerDetectionResults = new OpenCVArUcoMarkerDetectionResults();
