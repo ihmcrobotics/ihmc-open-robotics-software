@@ -28,6 +28,8 @@ import us.ihmc.rdx.simulation.bullet.RDXBulletPhysicsManager;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectLibrary;
+import us.ihmc.rdx.simulation.environment.object.objects.RDXDirectionalLightObject;
+import us.ihmc.rdx.simulation.environment.object.objects.RDXPointLightObject;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
@@ -44,6 +46,7 @@ public class RDXEnvironmentBuilder extends RDXPanel
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final WorkspaceResourceDirectory environmentFilesDirectory = new WorkspaceResourceDirectory(getClass(), "/environments");
    private final ArrayList<RDXEnvironmentObject> allObjects = new ArrayList<>();
+   private final ArrayList<RDXEnvironmentObject> lightObjects = new ArrayList<>();
    private final RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo();
    private final RDX3DPanel panel3D;
    private final RDXPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
@@ -378,12 +381,34 @@ public class RDXEnvironmentBuilder extends RDXPanel
    {
       allObjects.add(environmentObject);
       environmentObject.addToBullet(bulletPhysicsManager);
+
+      if (environmentObject instanceof RDXPointLightObject pointLightObject)
+      {
+         panel3D.getScene().addPointLight(pointLightObject.getLight());
+         lightObjects.add(pointLightObject);
+      }
+      else if (environmentObject instanceof RDXDirectionalLightObject directionalLightObject)
+      {
+         panel3D.getScene().addDirectionalLight(directionalLightObject.getLight());
+         lightObjects.add(directionalLightObject);
+      }
    }
 
    public void removeObject(RDXEnvironmentObject environmentObject)
    {
       allObjects.remove(environmentObject);
       environmentObject.removeFromBullet();
+
+      if (environmentObject instanceof RDXPointLightObject lightObject)
+      {
+         panel3D.getScene().removePointLight(lightObject.getLight());
+         lightObjects.remove(environmentObject);
+      }
+      else if (environmentObject instanceof RDXDirectionalLightObject lightObject)
+      {
+         panel3D.getScene().removeDirectionalLight(lightObject.getLight());
+         lightObjects.remove(environmentObject);
+      }
    }
 
    private void reindexScripts()
@@ -404,11 +429,16 @@ public class RDXEnvironmentBuilder extends RDXPanel
       {
          for (RDXEnvironmentObject object : allObjects)
          {
-            object.getRealRenderables(renderables, pool);
+            if (!(object instanceof RDXPointLightObject) && !(object instanceof RDXDirectionalLightObject))
+               object.getRealRenderables(renderables, pool);
          }
       }
       if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
+         for (RDXEnvironmentObject object : lightObjects)
+         {
+            object.getRealRenderables(renderables, pool);
+         }
          if (selectedObject != null)
          {
             selectedObject.getCollisionMeshRenderables(renderables, pool);
