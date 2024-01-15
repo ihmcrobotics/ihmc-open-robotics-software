@@ -12,9 +12,6 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 
 public class IterativeClosestPointObjectTrack
 {
-   private static final double translationResetDistance = 0.25;
-   private static final double orientationResetAngle = Math.toRadians(45.0);
-
    private final FramePose3D objectPose = new FramePose3D();
    private final FrameVector3D objectLinearVelocity = new FrameVector3D();
    private final FrameVector3D objectAngularVelocity = new FrameVector3D();
@@ -48,8 +45,8 @@ public class IterativeClosestPointObjectTrack
       FramePose3DReadOnly posePrediction = predictObjectPoseCurrentVelocities(timeDelta);
 
       // If the error between the prediction and the measurement is too great, reset to the measurement.
-      boolean aboveTranslationThreshold = posePrediction.getPosition().distanceSquared(measuredObjectPose.getPosition()) > MathTools.square(translationResetDistance);
-      boolean aboveRotationThreshold = Math.abs(posePrediction.getOrientation().distance(measuredObjectPose.getOrientation())) > orientationResetAngle;
+      boolean aboveTranslationThreshold = posePrediction.getPosition().distanceSquared(measuredObjectPose.getPosition()) > MathTools.square(icpParameters.getTrackPredictionTranslationErrorToReset());
+      boolean aboveRotationThreshold = Math.abs(posePrediction.getOrientation().distance(measuredObjectPose.getOrientation())) > icpParameters.getTrackPredictionOrientationErrorToReset();
       if (aboveTranslationThreshold || aboveRotationThreshold)
       {
          objectPose.set(measuredObjectPose);

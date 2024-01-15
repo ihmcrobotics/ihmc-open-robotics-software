@@ -93,7 +93,8 @@ public class IterativeClosestPointManager
                                                                  requestXRadius,
                                                                  requestYRadius,
                                                                  requestZRadius);
-               worker.changeSize(requestXLength, requestYLength, requestZLength, requestXRadius, requestYRadius, requestZRadius, newNumberOfPoints);
+               icpParameters.setPointsToDescribeObjectShape(newNumberOfPoints);
+               worker.changeSize(requestXLength, requestYLength, requestZLength, requestXRadius, requestYRadius, requestZRadius);
             }
 
             // Update worker
@@ -197,6 +198,7 @@ public class IterativeClosestPointManager
       float zRadius = requestMessage.getZRadius();
 
       int numberOfPoints = approximateNumberOfPoints(shape, xLength, yLength, zLength, xRadius, yRadius, zRadius);
+      icpParameters.setPointsToDescribeObjectShape(numberOfPoints);
       IterativeClosestPointWorker worker = new IterativeClosestPointWorker(icpParameters,
                                                                            shape,
                                                                            xLength,
@@ -205,7 +207,6 @@ public class IterativeClosestPointManager
                                                                            xRadius,
                                                                            yRadius,
                                                                            zRadius,
-                                                                           numberOfPoints,
                                                                            new FramePose3D(requestMessage.getProvidedPose()),
                                                                            random);
       worker.setSceneNodeID(requestMessage.getNodeId());

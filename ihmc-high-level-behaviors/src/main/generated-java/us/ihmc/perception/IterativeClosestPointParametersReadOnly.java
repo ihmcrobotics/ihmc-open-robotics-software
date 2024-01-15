@@ -32,6 +32,18 @@ public interface IterativeClosestPointParametersReadOnly extends StoredPropertyS
       return get(minimumCorrespondences);
    }
 
+   /**
+    * When doing point to point matching, this is the number of points used to
+    * describe the object
+    */
+   default int getPointsToDescribeObjectShape()
+   {
+      return get(pointsToDescribeObjectShape);
+   }
+
+   /**
+    * If this is true, we use a velocity to predict the next pose of the object.
+    */
    default boolean getComputeObjectPoseWithTrack()
    {
       return get(computeObjectPoseWithTrack);
@@ -42,6 +54,11 @@ public interface IterativeClosestPointParametersReadOnly extends StoredPropertyS
       return get(segmentPointCloudWithObjectShape);
    }
 
+   /**
+    * This is the distance from the object to include in the point cloud. If
+    * segmenting with the shape, it's the distance to the shape. If not, it's the
+    * distance to the centroid
+    */
    default double getImageSegmentationRadius()
    {
       return get(imageSegmentationRadius);
@@ -73,5 +90,23 @@ public interface IterativeClosestPointParametersReadOnly extends StoredPropertyS
    default double getObservationVelocityFusingFrequency()
    {
       return get(observationVelocityFusingFrequency);
+   }
+
+   /**
+    * If the prediction error is above this value vs measured, we reset to the
+    * measurement.
+    */
+   default double getTrackPredictionTranslationErrorToReset()
+   {
+      return get(trackPredictionTranslationErrorToReset);
+   }
+
+   /**
+    * If the prediction error is above this value vs measured, we reset to the
+    * measurement.
+    */
+   default double getTrackPredictionOrientationErrorToReset()
+   {
+      return get(trackPredictionOrientationErrorToReset);
    }
 }

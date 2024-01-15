@@ -3,11 +3,14 @@
   "Ignore correspondences on edges" : true,
   "Correspondences to use" : [750, "This is the number of corresponding points the algorithm attempts to use when fitting the point clouds."],
   "Minimum correspondences" : [150, "This is the minimum number of corresponding points the algorithm needs to run."],
-  "Compute object pose with track" : true,
+  "Points to describe object shape" : [1000, "When doing point to point matching, this is the number of points used to describe the object"],
+  "Compute object pose with track" : [true, "If this is true, we use a velocity to predict the next pose of the object."],
   "Segment point cloud with object shape" : true,
-  "Image segmentation radius" :  0.6,
+  "Image segmentation radius" :  [0.6, "This is the distance from the object to include in the point cloud. If segmenting with the shape, it's the distance to the shape. If not, it's the distance to the centroid"],
   "Prioritize correspondences by distance instead of random" : true,
   "Iteration transform discount factor" : 1.0,
   "Observation pose fusing frequency" : [50.0, "The higher this frequency, the more the result will bias towards the incoming measurement."],
-  "Observation velocity fusing frequency" : [20.0, "The higher this frequency, the more the resulting velocity will bias towards the new velocity"]
+  "Observation velocity fusing frequency" : [20.0, "The higher this frequency, the more the resulting velocity will bias towards the new velocity"],
+  "Track prediction translation error to reset" : [0.25, "If the prediction error is above this value vs measured, we reset to the measurement."],
+  "Track prediction orientation error to reset" : [0.785, "If the prediction error is above this value vs measured, we reset to the measurement."]
 }

@@ -30,14 +30,15 @@ public class IterativeClosestPointWorkerTest
       int correspondences = 1000;
       IterativeClosestPointParameters icpParameters = new IterativeClosestPointParameters();
       icpParameters.setCorrespondencesToUse(correspondences);
-      IterativeClosestPointWorker icp = new IterativeClosestPointWorker(icpParameters, objectSamples, random);
+      icpParameters.setPointsToDescribeObjectShape(objectSamples);
+      IterativeClosestPointWorker icp = new IterativeClosestPointWorker(icpParameters, random);
 
       float actualBoxWidth = 0.3f;
       float actualBoxDepth = 0.4f;
       float actualBoxHeight = 0.5f;
 
       icp.setDetectionShape(PrimitiveRigidBodyShape.BOX);
-      icp.changeSize(actualBoxDepth, actualBoxWidth, actualBoxHeight, 0.1f, 0.1f, 0.1f, objectSamples);
+      icp.changeSize(actualBoxDepth, actualBoxWidth, actualBoxHeight, 0.1f, 0.1f, 0.1f);
 
       // test perfectly sized box with just translation error
       Vector3D translationError = new Vector3D(0.1, 0.0, 0.04);
@@ -60,14 +61,15 @@ public class IterativeClosestPointWorkerTest
       int correspondences = 1000;
       IterativeClosestPointParameters icpParameters = new IterativeClosestPointParameters();
       icpParameters.setCorrespondencesToUse(correspondences);
-      IterativeClosestPointWorker icp = new IterativeClosestPointWorker(icpParameters, objectSamples, random);
+      icpParameters.setPointsToDescribeObjectShape(objectSamples);
+      IterativeClosestPointWorker icp = new IterativeClosestPointWorker(icpParameters, random);
 
       float actualBoxWidth = 0.3f;
       float actualBoxDepth = 0.4f;
       float actualBoxHeight = 0.5f;
 
       icp.setDetectionShape(PrimitiveRigidBodyShape.BOX);
-      icp.changeSize(actualBoxDepth, actualBoxWidth, actualBoxHeight, 0.1f, 0.1f, 0.1f, objectSamples);
+      icp.changeSize(actualBoxDepth, actualBoxWidth, actualBoxHeight, 0.1f, 0.1f, 0.1f);
 
       // test perfect sized box
       testWithDifferentBoxesAndRandomError(icp, 1.0f, actualBoxDepth, actualBoxWidth, actualBoxHeight, random);

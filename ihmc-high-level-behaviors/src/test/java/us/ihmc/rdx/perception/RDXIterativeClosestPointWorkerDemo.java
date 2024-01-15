@@ -62,7 +62,7 @@ public class RDXIterativeClosestPointWorkerDemo
    private RawImage zedDepthImage;
    private RawImage zedLeftColorImage;
    private final IterativeClosestPointParameters icpParameters = new IterativeClosestPointParameters();
-   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(icpParameters, MAX_ENVIRONMENT_SIZE, random);
+   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(icpParameters, random);
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
@@ -293,7 +293,6 @@ public class RDXIterativeClosestPointWorkerDemo
                                                            xRadius.get(),
                                                            yRadius.get(),
                                                            zRadius.get(),
-                                                           MAX_ENVIRONMENT_SIZE,
                                                            new FramePose3D(ReferenceFrame.getWorldFrame(), pickFramePoint, new RotationMatrix()),
                                                            random);
             }
@@ -304,11 +303,12 @@ public class RDXIterativeClosestPointWorkerDemo
             ImGui.sliderFloat("yRadius", yRadius.getData(), 0.0f, 1.0f);
             ImGui.sliderFloat("zRadius", zRadius.getData(), 0.0f, 1.0f);
             ImGui.sliderInt("Num Shape Samples", numberOfShapeSamples.getData(), 0, 10000);
+            icpParameters.setPointsToDescribeObjectShape(numberOfShapeSamples.get());
             ImGui.sliderInt("Num Correspondences", numberOfCorespondences.getData(), 0, 10000);
             icpParameters.setCorrespondencesToUse(numberOfCorespondences.get());
             if (ImGui.button("Apply Size"))
             {
-               icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get(), numberOfShapeSamples.get());
+               icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get());
             }
             ImGui.sliderFloat("Segmentation Radius", segmentationRadius.getData(), 0.0f, 1.0f);
             icpParameters.setImageSegmentationRadius(segmentationRadius.get());

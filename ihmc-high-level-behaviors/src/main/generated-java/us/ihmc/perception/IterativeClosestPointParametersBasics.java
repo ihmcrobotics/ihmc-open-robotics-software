@@ -30,6 +30,18 @@ public interface IterativeClosestPointParametersBasics extends IterativeClosestP
       set(IterativeClosestPointParameters.minimumCorrespondences, minimumCorrespondences);
    }
 
+   /**
+    * When doing point to point matching, this is the number of points used to
+    * describe the object
+    */
+   default void setPointsToDescribeObjectShape(int pointsToDescribeObjectShape)
+   {
+      set(IterativeClosestPointParameters.pointsToDescribeObjectShape, pointsToDescribeObjectShape);
+   }
+
+   /**
+    * If this is true, we use a velocity to predict the next pose of the object.
+    */
    default void setComputeObjectPoseWithTrack(boolean computeObjectPoseWithTrack)
    {
       set(IterativeClosestPointParameters.computeObjectPoseWithTrack, computeObjectPoseWithTrack);
@@ -40,6 +52,11 @@ public interface IterativeClosestPointParametersBasics extends IterativeClosestP
       set(IterativeClosestPointParameters.segmentPointCloudWithObjectShape, segmentPointCloudWithObjectShape);
    }
 
+   /**
+    * This is the distance from the object to include in the point cloud. If
+    * segmenting with the shape, it's the distance to the shape. If not, it's the
+    * distance to the centroid
+    */
    default void setImageSegmentationRadius(double imageSegmentationRadius)
    {
       set(IterativeClosestPointParameters.imageSegmentationRadius, imageSegmentationRadius);
@@ -71,5 +88,23 @@ public interface IterativeClosestPointParametersBasics extends IterativeClosestP
    default void setObservationVelocityFusingFrequency(double observationVelocityFusingFrequency)
    {
       set(IterativeClosestPointParameters.observationVelocityFusingFrequency, observationVelocityFusingFrequency);
+   }
+
+   /**
+    * If the prediction error is above this value vs measured, we reset to the
+    * measurement.
+    */
+   default void setTrackPredictionTranslationErrorToReset(double trackPredictionTranslationErrorToReset)
+   {
+      set(IterativeClosestPointParameters.trackPredictionTranslationErrorToReset, trackPredictionTranslationErrorToReset);
+   }
+
+   /**
+    * If the prediction error is above this value vs measured, we reset to the
+    * measurement.
+    */
+   default void setTrackPredictionOrientationErrorToReset(double trackPredictionOrientationErrorToReset)
+   {
+      set(IterativeClosestPointParameters.trackPredictionOrientationErrorToReset, trackPredictionOrientationErrorToReset);
    }
 }
