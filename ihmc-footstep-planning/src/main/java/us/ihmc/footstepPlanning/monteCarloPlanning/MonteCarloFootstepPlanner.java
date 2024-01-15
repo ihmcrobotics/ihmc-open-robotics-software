@@ -52,9 +52,9 @@ public class MonteCarloFootstepPlanner
       // Initialize Root
       if (root == null)
       {
-         Point2D position = new Point2D(request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getX() * cellsPerMeter,
-                                        request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getY() * cellsPerMeter);
-         float yaw = (float) request.getStartFootPoses().get(RobotSide.LEFT).getYaw();
+         Point2D position = new Point2D(request.getStartFootPoses().get(request.getRequestedInitialStanceSide()).getPosition().getX() * cellsPerMeter,
+                                        request.getStartFootPoses().get(request.getRequestedInitialStanceSide()).getPosition().getY() * cellsPerMeter);
+         float yaw = (float) request.getStartFootPoses().get(request.getRequestedInitialStanceSide()).getYaw();
          Point3D state = new Point3D(position.getX(), position.getY(), yaw);
          root = new MonteCarloFootstepNode(state, null, request.getRequestedInitialStanceSide(), uniqueNodeId++);
       }
@@ -200,7 +200,7 @@ public class MonteCarloFootstepPlanner
 
    public void backPropagate(MonteCarloFootstepNode node, float score)
    {
-      node.setValue(Math.max(score, node.getValue()));
+      node.setValue(score + node.getValue());
       node.incrementVisits();
 
       if (!node.getParents().isEmpty())
@@ -221,9 +221,9 @@ public class MonteCarloFootstepPlanner
       if (request == null)
          root = new MonteCarloFootstepNode(new Point3D(), null, RobotSide.LEFT, uniqueNodeId++);
       else
-         root = new MonteCarloFootstepNode(new Point3D(request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getX() * cellsPerMeter,
-                                                       request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getY() * cellsPerMeter,
-                                                       request.getStartFootPoses().get(RobotSide.LEFT).getYaw()),
+         root = new MonteCarloFootstepNode(new Point3D(request.getStartFootPoses().get(request.getRequestedInitialStanceSide()).getPosition().getX() * cellsPerMeter,
+                                                       request.getStartFootPoses().get(request.getRequestedInitialStanceSide()).getPosition().getY() * cellsPerMeter,
+                                                       request.getStartFootPoses().get(request.getRequestedInitialStanceSide()).getYaw()),
                                            null,
                                            request.getRequestedInitialStanceSide(),
                                            uniqueNodeId++);

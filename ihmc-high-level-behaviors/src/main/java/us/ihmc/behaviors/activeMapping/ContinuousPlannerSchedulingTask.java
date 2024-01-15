@@ -112,7 +112,9 @@ public class ContinuousPlannerSchedulingTask
          sendPauseWalkingMessage();
          setImminentStanceToCurrent();
 
+         continuousPlanner.getMonteCarloFootstepPlanner().reset(null);
          continuousPlanner.setInitialized(false);
+
          return;
       }
 
@@ -185,6 +187,7 @@ public class ContinuousPlannerSchedulingTask
          }
          else
          {
+            // TODO: Add replanning. Replanned plan valid only until the foot lands.
             state = ContinuousWalkingState.WAITING_TO_LAND;
             LogTools.error(message = String.format("State: [%s]: Planning failed... will try again when current step is completed", state));
             statistics.appendString(message);
@@ -234,6 +237,7 @@ public class ContinuousPlannerSchedulingTask
       }
       else if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
       {
+         // TODO: Use the transfer time (starting now) to start planning (if WAITING_TO_LAND then plan again)
          statistics.setLastFootstepQueueLength(controllerQueueSize);
          statistics.incrementTotalStepsCompleted();
 
@@ -265,10 +269,11 @@ public class ContinuousPlannerSchedulingTask
 
    private void setImminentStanceToCurrent()
    {
-      rightRobotFoot = new FramePose3D(ReferenceFrame.getWorldFrame(), referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
-      leftRobotFoot = new FramePose3D(ReferenceFrame.getWorldFrame(), referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
+      RobotSide closerSide = continuousPlanner.getCloserSideToGoal();
+      FramePose3D closerToGoalFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), referenceFrames.getSoleFrame(closerSide).getTransformToWorldFrame());
+      FramePose3D fartherToGoalFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), referenceFrames.getSoleFrame(closerSide.getOppositeSide()).getTransformToWorldFrame());
 
-      if (continuousPlanner.updateImminentStance(rightRobotFoot, leftRobotFoot, RobotSide.LEFT))
+      if (continuousPlanner.updateImminentStance(fartherToGoalFootPose, closerToGoalFootPose, closerSide))
       {
          debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
       }
