@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.monteCarloPlanning;
 
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -57,19 +59,18 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
 
    public boolean checkReachability(MonteCarloFootstepPlannerRequest request, MonteCarloFootstepPlannerParameters parameters, Vector3DReadOnly action)
    {
-      Point3D newPosition = new Point3D();
-      newPosition.add(state, action);
-      newPosition.scale(1.0 / 50.0);
+      Point2D newPosition = new Point2D();
+      Point2D previousPosition = new Point2D(state);
+      Vector2D positionAction = new Vector2D(action.getX(), action.getY()); // yaw is the z-component, not used
 
-      Point3D previousPosition = new Point3D(state);
+      newPosition.add(previousPosition, positionAction);
+      newPosition.scale(1.0 / 50.0);
       previousPosition.scale(1.0 / 50.0);
 
       double previousHeight = request.getTerrainMapData().getHeightInWorld((float) previousPosition.getX(), (float) previousPosition.getY());
       double currentHeight = request.getTerrainMapData().getHeightInWorld((float) newPosition.getX(), (float) newPosition.getY());
 
       boolean valid = Math.abs(currentHeight - previousHeight) < parameters.getMaxTransferHeight();
-      valid = valid & (Math.abs(state.getZ() - newPosition.getZ()) < parameters.getMaxTransferYaw());
-
       return valid;
    }
 

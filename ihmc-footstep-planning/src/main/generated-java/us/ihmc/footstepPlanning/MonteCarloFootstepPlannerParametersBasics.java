@@ -112,4 +112,9 @@ public interface MonteCarloFootstepPlannerParametersBasics extends MonteCarloFoo
    {
       set(MonteCarloFootstepPlannerParameters.minimumStepLength, minimumStepLength);
    }
+
+   default void setDecayFactor(double decayFactor)
+   {
+      set(MonteCarloFootstepPlannerParameters.decayFactor, decayFactor);
+   }
 }

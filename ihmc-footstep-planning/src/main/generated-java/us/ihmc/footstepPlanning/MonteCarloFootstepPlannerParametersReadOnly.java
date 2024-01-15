@@ -114,4 +114,9 @@ public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPrope
    {
       return get(minimumStepLength);
    }
+
+   default double getDecayFactor()
+   {
+      return get(decayFactor);
+   }
 }

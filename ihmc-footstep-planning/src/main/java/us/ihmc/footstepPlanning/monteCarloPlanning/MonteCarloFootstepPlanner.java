@@ -213,7 +213,10 @@ public class MonteCarloFootstepPlanner
 
    public void backPropagate(MonteCarloFootstepNode node, float score)
    {
-      node.setValue(score + node.getValue());
+      if (timeSpentPlanningSoFar > request.getTimeout())
+         return;
+
+      node.setValue((float) (score + parameters.getDecayFactor() * node.getValue()));
       node.incrementVisits();
 
       if (!node.getParents().isEmpty())

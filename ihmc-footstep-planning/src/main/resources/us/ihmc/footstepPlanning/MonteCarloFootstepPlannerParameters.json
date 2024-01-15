@@ -100,5 +100,10 @@
     "value" : 0.15,
     "lowerBound" : 0.1,
     "upperBound" : 0.3
+  },
+  "Decay factor" : {
+    "value" : 0.9,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
   }
 }

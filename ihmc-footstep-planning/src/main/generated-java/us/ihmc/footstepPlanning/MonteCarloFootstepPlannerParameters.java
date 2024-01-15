@@ -39,6 +39,7 @@ public class MonteCarloFootstepPlannerParameters extends StoredPropertySet imple
    public static final DoubleStoredPropertyKey maximumStepLength = keys.addDoubleKey("Maximum step length");
    public static final DoubleStoredPropertyKey minimumStepWidth = keys.addDoubleKey("Minimum step width");
    public static final DoubleStoredPropertyKey minimumStepLength = keys.addDoubleKey("Minimum step length");
+   public static final DoubleStoredPropertyKey decayFactor = keys.addDoubleKey("Decay factor");
 
    /**
     * Loads this property set.
