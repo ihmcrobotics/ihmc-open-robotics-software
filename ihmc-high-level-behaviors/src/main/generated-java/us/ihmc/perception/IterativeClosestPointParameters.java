@@ -19,11 +19,30 @@ public class IterativeClosestPointParameters extends StoredPropertySet implement
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final BooleanStoredPropertyKey ignoreCorrespondencesOnEdges = keys.addBooleanKey("Ignore correspondences on edges");
+   /**
+    * This is the number of corresponding points the algorithm attempts to use when
+    * fitting the point clouds.
+    */
+   public static final IntegerStoredPropertyKey correspondencesToUse = keys.addIntegerKey("Correspondences to use");
+   /**
+    * This is the minimum number of corresponding points the algorithm needs to run.
+    */
+   public static final IntegerStoredPropertyKey minimumCorrespondences = keys.addIntegerKey("Minimum correspondences");
    public static final BooleanStoredPropertyKey computeObjectPoseWithTrack = keys.addBooleanKey("Compute object pose with track");
    public static final BooleanStoredPropertyKey segmentPointCloudWithObjectShape = keys.addBooleanKey("Segment point cloud with object shape");
    public static final DoubleStoredPropertyKey imageSegmentationRadius = keys.addDoubleKey("Image segmentation radius");
    public static final BooleanStoredPropertyKey prioritizeCorrespondencesByDistanceInsteadOfRandom = keys.addBooleanKey("Prioritize correspondences by distance instead of random");
    public static final DoubleStoredPropertyKey iterationTransformDiscountFactor = keys.addDoubleKey("Iteration transform discount factor");
+   /**
+    * The higher this frequency, the more the result will bias towards the incoming
+    * measurement.
+    */
+   public static final DoubleStoredPropertyKey observationPoseFusingFrequency = keys.addDoubleKey("Observation pose fusing frequency");
+   /**
+    * The higher this frequency, the more the resulting velocity will bias towards the
+    * new velocity
+    */
+   public static final DoubleStoredPropertyKey observationVelocityFusingFrequency = keys.addDoubleKey("Observation velocity fusing frequency");
 
    /**
     * Loads this property set.

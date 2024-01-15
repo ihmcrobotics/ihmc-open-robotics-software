@@ -15,6 +15,23 @@ public interface IterativeClosestPointParametersReadOnly extends StoredPropertyS
       return get(ignoreCorrespondencesOnEdges);
    }
 
+   /**
+    * This is the number of corresponding points the algorithm attempts to use when
+    * fitting the point clouds.
+    */
+   default int getCorrespondencesToUse()
+   {
+      return get(correspondencesToUse);
+   }
+
+   /**
+    * This is the minimum number of corresponding points the algorithm needs to run.
+    */
+   default int getMinimumCorrespondences()
+   {
+      return get(minimumCorrespondences);
+   }
+
    default boolean getComputeObjectPoseWithTrack()
    {
       return get(computeObjectPoseWithTrack);
@@ -38,5 +55,23 @@ public interface IterativeClosestPointParametersReadOnly extends StoredPropertyS
    default double getIterationTransformDiscountFactor()
    {
       return get(iterationTransformDiscountFactor);
+   }
+
+   /**
+    * The higher this frequency, the more the result will bias towards the incoming
+    * measurement.
+    */
+   default double getObservationPoseFusingFrequency()
+   {
+      return get(observationPoseFusingFrequency);
+   }
+
+   /**
+    * The higher this frequency, the more the resulting velocity will bias towards the
+    * new velocity
+    */
+   default double getObservationVelocityFusingFrequency()
+   {
+      return get(observationVelocityFusingFrequency);
    }
 }

@@ -58,7 +58,6 @@ public class IterativeClosestPointWorker
    private float xRadius = 0.1f;
    private float yRadius = 0.1f;
    private float zRadius = 0.1f;
-   private int numberOfCorrespondences;
 
    private final DMatrixRMaj crossCovarianceMatrix = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj objectRelativeToCentroidPoints;
@@ -89,7 +88,7 @@ public class IterativeClosestPointWorker
 
    private final Pose3D resultPose = new Pose3D();
 
-   public IterativeClosestPointWorker(IterativeClosestPointParametersBasics icpParameters, int numberOfObjectSamples, int numberOfCorrespondences, Random random)
+   public IterativeClosestPointWorker(IterativeClosestPointParametersBasics icpParameters, int numberOfObjectSamples, Random random)
    {
       this(icpParameters,
            defaultDetectionShape,
@@ -100,7 +99,6 @@ public class IterativeClosestPointWorker
            defaultYRadius,
            defaultZRadius,
            numberOfObjectSamples,
-           numberOfCorrespondences,
            new Pose3D(),
            random);
    }
@@ -114,7 +112,6 @@ public class IterativeClosestPointWorker
                                       float yRadius,
                                       float zRadius,
                                       int numberOfObjectSamples,
-                                      int numberOfCorrespondences,
                                       Pose3DReadOnly initialPose,
                                       Random random)
    {
@@ -127,13 +124,12 @@ public class IterativeClosestPointWorker
       this.xRadius = xRadius;
       this.yRadius = yRadius;
       this.zRadius = zRadius;
-      this.numberOfCorrespondences = numberOfCorrespondences;
       this.random = random;
 
       targetPoint.set(initialPose.getPosition());
 
-      objectRelativeToCentroidPoints = new DMatrixRMaj(numberOfCorrespondences, 3);
-      measurementRelativeToCentroidPoints = new DMatrixRMaj(numberOfCorrespondences, 3);
+      objectRelativeToCentroidPoints = new DMatrixRMaj(icpParameters.getCorrespondencesToUse(), 3);
+      measurementRelativeToCentroidPoints = new DMatrixRMaj(icpParameters.getCorrespondencesToUse(), 3);
 
       localObjectPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape,
                                                                                new Pose3D(),
@@ -185,7 +181,7 @@ public class IterativeClosestPointWorker
          }
 
          // Only run ICP iteration if segmented point cloud has enough points
-         if (segmentedPointCloud.size() >= 0.25 * numberOfCorrespondences)
+         if (segmentedPointCloud.size() >= icpParameters.getMinimumCorrespondences())
          {
             objectTransformToPointCloud = computeTransformOfObjectToPointCloud();
             ranICPSuccessfully = true;
@@ -258,7 +254,7 @@ public class IterativeClosestPointWorker
                                                                   xRadius,
                                                                   yRadius,
                                                                   zRadius,
-                                                                  numberOfCorrespondences,
+                                                                  icpParameters.getCorrespondencesToUse(),
                                                                   icpParameters.getIgnoreCorrespondencesOnEdges());
       }
       else
@@ -438,7 +434,7 @@ public class IterativeClosestPointWorker
       List<Point3D32> objectInWorldPoints = getObjectPointCloud();
       int maxIterations = 2 * objectInWorldPoints.size();
 
-      while (correspondingMeasurementPointsToPack.size() < numberOfCorrespondences && measurementIdx < measurementPoints.size() && iteration < maxIterations)
+      while (correspondingMeasurementPointsToPack.size() < icpParameters.getCorrespondencesToUse() && measurementIdx < measurementPoints.size() && iteration < maxIterations)
       {
          Point3DReadOnly measurementPoint = measurementPoints.get(measurementIdx++);
          double minDistance = Double.POSITIVE_INFINITY;
@@ -491,13 +487,6 @@ public class IterativeClosestPointWorker
    public void setSceneNodeID(long id)
    {
       sceneNodeID = id;
-   }
-
-   public void setNumberOfCorrespondences(int numberOfCorrespondences)
-   {
-      this.numberOfCorrespondences = numberOfCorrespondences;
-      objectRelativeToCentroidPoints.reshape(numberOfCorrespondences, 3);
-      measurementRelativeToCentroidPoints.reshape(numberOfCorrespondences, 3);
    }
 
    public void setDetectionShape(PrimitiveRigidBodyShape shape)

@@ -13,6 +13,23 @@ public interface IterativeClosestPointParametersBasics extends IterativeClosestP
       set(IterativeClosestPointParameters.ignoreCorrespondencesOnEdges, ignoreCorrespondencesOnEdges);
    }
 
+   /**
+    * This is the number of corresponding points the algorithm attempts to use when
+    * fitting the point clouds.
+    */
+   default void setCorrespondencesToUse(int correspondencesToUse)
+   {
+      set(IterativeClosestPointParameters.correspondencesToUse, correspondencesToUse);
+   }
+
+   /**
+    * This is the minimum number of corresponding points the algorithm needs to run.
+    */
+   default void setMinimumCorrespondences(int minimumCorrespondences)
+   {
+      set(IterativeClosestPointParameters.minimumCorrespondences, minimumCorrespondences);
+   }
+
    default void setComputeObjectPoseWithTrack(boolean computeObjectPoseWithTrack)
    {
       set(IterativeClosestPointParameters.computeObjectPoseWithTrack, computeObjectPoseWithTrack);
@@ -36,5 +53,23 @@ public interface IterativeClosestPointParametersBasics extends IterativeClosestP
    default void setIterationTransformDiscountFactor(double iterationTransformDiscountFactor)
    {
       set(IterativeClosestPointParameters.iterationTransformDiscountFactor, iterationTransformDiscountFactor);
+   }
+
+   /**
+    * The higher this frequency, the more the result will bias towards the incoming
+    * measurement.
+    */
+   default void setObservationPoseFusingFrequency(double observationPoseFusingFrequency)
+   {
+      set(IterativeClosestPointParameters.observationPoseFusingFrequency, observationPoseFusingFrequency);
+   }
+
+   /**
+    * The higher this frequency, the more the resulting velocity will bias towards the
+    * new velocity
+    */
+   default void setObservationVelocityFusingFrequency(double observationVelocityFusingFrequency)
+   {
+      set(IterativeClosestPointParameters.observationVelocityFusingFrequency, observationVelocityFusingFrequency);
    }
 }
