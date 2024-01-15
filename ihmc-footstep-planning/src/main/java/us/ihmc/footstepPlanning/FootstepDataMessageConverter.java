@@ -52,13 +52,9 @@ public class FootstepDataMessageConverter
       {
          PlannedFootstep plannedFootstep = PlannedFootstep.getFromMessage(footstepMessage);
          footstepPlan.addFootstep(plannedFootstep);
-         LogTools.warn("Custom Waypoints: Before: [{}], After: [{}]", footstepMessage.getCustomPositionWaypoints().size(),
-                       plannedFootstep.getCustomWaypointPositions().size());
       }
 
-
       return footstepPlan;
-
    }
 
    public static ArrayList<Pair<RobotSide, Pose3D>> reduceFootstepPlanForUIMessager(FootstepDataListMessage footstepDataListMessage)
