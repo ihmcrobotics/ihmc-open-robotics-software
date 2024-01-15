@@ -31,7 +31,7 @@ public class IterativeClosestPointWorkerTest
       IterativeClosestPointParameters icpParameters = new IterativeClosestPointParameters();
       icpParameters.setCorrespondencesToUse(correspondences);
       icpParameters.setPointsToDescribeObjectShape(objectSamples);
-      IterativeClosestPointWorker icp = new IterativeClosestPointWorker(icpParameters, random);
+      IterativeClosestPointWorker icp = new IterativeClosestPointWorker(icpParameters);
 
       float actualBoxWidth = 0.3f;
       float actualBoxDepth = 0.4f;
@@ -62,7 +62,7 @@ public class IterativeClosestPointWorkerTest
       IterativeClosestPointParameters icpParameters = new IterativeClosestPointParameters();
       icpParameters.setCorrespondencesToUse(correspondences);
       icpParameters.setPointsToDescribeObjectShape(objectSamples);
-      IterativeClosestPointWorker icp = new IterativeClosestPointWorker(icpParameters, random);
+      IterativeClosestPointWorker icp = new IterativeClosestPointWorker(icpParameters);
 
       float actualBoxWidth = 0.3f;
       float actualBoxDepth = 0.4f;
