@@ -57,8 +57,8 @@ public class RDXIterativeClosestPointBasicWorkerDemo
    private final ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "icp_worker_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(node);
    private final IterativeClosestPointParameters icpParameters = new IterativeClosestPointParameters();
-   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(icpParameters, SHAPE_SAMPLE_POINTS, CORRESPONDENCE_POINTS, random);
-   private IterativeClosestPointObjectTrack track = new IterativeClosestPointObjectTrack();
+   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(icpParameters, SHAPE_SAMPLE_POINTS, random);
+   private IterativeClosestPointObjectTrack track = new IterativeClosestPointObjectTrack(icpParameters);
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
@@ -424,7 +424,6 @@ public class RDXIterativeClosestPointBasicWorkerDemo
                                                            yRadius.get(),
                                                            zRadius.get(),
                                                            SHAPE_SAMPLE_POINTS,
-                                                           CORRESPONDENCE_POINTS,
                                                            new FramePose3D(ReferenceFrame.getWorldFrame(), pickFramePoint, new RotationMatrix()),
                                                            random);
             }
@@ -436,6 +435,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             ImGui.sliderFloat("zRadius", zRadius.getData(), 0.0f, 1.0f);
             ImGui.sliderInt("Num Shape Samples", numberOfShapeSamples.getData(), 0, 10000);
             ImGui.sliderInt("Num Correspondences", numberOfCorrespondences.getData(), 0, 10000);
+            icpParameters.setCorrespondencesToUse(numberOfCorrespondences.get());
 
             if (ImGui.button("Apply Size"))
             {
@@ -446,7 +446,6 @@ public class RDXIterativeClosestPointBasicWorkerDemo
                icpWorker.setPoseGuess(shapeInputPose);
                track.setObjectPose(shapeInputPose);
             }
-            icpWorker.setNumberOfCorrespondences(numberOfCorrespondences.get());
             ImGui.sliderFloat("Segmentation Radius", segmentationRadius.getData(), 0.0f, 1.0f);
             icpParameters.setImageSegmentationRadius(segmentationRadius.get());
 

@@ -8,16 +8,10 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 
 public class IterativeClosestPointObjectTrack
 {
-   // the higher this frequency, the more the result will bias towards the incoming measurement.
-   private static final double observationFusingFrequency = 50.0;
-   // the higher this frequency, the more the resulting velocity will bias towards the new velocity.
-   private static final double velocityFusingFrequency = 25.0;
-
    private static final double translationResetDistance = 0.25;
    private static final double orientationResetAngle = Math.toRadians(45.0);
 
@@ -27,8 +21,11 @@ public class IterativeClosestPointObjectTrack
 
    private double mostRecentMeasurementTime;
 
-   public IterativeClosestPointObjectTrack()
+   private final IterativeClosestPointParameters icpParameters;
+
+   public IterativeClosestPointObjectTrack(IterativeClosestPointParameters icpParameters)
    {
+      this.icpParameters = icpParameters;
    }
 
    public void setObjectPose(Pose3DReadOnly objectPose)
@@ -68,7 +65,7 @@ public class IterativeClosestPointObjectTrack
 
          // update the velocity measurements using the fusing frequency. The higher the frequency, the more biased towards the velocity from the fused pose and
          // previous pose.
-         double velocityAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(velocityFusingFrequency, timeDelta);
+         double velocityAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(icpParameters.getObservationVelocityFusingFrequency(), timeDelta);
          objectLinearVelocity.interpolate(objectLinearVelocity, linearVelocityFromMeasurement, velocityAlpha);
          objectAngularVelocity.interpolate(objectAngularVelocity, angularVelocityFromMeasurement, velocityAlpha);
 
@@ -98,7 +95,7 @@ public class IterativeClosestPointObjectTrack
 
    private FramePose3DReadOnly fuseMeasuredAndPredictedPose(Pose3DReadOnly measuredObjectPose, FramePose3DReadOnly predictedObjectPose, double timeDelta)
    {
-      double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(observationFusingFrequency, timeDelta);
+      double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(icpParameters.getObservationPoseFusingFrequency(), timeDelta);
 
       FramePose3D fusedPose = new FramePose3D();
       fusedPose.getRotation().interpolate(measuredObjectPose.getRotation(), predictedObjectPose.getRotation(), alpha);

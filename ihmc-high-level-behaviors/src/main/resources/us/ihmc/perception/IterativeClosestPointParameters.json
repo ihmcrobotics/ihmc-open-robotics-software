@@ -1,9 +1,13 @@
 {
   "title" : "Iterative Closest Point Parameters",
   "Ignore correspondences on edges" : true,
+  "Correspondences to use" : [750, "This is the number of corresponding points the algorithm attempts to use when fitting the point clouds."],
+  "Minimum correspondences" : [150, "This is the minimum number of corresponding points the algorithm needs to run."],
   "Compute object pose with track" : true,
   "Segment point cloud with object shape" : true,
   "Image segmentation radius" :  0.6,
   "Prioritize correspondences by distance instead of random" : true,
-  "Iteration transform discount factor" : 1.0
+  "Iteration transform discount factor" : 1.0,
+  "Observation pose fusing frequency" : [50.0, "The higher this frequency, the more the result will bias towards the incoming measurement."],
+  "Observation velocity fusing frequency" : [20.0, "The higher this frequency, the more the resulting velocity will bias towards the new velocity"]
 }
