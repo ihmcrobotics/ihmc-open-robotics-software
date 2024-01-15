@@ -150,10 +150,19 @@ public class RawImage
       {
          throw new NullPointerException("Neither CPU nor GPU matrices were initialized");
       }
-      else if (gpuImageMatrix == null && cpuImageMatrix != null && !cpuImageMatrix.isNull())
+      else if (gpuImageMatrix == null && !cpuImageMatrix.isNull())
       {
          gpuImageMatrix = new GpuMat(imageHeight, imageWidth, openCVType);
          gpuImageMatrix.upload(cpuImageMatrix);
+      }
+
+      if (gpuImageMatrix == null || gpuImageMatrix.isNull())
+      {
+         throw new NullPointerException("Failed to initialize GPU image");
+      }
+      if (gpuImageMatrix.isNull())
+      {
+         throw new NullPointerException("Failed to upload CPU image to GPU");
       }
 
       return gpuImageMatrix;
