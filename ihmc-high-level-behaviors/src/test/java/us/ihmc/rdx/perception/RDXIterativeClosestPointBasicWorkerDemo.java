@@ -24,6 +24,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.IterativeClosestPointObjectTrack;
+import us.ihmc.perception.IterativeClosestPointParameters;
 import us.ihmc.perception.IterativeClosestPointTools;
 import us.ihmc.perception.IterativeClosestPointWorker;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
@@ -55,7 +56,8 @@ public class RDXIterativeClosestPointBasicWorkerDemo
 
    private final ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "icp_worker_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(node);
-   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(SHAPE_SAMPLE_POINTS, CORRESPONDENCE_POINTS, random);
+   private final IterativeClosestPointParameters icpParameters = new IterativeClosestPointParameters();
+   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(icpParameters, SHAPE_SAMPLE_POINTS, CORRESPONDENCE_POINTS, random);
    private IterativeClosestPointObjectTrack track = new IterativeClosestPointObjectTrack();
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
@@ -179,8 +181,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
 
       icpWorker.setTargetPoint(pickFramePoint);
       icpWorker.useProvidedTargetPoint(mouseTrackingToggle);
-      icpWorker.setSegmentSphereRadius(segmentationRadius.get());
-      if (useObjectTrackAsAPoseGuess.get())
+      if (icpParameters.getComputeObjectPoseWithTrack())
          icpWorker.setPoseGuess(track.predictObjectPoseNow());
 
       long startTimeNanos = System.nanoTime();
@@ -225,7 +226,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
       }
 
       track.updateWithMeasurement(icpWorker.getResultPose());
-      if (useObjectTrackAsAPoseGuess.get())
+      if (icpParameters.getComputeObjectPoseWithTrack())
          referenceFrameGraphic.setPoseInWorldFrame(track.getMostRecentFusedPose());
       else
          referenceFrameGraphic.setPoseInWorldFrame(icpWorker.getResultPose());
@@ -414,7 +415,8 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             if (ImGui.combo("Shape", shapeIndex, shapeValues))
             {
                shape = PrimitiveRigidBodyShape.valueOf(shapeValues[shapeIndex.get()]);
-               icpWorker = new IterativeClosestPointWorker(shape,
+               icpWorker = new IterativeClosestPointWorker(icpParameters,
+                                                           shape,
                                                            depth.get(),
                                                            width.get(),
                                                            height.get(),
@@ -446,6 +448,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             }
             icpWorker.setNumberOfCorrespondences(numberOfCorrespondences.get());
             ImGui.sliderFloat("Segmentation Radius", segmentationRadius.getData(), 0.0f, 1.0f);
+            icpParameters.setImageSegmentationRadius(segmentationRadius.get());
 
             DecimalFormat df = new DecimalFormat("#.###");
             DecimalFormat tf = new DecimalFormat("#.#########");
@@ -476,6 +479,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             ImGui.checkbox("Add ground", addGround);
             ImGui.checkbox("Filter unobservable points", filterUnobservablePoints);
             ImGui.checkbox("Use Object track as a pose guess", useObjectTrackAsAPoseGuess);
+            icpParameters.setComputeObjectPoseWithTrack(useObjectTrackAsAPoseGuess.get());
          }
 
 

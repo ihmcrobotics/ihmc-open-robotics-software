@@ -31,6 +31,7 @@ public class IterativeClosestPointManager
    private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor(openCLManager);
 
    private final Random random = new Random(System.nanoTime());
+   private final IterativeClosestPointParameters icpParameters = new IterativeClosestPointParameters();
    private final HashMap<Long, IterativeClosestPointObjectTrack> nodeIDToTrackMap = new HashMap<>();
    private final HashMap<Long, IterativeClosestPointWorker> nodeIDToWorkerMap = new HashMap<>();
    private final IHMCROS2Input<IterativeClosestPointRequest> requestMessageSubscription;
@@ -103,11 +104,11 @@ public class IterativeClosestPointManager
             if (requestMessage.getUseProvidedPose())
             {
                track.setObjectPose(requestMessage.getProvidedPose());
-               worker.setSegmentSphereRadius(0.3);
+               icpParameters.setImageSegmentationRadius(0.3); // TODO this is weird
             }
             else
             {
-               worker.setSegmentSphereRadius(0.2);
+               icpParameters.setImageSegmentationRadius(0.2); // TODO this is weird
             }
          }
       });
@@ -198,7 +199,8 @@ public class IterativeClosestPointManager
       float zRadius = requestMessage.getZRadius();
 
       int numberOfPoints = approximateNumberOfPoints(shape, xLength, yLength, zLength, xRadius, yRadius, zRadius);
-      IterativeClosestPointWorker worker = new IterativeClosestPointWorker(shape,
+      IterativeClosestPointWorker worker = new IterativeClosestPointWorker(icpParameters,
+                                                                           shape,
                                                                            xLength,
                                                                            yLength,
                                                                            zLength,

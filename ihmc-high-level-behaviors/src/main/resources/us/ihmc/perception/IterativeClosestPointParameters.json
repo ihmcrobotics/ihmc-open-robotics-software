@@ -1,0 +1,9 @@
+{
+  "title" : "Iterative Closest Point Parameters",
+  "Ignore correspondences on edges" : true,
+  "Compute object pose with track" : true,
+  "Segment point cloud with object shape" : true,
+  "Image segmentation radius" :  0.6,
+  "Prioritize correspondences by distance instead of random" : true,
+  "Iteration transform discount factor" : 1.0
+}
