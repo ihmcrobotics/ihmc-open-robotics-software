@@ -60,6 +60,7 @@ public class FunctionGeneratorErrorCalculator
 
       private final TDoubleArrayList positionErrorsSq = new TDoubleArrayList(new double[SAMPLES_PER_PERIOD]);
       private final TDoubleArrayList velocityErrorsSq = new TDoubleArrayList(new double[SAMPLES_PER_PERIOD]);
+      private boolean firstTick = true;
 
       TrajectorySignal(YoFunctionGeneratorNew functionGenerator, OneDoFJointBasics joint, YoRegistry registry)
       {
@@ -77,8 +78,9 @@ public class FunctionGeneratorErrorCalculator
 
       void update()
       {
-         if (!EuclidCoreTools.epsilonEquals(functionGenerator.getFrequency(), previousFrequency.getValue(), 1e-5))
+         if (firstTick || !EuclidCoreTools.epsilonEquals(functionGenerator.getFrequency(), previousFrequency.getValue(), 1e-5))
          {
+            firstTick = false;
             previousFrequency.set(functionGenerator.getFrequency());
             double periodDuration = 1.0 / functionGenerator.getFrequency();
             double sampleDT = periodDuration / SAMPLES_PER_PERIOD;
@@ -92,7 +94,7 @@ public class FunctionGeneratorErrorCalculator
          }
 
          long count = controllerCounter.getValue() - startCount.getValue();
-         if (count % controlTicksPerSample.getValue() == 0)
+         if (controlTicksPerSample.getValue() > 0 && count % controlTicksPerSample.getValue() == 0)
          {
             positionErrorsSq.set(counter.getValue(), EuclidCoreTools.square(functionGenerator.getValue() - joint.getQ()));
             velocityErrorsSq.set(counter.getValue(), EuclidCoreTools.square(functionGenerator.getValueDot() - joint.getQd()));
