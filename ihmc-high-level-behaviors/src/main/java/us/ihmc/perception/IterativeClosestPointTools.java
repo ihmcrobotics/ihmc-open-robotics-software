@@ -30,9 +30,9 @@ public class IterativeClosestPointTools
                                                  float xRadius,
                                                  float yRadius,
                                                  float zRadius,
-                                                 boolean ignoreShapeType)
+                                                 boolean segmentPointCloudWithObjectShape)
    {
-      if (ignoreShapeType)
+      if (!segmentPointCloudWithObjectShape)
       {
          return pointQuery.distanceSquared(shapePose.getPosition());
       }

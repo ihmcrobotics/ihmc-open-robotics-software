@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.perception.IterativeClosestPointParameters;
 import us.ihmc.perception.IterativeClosestPointWorker;
 import us.ihmc.perception.OpenCLPointCloudExtractor;
 import us.ihmc.perception.RawImage;
@@ -61,7 +62,8 @@ public class RDXIterativeClosestPointWorkerDemo
    private final ZEDColorDepthImagePublisher zedImagePublisher;
    private RawImage zedDepthImage;
    private RawImage zedLeftColorImage;
-   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(MAX_ENVIRONMENT_SIZE, CORRESPONDENCES, random);
+   private final IterativeClosestPointParameters icpParameters = new IterativeClosestPointParameters();
+   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(icpParameters, MAX_ENVIRONMENT_SIZE, CORRESPONDENCES, random);
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
@@ -143,7 +145,6 @@ public class RDXIterativeClosestPointWorkerDemo
 
       icpWorker.setTargetPoint(shapeInputPose.getPosition());
       icpWorker.useProvidedTargetPoint(mouseTrackingToggle);
-      icpWorker.setSegmentSphereRadius(segmentationRadius.get());
 
       long startTimeNanos = System.nanoTime();
       boolean success = icpWorker.runICP(numberOfIterations.get());
@@ -285,7 +286,8 @@ public class RDXIterativeClosestPointWorkerDemo
             if (ImGui.combo("Shape", shapeIndex, shapeValues))
             {
                shape = PrimitiveRigidBodyShape.valueOf(shapeValues[shapeIndex.get()]);
-               icpWorker = new IterativeClosestPointWorker(shape,
+               icpWorker = new IterativeClosestPointWorker(icpParameters,
+                                                           shape,
                                                            depth.get(),
                                                            width.get(),
                                                            height.get(),
@@ -311,6 +313,7 @@ public class RDXIterativeClosestPointWorkerDemo
                icpWorker.setNumberOfCorrespondences(numberOfCorespondences.get());
             }
             ImGui.sliderFloat("Segmentation Radius", segmentationRadius.getData(), 0.0f, 1.0f);
+            icpParameters.setImageSegmentationRadius(segmentationRadius.get());
             ImGui.sliderInt("Number of Iterations", numberOfIterations.getData(), 1, 10);
 
             ImGui.separator();

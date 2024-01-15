@@ -26,12 +26,7 @@ import static us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBo
 
 public class IterativeClosestPointWorker
 {
-   private static final double discountFactor = 1.0;
-
-   private static final boolean ignoreShapeTypeWhenSegmenting = false;
    private static final boolean useParallelStreams = false;
-   private static final boolean sortByDistanceNotRandom = false;
-   private static final boolean ignoreCorrespondencesOnEdges = true;
 
    private static final float defaultXLength = 0.2f;
    private static final float defaultYLength = 0.4f;
@@ -49,6 +44,8 @@ public class IterativeClosestPointWorker
          return Double.compare(o1.getDistanceSquared(), o2.getDistanceSquared());
       }
    };
+
+   private final IterativeClosestPointParametersBasics icpParameters;
 
    private final Random random;
 
@@ -92,9 +89,10 @@ public class IterativeClosestPointWorker
 
    private final Pose3D resultPose = new Pose3D();
 
-   public IterativeClosestPointWorker(int numberOfObjectSamples, int numberOfCorrespondences, Random random)
+   public IterativeClosestPointWorker(IterativeClosestPointParametersBasics icpParameters, int numberOfObjectSamples, int numberOfCorrespondences, Random random)
    {
-      this(defaultDetectionShape,
+      this(icpParameters,
+           defaultDetectionShape,
            defaultXLength,
            defaultYLength,
            defaultZLength,
@@ -107,7 +105,8 @@ public class IterativeClosestPointWorker
            random);
    }
 
-   public IterativeClosestPointWorker(PrimitiveRigidBodyShape objectShape,
+   public IterativeClosestPointWorker(IterativeClosestPointParametersBasics icpParameters,
+                                      PrimitiveRigidBodyShape objectShape,
                                       float xLength,
                                       float yLength,
                                       float zLength,
@@ -119,6 +118,8 @@ public class IterativeClosestPointWorker
                                       Pose3DReadOnly initialPose,
                                       Random random)
    {
+      this.icpParameters = icpParameters;
+
       detectionShape = objectShape;
       this.xLength = xLength;
       this.yLength = yLength;
@@ -165,7 +166,7 @@ public class IterativeClosestPointWorker
          if (objectTransformToPointCloud != null)
          {
             // Update the object pose to fit the point cloud. Use the discount factor to represent the fact that this is an interative algorithm.
-            updateObjectPose(objectTransformToPointCloud, discountFactor);
+            updateObjectPose(objectTransformToPointCloud, icpParameters.getIterationTransformDiscountFactor());
          }
 
          // Segment the point cloud
@@ -176,11 +177,11 @@ public class IterativeClosestPointWorker
 
             // TODO: find way to make shape segmentation not suck ICP into ground (without side effects)
             if (numberOfIterations > 1 && i == 0)  // Running multiple iterations, on first iteration segment & find neighbors
-               segmentedPointCloud = segmentPointCloudAndFindNeighbors(measurementPointCloud, detectionPoint, segmentSphereRadius);
+               segmentedPointCloud = segmentPointCloudAndFindNeighbors(measurementPointCloud, detectionPoint, icpParameters.getImageSegmentationRadius());
             else if (numberOfIterations > 1)       // Running multiple iterations, on following iterations use neighbor points for segmentation (faster)
-               segmentedPointCloud = segmentPointCloud(neighborPointCloud, detectionPoint, segmentSphereRadius);
+               segmentedPointCloud = segmentPointCloud(neighborPointCloud, detectionPoint, icpParameters.getImageSegmentationRadius());
             else                                   // Running only one iteration, don't bother finding neighbors
-               segmentedPointCloud = segmentPointCloud(measurementPointCloud, detectionPoint, segmentSphereRadius);
+               segmentedPointCloud = segmentPointCloud(measurementPointCloud, detectionPoint, icpParameters.getImageSegmentationRadius());
          }
 
          // Only run ICP iteration if segmented point cloud has enough points
@@ -235,7 +236,7 @@ public class IterativeClosestPointWorker
    // TODO: Pass in a Pose to transform (all object points define WRT the pose of object)
    private RigidBodyTransformReadOnly computeTransformOfObjectToPointCloud()
    {
-      if (sortByDistanceNotRandom)
+      if (icpParameters.getPrioritizeCorrespondencesByDistanceInsteadOfRandom())
          segmentedPointCloud.sort(distanceComparator);
       else
          Collections.shuffle(segmentedPointCloud, random);
@@ -258,7 +259,7 @@ public class IterativeClosestPointWorker
                                                                   yRadius,
                                                                   zRadius,
                                                                   numberOfCorrespondences,
-                                                                  ignoreCorrespondencesOnEdges);
+                                                                  icpParameters.getIgnoreCorrespondencesOnEdges());
       }
       else
       {
@@ -315,14 +316,14 @@ public class IterativeClosestPointWorker
       // Create the transform, and set the rotation, so it's a pure rotation transform
       optimalRotationMatrix.set(optimalRotation);
       RigidBodyTransform objectToMeasurementTransform = new RigidBodyTransform();
-      objectToMeasurementTransform.getRotation().interpolate(optimalRotationMatrix, discountFactor);
+      objectToMeasurementTransform.getRotation().set(optimalRotationMatrix);
 
       // Calcualte the necessary translation
       objectToMeasurementTransform.transform(objectCentroid, objectAdjustedLocation);
       objectTranslation.sub(measurementCentroid, objectAdjustedLocation);
 
       // set that translation into the transform
-      objectToMeasurementTransform.getTranslation().setAndScale(discountFactor, objectTranslation);
+      objectToMeasurementTransform.getTranslation().set(objectTranslation);
 
       // Rotate and translate the resulting pose according to the correction transform.
       return objectToMeasurementTransform;
@@ -346,7 +347,7 @@ public class IterativeClosestPointWorker
                                                                                                             xRadius,
                                                                                                             yRadius,
                                                                                                             zRadius,
-                                                                                                            ignoreShapeTypeWhenSegmenting);
+                                                                                                            icpParameters.getSegmentPointCloudWithObjectShape());
                                       return new DistancedPoint(point, distance);
                                    }).filter(point -> point.getDistanceSquared() <= cutoffSquare).collect(Collectors.toList());
    }
@@ -367,7 +368,7 @@ public class IterativeClosestPointWorker
                                                                                                                                             xRadius,
                                                                                                                                             yRadius,
                                                                                                                                             zRadius,
-                                                                                                                                            ignoreShapeTypeWhenSegmenting);
+                                                                                                                                            icpParameters.getSegmentPointCloudWithObjectShape());
                                                                       return new DistancedPoint(point, distance);
                                                                    }).toList();
 
@@ -475,11 +476,6 @@ public class IterativeClosestPointWorker
       {
          measurementPointCloud = pointCloud;
       }
-   }
-
-   public void setSegmentSphereRadius(double radius)
-   {
-      segmentSphereRadius = radius;
    }
 
    public void useProvidedTargetPoint(boolean targetPointOn)
