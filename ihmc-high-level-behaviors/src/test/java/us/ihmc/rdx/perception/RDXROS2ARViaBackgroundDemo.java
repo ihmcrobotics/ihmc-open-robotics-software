@@ -47,7 +47,7 @@ public class RDXROS2ARViaBackgroundDemo
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
             baseUI.getPrimaryScene().getSceneLevelsToRender().remove(RDXSceneLevel.MODEL);
-            environmentBuilder.loadEnvironment("LookAndStepHard.json");
+            environmentBuilder.loadEnvironment("FlatGround.json");
 
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
             sensorPoseGizmo.setResizeAutomatically(true);

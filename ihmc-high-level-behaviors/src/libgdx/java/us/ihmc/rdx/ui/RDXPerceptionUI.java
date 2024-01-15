@@ -11,8 +11,6 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.logging.RDXPerceptionDataLoaderPanel;
 import us.ihmc.rdx.logging.RDXPerceptionDataLoggerPanel;
 import us.ihmc.rdx.perception.RDXRemotePerceptionUI;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.simulation.environment.RDXBuildingConstructor;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.ui.graphics.ros2.*;
 import us.ihmc.rdx.ui.graphics.RDXGeneralToolsPanel;
@@ -33,7 +31,6 @@ public class RDXPerceptionUI
    private PerceptionDataLogger logger;
 
    private RDXEnvironmentBuilder environmentBuilder;
-   private RDXBuildingConstructor buildingConstructor;
    private RDXRemotePerceptionUI remotePerceptionUI;
 
    public RDXPerceptionUI()
@@ -161,7 +158,6 @@ public class RDXPerceptionUI
 
 
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
-            buildingConstructor = new RDXBuildingConstructor(baseUI.getPrimary3DPanel());
 
             perceptionLoggingPanel = new RDXPerceptionDataLoggerPanel("Perception Logger", logger);
             baseUI.getImGuiPanelManager().addPanel(perceptionLoggingPanel);
@@ -171,7 +167,6 @@ public class RDXPerceptionUI
 
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.getImGuiPanelManager().addPanel(buildingConstructor.getPanelName(), buildingConstructor::renderImGuiWidgets);
 
             baseUI.create();
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI);
@@ -180,11 +175,7 @@ public class RDXPerceptionUI
             remotePerceptionUI.setBlackflyLensProperties(SensorHeadParameters.BENCHTOP_BLACKFLY_LENS_COMBO);
 
             environmentBuilder.create();
-            environmentBuilder.loadEnvironment("DemoPullDoor.json");
-
-            buildingConstructor.create();
-            baseUI.getPrimaryScene().addRenderableProvider(buildingConstructor::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
-            baseUI.getPrimaryScene().addRenderableProvider(buildingConstructor::getRealRenderables, RDXSceneLevel.MODEL);
+            environmentBuilder.loadEnvironment("FlatGround.json");
 
             globalVisualizersUI.create();
          }

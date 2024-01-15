@@ -54,7 +54,7 @@ public class RDXFFMPEGL515DepthLoggingDemo
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            environmentBuilder.loadEnvironment("DemoPullDoor.json");
+            environmentBuilder.loadEnvironment("FlatGround.json");
 
             robotInteractableReferenceFrame = new RDXInteractableReferenceFrame();
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
