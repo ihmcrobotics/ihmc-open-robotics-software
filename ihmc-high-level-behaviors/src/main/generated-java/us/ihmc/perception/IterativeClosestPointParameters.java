@@ -28,8 +28,21 @@ public class IterativeClosestPointParameters extends StoredPropertySet implement
     * This is the minimum number of corresponding points the algorithm needs to run.
     */
    public static final IntegerStoredPropertyKey minimumCorrespondences = keys.addIntegerKey("Minimum correspondences");
+   /**
+    * When doing point to point matching, this is the number of points used to
+    * describe the object
+    */
+   public static final IntegerStoredPropertyKey pointsToDescribeObjectShape = keys.addIntegerKey("Points to describe object shape");
+   /**
+    * If this is true, we use a velocity to predict the next pose of the object.
+    */
    public static final BooleanStoredPropertyKey computeObjectPoseWithTrack = keys.addBooleanKey("Compute object pose with track");
    public static final BooleanStoredPropertyKey segmentPointCloudWithObjectShape = keys.addBooleanKey("Segment point cloud with object shape");
+   /**
+    * This is the distance from the object to include in the point cloud. If
+    * segmenting with the shape, it's the distance to the shape. If not, it's the
+    * distance to the centroid
+    */
    public static final DoubleStoredPropertyKey imageSegmentationRadius = keys.addDoubleKey("Image segmentation radius");
    public static final BooleanStoredPropertyKey prioritizeCorrespondencesByDistanceInsteadOfRandom = keys.addBooleanKey("Prioritize correspondences by distance instead of random");
    public static final DoubleStoredPropertyKey iterationTransformDiscountFactor = keys.addDoubleKey("Iteration transform discount factor");
@@ -43,6 +56,16 @@ public class IterativeClosestPointParameters extends StoredPropertySet implement
     * new velocity
     */
    public static final DoubleStoredPropertyKey observationVelocityFusingFrequency = keys.addDoubleKey("Observation velocity fusing frequency");
+   /**
+    * If the prediction error is above this value vs measured, we reset to the
+    * measurement.
+    */
+   public static final DoubleStoredPropertyKey trackPredictionTranslationErrorToReset = keys.addDoubleKey("Track prediction translation error to reset");
+   /**
+    * If the prediction error is above this value vs measured, we reset to the
+    * measurement.
+    */
+   public static final DoubleStoredPropertyKey trackPredictionOrientationErrorToReset = keys.addDoubleKey("Track prediction orientation error to reset");
 
    /**
     * Loads this property set.

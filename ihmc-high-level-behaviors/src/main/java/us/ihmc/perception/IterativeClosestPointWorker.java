@@ -69,8 +69,6 @@ public class IterativeClosestPointWorker
    private final Object measurementPointCloudSynchronizer = new Object();
 
    private List<DistancedPoint> segmentedPointCloud;
-   private double segmentSphereRadius = 1.0;
-
    private List<DistancedPoint> neighborPointCloud;
 
    private List<Point3DReadOnly> correspondingObjectPoints;
@@ -88,7 +86,7 @@ public class IterativeClosestPointWorker
 
    private final Pose3D resultPose = new Pose3D();
 
-   public IterativeClosestPointWorker(IterativeClosestPointParametersBasics icpParameters, int numberOfObjectSamples, Random random)
+   public IterativeClosestPointWorker(IterativeClosestPointParametersBasics icpParameters, Random random)
    {
       this(icpParameters,
            defaultDetectionShape,
@@ -98,7 +96,6 @@ public class IterativeClosestPointWorker
            defaultXRadius,
            defaultYRadius,
            defaultZRadius,
-           numberOfObjectSamples,
            new Pose3D(),
            random);
    }
@@ -111,7 +108,6 @@ public class IterativeClosestPointWorker
                                       float xRadius,
                                       float yRadius,
                                       float zRadius,
-                                      int numberOfObjectSamples,
                                       Pose3DReadOnly initialPose,
                                       Random random)
    {
@@ -139,7 +135,7 @@ public class IterativeClosestPointWorker
                                                                                xRadius,
                                                                                yRadius,
                                                                                zRadius,
-                                                                               numberOfObjectSamples,
+                                                                               icpParameters.getPointsToDescribeObjectShape(),
                                                                                random);
       setPoseGuess(initialPose);
    }
@@ -492,10 +488,10 @@ public class IterativeClosestPointWorker
    public void setDetectionShape(PrimitiveRigidBodyShape shape)
    {
       detectionShape = shape;
-      changeSize(xLength, yLength, zLength, xRadius, yRadius, zRadius, localObjectPoints.size());
+      changeSize(xLength, yLength, zLength, xRadius, yRadius, zRadius);
    }
 
-   public void changeSize(float xLength, float yLength, float zLength, float xRadius, float yRadius, float zRadius, int numberOfObjectSamples)
+   public void changeSize(float xLength, float yLength, float zLength, float xRadius, float yRadius, float zRadius)
    {
       this.xLength = xLength;
       this.yLength = yLength;
@@ -512,7 +508,7 @@ public class IterativeClosestPointWorker
                                                                                xRadius,
                                                                                yRadius,
                                                                                zRadius,
-                                                                               numberOfObjectSamples,
+                                                                               icpParameters.getPointsToDescribeObjectShape(),
                                                                                random);
       setPoseGuess(resultPose);
    }

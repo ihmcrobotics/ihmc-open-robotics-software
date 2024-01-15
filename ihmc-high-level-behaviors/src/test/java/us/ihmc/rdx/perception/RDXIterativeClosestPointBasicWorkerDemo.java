@@ -57,7 +57,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
    private final ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "icp_worker_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(node);
    private final IterativeClosestPointParameters icpParameters = new IterativeClosestPointParameters();
-   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(icpParameters, SHAPE_SAMPLE_POINTS, random);
+   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(icpParameters, random);
    private IterativeClosestPointObjectTrack track = new IterativeClosestPointObjectTrack(icpParameters);
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
@@ -171,7 +171,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
 
       if (firstTick)
       {
-         icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get(), numberOfShapeSamples.get());
+         icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get());
          icpWorker.setPoseGuess(shapeInputPose);
          track.setObjectPose(shapeInputPose);
          firstTick = false;
@@ -423,7 +423,6 @@ public class RDXIterativeClosestPointBasicWorkerDemo
                                                            xRadius.get(),
                                                            yRadius.get(),
                                                            zRadius.get(),
-                                                           SHAPE_SAMPLE_POINTS,
                                                            new FramePose3D(ReferenceFrame.getWorldFrame(), pickFramePoint, new RotationMatrix()),
                                                            random);
             }
@@ -434,12 +433,13 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             ImGui.sliderFloat("yRadius", yRadius.getData(), 0.0f, 1.0f);
             ImGui.sliderFloat("zRadius", zRadius.getData(), 0.0f, 1.0f);
             ImGui.sliderInt("Num Shape Samples", numberOfShapeSamples.getData(), 0, 10000);
+            icpParameters.setPointsToDescribeObjectShape(numberOfShapeSamples.get());
             ImGui.sliderInt("Num Correspondences", numberOfCorrespondences.getData(), 0, 10000);
             icpParameters.setCorrespondencesToUse(numberOfCorrespondences.get());
 
             if (ImGui.button("Apply Size"))
             {
-               icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get(), numberOfShapeSamples.get());
+               icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get());
             }
             if (ImGui.button("Reset pose"))
             {
