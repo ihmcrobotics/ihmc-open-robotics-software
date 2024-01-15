@@ -2,17 +2,24 @@ package us.ihmc.perception;
 
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTools;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 
 public class IterativeClosestPointObjectTrack
 {
-   private static double observationFusingFrequency = 50.0;
-   private static double velocityFusingFrequency = 25.0;
+   // the higher this frequency, the more the result will bias towards the incoming measurement.
+   private static final double observationFusingFrequency = 50.0;
+   // the higher this frequency, the more the resulting velocity will bias towards the new velocity.
+   private static final double velocityFusingFrequency = 25.0;
+
+   private static final double translationResetDistance = 0.25;
+   private static final double orientationResetAngle = Math.toRadians(45.0);
 
    private final FramePose3D objectPose = new FramePose3D();
    private final FrameVector3D objectLinearVelocity = new FrameVector3D();
@@ -21,7 +28,8 @@ public class IterativeClosestPointObjectTrack
    private double mostRecentMeasurementTime;
 
    public IterativeClosestPointObjectTrack()
-   {}
+   {
+   }
 
    public void setObjectPose(Pose3DReadOnly objectPose)
    {
@@ -39,19 +47,33 @@ public class IterativeClosestPointObjectTrack
 
       double timeDelta = mostRecentMeasurementTime - oldTime;
 
+      // TODO should we decay the current velocity?
       FramePose3DReadOnly posePrediction = predictObjectPoseCurrentVelocities(timeDelta);
 
-      FramePose3DReadOnly fusedPose = fuseMeasuredAndPredictedPose(measuredObjectPose, posePrediction, timeDelta);
+      // If the error between the prediction and the measurement is too great, reset to the measurement.
+      boolean aboveTranslationThreshold = posePrediction.getPosition().distanceSquared(measuredObjectPose.getPosition()) > MathTools.square(translationResetDistance);
+      boolean aboveRotationThreshold = Math.abs(posePrediction.getOrientation().distance(measuredObjectPose.getOrientation())) > orientationResetAngle;
+      if (aboveTranslationThreshold || aboveRotationThreshold)
+      {
+         objectPose.set(measuredObjectPose);
+         objectLinearVelocity.setToZero();
+         objectAngularVelocity.setToZero();
+      }
+      else
+      {
+         FramePose3DReadOnly fusedPose = fuseMeasuredAndPredictedPose(measuredObjectPose, posePrediction, timeDelta);
 
-      FrameVector3DReadOnly linearVelocityFromMeasurement = computeLinearVelocity(fusedPose, objectPose, timeDelta);
-      FrameVector3DReadOnly angularVelocityFromMeasurement = computeAngularVelocity(fusedPose, objectPose, timeDelta);
+         FrameVector3DReadOnly linearVelocityFromMeasurement = computeLinearVelocity(fusedPose, objectPose, timeDelta);
+         FrameVector3DReadOnly angularVelocityFromMeasurement = computeAngularVelocity(fusedPose, objectPose, timeDelta);
 
-      // update the velocity measurements using the fusing frequency.
-      double velocityALpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(velocityFusingFrequency, timeDelta);
-      objectLinearVelocity.interpolate(objectLinearVelocity, linearVelocityFromMeasurement, velocityALpha);
-      objectAngularVelocity.interpolate(objectAngularVelocity, angularVelocityFromMeasurement, velocityALpha);
+         // update the velocity measurements using the fusing frequency. The higher the frequency, the more biased towards the velocity from the fused pose and
+         // previous pose.
+         double velocityAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(velocityFusingFrequency, timeDelta);
+         objectLinearVelocity.interpolate(objectLinearVelocity, linearVelocityFromMeasurement, velocityAlpha);
+         objectAngularVelocity.interpolate(objectAngularVelocity, angularVelocityFromMeasurement, velocityAlpha);
 
-      this.objectPose.set(fusedPose);
+         objectPose.set(fusedPose);
+      }
    }
 
    public FramePose3DReadOnly getMostRecentFusedPose()
@@ -67,7 +89,7 @@ public class IterativeClosestPointObjectTrack
 
    private FramePose3DReadOnly predictObjectPoseCurrentVelocities(double timeDelta)
    {
-      FramePose3D posePrediction = new FramePose3D(objectPose);
+      FramePose3D posePrediction = new FramePose3D();
       KSTTools.integrateLinearVelocity(timeDelta, objectPose.getPosition(), objectLinearVelocity, posePrediction.getPosition());
       KSTTools.integrateAngularVelocity(timeDelta, objectPose.getOrientation(), objectAngularVelocity, posePrediction.getOrientation());
 
@@ -79,8 +101,8 @@ public class IterativeClosestPointObjectTrack
       double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(observationFusingFrequency, timeDelta);
 
       FramePose3D fusedPose = new FramePose3D();
-      fusedPose.getRotation().interpolate(predictedObjectPose.getRotation(), measuredObjectPose.getRotation(), alpha);
-      fusedPose.getTranslation().interpolate(predictedObjectPose.getTranslation(), measuredObjectPose.getTranslation(), alpha);
+      fusedPose.getRotation().interpolate(measuredObjectPose.getRotation(), predictedObjectPose.getRotation(), alpha);
+      fusedPose.getTranslation().interpolate(measuredObjectPose.getTranslation(), predictedObjectPose.getTranslation(), alpha);
 
       return fusedPose;
    }
