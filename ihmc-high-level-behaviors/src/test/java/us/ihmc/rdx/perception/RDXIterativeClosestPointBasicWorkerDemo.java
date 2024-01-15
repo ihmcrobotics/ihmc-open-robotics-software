@@ -101,6 +101,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
    private final ImBoolean icpGuiAutoMoveEnv = new ImBoolean(true);
    private final ImBoolean addGround = new ImBoolean(false);
    private final ImBoolean filterUnobservablePoints = new ImBoolean(false);
+   private final ImBoolean useObjectTrackAsAPoseGuess = new ImBoolean(true);
 
    // These are the actual shape pose
    private final float[] icpGuiShapeSetPostionX = {2.5f};
@@ -179,7 +180,8 @@ public class RDXIterativeClosestPointBasicWorkerDemo
       icpWorker.setTargetPoint(pickFramePoint);
       icpWorker.useProvidedTargetPoint(mouseTrackingToggle);
       icpWorker.setSegmentSphereRadius(segmentationRadius.get());
-      icpWorker.setPoseGuess(track.predictObjectPoseNow());
+      if (useObjectTrackAsAPoseGuess.get())
+         icpWorker.setPoseGuess(track.predictObjectPoseNow());
 
       long startTimeNanos = System.nanoTime();
       boolean success = icpWorker.runICP(icpGuiNumICPIterations[0]);
@@ -223,7 +225,10 @@ public class RDXIterativeClosestPointBasicWorkerDemo
       }
 
       track.updateWithMeasurement(icpWorker.getResultPose());
-      referenceFrameGraphic.setPoseInWorldFrame(track.getMostRecentFusedPose());
+      if (useObjectTrackAsAPoseGuess.get())
+         referenceFrameGraphic.setPoseInWorldFrame(track.getMostRecentFusedPose());
+      else
+         referenceFrameGraphic.setPoseInWorldFrame(icpWorker.getResultPose());
    }
 
    private void addGroundToPointCloud(List<Point3D32> pointsToAdd)
@@ -434,6 +439,11 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             {
                icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get(), numberOfShapeSamples.get());
             }
+            if (ImGui.button("Reset pose"))
+            {
+               icpWorker.setPoseGuess(shapeInputPose);
+               track.setObjectPose(shapeInputPose);
+            }
             icpWorker.setNumberOfCorrespondences(numberOfCorrespondences.get());
             ImGui.sliderFloat("Segmentation Radius", segmentationRadius.getData(), 0.0f, 1.0f);
 
@@ -465,6 +475,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             ImGui.checkbox("Auto Move", icpGuiAutoMoveEnv);
             ImGui.checkbox("Add ground", addGround);
             ImGui.checkbox("Filter unobservable points", filterUnobservablePoints);
+            ImGui.checkbox("Use Object track as a pose guess", useObjectTrackAsAPoseGuess);
          }
 
 
