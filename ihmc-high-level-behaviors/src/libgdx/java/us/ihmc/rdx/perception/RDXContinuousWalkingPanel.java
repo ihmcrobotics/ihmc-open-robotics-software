@@ -67,7 +67,10 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    private final ImBoolean showStateSpheres = new ImBoolean(true);
    private final ImBoolean showExpansionSpheres = new ImBoolean(true);
    private final ImBoolean localRenderMode = new ImBoolean(false);
-   private final ImBoolean useMonteCarloReference = new ImBoolean(true);
+   private final ImBoolean useMonteCarloReference = new ImBoolean(false);
+   private final ImBoolean useHybridPlanner = new ImBoolean(false);
+   private final ImBoolean useAStarFootstepPlanner = new ImBoolean(false);
+   private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(true);
 
    private RDXStancePoseSelectionPanel stancePoseSelectionPanel;
    private final IHMCROS2Publisher<ContinuousWalkingCommandMessage> commandPublisher;
@@ -236,6 +239,8 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       ImGui.checkbox("Show Continuous Walking Plan", showContinuousWalkingPlan);
       ImGui.checkbox("Show State Spheres", showStateSpheres);
       ImGui.checkbox("Show Expansion Spheres", showExpansionSpheres);
+      ImGui.checkbox("Use A* Footstep Planner", useAStarFootstepPlanner);
+      ImGui.checkbox("Use Monte-Carlo Footstep Planner", useMonteCarloFootstepPlanner);
 
       publishInputCommandMessage();
    }
@@ -335,6 +340,12 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
          commandMessage.setForwardValue(forwardJoystickValue);
          commandMessage.setLateralValue(lateralJoystickValue);
          commandMessage.setTurningValue(turningJoystickValue);
+         commandMessage.setUseMonteCarloFootstepPlanner(useMonteCarloFootstepPlanner.get());
+         commandMessage.setUseAstarFootstepPlanner(useAStarFootstepPlanner.get());
+         commandMessage.setUseMonteCarloPlanAsReference(useMonteCarloReference.get());
+         commandMessage.setUsePreviousPlanAsReference(!useMonteCarloReference.get());
+         commandMessage.setUseHybridPlanner(useHybridPlanner.get());
+
          commandPublisher.publish(commandMessage);
       }
    }

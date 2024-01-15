@@ -35,6 +35,26 @@ module behavior_msgs
          * turning joystick value
          */
         double turning_value;
+        /**
+         * flag to enable/disable hybrid planning
+         */
+        boolean use_hybrid_planner;
+        /**
+         * flag to enable/disable planning with astar planner
+         */
+        boolean use_astar_footstep_planner;
+        /**
+         * flag to enable/disable planning with monte-carlo footstep planner
+         */
+        boolean use_monte_carlo_footstep_planner;
+        /**
+         * flag to enable/disable using previous plan as reference
+         */
+        boolean use_previous_plan_as_reference;
+        /**
+         * flag to enable/disable using monte-carlo plan as reference
+         */
+        boolean use_monte_carlo_plan_as_reference;
       };
     };
   };

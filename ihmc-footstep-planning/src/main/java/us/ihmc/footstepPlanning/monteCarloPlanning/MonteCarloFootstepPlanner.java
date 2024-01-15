@@ -27,6 +27,9 @@ public class MonteCarloFootstepPlanner
    private final Random random = new Random();
    private SideDependentList<ConvexPolygon2D> footPolygons;
 
+   private double startTime = 0;
+   private double timeSpentPlanningSoFar = 0;
+
    private boolean planning = false;
    private int uniqueNodeId = 0;
    private int cellsPerMeter = 50;
@@ -41,6 +44,7 @@ public class MonteCarloFootstepPlanner
 
    public FootstepPlan generateFootstepPlan(MonteCarloFootstepPlannerRequest request)
    {
+      this.startTime = System.nanoTime() / 1e9;
       this.request = request;
       planning = true;
 
@@ -74,12 +78,21 @@ public class MonteCarloFootstepPlanner
       statistics.setLayerCountsString(MonteCarloPlannerTools.getLayerCountsString(root));
       statistics.logToFile(true, true);
 
+      if (timeSpentPlanningSoFar > request.getTimeout())
+         LogTools.warn("[Monte-Carlo Footstep Planner] Timeout Reached: Spent:{} / Allowed:{}", timeSpentPlanningSoFar, request.getTimeout());
+
       planning = false;
       return plan;
    }
 
    public void updateTree(MonteCarloFootstepNode node, MonteCarloFootstepPlannerRequest request)
    {
+      timeSpentPlanningSoFar = System.nanoTime() / 1e9 - startTime;
+      if (timeSpentPlanningSoFar > request.getTimeout())
+      {
+         return;
+      }
+
       if (node == null)
       {
          LogTools.debug("Node is null");
@@ -242,14 +255,14 @@ public class MonteCarloFootstepPlanner
          child.getParents().clear();
       }
       MonteCarloFootstepNode maxNode = (MonteCarloFootstepNode) root.getMaxQueueNode();
-      Vector3D action = new Vector3D(maxNode.getState());
-      action.sub(root.getState());
-      action.scale(1 / 50.0);
 
       root = maxNode;
       MonteCarloPlannerTools.pruneTree(root, parameters.getMaxNumberOfChildNodes());
       MonteCarloPlannerTools.resetNodeLevels(root, 0);
 
+      Vector3D action = new Vector3D(maxNode.getState());
+      action.sub(root.getState());
+      action.scale(1 / 50.0);
       return action;
    }
 

@@ -12,7 +12,7 @@
     "upperBound" : 400
   },
   "Timeout duration" : {
-    "value" : 0.1,
+    "value" : 0.05,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
@@ -37,12 +37,12 @@
     "upperBound" : 1000
   },
   "Max transfer height" : {
-    "value" : 0.448916,
+    "value" : 0.35,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
   "Max transfer depth" : {
-    "value" : 0.452136,
+    "value" : 0.35,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
@@ -62,17 +62,17 @@
     "upperBound" : 1000
   },
   "Max tree depth" : {
-    "value" : 5,
+    "value" : 4,
     "lowerBound" : 2,
     "upperBound" : 12
   },
   "Search inner radius" : {
-    "value" : 0.203077,
+    "value" : 0.25,
     "lowerBound" : 0.0,
     "upperBound" : 0.3
   },
   "Search outer radius" : {
-    "value" : 0.680412,
+    "value" : 0.65,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -82,22 +82,22 @@
     "upperBound" : 10
   },
   "Maximum step width" : {
-    "value" : 0.6,
+    "value" : 0.45,
     "lowerBound" : 0.2,
     "upperBound" : 0.5
   },
   "Maximum step length" : {
-    "value" : 0.7,
+    "value" : 0.65,
     "lowerBound" : 0.2,
     "upperBound" : 0.7
   },
   "Minimum step width" : {
-    "value" : 0.157292,
+    "value" : 0.15,
     "lowerBound" : 0.1,
     "upperBound" : 0.3
   },
   "Minimum step length" : {
-    "value" : 0.1,
+    "value" : 0.15,
     "lowerBound" : 0.1,
     "upperBound" : 0.3
   }

@@ -58,11 +58,6 @@ public interface ContinuousWalkingParametersBasics extends ContinuousWalkingPara
       set(ContinuousWalkingParameters.plannerTimeoutFraction, plannerTimeoutFraction);
    }
 
-   default void setPlanningReferenceTimeout(double planningReferenceTimeout)
-   {
-      set(ContinuousWalkingParameters.planningReferenceTimeout, planningReferenceTimeout);
-   }
-
    default void setPlanningWithoutReferenceTimeout(double planningWithoutReferenceTimeout)
    {
       set(ContinuousWalkingParameters.planningWithoutReferenceTimeout, planningWithoutReferenceTimeout);

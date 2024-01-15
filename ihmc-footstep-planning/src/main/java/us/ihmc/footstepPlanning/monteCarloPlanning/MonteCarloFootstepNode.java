@@ -59,21 +59,15 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
    {
       Point3D newPosition = new Point3D();
       newPosition.add(state, action);
+      newPosition.scale(1.0 / 50.0);
 
-      int offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * 50);
-      int offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * 50);
+      Point3D previousPosition = new Point3D(state);
+      previousPosition.scale(1.0 / 50.0);
 
-      int rIndexPrevious = (int) (state.getX() + request.getTerrainMapData().getLocalGridSize() / 2) - offsetX;
-      int cIndexPrevious = (int) (state.getY() + request.getTerrainMapData().getLocalGridSize() / 2) - offsetY;
+      double previousHeight = request.getTerrainMapData().getHeightInWorld((float) previousPosition.getX(), (float) previousPosition.getY());
+      double currentHeight = request.getTerrainMapData().getHeightInWorld((float) newPosition.getX(), (float) newPosition.getY());
 
-      int rIndex = (int) (newPosition.getX() + request.getTerrainMapData().getLocalGridSize() / 2) - offsetX;
-      int cIndex = (int) (newPosition.getY() + request.getTerrainMapData().getLocalGridSize() / 2) - offsetY;
-
-      double previousHeight = request.getTerrainMapData().getHeightLocal(rIndexPrevious, cIndexPrevious);
-      double currentHeight = request.getTerrainMapData().getHeightLocal(rIndex, cIndex);
-
-      boolean valid = ((currentHeight - previousHeight) < parameters.getMaxTransferHeight());
-      valid = valid & ((currentHeight - previousHeight) > -parameters.getMaxTransferDepth());
+      boolean valid = Math.abs(currentHeight - previousHeight) < parameters.getMaxTransferHeight();
       valid = valid & (Math.abs(state.getZ() - newPosition.getZ()) < parameters.getMaxTransferYaw());
 
       return valid;

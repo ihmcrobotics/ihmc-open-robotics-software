@@ -263,7 +263,7 @@ public class CollisionFreeSwingCalculator
 
          swingKnotOptimizationResult.reset();
          optimizeKnotPoints(planarRegionsList, heightMapData);
-         LogTools.info("Swing Knot Result: [{}]", swingKnotOptimizationResult.toString());
+         //LogTools.info("Swing Knot Result: [{}]", swingKnotOptimizationResult.toString());
 
          if (!collisionFound.getValue())
          {

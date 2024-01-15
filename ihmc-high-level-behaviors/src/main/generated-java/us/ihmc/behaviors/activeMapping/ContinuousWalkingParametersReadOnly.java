@@ -60,11 +60,6 @@ public interface ContinuousWalkingParametersReadOnly extends StoredPropertySetRe
       return get(plannerTimeoutFraction);
    }
 
-   default double getPlanningReferenceTimeout()
-   {
-      return get(planningReferenceTimeout);
-   }
-
    default double getPlanningWithoutReferenceTimeout()
    {
       return get(planningWithoutReferenceTimeout);
