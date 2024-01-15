@@ -53,7 +53,6 @@ public class RDXIterativeClosestPointWorkerDemo
 
    private final OpenCLManager openCLManager = new OpenCLManager();
    private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor(openCLManager);
-   private final Random random = new Random(System.nanoTime());
 
    private final ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "icp_worker_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(node);
@@ -62,7 +61,7 @@ public class RDXIterativeClosestPointWorkerDemo
    private RawImage zedDepthImage;
    private RawImage zedLeftColorImage;
    private final IterativeClosestPointParameters icpParameters = new IterativeClosestPointParameters();
-   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(icpParameters, random);
+   private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(icpParameters);
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
@@ -293,8 +292,7 @@ public class RDXIterativeClosestPointWorkerDemo
                                                            xRadius.get(),
                                                            yRadius.get(),
                                                            zRadius.get(),
-                                                           new FramePose3D(ReferenceFrame.getWorldFrame(), pickFramePoint, new RotationMatrix()),
-                                                           random);
+                                                           new FramePose3D(ReferenceFrame.getWorldFrame(), pickFramePoint, new RotationMatrix()));
             }
             ImGui.sliderFloat("Depth", depth.getData(), 0.0f, 1.0f);
             ImGui.sliderFloat("Width", width.getData(), 0.0f, 1.0f);

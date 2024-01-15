@@ -29,7 +29,6 @@ public class IterativeClosestPointManager
    private final OpenCLManager openCLManager = new OpenCLManager();
    private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor(openCLManager);
 
-   private final Random random = new Random(System.nanoTime());
    private final IterativeClosestPointParameters icpParameters = new IterativeClosestPointParameters();
    private final HashMap<Long, IterativeClosestPointObjectTrack> nodeIDToTrackMap = new HashMap<>();
    private final HashMap<Long, IterativeClosestPointWorker> nodeIDToWorkerMap = new HashMap<>();
@@ -207,8 +206,7 @@ public class IterativeClosestPointManager
                                                                            xRadius,
                                                                            yRadius,
                                                                            zRadius,
-                                                                           new FramePose3D(requestMessage.getProvidedPose()),
-                                                                           random);
+                                                                           new FramePose3D(requestMessage.getProvidedPose()));
       worker.setSceneNodeID(requestMessage.getNodeId());
       nodeIDToWorkerMap.putIfAbsent(requestMessage.getNodeId(), worker);
    }

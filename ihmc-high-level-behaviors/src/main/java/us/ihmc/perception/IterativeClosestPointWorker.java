@@ -47,7 +47,7 @@ public class IterativeClosestPointWorker
 
    private final IterativeClosestPointParametersBasics icpParameters;
 
-   private final Random random;
+   private final Random random = new Random(1738L);
 
    private long sceneNodeID = -1L;
 
@@ -86,7 +86,7 @@ public class IterativeClosestPointWorker
 
    private final Pose3D resultPose = new Pose3D();
 
-   public IterativeClosestPointWorker(IterativeClosestPointParametersBasics icpParameters, Random random)
+   public IterativeClosestPointWorker(IterativeClosestPointParametersBasics icpParameters)
    {
       this(icpParameters,
            defaultDetectionShape,
@@ -96,8 +96,7 @@ public class IterativeClosestPointWorker
            defaultXRadius,
            defaultYRadius,
            defaultZRadius,
-           new Pose3D(),
-           random);
+           new Pose3D());
    }
 
    public IterativeClosestPointWorker(IterativeClosestPointParametersBasics icpParameters,
@@ -108,8 +107,7 @@ public class IterativeClosestPointWorker
                                       float xRadius,
                                       float yRadius,
                                       float zRadius,
-                                      Pose3DReadOnly initialPose,
-                                      Random random)
+                                      Pose3DReadOnly initialPose)
    {
       this.icpParameters = icpParameters;
 
@@ -120,7 +118,6 @@ public class IterativeClosestPointWorker
       this.xRadius = xRadius;
       this.yRadius = yRadius;
       this.zRadius = zRadius;
-      this.random = random;
 
       targetPoint.set(initialPose.getPosition());
 
