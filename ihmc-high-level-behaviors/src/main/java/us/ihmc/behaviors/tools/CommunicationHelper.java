@@ -42,6 +42,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
@@ -170,6 +171,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Notification callback, T messageToRecycle)
    {
       ros2Helper.subscribeViaCallback(topic, callback, messageToRecycle);
+   }
+
+   @Override
+   public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback)
+   {
+      return ros2Helper.subscribeViaSwapReference(topic, callback);
    }
 
    @Override

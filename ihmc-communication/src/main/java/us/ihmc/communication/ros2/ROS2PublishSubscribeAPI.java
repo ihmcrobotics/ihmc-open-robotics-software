@@ -8,6 +8,7 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.thread.SwapReference;
 
 import java.util.function.Consumer;
 
@@ -18,10 +19,13 @@ public interface ROS2PublishSubscribeAPI
 {
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback);
 
-   /** Allocation free version. */
+   /** Allocation free version. Not thread safe! */
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Notification callback, T messageToRecycle);
 
-   /** Allocation free version. */
+   /** Use when you only need the latest message and need allocation free. */
+   public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback);
+
+   /** Allocation free version with size 16 ring buffer. */
    public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic);
 
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback);
