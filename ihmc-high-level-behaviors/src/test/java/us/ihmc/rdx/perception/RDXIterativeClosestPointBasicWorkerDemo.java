@@ -18,7 +18,10 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.IterativeClosestPointTools;
@@ -79,6 +82,8 @@ public class RDXIterativeClosestPointBasicWorkerDemo
    private boolean firstTick = true;
 
    private final Pose3D shapeInputPose = new Pose3D();
+   private final Pose3D cameraPose = new Pose3D(); // IXME change this
+
    private PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.BOX;
    private final ImInt shapeIndex = new ImInt();
    private final String[] shapeValues = new String[PrimitiveRigidBodyShape.values().length];
@@ -94,17 +99,23 @@ public class RDXIterativeClosestPointBasicWorkerDemo
 
    private final ImBoolean icpGuiAutoMoveEnv = new ImBoolean(true);
    private final ImBoolean addGround = new ImBoolean(false);
+   private final ImBoolean filterUnobservablePoints = new ImBoolean(false);
 
    // These are the actual shape pose
-   private final float[] icpGuiShapeSetPostionX = {0.0f};
+   private final float[] icpGuiShapeSetPostionX = {2.5f};
    private final float[] icpGuiShapeSetPostionY = {0.0f};
-   private final float[] icpGuiShapeSetPostionZ = {0.0f};
+   private final float[] icpGuiShapeSetPostionZ = {0.5f};
    private final float[] icpGuiShapeSetYaw = {0.0f};
    private final float[] icpGuiShapeSetPitch = {0.0f};
    private final float[] icpGuiShapeSetRoll = {0.0f};
+   {
+      shapeInputPose.getTranslation().set(icpGuiShapeSetPostionX[0], icpGuiShapeSetPostionY[0], icpGuiShapeSetPostionZ[0]);
+      shapeInputPose.getRotation().setYawPitchRoll(icpGuiShapeSetYaw[0], icpGuiShapeSetPitch[0], icpGuiShapeSetRoll[0]);
+   }
 
    // These are the speed at which the input shape is moving.
-   private final float[] icpGuiEnvAutoMoveSpeed = {0.0f};
+   private final float[] icpGuiEnvAutoTranslationSpeed = {0.0f};
+   private final float[] icpGuiEnvAutoRotationSpeed = {0.0f};
    private final int[] icpGuiNumICPIterations = {1};
    private double icpGuiICPRunTimeInSeconds = 0;
 
@@ -148,6 +159,10 @@ public class RDXIterativeClosestPointBasicWorkerDemo
       {
          addGroundToPointCloud(environmentPointCloud);
       }
+      if (filterUnobservablePoints.get())
+      {
+         filterUnobservablePoints(environmentPointCloud);
+      }
       environmentPointCloudRenderer.setPointsToRender(environmentPointCloud, Color.BLUE);
 
       if (firstTick)
@@ -172,7 +187,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
       if (success)
          ros2Helper.publish(PerceptionAPI.ICP_RESULT, icpWorker.getResult());
 
-      List<Point3DReadOnly> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
+      List<? extends Point3DReadOnly> segmentedPointCloud = icpWorker.getSegmentedPointCloud();
       segmentedPtCld.clear();
       if (segmentedPointCloud != null && !segmentedPointCloud.isEmpty())
       {
@@ -212,13 +227,45 @@ public class RDXIterativeClosestPointBasicWorkerDemo
    private void addGroundToPointCloud(List<Point3D32> pointsToAdd)
    {
       double groundHeight = shapeInputPose.getZ() - height.get() / 2.0;
-      for (int i = 0; i < 500; i++)
+      for (int i = 0; i < 2000; i++)
       {
          double xDistance = RandomNumbers.nextDouble(random, 0.75) + shapeInputPose.getX();
          double yDistance = RandomNumbers.nextDouble(random, 0.75) + shapeInputPose.getY();
          pointsToAdd.add(new Point3D32((float) xDistance, (float) yDistance, (float) groundHeight));
       }
    }
+
+   private void filterUnobservablePoints(List<Point3D32> points)
+   {
+      int pointIdx = 0;
+      while (pointIdx < points.size())
+      {
+         if (isPointObservable(points.get(pointIdx)))
+            pointIdx++;
+         else
+            points.remove(pointIdx);
+      }
+   }
+
+   private boolean isPointObservable(Point3DReadOnly point)
+   {
+      Box3D box = new Box3D(shapeInputPose, depth.get(), width.get(), height.get());
+      Vector3D direction = new Vector3D();
+      direction.sub(point, cameraPose.getPosition());
+      Point3D intersection1 = new Point3D();
+      Point3D intersection2 = new Point3D();
+      int intersections = box.intersectionWith(cameraPose.getPosition(), direction, intersection1, intersection2);
+
+      if (intersections == 0)
+         return true;
+
+      double pointToCamera = point.distanceSquared(cameraPose.getPosition());
+      double pointTo1 = cameraPose.getPosition().distanceSquared(intersection1) + 0.001;
+      double pointTo2 = intersections > 1 ? cameraPose.getPosition().distanceSquared(intersection2) + 0.001 : Double.POSITIVE_INFINITY;
+
+      return pointToCamera < pointTo1 && pointToCamera < pointTo2;
+   }
+
 
    private void calculateICPTime(long time1, long time2)
    {
@@ -231,18 +278,30 @@ public class RDXIterativeClosestPointBasicWorkerDemo
       long counter = baseUI.getRenderIndex();
       if (icpGuiAutoMoveEnv.get())
       {
-         double x = (Math.sin(((double) counter) * 0.001 * icpGuiEnvAutoMoveSpeed[0]) * 2) + 2.5;
-         double y = (Math.sin(((double) counter) * 0.0033 * icpGuiEnvAutoMoveSpeed[0]) * 1);
-         double z = (Math.sin(((double) counter) * 0.004 * icpGuiEnvAutoMoveSpeed[0]) * .5) + .5;
-         double roll = (Math.sin(((double) counter) * 0.002 * icpGuiEnvAutoMoveSpeed[0]) * 3.14159);
-         double pitch = (Math.sin(((double) counter) * 0.0023 * icpGuiEnvAutoMoveSpeed[0]) * 3.14159);
-         double yaw = (Math.sin(((double) counter) * 0.00275 * icpGuiEnvAutoMoveSpeed[0]) * 3.14159);
+         double t = (double) counter;
+         double deltaT = 0.002;
+         double xRate = 1.5 * Math.sin(t * 0.0005 * icpGuiEnvAutoTranslationSpeed[0]);
+         double yRate = 1.0 * Math.sin(t * 0.001 * icpGuiEnvAutoTranslationSpeed[0]);
+         double zRate = 0.5 * Math.sin(t * 0.004 * icpGuiEnvAutoTranslationSpeed[0]);
+         double rollRate = Math.PI * Math.sin(t * 0.02 * icpGuiEnvAutoRotationSpeed[0]);
+         double pitchRate = Math.PI * Math.sin(t * 0.03 * icpGuiEnvAutoRotationSpeed[0]);
+         double yawRate = Math.PI * Math.sin(t * 0.01 * icpGuiEnvAutoRotationSpeed[0]);
+
+         // TODO need delta t
+         double x = shapeInputPose.getX() + xRate * deltaT;
+         double y = shapeInputPose.getY() + yRate * deltaT;
+         double z = shapeInputPose.getZ() + zRate * deltaT;
+         double roll = shapeInputPose.getRoll() + rollRate * deltaT;
+         double pitch = shapeInputPose.getPitch() + pitchRate * deltaT;
+         double yaw = shapeInputPose.getYaw() + yawRate * deltaT;
+
          icpGuiShapeSetPostionX[0] = (float) x;
          icpGuiShapeSetPostionY[0] = (float) y;
          icpGuiShapeSetPostionZ[0] = (float) z;
          icpGuiShapeSetYaw[0] = (float) yaw;
          icpGuiShapeSetPitch[0] = (float) pitch;
          icpGuiShapeSetRoll[0] = (float) roll;
+
          shapeInputPose.getTranslation().set(x, y, z);
          shapeInputPose.getRotation().setYawPitchRoll(yaw, pitch, roll);
       }
@@ -396,10 +455,12 @@ public class RDXIterativeClosestPointBasicWorkerDemo
             ImGui.text(" ");
             ImGui.sliderFloat("Env Noise", icpGuiEnvGaussianNoiseScale, 0.0f, 0.2f);
             ImGui.text(" ");
-            ImGui.sliderFloat("Move Speed", icpGuiEnvAutoMoveSpeed, 0.0f, 10.0f);
+            ImGui.sliderFloat("Translation Speed", icpGuiEnvAutoTranslationSpeed, 0.0f, 5.0f);
+            ImGui.sliderFloat("Rotation Speed", icpGuiEnvAutoRotationSpeed, 0.0f, 5.0f);
             ImGui.sliderInt("# iterations / tick", icpGuiNumICPIterations,1, 10);
             ImGui.checkbox("Auto Move", icpGuiAutoMoveEnv);
             ImGui.checkbox("Add ground", addGround);
+            ImGui.checkbox("Filter unobservable points", filterUnobservablePoints);
          }
 
 
