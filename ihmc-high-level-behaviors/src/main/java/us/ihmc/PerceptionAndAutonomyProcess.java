@@ -358,9 +358,8 @@ public class PerceptionAndAutonomyProcess
             {
                blackflyImages.put(side, blackflyImageRetrievers.get(side).getLatestRawImage());
 
-               RawImage distortedImage = blackflyImages.get(side).get();
-               blackflyImagePublishers.get(side).setNextDistortedImage(distortedImage);
-               arUcoUpdater.setNextDistortedImage(distortedImage);
+               blackflyImagePublishers.get(side).setNextDistortedImage(blackflyImages.get(side).get());
+               arUcoUpdater.setNextDistortedImage(blackflyImages.get(side).get());
 
                blackflyImages.get(side).release();
             }
