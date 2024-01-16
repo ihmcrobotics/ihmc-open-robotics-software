@@ -4,6 +4,7 @@ import org.bytedeco.opencv.global.*;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -40,6 +41,7 @@ public class ArUcoDetectionUpdater
    private GpuMat undistortionMap1;
    private GpuMat undistortionMap2;
    private final Mat cameraMatrixEstimate = new Mat(3, 3, opencv_core.CV_64F);
+   private final TypedNotification<RawImage> distortedInputImage = new TypedNotification<>();
 
    public ArUcoDetectionUpdater(ROS2Helper ros2Helper, BlackflyLensProperties blackflyLensProperties, Supplier<ReferenceFrame> blackflyFrameSupplier)
    {
@@ -48,30 +50,40 @@ public class ArUcoDetectionUpdater
       this.ros2Helper = ros2Helper;
    }
 
-   public void undistortAndUpdateArUco(RawImage arUcoImage)
+   public void setNextDistortedImage(RawImage arUcoImage)
    {
-      if (arUcoBytedecoImage == null)
-         initialize(arUcoImage.getImageWidth(), arUcoImage.getImageHeight());
+      distortedInputImage.set(arUcoImage);
+   }
 
-      // Convert color from BGR to RGB
-      GpuMat imageForUndistortionRGB = new GpuMat(arUcoImage.getImageHeight(), arUcoImage.getImageWidth(), arUcoImage.getOpenCVType());
-      opencv_cudaimgproc.cvtColor(arUcoImage.getGpuImageMat(), imageForUndistortionRGB, opencv_imgproc.COLOR_BGR2RGB);
+   public void undistortAndUpdateArUco()
+   {
+      if (distortedInputImage.poll())
+      {
+         RawImage arUcoImage = distortedInputImage.read();
 
-      // Undistort image
-      GpuMat undistortedImageRGB = new GpuMat(arUcoImage.getImageHeight(), arUcoImage.getImageWidth(), arUcoImage.getOpenCVType());
-      opencv_cudawarping.remap(imageForUndistortionRGB, undistortedImageRGB, undistortionMap1, undistortionMap2, opencv_imgproc.INTER_LINEAR);
+         if (arUcoBytedecoImage == null)
+            initialize(arUcoImage.getImageWidth(), arUcoImage.getImageHeight());
 
-      // Update the Bytedeco image
-      undistortedImageRGB.download(arUcoBytedecoImage.getBytedecoOpenCVMat());
+         // Convert color from BGR to RGB
+         GpuMat imageForUndistortionRGB = new GpuMat(arUcoImage.getImageHeight(), arUcoImage.getImageWidth(), arUcoImage.getOpenCVType());
+         opencv_cudaimgproc.cvtColor(arUcoImage.getGpuImageMat(), imageForUndistortionRGB, opencv_imgproc.COLOR_BGR2RGB);
 
-      arUcoMarkerDetector.update();
-      arUcoMarkerDetectionResults.copyOutputData(arUcoMarkerDetector);
-      arUcoMarkerPublisher.update();
+         // Undistort image
+         GpuMat undistortedImageRGB = new GpuMat(arUcoImage.getImageHeight(), arUcoImage.getImageWidth(), arUcoImage.getOpenCVType());
+         opencv_cudawarping.remap(imageForUndistortionRGB, undistortedImageRGB, undistortionMap1, undistortionMap2, opencv_imgproc.INTER_LINEAR);
 
-      // Close stuff
-      imageForUndistortionRGB.close();
-      undistortedImageRGB.close();
-      arUcoImage.release();
+         // Update the Bytedeco image
+         undistortedImageRGB.download(arUcoBytedecoImage.getBytedecoOpenCVMat());
+
+         arUcoMarkerDetector.update();
+         arUcoMarkerDetectionResults.copyOutputData(arUcoMarkerDetector);
+         arUcoMarkerPublisher.update();
+
+         // Close stuff
+         imageForUndistortionRGB.close();
+         undistortedImageRGB.close();
+         arUcoImage.release();
+      }
    }
 
    public void initialize(int imageWidth, int imageHeight)

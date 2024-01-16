@@ -358,7 +358,9 @@ public class PerceptionAndAutonomyProcess
             {
                blackflyImages.put(side, blackflyImageRetrievers.get(side).getLatestRawImage());
 
-               blackflyImagePublishers.get(side).setNextDistortedImage(blackflyImages.get(side).get());
+               RawImage distortedImage = blackflyImages.get(side).get();
+               blackflyImagePublishers.get(side).setNextDistortedImage(distortedImage);
+               arUcoUpdater.setNextDistortedImage(distortedImage);
 
                blackflyImages.get(side).release();
             }
@@ -375,9 +377,9 @@ public class PerceptionAndAutonomyProcess
 
    private void detectAndPublishArUcoMarkers()
    {
-      if (arUcoDetectionDemandNode.isDemanded() && blackflyImages.get(RobotSide.RIGHT) != null)
+      if (arUcoDetectionDemandNode.isDemanded())
       {
-         arUcoUpdater.undistortAndUpdateArUco(blackflyImages.get(RobotSide.RIGHT).get());
+         arUcoUpdater.undistortAndUpdateArUco();
          sharedArUcoDetectionResults.getForThreadOne().copyOutputData(arUcoUpdater.getArUcoMarkerDetector());
          sharedArUcoDetectionResults.swap();
       }
