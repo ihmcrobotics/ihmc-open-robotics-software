@@ -1,7 +1,6 @@
 package us.ihmc.perception;
 
 import perception_msgs.msg.dds.IterativeClosestPointRequest;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
@@ -9,6 +8,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -21,7 +21,6 @@ import java.util.Random;
 public class IterativeClosestPointManager
 {
    private static final double ICP_WORK_FREQUENCY = 20.0;
-   private static final int NUMBER_OF_CORRESPONDENCES = 1000; // TODO extract to request message
    private static final double EPSILON = 0.001;
 
    private final ROS2Helper ros2Helper;
@@ -32,6 +31,7 @@ public class IterativeClosestPointManager
 
    private final Random random = new Random(System.nanoTime());
    private final HashMap<Long, IterativeClosestPointWorker> nodeIDToWorkerMap = new HashMap<>();
+   private final HashMap<IterativeClosestPointWorker, Integer> workerToIterationsMap = new HashMap<>();
    private final IHMCROS2Input<IterativeClosestPointRequest> requestMessageSubscription;
    private final RestartableThrottledThread workerThread;
 
@@ -45,7 +45,7 @@ public class IterativeClosestPointManager
       requestMessageSubscription = ros2Helper.subscribe(PerceptionAPI.ICP_REQUEST);
 
       // Each time a request message is received, we update the corresponding worker accordingly
-      // TODO: Find out whether messages can be skipped, resulting in updates being misseed
+      // TODO: Find out whether messages can be skipped, resulting in updates being missed
       requestMessageSubscription.addCallback(requestMessage ->
       {
          long nodeID = requestMessage.getNodeId();
@@ -56,6 +56,7 @@ public class IterativeClosestPointManager
          }
          else if (!requestMessage.getRunIcp())           // ICP Worker no longer needed (remove)
          {
+            workerToIterationsMap.remove(nodeIDToWorkerMap.get(nodeID));
             nodeIDToWorkerMap.remove(nodeID);
          }
          else                                            // ICP Worker exists (update it)
@@ -64,39 +65,27 @@ public class IterativeClosestPointManager
 
             // Check if size changed
             PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.fromByte(requestMessage.getShape());
-            float requestXLength = requestMessage.getXLength();
-            float requestYLength = requestMessage.getYLength();
-            float requestZLength = requestMessage.getZLength();
-            float requestXRadius = requestMessage.getXRadius();
-            float requestYRadius = requestMessage.getYRadius();
-            float requestZRadius = requestMessage.getZRadius();
+            Vector3D lengths = requestMessage.getLengths();
+            Vector3D radii = requestMessage.getRadii();
+            int numberOfShapeSamples = requestMessage.getNumberOfShapeSamples();
 
             boolean sizeChanged = false;
-            sizeChanged |= !MathTools.epsilonEquals(worker.getXLength(), requestXLength, EPSILON);
-            sizeChanged |= !MathTools.epsilonEquals(worker.getYLength(), requestYLength, EPSILON);
-            sizeChanged |= !MathTools.epsilonEquals(worker.getZLength(), requestZLength, EPSILON);
-            sizeChanged |= !MathTools.epsilonEquals(worker.getXRadius(), requestXRadius, EPSILON);
-            sizeChanged |= !MathTools.epsilonEquals(worker.getYRadius(), requestYRadius, EPSILON);
-            sizeChanged |= !MathTools.epsilonEquals(worker.getZRadius(), requestZRadius, EPSILON);
+            sizeChanged |= !lengths.epsilonEquals(worker.getLengths(), EPSILON);
+            sizeChanged |= !radii.epsilonEquals(worker.getRadii(), EPSILON);
+            sizeChanged |= numberOfShapeSamples != worker.getNumberOfShapeSamples();
 
             // Update worker size if changed
             if (sizeChanged)
             {
-               int newNumberOfPoints = approximateNumberOfPoints(shape,
-                                                                 requestXLength,
-                                                                 requestYLength,
-                                                                 requestZLength,
-                                                                 requestXRadius,
-                                                                 requestYRadius,
-                                                                 requestZRadius);
-               worker.changeSize(requestXLength, requestYLength, requestZLength, requestXRadius, requestYRadius, requestZRadius, newNumberOfPoints);
+               worker.changeSize(lengths, radii, numberOfShapeSamples);
             }
 
             // Update worker
-            worker.setNumberOfCorrespondences(NUMBER_OF_CORRESPONDENCES);             // TODO extract to request message
+            worker.setNumberOfCorrespondences(requestMessage.getNumberOfCorrespondences());
             worker.setTargetPoint(requestMessage.getProvidedPose().getPosition());
             worker.useProvidedTargetPoint(requestMessage.getUseProvidedPose());
-            worker.setSegmentSphereRadius(requestMessage.getUseProvidedPose() ? 0.3 : 0.2);
+            worker.setSegmentSphereRadius(requestMessage.getSegmentationRadius());
+            workerToIterationsMap.replace(worker, requestMessage.getNumberOfIterations());
          }
       });
 
@@ -147,16 +136,24 @@ public class IterativeClosestPointManager
       for (long id : nodeIDToWorkerMap.keySet())
       {
          IterativeClosestPointWorker worker = nodeIDToWorkerMap.get(id);
-         if (worker.runICP(2))
+         if (worker.runICP(workerToIterationsMap.get(worker)))
             ros2Helper.publish(PerceptionAPI.ICP_RESULT, worker.getResult());
 
          // If ICP isn't using the provided target pose, it'll update the SceneNode to the ICP worker's centroid
          if (!worker.isUsingTargetPoint())
          {
-            SceneNode node = sceneGraph.getIDToNodeMap().get(id);
             RigidBodyTransform centroidToWorldTransform = new RigidBodyTransform(worker.getResultPose());
-            node.getNodeToParentFrameTransform().set(centroidToWorldTransform);
-            node.getNodeFrame().update();
+            SceneNode node = sceneGraph.getIDToNodeMap().get(id);
+            if (node != null) // Ensure the node has not been removed from the scene graph
+            {
+               node.getNodeToParentFrameTransform().set(centroidToWorldTransform);
+               node.getNodeFrame().update();
+            }
+            else // node has been removed from scene graph -> remove from here too
+            {
+               workerToIterationsMap.remove(nodeIDToWorkerMap.get(id));
+               nodeIDToWorkerMap.remove(id);
+            }
          }
       }
    }
@@ -165,42 +162,18 @@ public class IterativeClosestPointManager
    {
       PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.fromByte(requestMessage.getShape());
 
-      float xLength = requestMessage.getXLength();
-      float yLength = requestMessage.getYLength();
-      float zLength = requestMessage.getZLength();
-      float xRadius = requestMessage.getXRadius();
-      float yRadius = requestMessage.getYRadius();
-      float zRadius = requestMessage.getZRadius();
+      Vector3D lengths = requestMessage.getLengths();
+      Vector3D radii = requestMessage.getRadii();
 
-      int numberOfPoints = approximateNumberOfPoints(shape, xLength, yLength, zLength, xRadius, yRadius, zRadius);
       IterativeClosestPointWorker worker = new IterativeClosestPointWorker(shape,
-                                                                           xLength,
-                                                                           yLength,
-                                                                           zLength,
-                                                                           xRadius,
-                                                                           yRadius,
-                                                                           zRadius,
-                                                                           numberOfPoints,
-                                                                           NUMBER_OF_CORRESPONDENCES,
+                                                                           lengths,
+                                                                           radii,
+                                                                           requestMessage.getNumberOfShapeSamples(),
+                                                                           requestMessage.getNumberOfCorrespondences(),
                                                                            new FramePose3D(requestMessage.getProvidedPose()),
                                                                            random);
       worker.setSceneNodeID(requestMessage.getNodeId());
       nodeIDToWorkerMap.putIfAbsent(requestMessage.getNodeId(), worker);
-   }
-
-   // FIXME: Maybe just allow the user to select number of points instead of trying to calculate it using the dimensions
-   private int approximateNumberOfPoints(PrimitiveRigidBodyShape shape, float xLength, float yLength, float zLength, float xRadius, float yRadius, float zRadius)
-   {
-      double surfaceArea;
-      switch (shape)
-      {
-         case BOX -> surfaceArea = 2.0 * (xLength * yLength + xLength * zLength + yLength * zLength);
-         case PRISM -> surfaceArea = (xLength * zLength) + (2.0 * Math.sqrt(xLength * xLength + zLength * zLength));
-         case CYLINDER -> surfaceArea = 2.0 * Math.PI * xRadius * (zLength + xRadius);
-         case CONE -> surfaceArea = Math.PI * xRadius * zLength;
-         default -> surfaceArea = 0.5;
-      }
-
-      return (int) (surfaceArea * 2000.0);
+      workerToIterationsMap.putIfAbsent(worker, requestMessage.getNumberOfIterations());
    }
 }

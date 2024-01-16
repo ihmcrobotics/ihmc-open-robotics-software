@@ -15,7 +15,7 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "aec0295651144711562a96d4526e21a51d210745192d03ed5cf6ea817440f326";
+   		return "8a61b79a90e825a68849576fd961f364a96c8f040edb234350b0bab01ae49e0a";
    }
    
    @Override
@@ -58,19 +58,19 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -98,25 +98,23 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getLengths(), current_alignment);
 
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRadii(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getProvidedPose(), current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -136,19 +134,17 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
 
       cdr.write_type_9(data.getShape());
 
-      cdr.write_type_5(data.getXLength());
-
-      cdr.write_type_5(data.getYLength());
-
-      cdr.write_type_5(data.getZLength());
-
-      cdr.write_type_5(data.getXRadius());
-
-      cdr.write_type_5(data.getYRadius());
-
-      cdr.write_type_5(data.getZRadius());
-
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLengths(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRadii(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getProvidedPose(), cdr);
+      cdr.write_type_2(data.getNumberOfShapeSamples());
+
+      cdr.write_type_2(data.getNumberOfCorrespondences());
+
+      cdr.write_type_2(data.getNumberOfIterations());
+
+      cdr.write_type_5(data.getSegmentationRadius());
+
       cdr.write_type_7(data.getRunIcp());
 
       cdr.write_type_7(data.getUseProvidedPose());
@@ -163,19 +159,17 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
       	
       data.setShape(cdr.read_type_9());
       	
-      data.setXLength(cdr.read_type_5());
-      	
-      data.setYLength(cdr.read_type_5());
-      	
-      data.setZLength(cdr.read_type_5());
-      	
-      data.setXRadius(cdr.read_type_5());
-      	
-      data.setYRadius(cdr.read_type_5());
-      	
-      data.setZRadius(cdr.read_type_5());
-      	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLengths(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRadii(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getProvidedPose(), cdr);	
+      data.setNumberOfShapeSamples(cdr.read_type_2());
+      	
+      data.setNumberOfCorrespondences(cdr.read_type_2());
+      	
+      data.setNumberOfIterations(cdr.read_type_2());
+      	
+      data.setSegmentationRadius(cdr.read_type_5());
+      	
       data.setRunIcp(cdr.read_type_7());
       	
       data.setUseProvidedPose(cdr.read_type_7());
@@ -189,14 +183,16 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_4("node_id", data.getNodeId());
       ser.write_type_9("shape", data.getShape());
-      ser.write_type_5("x_length", data.getXLength());
-      ser.write_type_5("y_length", data.getYLength());
-      ser.write_type_5("z_length", data.getZLength());
-      ser.write_type_5("x_radius", data.getXRadius());
-      ser.write_type_5("y_radius", data.getYRadius());
-      ser.write_type_5("z_radius", data.getZRadius());
+      ser.write_type_a("lengths", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLengths());
+
+      ser.write_type_a("radii", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRadii());
+
       ser.write_type_a("provided_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getProvidedPose());
 
+      ser.write_type_2("number_of_shape_samples", data.getNumberOfShapeSamples());
+      ser.write_type_2("number_of_correspondences", data.getNumberOfCorrespondences());
+      ser.write_type_2("number_of_iterations", data.getNumberOfIterations());
+      ser.write_type_5("segmentation_radius", data.getSegmentationRadius());
       ser.write_type_7("run_icp", data.getRunIcp());
       ser.write_type_7("use_provided_pose", data.getUseProvidedPose());
    }
@@ -207,14 +203,16 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setNodeId(ser.read_type_4("node_id"));
       data.setShape(ser.read_type_9("shape"));
-      data.setXLength(ser.read_type_5("x_length"));
-      data.setYLength(ser.read_type_5("y_length"));
-      data.setZLength(ser.read_type_5("z_length"));
-      data.setXRadius(ser.read_type_5("x_radius"));
-      data.setYRadius(ser.read_type_5("y_radius"));
-      data.setZRadius(ser.read_type_5("z_radius"));
+      ser.read_type_a("lengths", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLengths());
+
+      ser.read_type_a("radii", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRadii());
+
       ser.read_type_a("provided_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getProvidedPose());
 
+      data.setNumberOfShapeSamples(ser.read_type_2("number_of_shape_samples"));
+      data.setNumberOfCorrespondences(ser.read_type_2("number_of_correspondences"));
+      data.setNumberOfIterations(ser.read_type_2("number_of_iterations"));
+      data.setSegmentationRadius(ser.read_type_5("segmentation_radius"));
       data.setRunIcp(ser.read_type_7("run_icp"));
       data.setUseProvidedPose(ser.read_type_7("use_provided_pose"));
    }

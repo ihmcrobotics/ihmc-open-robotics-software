@@ -30,12 +30,10 @@ public class IterativeClosestPointWorkerTest
       int correspondences = 1000;
       IterativeClosestPointWorker icp = new IterativeClosestPointWorker(objectSamples, correspondences, random);
 
-      float actualBoxWidth = 0.3f;
-      float actualBoxDepth = 0.4f;
-      float actualBoxHeight = 0.5f;
+      Vector3D actualBoxDimensions = new Vector3D(0.4, 0.3, 0.5);
 
       icp.setDetectionShape(PrimitiveRigidBodyShape.BOX);
-      icp.changeSize(actualBoxDepth, actualBoxWidth, actualBoxHeight, 0.1f, 0.1f, 0.1f, objectSamples);
+      icp.changeSize(actualBoxDimensions, new Vector3D(0.1, 0.1, 0.1), objectSamples);
 
       // test perfectly sized box with just translation error
       Vector3D translationError = new Vector3D(0.1, 0.0, 0.04);
@@ -45,10 +43,10 @@ public class IterativeClosestPointWorkerTest
 //      testWithDifferentBoxes(icp, 0.9f, actualBoxDepth, actualBoxWidth, actualBoxHeight, new Pose3D(), translationError, new Quaternion(), random);
 
       // test medium undersized box with just translation error
-      testWithDifferentBoxes(icp, 0.75f, actualBoxDepth, actualBoxWidth, actualBoxHeight, new Pose3D(), translationError, new Quaternion(), random);
+      testWithDifferentBoxes(icp, 0.75f, actualBoxDimensions.getX32(), actualBoxDimensions.getY32(), actualBoxDimensions.getZ32(), new Pose3D(), translationError, new Quaternion(), random);
 
       // test very undersized box with just translation error
-      testWithDifferentBoxes(icp, 0.5f, actualBoxDepth, actualBoxWidth, actualBoxHeight, new Pose3D(), translationError, new Quaternion(), random);
+      testWithDifferentBoxes(icp, 0.5f, actualBoxDimensions.getX32(), actualBoxDimensions.getY32(), actualBoxDimensions.getZ32(), new Pose3D(), translationError, new Quaternion(), random);
    }
 
    @Test
@@ -63,7 +61,7 @@ public class IterativeClosestPointWorkerTest
       float actualBoxHeight = 0.5f;
 
       icp.setDetectionShape(PrimitiveRigidBodyShape.BOX);
-      icp.changeSize(actualBoxDepth, actualBoxWidth, actualBoxHeight, 0.1f, 0.1f, 0.1f, objectSamples);
+      icp.changeSize(new Vector3D(actualBoxDepth, actualBoxWidth, actualBoxHeight), new Vector3D(0.1f, 0.1f, 0.1f), objectSamples);
 
       // test perfect sized box
       testWithDifferentBoxesAndRandomError(icp, 1.0f, actualBoxDepth, actualBoxWidth, actualBoxHeight, random);
