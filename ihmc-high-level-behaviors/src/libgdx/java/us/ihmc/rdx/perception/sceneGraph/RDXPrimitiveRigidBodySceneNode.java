@@ -7,6 +7,11 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+<<<<<<< Updated upstream
+=======
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+>>>>>>> Stashed changes
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
@@ -44,12 +49,34 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
 
       switch (primitiveRigidBodySceneNode.getShape())
       {
+<<<<<<< Updated upstream
          case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBox(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
          case PRISM -> modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
          case CYLINDER -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
          case ELLIPSOID ->
                modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
          case CONE -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
+=======
+         case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBox(lengths.getX32(), lengths.getY32(), lengths.getZ32(), Color.WHITE));
+         case PRISM -> modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(lengths.getX32(),
+                                                                                        lengths.getY32(),
+                                                                                        lengths.getZ32(),
+                                                                                        new Point3D(0, 0, -zLength.get() / 2),
+                                                                                        Color.WHITE));
+         case CYLINDER -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(lengths.getZ32(),
+                                                                                              radii.getX32(),
+                                                                                              new Point3D(0, 0, -zLength.get() / 2),
+                                                                                              Color.WHITE));
+         case ELLIPSOID -> modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(radii.getX32(),
+                                                                                                radii.getY32(),
+                                                                                                radii.getZ32(),
+                                                                                                new Point3D(),
+                                                                                                Color.WHITE));
+         case CONE -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(lengths.getZ32(),
+                                                                                      radii.getX32(),
+                                                                                      new Point3D(0, 0, -zLength.get() / 2),
+                                                                                      Color.WHITE));
+>>>>>>> Stashed changes
       }
       modelInstance.setColor(GHOST_COLOR);
    }
@@ -95,7 +122,11 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
             {
                if (modelInstance != null)
                   modelInstance.model.dispose();
-               modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(xLength.get(), yLength.get(), zLength.get(), Color.WHITE));
+               modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(xLength.get(),
+                                                                                yLength.get(),
+                                                                                zLength.get(),
+                                                                                new Point3D(0, 0, -zLength.get() / 2),
+                                                                                Color.WHITE));
                modelInstance.setColor(GHOST_COLOR);
             }
          }
@@ -110,7 +141,10 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
             {
                if (modelInstance != null)
                   modelInstance.model.dispose();
-               modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(zLength.get(), xRadius.get(), Color.WHITE));
+               modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(zLength.get(),
+                                                                                   xRadius.get(),
+                                                                                   new Point3D(0, 0, -zLength.get() / 2),
+                                                                                   Color.WHITE));
                modelInstance.setColor(GHOST_COLOR);
             }
          }
@@ -127,7 +161,11 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
             {
                if (modelInstance != null)
                   modelInstance.model.dispose();
-               modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(xRadius.get(), yRadius.get(), zRadius.get(), Color.WHITE));
+               modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(xRadius.get(),
+                                                                                    yRadius.get(),
+                                                                                    zRadius.get(),
+                                                                                    new Point3D(),
+                                                                                    Color.WHITE));
                modelInstance.setColor(GHOST_COLOR);
             }
          }
@@ -142,7 +180,10 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
             {
                if (modelInstance != null)
                   modelInstance.model.dispose();
-               modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(zLength.get(), xRadius.get(), Color.WHITE));
+               modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(zLength.get(),
+                                                                               xRadius.get(),
+                                                                               new Point3D(0, 0, -zLength.get() / 2),
+                                                                               Color.WHITE));
                modelInstance.setColor(GHOST_COLOR);
             }
          }
