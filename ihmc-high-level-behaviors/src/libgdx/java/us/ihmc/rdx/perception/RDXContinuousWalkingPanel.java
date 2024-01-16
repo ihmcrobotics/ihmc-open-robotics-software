@@ -171,13 +171,13 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
 
       if (monteCarloPlanDataListMessage.get() != null)
       {
-         LogTools.warn("Generating Monte-Carlo Plan Graphic");
          terrainPlanningDebugger.generateMonteCarloPlanGraphic(monteCarloPlanDataListMessage.get());
          monteCarloPlanDataListMessage.set(null);
       }
 
       terrainPlanningDebugger.generateStartAndGoalFootstepGraphics(startStancePose, goalStancePose);
       terrainPlanningDebugger.render(terrainMapData);
+      stancePoseSelectionPanel.update(goalStancePose, terrainMapData);
    }
 
    public void renderImGuiWidgets()
@@ -267,6 +267,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
 
    public void destroy()
    {
+      stancePoseSelectionPanel.destroy();
       terrainPlanningDebugger.destroy();
    }
 
