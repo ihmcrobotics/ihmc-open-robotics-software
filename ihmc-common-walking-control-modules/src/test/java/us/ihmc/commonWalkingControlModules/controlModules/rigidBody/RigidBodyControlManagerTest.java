@@ -520,6 +520,7 @@ public class RigidBodyControlManagerTest
                                                                     null,
                                                                     false,
                                                                     yoTime,
+                                                                    0.0,
                                                                     null,
                                                                     testRegistry);
       manager.setGains(jointspaceGains, null);

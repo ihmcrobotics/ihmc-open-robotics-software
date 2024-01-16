@@ -55,7 +55,7 @@ public class ArUcoDetectionUpdater
 
       // Convert color from BGR to RGB
       GpuMat imageForUndistortionRGB = new GpuMat(arUcoImage.getImageHeight(), arUcoImage.getImageWidth(), arUcoImage.getOpenCVType());
-      opencv_cudaimgproc.cvtColor(arUcoImage.getGpuImageMatrix(), imageForUndistortionRGB, opencv_imgproc.COLOR_BGR2RGB);
+      opencv_cudaimgproc.cvtColor(arUcoImage.getGpuImageMat(), imageForUndistortionRGB, opencv_imgproc.COLOR_BGR2RGB);
 
       // Undistort image
       GpuMat undistortedImageRGB = new GpuMat(arUcoImage.getImageHeight(), arUcoImage.getImageWidth(), arUcoImage.getOpenCVType());
