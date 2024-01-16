@@ -25,6 +25,7 @@ import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.*;
+import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -166,9 +167,9 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    @Override
-   public <T> void subscribeViaCallback(ROS2Topic<T> topic, Notification callback, T messageToRecycle)
+   public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic)
    {
-      ros2Helper.subscribeViaCallback(topic, callback, messageToRecycle);
+      return ros2Helper.subscribeViaQueue(topic);
    }
 
    @Override

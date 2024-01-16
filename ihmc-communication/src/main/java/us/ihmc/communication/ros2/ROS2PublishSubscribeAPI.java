@@ -5,6 +5,7 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -18,7 +19,7 @@ public interface ROS2PublishSubscribeAPI
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback);
 
    /** Allocation free version. */
-   public <T> void subscribeViaCallback(ROS2Topic<T> topic, Notification callback, T messageToRecycle);
+   public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic);
 
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback);
 

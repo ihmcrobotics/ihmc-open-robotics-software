@@ -2,13 +2,12 @@ package us.ihmc.communication.ros2;
 
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -46,22 +45,33 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    }
 
    @Override
-   public <T> void subscribeViaCallback(ROS2Topic<T> topic, Notification callback, T messageToRecycle)
+   public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic)
    {
       try
       {
          TopicDataType<T> topicDataType = IHMCROS2Callback.newMessageTopicDataTypeInstance(topic.getType());
+         int queueSize = 16;
+         ConcurrentRingBuffer<T> concurrentQueue = new ConcurrentRingBuffer<>(topicDataType::createData, queueSize);
          ros2NodeInterface.createSubscription(topicDataType, subscriber ->
          {
-            if (subscriber.takeNextData(messageToRecycle, null))
+            T nextData = concurrentQueue.next();
+            if (nextData != null)
             {
-               callback.set();
+               if (subscriber.takeNextData(nextData, null))
+               {
+                  concurrentQueue.commit();
+               }
+            }
+            else
+            {
+               LogTools.warn("Concurrent ring buffer is full! Queue size: {}", queueSize);
             }
          }, topic.getName(), ROS2QosProfile.DEFAULT());
+         return concurrentQueue;
       }
       catch (IOException e)
       {
-         DefaultExceptionHandler.RUNTIME_EXCEPTION.handleException(e);
+         throw new RuntimeException(e);
       }
    }
 

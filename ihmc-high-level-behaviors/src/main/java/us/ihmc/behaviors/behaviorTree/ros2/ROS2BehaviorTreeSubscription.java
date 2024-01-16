@@ -6,9 +6,9 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -19,12 +19,12 @@ import java.util.function.Consumer;
 public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
 {
    private final ROS2Topic<BehaviorTreeStateMessage> topic;
-   private final Notification recievedMessageNotification = new Notification();
    private final ArrayList<Runnable> messageRecievedCallbacks = new ArrayList<>();
    private final BehaviorTreeState behaviorTreeState;
    private final Consumer<T> rootNodeSetter;
    private long numberOfMessagesReceived = 0;
-   private BehaviorTreeStateMessage behaviorTreeStateMessage = new BehaviorTreeStateMessage();
+   private int numberOfOnRobotNodes = 0;
+   private final ConcurrentRingBuffer<BehaviorTreeStateMessage> incomingStateMessageQueue;
    private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
 
@@ -36,18 +36,27 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       this.rootNodeSetter = rootNodeSetter;
 
       topic = AutonomyAPI.BEAVIOR_TREE.getTopic(behaviorTreeState.getCRDTInfo().getActorDesignation().getIncomingQualifier());
-      ros2PublishSubscribeAPI.subscribeViaCallback(topic, recievedMessageNotification, behaviorTreeStateMessage);
+      incomingStateMessageQueue = ros2PublishSubscribeAPI.subscribeViaQueue(topic);
    }
 
    public void update()
    {
-      if (recievedMessageNotification.poll())
+      if (incomingStateMessageQueue.poll())
       {
+         BehaviorTreeStateMessage behaviorTreeStateMessage = null;
+         BehaviorTreeStateMessage next;
+         while ((next = incomingStateMessageQueue.read()) != null)
+         {
+            behaviorTreeStateMessage = next;
+         }
+
          ++numberOfMessagesReceived;
          for (Runnable messageRecievedCallback : messageRecievedCallbacks)
          {
             messageRecievedCallback.run();
          }
+
+         numberOfOnRobotNodes = behaviorTreeStateMessage.getBehaviorTreeIndices().size();
 
          subscriptionRootNode.clear();
          subscriptionNodeDepthFirstIndex.setValue(0);
@@ -85,6 +94,8 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
 
             topologyOperationQueue.queueOperation(behaviorTreeState.getTreeRebuilder().getDestroyLeftoversOperation());
          });
+
+         incomingStateMessageQueue.flush();
       }
    }
 
@@ -187,8 +198,8 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       return numberOfMessagesReceived;
    }
 
-   public BehaviorTreeStateMessage getBehaviorTreeStateMessage()
+   public int getNumberOfOnRobotNodes()
    {
-      return behaviorTreeStateMessage;
+      return numberOfOnRobotNodes;
    }
 }
