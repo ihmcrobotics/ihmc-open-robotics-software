@@ -90,7 +90,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
          getState().stepForwardNextExecutionIndex();
       }
       ImGuiTools.previousWidgetTooltip("Go to next action");
-
+      
       boolean endOfSequence = getState().getExecutionNextIndex() >= getIndexEndOfSequence(getChildren());
       if (!endOfSequence)
       {

@@ -1,5 +1,7 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
+
 import java.util.function.Consumer;
 
 public class RDXBehaviorTreeTools
@@ -19,6 +21,22 @@ public class RDXBehaviorTreeTools
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
       {
          runForSubtreeNodes(child, operation);
+      }
+   }
+
+   public static RDXActionSequence findActionSequenceAncestor(RDXBehaviorTreeNode<?, ?> node)
+   {
+      if (node.getParent() == null)
+      {
+         return null;
+      }
+      else if (node.getParent() instanceof RDXActionSequence actionSequence)
+      {
+         return actionSequence;
+      }
+      else
+      {
+         return findActionSequenceAncestor(node.getParent());
       }
    }
 }

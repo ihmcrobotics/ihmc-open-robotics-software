@@ -4,7 +4,8 @@ import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotPoint;
 import imgui.extension.implot.flag.*;
-import imgui.internal.ImGui;
+import imgui.ImGui;
+import imgui.flag.ImGuiCond;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -151,9 +152,19 @@ public class ImPlotPlot
       this.flags = flags;
    }
 
+   public int getXFlags()
+   {
+      return xFlags;
+   }
+
    public void setXFlags(int xFlags)
    {
       this.xFlags = xFlags;
+   }
+
+   public int getYFlags()
+   {
+      return yFlags;
    }
 
    public void setYFlags(int yFlags)

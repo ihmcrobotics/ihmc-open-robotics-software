@@ -1,9 +1,11 @@
 package us.ihmc.perception.sceneGraph.centerpose;
 
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.perception.filters.BreakFrequencyAlphaCalculator;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
 
 public class CenterposeNode extends DetectableSceneNode
 {
@@ -13,9 +15,10 @@ public class CenterposeNode extends DetectableSceneNode
    private String objectType;
    private double confidence;
 
-   private final AlphaFilteredRigidBodyTransform alphaFilteredTransformToParent = new AlphaFilteredRigidBodyTransform();
-   private final BreakFrequencyAlphaCalculator breakFrequencyAlphaCalculator = new BreakFrequencyAlphaCalculator();
-   private double breakFrequency = 1.0;
+   private final RigidBodyTransform interpolatedTransform = new RigidBodyTransform();
+   private final FramePose3D lastPose = new FramePose3D(ReferenceFrame.getWorldFrame());
+
+   private int glitchCount;
 
    public CenterposeNode(long id, String name, int markerID, Point3D[] vertices3D, Point3D[] vertices2D)
    {
@@ -27,10 +30,41 @@ public class CenterposeNode extends DetectableSceneNode
 
    public void update()
    {
-      alphaFilteredTransformToParent.setAlpha(breakFrequencyAlphaCalculator.calculateAlpha(breakFrequency));
-      alphaFilteredTransformToParent.update(getNodeToParentFrameTransform());
-      getNodeToParentFrameTransform().set(alphaFilteredTransformToParent);
-      getNodeFrame().update();
+      RigidBodyTransform detectionTransform = getNodeToParentFrameTransform();
+      FramePose3D detectionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), detectionTransform);
+
+      double distance = lastPose.getPositionDistance(detectionPose);
+
+      boolean skipUpdate = false;
+      if (distance > 0.5)
+      {
+         if (glitchCount < 5)
+         {
+            skipUpdate = true;
+            glitchCount++;
+         }
+         else
+         {
+            glitchCount = 0;
+         }
+      }
+
+      if (!skipUpdate)
+      {
+         double alpha = normalize(distance, 0.001, 1.0);
+         alpha = MathTools.clamp(alpha, 0.001, 0.15);
+
+         interpolatedTransform.interpolate(detectionTransform, alpha);
+
+         getNodeToParentFrameTransform().set(interpolatedTransform);
+         getNodeFrame().update();
+      }
+
+      lastPose.set(detectionPose);
+   }
+
+   public static double normalize(double value, double min, double max) {
+      return (value - min) / (max - min);
    }
 
    public int getObjectID()
@@ -81,15 +115,5 @@ public class CenterposeNode extends DetectableSceneNode
    public void setConfidence(double confidence)
    {
       this.confidence = confidence;
-   }
-
-   public double getBreakFrequency()
-   {
-      return breakFrequency;
-   }
-
-   public void setBreakFrequency(double breakFrequency)
-   {
-      this.breakFrequency = breakFrequency;
    }
 }

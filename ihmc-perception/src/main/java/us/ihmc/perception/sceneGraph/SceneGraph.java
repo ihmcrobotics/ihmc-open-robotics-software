@@ -70,12 +70,12 @@ public class SceneGraph
     * This method updates the caches and the static relative nodes, whose
     * tracking state should only be evaluated by the robot.
     */
-   public void updateOnRobotOnly(ReferenceFrame sensorFrame)
+   public void updateOnRobotOnly(ReferenceFrame robotPelvisFrame)
    {
       // This must happen only once per on-robot tick
       detectionFilterCollection.update();
 
-      modifyTree(modificationQueue -> updateOnRobotOnly(rootNode, sensorFrame, modificationQueue));
+      modifyTree(modificationQueue -> updateOnRobotOnly(rootNode, robotPelvisFrame, modificationQueue));
    }
 
    private void updateOnRobotOnly(SceneNode sceneNode, ReferenceFrame sensorFrame, SceneGraphModificationQueue modificationQueue)

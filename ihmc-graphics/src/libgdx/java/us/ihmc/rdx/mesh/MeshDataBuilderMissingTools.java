@@ -10,7 +10,6 @@ public class MeshDataBuilderMissingTools
     *
     * @param eightVertices
     * @param lineWidth
-    * @param color
     */
    public static void addMultiLineBox(Point3DReadOnly[] eightVertices, double lineWidth, MeshDataBuilder meshDataBuilder)
    {

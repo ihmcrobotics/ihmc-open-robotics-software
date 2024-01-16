@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionFootstepDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionFootstepState;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFootstep;
@@ -71,7 +70,7 @@ public class RDXFootstepPlanActionFootstep
 
          interactableFootstep.update();
 
-         flatFootstepGraphic.setPose(getGizmo().getPose());
+         flatFootstepGraphic.setPoseFromReferenceFrame(getState().getSoleFrame().getReferenceFrame());
       }
    }
 
@@ -110,11 +109,6 @@ public class RDXFootstepPlanActionFootstep
       }
    }
 
-   public ReferenceFrame getFootstepFrame()
-   {
-      return state.getSoleFrame().getReferenceFrame();
-   }
-
    private RDXPose3DGizmo getGizmo()
    {
       return interactableFootstep.getSelectablePose3DGizmo().getPoseGizmo();
@@ -123,5 +117,10 @@ public class RDXFootstepPlanActionFootstep
    public FootstepPlanActionFootstepDefinition getDefinition()
    {
       return definition;
+   }
+
+   public FootstepPlanActionFootstepState getState()
+   {
+      return state;
    }
 }

@@ -89,4 +89,19 @@ public class RDXROS2ArUcoMarkerPosesVisualizer extends RDXVisualizer
          }
       }
    }
+
+   public ImGuiFrequencyPlot getFrequencyPlot()
+   {
+      return frequencyPlot;
+   }
+
+   public ImGuiPlot getNumberOfMarkersPlot()
+   {
+      return numberOfMarkersPlot;
+   }
+
+   public int getNumberOfArUcoMarkers()
+   {
+      return numberOfArUcoMarkers;
+   }
 }

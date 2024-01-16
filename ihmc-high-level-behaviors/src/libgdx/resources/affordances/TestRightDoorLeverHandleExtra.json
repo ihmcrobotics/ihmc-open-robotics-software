@@ -1,0 +1,124 @@
+{
+  "name" : "TestRightDoorLeverHandle",
+  "object" : "RightDoorLeverHandle",
+  "x" : 0.0,
+  "y" : 0.0,
+  "z" : 0.0,
+  "rollInDegrees" : 0.0,
+  "pitchInDegrees" : 0.0,
+  "yawInDegrees" : -178.34,
+  "frames" : [ {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : -178.34,
+    "configuration" : [ {
+      "side" : "right",
+      "type" : "OPEN"
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : -178.34,
+    "configuration" : [ {
+      "side" : "right",
+      "type" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : -178.34,
+    "configuration" : [ {
+      "side" : "right",
+      "type" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : -178.34,
+    "configuration" : [ {
+      "side" : "right",
+      "type" : "GRIP_HARD"
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : -178.34,
+    "configuration" : [ {
+      "side" : "right",
+      "type" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 16.42,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : -178.34,
+    "configuration" : [ {
+      "side" : "right",
+      "type" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 41.18,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : -178.34,
+    "configuration" : [ {
+      "side" : "right",
+      "type" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 71.94,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : -178.34,
+    "configuration" : [ {
+      "side" : "right",
+      "type" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 88.42,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : -178.34,
+    "configuration" : [ {
+      "side" : "right",
+      "type" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 96.34,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : -178.34,
+    "configuration" : [ {
+      "side" : "right",
+      "type" : ""
+    } ]
+  } ],
+  "activeSides" : 1,
+  "numberPreGraspFrames" : 3,
+  "numberPostGraspFrames" : 6
+}

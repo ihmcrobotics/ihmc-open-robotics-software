@@ -180,10 +180,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
       ImGui.text(topic.getName());
       if (getHasReceivedOne())
       {
-         messageSizeReadout.renderImGuiWidgets();
-         getFrequencyPlot().renderImGuiWidgets();
-         delayPlot.renderImGuiWidgets();
-         sequenceDiscontinuityPlot.renderImGuiWidgets();
+         renderStatistics();
       }
    }
 
@@ -216,5 +213,13 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
    {
       super.destroy();
       setSubscribed(false);
+   }
+
+   public void renderStatistics()
+   {
+      messageSizeReadout.renderImGuiWidgets();
+      getFrequencyPlot().renderImGuiWidgets();
+      delayPlot.renderImGuiWidgets();
+      sequenceDiscontinuityPlot.renderImGuiWidgets();
    }
 }

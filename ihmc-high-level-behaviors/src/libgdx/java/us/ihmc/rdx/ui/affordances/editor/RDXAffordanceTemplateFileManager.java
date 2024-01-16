@@ -310,7 +310,7 @@ public class RDXAffordanceTemplateFileManager
                }
             }
          });
-         LogTools.info("SAVED to file {}", file.getFileName());
+         LogTools.info("Saved to file {}", file.getFileName());
       }
       else
       {
@@ -615,7 +615,7 @@ public class RDXAffordanceTemplateFileManager
                }
             }
          });
-         LogTools.info("LOADED file {}", filePath);
+         LogTools.info("Loaded file {}", filePath);
       }
       else
       {

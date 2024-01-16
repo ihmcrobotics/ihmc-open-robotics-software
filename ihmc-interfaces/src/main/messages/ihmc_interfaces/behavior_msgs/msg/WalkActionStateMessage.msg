@@ -4,8 +4,13 @@ behavior_msgs/ActionNodeStateMessage state
 # Definition
 behavior_msgs/WalkActionDefinitionMessage definition
 
-# Total number of footsteps; used for walking actions
-uint16 total_number_of_footsteps
+byte TRIGGERED = 0
+byte FOOTSTEP_PLANNING = 1
+byte PLANNING_FAILED = 2
+byte PLANNING_SUCCEEDED = 3
+byte PLAN_COMMANDED = 4
+byte PLAN_EXECUTION_COMPLETE = 5
 
-# Incomplete footsteps; used for walking actions
-uint16 number_of_incomplete_footsteps
+byte execution_state
+
+behavior_msgs/FootstepPlanActionStateBasicsMessage footstep_plan_state_basics

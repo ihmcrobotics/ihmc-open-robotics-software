@@ -208,10 +208,17 @@ double interpolate(double a, double b, double alpha)
  **/
 float determinant3x3Matrix(float* matrix)
 {
-   float pos = matrix[0] * matrix[4] * matrix[8] + matrix[1] * matrix[5] * matrix[6] + matrix[2] * matrix[3] * matrix[7];
-   float neg = matrix[2] * matrix[4] * matrix[6] + matrix[1] * matrix[3] * matrix[8] + matrix[0] * matrix[5] * matrix[7];
+    float m00 = matrix[0];
+    float m01 = matrix[1];
+    float m02 = matrix[2];
+    float m10 = matrix[3];
+    float m11 = matrix[4];
+    float m12 = matrix[5];
+    float m20 = matrix[6];
+    float m21 = matrix[7];
+    float m22 = matrix[8];
 
-   return pos - neg;
+   return m00 * m11 * m22 + m01 * m12 * m20 + m02 * m10 * m21 - m02 * m11 * m20 - m01 * m10 * m22 - m00 * m12 * m21;
 }
 
 /**
@@ -220,20 +227,31 @@ float determinant3x3Matrix(float* matrix)
  **/
 float* invert3x3Matrix(float* matrix)
 {
-   float det = determinant3x3Matrix(matrix);
+    float m00 = matrix[0];
+    float m01 = matrix[1];
+    float m02 = matrix[2];
+    float m10 = matrix[3];
+    float m11 = matrix[4];
+    float m12 = matrix[5];
+    float m20 = matrix[6];
+    float m21 = matrix[7];
+    float m22 = matrix[8];
+
+    // compute the determinant
+   float det = m00 * m11 * m22 + m01 * m12 * m20 + m02 * m10 * m21 - m02 * m11 * m20 - m01 * m10 * m22 - m00 * m12 * m21;
    float ret[9];
 
-   float detMinor00 = matrix[4] * matrix[8] - matrix[5] * matrix[7];
-   float detMinor01 = matrix[3] * matrix[8] - matrix[5] * matrix[6];
-   float detMinor02 = matrix[3] * matrix[7] - matrix[4] * matrix[6];
+   float detMinor00 = m11 * m22 - m12 * m21;
+   float detMinor01 = m10 * m22 - m12 * m20;
+   float detMinor02 = m10 * m21 - m11 * m20;
 
-   float detMinor10 = matrix[1] * matrix[8] - matrix[2] * matrix[7];
-   float detMinor11 = matrix[0] * matrix[8] - matrix[2] * matrix[6];
-   float detMinor12 = matrix[0] * matrix[7] - matrix[1] * matrix[6];
+   float detMinor10 = m01 * m22 - m02 * m21;
+   float detMinor11 = m00 * m22 - m02 * m20;
+   float detMinor12 = m00 * m21 - m01 * m20;
 
-   float detMinor20 = matrix[1] * matrix[5] - matrix[2] * matrix[4];
-   float detMinor21 = matrix[0] * matrix[5] - matrix[2] * matrix[3];
-   float detMinor22 = matrix[0] * matrix[4] - matrix[1] * matrix[3];
+   float detMinor20 = m01 * m12 - m02 * m11;
+   float detMinor21 = m00 * m12 - m02 * m10;
+   float detMinor22 = m00 * m11 - m01 * m10;
 
    ret[0] = detMinor00 / det;
    ret[1] = -detMinor10 / det;
@@ -315,13 +333,25 @@ float signedDistanceFromPoint3DToPlane3D(float3 pointQuery, float3 pointOnPlane,
 }
 
 /**
- * Returns the distane of a point 3D to a plane 3D that's defined by the point on the plane and the plane normal.
+ * Returns the distance of a point 3D to a plane 3D that's defined by the point on the plane and the plane normal.
  **/
 float distanceFromPoint3DToPlane3D(float3 pointQuery, float3 pointOnPlane, float3 planeNormal)
 {
    float3 delta = pointQuery - pointOnPlane;
 
    return fabs(dot(delta, planeNormal));
+}
+
+/**
+ * Returns the distance of a point 3D to a plane 3D that's defined by the point on the plane and the plane normal.
+ **/
+float getZOnPlane(float2 pointQuery, float3 pointOnPlane, float3 planeNormal)
+{
+   float k = dot(planeNormal, pointOnPlane);
+
+   float residual = k - planeNormal.x * pointOnPlane.x - planeNormal.y * pointOnPlane.y;
+
+   return residual / planeNormal.z;
 }
 
 /**
@@ -340,11 +370,13 @@ float3 computeNormal3DFromThreePoint3Ds(float3 firstPointOnPlane, float3 secondP
 void solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vector, float* coefficients)
 {
     float* inverse_covariance_matrix = invert3x3Matrix(covariance_matrix);
+
+    // This is a simple matrix multiply, coefficients = inverse_covariance_matrix * z_variance_vector
     for (int row = 0; row < 3; row++)
     {
         for (int col = 0; col < 3; col++)
         {
-            coefficients[row] += inverse_covariance_matrix[col + row * 3] * z_variance_vector[col];
+            coefficients[row] += inverse_covariance_matrix[row * 3 + col] * z_variance_vector[col];
         }
     }
 }

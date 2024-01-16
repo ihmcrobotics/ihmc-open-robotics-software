@@ -85,7 +85,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
 
       if (topic.getType().equals(LidarScanMessage.class))
       {
-         lidarActiveHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.PUBLISH_LIDAR_SCAN);
+         lidarActiveHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_LIDAR_SCAN);
       }
    }
 

@@ -84,6 +84,11 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       return handConfigurationIndex.getValue();
    }
 
+   public SakeHandCommandOption getSakeCommandOption()
+   {
+      return SakeHandCommandOption.values[handConfigurationIndex.getValue()];
+   }
+
    public void setHandConfigurationIndex(int handConfigurationIndex)
    {
       this.handConfigurationIndex.setValue(handConfigurationIndex);

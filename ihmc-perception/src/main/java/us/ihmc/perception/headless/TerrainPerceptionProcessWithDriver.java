@@ -336,7 +336,7 @@ public class TerrainPerceptionProcessWithDriver
 
          /* Call all "enabled" setters before this update call.*/
          humanoidPerception.updateTerrain(ros2Helper, depth16UC1Image, cameraFrame,
-                                          cameraZUpFrame, true, false);
+                                          cameraZUpFrame, false);
 
          if (parameters.getPublishDepth() || parameters.getRapidRegionsEnabled())
          {
