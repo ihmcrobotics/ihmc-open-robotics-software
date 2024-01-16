@@ -82,7 +82,7 @@
     "upperBound" : 0.8
   },
   "Internal global width in meters" : {
-    "value" : 4.0,
+    "value" : 30.0,
     "lowerBound" : 20.0,
     "upperBound" : 40.0
   },
