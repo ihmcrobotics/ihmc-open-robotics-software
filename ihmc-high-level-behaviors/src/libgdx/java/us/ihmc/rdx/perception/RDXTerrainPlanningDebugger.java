@@ -8,54 +8,140 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
+import imgui.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
+import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXTerrainPlanningDebugger implements RenderableProvider
 {
+   private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
+   private final RDXFootstepPlanGraphic monteCarloPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private final AtomicReference<FootstepDataListMessage> monteCarloPlanDataListMessage = new AtomicReference<>(null);
-   private MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters;
+   private final SideDependentList<ArrayList<ModelInstance>> expansionSpheres = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
+   private final ArrayList<ModelInstance> stateSpheres = new ArrayList<>();
+   private final ImBoolean showMonteCarloPlan = new ImBoolean(true);
+   private final ImBoolean showContinuousWalkingPlan = new ImBoolean(true);
+   private final ImBoolean showStateSpheres = new ImBoolean(true);
+   private final ImBoolean showExpansionSpheres = new ImBoolean(true);
+   private final ImBoolean showStartPoses = new ImBoolean(true);
+   private final ImBoolean showGoalPoses = new ImBoolean(true);
+   private final ImBoolean showRightActionSet = new ImBoolean(false);
+   private final ImBoolean showLeftActionSet = new ImBoolean(false);
 
-   private SideDependentList<ArrayList<ModelInstance>> expansionSpheres = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
-   private ArrayList<ModelInstance> stateSpheres = new ArrayList<>();
-   private ArrayList<ModelInstance> stepCylinders = new ArrayList<>();
+   private MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters;
+   private SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
+   private SideDependentList<RDXFootstepGraphic> startFootstepGraphics;
    private List<Pose3D> monteCarloTreeNodeStates;
    private TerrainMapData terrainMapData;
 
    private int leftIndex = 0;
    private int rightIndex = 0;
-   private boolean showStateSpheres = true;
-   private boolean showExpansionSpheres = true;
 
-   public RDXTerrainPlanningDebugger(ROS2Helper ros2Helper, MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters)
+   public RDXTerrainPlanningDebugger(ROS2Helper ros2Helper,
+                                     MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters,
+                                     SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints)
    {
+
       this.monteCarloFootstepPlannerParameters = monteCarloFootstepPlannerParameters;
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_TREE_NODES, this::onMonteCarloTreeNodesReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
+
+      goalFootstepGraphics = new SideDependentList<>(new RDXFootstepGraphic(contactPoints, RobotSide.LEFT),
+                                                     new RDXFootstepGraphic(contactPoints, RobotSide.RIGHT));
+      startFootstepGraphics = new SideDependentList<>(new RDXFootstepGraphic(contactPoints, RobotSide.LEFT),
+                                                      new RDXFootstepGraphic(contactPoints, RobotSide.RIGHT));
+
+      goalFootstepGraphics.get(RobotSide.RIGHT).setColor(new Color(1.0f, 1.0f, 1.0f, 0.5f));
+      goalFootstepGraphics.get(RobotSide.RIGHT).create();
+
+      goalFootstepGraphics.get(RobotSide.LEFT).setColor(new Color(1.0f, 1.0f, 1.0f, 0.5f));
+      goalFootstepGraphics.get(RobotSide.LEFT).create();
+
+      startFootstepGraphics.get(RobotSide.RIGHT).setColor(new Color(0.0f, 0.0f, 0.0f, 1.0f));
+      startFootstepGraphics.get(RobotSide.RIGHT).create();
+
+      startFootstepGraphics.get(RobotSide.LEFT).setColor(new Color(0.0f, 0.0f, 0.0f, 1.0f));
+      startFootstepGraphics.get(RobotSide.LEFT).create();
+
+      footstepPlanGraphic.setColor(RobotSide.LEFT, Color.GRAY);
+      footstepPlanGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
+
+      monteCarloPlanGraphic.setColor(RobotSide.LEFT, Color.CYAN);
+      monteCarloPlanGraphic.setColor(RobotSide.RIGHT, Color.RED);
 
       for (int i = 0; i < 500; i++)
       {
          expansionSpheres.get(RobotSide.LEFT).add(RDXModelBuilder.createSphere(0.015f, Color.CYAN));
          expansionSpheres.get(RobotSide.RIGHT).add(RDXModelBuilder.createSphere(0.015f, Color.RED));
       }
+   }
+
+   public void generateStartAndGoalFootstepGraphics(SideDependentList<FramePose3D> startStancePose, SideDependentList<FramePose3D> goalStancePose)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         startFootstepGraphics.get(side).setPose(startStancePose.get(side));
+         goalFootstepGraphics.get(side).setPose(goalStancePose.get(side));
+      }
+   }
+
+   public void generateSwingGraphics(FootstepPlan plan, List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories)
+   {
+      if (plan != null)
+      {
+         footstepPlanGraphic.updateTrajectoriesFromPlan(plan, swingTrajectories);
+      }
+   }
+
+   public void generateFootstepPlanGraphic(FootstepDataListMessage message)
+   {
+      FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(message);
+      for (int i = 0; i < plan.getNumberOfSteps(); i++)
+      {
+         LogTools.info("({})[A* Footstep: {}, {}]", i, plan.getFootstep(i).getRobotSide(), plan.getFootstep(i).getFootstepPose());
+      }
+
+      footstepPlanGraphic.generateMeshesAsync(message, "Continuous Walking");
+      footstepPlanGraphic.update();
+   }
+
+   public void generateMonteCarloPlanGraphic(FootstepDataListMessage message)
+   {
+      FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(message);
+      for (int i = 0; i < plan.getNumberOfSteps(); i++)
+      {
+         LogTools.info("({})[Monte-Carlo Footstep: {}, {}]", i, plan.getFootstep(i).getRobotSide(), plan.getFootstep(i).getFootstepPose());
+      }
+
+      monteCarloPlanGraphic.generateMeshesAsync(message, "Monte-Carlo Plan");
+      monteCarloPlanGraphic.update();
    }
 
    public void onMonteCarloTreeNodesReceived(PoseListMessage poseListMessage)
@@ -73,18 +159,15 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
       this.monteCarloPlanDataListMessage.set(message);
    }
 
-   public void render(TerrainMapData terrainMapData, boolean showStateSpheres, boolean showExpansionSpheres)
+   public void render(TerrainMapData terrainMapData)
    {
-      this.showStateSpheres = showStateSpheres;
-      this.showExpansionSpheres = showExpansionSpheres;
-
-      if (monteCarloTreeNodeStates != null && showStateSpheres)
+      if (monteCarloTreeNodeStates != null && showStateSpheres.get())
       {
          updateStateSpheres(monteCarloTreeNodeStates);
          monteCarloTreeNodeStates = null;
       }
 
-      if (monteCarloPlanDataListMessage.get() != null && showExpansionSpheres)
+      if (monteCarloPlanDataListMessage.get() != null && showExpansionSpheres.get())
       {
          updateExpansionSpheres(monteCarloPlanDataListMessage.getAndSet(null), terrainMapData);
       }
@@ -177,7 +260,7 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (showStateSpheres)
+      if (showStateSpheres.get())
       {
          for (ModelInstance stateSphere : stateSpheres)
          {
@@ -185,7 +268,7 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
          }
       }
 
-      if (showExpansionSpheres)
+      if (showExpansionSpheres.get())
       {
          for (RobotSide side : RobotSide.values)
          {
@@ -195,19 +278,45 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
             }
          }
       }
+
+      if (showMonteCarloPlan.get())
+         monteCarloPlanGraphic.getRenderables(renderables, pool);
+
+      if (showContinuousWalkingPlan.get())
+         footstepPlanGraphic.getRenderables(renderables, pool);
+
+      goalFootstepGraphics.get(RobotSide.LEFT).getRenderables(renderables, pool);
+      goalFootstepGraphics.get(RobotSide.RIGHT).getRenderables(renderables, pool);
+      startFootstepGraphics.get(RobotSide.LEFT).getRenderables(renderables, pool);
+      startFootstepGraphics.get(RobotSide.RIGHT).getRenderables(renderables, pool);
+   }
+
+   public void renderImGuiWidgets()
+   {
+      ImGui.checkbox("Show Monte-Carlo Plan", showMonteCarloPlan);
+      ImGui.checkbox("Show Continuous Walking Plan", showContinuousWalkingPlan);
+      ImGui.checkbox("Show State Spheres", showStateSpheres);
+      ImGui.checkbox("Show Expansion Spheres", showExpansionSpheres);
+   }
+
+   public void reset()
+   {
+      footstepPlanGraphic.clear();
+      monteCarloPlanGraphic.clear();
+
+      goalFootstepGraphics.get(RobotSide.LEFT).setPose(new FramePose3D());
+      goalFootstepGraphics.get(RobotSide.RIGHT).setPose(new FramePose3D());
+      startFootstepGraphics.get(RobotSide.LEFT).setPose(new FramePose3D());
+      startFootstepGraphics.get(RobotSide.RIGHT).setPose(new FramePose3D());
    }
 
    public void destroy()
    {
-   }
-
-   public void setShowStateSpheres(boolean showStateSpheres)
-   {
-      this.showStateSpheres = showStateSpheres;
-   }
-
-   public void setShowExpansionSpheres(boolean showExpansionSpheres)
-   {
-      this.showExpansionSpheres = showExpansionSpheres;
+      footstepPlanGraphic.destroy();
+      monteCarloPlanGraphic.destroy();
+      goalFootstepGraphics.get(RobotSide.LEFT).destroy();
+      goalFootstepGraphics.get(RobotSide.RIGHT).destroy();
+      startFootstepGraphics.get(RobotSide.LEFT).destroy();
+      startFootstepGraphics.get(RobotSide.RIGHT).destroy();
    }
 }
