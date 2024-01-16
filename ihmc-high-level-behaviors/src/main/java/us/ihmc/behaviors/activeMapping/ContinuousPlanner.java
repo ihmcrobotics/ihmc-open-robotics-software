@@ -563,6 +563,17 @@ public class ContinuousPlanner
       return swingPlannerParameters;
    }
 
+
+   public FramePose3D getImminentFootstepPose()
+   {
+      return imminentFootstepPose;
+   }
+
+   public RobotSide getImminentFootstepSide()
+   {
+      return imminentFootstepSide;
+   }
+
    public SideDependentList<FramePose3D> getGoalStancePose()
    {
       return goalStancePose;
