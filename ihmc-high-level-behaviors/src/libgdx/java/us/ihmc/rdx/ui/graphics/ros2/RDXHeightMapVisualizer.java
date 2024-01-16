@@ -264,6 +264,11 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       return latestHeightMapMessage;
    }
 
+   public HeightMapData getLatestHeightMapData()
+   {
+      return latestHeightMapData;
+   }
+
    public TerrainMapData getTerrainMapData()
    {
       terrainMapData.setHeightMap(heightMapImage);
