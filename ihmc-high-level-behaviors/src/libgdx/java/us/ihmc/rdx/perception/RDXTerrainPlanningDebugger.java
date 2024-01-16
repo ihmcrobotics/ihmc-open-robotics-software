@@ -129,7 +129,6 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
       }
 
       footstepPlanGraphic.generateMeshesAsync(message, "Continuous Walking");
-      footstepPlanGraphic.update();
    }
 
    public void generateMonteCarloPlanGraphic(FootstepDataListMessage message)
@@ -141,7 +140,6 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
       }
 
       monteCarloPlanGraphic.generateMeshesAsync(message, "Monte-Carlo Plan");
-      monteCarloPlanGraphic.update();
    }
 
    public void onMonteCarloTreeNodesReceived(PoseListMessage poseListMessage)
@@ -171,6 +169,12 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
       {
          updateExpansionSpheres(monteCarloPlanDataListMessage.getAndSet(null), terrainMapData);
       }
+   }
+
+   public void update()
+   {
+      footstepPlanGraphic.update();
+      monteCarloPlanGraphic.update();
    }
 
    public void updateExpansionSpheres(FootstepDataListMessage monteCarloFootstepsMessage, TerrainMapData terrainMapData)
