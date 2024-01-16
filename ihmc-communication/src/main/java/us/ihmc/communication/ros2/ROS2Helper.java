@@ -2,17 +2,20 @@ package us.ihmc.communication.ros2;
 
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.ros2.*;
 
+import java.io.IOException;
 import java.util.function.Consumer;
 
 /**
@@ -40,6 +43,26 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
       ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, callback);
+   }
+
+   @Override
+   public <T> void subscribeViaCallback(ROS2Topic<T> topic, Notification callback, T messageToRecycle)
+   {
+      try
+      {
+         TopicDataType<T> topicDataType = IHMCROS2Callback.newMessageTopicDataTypeInstance(topic.getType());
+         ros2NodeInterface.createSubscription(topicDataType, subscriber ->
+         {
+            if (subscriber.takeNextData(messageToRecycle, null))
+            {
+               callback.set();
+            }
+         }, topic.getName(), ROS2QosProfile.DEFAULT());
+      }
+      catch (IOException e)
+      {
+         DefaultExceptionHandler.RUNTIME_EXCEPTION.handleException(e);
+      }
    }
 
    @Override

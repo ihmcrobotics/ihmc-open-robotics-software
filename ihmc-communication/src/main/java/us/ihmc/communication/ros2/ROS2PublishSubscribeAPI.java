@@ -17,6 +17,9 @@ public interface ROS2PublishSubscribeAPI
 {
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback);
 
+   /** Allocation free version. */
+   public <T> void subscribeViaCallback(ROS2Topic<T> topic, Notification callback, T messageToRecycle);
+
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback);
 
    public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic);

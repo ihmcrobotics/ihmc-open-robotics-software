@@ -6,23 +6,25 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.AutonomyAPI;
-import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
 
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 @SuppressWarnings({"unchecked"}) // Sometimes in this class we need to be a little unsafe
 public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
 {
    private final ROS2Topic<BehaviorTreeStateMessage> topic;
-   private final IHMCROS2Input<BehaviorTreeStateMessage> behaviorTreeSubscription;
+   private final Notification recievedMessageNotification = new Notification();
+   private final ArrayList<Runnable> messageRecievedCallbacks = new ArrayList<>();
    private final BehaviorTreeState behaviorTreeState;
    private final Consumer<T> rootNodeSetter;
    private long numberOfMessagesReceived = 0;
-   private BehaviorTreeStateMessage latestBehaviorTreeMessage;
+   private BehaviorTreeStateMessage behaviorTreeStateMessage = new BehaviorTreeStateMessage();
    private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
 
@@ -34,23 +36,26 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       this.rootNodeSetter = rootNodeSetter;
 
       topic = AutonomyAPI.BEAVIOR_TREE.getTopic(behaviorTreeState.getCRDTInfo().getActorDesignation().getIncomingQualifier());
-      behaviorTreeSubscription = ros2PublishSubscribeAPI.subscribe(topic);
+      ros2PublishSubscribeAPI.subscribeViaCallback(topic, recievedMessageNotification, behaviorTreeStateMessage);
    }
 
    public void update()
    {
-      if (behaviorTreeSubscription.getMessageNotification().poll())
+      if (recievedMessageNotification.poll())
       {
          ++numberOfMessagesReceived;
-         latestBehaviorTreeMessage = behaviorTreeSubscription.getMessageNotification().read();
+         for (Runnable messageRecievedCallback : messageRecievedCallbacks)
+         {
+            messageRecievedCallback.run();
+         }
 
          subscriptionRootNode.clear();
          subscriptionNodeDepthFirstIndex.setValue(0);
-         boolean subscriptionRootIsNull = latestBehaviorTreeMessage.getBehaviorTreeTypes().isEmpty();
+         boolean subscriptionRootIsNull = behaviorTreeStateMessage.getBehaviorTreeTypes().isEmpty();
          if (!subscriptionRootIsNull)
-            buildSubscriptionTree(latestBehaviorTreeMessage, subscriptionRootNode);
+            buildSubscriptionTree(behaviorTreeStateMessage, subscriptionRootNode);
 
-         behaviorTreeState.fromMessage(latestBehaviorTreeMessage);
+         behaviorTreeState.fromMessage(behaviorTreeStateMessage);
 
          if (!behaviorTreeState.isFrozen())
          {
@@ -172,9 +177,9 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
 
    }
 
-   public IHMCROS2Input<BehaviorTreeStateMessage> getBehaviorTreeSubscription()
+   public void registerMessageReceivedCallback(Runnable callback)
    {
-      return behaviorTreeSubscription;
+      messageRecievedCallbacks.add(callback);
    }
 
    public long getNumberOfMessagesReceived()
@@ -182,8 +187,8 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       return numberOfMessagesReceived;
    }
 
-   public BehaviorTreeStateMessage getLatestBehaviorTreeMessage()
+   public BehaviorTreeStateMessage getBehaviorTreeStateMessage()
    {
-      return latestBehaviorTreeMessage;
+      return behaviorTreeStateMessage;
    }
 }
