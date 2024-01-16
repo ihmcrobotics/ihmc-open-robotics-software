@@ -19,6 +19,9 @@ public interface ROS2PublishSubscribeAPI
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback);
 
    /** Allocation free version. */
+   public <T> void subscribeViaCallback(ROS2Topic<T> topic, Notification callback, T messageToRecycle);
+
+   /** Allocation free version. */
    public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic);
 
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback);

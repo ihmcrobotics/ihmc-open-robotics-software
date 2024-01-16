@@ -45,6 +45,26 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    }
 
    @Override
+   public <T> void subscribeViaCallback(ROS2Topic<T> topic, Notification callback, T messageToRecycle)
+   {
+      try
+      {
+         TopicDataType<T> topicDataType = IHMCROS2Callback.newMessageTopicDataTypeInstance(topic.getType());
+         ros2NodeInterface.createSubscription(topicDataType, subscriber ->
+         {
+            if (subscriber.takeNextData(messageToRecycle, null))
+            {
+               callback.set();
+            }
+         }, topic.getName(), ROS2QosProfile.DEFAULT());
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   @Override
    public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic)
    {
       try
