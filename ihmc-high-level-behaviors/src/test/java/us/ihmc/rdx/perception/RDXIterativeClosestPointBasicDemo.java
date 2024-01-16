@@ -7,10 +7,15 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -18,6 +23,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 import java.io.BufferedReader;
@@ -48,6 +54,7 @@ public class RDXIterativeClosestPointBasicDemo
 
    private final RDXPointCloudRenderer envPointCloudRenderer = new RDXPointCloudRenderer();
    private final RDXPointCloudRenderer objectPointCloudRenderer = new RDXPointCloudRenderer();
+   private RDXReferenceFrameGraphic referenceFrameGraphic;
 
    private final RecyclingArrayList<Point3D32> envPointCloud = new RecyclingArrayList<>(Point3D32::new);
    private final RecyclingArrayList<FramePoint3D> objectModelPointCloud = new RecyclingArrayList<>(FramePoint3D::new);
@@ -56,6 +63,12 @@ public class RDXIterativeClosestPointBasicDemo
 
    private final RigidBodyTransform objectTransform = new RigidBodyTransform();
    private final ReferenceFrame objectReferenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), objectTransform);
+   private final FramePose3D objectPose = new FramePose3D(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D objectPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
+   private final FrameQuaternion objectOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
+   private final YawPitchRoll objectYawPitchRoll = new YawPitchRoll();
+   private final RotationMatrix objectRotationMatrix = new RotationMatrix();
+   private final RotationMatrix objectDeltaMatrix = new RotationMatrix();
    private final FramePoint3D pointA = new FramePoint3D(objectReferenceFrame);
    private final RigidBodyTransform envTransform = new RigidBodyTransform();
    private final ReferenceFrame envReferenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), envTransform);
@@ -64,8 +77,10 @@ public class RDXIterativeClosestPointBasicDemo
    private final int envSize = 1000;
 
    private final DMatrixRMaj objectCentroid = new DMatrixRMaj(1, 3);
+   private final DMatrixRMaj actualObjectCentroid = new DMatrixRMaj(1, 3);
    private final DMatrixRMaj envCentroid = new DMatrixRMaj(1, 3);
    private final DMatrixRMaj objectCentroidSubtractedPoints = new DMatrixRMaj(envSize, 3);
+   private final DMatrixRMaj actualObjectCentroidSubtractedPoints= new DMatrixRMaj(envSize, 3);
    private final DMatrixRMaj envCentroidSubtractedPoints= new DMatrixRMaj(envSize, 3);
    private final DMatrixRMaj envToObjectCorrespondencePoints = new DMatrixRMaj(envSize, 3);
    private final DMatrixRMaj zeroMatrixPoint = new DMatrixRMaj(1,3);
@@ -110,6 +125,9 @@ public class RDXIterativeClosestPointBasicDemo
             RDX3DPanel panel3D = new RDX3DPanel("3D View 2", true);
             baseUI.add3DPanel(panel3D);
 
+            referenceFrameGraphic = new RDXReferenceFrameGraphic(0.5);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(referenceFrameGraphic);
+
             getObjectPoints();
           }
 
@@ -122,11 +140,14 @@ public class RDXIterativeClosestPointBasicDemo
             float halfBoxWidth = (float) RigidBodySceneObjectDefinitions.BOX_WIDTH/2.0f;
             float halfBoxDepth = (float)RigidBodySceneObjectDefinitions.BOX_DEPTH/2.0f;
             float halfBoxHeight = (float)RigidBodySceneObjectDefinitions.BOX_HEIGHT/2.0f;
+            // Initialize object points within the box, then change a coordinate to force them to a face.
             for (int i = 0; i < envSize; i++) {
                int j = random.nextInt(6);
+               // Initialize the point within the box
                float x =(float)random.nextDouble(-halfBoxDepth, halfBoxDepth);
                float y =(float)random.nextDouble(-halfBoxWidth, halfBoxWidth);
                float z =(float)random.nextDouble(-halfBoxHeight, halfBoxHeight);
+               // Alter x, y, or z so that the point lies on a face (and not inside the box)
                if (j==0 | j==1) {x = (-(j&1)*halfBoxDepth*2.0f)+halfBoxDepth;}
                if (j==2 | j==3) {y = (-(j&1)*halfBoxWidth*2.0f)+halfBoxWidth;}
                if (j==4 | j==5) {z = (-(j&1)*halfBoxHeight*2.0f)+halfBoxHeight;}
@@ -136,11 +157,14 @@ public class RDXIterativeClosestPointBasicDemo
                worldFramePoint.setIncludingFrame(pointA);
             }
             for (int i = 0; i < envSize; i++) {
+               // We grab only 3 faces of the box here to simulate what the camera would see.
                int j = random.nextInt(3);
                j=j*2;
+               // Initialize the point within the box
                float x =(float)random.nextDouble(-halfBoxDepth, halfBoxDepth);
                float y =(float)random.nextDouble(-halfBoxWidth, halfBoxWidth);
                float z =(float)random.nextDouble(-halfBoxHeight, halfBoxHeight);
+               // Alter x, y, or z so that the point lies on a face (and not inside the box)
                if (j==0 | j==1) {x = (-(j&1)*halfBoxDepth*2.0f)+halfBoxDepth;}
                if (j==2 | j==3) {y = (-(j&1)*halfBoxWidth*2.0f)+halfBoxWidth;}
                if (j==4 | j==5) {z = (-(j&1)*halfBoxHeight*2.0f)+halfBoxHeight;}
@@ -269,6 +293,13 @@ public class RDXIterativeClosestPointBasicDemo
             ImGui.text("Obj Centroid: " + df.format(objectCentroid.get(0, 0)) + " y: " + df.format(objectCentroid.get(0, 1)) + " z: " + df.format(objectCentroid.get(0, 2)));
             ImGui.text("diff Centroid: " + df.format(envCentroid.get(0, 0)-objectCentroid.get(0, 0)) + " y: " + df.format(envCentroid.get(0, 1)-objectCentroid.get(0, 1)) + " z: " + df.format(envCentroid.get(0, 2)-objectCentroid.get(0, 2)));
             ImGui.text(" ");
+            ImGui.text("Object pos. X: " + df.format(objectPose.getPosition().getX()) + "  Y: " + df.format(objectPose.getPosition().getY()) + "  Z: " + df.format(objectPose.getPosition().getZ()));
+            ImGui.text("Object quat. X: " + df.format(objectPose.getOrientation().getX()) + "  Y: " + df.format(objectPose.getOrientation().getY()) + "  Z: " + df.format(objectPose.getOrientation().getZ()) + "  S: " + df.format(objectPose.getOrientation().getS()));
+            ImGui.text(" ");
+            ImGui.text("Object Roll:  " + df.format(objectYawPitchRoll.getRoll()));
+            ImGui.text("Object Pitch: " + df.format(objectYawPitchRoll.getPitch()));
+            ImGui.text("Object Yaw:   " + df.format(objectYawPitchRoll.getYaw()));
+            ImGui.text(" ");
             ImGui.sliderFloat("X Position", icpGuiEnvSetPostionX, -2.0f, 2.0f);
             ImGui.sliderFloat("Y Position", icpGuiEnvSetPostionY, -2.0f, 2.0f);
             ImGui.sliderFloat("Z Position", icpGuiEnvSetPostionZ, -2.0f, 2.0f);
@@ -331,6 +362,25 @@ public class RDXIterativeClosestPointBasicDemo
                      objectCentroidSubtractedPoints.set(i, 2, envToObjectCorrespondencePoints.get(i, 2) - objectCentroid.get(0, 2));
                   }
 
+                  // TODO: The centroid above is the centroid of the model/object points which correspond to scene points. The following centroid is the
+                  //  centroid of ALL the object points. Should we rename something here? Is there a simpler way to grab actualObjectCentroid from the math
+                  //  above?
+                  actualObjectCentroid.set(zeroMatrixPoint);
+                  for (int i = 0; i < objectInWorldPoints.size(); i++) {
+                     actualObjectCentroid.add(0, 0, objectInWorldPoints.get(i).getX());
+                     actualObjectCentroid.add(0, 1, objectInWorldPoints.get(i).getY());
+                     actualObjectCentroid.add(0, 2, objectInWorldPoints.get(i).getZ());
+                  }
+                  actualObjectCentroid.set(0, 0, actualObjectCentroid.get(0, 0) / envSize);
+                  actualObjectCentroid.set(0, 1, actualObjectCentroid.get(0, 1) / envSize);
+                  actualObjectCentroid.set(0, 2, actualObjectCentroid.get(0, 2) / envSize);
+                  // Subtract env centroid from env point cloud
+                  for (int i = 0; i < objectInWorldPoints.size(); i++) {
+                     actualObjectCentroidSubtractedPoints.set(i, 0, objectInWorldPoints.get(i).getX() - actualObjectCentroid.get(0, 0));
+                     actualObjectCentroidSubtractedPoints.set(i, 1, objectInWorldPoints.get(i).getY() - actualObjectCentroid.get(0, 1));
+                     actualObjectCentroidSubtractedPoints.set(i, 2, objectInWorldPoints.get(i).getZ() - actualObjectCentroid.get(0, 2));
+                  }
+
                   // Calculate env centroid
                   envCentroid.set(zeroMatrixPoint);
                   for (int i = 0; i < envSize; i++) {
@@ -366,6 +416,10 @@ public class RDXIterativeClosestPointBasicDemo
                   svdSolver.getU(U, false);
                   svdSolver.getV(V, true);
                   CommonOps_DDRM.multTransAB(V, U, R);
+                  // Correct any negative rotation matrices which come out of SVD its positive counterpart (fixes NotARotationMatrix issues)
+                  if (CommonOps_DDRM.det(R) < 0.0) {
+                     CommonOps_DDRM.scale(-1.0, R);
+                  }
 
                   // Calculate object translation
                   CommonOps_DDRM.multTransB(R, objectCentroid, objAdjustedLocation);
@@ -379,6 +433,18 @@ public class RDXIterativeClosestPointBasicDemo
                      CommonOps_DDRM.mult(R, interimPoint, movedPoint);
                      objectInWorldPoint.set(movedPoint.get(0) + objTranslation.get(0), movedPoint.get(1) + objTranslation.get(1), movedPoint.get(2) + objTranslation.get(2));
                   }
+
+                  //TODO I think the prior logic and the following logic assume the box starts at the "zero" orientation. To make this robust, it would be
+                  // good to include an explicit initial condition. Then you could initialize objectRotationMatrix to that orientation.
+
+                  // Update object pose
+                  objectPosition.set(actualObjectCentroid.get(0, 0), actualObjectCentroid.get(0, 1), actualObjectCentroid.get(0, 2));
+                  objectDeltaMatrix.set(R); // save the incremental change in rotation to a RotationMatrix
+                  objectRotationMatrix.prepend(objectDeltaMatrix); // *prepend* the rotation to the total rotation of the body relative to world
+                  objectOrientation.set(objectRotationMatrix);
+                  objectYawPitchRoll.set(objectRotationMatrix);
+                  objectPose.set(objectPosition, objectOrientation);
+                  referenceFrameGraphic.setPoseInWorldFrame(objectPose);
                }
             }
          }
