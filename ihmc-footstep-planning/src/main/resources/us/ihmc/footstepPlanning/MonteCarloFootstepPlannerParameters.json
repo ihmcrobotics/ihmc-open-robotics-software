@@ -7,7 +7,7 @@
     "upperBound" : 400
   },
   "Number of simulations" : {
-    "value" : 14,
+    "value" : 25,
     "lowerBound" : 1,
     "upperBound" : 400
   },
@@ -17,12 +17,12 @@
     "upperBound" : 1.0
   },
   "Feasible Contact Reward" : {
-    "value" : 240.963861,
+    "value" : 271.084338,
     "lowerBound" : 0.0,
     "upperBound" : 1000.0
   },
   "Goal Reward" : {
-    "value" : 28.755364,
+    "value" : 6.437768,
     "lowerBound" : 0.0,
     "upperBound" : 100.0
   },
@@ -57,7 +57,7 @@
     "upperBound" : 5.0
   },
   "Initial value cutoff" : {
-    "value" : 159,
+    "value" : 229,
     "lowerBound" : -1000,
     "upperBound" : 1000
   },
