@@ -57,10 +57,12 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
 
       posePlacement.create(Color.YELLOW, "Place Node Pose", "Placing Node", "Stop Placement");
       RDXBaseUI.getInstance().getPrimary3DPanel().addImGui3DViewInputProcessor(posePlacement::processImGui3DViewInput);
+      posePlacement.setOnStartPositionPlacement(() -> RDXBaseUI.getInstance().setModelSceneMouseCollisionEnabled(true));
       posePlacement.setOnEndPositionPlacement(() ->
       {
          if (posePlacement.isPlacingPosition())
             posePlacement.clear();
+         RDXBaseUI.getInstance().setModelSceneMouseCollisionEnabled(false);
       });
 
       offsetPoseGizmo = new RDXSelectablePose3DGizmo(rigidBodySceneNode.getNodeFrame(), rigidBodySceneNode.getNodeToParentFrameTransform());
@@ -144,7 +146,8 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
    {
       super.getRenderables(renderables, pool, sceneLevels);
 
-      posePlacement.getRenderables(renderables, pool);
+      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+         posePlacement.getRenderables(renderables, pool);
    }
 
    @Override
