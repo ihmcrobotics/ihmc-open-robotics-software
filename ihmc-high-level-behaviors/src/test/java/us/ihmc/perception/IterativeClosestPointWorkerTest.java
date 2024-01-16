@@ -29,12 +29,10 @@ public class IterativeClosestPointWorkerTest
       int correspondences = 1000;
       IterativeClosestPointWorker icp = new IterativeClosestPointWorker(objectSamples, correspondences, random);
 
-      float actualBoxWidth = 0.3f;
-      float actualBoxDepth = 0.4f;
-      float actualBoxHeight = 0.5f;
+      Vector3D actualBoxDimensions = new Vector3D(0.4, 0.3, 0.5);
 
       icp.setDetectionShape(PrimitiveRigidBodyShape.BOX);
-      icp.changeSize(actualBoxDepth, actualBoxWidth, actualBoxHeight, 0.1f, 0.1f, 0.1f, objectSamples);
+      icp.changeSize(actualBoxDimensions, new Vector3D(0.1, 0.1, 0.1), objectSamples);
 
       float scaleFactor = 0.5f;
       for (int i = 0; i < 5; i++)
@@ -50,10 +48,12 @@ public class IterativeClosestPointWorkerTest
 
          icp.setPoseGuess(poseGuess);
 
+         Vector3D scaledBoxDimensions = new Vector3D(actualBoxDimensions);
+         scaledBoxDimensions.scale(scaleFactor);
          List<Point3D32> pointCloud = IterativeClosestPointTools.createBoxPointCloud(actualBoxPose,
-                                                                                     scaleFactor * actualBoxDepth,
-                                                                                     scaleFactor * actualBoxWidth,
-                                                                                     scaleFactor * actualBoxHeight,
+                                                                                     scaledBoxDimensions.getX32(),
+                                                                                     scaledBoxDimensions.getY32(),
+                                                                                     scaledBoxDimensions.getZ32(),
                                                                                      objectSamples,
                                                                                      random);
 
@@ -66,12 +66,24 @@ public class IterativeClosestPointWorkerTest
          for (Point3DReadOnly pointOnObject : icp.getCorrespondingMeasurementPoints())
          {
             // all of the measurement correspondence points projected onto the box should have zero distance to the box.
-            assertEquals(0.0f, IterativeClosestPointTools.distanceSquaredFromBox(actualBoxPose, pointOnObject, scaleFactor * actualBoxDepth, scaleFactor * actualBoxWidth, scaleFactor * actualBoxHeight), 5e-4);
+            assertEquals(0.0f,
+                         IterativeClosestPointTools.distanceSquaredFromBox(actualBoxPose,
+                                                                           pointOnObject,
+                                                                           scaledBoxDimensions.getX32(),
+                                                                           scaledBoxDimensions.getY32(),
+                                                                           scaledBoxDimensions.getZ32()),
+                         5e-4);
          }
          for (Point3DReadOnly pointOnObject : icp.getCorrespondingObjectPoints())
          {
             // all of the object correspondence points projected onto the box should have zero distance to the box.
-            assertEquals(0.0f, IterativeClosestPointTools.distanceSquaredFromBox(poseGuess, pointOnObject, actualBoxDepth, actualBoxWidth, actualBoxHeight), 5e-4);
+            assertEquals(0.0f,
+                         IterativeClosestPointTools.distanceSquaredFromBox(poseGuess,
+                                                                           pointOnObject,
+                                                                           actualBoxDimensions.getX32(),
+                                                                           actualBoxDimensions.getY32(),
+                                                                           actualBoxDimensions.getZ32()),
+                         5e-4);
          }
 
 //         icp.runICP(5);
