@@ -1,10 +1,16 @@
 package us.ihmc.behaviors.activeMapping;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 
@@ -15,6 +21,8 @@ public class StancePoseCalculator
    private float maxWidth = 0.5f;
    private float maxLength = 0.5f;
    private float maxYaw = 0.1f;
+
+   private HeightMapPolygonSnapper heightMapPolygonSnapper;
 
    private ArrayList<FramePose3D> leftPoses = new ArrayList<>();
    private ArrayList<FramePose3D> rightPoses = new ArrayList<>();
@@ -27,13 +35,16 @@ public class StancePoseCalculator
       this.maxWidth = maxWidth;
       this.maxLength = maxLength;
       this.maxYaw = maxYaw;
+      this.heightMapPolygonSnapper = new HeightMapPolygonSnapper();
    }
 
-   public SideDependentList<FramePose3D> getStancePoses(FramePose3D goalPose, TerrainMapData terrainMap)
+   public SideDependentList<FramePose3D> getStancePoses(FramePose3D goalPose, TerrainMapData terrainMap, HeightMapData heightMapData)
    {
       insertCandidatePoses(leftPoses, goalPose, RobotSide.LEFT);
       insertCandidatePoses(rightPoses, goalPose, RobotSide.RIGHT);
-      return searchForOptimalGoalStance(leftPoses, rightPoses, goalPose, terrainMap);
+      searchForOptimalGoalStance(leftPoses, rightPoses, goalPose, terrainMap);
+      snapPosesToHeightMapData(heightMapData);
+      return bestFramePoses;
    }
 
    public void insertCandidatePoses(ArrayList<FramePose3D> poses, FramePose3D goalPose, RobotSide side)
@@ -57,10 +68,7 @@ public class StancePoseCalculator
       }
    }
 
-   public SideDependentList<FramePose3D> searchForOptimalGoalStance(ArrayList<FramePose3D> leftPoses,
-                                                                    ArrayList<FramePose3D> rightPoses,
-                                                                    FramePose3D goalPose,
-                                                                    TerrainMapData terrainMap)
+   public void searchForOptimalGoalStance(ArrayList<FramePose3D> leftPoses, ArrayList<FramePose3D> rightPoses, FramePose3D goalPose, TerrainMapData terrainMap)
    {
       double minCost = Double.POSITIVE_INFINITY;
       double cost = 0.0f;
@@ -89,8 +97,29 @@ public class StancePoseCalculator
             }
          }
       }
+   }
 
-      return bestFramePoses;
+   public void snapPosesToHeightMapData(HeightMapData heightMapData)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         snapFootPoseToHeightMap(heightMapData, bestFramePoses.get(side));
+      }
+   }
+
+   private void snapFootPoseToHeightMap(HeightMapData heightMapData, FramePose3D poseToSnap)
+   {
+      ConvexPolygon2D footPolygon = PlannerTools.createFootPolygon(0.25, 0.12, 0.8);
+      footPolygon.applyTransform(poseToSnap);
+
+      RigidBodyTransform snapTransform = heightMapPolygonSnapper.snapPolygonToHeightMap(footPolygon, heightMapData, 0.1);
+
+      if (snapTransform != null)
+      {
+         snapTransform.getTranslation().setZ(0);
+         snapTransform.getRotation().setYawPitchRoll(0, snapTransform.getRotation().getPitch(), snapTransform.getRotation().getRoll());
+         poseToSnap.getRotation().applyTransform(snapTransform);
+      }
    }
 
    public ArrayList<FramePose3D> getLeftPoses()
@@ -101,16 +130,6 @@ public class StancePoseCalculator
    public ArrayList<FramePose3D> getRightPoses()
    {
       return rightPoses;
-   }
-
-   public int getTotalLeftPoses()
-   {
-      return windowSize * windowSize;
-   }
-
-   public int getTotalRightPoses()
-   {
-      return rightPoses.size();
    }
 
    public SideDependentList<Pose3D> getBestPoses()

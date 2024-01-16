@@ -39,6 +39,7 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -139,7 +140,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       });
    }
 
-   public void update(TerrainMapData terrainMapData)
+   public void update(TerrainMapData terrainMapData, HeightMapData heightMapData)
    {
       if (!renderEnabled.get())
          return;
@@ -177,7 +178,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
 
       terrainPlanningDebugger.generateStartAndGoalFootstepGraphics(startStancePose, goalStancePose);
       terrainPlanningDebugger.render(terrainMapData);
-      stancePoseSelectionPanel.update(goalStancePose, terrainMapData);
+      stancePoseSelectionPanel.update(goalStancePose, terrainMapData, heightMapData);
    }
 
    public void renderImGuiWidgets()

@@ -25,9 +25,11 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -326,8 +328,8 @@ public class MonteCarloPlannerTools
       MonteCarloPlannerTools.getOptimalPath(root, path);
       LogTools.info("Optimal Path Size: {}", path.size());
 
+
       HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
-      heightMapSnapper.setSnapAreaResolution(0.05);
 
       FootstepPlan footstepPlan = new FootstepPlan();
       for (MonteCarloTreeNode node : path)
@@ -339,18 +341,35 @@ public class MonteCarloPlannerTools
          float nodeZ = request.getTerrainMapData().getHeightInWorld(nodeX, nodeY);
          float nodeYaw = footstepNode.getState().getZ32();
 
-         ConvexPolygon2D footPolygon = new ConvexPolygon2D();
-         DiscreteFootstepTools.getFootPolygon(nodeX, nodeY, nodeYaw, footPolygons.get(footstepNode.getRobotSide()), footPolygon);
-
-         //RigidBodyTransform snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon, request.getHeightMapData(), request.getSnapHeightThreshold());
-         //FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), snapTransform);
-
+         ConvexPolygon2D footPolygon = PlannerTools.createFootPolygon(0.25, 0.12, 0.8);
          FramePose3D footstepPose = getFramePose3D(nodeX, nodeY, nodeZ, nodeYaw);
+         footPolygon.applyTransform(footstepPose);
+
+         LogTools.warn("Attempting to snap footstep pose to height map");
+         MonteCarloPlannerTools.snapFootPoseToHeightMap(request.getHeightMapData(), footstepPose, heightMapSnapper, footPolygon);
+
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
          LogTools.debug("Footstep Node -> Position: {}, Yaw: {}", footstepPose.getPosition(), footstepPose.getYaw());
       }
       return footstepPlan;
+   }
+
+   public static void snapFootPoseToHeightMap(HeightMapData heightMapData, FramePose3D poseToSnap, HeightMapPolygonSnapper snapper, ConvexPolygon2D footPolygon)
+   {
+      footPolygon.applyTransform(poseToSnap);
+      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMapData, 0.1);
+      if (snapTransform != null)
+      {
+         snapTransform.getTranslation().setZ(0);
+         snapTransform.getRotation().setYawPitchRoll(0, snapTransform.getRotation().getPitch(), snapTransform.getRotation().getRoll());
+         poseToSnap.getRotation().applyTransform(snapTransform);
+         LogTools.warn("SUCCESS: Snapped footstep pose to height map");
+      }
+      else
+      {
+         LogTools.warn("Failed to snap footstep pose to height map");
+      }
    }
 
    private static FramePose3D getFramePose3D(double xPosition, double yPosition, float zPosition, double yaw)
