@@ -378,9 +378,12 @@ public class PerceptionAndAutonomyProcess
    {
       if (arUcoDetectionDemandNode.isDemanded())
       {
-         arUcoUpdater.undistortAndUpdateArUco();
-         sharedArUcoDetectionResults.getForThreadOne().copyOutputData(arUcoUpdater.getArUcoMarkerDetector());
-         sharedArUcoDetectionResults.swap();
+         boolean performedDetection = arUcoUpdater.undistortAndUpdateArUco();
+         if (performedDetection)
+         {
+            sharedArUcoDetectionResults.getForThreadOne().copyOutputData(arUcoUpdater.getArUcoMarkerDetector());
+            sharedArUcoDetectionResults.swap();
+         }
       }
       else
       {
