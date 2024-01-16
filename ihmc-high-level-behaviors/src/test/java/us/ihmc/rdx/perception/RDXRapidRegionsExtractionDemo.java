@@ -306,27 +306,3 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
       new RDXRapidRegionsExtractionDemo();
    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
