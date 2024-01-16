@@ -246,6 +246,8 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       }
       ImGui.sameLine();
 
+      ImGui.text("Goal Planning");
+      ImGui.sameLine();
       goalAffordance.renderPlaceGoalButton();
       ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
       ImGui.checkbox(labels.get("Show height map"), showHeightMap);
@@ -281,8 +283,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       stopForImpassibilities.renderImGuiWidget();
       impassibilityDetectedPlot.setNextValue(impassibilityDetected.getLatest().getData() ? 1.0f : 0.0f);
       impassibilityDetectedPlot.calculate(impassibilityDetected.getLatest().getData() ? "OBSTRUCTED" : "ALL CLEAR");
-
-      ImGui.text(ReferenceBasedIdealStepCalculator.statusMessage);
 
       referenceAlpha.renderImGuiWidget();
 

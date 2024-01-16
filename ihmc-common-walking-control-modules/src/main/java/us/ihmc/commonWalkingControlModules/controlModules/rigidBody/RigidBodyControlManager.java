@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -33,6 +34,17 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.Map;
 
+/**
+ * Manages a rigid body as part of a high level controller.
+ * <p>
+ * This class triages user commands and computes inverse dynamics, feedback control commands,
+ * and joint desired output data that are provided to the whole body controller core.
+ * </p>
+ * <p>
+ * As part of this class, a rigid body can be in one of the four {@link RigidBodyControlMode
+ * rigid body control modes}.
+ * </p>
+ */
 public class RigidBodyControlManager implements SCS2YoGraphicHolder
 {
    public static final double INITIAL_GO_HOME_TIME = 2.0;
@@ -73,6 +85,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   RigidBodyControlMode defaultControlMode,
                                   boolean enableFunctionGenerators,
                                   YoDouble yoTime,
+                                  double controlDT,
                                   YoGraphicsListRegistry graphicsListRegistry,
                                   YoRegistry parentRegistry)
    {
@@ -89,7 +102,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
       initialJointPositions = new double[jointsToControl.length];
 
-      RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, yoTime, enableFunctionGenerators, parentRegistry);
+      RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, yoTime, controlDT, enableFunctionGenerators, parentRegistry);
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, jointControlHelper, registry);
 
@@ -101,6 +114,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                                    baseFrame,
                                                                                                    yoTime,
                                                                                                    jointControlHelper,
+                                                                                                   enableFunctionGenerators,
                                                                                                    parentRegistry);
          if (taskspaceOrientationGains == null)
          {
@@ -119,6 +133,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                              controlFrame,
                                                                                              baseFrame,
                                                                                              yoTime,
+                                                                                             enableFunctionGenerators,
                                                                                              parentRegistry,
                                                                                              graphicsListRegistry);
          if (taskspacePositionGains == null)
@@ -139,6 +154,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                      baseFrame,
                                                                                      yoTime,
                                                                                      jointControlHelper,
+                                                                                     enableFunctionGenerators,
                                                                                      graphicsListRegistry,
                                                                                      registry);
          if (taskspaceOrientationGains == null || taskspacePositionGains == null)
@@ -613,6 +629,12 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    public RigidBodyTaskspaceControlState getTaskspaceControlState()
    {
       return taskspaceControlState;
+   }
+
+   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
+   {
+      if (loadBearingControlState != null)
+         loadBearingControlState.setControllerCoreOutput(controllerCoreOutput);
    }
 
    @Override

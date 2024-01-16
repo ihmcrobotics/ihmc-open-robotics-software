@@ -21,6 +21,15 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * A rigid body control mode for orientation only. See {@link RigidBodyOrientationControlHelper}.
+ * <p>
+ * This class also features a hybrid control mode, where the jointspace control commands from
+ * {@link RigidBodyJointControlHelper} are also included. This is useful for more control over, for example,
+ * the arms of the robot by specifying desireds in both taskspace and jointspace, which can help avoid
+ * singularities and instabilities.
+ * </p>
+ */
 public class RigidBodyOrientationController extends RigidBodyTaskspaceControlState
 {
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
@@ -44,6 +53,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
                                          ReferenceFrame baseFrame,
                                          YoDouble yoTime,
                                          RigidBodyJointControlHelper jointControlHelper,
+                                         boolean enableFunctionGenerators,
                                          YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
@@ -67,6 +77,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
                                                                 baseFrame,
                                                                 useBaseFrameForControl,
                                                                 usingWeightFromMessage,
+                                                                enableFunctionGenerators,
                                                                 yoTime,
                                                                 registry);
 

@@ -61,13 +61,13 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                getDefinition()::getParentFrameName,
+                                                                getDefinition().getBasics()::getParentFrameName,
                                                                 this::changeParentFrame);
-      swingDurationWidget = new ImDoubleWrapper(getDefinition()::getSwingDuration,
-                                                getDefinition()::setSwingDuration,
+      swingDurationWidget = new ImDoubleWrapper(getDefinition().getBasics()::getSwingDuration,
+                                                getDefinition().getBasics()::setSwingDuration,
                                                 imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
-      transferDurationWidget = new ImDoubleWrapper(getDefinition()::getTransferDuration,
-                                                   getDefinition()::setTransferDuration,
+      transferDurationWidget = new ImDoubleWrapper(getDefinition().getBasics()::getTransferDuration,
+                                                   getDefinition().getBasics()::setTransferDuration,
                                                    imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
 
       footsteps = new RecyclingArrayList<>(() ->
@@ -84,25 +84,26 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
       RecyclingArrayListTools.synchronizeSize(footsteps, state.getFootsteps());
 
-      frameIsChildOfWorld = referenceFrameLibrary.containsFrame(getDefinition().getParentFrameName());
+      frameIsChildOfWorld = referenceFrameLibrary.containsFrame(getDefinition().getBasics().getParentFrameName());
       if (frameIsChildOfWorld)
       {
          // Add a footstep to the action data only
          if (userAddedFootstep.poll())
          {
             RobotSide newSide = userAddedFootstep.read();
-            RecyclingArrayListTools.addToAll(getDefinition().getFootsteps(), state.getFootsteps());
+            RecyclingArrayListTools.addToAll(getDefinition().getFootsteps().getValue(), state.getFootsteps());
             RDXFootstepPlanActionFootstep addedFootstep = footsteps.add();
             addedFootstep.getDefinition().setSide(newSide);
+            addedFootstep.getState().update();
             FramePose3D newFootstepPose = new FramePose3D();
             if (footsteps.size() > 1)
             {
-               RDXFootstepPlanActionFootstep previousFootstep = footsteps.get(footsteps.size() - 1);
-               newFootstepPose.setToZero(previousFootstep.getFootstepFrame());
+               RDXFootstepPlanActionFootstep previousFootstep = footsteps.get(footsteps.size() - 2);
+               newFootstepPose.setToZero(previousFootstep.getState().getSoleFrame().getReferenceFrame());
 
                if (previousFootstep.getDefinition().getSide() != newSide)
                {
-                  double minStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getMinStepWidth();
+                  double minStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getInPlaceWidth();
                   newFootstepPose.getPosition().addY(newSide.negateIfRightSide(minStepWidth));
                }
             }
@@ -114,7 +115,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             double aLittleInFront = 0.15;
             newFootstepPose.getPosition().addX(aLittleInFront);
 
-            newFootstepPose.changeFrame(referenceFrameLibrary.findFrameByName(getDefinition().getParentFrameName()));
+            newFootstepPose.changeFrame(addedFootstep.getState().getSoleFrame().getReferenceFrame().getParent());
             addedFootstep.getDefinition().getSoleToPlanFrameTransform().getValue().set(newFootstepPose);
          }
 
@@ -122,15 +123,12 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          {
             RecyclingArrayListTools.removeLast(footsteps);
             RecyclingArrayListTools.removeLast(state.getFootsteps());
-            RecyclingArrayListTools.removeLast(getDefinition().getFootsteps());
+            RecyclingArrayListTools.removeLast(getDefinition().getFootsteps().getValue());
          }
 
-         state.getFootsteps().clear();
-         for (int i = 0; i < footsteps.size(); i++)
+         for (RDXFootstepPlanActionFootstep footstep : footsteps)
          {
-            footsteps.get(i).update();
-            FootstepPlanActionFootstepState footstepState = state.getFootsteps().add();
-            footstepState.setIndex(i);
+            footstep.update();
          }
       }
    }
@@ -180,12 +178,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             if (ImGui.button(labels.get(side.getPascalCaseName())))
                userAddedFootstep.set(side);
          }
-         ImGui.sameLine();
-         ImGui.text("Remove:");
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Last")))
+         if (!getState().getFootsteps().isEmpty())
          {
-            userRemovedFootstep.set();
+            ImGui.sameLine();
+            ImGui.text("Remove:");
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Last")))
+            {
+               userRemovedFootstep.set();
+            }
          }
       }
    }
@@ -210,9 +211,10 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
    public void changeParentFrame(String newParentFrameName)
    {
+      getDefinition().getBasics().setParentFrameName(newParentFrameName);
       for (FootstepPlanActionFootstepState footstepState : getState().getFootsteps())
       {
-         footstepState.getSoleFrame().changeFrame(getDefinition().getParentFrameName());
+         footstepState.getSoleFrame().changeFrame(newParentFrameName);
       }
    }
 }

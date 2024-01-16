@@ -144,6 +144,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          footstepBeingPlaced.processVRInput(vrContext);
       }
    }
+
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       renderTooltip = false;
@@ -228,7 +229,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       }
    }
 
-   private void placeFootstep()
+   public void placeFootstep()
    {
       if (footstepBeingPlacedIsReachable)
       {
@@ -244,6 +245,12 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          // If not safe print message and abort footstep placement
          LogTools.info("Footstep Rejected, too far from previous foot... not placing footstep");
       }
+   }
+
+   public void forcePlaceFootstep()
+   {
+      footstepBeingPlacedIsReachable = true;
+      placeFootstep();
    }
 
    @Override
@@ -291,6 +298,12 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       tempFramePose.set(rigidBodyTransform);
       tempFramePose.getOrientation().setToYawOrientation(latestFootstepYaw);
       footstepBeingPlaced.updatePose(tempFramePose);
+   }
+
+   public void setFootstepPose(FramePose3DReadOnly poseToSet)
+   {
+      poseToSet.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      footstepBeingPlaced.updatePose(poseToSet);
    }
 
    public void squareUpFootstep()

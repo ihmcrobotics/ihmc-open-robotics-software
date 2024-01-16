@@ -1,6 +1,6 @@
 #!/bin/bash
-# docker build --no-cache -t centerpose-ros2:0.0.1 . # Run this if you want to rebuild all the layers
-docker build -t centerpose-ros2:0.0.1 .
+docker build --no-cache -t centerpose-ros2:0.0.1 . # Run this if you want to rebuild all the layers
+#docker build -t centerpose-ros2:0.0.1 .
 
 random_id=$(uuidgen | cut -c-8)
 
