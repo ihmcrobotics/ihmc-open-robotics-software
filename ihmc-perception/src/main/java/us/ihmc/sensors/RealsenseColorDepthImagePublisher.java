@@ -26,7 +26,7 @@ public class RealsenseColorDepthImagePublisher
    private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
    private final IHMCROS2Publisher<ImageMessage> ros2ColorImagePublisher;
 
-   private final CUDAImageEncoder imageEncoder = new CUDAImageEncoder();
+   private CUDAImageEncoder imageEncoder;
 
    private long lastDepthSequenceNumber = -1L;
    private long lastColorSequenceNumber = -1L;
@@ -142,6 +142,9 @@ public class RealsenseColorDepthImagePublisher
       // Redundant safety checks
       if (colorImageToPublish != null && !colorImageToPublish.isEmpty() && colorImageToPublish.getSequenceNumber() != lastColorSequenceNumber)
       {
+         if (imageEncoder == null)
+            imageEncoder = new CUDAImageEncoder();
+
          // Compress image
          BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getImageHeight() * colorImageToPublish.getImageWidth());
          imageEncoder.encodeBGR(colorImageToPublish.getGpuImageMat().data(),
@@ -255,7 +258,8 @@ public class RealsenseColorDepthImagePublisher
       if (nextCpuColorImage != null)
          nextCpuColorImage.release();
 
-      imageEncoder.destroy();
+      if (imageEncoder != null)
+         imageEncoder.destroy();
 
       ros2DepthImagePublisher.destroy();
       ros2ColorImagePublisher.destroy();
