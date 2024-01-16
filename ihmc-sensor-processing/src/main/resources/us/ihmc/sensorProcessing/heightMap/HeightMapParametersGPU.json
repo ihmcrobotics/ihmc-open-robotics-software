@@ -112,7 +112,7 @@
     "upperBound" : 64
   },
   "Stepping cosine threshold" : {
-    "value" : 0.985,
+    "value" : 0.99,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
