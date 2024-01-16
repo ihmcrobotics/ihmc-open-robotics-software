@@ -48,10 +48,10 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
    private final ImBoolean runICP = new ImBoolean(false);
    private final ImBoolean useICPPose = new ImBoolean(false);
    private final ImBoolean showICPPointCloud = new ImBoolean(false);
-   private final ImInt numberOfShapeSamples = new ImInt(500);
-   private final ImInt numberOfCorrespondences = new ImInt(500);
+   private final ImInt numberOfShapeSamples = new ImInt(750);
+   private final ImInt numberOfCorrespondences = new ImInt(750);
    private final ImInt numberOfIterations = new ImInt(2);
-   private final ImFloat segmentationRadius = new ImFloat(0.04f);
+   private final ImFloat segmentationRadius = new ImFloat(0.05f);
    private final Timer useICPPoseTimer = new Timer();
 
    private final RecyclingArrayList<Point3D32> icpObjectPointCloud = new RecyclingArrayList<>(ICP_MAX_POINTS, Point3D32::new);
