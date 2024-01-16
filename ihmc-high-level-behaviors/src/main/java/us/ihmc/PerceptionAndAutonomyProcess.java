@@ -15,6 +15,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.*;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.IterativeClosestPointManager;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
@@ -122,6 +123,8 @@ public class PerceptionAndAutonomyProcess
    private final CenterposeDetectionManager centerposeDetectionManager;
    private ROS2DemandGraphNode centerposeDemandNode;
 
+   private final IterativeClosestPointManager icpManager;
+
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
    private ReferenceFrameLibrary behaviorTreeReferenceFrameLibrary;
    private ROS2BehaviorTreeExecutor behaviorTreeExecutor;
@@ -179,6 +182,9 @@ public class PerceptionAndAutonomyProcess
       arUcoUpdater = new ArUcoDetectionUpdater(ros2Helper, sceneGraph, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2Helper, zed2iLeftCameraFrame);
+
+      icpManager = new IterativeClosestPointManager(ros2Helper, sceneGraph);
+      icpManager.startWorkers();
    }
 
    /** Needs to be a separate method to allow constructing test bench version. */
@@ -248,6 +254,7 @@ public class PerceptionAndAutonomyProcess
             blackflyImageRetrievers.get(side).destroy();
       }
 
+      icpManager.destroy();
 
       zedPointCloudDemandNode.destroy();
       zedColorDemandNode.destroy();
@@ -283,7 +290,8 @@ public class PerceptionAndAutonomyProcess
             zedColorImages.put(side, zedImageRetriever.getLatestRawColorImage(side));
          }
 
-         // Do processing on image
+         if (zedDepthImage != null && !zedDepthImage.isEmpty())
+            icpManager.setEnvironmentPointCloud(zedDepthImage);
 
          zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
          for (RobotSide side : RobotSide.values)

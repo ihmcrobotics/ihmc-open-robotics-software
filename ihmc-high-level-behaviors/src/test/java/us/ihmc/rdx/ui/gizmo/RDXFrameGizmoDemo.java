@@ -54,6 +54,7 @@ public class RDXFrameGizmoDemo
                   = new RDXPathControlRingGizmo(interactableReferenceFrame2.getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame());
             footstepRingGizmo.createAndSetupDefault(baseUI);
             baseUI.getImGuiPanelManager().addPanel(footstepRingGizmo.createTunerPanel(RDXFrameGizmoDemo.class.getSimpleName()));
+
          }
 
          @Override
