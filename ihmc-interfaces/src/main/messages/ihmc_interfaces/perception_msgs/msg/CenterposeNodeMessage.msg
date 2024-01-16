@@ -22,5 +22,4 @@ geometry_msgs/Point[8] bounding_box_2d_vertices
 # 3d Vertices of the 3d object Bounding box
 geometry_msgs/Point[8] bounding_box_vertices
 
-# Break frequency filter value for nodes that are alpha filtered
-float32 break_frequency
+bool enable_tracking
