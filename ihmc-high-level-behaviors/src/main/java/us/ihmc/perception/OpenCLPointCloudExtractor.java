@@ -63,7 +63,7 @@ public class OpenCLPointCloudExtractor
 
       if (bytedecoDepthImage != null)
          bytedecoDepthImage.destroy(openCLManager);
-      bytedecoDepthImage = new BytedecoImage(depthImage.getCpuImageMatrix());
+      bytedecoDepthImage = new BytedecoImage(depthImage.getCpuImageMat());
       bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
       bytedecoDepthImage.writeOpenCLImage(openCLManager);
 
