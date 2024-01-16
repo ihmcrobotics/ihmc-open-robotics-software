@@ -478,6 +478,12 @@ public class ContinuousPlanner
       }
    }
 
+   public void syncParametersCallback()
+   {
+      this.swingPlannerParameters.setMinimumSwingTime(continuousWalkingParameters.getSwingTime());
+      this.swingPlannerParameters.setMaximumSwingTime(continuousWalkingParameters.getSwingTime());
+   }
+
    /*
     * This method both generates the swing trajectories and packs the footstep plan with optimized waypoints
     */

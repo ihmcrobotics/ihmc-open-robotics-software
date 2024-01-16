@@ -98,6 +98,8 @@ public class ContinuousPlannerSchedulingTask
     */
    private void tickStateMachine()
    {
+      continuousPlanner.syncParametersCallback();
+
       if (!parameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
       {
          state = ContinuousWalkingState.NOT_STARTED;
@@ -202,6 +204,7 @@ public class ContinuousPlannerSchedulingTask
          if (parameters.getStepPublisherEnabled())
          {
             LogTools.info(message = String.format("State: [%s]: Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller", state));
+
             publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
 
             state = ContinuousWalkingState.WAITING_TO_LAND;

@@ -5,11 +5,9 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.Axis2D;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -17,13 +15,11 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
@@ -345,8 +341,8 @@ public class MonteCarloPlannerTools
          FramePose3D footstepPose = getFramePose3D(nodeX, nodeY, nodeZ, nodeYaw);
          footPolygon.applyTransform(footstepPose);
 
-         LogTools.warn("Attempting to snap footstep pose to height map");
-         MonteCarloPlannerTools.snapFootPoseToHeightMap(request.getHeightMapData(), footstepPose, heightMapSnapper, footPolygon);
+//         LogTools.warn("Attempting to snap footstep pose to height map");
+//         MonteCarloPlannerTools.snapFootPoseToHeightMap(request.getHeightMapData(), footstepPose, heightMapSnapper, footPolygon);
 
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
@@ -492,27 +488,23 @@ public class MonteCarloPlannerTools
    {
       double score = 0.0;
 
-      int offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * 50);
-      int offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * 50);
-
-      int rIndex = (int) (newNode.getState().getX() + request.getTerrainMapData().getLocalGridSize() / 2) - offsetX;
-      int cIndex = (int) (newNode.getState().getY() + request.getTerrainMapData().getLocalGridSize() / 2) - offsetY;
-
       Point2D previousPosition = new Point2D(oldNode.getState());
+      previousPosition.scale(1/50.0f);
+
       Point2D currentPosition = new Point2D(newNode.getState());
+      currentPosition.scale(1/50.0f);
+
       Point2D goalPositionRight = new Point2D(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition());
       Point2D goalPositionLeft = new Point2D(request.getGoalFootPoses().get(RobotSide.RIGHT).getPosition());
       Point2D goalPosition = new Point2D();
       goalPosition.add(goalPositionRight, goalPositionLeft);
       goalPosition.scale(0.5f);
-      goalPosition.scale(50.0f);
 
-      Point2D startPositionLeft = new Point2D(request.getStartFootPoses().get(RobotSide.LEFT).getPosition());
-      Point2D startPositionRight = new Point2D(request.getStartFootPoses().get(RobotSide.RIGHT).getPosition());
-      Point2D startPosition = new Point2D();
-      startPosition.add(startPositionLeft, startPositionRight);
-      startPosition.scale(0.5f);
-      startPosition.scale(50.0f);
+//      Point2D startPositionLeft = new Point2D(request.getStartFootPoses().get(RobotSide.LEFT).getPosition());
+//      Point2D startPositionRight = new Point2D(request.getStartFootPoses().get(RobotSide.RIGHT).getPosition());
+//      Point2D startPosition = new Point2D();
+//      startPosition.add(startPositionLeft, startPositionRight);
+//      startPosition.scale(0.5f);
 
       Vector2D stepVector = new Vector2D();
       stepVector.sub(currentPosition, previousPosition);
@@ -530,8 +522,8 @@ public class MonteCarloPlannerTools
 
       double goalReward = plannerParameters.getGoalReward() * progressToGoal;
 
-      double contactValue = request.getTerrainMapData().getContactScoreLocal(rIndex, cIndex);
-      contactValue = MathTools.clamp(contactValue, 3.0f, 8.0f) / 8.0f;
+      double contactValue = request.getTerrainMapData().getContactScoreInWorld(currentPosition.getX32(), currentPosition.getY32());
+      contactValue = MathTools.clamp(contactValue, 4.0f, 12.0f) / 12.0f;
       double contactReward = (contactValue) * plannerParameters.getFeasibleContactReward();
 
       if (contactValue < 0.38)

@@ -2,12 +2,12 @@
   "title" : "MonteCarloFootstepPlannerParameters",
   "Reset" : false,
   "Number of iterations" : {
-    "value" : 100,
+    "value" : 120,
     "lowerBound" : 1,
     "upperBound" : 400
   },
   "Number of simulations" : {
-    "value" : 25,
+    "value" : 20,
     "lowerBound" : 1,
     "upperBound" : 400
   },
@@ -17,12 +17,12 @@
     "upperBound" : 1.0
   },
   "Feasible Contact Reward" : {
-    "value" : 271.084338,
+    "value" : 253.012061,
     "lowerBound" : 0.0,
     "upperBound" : 1000.0
   },
   "Goal Reward" : {
-    "value" : 6.437768,
+    "value" : 18.454936,
     "lowerBound" : 0.0,
     "upperBound" : 100.0
   },
@@ -57,22 +57,22 @@
     "upperBound" : 5.0
   },
   "Initial value cutoff" : {
-    "value" : 229,
+    "value" : 112,
     "lowerBound" : -1000,
     "upperBound" : 1000
   },
   "Max tree depth" : {
-    "value" : 4,
+    "value" : 5,
     "lowerBound" : 2,
     "upperBound" : 12
   },
   "Search inner radius" : {
-    "value" : 0.25,
+    "value" : 0.35,
     "lowerBound" : 0.0,
     "upperBound" : 0.3
   },
   "Search outer radius" : {
-    "value" : 0.65,
+    "value" : 0.6,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },

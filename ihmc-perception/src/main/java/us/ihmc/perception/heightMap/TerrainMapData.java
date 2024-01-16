@@ -4,6 +4,8 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -121,6 +123,32 @@ public class TerrainMapData
          double height = heightMapData.getHeightAt(key);
          setHeightLocal((float) height, xIndex, yIndex);
       }
+   }
+
+   public Vector3D computeSurfaceNormalInWorld(float x, float y)
+   {
+      int rIndex = getLocalIndex(x, sensorOrigin.getX32());
+      int cIndex = getLocalIndex(y, sensorOrigin.getY32());
+
+      for (int i = -2; i <= 2; i++)
+      {
+         for (int j = -2; j <= 2; j++)
+         {
+            int r = rIndex + i - 5;
+            int c = cIndex + j - 5;
+            if (r < 0 || r >= localGridSize || c < 0 || c >= localGridSize)
+               return null;
+
+            float height = getHeightLocal(r, c);
+
+            // compute full 3d point
+            Point3D point = new Point3D();
+            point.setX(sensorOrigin.getX32() + (r - localGridSize / 2) / cellsPerMeter);
+            point.setY(sensorOrigin.getY32() + (c - localGridSize / 2) / cellsPerMeter);
+            point.setZ(height);
+         }
+      }
+      return new Vector3D();
    }
 
    public void setSensorOrigin(double originX, double originY)
