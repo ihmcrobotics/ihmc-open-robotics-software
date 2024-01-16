@@ -92,7 +92,7 @@ public class ZEDColorDepthImagePublisher
       {
          // Encode depth image to png
          BytePointer depthPNGPointer = new BytePointer();
-         OpenCVTools.compressImagePNG(depthImageToPublish.getCpuImageMatrix(), depthPNGPointer);
+         OpenCVTools.compressImagePNG(depthImageToPublish.getCpuImageMat(), depthPNGPointer);
 
          // Publish image
          ImageMessage depthImageMessage = new ImageMessage();
@@ -178,11 +178,11 @@ public class ZEDColorDepthImagePublisher
          // Compress image
          BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getImageHeight() * colorImageToPublish.getImageWidth());
          imageEncoders.get(side)
-                      .encodeBGR(colorImageToPublish.getGpuImageMatrix().data(),
+                      .encodeBGR(colorImageToPublish.getGpuImageMat().data(),
                                  colorJPEGPointer,
                                  colorImageToPublish.getImageWidth(),
                                  colorImageToPublish.getImageHeight(),
-                                 colorImageToPublish.getGpuImageMatrix().step());
+                                 colorImageToPublish.getGpuImageMat().step());
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();
