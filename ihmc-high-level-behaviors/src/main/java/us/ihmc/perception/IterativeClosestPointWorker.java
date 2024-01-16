@@ -4,73 +4,103 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import perception_msgs.msg.dds.DetectedObjectPacket;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape.BOX;
 
 public class IterativeClosestPointWorker
 {
+   private static final double discountFactor = 1.0;
+
+   private static final boolean ignoreShapeTypeWhenSegmenting = false;
+   private static final boolean useParallelStreams = false;
+   private static final boolean sortByDistanceNotRandom = false;
+
+   private static final float defaultXLength = 0.2f;
+   private static final float defaultYLength = 0.4f;
+   private static final float defaultZLength = 0.3f;
+   private static final float defaultXRadius = 0.1f;
+   private static final float defaultYRadius = 0.1f;
+   private static final float defaultZRadius = 0.1f;
+   private static final PrimitiveRigidBodyShape defaultDetectionShape = BOX;
+
+   private final Comparator<DistancedPoint> distanceComparator = new Comparator<DistancedPoint>()
+   {
+      @Override
+      public int compare(DistancedPoint o1, DistancedPoint o2)
+      {
+         return Double.compare(o1.getDistanceSquared(), o2.getDistanceSquared());
+      }
+   };
+
    private final Random random;
 
-   private final ROS2Helper ros2Helper;
    private long sceneNodeID = -1L;
 
-   private final PrimitiveRigidBodyShape detectionShape;
-   private float xLength = 0.0f;
-   private float yLength = 0.0f;
-   private float zLength = 0.0f;
-   private float xRadius = 0.0f;
-   private float yRadius = 0.0f;
-   private float zRadius = 0.0f;
-   private int numberOfICPObjectPoints;
+   private PrimitiveRigidBodyShape detectionShape;
+   private float xLength = 0.19f;
+   private float yLength = 0.4f;
+   private float zLength = 0.31f;
+   private float xRadius = 0.1f;
+   private float yRadius = 0.1f;
+   private float zRadius = 0.1f;
+   private int numberOfCorrespondences;
 
-   private final DMatrixRMaj objectCentroid = new DMatrixRMaj(1, 3);
-   private final DMatrixRMaj environmentCentroid = new DMatrixRMaj(1, 3);
-   private final DMatrixRMaj objectPointCloudCentroid = new DMatrixRMaj(1, 3);
-   private final DMatrixRMaj objectCentroidSubtractedPoints;
-   private final DMatrixRMaj environmentCentroidSubtractedPoints;
-   private final DMatrixRMaj environmentToObjectCorrespondencePoints;
+   private final DMatrixRMaj objectRelativeToCentroidPoints;
+   private final DMatrixRMaj measurementRelativeToCentroidPoints;
 
    private final SvdImplicitQrDecompose_DDRM svdSolver = new SvdImplicitQrDecompose_DDRM(false, true, true, false);
 
-   private RecyclingArrayList<Point3D32> environmentPointCloud;
-   private final Object environmentPointCloudSynchronizer = new Object();
+   private List<? extends Point3DReadOnly> measurementPointCloud;
+   private final Object measurementPointCloudSynchronizer = new Object();
 
-   private final RecyclingArrayList<Point3D32> segmentedPointCloud = new RecyclingArrayList<>(Point3D32::new);
-   private double segmentSphereRadius = 0.3;
+   private List<DistancedPoint> segmentedPointCloud;
+   private double segmentSphereRadius = 1.0;
 
-   private RecyclingArrayList<Point3D32> objectInWorldPoints;
+   private List<DistancedPoint> neighborPointCloud;
+
+   private List<Point3DReadOnly> correspondingObjectPoints;
+   private List<Point3DReadOnly> correspondingMeasurementPoints;
+   private final Point3D32 measurementCentroid = new Point3D32();
+   private final Point3D32 objectCentroid = new Point3D32();
+
+   private List<Point3D32> localObjectPoints;
+   private List<Point3D32> objectInWorldPoints;
+   private boolean objectInWorldPointsIsUpToDate = false;
 
    private final AtomicBoolean useTargetPoint = new AtomicBoolean(true);
-   // Point around which ICP will segment the environment point cloud
-   private final FramePoint3D targetPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
+   // Point around which ICP will segment the measurement point cloud
+   private final Point3D targetPoint = new Point3D();
 
-   private final FramePose3D resultPose = new FramePose3D(ReferenceFrame.getWorldFrame());
+   private final Pose3D resultPose = new Pose3D();
 
-   public IterativeClosestPointWorker(int numberOfICPObjectPoints, ROS2Helper ros2Helper, Random random)
+   public IterativeClosestPointWorker(int numberOfObjectSamples, int numberOfCorrespondences, Random random)
    {
-      this.ros2Helper = ros2Helper;
-      this.numberOfICPObjectPoints = numberOfICPObjectPoints;
-      this.random = random;
-
-      objectCentroidSubtractedPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
-      environmentCentroidSubtractedPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
-      environmentToObjectCorrespondencePoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
-      detectionShape = PrimitiveRigidBodyShape.BOX;
-      objectInWorldPoints = createDefaultBoxPointCloud(numberOfICPObjectPoints, random);
+      this(defaultDetectionShape,
+           defaultXLength,
+           defaultYLength,
+           defaultZLength,
+           defaultXRadius,
+           defaultYRadius,
+           defaultZRadius,
+           numberOfObjectSamples,
+           numberOfCorrespondences,
+           new Pose3D(),
+           random);
    }
 
    public IterativeClosestPointWorker(PrimitiveRigidBodyShape objectShape,
@@ -80,9 +110,9 @@ public class IterativeClosestPointWorker
                                       float xRadius,
                                       float yRadius,
                                       float zRadius,
-                                      int numberOfICPObjectPoints,
-                                      FramePose3DBasics initialPose,
-                                      ROS2Helper ros2Helper,
+                                      int numberOfObjectSamples,
+                                      int numberOfCorrespondences,
+                                      Pose3DReadOnly initialPose,
                                       Random random)
    {
       detectionShape = objectShape;
@@ -92,429 +122,323 @@ public class IterativeClosestPointWorker
       this.xRadius = xRadius;
       this.yRadius = yRadius;
       this.zRadius = zRadius;
-      this.numberOfICPObjectPoints = numberOfICPObjectPoints;
-      this.ros2Helper = ros2Helper;
+      this.numberOfCorrespondences = numberOfCorrespondences;
       this.random = random;
 
       targetPoint.set(initialPose.getPosition());
-      resultPose.set(initialPose);
 
-      objectCentroidSubtractedPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
-      environmentCentroidSubtractedPoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
-      environmentToObjectCorrespondencePoints = new DMatrixRMaj(numberOfICPObjectPoints, 3);
+      objectRelativeToCentroidPoints = new DMatrixRMaj(numberOfCorrespondences, 3);
+      measurementRelativeToCentroidPoints = new DMatrixRMaj(numberOfCorrespondences, 3);
 
-      objectInWorldPoints = createICPObjectPointCloud(detectionShape, xLength, yLength, zLength, xRadius, yRadius, zRadius, numberOfICPObjectPoints);
+      localObjectPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape,
+                                                                               new Pose3D(),
+                                                                               xLength,
+                                                                               yLength,
+                                                                               zLength,
+                                                                               xRadius,
+                                                                               yRadius,
+                                                                               zRadius,
+                                                                               numberOfObjectSamples,
+                                                                               random);
+      setPoseGuess(initialPose);
    }
 
-   public void runICP(int numberOfIterations)
+   public boolean runICP(int numberOfIterations)
    {
       // Determine around where the point cloud should be segmented
       // (user provided point or last centroid)
-      FramePoint3D detectionPoint;
+      Pose3D detectionPoint = new Pose3D();
       if (useTargetPoint.get())
-         detectionPoint = new FramePoint3D(targetPoint);
+         detectionPoint.getPosition().set(targetPoint);
       else
-         detectionPoint = new FramePoint3D(resultPose.getPosition());
+         detectionPoint.set(resultPose);
 
-      // Segment the point cloud
-      synchronized (environmentPointCloudSynchronizer) // synchronize as to avoid changes to environment point cloud while segmenting it
+      boolean ranICPSuccessfully = false;
+      for (int i = 0; i < numberOfIterations; ++i)
       {
-         if (environmentPointCloud == null)
-            return;
-
-         segmentPointCloud(environmentPointCloud, detectionPoint, segmentSphereRadius);
-      }
-
-      // Only run ICP iteration if segmented point cloud has enough points
-      if (segmentedPointCloud.size() >= numberOfICPObjectPoints)
-      {
-         for (int i = 0; i < numberOfIterations; ++i)
+         // Segment the point cloud
+         synchronized (measurementPointCloudSynchronizer) // synchronize as to avoid changes to environment point cloud while segmenting it
          {
-            runICPIteration(segmentedPointCloud);
+            if (measurementPointCloud == null)
+               return false;
+
+            // TODO: find way to make shape segmentation not suck ICP into ground (without side effects)
+            if (numberOfIterations > 1 && i == 0)  // Running multiple iterations, on first iteration segment & find neighbors
+               segmentedPointCloud = segmentPointCloudAndFindNeighbors(measurementPointCloud, detectionPoint, segmentSphereRadius);
+            else if (numberOfIterations > 1)       // Running multiple iterations, on following iterations use neighbor points for segmentation (faster)
+               segmentedPointCloud = segmentPointCloud(neighborPointCloud, detectionPoint, segmentSphereRadius);
+            else                                   // Running only one iteration, don't bother finding neighbors
+               segmentedPointCloud = segmentPointCloud(measurementPointCloud, detectionPoint, segmentSphereRadius);
          }
 
-         // Send result message
-         if (sceneNodeID != -1L)
+         // Only run ICP iteration if segmented point cloud has enough points
+         if (segmentedPointCloud.size() >= 0.25 * numberOfCorrespondences)
          {
-            DetectedObjectPacket resultMessage = new DetectedObjectPacket();
-            resultMessage.setId((int) sceneNodeID);
-            resultMessage.getPose().set(resultPose);
-            for (Point3D32 point3D32 : getObjectPointCloud())
-               resultMessage.getObjectPointCloud().add().set(point3D32);
-            for (int i = 0; i < numberOfICPObjectPoints; i++)
-               resultMessage.getSegmentedPointCloud().add().set(segmentedPointCloud.get(i));
-            ros2Helper.publish(PerceptionAPI.ICP_RESULT, resultMessage);
+            runICPIteration();
+
+            ranICPSuccessfully = true;
          }
       }
+
+      return ranICPSuccessfully;
+   }
+
+   public DetectedObjectPacket getResult()
+   {
+      DetectedObjectPacket resultMessage = new DetectedObjectPacket();
+      resultMessage.setId((int) sceneNodeID);
+      resultMessage.getPose().set(resultPose);
+      for (Point3D32 point3D32 : getObjectPointCloud())
+         resultMessage.getObjectPointCloud().add().set(point3D32);
+      for (int i = 0; i < segmentedPointCloud.size(); i++)
+         resultMessage.getSegmentedPointCloud().add().set(segmentedPointCloud.get(i));
+
+      return resultMessage;
    }
 
    // TODO: Pass in a Pose to transform (all object points define WRT the pose of object)
-   private void runICPIteration(RecyclingArrayList<Point3D32> segmentedEnvironmentPointCloud)
+   private void runICPIteration()
    {
-      segmentedEnvironmentPointCloud.shuffle(random);
+      if (sortByDistanceNotRandom)
+         segmentedPointCloud.sort(distanceComparator);
+      else
+         Collections.shuffle(segmentedPointCloud, random);
 
-      // Calculate nearest neighbor (environment to object)
-      for (int i = 0; i < numberOfICPObjectPoints; ++i)
+      // Calculate nearest neighbor for each point (environment to object)
+      correspondingObjectPoints = new ArrayList<>();
+      correspondingMeasurementPoints = new ArrayList<>();
+
+      if (IterativeClosestPointTools.canComputeCorrespondencesOnShape(detectionShape))
       {
-         Point3D32 environmentPoint = segmentedEnvironmentPointCloud.get(i);
-         float minDistance = Float.MAX_VALUE;
-         int minIndex = Integer.MAX_VALUE;
-
-         for (int j = 0; j < objectInWorldPoints.size(); ++j)
-         {
-            float distance = (float) environmentPoint.distance(objectInWorldPoints.get(j));
-            if (distance <= minDistance)
-            {
-               minDistance = distance;
-               minIndex = j;
-            }
-         }
-         if (minIndex == Integer.MAX_VALUE)
-            return;
-
-         environmentToObjectCorrespondencePoints.set(i, 0, objectInWorldPoints.get(minIndex).getX());
-         environmentToObjectCorrespondencePoints.set(i, 1, objectInWorldPoints.get(minIndex).getY());
-         environmentToObjectCorrespondencePoints.set(i, 2, objectInWorldPoints.get(minIndex).getZ());
+         IterativeClosestPointTools.computeCorrespondencesOnShape(detectionShape,
+                                                                  resultPose,
+                                                                  segmentedPointCloud,
+                                                                  correspondingMeasurementPoints,
+                                                                  correspondingObjectPoints,
+                                                                  xLength,
+                                                                  yLength,
+                                                                  zLength,
+                                                                  xRadius,
+                                                                  yRadius,
+                                                                  zRadius,
+                                                                  numberOfCorrespondences);
+      }
+      else
+      {
+         computeCorrespondingPointsBetweenMeasurementAndObjectPointCloud(segmentedPointCloud,
+                                                                         correspondingMeasurementPoints,
+                                                                         correspondingObjectPoints);
       }
 
-      // Calculate object centroid
-      objectCentroid.set(0, 0, 0);
-      objectCentroid.set(0, 1, 0);
-      objectCentroid.set(0, 2, 0);
-      for (int i = 0; i < numberOfICPObjectPoints; ++i)
-      {
-         objectCentroid.add(0, 0, environmentToObjectCorrespondencePoints.get(i, 0));
-         objectCentroid.add(0, 1, environmentToObjectCorrespondencePoints.get(i, 1));
-         objectCentroid.add(0, 2, environmentToObjectCorrespondencePoints.get(i, 2));
-      }
-      objectCentroid.set(0, 0, objectCentroid.get(0, 0) / numberOfICPObjectPoints);
-      objectCentroid.set(0, 1, objectCentroid.get(0, 1) / numberOfICPObjectPoints);
-      objectCentroid.set(0, 2, objectCentroid.get(0, 2) / numberOfICPObjectPoints);
+      // Calculate object corresponce centroid
+      objectCentroid.set(IterativeClosestPointTools.computeCentroidOfPointCloud(correspondingObjectPoints));
+      int foundCorrespondences = correspondingMeasurementPoints.size();
 
-      for (int i = 0; i < numberOfICPObjectPoints; ++i)
+      objectRelativeToCentroidPoints.reshape(foundCorrespondences, 3);
+      measurementRelativeToCentroidPoints.reshape(foundCorrespondences, 3);
+
+      for (int i = 0; i < foundCorrespondences; ++i)
       {
-         objectCentroidSubtractedPoints.set(i, 0, environmentToObjectCorrespondencePoints.get(i, 0) - objectCentroid.get(0, 0));
-         objectCentroidSubtractedPoints.set(i, 1, environmentToObjectCorrespondencePoints.get(i, 1) - objectCentroid.get(0, 1));
-         objectCentroidSubtractedPoints.set(i, 2, environmentToObjectCorrespondencePoints.get(i, 2) - objectCentroid.get(0, 2));
+         objectRelativeToCentroidPoints.set(i, 0, correspondingObjectPoints.get(i).getX() - objectCentroid.getX());
+         objectRelativeToCentroidPoints.set(i, 1, correspondingObjectPoints.get(i).getY() - objectCentroid.getY());
+         objectRelativeToCentroidPoints.set(i, 2, correspondingObjectPoints.get(i).getZ() - objectCentroid.getZ());
       }
 
-      // Calculate environment centroid
-      environmentCentroid.set(0, 0, 0);
-      environmentCentroid.set(0, 1, 0);
-      environmentCentroid.set(0, 2, 0);
-      for (int i = 0; i < numberOfICPObjectPoints; ++i)
-      {
-         environmentCentroid.add(0, 0, segmentedEnvironmentPointCloud.get(i).getX());
-         environmentCentroid.add(0, 1, segmentedEnvironmentPointCloud.get(i).getY());
-         environmentCentroid.add(0, 2, segmentedEnvironmentPointCloud.get(i).getZ());
-      }
-      environmentCentroid.set(0, 0, environmentCentroid.get(0, 0) / numberOfICPObjectPoints);
-      environmentCentroid.set(0, 1, environmentCentroid.get(0, 1) / numberOfICPObjectPoints);
-      environmentCentroid.set(0, 2, environmentCentroid.get(0, 2) / numberOfICPObjectPoints);
+      // Calculate measurement centroid
+      measurementCentroid.set(IterativeClosestPointTools.computeCentroidOfPointCloud(correspondingMeasurementPoints));
 
-      for (int i = 0; i < numberOfICPObjectPoints; ++i)
+      for (int i = 0; i < foundCorrespondences; ++i)
       {
-         environmentCentroidSubtractedPoints.set(i, 0, segmentedEnvironmentPointCloud.get(i).getX() - environmentCentroid.get(0, 0));
-         environmentCentroidSubtractedPoints.set(i, 1, segmentedEnvironmentPointCloud.get(i).getY() - environmentCentroid.get(0, 1));
-         environmentCentroidSubtractedPoints.set(i, 2, segmentedEnvironmentPointCloud.get(i).getZ() - environmentCentroid.get(0, 2));
+         measurementRelativeToCentroidPoints.set(i, 0, correspondingMeasurementPoints.get(i).getX() - measurementCentroid.getX());
+         measurementRelativeToCentroidPoints.set(i, 1, correspondingMeasurementPoints.get(i).getY() - measurementCentroid.getY());
+         measurementRelativeToCentroidPoints.set(i, 2, correspondingMeasurementPoints.get(i).getZ() - measurementCentroid.getZ());
       }
 
       // Initialize matrix variables
       DMatrixRMaj H = new DMatrixRMaj(3, 3);
       DMatrixRMaj U = new DMatrixRMaj(3, 3);
       DMatrixRMaj V = new DMatrixRMaj(3, 3);
-      DMatrixRMaj R = new DMatrixRMaj(3, 3);
-      DMatrixRMaj objectAdjustedLocation = new DMatrixRMaj(3, 1);
-      DMatrixRMaj objectTranslation = new DMatrixRMaj(1, 3);
-      DMatrixRMaj T = new DMatrixRMaj(4, 4);
-      CommonOps_DDRM.setIdentity(T);
-      DMatrixRMaj interimPoint = new DMatrixRMaj(1, 3);
-      DMatrixRMaj movedPoint = new DMatrixRMaj(1, 3);
+      RotationMatrix optimalRotationMatrix = new RotationMatrix();
+      DMatrixRMaj optimalRotation = new DMatrixRMaj(3, 3); // This is the optimized rotation matrix to rotate the measurement to match the point cloud.
+      Point3D32 objectAdjustedLocation = new Point3D32();
+      Point3D32 objectTranslation = new Point3D32();
 
       // TODO: Get new translation every iteration, append to last, modify object pose using the translation
       // Solve for Best Fit Transformation
-      CommonOps_DDRM.multTransA(objectCentroidSubtractedPoints, environmentCentroidSubtractedPoints, H);
+      CommonOps_DDRM.multTransA(objectRelativeToCentroidPoints, measurementRelativeToCentroidPoints, H);
       svdSolver.decompose(H);
       svdSolver.getU(U, false);
       svdSolver.getV(V, true);
-      CommonOps_DDRM.multTransAB(V, U, R);
+      CommonOps_DDRM.multTransAB(V, U, optimalRotation);
 
       // Correct any negative rotation matrices which come out of SVD its positive counterpart (fixes NotARotationMatrix issues)
-      if (CommonOps_DDRM.det(R) < 0.0) {
-         CommonOps_DDRM.scale(-1.0, R);
-      }
+      if (CommonOps_DDRM.det(optimalRotation) < 0.0)
+         CommonOps_DDRM.scale(-1.0, optimalRotation);
 
-      RotationMatrix deltaRotation = new RotationMatrix(R);
+      /* Calculate object transform */
+      // Create the transform, and set the rotation, so it's a pure rotation transform
+      optimalRotationMatrix.set(optimalRotation);
+      RigidBodyTransform objectToMeasurementTransform = new RigidBodyTransform();
+      objectToMeasurementTransform.getRotation().interpolate(optimalRotationMatrix, discountFactor);
 
-      // Calculate object translation
-      CommonOps_DDRM.multTransB(R, objectCentroid, objectAdjustedLocation);
-      CommonOps_DDRM.transpose(objectAdjustedLocation);
-      CommonOps_DDRM.subtract(environmentCentroid, objectAdjustedLocation, objectTranslation);
+      // Calcualte the necessary translation
+      objectToMeasurementTransform.transform(objectCentroid, objectAdjustedLocation);
+      objectTranslation.sub(measurementCentroid, objectAdjustedLocation);
 
-      // Rotate and translate object points
-      for (Point3D32 objectInWorldPoint : this.objectInWorldPoints)
-      {
-         interimPoint.set(new double[][] {{objectInWorldPoint.getX()}, {objectInWorldPoint.getY()}, {objectInWorldPoint.getZ()}});
-         CommonOps_DDRM.mult(R, interimPoint, movedPoint);
-         objectInWorldPoint.set(movedPoint.get(0) + objectTranslation.get(0),
-                                movedPoint.get(1) + objectTranslation.get(1),
-                                movedPoint.get(2) + objectTranslation.get(2));
-      }
+      // set that translation into the transform
+      objectToMeasurementTransform.getTranslation().setAndScale(discountFactor, objectTranslation);
 
-      // TODO: Remove this cheat
-      // Calculate object centroid
-      objectPointCloudCentroid.set(0, 0, 0);
-      objectPointCloudCentroid.set(0, 1, 0);
-      objectPointCloudCentroid.set(0, 2, 0);
-      for (int i = 0; i < numberOfICPObjectPoints; ++i)
-      {
-         objectPointCloudCentroid.add(0, 0, objectInWorldPoints.get(i).getX());
-         objectPointCloudCentroid.add(0, 1, objectInWorldPoints.get(i).getY());
-         objectPointCloudCentroid.add(0, 2, objectInWorldPoints.get(i).getZ());
-      }
-      objectPointCloudCentroid.set(0, 0, objectPointCloudCentroid.get(0, 0) / numberOfICPObjectPoints);
-      objectPointCloudCentroid.set(0, 1, objectPointCloudCentroid.get(0, 1) / numberOfICPObjectPoints);
-      objectPointCloudCentroid.set(0, 2, objectPointCloudCentroid.get(0, 2) / numberOfICPObjectPoints);
-
-      resultPose.prependRotation(deltaRotation);
-      resultPose.getPosition().set(objectPointCloudCentroid.get(0, 0), objectPointCloudCentroid.get(0, 1), objectPointCloudCentroid.get(0, 2));
+      // Rotate and translate the resulting pose according to the correction transform.
+      resultPose.applyTransform(objectToMeasurementTransform);
+      objectInWorldPointsIsUpToDate = false;
    }
 
-   private RecyclingArrayList<Point3D32> createICPObjectPointCloud(PrimitiveRigidBodyShape shape,
-                                                                   float xLength,
-                                                                   float yLength,
-                                                                   float zLength,
-                                                                   float xRadius,
-                                                                   float yRadius,
-                                                                   float zRadius,
-                                                                   int numberOfICPObjectPoints)
+   private List<DistancedPoint> segmentPointCloud(List<? extends Point3DReadOnly> measurementPointCloud,
+                                                  Pose3DReadOnly virtualObjectPointInWorld,
+                                                  double cutoffRange)
    {
-      RecyclingArrayList<Point3D32> objectPointCloud;
+      double cutoffSquare = MathTools.square(cutoffRange);
 
-      switch (shape)
-      {
-         case BOX -> objectPointCloud = createBoxPointCloud(xLength, yLength, zLength, numberOfICPObjectPoints, random);
-         case PRISM -> objectPointCloud = createPrismPointCloud(xLength, yLength, zLength, numberOfICPObjectPoints, random);
-         case CYLINDER -> objectPointCloud = createCylinderPointCloud(zLength, xRadius, numberOfICPObjectPoints, random);
-         case ELLIPSOID -> objectPointCloud = createEllipsoidPointCloud(xRadius, yRadius, zRadius, numberOfICPObjectPoints, random);
-         case CONE -> objectPointCloud = createConePointCloud(zLength, xRadius, numberOfICPObjectPoints, random);
-         default -> objectPointCloud = createDefaultBoxPointCloud(numberOfICPObjectPoints, random);
-      }
-
-      return objectPointCloud;
+      Stream<? extends Point3DReadOnly> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
+      return measurementStream.map(point ->
+                                   {
+                                      double distance = IterativeClosestPointTools.distanceSquaredFromShape(detectionShape,
+                                                                                                            virtualObjectPointInWorld,
+                                                                                                            point,
+                                                                                                            xLength,
+                                                                                                            yLength,
+                                                                                                            zLength,
+                                                                                                            xRadius,
+                                                                                                            yRadius,
+                                                                                                            zRadius,
+                                                                                                            ignoreShapeTypeWhenSegmenting);
+                                      return new DistancedPoint(point, distance);
+                                   }).filter(point -> point.getDistanceSquared() <= cutoffSquare).collect(Collectors.toList());
    }
 
-   private RecyclingArrayList<Point3D32> createBoxPointCloud(float xLength, float yLength, float zLength, int numberOfPoints, Random random)
+   private List<DistancedPoint> segmentPointCloudAndFindNeighbors(List<? extends Point3DReadOnly> measurementPointCloud,
+                                                                  Pose3DReadOnly virtualShapeLocation,
+                                                                  double cutoffRange)
    {
-      RecyclingArrayList<Point3D32> boxObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
-      FramePose3D boxPointPose = new FramePose3D();
+      Stream<? extends Point3DReadOnly> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
+      List<DistancedPoint> distancedPoints = measurementStream.map(point ->
+                                                                   {
+                                                                      double distance = IterativeClosestPointTools.distanceSquaredFromShape(detectionShape,
+                                                                                                                                            virtualShapeLocation,
+                                                                                                                                            point,
+                                                                                                                                            xLength,
+                                                                                                                                            yLength,
+                                                                                                                                            zLength,
+                                                                                                                                            xRadius,
+                                                                                                                                            yRadius,
+                                                                                                                                            zRadius,
+                                                                                                                                            ignoreShapeTypeWhenSegmenting);
+                                                                      return new DistancedPoint(point, distance);
+                                                                   }).toList();
 
-      float halfBoxDepth = xLength / 2.0f;
-      float halfBoxWidth = yLength / 2.0f;
-      float halfBoxHeight = zLength / 2.0f;
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         int j = random.nextInt(6);
-         float x = random.nextFloat(-halfBoxDepth, halfBoxDepth);
-         float y = random.nextFloat(-halfBoxWidth, halfBoxWidth);
-         float z = random.nextFloat(-halfBoxHeight, halfBoxHeight);
-         if (j == 0 | j == 1)
-         {
-            x = (-(j & 1) * halfBoxDepth * 2.0f) + halfBoxDepth;
-         }
-         if (j == 2 | j == 3)
-         {
-            y = (-(j & 1) * halfBoxWidth * 2.0f) + halfBoxWidth;
-         }
-         if (j == 4 | j == 5)
-         {
-            z = (-(j & 1) * halfBoxHeight * 2.0f) + halfBoxHeight;
-         }
-
-         boxPointPose.set(resultPose);
-         boxPointPose.appendTranslation(x, y, z);
-
-         Point3D32 boxPoint = boxObjectPointCloud.add();
-         boxPoint.set(boxPointPose.getPosition());
-      }
-
-      return boxObjectPointCloud;
+      return segmentPointCloudUsingSphereAndFindNeighbors(distancedPoints, cutoffRange);
    }
 
-   private RecyclingArrayList<Point3D32> createPrismPointCloud(float xLength, float yLength, float zLength, int numberOfPoints, Random random)
+   public List<DistancedPoint> segmentPointCloudUsingSphere(List<Point3DReadOnly> measurementPointCloud,
+                                                            Pose3DReadOnly virtualObjectPointInWorld,
+                                                            double cutoffRange)
    {
-      RecyclingArrayList<Point3D32> prismObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
-      FramePose3D prismPointPose = new FramePose3D();
-
-      float halfPrismDepth = xLength / 2.0f;
-      float halfPrismWidth = yLength / 2.0f;
-
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         int side = random.nextInt(0, 4);
-         float x = random.nextFloat(-halfPrismDepth, halfPrismDepth);
-         float y = random.nextFloat(-halfPrismWidth, halfPrismWidth);
-         float z = random.nextFloat(0, zLength);
-         if (side == 0 || side == 1) // triangular faces
-         {
-            x = (1.0f - (z / zLength)) * x;
-            y = (-(side & 1) * halfPrismWidth * 2.0f) + halfPrismWidth;
-         }
-         else if (side == 2 || side == 3) // rectangular faces
-         {
-            x = (1.0f - (z / zLength)) * ((-(side & 1) * halfPrismDepth * 2.0f) + halfPrismDepth);
-         }
-
-         prismPointPose.set(resultPose);
-         prismPointPose.appendTranslation(x, y, z);
-
-         Point3D32 prismPoint = prismObjectPointCloud.add();
-         prismPoint.set(prismPointPose.getPosition());
-      }
-
-      return prismObjectPointCloud;
+      double cutoffRangeSquared = cutoffRange * cutoffRange;
+      Stream<Point3DReadOnly> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
+      return measurementStream.map(point -> new DistancedPoint(point, point.distanceSquared(virtualObjectPointInWorld.getPosition())))
+                              .filter(point -> point.getDistanceSquared() <= cutoffRangeSquared)
+                              .collect(Collectors.toList());
    }
 
-   private RecyclingArrayList<Point3D32> createCylinderPointCloud(float zLength, float xRadius, int numberOfPoints, Random random)
+   public List<DistancedPoint> segmentPointCloudUsingSphereAndFindNeighbors(List<Point3DReadOnly> measurementPointCloud,
+                                                                            Pose3DReadOnly virtualObjectPointInWorld,
+                                                                            double cutoffRange)
    {
-      RecyclingArrayList<Point3D32> cylinderObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
-      FramePose3D cylinderPointPose = new FramePose3D();
+      Stream<Point3DReadOnly> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
+      List<DistancedPoint> distancedPoints = measurementStream.map(point -> new DistancedPoint(point,
+                                                                                               point.distanceSquared(virtualObjectPointInWorld.getPosition())))
+                                                              .toList();
 
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         int j = random.nextInt(6);
-         float z = random.nextFloat(0, zLength);
-         float r = xRadius;
-         if (j == 0)
-         {
-            z = 0;
-            r = random.nextFloat(0, xRadius);
-         }
-         if (j == 1)
-         {
-            z = zLength;
-            r = random.nextFloat(0, xRadius);
-         }
-         double phi = random.nextDouble(0, 2 * Math.PI);
-         float x = (float) Math.cos(phi) * r;
-         float y = (float) Math.sin(phi) * r;
-
-         cylinderPointPose.set(resultPose);
-         cylinderPointPose.appendTranslation(x, y, z);
-
-         Point3D32 cylinderPoint = cylinderObjectPointCloud.add();
-         cylinderPoint.set(cylinderPointPose.getPosition());
-      }
-
-      return cylinderObjectPointCloud;
+      return segmentPointCloudUsingSphereAndFindNeighbors(distancedPoints, cutoffRange);
    }
 
-   private RecyclingArrayList<Point3D32> createEllipsoidPointCloud(float xRadius, float yRadius, float zRadius, int numberOfPoints, Random random)
+   public List<DistancedPoint> segmentPointCloudUsingSphereAndFindNeighbors(List<DistancedPoint> distancedPoints, double cutoffRange)
    {
-      RecyclingArrayList<Point3D32> ellipsoidObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
-      FramePose3D ellipsoidPointPose = new FramePose3D();
+      double neighborCutoff = 2.0 * cutoffRange;
+      double cutoffRangeSquared = cutoffRange * cutoffRange;
+      double neighborCutoffRangeSquared = neighborCutoff * neighborCutoff;
 
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         double phi = random.nextDouble(0, 2.0 * Math.PI);
-         double theta = random.nextDouble(0, 2.0 * Math.PI);
-         float x = (float) (Math.sin(phi) * Math.cos(theta) * xRadius);
-         float y = (float) (Math.sin(phi) * Math.sin(theta) * yRadius);
-         float z = (float) Math.cos(phi) * zRadius;
+      Stream<DistancedPoint> distancedPointsStream = useParallelStreams ? distancedPoints.parallelStream() : distancedPoints.stream();
+      List<DistancedPoint> neighborPointCloud = distancedPointsStream.filter(point -> point.getDistanceSquared() <= neighborCutoffRangeSquared)
+                                                                     .collect(Collectors.toList());
+      this.neighborPointCloud = neighborPointCloud;
 
-         ellipsoidPointPose.set(resultPose);
-         ellipsoidPointPose.appendTranslation(x, y, z);
-
-         Point3D32 ellipsoidPoint = ellipsoidObjectPointCloud.add();
-         ellipsoidPoint.set(ellipsoidPointPose.getPosition());
-      }
-
-      return ellipsoidObjectPointCloud;
+      Stream<DistancedPoint> neighborPointsStream = useParallelStreams ? neighborPointCloud.parallelStream() : neighborPointCloud.stream();
+      return neighborPointsStream.filter(point -> point.getDistanceSquared() <= cutoffRangeSquared).collect(Collectors.toList());
    }
 
-   private RecyclingArrayList<Point3D32> createConePointCloud(float zLength, float xRadius, int numberOfPoints, Random random)
+   private static class DistancedPoint extends Point3D32
    {
-      RecyclingArrayList<Point3D32> coneObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
-      FramePose3D conePointPose = new FramePose3D();
+      private final double distanceSquared;
 
-      for (int i = 0; i < numberOfPoints; i++)
+      public DistancedPoint(Point3DReadOnly point, double distanceSquared)
       {
-         float z = random.nextFloat(0, zLength);
-         double phi = random.nextDouble(0, 2.0 * Math.PI);
-         float x = (float) Math.cos(phi) * (zLength - z) * (xRadius / zLength);
-         float y = (float) Math.sin(phi) * (zLength - z) * (xRadius / zLength);
-
-         conePointPose.set(resultPose);
-         conePointPose.appendTranslation(x, y, z);
-
-         Point3D32 conePoint = coneObjectPointCloud.add();
-         conePoint.set(conePointPose.getPosition());
+         super(point);
+         this.distanceSquared = distanceSquared;
       }
 
-      return coneObjectPointCloud;
+      public double getDistanceSquared()
+      {
+         return distanceSquared;
+      }
    }
 
-   private RecyclingArrayList<Point3D32> createDefaultBoxPointCloud(int numberOfPoints, Random random)
+   private void computeCorrespondingPointsBetweenMeasurementAndObjectPointCloud(List<DistancedPoint> measurementPoints,
+                                                                                List<Point3DReadOnly> correspondingMeasurementPointsToPack,
+                                                                                List<Point3DReadOnly> correspondingObjectPointsToPack)
    {
-      RecyclingArrayList<Point3D32> boxObjectPointCloud = new RecyclingArrayList<>(Point3D32::new);
-      FramePose3D boxPointPose = new FramePose3D();
+      int measurementIdx = 0;
+      int iteration = 0;
+      List<Point3D32> objectInWorldPoints = getObjectPointCloud();
+      int maxIterations = 2 * objectInWorldPoints.size();
 
-      float halfBoxWidth = 0.405f / 2.0f;
-      float halfBoxDepth = 0.31f / 2.0f;
-      float halfBoxHeight = 0.19f / 2.0f;
-      for (int i = 0; i < numberOfPoints; i++)
+      while (correspondingMeasurementPointsToPack.size() < numberOfCorrespondences && measurementIdx < measurementPoints.size() && iteration < maxIterations)
       {
-         int j = random.nextInt(6);
-         float x = random.nextFloat(-halfBoxDepth, halfBoxDepth);
-         float y = random.nextFloat(-halfBoxWidth, halfBoxWidth);
-         float z = random.nextFloat(-halfBoxHeight, halfBoxHeight);
-         if (j == 0 | j == 1)
+         Point3DReadOnly measurementPoint = measurementPoints.get(measurementIdx++);
+         double minDistance = Double.POSITIVE_INFINITY;
+         Point3D32 correspondingObjectPoint = null;
+
+         for (Point3D32 objectPoint : objectInWorldPoints)
          {
-            x = (-(j & 1) * halfBoxDepth * 2.0f) + halfBoxDepth;
+            double distanceSquared = measurementPoint.distanceSquared(objectPoint);
+            if (distanceSquared < minDistance)
+            {
+               minDistance = distanceSquared;
+               correspondingObjectPoint = objectPoint;
+            }
          }
-         if (j == 2 | j == 3)
-         {
-            y = (-(j & 1) * halfBoxWidth * 2.0f) + halfBoxWidth;
-         }
-         if (j == 4 | j == 5)
-         {
-            z = (-(j & 1) * halfBoxHeight * 2.0f) + halfBoxHeight;
-         }
+         if (correspondingObjectPoint == null)
+            continue;
 
-         boxPointPose.set(resultPose);
-         boxPointPose.appendTranslation(x, y, z);
+         // record
+         correspondingMeasurementPointsToPack.add(measurementPoint);
+         correspondingObjectPointsToPack.add(correspondingObjectPoint);
 
-         Point3D32 boxPoint = boxObjectPointCloud.add();
-         boxPoint.set(boxPointPose.getPosition());
-      }
-
-      return boxObjectPointCloud;
-   }
-
-   private void segmentPointCloud(List<Point3D32> environmentPointCloud, FramePoint3D virtualObjectPointInWorld, double cutoffRange)
-   {
-      segmentedPointCloud.clear();
-
-      for (Point3D32 point : environmentPointCloud)
-      {
-         double distanceFromVirtualObjectCentroid = virtualObjectPointInWorld.distance(point);
-         if (distanceFromVirtualObjectCentroid <= cutoffRange)
-         {
-            Point3D32 segmentPoint = segmentedPointCloud.add();
-            segmentPoint.set(point);
-         }
+         iteration++;
       }
    }
+
+
 
    // TODO: Color filtering could go here
    // pass in depth and color image -> cut out invalid pixels of depth image based on color image ->
    // -> create "environmentPointCloud" based off the color-filtered depth image ->
    // -> set the segmentation radius to be large (1.0~1.5?)
-   public void setEnvironmentPointCloud(RecyclingArrayList<Point3D32> pointCloud)
+   public void setEnvironmentPointCloud(List<? extends Point3DReadOnly> pointCloud)
    {
-      synchronized (environmentPointCloudSynchronizer)
+      synchronized (measurementPointCloudSynchronizer)
       {
-         environmentPointCloud = pointCloud;
+         measurementPointCloud = pointCloud;
       }
    }
 
@@ -538,7 +462,20 @@ public class IterativeClosestPointWorker
       sceneNodeID = id;
    }
 
-   public void changeSize(float xLength, float yLength, float zLength, float xRadius, float yRadius, float zRadius, int numberOfICPObjectPoints)
+   public void setNumberOfCorrespondences(int numberOfCorrespondences)
+   {
+      this.numberOfCorrespondences = numberOfCorrespondences;
+      objectRelativeToCentroidPoints.reshape(numberOfCorrespondences, 3);
+      measurementRelativeToCentroidPoints.reshape(numberOfCorrespondences, 3);
+   }
+
+   public void setDetectionShape(PrimitiveRigidBodyShape shape)
+   {
+      detectionShape = shape;
+      changeSize(xLength, yLength, zLength, xRadius, yRadius, zRadius, localObjectPoints.size());
+   }
+
+   public void changeSize(float xLength, float yLength, float zLength, float xRadius, float yRadius, float zRadius, int numberOfObjectSamples)
    {
       this.xLength = xLength;
       this.yLength = yLength;
@@ -546,27 +483,76 @@ public class IterativeClosestPointWorker
       this.xRadius = xRadius;
       this.yRadius = yRadius;
       this.zRadius = zRadius;
-      this.numberOfICPObjectPoints = numberOfICPObjectPoints;
 
-      objectCentroidSubtractedPoints.reshape(numberOfICPObjectPoints, 3);
-      environmentCentroidSubtractedPoints.reshape(numberOfICPObjectPoints, 3);
-      environmentToObjectCorrespondencePoints.reshape(numberOfICPObjectPoints, 3);
-
-      objectInWorldPoints = createICPObjectPointCloud(detectionShape, xLength, yLength, zLength, xRadius, yRadius, zRadius, numberOfICPObjectPoints);
+      localObjectPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape,
+                                                                               new Pose3D(),
+                                                                               xLength,
+                                                                               yLength,
+                                                                               zLength,
+                                                                               xRadius,
+                                                                               yRadius,
+                                                                               zRadius,
+                                                                               numberOfObjectSamples,
+                                                                               random);
+      setPoseGuess(resultPose);
    }
 
-   public List<Point3D32> getSegmentedPointCloud()
+   public List<? extends Point3DReadOnly> getSegmentedPointCloud()
    {
       return segmentedPointCloud;
    }
 
-   public FixedFramePose3DBasics getResultPose()
+   public List<Point3DReadOnly> getCorrespondingMeasurementPoints()
+   {
+      return correspondingMeasurementPoints;
+   }
+
+   public List<Point3DReadOnly> getCorrespondingObjectPoints()
+   {
+      return correspondingObjectPoints;
+   }
+
+   public Point3DReadOnly getMeasurementCentroid()
+   {
+      return measurementCentroid;
+   }
+
+   public Point3DReadOnly getObjectCentroid()
+   {
+      return objectCentroid;
+   }
+
+   public void setPoseGuess(Pose3DReadOnly pose)
+   {
+      resultPose.set(pose);
+      objectInWorldPointsIsUpToDate = false;
+      //      updateObjectInWorldPoints();
+   }
+
+   private void updateObjectInWorldPoints()
+   {
+      if (objectInWorldPointsIsUpToDate)
+         return;
+
+      Stream<Point3D32> localPointsStream = useParallelStreams ? localObjectPoints.parallelStream() : localObjectPoints.stream();
+      objectInWorldPoints = localPointsStream.map(localPoint ->
+                                                  {
+                                                     Point3D32 pointInWorld = new Point3D32(localPoint);
+                                                     resultPose.transform(pointInWorld);
+                                                     return pointInWorld;
+                                                  }).collect(Collectors.toList());
+      objectInWorldPointsIsUpToDate = true;
+   }
+
+   public Pose3DReadOnly getResultPose()
    {
       return resultPose;
    }
 
    public List<Point3D32> getObjectPointCloud()
    {
+      if (!objectInWorldPointsIsUpToDate)
+         updateObjectInWorldPoints();
       return objectInWorldPoints;
    }
 
@@ -598,11 +584,6 @@ public class IterativeClosestPointWorker
    public float getZRadius()
    {
       return zRadius;
-   }
-
-   public int getNumberOfICPObjectPoints()
-   {
-      return numberOfICPObjectPoints;
    }
 
    public boolean isUsingTargetPoint()

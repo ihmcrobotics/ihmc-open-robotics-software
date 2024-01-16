@@ -90,10 +90,10 @@ public class RDXIterativeClosestPointBasicDemo
             envPointCloudRenderer.create(envSize);
 
             // Create Shape
-//            createICPPointCloudBox();
+            createICPPointCloudBox();
 //            createICPPointCloudCone();
 //            createICPPointCloudCylinder();
-            createICPPointCloudCSV();
+//            createICPPointCloudCSV();
 
             // Create Renderables for Object
             baseUI.getPrimaryScene().addRenderableProvider(objectPointCloudRenderer, RDXSceneLevel.VIRTUAL);
