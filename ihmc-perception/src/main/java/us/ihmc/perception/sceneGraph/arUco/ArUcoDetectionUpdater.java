@@ -86,7 +86,7 @@ public class ArUcoDetectionUpdater
       }
    }
 
-   public void initialize(int imageWidth, int imageHeight)
+   private void initialize(int imageWidth, int imageHeight)
    {
       LogTools.info("Initializing ArUco process");
       LogTools.info("Image dimensions: {} x {}", imageWidth, imageHeight);
