@@ -82,11 +82,11 @@ public class IterativeClosestPointTools
       pointRelativeToCylinder.applyInverseTransform(cylinderPose);
 
       Vector3D axis = new Vector3D(0.0, 0.0, 1.0);
-      return MathTools.square(Math.max(EuclidShapeTools.signedDistanceBetweenPoint3DAndCylinder3D(pointRelativeToCylinder,
-                                                                                                  new Point3D(),
-                                                                                                  axis,
-                                                                                                  zLength,
-                                                                                                  radius), 0.0f));
+      return MathTools.square(Math.max(0.0, EuclidShapeTools.signedDistanceBetweenPoint3DAndCylinder3D(pointRelativeToCylinder,
+                                                                                                       new Point3D(),
+                                                                                                       axis,
+                                                                                                       zLength,
+                                                                                                       radius)));
    }
 
    public static double distanceSquaredFromEllipsoid(Pose3DReadOnly ellipsePose, Point3DReadOnly query, float xRadius, float yRadius, float zRadius)
@@ -546,5 +546,20 @@ public class IterativeClosestPointTools
       }
 
       return boxObjectPointCloud;
+   }
+
+   public static Point3D32 computeCentroidOfPointCloud(List<Point3DReadOnly> pointCloud)
+   {
+      return computeCentroidOfPointCloud(pointCloud, pointCloud.size());
+   }
+
+   public static Point3D32 computeCentroidOfPointCloud(List<Point3DReadOnly> pointCloud, int pointsToAverage)
+   {
+      Point3D32 centroid = new Point3D32();
+      for (int i = 0; i < pointsToAverage; i++)
+         centroid.add(pointCloud.get(i));
+      centroid.scale(1.0 / pointsToAverage);
+
+      return centroid;
    }
 }
