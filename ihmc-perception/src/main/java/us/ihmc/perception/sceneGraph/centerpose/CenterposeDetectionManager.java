@@ -13,14 +13,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.filters.TimeBasedDetectionFilter;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Topic;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class CenterposeDetectionManager
@@ -93,7 +90,8 @@ public class CenterposeDetectionManager
                                                    "CenterposeDetectedObject%d".formatted(detectedObjectPacket.getId()),
                                                    detectedObjectPacket.getId(),
                                                    vertices,
-                                                   detectedObjectPacket.getBoundingBox2dVertices());
+                                                   detectedObjectPacket.getBoundingBox2dVertices(),
+                                                   true);
 
                modificationQueue.accept(new SceneGraphNodeAddition(centerposeNode, sceneGraph.getRootNode()));
                sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().put(centerposeNode.getObjectID(), centerposeNode);
