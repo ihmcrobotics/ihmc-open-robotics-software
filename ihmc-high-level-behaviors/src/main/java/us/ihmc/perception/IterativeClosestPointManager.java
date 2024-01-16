@@ -21,6 +21,7 @@ import java.util.Random;
 public class IterativeClosestPointManager
 {
    private static final double ICP_WORK_FREQUENCY = 20.0;
+   private static final int NUMBER_OF_CORRESPONDENCES = 1000; // TODO extract to request message
    private static final double EPSILON = 0.001;
 
    private final ROS2Helper ros2Helper;
@@ -92,6 +93,7 @@ public class IterativeClosestPointManager
             }
 
             // Update worker
+            worker.setNumberOfCorrespondences(NUMBER_OF_CORRESPONDENCES);             // TODO extract to request message
             worker.setTargetPoint(requestMessage.getProvidedPose().getPosition());
             worker.useProvidedTargetPoint(requestMessage.getUseProvidedPose());
             worker.setSegmentSphereRadius(requestMessage.getUseProvidedPose() ? 0.3 : 0.2);
@@ -145,7 +147,8 @@ public class IterativeClosestPointManager
       for (long id : nodeIDToWorkerMap.keySet())
       {
          IterativeClosestPointWorker worker = nodeIDToWorkerMap.get(id);
-         worker.runICP(2);
+         if (worker.runICP(2))
+            ros2Helper.publish(PerceptionAPI.ICP_RESULT, worker.getResult());
 
          // If ICP isn't using the provided target pose, it'll update the SceneNode to the ICP worker's centroid
          if (!worker.isUsingTargetPoint())
@@ -178,8 +181,8 @@ public class IterativeClosestPointManager
                                                                            yRadius,
                                                                            zRadius,
                                                                            numberOfPoints,
+                                                                           NUMBER_OF_CORRESPONDENCES,
                                                                            new FramePose3D(requestMessage.getProvidedPose()),
-                                                                           ros2Helper,
                                                                            random);
       worker.setSceneNodeID(requestMessage.getNodeId());
       nodeIDToWorkerMap.putIfAbsent(requestMessage.getNodeId(), worker);
