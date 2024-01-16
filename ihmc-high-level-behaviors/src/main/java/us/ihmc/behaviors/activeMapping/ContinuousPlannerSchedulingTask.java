@@ -105,8 +105,8 @@ public class ContinuousPlannerSchedulingTask
          sendPauseWalkingMessage();
          setImminentStanceToCurrent();
 
-         continuousPlanner.getMonteCarloFootstepPlanner().reset(null);
          continuousPlanner.setInitialized(false);
+         continuousPlanner.requestMonteCarloPlannerReset();
 
          return;
       }

@@ -191,7 +191,9 @@ public class ContinuousPlanner
       long timeStart = System.nanoTime();
 
       if (resetMonteCarloFootstepPlanner)
+      {
          monteCarloFootstepPlanner.reset(monteCarloFootstepPlannerRequest);
+      }
 
       FootstepPlan latestMonteCarloPlan = monteCarloFootstepPlanner.generateFootstepPlan(monteCarloFootstepPlannerRequest);
 
@@ -583,5 +585,10 @@ public class ContinuousPlanner
    public void setLatestTerrainMapData(TerrainMapData terrainMapData)
    {
       this.latestTerrainMapData = terrainMapData;
+   }
+
+   public void requestMonteCarloPlannerReset()
+   {
+      resetMonteCarloFootstepPlanner = true;
    }
 }
