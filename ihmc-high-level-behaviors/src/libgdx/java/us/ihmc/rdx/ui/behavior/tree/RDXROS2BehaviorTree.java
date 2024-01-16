@@ -51,7 +51,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
 
       ros2BehaviorTreeState = new ROS2BehaviorTreeState(getBehaviorTreeState(), this::setRootNode, ros2);
 
-      ros2BehaviorTreeState.getBehaviorTreeSubscription().getBehaviorTreeSubscription().addCallback(message -> subscriptionFrequencyText.ping());
+      ros2BehaviorTreeState.getBehaviorTreeSubscription().registerMessageReceivedCallback(subscriptionFrequencyText::ping);
    }
 
    public void createAndSetupDefault(RDXBaseUI baseUI)
@@ -88,7 +88,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
 
       ImGui.sameLine(ImGui.getWindowSizeX() - nodeCountsTextWidth - frozenStatusTextWidth - frequencyTextWidth - rightMargin);
       int numberOfLocalNodes = ros2BehaviorTreeState.getBehaviorTreeState().getNumberOfNodes();
-      BehaviorTreeStateMessage latestBehaviorTreeMessage = ros2BehaviorTreeState.getBehaviorTreeSubscription().getLatestBehaviorTreeMessage();
+      BehaviorTreeStateMessage latestBehaviorTreeMessage = ros2BehaviorTreeState.getBehaviorTreeSubscription().getBehaviorTreeStateMessage();
       int numberOfOnRobotNodes = latestBehaviorTreeMessage == null ? 0 : latestBehaviorTreeMessage.getBehaviorTreeIndices().size();
       ImGui.text("Operator: %3d  Robot: %3d".formatted(numberOfLocalNodes, numberOfOnRobotNodes));
 

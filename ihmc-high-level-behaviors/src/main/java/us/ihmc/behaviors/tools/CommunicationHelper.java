@@ -166,6 +166,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    @Override
+   public <T> void subscribeViaCallback(ROS2Topic<T> topic, Notification callback, T messageToRecycle)
+   {
+      ros2Helper.subscribeViaCallback(topic, callback, messageToRecycle);
+   }
+
+   @Override
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback)
    {
       ros2Helper.subscribeViaCallback(topic, callback);
