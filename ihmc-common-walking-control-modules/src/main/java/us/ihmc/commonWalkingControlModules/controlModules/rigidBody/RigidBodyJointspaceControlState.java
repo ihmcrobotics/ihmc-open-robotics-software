@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -28,6 +29,25 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * Manages control of a rigid body by controlling a number of joint ancestors
+ * in joint space through jointspace feedback control commands.
+ * <p>
+ * When robot hardware requires direct position control instead of
+ * torque control, this class supports disabling acceleration integration on those
+ * joints and instead provides joint desired output data for those joints to
+ * the controller core, which will bypass the optimizer. The user
+ * specifies this via {@link ArmTrajectoryCommand.RequestedMode}.
+ * </p>
+ * <p>
+ * This class is also responsible for commanding the "home" configuration
+ * to the whole body controller when requested by the user.
+ * </p>
+ * <p>
+ * Finally, this class reports status messages with the current and desired
+ * joint positions.
+ * </p>
+ */
 public class RigidBodyJointspaceControlState extends RigidBodyControlState
 {
    public static final int maxPoints = 10000;
