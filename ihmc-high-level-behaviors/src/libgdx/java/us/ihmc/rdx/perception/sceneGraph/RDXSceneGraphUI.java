@@ -153,11 +153,35 @@ public class RDXSceneGraphUI
                      modificationQueue.accept(new SceneGraphNodeAddition(shoe.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(shoe);
                   }
-                  if (ImGui.button(labels.get("Add ThinkPad")))
+                  if (ImGui.button(labels.get("Add Laptop")))
                   {
-                     RDXPredefinedRigidBodySceneNode thinkpad = predefinedRigidBodySceneNodeBuilder.build("ThinkPad");
-                     modificationQueue.accept(new SceneGraphNodeAddition(thinkpad.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
-                     addUISceneNode(thinkpad);
+                     RDXPredefinedRigidBodySceneNode laptop = predefinedRigidBodySceneNodeBuilder.build("Laptop");
+                     modificationQueue.accept(new SceneGraphNodeAddition(laptop.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(laptop);
+                  }
+                  if (ImGui.button(labels.get("Add Book")))
+                  {
+                     RDXPredefinedRigidBodySceneNode book = predefinedRigidBodySceneNodeBuilder.build("Book");
+                     modificationQueue.accept(new SceneGraphNodeAddition(book.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(book);
+                  }
+                  if (ImGui.button(labels.get("Add Cereal")))
+                  {
+                     RDXPredefinedRigidBodySceneNode cereal = predefinedRigidBodySceneNodeBuilder.build("Cereal");
+                     modificationQueue.accept(new SceneGraphNodeAddition(cereal.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(cereal);
+                  }
+                  if (ImGui.button(labels.get("Add Mug")))
+                  {
+                     RDXPredefinedRigidBodySceneNode mug = predefinedRigidBodySceneNodeBuilder.build("Mug");
+                     modificationQueue.accept(new SceneGraphNodeAddition(mug.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(mug);
+                  }
+                  if (ImGui.button(labels.get("Add Bike")))
+                  {
+                     RDXPredefinedRigidBodySceneNode bike = predefinedRigidBodySceneNodeBuilder.build("Bike");
+                     modificationQueue.accept(new SceneGraphNodeAddition(bike.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(bike);
                   }
                   ImGui.endTable();
                }
