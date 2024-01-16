@@ -19,9 +19,6 @@ public interface ROS2PublishSubscribeAPI
 {
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback);
 
-   /** Allocation free version. Not thread safe! */
-   public <T> void subscribeViaCallback(ROS2Topic<T> topic, Notification callback, T messageToRecycle);
-
    /** Use when you only need the latest message and need allocation free. */
    public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback);
 
