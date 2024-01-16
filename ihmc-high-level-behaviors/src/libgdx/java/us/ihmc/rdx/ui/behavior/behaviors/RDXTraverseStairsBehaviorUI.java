@@ -137,6 +137,8 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public void renderTreeNodeImGuiWidgets()
    {
+      ImGui.text("Goal Planning");
+      ImGui.sameLine();
       goalAffordance.renderPlaceGoalButton();
       ImGui.sameLine();
       ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");

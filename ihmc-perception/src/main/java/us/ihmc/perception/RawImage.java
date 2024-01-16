@@ -37,9 +37,9 @@ public class RawImage
     * at least one should be not null.
     */
    @Nullable
-   private Mat cpuImageMatrix;
+   private Mat cpuImageMat;
    @Nullable
-   private GpuMat gpuImageMatrix;
+   private GpuMat gpuImageMat;
    private final int openCVType;
    private final float focalLengthX;
    private final float focalLengthY;
@@ -55,8 +55,8 @@ public class RawImage
                    int imageWidth,
                    int imageHeight,
                    float depthDiscretization,
-                   @Nullable Mat cpuImageMatrix,
-                   @Nullable GpuMat gpuImageMatrix,
+                   @Nullable Mat cpuImageMat,
+                   @Nullable GpuMat gpuImageMat,
                    int openCVType,
                    float focalLengthX,
                    float focalLengthY,
@@ -70,8 +70,8 @@ public class RawImage
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
       this.depthDiscretization = depthDiscretization;
-      this.cpuImageMatrix = cpuImageMatrix;
-      this.gpuImageMatrix = gpuImageMatrix;
+      this.cpuImageMat = cpuImageMat;
+      this.gpuImageMat = gpuImageMat;
       this.openCVType = openCVType;
       this.focalLengthX = focalLengthX;
       this.focalLengthY = focalLengthY;
@@ -90,10 +90,10 @@ public class RawImage
       this.depthDiscretization = other.depthDiscretization;
       if (!other.isEmpty())
       {
-         if (other.cpuImageMatrix != null && !other.cpuImageMatrix.isNull())
-            this.cpuImageMatrix = other.cpuImageMatrix.clone();
-         if (other.gpuImageMatrix != null && !other.gpuImageMatrix.isNull())
-            this.gpuImageMatrix = other.gpuImageMatrix.clone();
+         if (other.cpuImageMat != null && !other.cpuImageMat.isNull())
+            this.cpuImageMat = other.cpuImageMat.clone();
+         if (other.gpuImageMat != null && !other.gpuImageMat.isNull())
+            this.gpuImageMat = other.gpuImageMat.clone();
       }
       this.openCVType = other.openCVType;
       this.focalLengthX = other.focalLengthX;
@@ -129,43 +129,43 @@ public class RawImage
       return depthDiscretization;
    }
 
-   public Mat getCpuImageMatrix()
+   public Mat getCpuImageMat()
    {
-      if (cpuImageMatrix == null && gpuImageMatrix == null)
+      if (cpuImageMat == null && gpuImageMat == null)
       {
          throw new NullPointerException("Neither CPU nor GPU matrices were initialized");
       }
-      else if (cpuImageMatrix == null && gpuImageMatrix != null && !gpuImageMatrix.isNull())
+      else if (cpuImageMat == null && !gpuImageMat.isNull())
       {
-         cpuImageMatrix = new Mat(imageHeight, imageWidth, openCVType);
-         gpuImageMatrix.download(cpuImageMatrix);
+         cpuImageMat = new Mat(imageHeight, imageWidth, openCVType);
+         gpuImageMat.download(cpuImageMat);
       }
 
-      return cpuImageMatrix;
+      return cpuImageMat;
    }
 
-   public GpuMat getGpuImageMatrix()
+   public GpuMat getGpuImageMat()
    {
-      if (gpuImageMatrix == null && cpuImageMatrix == null)
+      if (gpuImageMat == null && cpuImageMat == null)
       {
          throw new NullPointerException("Neither CPU nor GPU matrices were initialized");
       }
-      else if (gpuImageMatrix == null && !cpuImageMatrix.isNull())
+      else if (gpuImageMat == null && !cpuImageMat.isNull())
       {
-         gpuImageMatrix = new GpuMat(imageHeight, imageWidth, openCVType);
-         gpuImageMatrix.upload(cpuImageMatrix);
+         gpuImageMat = new GpuMat(imageHeight, imageWidth, openCVType);
+         gpuImageMat.upload(cpuImageMat);
       }
 
-      if (gpuImageMatrix == null || gpuImageMatrix.isNull())
+      if (gpuImageMat == null || gpuImageMat.isNull())
       {
          throw new NullPointerException("Failed to initialize GPU image");
       }
-      if (gpuImageMatrix.isNull())
+      if (gpuImageMat.isNull())
       {
          throw new NullPointerException("Failed to upload CPU image to GPU");
       }
 
-      return gpuImageMatrix;
+      return gpuImageMat;
    }
 
    public int getOpenCVType()
@@ -205,7 +205,7 @@ public class RawImage
 
    public boolean isEmpty()
    {
-      return cpuImageMatrix == null && gpuImageMatrix == null;
+      return cpuImageMat == null && gpuImageMat == null;
    }
 
    public RawImage get()
@@ -222,9 +222,9 @@ public class RawImage
 
    private void destroy()
    {
-      if (cpuImageMatrix != null)
-         cpuImageMatrix.close();
-      if (gpuImageMatrix != null)
-         gpuImageMatrix.close();
+      if (cpuImageMat != null)
+         cpuImageMat.close();
+      if (gpuImageMat != null)
+         gpuImageMat.close();
    }
 }
