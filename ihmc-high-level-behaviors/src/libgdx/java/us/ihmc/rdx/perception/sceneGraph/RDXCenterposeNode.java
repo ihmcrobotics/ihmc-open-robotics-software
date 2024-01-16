@@ -1,7 +1,9 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
@@ -41,6 +43,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    private final RDX3DPanel panel3D;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ImBoolean showBoundingBox = new ImBoolean(false);
+   private final ImBoolean enableTracking = new ImBoolean(true);
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
@@ -73,6 +76,8 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    public void update(SceneGraphModificationQueue modificationQueue)
    {
       super.update(modificationQueue);
+
+      centerposeNode.setEnableTracking(enableTracking.get());
 
       Point3D[] vertices = centerposeNode.getVertices3D();
       for (int i = 0; i < vertices.length; i++)
@@ -111,7 +116,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
       }
       else
       {
-         if (centerposeNode.getCurrentlyDetected())
+         if (centerposeNode.getCurrentlyDetected() && centerposeNode.isEnableTracking())
          {
             interactableObject.setPose(centerposeNode.getNodeToParentFrameTransform());
             LibGDXTools.setOpacity(interactableObject.getModelInstance(), (float) centerposeNode.getConfidence());
@@ -141,15 +146,44 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
          interactableObject.clear();
       }
 
-      if (centerposeNode.getObjectType().equals("SHOE"))
+      switch (centerposeNode.getObjectType())
       {
-         interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
-         interactableObject.load(RigidBodySceneObjectDefinitions.SHOE_VISUAL_MODEL_FILE_PATH, RigidBodySceneObjectDefinitions.SHOE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      }
-      else if (centerposeNode.getObjectType().equals("LAPTOP"))
-      {
-         interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
-         interactableObject.load(RigidBodySceneObjectDefinitions.THINKPAD_VISUAL_MODEL_FILE_PATH, RigidBodySceneObjectDefinitions.THINKPAD_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         case "SHOE" ->
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(RigidBodySceneObjectDefinitions.SHOE_VISUAL_MODEL_FILE_PATH,
+                                    RigidBodySceneObjectDefinitions.SHOE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         }
+         case "LAPTOP" ->
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(RigidBodySceneObjectDefinitions.LAPTOP_VISUAL_MODEL_FILE_PATH,
+                                    RigidBodySceneObjectDefinitions.LAPTOP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         }
+         case "BOOK" ->
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(RigidBodySceneObjectDefinitions.BOOK_VISUAL_MODEL_FILE_PATH,
+                                    RigidBodySceneObjectDefinitions.BOOK_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         }
+         case "CEREAL" ->
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(RigidBodySceneObjectDefinitions.CEREAL_VISUAL_MODEL_FILE_PATH,
+                                    RigidBodySceneObjectDefinitions.CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         }
+         case "MUG" ->
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(RigidBodySceneObjectDefinitions.MUG_VISUAL_MODEL_FILE_PATH,
+                                    RigidBodySceneObjectDefinitions.MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         }
+         case "BIKE" ->
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(RigidBodySceneObjectDefinitions.BIKE_VISUAL_MODEL_FILE_PATH,
+                                    RigidBodySceneObjectDefinitions.BIKE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         }
       }
    }
 
@@ -158,6 +192,8 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
       ImGui.checkbox(labels.get("Show bounding box"), showBoundingBox);
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Enable tracking"), enableTracking);
       ImGui.text("ID: %d".formatted(centerposeNode.getObjectID()));
       ImGui.sameLine();
    }
