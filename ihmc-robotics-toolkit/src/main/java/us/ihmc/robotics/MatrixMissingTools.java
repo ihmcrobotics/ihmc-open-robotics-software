@@ -163,6 +163,27 @@ public class MatrixMissingTools
       }
    }
 
+   public static void setMatrixRow(DMatrixRMaj dest,
+                                   int destRow,
+                                   DMatrixRMaj src,
+                                   int srcRow)
+   {
+      if (dest.getNumCols() != src.getNumCols())
+         throw new IllegalArgumentException("dest and src must have the same number of columns, was: [dest cols: " + dest.getNumCols() + ", src cols: "
+                                            + src.getNumCols() + "]");
+      if (dest.getNumRows() < destRow + 1)
+         throw new IllegalArgumentException("dest is too small, min size: [rows: " + (destRow + 1) + "], was: [rows: "
+                                            + dest.getNumRows() + "]");
+      if (src.getNumRows() < srcRow + 1)
+         throw new IllegalArgumentException("src is too small, min size: [rows: " + (srcRow + 1) + "], was: [rows: "
+                                            + src.getNumRows() + "]");
+
+      for (int j = 0; j < dest.getNumCols(); j++)
+      {
+         dest.unsafe_set(destRow, j, src.unsafe_get(srcRow, j));
+      }
+   }
+
    public static void setMatrixColumns(DMatrixRMaj dest,
                                        int destStartColumn,
                                        DMatrixRMaj src,
@@ -188,6 +209,27 @@ public class MatrixMissingTools
          {
             dest.unsafe_set(i, destStartColumn + j, src.unsafe_get(i, srcStartColumn + j));
          }
+      }
+   }
+
+   public static void setMatrixColumn(DMatrixRMaj dest,
+                                      int destColumn,
+                                      DMatrixRMaj src,
+                                      int srcColumn)
+   {
+      if (dest.getNumRows() != src.getNumRows())
+         throw new IllegalArgumentException("dest and src must have the same number of rows, was: [dest rows: " + dest.getNumRows() + ", src rows: "
+                                            + src.getNumRows() + "]");
+      if (dest.getNumCols() < destColumn + 1)
+         throw new IllegalArgumentException("dest is too small, min size: [cols: " + (destColumn + 1) + "], was: [cols: "
+                                            + dest.getNumCols() + "]");
+      if (src.getNumCols() < srcColumn + 1)
+         throw new IllegalArgumentException("src is too small, min size: [cols: " + (srcColumn + 1) + "], was: [cols: "
+                                            + src.getNumCols() + "]");
+
+      for (int i = 0; i < dest.getNumRows(); i++)
+      {
+         dest.unsafe_set(i, destColumn, src.unsafe_get(i, srcColumn));
       }
    }
 
