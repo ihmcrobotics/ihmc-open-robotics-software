@@ -55,9 +55,10 @@ public class ArUcoDetectionUpdater
       distortedInputImage.set(arUcoImage);
    }
 
-   public void undistortAndUpdateArUco()
+   public boolean undistortAndUpdateArUco()
    {
-      if (distortedInputImage.poll())
+      boolean newImageAvailable = distortedInputImage.poll();
+      if (newImageAvailable)
       {
          RawImage arUcoImage = distortedInputImage.read();
 
@@ -84,6 +85,7 @@ public class ArUcoDetectionUpdater
          undistortedImageRGB.close();
          arUcoImage.release();
       }
+      return newImageAvailable;
    }
 
    private void initialize(int imageWidth, int imageHeight)
