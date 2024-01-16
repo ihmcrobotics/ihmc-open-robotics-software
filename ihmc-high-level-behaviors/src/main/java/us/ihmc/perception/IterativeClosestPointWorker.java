@@ -11,8 +11,10 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
 import java.util.*;
@@ -52,12 +54,8 @@ public class IterativeClosestPointWorker
    private long sceneNodeID = -1L;
 
    private PrimitiveRigidBodyShape detectionShape;
-   private float xLength = 0.19f;
-   private float yLength = 0.4f;
-   private float zLength = 0.31f;
-   private float xRadius = 0.1f;
-   private float yRadius = 0.1f;
-   private float zRadius = 0.1f;
+   private final Vector3D lengths = new Vector3D(defaultXLength, defaultYLength, defaultZLength);
+   private final Vector3D radii = new Vector3D(defaultXRadius, defaultYRadius, defaultZRadius);
    private int numberOfCorrespondences;
 
    private final DMatrixRMaj objectRelativeToCentroidPoints;
@@ -91,12 +89,8 @@ public class IterativeClosestPointWorker
    public IterativeClosestPointWorker(int numberOfObjectSamples, int numberOfCorrespondences, Random random)
    {
       this(defaultDetectionShape,
-           defaultXLength,
-           defaultYLength,
-           defaultZLength,
-           defaultXRadius,
-           defaultYRadius,
-           defaultZRadius,
+           new Vector3D(defaultXLength, defaultYLength, defaultZLength),
+           new Vector3D(defaultXRadius, defaultYRadius, defaultZRadius),
            numberOfObjectSamples,
            numberOfCorrespondences,
            new Pose3D(),
@@ -104,24 +98,16 @@ public class IterativeClosestPointWorker
    }
 
    public IterativeClosestPointWorker(PrimitiveRigidBodyShape objectShape,
-                                      float xLength,
-                                      float yLength,
-                                      float zLength,
-                                      float xRadius,
-                                      float yRadius,
-                                      float zRadius,
+                                      Vector3DReadOnly lengths,
+                                      Vector3DReadOnly radii,
                                       int numberOfObjectSamples,
                                       int numberOfCorrespondences,
                                       Pose3DReadOnly initialPose,
                                       Random random)
    {
       detectionShape = objectShape;
-      this.xLength = xLength;
-      this.yLength = yLength;
-      this.zLength = zLength;
-      this.xRadius = xRadius;
-      this.yRadius = yRadius;
-      this.zRadius = zRadius;
+      this.lengths.set(lengths);
+      this.radii.set(radii);
       this.numberOfCorrespondences = numberOfCorrespondences;
       this.random = random;
 
@@ -132,12 +118,12 @@ public class IterativeClosestPointWorker
 
       localObjectPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape,
                                                                                new Pose3D(),
-                                                                               xLength,
-                                                                               yLength,
-                                                                               zLength,
-                                                                               xRadius,
-                                                                               yRadius,
-                                                                               zRadius,
+                                                                               lengths.getX32(),
+                                                                               lengths.getY32(),
+                                                                               lengths.getZ32(),
+                                                                               radii.getX32(),
+                                                                               radii.getY32(),
+                                                                               radii.getZ32(),
                                                                                numberOfObjectSamples,
                                                                                random);
       setPoseGuess(initialPose);
@@ -190,7 +176,7 @@ public class IterativeClosestPointWorker
       resultMessage.getPose().set(resultPose);
       for (Point3D32 point3D32 : getObjectPointCloud())
          resultMessage.getObjectPointCloud().add().set(point3D32);
-      for (int i = 0; i < segmentedPointCloud.size(); i++)
+      for (int i = 0; i < Math.min(segmentedPointCloud.size(), numberOfCorrespondences); i++)
          resultMessage.getSegmentedPointCloud().add().set(segmentedPointCloud.get(i));
 
       return resultMessage;
@@ -215,12 +201,12 @@ public class IterativeClosestPointWorker
                                                                   segmentedPointCloud,
                                                                   correspondingMeasurementPoints,
                                                                   correspondingObjectPoints,
-                                                                  xLength,
-                                                                  yLength,
-                                                                  zLength,
-                                                                  xRadius,
-                                                                  yRadius,
-                                                                  zRadius,
+                                                                  lengths.getX32(),
+                                                                  lengths.getY32(),
+                                                                  lengths.getZ32(),
+                                                                  radii.getX32(),
+                                                                  radii.getY32(),
+                                                                  radii.getZ32(),
                                                                   numberOfCorrespondences);
       }
       else
@@ -305,12 +291,12 @@ public class IterativeClosestPointWorker
                                       double distance = IterativeClosestPointTools.distanceSquaredFromShape(detectionShape,
                                                                                                             virtualObjectPointInWorld,
                                                                                                             point,
-                                                                                                            xLength,
-                                                                                                            yLength,
-                                                                                                            zLength,
-                                                                                                            xRadius,
-                                                                                                            yRadius,
-                                                                                                            zRadius,
+                                                                                                            lengths.getX32(),
+                                                                                                            lengths.getY32(),
+                                                                                                            lengths.getZ32(),
+                                                                                                            radii.getX32(),
+                                                                                                            radii.getY32(),
+                                                                                                            radii.getZ32(),
                                                                                                             ignoreShapeTypeWhenSegmenting);
                                       return new DistancedPoint(point, distance);
                                    }).filter(point -> point.getDistanceSquared() <= cutoffSquare).collect(Collectors.toList());
@@ -326,12 +312,12 @@ public class IterativeClosestPointWorker
                                                                       double distance = IterativeClosestPointTools.distanceSquaredFromShape(detectionShape,
                                                                                                                                             virtualShapeLocation,
                                                                                                                                             point,
-                                                                                                                                            xLength,
-                                                                                                                                            yLength,
-                                                                                                                                            zLength,
-                                                                                                                                            xRadius,
-                                                                                                                                            yRadius,
-                                                                                                                                            zRadius,
+                                                                                                                                            lengths.getX32(),
+                                                                                                                                            lengths.getY32(),
+                                                                                                                                            lengths.getZ32(),
+                                                                                                                                            radii.getX32(),
+                                                                                                                                            radii.getY32(),
+                                                                                                                                            radii.getZ32(),
                                                                                                                                             ignoreShapeTypeWhenSegmenting);
                                                                       return new DistancedPoint(point, distance);
                                                                    }).toList();
@@ -472,26 +458,22 @@ public class IterativeClosestPointWorker
    public void setDetectionShape(PrimitiveRigidBodyShape shape)
    {
       detectionShape = shape;
-      changeSize(xLength, yLength, zLength, xRadius, yRadius, zRadius, localObjectPoints.size());
+      changeSize(lengths, radii, localObjectPoints.size());
    }
 
-   public void changeSize(float xLength, float yLength, float zLength, float xRadius, float yRadius, float zRadius, int numberOfObjectSamples)
+   public void changeSize(Vector3D lengths, Vector3D radii, int numberOfObjectSamples)
    {
-      this.xLength = xLength;
-      this.yLength = yLength;
-      this.zLength = zLength;
-      this.xRadius = xRadius;
-      this.yRadius = yRadius;
-      this.zRadius = zRadius;
+      this.lengths.set(lengths);
+      this.radii.set(radii);
 
       localObjectPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape,
                                                                                new Pose3D(),
-                                                                               xLength,
-                                                                               yLength,
-                                                                               zLength,
-                                                                               xRadius,
-                                                                               yRadius,
-                                                                               zRadius,
+                                                                               lengths.getX32(),
+                                                                               lengths.getY32(),
+                                                                               lengths.getZ32(),
+                                                                               radii.getX32(),
+                                                                               radii.getY32(),
+                                                                               radii.getZ32(),
                                                                                numberOfObjectSamples,
                                                                                random);
       setPoseGuess(resultPose);
@@ -556,38 +538,23 @@ public class IterativeClosestPointWorker
       return objectInWorldPoints;
    }
 
-   public float getXLength()
-   {
-      return xLength;
-   }
-
-   public float getYLength()
-   {
-      return yLength;
-   }
-
-   public float getZLength()
-   {
-      return zLength;
-   }
-
-   public float getXRadius()
-   {
-      return xRadius;
-   }
-
-   public float getYRadius()
-   {
-      return yRadius;
-   }
-
-   public float getZRadius()
-   {
-      return zRadius;
-   }
-
    public boolean isUsingTargetPoint()
    {
       return useTargetPoint.get();
+   }
+
+   public int getNumberOfShapeSamples()
+   {
+      return getObjectPointCloud().size();
+   }
+
+   public Vector3DReadOnly getLengths()
+   {
+      return lengths;
+   }
+
+   public Vector3DReadOnly getRadii()
+   {
+      return radii;
    }
 }

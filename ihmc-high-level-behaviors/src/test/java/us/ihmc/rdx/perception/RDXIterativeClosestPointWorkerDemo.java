@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.IterativeClosestPointWorker;
 import us.ihmc.perception.OpenCLPointCloudExtractor;
@@ -286,12 +287,8 @@ public class RDXIterativeClosestPointWorkerDemo
             {
                shape = PrimitiveRigidBodyShape.valueOf(shapeValues[shapeIndex.get()]);
                icpWorker = new IterativeClosestPointWorker(shape,
-                                                           depth.get(),
-                                                           width.get(),
-                                                           height.get(),
-                                                           xRadius.get(),
-                                                           yRadius.get(),
-                                                           zRadius.get(),
+                                                           new Vector3D(depth.get(), width.get(), height.get()),
+                                                           new Vector3D(xRadius.get(), yRadius.get(), zRadius.get()),
                                                            MAX_ENVIRONMENT_SIZE,
                                                            CORRESPONDENCES,
                                                            new FramePose3D(ReferenceFrame.getWorldFrame(), pickFramePoint, new RotationMatrix()),
@@ -307,7 +304,9 @@ public class RDXIterativeClosestPointWorkerDemo
             ImGui.sliderInt("Num Correspondences", numberOfCorespondences.getData(), 0, 10000);
             if (ImGui.button("Apply Size"))
             {
-               icpWorker.changeSize(depth.get(), width.get(), height.get(), xRadius.get(), yRadius.get(), zRadius.get(), numberOfShapeSamples.get());
+               icpWorker.changeSize(new Vector3D(depth.get(), width.get(), height.get()),
+                                    new Vector3D(xRadius.get(), yRadius.get(), zRadius.get()),
+                                    numberOfShapeSamples.get());
                icpWorker.setNumberOfCorrespondences(numberOfCorespondences.get());
             }
             ImGui.sliderFloat("Segmentation Radius", segmentationRadius.getData(), 0.0f, 1.0f);

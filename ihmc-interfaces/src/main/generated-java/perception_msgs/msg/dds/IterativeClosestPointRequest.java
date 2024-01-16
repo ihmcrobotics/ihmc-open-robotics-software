@@ -31,16 +31,19 @@ public class IterativeClosestPointRequest extends Packet<IterativeClosestPointRe
    /**
             * Dimensions of the object
             */
-   public float x_length_;
-   public float y_length_;
-   public float z_length_;
-   public float x_radius_;
-   public float y_radius_;
-   public float z_radius_;
+   public us.ihmc.euclid.tuple3D.Vector3D lengths_;
+   public us.ihmc.euclid.tuple3D.Vector3D radii_;
    /**
             * User defined pose of virtual object
             */
    public us.ihmc.euclid.geometry.Pose3D provided_pose_;
+   /**
+            * ICP parameters
+            */
+   public int number_of_shape_samples_;
+   public int number_of_correspondences_;
+   public int number_of_iterations_;
+   public float segmentation_radius_;
    /**
             * Start/stop flag (true = run, false = stop)
             */
@@ -52,6 +55,8 @@ public class IterativeClosestPointRequest extends Packet<IterativeClosestPointRe
 
    public IterativeClosestPointRequest()
    {
+      lengths_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      radii_ = new us.ihmc.euclid.tuple3D.Vector3D();
       provided_pose_ = new us.ihmc.euclid.geometry.Pose3D();
    }
 
@@ -69,19 +74,17 @@ public class IterativeClosestPointRequest extends Packet<IterativeClosestPointRe
 
       shape_ = other.shape_;
 
-      x_length_ = other.x_length_;
-
-      y_length_ = other.y_length_;
-
-      z_length_ = other.z_length_;
-
-      x_radius_ = other.x_radius_;
-
-      y_radius_ = other.y_radius_;
-
-      z_radius_ = other.z_radius_;
-
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.lengths_, lengths_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.radii_, radii_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.provided_pose_, provided_pose_);
+      number_of_shape_samples_ = other.number_of_shape_samples_;
+
+      number_of_correspondences_ = other.number_of_correspondences_;
+
+      number_of_iterations_ = other.number_of_iterations_;
+
+      segmentation_radius_ = other.segmentation_radius_;
+
       run_icp_ = other.run_icp_;
 
       use_provided_pose_ = other.use_provided_pose_;
@@ -133,64 +136,19 @@ public class IterativeClosestPointRequest extends Packet<IterativeClosestPointRe
       return shape_;
    }
 
+
    /**
             * Dimensions of the object
             */
-   public void setXLength(float x_length)
+   public us.ihmc.euclid.tuple3D.Vector3D getLengths()
    {
-      x_length_ = x_length;
-   }
-   /**
-            * Dimensions of the object
-            */
-   public float getXLength()
-   {
-      return x_length_;
+      return lengths_;
    }
 
-   public void setYLength(float y_length)
-   {
-      y_length_ = y_length;
-   }
-   public float getYLength()
-   {
-      return y_length_;
-   }
 
-   public void setZLength(float z_length)
+   public us.ihmc.euclid.tuple3D.Vector3D getRadii()
    {
-      z_length_ = z_length;
-   }
-   public float getZLength()
-   {
-      return z_length_;
-   }
-
-   public void setXRadius(float x_radius)
-   {
-      x_radius_ = x_radius;
-   }
-   public float getXRadius()
-   {
-      return x_radius_;
-   }
-
-   public void setYRadius(float y_radius)
-   {
-      y_radius_ = y_radius;
-   }
-   public float getYRadius()
-   {
-      return y_radius_;
-   }
-
-   public void setZRadius(float z_radius)
-   {
-      z_radius_ = z_radius;
-   }
-   public float getZRadius()
-   {
-      return z_radius_;
+      return radii_;
    }
 
 
@@ -200,6 +158,48 @@ public class IterativeClosestPointRequest extends Packet<IterativeClosestPointRe
    public us.ihmc.euclid.geometry.Pose3D getProvidedPose()
    {
       return provided_pose_;
+   }
+
+   /**
+            * ICP parameters
+            */
+   public void setNumberOfShapeSamples(int number_of_shape_samples)
+   {
+      number_of_shape_samples_ = number_of_shape_samples;
+   }
+   /**
+            * ICP parameters
+            */
+   public int getNumberOfShapeSamples()
+   {
+      return number_of_shape_samples_;
+   }
+
+   public void setNumberOfCorrespondences(int number_of_correspondences)
+   {
+      number_of_correspondences_ = number_of_correspondences;
+   }
+   public int getNumberOfCorrespondences()
+   {
+      return number_of_correspondences_;
+   }
+
+   public void setNumberOfIterations(int number_of_iterations)
+   {
+      number_of_iterations_ = number_of_iterations;
+   }
+   public int getNumberOfIterations()
+   {
+      return number_of_iterations_;
+   }
+
+   public void setSegmentationRadius(float segmentation_radius)
+   {
+      segmentation_radius_ = segmentation_radius;
+   }
+   public float getSegmentationRadius()
+   {
+      return segmentation_radius_;
    }
 
    /**
@@ -256,19 +256,17 @@ public class IterativeClosestPointRequest extends Packet<IterativeClosestPointRe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shape_, other.shape_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.x_length_, other.x_length_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.y_length_, other.y_length_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.z_length_, other.z_length_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.x_radius_, other.x_radius_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.y_radius_, other.y_radius_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.z_radius_, other.z_radius_, epsilon)) return false;
-
+      if (!this.lengths_.epsilonEquals(other.lengths_, epsilon)) return false;
+      if (!this.radii_.epsilonEquals(other.radii_, epsilon)) return false;
       if (!this.provided_pose_.epsilonEquals(other.provided_pose_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_shape_samples_, other.number_of_shape_samples_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_correspondences_, other.number_of_correspondences_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_iterations_, other.number_of_iterations_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.segmentation_radius_, other.segmentation_radius_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.run_icp_, other.run_icp_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_provided_pose_, other.use_provided_pose_, epsilon)) return false;
@@ -292,19 +290,17 @@ public class IterativeClosestPointRequest extends Packet<IterativeClosestPointRe
 
       if(this.shape_ != otherMyClass.shape_) return false;
 
-      if(this.x_length_ != otherMyClass.x_length_) return false;
-
-      if(this.y_length_ != otherMyClass.y_length_) return false;
-
-      if(this.z_length_ != otherMyClass.z_length_) return false;
-
-      if(this.x_radius_ != otherMyClass.x_radius_) return false;
-
-      if(this.y_radius_ != otherMyClass.y_radius_) return false;
-
-      if(this.z_radius_ != otherMyClass.z_radius_) return false;
-
+      if (!this.lengths_.equals(otherMyClass.lengths_)) return false;
+      if (!this.radii_.equals(otherMyClass.radii_)) return false;
       if (!this.provided_pose_.equals(otherMyClass.provided_pose_)) return false;
+      if(this.number_of_shape_samples_ != otherMyClass.number_of_shape_samples_) return false;
+
+      if(this.number_of_correspondences_ != otherMyClass.number_of_correspondences_) return false;
+
+      if(this.number_of_iterations_ != otherMyClass.number_of_iterations_) return false;
+
+      if(this.segmentation_radius_ != otherMyClass.segmentation_radius_) return false;
+
       if(this.run_icp_ != otherMyClass.run_icp_) return false;
 
       if(this.use_provided_pose_ != otherMyClass.use_provided_pose_) return false;
@@ -325,20 +321,20 @@ public class IterativeClosestPointRequest extends Packet<IterativeClosestPointRe
       builder.append(this.node_id_);      builder.append(", ");
       builder.append("shape=");
       builder.append(this.shape_);      builder.append(", ");
-      builder.append("x_length=");
-      builder.append(this.x_length_);      builder.append(", ");
-      builder.append("y_length=");
-      builder.append(this.y_length_);      builder.append(", ");
-      builder.append("z_length=");
-      builder.append(this.z_length_);      builder.append(", ");
-      builder.append("x_radius=");
-      builder.append(this.x_radius_);      builder.append(", ");
-      builder.append("y_radius=");
-      builder.append(this.y_radius_);      builder.append(", ");
-      builder.append("z_radius=");
-      builder.append(this.z_radius_);      builder.append(", ");
+      builder.append("lengths=");
+      builder.append(this.lengths_);      builder.append(", ");
+      builder.append("radii=");
+      builder.append(this.radii_);      builder.append(", ");
       builder.append("provided_pose=");
       builder.append(this.provided_pose_);      builder.append(", ");
+      builder.append("number_of_shape_samples=");
+      builder.append(this.number_of_shape_samples_);      builder.append(", ");
+      builder.append("number_of_correspondences=");
+      builder.append(this.number_of_correspondences_);      builder.append(", ");
+      builder.append("number_of_iterations=");
+      builder.append(this.number_of_iterations_);      builder.append(", ");
+      builder.append("segmentation_radius=");
+      builder.append(this.segmentation_radius_);      builder.append(", ");
       builder.append("run_icp=");
       builder.append(this.run_icp_);      builder.append(", ");
       builder.append("use_provided_pose=");
