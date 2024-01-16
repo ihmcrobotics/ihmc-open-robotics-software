@@ -47,5 +47,4 @@ public abstract class RDXSceneNodeBuilder<T extends RDXSceneNode>
    }
 
    public abstract T build();
-
 }
