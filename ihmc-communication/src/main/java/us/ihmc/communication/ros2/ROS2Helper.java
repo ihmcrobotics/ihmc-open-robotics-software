@@ -12,7 +12,9 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.*;
+import us.ihmc.tools.thread.SwapReference;
 
 import java.io.IOException;
 import java.util.function.Consumer;
@@ -57,6 +59,29 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
                callback.set();
             }
          }, topic.getName(), ROS2QosProfile.DEFAULT());
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   @Override
+   public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback)
+   {
+      try
+      {
+         TopicDataType<T> topicDataType = IHMCROS2Callback.newMessageTopicDataTypeInstance(topic.getType());
+         SwapReference<T> swapReference = new SwapReference<>(topicDataType::createData);
+         ros2NodeInterface.createSubscription(topicDataType, subscriber ->
+         {
+            if (subscriber.takeNextData(swapReference.getForThreadOne(), null))
+            {
+               swapReference.swap();
+               callback.set();
+            }
+         }, topic.getName(), ROS2QosProfile.DEFAULT());
+         return swapReference;
       }
       catch (IOException e)
       {
