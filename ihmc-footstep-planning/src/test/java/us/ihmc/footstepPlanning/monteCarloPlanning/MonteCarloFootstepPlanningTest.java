@@ -79,9 +79,9 @@ public class MonteCarloFootstepPlanningTest
 
       if (displayPlots)
       {
-         planner.getDebugger().refresh(terrainMapData);
-         planner.getDebugger().plotFootstepPlan(plan);
-         planner.getDebugger().display(0);
+//         planner.getDebugger().refresh(terrainMapData);
+//         planner.getDebugger().plotFootstepPlan(plan);
+//         planner.getDebugger().display(0);
       }
 
       Assertions.assertEquals(0.0, 0.0 - 0.0001, 1e-3);
