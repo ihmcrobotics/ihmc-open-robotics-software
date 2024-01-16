@@ -15,7 +15,7 @@ public class PelvisHeightPitchActionStateMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "db2eabc0147b1034e06583f01e1e1c766ed677b1ceeb09c346a862aa26c57b7d";
+   		return "ce3bd2d17bdacb201f7ca1beb1aa7acfe2ed9043b02d6064a0fcdce2bd5a016e";
    }
    
    @Override
