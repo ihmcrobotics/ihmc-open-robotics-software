@@ -15,8 +15,8 @@ import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
-import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class IterativeClosestPointManager
 {
@@ -30,8 +30,8 @@ public class IterativeClosestPointManager
    private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor(openCLManager);
 
    private final Random random = new Random(System.nanoTime());
-   private final HashMap<Long, IterativeClosestPointWorker> nodeIDToWorkerMap = new HashMap<>();
-   private final HashMap<IterativeClosestPointWorker, Integer> workerToIterationsMap = new HashMap<>();
+   private final ConcurrentHashMap<Long, IterativeClosestPointWorker> nodeIDToWorkerMap = new ConcurrentHashMap<>();
+   private final ConcurrentHashMap<IterativeClosestPointWorker, Integer> workerToIterationsMap = new ConcurrentHashMap<>();
    private final IHMCROS2Input<IterativeClosestPointRequest> requestMessageSubscription;
    private final RestartableThrottledThread workerThread;
 
@@ -102,10 +102,7 @@ public class IterativeClosestPointManager
       depthImage.get();
 
       environmentPointCloud = pointCloudExtractor.extractPointCloud(depthImage);
-      for (IterativeClosestPointWorker worker : nodeIDToWorkerMap.values())
-      {
-         worker.setEnvironmentPointCloud(environmentPointCloud);
-      }
+      nodeIDToWorkerMap.forEachValue(1L, worker -> worker.setEnvironmentPointCloud(environmentPointCloud));
 
       depthImage.release();
    }
@@ -133,29 +130,22 @@ public class IterativeClosestPointManager
     */
    private void runWorkers()
    {
-      for (long id : nodeIDToWorkerMap.keySet())
+      nodeIDToWorkerMap.forEach(1L, (nodeID, worker) ->
       {
-         IterativeClosestPointWorker worker = nodeIDToWorkerMap.get(id);
          if (worker.runICP(workerToIterationsMap.get(worker)))
             ros2Helper.publish(PerceptionAPI.ICP_RESULT, worker.getResult());
 
-         // If ICP isn't using the provided target pose, it'll update the SceneNode to the ICP worker's centroid
          if (!worker.isUsingTargetPoint())
          {
             RigidBodyTransform centroidToWorldTransform = new RigidBodyTransform(worker.getResultPose());
-            SceneNode node = sceneGraph.getIDToNodeMap().get(id);
-            if (node != null) // Ensure the node has not been removed from the scene graph
+            SceneNode node = sceneGraph.getIDToNodeMap().get(nodeID);
+            if (node != null) // FIXME: race condition occurs when this is running & node is removed from scene graph through the scene graph UI
             {
                node.getNodeToParentFrameTransform().set(centroidToWorldTransform);
                node.getNodeFrame().update();
             }
-            else // node has been removed from scene graph -> remove from here too
-            {
-               workerToIterationsMap.remove(nodeIDToWorkerMap.get(id));
-               nodeIDToWorkerMap.remove(id);
-            }
          }
-      }
+      });
    }
 
    private void addWorker(IterativeClosestPointRequest requestMessage)
