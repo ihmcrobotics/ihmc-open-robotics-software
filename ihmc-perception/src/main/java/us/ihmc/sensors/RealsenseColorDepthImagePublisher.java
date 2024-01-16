@@ -1,25 +1,17 @@
 package us.ihmc.sensors;
 
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.cuda.CUDAImageEncoder;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.RestartableThread;
@@ -27,7 +19,6 @@ import us.ihmc.tools.thread.RestartableThread;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 
 public class RealsenseColorDepthImagePublisher
 {
@@ -94,7 +85,7 @@ public class RealsenseColorDepthImagePublisher
       {
          // Encode depth image to png
          BytePointer depthPNGPointer = new BytePointer();
-         OpenCVTools.compressImagePNG(depthImageToPublish.getCpuImageMatrix(), depthPNGPointer);
+         OpenCVTools.compressImagePNG(depthImageToPublish.getCpuImageMat(), depthPNGPointer);
 
          // Publish image
          ImageMessage depthImageMessage = new ImageMessage();
@@ -153,11 +144,11 @@ public class RealsenseColorDepthImagePublisher
       {
          // Compress image
          BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getImageHeight() * colorImageToPublish.getImageWidth());
-         imageEncoder.encodeBGR(colorImageToPublish.getGpuImageMatrix().data(),
+         imageEncoder.encodeBGR(colorImageToPublish.getGpuImageMat().data(),
                                 colorJPEGPointer,
                                 colorImageToPublish.getImageWidth(),
                                 colorImageToPublish.getImageHeight(),
-                                colorImageToPublish.getGpuImageMatrix().step());
+                                colorImageToPublish.getGpuImageMat().step());
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();

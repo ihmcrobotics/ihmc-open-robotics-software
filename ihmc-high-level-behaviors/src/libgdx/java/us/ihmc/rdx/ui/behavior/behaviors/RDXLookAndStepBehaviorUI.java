@@ -246,6 +246,8 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       }
       ImGui.sameLine();
 
+      ImGui.text("Goal Planning");
+      ImGui.sameLine();
       goalAffordance.renderPlaceGoalButton();
       ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
       ImGui.checkbox(labels.get("Show height map"), showHeightMap);
