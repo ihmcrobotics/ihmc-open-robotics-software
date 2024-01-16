@@ -237,6 +237,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       Pose3D homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);
       RigidBodyBasics elevator = controllerToolbox.getFullRobotModel().getElevator();
       YoDouble yoTime = controllerToolbox.getYoTime();
+      double controlDT = controllerToolbox.getControlDT();
 
       ContactablePlaneBody contactableBody = controllerToolbox.getContactableBody(bodyToControl);
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
@@ -258,6 +259,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
                                                                     yoTime,
+                                                                    controlDT,
                                                                     graphicsListRegistry,
                                                                     registry);
       manager.setGains(jointspaceHighLevelGainMap, jointspaceLowLevelGainMap);
