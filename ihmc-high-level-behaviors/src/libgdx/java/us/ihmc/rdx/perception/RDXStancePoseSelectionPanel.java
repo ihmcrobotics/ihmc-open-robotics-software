@@ -64,7 +64,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       pickPointSphere = RDXModelBuilder.createSphere(0.04f, Color.CYAN);
    }
 
-   public void update(FramePose3D goalPose, TerrainMapData terrainMapData)
+   public void update(SideDependentList<FramePose3D> goalPoses, TerrainMapData terrainMapData)
    {
       this.terrainMapData = terrainMapData;
       boolean panel3DIsHovered = latestInput != null && latestInput.isWindowHovered();

@@ -150,6 +150,24 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       visualizers.put("HeightMap", heightMapVisualizer);
    }
 
+   public void update(TerrainMapData terrainMapData)
+   {
+      Mat contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(terrainMapData.getContactMap());
+      croppedHeightMapPanel.drawDepthImage(terrainMapData.getHeightMap());
+      contactMapImagePanel.drawColorImage(contactHeatMapImage);
+      terrainGridGraphic.update(humanoidPerception.getRapidHeightMapExtractor().getCurrentGroundToWorldTransform());
+
+      for (RDXVisualizer visualizer : visualizers.values())
+      {
+         if (visualizer.getPanel() != null)
+            visualizer.getPanel().getIsShowing().set(visualizer.isActive());
+         if (visualizer.isActive())
+         {
+            visualizer.update();
+         }
+      }
+   }
+
    public void update()
    {
       if (heightMapUI != null)
