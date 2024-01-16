@@ -142,10 +142,18 @@ public class IterativeClosestPointManager
          // If ICP isn't using the provided target pose, it'll update the SceneNode to the ICP worker's centroid
          if (!worker.isUsingTargetPoint())
          {
-            SceneNode node = sceneGraph.getIDToNodeMap().get(id);
             RigidBodyTransform centroidToWorldTransform = new RigidBodyTransform(worker.getResultPose());
-            node.getNodeToParentFrameTransform().set(centroidToWorldTransform);
-            node.getNodeFrame().update();
+            SceneNode node = sceneGraph.getIDToNodeMap().get(id);
+            if (node != null) // Ensure the node has not been removed from the scene graph
+            {
+               node.getNodeToParentFrameTransform().set(centroidToWorldTransform);
+               node.getNodeFrame().update();
+            }
+            else // node has been removed from scene graph -> remove from here too
+            {
+               workerToIterationsMap.remove(nodeIDToWorkerMap.get(id));
+               nodeIDToWorkerMap.remove(id);
+            }
          }
       }
    }
