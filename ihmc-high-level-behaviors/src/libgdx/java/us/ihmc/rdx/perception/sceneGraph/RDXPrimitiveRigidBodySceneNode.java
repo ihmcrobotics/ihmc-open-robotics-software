@@ -35,6 +35,7 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.Timer;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
 import java.util.Set;
@@ -47,14 +48,6 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    private static final float DEFAULT_DIMENSION = 0.1F;
-   private static final double ICP_REQUEST_FREQUENCY = 5.0;
-   private static final int ICP_MAX_POINTS = 10000;
-
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "primitive_scene_node_" + getSceneNode().getID());
-   private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-   private final IHMCROS2Publisher<IterativeClosestPointRequest> requestPublisher = new IHMCROS2Publisher<>(ros2Node, PerceptionAPI.ICP_REQUEST);
-   private final IHMCROS2Input<DetectedObjectPacket> icpResultSubscription;
-   private final RestartableThrottledThread requestPublisherThread;
 
    private RDXModelInstance modelInstance;
 
@@ -65,23 +58,7 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    private final ImFloat yRadius = new ImFloat(DEFAULT_DIMENSION);
    private final ImFloat zRadius = new ImFloat(DEFAULT_DIMENSION);
 
-   private final ImBoolean runICP = new ImBoolean(false);
-   private final ImBoolean useICPPose = new ImBoolean(false);
-   private final ImBoolean showICPPointCloud = new ImBoolean(false);
-
-   private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
-   private boolean showICPParameters = false;
-   private final ImInt numberOfShapeSamples = new ImInt(1000);
-   private final ImInt numberOfCorrespondences = new ImInt(1000);
-   private final ImInt numberOfIterations = new ImInt(1);
-   private final ImFloat segmentationRadius = new ImFloat(0.2f);
-
-   private final RecyclingArrayList<Point3D32> icpObjectPointCloud = new RecyclingArrayList<>(32768, Point3D32::new);
-   private final RDXPointCloudRenderer icpObjectPointCloudRenderer = new RDXPointCloudRenderer();
-   private final RecyclingArrayList<Point3D32> icpSegmentedPointCloud = new RecyclingArrayList<>(32768, Point3D32::new);
-   private final RDXPointCloudRenderer icpSegmentationRednerer = new RDXPointCloudRenderer();
-   private boolean updateObjectPointCloudMesh;
-   private final RDXReferenceFrameGraphic icpFrameGraphic = new RDXReferenceFrameGraphic(0.2);
+   private final RDXIterativeClosestPointOptions icpOptions;
 
    public RDXPrimitiveRigidBodySceneNode(PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode, RDX3DPanel panel3D)
    {
@@ -117,53 +94,7 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
       }
       modelInstance.setColor(GHOST_COLOR);
 
-      requestPublisherThread = new RestartableThrottledThread(getClass().getName() + getSceneNode().getID() + "ICPRequest",
-                                                              ICP_REQUEST_FREQUENCY,
-                                                              this::updateICP);
-      icpResultSubscription = ros2Helper.subscribe(PerceptionAPI.ICP_RESULT, message -> message.getId() == getSceneNode().getID());
-
-      icpObjectPointCloudRenderer.create(10000);
-      panel3D.getScene().addRenderableProvider(icpObjectPointCloudRenderer, RDXSceneLevel.VIRTUAL);
-
-      icpSegmentationRednerer.create(10000);
-      panel3D.getScene().addRenderableProvider(icpSegmentationRednerer, RDXSceneLevel.VIRTUAL);
-   }
-
-   private void updateICP()
-   {
-      IterativeClosestPointRequest requestMessage = new IterativeClosestPointRequest();
-      requestMessage.setNodeId(getSceneNode().getID());
-      requestMessage.setShape(((PrimitiveRigidBodySceneNode) getSceneNode()).getShape().toByte());
-      requestMessage.getLengths().set(xLength.get(), yLength.get(), zLength.get());
-      requestMessage.getRadii().set(xRadius.get(), yRadius.get(), zRadius.get());
-      requestMessage.getProvidedPose().set(getSceneNode().getNodeFrame().getTransformToWorldFrame());
-      requestMessage.setNumberOfCorrespondences(numberOfCorrespondences.get());
-      requestMessage.setNumberOfShapeSamples(numberOfShapeSamples.get());
-      requestMessage.setNumberOfIterations(numberOfIterations.get());
-      requestMessage.setSegmentationRadius(segmentationRadius.get());
-      requestMessage.setRunIcp(runICP.get());
-      requestMessage.setUseProvidedPose(!useICPPose.get());
-      requestPublisher.publish(requestMessage);
-
-      icpObjectPointCloud.clear();
-      icpSegmentedPointCloud.clear();
-      if (runICP.get() && icpResultSubscription.hasReceivedFirstMessage())
-      {
-         icpFrameGraphic.setPoseInWorldFrame(icpResultSubscription.getLatest().getPose());
-         getModelInstance().setPoseInWorldFrame(icpResultSubscription.getLatest().getPose());
-
-         if (showICPPointCloud.get())
-         {
-            for (Point3D32 point : icpResultSubscription.getLatest().getObjectPointCloud())
-               icpObjectPointCloud.add().set(point);
-
-            for (Point3D32 point : icpResultSubscription.getLatest().getSegmentedPointCloud())
-               icpSegmentedPointCloud.add().set(point);
-         }
-         updateObjectPointCloudMesh = true;
-      }
-      icpObjectPointCloudRenderer.setPointsToRender(icpObjectPointCloud, Color.GOLD);
-      icpSegmentationRednerer.setPointsToRender(icpSegmentedPointCloud, Color.LIGHT_GRAY);
+      icpOptions = new RDXIterativeClosestPointOptions(this, labels);
    }
 
    @Override
@@ -171,41 +102,7 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
 
-      if (ImGui.checkbox(labels.get("Run ICP"), runICP))
-      {
-         if (runICP.get())
-            requestPublisherThread.start();
-         else
-            requestPublisherThread.stop();
-      }
-
-      ImGui.beginDisabled(!runICP.get());
-
-      ImGui.sameLine();
-      ImGui.checkbox(labels.get("Use ICP Pose"), useICPPose);
-
-      ImGui.endDisabled();
-
-      ImGui.sameLine();
-      ImGui.checkbox(labels.get("Show ICP Point Cloud"), showICPPointCloud);
-
-      if (expandCollapseRenderer.render(showICPParameters))
-      {
-         showICPParameters = !showICPParameters;
-      }
-      ImGui.sameLine();
-      ImGui.text("ICP Parameters");
-      if (showICPParameters)
-      {
-         if (ImGuiTools.volatileInputInt(labels.get("Num Shape Samples"), numberOfShapeSamples))
-            numberOfShapeSamples.set(MathTools.clamp(numberOfShapeSamples.get(), 1, ICP_MAX_POINTS));
-         if (ImGuiTools.volatileInputInt(labels.get("Num Correspondences"), numberOfCorrespondences))
-            numberOfCorrespondences.set(MathTools.clamp(numberOfCorrespondences.get(), 1, ICP_MAX_POINTS));
-         if (ImGuiTools.volatileInputInt(labels.get("Num Iterations"), numberOfIterations))
-            numberOfIterations.set(MathTools.clamp(numberOfIterations.get(), 1, 10));
-         if (ImGuiTools.volatileInputFloat(labels.get("Segmentation Radius"), segmentationRadius))
-            segmentationRadius.set((float) MathTools.clamp(segmentationRadius.get(), 0.0f, Float.MAX_VALUE));
-      }
+      icpOptions.renderImGuiWidgets();
 
       ImGui.text("Modify shape:");
 
@@ -305,15 +202,7 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
       if (sceneLevels.contains(RDXSceneLevel.MODEL))
          modelInstance.getRenderables(renderables, pool);
 
-      if (icpResultSubscription.hasReceivedFirstMessage())
-      {
-         if (updateObjectPointCloudMesh)
-         {
-            icpObjectPointCloudRenderer.updateMesh();
-            icpSegmentationRednerer.updateMesh();
-         }
-         icpFrameGraphic.getRenderables(renderables, pool);
-      }
+      icpOptions.getRenderables(renderables, pool);
    }
 
    @Override
@@ -326,16 +215,16 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    public void remove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
       super.remove(modificationQueue, sceneGraph);
-      requestPublisherThread.blockingStop();
+      icpOptions.destroy();
+   }
 
-      showICPPointCloud.set(false);
-      useICPPose.set(false);
-      runICP.set(false);
+   public Vector3D32 getLengths()
+   {
+      return new Vector3D32(xLength.get(), yLength.get(), zLength.get());
+   }
 
-      // send message to ICP manager to remove this node
-      updateICP();
-
-      requestPublisher.destroy();
-      ros2Node.destroy();
+   public Vector3D32 getRadii()
+   {
+      return new Vector3D32(xRadius.get(), yRadius.get(), zRadius.get());
    }
 }
