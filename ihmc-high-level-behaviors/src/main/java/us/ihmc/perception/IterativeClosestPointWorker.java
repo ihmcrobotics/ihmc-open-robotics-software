@@ -306,21 +306,23 @@ public class IterativeClosestPointWorker
                                                                   Pose3DReadOnly virtualShapeLocation,
                                                                   double cutoffRange)
    {
-      Stream<? extends Point3DReadOnly> measurementStream = useParallelStreams ? measurementPointCloud.parallelStream() : measurementPointCloud.stream();
-      List<DistancedPoint> distancedPoints = measurementStream.map(point ->
-                                                                   {
-                                                                      double distance = IterativeClosestPointTools.distanceSquaredFromShape(detectionShape,
-                                                                                                                                            virtualShapeLocation,
-                                                                                                                                            point,
-                                                                                                                                            lengths.getX32(),
-                                                                                                                                            lengths.getY32(),
-                                                                                                                                            lengths.getZ32(),
-                                                                                                                                            radii.getX32(),
-                                                                                                                                            radii.getY32(),
-                                                                                                                                            radii.getZ32(),
-                                                                                                                                            ignoreShapeTypeWhenSegmenting);
-                                                                      return new DistancedPoint(point, distance);
-                                                                   }).toList();
+      List<DistancedPoint> distancedPoints = new ArrayList<>();
+
+      for (Point3DReadOnly point : measurementPointCloud)
+      {
+         double distance = IterativeClosestPointTools.distanceSquaredFromShape(detectionShape,
+                                                                               virtualShapeLocation,
+                                                                               point,
+                                                                               lengths.getX32(),
+                                                                               lengths.getY32(),
+                                                                               lengths.getZ32(),
+                                                                               radii.getX32(),
+                                                                               radii.getY32(),
+                                                                               radii.getZ32(),
+                                                                               ignoreShapeTypeWhenSegmenting);
+
+         distancedPoints.add(new DistancedPoint(point, distance));
+      }
 
       return segmentPointCloudUsingSphereAndFindNeighbors(distancedPoints, cutoffRange);
    }
