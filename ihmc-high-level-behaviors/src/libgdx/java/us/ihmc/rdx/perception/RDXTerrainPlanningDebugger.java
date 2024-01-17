@@ -167,7 +167,7 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
       this.monteCarloPlanDataListMessage.set(message);
    }
 
-   public void render(TerrainMapData terrainMapData)
+   public void update(TerrainMapData terrainMapData)
    {
       if (monteCarloTreeNodeStates != null && showStateSpheres.get())
       {
@@ -179,10 +179,7 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
       {
          updateExpansionSpheres(monteCarloPlanDataListMessage.getAndSet(null), terrainMapData);
       }
-   }
 
-   public void update()
-   {
       footstepPlanGraphic.update();
       monteCarloPlanGraphic.update();
    }

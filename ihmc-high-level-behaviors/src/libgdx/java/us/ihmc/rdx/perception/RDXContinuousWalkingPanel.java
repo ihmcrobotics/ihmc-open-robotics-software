@@ -177,7 +177,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       }
 
       terrainPlanningDebugger.generateStartAndGoalFootstepGraphics(startStancePose, goalStancePose);
-      terrainPlanningDebugger.render(terrainMapData);
+      terrainPlanningDebugger.update(terrainMapData);
       stancePoseSelectionPanel.update(goalStancePose, terrainMapData, heightMapData);
    }
 
