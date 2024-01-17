@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
@@ -58,6 +59,7 @@ import java.util.List;
 public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPoseActionDefinition>
 {
    private final HandPoseActionState state;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
@@ -85,13 +87,15 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                             WorkspaceResourceDirectory saveFileDirectory,
                             RDX3DPanel panel3D,
                             DRCRobotModel robotModel,
-                            FullHumanoidRobotModel syncedFullRobotModel,
+                            ROS2SyncedRobotModel syncedRobot,
                             RobotCollisionModel selectionCollisionModel,
                             ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
       state = getState();
+
+      this.syncedRobot = syncedRobot;
 
       getDefinition().setDescription("Hand pose");
 
@@ -117,6 +121,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                                             imBoolean.set(true);
                                                       });
 
+      FullHumanoidRobotModel syncedFullRobotModel = syncedRobot.getFullRobotModel();
       for (RobotSide side : RobotSide.values)
       {
          handNames.put(side, syncedFullRobotModel.getHand(side).getName());
