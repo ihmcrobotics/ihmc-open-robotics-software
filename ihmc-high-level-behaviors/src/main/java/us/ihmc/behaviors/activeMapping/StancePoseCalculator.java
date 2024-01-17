@@ -45,7 +45,7 @@ public class StancePoseCalculator
       insertCandidatePoses(leftPoses, goalPose, RobotSide.LEFT);
       insertCandidatePoses(rightPoses, goalPose, RobotSide.RIGHT);
       searchForOptimalGoalStance(leftPoses, rightPoses, goalPose, terrainMap);
-      snapPosesToHeightMapData(heightMapData);
+      snapPosesToTerrainMapData(terrainMap);
       return bestFramePoses;
    }
 

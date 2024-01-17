@@ -258,6 +258,10 @@ public class ContinuousPlannerSchedulingTask
             {
                parameters.setEnableContinuousWalking(false);
                LogTools.error("Planning failed:" + reason.name());
+               LogTools.info("Start of Swing:" + startOfSwingPose);
+               LogTools.info("Stance:" + stanceFootPose);
+               LogTools.info("Candidate:" + candidateStepPose);
+
                continuousPlanner.setInitialized(false);
                state = ContinuousWalkingState.NOT_STARTED;
             }
