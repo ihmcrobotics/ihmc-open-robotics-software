@@ -25,6 +25,8 @@ public class TrajectoryTrackingErrorCalculator
    {
       executionTimer.reset();
 
+      positionError = Double.POSITIVE_INFINITY;
+      orientationError = Double.POSITIVE_INFINITY;
       timeIsUp = false;
       hitTimeLimit = false;
       isWithinPositionTolerance = false;
