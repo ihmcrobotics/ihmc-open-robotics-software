@@ -53,8 +53,6 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       message.setFailed(failed.toMessage());
       message.setNominalExecutionDuration(nominalExecutionDuration.toMessage());
       message.setElapsedExecutionTime(elapsedExecutionTime.toMessage());
-      message.setNominalExecutionDuration(nominalExecutionDuration.toMessage());
-      message.setElapsedExecutionTime(elapsedExecutionTime.toMessage());
       desiredTrajectory.toMessage(message.getDesiredTrajectory());
       currentPose.toMessage(message.getCurrentPose());
       message.setPositionDistanceToGoalTolerance(positionDistanceToGoalTolerance.toMessage());
