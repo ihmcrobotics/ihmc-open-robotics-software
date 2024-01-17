@@ -4,8 +4,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
-import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
-import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
+import us.ihmc.behaviors.sequence.TrajectoryTrackingErrorCalculator;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
@@ -17,7 +16,6 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.NonWallTimer;
 
 import java.util.UUID;
 
@@ -37,8 +35,7 @@ public class FootstepPlanActionExecutorBasics
    private final SideDependentList<FramePose3D> syncedFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<Integer> indexOfLastFoot = new SideDependentList<>();
    private double nominalExecutionDuration;
-   private final NonWallTimer executionTimer = new NonWallTimer();
-   private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
+   private final SideDependentList<TrajectoryTrackingErrorCalculator> trackingCalculators = new SideDependentList<>(TrajectoryTrackingErrorCalculator::new);
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
 
@@ -64,10 +61,9 @@ public class FootstepPlanActionExecutorBasics
 
    public void update()
    {
-      executionTimer.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
-
       for (RobotSide side : RobotSide.values)
       {
+         trackingCalculators.get(side).update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
       }
    }
@@ -83,7 +79,11 @@ public class FootstepPlanActionExecutorBasics
          footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
          LogTools.info("Commanding {} footsteps", footstepDataListMessage.getFootstepDataList().size());
          ros2ControllerHelper.publishToController(footstepDataListMessage);
-         executionTimer.reset();
+
+         for (RobotSide side : RobotSide.values)
+         {
+            trackingCalculators.get(side).reset();
+         }
 
          nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanToExecute,
                                                                                             definition.getSwingDuration(),
@@ -123,34 +123,37 @@ public class FootstepPlanActionExecutorBasics
    {
       if (footstepPlanToExecute != null && footstepPlanToExecute.getNumberOfSteps() > 0)
       {
-         boolean isComplete = true;
+         boolean hitTimeLimit = false;
+         boolean meetsDesiredCompletionCriteria = true;
          for (RobotSide side : RobotSide.values)
          {
-            isComplete &= completionCalculator.get(side)
-                                              .isComplete(commandedGoalFeetPoses.get(side),
-                                                          syncedFeetPoses.get(side),
-                                                          POSITION_TOLERANCE,
-                                                          ORIENTATION_TOLERANCE,
-                                                          nominalExecutionDuration,
-                                                          executionTimer,
-                                                          actionNodeExecutor.getState(),
-                                                          BehaviorActionCompletionComponent.TRANSLATION,
-                                                          BehaviorActionCompletionComponent.ORIENTATION);
+            trackingCalculators.get(side).computeExecutionTimings(nominalExecutionDuration);
+            trackingCalculators.get(side).computePoseTrackingData(commandedGoalFeetPoses.get(side), syncedFeetPoses.get(side));
+            trackingCalculators.get(side).factorInR3Errors(POSITION_TOLERANCE);
+            trackingCalculators.get(side).factoryInSO3Errors(ORIENTATION_TOLERANCE);
+            meetsDesiredCompletionCriteria &= trackingCalculators.get(side).isWithinPositionTolerance();
+            meetsDesiredCompletionCriteria &= trackingCalculators.get(side).getTimeIsUp();
+            hitTimeLimit |= trackingCalculators.get(side).getHitTimeLimit();
          }
          int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
-         isComplete &= incompleteFootsteps == 0;
+         meetsDesiredCompletionCriteria &= incompleteFootsteps == 0;
 
-         actionNodeExecutor.getState().setIsExecuting(!isComplete);
+         if (meetsDesiredCompletionCriteria || hitTimeLimit)
+            actionNodeExecutor.getState().setIsExecuting(false);
+
+         if (hitTimeLimit)
+            actionNodeExecutor.getState().setFailed(true);
+
          actionNodeExecutor.getState().setNominalExecutionDuration(nominalExecutionDuration);
-         actionNodeExecutor.getState().setElapsedExecutionTime(executionTimer.getElapsedTime());
+         actionNodeExecutor.getState().setElapsedExecutionTime(trackingCalculators.get(RobotSide.LEFT).getElapsedTime());
          state.setTotalNumberOfFootsteps(footstepPlanToExecute.getNumberOfSteps());
          state.setNumberOfIncompleteFootsteps(incompleteFootsteps);
          actionNodeExecutor.getState().setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
          actionNodeExecutor.getState().setStartPositionDistanceToGoal(startPositionDistanceToGoal);
          actionNodeExecutor.getState().setCurrentOrientationDistanceToGoal(
-               completionCalculator.get(RobotSide.LEFT).getRotationError() + completionCalculator.get(RobotSide.RIGHT).getRotationError());
+               trackingCalculators.get(RobotSide.LEFT).getOrientationError() + trackingCalculators.get(RobotSide.RIGHT).getOrientationError());
          actionNodeExecutor.getState().setCurrentPositionDistanceToGoal(
-               completionCalculator.get(RobotSide.LEFT).getTranslationError() + completionCalculator.get(RobotSide.RIGHT).getTranslationError());
+               trackingCalculators.get(RobotSide.LEFT).getPositionError() + trackingCalculators.get(RobotSide.RIGHT).getPositionError());
       }
       else
       {
