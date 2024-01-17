@@ -52,7 +52,7 @@ public class OpenCVArUcoMarkerGenerator
    public static void main(String[] args)
    {
       Mat markerToSave = new Mat();
-      Dictionary dictionary = opencv_objdetect.getPredefinedDictionary(OpenCVArUcoMarkerDetection.DEFAULT_DICTIONARY);
+      Dictionary dictionary = opencv_objdetect.getPredefinedDictionary(OpenCVArUcoMarkerDetector.DEFAULT_DICTIONARY);
       int startingMarkerID = 0;
       int numberOfSequentialMarkersToGenerate = 4;
       int endIndex = startingMarkerID + numberOfSequentialMarkersToGenerate;
