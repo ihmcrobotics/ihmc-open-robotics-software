@@ -523,7 +523,7 @@ public class RigidBodyControlManagerTest
                                                                     0.0,
                                                                     null,
                                                                     testRegistry);
-      manager.setGains(jointspaceGains, null);
+      manager.setGains(jointspaceGains);
       manager.setWeights(jointspaceWeights, userModeWeights);
 
       new DefaultParameterReader().readParametersInRegistry(testRegistry);
