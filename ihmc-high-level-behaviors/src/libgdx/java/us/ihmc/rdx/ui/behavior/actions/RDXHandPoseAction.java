@@ -209,15 +209,37 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
          if (getParent().getState() instanceof ActionSequenceState parent)
          {
-            HandPoseActionState previousHandPose = parent.findNextPreviousAction(HandPoseActionState.class,
-                                                                                 getState().getActionIndex(),
-                                                                                 getDefinition().getSide());
-            if (previousHandPose != null)
+            HandPoseActionState previousHandAction = parent.findNextPreviousAction(HandPoseActionState.class,
+                                                                                   getState().getActionIndex(),
+                                                                                   getDefinition().getSide());
+
+            boolean previousHandActionExists = previousHandAction != null;
+            boolean weAreAfterIt = previousHandActionExists && parent.getExecutionNextIndex() > previousHandAction.getActionIndex();
+
+            boolean previousIsExecuting = previousHandActionExists && previousHandAction.getIsExecuting();
+            boolean showFromPreviousHand = previousHandActionExists;
+            boolean showFromCurrentHand = !showFromPreviousHand && state.getIsNextForExecution() && ! previousIsExecuting;
+
+            ReferenceFrame fromFrame = null;
+            if (showFromPreviousHand)
+            {
+               fromFrame = previousHandAction.getPalmFrame().getReferenceFrame();
+            }
+            if (showFromCurrentHand)
+            {
+               fromFrame = syncedRobot.getReferenceFrames().getHandFrame(getDefinition().getSide());
+            }
+
+            if (fromFrame != null)
             {
                double lineWidth = 0.01;
                trajectoryGraphic.update(lineWidth,
-                                        previousHandPose.getPalmFrame().getReferenceFrame().getTransformToRoot(),
+                                        fromFrame.getTransformToRoot(),
                                         getState().getPalmFrame().getReferenceFrame().getTransformToRoot());
+            }
+            else
+            {
+               trajectoryGraphic.clear();
             }
          }
       }
