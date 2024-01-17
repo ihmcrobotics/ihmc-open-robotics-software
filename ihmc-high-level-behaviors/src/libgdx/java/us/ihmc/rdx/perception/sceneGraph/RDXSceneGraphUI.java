@@ -259,6 +259,7 @@ public class RDXSceneGraphUI
                      RDXPrimitiveRigidBodySceneNode smallBox = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.BOX, smallBoxLengths, null);
                      modificationQueue.accept(new SceneGraphNodeAddition(smallBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(smallBox);
+                     smallBox.place();
                   }
                   if (ImGui.button(labels.get("Add medium box")))
                   {
@@ -266,6 +267,7 @@ public class RDXSceneGraphUI
                      RDXPrimitiveRigidBodySceneNode mediumBox = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.BOX, mediumBoxLengths, null);
                      modificationQueue.accept(new SceneGraphNodeAddition(mediumBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(mediumBox);
+                     mediumBox.place();
                   }
                   if (ImGui.button(labels.get("Add large box")))
                   {
@@ -273,6 +275,7 @@ public class RDXSceneGraphUI
                      RDXPrimitiveRigidBodySceneNode largeBox = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.BOX, largeBoxLengths, null);
                      modificationQueue.accept(new SceneGraphNodeAddition(largeBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(largeBox);
+                     largeBox.place();
                   }
                   ImGui.endTable();
                }

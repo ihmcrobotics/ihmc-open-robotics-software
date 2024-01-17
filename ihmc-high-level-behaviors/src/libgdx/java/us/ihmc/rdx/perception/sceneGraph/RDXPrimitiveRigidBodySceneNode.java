@@ -42,6 +42,8 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
 
    private final RDXIterativeClosestPointOptions icpOptions;
 
+   private boolean wasPlacing = false;
+
    public RDXPrimitiveRigidBodySceneNode(PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode, RDX3DPanel panel3D)
    {
       this(new Vector3D32(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION),
@@ -222,6 +224,23 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    {
       super.remove(modificationQueue, sceneGraph);
       icpOptions.destroy();
+   }
+
+   @Override
+   public void update(SceneGraphModificationQueue modificationQueue)
+   {
+      super.update(modificationQueue);
+
+      if (!wasPlacing && getPosePlacement().isPlaced())
+      {
+         icpOptions.stopICP();
+      }
+      else if (wasPlacing && !getPosePlacement().isPlaced())
+      {
+         icpOptions.runICP();
+      }
+
+      wasPlacing = getPosePlacement().isPlaced();
    }
 
    public Vector3D32 getLengths()

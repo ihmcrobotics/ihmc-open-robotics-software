@@ -188,4 +188,20 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
       requestPublisher.destroy();
       ros2Node.destroy();
    }
+
+   public void runICP()
+   {
+      runICP.set(true);
+      showICPPointCloud.set(true);
+      updateThread.start();
+      useICPPoseTimer.reset();
+   }
+
+   public void stopICP()
+   {
+      runICP.set(false);
+      showICPPointCloud.set(false);
+      useICPPose.set(false);
+      updateThread.stop();
+   }
 }

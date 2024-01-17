@@ -73,6 +73,17 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
                                                       imBoolean -> ImGui.checkbox(labels.get("Track " + initialParentName), imBoolean));
    }
 
+   public void place()
+   {
+      posePlacement.getPlaceGoalActionMap().start();
+      ImGui.setWindowFocus(RDXBaseUI.getInstance().getPrimary3DPanel().getPanelName());
+   }
+
+   public RDXBallAndArrowPosePlacement getPosePlacement()
+   {
+      return posePlacement;
+   }
+
    public void update(SceneGraphModificationQueue modificationQueue)
    {
       if (trackDetectedPoseChanged.poll())
