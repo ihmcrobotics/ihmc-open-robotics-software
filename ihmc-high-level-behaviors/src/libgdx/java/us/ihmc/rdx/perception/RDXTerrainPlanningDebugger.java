@@ -41,11 +41,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXTerrainPlanningDebugger implements RenderableProvider
 {
-   private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
-   private final RDXFootstepPlanGraphic monteCarloPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
-   private final AtomicReference<FootstepDataListMessage> monteCarloPlanDataListMessage = new AtomicReference<>(null);
-   private final SideDependentList<ArrayList<ModelInstance>> expansionSpheres = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
-   private final ArrayList<ModelInstance> stateSpheres = new ArrayList<>();
    private final ImBoolean showMonteCarloPlan = new ImBoolean(true);
    private final ImBoolean showContinuousWalkingPlan = new ImBoolean(true);
    private final ImBoolean showStateSpheres = new ImBoolean(true);
@@ -54,6 +49,13 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
    private final ImBoolean showGoalPoses = new ImBoolean(true);
    private final ImBoolean showRightActionSet = new ImBoolean(false);
    private final ImBoolean showLeftActionSet = new ImBoolean(false);
+
+   private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
+   private final RDXFootstepPlanGraphic monteCarloPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
+   private final AtomicReference<FootstepDataListMessage> monteCarloPlanDataListMessage = new AtomicReference<>(null);
+   private final SideDependentList<ArrayList<ModelInstance>> expansionSpheres = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
+   private final ArrayList<ModelInstance> stateSpheres = new ArrayList<>();
+   private final ArrayList<ModelInstance> normalArrows = new ArrayList<>();
 
    private MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters;
    private SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
@@ -100,6 +102,14 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
       {
          expansionSpheres.get(RobotSide.LEFT).add(RDXModelBuilder.createSphere(0.015f, Color.CYAN));
          expansionSpheres.get(RobotSide.RIGHT).add(RDXModelBuilder.createSphere(0.015f, Color.RED));
+      }
+
+      for (int i = 0; i<201; i++)
+      {
+         for (int j = 0; j<201; j++)
+         {
+            normalArrows.add(RDXModelBuilder.createArrow(0.01f, Color.YELLOW));
+         }
       }
    }
 
