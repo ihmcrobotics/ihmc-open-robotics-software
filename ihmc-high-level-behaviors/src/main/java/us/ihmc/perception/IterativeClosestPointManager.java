@@ -9,12 +9,14 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -130,22 +132,32 @@ public class IterativeClosestPointManager
     */
    private void runWorkers()
    {
-      nodeIDToWorkerMap.forEach(1L, (nodeID, worker) ->
+      for (Map.Entry<Long, IterativeClosestPointWorker> entry : nodeIDToWorkerMap.entrySet())
       {
-         if (worker.runICP(workerToIterationsMap.get(worker)))
-            ros2Helper.publish(PerceptionAPI.ICP_RESULT, worker.getResult());
+         long nodeID = entry.getKey();
 
-         if (!worker.isUsingTargetPoint())
+         if (!sceneGraph.getIDToNodeMap().containsKey(nodeID))
          {
-            RigidBodyTransform centroidToWorldTransform = new RigidBodyTransform(worker.getResultPose());
-            SceneNode node = sceneGraph.getIDToNodeMap().get(nodeID);
+            workerToIterationsMap.remove(nodeIDToWorkerMap.get(nodeID));
+            nodeIDToWorkerMap.remove(nodeID);
+            LogTools.info("Force removing ICP worker for node ID " + nodeID);
+            continue;
+         }
+
+         if (entry.getValue().runICP(workerToIterationsMap.get(entry.getValue())))
+            ros2Helper.publish(PerceptionAPI.ICP_RESULT, entry.getValue().getResult());
+
+         if (!entry.getValue().isUsingTargetPoint())
+         {
+            RigidBodyTransform centroidToWorldTransform = new RigidBodyTransform(entry.getValue().getResultPose());
+            SceneNode node = sceneGraph.getIDToNodeMap().get(entry.getKey());
             if (node != null) // FIXME: race condition occurs when this is running & node is removed from scene graph through the scene graph UI
             {
                node.getNodeToParentFrameTransform().set(centroidToWorldTransform);
                node.getNodeFrame().update();
             }
          }
-      });
+      }
    }
 
    private void addWorker(IterativeClosestPointRequest requestMessage)
