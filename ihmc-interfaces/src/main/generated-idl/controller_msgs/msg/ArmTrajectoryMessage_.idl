@@ -14,12 +14,6 @@ module controller_msgs
       const octet ROBOT_SIDE_RIGHT =
       1;
 
-      const octet REQUESTED_MODE_TORQUE_CONTROL =
-      0;
-
-      const octet REQUESTED_MODE_POSITION_CONTROL =
-      1;
-
 
       /**
        * This message is part of the IHMC whole-body controller API.
@@ -37,12 +31,6 @@ module controller_msgs
          * To by-pass the safety check and force the execution of this message, set this field to true.
          */
         boolean force_execution;
-        /**
-         * Optional field, if REQUESTED_MODE_POSITION_CONTROL and the robot has low-level gains for the arms, this is executed in position control mode.
-         * If REQUESTED_MODE_TORQUE_CONTROL this is executed in torque control mode. If left unset the existing execution mode is unchanged.
-         */
-        @defaultValue(value=255)
-        octet requested_mode;
         /**
          * Specifies the side of the robot that will execute the trajectory.
          */
