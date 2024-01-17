@@ -124,6 +124,11 @@ public class RigidBodySceneObjectDefinitions
    public static final String MUG_NAME = "Mug";
    public static final String MUG_VISUAL_MODEL_FILE_PATH = "environmentObjects/mug/mug.g3dj";
    public static final RigidBodyTransform MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      EuclidCoreMissingTools.setYawPitchRollDegrees(MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 0, -90, -90);
+      MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.1);
+   }
 
    public static final String BIKE_NAME = "Bike";
    public static final String BIKE_VISUAL_MODEL_FILE_PATH = "environmentObjects/bike/bike.g3dj";
