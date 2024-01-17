@@ -67,7 +67,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       jsonNode.put("maxForce", maxForce.getValue());
       jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
       jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
-      JSONTools.toJSON(jsonNode, "wrenchContactPose", screwAxisPoseInObjectFrame.getValueReadOnly());
+      JSONTools.toJSON(jsonNode, "wrenchContactPose", wrenchContactPoseInHandControlFrame.getValueReadOnly());
       jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater.getValue());
    }
 
