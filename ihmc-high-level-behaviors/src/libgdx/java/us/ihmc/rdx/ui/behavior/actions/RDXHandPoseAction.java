@@ -110,7 +110,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                                           imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
       holdPoseInWorldLaterWrapper = new ImBooleanWrapper(getDefinition()::getHoldPoseInWorldLater,
                                                          getDefinition()::setHoldPoseInWorldLater,
-                                                         imBoolean -> ImGui.checkbox(labels.get("Hold jointspace on completion"), imBoolean));
+                                                         imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
       jointSpaceControlWrapper = new ImBooleanWrapper(getDefinition()::getJointspaceOnly,
                                                       getDefinition()::setJointspaceOnly,
                                                       imBoolean -> {
