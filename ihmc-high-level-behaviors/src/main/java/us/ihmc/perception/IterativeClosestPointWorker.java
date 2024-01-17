@@ -356,13 +356,17 @@ public class IterativeClosestPointWorker
       double cutoffRangeSquared = cutoffRange * cutoffRange;
       double neighborCutoffRangeSquared = neighborCutoff * neighborCutoff;
 
-      Stream<DistancedPoint> distancedPointsStream = useParallelStreams ? distancedPoints.parallelStream() : distancedPoints.stream();
-      List<DistancedPoint> neighborPointCloud = distancedPointsStream.filter(point -> point.getDistanceSquared() <= neighborCutoffRangeSquared)
-                                                                     .collect(Collectors.toList());
+      List<DistancedPoint> neighborPointCloud = new ArrayList<>();
+
+      for (DistancedPoint point : distancedPoints)
+      {
+         if (point.getDistanceSquared() <= neighborCutoffRangeSquared && point.getDistanceSquared() <= cutoffRangeSquared)
+            neighborPointCloud.add(point);
+      }
+
       this.neighborPointCloud = neighborPointCloud;
 
-      Stream<DistancedPoint> neighborPointsStream = useParallelStreams ? neighborPointCloud.parallelStream() : neighborPointCloud.stream();
-      return neighborPointsStream.filter(point -> point.getDistanceSquared() <= cutoffRangeSquared).collect(Collectors.toList());
+      return neighborPointCloud;
    }
 
    private static class DistancedPoint extends Point3D32

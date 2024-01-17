@@ -119,15 +119,11 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
       {
          if (runICP.get())
          {
-            showICPPointCloud.set(true);
-            updateThread.start();
-            useICPPoseTimer.reset();
+            runICP();
          }
          else
          {
-            showICPPointCloud.set(false);
-            useICPPose.set(false);
-            updateThread.stop();
+            stopICP();
          }
       }
 
@@ -178,9 +174,7 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
    {
       updateThread.blockingStop();
 
-      showICPPointCloud.set(false);
-      useICPPose.set(false);
-      runICP.set(false);
+      stopICP();
 
       // send message to ICP manager to remove this node
       update();
