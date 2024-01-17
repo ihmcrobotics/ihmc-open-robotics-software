@@ -304,6 +304,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       armTrajectoryMessage.setRobotSide(getDefinition().getSide().toByte());
       armTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
       armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
+      LogTools.info("Publishing arm jointspace trajectory to disengage holding hand in taskspace");
       ros2ControllerHelper.publishToController(armTrajectoryMessage);
    }
 
