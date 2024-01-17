@@ -1,8 +1,9 @@
 package us.ihmc.perception.sceneGraph.arUco;
 
 import gnu.trove.iterator.TIntIterator;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.filters.DetectionFilter;
@@ -16,13 +17,18 @@ import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
  */
 public class ArUcoSceneTools
 {
-   public static void updateSceneGraph(OpenCVArUcoMarkerDetection arUcoMarkerDetection, ROS2SceneGraph sceneGraph)
+   /**
+    * Takes results from ArUco marker detection and using the predefined object
+    * definitions, add detected objects to the scene graph and keeps their poses
+    * up to date.
+    */
+   public static void updateSceneGraph(OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults, ReferenceFrame sensorFrame, ROS2SceneGraph sceneGraph)
    {
-      synchronized (arUcoMarkerDetection.getSyncObject())
+      if (!arUcoMarkerDetectionResults.getDetectedIDs().isEmpty())
       {
          sceneGraph.modifyTree(modificationQueue ->
          {
-            for (TIntIterator iterator = arUcoMarkerDetection.getDetectedIDs().iterator(); iterator.hasNext(); )
+            for (TIntIterator iterator = arUcoMarkerDetectionResults.getDetectedIDs().iterator(); iterator.hasNext(); )
             {
                int detectedID = iterator.next();
                ArUcoMarkerNode arUcoMarkerNode = sceneGraph.getArUcoMarkerIDToNodeMap().get(detectedID);
@@ -44,10 +50,7 @@ public class ArUcoSceneTools
                         sceneGraph.getDetectionFilterCollection().removeFilter(detectedID);
 
                         String nodeName = "ArUcoMarker%d".formatted(detectedID);
-                        arUcoMarkerNode = new ArUcoMarkerNode(sceneGraph.getNextID().getAndIncrement(),
-                                                              nodeName,
-                                                              detectedID,
-                                                              markerSize);
+                        arUcoMarkerNode = new ArUcoMarkerNode(sceneGraph.getNextID().getAndIncrement(), nodeName, detectedID, markerSize);
                         LogTools.info("Adding detected ArUco marker {} to scene graph as {}", detectedID, nodeName);
                         modificationQueue.accept(new SceneGraphNodeAddition(arUcoMarkerNode, sceneGraph.getRootNode()));
                         sceneGraph.getArUcoMarkerIDToNodeMap().put(detectedID, arUcoMarkerNode); // Prevent it getting added twice
@@ -66,12 +69,13 @@ public class ArUcoSceneTools
          {
             if (child instanceof ArUcoMarkerNode arUcoMarkerNode)
             {
-               boolean isDetected = arUcoMarkerDetection.isDetected(arUcoMarkerNode.getMarkerID());
+               boolean isDetected = arUcoMarkerDetectionResults.isDetected(arUcoMarkerNode.getMarkerID());
                arUcoMarkerNode.setCurrentlyDetected(isDetected);
                if (isDetected)
                {
-                  arUcoMarkerDetection.getPose(arUcoMarkerNode.getMarkerID(),
+                  arUcoMarkerDetectionResults.getPose(arUcoMarkerNode.getMarkerID(),
                                                arUcoMarkerNode.getMarkerSize(),
+                                               sensorFrame,
                                                arUcoMarkerNode.getNodeFrame().getParent(),
                                                arUcoMarkerNode.getNodeToParentFrameTransform());
                   arUcoMarkerNode.applyFilter();
