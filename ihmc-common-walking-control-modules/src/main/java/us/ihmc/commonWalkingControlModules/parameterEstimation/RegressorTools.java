@@ -80,6 +80,8 @@ public class RegressorTools
       {
          for (SpatialInertiaBasisOption option : SpatialInertiaBasisOption.values)
          {
+            // NOTE: we use the ordinal of the basis option to index the correct regressor column -- this is how we effectively translate between an (unordered)
+            // set and an ordered list of basis options
             int regressorColumnIndex = i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY + option.ordinal();
             if (basisSets[i].contains(option))
             {
