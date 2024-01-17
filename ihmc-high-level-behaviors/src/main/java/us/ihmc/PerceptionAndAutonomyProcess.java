@@ -17,12 +17,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.IterativeClosestPointManager;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
 import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectionUpdater;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
@@ -37,6 +39,7 @@ import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 import us.ihmc.tools.thread.RestartableThread;
 import us.ihmc.tools.thread.RestartableThrottledThread;
+import us.ihmc.tools.thread.SwapReference;
 
 import java.util.Collections;
 import java.util.function.Supplier;
@@ -114,11 +117,14 @@ public class PerceptionAndAutonomyProcess
    private final SideDependentList<BlackflyImagePublisher> blackflyImagePublishers = new SideDependentList<>();
    private final RestartableThread blackflyProcessAndPublishThread;
 
+   private final RestartableThread arUcoMarkerDetectionThread;
+   private final ArUcoDetectionUpdater arUcoUpdater;
+   private final SwapReference<OpenCVArUcoMarkerDetectionResults> sharedArUcoDetectionResults = new SwapReference<>(OpenCVArUcoMarkerDetectionResults::new);
+
    private final Supplier<ReferenceFrame> robotPelvisFrameSupplier;
    private final ROS2SceneGraph sceneGraph;
    private final RestartableThrottledThread sceneGraphUpdateThread;
    private ROS2DemandGraphNode arUcoDetectionDemandNode;
-   private final ArUcoDetectionUpdater arUcoUpdater;
 
    private final CenterposeDetectionManager centerposeDetectionManager;
    private ROS2DemandGraphNode centerposeDemandNode;
@@ -175,11 +181,13 @@ public class PerceptionAndAutonomyProcess
       blackflyProcessAndPublishThread = new RestartableThread("BlackflyProcessAndPublish", this::processAndPublishBlackfly);
       blackflyProcessAndPublishThread.start();
 
+      arUcoUpdater = new ArUcoDetectionUpdater(ros2Helper, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
+      arUcoMarkerDetectionThread = new RestartableThread("ArUcoMarkerDetection", this::detectAndPublishArUcoMarkers);
+      arUcoMarkerDetectionThread.start();
+
       this.robotPelvisFrameSupplier = robotPelvisFrameSupplier;
       sceneGraph = new ROS2SceneGraph(ros2Helper);
       sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", ROS2BehaviorTreeState.SYNC_FREQUENCY, this::updateSceneGraph);
-
-      arUcoUpdater = new ArUcoDetectionUpdater(ros2Helper, sceneGraph, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2Helper, zed2iLeftCameraFrame);
 
@@ -358,6 +366,7 @@ public class PerceptionAndAutonomyProcess
                blackflyImages.put(side, blackflyImageRetrievers.get(side).getLatestRawImage());
 
                blackflyImagePublishers.get(side).setNextDistortedImage(blackflyImages.get(side).get());
+               arUcoUpdater.setNextDistortedImage(blackflyImages.get(side).get());
 
                blackflyImages.get(side).release();
             }
@@ -372,17 +381,30 @@ public class PerceptionAndAutonomyProcess
          ThreadTools.sleep(500);
    }
 
-   private void updateSceneGraph()
+   private void detectAndPublishArUcoMarkers()
    {
-      // Update ArUco stuff
-      if (arUcoDetectionDemandNode.isDemanded() && blackflyImages.get(RobotSide.RIGHT) != null)
+      if (arUcoDetectionDemandNode.isDemanded())
       {
-         if (!arUcoUpdater.isInitialized())
-            arUcoUpdater.initializeArUcoDetection(blackflyImages.get(RobotSide.RIGHT).getImageWidth(), blackflyImages.get(RobotSide.RIGHT).getImageHeight());
-         arUcoUpdater.undistortAndUpdateArUco(blackflyImages.get(RobotSide.RIGHT).get());
+         boolean performedDetection = arUcoUpdater.undistortAndUpdateArUco();
+         if (performedDetection)
+         {
+            sharedArUcoDetectionResults.getForThreadOne().copyOutputData(arUcoUpdater.getArUcoMarkerDetector());
+            sharedArUcoDetectionResults.swap();
+         }
       }
       else
-         sceneGraph.updateSubscription();
+      {
+         ThreadTools.sleep(500);
+      }
+   }
+
+   private void updateSceneGraph()
+   {
+      sceneGraph.updateSubscription();
+      synchronized (sharedArUcoDetectionResults)
+      {
+         ArUcoSceneTools.updateSceneGraph(sharedArUcoDetectionResults.getForThreadTwo(), blackflyFrameSuppliers.get(RobotSide.RIGHT).get(), sceneGraph);
+      }
 
       // Update CenterPose stuff
       if (centerposeDemandNode.isDemanded())
