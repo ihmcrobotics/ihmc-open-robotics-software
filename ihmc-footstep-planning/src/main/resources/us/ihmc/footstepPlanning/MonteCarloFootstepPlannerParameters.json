@@ -1,0 +1,109 @@
+{
+  "title" : "MonteCarloFootstepPlannerParameters",
+  "Reset" : false,
+  "Number of iterations" : {
+    "value" : 120,
+    "lowerBound" : 1,
+    "upperBound" : 400
+  },
+  "Number of simulations" : {
+    "value" : 20,
+    "lowerBound" : 1,
+    "upperBound" : 400
+  },
+  "Timeout duration" : {
+    "value" : 0.05,
+    "lowerBound" : 0.01,
+    "upperBound" : 1.0
+  },
+  "Feasible Contact Reward" : {
+    "value" : 253.012061,
+    "lowerBound" : 0.0,
+    "upperBound" : 1000.0
+  },
+  "Goal Reward" : {
+    "value" : 18.454936,
+    "lowerBound" : 0.0,
+    "upperBound" : 100.0
+  },
+  "Max number of visited nodes" : {
+    "value" : 14409,
+    "lowerBound" : 1000,
+    "upperBound" : 1000000
+  },
+  "Max number of child nodes" : {
+    "value" : 8,
+    "lowerBound" : 5,
+    "upperBound" : 1000
+  },
+  "Max transfer height" : {
+    "value" : 0.35,
+    "lowerBound" : 0.01,
+    "upperBound" : 1.0
+  },
+  "Max transfer depth" : {
+    "value" : 0.35,
+    "lowerBound" : 0.01,
+    "upperBound" : 1.0
+  },
+  "Max transfer yaw" : {
+    "value" : 0.281674,
+    "lowerBound" : 0.01,
+    "upperBound" : 1.0
+  },
+  "Exploration constant" : {
+    "value" : 0.301508,
+    "lowerBound" : 0.0,
+    "upperBound" : 5.0
+  },
+  "Initial value cutoff" : {
+    "value" : 112,
+    "lowerBound" : -1000,
+    "upperBound" : 1000
+  },
+  "Max tree depth" : {
+    "value" : 5,
+    "lowerBound" : 2,
+    "upperBound" : 12
+  },
+  "Search inner radius" : {
+    "value" : 0.35,
+    "lowerBound" : 0.0,
+    "upperBound" : 0.3
+  },
+  "Search outer radius" : {
+    "value" : 0.6,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
+  },
+  "Search skip size" : {
+    "value" : 2,
+    "lowerBound" : 0,
+    "upperBound" : 10
+  },
+  "Maximum step width" : {
+    "value" : 0.45,
+    "lowerBound" : 0.2,
+    "upperBound" : 0.5
+  },
+  "Maximum step length" : {
+    "value" : 0.65,
+    "lowerBound" : 0.2,
+    "upperBound" : 0.7
+  },
+  "Minimum step width" : {
+    "value" : 0.15,
+    "lowerBound" : 0.1,
+    "upperBound" : 0.3
+  },
+  "Minimum step length" : {
+    "value" : 0.15,
+    "lowerBound" : 0.1,
+    "upperBound" : 0.3
+  },
+  "Decay factor" : {
+    "value" : 0.9,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
+  }
+}

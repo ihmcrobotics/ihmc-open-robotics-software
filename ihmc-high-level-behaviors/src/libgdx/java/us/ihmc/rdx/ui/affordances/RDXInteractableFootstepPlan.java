@@ -53,7 +53,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private RDXSwingPlanningModule swingPlanningModule;
    private SideDependentList<ConvexPolygon2D> defaultPolygons;
    private RDXLocomotionParameters locomotionParameters;
-   private SwingPlannerParametersBasics swingFootPlannerParameters;
+   private SwingPlannerParametersBasics swingPlannerParameters;
 
    private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>();
@@ -77,7 +77,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       this.communicationHelper = communicationHelper;
       this.syncedRobot = syncedRobot;
       this.locomotionParameters = locomotionParameters;
-      this.swingFootPlannerParameters = swingFootPlannerParameters;
+      this.swingPlannerParameters = swingFootPlannerParameters;
 
       defaultPolygons = FootstepPlanningModuleLauncher.createFootPolygons(communicationHelper.getRobotModel());
       stepChecker = new RDXFootstepChecker(baseUI, syncedRobot, controllerStatusTracker, defaultPolygons, footstepPlannerParameters);
@@ -237,7 +237,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          if (heightMapMessage != null)
             swingPlanningModule.setHeightMapData(heightMapMessage);
 
-         swingPlanningModule.setSwingPlannerParameters(swingFootPlannerParameters);
+         swingPlanningModule.setSwingPlannerParameters(swingPlannerParameters);
          swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
 
          wasPlanUpdated = false;

@@ -17,7 +17,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 public class HeightMapCollisionDetector
 {
-   public static EuclidShape3DCollisionResult evaluateCollision(FrameBox3DReadOnly collisionBox, HeightMapData heightMap)
+   public static EuclidShape3DCollisionResult evaluateCollision(FrameBox3DReadOnly collisionBox, HeightMapData heightMap, SwingKnotOptimizationResult knotResult)
    {
       EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
 

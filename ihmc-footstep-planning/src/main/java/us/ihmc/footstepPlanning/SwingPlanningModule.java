@@ -18,6 +18,7 @@ import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.footstepPlanning.swing.CollisionFreeSwingCalculator;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
+import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
@@ -177,7 +178,7 @@ public class SwingPlanningModule
             double swingScale = Math.max(1.0, swingOverPlanarRegionsTrajectoryExpander.getExpandedTrajectoryLength() / nominalSwingTrajectoryLength);
             double swingTime = swingPlannerParameters.getAdditionalSwingTimeIfExpanded() + swingScale * swingPlannerParameters.getMinimumSwingTime();
             footstep.setSwingDuration(swingTime);
-            swingTrajectories.add(CollisionFreeSwingCalculator.copySwingTrajectories(swingOverPlanarRegionsTrajectoryExpander.getSwingTrajectory()));
+            swingTrajectories.add(SwingPlannerTools.copySwingTrajectories(swingOverPlanarRegionsTrajectoryExpander.getSwingTrajectory()));
          }
          else
          {

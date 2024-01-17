@@ -26,6 +26,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
+import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
@@ -159,7 +160,7 @@ public class RDXInteractableFootstep
       plannedFootstepInternal.limitFootholdVertices();
       plannedFootstepTrajectory.clear();
       if (swingTrajectory != null)
-         swingTrajectory.keySet().forEach(key -> plannedFootstepTrajectory.put(key, copyPolynomialList(swingTrajectory.get(key))));
+         swingTrajectory.keySet().forEach(key -> plannedFootstepTrajectory.put(key, RDXVisualTools.copyPolynomialList(swingTrajectory.get(key))));
 
       boolean setCustomFoothold = plannedFootstepInternal.hasFoothold();
       if (setCustomFoothold)
@@ -224,7 +225,7 @@ public class RDXInteractableFootstep
       {
          for (Axis3D axis : Axis3D.values)
          {
-            List<PolynomialReadOnly> polynomialListCopy = copyPolynomialList(otherTrajectory.get(axis));
+            List<PolynomialReadOnly> polynomialListCopy = RDXVisualTools.copyPolynomialList(otherTrajectory.get(axis));
             plannedFootstepTrajectory.put(axis, polynomialListCopy);
          }
       }
@@ -496,36 +497,8 @@ public class RDXInteractableFootstep
       }
 
       swingTrajectoryModel.clear();
-      List<RDXPolynomial.Polynomial3DVariableHolder> polynomials = createPolynomial3DList(trajectory.get(Axis3D.X), trajectory.get(Axis3D.Y), trajectory.get(Axis3D.Z));
+      List<RDXPolynomial.Polynomial3DVariableHolder> polynomials = RDXVisualTools.createPolynomial3DList(trajectory.get(Axis3D.X), trajectory.get(Axis3D.Y), trajectory.get(Axis3D.Z));
       swingTrajectoryModel.compute(polynomials);
-   }
-
-   private static List<RDXPolynomial.Polynomial3DVariableHolder> createPolynomial3DList(List<PolynomialReadOnly> xPolynomial, List<PolynomialReadOnly> yPolynomial, List<PolynomialReadOnly> zPolynomial)
-   {
-      List<RDXPolynomial.Polynomial3DVariableHolder> polynomials = new ArrayList<>();
-      if (xPolynomial == null || yPolynomial == null || zPolynomial == null)
-         return polynomials;
-
-      for (int i = 0; i < xPolynomial.size(); i++)
-      {
-         polynomials.add(new RDXPolynomial.Polynomial3DVariables(xPolynomial.get(i), yPolynomial.get(i), zPolynomial.get(i)));
-      }
-      return polynomials;
-   }
-
-   private static List<PolynomialReadOnly> copyPolynomialList(List<PolynomialReadOnly> other)
-   {
-      List<PolynomialReadOnly> copy = new ArrayList<>();
-      other.forEach(poly -> copy.add(copyPolynomial(poly)));
-
-      return copy;
-   }
-
-   private static PolynomialReadOnly copyPolynomial(PolynomialReadOnly other)
-   {
-      Polynomial polynomial = new Polynomial(other.getNumberOfCoefficients());
-      polynomial.set(other);
-      return polynomial;
    }
 
    /**

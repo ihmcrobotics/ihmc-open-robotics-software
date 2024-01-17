@@ -30,6 +30,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlannerTools
@@ -49,6 +50,17 @@ public class PlannerTools
       footPolygon.update();
 
       return footPolygon;
+   }
+
+   public static ArrayList<Point2D> createFootContactPoints(double footLength, double heelWidth, double toeWidth)
+   {
+      ArrayList<Point2D> contactPoints = new ArrayList<>();
+      contactPoints.add(new Point2D(footLength / 2.0, toeWidth / 2.0));
+      contactPoints.add(new Point2D(footLength / 2.0, -toeWidth / 2.0));
+      contactPoints.add(new Point2D(-footLength / 2.0, heelWidth / 2.0));
+      contactPoints.add(new Point2D(-footLength / 2.0, -heelWidth / 2.0));
+
+      return contactPoints;
    }
 
    public static ConvexPolygon2D createFootPolygon(double footLength, double footWidth)

@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
-import com.esotericsoftware.minlog.Log;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
@@ -10,10 +9,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +20,7 @@ import static us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionPolygonSnappe
 
 public class HeightMapPolygonSnapper
 {
-   private final List<Point3D> pointsInsidePolyon = new ArrayList<>();
+   private final List<Point3D> pointsInsidePolygon = new ArrayList<>();
    private final Plane3D bestFitPlane = new Plane3D();
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
 
@@ -56,7 +53,7 @@ public class HeightMapPolygonSnapper
     */
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap, double snapHeightThreshold, double minimumHeightToConsider)
    {
-      pointsInsidePolyon.clear();
+      pointsInsidePolygon.clear();
       bestFitPlane.setToNaN();
 
       // collect all the points in the foot that are valid under the foothold
@@ -85,35 +82,35 @@ public class HeightMapPolygonSnapper
                continue;
             }
 
-            pointsInsidePolyon.add(new Point3D(point.getX(), point.getY(), height));
+            pointsInsidePolygon.add(new Point3D(point.getX(), point.getY(), height));
          }
       }
 
-      if (pointsInsidePolyon.isEmpty())
+      if (pointsInsidePolygon.isEmpty())
       {
          return null;
       }
 
       // FIXME It's worth noting that if a single point is significantly far enough above all the other points, this will remove the other points, making it an
       // FIXME invalid snap. That may or may not be what we actually want.
-      double maxZ = pointsInsidePolyon.stream().mapToDouble(Point3D::getZ).max().getAsDouble();
+      double maxZ = pointsInsidePolygon.stream().mapToDouble(Point3D::getZ).max().getAsDouble();
       double minZ = maxZ - snapHeightThreshold;
-      pointsInsidePolyon.removeIf(point -> point.getZ() < minZ);
-      if (pointsInsidePolyon.size() < 3)
+      pointsInsidePolygon.removeIf(point -> point.getZ() < minZ);
+      if (pointsInsidePolygon.size() < 3)
       {
          area = Double.NaN;
          return null;
       }
-      ConvexPolygon2D snappedPolygon = new ConvexPolygon2D(Vertex3DSupplier.asVertex3DSupplier(pointsInsidePolyon));
+      ConvexPolygon2D snappedPolygon = new ConvexPolygon2D(Vertex3DSupplier.asVertex3DSupplier(pointsInsidePolygon));
       area = snappedPolygon.getArea();
 
-      planeFitter.fitPlaneToPoints(pointsInsidePolyon, bestFitPlane);
+      planeFitter.fitPlaneToPoints(pointsInsidePolygon, bestFitPlane);
       rootMeanSquaredError = 0.0;
 
-      for (int i = 0; i < pointsInsidePolyon.size(); i++)
+      for (int i = 0; i < pointsInsidePolygon.size(); i++)
       {
-         double predictedHeight = bestFitPlane.getZOnPlane(pointsInsidePolyon.get(i).getX(), pointsInsidePolyon.get(i).getY());
-         rootMeanSquaredError += MathTools.square(predictedHeight - pointsInsidePolyon.get(i).getZ());
+         double predictedHeight = bestFitPlane.getZOnPlane(pointsInsidePolygon.get(i).getX(), pointsInsidePolygon.get(i).getY());
+         rootMeanSquaredError += MathTools.square(predictedHeight - pointsInsidePolygon.get(i).getZ());
       }
       maxPossibleRMSError = MathTools.square(1.0 / snapAreaResolution) * MathTools.square(0.5 * snapHeightThreshold);
 
@@ -122,7 +119,7 @@ public class HeightMapPolygonSnapper
          return null;
       }
 
-      rootMeanSquaredError = Math.sqrt(rootMeanSquaredError / pointsInsidePolyon.size());
+      rootMeanSquaredError = Math.sqrt(rootMeanSquaredError / pointsInsidePolygon.size());
 
       RigidBodyTransform transformToReturn = createTransformToMatchSurfaceNormalPreserveX(bestFitPlane.getNormal());
 

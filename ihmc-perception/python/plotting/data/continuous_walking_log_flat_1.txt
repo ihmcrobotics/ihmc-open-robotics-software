@@ -1,0 +1,437 @@
+231108 16:48:51:918 [WARN] (ContinuousPlanner.java:212): No Reference Plan Available
+231108 16:48:51:918 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:48:52:339 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: LEFT
+231108 16:48:52:349 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:48:52:383 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:48:52:430 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/0 -> 0/3. IDs: [1386783507, 947848297, 387820679]
+231108 16:48:52:435 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:48:52:447 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:48:53:002 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:48:53:002 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:48:53:002 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:48:53:229 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: RIGHT
+231108 16:48:53:229 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:48:53:255 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:48:53:287 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [1285514787, 1364640225, 1611364116]
+231108 16:48:53:287 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:48:53:291 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:48:53:455 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 1386783507 Total steps completed: 1
+231108 16:48:53:456 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:0.35201812, total_steps_completed:1.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:0.648, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.227, last_step_length:0.35201812, ]
+231108 16:48:53:458 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:48:53:701 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:48:53:702 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:48:53:702 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:48:53:979 [INFO] (ContinuousPlanner.java:222): Plan Result: FOUND_SOLUTION, Steps: 4, Result: true, Initial Stance: LEFT
+231108 16:48:53:979 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:48:54:015 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:48:54:048 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [665746215, 1855626002, 406943956]
+231108 16:48:54:049 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:48:54:054 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:48:54:148 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 0/3. ID: 1285514787 Total steps completed: 2
+231108 16:48:54:150 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:0.72083366, total_steps_completed:2.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:0.925, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.277, last_step_length:0.3688155, ]
+231108 16:48:54:153 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:48:54:393 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:48:54:394 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:48:54:394 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:48:54:620 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: RIGHT
+231108 16:48:54:620 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:48:54:649 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:48:54:674 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [1968730185, 2076804142, 1986298266]
+231108 16:48:54:675 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:48:54:679 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:48:54:834 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 665746215 Total steps completed: 3
+231108 16:48:54:835 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:1.0426677, total_steps_completed:3.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:1.151, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.226, last_step_length:0.32183406, ]
+231108 16:48:54:836 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:48:55:070 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:48:55:071 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:48:55:071 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:48:55:353 [INFO] (ContinuousPlanner.java:222): Plan Result: FOUND_SOLUTION, Steps: 4, Result: true, Initial Stance: LEFT
+231108 16:48:55:353 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:48:55:380 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:48:55:443 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [865273176, 1627650621, 1012552394]
+231108 16:48:55:443 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:48:55:453 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:48:55:534 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 0/3. ID: 1968730185 Total steps completed: 4
+231108 16:48:55:534 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:1.364018, total_steps_completed:4.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:1.4330001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.282, last_step_length:0.3213502, ]
+231108 16:48:55:536 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:48:55:776 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:48:55:776 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:48:55:776 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:48:55:963 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: RIGHT
+231108 16:48:55:963 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:48:55:989 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:48:56:012 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [1279656390, 751025156, 1630825573]
+231108 16:48:56:013 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:48:56:020 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:48:56:206 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 865273176 Total steps completed: 5
+231108 16:48:56:207 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:1.9194651, total_steps_completed:5.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:1.6200001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.187, last_step_length:0.5554471, ]
+231108 16:48:56:208 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:48:56:447 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:48:56:447 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:48:56:448 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:48:56:669 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: LEFT
+231108 16:48:56:670 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:48:56:693 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:48:56:741 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [299337949, 856892223, 218077153]
+231108 16:48:56:741 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:48:56:749 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:48:56:902 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 0/3. ID: 1279656390 Total steps completed: 6
+231108 16:48:56:903 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:2.2352898, total_steps_completed:6.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:1.8430002, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.223, last_step_length:0.31582484, ]
+231108 16:48:56:905 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:48:57:145 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:48:57:146 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:48:57:146 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:48:57:455 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: RIGHT
+231108 16:48:57:455 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:48:57:481 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:48:57:507 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [1101419503, 1247402312, 1798277277]
+231108 16:48:57:508 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:48:57:516 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:48:57:576 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 299337949 Total steps completed: 7
+231108 16:48:57:576 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:2.6259232, total_steps_completed:7.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:2.1520002, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.309, last_step_length:0.39063323, ]
+231108 16:48:57:578 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:48:57:811 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:48:57:811 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:48:57:811 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:48:58:040 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: LEFT
+231108 16:48:58:040 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:48:58:066 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:48:58:088 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [453000269, 629267485, 2069134550]
+231108 16:48:58:089 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:48:58:092 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:48:58:246 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 0/3. ID: 1101419503 Total steps completed: 8
+231108 16:48:58:247 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:2.877449, total_steps_completed:8.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:2.3810003, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.229, last_step_length:0.25152585, ]
+231108 16:48:58:248 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:48:58:483 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:48:58:483 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:48:58:483 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:48:58:755 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: RIGHT
+231108 16:48:58:755 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:48:58:781 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:48:58:806 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [304531447, 890642003, 731716892]
+231108 16:48:58:806 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:48:58:809 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:48:58:925 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 453000269 Total steps completed: 9
+231108 16:48:58:925 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:3.4374185, total_steps_completed:9.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:2.6530004, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.272, last_step_length:0.55996954, ]
+231108 16:48:58:926 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:48:59:160 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:48:59:161 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:48:59:161 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:48:59:404 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: LEFT
+231108 16:48:59:404 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:48:59:431 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:48:59:489 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [1347543247, 554042596, 864036775]
+231108 16:48:59:490 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:48:59:492 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:48:59:622 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 0/3. ID: 304531447 Total steps completed: 10
+231108 16:48:59:622 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:3.822084, total_steps_completed:10.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:2.8960004, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.243, last_step_length:0.3846655, ]
+231108 16:48:59:623 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:48:59:863 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:48:59:863 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:48:59:864 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:00:132 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: RIGHT
+231108 16:49:00:132 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:00:157 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:00:182 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [350095510, 1959719557, 1827964125]
+231108 16:49:00:182 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:00:188 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:00:296 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 1347543247 Total steps completed: 11
+231108 16:49:00:297 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:4.1867895, total_steps_completed:11.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:3.1650004, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.269, last_step_length:0.36470547, ]
+231108 16:49:00:297 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:00:527 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:00:528 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:00:528 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:00:962 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 1/3. ID: 350095510 Total steps completed: 12
+231108 16:49:00:962 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:0.0, total_length_completed:4.513337, total_steps_completed:12.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:3.1650004, last_footstep_queue_length:3.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.269, last_step_length:0.3265475, ]
+231108 16:49:00:964 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 2
+231108 16:49:01:004 [INFO] (ContinuousPlanner.java:222): Plan Result: FOUND_SOLUTION, Steps: 4, Result: true, Initial Stance: LEFT
+231108 16:49:01:005 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:01:029 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:01:054 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 1/3 -> 0/3. IDs: [1681605401, 393472013, 551783392]
+231108 16:49:01:054 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:01:061 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:01:195 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:01:196 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:01:196 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:01:507 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: RIGHT
+231108 16:49:01:507 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:01:534 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:01:559 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [572137548, 514541005, 1316064837]
+231108 16:49:01:559 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:01:561 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:01:631 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 1681605401 Total steps completed: 13
+231108 16:49:01:632 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:4.9710937, total_steps_completed:13.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:3.9530005, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.311, last_step_length:0.45775658, ]
+231108 16:49:01:633 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:01:872 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:01:873 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:01:873 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:02:250 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: LEFT
+231108 16:49:02:250 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:02:277 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:02:301 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 1/3. ID: 572137548 Total steps completed: 14
+231108 16:49:02:302 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:0.0, total_length_completed:5.443367, total_steps_completed:14.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:4.3300004, last_footstep_queue_length:3.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.377, last_step_length:0.47227326, ]
+231108 16:49:02:302 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 1/3 -> 0/3. IDs: [2107725771, 638083055, 925503530]
+231108 16:49:02:302 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:02:303 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 2
+231108 16:49:02:309 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:02:534 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:02:534 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:02:534 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:02:971 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 1/3. ID: 2107725771 Total steps completed: 15
+231108 16:49:02:971 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:0.0, total_length_completed:5.7702847, total_steps_completed:15.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:4.3300004, last_footstep_queue_length:3.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.377, last_step_length:0.32691765, ]
+231108 16:49:02:973 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 2
+231108 16:49:03:006 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: RIGHT
+231108 16:49:03:007 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:03:034 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:03:088 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 1/3 -> 0/3. IDs: [1764933775, 807560706, 2052318929]
+231108 16:49:03:088 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:03:096 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:03:230 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:03:230 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:03:230 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:03:511 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: LEFT
+231108 16:49:03:511 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:03:535 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:03:599 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [1541486519, 112276924, 2085877474]
+231108 16:49:03:600 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:03:605 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:03:688 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 0/3. ID: 1764933775 Total steps completed: 16
+231108 16:49:03:689 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:6.2302275, total_steps_completed:16.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:5.0830007, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.281, last_step_length:0.45994276, ]
+231108 16:49:03:690 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:03:922 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:03:923 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:03:923 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:04:218 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: RIGHT
+231108 16:49:04:218 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:04:246 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:04:272 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [118991419, 730921494, 1762530103]
+231108 16:49:04:272 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:04:277 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:04:369 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 1541486519 Total steps completed: 17
+231108 16:49:04:370 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:6.5618286, total_steps_completed:17.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:5.3780007, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.295, last_step_length:0.331601, ]
+231108 16:49:04:371 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:04:606 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:04:606 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:04:606 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:04:904 [INFO] (ContinuousPlanner.java:222): Plan Result: FOUND_SOLUTION, Steps: 4, Result: true, Initial Stance: LEFT
+231108 16:49:04:904 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:04:928 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:04:952 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [760728218, 1824800734, 517903321]
+231108 16:49:04:953 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:04:961 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:05:051 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 0/3. ID: 118991419 Total steps completed: 18
+231108 16:49:05:051 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:6.9882693, total_steps_completed:18.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:5.6760006, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.298, last_step_length:0.42644054, ]
+231108 16:49:05:053 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:05:286 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:05:286 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:05:286 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:05:529 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: RIGHT
+231108 16:49:05:529 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:05:553 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:05:606 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [1858486817, 959824582, 285834944]
+231108 16:49:05:606 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:05:615 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:05:750 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 760728218 Total steps completed: 19
+231108 16:49:05:750 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:7.4430966, total_steps_completed:19.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:5.9190006, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.243, last_step_length:0.4548273, ]
+231108 16:49:05:752 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:05:990 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:05:990 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:05:990 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:06:184 [INFO] (ContinuousPlanner.java:222): Plan Result: FOUND_SOLUTION, Steps: 4, Result: true, Initial Stance: LEFT
+231108 16:49:06:184 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:06:210 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:06:231 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [425102204, 444764684, 810852807]
+231108 16:49:06:231 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:06:242 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:06:431 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 0/3. ID: 1858486817 Total steps completed: 20
+231108 16:49:06:432 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:7.986099, total_steps_completed:20.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:6.113001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.194, last_step_length:0.5430023, ]
+231108 16:49:06:433 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:06:646 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:06:646 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:06:646 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:06:831 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: RIGHT
+231108 16:49:06:831 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:06:858 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:06:881 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [1776197508, 1758251162, 168137299]
+231108 16:49:06:882 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:06:889 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:07:086 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 425102204 Total steps completed: 21
+231108 16:49:07:086 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:8.371439, total_steps_completed:21.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:6.298001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.185, last_step_length:0.3853399, ]
+231108 16:49:07:087 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:07:326 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:07:326 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:07:326 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:07:641 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: LEFT
+231108 16:49:07:641 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:07:664 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:07:688 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [1654251093, 1266031214, 1601068257]
+231108 16:49:07:689 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:07:694 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:07:763 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 0/3. ID: 1776197508 Total steps completed: 22
+231108 16:49:07:763 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:8.654167, total_steps_completed:22.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:6.613001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.315, last_step_length:0.282728, ]
+231108 16:49:07:764 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:07:991 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:07:992 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:07:992 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:08:272 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: RIGHT
+231108 16:49:08:272 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:08:299 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:08:324 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [492167999, 1925183207, 496445815]
+231108 16:49:08:324 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:08:327 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:08:433 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 1654251093 Total steps completed: 23
+231108 16:49:08:434 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:9.100202, total_steps_completed:23.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:6.893001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.28, last_step_length:0.4460345, ]
+231108 16:49:08:436 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:08:667 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:08:667 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:08:667 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:08:963 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: LEFT
+231108 16:49:08:963 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:09:010 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:09:038 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [1290660222, 1779591701, 149488469]
+231108 16:49:09:038 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:09:042 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:09:126 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 0/3. ID: 492167999 Total steps completed: 24
+231108 16:49:09:126 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:9.464608, total_steps_completed:24.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:7.189001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.296, last_step_length:0.36440638, ]
+231108 16:49:09:126 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:09:361 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:09:361 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:09:361 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:09:770 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: RIGHT
+231108 16:49:09:770 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:09:794 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:09:801 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 1/3. ID: 1290660222 Total steps completed: 25
+231108 16:49:09:802 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:0.0, total_length_completed:9.7670555, total_steps_completed:25.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:7.598001, last_footstep_queue_length:3.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.409, last_step_length:0.30244768, ]
+231108 16:49:09:804 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 2
+231108 16:49:09:820 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 1/3 -> 0/3. IDs: [1966780254, 222197371, 1246505498]
+231108 16:49:09:820 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:09:825 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:10:042 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:10:042 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:10:042 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:10:287 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: LEFT
+231108 16:49:10:287 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:10:312 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:10:336 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [939565377, 59812226, 2040414709]
+231108 16:49:10:336 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:10:339 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:10:479 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 0/3. ID: 1966780254 Total steps completed: 26
+231108 16:49:10:479 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:10.192648, total_steps_completed:26.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:7.843001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.245, last_step_length:0.4255923, ]
+231108 16:49:10:481 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:10:722 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:10:722 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:10:722 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:11:045 [INFO] (ContinuousPlanner.java:222): Plan Result: FOUND_SOLUTION, Steps: 4, Result: true, Initial Stance: RIGHT
+231108 16:49:11:045 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:11:070 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:11:094 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [1759859806, 802323303, 442641431]
+231108 16:49:11:095 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:11:104 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:11:156 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 939565377 Total steps completed: 27
+231108 16:49:11:156 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:10.474531, total_steps_completed:27.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:8.166001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.323, last_step_length:0.2818835, ]
+231108 16:49:11:158 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:11:388 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:11:389 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:11:389 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:11:612 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: LEFT
+231108 16:49:11:613 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:11:638 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:11:662 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [1103552188, 1690116009, 2088559389]
+231108 16:49:11:663 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:11:668 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:11:830 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 0/3. ID: 1759859806 Total steps completed: 28
+231108 16:49:11:830 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:10.941606, total_steps_completed:28.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:8.391002, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.225, last_step_length:0.46707404, ]
+231108 16:49:11:833 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:12:046 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:12:047 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:12:047 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:12:301 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 4, Result: true, Initial Stance: RIGHT
+231108 16:49:12:301 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:12:325 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:12:348 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [900465985, 434403193, 1814635664]
+231108 16:49:12:349 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:12:351 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:12:483 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 1103552188 Total steps completed: 29
+231108 16:49:12:483 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:11.395055, total_steps_completed:29.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:8.645001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.254, last_step_length:0.45344958, ]
+231108 16:49:12:485 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:12:691 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:12:692 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:12:692 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:12:968 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: LEFT
+231108 16:49:12:968 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:12:995 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:13:057 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [61950578, 669988423, 1883799179]
+231108 16:49:13:058 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:13:066 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:13:166 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 0/3. ID: 900465985 Total steps completed: 30
+231108 16:49:13:166 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:11.786385, total_steps_completed:30.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:8.921001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.276, last_step_length:0.39132932, ]
+231108 16:49:13:167 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:13:401 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:13:401 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:13:401 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:13:697 [INFO] (ContinuousPlanner.java:222): Plan Result: FOUND_SOLUTION, Steps: 4, Result: true, Initial Stance: RIGHT
+231108 16:49:13:697 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:13:723 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:13:746 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [1701973262, 222113032, 1382192581]
+231108 16:49:13:747 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:13:755 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:13:846 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 61950578 Total steps completed: 31
+231108 16:49:13:846 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:12.077691, total_steps_completed:31.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:9.217001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.296, last_step_length:0.29130673, ]
+231108 16:49:13:848 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:14:080 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:14:080 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:14:080 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:14:259 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: LEFT
+231108 16:49:14:259 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:14:285 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:14:308 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [1811509423, 456668422, 1486674160]
+231108 16:49:14:308 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:14:315 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:14:520 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 0/3. ID: 1701973262 Total steps completed: 32
+231108 16:49:14:520 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:12.499264, total_steps_completed:32.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:9.396001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.179, last_step_length:0.42157224, ]
+231108 16:49:14:521 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:14:753 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:14:753 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:14:753 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:14:958 [INFO] (ContinuousPlanner.java:222): Plan Result: FOUND_SOLUTION, Steps: 4, Result: true, Initial Stance: RIGHT
+231108 16:49:14:959 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:14:983 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:15:008 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [304525191, 953353510, 689790469]
+231108 16:49:15:008 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:15:012 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:15:194 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 1811509423 Total steps completed: 33
+231108 16:49:15:195 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:12.798803, total_steps_completed:33.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:9.601001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.205, last_step_length:0.29953936, ]
+231108 16:49:15:196 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:15:432 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:15:432 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:15:432 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:15:633 [INFO] (ContinuousPlanner.java:222): Plan Result: FOUND_SOLUTION, Steps: 4, Result: true, Initial Stance: LEFT
+231108 16:49:15:633 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:15:655 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:15:679 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [1392068860, 471247389, 1375555996]
+231108 16:49:15:679 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:15:681 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:15:871 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 0/3. ID: 304525191 Total steps completed: 34
+231108 16:49:15:871 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:13.268237, total_steps_completed:34.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:9.802001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.201, last_step_length:0.46943378, ]
+231108 16:49:15:872 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:16:112 [INFO] (ContinuousPlannerSchedulingTask.java:126): State: READY_TO_PLAN
+231108 16:49:16:113 [INFO] (ContinuousPlanner.java:193): Setting Previous Plan as Reference in the Request
+231108 16:49:16:113 [INFO] (FootstepPlanningModule.java:191): Handling footstep planner request...
+231108 16:49:16:290 [INFO] (ContinuousPlanner.java:222): Plan Result: HALTED, Steps: 3, Result: true, Initial Stance: RIGHT
+231108 16:49:16:290 [INFO] (ContinuousPlannerSchedulingTask.java:139): State: PLAN_AVAILABLE
+231108 16:49:16:315 [INFO] (ContinuousPlannerSchedulingTask.java:143): Sending (3) steps to controller
+231108 16:49:16:340 [INFO] (WalkingFootstepTracker.java:126): OVERRIDEing 3 footsteps. Completion: 0/3 -> 0/3. IDs: [51785540, 1914872357, 276913554]
+231108 16:49:16:340 [INFO] (ContinuousPlanner.java:382): Setting Previously Sent Plan for Reference
+231108 16:49:16:344 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 4
+231108 16:49:16:551 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 0/3 -> 0/3. ID: 1392068860 Total steps completed: 35
+231108 16:49:16:552 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:13.553676, total_steps_completed:35.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:9.979001, last_footstep_queue_length:4.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.177, last_step_length:0.28543854, ]
+231108 16:49:16:553 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 3
+231108 16:49:17:220 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 0/3 -> 1/3. ID: 51785540 Total steps completed: 36
+231108 16:49:17:220 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:0.0, total_length_completed:13.957685, total_steps_completed:36.0, total_waiting_time:0.0, total_steps_planned:0.0, total_planning_time:9.979001, last_footstep_queue_length:3.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.177, last_step_length:0.40400964, ]
+231108 16:49:17:220 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 2
+231108 16:49:17:895 [INFO] (WalkingFootstepTracker.java:91): RIGHT footstep completed. Completion: 1/3 -> 2/3. ID: 1914872357 Total steps completed: 37
+231108 16:49:17:895 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:1.69948378E9, total_length_completed:14.403525, total_steps_completed:37.0, total_waiting_time:1.69948378E9, total_steps_planned:0.0, total_planning_time:9.979001, last_footstep_queue_length:2.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.177, last_step_length:0.4458399, ]
+231108 16:49:17:897 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 1
+231108 16:49:18:575 [INFO] (WalkingFootstepTracker.java:91): LEFT footstep completed. Completion: 2/3 -> 3/3. ID: 276913554 Total steps completed: 38
+231108 16:49:18:575 [INFO] (ContinuousPlannerSchedulingTask.java:191): ContinuousPlannerStatistics: [last_waiting_time:0.0, total_length_completed:14.694607, total_steps_completed:38.0, total_waiting_time:1.69948378E9, total_steps_planned:0.0, total_planning_time:9.979001, last_footstep_queue_length:1.0, total_continuous_walking_time:0.0, last_continuous_walking_time:0.0, number_of_interventions:0.0, last_planning_time:0.177, last_step_length:0.29108182, ]
+231108 16:49:18:576 [WARN] (ContinuousPlannerSchedulingTask.java:200): Controller Queue Footstep Size: 0

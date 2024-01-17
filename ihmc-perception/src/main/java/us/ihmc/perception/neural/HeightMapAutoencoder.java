@@ -68,14 +68,14 @@ public class HeightMapAutoencoder
       }
    }
 
-   public Mat denoiseHeightMap(Mat heightMap, float offset)
+   public Mat denoiseHeightMap(Mat heightMap, double offset)
    {
       Mat denoisedHeightMapImage = null;
       try
       {
          long startTime = System.nanoTime();
 
-         denoisedHeightMapImage = predict(heightMap, offset);
+         denoisedHeightMapImage = predict(heightMap, (float) offset);
 
          long endTime = System.nanoTime();
          LogTools.debug("Inference time: {} ms", Conversions.nanosecondsToMilliseconds(endTime - startTime));

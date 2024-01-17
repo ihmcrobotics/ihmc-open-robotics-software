@@ -96,6 +96,31 @@ public class FootstepPlanningModuleLauncher
    }
 
    /**
+    * Creates a FootstepPlanningModule object given a DRCRobotModel
+    */
+   public static FootstepPlanningModule createModule(DRCRobotModel robotModel, String suffix)
+   {
+      String moduleName = robotModel.getSimpleRobotName();
+
+      VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
+      FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters(suffix);
+      SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
+      StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
+
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
+      SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);
+
+      return new FootstepPlanningModule(moduleName,
+                                        visibilityGraphsParameters,
+                                        robotModel.getAStarBodyPathPlannerParameters(),
+                                        footstepPlannerParameters,
+                                        swingPlannerParameters,
+                                        walkingControllerParameters,
+                                        footPolygons,
+                                        stepReachabilityData);
+   }
+
+   /**
     * Creates a FootstepPlanningModule and creates ROS 2 subscribers and publishers on a new ros node
     */
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel, DomainFactory.PubSubImplementation pubSubImplementation)

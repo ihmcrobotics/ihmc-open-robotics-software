@@ -18,11 +18,15 @@ import us.ihmc.rdx.tools.RDXModelInstanceScaler;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.gizmo.RDXVisualModelInstance;
+import us.ihmc.rdx.visualizers.RDXPolynomial;
+import us.ihmc.robotics.math.trajectories.core.Polynomial;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.visual.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -227,5 +231,33 @@ public class RDXVisualTools
             rigidBodyConsumer.accept(bodyBC);
          }
       }
+   }
+
+   public static List<RDXPolynomial.Polynomial3DVariableHolder> createPolynomial3DList(List<PolynomialReadOnly> xPolynomial, List<PolynomialReadOnly> yPolynomial, List<PolynomialReadOnly> zPolynomial)
+   {
+      List<RDXPolynomial.Polynomial3DVariableHolder> polynomials = new ArrayList<>();
+      if (xPolynomial == null || yPolynomial == null || zPolynomial == null)
+         return polynomials;
+
+      for (int i = 0; i < xPolynomial.size(); i++)
+      {
+         polynomials.add(new RDXPolynomial.Polynomial3DVariables(xPolynomial.get(i), yPolynomial.get(i), zPolynomial.get(i)));
+      }
+      return polynomials;
+   }
+
+   public static List<PolynomialReadOnly> copyPolynomialList(List<PolynomialReadOnly> other)
+   {
+      List<PolynomialReadOnly> copy = new ArrayList<>();
+      other.forEach(poly -> copy.add(copyPolynomial(poly)));
+
+      return copy;
+   }
+
+   public static PolynomialReadOnly copyPolynomial(PolynomialReadOnly other)
+   {
+      Polynomial polynomial = new Polynomial(other.getNumberOfCoefficients());
+      polynomial.set(other);
+      return polynomial;
    }
 }

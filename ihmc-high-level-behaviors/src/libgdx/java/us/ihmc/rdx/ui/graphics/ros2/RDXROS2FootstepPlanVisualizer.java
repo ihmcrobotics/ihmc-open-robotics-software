@@ -53,10 +53,7 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
 
    private void queueFootstepDataListMessage(Subscriber<FootstepDataListMessage> subscriber)
    {
-      synchronized (syncObject)
-      {
-
-      }
+      footstepDataListMessage.set(subscriber.takeNextData());
    }
 
    @Override
@@ -68,7 +65,7 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
    @Override
    public void update()
    {
-
+      super.update();
    }
 
    @Override

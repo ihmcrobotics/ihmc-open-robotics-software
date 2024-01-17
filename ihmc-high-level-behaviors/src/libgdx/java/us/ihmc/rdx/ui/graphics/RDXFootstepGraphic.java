@@ -40,6 +40,7 @@ public class RDXFootstepGraphic implements RenderableProvider
    private final BoxRayIntersection boxRayIntersection = new BoxRayIntersection();
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private boolean mouseHovering = false;
+   private boolean render = true;
    private RDX3DPanelTooltip tooltip;
 
    public RDXFootstepGraphic(SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints, RobotSide side)
@@ -66,7 +67,7 @@ public class RDXFootstepGraphic implements RenderableProvider
 
       modelInstance = new RDXModelInstance(RDXModelBuilder.buildModelInstance(meshBuilder ->
       {
-         meshBuilder.addMultiLine(vertices, 0.01, color, true);
+         meshBuilder.addMultiLine(vertices, 0.014, color, true);
       }, "footstepGraphic" + INDEX.getAndIncrement()));
       LibGDXTools.setOpacity(modelInstance, color.a);
    }
@@ -125,7 +126,8 @@ public class RDXFootstepGraphic implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      modelInstance.getRenderables(renderables, pool);
+      if (render)
+         modelInstance.getRenderables(renderables, pool);
    }
 
    public void destroy()
@@ -136,5 +138,10 @@ public class RDXFootstepGraphic implements RenderableProvider
    public boolean getMouseHovering()
    {
       return mouseHovering;
+   }
+
+   public void setRender(boolean render)
+   {
+      this.render = render;
    }
 }

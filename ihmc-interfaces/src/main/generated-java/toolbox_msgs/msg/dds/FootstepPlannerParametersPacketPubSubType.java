@@ -15,7 +15,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ae6b7bcf21d60dacbd381bc626a75d196be04e527bcc77ac06b0cf756df4c880";
+   		return "6ae55ce492ff3553da93f7161f575ea4bab1970a78dde4572dde2eb6177d581f";
    }
    
    @Override
@@ -189,6 +189,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -450,6 +454,12 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -610,6 +620,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getHeightMapSnapThreshold());
 
+      cdr.write_type_6(data.getScaledFootPolygonPercentage());
+
+      cdr.write_type_6(data.getCliffHeightThreshold());
+
    }
 
    public static void read(toolbox_msgs.msg.dds.FootstepPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -768,6 +782,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setHeightMapSnapThreshold(cdr.read_type_6());
       	
+      data.setScaledFootPolygonPercentage(cdr.read_type_6());
+      	
+      data.setCliffHeightThreshold(cdr.read_type_6());
+      	
 
    }
 
@@ -851,6 +869,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("rms_error_cost", data.getRmsErrorCost());
       ser.write_type_6("rms_min_error_to_penalize", data.getRmsMinErrorToPenalize());
       ser.write_type_6("height_map_snap_threshold", data.getHeightMapSnapThreshold());
+      ser.write_type_6("scaled_foot_polygon_percentage", data.getScaledFootPolygonPercentage());
+      ser.write_type_6("cliff_height_threshold", data.getCliffHeightThreshold());
    }
 
    @Override
@@ -933,6 +953,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setRmsErrorCost(ser.read_type_6("rms_error_cost"));
       data.setRmsMinErrorToPenalize(ser.read_type_6("rms_min_error_to_penalize"));
       data.setHeightMapSnapThreshold(ser.read_type_6("height_map_snap_threshold"));
+      data.setScaledFootPolygonPercentage(ser.read_type_6("scaled_foot_polygon_percentage"));
+      data.setCliffHeightThreshold(ser.read_type_6("cliff_height_threshold"));
    }
 
    public static void staticCopy(toolbox_msgs.msg.dds.FootstepPlannerParametersPacket src, toolbox_msgs.msg.dds.FootstepPlannerParametersPacket dest)

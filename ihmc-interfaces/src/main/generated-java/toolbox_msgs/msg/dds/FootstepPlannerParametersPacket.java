@@ -496,6 +496,14 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * z_max - dz, where z_max is the highest point and dz is this value.
             */
    public double height_map_snap_threshold_ = -11.1;
+   /**
+            * When using a height map, scaling the foot polygon is done as a safety margin for collisions with the height map
+            */
+   public double scaled_foot_polygon_percentage_ = -11.1;
+   /**
+            * When using a height map, a distance is set that determines if a cliff is detected or not
+            */
+   public double cliff_height_threshold_ = -11.1;
 
    public FootstepPlannerParametersPacket()
    {
@@ -662,6 +670,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       rms_min_error_to_penalize_ = other.rms_min_error_to_penalize_;
 
       height_map_snap_threshold_ = other.height_map_snap_threshold_;
+
+      scaled_foot_polygon_percentage_ = other.scaled_foot_polygon_percentage_;
+
+      cliff_height_threshold_ = other.cliff_height_threshold_;
 
    }
 
@@ -2120,6 +2132,36 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       return height_map_snap_threshold_;
    }
 
+   /**
+            * When using a height map, scaling the foot polygon is done as a safety margin for collisions with the height map
+            */
+   public void setScaledFootPolygonPercentage(double scaled_foot_polygon_percentage)
+   {
+      scaled_foot_polygon_percentage_ = scaled_foot_polygon_percentage;
+   }
+   /**
+            * When using a height map, scaling the foot polygon is done as a safety margin for collisions with the height map
+            */
+   public double getScaledFootPolygonPercentage()
+   {
+      return scaled_foot_polygon_percentage_;
+   }
+
+   /**
+            * When using a height map, a distance is set that determines if a cliff is detected or not
+            */
+   public void setCliffHeightThreshold(double cliff_height_threshold)
+   {
+      cliff_height_threshold_ = cliff_height_threshold;
+   }
+   /**
+            * When using a height map, a distance is set that determines if a cliff is detected or not
+            */
+   public double getCliffHeightThreshold()
+   {
+      return cliff_height_threshold_;
+   }
+
 
    public static Supplier<FootstepPlannerParametersPacketPubSubType> getPubSubType()
    {
@@ -2292,6 +2334,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_map_snap_threshold_, other.height_map_snap_threshold_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.scaled_foot_polygon_percentage_, other.scaled_foot_polygon_percentage_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cliff_height_threshold_, other.cliff_height_threshold_, epsilon)) return false;
+
 
       return true;
    }
@@ -2459,6 +2505,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.height_map_snap_threshold_ != otherMyClass.height_map_snap_threshold_) return false;
 
+      if(this.scaled_foot_polygon_percentage_ != otherMyClass.scaled_foot_polygon_percentage_) return false;
+
+      if(this.cliff_height_threshold_ != otherMyClass.cliff_height_threshold_) return false;
+
 
       return true;
    }
@@ -2622,7 +2672,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("rms_min_error_to_penalize=");
       builder.append(this.rms_min_error_to_penalize_);      builder.append(", ");
       builder.append("height_map_snap_threshold=");
-      builder.append(this.height_map_snap_threshold_);
+      builder.append(this.height_map_snap_threshold_);      builder.append(", ");
+      builder.append("scaled_foot_polygon_percentage=");
+      builder.append(this.scaled_foot_polygon_percentage_);      builder.append(", ");
+      builder.append("cliff_height_threshold=");
+      builder.append(this.cliff_height_threshold_);
       builder.append("}");
       return builder.toString();
    }

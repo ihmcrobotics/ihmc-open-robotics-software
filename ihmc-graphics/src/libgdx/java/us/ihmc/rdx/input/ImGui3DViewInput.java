@@ -172,6 +172,16 @@ public class ImGui3DViewInput
       return pickPoint;
    }
 
+   public Point3DReadOnly getGroundPickPointInWorld(double fallbackXYPlaneIntersectionHeight)
+   {
+      double xyZHeight = Double.isNaN(fallbackXYPlaneIntersectionHeight) ? lastZCollision : fallbackXYPlaneIntersectionHeight;
+      pickPoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), EuclidCoreTools.origin3D);
+      pickPoint.setZ(xyZHeight);
+      getPickRayInWorld();
+      EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pickPoint, Axis3D.Z, pickRayInWorld.getPoint(), pickRayInWorld.getDirection(), pickPoint);
+      return pickPoint;
+   }
+
    public void addPickResult(ImGui3DViewPickResult pickResult)
    {
       pickResults.add(pickResult);
