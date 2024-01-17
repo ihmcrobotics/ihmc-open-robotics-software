@@ -39,6 +39,7 @@ public class RDXMutableMultiLineModel extends RDXMutableMeshModel
 
       boolean outOfDate = false;
 
+      outOfDate |= modelInstance == null != pointsUpdateReadOnly.isEmpty();
       outOfDate |= points.size() != pointsUpdateReadOnly.size();
       outOfDate |= !EuclidCoreTools.epsilonEquals(lineWidth, lineWidthUpdate, EPSILON);
       outOfDate |= isColorOutOfDate(color);
