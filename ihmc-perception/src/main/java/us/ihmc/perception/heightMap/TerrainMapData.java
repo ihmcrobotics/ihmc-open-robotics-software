@@ -92,7 +92,7 @@ public class TerrainMapData
       float cellHeight = (float) ((float) height / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
                          - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
 
-      LogTools.info(String.format("rIndex: %d, cIndex: %d, height: %d, cellHeight: %.3f", rIndex, cIndex, height, cellHeight));
+      //LogTools.info(String.format("rIndex: %d, cIndex: %d, height: %d, cellHeight: %.3f", rIndex, cIndex, height, cellHeight));
       return cellHeight;
    }
 
@@ -147,7 +147,7 @@ public class TerrainMapData
       int rIndex = getLocalIndex(x, sensorOrigin.getX32());
       int cIndex = getLocalIndex(y, sensorOrigin.getY32());
 
-      LogTools.info("rIndex: {}, cIndex: {}, origin: {}", rIndex, cIndex, sensorOrigin);
+      //LogTools.info("rIndex: {}, cIndex: {}, origin: {}", rIndex, cIndex, sensorOrigin);
 
       for (int i = -patchSize; i <= patchSize; i++)
       {
