@@ -215,7 +215,7 @@ public class RigidBodyJointControlHelper
       if (functionGeneratorErrorCalculator != null)
          functionGeneratorErrorCalculator.update();
 
-      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      for (int jointIdx = 0; jointIdx < functionGenerators.size(); jointIdx++)
       {
          functionGenerators.get(jointIdx).update();
       }
