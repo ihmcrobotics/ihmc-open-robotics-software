@@ -11,13 +11,10 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
-import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
+import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -26,7 +23,6 @@ import us.ihmc.rdx.ui.interactable.RDXInteractableAffordanceTemplateHand;
 import us.ihmc.rdx.ui.interactable.RDXInteractableNub;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
-import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
@@ -79,7 +75,6 @@ public class RDXAffordanceTemplateEditorUI
    private boolean fractionalScalingEnabled = false;
    private boolean affordanceTemplateLoaded = false;
    private float[] objectScale;
-   private final SceneGraph sceneGraph;
 
    private final ImGuiInputText textInput = new ImGuiInputText("(optional) Enter additional description");
    private final ImGuiDirectory fileManagerDirectory;
@@ -87,9 +82,21 @@ public class RDXAffordanceTemplateEditorUI
    public RDXAffordanceTemplateEditorUI(RDXBaseUI baseUI, SceneGraph uiSceneGraph)
    {
       panel3D = baseUI.getPrimary3DPanel();
-      sceneGraph = uiSceneGraph;
-
-      addSceneNodes();
+      SceneGraph sceneGraph = new SceneGraph();
+      sceneGraph.modifyTree(modificationQueue ->
+                            {
+                               DoorSceneNodeDefinitions.ensureRightPushDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               DoorSceneNodeDefinitions.ensureLeftPushDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureBoxNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureCanOfSoupNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureDebrisNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureShoeNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureLaptopNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureBookNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureCerealNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureMugNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureBikeNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                            });
 
       objectBuilder = new RDXInteractableObjectBuilder(baseUI, sceneGraph);
       baseUI.getImGuiPanelManager().addPanel(objectBuilder.getWindowName(), objectBuilder::renderImGuiWidgets);
@@ -158,32 +165,6 @@ public class RDXAffordanceTemplateEditorUI
                                                              && !pathEntry.path().getFileName().toString().contains("Frames")
                                                              && !pathEntry.path().getFileName().toString().contains("Extra"),
                                                 fileManager::setLoadingFile);
-   }
-
-   private void addSceneNodes()
-   {
-      sceneGraph.modifyTree(modificationQueue ->
-                            {
-                               DoorSceneNodeDefinitions.ensureRightPushDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-                               DoorSceneNodeDefinitions.ensureLeftPushDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-                               RigidBodySceneObjectDefinitions.ensureBoxNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-                               RigidBodySceneObjectDefinitions.ensureCanOfSoupNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-                               RigidBodySceneObjectDefinitions.ensureDebrisNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-                               RigidBodySceneObjectDefinitions.ensureShoeNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-                               RigidBodySceneObjectDefinitions.ensureThinkPadNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-                               for (PrimitiveRigidBodyShape primitiveShape : PrimitiveRigidBodyShape.values())
-                               {
-                                  String primitiveShapename = Character.toUpperCase(primitiveShape.name().charAt(0)) + primitiveShape.name().substring(1).toLowerCase();
-                                  PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode = new PrimitiveRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                                                                            "Resizable" + primitiveShapename,
-                                                                                                                            sceneGraph.getIDToNodeMap(),
-                                                                                                                            sceneGraph.getRootNode().getID(),
-                                                                                                                            new RigidBodyTransform(),
-                                                                                                                            primitiveShape);
-                                  LogTools.info("Adding Resizable " + primitiveShapename + " Node to scene graph.");
-                                  modificationQueue.accept(new SceneGraphNodeAddition(primitiveRigidBodySceneNode, sceneGraph.getRootNode()));
-                               }
-                            });
    }
 
    public void update()
