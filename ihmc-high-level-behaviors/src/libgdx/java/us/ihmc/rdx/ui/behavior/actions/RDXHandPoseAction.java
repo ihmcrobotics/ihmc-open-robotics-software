@@ -7,12 +7,17 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
+import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -58,6 +63,7 @@ import java.util.List;
 public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPoseActionDefinition>
 {
    private final HandPoseActionState state;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
@@ -85,13 +91,15 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                             WorkspaceResourceDirectory saveFileDirectory,
                             RDX3DPanel panel3D,
                             DRCRobotModel robotModel,
-                            FullHumanoidRobotModel syncedFullRobotModel,
+                            ROS2SyncedRobotModel syncedRobot,
                             RobotCollisionModel selectionCollisionModel,
                             ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
       state = getState();
+
+      this.syncedRobot = syncedRobot;
 
       getDefinition().setDescription("Hand pose");
 
@@ -117,6 +125,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                                             imBoolean.set(true);
                                                       });
 
+      FullHumanoidRobotModel syncedFullRobotModel = syncedRobot.getFullRobotModel();
       for (RobotSide side : RobotSide.values)
       {
          handNames.put(side, syncedFullRobotModel.getHand(side).getName());
@@ -267,6 +276,18 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       trajectoryDurationWidget.renderImGuiWidget();
       ImGui.text("IK Solution Quality: %.2f".formatted(state.getSolutionQuality()));
       ImGui.popItemWidth();
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Set Pose to Synced Hand")))
+      {
+         CRDTDetachableReferenceFrame actionPalmFrame = getState().getPalmFrame();
+         CRDTUnidirectionalRigidBodyTransform palmTransformToParent = getDefinition().getPalmTransformToParent();
+         MovingReferenceFrame syncedPalmFrame = syncedRobot.getReferenceFrames().getHandFrame(getDefinition().getSide());
+         FramePose3D syncedPalmPose = new FramePose3D();
+         syncedPalmPose.setToZero(syncedPalmFrame);
+         syncedPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
+         palmTransformToParent.getValue().set(syncedPalmPose);
+         actionPalmFrame.update();
+      }
    }
 
    public void render3DPanelImGuiOverlays()
