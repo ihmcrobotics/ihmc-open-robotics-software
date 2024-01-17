@@ -133,12 +133,21 @@ public class RawImage
    {
       if (cpuImageMat == null && gpuImageMat == null)
       {
-         throw new NullPointerException("Neither CPU nor GPU matrices were initialized");
+         throw new NullPointerException("Neither CPU nor GPU Mats were initialized");
       }
-      else if (cpuImageMat == null && gpuImageMat != null && !gpuImageMat.isNull())
+      else if (cpuImageMat == null && !gpuImageMat.isNull())
       {
          cpuImageMat = new Mat(imageHeight, imageWidth, openCVType);
          gpuImageMat.download(cpuImageMat);
+      }
+
+      if (cpuImageMat == null)
+      {
+         throw new NullPointerException("Failed to initialize CPU image");
+      }
+      if (cpuImageMat.isNull())
+      {
+         throw new NullPointerException("Failed to download GPU image to CPU");
       }
 
       return cpuImageMat;
@@ -148,12 +157,21 @@ public class RawImage
    {
       if (gpuImageMat == null && cpuImageMat == null)
       {
-         throw new NullPointerException("Neither CPU nor GPU matrices were initialized");
+         throw new NullPointerException("Neither CPU nor GPU Mats were initialized");
       }
-      else if (gpuImageMat == null && cpuImageMat != null && !cpuImageMat.isNull())
+      else if (gpuImageMat == null && !cpuImageMat.isNull())
       {
          gpuImageMat = new GpuMat(imageHeight, imageWidth, openCVType);
          gpuImageMat.upload(cpuImageMat);
+      }
+
+      if (gpuImageMat == null)
+      {
+         throw new NullPointerException("Failed to initialize GPU image");
+      }
+      if (gpuImageMat.isNull())
+      {
+         throw new NullPointerException("Failed to upload CPU image to GPU");
       }
 
       return gpuImageMat;
@@ -201,8 +219,10 @@ public class RawImage
 
    public RawImage get()
    {
-      numberOfReferences.incrementAndGet();
-      return this;
+      if (numberOfReferences.incrementAndGet() > 1)
+         return this;
+      else
+         throw new NullPointerException("This image has been deallocated");
    }
 
    public void release()
