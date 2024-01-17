@@ -67,14 +67,12 @@ public class RigidBodyJointControlHelper
    private final List<DoubleProvider> defaultWeights = new ArrayList<>();
    private final List<YoDouble> currentWeights = new ArrayList<>();
    private final List<YoDouble> messageWeights = new ArrayList<>();
-   private final List<PIDGainsReadOnly> highLevelGains = new ArrayList<>();
-   private final List<PIDGainsReadOnly> lowLevelGains = new ArrayList<>();
+   private final List<PIDGainsReadOnly> gains = new ArrayList<>();
    private final List<YoFunctionGeneratorNew> functionGenerators = new ArrayList<>();
    private final FunctionGeneratorErrorCalculator functionGeneratorErrorCalculator;
 
    private final YoBoolean hasWeights;
-   private final YoBoolean hasHighLevelGains;
-   private final YoBoolean[] hasLowLevelGains;
+   private final YoBoolean hasGains;
 
    private final OneDoFTrajectoryPoint lastPointAdded = new OneDoFTrajectoryPoint();
    private final JointspaceFeedbackControlCommand feedbackControlCommand = new JointspaceFeedbackControlCommand();
@@ -96,8 +94,7 @@ public class RigidBodyJointControlHelper
 
       String prefix = bodyName + "Jointspace";
       hasWeights = new YoBoolean(prefix + "HasWeights", registry);
-      hasHighLevelGains = new YoBoolean(prefix + "HasHighLevelGains", registry);
-      hasLowLevelGains = new YoBoolean[jointsToControl.length];
+      hasGains = new YoBoolean(prefix + "HasGains", registry);
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       functionGeneratorErrorCalculator = enableFunctionGenerators ? new FunctionGeneratorErrorCalculator(bodyName, controlDT, registry) : null;
 
@@ -127,8 +124,6 @@ public class RigidBodyJointControlHelper
             functionGenerators.add(new YoFunctionGeneratorNew(prefix + "_" + jointName + "_FG", time, registry));
             functionGeneratorErrorCalculator.addTrajectorySignal(functionGenerators.get(jointIdx), jointsToControl[jointIdx]);
          }
-
-         hasLowLevelGains[jointIdx] = new YoBoolean(joint.getName() + "HasLowLevelGains", registry);
       }
 
       streamTimestampOffset = new YoDouble(prefix + "StreamTimestampOffset", registry);
@@ -171,49 +166,33 @@ public class RigidBodyJointControlHelper
       setWeightsToDefaults();
    }
 
-   public void setGains(Map<String, PIDGainsReadOnly> highLevelGains, Map<String, PIDGainsReadOnly> lowLevelGains)
+   public void setGains(Map<String, PIDGainsReadOnly> gains)
    {
-      hasHighLevelGains.set(true);
-      this.highLevelGains.clear();
+      hasGains.set(true);
+      this.gains.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          OneDoFJointBasics joint = joints[jointIdx];
-         if (highLevelGains.containsKey(joint.getName()))
+         if (gains.containsKey(joint.getName()))
          {
-            this.highLevelGains.add(highLevelGains.get(joint.getName()));
+            this.gains.add(gains.get(joint.getName()));
          }
          else
          {
-            this.highLevelGains.clear();
-            hasHighLevelGains.set(false);
+            this.gains.clear();
+            hasGains.set(false);
             return;
          }
       }
-
-      this.lowLevelGains.clear();
-      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
-      {
-         hasLowLevelGains[jointIdx].set(false);
-      }
-
-      if (lowLevelGains == null)
-         return;
-
-      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
-      {
-         OneDoFJointBasics joint = joints[jointIdx];
-         this.lowLevelGains.add(jointIdx, lowLevelGains.get(joint.getName()));
-         hasLowLevelGains[jointIdx].set(lowLevelGains.containsKey(joint.getName()));
-      }
    }
 
-   public void setHighLevelGains(YoPIDGains highLevelGains)
+   public void setGains(YoPIDGains gains)
    {
-      hasHighLevelGains.set(true);
-      this.highLevelGains.clear();
+      hasGains.set(true);
+      this.gains.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         this.highLevelGains.add(highLevelGains);
+         this.gains.add(gains);
       }
    }
 
@@ -224,7 +203,7 @@ public class RigidBodyJointControlHelper
 
    public boolean doAction(double timeInTrajectory)
    {
-      if (!hasHighLevelGains.getBooleanValue() || !hasWeights.getBooleanValue())
+      if (!hasGains.getBooleanValue() || !hasWeights.getBooleanValue())
       {
          LogTools.warn(warningPrefix + "Can not send joint trajectory commands. Do not have all weights and gains set.");
          throw new RuntimeException(warningPrefix + "Has no gains or weights.");
@@ -235,6 +214,11 @@ public class RigidBodyJointControlHelper
       List<? extends DoubleProvider> weights = usingWeightFromMessage.getBooleanValue() ? messageWeights : defaultWeights;
       if (functionGeneratorErrorCalculator != null)
          functionGeneratorErrorCalculator.update();
+
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      {
+         functionGenerators.get(jointIdx).update();
+      }
 
       feedbackControlCommand.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
@@ -262,20 +246,12 @@ public class RigidBodyJointControlHelper
          }
 
          generator.compute(timeInTrajectory);
-         double desiredPosition = generator.getValue();
-         double desiredVelocity = generator.getVelocity();
-         double feedForwardAcceleration = generator.getAcceleration();
-
-         if (!functionGenerators.isEmpty())
-         {
-            functionGenerators.get(jointIdx).update();
-            desiredPosition += functionGenerators.get(jointIdx).getValue();
-            desiredVelocity += functionGenerators.get(jointIdx).getValueDot();
-            feedForwardAcceleration += functionGenerators.get(jointIdx).getValueDDot();
-         }
+         double desiredPosition = getJointDesiredPosition(jointIdx);
+         double desiredVelocity = getJointDesiredVelocity(jointIdx);
+         double feedForwardAcceleration = getJointDesiredAcceleration(jointIdx);
 
          OneDoFJointBasics joint = joints[jointIdx];
-         PIDGainsReadOnly gain = highLevelGains.get(jointIdx);
+         PIDGainsReadOnly gain = gains.get(jointIdx);
          double weight = weights.get(jointIdx).getValue();
          currentWeights.get(jointIdx).set(weight);
          if (weight > 0.0)
@@ -333,7 +309,7 @@ public class RigidBodyJointControlHelper
 
    public boolean handleTrajectoryCommand(JointspaceTrajectoryCommand command, double[] initialJointPositions)
    {
-      if (!hasHighLevelGains.getBooleanValue() || !hasWeights.getBooleanValue())
+      if (!hasGains.getBooleanValue() || !hasWeights.getBooleanValue())
       {
          LogTools.warn(warningPrefix + "Can not send joint trajectory commands. Do not have all weights and gains set.");
          return false;
@@ -620,7 +596,12 @@ public class RigidBodyJointControlHelper
 
    public double getJointDesiredPosition(int jointIdx)
    {
-      return jointTrajectoryGenerators.get(jointIdx).getValue();
+      double desiredPosition = jointTrajectoryGenerators.get(jointIdx).getValue();
+      if (!functionGenerators.isEmpty())
+      {
+         desiredPosition += functionGenerators.get(jointIdx).getValue();
+      }
+      return desiredPosition;
    }
 
    public void queueInitialPointsAtCurrentDesired()
@@ -633,7 +614,22 @@ public class RigidBodyJointControlHelper
 
    public double getJointDesiredVelocity(int jointIdx)
    {
-      return jointTrajectoryGenerators.get(jointIdx).getVelocity();
+      double desiredVelocity = jointTrajectoryGenerators.get(jointIdx).getVelocity();
+      if (!functionGenerators.isEmpty())
+      {
+         desiredVelocity += functionGenerators.get(jointIdx).getValueDot();
+      }
+      return desiredVelocity;
+   }
+
+   public double getJointDesiredAcceleration(int jointIdx)
+   {
+      double desiredAcceleration = jointTrajectoryGenerators.get(jointIdx).getAcceleration();
+      if (!functionGenerators.isEmpty())
+      {
+         desiredAcceleration += functionGenerators.get(jointIdx).getValueDDot();
+      }
+      return desiredAcceleration;
    }
 
    public JointspaceFeedbackControlCommand getJointspaceCommand()
@@ -648,15 +644,5 @@ public class RigidBodyJointControlHelper
          OneDoFJointBasics joint = joints[jointIdx];
          queueInitialPoint(joint.getQ(), jointIdx);
       }
-   }
-
-   public boolean hasLowLevelJointGains(int jointIdx)
-   {
-      return hasLowLevelGains[jointIdx].getValue();
-   }
-   
-   public PIDGainsReadOnly getLowLevelJointGain(int jointIdx)
-   {
-      return lowLevelGains.get(jointIdx);
    }
 }
