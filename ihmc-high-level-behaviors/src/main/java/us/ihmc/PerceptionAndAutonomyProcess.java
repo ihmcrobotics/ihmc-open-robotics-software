@@ -178,14 +178,13 @@ public class PerceptionAndAutonomyProcess
       blackflyProcessAndPublishThread = new RestartableThread("BlackflyProcessAndPublish", this::processAndPublishBlackfly);
       blackflyProcessAndPublishThread.start();
 
+      arUcoUpdater = new ArUcoDetectionUpdater(ros2Helper, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
       arUcoMarkerDetectionThread = new RestartableThread("ArUcoMarkerDetection", this::detectAndPublishArUcoMarkers);
       arUcoMarkerDetectionThread.start();
 
       this.robotPelvisFrameSupplier = robotPelvisFrameSupplier;
       sceneGraph = new ROS2SceneGraph(ros2Helper);
       sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", ROS2BehaviorTreeState.SYNC_FREQUENCY, this::updateSceneGraph);
-
-      arUcoUpdater = new ArUcoDetectionUpdater(ros2Helper, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2Helper, zed2iLeftCameraFrame);
    }
