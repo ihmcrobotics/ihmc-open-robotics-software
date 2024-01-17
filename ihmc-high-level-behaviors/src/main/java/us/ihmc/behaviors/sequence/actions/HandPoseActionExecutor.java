@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.QueueableMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
@@ -13,6 +14,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.*;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -33,7 +35,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final HandPoseActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final TrajectoryActionExecutorCommonFunctionality trajectoryActionCommon;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
@@ -43,6 +44,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final RigidBodyTransform chestToPelvisZeroAngles = new RigidBodyTransform();
    private final FramePose3D chestInPelvis = new FramePose3D();
    private final FramePose3D goalChestFrame = new FramePose3D();
+   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
    public HandPoseActionExecutor(long id,
                                  CRDTInfo crdtInfo,
@@ -58,8 +60,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
-
-      trajectoryActionCommon = new TrajectoryActionExecutorCommonFunctionality(syncedRobot, ros2ControllerHelper, state);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -77,7 +77,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    {
       super.update();
 
-      trajectoryActionCommon.update();
+      trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
       state.setCanExecute(state.getPalmFrame().isChildOfWorld());
 
@@ -219,7 +219,9 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             ros2ControllerHelper.publishToController(handHybridJointspaceTaskspaceTrajectoryMessage);
          }
 
-         trajectoryActionCommon.triggerActionExecution(getDefinition().getTrajectoryDuration());
+         trackingCalculator.reset();
+
+         state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
          
          desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
@@ -235,9 +237,19 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    @Override
    public void updateCurrentlyExecuting()
    {
-      trajectoryActionCommon.checkAndHandleTimeLimit();
+      trackingCalculator.computeExecutionTimings(state.getNominalExecutionDuration());
+      state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
 
-      if (!trajectoryActionCommon.getHitTimeLimit() && state.getPalmFrame().isChildOfWorld())
+      if (trackingCalculator.getHitTimeLimit())
+      {
+         state.setIsExecuting(false);
+         state.setFailed(true);
+         LogTools.error("Task execution timed out. Publishing stop all trajectories message.");
+         ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+         return;
+      }
+
+      if (state.getPalmFrame().isChildOfWorld())
       {
          desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));

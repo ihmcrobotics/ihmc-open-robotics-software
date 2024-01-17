@@ -1,10 +1,12 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.TrajectoryTrackingErrorCalculator;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -23,11 +25,11 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    private final ChestOrientationActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final TrajectoryActionExecutorCommonFunctionality trajectoryActionCommon;
    private final FramePose3D desiredChestPose = new FramePose3D();
    private final FramePose3D syncedChestPose = new FramePose3D();
    private double startOrientationDistanceToGoal;
    private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
+   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
    public ChestOrientationActionExecutor(long id,
                                          CRDTInfo crdtInfo,
@@ -42,8 +44,6 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
-
-      trajectoryActionCommon = new TrajectoryActionExecutorCommonFunctionality(syncedRobot, ros2ControllerHelper, state);
    }
 
    @Override
@@ -51,7 +51,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    {
       super.update();
 
-      trajectoryActionCommon.update();
+      trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
       state.setCanExecute(state.getChestFrame().isChildOfWorld());
    }
@@ -77,7 +77,9 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
 
          ros2ControllerHelper.publishToController(message);
 
-         trajectoryActionCommon.triggerActionExecution(getDefinition().getTrajectoryDuration());
+         trackingCalculator.reset();
+
+         state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
 
          desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
          syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
@@ -92,9 +94,19 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    @Override
    public void updateCurrentlyExecuting()
    {
-      trajectoryActionCommon.checkAndHandleTimeLimit();
+      trackingCalculator.computeExecutionTimings(state.getNominalExecutionDuration());
+      state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
 
-      if (!trajectoryActionCommon.getHitTimeLimit() && state.getChestFrame().isChildOfWorld())
+      if (trackingCalculator.getHitTimeLimit())
+      {
+         state.setIsExecuting(false);
+         state.setFailed(true);
+         LogTools.error("Task execution timed out. Publishing stop all trajectories message.");
+         ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+         return;
+      }
+
+      if (state.getChestFrame().isChildOfWorld())
       {
          desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
          syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());

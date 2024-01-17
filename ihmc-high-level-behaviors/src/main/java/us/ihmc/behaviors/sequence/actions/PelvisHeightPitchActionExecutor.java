@@ -1,10 +1,12 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.TrajectoryTrackingErrorCalculator;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -22,12 +24,12 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
    private final PelvisHeightPitchActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final TrajectoryActionExecutorCommonFunctionality trajectoryActionCommon;
    private final FramePose3D desiredPelvisPose = new FramePose3D();
    private final FramePose3D syncedPelvisPose = new FramePose3D();
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
    private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
+   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
    public PelvisHeightPitchActionExecutor(long id,
                                           CRDTInfo crdtInfo,
@@ -43,8 +45,6 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
-      trajectoryActionCommon = new TrajectoryActionExecutorCommonFunctionality(syncedRobot, ros2ControllerHelper, state);
-
       definition = getDefinition();
    }
 
@@ -53,7 +53,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
    {
       super.update();
 
-      trajectoryActionCommon.update();
+      trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
       state.setCanExecute(state.getPelvisFrame().isChildOfWorld());
    }
@@ -84,7 +84,9 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
          message.getSe3Trajectory().getLinearSelectionMatrix().setZSelected(true);
          ros2ControllerHelper.publishToController(message);
 
-         trajectoryActionCommon.triggerActionExecution(getDefinition().getTrajectoryDuration());
+         trackingCalculator.reset();
+
+         state.setNominalExecutionDuration(definition.getTrajectoryDuration());
 
          desiredPelvisPose.setFromReferenceFrame(state.getPelvisFrame().getReferenceFrame());
          syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
@@ -102,9 +104,19 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
    @Override
    public void updateCurrentlyExecuting()
    {
-      trajectoryActionCommon.checkAndHandleTimeLimit();
+      trackingCalculator.computeExecutionTimings(state.getNominalExecutionDuration());
+      state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
 
-      if (!trajectoryActionCommon.getHitTimeLimit() && state.getPelvisFrame().isChildOfWorld())
+      if (trackingCalculator.getHitTimeLimit())
+      {
+         state.setIsExecuting(false);
+         state.setFailed(true);
+         LogTools.error("Task execution timed out. Publishing stop all trajectories message.");
+         ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+         return;
+      }
+
+      if (state.getPelvisFrame().isChildOfWorld())
       {
          desiredPelvisPose.setFromReferenceFrame(state.getPelvisFrame().getReferenceFrame());
          syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
