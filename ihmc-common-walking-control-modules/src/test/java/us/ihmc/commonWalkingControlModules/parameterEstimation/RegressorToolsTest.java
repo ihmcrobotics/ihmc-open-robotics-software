@@ -7,7 +7,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
-import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.robotics.MatrixMissingTools;
 
 import java.util.*;
@@ -18,8 +17,9 @@ import static us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.*;
 public class RegressorToolsTest
 {
    private static final double EPSILON = 1e-9;
-
    private static final int ITERATIONS = 1000;
+   
+   private static final int PARAMETERS_PER_RIGID_BODY = 10;
 
    @Test
    public void testPartitionRegressor()
@@ -154,12 +154,12 @@ public class RegressorToolsTest
 
       for (int i = 0; i < basisSets.length; ++i)
       {
-         for (int j = 0; j < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; ++j)
+         for (int j = 0; j < PARAMETERS_PER_RIGID_BODY; ++j)
          {
             if (basisSets[i].contains(SpatialInertiaBasisOption.values[j]))
-               collectionIndices.add(i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY + j);
+               collectionIndices.add(i * PARAMETERS_PER_RIGID_BODY + j);
             else
-               collectionComplementIndices.add(i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY + j);
+               collectionComplementIndices.add(i * PARAMETERS_PER_RIGID_BODY + j);
          }
       }
 
