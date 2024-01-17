@@ -3,8 +3,10 @@ package us.ihmc.behaviors.activeMapping;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -107,6 +109,21 @@ public class StancePoseCalculator
       }
    }
 
+   public void snapPosesToTerrainMapData(TerrainMapData terrainMapData)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         snapFootPoseToTerrainMap(terrainMapData, bestFramePoses.get(side));
+      }
+   }
+
+   private void snapFootPoseToTerrainMap(TerrainMapData terrainMapData, FramePose3D poseToSnap)
+   {
+      UnitVector3DBasics normal = terrainMapData.computeSurfaceNormalInWorld((float) poseToSnap.getX(), (float) poseToSnap.getY(), 1);
+      RigidBodyTransform snapTransform = createTransformToMatchSurfaceNormalPreserveX(normal);
+      poseToSnap.applyTransform(snapTransform);
+   }
+
    private void snapFootPoseToHeightMap(HeightMapData heightMapData, FramePose3D poseToSnap)
    {
       ConvexPolygon2D footPolygon = PlannerTools.createFootPolygon(0.25, 0.12, 0.8);
@@ -120,6 +137,34 @@ public class StancePoseCalculator
          snapTransform.getRotation().setYawPitchRoll(0, snapTransform.getRotation().getPitch(), snapTransform.getRotation().getRoll());
          poseToSnap.getRotation().applyTransform(snapTransform);
       }
+   }
+
+   static RigidBodyTransform createTransformToMatchSurfaceNormalPreserveX(Vector3DReadOnly surfaceNormal)
+   {
+      RigidBodyTransform transformToReturn = new RigidBodyTransform();
+      constructTransformToMatchSurfaceNormalPreserveX(surfaceNormal, transformToReturn);
+
+      return transformToReturn;
+   }
+
+   static void constructTransformToMatchSurfaceNormalPreserveX(Vector3DReadOnly surfaceNormal, RigidBodyTransform transformToPack)
+   {
+      // xAxis = yAxis cross SurfaceNormal
+      double xAxisX = surfaceNormal.getZ();
+      double xAxisY = 0.0;
+      double xAxisZ = -surfaceNormal.getX();
+
+      double xNorm = EuclidCoreTools.norm(xAxisX, xAxisZ);
+
+      xAxisX /= xNorm;
+      xAxisZ /= xNorm;
+
+      // yAxis = surfaceNormal cross xAxis
+      double yAxisX = surfaceNormal.getY() * xAxisZ;
+      double yAxisY = surfaceNormal.getZ() * xAxisX - surfaceNormal.getX() * xAxisZ;
+      double yAxisZ = -surfaceNormal.getY() * xAxisX;
+
+      transformToPack.getRotation().set(xAxisX, yAxisX, surfaceNormal.getX(), xAxisY, yAxisY, surfaceNormal.getY(), xAxisZ, yAxisZ, surfaceNormal.getZ());
    }
 
    public ArrayList<FramePose3D> getLeftPoses()
