@@ -2,7 +2,6 @@ package us.ihmc.perception;
 
 import perception_msgs.msg.dds.IterativeClosestPointRequest;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -105,7 +104,6 @@ public class IterativeClosestPointManager
       depthImage.get();
 
       environmentPointCloud = pointCloudExtractor.extractPointCloud(depthImage);
-      nodeIDToWorkerMap.forEachValue(1L, worker -> worker.setEnvironmentPointCloud(environmentPointCloud));
 
       depthImage.release();
    }
@@ -150,12 +148,14 @@ public class IterativeClosestPointManager
             continue;
          }
 
-         if (entry.getValue().runICP(workerToIterationsMap.get(entry.getValue())))
-            ros2Helper.publish(PerceptionAPI.ICP_RESULT, entry.getValue().getResult());
+         IterativeClosestPointWorker worker = entry.getValue();
+         worker.setEnvironmentPointCloud(environmentPointCloud);
+         if (worker.runICP(workerToIterationsMap.get(worker)))
+            ros2Helper.publish(PerceptionAPI.ICP_RESULT, worker.getResult());
 
-         if (!entry.getValue().isUsingTargetPoint())
+         if (!worker.isUsingTargetPoint())
          {
-            RigidBodyTransform centroidToWorldTransform = new RigidBodyTransform(entry.getValue().getResultPose());
+            RigidBodyTransform centroidToWorldTransform = new RigidBodyTransform(worker.getResultPose());
             SceneNode node = sceneGraph.getIDToNodeMap().get(entry.getKey());
             if (node != null) // FIXME: race condition occurs when this is running & node is removed from scene graph through the scene graph UI
             {

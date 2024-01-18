@@ -64,8 +64,6 @@ public class IterativeClosestPointWorker
    private final SvdImplicitQrDecompose_DDRM svdSolver = new SvdImplicitQrDecompose_DDRM(false, true, true, false);
 
    private List<? extends Point3DReadOnly> measurementPointCloud;
-   private final Object measurementPointCloudSynchronizer = new Object();
-
    private List<DistancedPoint> segmentedPointCloud;
    private double segmentSphereRadius = 1.0;
 
@@ -143,19 +141,16 @@ public class IterativeClosestPointWorker
       for (int i = 0; i < numberOfIterations; ++i)
       {
          // Segment the point cloud
-         synchronized (measurementPointCloudSynchronizer) // synchronize as to avoid changes to environment point cloud while segmenting it
-         {
-            if (measurementPointCloud == null)
-               return false;
+         if (measurementPointCloud == null)
+            return false;
 
-            // TODO: find way to make shape segmentation not suck ICP into ground (without side effects)
-            if (numberOfIterations > 1 && i == 0)  // Running multiple iterations, on first iteration segment & find neighbors
-               segmentedPointCloud = segmentPointCloudAndFindNeighbors(measurementPointCloud, detectionPoint, segmentSphereRadius);
-            else if (numberOfIterations > 1)       // Running multiple iterations, on following iterations use neighbor points for segmentation (faster)
-               segmentedPointCloud = segmentPointCloud(neighborPointCloud, detectionPoint, segmentSphereRadius);
-            else                                   // Running only one iteration, don't bother finding neighbors
-               segmentedPointCloud = segmentPointCloud(measurementPointCloud, detectionPoint, segmentSphereRadius);
-         }
+         // TODO: find way to make shape segmentation not suck ICP into ground (without side effects)
+         if (numberOfIterations > 1 && i == 0)  // Running multiple iterations, on first iteration segment & find neighbors
+            segmentedPointCloud = segmentPointCloudAndFindNeighbors(measurementPointCloud, detectionPoint, segmentSphereRadius);
+         else if (numberOfIterations > 1)       // Running multiple iterations, on following iterations use neighbor points for segmentation (faster)
+            segmentedPointCloud = segmentPointCloud(neighborPointCloud, detectionPoint, segmentSphereRadius);
+         else                                   // Running only one iteration, don't bother finding neighbors
+            segmentedPointCloud = segmentPointCloud(measurementPointCloud, detectionPoint, segmentSphereRadius);
 
          // Only run ICP iteration if segmented point cloud has enough points
          if (segmentedPointCloud.size() >= 0.25 * numberOfCorrespondences)
@@ -384,18 +379,13 @@ public class IterativeClosestPointWorker
       }
    }
 
-
-
    // TODO: Color filtering could go here
    // pass in depth and color image -> cut out invalid pixels of depth image based on color image ->
    // -> create "environmentPointCloud" based off the color-filtered depth image ->
    // -> set the segmentation radius to be large (1.0~1.5?)
    public void setEnvironmentPointCloud(List<? extends Point3DReadOnly> pointCloud)
    {
-      synchronized (measurementPointCloudSynchronizer)
-      {
-         measurementPointCloud = pointCloud;
-      }
+      measurementPointCloud = pointCloud;
    }
 
    public void setSegmentSphereRadius(double radius)
