@@ -12,18 +12,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
             * Parent definition fields
             */
    public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
-   /**
-            * Name of the parent frame the footsteps are expressed in
-            */
-   public java.lang.StringBuilder parent_frame_name_;
-   /**
-            * Swing duration
-            */
-   public double swing_duration_;
-   /**
-            * Transfer duration
-            */
-   public double transfer_duration_;
+   public behavior_msgs.msg.dds.FootstepPlanActionDefinitionBasicsMessage definition_basics_;
    /**
             * The footsteps, with a maximum of 50
             */
@@ -32,7 +21,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    public FootstepPlanActionDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
-      parent_frame_name_ = new java.lang.StringBuilder(255);
+      definition_basics_ = new behavior_msgs.msg.dds.FootstepPlanActionDefinitionBasicsMessage();
       footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage> (50, new behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType());
 
    }
@@ -46,13 +35,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    public void set(FootstepPlanActionDefinitionMessage other)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
-      parent_frame_name_.setLength(0);
-      parent_frame_name_.append(other.parent_frame_name_);
-
-      swing_duration_ = other.swing_duration_;
-
-      transfer_duration_ = other.transfer_duration_;
-
+      behavior_msgs.msg.dds.FootstepPlanActionDefinitionBasicsMessagePubSubType.staticCopy(other.definition_basics_, definition_basics_);
       footsteps_.set(other.footsteps_);
    }
 
@@ -65,58 +48,10 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       return definition_;
    }
 
-   /**
-            * Name of the parent frame the footsteps are expressed in
-            */
-   public void setParentFrameName(java.lang.String parent_frame_name)
-   {
-      parent_frame_name_.setLength(0);
-      parent_frame_name_.append(parent_frame_name);
-   }
 
-   /**
-            * Name of the parent frame the footsteps are expressed in
-            */
-   public java.lang.String getParentFrameNameAsString()
+   public behavior_msgs.msg.dds.FootstepPlanActionDefinitionBasicsMessage getDefinitionBasics()
    {
-      return getParentFrameName().toString();
-   }
-   /**
-            * Name of the parent frame the footsteps are expressed in
-            */
-   public java.lang.StringBuilder getParentFrameName()
-   {
-      return parent_frame_name_;
-   }
-
-   /**
-            * Swing duration
-            */
-   public void setSwingDuration(double swing_duration)
-   {
-      swing_duration_ = swing_duration;
-   }
-   /**
-            * Swing duration
-            */
-   public double getSwingDuration()
-   {
-      return swing_duration_;
-   }
-
-   /**
-            * Transfer duration
-            */
-   public void setTransferDuration(double transfer_duration)
-   {
-      transfer_duration_ = transfer_duration;
-   }
-   /**
-            * Transfer duration
-            */
-   public double getTransferDuration()
-   {
-      return transfer_duration_;
+      return definition_basics_;
    }
 
 
@@ -147,12 +82,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.parent_frame_name_, other.parent_frame_name_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_duration_, other.swing_duration_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_duration_, other.transfer_duration_, epsilon)) return false;
-
+      if (!this.definition_basics_.epsilonEquals(other.definition_basics_, epsilon)) return false;
       if (this.footsteps_.size() != other.footsteps_.size()) { return false; }
       else
       {
@@ -174,12 +104,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       FootstepPlanActionDefinitionMessage otherMyClass = (FootstepPlanActionDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
-      if (!us.ihmc.idl.IDLTools.equals(this.parent_frame_name_, otherMyClass.parent_frame_name_)) return false;
-
-      if(this.swing_duration_ != otherMyClass.swing_duration_) return false;
-
-      if(this.transfer_duration_ != otherMyClass.transfer_duration_) return false;
-
+      if (!this.definition_basics_.equals(otherMyClass.definition_basics_)) return false;
       if (!this.footsteps_.equals(otherMyClass.footsteps_)) return false;
 
       return true;
@@ -193,12 +118,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       builder.append("FootstepPlanActionDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
-      builder.append("parent_frame_name=");
-      builder.append(this.parent_frame_name_);      builder.append(", ");
-      builder.append("swing_duration=");
-      builder.append(this.swing_duration_);      builder.append(", ");
-      builder.append("transfer_duration=");
-      builder.append(this.transfer_duration_);      builder.append(", ");
+      builder.append("definition_basics=");
+      builder.append(this.definition_basics_);      builder.append(", ");
       builder.append("footsteps=");
       builder.append(this.footsteps_);
       builder.append("}");

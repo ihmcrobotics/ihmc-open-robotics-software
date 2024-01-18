@@ -1,0 +1,45 @@
+#ifndef __behavior_msgs__msg__FootstepPlanActionStateBasicsMessage__idl__
+#define __behavior_msgs__msg__FootstepPlanActionStateBasicsMessage__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "ihmc_common_msgs/msg/./SE3TrajectoryPointMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::FootstepPlanActionStateBasicsMessage_")
+      struct FootstepPlanActionStateBasicsMessage
+      {
+        /**
+         * Total number of footsteps; used for walking actions
+         */
+        unsigned short total_number_of_footsteps;
+        /**
+         * Incomplete footsteps; used for walking actions
+         */
+        unsigned short number_of_incomplete_footsteps;
+        /**
+         * Desired left footsteps
+         */
+        sequence<ihmc_common_msgs::msg::dds::SE3TrajectoryPointMessage, 50> desired_left_footsteps;
+        /**
+         * Desired right footsteps
+         */
+        sequence<ihmc_common_msgs::msg::dds::SE3TrajectoryPointMessage, 50> desired_right_footsteps;
+        /**
+         * Current left pose
+         */
+        geometry_msgs::msg::dds::Pose current_left_foot_pose;
+        /**
+         * Current right pose
+         */
+        geometry_msgs::msg::dds::Pose current_right_foot_pose;
+      };
+    };
+  };
+};
+
+#endif

@@ -4,7 +4,6 @@ import perception_msgs.msg.dds.DetectedObjectPacket;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -15,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.filters.TimeBasedDetectionFilter;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.HashMap;
@@ -31,14 +31,16 @@ public class CenterposeDetectionManager
    private final IHMCROS2Input<DetectedObjectPacket> subscriber;
    private final Map<Integer, TimeBasedDetectionFilter> centerposeNodeDetectionFilters = new HashMap<>();
    private final ReferenceFrame centerposeOutputFrame;
+   private final MutableReferenceFrame imageAquisitionSensorFrame = new MutableReferenceFrame();
 
-   public CenterposeDetectionManager(ROS2PublishSubscribeAPI ros2API, ReferenceFrame sensorFrame)
+   public CenterposeDetectionManager(ROS2Helper ros2Helper, ReferenceFrame sensorFrame)
    {
       ROS2Topic<DetectedObjectPacket> topicName = PerceptionAPI.CENTERPOSE_DETECTED_OBJECT;
-      subscriber = ros2API.subscribe(topicName);
+      subscriber = ros2Helper.subscribe(topicName);
+
 
       centerposeOutputFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("CenterposeOutputFrame",
-                                                                                                sensorFrame,
+                                                                                                imageAquisitionSensorFrame.getReferenceFrame(),
                                                                                                 CENTERPOSE_DETECTION_TO_IHMC_ZUP_TRANSFORM);
    }
 
@@ -49,10 +51,13 @@ public class CenterposeDetectionManager
       {
          DetectedObjectPacket detectedObjectPacket = subscriber.getMessageNotification().read();
 
+         imageAquisitionSensorFrame.getTransformToParent().set(detectedObjectPacket.getSensorPose());
+         imageAquisitionSensorFrame.getReferenceFrame().update();
+
          // Update or add the corresponding CenterposeSceneNode
          sceneGraph.modifyTree(modificationQueue ->
          {
-            CenterposeNode centerposeNode;
+          CenterposeNode centerposeNode;
 
             Point3D[] vertices = detectedObjectPacket.getBoundingBoxVertices();
             for (Point3D vertex : vertices)
@@ -85,7 +90,8 @@ public class CenterposeDetectionManager
                                                    "CenterposeDetectedObject%d".formatted(detectedObjectPacket.getId()),
                                                    detectedObjectPacket.getId(),
                                                    vertices,
-                                                   detectedObjectPacket.getBoundingBox2dVertices());
+                                                   detectedObjectPacket.getBoundingBox2dVertices(),
+                                                   true);
 
                modificationQueue.accept(new SceneGraphNodeAddition(centerposeNode, sceneGraph.getRootNode()));
                sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().put(centerposeNode.getObjectID(), centerposeNode);
@@ -101,6 +107,11 @@ public class CenterposeDetectionManager
          centerposeNode.update();
          centerposeNode.setCurrentlyDetected(centerposeNodeDetectionFilters.get(centerposeNode.getObjectID()).isDetected());
       }
+   }
+
+   public RigidBodyTransform getImageAquisitionSensorFrameTransformToRoot()
+   {
+      return imageAquisitionSensorFrame.getReferenceFrame().getTransformToRoot();
    }
 
    public void destroy()

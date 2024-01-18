@@ -82,24 +82,25 @@ public class BehaviorTreeTopologyOperationQueue
    }
 
    public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueMoveAndFreezeNode(T nodeToMove,
-                                                                                    T parent,
+                                                                                    T previousParent,
+                                                                                    T nextParent,
                                                                                     T relativeNode,
                                                                                     BehaviorTreeNodeInsertionType insertionType)
    {
       topologyOperationQueue.add(() ->
       {
-         int indexOfNodeToMove = nodeToMove.getParent().getChildren().indexOf(nodeToMove);
-         int indexOfRelativeNode = nodeToMove.getParent().getChildren().indexOf(relativeNode);
+         int indexOfNodeToMove = previousParent.getChildren().indexOf(nodeToMove);
+         int indexOfRelativeNode = nextParent.getChildren().indexOf(relativeNode);
 
          int insertionIndex = indexOfRelativeNode;
 
          if (insertionType == BehaviorTreeNodeInsertionType.INSERT_AFTER)
             ++insertionIndex;
 
-         if (indexOfRelativeNode > indexOfNodeToMove) // Avoid out of bounds after node's been removed
+         if (previousParent == nextParent && indexOfRelativeNode > indexOfNodeToMove) // Avoid out of bounds after node's been removed
             --insertionIndex;
 
-         BehaviorTreeTopologyOperations.moveAndFreeze(nodeToMove, parent, insertionIndex);
+         BehaviorTreeTopologyOperations.moveAndFreeze(nodeToMove, previousParent, nextParent, insertionIndex);
       });
    }
 

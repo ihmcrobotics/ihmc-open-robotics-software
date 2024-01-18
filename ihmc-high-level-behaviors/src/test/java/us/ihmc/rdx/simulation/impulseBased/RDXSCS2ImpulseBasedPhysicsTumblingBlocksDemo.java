@@ -32,7 +32,7 @@ import java.util.Random;
 public class RDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private final RDXSCS2SimulationSession rdxSCS2SimulationSession = new RDXSCS2SimulationSession();
+   private RDXSCS2SimulationSession rdxSCS2SimulationSession;
 
    public RDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo()
    {
@@ -43,7 +43,7 @@ public class RDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo
          {
             baseUI.create();
 
-            rdxSCS2SimulationSession.create(baseUI);
+            rdxSCS2SimulationSession = new RDXSCS2SimulationSession(baseUI);
 
             SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
 
@@ -109,8 +109,6 @@ public class RDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo
             simulationSession.addTerrainObject(slopeTerrain);
 
             rdxSCS2SimulationSession.startSession(simulationSession);
-
-            baseUI.getImGuiPanelManager().addPanel(rdxSCS2SimulationSession.getControlPanel());
          }
 
          @Override

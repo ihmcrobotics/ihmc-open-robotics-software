@@ -16,6 +16,7 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXLabFloorObject.FACTORY);
       objectFactories.add(RDXPalletObject.FACTORY);
       objectFactories.add(RDXStairsObject.FACTORY);
+      objectFactories.add(RDXWorkPlatformObject.FACTORY);
       objectFactories.add(RDXDoorFrameObject.FACTORY);
       objectFactories.add(RDXDoorPanelObject.FACTORY);
       objectFactories.add(RDXDoorLeverHandleObject.FACTORY);

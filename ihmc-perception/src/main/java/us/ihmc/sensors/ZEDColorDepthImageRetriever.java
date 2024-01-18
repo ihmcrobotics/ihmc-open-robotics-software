@@ -38,7 +38,7 @@ public class ZEDColorDepthImageRetriever
 
    private final int cameraID;
    private ZEDModelData zedModelData;
-   private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
+   private SL_RuntimeParameters zedRuntimeParameters;
 
    private int imageWidth; // Width of rectified image in pixels (color image width == depth image width)
    private int imageHeight; // Height of rectified image in pixels (color image height ==  depth image height)
@@ -81,7 +81,6 @@ public class ZEDColorDepthImageRetriever
    {
       this.cameraID = cameraID;
 
-      LogTools.info("ZED SDK version: " + sl_get_sdk_version().getString());
 
       zedGrabThread = new RestartableThread("ZEDImageGrabber", () ->
       {
@@ -296,6 +295,10 @@ public class ZEDColorDepthImageRetriever
    private boolean startZED()
    {
       boolean success;
+
+      zedRuntimeParameters = new SL_RuntimeParameters();
+
+      LogTools.info("ZED SDK version: " + sl_get_sdk_version().getString());
 
       if (colorImagePointer != null && !colorImagePointer.isNull())
          colorImagePointer.close();

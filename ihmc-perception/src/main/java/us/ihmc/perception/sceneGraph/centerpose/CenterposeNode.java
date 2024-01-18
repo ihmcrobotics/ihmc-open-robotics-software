@@ -1,9 +1,11 @@
 package us.ihmc.perception.sceneGraph.centerpose;
 
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.perception.filters.BreakFrequencyAlphaCalculator;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
 
 public class CenterposeNode extends DetectableSceneNode
 {
@@ -12,25 +14,54 @@ public class CenterposeNode extends DetectableSceneNode
    private Point3D[] vertices2D;
    private String objectType;
    private double confidence;
+   private final RigidBodyTransform interpolatedModelTransform = new RigidBodyTransform();
+   private int glitchCount;
+   private boolean enableTracking;
 
-   private final AlphaFilteredRigidBodyTransform alphaFilteredTransformToParent = new AlphaFilteredRigidBodyTransform();
-   private final BreakFrequencyAlphaCalculator breakFrequencyAlphaCalculator = new BreakFrequencyAlphaCalculator();
-   private double breakFrequency = 1.0;
-
-   public CenterposeNode(long id, String name, int markerID, Point3D[] vertices3D, Point3D[] vertices2D)
+   public CenterposeNode(long id, String name, int markerID, Point3D[] vertices3D, Point3D[] vertices2D, boolean enableTracking)
    {
       super(id, name);
       this.objectID = markerID;
       this.vertices3D = vertices3D;
       this.vertices2D = vertices2D;
+      this.enableTracking = enableTracking;
    }
 
    public void update()
    {
-      alphaFilteredTransformToParent.setAlpha(breakFrequencyAlphaCalculator.calculateAlpha(breakFrequency));
-      alphaFilteredTransformToParent.update(getNodeToParentFrameTransform());
-      getNodeToParentFrameTransform().set(alphaFilteredTransformToParent);
-      getNodeFrame().update();
+      RigidBodyTransform detectionTransform = getNodeToParentFrameTransform();
+      FramePose3D detectionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), detectionTransform);
+      FramePose3D interpolatedModelTransformPose = new FramePose3D(ReferenceFrame.getWorldFrame(), interpolatedModelTransform);
+
+      double distance = detectionPose.getPositionDistance(interpolatedModelTransformPose);
+
+      boolean skipUpdate = false;
+      if (distance > 0.5)
+      {
+         if (glitchCount < 5)
+         {
+            skipUpdate = true;
+            glitchCount++;
+         }
+         else
+         {
+            glitchCount = 0;
+         }
+      }
+
+      if (!skipUpdate && enableTracking)
+      {
+         double alpha = normalize(distance, 0.001, 1.0);
+         alpha = MathTools.clamp(alpha, 0.001, 1);
+
+         interpolatedModelTransform.interpolate(detectionTransform, alpha);
+         getNodeToParentFrameTransform().set(interpolatedModelTransform);
+         getNodeFrame().update();
+      }
+   }
+
+   public static double normalize(double value, double min, double max) {
+      return (value - min) / (max - min);
    }
 
    public int getObjectID()
@@ -83,13 +114,13 @@ public class CenterposeNode extends DetectableSceneNode
       this.confidence = confidence;
    }
 
-   public double getBreakFrequency()
+   public boolean isEnableTracking()
    {
-      return breakFrequency;
+      return enableTracking;
    }
 
-   public void setBreakFrequency(double breakFrequency)
+   public void setEnableTracking(boolean enableTracking)
    {
-      this.breakFrequency = breakFrequency;
+      this.enableTracking = enableTracking;
    }
 }

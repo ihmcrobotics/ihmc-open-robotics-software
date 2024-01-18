@@ -68,6 +68,11 @@ public class RDXYoManager
       return linkedRootRegistry;
    }
 
+   public LinkedYoVariableFactory getLinkedYoVariableFactory()
+   {
+      return linkedYoVariableFactory;
+   }
+
    public LinkedBufferProperties getLinkedBufferProperties()
    {
       return linkedBufferProperties;

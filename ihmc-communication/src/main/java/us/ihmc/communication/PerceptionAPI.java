@@ -134,7 +134,7 @@ public class PerceptionAPI
                                                                                                               IHMC_ROOT.withModule(ZED2_NAME)
                                                                                                                        .withType(ImageMessage.class)
                                                                                                                        .withSuffix("right_color"));
-   public static final ROS2Topic<ImageMessage> ZED2_DEPTH = IHMC_ROOT.withSuffix(ZED2_NAME).withType(ImageMessage.class).withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> ZED2_DEPTH = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("depth");
 
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
    public static final ROS2Topic<FusedSensorHeadPointCloudMessage> FUSED_SENSOR_HEAD_POINT_CLOUD = IHMC_ROOT.withTypeName(FusedSensorHeadPointCloudMessage.class);
