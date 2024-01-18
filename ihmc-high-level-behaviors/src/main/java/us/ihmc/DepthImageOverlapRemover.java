@@ -25,9 +25,9 @@ public class DepthImageOverlapRemover
    private final MutableReferenceFrame realsenseFrame = new MutableReferenceFrame();
    private final Object imageDataUsageSynchronizer = new Object();
 
-   private RawImage inputZEDImage;
-   private BytedecoImage bytedecoZEDInput;
-   private RawImage inputRealsenseImage;
+   private RawImage slaveImage;
+   private BytedecoImage bytedecoSlaveImage;
+   private RawImage masterImage;
 
    private BytedecoImage bytedecoZEDOutput;
 
@@ -38,87 +38,97 @@ public class DepthImageOverlapRemover
       kernel = openCLManager.createKernel(openCLProgram, "removeDepthOverlap");
    }
 
-   public void setRealsenseDepthImage(RawImage realsenseDepthImage)
+   /**
+    * Sets the master image (the unmodified image)
+    * @param masterImage the master image
+    */
+   public void setMasterImage(RawImage masterImage)
    {
       synchronized (imageDataUsageSynchronizer)
       {
-         if (inputRealsenseImage != null)
+         if (this.masterImage != null)
          {
-            inputRealsenseImage.release();
+            this.masterImage.release();
          }
-         inputRealsenseImage = realsenseDepthImage;
+         this.masterImage = masterImage;
       }
    }
 
-   public RawImage removeOverlap(RawImage zedDepthImage)
+   /**
+    * Removes the overlapping region between the master and slave image from the slave image.
+    * The master image will not be modified, while the slave image will have the overlapping portion cut out.
+    * @param slaveImage the slave image to be modified
+    * @return A new RawImage object which is the provided slave image without the overlapping section.
+    */
+   public RawImage removeOverlap(RawImage slaveImage)
    {
-      if (inputZEDImage != null)
-         inputZEDImage.release();
-      inputZEDImage = zedDepthImage;
+      if (this.slaveImage != null)
+         this.slaveImage.release();
+      this.slaveImage = slaveImage;
 
-      if (inputRealsenseImage == null || inputRealsenseImage.isEmpty())
-         return inputZEDImage;
+      if (masterImage == null || masterImage.isEmpty())
+         return this.slaveImage;
 
-      zedFrame.update(transformToWorld -> transformToWorld.set(inputZEDImage.getOrientation(), inputZEDImage.getPosition()));
-      realsenseFrame.update(transformToWorld -> transformToWorld.set(inputRealsenseImage.getOrientation(), inputRealsenseImage.getPosition()));
+      zedFrame.update(transformToWorld -> transformToWorld.set(this.slaveImage.getOrientation(), this.slaveImage.getPosition()));
+      realsenseFrame.update(transformToWorld -> transformToWorld.set(masterImage.getOrientation(), masterImage.getPosition()));
       zedFrame.getReferenceFrame().getTransformToDesiredFrame(zedToRealsenseTransform, realsenseFrame.getReferenceFrame());
       zedToRealsenseTransformParameter.setParameter(zedToRealsenseTransform);
       zedToRealsenseTransformParameter.writeOpenCLBufferObject(openCLManager);
 
-      parameters.setParameter(inputZEDImage.getFocalLengthX());
-      parameters.setParameter(inputZEDImage.getFocalLengthY());
-      parameters.setParameter(inputZEDImage.getPrincipalPointX());
-      parameters.setParameter(inputZEDImage.getPrincipalPointY());
-      parameters.setParameter(inputZEDImage.getDepthDiscretization());
-      parameters.setParameter(inputZEDImage.getImageWidth());
-      parameters.setParameter(inputZEDImage.getImageHeight());
-      parameters.setParameter(inputRealsenseImage.getFocalLengthX());
-      parameters.setParameter(inputRealsenseImage.getFocalLengthY());
-      parameters.setParameter(inputRealsenseImage.getPrincipalPointX());
-      parameters.setParameter(inputRealsenseImage.getPrincipalPointY());
-      parameters.setParameter(inputRealsenseImage.getDepthDiscretization());
-      parameters.setParameter(inputRealsenseImage.getImageWidth());
-      parameters.setParameter(inputRealsenseImage.getImageHeight());
+      parameters.setParameter(this.slaveImage.getFocalLengthX());
+      parameters.setParameter(this.slaveImage.getFocalLengthY());
+      parameters.setParameter(this.slaveImage.getPrincipalPointX());
+      parameters.setParameter(this.slaveImage.getPrincipalPointY());
+      parameters.setParameter(this.slaveImage.getDepthDiscretization());
+      parameters.setParameter(this.slaveImage.getImageWidth());
+      parameters.setParameter(this.slaveImage.getImageHeight());
+      parameters.setParameter(masterImage.getFocalLengthX());
+      parameters.setParameter(masterImage.getFocalLengthY());
+      parameters.setParameter(masterImage.getPrincipalPointX());
+      parameters.setParameter(masterImage.getPrincipalPointY());
+      parameters.setParameter(masterImage.getDepthDiscretization());
+      parameters.setParameter(masterImage.getImageWidth());
+      parameters.setParameter(masterImage.getImageHeight());
       parameters.writeOpenCLBufferObject(openCLManager);
 
-      if (bytedecoZEDInput != null)
-         bytedecoZEDInput.destroy(openCLManager);
-      bytedecoZEDInput = new BytedecoImage(inputZEDImage.getCpuImageMat());
-      bytedecoZEDInput.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-      bytedecoZEDInput.writeOpenCLImage(openCLManager);
+      if (bytedecoSlaveImage != null)
+         bytedecoSlaveImage.destroy(openCLManager);
+      bytedecoSlaveImage = new BytedecoImage(this.slaveImage.getCpuImageMat());
+      bytedecoSlaveImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+      bytedecoSlaveImage.writeOpenCLImage(openCLManager);
 
       if (bytedecoZEDOutput != null)
          bytedecoZEDOutput.destroy(openCLManager);
-      bytedecoZEDOutput = new BytedecoImage(inputZEDImage.getImageWidth(), inputZEDImage.getImageHeight(), inputZEDImage.getOpenCVType());
+      bytedecoZEDOutput = new BytedecoImage(this.slaveImage.getImageWidth(), this.slaveImage.getImageHeight(), this.slaveImage.getOpenCVType());
       bytedecoZEDOutput.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
 
       synchronized (imageDataUsageSynchronizer)
       {
-         openCLManager.setKernelArgument(kernel, 0, bytedecoZEDInput.getOpenCLImageObject());
+         openCLManager.setKernelArgument(kernel, 0, bytedecoSlaveImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(kernel, 1, bytedecoZEDOutput.getOpenCLImageObject());
          openCLManager.setKernelArgument(kernel, 2, parameters.getOpenCLBufferObject());
          openCLManager.setKernelArgument(kernel, 3, zedToRealsenseTransformParameter.getOpenCLBufferObject());
 
-         openCLManager.execute2D(kernel, inputZEDImage.getImageWidth(), inputZEDImage.getImageHeight());
+         openCLManager.execute2D(kernel, this.slaveImage.getImageWidth(), this.slaveImage.getImageHeight());
 
          bytedecoZEDOutput.readOpenCLImage(openCLManager);
       }
 
-      zedDepthImage.release();
+      slaveImage.release();
 
-      return new RawImage(zedDepthImage.getSequenceNumber(),
-                          zedDepthImage.getAcquisitionTime(),
-                          zedDepthImage.getImageWidth(),
-                          zedDepthImage.getImageHeight(),
-                          zedDepthImage.getDepthDiscretization(),
+      return new RawImage(slaveImage.getSequenceNumber(),
+                          slaveImage.getAcquisitionTime(),
+                          slaveImage.getImageWidth(),
+                          slaveImage.getImageHeight(),
+                          slaveImage.getDepthDiscretization(),
                           bytedecoZEDOutput.getBytedecoOpenCVMat(),
                           null,
-                          zedDepthImage.getOpenCVType(),
-                          zedDepthImage.getFocalLengthX(),
-                          zedDepthImage.getFocalLengthY(),
-                          zedDepthImage.getPrincipalPointX(),
-                          zedDepthImage.getPrincipalPointY(),
-                          zedDepthImage.getPosition(),
-                          zedDepthImage.getOrientation());
+                          slaveImage.getOpenCVType(),
+                          slaveImage.getFocalLengthX(),
+                          slaveImage.getFocalLengthY(),
+                          slaveImage.getPrincipalPointX(),
+                          slaveImage.getPrincipalPointY(),
+                          slaveImage.getPosition(),
+                          slaveImage.getOrientation());
    }
 }
