@@ -28,21 +28,9 @@ public class RDXPrimitiveRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<R
 
    public RDXPrimitiveRigidBodySceneNode build(PrimitiveRigidBodyShape shape)
    {
-      String name;
-
-      if (super.name.isEmpty())
-      {
-         ids.merge(shape, 1, Integer::sum);
-         name = shape.getCapitalizedName() + ids.get(shape).toString();
-      }
-      else
-      {
-         name = super.name.get();
-      }
-
       long nextID = sceneGraph.getNextID().getAndIncrement();
       PrimitiveRigidBodySceneNode sceneNode = new PrimitiveRigidBodySceneNode(nextID,
-                                                                              name,
+                                                                              getName(shape),
                                                                               sceneGraph.getIDToNodeMap(),
                                                                               parent.getID(),
                                                                               new RigidBodyTransform(),
@@ -54,11 +42,24 @@ public class RDXPrimitiveRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<R
    {
       long nextID = sceneGraph.getNextID().getAndIncrement();
       PrimitiveRigidBodySceneNode sceneNode = new PrimitiveRigidBodySceneNode(nextID,
-                                                                              name.get(),
+                                                                              getName(shape),
                                                                               sceneGraph.getIDToNodeMap(),
                                                                               parent.getID(),
                                                                               new RigidBodyTransform(),
                                                                               shape);
       return new RDXPrimitiveRigidBodySceneNode(lengths, radii, sceneNode, RDXBaseUI.getInstance().getPrimary3DPanel());
+   }
+
+   private String getName(PrimitiveRigidBodyShape shape)
+   {
+      if (super.name.isEmpty())
+      {
+         ids.merge(shape, 1, Integer::sum);
+         return shape.getCapitalizedName() + ids.get(shape).toString();
+      }
+      else
+      {
+         return super.name.get();
+      }
    }
 }
