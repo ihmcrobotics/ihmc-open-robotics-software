@@ -117,4 +117,14 @@ public interface MonteCarloFootstepPlannerParametersBasics extends MonteCarloFoo
    {
       set(MonteCarloFootstepPlannerParameters.decayFactor, decayFactor);
    }
+
+   default void setMinimumContactValue(double minimumContactValue)
+   {
+      set(MonteCarloFootstepPlannerParameters.minimumContactValue, minimumContactValue);
+   }
+
+   default void setMaximumContactValue(double maximumContactValue)
+   {
+      set(MonteCarloFootstepPlannerParameters.maximumContactValue, maximumContactValue);
+   }
 }

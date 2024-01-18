@@ -324,7 +324,6 @@ public class MonteCarloPlannerTools
       MonteCarloPlannerTools.getOptimalPath(root, path);
       LogTools.info("Optimal Path Size: {}", path.size());
 
-
       HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
 
       FootstepPlan footstepPlan = new FootstepPlan();
@@ -341,8 +340,8 @@ public class MonteCarloPlannerTools
          FramePose3D footstepPose = getFramePose3D(nodeX, nodeY, nodeZ, nodeYaw);
          footPolygon.applyTransform(footstepPose);
 
-//         LogTools.warn("Attempting to snap footstep pose to height map");
-//         MonteCarloPlannerTools.snapFootPoseToHeightMap(request.getHeightMapData(), footstepPose, heightMapSnapper, footPolygon);
+         //         LogTools.warn("Attempting to snap footstep pose to height map");
+         //         MonteCarloPlannerTools.snapFootPoseToHeightMap(request.getHeightMapData(), footstepPose, heightMapSnapper, footPolygon);
 
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
@@ -400,8 +399,6 @@ public class MonteCarloPlannerTools
 
       RigidBodyTransform yawTransform = new RigidBodyTransform(new Quaternion(yawPrevious, 0, 0), new Vector3D());
 
-
-
       Vector3D forwardVector = new Vector3D(Axis3D.X);
       forwardVector.applyTransform(yawTransform);
 
@@ -430,10 +427,8 @@ public class MonteCarloPlannerTools
             double orthogonalDistanceToMidline = midLine.distance(point);
             double orthogonalDistanceToBaseLine = baseLine.distance(point);
 
-            if (radius >= minRadius && radius <= maxRadius && dotProduct > 0 && stanceSide * dotProductLeft > 0
-                && orthogonalDistanceToMidline <= maxWidth && orthogonalDistanceToMidline >= minWidth
-                && orthogonalDistanceToBaseLine <= maxLength && orthogonalDistanceToBaseLine >= minLength
-            )
+            if (radius >= minRadius && radius <= maxRadius && dotProduct > 0 && stanceSide * dotProductLeft > 0 && orthogonalDistanceToMidline <= maxWidth
+                && orthogonalDistanceToMidline >= minWidth && orthogonalDistanceToBaseLine <= maxLength && orthogonalDistanceToBaseLine >= minLength)
             {
                //actions.add(new Vector3D(i, j, -0.1));
                actions.add(new Vector3D(i, j, 0));
@@ -489,10 +484,10 @@ public class MonteCarloPlannerTools
       double score = 0.0;
 
       Point2D previousPosition = new Point2D(oldNode.getState());
-      previousPosition.scale(1/50.0f);
+      previousPosition.scale(1 / 50.0f);
 
       Point2D currentPosition = new Point2D(newNode.getState());
-      currentPosition.scale(1/50.0f);
+      currentPosition.scale(1 / 50.0f);
 
       Point2D goalPositionRight = new Point2D(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition());
       Point2D goalPositionLeft = new Point2D(request.getGoalFootPoses().get(RobotSide.RIGHT).getPosition());
@@ -500,11 +495,11 @@ public class MonteCarloPlannerTools
       goalPosition.add(goalPositionRight, goalPositionLeft);
       goalPosition.scale(0.5f);
 
-//      Point2D startPositionLeft = new Point2D(request.getStartFootPoses().get(RobotSide.LEFT).getPosition());
-//      Point2D startPositionRight = new Point2D(request.getStartFootPoses().get(RobotSide.RIGHT).getPosition());
-//      Point2D startPosition = new Point2D();
-//      startPosition.add(startPositionLeft, startPositionRight);
-//      startPosition.scale(0.5f);
+      //      Point2D startPositionLeft = new Point2D(request.getStartFootPoses().get(RobotSide.LEFT).getPosition());
+      //      Point2D startPositionRight = new Point2D(request.getStartFootPoses().get(RobotSide.RIGHT).getPosition());
+      //      Point2D startPosition = new Point2D();
+      //      startPosition.add(startPositionLeft, startPositionRight);
+      //      startPosition.scale(0.5f);
 
       Vector2D stepVector = new Vector2D();
       stepVector.sub(currentPosition, previousPosition);
@@ -523,10 +518,11 @@ public class MonteCarloPlannerTools
       double goalReward = plannerParameters.getGoalReward() * progressToGoal;
 
       double contactValue = request.getTerrainMapData().getContactScoreInWorld(currentPosition.getX32(), currentPosition.getY32());
-      contactValue = MathTools.clamp(contactValue, 4.0f, 12.0f) / 12.0f;
+      contactValue = MathTools.clamp(contactValue, plannerParameters.getMinimumContactValue(), plannerParameters.getMaximumContactValue());
+      contactValue /= plannerParameters.getMaximumContactValue();
       double contactReward = (contactValue) * plannerParameters.getFeasibleContactReward();
 
-      if (contactValue < 0.38)
+      if (contactValue < plannerParameters.getMinimumContactValue() / plannerParameters.getMaximumContactValue())
          contactReward = 0.0f;
 
       //      double stepYawCost = Math.abs(oldNode.getState().getZ() - newNode.getState().getZ()) * 0.01f;
