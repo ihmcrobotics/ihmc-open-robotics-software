@@ -28,7 +28,12 @@ public class RDXPrimitiveRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<R
 
    public RDXPrimitiveRigidBodySceneNode build(PrimitiveRigidBodyShape shape)
    {
-      String name;
+      return build(shape, name.get());
+   }
+
+   public RDXPrimitiveRigidBodySceneNode build(PrimitiveRigidBodyShape shape, String name)
+   {
+      super.name.set(name);
 
       if (super.name.isEmpty())
       {

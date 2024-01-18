@@ -1,6 +1,6 @@
 {
-  "name" : "PickUpGraspBox",
-  "object" : "Box",
+  "name" : "PickUpShow45Shoe",
+  "object" : "Shoe",
   "x" : 0.0,
   "y" : 0.0,
   "z" : 0.0,
@@ -14,12 +14,9 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": "OPEN"
-    }, {
-      "side" : "right",
-      "type": "OPEN"
+      "type" : "CLOSE"
     } ]
   }, {
     "x" : 0.0,
@@ -28,12 +25,9 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": ""
-    }, {
-      "side" : "right",
-      "type": ""
+      "type" : "OPEN"
     } ]
   }, {
     "x" : 0.0,
@@ -42,12 +36,9 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": ""
-    }, {
-      "side" : "right",
-      "type": ""
+      "type" : "CLOSE"
     } ]
   }, {
     "x" : 0.0,
@@ -56,44 +47,35 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": "GRIP_HARD"
-    }, {
-      "side" : "right",
-      "type": "GRIP_HARD"
+      "type" : "GRIP_HARD"
     } ]
   }, {
     "x" : 0.0,
     "y" : 0.0,
-    "z" : 0.228,
+    "z" : 0.045,
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": ""
-    }, {
-      "side" : "right",
-      "type": ""
+      "type" : "GRIP_HARD"
     } ]
   }, {
-    "x" : 0.123,
+    "x" : 0.0,
     "y" : 0.0,
-    "z" : 0.4965,
+    "z" : 0.165,
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": ""
-    }, {
-      "side" : "right",
-      "type": ""
+      "type" : "GRIP_HARD"
     } ]
   } ],
-  "activeSides" : 2,
-  "numberPreGraspFrames" : 3,
-  "numberPostGraspFrames" : 2,
+  "activeSides" : 1,
+  "numberPreGraspFrames" : 2,
+  "numberPostGraspFrames" : 3,
   "resizablePrimitiveShape" : "NULL"
 }
