@@ -661,20 +661,18 @@ void kernel computeSnappedValuesKernel(global float* params,
             int2 query_key = (int2) (x_query, y_query);
             int query_height_int = read_imageui(height_map, query_key).x;
 
-            float distance_to_foot_from_this_query;
             if (ASSUME_FOOT_IS_A_CIRCLE)
             {
-                distance_to_foot_from_this_query = signed_distance_to_foot_circle(map_center_index, map_resolution, params, map_key, query_key);
+                max_height_int = max(query_height_int, max_height_int);
             }
             else
             {
-                distance_to_foot_from_this_query = signed_distance_to_foot_polygon(map_center_index, map_resolution, params, map_key, foot_yaw, query_key);
-            }
-
-            // If the distance is within the search area, we want to include it.
-            if (distance_to_foot_from_this_query < 1e-3f)
-            {
-                max_height_int = max(query_height_int, max_height_int);
+                float distance_to_foot_from_this_query = signed_distance_to_foot_polygon(map_center_index, map_resolution, params, map_key, foot_yaw, query_key);
+                // If the distance is within the search area, we want to include it.
+                if (distance_to_foot_from_this_query < 1e-3f)
+                {
+                    max_height_int = max(query_height_int, max_height_int);
+                }
             }
         }
     }
