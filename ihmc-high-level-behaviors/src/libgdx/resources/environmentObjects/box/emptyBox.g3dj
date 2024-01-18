@@ -65,7 +65,7 @@
 					]
 				}, 
 				{
-					"id": "Mesh.003_part1", 
+					"id": "Mesh.001_part1", 
 					"type": "TRIANGLES", 
 					"indices": [
 						 24,  25,  26,  26,  27,  24,  28,  29,  30,  30,  29,  31, 
@@ -115,7 +115,7 @@
 			"id": "Cube", 
 			"rotation": [ 0.000000,  0.000000, -0.707107,  0.707107], 
 			"scale": [ 0.175000,  0.175000,  0.175000], 
-			"translation": [ 0.000000,  0.000000,  0.132500], 
+			"translation": [ 0.000000,  0.000000,  0.000906], 
 			"parts": [
 				{
 					"meshpartid": "Cube.001_part1", 
@@ -136,10 +136,10 @@
 		}, 
 		{
 			"id": "Box034", 
-			"translation": [-0.164003,  0.000000,  0.078930], 
+			"translation": [-0.164003,  0.000000, -0.052664], 
 			"parts": [
 				{
-					"meshpartid": "Mesh.003_part1", 
+					"meshpartid": "Mesh.001_part1", 
 					"materialid": "19 - Default.001", 
 					"uvMapping": [[]]
 				}

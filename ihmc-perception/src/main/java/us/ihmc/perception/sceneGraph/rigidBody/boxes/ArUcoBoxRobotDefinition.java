@@ -38,7 +38,6 @@ public class ArUcoBoxRobotDefinition extends RobotDefinition
       CollisionShapeDefinition collisionShapeDefinition = new CollisionShapeDefinition(new Box3DDefinition(RigidBodySceneObjectDefinitions.BOX_DEPTH,
                                                                                                            RigidBodySceneObjectDefinitions.BOX_WIDTH,
                                                                                                            RigidBodySceneObjectDefinitions.BOX_HEIGHT));
-      collisionShapeDefinition.getOriginPose().getTranslation().set(RigidBodySceneObjectDefinitions.BOX_DEPTH / 2.0, RigidBodySceneObjectDefinitions.BOX_WIDTH / 2.0, 0.0);
       box.addCollisionShapeDefinition(collisionShapeDefinition);
 
       box.setMass(0.5);
