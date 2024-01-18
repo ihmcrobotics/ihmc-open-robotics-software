@@ -24,7 +24,5 @@ public class RDXArUcoBoxObject extends RDXEnvironmentObject
                                      RigidBodySceneObjectDefinitions.BOX_WIDTH,
                                      RigidBodySceneObjectDefinitions.BOX_HEIGHT);
       setCollisionGeometryObject(collisionBox);
-
-      getRealisticModelOffset().getTranslation().add(0.0, 0.0, -collisionBox.getSizeZ() / 2.0);
    }
 }

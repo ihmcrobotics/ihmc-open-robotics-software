@@ -68,6 +68,12 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
                                       HumanoidMessageTools.createHandDesiredConfigurationMessage(getDefinition().getSide(),
                                                                                                  HandConfiguration.CLOSE));
       }
+      else if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.GRIP_HARD)
+      {
+         ros2ControllerHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                      HumanoidMessageTools.createHandDesiredConfigurationMessage(getDefinition().getSide(),
+                                                                                                 HandConfiguration.CRUSH));
+      }
 
       executionTimer.reset();
    }

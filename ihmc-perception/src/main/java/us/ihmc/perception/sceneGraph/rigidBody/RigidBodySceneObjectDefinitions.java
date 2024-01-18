@@ -30,7 +30,7 @@ public class RigidBodySceneObjectDefinitions
    public static final double BOX_WIDTH = 0.394;
    public static final double BOX_DEPTH = 0.31;
    public static final double BOX_HEIGHT = 0.265;
-   public static final double BOX_MARKER_FROM_BOTTOM_Z = 0.0795;
+   public static final double BOX_MARKER_FROM_BOTTOM_Z = -0.05;
    public static final double BOX_MARKER_FROM_RIGHT_Y = 0.0765;
    public static final double BOX_MARKER_FROM_FRONT_X = 0.1685;
    public static final RigidBodyTransform BOX_TRANSFORM_TO_MARKER = new RigidBodyTransform();
