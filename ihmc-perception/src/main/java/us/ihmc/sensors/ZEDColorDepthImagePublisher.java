@@ -85,7 +85,8 @@ public class ZEDColorDepthImagePublisher
             newDepthImageAvailable.await();
          }
 
-         publishDepthImage(nextGpuDepthImage);
+         ros2DepthImagePublisher.publish(createDepthImageMessage(nextGpuDepthImage));
+         lastDepthSequenceNumber = nextGpuDepthImage.getSequenceNumber();
       }
       catch (InterruptedException interruptedException)
       {
@@ -108,7 +109,8 @@ public class ZEDColorDepthImagePublisher
             newCutOutDepthImageAvailable.await();
          }
 
-         publishDepthImage(nextCutOutDepthImage);
+         ros2CutOutDepthImagePublisher.publish(createDepthImageMessage(nextCutOutDepthImage));
+         lastCutOutDepthSequenceNumber = nextCutOutDepthImage.getSequenceNumber();
       }
       catch (InterruptedException interruptedException)
       {
@@ -120,8 +122,10 @@ public class ZEDColorDepthImagePublisher
       }
    }
 
-   private void publishDepthImage(RawImage depthImageToPublish)
+   private ImageMessage createDepthImageMessage(RawImage depthImageToPublish)
    {
+      ImageMessage depthImageMessage = new ImageMessage();
+
       // Redundant safety checks
       if (depthImageToPublish != null && !depthImageToPublish.isEmpty() && depthImageToPublish.getSequenceNumber() != lastDepthSequenceNumber)
       {
@@ -130,7 +134,6 @@ public class ZEDColorDepthImagePublisher
          OpenCVTools.compressImagePNG(depthImageToPublish.getCpuImageMat(), depthPNGPointer);
 
          // Publish image
-         ImageMessage depthImageMessage = new ImageMessage();
          ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());
          imageMessageDataPacker.pack(depthImageMessage, depthPNGPointer);
          MessageTools.toMessage(depthImageToPublish.getAcquisitionTime(), depthImageMessage.getAcquisitionTime());
@@ -146,14 +149,12 @@ public class ZEDColorDepthImagePublisher
          depthImageMessage.setDepthDiscretization(depthImageToPublish.getDepthDiscretization());
          CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
          ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
-
-         ros2DepthImagePublisher.publish(depthImageMessage);
-
-         lastDepthSequenceNumber = depthImageToPublish.getSequenceNumber();
-
+         
          // Close GpuMat
          depthPNGPointer.close();
       }
+
+      return depthImageMessage;
    }
 
    private void publishLeftColorThreadFunction()
