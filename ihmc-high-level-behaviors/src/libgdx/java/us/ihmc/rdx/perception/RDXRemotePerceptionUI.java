@@ -59,6 +59,7 @@ public class RDXRemotePerceptionUI
       remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(continuousWalkingParameters, ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(heightMapParameters, PerceptionComms.HEIGHT_MAP_PARAMETERS);
+      remotePropertySets.registerRemotePropertySet(monteCarloFootstepPlannerParameters, ContinuousWalkingAPI.MONTE_CARLO_PLANNER_PARAMETERS);
    }
 
    public void registerRapidRegionsParameters()

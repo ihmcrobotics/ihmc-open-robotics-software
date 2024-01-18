@@ -225,7 +225,7 @@ public class ContinuousPlanner
       }
 
       // Sync the swing time to always be the same whether its obstacle avoidance or not
-      footstepPlanner.getSwingPlannerParameters().set(swingPlannerParameters);
+//      footstepPlanner.getSwingPlannerParameters().set(swingPlannerParameters);
 
       FootstepPlannerRequest request = createFootstepPlannerRequest(startingStancePose, goalStancePose);
       request.setRequestedInitialStanceSide(imminentFootstepSide);

@@ -12,12 +12,12 @@
     "upperBound" : 400
   },
   "Timeout duration" : {
-    "value" : 0.05,
+    "value" : 0.50276,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
   "Feasible Contact Reward" : {
-    "value" : 253.012061,
+    "value" : 679.775298,
     "lowerBound" : 0.0,
     "upperBound" : 1000.0
   },
@@ -57,7 +57,7 @@
     "upperBound" : 5.0
   },
   "Initial value cutoff" : {
-    "value" : 112,
+    "value" : -88,
     "lowerBound" : -1000,
     "upperBound" : 1000
   },
@@ -67,17 +67,17 @@
     "upperBound" : 12
   },
   "Search inner radius" : {
-    "value" : 0.35,
+    "value" : 0.3,
     "lowerBound" : 0.0,
     "upperBound" : 0.3
   },
   "Search outer radius" : {
-    "value" : 0.6,
+    "value" : 0.606796,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Search skip size" : {
-    "value" : 2,
+    "value" : 1,
     "lowerBound" : 0,
     "upperBound" : 10
   },
@@ -92,7 +92,7 @@
     "upperBound" : 0.7
   },
   "Minimum step width" : {
-    "value" : 0.15,
+    "value" : 0.3,
     "lowerBound" : 0.1,
     "upperBound" : 0.3
   },

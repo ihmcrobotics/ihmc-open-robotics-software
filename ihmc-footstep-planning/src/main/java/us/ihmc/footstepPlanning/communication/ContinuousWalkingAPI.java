@@ -41,4 +41,7 @@ public class ContinuousWalkingAPI
 
    public static final StoredPropertySetROS2TopicPair SWING_PLANNING_PARAMETERS
          = new StoredPropertySetROS2TopicPair(ACTIVE_MODULE_NAME,"swing_planning_parameters");
+
+   public static final StoredPropertySetROS2TopicPair MONTE_CARLO_PLANNER_PARAMETERS
+         = new StoredPropertySetROS2TopicPair(ACTIVE_MODULE_NAME,"monte_carlo_planner_parameters");
 }
