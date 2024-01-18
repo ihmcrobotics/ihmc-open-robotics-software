@@ -252,4 +252,9 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    {
       return new Vector3D32(xRadius.get(), yRadius.get(), zRadius.get());
    }
+
+   public void setModelInstance(RDXModelInstance modelInstance)
+   {
+      this.modelInstance = modelInstance;
+   }
 }

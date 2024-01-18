@@ -1,6 +1,6 @@
 {
-  "name" : "PickUpGraspBox",
-  "object" : "Box",
+  "name" : "ResizableBox",
+  "object" : "ResizableBox",
   "x" : 0.0,
   "y" : 0.0,
   "z" : 0.0,
@@ -14,12 +14,12 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": "OPEN"
+      "type" : ""
     }, {
       "side" : "right",
-      "type": "OPEN"
+      "type" : ""
     } ]
   }, {
     "x" : 0.0,
@@ -28,12 +28,12 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": ""
+      "type" : ""
     }, {
       "side" : "right",
-      "type": ""
+      "type" : ""
     } ]
   }, {
     "x" : 0.0,
@@ -42,58 +42,50 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": ""
+      "type" : ""
     }, {
       "side" : "right",
-      "type": ""
+      "type" : ""
     } ]
   }, {
-    "x" : 0.0,
+    "x" : 0.072,
     "y" : 0.0,
-    "z" : 0.0,
+    "z" : 0.258,
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": "GRIP_HARD"
+      "type" : ""
     }, {
       "side" : "right",
-      "type": "GRIP_HARD"
+      "type" : ""
     } ]
   }, {
-    "x" : 0.0,
+    "x" : 0.072,
     "y" : 0.0,
-    "z" : 0.228,
+    "z" : 0.8635,
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": ""
+      "type" : ""
     }, {
       "side" : "right",
-      "type": ""
-    } ]
-  }, {
-    "x" : 0.123,
-    "y" : 0.0,
-    "z" : 0.4965,
-    "rollInDegrees" : 0.0,
-    "pitchInDegrees" : 0.0,
-    "yawInDegrees" : 0.0,
-    "configuration": [ {
-      "side" : "left",
-      "type": ""
-    }, {
-      "side" : "right",
-      "type": ""
+      "type" : ""
     } ]
   } ],
   "activeSides" : 2,
-  "numberPreGraspFrames" : 3,
+  "numberPreGraspFrames" : 2,
   "numberPostGraspFrames" : 2,
-  "resizablePrimitiveShape" : "NULL"
+  "resizablePrimitiveShape" : "BOX",
+  "xLength" : 0.31,
+  "yLength" : 0.394,
+  "zLength" : 0.265,
+  "xRadius" : 0.1,
+  "yRadius" : 0.1,
+  "zRadius" : 0.1
 }

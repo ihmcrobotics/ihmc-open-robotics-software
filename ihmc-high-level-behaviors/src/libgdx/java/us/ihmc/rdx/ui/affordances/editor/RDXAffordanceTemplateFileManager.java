@@ -87,8 +87,9 @@ public class RDXAffordanceTemplateFileManager
          LogTools.info("Saving to file ...");
          JSONFileTools.save(file, jsonNode ->
          {
-            jsonNode.put("name", fileName);
-            ArrayNode actionsArrayNode = jsonNode.putArray("actions");
+            jsonNode.put("type", "ActionSequenceDefinition");
+            jsonNode.put("description", fileName);
+            ArrayNode actionsArrayNode = jsonNode.putArray("children");
 
             var preGraspPoses = preGraspFrames.getPoses();
             var graspPoses = graspFrame.getPoses();
@@ -142,6 +143,7 @@ public class RDXAffordanceTemplateFileManager
                      else
                         actionNode.put("executeWithNextAction", preGraspHandConfigurations.get(side).get(i) != null ? true : false);
                      actionNode.put("holdPoseInWorldLater", true);
+                     actionNode.put("jointSpaceControl", true);
 
                      double[] dataTrajectories = new double[16];
                      transformToParent.get(dataTrajectories);
@@ -201,6 +203,7 @@ public class RDXAffordanceTemplateFileManager
                   else
                      actionNode.put("executeWithNextAction", graspFrame.getHandConfiguration(side) != null ? true : false);
                   actionNode.put("holdPoseInWorldLater", true);
+                  actionNode.put("jointSpaceControl", true);
 
                   double[] dataTrajectories = new double[16];
                   transformToParent.get(dataTrajectories);
@@ -267,6 +270,7 @@ public class RDXAffordanceTemplateFileManager
                      else
                         actionNode.put("executeWithNextAction", postGraspHandConfigurations.get(side).get(i) != null ? true : false);
                      actionNode.put("holdPoseInWorldLater", (i != numberOfPostGraspFrames - 1));
+                     actionNode.put("jointSpaceControl", true);
 
                      double[] dataTrajectories = new double[16];
                      transformToParent.get(dataTrajectories);
@@ -502,6 +506,20 @@ public class RDXAffordanceTemplateFileManager
                   gripArray.put("type", postGraspHandConfigurations.get(side).get(i) == null ? "" : postGraspHandConfigurations.get(side).get(i).toString());
                }
             }
+            if (!(objectBuilder.getSelectedObject().getShape()==null))
+            {
+               jsonNode.put("resizablePrimitiveShape", objectBuilder.getSelectedObject().getShape().toString());
+               jsonNode.put("xLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(0));
+               jsonNode.put("yLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(1));
+               jsonNode.put("zLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(2));
+               jsonNode.put("xRadius", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(3));
+               jsonNode.put("yRadius", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(4));
+               jsonNode.put("zRadius", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(5));
+            }
+            else
+            {
+               jsonNode.put("resizablePrimitiveShape", "NULL");
+            }
          });
          LogTools.info("SAVED to file {}", extraFile.getFileName());
       }
@@ -596,6 +614,19 @@ public class RDXAffordanceTemplateFileManager
                   String configuration = handConfigurationArrayNode.get(sideIndex).get("type").asText();
                   postGraspFrames.addHandConfiguration(configuration.isEmpty() ? null : configuration, side);
                }
+            }
+
+            String resizablePrimitiveShape = jsonNode.get("resizablePrimitiveShape").asText();
+            if (!resizablePrimitiveShape.equals("NULL"))
+            {
+               List<Float> readPrimitiveSize = new ArrayList<>();
+               readPrimitiveSize.add(jsonNode.get("xLength").floatValue());
+               readPrimitiveSize.add(jsonNode.get("yLength").floatValue());
+               readPrimitiveSize.add(jsonNode.get("zLength").floatValue());
+               readPrimitiveSize.add(jsonNode.get("xRadius").floatValue());
+               readPrimitiveSize.add(jsonNode.get("yRadius").floatValue());
+               readPrimitiveSize.add(jsonNode.get("zRadius").floatValue());
+               objectBuilder.getSelectedObject().setReadResizablePrimitiveSize(readPrimitiveSize);
             }
          });
          LogTools.info("Loaded file {}", filePath);

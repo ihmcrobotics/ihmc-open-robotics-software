@@ -1,0 +1,60 @@
+{
+  "name" : "PickUpShow45Shoe",
+  "preGraspFrames" : [ {
+    "side" : "left",
+    "isPoseSet" : true,
+    "x" : -0.217,
+    "y" : 0.142,
+    "z" : 0.1355,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -90.0,
+    "yawInDegrees" : 0.0
+  }, {
+    "side" : "left",
+    "isPoseSet" : true,
+    "x" : -0.12,
+    "y" : 0.032,
+    "z" : 0.169,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -35.92,
+    "yawInDegrees" : -0.26
+  } ],
+  "graspFrames" : [ {
+    "side" : "left",
+    "isPoseSet" : true,
+    "x" : -0.0835,
+    "y" : 0.032,
+    "z" : 0.0885,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -38.04,
+    "yawInDegrees" : -0.26
+  } ],
+  "postGraspFrames" : [ {
+    "side" : "left",
+    "isPoseSet" : true,
+    "x" : -0.083,
+    "y" : 0.032,
+    "z" : 0.0725,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -45.18,
+    "yawInDegrees" : -0.26
+  }, {
+    "side" : "left",
+    "isPoseSet" : true,
+    "x" : -0.083,
+    "y" : 0.032,
+    "z" : 0.1175,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -45.18,
+    "yawInDegrees" : -0.26
+  }, {
+    "side" : "left",
+    "isPoseSet" : true,
+    "x" : -0.083,
+    "y" : 0.032,
+    "z" : 0.2375,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -45.18,
+    "yawInDegrees" : -0.26
+  } ]
+}

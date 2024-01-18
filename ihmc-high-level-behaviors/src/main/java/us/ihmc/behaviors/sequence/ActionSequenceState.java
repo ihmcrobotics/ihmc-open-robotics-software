@@ -16,18 +16,22 @@ import java.util.List;
 public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDefinition>
 {
    private final CRDTBidirectionalBoolean automaticExecution;
+   private final CRDTBidirectionalBoolean invertExecution;
    private final CRDTBidirectionalInteger executionNextIndex;
    private final CRDTBidirectionalNotification manualExecutionRequested;
    private final CRDTUnidirectionalString nextActionRejectionTooltip;
 
    private transient final MutableInt actionIndex = new MutableInt();
    private final List<ActionNodeState<?>> actionChildren = new ArrayList<>();
+   private boolean prevInvertExecution = false;
+   private int firstIndexOfLastConcurrentActions = 0;
 
    public ActionSequenceState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new ActionSequenceDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
       automaticExecution = new CRDTBidirectionalBoolean(this, false);
+      invertExecution = new CRDTBidirectionalBoolean(this, false);
       executionNextIndex = new CRDTBidirectionalInteger(this, 0);
       manualExecutionRequested = new CRDTBidirectionalNotification(this);
       nextActionRejectionTooltip = new CRDTUnidirectionalString(ROS2ActorDesignation.ROBOT, crdtInfo, "");
@@ -41,6 +45,19 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       actionIndex.setValue(0);
       actionChildren.clear();
       updateActionSubtree(this, actionIndex);
+   }
+
+   public void updateExecuteNextIndex()
+   {
+      for (int i = getActionChildren().size() - 1 - firstIndexOfLastConcurrentActions; i >= 0; i--)
+      {
+         firstIndexOfLastConcurrentActions += 1;
+         if (getActionChildren().get(i).getDefinition().getExecuteWithNextAction())
+         {
+            executionNextIndex.setValue(i);
+            break;
+         }
+      }
    }
 
    public void updateActionSubtree(BehaviorTreeNodeState<?> node, MutableInt actionIndex)
@@ -66,6 +83,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       super.toMessage(message.getState());
 
       message.setAutomaticExecution(automaticExecution.toMessage());
+      message.setInvertActionSequence(invertExecution.toMessage());
       message.setExecutionNextIndex(executionNextIndex.toMessage());
       message.setManualExecutionRequested(manualExecutionRequested.toMessage());
       message.setNextActionRejectionTooltip(nextActionRejectionTooltip.toMessage());
@@ -78,6 +96,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       getDefinition().fromMessage(message.getDefinition());
 
       automaticExecution.fromMessage(message.getAutomaticExecution());
+      invertExecution.fromMessage(message.getInvertActionSequence());
       executionNextIndex.fromMessage(message.getExecutionNextIndex());
       manualExecutionRequested.fromMessage(message.getManualExecutionRequested());
       nextActionRejectionTooltip.fromMessage(message.getNextActionRejectionTooltipAsString());
@@ -115,6 +134,13 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       if (executionNextIndex.getValue() < actionChildren.size())
          executionNextIndex.increment();
    }
+
+   public boolean getInvertExecution()
+   {
+      return invertExecution.getValue();
+   }
+
+   public void setInvertExecution(boolean invertExecution){this.invertExecution.setValue(invertExecution);}
 
    public void setExecutionNextIndex(int executionNextIndex)
    {

@@ -5,6 +5,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -15,8 +16,9 @@ public class RDXInteractableObjectBuilder extends RDXPanel
 {
    private final static String WINDOW_NAME = "Object Panel";
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private RDXInteractableObject selectedObject;
+   private final RDXInteractableObject selectedObject;
    private final SortedMap<String, PredefinedRigidBodySceneNode> nameToNodesMap = new TreeMap<>();
+   private final SortedMap<String, PrimitiveRigidBodySceneNode> nameToPrimitiveNodesMap = new TreeMap<>();
    private String selectedObjectName = "";
    private final TypedNotification<String> selectedObjectChanged = new TypedNotification<>();
 
@@ -37,6 +39,11 @@ public class RDXInteractableObjectBuilder extends RDXPanel
          nameToNodesMap.put(predefinedRigidBodySceneNode.getName(), predefinedRigidBodySceneNode);
       }
 
+      if (sceneNode instanceof PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode)
+      {
+         nameToPrimitiveNodesMap.put(primitiveRigidBodySceneNode.getName(), primitiveRigidBodySceneNode);
+      }
+
       for (SceneNode child : sceneNode.getChildren())
       {
          registerSceneSubtree(child);
@@ -46,7 +53,7 @@ public class RDXInteractableObjectBuilder extends RDXPanel
    public void renderImGuiWidgets()
    {
       ImGui.text("Selected: " + (!isAnyObjectSelected() ? "" : (selectedObjectChanged.read())));
-      ImGui.text("Select object: ");
+      ImGui.text("Predefined object: ");
       for (PredefinedRigidBodySceneNode predefinedRigidBodySceneNode : nameToNodesMap.values())
       {
          if (ImGui.button(labels.get(predefinedRigidBodySceneNode.getName())))
@@ -56,6 +63,21 @@ public class RDXInteractableObjectBuilder extends RDXPanel
             selectedObject.load(predefinedRigidBodySceneNode.getVisualModelFilePath(), predefinedRigidBodySceneNode.getVisualModelToNodeFrameTransform());
             // Notify that the object selection has been updated
             selectedObjectName = predefinedRigidBodySceneNode.getName();
+            selectedObjectChanged.set(selectedObjectName);
+         }
+         ImGui.separator();
+      }
+      ImGui.text("Resizable Primitive Objects: ");
+      for (PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode : nameToPrimitiveNodesMap.values())
+      {
+         if (ImGui.button(labels.get(primitiveRigidBodySceneNode.getName())))
+         {
+            if (isAnyObjectSelected())
+               selectedObject.clear();
+            selectedObject.setShape(primitiveRigidBodySceneNode.getShape());
+            selectedObject.createVisuals();
+            // Notify that the object selection has been updated
+            selectedObjectName = primitiveRigidBodySceneNode.getName();
             selectedObjectChanged.set(selectedObjectName);
          }
          ImGui.separator();
@@ -77,6 +99,10 @@ public class RDXInteractableObjectBuilder extends RDXPanel
       if (isAnyObjectSelected() && (ImGui.button(labels.get("Hide/Show Gizmo") + "##object")))
       {
          selectedObject.switchGizmoVisualization();
+      }
+      if (selectedObject.getShape() != null)
+      {
+         selectedObject.updateVisuals();
       }
    }
 

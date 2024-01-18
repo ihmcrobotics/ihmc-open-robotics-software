@@ -22,7 +22,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  */
 public class RDXAffordanceTemplateFrame
 {
-   private final SideDependentList<FramePose3D> poses = new SideDependentList<>();
+   private SideDependentList<FramePose3D> poses = new SideDependentList<>();
    private final SideDependentList<Boolean> isPoseSet = new SideDependentList<>();
    private final SideDependentList<PoseReferenceFrame> poseFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> frameGraphics = new SideDependentList<>();
@@ -165,7 +165,12 @@ public class RDXAffordanceTemplateFrame
 
    public void setFrame(FramePose3D poseReference, RobotSide side)
    {
-      poses.replace(side, new FramePose3D(poseReference.getReferenceFrame(), poseReference));
+      poses.replace(side, poseReference);
+      updateInternal(side);
+   }
+
+   public void updateInternal(RobotSide side)
+   {
       poses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
       poseFrames.get(side).setPoseAndUpdate(poses.get(side));
       isPoseSet.replace(side, true);
@@ -212,6 +217,11 @@ public class RDXAffordanceTemplateFrame
    public SideDependentList<FramePose3D> getPoses()
    {
       return poses;
+   }
+
+   public void setPoses(SideDependentList<FramePose3D> poses)
+   {
+      this.poses = poses;
    }
 
    public String getHandConfiguration(RobotSide side)

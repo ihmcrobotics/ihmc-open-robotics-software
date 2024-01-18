@@ -256,34 +256,43 @@ public class RDXAffordanceTemplateFrames
 
    public void loadFrame(FramePose3D poseReference, RobotSide side, int index)
    {
+      // Update pose reference frame
       poseReference.changeFrame(ReferenceFrame.getWorldFrame());
-      PoseReferenceFrame frame = new PoseReferenceFrame(side.getLowerCaseName() + index + "Frame", poseReference.getReferenceFrame());
-      frame.setPoseAndUpdate(poseReference);
 
+      // Add pose reference to respective list
       poses.get(side).add(poseReference);
+
+      // Create a new PoseReferenceFrame and Add pose frame to respective list
+      PoseReferenceFrame frame = new PoseReferenceFrame(side.getLowerCaseName() + index + "Frame", poseReference.getReferenceFrame());
       poseFrames.get(side).add(frame);
-      boolean hasFrameBeenSetOnce = false;
-      for (boolean isInitialPoseSet : arePosesSet.get(side))
-      {
-         if (isInitialPoseSet)
-         {
-            hasFrameBeenSetOnce = true;
-            break;
-         }
-      }
+
+      updateInternal(side, index);
+   }
+
+   public void updateInternal(RobotSide side, int index)
+   {
+      poseFrames.get(side).get(index-1).setPoseAndUpdate(poses.get(side).get(index-1));
+
+      // Check if frame has been set at least once
+      boolean hasFrameBeenSetOnce = arePosesSet.get(side).stream().anyMatch(Boolean::booleanValue);
+
+      // Determine graphics based on conditions
       if (!hasFrameBeenSetOnce)
+      {
          frameGraphics.get(side).add(null);
-      else if (!arePosesSet.get(side).get(index-1))
+      }
+      else if (!arePosesSet.get(side).get(index - 1))
       {
          frameGraphics.get(side).add(new RDXReferenceFrameGraphic(0.1, Color.RED));
       }
       else
+      {
          frameGraphics.get(side).add(new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex % colors.size())));
+      }
       colorIndex++;
 
-      // no hand configuration is set right when you add a new frame
+      // Reset selectedFrameConfiguration and add an empty spot for hand configurations
       selectedFrameConfiguration = null;
-      // add an empty spot for the hand configurations
       handConfigurations.get(side).add(null);
    }
 
@@ -361,6 +370,11 @@ public class RDXAffordanceTemplateFrames
       return poses;
    }
 
+   public SideDependentList<List<PoseReferenceFrame>> getPoseFrames()
+   {
+      return poseFrames;
+   }
+
    public SideDependentList<List<Boolean>> getArePosesSet()
    {
       return arePosesSet;
@@ -393,6 +407,16 @@ public class RDXAffordanceTemplateFrames
    {
       selectedIndex--;
       selectFrame(selectedIndex);
+   }
+
+   public int getIndex()
+   {
+      return index;
+   }
+
+   public List<Integer> getPoseIndices()
+   {
+      return poseIndices;
    }
 
    public void resetSelectedIndex()
