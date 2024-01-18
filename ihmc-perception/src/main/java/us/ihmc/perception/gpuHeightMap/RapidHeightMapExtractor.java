@@ -328,26 +328,28 @@ public class RapidHeightMapExtractor
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
+      if (computeSteppability)
+      {
+         snappingParametersBuffer.setParameter((float) gridCenter.getX());
+         snappingParametersBuffer.setParameter((float) gridCenter.getY());
+         snappingParametersBuffer.setParameter((float) parameters.getGlobalCellSizeInMeters());
+         snappingParametersBuffer.setParameter(globalCenterIndex);
+         snappingParametersBuffer.setParameter((float) cropCenterIndex);
+         snappingParametersBuffer.setParameter((float) parameters.getHeightScaleFactor());
+         snappingParametersBuffer.setParameter((float) parameters.getHeightOffset());
+         snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getFootLength());
+         snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getFootWidth());
+         snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getDistanceFromCliffTops());
+         snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getDistanceFromCliffBottoms());
+         snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getCliffStartHeightToAvoid());
+         snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getCliffEndHeightToAvoid());
+         snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getMinSupportAreaFraction());
+         snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getMinSnapHeightThreshold());
+         snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getSnapHeightThresholdAtSearchEdge());
+         snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getInequalityActivationSlope());
 
-      snappingParametersBuffer.setParameter((float) gridCenter.getX());
-      snappingParametersBuffer.setParameter((float) gridCenter.getY());
-      snappingParametersBuffer.setParameter((float) parameters.getGlobalCellSizeInMeters());
-      snappingParametersBuffer.setParameter(globalCenterIndex);
-      snappingParametersBuffer.setParameter((float) cropCenterIndex);
-      snappingParametersBuffer.setParameter((float) parameters.getHeightScaleFactor());
-      snappingParametersBuffer.setParameter((float) parameters.getHeightOffset());
-      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getFootLength());
-      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getFootWidth());
-      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getDistanceFromCliffTops());
-      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getDistanceFromCliffBottoms());
-      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getCliffStartHeightToAvoid());
-      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getCliffEndHeightToAvoid());
-      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getMinSupportAreaFraction());
-      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getMinSnapHeightThreshold());
-      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getSnapHeightThresholdAtSearchEdge());
-      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getInequalityActivationSlope());
-
-      snappingParametersBuffer.writeOpenCLBufferObject(openCLManager);
+         snappingParametersBuffer.writeOpenCLBufferObject(openCLManager);
+      }
    }
 
    public void computeContactMap()
