@@ -33,6 +33,10 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
             */
    public boolean is_executing_;
    /**
+            * If the node had a failure during it's last execution
+            */
+   public boolean failed_;
+   /**
             * Nominal execution duration
             */
    public double nominal_execution_duration_;
@@ -41,25 +45,17 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
             */
    public double elapsed_execution_time_;
    /**
-            * Current position distance to goal
+            * Desired trajectory
             */
-   public double current_position_distance_to_goal_;
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage>  desired_trajectory_;
    /**
-            * Start position distance to goal
+            * Current pose
             */
-   public double start_position_distance_to_goal_;
+   public us.ihmc.euclid.geometry.Pose3D current_pose_;
    /**
             * Position distance to goal tolerance
             */
    public double position_distance_to_goal_tolerance_;
-   /**
-            * Current orientation distance to goal
-            */
-   public double current_orientation_distance_to_goal_;
-   /**
-            * Start orientation distance to goal
-            */
-   public double start_orientation_distance_to_goal_;
    /**
             * Orientation distance to goal tolerance
             */
@@ -68,6 +64,9 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
    public ActionNodeStateMessage()
    {
       state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
+      desired_trajectory_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage> (50, new ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
+      current_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+
    }
 
    public ActionNodeStateMessage(ActionNodeStateMessage other)
@@ -89,19 +88,15 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
 
       is_executing_ = other.is_executing_;
 
+      failed_ = other.failed_;
+
       nominal_execution_duration_ = other.nominal_execution_duration_;
 
       elapsed_execution_time_ = other.elapsed_execution_time_;
 
-      current_position_distance_to_goal_ = other.current_position_distance_to_goal_;
-
-      start_position_distance_to_goal_ = other.start_position_distance_to_goal_;
-
+      desired_trajectory_.set(other.desired_trajectory_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.current_pose_, current_pose_);
       position_distance_to_goal_tolerance_ = other.position_distance_to_goal_tolerance_;
-
-      current_orientation_distance_to_goal_ = other.current_orientation_distance_to_goal_;
-
-      start_orientation_distance_to_goal_ = other.start_orientation_distance_to_goal_;
 
       orientation_distance_to_goal_tolerance_ = other.orientation_distance_to_goal_tolerance_;
 
@@ -192,6 +187,21 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
    }
 
    /**
+            * If the node had a failure during it's last execution
+            */
+   public void setFailed(boolean failed)
+   {
+      failed_ = failed;
+   }
+   /**
+            * If the node had a failure during it's last execution
+            */
+   public boolean getFailed()
+   {
+      return failed_;
+   }
+
+   /**
             * Nominal execution duration
             */
    public void setNominalExecutionDuration(double nominal_execution_duration)
@@ -221,34 +231,22 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       return elapsed_execution_time_;
    }
 
-   /**
-            * Current position distance to goal
-            */
-   public void setCurrentPositionDistanceToGoal(double current_position_distance_to_goal)
-   {
-      current_position_distance_to_goal_ = current_position_distance_to_goal;
-   }
-   /**
-            * Current position distance to goal
-            */
-   public double getCurrentPositionDistanceToGoal()
-   {
-      return current_position_distance_to_goal_;
-   }
 
    /**
-            * Start position distance to goal
+            * Desired trajectory
             */
-   public void setStartPositionDistanceToGoal(double start_position_distance_to_goal)
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage>  getDesiredTrajectory()
    {
-      start_position_distance_to_goal_ = start_position_distance_to_goal;
+      return desired_trajectory_;
    }
+
+
    /**
-            * Start position distance to goal
+            * Current pose
             */
-   public double getStartPositionDistanceToGoal()
+   public us.ihmc.euclid.geometry.Pose3D getCurrentPose()
    {
-      return start_position_distance_to_goal_;
+      return current_pose_;
    }
 
    /**
@@ -264,36 +262,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
    public double getPositionDistanceToGoalTolerance()
    {
       return position_distance_to_goal_tolerance_;
-   }
-
-   /**
-            * Current orientation distance to goal
-            */
-   public void setCurrentOrientationDistanceToGoal(double current_orientation_distance_to_goal)
-   {
-      current_orientation_distance_to_goal_ = current_orientation_distance_to_goal;
-   }
-   /**
-            * Current orientation distance to goal
-            */
-   public double getCurrentOrientationDistanceToGoal()
-   {
-      return current_orientation_distance_to_goal_;
-   }
-
-   /**
-            * Start orientation distance to goal
-            */
-   public void setStartOrientationDistanceToGoal(double start_orientation_distance_to_goal)
-   {
-      start_orientation_distance_to_goal_ = start_orientation_distance_to_goal;
-   }
-   /**
-            * Start orientation distance to goal
-            */
-   public double getStartOrientationDistanceToGoal()
-   {
-      return start_orientation_distance_to_goal_;
    }
 
    /**
@@ -340,19 +308,21 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_executing_, other.is_executing_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.failed_, other.failed_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.nominal_execution_duration_, other.nominal_execution_duration_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.elapsed_execution_time_, other.elapsed_execution_time_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_position_distance_to_goal_, other.current_position_distance_to_goal_, epsilon)) return false;
+      if (this.desired_trajectory_.size() != other.desired_trajectory_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.desired_trajectory_.size(); i++)
+         {  if (!this.desired_trajectory_.get(i).epsilonEquals(other.desired_trajectory_.get(i), epsilon)) return false; }
+      }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.start_position_distance_to_goal_, other.start_position_distance_to_goal_, epsilon)) return false;
-
+      if (!this.current_pose_.epsilonEquals(other.current_pose_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_distance_to_goal_tolerance_, other.position_distance_to_goal_tolerance_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_orientation_distance_to_goal_, other.current_orientation_distance_to_goal_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.start_orientation_distance_to_goal_, other.start_orientation_distance_to_goal_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.orientation_distance_to_goal_tolerance_, other.orientation_distance_to_goal_tolerance_, epsilon)) return false;
 
@@ -380,19 +350,15 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
 
       if(this.is_executing_ != otherMyClass.is_executing_) return false;
 
+      if(this.failed_ != otherMyClass.failed_) return false;
+
       if(this.nominal_execution_duration_ != otherMyClass.nominal_execution_duration_) return false;
 
       if(this.elapsed_execution_time_ != otherMyClass.elapsed_execution_time_) return false;
 
-      if(this.current_position_distance_to_goal_ != otherMyClass.current_position_distance_to_goal_) return false;
-
-      if(this.start_position_distance_to_goal_ != otherMyClass.start_position_distance_to_goal_) return false;
-
+      if (!this.desired_trajectory_.equals(otherMyClass.desired_trajectory_)) return false;
+      if (!this.current_pose_.equals(otherMyClass.current_pose_)) return false;
       if(this.position_distance_to_goal_tolerance_ != otherMyClass.position_distance_to_goal_tolerance_) return false;
-
-      if(this.current_orientation_distance_to_goal_ != otherMyClass.current_orientation_distance_to_goal_) return false;
-
-      if(this.start_orientation_distance_to_goal_ != otherMyClass.start_orientation_distance_to_goal_) return false;
 
       if(this.orientation_distance_to_goal_tolerance_ != otherMyClass.orientation_distance_to_goal_tolerance_) return false;
 
@@ -418,20 +384,18 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       builder.append(this.can_execute_);      builder.append(", ");
       builder.append("is_executing=");
       builder.append(this.is_executing_);      builder.append(", ");
+      builder.append("failed=");
+      builder.append(this.failed_);      builder.append(", ");
       builder.append("nominal_execution_duration=");
       builder.append(this.nominal_execution_duration_);      builder.append(", ");
       builder.append("elapsed_execution_time=");
       builder.append(this.elapsed_execution_time_);      builder.append(", ");
-      builder.append("current_position_distance_to_goal=");
-      builder.append(this.current_position_distance_to_goal_);      builder.append(", ");
-      builder.append("start_position_distance_to_goal=");
-      builder.append(this.start_position_distance_to_goal_);      builder.append(", ");
+      builder.append("desired_trajectory=");
+      builder.append(this.desired_trajectory_);      builder.append(", ");
+      builder.append("current_pose=");
+      builder.append(this.current_pose_);      builder.append(", ");
       builder.append("position_distance_to_goal_tolerance=");
       builder.append(this.position_distance_to_goal_tolerance_);      builder.append(", ");
-      builder.append("current_orientation_distance_to_goal=");
-      builder.append(this.current_orientation_distance_to_goal_);      builder.append(", ");
-      builder.append("start_orientation_distance_to_goal=");
-      builder.append(this.start_orientation_distance_to_goal_);      builder.append(", ");
       builder.append("orientation_distance_to_goal_tolerance=");
       builder.append(this.orientation_distance_to_goal_tolerance_);
       builder.append("}");

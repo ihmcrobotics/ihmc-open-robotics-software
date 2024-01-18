@@ -340,6 +340,8 @@ public class RDXLocomotionManager
 
       manualFootstepPlacement.renderImGuiWidgets();
 
+      ImGui.text("Goal Planning");
+      ImGui.sameLine();
       if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
 
@@ -524,5 +526,10 @@ public class RDXLocomotionManager
    public RDXLocomotionParameters getLocomotionParameters()
    {
       return locomotionParameters;
+   }
+
+   public RDXInteractableFootstepPlan getInteractableFootstepPlan()
+   {
+      return interactableFootstepPlan;
    }
 }

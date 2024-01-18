@@ -22,14 +22,15 @@ public class RDXSCS2YoImPlotManager
 {
    private RDXImGuiLayoutManager layoutManager;
    private final ArrayList<ImPlotModifiableYoPlotPanel> plotPanels = new ArrayList<>();
+   private final ArrayList<RDXLinkedYoBooleanWidget> variableWidgets = new ArrayList<>();
    private RDXYoManager yoManager;
    private ImGuiYoVariableSearchPanel yoVariableSearchPanel;
    private RDXPanel parentPanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString panelToCreateName = new ImString("", 100);
    private HybridResourceFile configurationFile;
-   private boolean layoutReloadQueued = false;
-   private int delayedLayoutReloadCounter = 0;
+//   private boolean layoutReloadQueued = false;
+//   private int delayedLayoutReloadCounter = 0;
 
    public void create(RDXImGuiLayoutManager layoutManager, RDXPanel parentPanel)
    {
@@ -46,16 +47,16 @@ public class RDXSCS2YoImPlotManager
    {
       // This is because the panel changes get queued, so we need to wait a couple frames
       // to make sure we are ready to reload.
-      if (layoutReloadQueued)
-      {
-         ++delayedLayoutReloadCounter;
-         if (delayedLayoutReloadCounter == 2)
-         {
-            delayedLayoutReloadCounter = 0;
-            layoutReloadQueued = false;
-            layoutManager.reloadLayout();
-         }
-      }
+//      if (layoutReloadQueued)
+//      {
+//         ++delayedLayoutReloadCounter;
+//         if (delayedLayoutReloadCounter == 2)
+//         {
+//            delayedLayoutReloadCounter = 0;
+//            layoutReloadQueued = false;
+//            layoutManager.reloadLayout();
+//         }
+//      }
    }
 
    public void setupForSession(RDXYoManager yoManager)
@@ -72,9 +73,6 @@ public class RDXSCS2YoImPlotManager
       {
          removeAllPlotPanels();
          yoVariableSearchPanel.changeYoRegistry(yoManager.getRootRegistry());
-
-         layoutReloadQueued = true;
-         delayedLayoutReloadCounter = 0;
       }
 
       loadConfiguration(layoutManager.getCurrentConfigurationLocation());
@@ -159,6 +157,11 @@ public class RDXSCS2YoImPlotManager
 
    public void renderImGuiWidgets()
    {
+      for (RDXLinkedYoBooleanWidget variableWidget : variableWidgets)
+      {
+         variableWidget.renderImGuiWidgets();
+      }
+
       ImGui.pushItemWidth(150);
       int flags = ImGuiInputTextFlags.None;
       flags += ImGuiInputTextFlags.CallbackResize;
@@ -199,5 +202,10 @@ public class RDXSCS2YoImPlotManager
       {
          removePlotPanel(plotPanel);
       }
+   }
+
+   public void addVariableWidget(String variableName)
+   {
+      variableWidgets.add(new RDXLinkedYoBooleanWidget(yoManager, variableName));
    }
 }

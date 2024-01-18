@@ -51,7 +51,12 @@ public class ArmIKSolver
    /** The gains of the solver depend on this dt, it shouldn't change based on the actual thread scheduled period. */
    public static final double CONTROL_DT = 0.001;
    public static final double GRAVITY = 9.81;
-   private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 50;
+   public static final double GOOD_QUALITY_MAX = 1.0;
+   private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 70;
+   public static final double DEFAULT_POSITION_GAIN = 1200.0;
+   public static final double DEFAULT_POSITION_WEIGHT = 20.0;
+   public static final double DEFAULT_ORIENTATION_GAIN = 100.0;
+   public static final double DEFAULT_ORIENTATION_WEIGHT = 1.0;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final ReferenceFrame armWorldFrame = ReferenceFrame.getWorldFrame();
@@ -89,7 +94,10 @@ public class ArmIKSolver
       sourceOneDoFJoints = FullRobotModelUtils.getArmJoints(sourceFullRobotModel, side, armJointNames);
 
       // We clone a detached chest and single arm for the WBCC to work with. We just want to find arm joint angles.
-      workChest = MultiBodySystemMissingTools.getDetachedCopyOfSubtree(sourceChest, armWorldFrame, sourceFirstArmJoint);
+      workChest = MultiBodySystemMissingTools.getDetachedCopyOfSubtree(sourceChest,
+                                                                       armWorldFrame,
+                                                                       sourceFirstArmJoint,
+                                                                       sourceFullRobotModel.getHand(side).getName());
 
       // Remove fingers
       workHand = MultiBodySystemTools.findRigidBody(workChest, robotModel.getJointMap().getHandName(side));
@@ -134,12 +142,10 @@ public class ArmIKSolver
 
       controllerCoreCommand.setControllerCoreMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
 
-      double gain = 1200.0;
-      double weight = 20.0;
-      gains.setPositionProportionalGains(gain);
-      gains.setOrientationProportionalGains(gain);
-      weightMatrix.setLinearWeights(weight, weight, weight);
-      weightMatrix.setAngularWeights(weight, weight, weight);
+      gains.setPositionProportionalGains(DEFAULT_POSITION_GAIN);
+      gains.setOrientationProportionalGains(DEFAULT_ORIENTATION_GAIN);
+      weightMatrix.setLinearWeights(DEFAULT_POSITION_WEIGHT, DEFAULT_POSITION_WEIGHT, DEFAULT_POSITION_WEIGHT);
+      weightMatrix.setAngularWeights(DEFAULT_ORIENTATION_WEIGHT, DEFAULT_ORIENTATION_WEIGHT, DEFAULT_ORIENTATION_WEIGHT);
 
       // selects everything
       selectionMatrix.resetSelection();
@@ -249,7 +255,7 @@ public class ArmIKSolver
 
       double totalRobotMass = 0.0; // We don't need this parameter
       quality = solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0);
-      if (quality > 1.0)
+      if (quality > GOOD_QUALITY_MAX)
       {
          LogTools.debug("Bad quality solution: {} Try upping the gains, giving more iteration, or setting a more acheivable goal.", quality);
       }

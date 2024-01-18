@@ -15,7 +15,7 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "280815d3ffb6b18c3e85d230511a673bd5b22275ab5a9add4cf8d2b11f8db3e5";
+   		return "3a945217f1fc7c0a0c6b102534d074cb006ff373548e526a085aa456e8c761e5";
    }
    
    @Override
@@ -54,16 +54,13 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += behavior_msgs.msg.dds.FootstepPlanActionDefinitionBasicsMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -80,19 +77,13 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrameName().length() + 1;
+      current_alignment += behavior_msgs.msg.dds.FootstepPlanActionDefinitionBasicsMessagePubSubType.getCdrSerializedSize(data.getDefinitionBasics(), current_alignment);
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToParent(), current_alignment);
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getLeftGoalFootTransformToGizmo(), current_alignment);
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getRightGoalFootTransformToGizmo(), current_alignment);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
 
       return current_alignment - initial_alignment;
@@ -101,30 +92,19 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    public static void write(behavior_msgs.msg.dds.WalkActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
-      if(data.getParentFrameName().length() <= 255)
-      cdr.write_type_d(data.getParentFrameName());else
-          throw new RuntimeException("parent_frame_name field exceeds the maximum length");
-
+      behavior_msgs.msg.dds.FootstepPlanActionDefinitionBasicsMessagePubSubType.write(data.getDefinitionBasics(), cdr);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToParent(), cdr);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getLeftGoalFootTransformToGizmo(), cdr);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getRightGoalFootTransformToGizmo(), cdr);
-      cdr.write_type_6(data.getSwingDuration());
-
-      cdr.write_type_6(data.getTransferDuration());
-
    }
 
    public static void read(behavior_msgs.msg.dds.WalkActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
-      cdr.read_type_d(data.getParentFrameName());	
+      behavior_msgs.msg.dds.FootstepPlanActionDefinitionBasicsMessagePubSubType.read(data.getDefinitionBasics(), cdr);	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToParent(), cdr);	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getLeftGoalFootTransformToGizmo(), cdr);	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getRightGoalFootTransformToGizmo(), cdr);	
-      data.setSwingDuration(cdr.read_type_6());
-      	
-      data.setTransferDuration(cdr.read_type_6());
-      	
 
    }
 
@@ -133,15 +113,14 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
-      ser.write_type_d("parent_frame_name", data.getParentFrameName());
+      ser.write_type_a("definition_basics", new behavior_msgs.msg.dds.FootstepPlanActionDefinitionBasicsMessagePubSubType(), data.getDefinitionBasics());
+
       ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       ser.write_type_a("left_goal_foot_transform_to_gizmo", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getLeftGoalFootTransformToGizmo());
 
       ser.write_type_a("right_goal_foot_transform_to_gizmo", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getRightGoalFootTransformToGizmo());
 
-      ser.write_type_6("swing_duration", data.getSwingDuration());
-      ser.write_type_6("transfer_duration", data.getTransferDuration());
    }
 
    @Override
@@ -149,15 +128,14 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
-      ser.read_type_d("parent_frame_name", data.getParentFrameName());
+      ser.read_type_a("definition_basics", new behavior_msgs.msg.dds.FootstepPlanActionDefinitionBasicsMessagePubSubType(), data.getDefinitionBasics());
+
       ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       ser.read_type_a("left_goal_foot_transform_to_gizmo", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getLeftGoalFootTransformToGizmo());
 
       ser.read_type_a("right_goal_foot_transform_to_gizmo", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getRightGoalFootTransformToGizmo());
 
-      data.setSwingDuration(ser.read_type_6("swing_duration"));
-      data.setTransferDuration(ser.read_type_6("transfer_duration"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.WalkActionDefinitionMessage src, behavior_msgs.msg.dds.WalkActionDefinitionMessage dest)

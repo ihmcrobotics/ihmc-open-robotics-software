@@ -1,6 +1,6 @@
 package us.ihmc.perception.sceneGraph.multiBodies.door;
 
-import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
+import us.ihmc.perception.sceneGraph.SceneObjectDefinitions;
 
 /**
  * The parameters for the real and simulated door.
@@ -28,21 +28,27 @@ public class DoorModelParameters
    /** The vertical length of the panel. */
    public static final double DOOR_PANEL_HEIGHT = 2.033;
    /** The horizontal length of the panel. */
-   public static final double DOOR_PANEL_WIDTH = 0.914;
+   public static final double DOOR_PANEL_WIDTH = 0.924;
    /** Distance the handle joint in from the edge of the panel. */
    public static final double DOOR_OPENER_INSET = 0.062;
    /** We place the lever handle up from the bottom of the panel as measured on our lab door. */
    public static final double DOOR_OPENER_FROM_BOTTOM_OF_PANEL = 0.915;
    /** Mount the panel up off the ground a little so it's not dragging. */
    public static final double DOOR_PANEL_GROUND_GAP_HEIGHT = 0.02;
-   /** Place the panel away from the hinge a little.
-    *  TODO: Rethink this, it's not very realistic. */
-   public static final double DOOR_PANEL_HINGE_OFFSET = 0.005;
+   /** Place the panel away from the hinge a little. */
+   public static final double DOOR_PANEL_HINGE_OFFSET = 0.002;
    /** Distance from the frame post to the frame model's origin. */
    public static final double DOOR_FRAME_HINGE_OFFSET = 0.006;
+   /** Frame post X size. */
+   public static final double DOOR_FRAME_PILLAR_SIZE_X = 0.0889;
+   /** Frame post Z size. */
+   public static final double DOOR_FRAME_PILLAR_SIZE_Z = 2.159;
+   public static final double DOOR_BOLT_HEIGHT = 0.015;
+   public static final double DOOR_BOLT_HOLE_HEIGHT = DOOR_BOLT_HEIGHT + 0.01;
+   public static final double DOOR_BOLT_TRAVEL = 0.015;
 
    /** This refers to the edges of the black parts with no margin. The margins included will be wider than this. */
-   public static final double DOOR_ARUCO_MARKER_WIDTH = RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH;
+   public static final double DOOR_ARUCO_MARKER_WIDTH = SceneObjectDefinitions.LARGE_MARKER_WIDTH;
    public static final int LEFT_PULL_DOOR_MARKER_ID = 0;
    public static final int RIGHT_PUSH_DOOR_MARKER_ID = 1;
    public static final int RIGHT_PULL_DOOR_MARKER_ID = 10;

@@ -77,6 +77,7 @@ import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
@@ -223,11 +224,6 @@ public class SCS2AvatarSimulationFactory
 
       robotDefinition = robotModel.getRobotDefinition();
 
-      if (useBulletPhysicsEngine.get() && bulletCollisionMutator.hasValue())
-      {
-         bulletCollisionMutator.get().accept(robotDefinition);
-      }
-
       if (!enableSimulatedRobotDamping.get())
       {
          for (JointDefinition joint : robotDefinition.getAllJoints())
@@ -243,8 +239,19 @@ public class SCS2AvatarSimulationFactory
       {
          RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, robotCollisionName, terrainCollisionName);
          if (collisionModel != null)
+         {
+            // Clear all existing collidables that may be present
+            for (RigidBodyDefinition rigidBody : robotDefinition.getAllRigidBodies())
+               rigidBody.getCollisionShapeDefinitions().clear();
+
             RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
                                                                 robotDefinition);
+         }
+      }
+
+      if (useBulletPhysicsEngine.get() && bulletCollisionMutator.hasValue())
+      {
+         bulletCollisionMutator.get().accept(robotDefinition);
       }
 
       robotInitialSetup.get().initializeRobotDefinition(robotDefinition);
@@ -584,6 +591,14 @@ public class SCS2AvatarSimulationFactory
                                       enableSCS2YoGraphics.get() ? stepGeneratorThread.getSCS2YoGraphics() : null);
          stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                                  stepGeneratorThread.getYoVariableRegistry()));
+
+         if (handControlTask != null)
+         {
+            yoVariableServer.addRegistry(handControlThread.getYoVariableRegistry(), null, null);
+            AvatarSimulatedHandControlThread finalHandControlThread = handControlThread;
+            handControlTask.addCallbackPostTask(() -> yoVariableServer.update(finalHandControlThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                              finalHandControlThread.getYoVariableRegistry()));
+         }
       }
 
       List<MirroredYoVariableRegistry> mirroredRegistries = new ArrayList<>();
@@ -832,6 +847,12 @@ public class SCS2AvatarSimulationFactory
    public void setSimulationDataBufferSize(int simulationDataBufferSize)
    {
       this.simulationDataBufferSize.set(simulationDataBufferSize);
+   }
+
+   /** Must be set after record tick period in order to be correct. */
+   public void setSimulationDataBufferDuration(double bufferDuration)
+   {
+      this.simulationDataBufferSize.set((int) (bufferDuration / simulationDT.get() / simulationDataRecordTickPeriod.get()));
    }
 
    public void setSimulationDataRecordTimePeriod(double simulationDataRecordTimePeriod)

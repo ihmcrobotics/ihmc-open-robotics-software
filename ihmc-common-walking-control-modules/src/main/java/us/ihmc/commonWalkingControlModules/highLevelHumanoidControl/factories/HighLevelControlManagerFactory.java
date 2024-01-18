@@ -76,8 +76,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private SplitFractionCalculatorParametersReadOnly splitFractionParameters = new DefaultSplitFractionCalculatorParameters();
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
-   private final Map<String, PIDGainsReadOnly> jointspaceHighLevelGainMap = new HashMap<>();
-   private final Map<String, PIDGainsReadOnly> jointspaceLowLevelGainMap = new HashMap<>();
+   private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspaceOrientationGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspacePositionGainMap = new HashMap<>();
 
@@ -116,8 +115,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
 
       // Transform weights and gains to their parameterized versions.
-      ParameterTools.extractJointGainMap(walkingControllerParameters.getHighLevelJointSpaceControlGains(), jointspaceHighLevelGainMap, jointGainRegistry);
-      ParameterTools.extractJointGainMap(walkingControllerParameters.getLowLevelJointSpaceControlGains(), jointspaceLowLevelGainMap, jointGainRegistry);
+      ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, jointGainRegistry);
       ParameterTools.extract3DGainMap("Orientation",
                                       walkingControllerParameters.getTaskspaceOrientationControlGains(),
                                       taskspaceOrientationGainMap,
@@ -237,6 +235,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       Pose3D homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);
       RigidBodyBasics elevator = controllerToolbox.getFullRobotModel().getElevator();
       YoDouble yoTime = controllerToolbox.getYoTime();
+      double controlDT = controllerToolbox.getControlDT();
 
       ContactablePlaneBody contactableBody = controllerToolbox.getContactableBody(bodyToControl);
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
@@ -258,9 +257,10 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
                                                                     yoTime,
+                                                                    controlDT,
                                                                     graphicsListRegistry,
                                                                     registry);
-      manager.setGains(jointspaceHighLevelGainMap, jointspaceLowLevelGainMap);
+      manager.setGains(jointGainMap);
       manager.setWeights(jointspaceWeightMap, userModeWeightMap);
 
       rigidBodyManagerMapByBodyName.put(bodyName, manager);

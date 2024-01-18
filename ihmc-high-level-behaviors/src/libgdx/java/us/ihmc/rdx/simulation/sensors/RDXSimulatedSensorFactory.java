@@ -3,7 +3,8 @@ package us.ihmc.rdx.simulation.sensors;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.utilities.ros.RosNodeInterface;
@@ -183,7 +184,7 @@ public class RDXSimulatedSensorFactory
 
    public static RDXHighLevelDepthSensorSimulator createBlackflyFisheye(ROS2SyncedRobotModel syncedRobot)
    {
-      return createBlackflyFisheye(syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame(), syncedRobot::getTimestamp);
+      return createBlackflyFisheye(syncedRobot.getReferenceFrames().getSituationalAwarenessCameraFrame(RobotSide.RIGHT), syncedRobot::getTimestamp);
    }
 
    public static RDXHighLevelDepthSensorSimulator createBlackflyFisheyeImageOnlyNoComms(ReferenceFrame sensorFrame)
@@ -215,7 +216,14 @@ public class RDXSimulatedSensorFactory
    }
 
    public static RDXHighLevelDepthSensorSimulator createChestRightBlackflyForObjectDetection(ROS2SyncedRobotModel syncedRobot,
-                                                                                             DomainFactory.PubSubImplementation pubSubImplementation)
+                                                                                             PubSubImplementation pubSubImplementation)
+   {
+      return createChestRightBlackflyForObjectDetection(syncedRobot.getReferenceFrames(), syncedRobot::getTimestamp, pubSubImplementation);
+   }
+
+   public static RDXHighLevelDepthSensorSimulator createChestRightBlackflyForObjectDetection(HumanoidReferenceFrames referenceFrames,
+                                                                                             LongSupplier timeSupplier,
+                                                                                             PubSubImplementation pubSubImplementation)
    {
       double publishRateHz = 20.0;
       double verticalFOV = 100.0;
@@ -223,19 +231,19 @@ public class RDXSimulatedSensorFactory
       int imageHeight = 1024;
       double minRange = 0.105;
       double maxRange = 5.0;
-      RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = new RDXHighLevelDepthSensorSimulator("Blackfly Right for Object Detection",
-                                                                                                            syncedRobot.getReferenceFrames()
-                                                                                                                       .getObjectDetectionCameraFrame(),
-                                                                                                            syncedRobot::getTimestamp,
-                                                                                                            verticalFOV,
-                                                                                                            imageWidth,
-                                                                                                            imageHeight,
-                                                                                                            minRange,
-                                                                                                            maxRange,
-                                                                                                            0.01,
-                                                                                                            0.01,
-                                                                                                            false,
-                                                                                                            publishRateHz);
+      RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator
+            = new RDXHighLevelDepthSensorSimulator("Blackfly Right for Object Detection",
+                                                   referenceFrames.getSituationalAwarenessCameraFrame(RobotSide.RIGHT),
+                                                   timeSupplier,
+                                                   verticalFOV,
+                                                   imageWidth,
+                                                   imageHeight,
+                                                   minRange,
+                                                   maxRange,
+                                                   0.01,
+                                                   0.01,
+                                                   false,
+                                                   publishRateHz);
       highLevelDepthSensorSimulator.setupForROS2Color(pubSubImplementation, PerceptionAPI.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
       return highLevelDepthSensorSimulator;
    }

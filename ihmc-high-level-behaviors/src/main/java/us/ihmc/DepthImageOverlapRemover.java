@@ -83,7 +83,7 @@ public class DepthImageOverlapRemover
 
       if (bytedecoZEDInput != null)
          bytedecoZEDInput.destroy(openCLManager);
-      bytedecoZEDInput = new BytedecoImage(inputZEDImage.getCpuImageMatrix());
+      bytedecoZEDInput = new BytedecoImage(inputZEDImage.getCpuImageMat());
       bytedecoZEDInput.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
       bytedecoZEDInput.writeOpenCLImage(openCLManager);
 

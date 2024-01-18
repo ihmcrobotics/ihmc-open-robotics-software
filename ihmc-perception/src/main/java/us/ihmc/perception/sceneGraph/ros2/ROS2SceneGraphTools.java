@@ -68,7 +68,8 @@ public class ROS2SceneGraphTools
                                         nodeName,
                                         subscriptionNode.getCenterposeNodeMessage().getObjectId(),
                                         subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices(),
-                                        subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices());
+                                        subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices(),
+                                        subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
       }
       else if (nodeType == SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE)
       {

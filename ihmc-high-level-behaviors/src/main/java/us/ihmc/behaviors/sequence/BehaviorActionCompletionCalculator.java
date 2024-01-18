@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.sequence;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.tools.Timer;
+import us.ihmc.tools.NonWallTimer;
 
 /**
  * This class will probably change a lot as actions have
@@ -18,10 +18,16 @@ public class BehaviorActionCompletionCalculator
                              double translationTolerance,
                              double rotationTolerance,
                              double actionNominalDuration,
-                             Timer executionTimer,
+                             NonWallTimer executionTimer,
+                             ActionNodeState<?> state,
                              BehaviorActionCompletionComponent... components)
    {
       boolean timeIsUp = !executionTimer.isRunning(actionNominalDuration);
+      // Don't allow it to go more than 50% longer
+      boolean hitTimeLimit = !executionTimer.isRunning(actionNominalDuration * 1.5);
+      if (hitTimeLimit)
+         state.setFailed(true); // This is a failure which should abort automatic execution
+
       boolean desiredPoseAchieved = timeIsUp;
       for (BehaviorActionCompletionComponent component : components)
       {
