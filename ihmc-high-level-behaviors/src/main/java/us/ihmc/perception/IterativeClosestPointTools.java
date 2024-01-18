@@ -402,23 +402,24 @@ public class IterativeClosestPointTools
       List<Point3D32> prismObjectPointCloud = new ArrayList<>();
       Pose3D prismPointPose = new Pose3D();
 
-      float halfPrismDepth = xLength / 2.0f;
-      float halfPrismWidth = yLength / 2.0f;
+      float halfPrismDepth = 0.5f * xLength;
+      float halfPrismWidth = 0.5f * yLength;
+      float halfPrismHeight = 0.5f * zLength;
 
       for (int i = 0; i < numberOfPoints; i++)
       {
          int side = random.nextInt(0, 4);
          float x = random.nextFloat(-halfPrismDepth, halfPrismDepth);
          float y = random.nextFloat(-halfPrismWidth, halfPrismWidth);
-         float z = random.nextFloat(0, zLength);
+         float z = random.nextFloat(-halfPrismHeight, halfPrismHeight);
          if (side == 0 || side == 1) // triangular faces
          {
-            x = (1.0f - (z / zLength)) * x;
+            x = (1.0f - ((z + halfPrismHeight) / zLength)) * x;
             y = (-(side & 1) * halfPrismWidth * 2.0f) + halfPrismWidth;
          }
          else if (side == 2 || side == 3) // rectangular faces
          {
-            x = (1.0f - (z / zLength)) * ((-(side & 1) * halfPrismDepth * 2.0f) + halfPrismDepth);
+            x = (1.0f - ((z + halfPrismHeight) / zLength)) * ((-(side & 1) * halfPrismDepth * 2.0f) + halfPrismDepth);
          }
 
          prismPointPose.set(prismPose);
@@ -495,13 +496,14 @@ public class IterativeClosestPointTools
    {
       List<Point3D32> coneObjectPointCloud = new ArrayList<>();
       Pose3D conePointPose = new Pose3D();
+      float halfZLength = 0.5f * zLength;
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         float z = random.nextFloat(0, zLength);
+         float z = random.nextFloat(-halfZLength, halfZLength);
          double phi = random.nextDouble(0, 2.0 * Math.PI);
-         float x = (float) Math.cos(phi) * (zLength - z) * (xRadius / zLength);
-         float y = (float) Math.sin(phi) * (zLength - z) * (xRadius / zLength);
+         float x = (float) Math.cos(phi) * (zLength - (z + halfZLength)) * (xRadius / zLength);
+         float y = (float) Math.sin(phi) * (zLength - (z + halfZLength)) * (xRadius / zLength);
 
          conePointPose.set(conePose);
          conePointPose.appendTranslation(x, y, z);
