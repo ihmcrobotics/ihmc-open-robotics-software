@@ -72,6 +72,7 @@ public class PerceptionAndAutonomyProcess
    private static final int ZED_CAMERA_ID = 0;
    private static final SideDependentList<ROS2Topic<ImageMessage>> ZED_COLOR_TOPICS = PerceptionAPI.ZED2_COLOR_IMAGES;
    private static final ROS2Topic<ImageMessage> ZED_DEPTH_TOPIC = PerceptionAPI.ZED2_DEPTH;
+   private static final ROS2Topic<ImageMessage> ZED_CUT_OUT_DEPTH = PerceptionAPI.ZED2_CUT_OUT_DEPTH;
 
    private static final String REALSENSE_SERIAL_NUMBER = System.getProperty("d455.serial.number", "215122253249");
    private static final ROS2Topic<ImageMessage> REALSENSE_COLOR_TOPIC = PerceptionAPI.D455_COLOR_IMAGE;
@@ -153,7 +154,7 @@ public class PerceptionAndAutonomyProcess
       initializeDependencyGraph(ros2Helper);
 
       zedImageRetriever = new ZEDColorDepthImageRetriever(ZED_CAMERA_ID, zedFrameSupplier, zedDepthDemandNode, zedColorDemandNode);
-      zedImagePublisher = new ZEDColorDepthImagePublisher(ZED_COLOR_TOPICS, ZED_DEPTH_TOPIC);
+      zedImagePublisher = new ZEDColorDepthImagePublisher(ZED_COLOR_TOPICS, ZED_DEPTH_TOPIC, ZED_CUT_OUT_DEPTH);
       zedProcessAndPublishThread = new RestartableThread("ZEDImageProcessAndPublish", this::processAndPublishZED);
       zedProcessAndPublishThread.start();
 
@@ -293,22 +294,23 @@ public class PerceptionAndAutonomyProcess
             zedColorImages.put(side, zedImageRetriever.getLatestRawColorImage(side));
          }
 
-         RawImage zedProcessedImage;
+         RawImage zedCutOutDepthImage;
          if (realsenseDemandNode.isDemanded() && realsenseDepthImage != null)
          {
-            zedProcessedImage = overlapRemover.removeOverlap(zedDepthImage.get());
+            zedCutOutDepthImage = overlapRemover.removeOverlap(zedDepthImage.get());
          }
          else
-            zedProcessedImage = zedDepthImage.get();
+            zedCutOutDepthImage = zedDepthImage.get();
 
-         zedImagePublisher.setNextGpuDepthImage(zedProcessedImage.get());
+         zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
+         zedImagePublisher.setNextCutOutDepthImage(zedCutOutDepthImage.get());
          for (RobotSide side : RobotSide.values)
          {
             zedImagePublisher.setNextColorImage(zedColorImages.get(side).get(), side);
          }
 
          zedDepthImage.release();
-         zedProcessedImage.release();
+         zedCutOutDepthImage.release();
          zedColorImages.forEach(RawImage::release);
       }
       else
@@ -322,7 +324,7 @@ public class PerceptionAndAutonomyProcess
          realsenseDepthImage = realsenseImageRetriever.getLatestRawDepthImage();
          realsenseColorImage = realsenseImageRetriever.getLatestRawColorImage();
 
-         overlapRemover.setRealsenseDepthImage(realsenseDepthImage.get());
+         overlapRemover.setMasterImage(realsenseDepthImage.get());
 
          realsenseImagePublisher.setNextDepthImage(realsenseDepthImage.get());
          realsenseImagePublisher.setNextColorImage(realsenseColorImage.get());
