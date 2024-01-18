@@ -27,6 +27,7 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
+import imgui.type.ImBoolean;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
@@ -68,6 +69,7 @@ public class RDX3DSituatedImGuiPanel
    private float mousePosX = -20.0f;
    private float mousePosY = -20.0f;
    private boolean leftMouseDown = false;
+   private final ImBoolean isPanelCollapsed = new ImBoolean(false);
    private final AtomicLong INDEX = new AtomicLong(0);
    private final RigidBodyTransform transform = new RigidBodyTransform();
    private final RigidBodyTransform graphicsXRightYDownToCenterXThroughZUpTransform = new RigidBodyTransform();
@@ -202,6 +204,7 @@ public class RDX3DSituatedImGuiPanel
 
       ImGui.setNextWindowPos(0.0f, 0.0f);
       ImGui.setNextWindowSize(pixelsWidth, pixelsHeight);
+      ImGui.setNextWindowCollapsed(isPanelCollapsed.get());
 
       int windowFlags = ImGuiWindowFlags.None;
 //      windowFlags |= ImGuiWindowFlags.NoBackground;
@@ -232,27 +235,30 @@ public class RDX3DSituatedImGuiPanel
    {
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
-         // Check not facing the back of the panel
-         if (controller.getPickRay().getDirection().dot(plane.getNormal()) > 0.0)
+         if (!isPanelCollapsed.get())
          {
-            pickIntersection.setToZero(ReferenceFrame.getWorldFrame());
-            plane.intersectionWith(controller.getPickRay(), pickIntersection);
-            double distance = controller.getPickRay().getPoint().distance(pickIntersection);
-
-            pickIntersection.changeFrame(graphicsXRightYDownFrame);
-
-            float scaledX = Math.round((float) pickIntersection.getX() * metersToPixels);
-            float scaledY = Math.round((float) pickIntersection.getY() * metersToPixels);
-
-            boolean xInBounds = MathTools.intervalContains(scaledX, 0, pixelsWidth, true, false);
-            boolean yInBounds = MathTools.intervalContains(scaledY, 0, pixelsHeight, true, false);
-            if (xInBounds && yInBounds)
+            // Check not facing the back of the panel
+            if (controller.getPickRay().getDirection().dot(plane.getNormal()) > 0.0)
             {
-               mousePosX = scaledX;
-               mousePosY = scaledY;
+               pickIntersection.setToZero(ReferenceFrame.getWorldFrame());
+               plane.intersectionWith(controller.getPickRay(), pickIntersection);
+               double distance = controller.getPickRay().getPoint().distance(pickIntersection);
 
-               pickResult.get(RobotSide.RIGHT).setPointingAtCollision(distance);
-               controller.addPickResult(pickResult.get(RobotSide.RIGHT));
+               pickIntersection.changeFrame(graphicsXRightYDownFrame);
+
+               float scaledX = Math.round((float) pickIntersection.getX() * metersToPixels);
+               float scaledY = Math.round((float) pickIntersection.getY() * metersToPixels);
+
+               boolean xInBounds = MathTools.intervalContains(scaledX, 0, pixelsWidth, true, false);
+               boolean yInBounds = MathTools.intervalContains(scaledY, 0, pixelsHeight, true, false);
+               if (xInBounds && yInBounds)
+               {
+                  mousePosX = scaledX;
+                  mousePosY = scaledY;
+
+                  pickResult.get(RobotSide.RIGHT).setPointingAtCollision(distance);
+                  controller.addPickResult(pickResult.get(RobotSide.RIGHT));
+               }
             }
          }
       });
@@ -283,6 +289,16 @@ public class RDX3DSituatedImGuiPanel
       {
          material.set(new BlendingAttribute(true, GL41.GL_SRC_ALPHA, GL41.GL_ONE_MINUS_SRC_ALPHA, 1.0f));
       }
+   }
+
+   public void toggleCollapse()
+   {
+      this.isPanelCollapsed.set(!this.isPanelCollapsed.get());
+   }
+
+   public boolean isPanelCollapsed()
+   {
+      return isPanelCollapsed.get();
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
