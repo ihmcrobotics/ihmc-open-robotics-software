@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
+/**
+ * Provides a helper layer over {@link ImPlot} which helps use it
+ * in the context of common things we've needed so far.
+ */
 public class ImPlotPlot
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());

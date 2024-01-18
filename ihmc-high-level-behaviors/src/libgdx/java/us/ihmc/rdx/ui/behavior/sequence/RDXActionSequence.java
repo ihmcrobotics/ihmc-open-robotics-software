@@ -168,7 +168,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
          {
             ImGui.sameLine();
             ImGui.text("%s (%s)".formatted(currentlyExecutingAction.getDefinition().getDescription(),
-                                                          currentlyExecutingAction.getActionTypeTitle()));
+                                           currentlyExecutingAction.getActionTypeTitle()));
          }
       }
 

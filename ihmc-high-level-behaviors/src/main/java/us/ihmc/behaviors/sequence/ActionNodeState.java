@@ -2,7 +2,11 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.communication.crdt.*;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
+import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTUnidirectionalPose3D;
+import us.ihmc.communication.crdt.CRDTUnidirectionalSE3Trajectory;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 public abstract class ActionNodeState<D extends ActionNodeDefinition> extends BehaviorTreeNodeState<D>
@@ -47,8 +51,6 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       message.setCanExecute(canExecute.toMessage());
       message.setIsExecuting(isExecuting.toMessage());
       message.setFailed(failed.toMessage());
-      message.setNominalExecutionDuration(nominalExecutionDuration.toMessage());
-      message.setElapsedExecutionTime(elapsedExecutionTime.toMessage());
       message.setNominalExecutionDuration(nominalExecutionDuration.toMessage());
       message.setElapsedExecutionTime(elapsedExecutionTime.toMessage());
       desiredTrajectory.toMessage(message.getDesiredTrajectory());

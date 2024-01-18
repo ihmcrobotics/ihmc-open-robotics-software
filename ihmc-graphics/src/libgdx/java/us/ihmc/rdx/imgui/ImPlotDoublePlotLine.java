@@ -5,6 +5,10 @@ import imgui.flag.ImGuiCond;
 
 import java.text.DecimalFormat;
 
+/**
+ * Implementation of {@link ImPlotWallTimeScrollingPlotLine} for double
+ * data values.
+ */
 public class ImPlotDoublePlotLine extends ImPlotWallTimeScrollingPlotLine
 {
    private final DecimalFormat decimalFormatter;

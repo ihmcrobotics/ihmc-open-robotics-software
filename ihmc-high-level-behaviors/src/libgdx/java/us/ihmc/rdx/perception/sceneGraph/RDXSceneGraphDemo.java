@@ -3,8 +3,10 @@ package us.ihmc.rdx.perception.sceneGraph;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
+import us.ihmc.perception.sceneGraph.SceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.pubsub.DomainFactory;
@@ -34,7 +36,8 @@ public class RDXSceneGraphDemo
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo("SimulatedSensor");
    private RDXHighLevelDepthSensorSimulator simulatedCamera;
    private RDXGlobalVisualizersPanel globalVisualizersUI;
-   private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
+   private OpenCVArUcoMarkerDetector arUcoMarkerDetector;
+   private OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults;
    private ROS2SceneGraph onRobotSceneGraph;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private ReferenceFrameLibrary referenceFrameLibrary;
@@ -76,10 +79,10 @@ public class RDXSceneGraphDemo
             simulatedCamera.setRenderColorVideoDirectly(true);
             baseUI.getPrimaryScene().addRenderableProvider(simulatedCamera::getRenderables);
 
-            arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-            arUcoMarkerDetection.create(simulatedCamera.getSensorFrame());
-            arUcoMarkerDetection.setSourceImageForDetection(simulatedCamera.getLowLevelSimulator().getRGBA8888ColorImage());
-            arUcoMarkerDetection.setCameraInstrinsics(simulatedCamera.getDepthCameraIntrinsics());
+            arUcoMarkerDetector = new OpenCVArUcoMarkerDetector();
+            arUcoMarkerDetector.setSourceImageForDetection(simulatedCamera.getLowLevelSimulator().getRGBA8888ColorImage());
+            arUcoMarkerDetector.setCameraInstrinsics(simulatedCamera.getDepthCameraIntrinsics());
+            arUcoMarkerDetectionResults = new OpenCVArUcoMarkerDetectionResults();
 
             onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
 
@@ -89,9 +92,10 @@ public class RDXSceneGraphDemo
             arUcoMarkerPosesVisualizer.setActive(true);
             globalVisualizersUI.addVisualizer(arUcoMarkerPosesVisualizer);
 
-            arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection,
+            arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetectionResults,
                                                                       ros2Helper,
-                                                                      onRobotSceneGraph.getArUcoMarkerIDToNodeMap());
+                                                                      SceneObjectDefinitions.ARUCO_MARKER_SIZES,
+                                                                      simulatedCamera.getSensorFrame());
 
             referenceFrameLibrary = new ReferenceFrameLibrary();
 
@@ -100,7 +104,7 @@ public class RDXSceneGraphDemo
             baseUI.getImGuiPanelManager().addPanel(sceneGraphUI.getPanel());
 
             openCVArUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI();
-            openCVArUcoMarkerDetectionUI.create(arUcoMarkerDetection);
+            openCVArUcoMarkerDetectionUI.create(arUcoMarkerDetector.getDetectorParameters());
             baseUI.getImGuiPanelManager().addPanel(openCVArUcoMarkerDetectionUI.getMainPanel());
 
             globalVisualizersUI.create();
@@ -114,7 +118,11 @@ public class RDXSceneGraphDemo
             environmentBuilder.update();
             simulatedCamera.render(baseUI.getPrimaryScene());
             if (runPerception)
-               arUcoMarkerDetection.update();
+            {
+               arUcoMarkerDetector.update();
+               openCVArUcoMarkerDetectionUI.copyOutputData(arUcoMarkerDetector);
+               arUcoMarkerDetectionResults.copyOutputData(arUcoMarkerDetector);
+            }
             openCVArUcoMarkerDetectionUI.update();
 
             if (runPerception)
@@ -122,7 +130,7 @@ public class RDXSceneGraphDemo
                arUcoMarkerPublisher.update();
 
                onRobotSceneGraph.updateSubscription();
-               ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetection, onRobotSceneGraph);
+               ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetectionResults, simulatedCamera.getSensorFrame(), onRobotSceneGraph);
                onRobotSceneGraph.updateOnRobotOnly(sensorPoseGizmo.getGizmoFrame());
                onRobotSceneGraph.updatePublication();
             }
@@ -139,7 +147,6 @@ public class RDXSceneGraphDemo
          public void dispose()
          {
             globalVisualizersUI.destroy();
-            arUcoMarkerDetection.destroy();
             simulatedCamera.dispose();
             baseUI.dispose();
             environmentBuilder.destroy();

@@ -6,7 +6,6 @@ import imgui.extension.implot.ImPlotContext;
 import imgui.extension.implot.ImPlotStyle;
 import imgui.extension.implot.flag.ImPlotAxisFlags;
 import imgui.extension.implot.flag.ImPlotFlags;
-import imgui.internal.ImGui;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
