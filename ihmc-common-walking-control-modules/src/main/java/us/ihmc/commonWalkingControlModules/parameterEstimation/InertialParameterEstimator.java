@@ -25,7 +25,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicEllipsoid3DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -227,7 +226,7 @@ public class InertialParameterEstimator implements SCS2YoGraphicHolder
          updateContactJacobians();
          updateContactWrenches();
          updateWholeSystemTorques();
-         updateInertiaEllipsoids();
+         updateInertiaEllipsoidGraphics();
 
          jointTorqueRegressorCalculator.compute();
 
@@ -324,7 +323,7 @@ public class InertialParameterEstimator implements SCS2YoGraphicHolder
    }
 
    //TODO: adjust this to be smarter and only update the ellipsoids that are being estimated
-   private void updateInertiaEllipsoids()
+   private void updateInertiaEllipsoidGraphics()
    {
       RigidBodyBasics[] estimateBodies = estimateRobotModel.getRootBody().subtreeArray();
       RigidBodyBasics[] actualBodies = actualRobotModel.getRootBody().subtreeArray();
