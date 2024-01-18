@@ -119,4 +119,14 @@ public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPrope
    {
       return get(decayFactor);
    }
+
+   default double getMinimumContactValue()
+   {
+      return get(minimumContactValue);
+   }
+
+   default double getMaximumContactValue()
+   {
+      return get(maximumContactValue);
+   }
 }
