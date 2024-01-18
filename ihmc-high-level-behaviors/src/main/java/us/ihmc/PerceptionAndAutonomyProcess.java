@@ -298,7 +298,7 @@ public class PerceptionAndAutonomyProcess
             zedColorImages.put(side, zedImageRetriever.getLatestRawColorImage(side));
          }
 
-         if (zedDepthImage != null && !zedDepthImage.isEmpty())
+         if (zedDepthImage != null && !zedDepthImage.isEmpty() && icpManager.isDemanded())
             icpManager.setEnvironmentPointCloud(zedDepthImage);
 
          zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
