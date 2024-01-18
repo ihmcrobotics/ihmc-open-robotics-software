@@ -144,20 +144,20 @@ public class RDXInteractableRobotLink
                   isVRPointing.put(side, true);
             }
 
-            RDXVRDragData gripDragData = controller.getGripDragData();
+            RDXVRDragData triggerDragData = controller.getTriggerDragData();
             InputDigitalActionData aButton = controller.getAButtonActionData();
             InputDigitalActionData bButton = controller.getBButtonActionData();
 
             // We want the delete and execute buttons to work when dragging, but
             // sometimes it's not hovering while dragging due to lag, so we also
             // enter this block if it's just being dragged.
-            if (isVRHovering.get(side) || gripDragData.isBeingDragged(this))
+            if (isVRHovering.get(side) || triggerDragData.isBeingDragged(this))
             {
-               if (gripDragData.getDragJustStarted())
+               if (triggerDragData.getDragJustStarted())
                {
                   modified = true;
-                  gripDragData.setObjectBeingDragged(this);
-                  gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+                  triggerDragData.setObjectBeingDragged(this);
+                  triggerDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
                }
 
                if (modified)
@@ -175,9 +175,9 @@ public class RDXInteractableRobotLink
                }
             }
 
-            if (gripDragData.isBeingDragged(this))
+            if (triggerDragData.isBeingDragged(this))
             {
-               gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
+               triggerDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
                                                                       selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
             }
          });
