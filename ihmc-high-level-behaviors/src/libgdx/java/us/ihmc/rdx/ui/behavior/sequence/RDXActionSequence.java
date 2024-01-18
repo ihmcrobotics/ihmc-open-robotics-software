@@ -2,9 +2,7 @@ package us.ihmc.rdx.ui.behavior.sequence;
 
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
-import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
-import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -31,9 +29,11 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
    private final Timer manualExecutionOverrideTimer = new Timer();
    private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
+   private final List<RDXActionNode<?, ?>> nextForExecutionActions = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> currentlyExecutingActions = new ArrayList<>();
    private final RDXMultipleActionProgressBars multipleActionProgressBars = new RDXMultipleActionProgressBars();
    private boolean prevInvertExecution = true;
+   private final RDXActionProgressWidgetsManager progressWidgetsManager = new RDXActionProgressWidgetsManager();
 
    public RDXActionSequence(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -57,6 +57,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    {
       super.update();
 
+      nextForExecutionActions.clear();
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
    }
@@ -67,6 +68,10 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       {
          if (child instanceof RDXActionNode<?, ?> actionNode)
          {
+            if (actionNode.getState().getIsNextForExecution())
+            {
+               nextForExecutionActions.add(actionNode);
+            }
             if (actionNode.getState().getIsExecuting())
             {
                currentlyExecutingActions.add(actionNode);
@@ -77,6 +82,15 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
             updateActionSubtree(child);
          }
       }
+   }
+
+   @Override
+   public void renderContextMenuItems()
+   {
+      super.renderContextMenuItems();
+
+      if (ImGui.menuItem(labels.get("Render Progress Using Plots"), null, progressWidgetsManager.getRenderAsPlots()))
+         progressWidgetsManager.setRenderAsPlots(!progressWidgetsManager.getRenderAsPlots());
    }
 
    @Override
@@ -165,26 +179,35 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
          {
             ImGui.text("End of sequence.");
          }
+      }
 
-         if (currentlyExecutingActions.isEmpty())
+      if (currentlyExecutingActions.isEmpty())
+      {
+         ImGui.text("Nothing executing.");
+      }
+      else
+      {
+         ImGui.text("Executing:");
+         for (RDXActionNode<?, ?> currentlyExecutingAction : currentlyExecutingActions)
          {
-            ImGui.text("Nothing executing.");
-         }
-         else
-         {
-            for (RDXActionNode<?, ?> currentlyExecutingAction : currentlyExecutingActions)
-            {
-               ImGui.text("Currently executing: " + currentlyExecutingAction.getDefinition().getDescription());
-            }
+            ImGui.sameLine();
+            ImGui.text("%s (%s)".formatted(currentlyExecutingAction.getDefinition().getDescription(),
+                                           currentlyExecutingAction.getActionTypeTitle()));
          }
       }
 
-      multipleActionProgressBars.getActionProgressBars().clear();
+      progressWidgetsManager.getActionNodesToRender().clear();
+      int lastIndex = 0;
       for (RDXActionNode<?, ?> currentlyExecutingAction : currentlyExecutingActions)
       {
-         RDXSingleActionProgressBars actionProgressBars = multipleActionProgressBars.getActionProgressBars().add();
-         actionProgressBars.setAction(currentlyExecutingAction);
+         progressWidgetsManager.getActionNodesToRender().add(currentlyExecutingAction);
+         lastIndex = Math.max(lastIndex, currentlyExecutingAction.getState().getActionIndex());
       }
-      multipleActionProgressBars.render();
+      for (RDXActionNode<?, ?> nextForExecutionAction : nextForExecutionActions)
+      {
+         if (currentlyExecutingActions.isEmpty() || nextForExecutionAction.getState().getActionIndex() < lastIndex)
+            progressWidgetsManager.getActionNodesToRender().add(nextForExecutionAction);
+      }
+      progressWidgetsManager.render();
    }
 }
