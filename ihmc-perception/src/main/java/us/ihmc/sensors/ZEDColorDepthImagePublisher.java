@@ -28,18 +28,25 @@ public class ZEDColorDepthImagePublisher
    private final ROS2Node ros2Node;
    private final SideDependentList<IHMCROS2Publisher<ImageMessage>> ros2ColorImagePublishers;
    private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
+   private final IHMCROS2Publisher<ImageMessage> ros2CutOutDepthImagePublisher;
 
    private final SideDependentList<CUDAImageEncoder> imageEncoders = new SideDependentList<>();
 
    private long lastDepthSequenceNumber = -1L;
+   private long lastCutOutDepthSequenceNumber = -1L;
    private final SideDependentList<Long> lastColorSequenceNumbers = new SideDependentList<>(-1L, -1L);
 
    private RawImage nextGpuDepthImage;
+   private RawImage nextCutOutDepthImage;
    private final SideDependentList<RawImage> nextGpuColorImages = new SideDependentList<>();
 
    private final RestartableThread publishDepthThread;
    private final Lock depthPublishLock = new ReentrantLock();
    private final Condition newDepthImageAvailable = depthPublishLock.newCondition();
+
+   private final RestartableThread publishCutOutDepthThread;
+   private final Lock cutOutDepthLock = new ReentrantLock();
+   private final Condition newCutOutDepthImageAvailable = cutOutDepthLock.newCondition();
 
    private final SideDependentList<RestartableThread> publishColorThreads = new SideDependentList<>();
    private final SideDependentList<Lock> colorPublishLocks = new SideDependentList<>(new ReentrantLock(), new ReentrantLock());
@@ -47,15 +54,20 @@ public class ZEDColorDepthImagePublisher
                                                                                                 colorPublishLocks.get(RobotSide.RIGHT).newCondition());
 
    public ZEDColorDepthImagePublisher(SideDependentList<ROS2Topic<ImageMessage>> colorTopics,
-                                      ROS2Topic<ImageMessage> depthTopic)
+                                      ROS2Topic<ImageMessage> depthTopic,
+                                      ROS2Topic<ImageMessage> cutoutDepthTopic)
    {
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed_color_depth_publisher");
       ros2ColorImagePublishers = new SideDependentList<>(ROS2Tools.createPublisher(ros2Node, colorTopics.get(RobotSide.LEFT), ROS2QosProfile.BEST_EFFORT()),
                                                          ROS2Tools.createPublisher(ros2Node, colorTopics.get(RobotSide.RIGHT), ROS2QosProfile.BEST_EFFORT()));
       ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
+      ros2CutOutDepthImagePublisher = ROS2Tools.createPublisher(ros2Node, cutoutDepthTopic, ROS2QosProfile.BEST_EFFORT());
 
       publishDepthThread = new RestartableThread("ZEDDepthImagePublisher", this::publishDepthThreadFunction);
       publishDepthThread.start();
+
+      publishCutOutDepthThread = new RestartableThread("ZEDCutOutDepthImagePublisher", this::publishCutOutDepth);
+      publishCutOutDepthThread.start();
 
       publishColorThreads.put(RobotSide.LEFT, new RestartableThread("ZEDLeftColorImagePublisher", this::publishLeftColorThreadFunction));
       publishColorThreads.put(RobotSide.RIGHT, new RestartableThread("ZEDRightColorImagePublisher", this::publishRightColorThreadFunction));
@@ -82,6 +94,29 @@ public class ZEDColorDepthImagePublisher
       finally
       {
          depthPublishLock.unlock();
+      }
+   }
+
+   private void publishCutOutDepth()
+   {
+      cutOutDepthLock.lock();
+      try
+      {
+         while ((nextCutOutDepthImage == null || nextCutOutDepthImage.isEmpty() || nextCutOutDepthImage.getSequenceNumber() == lastCutOutDepthSequenceNumber)
+                && publishCutOutDepthThread.isRunning())
+         {
+            newCutOutDepthImageAvailable.await();
+         }
+
+         publishDepthImage(nextCutOutDepthImage);
+      }
+      catch (InterruptedException interruptedException)
+      {
+         interruptedException.printStackTrace();
+      }
+      finally
+      {
+         cutOutDepthLock.unlock();
       }
    }
 
@@ -118,7 +153,6 @@ public class ZEDColorDepthImagePublisher
 
          // Close GpuMat
          depthPNGPointer.close();
-         depthImageToPublish.release();
       }
    }
 
@@ -218,6 +252,7 @@ public class ZEDColorDepthImagePublisher
    {
       System.out.println("Destroying " + getClass().getSimpleName());
       publishDepthThread.stop();
+      publishCutOutDepthThread.stop();
       publishColorThreads.forEach(RestartableThread::stop);
       depthPublishLock.lock();
       try
@@ -231,6 +266,19 @@ public class ZEDColorDepthImagePublisher
 
       if (nextGpuDepthImage != null)
          nextGpuDepthImage.release();
+
+      cutOutDepthLock.lock();
+      try
+      {
+         newCutOutDepthImageAvailable.signal();
+      }
+      finally
+      {
+         cutOutDepthLock.unlock();
+      }
+
+      if (nextCutOutDepthImage != null)
+         nextCutOutDepthImage.release();
 
       for (RobotSide side : RobotSide.values)
       {
@@ -261,12 +309,30 @@ public class ZEDColorDepthImagePublisher
       depthPublishLock.lock();
       try
       {
+         if (nextGpuDepthImage != null)
+            nextGpuDepthImage.release();
          nextGpuDepthImage = depthImage;
          newDepthImageAvailable.signal();
       }
       finally
       {
          depthPublishLock.unlock();
+      }
+   }
+
+   public void setNextCutOutDepthImage(RawImage cutOutDepthImage)
+   {
+      cutOutDepthLock.lock();
+      try
+      {
+         if (nextCutOutDepthImage != null)
+            nextCutOutDepthImage.release();
+         nextCutOutDepthImage = cutOutDepthImage;
+         newCutOutDepthImageAvailable.signal();
+      }
+      finally
+      {
+         cutOutDepthLock.unlock();
       }
    }
 
