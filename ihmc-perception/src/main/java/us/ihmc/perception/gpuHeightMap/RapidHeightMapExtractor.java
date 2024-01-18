@@ -1,6 +1,5 @@
 package us.ihmc.perception.gpuHeightMap;
 
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
@@ -22,8 +21,6 @@ import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersBa
 import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
 import us.ihmc.perception.steppableRegions.data.SteppableCell;
 import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
@@ -47,9 +44,9 @@ public class RapidHeightMapExtractor
    private int globalCellsPerAxis;
    public int sequenceNumber = 0;
 
-   private final ConcaveHullFactoryParameters concaveHullParameters = new ConcaveHullFactoryParameters();
-   private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
-   private final SteppableRegionCalculatorParameters parameters = new SteppableRegionCalculatorParameters();
+   private static final boolean computeSteppability = true;
+
+   private final SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();
 
    private static HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
    private final RigidBodyTransform currentSensorToWorldTransform = new RigidBodyTransform();
@@ -87,7 +84,6 @@ public class RapidHeightMapExtractor
    private BytedecoImage steppabilityConnectionsImage;
 
    private _cl_program rapidHeightMapUpdaterProgram;
-   private _cl_program snappingHeightProgram;
    private _cl_kernel heightMapUpdateKernel;
    private _cl_kernel heightMapRegistrationKernel;
    private _cl_kernel terrainCostKernel;
@@ -114,7 +110,6 @@ public class RapidHeightMapExtractor
       this.openCLManager = openCLManager;
 //      denoiser = new HeightMapAutoencoder();
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
-      snappingHeightProgram = openCLManager.loadProgram("SnappingHeightMap", "HeightMapUtils.cl");
    }
 
    public void initialize()
@@ -252,7 +247,8 @@ public class RapidHeightMapExtractor
          readContactMapImage();
 
          // compute the steppable height image
-         computeSteppabilityImage();
+         if (computeSteppability)
+            computeSteppabilityImage();
 
 //         PerceptionDebugTools.printMat("Internal Original Height Map", globalHeightMapImage.getBytedecoOpenCVMat(), 600, 600, 900, 900, 10);
 //         PerceptionDebugTools.printMat("Internal Snap Height Map", snapHeightImage.getBytedecoOpenCVMat(), 600, 600, 900, 900, 10);
@@ -260,18 +256,21 @@ public class RapidHeightMapExtractor
          croppedHeightMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
          //denoisedHeightMap = denoiser.denoiseHeightMap(croppedHeightMapImage, 3.2768f);
 
-         SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.createEnvironmentByMergingCellsIntoRegions(steppabilityImage,
-                                                                                                                              snapHeightImage,
-                                                                                                                              snapNormalXImage,
-                                                                                                                              snapNormalYImage,
-                                                                                                                              snapNormalZImage,
-                                                                                                                              steppabilityConnectionsImage,
-                                                                                                                              parameters,
-                                                                                                                              sensorOrigin.getX(),
-                                                                                                                              sensorOrigin.getY(),
-                                                                                                                              heightMapParameters.getGridResolutionXY(),
-                                                                                                                              cropCenterIndex);
-         generateSteppableRegionDebugImage(environment);
+         if (computeSteppability)
+         {
+            SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.createEnvironmentByMergingCellsIntoRegions(steppabilityImage,
+                                                                                                                                 snapHeightImage,
+                                                                                                                                 snapNormalXImage,
+                                                                                                                                 snapNormalYImage,
+                                                                                                                                 snapNormalZImage,
+                                                                                                                                 steppabilityConnectionsImage,
+                                                                                                                                 steppableRegionParameters,
+                                                                                                                                 sensorOrigin.getX(),
+                                                                                                                                 sensorOrigin.getY(),
+                                                                                                                                 heightMapParameters.getGridResolutionXY(),
+                                                                                                                                 cropCenterIndex);
+            generateSteppableRegionDebugImage(environment);
+         }
 
          double cropWindowSize = cropCenterIndex * getHeightMapParameters().getGridResolutionXY() * 2.0;
          /*
@@ -337,16 +336,16 @@ public class RapidHeightMapExtractor
       snappingParametersBuffer.setParameter((float) cropCenterIndex);
       snappingParametersBuffer.setParameter((float) parameters.getHeightScaleFactor());
       snappingParametersBuffer.setParameter((float) parameters.getHeightOffset());
-      snappingParametersBuffer.setParameter((float) this.parameters.getFootLength());
-      snappingParametersBuffer.setParameter((float) this.parameters.getFootWidth());
-      snappingParametersBuffer.setParameter((float) this.parameters.getDistanceFromCliffTops());
-      snappingParametersBuffer.setParameter((float) this.parameters.getDistanceFromCliffBottoms());
-      snappingParametersBuffer.setParameter((float) this.parameters.getCliffStartHeightToAvoid());
-      snappingParametersBuffer.setParameter((float) this.parameters.getCliffEndHeightToAvoid());
-      snappingParametersBuffer.setParameter((float) this.parameters.getMinSupportAreaFraction());
-      snappingParametersBuffer.setParameter((float) this.parameters.getMinSnapHeightThreshold());
-      snappingParametersBuffer.setParameter((float) this.parameters.getSnapHeightThresholdAtSearchEdge());
-      snappingParametersBuffer.setParameter((float) this.parameters.getInequalityActivationSlope());
+      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getFootLength());
+      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getFootWidth());
+      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getDistanceFromCliffTops());
+      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getDistanceFromCliffBottoms());
+      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getCliffStartHeightToAvoid());
+      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getCliffEndHeightToAvoid());
+      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getMinSupportAreaFraction());
+      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getMinSnapHeightThreshold());
+      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getSnapHeightThresholdAtSearchEdge());
+      snappingParametersBuffer.setParameter((float) this.steppableRegionParameters.getInequalityActivationSlope());
 
       snappingParametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
@@ -667,6 +666,6 @@ public class RapidHeightMapExtractor
 
    public SteppableRegionCalculatorParametersBasics getSteppableRegionParameters()
    {
-      return parameters;
+      return steppableRegionParameters;
    }
 }
