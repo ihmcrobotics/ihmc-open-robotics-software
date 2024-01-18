@@ -5,7 +5,7 @@ import us.ihmc.robotics.MatrixMissingTools;
 
 import java.util.Set;
 
-import static us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.*;
+import static us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
 
 public class RegressorTools
 {
