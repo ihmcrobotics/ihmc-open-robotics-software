@@ -23,15 +23,10 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    private final ActionSequenceState state;
    private final ImBooleanWrapper automaticExecutionCheckbox;
    private final ImBooleanWrapper reversedExecutionCheckBox;
-   private final ImVec2 calcDescriptionTextSize = new ImVec2();
-   private final ImVec2 expandButtonSize = new ImVec2();
-   private float longestDescriptionLength;
-   private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
    private final Timer manualExecutionOverrideTimer = new Timer();
    private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
    private final List<RDXActionNode<?, ?>> nextForExecutionActions = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> currentlyExecutingActions = new ArrayList<>();
-   private final RDXMultipleActionProgressBars multipleActionProgressBars = new RDXMultipleActionProgressBars();
    private boolean prevInvertExecution = true;
    private final RDXActionProgressWidgetsManager progressWidgetsManager = new RDXActionProgressWidgetsManager();
 
