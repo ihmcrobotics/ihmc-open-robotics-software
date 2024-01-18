@@ -2,6 +2,8 @@
 #define __behavior_msgs__msg__ActionNodeStateMessage__idl__
 
 #include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "ihmc_common_msgs/msg/./SE3TrajectoryPointMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -49,25 +51,17 @@ module behavior_msgs
          */
         double elapsed_execution_time;
         /**
-         * Current position distance to goal
+         * Desired trajectory
          */
-        double current_position_distance_to_goal;
+        sequence<ihmc_common_msgs::msg::dds::SE3TrajectoryPointMessage, 50> desired_trajectory;
         /**
-         * Start position distance to goal
+         * Current pose
          */
-        double start_position_distance_to_goal;
+        geometry_msgs::msg::dds::Pose current_pose;
         /**
          * Position distance to goal tolerance
          */
         double position_distance_to_goal_tolerance;
-        /**
-         * Current orientation distance to goal
-         */
-        double current_orientation_distance_to_goal;
-        /**
-         * Start orientation distance to goal
-         */
-        double start_orientation_distance_to_goal;
         /**
          * Orientation distance to goal tolerance
          */
