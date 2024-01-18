@@ -733,24 +733,27 @@ void kernel computeSnappedValuesKernel(global float* params,
                 float snap_height_threshold = params[MIN_SNAP_HEIGHT_THRESHOLD] + params[SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE] * clamp(offset_distance / foot_search_radius, 0.0f, 1.0f);
                 float min_height_under_foot_to_consider = max_height_under_foot - snap_height_threshold;
 
+                if (isnan(query_height) || query_height < min_height_under_foot_to_consider)
+                   continue;
+
                 // This activation gain is a way of doing a soft inequality. If the query height is less than the min height, as an inequality constraint, the
                 // activation value is zero, and if it's greater, the activation is 1.0. In this formulation, we're blurring around that hard inequality. If the
                 // query height is less than the min height, the "error" is negative, so the tanh function returns -1.0f. If it's positive, tanh returns 1.0f.
-                float tanh_slope = params[INEQUALITY_ACTIVATION_SLOPE];
-                float activation = 0.5f * (1.0f + tanh(tanh_slope * (query_height - min_height_under_foot_to_consider)));
+                //float tanh_slope = params[INEQUALITY_ACTIVATION_SLOPE];
+                //float activation = 0.5f * (1.0f + tanh(tanh_slope * (query_height - min_height_under_foot_to_consider)));
 
-                float activation2 = activation * activation;
+                //float activation2 = activation * activation;
 
-                n += activation;
-                x += activation * point_query.x;
-                y += activation * point_query.y;
-                z += activation * query_height;
-                xx += activation2 * point_query.x * point_query.x;
-                xy += activation2 * point_query.x * point_query.y;
-                xz += activation2 * point_query.x * query_height;
-                yy += activation2 * point_query.y * point_query.y;
-                yz += activation2 * point_query.y * query_height;
-                zz += activation2 * query_height * query_height;
+                                n += 1.0f;
+                                x += point_query.x;
+                                y += point_query.y;
+                                z += query_height;
+                                xx += point_query.x * point_query.x;
+                                xy += point_query.x * point_query.y;
+                                xz += point_query.x * query_height;
+                                yy += point_query.y * point_query.y;
+                                yz += point_query.y * query_height;
+                                zz += query_height * query_height;
             }
         }
     }
@@ -836,70 +839,71 @@ void kernel computeSnappedValuesKernel(global float* params,
 
     //////////// Check to make sure we're not stepping too near a cliff base or top
 
-    float cliff_search_offset = max_dimension / 2.0f + max(params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS], params[MIN_DISTANCE_FROM_CLIFF_TOPS]);
-    float cliff_search_offset_squared = cliff_search_offset * cliff_search_offset;
-    int cliff_offset_indices = (int) ceil(cliff_search_offset / map_resolution);
-
-    // search for a cliff base that's too close
-    for (int x_query = map_key.x - cliff_offset_indices && !failed; x_query <= map_key.x + cliff_offset_indices && !failed; x_query++)
-    {
-        // if we're outside of the search area in the x direction, skip to the end
-        if (x_query < 0 || x_query > map_cells_per_side_for_checking)
-            continue;
-
-        for (int y_query = map_key.y - cliff_offset_indices && !failed; y_query <= map_key.y + cliff_offset_indices; y_query++)
-        {
-            // y is out of bounds, so skip it
-            if (y_query < 0 || y_query > map_cells_per_side_for_checking)
-                continue;
-
-            float2 vector_to_point_from_foot = map_resolution * (float2) ((float) (x_query - map_key.x), (float) (y_query - map_key.y));
-            if (dot(vector_to_point_from_foot, vector_to_point_from_foot) > cliff_search_offset_squared)
-                continue;
-
-            // get the height at this offset point.
-            int2 query_key = (int2) (x_query, y_query);
-            float query_height = (float) read_imageui(height_map, query_key).x / params[SNAP_HEIGHT_SCALING_FACTOR] - params[SNAP_HEIGHT_OFFSET];
-
-            // compute the relative height at this point, compared to the height contained in the current cell.
-            float relative_height_of_query = query_height - snap_height;
-
-            float distance_to_foot_from_this_query;
-            if (ASSUME_FOOT_IS_A_CIRCLE)
-            {
-                distance_to_foot_from_this_query = signed_distance_to_foot_circle(map_center_index, map_resolution, params, map_key, query_key);
-            }
-            else
-            {
-                distance_to_foot_from_this_query = signed_distance_to_foot_polygon(map_center_index, map_resolution, params, map_key, foot_yaw, query_key);
-            }
-
-            if (relative_height_of_query > params[CLIFF_START_HEIGHT_TO_AVOID])
-            {
-                float height_alpha = (relative_height_of_query - params[CLIFF_START_HEIGHT_TO_AVOID]) / (params[CLIFF_END_HEIGHT_TO_AVOID] - params[CLIFF_START_HEIGHT_TO_AVOID]);
-                height_alpha = clamp(height_alpha, 0.0f, 1.0f);
-                float min_distance_from_this_point_to_avoid_cliff = height_alpha * params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS];
-
-                if (distance_to_foot_from_this_query < min_distance_from_this_point_to_avoid_cliff)
-                {
-                    // we're too close to the cliff bottom!
-                    snap_result = CLIFF_BOTTOM;
-                    failed = true;
-                    break;
-                }
-            }
-            else if (relative_height_of_query < -params[CLIFF_START_HEIGHT_TO_AVOID])
-            {
-                if (distance_to_foot_from_this_query < params[MIN_DISTANCE_FROM_CLIFF_TOPS])
-                {
-                    // we're too close to the cliff top!
-                    snap_result = CLIFF_TOP;
-                    failed = true;
-                    break;
-                }
-            }
-        }
-    }
+ //   float cliff_search_offset = max_dimension / 2.0f + max(params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS], params[MIN_DISTANCE_FROM_CLIFF_TOPS]);
+ //   float cliff_search_offset_squared = cliff_search_offset * cliff_search_offset;
+ //   int cliff_offset_indices = (int) ceil(cliff_search_offset / map_resolution);
+//
+ //   // search for a cliff base that's too close
+ //   for (int x_query = map_key.x - cliff_offset_indices && !failed; x_query <= map_key.x + cliff_offset_indices && !failed; x_query++)
+ //   {
+ //       // if we're outside of the search area in the x direction, skip to the end
+ //       if (x_query < 0 || x_query > map_cells_per_side_for_checking)
+ //           continue;
+//
+ //       for (int y_query = map_key.y - cliff_offset_indices && !failed; y_query <= map_key.y + cliff_offset_indices; y_query++)
+ //       {
+ //           // y is out of bounds, so skip it
+ //           if (y_query < 0 || y_query > map_cells_per_side_for_checking)
+ //               continue;
+//
+ //           float2 vector_to_point_from_foot = map_resolution * (float2) ((float) (x_query - map_key.x), (float) (y_query - map_key.y));
+ //           float distance_to_point_squared = dot(vector_to_point_from_foot, vector_to_point_from_foot);
+ //           if (distance_to_point_squared > cliff_search_offset_squared)
+ //               continue;
+//
+ //           // get the height at this offset point.
+ //           int2 query_key = (int2) (x_query, y_query);
+ //           float query_height = (float) read_imageui(height_map, query_key).x / params[SNAP_HEIGHT_SCALING_FACTOR] - params[SNAP_HEIGHT_OFFSET];
+//
+ //           // compute the relative height at this point, compared to the height contained in the current cell.
+ //           float relative_height_of_query = query_height - snap_height;
+//
+ //           float distance_to_foot_from_this_query;
+ //           if (ASSUME_FOOT_IS_A_CIRCLE)
+ //           {
+ //               distance_to_foot_from_this_query = sqrt(distance_to_point_squared); //signed_distance_to_foot_circle(map_center_index, map_resolution, params, map_key, query_key);
+ //           }
+ //           else
+ //           {
+ //               distance_to_foot_from_this_query = signed_distance_to_foot_polygon(map_center_index, map_resolution, params, map_key, foot_yaw, query_key);
+ //           }
+//
+ //           if (relative_height_of_query > params[CLIFF_START_HEIGHT_TO_AVOID])
+ //           {
+ //               float height_alpha = (relative_height_of_query - params[CLIFF_START_HEIGHT_TO_AVOID]) / (params[CLIFF_END_HEIGHT_TO_AVOID] - params[CLIFF_START_HEIGHT_TO_AVOID]);
+ //               height_alpha = clamp(height_alpha, 0.0f, 1.0f);
+ //               float min_distance_from_this_point_to_avoid_cliff = height_alpha * params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS];
+//
+ //               if (distance_to_foot_from_this_query < min_distance_from_this_point_to_avoid_cliff)
+ //               {
+ //                   // we're too close to the cliff bottom!
+ //                   snap_result = CLIFF_BOTTOM;
+ //                   failed = true;
+ //                   break;
+ //               }
+ //           }
+ //           else if (relative_height_of_query < -params[CLIFF_START_HEIGHT_TO_AVOID])
+ //           {
+ //               if (distance_to_foot_from_this_query < params[MIN_DISTANCE_FROM_CLIFF_TOPS])
+ //               {
+ //                   // we're too close to the cliff top!
+ //                   snap_result = CLIFF_TOP;
+ //                   failed = true;
+ //                   break;
+ //               }
+ //           }
+ //       }
+ //   }
 
     /////////////// Make sure there's enough step area.
 

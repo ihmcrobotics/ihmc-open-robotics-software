@@ -7,10 +7,12 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
@@ -381,6 +383,8 @@ public class RapidHeightMapExtractor
       yaw.setParameter(0.0f); // we're only doing a single discretization, and then assuming the foot is a big rectangle
       yaw.writeOpenCLBufferObject(openCLManager);
 
+      long startTime = System.nanoTime();
+
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 0, snappingParametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 1, globalHeightMapImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 2, yaw.getOpenCLBufferObject());
@@ -392,10 +396,17 @@ public class RapidHeightMapExtractor
 
       openCLManager.execute2D(computeSnappedValuesKernel, heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
 
+      LogTools.info("Snap duration : " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
+
+
       snapHeightImage.readOpenCLImage(openCLManager);
       snapNormalXImage.readOpenCLImage(openCLManager);
       snapNormalYImage.readOpenCLImage(openCLManager);
       snapNormalZImage.readOpenCLImage(openCLManager);
+
+      LogTools.info("Snap read duration : " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
+
+      startTime = System.nanoTime();
 
       openCLManager.setKernelArgument(computeSteppabilityConnectionsKernel, 0, snappingParametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeSteppabilityConnectionsKernel, 1, steppabilityImage.getOpenCLImageObject());
@@ -405,6 +416,7 @@ public class RapidHeightMapExtractor
 
       steppabilityImage.readOpenCLImage(openCLManager);
       steppabilityConnectionsImage.readOpenCLImage(openCLManager);
+      LogTools.info("steppability duration : " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
    }
 
    public void reset()
