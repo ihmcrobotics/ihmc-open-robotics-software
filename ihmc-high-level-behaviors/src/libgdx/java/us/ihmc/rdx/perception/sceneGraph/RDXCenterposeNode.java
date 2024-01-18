@@ -142,7 +142,6 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    {
       if (interactableObject != null)
       {
-         interactableObject.getModelInstance().model.dispose();
          interactableObject.clear();
       }
 
