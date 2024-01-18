@@ -27,7 +27,6 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D desiredChestPose = new FramePose3D();
    private final FramePose3D syncedChestPose = new FramePose3D();
-   private double startOrientationDistanceToGoal;
    private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
@@ -83,7 +82,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
 
          desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
          syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
-         startOrientationDistanceToGoal = syncedChestPose.getRotation().distance(desiredChestPose.getRotation(), true);
+         state.getDesiredTrajectory().setSingleSegmentTrajectory(syncedChestPose, desiredChestPose, getDefinition().getTrajectoryDuration());
       }
       else
       {
@@ -116,6 +115,8 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
 
          boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
          meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
+         state.getCurrentPose().getValue().set(syncedChestPose);
+         state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
 
          if (meetsDesiredCompletionCriteria)
          {
@@ -127,8 +128,6 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
             }
          }
 
-         state.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-         state.setCurrentOrientationDistanceToGoal(trackingCalculator.getOrientationError());
          state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
       }
    }

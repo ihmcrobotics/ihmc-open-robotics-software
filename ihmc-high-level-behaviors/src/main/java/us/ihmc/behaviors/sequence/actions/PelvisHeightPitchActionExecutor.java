@@ -26,8 +26,6 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
    private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D desiredPelvisPose = new FramePose3D();
    private final FramePose3D syncedPelvisPose = new FramePose3D();
-   private double startPositionDistanceToGoal;
-   private double startOrientationDistanceToGoal;
    private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
@@ -92,8 +90,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
          syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
          desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
          desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());
-         startPositionDistanceToGoal = syncedPelvisPose.getTranslation().differenceNorm(desiredPelvisPose.getTranslation());
-         startOrientationDistanceToGoal = syncedPelvisPose.getRotation().distance(desiredPelvisPose.getRotation(), true);
+         state.getDesiredTrajectory().setSingleSegmentTrajectory(syncedPelvisPose, desiredPelvisPose, getDefinition().getTrajectoryDuration());
       }
       else
       {
@@ -134,10 +131,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
             state.setIsExecuting(false);
          }
 
-         state.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-         state.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
-         state.setCurrentOrientationDistanceToGoal(trackingCalculator.getOrientationError());
-         state.setCurrentPositionDistanceToGoal(trackingCalculator.getPositionError());
+         state.getCurrentPose().getValue().set(syncedPelvisPose);
          state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
       }
    }

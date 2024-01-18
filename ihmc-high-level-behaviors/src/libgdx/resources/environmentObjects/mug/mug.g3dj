@@ -7564,6 +7564,7 @@
 			"translation": [ 7.358891, -6.925791,  4.958309]}, 
 		{"id": "Cylinder", 
 			"rotation": [ 0.707107,  0.000000,  0.000000,  0.707107], 
+			"scale": [ 0.636279,  0.636279,  0.636279], 
 			"parts": [
 				{"meshpartid": "Cylinder_part1", 
 					"materialid": "Material.001", 

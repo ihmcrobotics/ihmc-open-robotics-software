@@ -38,8 +38,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
-   private double startPositionDistanceToGoal;
-   private double startOrientationDistanceToGoal;
    private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
    private final RigidBodyTransform chestToPelvisZeroAngles = new RigidBodyTransform();
    private final FramePose3D chestInPelvis = new FramePose3D();
@@ -225,8 +223,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          
          desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
-         startPositionDistanceToGoal = syncedHandControlPose.getTranslation().differenceNorm(desiredHandControlPose.getTranslation());
-         startOrientationDistanceToGoal = syncedHandControlPose.getRotation().distance(desiredHandControlPose.getRotation(), true);
+         state.getDesiredTrajectory().setSingleSegmentTrajectory(syncedHandControlPose, desiredHandControlPose, getDefinition().getTrajectoryDuration());
       }
       else
       {
@@ -260,6 +257,11 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
          boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
          meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
+         state.getCurrentPose().getValue().set(syncedHandControlPose);
+         state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
+         state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+         state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getLinearPart());
+         state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getAngularPart());
 
          if (meetsDesiredCompletionCriteria)
          {
@@ -270,14 +272,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                disengageHoldPoseInWorld();
             }
          }
-
-         state.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-         state.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
-         state.setCurrentOrientationDistanceToGoal(trackingCalculator.getOrientationError());
-         state.setCurrentPositionDistanceToGoal(trackingCalculator.getPositionError());
-         state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-         state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-         state.setHandWrenchMagnitudeLinear(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getLinearWrenchMagnitude(true));
       }
    }
 
