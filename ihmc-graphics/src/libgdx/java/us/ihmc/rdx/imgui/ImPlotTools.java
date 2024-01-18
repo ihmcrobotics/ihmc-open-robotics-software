@@ -4,6 +4,8 @@ import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
 import imgui.extension.implot.ImPlotStyle;
+import imgui.extension.implot.flag.ImPlotAxisFlags;
+import imgui.extension.implot.flag.ImPlotFlags;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -15,6 +17,8 @@ public final class ImPlotTools
    public static final int IMPLOT_AUTO = -1;
 
    private static ImPlotContext context = null;
+
+   private static ImVec2 emptyPlotSize = new ImVec2();
 
    public static void destroy()
    {
@@ -51,6 +55,18 @@ public final class ImPlotTools
       style.setLegendPadding(new ImVec2(0, 0));
       style.setLegendInnerPadding(new ImVec2(5, 0));
       style.setAntiAliasedLines(true);
+   }
+
+   public static void renderEmptyPlotArea(String label, float width, float height)
+   {
+      emptyPlotSize.set(width, height);
+      if (ImPlot.beginPlot(label, "", "", emptyPlotSize,
+                           ImPlotFlags.NoMenus | ImPlotFlags.NoBoxSelect | ImPlotFlags.NoTitle | ImPlotFlags.NoMousePos,
+                           ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.NoLabel,
+                           ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.NoLabel))
+      {
+         ImPlot.endPlot();
+      }
    }
 
    //Despite being identical code-wise, these need different methods because of casts from different primitive types
