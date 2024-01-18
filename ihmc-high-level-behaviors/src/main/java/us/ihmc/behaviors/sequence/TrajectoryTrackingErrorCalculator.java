@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.sequence;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.NonWallTimer;
 
 /**
@@ -9,15 +10,20 @@ import us.ihmc.tools.NonWallTimer;
  */
 public class TrajectoryTrackingErrorCalculator
 {
-   private double positionError;
-   private double orientationError;
+   private double positionErrorDistance;
+   private double orientationErrorDistance;
+
    private boolean timeIsUp;
    private boolean hitTimeLimit;
    private boolean isWithinPositionTolerance;
+   private double robotTime;
    private final NonWallTimer executionTimer = new NonWallTimer();
+
+   private final PoseDerivativeCalculator poseDerivativeCalculator = new PoseDerivativeCalculator();
 
    public void update(double robotTime)
    {
+      this.robotTime = robotTime;
       executionTimer.update(robotTime);
    }
 
@@ -25,11 +31,13 @@ public class TrajectoryTrackingErrorCalculator
    {
       executionTimer.reset();
 
-      positionError = Double.POSITIVE_INFINITY;
-      orientationError = Double.POSITIVE_INFINITY;
+      positionErrorDistance = Double.POSITIVE_INFINITY;
+      orientationErrorDistance = Double.POSITIVE_INFINITY;
       timeIsUp = false;
       hitTimeLimit = false;
       isWithinPositionTolerance = false;
+
+      poseDerivativeCalculator.reset();
    }
 
    public void computeExecutionTimings(double nominalExecutionDuration)
@@ -41,8 +49,10 @@ public class TrajectoryTrackingErrorCalculator
 
    public void computePoseTrackingData(FramePose3DReadOnly desired, FramePose3DReadOnly actual)
    {
-      positionError = actual.getTranslation().differenceNorm(desired.getTranslation());
-      orientationError = actual.getRotation().distance(desired.getRotation(), true);
+      positionErrorDistance = actual.getTranslation().differenceNorm(desired.getTranslation());
+      orientationErrorDistance = actual.getRotation().distance(desired.getRotation(), true);
+
+      poseDerivativeCalculator.compute(actual, robotTime);
 
       isWithinPositionTolerance = true;
    }
@@ -50,13 +60,13 @@ public class TrajectoryTrackingErrorCalculator
    /** Factors in errors in x,z,y translational Euclidean (R3) space. */
    public void factorInR3Errors(double positionErrorTolerance)
    {
-      isWithinPositionTolerance &= positionError <= positionErrorTolerance;
+      isWithinPositionTolerance &= positionErrorDistance <= positionErrorTolerance;
    }
 
    /** Factors in errors in rotational SO(3) space. */
    public void factoryInSO3Errors(double orientationErrorTolerance)
    {
-      isWithinPositionTolerance &= orientationError <= orientationErrorTolerance;
+      isWithinPositionTolerance &= orientationErrorDistance <= orientationErrorTolerance;
    }
 
    public boolean getTimeIsUp()
@@ -80,13 +90,18 @@ public class TrajectoryTrackingErrorCalculator
       return executionTimer.getElapsedTime();
    }
 
-   public double getPositionError()
+   public double getPositionErrorDistance()
    {
-      return positionError;
+      return positionErrorDistance;
    }
 
-   public double getOrientationError()
+   public double getOrientationErrorDistance()
    {
-      return orientationError;
+      return orientationErrorDistance;
+   }
+
+   public double getLinearVelocity()
+   {
+      return poseDerivativeCalculator.getLinearVelocity().norm();
    }
 }

@@ -43,6 +43,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final FramePose3D chestInPelvis = new FramePose3D();
    private final FramePose3D goalChestFrame = new FramePose3D();
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
+   private long syncedRobotUpdateNumber = -1;
 
    public HandPoseActionExecutor(long id,
                                  CRDTInfo crdtInfo,
@@ -248,28 +249,36 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
       if (state.getPalmFrame().isChildOfWorld())
       {
-         desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
-         syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
-
-         trackingCalculator.computePoseTrackingData(desiredHandControlPose, syncedHandControlPose);
-         trackingCalculator.factorInR3Errors(POSITION_TOLERANCE);
-         trackingCalculator.factoryInSO3Errors(ORIENTATION_TOLERANCE);
-
-         boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
-         meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
-         state.getCurrentPose().getValue().set(syncedHandControlPose);
-         state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-         state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-         state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getLinearPart());
-         state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getAngularPart());
-
-         if (meetsDesiredCompletionCriteria)
+         // Make sure not to run an update unless we got updated data from the robot
+         if (syncedRobot.getLatestRobotConfigurationData().getSequenceId() > syncedRobotUpdateNumber)
          {
-            state.setIsExecuting(false);
+            syncedRobotUpdateNumber = syncedRobot.getLatestRobotConfigurationData().getSequenceId();
 
-            if (!getDefinition().getJointspaceOnly() && !getDefinition().getHoldPoseInWorldLater())
+            desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
+            syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
+
+            trackingCalculator.computePoseTrackingData(desiredHandControlPose, syncedHandControlPose);
+            trackingCalculator.factorInR3Errors(POSITION_TOLERANCE);
+            trackingCalculator.factoryInSO3Errors(ORIENTATION_TOLERANCE);
+
+            LogTools.info("Linear velocity: %.6f".formatted(trackingCalculator.getLinearVelocity()));
+
+            boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
+            meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
+            state.getCurrentPose().getValue().set(syncedHandControlPose);
+            state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
+            state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+            state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getLinearPart());
+            state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getAngularPart());
+
+            if (meetsDesiredCompletionCriteria)
             {
-               disengageHoldPoseInWorld();
+               state.setIsExecuting(false);
+
+               if (!getDefinition().getJointspaceOnly() && !getDefinition().getHoldPoseInWorldLater())
+               {
+                  disengageHoldPoseInWorld();
+               }
             }
          }
       }
