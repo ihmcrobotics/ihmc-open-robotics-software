@@ -2,6 +2,7 @@ package us.ihmc.perception;
 
 import perception_msgs.msg.dds.IterativeClosestPointRequest;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -117,6 +118,11 @@ public class IterativeClosestPointManager
    public void stopWorkers()
    {
       workerThread.stop();
+   }
+
+   public boolean isDemanded()
+   {
+      return !nodeIDToWorkerMap.isEmpty();
    }
 
    public void destroy()
