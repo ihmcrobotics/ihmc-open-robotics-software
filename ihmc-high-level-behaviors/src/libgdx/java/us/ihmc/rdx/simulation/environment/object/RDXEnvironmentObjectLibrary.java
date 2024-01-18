@@ -14,6 +14,8 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXLargeCinderBlockRoughed.FACTORY);
       objectFactories.add(RDXLabFloorObject.FACTORY);
       objectFactories.add(RDXArUcoBoxObject.FACTORY);
+      objectFactories.add(RDXPointLightObject.FACTORY);
+      objectFactories.add(RDXDirectionalLightObject.FACTORY);
       objectFactories.add(RDXL515SensorObject.FACTORY);
    }
 

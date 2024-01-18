@@ -205,9 +205,12 @@ public class RDXEnvironmentBuilder extends RDXPanel
       ImGui.text("Selected Object: " + (selectedObject == null ? "" : (selectedObject.getTitleCasedName() + " " + selectedObject.getObjectIndex())));
       ImGui.text("Highlighted Object: " + (intersectedObject == null ? "" : (intersectedObject.getTitleCasedName() + " " + intersectedObject.getObjectIndex())));
 
-      if (ImGui.button("Delete selected object") && selectedObject != null || ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
+      if (ImGui.button("Delete selected object") || ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
       {
-         removeObject(selectedObject);
+         if (selectedObject != null)
+         {
+            removeObject(selectedObject);
+         }
          resetSelection();
       }
 
