@@ -638,7 +638,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     float foot_search_radius = sqrt(foot_search_radius_squared);
     int foot_offset_indices = (int) ceil(foot_search_radius / map_resolution);
 
-    float max_height_under_foot = -INFINITY;
+    int max_height_int = -INFINITY;
 
     for (int x_query = map_key.x - foot_offset_indices; x_query <= map_key.x + foot_offset_indices; x_query++)
     {
@@ -652,13 +652,14 @@ void kernel computeSnappedValuesKernel(global float* params,
             if (y_query < 0 || y_query > map_cells_per_side_for_checking)
                 continue;
 
+            // make sure that this point is within the search radius.
             float2 vector_to_point_from_foot = map_resolution * (float2) ((float) (x_query - map_key.x), (float) (y_query - map_key.y));
             if (dot(vector_to_point_from_foot, vector_to_point_from_foot) > foot_search_radius_squared)
                 continue;
 
             // get the height at this offset point.
             int2 query_key = (int2) (x_query, y_query);
-            float query_height = (float) read_imageui(height_map, query_key).x / params[SNAP_HEIGHT_SCALING_FACTOR] - params[SNAP_HEIGHT_OFFSET];
+            int query_height_int = read_imageui(height_map, query_key).x;
 
             float distance_to_foot_from_this_query;
             if (ASSUME_FOOT_IS_A_CIRCLE)
@@ -673,10 +674,11 @@ void kernel computeSnappedValuesKernel(global float* params,
             // If the distance is within the search area, we want to include it.
             if (distance_to_foot_from_this_query < 1e-3f)
             {
-                max_height_under_foot = max(query_height, max_height_under_foot);
+                max_height_int = max(query_height_int, max_height_int);
             }
         }
     }
+    float max_height_under_foot = (float) max_height_int / params[SNAP_HEIGHT_SCALING_FACTOR] - params[SNAP_HEIGHT_OFFSET];
 
     //////// Compute the local plane of the foot, as well as the area of support underneath it.
 
