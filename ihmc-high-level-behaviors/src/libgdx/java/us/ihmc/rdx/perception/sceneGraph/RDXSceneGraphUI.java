@@ -279,11 +279,51 @@ public class RDXSceneGraphUI
                   }
                   if (ImGui.button(labels.get("Add open box")))
                   {
-                     Vector3D32 largeBoxLengths = new Vector3D32(0.314f, 0.394f, 0.26f);
-                     RDXPrimitiveRigidBodySceneNode largeBox = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.BOX, largeBoxLengths, null);
-                     modificationQueue.accept(new SceneGraphNodeAddition(largeBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
-                     addUISceneNode(largeBox);
-                     largeBox.place();
+                     Vector3D32 openBoxLengths = new Vector3D32(0.314f, 0.394f, 0.26f);
+                     RDXPrimitiveRigidBodySceneNode openBox = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.BOX, openBoxLengths, null);
+                     modificationQueue.accept(new SceneGraphNodeAddition(openBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(openBox);
+                     openBox.place();
+                  }
+                  if (ImGui.button(labels.get("Add beaker")))
+                  {
+                     Vector3D32 beakerLengths = new Vector3D32(0.0f, 0.0f, 0.35f);
+                     Vector3D32 beakerRadii = new Vector3D32(0.035f, 0.0f, 0.0f);
+                     RDXPrimitiveRigidBodySceneNode beaker = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.CYLINDER,
+                                                                                                                beakerLengths,
+                                                                                                                beakerRadii);
+                     modificationQueue.accept(new SceneGraphNodeAddition(beaker.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(beaker);
+                     beaker.place();
+                  }
+                  if (ImGui.button(labels.get("Add safety cone")))
+                  {
+                     Vector3D32 safetyConeLengths = new Vector3D32(0.0f, 0.0f, 0.3f);
+                     Vector3D32 safetyConeRadii = new Vector3D32(0.08f, 0.0f, 0.0f);
+                     RDXPrimitiveRigidBodySceneNode safetyCone = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.CONE,
+                                                                                                                  safetyConeLengths,
+                                                                                                                  safetyConeRadii);
+                     modificationQueue.accept(new SceneGraphNodeAddition(safetyCone.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(safetyCone);
+                     safetyCone.place();
+                  }
+                  if (ImGui.button(labels.get("Add book")))
+                  {
+                     Vector3D32 bookLengths = new Vector3D32(0.17f, 0.28f, 0.21f);
+                     RDXPrimitiveRigidBodySceneNode book = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.PRISM, bookLengths, null);
+                     modificationQueue.accept(new SceneGraphNodeAddition(book.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(book);
+                     book.place();
+                  }
+                  if (ImGui.button(labels.get("Add basket ball")))
+                  {
+                     Vector3D32 basketBallRadii = new Vector3D32(0.115f, 0.115f, 0.115f);
+                     RDXPrimitiveRigidBodySceneNode basketBall = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.ELLIPSOID,
+                                                                                                                    null,
+                                                                                                                    basketBallRadii);
+                     modificationQueue.accept(new SceneGraphNodeAddition(basketBall.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(basketBall);
+                     basketBall.place();
                   }
                   ImGui.endTable();
                }
