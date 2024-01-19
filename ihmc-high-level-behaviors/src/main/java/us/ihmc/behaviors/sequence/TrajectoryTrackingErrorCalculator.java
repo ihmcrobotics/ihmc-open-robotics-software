@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.sequence;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.tools.NonWallTimer;
 
 /**
