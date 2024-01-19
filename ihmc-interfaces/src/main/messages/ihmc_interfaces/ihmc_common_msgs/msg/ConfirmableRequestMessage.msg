@@ -3,7 +3,9 @@
 # and confirmation at the same time.
 
 # Recent request numbers, monotonically increasing
+# The size of this is roughly the max amount of expected dropped messages in 1 second
 uint32[<=10] request_numbers
 
 # Recent confirmation numbers, the values of received request numbers
+# The size of this is roughly the max amount of expected dropped messages in 1 second
 uint32[<=10] confirmation_numbers
