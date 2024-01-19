@@ -63,6 +63,10 @@ module behavior_msgs
       struct BehaviorTreeStateMessage
       {
         /**
+         * Monotonically increasing message ID
+         */
+        unsigned long sequence_id;
+        /**
          * The ID to assign to the next instantiated node
          */
         unsigned long next_id;
