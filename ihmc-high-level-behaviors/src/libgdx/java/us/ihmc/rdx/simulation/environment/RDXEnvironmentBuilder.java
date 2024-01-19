@@ -79,7 +79,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
    public void create()
    {
       bulletPhysicsManager.create();
-
       pose3DGizmo.create(panel3D);
       panel3D.getScene().addRenderableProvider(this::getRenderables);
       panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
@@ -184,10 +183,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    public void update()
    {
-      for (RDXEnvironmentObject allObject : allObjects)
-      {
-         allObject.update(bulletPhysicsManager);
-      }
    }
 
    public void renderImGuiWidgets()
@@ -383,7 +378,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
    public void addObject(RDXEnvironmentObject environmentObject)
    {
       allObjects.add(environmentObject);
-      environmentObject.addToBullet(bulletPhysicsManager);
 
       if (environmentObject instanceof RDXPointLightObject pointLightObject)
       {
@@ -451,18 +445,12 @@ public class RDXEnvironmentBuilder extends RDXPanel
          {
             intersectedObject.getCollisionMeshRenderables(renderables, pool);
          }
-         bulletPhysicsManager.getVirtualRenderables(renderables, pool);
       }
    }
 
    public void destroy()
    {
       bulletPhysicsManager.destroy();
-   }
-
-   public RDXBulletPhysicsManager getBulletPhysicsManager()
-   {
-      return bulletPhysicsManager;
    }
 
    public ArrayList<RDXEnvironmentObject> getAllObjects()
