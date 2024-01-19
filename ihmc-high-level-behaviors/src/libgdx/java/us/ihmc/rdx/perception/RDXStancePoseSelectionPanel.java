@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -36,6 +37,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
    private ArrayList<ModelInstance> leftSpheres = new ArrayList<>();
    private ArrayList<ModelInstance> rightSpheres = new ArrayList<>();
 
+   private SideDependentList<FramePose3D> stancePoses = new SideDependentList<>();
    private final FramePose3D latestPose = new FramePose3D(ReferenceFrame.getWorldFrame());
    private final SideDependentList<RDXFootstepGraphic> footstepGraphics;
 
@@ -91,7 +93,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
          if (selectionActive)
          {
             latestPose.getTranslation().setZ(height);
-            SideDependentList<FramePose3D> stancePoses = stancePoseCalculator.getStancePoses(latestPose, terrainMapData, heightMapData);
+            stancePoses.set(stancePoseCalculator.getStancePoses(latestPose, terrainMapData, heightMapData));
             for (RobotSide robotSide : RobotSide.values)
             {
                footstepGraphics.get(robotSide).setPose(stancePoses.get(robotSide));
@@ -118,18 +120,6 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       }
 
       LibGDXTools.toLibGDX(latestPose.getPosition(), pickPointSphere.transform);
-   }
-
-   private void placeFootstep()
-   {
-      placed = true;
-
-
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         footstepGraphics.get(robotSide).setPose(new FramePose3D(latestPose));
-      }
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -168,6 +158,16 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       if (input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
       {
          selectionActive = false;
+      }
+   }
+
+   private void placeFootstep()
+   {
+      placed = true;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         LogTools.warn("[{}] -> Pose: {}", robotSide, stancePoses.get(robotSide));
       }
    }
 

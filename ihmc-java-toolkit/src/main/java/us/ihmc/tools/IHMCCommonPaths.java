@@ -20,6 +20,9 @@ public class IHMCCommonPaths
    public static final String PLANNING_DIRECTORY_NAME = "planning";
    public static final Path PLANNING_DIRECTORY = LOGS_DIRECTORY.resolve(PLANNING_DIRECTORY_NAME);
 
+   public static final String PLANNING_DATASETS_DIRECTORY_NAME = "planning-datasets";
+   public static final Path PLANNING_DATASETS_DIRECTORY = LOGS_DIRECTORY.resolve(PLANNING_DATASETS_DIRECTORY_NAME);
+
    public static final String CONTINUOUS_PLANNING_DIRECTORY_NAME = "continuous-planning";
    public static final Path CONTINUOUS_PLANNING_DIRECTORY = LOGS_DIRECTORY.resolve(CONTINUOUS_PLANNING_DIRECTORY_NAME);
 
