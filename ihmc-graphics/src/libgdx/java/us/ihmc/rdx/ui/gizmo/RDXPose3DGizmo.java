@@ -369,59 +369,82 @@ public class RDXPose3DGizmo implements RenderableProvider
 
             if (altHeld && !ctrlHeld) // orientation
             {
-               if (upArrowHeld) // pitch +
+               if (!disabledDoFs.contains(SixDoFSelection.ANGULAR_Y))
                {
-                  orientationToAdjust.appendPitchRotation(amountRotation);
+                  if (upArrowHeld) // pitch +
+                  {
+                     orientationToAdjust.appendPitchRotation(amountRotation);
+                  }
+                  if (downArrowHeld) // pitch -
+                  {
+                     orientationToAdjust.appendPitchRotation(-amountRotation);
+                  }
                }
-               if (downArrowHeld) // pitch -
+
+               if (!disabledDoFs.contains(SixDoFSelection.ANGULAR_X))
                {
-                  orientationToAdjust.appendPitchRotation(-amountRotation);
-               }
-               if (rightArrowHeld) // roll +
-               {
-                  orientationToAdjust.appendRollRotation(amountRotation);
-               }
-               if (leftArrowHeld) // roll -
-               {
-                  orientationToAdjust.appendRollRotation(-amountRotation);
+                  if (rightArrowHeld) // roll +
+                  {
+                     orientationToAdjust.appendRollRotation(amountRotation);
+                  }
+                  if (leftArrowHeld) // roll -
+                  {
+                     orientationToAdjust.appendRollRotation(-amountRotation);
+                  }
                }
             }
             else if (!altHeld && ctrlHeld) // yaw the orientation, or z the translation
             {
-               if (leftArrowHeld) // yaw +
+
+               if (!disabledDoFs.contains(SixDoFSelection.ANGULAR_Z))
                {
-                  orientationToAdjust.appendYawRotation(amountRotation);
+                  if (leftArrowHeld) // yaw +
+                  {
+                     orientationToAdjust.appendYawRotation(amountRotation);
+                  }
+                  if (rightArrowHeld) // yaw -
+                  {
+                     orientationToAdjust.appendYawRotation(-amountRotation);
+                  }
                }
-               if (rightArrowHeld) // yaw -
+
+               if (!disabledDoFs.contains(SixDoFSelection.LINEAR_Z))
                {
-                  orientationToAdjust.appendYawRotation(-amountRotation);
-               }
-               if (upArrowHeld) // z +
-               {
-                  positionToAdjust.addZ(getTranslateSpeedFactor() * amountTranslation);
-               }
-               if (downArrowHeld) // z -
-               {
-                  positionToAdjust.subZ(getTranslateSpeedFactor() * amountTranslation);
+                  if (upArrowHeld) // z +
+                  {
+                     positionToAdjust.addZ(getTranslateSpeedFactor() * amountTranslation);
+                  }
+                  if (downArrowHeld) // z -
+                  {
+                     positionToAdjust.subZ(getTranslateSpeedFactor() * amountTranslation);
+                  }
                }
             }
             else // translation
             {
-               if (upArrowHeld && !ctrlHeld) // x +
+
+               if (!disabledDoFs.contains(SixDoFSelection.LINEAR_X))
                {
-                  positionToAdjust.addX(getTranslateSpeedFactor() * amountTranslation);
+                  if (upArrowHeld && !ctrlHeld) // x +
+                  {
+                     positionToAdjust.addX(getTranslateSpeedFactor() * amountTranslation);
+                  }
+                  if (downArrowHeld && !ctrlHeld) // x -
+                  {
+                     positionToAdjust.subX(getTranslateSpeedFactor() * amountTranslation);
+                  }
                }
-               if (downArrowHeld && !ctrlHeld) // x -
+
+               if (!disabledDoFs.contains(SixDoFSelection.LINEAR_Y))
                {
-                  positionToAdjust.subX(getTranslateSpeedFactor() * amountTranslation);
-               }
-               if (leftArrowHeld && !ctrlHeld) // y +
-               {
-                  positionToAdjust.addY(getTranslateSpeedFactor() * amountTranslation);
-               }
-               if (rightArrowHeld && !ctrlHeld) // y -
-               {
-                  positionToAdjust.subY(getTranslateSpeedFactor() * amountTranslation);
+                  if (leftArrowHeld && !ctrlHeld) // y +
+                  {
+                     positionToAdjust.addY(getTranslateSpeedFactor() * amountTranslation);
+                  }
+                  if (rightArrowHeld && !ctrlHeld) // y -
+                  {
+                     positionToAdjust.subY(getTranslateSpeedFactor() * amountTranslation);
+                  }
                }
             }
 
