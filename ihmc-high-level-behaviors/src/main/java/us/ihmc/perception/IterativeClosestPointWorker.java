@@ -481,7 +481,6 @@ public class IterativeClosestPointWorker
             String[] lineItems = line.split(",");
             rowList.add(lineItems);
          }
-         br.close();
       }
       catch (Exception e)
       {
