@@ -30,6 +30,8 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
+import java.util.ArrayList;
+
 public class RDXIterativeClosestPointOptions implements RenderableProvider
 {
    private static final double ICP_REQUEST_FREQUENCY = 10.0;
@@ -74,6 +76,20 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
       updateThread = new RestartableThrottledThread(requestingNode.getClass().getName() + requestingNode.getSceneNode().getID() + "ICPRequest",
                                                     ICP_REQUEST_FREQUENCY,
                                                     this::update);
+
+      /* START HACKS FOR HANDLER DEMO */
+      switch (((PrimitiveRigidBodySceneNode) requestingNode.getSceneNode()).getShape())
+      {
+         case CYLINDER -> segmentationRadius.set(0.03f); // setting for beaker
+         case CONE -> segmentationRadius.set(0.18f);     // setting for safety cone
+         case PRISM -> segmentationRadius.set(0.17f);    // setting for book
+         case ELLIPSOID ->                               // settings for basketball
+         {
+            segmentationRadius.set(0.03f);
+            numberOfIterations.set(4);
+         }
+      }
+      /* END HACKS FOR HANDLER DEMO */
    }
 
    private void update()
@@ -108,9 +124,7 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
          }
       }
       objectPointCloudRenderer.setPointsToRender(icpObjectPointCloud, Color.GOLD);
-      objectPointCloudRenderer.updateMesh();
       segmentationRednerer.setPointsToRender(icpSegmentedPointCloud, Color.LIGHT_GRAY);
-      segmentationRednerer.updateMesh();
    }
 
    public void renderImGuiWidgets()
@@ -144,7 +158,14 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
          ImGui.checkbox(labels.get("Use ICP Pose"), useICPPose);
 
          ImGui.sameLine();
-         ImGui.checkbox(labels.get("Show ICP Point Cloud"), showICPPointCloud);
+         if (ImGui.checkbox(labels.get("Show ICP Point Cloud"), showICPPointCloud))
+         {
+            if (!showICPPointCloud.get())
+            {
+               objectPointCloudRenderer.setPointsToRender(new ArrayList<>());
+               segmentationRednerer.setPointsToRender(new ArrayList<>());
+            }
+         }
 
          ImGui.endDisabled();
 
@@ -167,6 +188,9 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
          objectPointCloudRenderer.getRenderables(renderables, pool);
          segmentationRednerer.getRenderables(renderables, pool);
          icpFrameGraphic.getRenderables(renderables, pool);
+
+         objectPointCloudRenderer.updateMesh();
+         segmentationRednerer.updateMesh();
       }
    }
 
