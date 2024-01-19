@@ -222,7 +222,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       }
       ImGui.endDisabled();
 
-      if (isPlaced() && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
+      if ((isPlacingGoal() || isPlacingPosition()) && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
          clear();
 
       return placementStarted;
