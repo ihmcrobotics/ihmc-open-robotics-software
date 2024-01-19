@@ -14,7 +14,6 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
@@ -138,10 +137,6 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
-
-      if (posePlacement.isPlaced() && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
-         posePlacement.clear();
-
       ImGui.sameLine();
       ImGui.text(" Parent: " + rigidBodySceneNode.getNodeFrame().getParent().getName());
 
