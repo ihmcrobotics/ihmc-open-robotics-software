@@ -1,15 +1,16 @@
 package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.robotics.MatrixMissingTools;
 
 import java.util.Set;
 
-import static us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.*;
+import static us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
 
 public class RegressorTools
 {
+   private static final int PARAMETERS_PER_RIGID_BODY = 10;
+
    /**
     * Partition a regressor matrix into two matrices, one matrix containing the regressor columns corresponding to the spatial inertia bases in the list of
     * {@code SpatialInertiaBasisOption} sets, and the other matrix containing the remaining regressor columns.
@@ -80,7 +81,9 @@ public class RegressorTools
       {
          for (SpatialInertiaBasisOption option : SpatialInertiaBasisOption.values)
          {
-            int regressorColumnIndex = i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY + option.ordinal();
+            // NOTE: we use the ordinal of the basis option to index the correct regressor column -- this is how we effectively translate between an (unordered)
+            // set and an ordered list of basis options
+            int regressorColumnIndex = (i * PARAMETERS_PER_RIGID_BODY) + option.ordinal();
             if (basisSets[i].contains(option))
             {
                MatrixMissingTools.setMatrixColumn(collectionPartitionToPack, collectionPartitionIndex, regressor, regressorColumnIndex);

@@ -6,23 +6,27 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.AutonomyAPI;
-import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.thread.SwapReference;
 
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 @SuppressWarnings({"unchecked"}) // Sometimes in this class we need to be a little unsafe
 public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
 {
    private final ROS2Topic<BehaviorTreeStateMessage> topic;
-   private final IHMCROS2Input<BehaviorTreeStateMessage> behaviorTreeSubscription;
+   private final ArrayList<Runnable> messageRecievedCallbacks = new ArrayList<>();
    private final BehaviorTreeState behaviorTreeState;
    private final Consumer<T> rootNodeSetter;
    private long numberOfMessagesReceived = 0;
-   private BehaviorTreeStateMessage latestBehaviorTreeMessage;
+   private int numberOfOnRobotNodes = 0;
+   private final SwapReference<BehaviorTreeStateMessage> behaviorTreeStateMessageSwapReference;
+   private final Notification recievedMessageNotification = new Notification();
    private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
 
@@ -34,52 +38,61 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       this.rootNodeSetter = rootNodeSetter;
 
       topic = AutonomyAPI.BEAVIOR_TREE.getTopic(behaviorTreeState.getCRDTInfo().getActorDesignation().getIncomingQualifier());
-      behaviorTreeSubscription = ros2PublishSubscribeAPI.subscribe(topic);
+      behaviorTreeStateMessageSwapReference = ros2PublishSubscribeAPI.subscribeViaSwapReference(topic, recievedMessageNotification);
    }
 
    public void update()
    {
-      if (behaviorTreeSubscription.getMessageNotification().poll())
+      if (recievedMessageNotification.poll())
       {
-         ++numberOfMessagesReceived;
-         latestBehaviorTreeMessage = behaviorTreeSubscription.getMessageNotification().read();
-
-         subscriptionRootNode.clear();
-         subscriptionNodeDepthFirstIndex.setValue(0);
-         boolean subscriptionRootIsNull = latestBehaviorTreeMessage.getBehaviorTreeTypes().isEmpty();
-         if (!subscriptionRootIsNull)
-            buildSubscriptionTree(latestBehaviorTreeMessage, subscriptionRootNode);
-
-         behaviorTreeState.fromMessage(latestBehaviorTreeMessage);
-
-         if (!behaviorTreeState.isFrozen())
+         synchronized (behaviorTreeStateMessageSwapReference)
          {
-            // Clears all unfrozen nodes
+            BehaviorTreeStateMessage behaviorTreeStateMessage = behaviorTreeStateMessageSwapReference.getForThreadTwo();
+
+            ++numberOfMessagesReceived;
+            for (Runnable messageRecievedCallback : messageRecievedCallbacks)
+            {
+               messageRecievedCallback.run();
+            }
+
+            numberOfOnRobotNodes = behaviorTreeStateMessage.getBehaviorTreeIndices().size();
+
+            subscriptionRootNode.clear();
+            subscriptionNodeDepthFirstIndex.setValue(0);
+            boolean subscriptionRootIsNull = behaviorTreeStateMessage.getBehaviorTreeTypes().isEmpty();
+            if (!subscriptionRootIsNull)
+               buildSubscriptionTree(behaviorTreeStateMessage, subscriptionRootNode);
+
+            behaviorTreeState.fromMessage(behaviorTreeStateMessage);
+
+            if (!behaviorTreeState.isFrozen())
+            {
+               // Clears all unfrozen nodes
+               behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
+                                      topologyOperationQueue.queueOperation(behaviorTreeState.getTreeRebuilder().getClearSubtreeOperation()));
+            }
+
             behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
-                                   topologyOperationQueue.queueOperation(behaviorTreeState.getTreeRebuilder().getClearSubtreeOperation()));
+            {
+               // When the root node is swapped out, we freeze the reference to the new one
+               boolean treeRootReferenceFrozen = behaviorTreeState.isFrozen();
+
+               boolean allowReplicatingRoot = !treeRootReferenceFrozen;
+               T rootNode = subscriptionRootIsNull ? null : retrieveOrReplicateLocalNode(subscriptionRootNode, allowReplicatingRoot);
+
+               if (rootNode != null)
+               {
+                  // The root node's parent is "null"
+                  updateLocalTreeFromSubscription(subscriptionRootNode, rootNode, null, topologyOperationQueue, treeRootReferenceFrozen);
+               }
+               else if (!treeRootReferenceFrozen)
+               {
+                  rootNodeSetter.accept(null);
+               }
+
+               topologyOperationQueue.queueOperation(behaviorTreeState.getTreeRebuilder().getDestroyLeftoversOperation());
+            });
          }
-
-         behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
-         {
-            // When the root node is swapped out, we freeze the reference to the new one
-            boolean treeRootReferenceFrozen = behaviorTreeState.isFrozen();
-
-            boolean allowReplicatingRoot = !treeRootReferenceFrozen;
-            T rootNode
-                  = subscriptionRootIsNull ? null : retrieveOrReplicateLocalNode(subscriptionRootNode, allowReplicatingRoot);
-
-            if (rootNode != null)
-            {
-               // The root node's parent is "null"
-               updateLocalTreeFromSubscription(subscriptionRootNode, rootNode, null, topologyOperationQueue, treeRootReferenceFrozen);
-            }
-            else if (!treeRootReferenceFrozen)
-            {
-               rootNodeSetter.accept(null);
-            }
-
-            topologyOperationQueue.queueOperation(behaviorTreeState.getTreeRebuilder().getDestroyLeftoversOperation());
-         });
       }
    }
 
@@ -172,9 +185,9 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
 
    }
 
-   public IHMCROS2Input<BehaviorTreeStateMessage> getBehaviorTreeSubscription()
+   public void registerMessageReceivedCallback(Runnable callback)
    {
-      return behaviorTreeSubscription;
+      messageRecievedCallbacks.add(callback);
    }
 
    public long getNumberOfMessagesReceived()
@@ -182,8 +195,8 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       return numberOfMessagesReceived;
    }
 
-   public BehaviorTreeStateMessage getLatestBehaviorTreeMessage()
+   public int getNumberOfOnRobotNodes()
    {
-      return latestBehaviorTreeMessage;
+      return numberOfOnRobotNodes;
    }
 }

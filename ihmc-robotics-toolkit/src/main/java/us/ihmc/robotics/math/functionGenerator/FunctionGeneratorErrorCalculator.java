@@ -91,6 +91,7 @@ public class FunctionGeneratorErrorCalculator
 
             startCount.set(controllerCounter.getValue());
             counter.set(0);
+            firstTick = false;
          }
 
          long count = controllerCounter.getValue() - startCount.getValue();
