@@ -108,19 +108,24 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
       requestMessage.setUseProvidedPose(!useICPPose.get());
       requestPublisher.publish(requestMessage);
 
-      icpObjectPointCloud.clear();
-      icpSegmentedPointCloud.clear();
       if (runICP.get() && resultSubscription.hasReceivedFirstMessage())
       {
          icpFrameGraphic.setPoseInWorldFrame(resultSubscription.getLatest().getPose());
 
          if (showICPPointCloud.get())
          {
-            for (Point3D32 point : resultSubscription.getLatest().getObjectPointCloud())
-               icpObjectPointCloud.add().set(point);
-
-            for (Point3D32 point : resultSubscription.getLatest().getSegmentedPointCloud())
-               icpSegmentedPointCloud.add().set(point);
+            synchronized (objectPointCloudRenderer)
+            {
+               icpObjectPointCloud.clear();
+               for (Point3D32 point : resultSubscription.getLatest().getObjectPointCloud())
+                  icpObjectPointCloud.add().set(point);
+            }
+            synchronized (segmentationRednerer)
+            {
+               icpSegmentedPointCloud.clear();
+               for (Point3D32 point : resultSubscription.getLatest().getSegmentedPointCloud())
+                  icpSegmentedPointCloud.add().set(point);
+            }
          }
       }
       objectPointCloudRenderer.setPointsToRender(icpObjectPointCloud, Color.GOLD);
@@ -189,8 +194,14 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
          segmentationRednerer.getRenderables(renderables, pool);
          icpFrameGraphic.getRenderables(renderables, pool);
 
-         objectPointCloudRenderer.updateMesh();
-         segmentationRednerer.updateMesh();
+         synchronized (objectPointCloudRenderer)
+         {
+            objectPointCloudRenderer.updateMesh();
+         }
+         synchronized (segmentationRednerer)
+         {
+            segmentationRednerer.updateMesh();
+         }
       }
    }
 
