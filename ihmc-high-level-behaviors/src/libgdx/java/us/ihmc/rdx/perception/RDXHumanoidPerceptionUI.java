@@ -20,6 +20,7 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXImagePanel;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
@@ -41,6 +42,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
    private RDXRapidRegionsUI rapidRegionsUI;
    private RDXRemoteHeightMapPanel heightMapUI;
+
+   private RDXStoredPropertySetTuner steppableRegionsParameterTuner;
 
    private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
 
@@ -64,6 +67,9 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    /* Image panel to display the terrain cost map (16-bit scalar metric for steppability cost per cell,
    *  computed based on terrain inclination and continuity) */
    private RDXBytedecoImagePanel terrainCostImagePanel;
+   private RDXBytedecoImagePanel steppableRegionAssignmentMat;
+   private RDXBytedecoImagePanel steppableRegionBordersMat;
+   private RDXBytedecoImagePanel steppabilityConnectionsImage;
 
    /* Image panel to display the feasible contact map (16-bit scalar for distance transform of the terrain cost map, represents safety score
    *  for distance away from boundaries and edges for each cell). For more information on Distance Transform visit:
@@ -167,6 +173,9 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          localHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat());
          croppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage());
          snapNormalZMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSnapNormalZImage().getBytedecoOpenCVMat());
+         steppableRegionAssignmentMat.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionAssignmentMat());
+         steppableRegionBordersMat.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionRingMat());
+         steppabilityConnectionsImage.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppabilityConnectionsImage().getBytedecoOpenCVMat());
          internalHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat());
          snappedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppableHeightMapImage().getBytedecoOpenCVMat());
          steppabilityPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppabilityImage().getBytedecoOpenCVMat());
@@ -281,6 +290,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          ImGui.unindent();
       }
 
+      steppableRegionsParameterTuner.renderImGuiWidgets();
+
       if (ImGui.collapsingHeader("Map Regions", mapRegionsCollapsedHeader))
       {
          ImGui.indent();
@@ -346,6 +357,18 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
                                                                   humanoidPerception.getRapidHeightMapExtractor().getSnapNormalZImage().getBytedecoOpenCVMat().cols(),
                                                                   humanoidPerception.getRapidHeightMapExtractor().getSnapNormalZImage().getBytedecoOpenCVMat().rows(),
                                                                   RDXImagePanel.FLIP_Y);
+         steppableRegionAssignmentMat = new RDXBytedecoImagePanel("Region Assignment",
+                                                         humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionAssignmentMat().cols(),
+                                                         humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionAssignmentMat().rows(),
+                                                         RDXImagePanel.FLIP_Y);
+         steppableRegionBordersMat = new RDXBytedecoImagePanel("Region Borders",
+                                                                  humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionRingMat().cols(),
+                                                                  humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionRingMat().rows(),
+                                                                  RDXImagePanel.FLIP_Y);
+         steppabilityConnectionsImage = new RDXBytedecoImagePanel("Region Connections",
+                                                                  humanoidPerception.getRapidHeightMapExtractor().getSteppabilityConnectionsImage().getBytedecoOpenCVMat().cols(),
+                                                                  humanoidPerception.getRapidHeightMapExtractor().getSteppabilityConnectionsImage().getBytedecoOpenCVMat().rows(),
+                                                                  RDXImagePanel.FLIP_Y);
          //sensorCroppedHeightMapPanel = new RDXBytedecoImagePanel("Sensor Cropped Height Map",
          //                                                        humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().cols(),
          //                                                        humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().rows(),
@@ -358,9 +381,16 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
                                                           humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage().cols(),
                                                           humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage().rows(),
                                                           RDXImagePanel.FLIP_Y);
+
+         steppableRegionsParameterTuner = new RDXStoredPropertySetTuner(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionParameters().getTitle());
+         steppableRegionsParameterTuner.create(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionParameters(), true);
+
          addChild(localHeightMapPanel.getImagePanel());
          addChild(croppedHeightMapPanel.getImagePanel());
          addChild(snapNormalZMapPanel.getImagePanel());
+         addChild(steppableRegionAssignmentMat.getImagePanel());
+         addChild(steppableRegionBordersMat.getImagePanel());
+         addChild(steppabilityConnectionsImage.getImagePanel());
          //addChild(sensorCroppedHeightMapPanel.getImagePanel());
          addChild(depthImagePanel.getImagePanel());
          addChild(internalHeightMapPanel.getImagePanel());
