@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
 import imgui.ImVec2;
+import imgui.flag.ImGuiCol;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
@@ -82,7 +83,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       ImGui.calcTextSize(statusTextSize, "State: Frozen (999)");
       float frozenStatusTextWidth = statusTextSize.x;
       ImGui.calcTextSize(statusTextSize, "999 Hz");
-      float frequencyDisplayWidth = statusTextSize.x + 100;
+      float frequencyDisplayWidth = statusTextSize.x + 100 + ImGui.getStyle().getItemInnerSpacingX();
       float rightMargin = 20.0f;
 
       ImGui.sameLine(ImGui.getWindowSizeX() - nodeCountsTextWidth - frozenStatusTextWidth - frequencyDisplayWidth - rightMargin);
@@ -99,8 +100,19 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
          ImGui.text("Normal");
 
       ImGui.sameLine(ImGui.getWindowSizeX() - frequencyDisplayWidth - rightMargin);
+      boolean messageError = ros2BehaviorTreeState.getBehaviorTreeSubscription().getRecentMessageDropped()
+                          || ros2BehaviorTreeState.getBehaviorTreeSubscription().getRecentMessageOutOfOrder();
+      if (messageError)
+      {
+         ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.RED);
+         ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
+      }
       subscriptionFrequencyDisplay.renderPlot();
       subscriptionFrequencyDisplay.renderHz();
+      if (messageError)
+      {
+         ImGui.popStyleColor(2);
+      }
 
       super.renderImGuiWidgetsPost();
    }
