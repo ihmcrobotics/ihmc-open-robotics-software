@@ -11,6 +11,8 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
@@ -171,10 +173,10 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
 
       if (ImGui.button(labels.get("Set Pose in Object Frame")))
       {
-         objectPoseInObjectFrame.set(xPosition.get(), yPosition.get(), zPosition.get(), yawOrieantation.get(), pitchOrientation.get(), rollOrientation.get());
-         ReferenceFrameDynamicCollection referenceFrameDynamicCollection = sceneGraph.asNewDynamicReferenceFrameCollection();
-//         offsetPoseGizmo.getPoseGizmo().getPose().setIncludingFrame(referenceFrameDynamicCollection.getFrameLookup().apply(""),objectPoseInObjectFrame);
-//         offsetPoseGizmo.getPoseGizmo().getPose().changeFrame(ReferenceFrame.getWorldFrame());
+         objectPoseInObjectFrame.setIncludingFrame(sceneGraph.getReferenceFrameLibrary().findFrameByName("midFeetZUp"), new Point3D(xPosition.get(), yPosition.get(), zPosition.get()), new Quaternion(yawOrieantation.get(), pitchOrientation.get(), rollOrientation.get()));
+         objectPoseInObjectFrame.changeFrame(offsetPoseGizmo.getPoseGizmo().getGizmoFrame().getParent());
+         offsetPoseGizmo.getPoseGizmo().getTransformToParent().set(objectPoseInObjectFrame);
+         offsetPoseGizmo.getPoseGizmo().update();
       }
    }
 
