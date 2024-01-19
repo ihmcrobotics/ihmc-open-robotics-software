@@ -154,6 +154,11 @@ public class SceneGraph
       this.referenceFrameLibrary = referenceFrameLibrary;
    }
 
+   public ReferenceFrameLibrary getReferenceFrameLibrary()
+   {
+      return referenceFrameLibrary;
+   }
+
    public SceneNode getRootNode()
    {
       return rootNode;
