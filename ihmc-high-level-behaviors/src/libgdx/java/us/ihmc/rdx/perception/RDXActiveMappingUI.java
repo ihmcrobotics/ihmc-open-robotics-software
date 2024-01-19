@@ -10,6 +10,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.behaviors.activeMapping.ActiveMapper;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.mapping.PlanarRegionMap;
@@ -52,7 +53,7 @@ public class RDXActiveMappingUI implements RenderableProvider
       {
          for (int j = 0; j < activeMapper.getGridSize(); j++)
          {
-            ModelInstance cylinderModel = RDXModelBuilder.createCylinder(0.02f, 0.03f, Color.BLUE);
+            ModelInstance cylinderModel = RDXModelBuilder.createCylinder(0.02f, 0.03f, new Point3D(), Color.BLUE);
             cylinderModel.transform.setToTranslation(activeMapper.getGridOrigin().getX32() + i * activeMapper.getGridResolution(),
                                                      activeMapper.getGridOrigin().getY32() + j * activeMapper.getGridResolution(),
                                                      0.0f);

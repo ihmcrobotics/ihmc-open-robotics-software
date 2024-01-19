@@ -90,10 +90,10 @@ public class RDXInteractableObject implements RenderableProvider
          modelInstance.model.dispose();
       switch (shape) {
          case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBoxOffset(xLength.get(), yLength.get(), zLength.get(), new Point3D(0, 0, zLength.get()/2), Color.WHITE));
-         case PRISM -> modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(xLength.get(), yLength.get(), zLength.get(), Color.WHITE));
-         case CYLINDER -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(zLength.get(), xRadius.get(), Color.WHITE));
-         case CONE -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(zLength.get(), xRadius.get(), Color.WHITE));
-         case ELLIPSOID -> modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(xRadius.get(), yRadius.get(), zRadius.get(), Color.WHITE));
+         case PRISM -> modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(xLength.get(), yLength.get(), zLength.get(), new Point3D(0, 0, -zLength.get() / 2), Color.WHITE));
+         case CYLINDER -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(zLength.get(), xRadius.get(), new Point3D(0, 0, -zLength.get() / 2), Color.WHITE));
+         case CONE -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(zLength.get(), xRadius.get(), new Point3D(0, 0, -zLength.get() / 2), Color.WHITE));
+         case ELLIPSOID -> modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(xRadius.get(), yRadius.get(), zRadius.get(), new Point3D(), Color.WHITE));
       }
       modelInstance.setColor(GHOST_COLOR);
       modelInstanceFrame = objectFrame;
