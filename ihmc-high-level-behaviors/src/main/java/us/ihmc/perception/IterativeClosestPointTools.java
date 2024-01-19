@@ -3,15 +3,12 @@ package us.ihmc.perception;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.tools.EuclidShapeTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
 import java.util.ArrayList;
@@ -37,12 +34,9 @@ public class IterativeClosestPointTools
       }
 
       double distanceSquared;
-      float maxRadius = Math.max(xRadius, Math.max(yRadius, zRadius));
-      double maxLength = Math.sqrt(2 * MathTools.square(Math.max(xLength, Math.max(yLength, zLength))));
-      float biggestDistance = Math.max((float) maxLength, maxRadius);
       if (shape == null)
       {
-         distanceSquared = distanceSquaredFromSphere(shapePose, pointQuery, biggestDistance);
+         distanceSquared = distanceSquaredFromPoint(shapePose.getPosition(), pointQuery);
       }
       else
       {
@@ -53,7 +47,7 @@ public class IterativeClosestPointTools
             case ELLIPSOID -> distanceSquared = distanceSquaredFromEllipsoid(shapePose, pointQuery, xRadius, yRadius, zRadius);
             // case PRISM // TODO
             // case CONE // TODO
-            default -> distanceSquared = distanceSquaredFromSphere(shapePose, pointQuery, biggestDistance);
+            default -> distanceSquared = distanceSquaredFromPoint(shapePose.getPosition(), pointQuery);
          }
       }
 
@@ -68,6 +62,11 @@ public class IterativeClosestPointTools
 
       Vector3D boxSize = new Vector3D(xLength, yLength, zLength);
       return MathTools.square(Math.max(0.0, EuclidShapeTools.signedDistanceBetweenPoint3DAndBox3D(pointRelativeToBox, boxSize)));
+   }
+
+   public static double distanceSquaredFromPoint(Point3DReadOnly referencePoint, Point3DReadOnly query)
+   {
+      return referencePoint.distanceSquared(query);
    }
 
    public static double distanceSquaredFromSphere(Pose3DReadOnly spherePose, Point3DReadOnly query, float radius)
