@@ -45,7 +45,7 @@ public class StancePoseCalculator
       insertCandidatePoses(leftPoses, goalPose, RobotSide.LEFT);
       insertCandidatePoses(rightPoses, goalPose, RobotSide.RIGHT);
       searchForOptimalGoalStance(leftPoses, rightPoses, goalPose, terrainMap);
-      snapPosesToTerrainMapData(terrainMap);
+      snapPosesToHeightMapData(heightMapData);
       return bestFramePoses;
    }
 
@@ -105,7 +105,7 @@ public class StancePoseCalculator
    {
       for (RobotSide side : RobotSide.values)
       {
-         snapFootPoseToHeightMap(heightMapData, bestFramePoses.get(side));
+         snapToHeightMap(heightMapData, bestFramePoses.get(side));
       }
    }
 
@@ -113,18 +113,18 @@ public class StancePoseCalculator
    {
       for (RobotSide side : RobotSide.values)
       {
-         snapFootPoseToTerrainMap(terrainMapData, bestFramePoses.get(side));
+         snapToTerrainMap(terrainMapData, bestFramePoses.get(side));
       }
    }
 
-   private void snapFootPoseToTerrainMap(TerrainMapData terrainMapData, FramePose3D poseToSnap)
+   private void snapToTerrainMap(TerrainMapData terrainMapData, FramePose3D poseToSnap)
    {
       UnitVector3DBasics normal = terrainMapData.computeSurfaceNormalInWorld((float) poseToSnap.getX(), (float) poseToSnap.getY(), 1);
       RigidBodyTransform snapTransform = createTransformToMatchSurfaceNormalPreserveX(normal);
       poseToSnap.applyTransform(snapTransform);
    }
 
-   private void snapFootPoseToHeightMap(HeightMapData heightMapData, FramePose3D poseToSnap)
+   private void snapToHeightMap(HeightMapData heightMapData, FramePose3D poseToSnap)
    {
       ConvexPolygon2D footPolygon = PlannerTools.createFootPolygon(0.25, 0.12, 0.8);
       footPolygon.applyTransform(poseToSnap);

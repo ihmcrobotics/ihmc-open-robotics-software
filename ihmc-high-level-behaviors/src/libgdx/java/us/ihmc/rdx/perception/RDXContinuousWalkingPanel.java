@@ -54,7 +54,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    private final SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
-   private final ImBoolean renderEnabled = new ImBoolean(false);
+   private final ImBoolean renderEnabled = new ImBoolean(true);
    private final ImBoolean localRenderMode = new ImBoolean(false);
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
    private final ImBoolean useHybridPlanner = new ImBoolean(false);

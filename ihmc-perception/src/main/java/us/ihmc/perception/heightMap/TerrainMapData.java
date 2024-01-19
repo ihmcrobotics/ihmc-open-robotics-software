@@ -166,7 +166,7 @@ public class TerrainMapData
             point.setY(sensorOrigin.getY32() + (float)(c - localGridSize / 2) / cellsPerMeter);
             point.setZ(height);
 
-            LogTools.info("Point: {}", point);
+            //LogTools.info("Point: {}", point);
 
             points.add(point);
          }
