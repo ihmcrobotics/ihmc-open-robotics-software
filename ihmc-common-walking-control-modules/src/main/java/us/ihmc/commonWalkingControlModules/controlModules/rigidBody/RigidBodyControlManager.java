@@ -10,6 +10,8 @@ import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactSta
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
@@ -311,8 +313,12 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
    public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand command)
    {
-      if (taskspaceControlState.handleTrajectoryCommand(command))
-      {
+      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
+      { // If in LOADBEARING mode, execute the trajectory in that state
+         loadBearingControlState.handleOrientationTrajectoryCommand(command);
+      }
+      else if (taskspaceControlState.handleTrajectoryCommand(command))
+      { // Otherwise execute in TASKSPACE mode
          requestState(taskspaceControlState.getControlMode());
       }
       else
@@ -326,8 +332,12 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    {
       computeDesiredJointPositions(initialJointPositions);
 
-      if (jointspaceControlState.handleTrajectoryCommand(command, initialJointPositions))
-      {
+      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
+      { // If in LOADBEARING mode, execute the trajectory in that state
+         loadBearingControlState.handleJointTrajectoryCommand(command, initialJointPositions);
+      }
+      else if (jointspaceControlState.handleTrajectoryCommand(command, initialJointPositions))
+      { // Otherwise execute in JOINTSPACE mode
          requestState(jointspaceControlState.getControlMode());
       }
       else
@@ -505,35 +515,25 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       }
    }
 
-   public void handleLoadBearingCommand(LoadBearingCommand loadBearingCommand, JointspaceTrajectoryCommand jointspaceCommand, SO3TrajectoryControllerCommand orientationTrajectory)
+   public void load(double coefficientOfFriction,
+                    Point3D contactPointInBodyFrame,
+                    Vector3D contactNormalInWorldFrame)
    {
       if (loadBearingControlState == null)
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " can not go to load bearing.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " cannot go to load bearing.");
          return;
       }
 
-      if (!loadBearingCommand.getLoad())
+      loadBearingControlState.load(coefficientOfFriction, contactPointInBodyFrame, contactNormalInWorldFrame);
+      requestState(loadBearingControlState.getControlMode());
+   }
+
+   public void unload()
+   {
+      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
       {
          hold();
-         return;
-      }
-
-      if (jointspaceCommand != null)
-      {
-         computeDesiredJointPositions(initialJointPositions);
-         if (!loadBearingControlState.handleJointTrajectoryCommand(jointspaceCommand, initialJointPositions))
-            return;
-      }
-      else if (orientationTrajectory != null)
-      {
-         if (!loadBearingControlState.handleOrientationTrajectoryCommand(orientationTrajectory))
-            return;
-      }
-
-      if (loadBearingControlState.handleLoadBearingCommand(loadBearingCommand))
-      {
-         requestState(loadBearingControlState.getControlMode());
       }
    }
 

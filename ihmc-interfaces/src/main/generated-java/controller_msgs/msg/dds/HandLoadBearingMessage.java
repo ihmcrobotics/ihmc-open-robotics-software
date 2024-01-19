@@ -23,32 +23,26 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
             */
    public byte robot_side_ = (byte) 255;
    /**
-            * Determines the control mode used for the arm's nullspace. If true, jointspace is used, otherwise taskspace orientation is used.
+            * If true it will load the contact point, otherwise the hand will stop bearing load.
             */
-   public boolean use_jointspace_command_ = true;
+   public boolean load_;
    /**
-            * The arm desired jointspace trajectory that will be used to control the arm's nullspace if use_jointspace_command is true.
-            * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
+            * Sets the coefficient of friction that the controller will use for the contact point (only used if load=true).
             */
-   public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
+   public double coefficient_of_friction_;
    /**
-            * The hand desired orientation trajectory that will be used to control the arm's nullspace if use_jointspace_command is false.
+            * Hand contact point expressed in the hand's body-fixed frame (only used if load=true).
             */
-   public ihmc_common_msgs.msg.dds.SO3TrajectoryMessage orientation_trajectory_;
+   public us.ihmc.euclid.tuple3D.Point3D contact_point_in_body_frame_;
    /**
-            * The time to delay this message on the controller side before being executed.
+            * Contact normal in world frame, pointing away from the environment (only used if load=true).
             */
-   public double execution_delay_time_;
-   /**
-            * Information specific to the load bearing properties.
-            */
-   public controller_msgs.msg.dds.LoadBearingMessage load_bearing_message_;
+   public us.ihmc.euclid.tuple3D.Vector3D contact_normal_in_world_;
 
    public HandLoadBearingMessage()
    {
-      jointspace_trajectory_ = new controller_msgs.msg.dds.JointspaceTrajectoryMessage();
-      orientation_trajectory_ = new ihmc_common_msgs.msg.dds.SO3TrajectoryMessage();
-      load_bearing_message_ = new controller_msgs.msg.dds.LoadBearingMessage();
+      contact_point_in_body_frame_ = new us.ihmc.euclid.tuple3D.Point3D();
+      contact_normal_in_world_ = new us.ihmc.euclid.tuple3D.Vector3D();
    }
 
    public HandLoadBearingMessage(HandLoadBearingMessage other)
@@ -63,13 +57,12 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
 
       robot_side_ = other.robot_side_;
 
-      use_jointspace_command_ = other.use_jointspace_command_;
+      load_ = other.load_;
 
-      controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.staticCopy(other.jointspace_trajectory_, jointspace_trajectory_);
-      ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.orientation_trajectory_, orientation_trajectory_);
-      execution_delay_time_ = other.execution_delay_time_;
+      coefficient_of_friction_ = other.coefficient_of_friction_;
 
-      controller_msgs.msg.dds.LoadBearingMessagePubSubType.staticCopy(other.load_bearing_message_, load_bearing_message_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.contact_point_in_body_frame_, contact_point_in_body_frame_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.contact_normal_in_world_, contact_normal_in_world_);
    }
 
    /**
@@ -103,61 +96,51 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
    }
 
    /**
-            * Determines the control mode used for the arm's nullspace. If true, jointspace is used, otherwise taskspace orientation is used.
+            * If true it will load the contact point, otherwise the hand will stop bearing load.
             */
-   public void setUseJointspaceCommand(boolean use_jointspace_command)
+   public void setLoad(boolean load)
    {
-      use_jointspace_command_ = use_jointspace_command;
+      load_ = load;
    }
    /**
-            * Determines the control mode used for the arm's nullspace. If true, jointspace is used, otherwise taskspace orientation is used.
+            * If true it will load the contact point, otherwise the hand will stop bearing load.
             */
-   public boolean getUseJointspaceCommand()
+   public boolean getLoad()
    {
-      return use_jointspace_command_;
-   }
-
-
-   /**
-            * The arm desired jointspace trajectory that will be used to control the arm's nullspace if use_jointspace_command is true.
-            * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
-            */
-   public controller_msgs.msg.dds.JointspaceTrajectoryMessage getJointspaceTrajectory()
-   {
-      return jointspace_trajectory_;
-   }
-
-
-   /**
-            * The hand desired orientation trajectory that will be used to control the arm's nullspace if use_jointspace_command is false.
-            */
-   public ihmc_common_msgs.msg.dds.SO3TrajectoryMessage getOrientationTrajectory()
-   {
-      return orientation_trajectory_;
+      return load_;
    }
 
    /**
-            * The time to delay this message on the controller side before being executed.
+            * Sets the coefficient of friction that the controller will use for the contact point (only used if load=true).
             */
-   public void setExecutionDelayTime(double execution_delay_time)
+   public void setCoefficientOfFriction(double coefficient_of_friction)
    {
-      execution_delay_time_ = execution_delay_time;
+      coefficient_of_friction_ = coefficient_of_friction;
    }
    /**
-            * The time to delay this message on the controller side before being executed.
+            * Sets the coefficient of friction that the controller will use for the contact point (only used if load=true).
             */
-   public double getExecutionDelayTime()
+   public double getCoefficientOfFriction()
    {
-      return execution_delay_time_;
+      return coefficient_of_friction_;
    }
 
 
    /**
-            * Information specific to the load bearing properties.
+            * Hand contact point expressed in the hand's body-fixed frame (only used if load=true).
             */
-   public controller_msgs.msg.dds.LoadBearingMessage getLoadBearingMessage()
+   public us.ihmc.euclid.tuple3D.Point3D getContactPointInBodyFrame()
    {
-      return load_bearing_message_;
+      return contact_point_in_body_frame_;
+   }
+
+
+   /**
+            * Contact normal in world frame, pointing away from the environment (only used if load=true).
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getContactNormalInWorld()
+   {
+      return contact_normal_in_world_;
    }
 
 
@@ -182,13 +165,12 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_jointspace_command_, other.use_jointspace_command_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.load_, other.load_, epsilon)) return false;
 
-      if (!this.jointspace_trajectory_.epsilonEquals(other.jointspace_trajectory_, epsilon)) return false;
-      if (!this.orientation_trajectory_.epsilonEquals(other.orientation_trajectory_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_delay_time_, other.execution_delay_time_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.coefficient_of_friction_, other.coefficient_of_friction_, epsilon)) return false;
 
-      if (!this.load_bearing_message_.epsilonEquals(other.load_bearing_message_, epsilon)) return false;
+      if (!this.contact_point_in_body_frame_.epsilonEquals(other.contact_point_in_body_frame_, epsilon)) return false;
+      if (!this.contact_normal_in_world_.epsilonEquals(other.contact_normal_in_world_, epsilon)) return false;
 
       return true;
    }
@@ -206,13 +188,12 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
-      if(this.use_jointspace_command_ != otherMyClass.use_jointspace_command_) return false;
+      if(this.load_ != otherMyClass.load_) return false;
 
-      if (!this.jointspace_trajectory_.equals(otherMyClass.jointspace_trajectory_)) return false;
-      if (!this.orientation_trajectory_.equals(otherMyClass.orientation_trajectory_)) return false;
-      if(this.execution_delay_time_ != otherMyClass.execution_delay_time_) return false;
+      if(this.coefficient_of_friction_ != otherMyClass.coefficient_of_friction_) return false;
 
-      if (!this.load_bearing_message_.equals(otherMyClass.load_bearing_message_)) return false;
+      if (!this.contact_point_in_body_frame_.equals(otherMyClass.contact_point_in_body_frame_)) return false;
+      if (!this.contact_normal_in_world_.equals(otherMyClass.contact_normal_in_world_)) return false;
 
       return true;
    }
@@ -227,16 +208,14 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
-      builder.append("use_jointspace_command=");
-      builder.append(this.use_jointspace_command_);      builder.append(", ");
-      builder.append("jointspace_trajectory=");
-      builder.append(this.jointspace_trajectory_);      builder.append(", ");
-      builder.append("orientation_trajectory=");
-      builder.append(this.orientation_trajectory_);      builder.append(", ");
-      builder.append("execution_delay_time=");
-      builder.append(this.execution_delay_time_);      builder.append(", ");
-      builder.append("load_bearing_message=");
-      builder.append(this.load_bearing_message_);
+      builder.append("load=");
+      builder.append(this.load_);      builder.append(", ");
+      builder.append("coefficient_of_friction=");
+      builder.append(this.coefficient_of_friction_);      builder.append(", ");
+      builder.append("contact_point_in_body_frame=");
+      builder.append(this.contact_point_in_body_frame_);      builder.append(", ");
+      builder.append("contact_normal_in_world=");
+      builder.append(this.contact_normal_in_world_);
       builder.append("}");
       return builder.toString();
    }

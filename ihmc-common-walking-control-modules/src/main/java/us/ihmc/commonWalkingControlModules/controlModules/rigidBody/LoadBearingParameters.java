@@ -3,12 +3,10 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.parameters.EnumParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class LoadBearingParameters
 {
-   private final EnumParameter<LoadBearingControlMode> defaultControlMode;
    private final DoubleParameter normalForceThresholdForLoaded;
    private final DoubleParameter linearSlippingThreshold;
 
@@ -19,7 +17,6 @@ public class LoadBearingParameters
    {
       String prefix = bodyName + "LoadBearing";
 
-      defaultControlMode = new EnumParameter<>(prefix + "DefaultControlMode", registry, LoadBearingControlMode.class, false, LoadBearingControlMode.JOINTSPACE);
       normalForceThresholdForLoaded = new DoubleParameter(prefix + "ForceThreshold", registry, 1000.0); // 10.0);
       linearSlippingThreshold = new DoubleParameter(prefix + "LinearTrackingSlipThreshold", registry, 0.04);
 
@@ -33,11 +30,6 @@ public class LoadBearingParameters
    public double getLinearTrackingSlipThreshold()
    {
       return linearSlippingThreshold.getValue();
-   }
-
-   public LoadBearingControlMode getDefaultControlMode()
-   {
-      return defaultControlMode.getValue();
    }
 
    public double getNormalForceThresholdForLoaded()

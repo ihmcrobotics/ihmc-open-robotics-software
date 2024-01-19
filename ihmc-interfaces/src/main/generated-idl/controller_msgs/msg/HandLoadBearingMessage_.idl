@@ -1,9 +1,8 @@
 #ifndef __controller_msgs__msg__HandLoadBearingMessage__idl__
 #define __controller_msgs__msg__HandLoadBearingMessage__idl__
 
-#include "controller_msgs/msg/./JointspaceTrajectoryMessage_.idl"
-#include "controller_msgs/msg/./LoadBearingMessage_.idl"
-#include "ihmc_common_msgs/msg/./SO3TrajectoryMessage_.idl"
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
 module controller_msgs
 {
   module msg
@@ -34,27 +33,21 @@ module controller_msgs
         @defaultValue(value=255)
         octet robot_side;
         /**
-         * Determines the control mode used for the arm's nullspace. If true, jointspace is used, otherwise taskspace orientation is used.
+         * If true it will load the contact point, otherwise the hand will stop bearing load.
          */
-        @defaultValue(value=True)
-        boolean use_jointspace_command;
+        boolean load;
         /**
-         * The arm desired jointspace trajectory that will be used to control the arm's nullspace if use_jointspace_command is true.
-         * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
+         * Sets the coefficient of friction that the controller will use for the contact point (only used if load=true).
          */
-        controller_msgs::msg::dds::JointspaceTrajectoryMessage jointspace_trajectory;
+        double coefficient_of_friction;
         /**
-         * The hand desired orientation trajectory that will be used to control the arm's nullspace if use_jointspace_command is false.
+         * Hand contact point expressed in the hand's body-fixed frame (only used if load=true).
          */
-        ihmc_common_msgs::msg::dds::SO3TrajectoryMessage orientation_trajectory;
+        geometry_msgs::msg::dds::Point contact_point_in_body_frame;
         /**
-         * The time to delay this message on the controller side before being executed.
+         * Contact normal in world frame, pointing away from the environment (only used if load=true).
          */
-        double execution_delay_time;
-        /**
-         * Information specific to the load bearing properties.
-         */
-        controller_msgs::msg::dds::LoadBearingMessage load_bearing_message;
+        geometry_msgs::msg::dds::Vector3 contact_normal_in_world;
       };
     };
   };

@@ -38,7 +38,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadHybridJo
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
@@ -527,23 +526,14 @@ public class WalkingCommandConsumer
          RobotSide robotSide = command.getRobotSide();
          if (handManagers.get(robotSide) != null)
          {
-            JointspaceTrajectoryCommand jointspaceTrajectory = null;
-            SO3TrajectoryControllerCommand orientationTrajectory = null;
-
-            if (command.useJointspaceCommand())
+            if (command.getLoad())
             {
-               jointspaceTrajectory = command.getJointspaceTrajectory();
-               jointspaceTrajectory.setSequenceId(command.getSequenceId());
+               handManagers.get(robotSide).load(command.getCoefficientOfFriction(), command.getContactPointInBodyFrame(), command.getContactNormalInWorldFrame());
             }
             else
             {
-               orientationTrajectory = command.getOrientationTrajectory();
-               orientationTrajectory.setSequenceId(command.getSequenceId());
+               handManagers.get(robotSide).unload();
             }
-
-            LoadBearingCommand loadBearingCommand = command.getLoadBearingCommand();
-            loadBearingCommand.setSequenceId(command.getSequenceId());
-            handManagers.get(robotSide).handleLoadBearingCommand(loadBearingCommand, jointspaceTrajectory, orientationTrajectory);
          }
       }
    }
