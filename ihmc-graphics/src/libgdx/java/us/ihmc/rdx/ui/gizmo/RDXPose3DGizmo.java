@@ -30,9 +30,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.RDXFocusBasedCamera;
-import us.ihmc.rdx.imgui.*;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.input.ImGuiMouseDragData;
@@ -42,23 +46,22 @@ import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.graphicsDescription.MeshDataGenerator;
-import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.interaction.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.AXIS_COLORS;
-import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.AXIS_SELECTED_COLORS;
+import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.*;
 
 /**
  * A gizmo for manipulating a Pose3D in 3D space using
  * mouse keyboard and monitor (KVM) by clicking and dragging on
  * the parts of it.
- *
+ * <p>
  * TODO: Support VR interaction.
  */
 public class RDXPose3DGizmo implements RenderableProvider
@@ -80,6 +83,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    private double arrowSpacing;
    private final Material[] normalMaterials = new Material[3];
    private final Material[] highlightedMaterials = new Material[3];
+   private final Material disabledMaterial = new Material();
    private final Axis3DRotations axisRotations = new Axis3DRotations();
    private final DynamicLibGDXModel[] arrowModels = new DynamicLibGDXModel[3];
    private final DynamicLibGDXModel[] torusModels = new DynamicLibGDXModel[3];
@@ -92,16 +96,26 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final SphereRayIntersection boundingSphereIntersection = new SphereRayIntersection();
    private final DiscreteTorusRayIntersection torusIntersection = new DiscreteTorusRayIntersection();
    private final DiscreteArrowRayIntersection arrowIntersection = new DiscreteArrowRayIntersection();
-   /** The main, source, true, base transform that this thing represents. */
+   /**
+    * The main, source, true, base transform that this thing represents.
+    */
    private RigidBodyTransform transformToParent;
-   /** This pose 3D should always be left in world frame and represent this gizmo's pose. */
+   /**
+    * This pose 3D should always be left in world frame and represent this gizmo's pose.
+    */
    private final FramePose3D framePose3D = new FramePose3D();
    private ReferenceFrame gizmoFrame;
-   /** Gizmo transform to world so it can be calculated once. */
+   /**
+    * Gizmo transform to world so it can be calculated once.
+    */
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
-   /** Transforms to world for placing the graphics. */
+   /**
+    * Transforms to world for placing the graphics.
+    */
    private final RigidBodyTransform[] axisTransformToWorlds = new RigidBodyTransform[3];
-   /** For being able to tell if the user moved the gizmo. */
+   /**
+    * For being able to tell if the user moved the gizmo.
+    */
    private final Notification gizmoModifiedByUser = new Notification();
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
    private final Line3DMouseDragAlgorithm lineDragAlgorithm = new Line3DMouseDragAlgorithm();
@@ -115,6 +129,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final Random random = new Random();
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
+   private List<SixDoFSelection> disabledDoFs = new ArrayList<>();
 
    public RDXPose3DGizmo()
    {
@@ -134,9 +149,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    public RDXPose3DGizmo(String gizmoFrameName, ReferenceFrame parentReferenceFrame)
    {
       RigidBodyTransform transformToParent = new RigidBodyTransform();
-      ReferenceFrame gizmoFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(gizmoFrameName,
-                                                                                                  parentReferenceFrame,
-                                                                                                  transformToParent);
+      ReferenceFrame gizmoFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(gizmoFrameName, parentReferenceFrame, transformToParent);
       initialize(gizmoFrame, transformToParent);
    }
 
@@ -229,18 +242,30 @@ public class RDXPose3DGizmo implements RenderableProvider
          highlightedMaterials[axis.ordinal()] = new Material();
          highlightedMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(RDXMultiColorMeshBuilder.loadPaletteTexture()));
          highlightedMaterials[axis.ordinal()].set(new BlendingAttribute(true, AXIS_SELECTED_COLORS[axis.ordinal()].a));
+         disabledMaterial.set(new BlendingAttribute(true, DISABLED_AXIS_COLOR.a));
          arrowModels[axis.ordinal()] = new DynamicLibGDXModel();
          arrowModels[axis.ordinal()].setMesh(meshBuilder ->
-         {
-            // Euclid cylinders are defined from the center, but mesh builder defines them from the bottom
-            meshBuilder.addCylinder(arrowBodyLength, arrowBodyRadius, new Point3D(0.0, 0.0, 0.5 * arrowSpacing), color);
-            meshBuilder.addCone(arrowHeadLength, arrowHeadRadius, new Point3D(0.0, 0.0, 0.5 * arrowSpacing + arrowBodyLength), color);
-            meshBuilder.addCylinder(arrowBodyLength, arrowBodyRadius, new Point3D(0.0, 0.0, -0.5 * arrowSpacing), FLIP_180, color);
-         });
+                                             {
+                                                // Euclid cylinders are defined from the center, but mesh builder defines them from the bottom
+                                                meshBuilder.addCylinder(arrowBodyLength, arrowBodyRadius, new Point3D(0.0, 0.0, 0.5 * arrowSpacing), color);
+                                                meshBuilder.addCone(arrowHeadLength,
+                                                                    arrowHeadRadius,
+                                                                    new Point3D(0.0, 0.0, 0.5 * arrowSpacing + arrowBodyLength),
+                                                                    color);
+                                                meshBuilder.addCylinder(arrowBodyLength,
+                                                                        arrowBodyRadius,
+                                                                        new Point3D(0.0, 0.0, -0.5 * arrowSpacing),
+                                                                        FLIP_180,
+                                                                        color);
+                                             });
          torusModels[axis.ordinal()] = new DynamicLibGDXModel();
          int resolution = 25;
-         torusModels[axis.ordinal()].setMesh(
-            meshBuilder -> meshBuilder.addArcTorus(0.0, Math.PI * 2.0f, torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), resolution, color));
+         torusModels[axis.ordinal()].setMesh(meshBuilder -> meshBuilder.addArcTorus(0.0,
+                                                                                    Math.PI * 2.0f,
+                                                                                    torusRadius.get(),
+                                                                                    torusTubeRadiusRatio.get() * torusRadius.get(),
+                                                                                    resolution,
+                                                                                    color));
          axisTransformToWorlds[axis.ordinal()] = new RigidBodyTransform();
       }
 
@@ -306,10 +331,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          }
          else if (closestCollisionSelection.isAngular())
          {
-            if (clockFaceDragAlgorithm.calculate(pickRay,
-                                                 closestCollision,
-                                                 axisRotations.get(closestCollisionSelection.toAxis3D()),
-                                                 transformToWorld))
+            if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, axisRotations.get(closestCollisionSelection.toAxis3D()), transformToWorld))
             {
                frameBasedGizmoModification.rotateInWorld(clockFaceDragAlgorithm.getMotion());
             }
@@ -431,7 +453,9 @@ public class RDXPose3DGizmo implements RenderableProvider
       }
    }
 
-   /** Call this instead of calculate3DViewPick and process3DViewInput if the gizmo is deactivated. */
+   /**
+    * Call this instead of calculate3DViewPick and process3DViewInput if the gizmo is deactivated.
+    */
    public void update()
    {
       if (frameBasedGizmoModification.applyAdjustmentIfNeeded(transformToParent))
@@ -498,6 +522,10 @@ public class RDXPose3DGizmo implements RenderableProvider
          // collide tori
          for (Axis3D axis : Axis3D.values)
          {
+            // don't compute collision if this DoF is disabled for the gizmo
+            if (disabledDoFs.contains(SixDoFSelection.toAngularSelection(axis)))
+               continue;
+
             // TODO: Only update when shape changes?
             torusIntersection.update(torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), axisTransformToWorlds[axis.ordinal()]);
             double distance = torusIntersection.intersect(pickRay, 100);
@@ -512,6 +540,10 @@ public class RDXPose3DGizmo implements RenderableProvider
          // collide arrows
          for (Axis3D axis : Axis3D.values)
          {
+            // don't compute collision if this DoF is disabled for the gizmo
+            if (disabledDoFs.contains(SixDoFSelection.toLinearSelection(axis)))
+               continue;
+
             for (RobotSide side : RobotSide.values)
             {
                double zOffset = side.negateIfRightSide(0.5 * arrowSpacing + 0.5 * arrowBodyLength);
@@ -537,7 +569,11 @@ public class RDXPose3DGizmo implements RenderableProvider
       // could only do this when selection changed
       for (Axis3D axis : Axis3D.values)
       {
-         if (highlightingPrior && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
+         if (disabledDoFs.contains(SixDoFSelection.toAngularSelection(axis)))
+         {
+            torusModels[axis.ordinal()].setMaterial(disabledMaterial);
+         }
+         else if (highlightingPrior && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
          {
             torusModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
@@ -546,7 +582,11 @@ public class RDXPose3DGizmo implements RenderableProvider
             torusModels[axis.ordinal()].setMaterial(normalMaterials[axis.ordinal()]);
          }
 
-         if (highlightingPrior && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
+         if (disabledDoFs.contains(SixDoFSelection.toLinearSelection(axis)))
+         {
+            arrowModels[axis.ordinal()].setMaterial(disabledMaterial);
+         }
+         else if (highlightingPrior && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
          {
             arrowModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
@@ -711,5 +751,21 @@ public class RDXPose3DGizmo implements RenderableProvider
    public Notification getGizmoModifiedByUser()
    {
       return gizmoModifiedByUser;
+   }
+
+   public void disableDoF(SixDoFSelection dof)
+   {
+      if (!disabledDoFs.contains(dof))
+      {
+         disabledDoFs.add(dof);
+      }
+   }
+
+   public void enableDoF(SixDoFSelection dof)
+   {
+      if (disabledDoFs.contains(dof))
+      {
+         disabledDoFs.remove(dof);
+      }
    }
 }
