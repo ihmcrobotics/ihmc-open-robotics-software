@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.editor.RDXUIActionMap;
 import us.ihmc.rdx.input.editor.RDXUITrigger;
@@ -220,6 +221,9 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          clear();
       }
       ImGui.endDisabled();
+
+      if (isPlaced() && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
+         clear();
 
       return placementStarted;
    }
