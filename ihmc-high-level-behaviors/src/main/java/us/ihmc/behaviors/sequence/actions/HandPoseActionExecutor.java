@@ -77,7 +77,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    {
       super.update();
 
-      syncedRobotUpdateNotification.update(syncedRobot);
+      syncedRobotUpdateNotification.update(syncedRobot, syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
       trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
       state.setCanExecute(state.getPalmFrame().isChildOfWorld());
@@ -261,11 +261,10 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             trackingCalculator.factorInR3Errors(POSITION_TOLERANCE);
             trackingCalculator.factoryInSO3Errors(ORIENTATION_TOLERANCE);
 
-            LogTools.info("Linear velocity: %.11f".formatted(trackingCalculator.getLinearVelocity()));
-
             boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
             meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
             state.getCurrentPose().getValue().set(syncedHandControlPose);
+            state.getCurrentTwist().getValue().getLinearPart().set(trackingCalculator.getPoseDerivativeCalculator().getLinearVelocity());
             state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
             state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
             state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getLinearPart());

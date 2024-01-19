@@ -99,8 +99,8 @@ public class TrajectoryTrackingErrorCalculator
       return orientationErrorDistance;
    }
 
-   public double getLinearVelocity()
+   public PoseDerivativeCalculator getPoseDerivativeCalculator()
    {
-      return poseDerivativeCalculator.getLinearVelocity().norm();
+      return poseDerivativeCalculator;
    }
 }
