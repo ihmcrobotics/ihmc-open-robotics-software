@@ -19,6 +19,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
+import us.ihmc.robotics.interaction.SixDoFSelection;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -333,5 +334,15 @@ public class RDXInteractableRobotLink
    public Notification getGizmoModifiedByUser()
    {
       return selectablePose3DGizmo.getPoseGizmo().getGizmoModifiedByUser();
+   }
+
+   /**
+    * Disables the specified DoF on the gizmo.
+    * Should only be called after `create()`
+    * @param dof
+    */
+   public void disableDoF(SixDoFSelection dof)
+   {
+      selectablePose3DGizmo.disableDoF(dof);
    }
 }
