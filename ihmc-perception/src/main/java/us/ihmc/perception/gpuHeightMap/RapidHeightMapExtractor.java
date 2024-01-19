@@ -396,15 +396,10 @@ public class RapidHeightMapExtractor
 
       openCLManager.execute2D(computeSnappedValuesKernel, heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
 
-      LogTools.info("Snap duration : " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
-
-
       snapHeightImage.readOpenCLImage(openCLManager);
       snapNormalXImage.readOpenCLImage(openCLManager);
       snapNormalYImage.readOpenCLImage(openCLManager);
       snapNormalZImage.readOpenCLImage(openCLManager);
-
-      LogTools.info("Snap read duration : " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
 
       startTime = System.nanoTime();
 
@@ -416,7 +411,6 @@ public class RapidHeightMapExtractor
 
       steppabilityImage.readOpenCLImage(openCLManager);
       steppabilityConnectionsImage.readOpenCLImage(openCLManager);
-      LogTools.info("steppability duration : " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
    }
 
    public void reset()
