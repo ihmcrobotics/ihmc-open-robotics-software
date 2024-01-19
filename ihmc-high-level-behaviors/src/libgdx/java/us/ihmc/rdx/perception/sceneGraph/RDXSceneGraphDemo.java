@@ -84,7 +84,8 @@ public class RDXSceneGraphDemo
             arUcoMarkerDetector.setCameraInstrinsics(simulatedCamera.getDepthCameraIntrinsics());
             arUcoMarkerDetectionResults = new OpenCVArUcoMarkerDetectionResults();
 
-            onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
+            ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
+            onRobotSceneGraph = new ROS2SceneGraph(ros2Helper, referenceFrameLibrary);
 
             RDXROS2ArUcoMarkerPosesVisualizer arUcoMarkerPosesVisualizer = new RDXROS2ArUcoMarkerPosesVisualizer("ArUco Marker Poses",
                                                                                                                  ros2Helper,
@@ -99,7 +100,7 @@ public class RDXSceneGraphDemo
 
             referenceFrameLibrary = new ReferenceFrameLibrary();
 
-            sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel());
+            sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel(), referenceFrameLibrary);
             baseUI.getPrimaryScene().addRenderableProvider(sceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(sceneGraphUI.getPanel());
 

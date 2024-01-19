@@ -40,10 +40,11 @@ public class BehaviorTreeModule
       ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2NodeInterface());
 
-      sceneGraph = new ROS2SceneGraph(ros2ControllerHelper);
       referenceFrameLibrary = new ReferenceFrameLibrary();
       referenceFrameLibrary.addAll(Collections.singleton(ReferenceFrame.getWorldFrame()));
       referenceFrameLibrary.addAll(syncedRobot.getReferenceFrames().getCommonReferenceFrames());
+
+      sceneGraph = new ROS2SceneGraph(ros2ControllerHelper, referenceFrameLibrary);
       referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
 
       behaviorTreeExecutor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,

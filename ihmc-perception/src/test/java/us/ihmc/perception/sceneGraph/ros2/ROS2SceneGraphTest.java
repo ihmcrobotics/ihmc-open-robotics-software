@@ -9,6 +9,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Node;
 
 public class ROS2SceneGraphTest
@@ -16,7 +17,9 @@ public class ROS2SceneGraphTest
    @Test
    public void testROS2SceneGraph()
    {
-      SceneGraph sceneGraph = new SceneGraph();
+      ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
+
+      SceneGraph sceneGraph = new SceneGraph(referenceFrameLibrary);
 
       SceneNode child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child0");
       SceneNode child1 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1");
@@ -31,7 +34,7 @@ public class ROS2SceneGraphTest
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "scene_graph_test");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      SceneGraph subscriptionSceneGraph = new SceneGraph();
+      SceneGraph subscriptionSceneGraph = new SceneGraph(referenceFrameLibrary);
       ROS2SceneGraphSubscription subscription = new ROS2SceneGraphSubscription(subscriptionSceneGraph, ros2Helper, ROS2IOTopicQualifier.COMMAND);
 
       ROS2SceneGraphPublisher publisher = new ROS2SceneGraphPublisher();

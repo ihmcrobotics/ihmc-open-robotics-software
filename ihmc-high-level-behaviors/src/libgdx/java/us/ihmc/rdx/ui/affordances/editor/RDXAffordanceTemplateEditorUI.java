@@ -22,6 +22,7 @@ import us.ihmc.rdx.ui.interactable.RDXInteractableAffordanceTemplateHand;
 import us.ihmc.rdx.ui.interactable.RDXInteractableNub;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
@@ -70,7 +71,10 @@ public class RDXAffordanceTemplateEditorUI
    public RDXAffordanceTemplateEditorUI(RDXBaseUI baseUI)
    {
       panel3D = baseUI.getPrimary3DPanel();
-      SceneGraph sceneGraph = new SceneGraph();
+
+      ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
+
+      SceneGraph sceneGraph = new SceneGraph(referenceFrameLibrary);
       sceneGraph.modifyTree(modificationQueue ->
                             {
                                DoorSceneNodeDefinitions.ensureRightPushDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
