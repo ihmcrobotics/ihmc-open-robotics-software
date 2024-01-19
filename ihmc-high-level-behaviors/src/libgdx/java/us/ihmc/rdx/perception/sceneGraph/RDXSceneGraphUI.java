@@ -296,6 +296,17 @@ public class RDXSceneGraphUI
                      addUISceneNode(beaker);
                      beaker.place();
                   }
+                  if (ImGui.button(labels.get("Add rocket")))
+                  {
+                     Vector3D32 beakerLengths = new Vector3D32(0.0f, 0.0f, 0.42f);
+                     Vector3D32 beakerRadii = new Vector3D32(0.024f, 0.0f, 0.0f);
+                     RDXPrimitiveRigidBodySceneNode beaker = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.CYLINDER,
+                                                                                                                beakerLengths,
+                                                                                                                beakerRadii);
+                     modificationQueue.accept(new SceneGraphNodeAddition(beaker.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(beaker);
+                     beaker.place();
+                  }
                   if (ImGui.button(labels.get("Add safety cone")))
                   {
                      Vector3D32 safetyConeLengths = new Vector3D32(0.0f, 0.0f, 0.3f);
