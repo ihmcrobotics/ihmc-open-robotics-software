@@ -374,8 +374,8 @@ public class SteppableRegionsCalculationModule
       {
          for (SteppableCell cell : region.getCells())
          {
-            int x = cell.getX();
-            int y = cell.getY();
+            int x = cell.getXIndex();
+            int y = cell.getYIndex();
 
             int row = cellsPerSide - x - 1;
             int column = cellsPerSide - y - 1;

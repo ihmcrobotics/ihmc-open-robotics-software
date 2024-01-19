@@ -14,8 +14,6 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-   public static final byte REQUESTED_MODE_TORQUE_CONTROL = (byte) 0;
-   public static final byte REQUESTED_MODE_POSITION_CONTROL = (byte) 1;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
@@ -25,11 +23,6 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
             * To by-pass the safety check and force the execution of this message, set this field to true.
             */
    public boolean force_execution_;
-   /**
-            * Optional field, if REQUESTED_MODE_POSITION_CONTROL and the robot has low-level gains for the arms, this is executed in position control mode.
-            * If REQUESTED_MODE_TORQUE_CONTROL this is executed in torque control mode. If left unset the existing execution mode is unchanged.
-            */
-   public byte requested_mode_ = (byte) 255;
    /**
             * Specifies the side of the robot that will execute the trajectory.
             */
@@ -56,8 +49,6 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
       sequence_id_ = other.sequence_id_;
 
       force_execution_ = other.force_execution_;
-
-      requested_mode_ = other.requested_mode_;
 
       robot_side_ = other.robot_side_;
 
@@ -94,23 +85,6 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
    public boolean getForceExecution()
    {
       return force_execution_;
-   }
-
-   /**
-            * Optional field, if REQUESTED_MODE_POSITION_CONTROL and the robot has low-level gains for the arms, this is executed in position control mode.
-            * If REQUESTED_MODE_TORQUE_CONTROL this is executed in torque control mode. If left unset the existing execution mode is unchanged.
-            */
-   public void setRequestedMode(byte requested_mode)
-   {
-      requested_mode_ = requested_mode;
-   }
-   /**
-            * Optional field, if REQUESTED_MODE_POSITION_CONTROL and the robot has low-level gains for the arms, this is executed in position control mode.
-            * If REQUESTED_MODE_TORQUE_CONTROL this is executed in torque control mode. If left unset the existing execution mode is unchanged.
-            */
-   public byte getRequestedMode()
-   {
-      return requested_mode_;
    }
 
    /**
@@ -160,8 +134,6 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.force_execution_, other.force_execution_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_mode_, other.requested_mode_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!this.jointspace_trajectory_.epsilonEquals(other.jointspace_trajectory_, epsilon)) return false;
@@ -182,8 +154,6 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
 
       if(this.force_execution_ != otherMyClass.force_execution_) return false;
 
-      if(this.requested_mode_ != otherMyClass.requested_mode_) return false;
-
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if (!this.jointspace_trajectory_.equals(otherMyClass.jointspace_trajectory_)) return false;
@@ -201,8 +171,6 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("force_execution=");
       builder.append(this.force_execution_);      builder.append(", ");
-      builder.append("requested_mode=");
-      builder.append(this.requested_mode_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("jointspace_trajectory=");

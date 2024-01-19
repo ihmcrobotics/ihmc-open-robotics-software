@@ -17,6 +17,7 @@ import us.ihmc.rdx.shader.RDXUniform;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 public class RDXPointCloudRenderer implements RenderableProvider
@@ -48,7 +49,11 @@ public class RDXPointCloudRenderer implements RenderableProvider
       shader.set(inputID, multiColor);
    });
 
-   private RecyclingArrayList<Point3D32> pointsToRender;
+   private final Point3D32 nanPoint = new Point3D32();
+   {
+      nanPoint.setToNaN();
+   }
+   private List<Point3D32> pointsToRender;
    private ColorProvider colorProvider;
    private float pointScale = 0.01f;
    private int pointsPerSegment;
@@ -114,7 +119,12 @@ public class RDXPointCloudRenderer implements RenderableProvider
       if (pointsToRender != null)
       {
          if (pointsToRender.isEmpty()) // make sure there's always one point
-            pointsToRender.add().setToNaN();
+         {
+            if (pointsToRender instanceof RecyclingArrayList<Point3D32> recycling)
+               recycling.add().setToNaN();
+            else
+               pointsToRender.add(nanPoint);
+         }
 
          for (int i = 0; i < pointsToRender.size(); i++)
          {
@@ -383,7 +393,7 @@ public class RDXPointCloudRenderer implements RenderableProvider
          renderable.meshPart.mesh.dispose();
    }
 
-   public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender)
+   public void setPointsToRender(List<Point3D32> pointsToRender)
    {
       setPointsToRender(pointsToRender, new ColorProvider()
       {
@@ -413,7 +423,7 @@ public class RDXPointCloudRenderer implements RenderableProvider
       });
    }
 
-   public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender, Color color)
+   public void setPointsToRender(List<Point3D32> pointsToRender, Color color)
    {
       setPointsToRender(pointsToRender, new ColorProvider()
       {
@@ -443,7 +453,7 @@ public class RDXPointCloudRenderer implements RenderableProvider
       });
    }
 
-   public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender, ColorProvider provider)
+   public void setPointsToRender(List<Point3D32> pointsToRender, ColorProvider provider)
    {
       this.pointsToRender = pointsToRender;
       this.colorProvider = provider;

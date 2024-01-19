@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 
@@ -44,12 +45,13 @@ public class RDXTerrainGridGraphic implements RenderableProvider
 
    private void createGridLines(ArrayList<ModelInstance> gridLines, float yaw, float size, float resolution, Color color)
    {
+      Point3D offset = new Point3D();
       for (int i = 0; i < (int) (size / resolution); i++)
       {
          RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
          rigidBodyTransform.getTranslation().set(-size / 2 + i * resolution, 0.0, 0.0);
          rigidBodyTransform.getRotation().setYawPitchRoll(yaw, Math.PI / 2, 0);
-         ModelInstance cylinder = RDXModelBuilder.createCylinder(4.0f, 0.02f, color);
+         ModelInstance cylinder = RDXModelBuilder.createCylinder(4.0f, 0.02f, offset, color);
          LibGDXTools.toLibGDX(rigidBodyTransform, cylinder.transform);
          gridLines.add(cylinder);
       }
