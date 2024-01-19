@@ -1,6 +1,7 @@
 package us.ihmc.communication.crdt;
 
-import gnu.trove.set.hash.TLongHashSet;
+import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.map.hash.TLongLongHashMap;
 import ihmc_common_msgs.msg.dds.ConfirmableRequestMessage;
 import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.commons.thread.Notification;
@@ -48,10 +49,14 @@ public class RequestConfirmFreezable implements Freezable
 {
    private final CRDTInfo crdtInfo;
    private final MutableLong nextRequestID = new MutableLong();
+   /** This reduces the request creation to once per update.
+    *  Often, many changes occur in a single tick, like loading the initial state. */
    private final Notification needToSendRequest = new Notification();
-   private final Notification needToSendConfirmation = new Notification();
-   private final TLongHashSet unconfirmedRequests = new TLongHashSet();
-   private long confirmationNumber;
+   private final TLongArrayList unconfirmedRequests = new TLongArrayList();
+   private final TLongLongHashMap requestTimeouts = new TLongLongHashMap();
+   private final TLongArrayList recentConfirmations = new TLongArrayList();
+   private final TLongLongHashMap confirmationTimeouts = new TLongLongHashMap();
+   private transient final TLongArrayList timedOutEntries = new TLongArrayList();
    private long updateNumberToUnfreeze = 0;
    private boolean isFrozen = false;
 
@@ -100,67 +105,100 @@ public class RequestConfirmFreezable implements Freezable
 
    public void toMessage(ConfirmableRequestMessage message)
    {
-      message.setIsRequest(false);
-      message.setIsConfirmation(false);
+      removeTimedOutEntries(unconfirmedRequests, requestTimeouts, true);
+      removeTimedOutEntries(recentConfirmations, confirmationTimeouts, false);
 
       if (needToSendRequest.poll())
       {
          long requestNumber = nextRequestID.incrementAndGet();
+         unconfirmedRequests.add(requestNumber);
+         requestTimeouts.put(requestNumber, updateNumberToUnfreeze);
+      }
+
+      message.getRequestNumbers().resetQuick();
+      message.getConfirmationNumbers().resetQuick();
+
+      for (int i = 0; i < unconfirmedRequests.size(); i++)
+      {
+         long requestNumber = unconfirmedRequests.get(i);
          LogTools.debug("%s Update #%d: %s requesting. Request #%d".formatted(crdtInfo.getActorDesignation(),
                                                                               crdtInfo.getUpdateNumber(),
                                                                               this.getClass().getSimpleName(),
                                                                               requestNumber));
-         message.setIsRequest(true);
-         message.setRequestNumber(requestNumber);
-         unconfirmedRequests.add(requestNumber);
+         message.getRequestNumbers().add(requestNumber);
       }
 
-      if (needToSendConfirmation.poll())
+      for (int i = 0; i < recentConfirmations.size(); i++)
       {
-         LogTools.debug("%s Update #%d: %s confirming. Request #%d".formatted(crdtInfo.getActorDesignation(),
-                                                                              crdtInfo.getUpdateNumber(),
-                                                                              this.getClass().getSimpleName(),
-                                                                              confirmationNumber));
-         message.setIsConfirmation(true);
-         message.setConfirmationNumber(confirmationNumber);
+         long confirmationNumber = recentConfirmations.get(i);
+         message.getConfirmationNumbers().add(confirmationNumber);
       }
    }
 
    public void fromMessage(ConfirmableRequestMessage message)
    {
-      if (message.getIsRequest())
+      for (int i = 0; i < message.getRequestNumbers().size(); i++)
       {
-         confirmationNumber = message.getRequestNumber();
-         needToSendConfirmation.set();
+         long confirmationNumber = message.getRequestNumbers().get(i);
+
+         if (!recentConfirmations.contains(confirmationNumber))
+         {
+            LogTools.debug("%s Update #%d: %s confirming. Request #%d".formatted(crdtInfo.getActorDesignation(),
+                                                                                 crdtInfo.getUpdateNumber(),
+                                                                                 this.getClass().getSimpleName(),
+                                                                                 confirmationNumber));
+            recentConfirmations.add(confirmationNumber);
+            confirmationTimeouts.put(confirmationNumber, crdtInfo.getUpdateNumber() + crdtInfo.getMaxFreezeDuration());
+         }
+
          nextRequestID.setValue(confirmationNumber + 1); // Avoid duplicate request numbers for clarity
       }
 
-      if (message.getIsConfirmation())
+      for (int i = 0; i < message.getConfirmationNumbers().size(); i++)
       {
-         long confirmedRequestNumber = message.getConfirmationNumber();
+         long confirmedRequestNumber = message.getConfirmationNumbers().get(i);
 
-         boolean removed = unconfirmedRequests.remove(confirmedRequestNumber);
-
-         if (removed)
+         if (unconfirmedRequests.contains(confirmedRequestNumber))
          {
-            LogTools.debug("%s Update #%d: %s recieved confirmation. Unfreezing. Request #%d".formatted(crdtInfo.getActorDesignation(),
-                                                                                                        crdtInfo.getUpdateNumber(),
-                                                                                                        this.getClass().getSimpleName(),
-                                                                                                        confirmedRequestNumber));
+            unconfirmedRequests.remove(confirmedRequestNumber);
+            requestTimeouts.remove(confirmedRequestNumber);
+
+            LogTools.debug("%s Update #%d: %s recieved confirmation for Request #%d. Unfreezing.".formatted(crdtInfo.getActorDesignation(),
+                                                                                                            crdtInfo.getUpdateNumber(),
+                                                                                                            this.getClass().getSimpleName(),
+                                                                                                            confirmedRequestNumber));
             if (!unconfirmedRequests.isEmpty())
                LogTools.debug("%s Update #%d: Still unconfirmed requests: %s".formatted(crdtInfo.getActorDesignation(),
                                                                                         crdtInfo.getUpdateNumber(),
                                                                                         unconfirmedRequests));
-
             unfreeze();
          }
-         else
+      }
+   }
+
+   private void removeTimedOutEntries(TLongArrayList numbers, TLongLongHashMap timeouts, boolean areRequests)
+   {
+      timedOutEntries.clear();
+      for (int i = 0; i < numbers.size(); i++)
+      {
+         if (crdtInfo.getUpdateNumber() >= timeouts.get(numbers.get(i)))
          {
-            LogTools.error("%s Update #%d: Unrecognized Request #%d. Unconfirmed requests: %s".formatted(crdtInfo.getActorDesignation(),
-                                                                                                         crdtInfo.getUpdateNumber(),
-                                                                                                         confirmedRequestNumber,
-                                                                                                         unconfirmedRequests));
+            timedOutEntries.add(numbers.get(i));
          }
+      }
+
+      for (int i = 0; i < timedOutEntries.size(); i++)
+      {
+         if (areRequests)
+         {
+            LogTools.error("%s Update #%d: %s never received confirmation for Request #%d".formatted(crdtInfo.getActorDesignation(),
+                                                                                                     crdtInfo.getUpdateNumber(),
+                                                                                                     this.getClass().getSimpleName(),
+                                                                                                     timedOutEntries.get(i)));
+         }
+
+         numbers.remove(timedOutEntries.get(i));
+         timeouts.remove(timedOutEntries.get(i));
       }
    }
 
