@@ -37,6 +37,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private String startPlacementButtonText = "Place pose";
    private String startPlacementButtonDisabledText = "Placing";
+   private String stopPlacementButtonText = "Clear";
    private ModelInstance sphere;
    private ModelInstance arrow;
    private RDXUIActionMap placeGoalActionMap;
@@ -57,12 +58,21 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       create(null, color);
    }
 
-   public void create(Consumer<Pose3D> placedPoseConsumer, Color color)
+   public void create(Color color, String startPlacementButtonText, String startPlacementButtonDisabledText, String stopPlacementButtonText)
    {
-      create(placedPoseConsumer, color, startPlacementButtonText, startPlacementButtonDisabledText);
+      create(null, color, startPlacementButtonText, startPlacementButtonDisabledText, stopPlacementButtonText);
    }
 
-   public void create(Consumer<Pose3D> placedPoseConsumer, Color color, String startPlacementButtonText, String startPlacementButtonDisabledText)
+   public void create(Consumer<Pose3D> placedPoseConsumer, Color color)
+   {
+      create(placedPoseConsumer, color, startPlacementButtonText, startPlacementButtonDisabledText, stopPlacementButtonText);
+   }
+
+   public void create(Consumer<Pose3D> placedPoseConsumer,
+                      Color color,
+                      String startPlacementButtonText,
+                      String startPlacementButtonDisabledText,
+                      String stopPlacementButtonText)
    {
       this.placedPoseConsumer = placedPoseConsumer;
       float sphereRadius = 0.03f;
@@ -99,6 +109,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
 
       this.startPlacementButtonText = startPlacementButtonText;
       this.startPlacementButtonDisabledText = startPlacementButtonDisabledText;
+      this.stopPlacementButtonText = stopPlacementButtonText;
 
       clear();
    }
@@ -204,7 +215,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       }
       ImGui.sameLine();
       ImGui.beginDisabled(!isPlaced());
-      if (ImGui.button(labels.get("Clear")))
+      if (ImGui.button(labels.get(stopPlacementButtonText)))
       {
          clear();
       }
