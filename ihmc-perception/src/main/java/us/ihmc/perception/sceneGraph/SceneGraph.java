@@ -13,6 +13,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -46,20 +47,22 @@ public class SceneGraph
    private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final TIntObjectMap<CenterposeNode> centerposeDetectedMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
+   private ReferenceFrameLibrary referenceFrameLibrary;
 
-   public SceneGraph()
+   public SceneGraph(ReferenceFrameLibrary referenceFrameLibrary)
    {
-      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME));
+      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME), referenceFrameLibrary);
    }
 
    /**
     * Support passing in the externally created root node so it can be extended
     * by a superclass implementation like for UI nodes.
     */
-   public SceneGraph(SceneNode rootNode)
+   public SceneGraph(SceneNode rootNode, ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.rootNode = rootNode;
       updateCaches(rootNode);
+      this.referenceFrameLibrary = referenceFrameLibrary;
    }
 
    /**
@@ -144,6 +147,11 @@ public class SceneGraph
       {
          updateCaches(child);
       }
+   }
+
+   public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
+   {
+      this.referenceFrameLibrary = referenceFrameLibrary;
    }
 
    public SceneNode getRootNode()

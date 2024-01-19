@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class RDXAffordanceTemplateEditorDemo
 {
