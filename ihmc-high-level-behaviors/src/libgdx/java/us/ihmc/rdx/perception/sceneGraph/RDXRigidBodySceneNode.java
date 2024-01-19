@@ -164,19 +164,24 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Show Offset Gizmo"), offsetPoseGizmo.getSelected());
 
-      ImGuiTools.volatileInputFloat(labels.get("xPosition"), xPosition);
-      ImGuiTools.volatileInputFloat(labels.get("yPosition"), yPosition);
-      ImGuiTools.volatileInputFloat(labels.get("zPosition"), zPosition);
-      ImGuiTools.volatileInputFloat(labels.get("rollOrientation"), rollOrientation);
-      ImGuiTools.volatileInputFloat(labels.get("pitchOrientation"), pitchOrientation);
-      ImGuiTools.volatileInputFloat(labels.get("yawOrieantation"), yawOrieantation);
-
-      if (ImGui.button(labels.get("Set Pose in Object Frame")))
+      if (ImGui.collapsingHeader(labels.get("Set")))
       {
-         objectPoseInObjectFrame.setIncludingFrame(sceneGraph.getReferenceFrameLibrary().findFrameByName("midFeetZUp"), new Point3D(xPosition.get(), yPosition.get(), zPosition.get()), new Quaternion(yawOrieantation.get(), pitchOrientation.get(), rollOrientation.get()));
-         objectPoseInObjectFrame.changeFrame(offsetPoseGizmo.getPoseGizmo().getGizmoFrame().getParent());
-         offsetPoseGizmo.getPoseGizmo().getTransformToParent().set(objectPoseInObjectFrame);
-         offsetPoseGizmo.getPoseGizmo().update();
+         ImGuiTools.volatileInputFloat(labels.get("xPosition"), xPosition);
+         ImGuiTools.volatileInputFloat(labels.get("yPosition"), yPosition);
+         ImGuiTools.volatileInputFloat(labels.get("zPosition"), zPosition);
+         ImGuiTools.volatileInputFloat(labels.get("rollOrientation"), rollOrientation);
+         ImGuiTools.volatileInputFloat(labels.get("pitchOrientation"), pitchOrientation);
+         ImGuiTools.volatileInputFloat(labels.get("yawOrieantation"), yawOrieantation);
+
+         if (ImGui.button(labels.get("Set Pose in Object Frame")))
+         {
+            objectPoseInObjectFrame.setIncludingFrame(sceneGraph.getReferenceFrameLibrary().findFrameByName("midFeetZUp"),
+                                                      new Point3D(xPosition.get(), yPosition.get(), zPosition.get()),
+                                                      new Quaternion(yawOrieantation.get(), pitchOrientation.get(), rollOrientation.get()));
+            objectPoseInObjectFrame.changeFrame(offsetPoseGizmo.getPoseGizmo().getGizmoFrame().getParent());
+            offsetPoseGizmo.getPoseGizmo().getTransformToParent().set(objectPoseInObjectFrame);
+            offsetPoseGizmo.getPoseGizmo().update();
+         }
       }
    }
 
