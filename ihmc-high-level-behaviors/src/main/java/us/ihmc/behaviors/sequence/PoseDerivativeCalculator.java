@@ -28,10 +28,7 @@ public class PoseDerivativeCalculator
       nextPose.set(poseUpdate);
       boolean pastFirstUpdate = !previousPose.containsNaN();
 
-      // Be robust to receiving a pose that's the same as the last
-      boolean poseChanged = !nextPose.getPosition().geometricallyEquals(previousPose.getPosition(), 1e-11);
-
-      if (pastFirstUpdate && poseChanged)
+      if (pastFirstUpdate)
       {
          double dt = nextTime - previousTime;
 
@@ -39,13 +36,8 @@ public class PoseDerivativeCalculator
          linearVelocity.scale(1.0 / dt);
       }
 
-      boolean shouldSkipUpdatingPrevious = pastFirstUpdate && !poseChanged;
-
-      if (!shouldSkipUpdatingPrevious)
-      {
-         previousTime = nextTime;
-         previousPose.set(nextPose);
-      }
+      previousTime = nextTime;
+      previousPose.set(nextPose);
 
       return pastFirstUpdate;
    }

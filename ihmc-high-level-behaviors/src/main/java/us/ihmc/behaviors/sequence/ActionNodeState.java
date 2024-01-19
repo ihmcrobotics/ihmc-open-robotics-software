@@ -7,6 +7,7 @@ import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
 import us.ihmc.communication.crdt.CRDTUnidirectionalPose3D;
 import us.ihmc.communication.crdt.CRDTUnidirectionalSE3Trajectory;
+import us.ihmc.communication.crdt.CRDTUnidirectionalSpatialVector;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 public abstract class ActionNodeState<D extends ActionNodeDefinition> extends BehaviorTreeNodeState<D>
@@ -22,6 +23,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    private final CRDTUnidirectionalDouble elapsedExecutionTime;
    private final CRDTUnidirectionalSE3Trajectory desiredTrajectory;
    private final CRDTUnidirectionalPose3D currentPose;
+   private final CRDTUnidirectionalSpatialVector currentTwist;
    private final CRDTUnidirectionalDouble positionDistanceToGoalTolerance;
    private final CRDTUnidirectionalDouble orientationDistanceToGoalTolerance;
 
@@ -38,6 +40,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       elapsedExecutionTime = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       desiredTrajectory = new CRDTUnidirectionalSE3Trajectory(ROS2ActorDesignation.ROBOT, crdtInfo);
       currentPose = new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, crdtInfo);
+      currentTwist = new CRDTUnidirectionalSpatialVector(ROS2ActorDesignation.ROBOT, crdtInfo);
       positionDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       orientationDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
    }
@@ -55,6 +58,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       message.setElapsedExecutionTime(elapsedExecutionTime.toMessage());
       desiredTrajectory.toMessage(message.getDesiredTrajectory());
       currentPose.toMessage(message.getCurrentPose());
+      currentTwist.toMessage(message.getCurrentTwist());
       message.setPositionDistanceToGoalTolerance(positionDistanceToGoalTolerance.toMessage());
       message.setOrientationDistanceToGoalTolerance(orientationDistanceToGoalTolerance.toMessage());
    }
@@ -72,6 +76,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       elapsedExecutionTime.fromMessage(message.getElapsedExecutionTime());
       desiredTrajectory.fromMessage(message.getDesiredTrajectory());
       currentPose.fromMessage(message.getCurrentPose());
+      currentTwist.fromMessage(message.getCurrentTwist());
       positionDistanceToGoalTolerance.fromMessage(message.getPositionDistanceToGoalTolerance());
       orientationDistanceToGoalTolerance.fromMessage(message.getOrientationDistanceToGoalTolerance());
    }
@@ -160,6 +165,11 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    public CRDTUnidirectionalPose3D getCurrentPose()
    {
       return currentPose;
+   }
+
+   public CRDTUnidirectionalSpatialVector getCurrentTwist()
+   {
+      return currentTwist;
    }
 
    public double getPositionDistanceToGoalTolerance()

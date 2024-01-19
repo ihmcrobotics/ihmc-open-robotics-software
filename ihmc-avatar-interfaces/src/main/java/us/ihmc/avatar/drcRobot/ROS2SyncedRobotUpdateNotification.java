@@ -2,6 +2,7 @@ package us.ihmc.avatar.drcRobot;
 
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 /**
  * This class is necessary because in some situations,
@@ -23,18 +24,18 @@ public class ROS2SyncedRobotUpdateNotification
    private long previousMonotonicTimeNanos = -1;
    private long nextMonotonicTimeNanos = -1;
 
-   private final FramePose3D previousPelvisPose = new FramePose3D();
-   private final FramePose3D nextPelvisPose = new FramePose3D();
+   private final FramePose3D previousPose = new FramePose3D();
+   private final FramePose3D nextPose = new FramePose3D();
 
    private final Notification notification = new Notification();
 
    public ROS2SyncedRobotUpdateNotification()
    {
-      previousPelvisPose.setToNaN();
-      nextPelvisPose.setToNaN();
+      previousPose.setToNaN();
+      nextPose.setToNaN();
    }
 
-   public void update(ROS2SyncedRobotModel syncedRobot)
+   public void update(ROS2SyncedRobotModel syncedRobot, ReferenceFrame referenceFrameThatShouldBeMoving)
    {
       if (syncedRobot.getLatestRobotConfigurationData().getSequenceId() > syncedRobotUpdateNumber)
       {
@@ -51,22 +52,22 @@ public class ROS2SyncedRobotUpdateNotification
 
             if (deltaTimeIsNonZero)
             {
-               nextPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
+               nextPose.setFromReferenceFrame(referenceFrameThatShouldBeMoving);
 
-               if (!previousPelvisPose.containsNaN())
+               if (!previousPose.containsNaN())
                {
-                  if (!nextPelvisPose.geometricallyEquals(previousPelvisPose, 1e-11))
+                  if (!nextPose.geometricallyEquals(previousPose, 1e-11))
                   {
                      notification.set();
                   }
                }
 
-               previousPelvisPose.set(nextPelvisPose);
+               previousPose.set(nextPose);
             }
          }
          else
          {
-            previousPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
+            previousPose.setFromReferenceFrame(referenceFrameThatShouldBeMoving);
          }
 
          previousMonotonicTimeNanos = nextMonotonicTimeNanos;
