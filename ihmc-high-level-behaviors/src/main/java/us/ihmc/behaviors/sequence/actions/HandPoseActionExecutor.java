@@ -11,6 +11,7 @@ import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotUpdateNotification;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.*;
@@ -43,7 +44,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final FramePose3D chestInPelvis = new FramePose3D();
    private final FramePose3D goalChestFrame = new FramePose3D();
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
-   private long syncedRobotUpdateNumber = -1;
+   private final ROS2SyncedRobotUpdateNotification syncedRobotUpdateNotification = new ROS2SyncedRobotUpdateNotification();
 
    public HandPoseActionExecutor(long id,
                                  CRDTInfo crdtInfo,
@@ -76,6 +77,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    {
       super.update();
 
+      syncedRobotUpdateNotification.update(syncedRobot);
       trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
       state.setCanExecute(state.getPalmFrame().isChildOfWorld());
@@ -250,10 +252,8 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       if (state.getPalmFrame().isChildOfWorld())
       {
          // Make sure not to run an update unless we got updated data from the robot
-         if (syncedRobot.getLatestRobotConfigurationData().getSequenceId() > syncedRobotUpdateNumber)
+         if (syncedRobotUpdateNotification.getNotification().poll())
          {
-            syncedRobotUpdateNumber = syncedRobot.getLatestRobotConfigurationData().getSequenceId();
-
             desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
             syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
 
@@ -261,7 +261,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             trackingCalculator.factorInR3Errors(POSITION_TOLERANCE);
             trackingCalculator.factoryInSO3Errors(ORIENTATION_TOLERANCE);
 
-            LogTools.info("Linear velocity: %.6f".formatted(trackingCalculator.getLinearVelocity()));
+            LogTools.info("Linear velocity: %.11f".formatted(trackingCalculator.getLinearVelocity()));
 
             boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
             meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();

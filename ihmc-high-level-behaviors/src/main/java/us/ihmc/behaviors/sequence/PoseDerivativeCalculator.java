@@ -3,7 +3,6 @@ package us.ihmc.behaviors.sequence;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.log.LogTools;
 
 public class PoseDerivativeCalculator
 {
@@ -28,30 +27,19 @@ public class PoseDerivativeCalculator
       nextTime = timeUpdate;
       nextPose.set(poseUpdate);
       boolean pastFirstUpdate = !previousPose.containsNaN();
-      boolean timeHasPassed = false;
 
-      if (pastFirstUpdate)
+      // Be robust to receiving a pose that's the same as the last
+      boolean poseChanged = !nextPose.getPosition().geometricallyEquals(previousPose.getPosition(), 1e-11);
+
+      if (pastFirstUpdate && poseChanged)
       {
          double dt = nextTime - previousTime;
-         boolean dtNonZero = dt > 0.0;
-         boolean poseChanged = !nextPose.getPosition().geometricallyEquals(previousPose.getPosition(), 1e-8);
-         timeHasPassed = dtNonZero;
-         timeHasPassed &= poseChanged;
 
-         if (dtNonZero && !poseChanged)
-         {
-            LogTools.warn(("Dt was %.6f but no position change."
-                         + "If this happens on real robot there's a problem").formatted(dt)); // State estimator time may pass without a simulation tick
-         }
-
-         if (timeHasPassed)
-         {
-            linearVelocity.sub(nextPose.getPosition(), previousPose.getPosition());
-            linearVelocity.scale(1.0 / dt);
-         }
+         linearVelocity.sub(nextPose.getPosition(), previousPose.getPosition());
+         linearVelocity.scale(1.0 / dt);
       }
 
-      boolean shouldSkipUpdatingPrevious = pastFirstUpdate && !timeHasPassed;
+      boolean shouldSkipUpdatingPrevious = pastFirstUpdate && !poseChanged;
 
       if (!shouldSkipUpdatingPrevious)
       {
@@ -59,7 +47,7 @@ public class PoseDerivativeCalculator
          previousPose.set(nextPose);
       }
 
-      return pastFirstUpdate && timeHasPassed;
+      return pastFirstUpdate;
    }
 
    public Vector3D getLinearVelocity()
