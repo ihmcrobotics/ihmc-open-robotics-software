@@ -53,6 +53,10 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
             */
    public us.ihmc.euclid.geometry.Pose3D current_pose_;
    /**
+            * Current twist
+            */
+   public controller_msgs.msg.dds.SpatialVectorMessage current_twist_;
+   /**
             * Position distance to goal tolerance
             */
    public double position_distance_to_goal_tolerance_;
@@ -66,6 +70,7 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
       desired_trajectory_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage> (50, new ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
       current_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      current_twist_ = new controller_msgs.msg.dds.SpatialVectorMessage();
 
    }
 
@@ -96,6 +101,7 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
 
       desired_trajectory_.set(other.desired_trajectory_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.current_pose_, current_pose_);
+      controller_msgs.msg.dds.SpatialVectorMessagePubSubType.staticCopy(other.current_twist_, current_twist_);
       position_distance_to_goal_tolerance_ = other.position_distance_to_goal_tolerance_;
 
       orientation_distance_to_goal_tolerance_ = other.orientation_distance_to_goal_tolerance_;
@@ -249,6 +255,15 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       return current_pose_;
    }
 
+
+   /**
+            * Current twist
+            */
+   public controller_msgs.msg.dds.SpatialVectorMessage getCurrentTwist()
+   {
+      return current_twist_;
+   }
+
    /**
             * Position distance to goal tolerance
             */
@@ -322,6 +337,7 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       }
 
       if (!this.current_pose_.epsilonEquals(other.current_pose_, epsilon)) return false;
+      if (!this.current_twist_.epsilonEquals(other.current_twist_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_distance_to_goal_tolerance_, other.position_distance_to_goal_tolerance_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.orientation_distance_to_goal_tolerance_, other.orientation_distance_to_goal_tolerance_, epsilon)) return false;
@@ -358,6 +374,7 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
 
       if (!this.desired_trajectory_.equals(otherMyClass.desired_trajectory_)) return false;
       if (!this.current_pose_.equals(otherMyClass.current_pose_)) return false;
+      if (!this.current_twist_.equals(otherMyClass.current_twist_)) return false;
       if(this.position_distance_to_goal_tolerance_ != otherMyClass.position_distance_to_goal_tolerance_) return false;
 
       if(this.orientation_distance_to_goal_tolerance_ != otherMyClass.orientation_distance_to_goal_tolerance_) return false;
@@ -394,6 +411,8 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       builder.append(this.desired_trajectory_);      builder.append(", ");
       builder.append("current_pose=");
       builder.append(this.current_pose_);      builder.append(", ");
+      builder.append("current_twist=");
+      builder.append(this.current_twist_);      builder.append(", ");
       builder.append("position_distance_to_goal_tolerance=");
       builder.append(this.position_distance_to_goal_tolerance_);      builder.append(", ");
       builder.append("orientation_distance_to_goal_tolerance=");

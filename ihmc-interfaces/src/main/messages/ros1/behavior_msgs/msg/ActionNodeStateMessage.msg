@@ -32,6 +32,9 @@ ihmc_common_msgs/SE3TrajectoryPointMessage[] desired_trajectory
 # Current pose
 geometry_msgs/Pose current_pose
 
+# Current twist
+controller_msgs/SpatialVectorMessage current_twist
+
 # Position distance to goal tolerance
 float64 position_distance_to_goal_tolerance
 
