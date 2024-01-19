@@ -27,6 +27,7 @@ public class FootstepChecker implements FootstepCheckerInterface
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    public static final String rejectionReasonVariable = "rejectionReason";
+   private static final boolean USE_GPU_DATA_FOR_SNAPPING = false;
 
    private static final double traversabilityThresholdCenter = 0.08;
    private static final double traversabilityThresholdPerimeter = 0.02;
@@ -120,10 +121,25 @@ public class FootstepChecker implements FootstepCheckerInterface
       }
 
       // Snap footstep to height map/planar regions
-      FootstepSnapData snapData = snapper.snapFootstep(candidateStep, stanceStep, parameters.getWiggleWhilePlanning());
-      candidateStepSnapData.set(snapData);
+      FootstepSnapData snapData;
+
+      if (USE_GPU_DATA_FOR_SNAPPING)
+      {
+         // TODO compute these from GPU data
+         RigidBodyTransform snapTransform = new RigidBodyTransform();
+         ConvexPolygon2D croppedFoothold = new ConvexPolygon2D();
+
+         snapData = new FootstepSnapData(snapTransform, croppedFoothold);
+         snapper.addSnapData(candidateStep, snapData);
+      }
+      else
+      {
+         snapData = snapper.snapFootstep(candidateStep, stanceStep, parameters.getWiggleWhilePlanning());
+         candidateStepSnapData.set(snapData);
+         achievedDeltaInside.set(snapData.getAchievedInsideDelta());
+      }
+
       heuristicPoseChecker.setApproximateStepDimensions(candidateStep, stanceStep);
-      achievedDeltaInside.set(snapData.getAchievedInsideDelta());
 
       // Check height map rejection reasons
       if (!doValidityCheckForHeightMap(candidateStep, snapData))
