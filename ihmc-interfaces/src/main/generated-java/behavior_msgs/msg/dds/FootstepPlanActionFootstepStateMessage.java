@@ -8,10 +8,7 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class FootstepPlanActionFootstepStateMessage extends Packet<FootstepPlanActionFootstepStateMessage> implements Settable<FootstepPlanActionFootstepStateMessage>, EpsilonComparable<FootstepPlanActionFootstepStateMessage>
 {
-   /**
-            * Index of the footstep
-            */
-   public int index_;
+   public boolean unused_placeholder_field_;
 
    public FootstepPlanActionFootstepStateMessage()
    {
@@ -25,23 +22,17 @@ public class FootstepPlanActionFootstepStateMessage extends Packet<FootstepPlanA
 
    public void set(FootstepPlanActionFootstepStateMessage other)
    {
-      index_ = other.index_;
+      unused_placeholder_field_ = other.unused_placeholder_field_;
 
    }
 
-   /**
-            * Index of the footstep
-            */
-   public void setIndex(int index)
+   public void setUnusedPlaceholderField(boolean unused_placeholder_field)
    {
-      index_ = index;
+      unused_placeholder_field_ = unused_placeholder_field;
    }
-   /**
-            * Index of the footstep
-            */
-   public int getIndex()
+   public boolean getUnusedPlaceholderField()
    {
-      return index_;
+      return unused_placeholder_field_;
    }
 
 
@@ -62,7 +53,8 @@ public class FootstepPlanActionFootstepStateMessage extends Packet<FootstepPlanA
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.index_, other.index_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unused_placeholder_field_, other.unused_placeholder_field_, epsilon)) return false;
+
 
       return true;
    }
@@ -76,7 +68,7 @@ public class FootstepPlanActionFootstepStateMessage extends Packet<FootstepPlanA
 
       FootstepPlanActionFootstepStateMessage otherMyClass = (FootstepPlanActionFootstepStateMessage) other;
 
-      if(this.index_ != otherMyClass.index_) return false;
+      if(this.unused_placeholder_field_ != otherMyClass.unused_placeholder_field_) return false;
 
 
       return true;
@@ -88,8 +80,8 @@ public class FootstepPlanActionFootstepStateMessage extends Packet<FootstepPlanA
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPlanActionFootstepStateMessage {");
-      builder.append("index=");
-      builder.append(this.index_);
+      builder.append("unused_placeholder_field=");
+      builder.append(this.unused_placeholder_field_);
       builder.append("}");
       return builder.toString();
    }

@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -41,6 +40,11 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * A load bearing state for a rigid body. This is currently for using the hands
+ * to help support the weight of the robot. It is based on a contact model
+ * of a single point on the hand contacting an environmental plane.
+ */
 public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

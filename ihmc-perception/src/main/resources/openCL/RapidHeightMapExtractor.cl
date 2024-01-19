@@ -35,6 +35,8 @@
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
 
+
+
 /**
  * Converts a coordinate (yaw, pitch) in the lidar sensor to a point in the sensor frame
  **/

@@ -23,7 +23,7 @@ public class RDXSphericalImageProjectionDemo
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(RDXProjectionSphere::new);
    private final SideDependentList<RDXIconTexture> imageTextures = new SideDependentList<>();
-   private final ImDouble pupillaryDistance = new ImDouble(0.67);
+   private final ImDouble pupillaryDistance = new ImDouble(0.180724);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RigidBodyTransform leftEyePose = new RigidBodyTransform();
 
@@ -47,7 +47,7 @@ public class RDXSphericalImageProjectionDemo
 
             baseUI.getImGuiPanelManager().addPanel("Projection", () ->
             {
-               if (ImGuiTools.sliderDouble(labels.get("Pupillary distance"), pupillaryDistance, 0.35, 0.85))
+               if (ImGuiTools.sliderDouble(labels.get("Pupillary distance"), pupillaryDistance, 0.1, 0.85))
                {
                   leftEyePose.getTranslation().setY(pupillaryDistance.get());
                   LibGDXTools.toLibGDX(leftEyePose, projectionSpheres.get(RobotSide.LEFT).getModelInstance().transform);

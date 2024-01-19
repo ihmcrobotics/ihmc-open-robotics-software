@@ -6,6 +6,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -13,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.tools.Timer;
+import us.ihmc.tools.NonWallTimer;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHeightPitchActionState, PelvisHeightPitchActionDefinition>
@@ -25,11 +26,9 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
    private final PelvisHeightPitchActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final Timer executionTimer = new Timer();
+   private final NonWallTimer executionTimer = new NonWallTimer();
    private final FramePose3D desiredPelvisPose = new FramePose3D();
    private final FramePose3D syncedPelvisPose = new FramePose3D();
-   private double startPositionDistanceToGoal;
-   private double startOrientationDistanceToGoal;
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
 
    public PelvisHeightPitchActionExecutor(long id,
@@ -54,12 +53,16 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
    {
       super.update();
 
+      executionTimer.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
+
       state.setCanExecute(state.getPelvisFrame().isChildOfWorld());
    }
 
    @Override
    public void triggerActionExecution()
    {
+      super.triggerActionExecution();
+
       if (state.getPelvisFrame().isChildOfWorld())
       {
          FramePose3D framePose = new FramePose3D(state.getPelvisFrame().getReferenceFrame());
@@ -86,8 +89,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
          syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
          desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
          desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());
-         startPositionDistanceToGoal = syncedPelvisPose.getTranslation().differenceNorm(desiredPelvisPose.getTranslation());
-         startOrientationDistanceToGoal = syncedPelvisPose.getRotation().distance(desiredPelvisPose.getRotation(), true);
+         state.getDesiredTrajectory().setSingleSegmentTrajectory(syncedPelvisPose, desiredPelvisPose, getDefinition().getTrajectoryDuration());
       }
       else
       {
@@ -111,14 +113,12 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
                                                                Double.NaN,
                                                                definition.getTrajectoryDuration(),
                                                                executionTimer,
+                                                               getState(),
                                                                BehaviorActionCompletionComponent.TRANSLATION));
 
          state.setNominalExecutionDuration(definition.getTrajectoryDuration());
          state.setElapsedExecutionTime(executionTimer.getElapsedTime());
-         state.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-         state.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
-         state.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
-         state.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
+         state.getCurrentPose().getValue().set(syncedPelvisPose);
          state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
          state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
       }
