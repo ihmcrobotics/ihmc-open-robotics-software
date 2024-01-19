@@ -43,7 +43,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       jsonNode.put("side", side.getValue().getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
       jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater.getValue());
-      jsonNode.put("jointSpaceControl", jointspaceOnly.getValue());
+      jsonNode.put("jointspaceOnly", jointspaceOnly.getValue());
    }
 
    @Override
@@ -56,7 +56,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       palmParentFrameName.setValue(jsonNode.get("parentFrame").textValue());
       JSONTools.toEuclid(jsonNode, palmTransformToParent.getValue());
       holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
-      jointspaceOnly.setValue(jsonNode.get("jointSpaceControl").asBoolean());
+      jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
    }
 
    public void toMessage(HandPoseActionDefinitionMessage message)

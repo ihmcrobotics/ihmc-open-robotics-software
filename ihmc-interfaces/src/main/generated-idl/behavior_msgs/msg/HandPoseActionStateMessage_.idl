@@ -4,6 +4,7 @@
 #include "behavior_msgs/msg/./ActionNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./HandPoseActionDefinitionMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
 module behavior_msgs
 {
   module msg
@@ -27,9 +28,13 @@ module behavior_msgs
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage goal_chest_transform_to_world;
         /**
-         * Linear hand wrench magnitude
+         * Hand force
          */
-        double hand_wrench_magnitude_linear;
+        geometry_msgs::msg::dds::Vector3 force;
+        /**
+         * Hand torque
+         */
+        geometry_msgs::msg::dds::Vector3 torque;
         /**
          * Joint angles
          */
