@@ -9,7 +9,7 @@ public class RDXAffordanceTemplateEditorDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXAffordanceTemplateEditorUI editor;
-   private final SceneGraph sceneGraph = new SceneGraph();
+   private final SceneGraph sceneGraph = new SceneGraph(null);
 
    public RDXAffordanceTemplateEditorDemo()
    {
