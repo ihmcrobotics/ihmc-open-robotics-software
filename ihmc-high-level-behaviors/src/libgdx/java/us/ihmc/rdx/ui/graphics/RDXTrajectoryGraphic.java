@@ -56,6 +56,13 @@ public class RDXTrajectoryGraphic
       updateInternal(lineWidth);
    }
 
+   public void clear()
+   {
+      positionTrajectoryGraphic.clear();
+      if (referenceFrameGraphics != null)
+         referenceFrameGraphics.clear();
+   }
+
    private void updateInternal(double lineWidth)
    {
       positionTrajectoryGraphic.update(positions, lineWidth, Color.WHITE);

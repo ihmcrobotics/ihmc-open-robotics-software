@@ -43,6 +43,26 @@ public interface SteppableRegionCalculatorParametersBasics extends SteppableRegi
       set(SteppableRegionCalculatorParameters.cliffEndHeightToAvoid, cliffEndHeightToAvoid);
    }
 
+   default void setMinSupportAreaFraction(double minSupportAreaFraction)
+   {
+      set(SteppableRegionCalculatorParameters.minSupportAreaFraction, minSupportAreaFraction);
+   }
+
+   default void setMinSnapHeightThreshold(double minSnapHeightThreshold)
+   {
+      set(SteppableRegionCalculatorParameters.minSnapHeightThreshold, minSnapHeightThreshold);
+   }
+
+   default void setSnapHeightThresholdAtSearchEdge(double snapHeightThresholdAtSearchEdge)
+   {
+      set(SteppableRegionCalculatorParameters.snapHeightThresholdAtSearchEdge, snapHeightThresholdAtSearchEdge);
+   }
+
+   default void setInequalityActivationSlope(double inequalityActivationSlope)
+   {
+      set(SteppableRegionCalculatorParameters.inequalityActivationSlope, inequalityActivationSlope);
+   }
+
    default void setMaxSearchDepthForRegions(int maxSearchDepthForRegions)
    {
       set(SteppableRegionCalculatorParameters.maxSearchDepthForRegions, maxSearchDepthForRegions);
