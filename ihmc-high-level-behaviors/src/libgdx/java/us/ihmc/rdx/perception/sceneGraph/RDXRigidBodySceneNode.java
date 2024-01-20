@@ -5,15 +5,19 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.type.ImFloat;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
@@ -21,6 +25,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
@@ -41,6 +46,14 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
    private String initialParentName;
    private final ImBooleanWrapper trackDetectedPoseWrapper;
    private final TypedNotification<Boolean> trackDetectedPoseChanged = new TypedNotification<>();
+
+   private final ImFloat xPosition = new ImFloat(0.0f);
+   private final ImFloat yPosition = new ImFloat(0.0f);
+   private final ImFloat zPosition = new ImFloat(0.0f);
+   private final ImFloat rollOrientation = new ImFloat(0.0f);
+   private final ImFloat pitchOrientation = new ImFloat(0.0f);
+   private final ImFloat yawOrieantation = new ImFloat(0.0f);
+   private final FramePose3D objectPoseInObjectFrame = new FramePose3D();
 
    protected transient final FramePose3D nodePose = new FramePose3D();
    protected transient final FramePose3D visualModelPose = new FramePose3D();
@@ -150,6 +163,26 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
       trackDetectedPoseWrapper.renderImGuiWidget();
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Show Offset Gizmo"), offsetPoseGizmo.getSelected());
+
+      if (ImGui.collapsingHeader(labels.get("Set")))
+      {
+         ImGuiTools.volatileInputFloat(labels.get("xPosition"), xPosition);
+         ImGuiTools.volatileInputFloat(labels.get("yPosition"), yPosition);
+         ImGuiTools.volatileInputFloat(labels.get("zPosition"), zPosition);
+         ImGuiTools.volatileInputFloat(labels.get("rollOrientation"), rollOrientation);
+         ImGuiTools.volatileInputFloat(labels.get("pitchOrientation"), pitchOrientation);
+         ImGuiTools.volatileInputFloat(labels.get("yawOrieantation"), yawOrieantation);
+
+         if (ImGui.button(labels.get("Set Pose in Object Frame")))
+         {
+            objectPoseInObjectFrame.setIncludingFrame(sceneGraph.getReferenceFrameLibrary().findFrameByName("midFeetZUp"),
+                                                      new Point3D(xPosition.get(), yPosition.get(), zPosition.get()),
+                                                      new Quaternion(yawOrieantation.get(), pitchOrientation.get(), rollOrientation.get()));
+            objectPoseInObjectFrame.changeFrame(offsetPoseGizmo.getPoseGizmo().getGizmoFrame().getParent());
+            offsetPoseGizmo.getPoseGizmo().getTransformToParent().set(objectPoseInObjectFrame);
+            offsetPoseGizmo.getPoseGizmo().update();
+         }
+      }
    }
 
    @Override

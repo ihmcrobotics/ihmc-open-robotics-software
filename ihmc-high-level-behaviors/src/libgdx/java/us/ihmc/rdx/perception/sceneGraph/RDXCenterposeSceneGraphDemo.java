@@ -75,17 +75,17 @@ public class RDXCenterposeSceneGraphDemo
             zed2ColoredPointCloudVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
-            sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel());
-            baseUI.getPrimaryScene().addRenderableProvider(sceneGraphUI::getRenderables);
-            baseUI.getImGuiPanelManager().addPanel(sceneGraphUI.getPanel());
-
             messageAquisitionFrameGraphic = new RDXReferenceFrameGraphic(0.1, Color.ORANGE);
             baseUI.getPrimaryScene().addRenderableProvider(messageAquisitionFrameGraphic);
 
             referenceFrameLibrary = new ReferenceFrameLibrary();
+
+            sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel(), referenceFrameLibrary);
+            baseUI.getPrimaryScene().addRenderableProvider(sceneGraphUI::getRenderables);
+            baseUI.getImGuiPanelManager().addPanel(sceneGraphUI.getPanel());
             referenceFrameLibrary.addDynamicCollection(sceneGraphUI.getSceneGraph().asNewDynamicReferenceFrameCollection());
 
-            onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
+            onRobotSceneGraph = new ROS2SceneGraph(ros2Helper, referenceFrameLibrary);
             centerposeProcess = new CenterposeDetectionManager(ros2Helper, ZEDModelData.createCameraReferenceFrame(RobotSide.LEFT, ReferenceFrame.getWorldFrame()));
 
             globalVisualizersPanel.create();

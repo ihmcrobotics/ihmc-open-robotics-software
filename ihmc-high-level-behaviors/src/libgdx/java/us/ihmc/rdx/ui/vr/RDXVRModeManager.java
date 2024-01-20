@@ -20,6 +20,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Set;
@@ -43,17 +44,19 @@ public class RDXVRModeManager
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
-                      ROS2ControllerHelper controllerHelper)
+                      ROS2ControllerHelper controllerHelper,
+                      ReferenceFrameLibrary referenceFrameLibrary)
    {
-      create(baseUI, syncedRobot, controllerHelper, new DefaultRetargetingParameters(), new SceneGraph());
+      create(baseUI, syncedRobot, controllerHelper, new DefaultRetargetingParameters(), new SceneGraph(referenceFrameLibrary));
    }
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
                       ROS2ControllerHelper controllerHelper,
-                      RetargetingParameters retargetingParameters)
+                      RetargetingParameters retargetingParameters,
+                      ReferenceFrameLibrary referenceFrameLibrary)
    {
-      create(baseUI, syncedRobot, controllerHelper, retargetingParameters, new SceneGraph());
+      create(baseUI, syncedRobot, controllerHelper, retargetingParameters, new SceneGraph(referenceFrameLibrary));
    }
 
    public void create(RDXBaseUI baseUI,

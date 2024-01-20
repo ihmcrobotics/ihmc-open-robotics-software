@@ -4,6 +4,7 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.function.BiFunction;
@@ -22,9 +23,9 @@ public class ROS2SceneGraph extends SceneGraph
    /**
     * Constructor for on-robot.
     */
-   public ROS2SceneGraph(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public ROS2SceneGraph(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME), null, ros2PublishSubscribeAPI, ROS2ActorDesignation.ROBOT);
+      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME), null, ros2PublishSubscribeAPI, ROS2ActorDesignation.ROBOT, referenceFrameLibrary);
    }
 
    /**
@@ -34,9 +35,10 @@ public class ROS2SceneGraph extends SceneGraph
    public ROS2SceneGraph(SceneNode rootNode,
                          BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier,
                          ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
-                         ROS2ActorDesignation ros2ActorDesignation)
+                         ROS2ActorDesignation ros2ActorDesignation,
+                         ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(rootNode);
+      super(rootNode, referenceFrameLibrary);
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
       this.ros2ActorDesignation = ros2ActorDesignation;
 
