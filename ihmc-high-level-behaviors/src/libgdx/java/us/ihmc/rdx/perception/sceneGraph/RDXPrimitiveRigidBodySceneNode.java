@@ -70,7 +70,7 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
 
       switch (primitiveRigidBodySceneNode.getShape())
       {
-         case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBox(lengths.getX32(), lengths.getY32(), lengths.getZ32(), Color.WHITE));
+         case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBoxOffset(lengths.getX32(), lengths.getY32(), lengths.getZ32(), new Point3D(), Color.WHITE));
          case PRISM -> modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(lengths.getX32(),
                                                                                         lengths.getY32(),
                                                                                         lengths.getZ32(),
@@ -121,7 +121,7 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
             {
                if (modelInstance != null)
                   modelInstance.model.dispose();
-               modelInstance = new RDXModelInstance(RDXModelBuilder.createBox(xLength.get(), yLength.get(), zLength.get(), Color.WHITE));
+               modelInstance = new RDXModelInstance(RDXModelBuilder.createBoxOffset(xLength.get(), yLength.get(), zLength.get(), new Point3D(), Color.WHITE));
                modelInstance.setColor(GHOST_COLOR);
             }
          }
