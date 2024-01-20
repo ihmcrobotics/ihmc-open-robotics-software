@@ -12,7 +12,7 @@ public class RDX3DPanelToolbar
 {
    private boolean show = true;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final float iconSize = 40.0f;
+   private final float iconSize = 80.0f;
    private final ArrayList<RDX3DPanelToolbarButton> buttons = new ArrayList<>();
 
    public RDX3DPanelToolbarButton addButton()
@@ -34,11 +34,9 @@ public class RDX3DPanelToolbar
          float startY = 40.0f;
 
          float upGray = 1.0f;
-         float hoverGray = 0.4f;
-         float downGray = 0.2f;
-         ImGui.pushStyleColor(ImGuiCol.Button, upGray, upGray, upGray, 0.5f);
-         ImGui.pushStyleColor(ImGuiCol.ButtonHovered, hoverGray, hoverGray, hoverGray, 0.8f);
-         ImGui.pushStyleColor(ImGuiCol.ButtonActive, downGray, downGray, downGray, 0.9f);
+         ImGui.pushStyleColor(ImGuiCol.Button, upGray, upGray, upGray, 0.9f);
+         ImGui.pushStyleColor(ImGuiCol.ButtonHovered, 0.9f, 0.9f, 1.0f, 0.9f);
+         ImGui.pushStyleColor(ImGuiCol.ButtonActive, 0.85f, 0.85f, 1.0f, 1.0f);
 
          for (int i = 0; i < buttons.size(); i++)
          {
