@@ -89,7 +89,7 @@ public class RDXInteractableObject implements RenderableProvider
       if (modelInstance != null)
          modelInstance.model.dispose();
       switch (shape) {
-         case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBoxOffset(xLength.get(), yLength.get(), zLength.get(), new Point3D(0, 0, zLength.get()/2), Color.WHITE));
+         case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBoxOffset(xLength.get(), yLength.get(), zLength.get(), new Point3D(), Color.WHITE));
          case PRISM -> modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(xLength.get(), yLength.get(), zLength.get(), new Point3D(0, 0, -zLength.get() / 2), Color.WHITE));
          case CYLINDER -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(zLength.get(), xRadius.get(), new Point3D(0, 0, -zLength.get() / 2), Color.WHITE));
          case CONE -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(zLength.get(), xRadius.get(), new Point3D(0, 0, -zLength.get() / 2), Color.WHITE));
