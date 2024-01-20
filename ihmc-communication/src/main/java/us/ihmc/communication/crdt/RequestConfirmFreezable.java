@@ -12,12 +12,6 @@ import us.ihmc.log.LogTools;
  * to end early if we know the change has propagated.
  *
  * <p>
- * We assume messages are not dropped and do not arrive out of order.
- * This is to separate the concerns of this algorithm and the
- * underlying communication protocol.
- * </p>
- *
- * <p>
  * A call to {@link #freeze} initiates incrementing and sending out a
  * monotonically increasing
  * request number. Another node receives that and sends back the same
@@ -38,6 +32,12 @@ import us.ihmc.log.LogTools;
  * <p>
  * The {@link #unfreeze} method works pulling back that timeout to
  * the current update number.
+ * </p>
+ *
+ * <p>
+ * This class handles dropped and out of order messages. It does so by
+ * resending requests until they are confirmed and resending
+ * confirmations until they expire.
  * </p>
  *
  * <p>
