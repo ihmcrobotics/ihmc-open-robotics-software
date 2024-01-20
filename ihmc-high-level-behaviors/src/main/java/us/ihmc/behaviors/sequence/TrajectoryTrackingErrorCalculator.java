@@ -18,8 +18,6 @@ public class TrajectoryTrackingErrorCalculator
    private double robotTime;
    private final NonWallTimer executionTimer = new NonWallTimer();
 
-   private final PoseDerivativeCalculator poseDerivativeCalculator = new PoseDerivativeCalculator();
-
    public void update(double robotTime)
    {
       this.robotTime = robotTime;
@@ -35,8 +33,6 @@ public class TrajectoryTrackingErrorCalculator
       timeIsUp = false;
       hitTimeLimit = false;
       isWithinPositionTolerance = false;
-
-      poseDerivativeCalculator.reset();
    }
 
    public void computeExecutionTimings(double nominalExecutionDuration)
@@ -50,8 +46,6 @@ public class TrajectoryTrackingErrorCalculator
    {
       positionErrorDistance = actual.getTranslation().differenceNorm(desired.getTranslation());
       orientationErrorDistance = actual.getRotation().distance(desired.getRotation(), true);
-
-      poseDerivativeCalculator.compute(actual, robotTime);
 
       isWithinPositionTolerance = true;
    }
@@ -97,10 +91,5 @@ public class TrajectoryTrackingErrorCalculator
    public double getOrientationErrorDistance()
    {
       return orientationErrorDistance;
-   }
-
-   public PoseDerivativeCalculator getPoseDerivativeCalculator()
-   {
-      return poseDerivativeCalculator;
    }
 }
