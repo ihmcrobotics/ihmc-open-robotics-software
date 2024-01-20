@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -32,6 +33,14 @@ public class TerrainMapData
    private Mat heightMap;
    private Mat contactMap;
    private Mat terrainCostMap;
+
+   private Mat steppableRegionRingMat;
+   private Mat steppabilityImage;
+   private Mat snapHeightImage;
+   private Mat snapNormalXImage;
+   private Mat snapNormalYImage;
+   private Mat snapNormalZImage;
+   private Mat steppabilityConnectionsImage;
 
    public TerrainMapData(Mat heightMap, Mat contactMap, Mat terrainCostMap)
    {
@@ -224,5 +233,50 @@ public class TerrainMapData
    public void setTerrainCostMap(Mat terrainCostMap)
    {
       this.terrainCostMap = terrainCostMap;
+   }
+
+   public void setSteppableRegionRingMat(Mat steppableRegionRingMat)
+   {
+      this.steppableRegionRingMat = steppableRegionRingMat;
+   }
+
+   public void setSteppabilityImage(Mat steppabilityImage)
+   {
+      this.steppabilityImage = steppabilityImage;
+   }
+
+   public void setSnapHeightImage(Mat snapHeightImage)
+   {
+      this.snapHeightImage = snapHeightImage;
+   }
+
+   public void setSnapNormalXImage(Mat snapNormalXImage)
+   {
+      this.snapNormalXImage = snapNormalXImage;
+   }
+
+   public void setSnapNormalYImage(Mat snapNormalYImage)
+   {
+      this.snapNormalYImage = snapNormalYImage;
+   }
+
+   public void setSnapNormalZImage(Mat snapNormalZImage)
+   {
+      this.snapNormalZImage = snapNormalZImage;
+   }
+
+   public void setSteppabilityConnectionsImage(Mat steppabilityConnectionsImage)
+   {
+      this.steppabilityConnectionsImage = steppabilityConnectionsImage;
+   }
+
+   public Mat getSteppableRegionRingMat()
+   {
+      return steppableRegionRingMat;
+   }
+
+   public Mat getSteppabilityImage()
+   {
+      return steppabilityImage;
    }
 }
