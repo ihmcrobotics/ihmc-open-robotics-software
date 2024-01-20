@@ -281,7 +281,7 @@ public class RDXSceneGraphUI
                   if (ImGui.button(labels.get("Add open box")))
                   {
                      Vector3D32 largeBoxLengths = new Vector3D32(0.314f, 0.394f, 0.26f);
-                     RDXPrimitiveRigidBodySceneNode largeBox = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.BOX, largeBoxLengths, null);
+                     RDXPrimitiveRigidBodySceneNode largeBox = predefinedPrimitiveRigidBodySceneNodeBuilder.name("ResizableBox").build(PrimitiveRigidBodyShape.BOX, largeBoxLengths, null);
                      modificationQueue.accept(new SceneGraphNodeAddition(largeBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(largeBox);
                      largeBox.place();
