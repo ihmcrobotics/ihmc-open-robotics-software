@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.affordances.editor;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class RDXAffordanceTemplateEditorDemo
 {

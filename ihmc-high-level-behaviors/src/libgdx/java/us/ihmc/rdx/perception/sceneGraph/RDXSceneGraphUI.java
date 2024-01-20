@@ -22,6 +22,7 @@ import us.ihmc.rdx.perception.sceneGraph.builder.RDXPredefinedRigidBodySceneNode
 import us.ihmc.rdx.perception.sceneGraph.builder.RDXPrimitiveRigidBodySceneNodeBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import java.util.Map;
 import java.util.Set;
@@ -49,14 +50,14 @@ public class RDXSceneGraphUI
    private final RDXPrimitiveRigidBodySceneNodeBuilder primitiveRigidBodySceneNodeBuilder;
    private final RDXPrimitiveRigidBodySceneNodeBuilder predefinedPrimitiveRigidBodySceneNodeBuilder;
 
-   public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D)
+   public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D, ReferenceFrameLibrary referenceFrameLibrary)
    {
       sceneGraph = new ROS2SceneGraph(new SceneNode(SceneGraph.ROOT_NODE_ID, SceneGraph.ROOT_NODE_NAME), (sceneGraph, ros2SceneGraphSubscriptionNode) ->
       {
          RDXSceneNode uiSceneNode = RDXSceneGraphTools.createNodeFromMessage(ros2SceneGraphSubscriptionNode, panel3D, sceneGraph);
          addUISceneNode(uiSceneNode);
          return uiSceneNode.getSceneNode();
-      }, ros2PublishSubscribeAPI, ROS2ActorDesignation.OPERATOR);
+      }, ros2PublishSubscribeAPI, ROS2ActorDesignation.OPERATOR, referenceFrameLibrary);
 
       this.panel3D = panel3D;
 

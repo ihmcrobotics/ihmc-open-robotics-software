@@ -149,7 +149,8 @@ public class PerceptionAndAutonomyProcess
                                        Supplier<ReferenceFrame> leftBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> rightBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> robotPelvisFrameSupplier,
-                                       ReferenceFrame zed2iLeftCameraFrame)
+                                       ReferenceFrame zed2iLeftCameraFrame,
+                                       ReferenceFrameLibrary referenceFrameLibrary)
    {
       initializeDependencyGraph(ros2Helper);
 
@@ -186,7 +187,7 @@ public class PerceptionAndAutonomyProcess
       arUcoMarkerDetectionThread.start();
 
       this.robotPelvisFrameSupplier = robotPelvisFrameSupplier;
-      sceneGraph = new ROS2SceneGraph(ros2Helper);
+      sceneGraph = new ROS2SceneGraph(ros2Helper, referenceFrameLibrary);
       sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", ROS2BehaviorTreeState.SYNC_FREQUENCY, this::updateSceneGraph);
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2Helper, zed2iLeftCameraFrame);
@@ -494,6 +495,8 @@ public class PerceptionAndAutonomyProcess
       ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "perception_autonomy_process");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
+      ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
+
       PerceptionAndAutonomyProcess perceptionAndAutonomyProcess = new PerceptionAndAutonomyProcess(ros2Helper,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
@@ -501,7 +504,8 @@ public class PerceptionAndAutonomyProcess
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
-                                                                                                   ReferenceFrame.getWorldFrame());
+                                                                                                   ReferenceFrame.getWorldFrame(),
+                                                                                                   referenceFrameLibrary);
       perceptionAndAutonomyProcess.startAutonomyThread();
 
       // To run a sensor without the UI, uncomment the below line.

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.robotics.EuclidCoreTestMissingTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class SceneGraphTest
 {
@@ -13,7 +14,9 @@ public class SceneGraphTest
    @Test
    public void testBasicOperations()
    {
-      SceneGraph sceneGraph = new SceneGraph();
+      ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
+
+      SceneGraph sceneGraph = new SceneGraph(referenceFrameLibrary);
 
       Assertions.assertEquals(0, sceneGraph.getRootNode().getChildren().size());
 
@@ -59,7 +62,9 @@ public class SceneGraphTest
    @Test
    public void testMovingNodes()
    {
-      SceneGraph sceneGraph = new SceneGraph();
+      ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
+
+      SceneGraph sceneGraph = new SceneGraph(referenceFrameLibrary);
       SceneNode child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child0");
       SceneNode child1 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1");
       SceneNode child1child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1Child0");
