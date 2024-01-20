@@ -34,6 +34,7 @@ public class TerrainMapData
    private Mat contactMap;
    private Mat terrainCostMap;
 
+   private Mat steppableRegionAssignmentMat;
    private Mat steppableRegionRingMat;
    private Mat steppabilityImage;
    private Mat snapHeightImage;
@@ -270,6 +271,16 @@ public class TerrainMapData
       this.steppabilityConnectionsImage = steppabilityConnectionsImage;
    }
 
+   public void setSteppableRegionAssignmentMat(Mat steppableRegionAssignmentMat)
+   {
+      this.steppableRegionAssignmentMat = steppableRegionAssignmentMat;
+   }
+
+   public Mat getSteppableRegionAssignmentMat()
+   {
+      return steppableRegionAssignmentMat;
+   }
+
    public Mat getSteppableRegionRingMat()
    {
       return steppableRegionRingMat;
@@ -278,5 +289,40 @@ public class TerrainMapData
    public Mat getSteppabilityImage()
    {
       return steppabilityImage;
+   }
+
+   public Mat getSnapHeightImage()
+   {
+      return snapHeightImage;
+   }
+
+   public Mat getSnapNormalXImage()
+   {
+      return snapNormalXImage;
+   }
+
+   public Mat getSnapNormalYImage()
+   {
+      return snapNormalYImage;
+   }
+
+   public Mat getSnapNormalZImage()
+   {
+      return snapNormalZImage;
+   }
+
+   public Mat getSteppabilityConnectionsImage()
+   {
+      return steppabilityConnectionsImage;
+   }
+
+   public void setZUpToWorldTransform(RigidBodyTransform zUpToWorldTransform)
+   {
+      this.zUpToWorldTransform.set(zUpToWorldTransform);
+   }
+
+   public RigidBodyTransform getZUpToWorldTransform()
+   {
+      return zUpToWorldTransform;
    }
 }
