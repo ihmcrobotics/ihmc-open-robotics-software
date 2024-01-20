@@ -80,8 +80,8 @@ public class TerrainPlanningDebugger
          return;
 
       this.request = request;
-      this.offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * 50.0f);
-      this.offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * 50.0f);
+      this.offsetX = (int) (request.getTerrainMapData().getHeightMapCenter().getX() * 50.0f);
+      this.offsetY = (int) (request.getTerrainMapData().getHeightMapCenter().getY() * 50.0f);
       refresh(request.getTerrainMapData());
    }
 
@@ -90,8 +90,8 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      this.offsetX = (int) (terrainMapData.getSensorOrigin().getX() * 50.0f);
-      this.offsetY = (int) (terrainMapData.getSensorOrigin().getY() * 50.0f);
+      this.offsetX = (int) (terrainMapData.getHeightMapCenter().getX() * 50.0f);
+      this.offsetY = (int) (terrainMapData.getHeightMapCenter().getY() * 50.0f);
 
       PerceptionDebugTools.convertDepthCopyToColor(terrainMapData.getHeightMap().clone(), heightMapColorImage);
       this.contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(terrainMapData.getContactMap().clone());

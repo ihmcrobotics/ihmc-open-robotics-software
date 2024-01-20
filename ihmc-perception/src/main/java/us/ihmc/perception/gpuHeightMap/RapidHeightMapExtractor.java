@@ -163,7 +163,6 @@ public class RapidHeightMapExtractor
       createTerrainCostImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
       createContactMapImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
       createSteppabilityMapImages(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
-      createSteppabilityMapImages(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
       createSensorCroppedHeightMapImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
       createSensorCroppedTerrainCostImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
       createSensorCroppedContactMapImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
@@ -296,9 +295,9 @@ public class RapidHeightMapExtractor
             terrainMapData.setSnapNormalYImage(snapNormalYImage.getBytedecoOpenCVMat());
             terrainMapData.setSnapNormalZImage(snapNormalZImage.getBytedecoOpenCVMat());
             terrainMapData.setSteppabilityImage(steppabilityImage.getBytedecoOpenCVMat());
-            terrainMapData.setSteppabilityConnectionsImage(steppabilityConnectionsImage.getBytedecoOpenCVMat());
+//            terrainMapData.setSteppabilityConnectionsImage(steppabilityConnectionsImage.getBytedecoOpenCVMat());
             terrainMapData.setSteppableRegionAssignmentMat(steppableRegionAssignmentMat);
-            terrainMapData.setSteppableRegionRingMat(steppableRegionRingMat);
+//            terrainMapData.setSteppableRegionRingMat(steppableRegionRingMat);
          }
 
          //terrainMapData.setTerrainCostMap(getCroppedImageOnKernel(terrainCostImage, sensorCroppedTerrainCostImage, parametersBuffer));
@@ -568,9 +567,9 @@ public class RapidHeightMapExtractor
    {
       steppabilityImage = new BytedecoImage(width, height, opencv_core.CV_8UC1);
       snapHeightImage = new BytedecoImage(width, height, opencv_core.CV_16UC1);
-      snapNormalXImage = new BytedecoImage(width, height, opencv_core.CV_16UC1);
-      snapNormalYImage = new BytedecoImage(width, height, opencv_core.CV_16UC1);
-      snapNormalZImage = new BytedecoImage(width, height, opencv_core.CV_16UC1);
+      snapNormalXImage = new BytedecoImage(width, height, opencv_core.CV_8UC1);
+      snapNormalYImage = new BytedecoImage(width, height, opencv_core.CV_8UC1);
+      snapNormalZImage = new BytedecoImage(width, height, opencv_core.CV_8UC1);
       steppabilityConnectionsImage = new BytedecoImage(width, height, opencv_core.CV_8UC1);
 
       steppabilityImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
