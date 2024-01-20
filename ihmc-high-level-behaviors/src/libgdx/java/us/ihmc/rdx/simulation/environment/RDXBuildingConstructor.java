@@ -207,7 +207,7 @@ public class RDXBuildingConstructor extends RDXPanel
             case CONSTRUCTING:
             {
                RDXSimpleObject objectToPlace = new RDXSimpleObject("Corner");
-               Model objectModel = RDXModelBuilder.createCylinder(0.15f, 0.25f, Color.BROWN).model;
+               Model objectModel = RDXModelBuilder.createCylinder(0.15f, 0.25f, new Point3D(), Color.BROWN).model;
                Box3D collisionBox = new Box3D(0.25f, 0.25f, 0.15f);
                objectToPlace.setRealisticModel(objectModel);
                //               objectToPlace.setCollisionModel(objectModel);

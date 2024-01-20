@@ -23,3 +23,7 @@ geometry_msgs/Point[8] bounding_box_2d_vertices
 
 # 3d Vertices of the 3d object Bounding box
 geometry_msgs/Point[8] bounding_box_vertices
+
+# Optional point cloud for ICP tracked object
+geometry_msgs/Point32[<=32768] object_point_cloud
+geometry_msgs/Point32[<=32768] segmented_point_cloud
