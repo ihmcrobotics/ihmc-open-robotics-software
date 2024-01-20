@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -39,6 +40,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
+   private final Twist syncedHandTwist = new Twist();
    private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
    private final RigidBodyTransform chestToPelvisZeroAngles = new RigidBodyTransform();
    private final FramePose3D chestInPelvis = new FramePose3D();
@@ -257,6 +259,9 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
             syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
 
+            syncedHandTwist.setIncludingFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()).getTwistOfFrame());
+            syncedHandTwist.changeFrame(ReferenceFrame.getWorldFrame());
+
             trackingCalculator.computePoseTrackingData(desiredHandControlPose, syncedHandControlPose);
             trackingCalculator.factorInR3Errors(POSITION_TOLERANCE);
             trackingCalculator.factoryInSO3Errors(ORIENTATION_TOLERANCE);
@@ -264,7 +269,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
             meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
             state.getCurrentPose().getValue().set(syncedHandControlPose);
-            state.getCurrentTwist().getValue().getLinearPart().set(trackingCalculator.getPoseDerivativeCalculator().getLinearVelocity());
+            state.getCurrentTwist().getValue().getLinearPart().set(syncedHandTwist.getLinearPart());
             state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
             state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
             state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getLinearPart());
