@@ -26,7 +26,6 @@ import java.util.Random;
 public class SteppableRegionsCalculator
 {
    private static final int maxRecursionDepth = 500;
-   public enum SnapResult { SNAP_FAILED, CLIFF_TOP, CLIFF_BOTTOM, NOT_ENOUGH_AREA, VALID}
 
    public static SteppableRegionsEnvironmentModel createEnvironmentByMergingCellsIntoRegions(BytedecoImage steppability,
                                                                                              BytedecoImage snappedHeight,

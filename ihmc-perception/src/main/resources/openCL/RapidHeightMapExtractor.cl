@@ -874,9 +874,9 @@ void kernel computeSnappedValuesKernel(global float* params,
     int2 storage_key = (int2) (idx_x, idx_y);
     write_imageui(steppable_map, storage_key, (uint4)(snap_result,0,0,0));
     write_imageui(snapped_height_map, storage_key, (uint4)(snap_height_int, 0, 0, 0));
-    write_imageui(snapped_normal_x_map, storage_key, (uint4)((int)(normal.x * params[SNAP_HEIGHT_SCALING_FACTOR]), 0, 0, 0));
-    write_imageui(snapped_normal_y_map, storage_key, (uint4)((int)(normal.y * params[SNAP_HEIGHT_SCALING_FACTOR]), 0, 0, 0));
-    write_imageui(snapped_normal_z_map, storage_key, (uint4)((int)(normal.z * params[SNAP_HEIGHT_SCALING_FACTOR]), 0, 0, 0));
+    write_imageui(snapped_normal_x_map, storage_key, (uint4)((int) normal.x, 0, 0, 0));
+    write_imageui(snapped_normal_y_map, storage_key, (uint4)((int) normal.y, 0, 0, 0));
+    write_imageui(snapped_normal_z_map, storage_key, (uint4)((int) normal.z, 0, 0, 0));
 }
 
 void kernel computeSteppabilityConnectionsKernel(global float* params,

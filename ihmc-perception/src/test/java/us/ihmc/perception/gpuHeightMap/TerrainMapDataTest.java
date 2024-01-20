@@ -24,6 +24,6 @@ public class TerrainMapDataTest
 
       //PerceptionDebugTools.printMat("Height Map", terrainMapData.getHeightMap(), 1);
 
-      LogTools.info("Normal: {}", terrainMapData.computeSurfaceNormalInWorld(0.3f, 0.3f, 1));
+      LogTools.info("Normal: {}", terrainMapData.computeSurfaceNormalInWorld(0.3f, 0.3f));
    }
 }
