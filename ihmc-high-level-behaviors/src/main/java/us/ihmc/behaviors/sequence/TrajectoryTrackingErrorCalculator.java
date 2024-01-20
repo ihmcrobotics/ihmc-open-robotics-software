@@ -15,12 +15,10 @@ public class TrajectoryTrackingErrorCalculator
    private boolean timeIsUp;
    private boolean hitTimeLimit;
    private boolean isWithinPositionTolerance;
-   private double robotTime;
    private final NonWallTimer executionTimer = new NonWallTimer();
 
    public void update(double robotTime)
    {
-      this.robotTime = robotTime;
       executionTimer.update(robotTime);
    }
 
