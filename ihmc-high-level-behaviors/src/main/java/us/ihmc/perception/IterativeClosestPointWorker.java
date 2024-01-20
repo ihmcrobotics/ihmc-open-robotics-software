@@ -8,6 +8,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -18,6 +19,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
 import java.util.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -417,12 +424,32 @@ public class IterativeClosestPointWorker
 
    public void setDetectionShape(PrimitiveRigidBodyShape shape)
    {
+      setDetectionShape(shape, null);
+   }
+
+   public void setDetectionShape(PrimitiveRigidBodyShape shape, String pointCloudFileName)
+   {
+      if (shape == PrimitiveRigidBodyShape.CUSTOM && pointCloudFileName == null)
+      {
+         throw new RuntimeException("If using a custom shape, a file name needs to be specified to loud the point cloud from.");
+      }
+
       detectionShape = shape;
-      changeSize(lengths, radii, localObjectPoints.size());
+      if (shape != PrimitiveRigidBodyShape.CUSTOM)
+      {
+         changeSize(lengths, radii, localObjectPoints.size());
+      }
+      else
+      {
+         loadPointCloudFromFile(pointCloudFileName);
+      }
    }
 
    public void changeSize(Vector3D lengths, Vector3D radii, int numberOfObjectSamples)
    {
+      if (detectionShape == PrimitiveRigidBodyShape.CUSTOM)
+         return;
+
       this.lengths.set(lengths);
       this.radii.set(radii);
 
@@ -437,6 +464,40 @@ public class IterativeClosestPointWorker
                                                                                numberOfObjectSamples,
                                                                                random);
       setPoseGuess(resultPose);
+   }
+
+   private void loadPointCloudFromFile(String pointCloudFileName)
+   {
+      // FIXME there's likely a better way to do this.
+      int numberOfObjectSamples = localObjectPoints.size();
+      localObjectPoints.clear();
+
+      List<String[]> rowList = new ArrayList<>();
+      try (BufferedReader br = new BufferedReader(new FileReader(pointCloudFileName)))
+      {
+         String line;
+         while ((line = br.readLine()) != null)
+         {
+            String[] lineItems = line.split(",");
+            rowList.add(lineItems);
+         }
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException("Failed trying to load the file.");
+         // Handle any I/O problems
+      }
+
+      Collections.shuffle(rowList, random);
+
+      for (int i = 0; i < numberOfObjectSamples; i++)
+      {
+         String[] row = rowList.get(i + 1); // FIXME why is there a + 1 query?
+         float x = Float.parseFloat(row[0]);
+         float y = Float.parseFloat(row[1]);
+         float z = Float.parseFloat(row[2]);
+         localObjectPoints.add(new Point3D32(x, y, z));
+      }
    }
 
    public List<? extends Point3DReadOnly> getSegmentedPointCloud()
