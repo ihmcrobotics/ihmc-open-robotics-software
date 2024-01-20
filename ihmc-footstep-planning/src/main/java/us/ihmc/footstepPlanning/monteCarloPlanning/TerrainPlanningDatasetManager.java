@@ -3,21 +3,33 @@ package us.ihmc.footstepPlanning.monteCarloPlanning;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerLoggingTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.logging.HDF5Tools;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.tools.PerceptionLoggingTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.IHMCCommonPaths;
 
+import java.io.File;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Scanner;
 
-public class TerrainPlanningDatasetGenerator
+public class TerrainPlanningDatasetManager
 {
+   private ArrayList<SideDependentList<Pose3D>> footstepPairList = new ArrayList<>();
    private PerceptionDataLogger perceptionDataLogger;
 
    public void configureLogger()
@@ -76,5 +88,89 @@ public class TerrainPlanningDatasetGenerator
       PerceptionLoggingTools.logHeightMap(perceptionDataLogger,
                                           heightMap,
                                           PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
+   }
+
+   public void loadRequests(File directory, int totalRequests)
+   {
+      footstepPairList.clear();
+      File requests = new File(directory.getAbsolutePath() + "/processed_requests.txt");
+      try (Scanner scanner = new Scanner(requests))
+      {
+         for (int k = 0; k<totalRequests; k++)
+         {
+            String line = scanner.nextLine();
+            LogTools.info("FIRST: {}", line);
+            line = scanner.nextLine();
+            LogTools.info("SECOND: {}", line);
+            if (line.contains("Loading log"))
+            {
+               line = scanner.nextLine();
+               LogTools.info("THIRD: {}", line);
+
+               for (int i = 0; i<totalRequests * 2; i++)
+               {
+                  footstepPairList.add(new SideDependentList<>());
+
+                  line = scanner.nextLine();
+                  line = line.replace(" ", "");
+                  LogTools.info("INPUT: {}", line);
+
+                  if (line.contains("[LEFT]"))
+                  {
+                     footstepPairList.get(i).put(RobotSide.LEFT, loadPoseFromString(line));
+                  }
+                  else if (line.contains("[RIGHT]"))
+                  {
+                     footstepPairList.get(i).put(RobotSide.RIGHT, loadPoseFromString(line));
+                  }
+
+                  LogTools.info("Side: {}, Pose: {}", line.contains("[LEFT]") ? "LEFT" : "RIGHT", line);
+               }
+            }
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   public Pose3D loadPoseFromString(String logLine)
+   {
+      String valueString = logLine.split("Pose:")[1];
+
+
+      String[] poseSplit = valueString.split("x");
+
+      LogTools.info("Value String: {} -> ({}) ({})", valueString, poseSplit[0], poseSplit[1]);
+
+      String positionString = poseSplit[0];
+      String orientationString = poseSplit[1];
+
+      LogTools.info("Position: {}, Orientation: {}", positionString, orientationString);
+
+      String[] positionSplit = positionString.split(",");
+      String[] orientationSplit = orientationString.split(",");
+
+      double x = Double.parseDouble(positionSplit[0]);
+      double y = Double.parseDouble(positionSplit[1]);
+      double z = Double.parseDouble(positionSplit[2]);
+
+      double qx = Double.parseDouble(orientationSplit[0]);
+      double qy = Double.parseDouble(orientationSplit[1]);
+      double qz = Double.parseDouble(orientationSplit[2]);
+      double qw = Double.parseDouble(orientationSplit[3]);
+
+      return new Pose3D(new Point3D(x, y, z), new Quaternion(qx, qy, qz, qw));
+   }
+
+   public ArrayList<SideDependentList<Pose3D>> getFootstepPairList()
+   {
+      return footstepPairList;
+   }
+
+   public SideDependentList<Pose3D> getFootstepPair(int index)
+   {
+      return footstepPairList.get(index);
    }
 }
