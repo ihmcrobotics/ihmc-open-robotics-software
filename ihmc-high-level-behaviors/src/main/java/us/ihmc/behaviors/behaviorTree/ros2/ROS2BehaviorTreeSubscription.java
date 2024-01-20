@@ -25,6 +25,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
    private final Consumer<T> rootNodeSetter;
    private long numberOfMessagesReceived = 0;
    private long previousUpdateNumber = -1;
+   private long messageDropCount = 0;
    private boolean recentMessageDropped = false;
    private boolean recentMessageOutOfOrder = false;
    private int numberOfOnRobotNodes = 0;
@@ -62,6 +63,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
             if (previousUpdateNumber > -1)
             {
                long expectedUpdateNumber = previousUpdateNumber + 1;
+               messageDropCount += nextUpdateNumber - expectedUpdateNumber;
                recentMessageDropped = nextUpdateNumber > expectedUpdateNumber;
                recentMessageOutOfOrder = nextUpdateNumber < expectedUpdateNumber;
             }
@@ -205,6 +207,11 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
    public long getNumberOfMessagesReceived()
    {
       return numberOfMessagesReceived;
+   }
+
+   public long getMessageDropCount()
+   {
+      return messageDropCount;
    }
 
    public boolean getRecentMessageDropped()
