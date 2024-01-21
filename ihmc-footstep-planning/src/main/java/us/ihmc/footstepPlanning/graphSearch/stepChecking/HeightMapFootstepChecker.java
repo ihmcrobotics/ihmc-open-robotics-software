@@ -119,6 +119,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
          return;
       }
 
+      // TODO add a check based on the steppability in the terrain map data.
 
       FootstepSnapDataReadOnly snapData = snapper.snapFootstep(candidateStep, stanceStep, parameters.getWiggleWhilePlanning());
       candidateStepSnapData.set(snapData);
