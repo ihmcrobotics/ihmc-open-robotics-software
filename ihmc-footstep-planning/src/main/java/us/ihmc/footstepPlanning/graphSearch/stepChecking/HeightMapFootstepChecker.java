@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepPlannerBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
@@ -11,6 +12,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.perception.steppableRegions.SnapResult;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -36,13 +38,12 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final ConvexPolygon2D tmpFootPolygon = new ConvexPolygon2D();
 
+   private final FootstepPlannerEnvironmentHandler environmentHandler;
    private final HeightMapCliffAvoider heightMapCliffAvoider;
    private final ObstacleBetweenStepsChecker obstacleBetweenStepsChecker;
    private final FootstepPlannerBodyCollisionDetector collisionDetector;
    private final FootstepPoseHeuristicChecker heuristicPoseChecker;
    private final FootstepPoseReachabilityChecker reachabilityChecker;
-
-   private HeightMapData heightMapData = null;
 
    private boolean assumeFlatGround = false;
 
@@ -57,6 +58,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
    public HeightMapFootstepChecker(FootstepPlannerParametersReadOnly parameters,
                                    SideDependentList<ConvexPolygon2D> footPolygons,
+                                   FootstepPlannerEnvironmentHandler environmentHandler,
                                    FootstepSnapperReadOnly snapper,
                                    StepReachabilityData stepReachabilityData,
                                    YoRegistry parentRegistry)
@@ -64,6 +66,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       this.parameters = parameters;
       this.snapper = snapper;
       this.footPolygons = footPolygons;
+      this.environmentHandler = environmentHandler;
       this.heightMapCliffAvoider = new HeightMapCliffAvoider(parameters, snapper, footPolygons, registry);
       this.obstacleBetweenStepsChecker = new ObstacleBetweenStepsChecker(parameters, snapper);
       this.collisionDetector = new FootstepPlannerBodyCollisionDetector(parameters);
@@ -119,26 +122,39 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
          return;
       }
 
-      // TODO add a check based on the steppability in the terrain map data.
-
       FootstepSnapDataReadOnly snapData = snapper.snapFootstep(candidateStep, stanceStep, parameters.getWiggleWhilePlanning());
       candidateStepSnapData.set(snapData);
       heuristicPoseChecker.setApproximateStepDimensions(candidateStep, stanceStep);
       achievedDeltaInside.set(snapData.getAchievedInsideDelta());
 
-      // Check height map rejection reasons
-      if (!doValidityCheckForHeightMap(candidateStep))
-         return;
-
       BipedalFootstepPlannerNodeRejectionReason poseRejectionReason;
 
-      // Check height map cliff avoidance
-      heightMapCliffAvoider.setHeightMapData(heightMapData);
-      if (!heightMapCliffAvoider.isStepValid(candidateStep, stanceStep))
+      if (environmentHandler.hasTerrainMapData())
       {
-         poseRejectionReason =  BipedalFootstepPlannerNodeRejectionReason.STEP_ON_CLIFF_EDGE;
-         rejectionReason.set(poseRejectionReason);
+         // Check height map rejection reasons
+         poseRejectionReason = doValidityCheckForTerrainMap(candidateStep);
+
+         if (poseRejectionReason != null)
+         {
+            rejectionReason.set(poseRejectionReason);
+            return;
+         }
       }
+      else
+      {
+         // Check height map rejection reasons
+         if (!doValidityCheckForHeightMap(candidateStep))
+            return;
+
+         // Check height map cliff avoidance
+         heightMapCliffAvoider.setHeightMapData(environmentHandler.getHeightMap());
+         if (!heightMapCliffAvoider.isStepValid(candidateStep, stanceStep))
+         {
+            poseRejectionReason =  BipedalFootstepPlannerNodeRejectionReason.STEP_ON_CLIFF_EDGE;
+            rejectionReason.set(poseRejectionReason);
+         }
+      }
+
 
       // Check step placement
       if (!assumeFlatGround && !isStepPlacementValid(candidateStep, snapData))
@@ -175,16 +191,29 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       isCollisionFree(candidateStep, stanceStep, startOfSwing);
    }
 
+   private BipedalFootstepPlannerNodeRejectionReason doValidityCheckForTerrainMap(DiscreteFootstep candidateStep)
+   {
+      SnapResult snapResult = environmentHandler.getTerrainMapData().getSnapResultInWorld(candidateStep.getX(), candidateStep.getY());
+      return switch (snapResult)
+            {
+               case CLIFF_TOP -> BipedalFootstepPlannerNodeRejectionReason.STEP_ON_CLIFF_EDGE;
+               case CLIFF_BOTTOM -> BipedalFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM;
+               case NOT_ENOUGH_AREA -> BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA;
+               case SNAP_FAILED -> BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP;
+               default -> null;
+            };
+   }
+
+
    private boolean doValidityCheckForHeightMap(DiscreteFootstep candidateStep)
    {
-      if (heightMapData == null || heightMapData.isEmpty())
+      if (environmentHandler.hasHeightMap())
          return true;
 
       // Area
-      double fullFootArea = footPolygons.get(candidateStep.getRobotSide()).getArea();
-      double area = candidateStepSnapData.getCroppedFoothold().getArea();
-      if (Double.isFinite(area))
-         footAreaPercentage.set(candidateStepSnapData.getCroppedFoothold().getArea() / fullFootArea);
+      double areaFraction = candidateStepSnapData.getSnapAreaFraction();
+      if (Double.isFinite(areaFraction))
+         footAreaPercentage.set(areaFraction);
       else
          footAreaPercentage.set(1.0);
 
@@ -232,19 +261,6 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       if (snappedSoleTransform.getM22() < minimumSurfaceNormalZ)
       {
          rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
-         return false;
-      }
-
-      // Check snap area
-      ConvexPolygon2D footholdAfterSnap = candidateStepSnapData.getCroppedFoothold();
-      double croppedFootArea = footholdAfterSnap.getArea();
-      double fullFootArea = footPolygons.get(candidateStep.getRobotSide()).getArea();
-      footAreaPercentage.set(croppedFootArea / fullFootArea);
-
-      double epsilonAreaPercentage = 1e-4;
-      if (!footholdAfterSnap.isEmpty() && footAreaPercentage.getValue() < (parameters.getMinimumFootholdPercent() - epsilonAreaPercentage))
-      {
-         rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
          return false;
       }
 
@@ -325,7 +341,6 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
    public void setHeightMapData(HeightMapData heightMapData)
    {
-      this.heightMapData = heightMapData;
       collisionDetector.setHeightMapData(heightMapData);
       obstacleBetweenStepsChecker.setHeightMapData(heightMapData);
    }

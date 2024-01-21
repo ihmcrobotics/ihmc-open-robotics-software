@@ -17,6 +17,7 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
    private int regionIndex = -1;
    private double achievedInsideDelta = Double.NaN;
    private double rmsError = Double.NaN;
+   private double areaFraction = Double.NaN;
    private boolean snappedFootstepTransformIncludesWiggleTransform = false;
 
    public FootstepSnapData()
@@ -106,10 +107,21 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
       this.rmsError = rSquaredHeightMap;
    }
 
+   public void setSnapAreaFraction(double areaFraction)
+   {
+      this.areaFraction = areaFraction;
+   }
+
    @Override
    public double getSnapRMSError()
    {
       return rmsError;
+   }
+
+   @Override
+   public double getSnapAreaFraction()
+   {
+      return areaFraction;
    }
 
    private void updateSnappedStepTransform(DiscreteFootstep footstep)
@@ -137,6 +149,7 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
       this.snappedFootstepTransformIncludesWiggleTransform = false;
 
       this.rmsError = other.getSnapRMSError();
+      this.areaFraction = other.getSnapAreaFraction();
    }
 
    public void clear()
@@ -149,6 +162,7 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
       this.achievedInsideDelta = Double.NaN;
       this.snappedFootstepTransformIncludesWiggleTransform = false;
       rmsError = Double.NaN;
+      areaFraction = Double.NaN;
    }
 
    private static final FootstepSnapData EMPTY_SNAP_DATA;

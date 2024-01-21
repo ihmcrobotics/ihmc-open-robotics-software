@@ -101,7 +101,7 @@ public class AStarFootstepPlanner
       this.stopwatch = stopwatch;
       this.statusCallbacks = statusCallbacks;
 
-      this.checker = new HeightMapFootstepChecker(footstepPlannerParameters, footPolygons, snapper, stepReachabilityData, registry);
+      this.checker = new HeightMapFootstepChecker(footstepPlannerParameters, footPolygons, plannerEnvironmentHandler, snapper, stepReachabilityData, registry);
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, plannerEnvironmentHandler, registry);
       this.referenceBasedIdealStepCalculator = new ReferenceBasedIdealStepCalculator(footstepPlannerParameters, idealStepCalculator, registry);
 

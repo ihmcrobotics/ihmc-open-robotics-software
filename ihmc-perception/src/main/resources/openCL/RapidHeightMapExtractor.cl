@@ -617,7 +617,8 @@ void kernel computeSnappedValuesKernel(global float* params,
                                 read_write image2d_t snapped_height_map,
                                 read_write image2d_t snapped_normal_x_map,
                                 read_write image2d_t snapped_normal_y_map,
-                                read_write image2d_t snapped_normal_z_map)
+                                read_write image2d_t snapped_normal_z_map,
+                                read_write image2d_t snapped_area_fraction)
 {
     // Remember, these are x and y in image coordinates, not world
     int idx_x = get_global_id(0); // column, top left
@@ -871,12 +872,18 @@ void kernel computeSnappedValuesKernel(global float* params,
         }
     }
 
+    uint area_fraction =  255 * n / max_points_possible_under_support;
+    uint normal_x_int = 255 * (normal.x + 1.0f);
+    uint normal_y_int = 255 * (normal.y + 1.0f);
+    uint normal_z_int = 255 * (normal.z + 1.0f);
     int2 storage_key = (int2) (idx_x, idx_y);
+
     write_imageui(steppable_map, storage_key, (uint4)(snap_result,0,0,0));
     write_imageui(snapped_height_map, storage_key, (uint4)(snap_height_int, 0, 0, 0));
-    write_imageui(snapped_normal_x_map, storage_key, (uint4)((int) normal.x, 0, 0, 0));
-    write_imageui(snapped_normal_y_map, storage_key, (uint4)((int) normal.y, 0, 0, 0));
-    write_imageui(snapped_normal_z_map, storage_key, (uint4)((int) normal.z, 0, 0, 0));
+    write_imageui(snapped_normal_x_map, storage_key, (uint4)(normal_x_int, 0, 0, 0));
+    write_imageui(snapped_normal_y_map, storage_key, (uint4)(normal_y_int, 0, 0, 0));
+    write_imageui(snapped_normal_z_map, storage_key, (uint4)(normal_z_int, 0, 0, 0));
+    write_imageui(snapped_area_fraction, storage_key, (uint4)(area_fraction, 0, 0, 0));
 }
 
 void kernel computeSteppabilityConnectionsKernel(global float* params,

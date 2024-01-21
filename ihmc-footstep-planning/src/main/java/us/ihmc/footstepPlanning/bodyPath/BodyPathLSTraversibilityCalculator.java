@@ -155,7 +155,6 @@ public class BodyPathLSTraversibilityCalculator
       traversibilityCosts.clear();
       validSteps.get(side).set(0);
 
-      double fullFootholdArea = footPolygons.get(side).getArea();
       double maxAreaToPenalize = 0.9;
       double minAreaThreshold = 0.65;
 
@@ -217,7 +216,7 @@ public class BodyPathLSTraversibilityCalculator
                   double rmsAlpha = Math.max(0.0,
                                              (snapper.getRMSError() - parameters.getRMSMinErrorToPenalize()) / (parameters.getRMSErrorThreshold()
                                                                                                                 - parameters.getRMSMinErrorToPenalize()));
-                  double areaAlpha = Math.max(0.0, 1.0 - (snapper.getArea() / fullFootholdArea - minAreaThreshold) / (maxAreaToPenalize - minAreaThreshold));
+                  double areaAlpha = Math.max(0.0, 1.0 - (snapper.getAreaFraction() - minAreaThreshold) / (maxAreaToPenalize - minAreaThreshold));
                   double inclineAlpha = Math.max(0.0,
                                                  (Math.acos(snapTransform.getM22()) - minSurfaceInclineToPenalize) / (maxSurfaceIncline
                                                                                                                       - minSurfaceInclineToPenalize));
