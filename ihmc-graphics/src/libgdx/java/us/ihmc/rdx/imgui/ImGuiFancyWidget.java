@@ -24,6 +24,8 @@ public abstract class ImGuiFancyWidget
    private float widgetWidth = -1.0f;
    private boolean widgetTextColoring = false;
    private int widgetTextColor = 0;
+   private String buttonText;
+   private Runnable onButtonPressed;
 
    protected ImGuiFancyWidget(String label)
    {
@@ -43,7 +45,14 @@ public abstract class ImGuiFancyWidget
    {
       ImGui.text(prefixLabel);
       ImGui.sameLine();
-      ImGui.pushItemWidth(widgetWidth >= 0.0 ? widgetWidth : ImGui.getColumnWidth());
+
+      float itemWidth = ImGui.getColumnWidth();
+      if (widgetWidth >= 0.0f)
+         itemWidth = widgetWidth;
+      if (buttonText != null)
+         itemWidth -= ImGuiTools.calcButtonWidth(buttonText) + ImGui.getStyle().getItemSpacingX();
+
+      ImGui.pushItemWidth(itemWidth);
 
       if (widgetTextColoring)
          ImGui.pushStyleColor(ImGuiCol.Text, widgetTextColor);
@@ -55,6 +64,13 @@ public abstract class ImGuiFancyWidget
 
       if (widgetTextColoring)
          ImGui.popStyleColor();
+
+      if (buttonText != null)
+      {
+         ImGui.sameLine();
+         if (ImGui.button(labels.get(buttonText, prefixLabel)))
+            onButtonPressed.run();
+      }
    }
 
    /**
@@ -82,5 +98,11 @@ public abstract class ImGuiFancyWidget
    public void setWidgetWidth(float widgetWidth)
    {
       this.widgetWidth = widgetWidth;
+   }
+
+   public void addButton(String buttonText, Runnable onButtonPressed)
+   {
+      this.buttonText = buttonText;
+      this.onButtonPressed = onButtonPressed;
    }
 }

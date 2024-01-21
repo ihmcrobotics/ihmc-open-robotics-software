@@ -45,6 +45,12 @@ public class RDXSelectablePose3DGizmo
       poseGizmo = new RDXPose3DGizmo(gizmoFrame, gizmoTransformToParentFrameToModify);
    }
 
+   public RDXSelectablePose3DGizmo(RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame, ImBoolean selected)
+   {
+      this.selected = selected;
+      poseGizmo = new RDXPose3DGizmo(gizmoTransformToParentFrameToModify, parentReferenceFrame);
+   }
+
    public void create(RDX3DPanel panel3D)
    {
       poseGizmo.create(panel3D);
