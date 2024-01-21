@@ -175,12 +175,12 @@ public class HeightMapPolygonSnapperTest
       environmentHandler.setHeightMap(heightMapData);
       snapper.snapPolygonToHeightMap(polygonToSnap, environmentHandler, 0.05, Math.toRadians(45.0));
 
-      Assertions.assertTrue(snapper.getArea() >= polygonToSnap.getArea());
+      Assertions.assertTrue(snapper.getAreaFraction() >= polygonToSnap.getArea());
 
       // make the foot overhang by a fair bit
       polygonToSnap.translate(-gridResolution, 0.0);
       snapper.snapPolygonToHeightMap(polygonToSnap, environmentHandler, 0.05, Math.toRadians(45.0));
-      Assertions.assertFalse(snapper.getArea() >= polygonToSnap.getArea());
-      Assertions.assertEquals(snapper.getArea(), (footLength - 0.05) * footWidth, 2e-3);
+      Assertions.assertFalse(snapper.getAreaFraction() >= polygonToSnap.getArea());
+      Assertions.assertEquals(snapper.getAreaFraction(), (footLength - 0.05) * footWidth, 2e-3);
    }
 }

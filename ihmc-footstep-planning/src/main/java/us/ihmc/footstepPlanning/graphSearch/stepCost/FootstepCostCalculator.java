@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.graphSearch.stepCost;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -25,7 +24,6 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
    private final FootstepSnapperReadOnly snapper;
    private final IdealStepCalculatorInterface idealStepCalculator;
    private final ToDoubleFunction<FootstepGraphNode> heuristics;
-   private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
 
    private final RigidBodyTransform stanceStepTransform = new RigidBodyTransform();
    private final RigidBodyTransform idealStepTransform = new RigidBodyTransform();
@@ -53,7 +51,6 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       this.snapper = snapper;
       this.idealStepCalculator = idealStepCalculator;
       this.heuristics = heuristics;
-      this.footPolygons = footPolygons;
 
       parentRegistry.addChild(registry);
    }
@@ -124,16 +121,12 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       FootstepSnapDataReadOnly snapData = snapper.snapFootstep(footstep);
       if (snapData != null)
       {
-         double area;
-         ConvexPolygon2DReadOnly footholdAfterSnap = snapData.getCroppedFoothold();
-         if (footholdAfterSnap.isEmpty() || footholdAfterSnap.containsNaN())
+         double areaFraction = snapData.getSnapAreaFraction();
+         if (Double.isNaN(areaFraction))
          {
             return 0.0;
          }
-         area = footholdAfterSnap.getArea();
-
-         double footArea = footPolygons.get(footstep.getRobotSide()).getArea();
-         double percentAreaUnoccupied = Math.max(0.0, 1.0 - area / footArea);
+         double percentAreaUnoccupied = Math.max(0.0, 1.0 - areaFraction);
          return percentAreaUnoccupied * parameters.getFootholdAreaWeight();
       }
       else

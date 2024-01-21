@@ -36,15 +36,15 @@ public class TerrainMapData
    private Mat steppableRegionRingMat;
    private Mat steppabilityImage;
    private Mat snapHeightImage;
+   private Mat snappedAreaFractionImage;
    private Mat snapNormalXImage;
    private Mat snapNormalYImage;
    private Mat snapNormalZImage;
    private Mat steppabilityConnectionsImage;
 
-   public TerrainMapData(Mat heightMap,
-                         Mat contactMap)
+   public TerrainMapData(Mat heightMap, Mat contactMap)
    {
-      this(heightMap, null, contactMap, null, null, null, null, null);
+      this(heightMap, null, contactMap, null, null, null, null, null, null);
    }
 
    public TerrainMapData(Mat heightMap,
@@ -54,7 +54,8 @@ public class TerrainMapData
                          Mat steppability,
                          Mat snapNormalXImage,
                          Mat snapNormalYImage,
-                         Mat snapNormalZImage)
+                         Mat snapNormalZImage,
+                         Mat snappedAreaFractionImage)
    {
       setHeightMap(heightMap);
       setSnapHeightImage(snapHeightImage);
@@ -64,6 +65,7 @@ public class TerrainMapData
       setSnapNormalXImage(snapNormalXImage);
       setSnapNormalYImage(snapNormalYImage);
       setSnapNormalZImage(snapNormalZImage);
+      setSnappedAreaFractionImage(snappedAreaFractionImage);
 
       this.localGridSize = heightMap.rows();
       // TODO need to add cells per meter
@@ -102,6 +104,13 @@ public class TerrainMapData
    {
       // TODO probably a height map tools method for this.
       return (int) ((coordinate - center) * cellsPerMeter + localGridSize / 2);
+   }
+
+   public float getSnappedAreaFractionInWorld(double x, double y)
+   {
+      int rIndex = getLocalIndex(x, heightMapCenter.getX());
+      int cIndex = getLocalIndex(y, heightMapCenter.getY());
+      return getSnappedAreaLocal(rIndex, cIndex);
    }
 
    public float getHeightInWorld(double x, double y)
@@ -176,6 +185,14 @@ public class TerrainMapData
       return convertScaledAndOffsetValue((float) height);
    }
 
+   private float getSnappedAreaLocal(int rIndex, int cIndex)
+   {
+      if (isOutOfBounds(rIndex, cIndex))
+         return 0.0f;
+
+      return ((float) ((int) snappedAreaFractionImage.ptr(rIndex, cIndex).getShort() & 0xFF * 255)) + 1.0f;
+   }
+
    private float getSnappedHeightLocal(int rIndex, int cIndex)
    {
       if (snapHeightImage == null)
@@ -202,7 +219,7 @@ public class TerrainMapData
 
    private static float getNormalLocalUnsafe(Mat normalImage, int rIndex, int cIndex)
    {
-      return (float) ((normalImage.ptr(rIndex, cIndex).get() & 0xFF));
+      return ((float) ((normalImage.ptr(rIndex, cIndex).get() & 0xFF))) / 255 - 1.0f;
    }
 
    private float getContactScoreLocal(int rIndex, int cIndex)
@@ -376,6 +393,11 @@ public class TerrainMapData
       this.snapNormalZImage = snapNormalZImage == null ? null : snapNormalZImage.clone();
    }
 
+   public void setSnappedAreaFractionImage(Mat snappedAreaFractionImage)
+   {
+      this.snappedAreaFractionImage = snappedAreaFractionImage == null ? null : snappedAreaFractionImage.clone();
+   }
+
    public void setSteppabilityConnectionsImage(Mat steppabilityConnectionsImage)
    {
       this.steppabilityConnectionsImage = steppabilityConnectionsImage == null ? null : steppabilityConnectionsImage.clone();
@@ -404,6 +426,11 @@ public class TerrainMapData
    public Mat getSnapHeightImage()
    {
       return snapHeightImage;
+   }
+
+   public Mat getSnappedAreaFractionImage()
+   {
+      return snappedAreaFractionImage;
    }
 
    public Mat getSnapNormalXImage()

@@ -1,11 +1,9 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
-import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -18,7 +16,6 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.robotics.EuclidGeometryPolygonMissingTools;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
@@ -37,7 +34,7 @@ public class HeightMapPolygonSnapper
 
    private double maxPossibleRMSError;
    private double rootMeanSquaredError;
-   private double area;
+   private double areaFraction;
 
    private double snapAreaResolution = 0.2;
 
@@ -127,6 +124,7 @@ public class HeightMapPolygonSnapper
          FootstepSnapData snapData = new FootstepSnapData(snapTransform);
 
          snapData.setRMSErrorHeightMap(rootMeanSquaredError / maxPossibleRMSError);
+         snapData.setSnapAreaFraction(areaFraction);
 
          // get the cropped polygon back in sole frame.
          snapData.getCroppedFoothold().set(snappedPolygon);
@@ -169,14 +167,15 @@ public class HeightMapPolygonSnapper
       if (environmentHandler.hasTerrainMapData() && terrainMapData.hasSnapHeight() && terrainMapData.hasSnapNormal())
       {
          Point2DReadOnly centroid = polygonToSnap.getCentroid();
-         double height = terrainMapData.getHeightInWorld(centroid.getX(), centroid.getY());
+         double height = terrainMapData.getSnappedHeightInWorld(centroid.getX(), centroid.getY());
          UnitVector3DReadOnly normal = terrainMapData.getNormalInWorld(centroid.getX(), centroid.getY());
 
          transformToReturn = createTransformToMatchSurfaceNormalPreserveX(normal);
          setTranslationSettingZAndPreservingXAndY(new Point3D(centroid.getX(), centroid.getY(), height), transformToReturn);
 
          // TODO need to compute the snapped polygon
-         // TODO need to compute the snap area.
+         snappedPolygon.set(polygonToSnap);
+         areaFraction = terrainMapData.getSnappedAreaFractionInWorld(centroid.getX(), centroid.getY());;
       }
       else
       {
@@ -239,12 +238,12 @@ public class HeightMapPolygonSnapper
 
          if (footPointsInEnvironment.size() < 3)
          {
-            area = Double.NaN;
+            areaFraction = Double.NaN;
             return null;
          }
 
          snappedPolygon.set(Vertex3DSupplier.asVertex3DSupplier(footPointsInEnvironment));
-         area = snappedPolygon.getArea();
+         areaFraction = snappedPolygon.getArea() / polygonToSnap.getArea();
 
          planeFitter.fitPlaneToPoints(footPointsInEnvironment, bestFitPlane);
          rootMeanSquaredError = 0.0;
@@ -295,9 +294,9 @@ public class HeightMapPolygonSnapper
       return rootMeanSquaredError / maxPossibleRMSError;
    }
 
-   public double getArea()
+   public double getAreaFraction()
    {
-      return area;
+      return areaFraction;
    }
 
    public ConvexPolygon2DReadOnly getSnappedPolygonInWorld()

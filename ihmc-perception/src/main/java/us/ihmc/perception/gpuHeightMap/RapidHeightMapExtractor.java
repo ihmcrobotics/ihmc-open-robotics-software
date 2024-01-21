@@ -94,6 +94,7 @@ public class RapidHeightMapExtractor
    private BytedecoImage snapNormalYImage;
    private BytedecoImage snapNormalZImage;
    private BytedecoImage steppabilityConnectionsImage;
+   private BytedecoImage snappedAreaFractionImage;
 
    private _cl_program rapidHeightMapUpdaterProgram;
    private _cl_kernel heightMapUpdateKernel;
@@ -294,6 +295,7 @@ public class RapidHeightMapExtractor
             terrainMapData.setSnapNormalXImage(snapNormalXImage.getBytedecoOpenCVMat());
             terrainMapData.setSnapNormalYImage(snapNormalYImage.getBytedecoOpenCVMat());
             terrainMapData.setSnapNormalZImage(snapNormalZImage.getBytedecoOpenCVMat());
+            terrainMapData.setSnappedAreaFractionImage(snappedAreaFractionImage.getBytedecoOpenCVMat());
             terrainMapData.setSteppabilityImage(steppabilityImage.getBytedecoOpenCVMat());
 //            terrainMapData.setSteppabilityConnectionsImage(steppabilityConnectionsImage.getBytedecoOpenCVMat());
             terrainMapData.setSteppableRegionAssignmentMat(steppableRegionAssignmentMat);
@@ -464,6 +466,7 @@ public class RapidHeightMapExtractor
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 5, snapNormalXImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 6, snapNormalYImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 7, snapNormalZImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(computeSnappedValuesKernel, 8, snappedAreaFractionImage.getOpenCLImageObject());
 
       openCLManager.execute2D(computeSnappedValuesKernel, heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
 
@@ -471,6 +474,7 @@ public class RapidHeightMapExtractor
       snapNormalXImage.readOpenCLImage(openCLManager);
       snapNormalYImage.readOpenCLImage(openCLManager);
       snapNormalZImage.readOpenCLImage(openCLManager);
+      snappedAreaFractionImage.readOpenCLImage(openCLManager);
 
       openCLManager.setKernelArgument(computeSteppabilityConnectionsKernel, 0, snappingParametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeSteppabilityConnectionsKernel, 1, steppabilityImage.getOpenCLImageObject());
@@ -570,6 +574,7 @@ public class RapidHeightMapExtractor
       snapNormalXImage = new BytedecoImage(width, height, opencv_core.CV_8UC1);
       snapNormalYImage = new BytedecoImage(width, height, opencv_core.CV_8UC1);
       snapNormalZImage = new BytedecoImage(width, height, opencv_core.CV_8UC1);
+      snappedAreaFractionImage = new BytedecoImage(width, height, opencv_core.CV_8UC1);
       steppabilityConnectionsImage = new BytedecoImage(width, height, opencv_core.CV_8UC1);
 
       steppabilityImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
@@ -577,6 +582,7 @@ public class RapidHeightMapExtractor
       snapNormalXImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       snapNormalYImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       snapNormalZImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      snappedAreaFractionImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       steppabilityConnectionsImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
    }
 

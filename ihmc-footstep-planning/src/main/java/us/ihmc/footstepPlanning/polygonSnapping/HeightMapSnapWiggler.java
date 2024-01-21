@@ -73,15 +73,14 @@ public class HeightMapSnapWiggler
 
             FootstepSnapData footstepSnapData = computeSnapData(offsetPosition, footstepToWiggle.getYaw(), robotSide, environmentHandler, snapHeightThreshold, minSurfaceInclineRadians);
 
-            double area = footstepSnapData.getCroppedFoothold().getArea();
-            wiggleAreas[wiggleIndex] = Double.isNaN(area) ? 0.0 : Math.min(area / maxArea, 1.0);
+            double areaFraction = footstepSnapData.getSnapAreaFraction();
+            wiggleAreas[wiggleIndex] = Double.isNaN(areaFraction) ? 0.0 : Math.min(areaFraction, 1.0);
             wiggleRMSErrors[wiggleIndex] = Double.isNaN(footstepSnapData.getSnapRMSError()) ? 1.0 : footstepSnapData.getSnapRMSError();
          }
 
          FootstepSnapData currentSnapData = computeSnapData(currentPosition, footstepToWiggle.getYaw(), robotSide, environmentHandler, snapHeightThreshold, minSurfaceInclineRadians);
 
-         double area = currentSnapData.getCroppedFoothold().getArea();
-         double normalizedArea = Math.min(area / maxArea, 1.0);
+         double normalizedArea = Math.min(currentSnapData.getSnapAreaFraction(), 1.0);
          computeGradientMagnitudes(normalizedArea, currentSnapData.getSnapRMSError());
 
          Vector2D wiggleGradient = computeWiggleGradient();
