@@ -245,7 +245,7 @@ public class ContinuousPlanner
          if (previousFootstepPlan != null && previousFootstepPlan.getNumberOfSteps() > 0)
             this.previousFootstepPlan.remove(0);
       }
-      else if (usePreviousPlanAsReference)
+      else if (usePreviousPlanAsReference && previousFootstepPlan != null)
       {
          statistics.appendString("Using Previous Plan As Reference: Total Steps: " + previousFootstepPlan.getNumberOfSteps());
 

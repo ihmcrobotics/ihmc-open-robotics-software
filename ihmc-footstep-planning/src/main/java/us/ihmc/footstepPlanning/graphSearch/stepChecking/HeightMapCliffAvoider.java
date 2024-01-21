@@ -99,6 +99,9 @@ public class HeightMapCliffAvoider
 
    public boolean isStepValid(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep)
    {
+      if (heightMapData == null || heightMapData.isEmpty())
+         return true;
+
       updateScaledFootPolygons();
 
       /* Transform to step location */
