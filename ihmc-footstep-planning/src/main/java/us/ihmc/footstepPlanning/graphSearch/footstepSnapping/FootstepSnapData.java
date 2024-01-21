@@ -16,11 +16,8 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
    private final ConvexPolygon2D croppedFoothold = new ConvexPolygon2D();
    private int regionIndex = -1;
    private double achievedInsideDelta = Double.NaN;
-   private double rmsErrorHeightMap = Double.NaN;
-   private double heightMapSnapArea = Double.NaN;
+   private double rmsError = Double.NaN;
    private boolean snappedFootstepTransformIncludesWiggleTransform = false;
-   private boolean snappedToPlanarRegions = false;
-   private boolean snappedToHeightMap = false;
 
    public FootstepSnapData()
    {
@@ -106,45 +103,13 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
 
    public void setRMSErrorHeightMap(double rSquaredHeightMap)
    {
-      this.rmsErrorHeightMap = rSquaredHeightMap;
-   }
-
-   public void setHeightMapArea(double area)
-   {
-      this.heightMapSnapArea = area;
-   }
-
-   public double getHeightMapArea()
-   {
-      return heightMapSnapArea;
-   }
-
-   public void setSnappedToPlanarRegions(boolean snappedToPlanarRegions)
-   {
-      this.snappedToPlanarRegions = snappedToPlanarRegions;
-   }
-
-   public void setSnappedToHeightMap(boolean snappedToHeightMap)
-   {
-      this.snappedToHeightMap = snappedToHeightMap;
+      this.rmsError = rSquaredHeightMap;
    }
 
    @Override
-   public boolean getSnappedToPlanarRegions()
+   public double getSnapRMSError()
    {
-      return snappedToPlanarRegions;
-   }
-
-   @Override
-   public boolean getSnappedToHeightMap()
-   {
-      return snappedToHeightMap;
-   }
-
-   @Override
-   public double getRMSErrorHeightMap()
-   {
-      return rmsErrorHeightMap;
+      return rmsError;
    }
 
    private void updateSnappedStepTransform(DiscreteFootstep footstep)
@@ -161,18 +126,17 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
       }
    }
 
-   public void set(FootstepSnapData other)
+   public void set(FootstepSnapDataReadOnly other)
    {
-      this.snapTransform.set(other.snapTransform);
-      this.croppedFoothold.set(other.croppedFoothold);
-      this.wiggleTransformInWorld.set(other.wiggleTransformInWorld);
-      this.snappedFootstepTransform.set(other.snappedFootstepTransform);
-      this.regionIndex = other.regionIndex;
-      this.achievedInsideDelta = other.achievedInsideDelta;
-      this.snappedFootstepTransformIncludesWiggleTransform = other.snappedFootstepTransformIncludesWiggleTransform;
+      this.snapTransform.set(other.getSnapTransform());
+      this.croppedFoothold.set(other.getCroppedFoothold());
+      this.wiggleTransformInWorld.set(other.getWiggleTransformInWorld());
+//      this.snappedFootstepTransform.set(other.snappedFootstepTransform);
+      this.regionIndex = other.getRegionIndex();
+      this.achievedInsideDelta = other.getAchievedInsideDelta();
+      this.snappedFootstepTransformIncludesWiggleTransform = false;
 
-      this.heightMapSnapArea = other.heightMapSnapArea;
-      this.rmsErrorHeightMap = other.rmsErrorHeightMap;
+      this.rmsError = other.getSnapRMSError();
    }
 
    public void clear()
@@ -184,9 +148,7 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
       this.regionIndex = PlanarRegion.NO_REGION_ID;
       this.achievedInsideDelta = Double.NaN;
       this.snappedFootstepTransformIncludesWiggleTransform = false;
-      rmsErrorHeightMap = Double.NaN;
-      snappedToPlanarRegions = false;
-      snappedToHeightMap = false;
+      rmsError = Double.NaN;
    }
 
    private static final FootstepSnapData EMPTY_SNAP_DATA;

@@ -48,7 +48,7 @@ public class RDXFootstepChecker
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltips);
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       tooltip = new RDX3DPanelTooltip(baseUI.getPrimary3DPanel());
       snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters, environmentHandler);
       stepChecker = new FootstepPoseHeuristicChecker(footstepPlannerParameters, snapper, registry);

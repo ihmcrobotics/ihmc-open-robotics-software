@@ -1,28 +1,19 @@
 package us.ihmc.footstepPlanning.graphSearch.collision;
 
-import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
-import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.swing.HeightMapCollisionDetector;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.function.DoubleSupplier;
 
-public class FootstepPlannerBodyCollisionDetector
+public class PlanarRegionFootstepPlannerBodyCollisionDetector
 {
    private final BoundingBoxCollisionDetector collisionDetector = new BoundingBoxCollisionDetector();
-   private final HashMap<LatticePoint, EuclidShape3DCollisionResult> collisionDataHolder = new HashMap<>();
-
-   private HeightMapData heightMapData;
-   private final Box3D bodyBox = new Box3D();
+   private final HashMap<LatticePoint, BodyCollisionData> collisionDataHolder = new HashMap<>();
 
    private final DoubleSupplier bodyBoxDepth;
    private final DoubleSupplier bodyBoxWidth;
@@ -32,7 +23,7 @@ public class FootstepPlannerBodyCollisionDetector
    private final DoubleSupplier bodyBoxBaseY;
    private final DoubleSupplier bodyBoxBaseZ;
 
-   public FootstepPlannerBodyCollisionDetector(FootstepPlannerParametersReadOnly parameters)
+   public PlanarRegionFootstepPlannerBodyCollisionDetector(FootstepPlannerParametersReadOnly parameters)
    {
       this(parameters::getBodyBoxDepth,
            parameters::getBodyBoxWidth,
@@ -42,12 +33,12 @@ public class FootstepPlannerBodyCollisionDetector
            parameters::getBodyBoxBaseZ);
    }
 
-   public FootstepPlannerBodyCollisionDetector(DoubleSupplier bodyBoxDepth,
-                                               DoubleSupplier bodyBoxWidth,
-                                               DoubleSupplier bodyBoxHeight,
-                                               DoubleSupplier bodyBoxBaseX,
-                                               DoubleSupplier bodyBoxBaseY,
-                                               DoubleSupplier bodyBoxBaseZ)
+   public PlanarRegionFootstepPlannerBodyCollisionDetector(DoubleSupplier bodyBoxDepth,
+                                                           DoubleSupplier bodyBoxWidth,
+                                                           DoubleSupplier bodyBoxHeight,
+                                                           DoubleSupplier bodyBoxBaseX,
+                                                           DoubleSupplier bodyBoxBaseY,
+                                                           DoubleSupplier bodyBoxBaseZ)
    {
       this.bodyBoxDepth = bodyBoxDepth;
       this.bodyBoxWidth = bodyBoxWidth;
@@ -57,9 +48,10 @@ public class FootstepPlannerBodyCollisionDetector
       this.bodyBoxBaseZ = bodyBoxBaseZ;
    }
 
-   public void setHeightMapData(HeightMapData heightMapData)
+   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
-      this.heightMapData = heightMapData;
+      if(planarRegionsList != null)
+         collisionDetector.setPlanarRegionsList(planarRegionsList);
       collisionDataHolder.clear();
    }
 
@@ -69,8 +61,8 @@ public class FootstepPlannerBodyCollisionDetector
 
       // Start by checking next step
       LatticePoint latticePoint = createLatticePointForCollisionCheck(footstep);
-      EuclidShape3DCollisionResult collisionData = checkForCollision(footstep, snapHeight);
-      if (collisionData.areShapesColliding())
+      BodyCollisionData collisionData = checkForCollision(footstep, snapHeight);
+      if (collisionData.isCollisionDetected())
       {
          return true;
       }
@@ -89,7 +81,7 @@ public class FootstepPlannerBodyCollisionDetector
          double interpolatedHeight = EuclidCoreTools.interpolate(snapHeight, previousSnapHeight, alpha);
 
          collisionData = checkForCollision(interpolatedPoint, interpolatedHeight);
-         if (collisionData.areShapesColliding())
+         if (collisionData.isCollisionDetected())
          {
             return true;
          }
@@ -98,13 +90,13 @@ public class FootstepPlannerBodyCollisionDetector
       return false;
    }
 
-   public EuclidShape3DCollisionResult checkForCollision(DiscreteFootstep footstep, double snappedHeight)
+   public BodyCollisionData checkForCollision(DiscreteFootstep footstep, double snappedHeight)
    {
       LatticePoint latticePoint = createLatticePointForCollisionCheck(footstep);
       return checkForCollision(latticePoint, snappedHeight);
    }
 
-   private EuclidShape3DCollisionResult checkForCollision(LatticePoint latticePoint, double snappedStepHeight)
+   private BodyCollisionData checkForCollision(LatticePoint latticePoint, double snappedStepHeight)
    {
       if (collisionDataHolder.containsKey(latticePoint))
       {
@@ -112,14 +104,10 @@ public class FootstepPlannerBodyCollisionDetector
       }
       else
       {
-         bodyBox.getSize().set(bodyBoxDepth.getAsDouble(), bodyBoxWidth.getAsDouble(), bodyBoxHeight.getAsDouble());
-         bodyBox.getPose().getTranslation().set(latticePoint.getX(), latticePoint.getY(), snappedStepHeight + bodyBoxBaseZ.getAsDouble() + 0.5 * bodyBoxHeight.getAsDouble());
-         bodyBox.getPose().getRotation().setYawPitchRoll(latticePoint.getYaw(), 0.0, 0.0);
-
-         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.evaluateCollision(bodyBox, heightMapData);
          collisionDetector.setBoxPose(latticePoint.getX(), latticePoint.getY(), snappedStepHeight + bodyBoxBaseZ.getAsDouble(), latticePoint.getYaw());
-         collisionDataHolder.put(latticePoint, collisionResult);
-         return collisionResult;
+         BodyCollisionData collisionData = collisionDetector.checkForCollision();
+         collisionDataHolder.put(latticePoint, collisionData);
+         return collisionData;
       }
    }
 
