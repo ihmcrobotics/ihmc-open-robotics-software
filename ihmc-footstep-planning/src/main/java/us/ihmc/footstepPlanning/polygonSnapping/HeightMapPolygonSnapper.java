@@ -175,6 +175,8 @@ public class HeightMapPolygonSnapper
 
          // TODO need to compute the snapped polygon
          snappedPolygon.set(polygonToSnap);
+         // TODO need to compute the RMS error on the GPU.
+         rootMeanSquaredError = Double.NaN;
          areaFraction = terrainMapData.getSnappedAreaFractionInWorld(centroid.getX(), centroid.getY());;
       }
       else
