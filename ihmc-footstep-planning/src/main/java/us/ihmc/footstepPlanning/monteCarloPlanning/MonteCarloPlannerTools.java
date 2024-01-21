@@ -353,7 +353,7 @@ public class MonteCarloPlannerTools
    public static void snapFootPoseToHeightMap(HeightMapData heightMapData, FramePose3D poseToSnap, HeightMapPolygonSnapper snapper, ConvexPolygon2D footPolygon)
    {
       footPolygon.applyTransform(poseToSnap);
-      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMapData, 0.1);
+      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMapData, 0.1, Math.toRadians(60.0));
       if (snapTransform != null)
       {
          snapTransform.getTranslation().setZ(0);
