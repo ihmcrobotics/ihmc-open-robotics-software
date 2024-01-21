@@ -174,6 +174,9 @@ public class HeightMapPolygonSnapper
 
          transformToReturn = createTransformToMatchSurfaceNormalPreserveX(normal);
          setTranslationSettingZAndPreservingXAndY(new Point3D(centroid.getX(), centroid.getY(), height), transformToReturn);
+
+         // TODO need to compute the snapped polygon
+         // TODO need to compute the snap area.
       }
       else
       {
