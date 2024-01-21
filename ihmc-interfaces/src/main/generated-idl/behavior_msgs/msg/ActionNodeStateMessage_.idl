@@ -53,7 +53,7 @@ module behavior_msgs
         /**
          * Desired trajectory
          */
-        sequence<ihmc_common_msgs::msg::dds::SE3TrajectoryPointMessage, 50> desired_trajectory;
+        sequence<ihmc_common_msgs::msg::dds::SE3TrajectoryPointMessage, 500> desired_trajectory;
         /**
          * Current pose
          */

@@ -64,7 +64,7 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
    public ActionNodeStateMessage()
    {
       state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
-      desired_trajectory_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage> (50, new ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
+      desired_trajectory_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage> (500, new ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
       current_pose_ = new us.ihmc.euclid.geometry.Pose3D();
 
    }
