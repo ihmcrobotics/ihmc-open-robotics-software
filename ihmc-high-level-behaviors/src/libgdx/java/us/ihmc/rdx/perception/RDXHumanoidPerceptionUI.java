@@ -324,7 +324,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          ImGui.unindent();
       }
 
-      steppableRegionsParameterTuner.renderImGuiWidgets();
+      if (steppableRegionsParameterTuner != null)
+         steppableRegionsParameterTuner.renderImGuiWidgets();
 
       if (ImGui.collapsingHeader("Map Regions", mapRegionsCollapsedHeader))
       {

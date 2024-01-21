@@ -354,7 +354,7 @@ public class MonteCarloPlannerTools
    {
       ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(footPolygon);
       footPolygonInWorld.applyTransform(poseToSnap);
-      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygonInWorld, heightMapData, 0.05);
+      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygonInWorld, heightMapData, 0.1);
       double area = snapper.getArea();
       double maxArea = footPolygon.getArea();
       if (snapTransform != null && (area / maxArea > 0.75))
@@ -363,17 +363,21 @@ public class MonteCarloPlannerTools
 //         snapTransform.getTranslation().setZ(0);
 //         snapTransform.getRotation().setYawPitchRoll(0, snapTransform.getRotation().getPitch(), snapTransform.getRotation().getRoll());
          poseToSnap.applyTransform(snapTransform);
-         LogTools.info("SUCCESS: Snapped footstep pose to height map");
+         LogTools.info("[SNAP] -> SUCCESS: Snapped footstep pose to height map");
+      }
+      else if (snapTransform != null && area / maxArea < 0.75)
+      {
+         LogTools.warn("[SNAP] Snap area too low.");
       }
       else
       {
-         LogTools.info("Failed to snap footstep pose to height map");
+         LogTools.info("[SNAP] Failed to snap footstep pose. Null.");
       }
    }
 
    private static FramePose3D getFramePose3D(double xPosition, double yPosition, float zPosition, double yaw)
    {
-      Point3D position = new Point3D(xPosition, yPosition, 0);
+      Point3D position = new Point3D(xPosition, yPosition, zPosition);
       Quaternion orientation = new Quaternion(yaw, 0, 0);
       return new FramePose3D(ReferenceFrame.getWorldFrame(), position, orientation);
    }

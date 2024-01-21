@@ -97,7 +97,7 @@
     "upperBound" : 0.3
   },
   "Minimum step length" : {
-    "value" : 0.1,
+    "value" : 0.0,
     "lowerBound" : 0.1,
     "upperBound" : 0.3
   },
