@@ -18,6 +18,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    private SakeHandCommandActionStateMessage sakeHandCommandActionStateMessage;
    private HandPoseActionStateMessage handPoseActionStateMessage;
    private HandWrenchActionStateMessage handWrenchActionStateMessage;
+   private ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage;
    private PelvisHeightPitchActionStateMessage pelvisHeightPitchActionStateMessage;
    private WaitDurationActionStateMessage waitDurationActionStateMessage;
    private WalkActionStateMessage walkActionStateMessage;
@@ -36,6 +37,7 @@ public class ROS2BehaviorTreeSubscriptionNode
       sakeHandCommandActionStateMessage = null;
       handPoseActionStateMessage = null;
       handWrenchActionStateMessage = null;
+      screwPrimitiveActionStateMessage = null;
       pelvisHeightPitchActionStateMessage = null;
       waitDurationActionStateMessage = null;
       walkActionStateMessage = null;
@@ -150,6 +152,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setHandWrenchActionStateMessage(HandWrenchActionStateMessage handWrenchActionStateMessage)
    {
       this.handWrenchActionStateMessage = handWrenchActionStateMessage;
+   }
+
+   public ScrewPrimitiveActionStateMessage getScrewPrimitiveActionStateMessage()
+   {
+      return screwPrimitiveActionStateMessage;
+   }
+
+   public void setScrewPrimitiveActionStateMessage(ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage)
+   {
+      this.screwPrimitiveActionStateMessage = screwPrimitiveActionStateMessage;
    }
 
    public PelvisHeightPitchActionStateMessage getPelvisHeightPitchActionStateMessage()

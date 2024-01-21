@@ -96,6 +96,17 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       {
          return new RDXHandWrenchAction(id, crdtInfo, saveFileDirectory);
       }
+      if (nodeType == ScrewPrimitiveActionDefinition.class)
+      {
+         return new RDXScrewPrimitiveAction(id,
+                                            crdtInfo,
+                                            saveFileDirectory,
+                                            panel3D,
+                                            robotModel,
+                                            syncedRobot.getFullRobotModel(),
+                                            selectionCollisionModel,
+                                            referenceFrameLibrary);
+      }
       if (nodeType == PelvisHeightPitchActionDefinition.class)
       {
          return new RDXPelvisHeightPitchAction(id,

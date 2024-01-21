@@ -15,6 +15,16 @@ public class ImGuiInputDoubleWrapper extends ImGuiFancyWidget
                                   double step,
                                   double stepFast,
                                   DoubleSupplier wrappedValueGetter,
+                                  DoubleConsumer wrappedValueSetter)
+   {
+      this(label, format, step, stepFast, wrappedValueGetter, wrappedValueSetter, () -> { });
+   }
+
+   public ImGuiInputDoubleWrapper(String label,
+                                  String format,
+                                  double step,
+                                  double stepFast,
+                                  DoubleSupplier wrappedValueGetter,
                                   DoubleConsumer wrappedValueSetter,
                                   Runnable onUserModified)
    {
@@ -25,14 +35,14 @@ public class ImGuiInputDoubleWrapper extends ImGuiFancyWidget
 
    private void render(double step, double stepFast, ImDouble imDouble)
    {
-      beforeWidgetRender();
       if (ImGuiTools.volatileInputDouble(label, imDouble, step, stepFast, format))
          onUserModified.run();
-      afterWidgetRender();
    }
 
-   public void render()
+   public void renderImGuiWidget()
    {
+      beforeWidgetRender();
       imDoubleWrapper.renderImGuiWidget();
+      afterWidgetRender();
    }
 }
