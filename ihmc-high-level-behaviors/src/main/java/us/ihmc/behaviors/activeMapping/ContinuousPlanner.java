@@ -155,14 +155,14 @@ public class ContinuousPlanner
    {
       long startTimeForStatistics = System.currentTimeMillis();
       generateMonteCarloFootstepPlan();
-      generateAStarFootstepPlan(latestHeightMapData, usePreviousPlanAsReference, useMonteCarloPlanAsReference);
+      generateAStarFootstepPlan(latestHeightMapData, latestTerrainMapData, usePreviousPlanAsReference, useMonteCarloPlanAsReference);
       statistics.setLastAndTotalPlanningTimes((float) (System.currentTimeMillis() - startTimeForStatistics) / 1000.0f);
    }
 
    public void planToGoalWithAStar(boolean usePreviousPlanAsReference, boolean useMonteCarloPlanAsReference)
    {
       long startTimeForStatistics = System.currentTimeMillis();
-      generateAStarFootstepPlan(latestHeightMapData, usePreviousPlanAsReference, false);
+      generateAStarFootstepPlan(latestHeightMapData, latestTerrainMapData, usePreviousPlanAsReference, false);
       statistics.setLastAndTotalPlanningTimes((float) (System.currentTimeMillis() - startTimeForStatistics) / 1000.0f);
    }
 
@@ -216,7 +216,7 @@ public class ContinuousPlanner
       return latestMonteCarloPlan;
    }
 
-   public void generateAStarFootstepPlan(HeightMapData heightMapData, boolean usePreviousPlanAsReference, boolean useMonteCarloPlanAsReference)
+   public void generateAStarFootstepPlan(HeightMapData heightMapData, TerrainMapData terrainMapData, boolean usePreviousPlanAsReference, boolean useMonteCarloPlanAsReference)
    {
       if (footstepPlanner.isPlanning())
       {
@@ -230,6 +230,7 @@ public class ContinuousPlanner
       FootstepPlannerRequest request = createFootstepPlannerRequest(startingStancePose, goalStancePose);
       request.setRequestedInitialStanceSide(imminentFootstepSide);
       request.setHeightMapData(heightMapData);
+      request.setTerrainMapData(terrainMapData);
       request.setSnapGoalSteps(true);
       request.setAbortIfGoalStepSnappingFails(true);
       LogTools.info("AStar {}", request);

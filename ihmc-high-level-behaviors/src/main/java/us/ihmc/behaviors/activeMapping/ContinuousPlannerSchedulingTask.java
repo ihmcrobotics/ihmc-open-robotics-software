@@ -104,9 +104,8 @@ public class ContinuousPlannerSchedulingTask
       statistics = new ContinuousPlannerStatistics();
       continuousPlanner.setContinuousPlannerStatistics(statistics);
 
-      SideDependentList<ConvexPolygon2D> footPolygons = FootstepPlanningModuleLauncher.createFootPolygons(robotModel);
-
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
+      // FIXME this needs to get a copy of the height map or terrain map for the step checker to actually work as intended.
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       snapper = new FootstepSnapAndWiggler(FootstepPlanningModuleLauncher.createFootPolygons(robotModel),
                                            continuousPlanner.getFootstepPlannerParameters(),
                                            environmentHandler);
