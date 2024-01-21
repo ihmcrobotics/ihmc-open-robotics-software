@@ -140,6 +140,11 @@ public class TerrainMapData
       return getSnapResultLocal(rIndex, cIndex);
    }
 
+   public boolean hasSnapHeight()
+   {
+      return snapHeightImage != null;
+   }
+
    public boolean hasSnapNormal()
    {
       return snapNormalXImage != null && snapNormalYImage != null && snapNormalZImage != null;
