@@ -74,28 +74,37 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
                                                                 referenceFrameLibrary,
                                                                 getDefinition()::getObjectFrameName,
                                                                 getDefinition()::setObjectFrameName);
+      ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
       translationWidget = new ImGuiSliderDoubleWrapper("Translation", "%.2f", -0.4, 0.4, getDefinition()::getTranslation, getDefinition()::setTranslation);
+      translationWidget.addWidgetAligner(widgetAligner);
       rotationWidget = new ImGuiSliderDoubleWrapper("Rotation", "%.2f", -2.0 * Math.PI, 2.0 * Math.PI,
                                                     getDefinition()::getRotation,
                                                     getDefinition()::setRotation);
+      rotationWidget.addWidgetAligner(widgetAligner);
       maxLinearVelocityWidget = new ImGuiSliderDoubleWrapper("Max Linear Velocity", "%.2f", 0.05, 1.0,
                                                              getDefinition()::getMaxLinearVelocity,
                                                              getDefinition()::setMaxLinearVelocity);
+      maxLinearVelocityWidget.addWidgetAligner(widgetAligner);
       maxAngularVelocityWidget = new ImGuiSliderDoubleWrapper("Max Angular Velocity", "%.2f", 0.1, Math.PI,
                                                               getDefinition()::getMaxAngularVelocity,
                                                               getDefinition()::setMaxAngularVelocity);
+      maxAngularVelocityWidget.addWidgetAligner(widgetAligner);
       maxForceWidget = new ImGuiSliderDoubleWrapper("Max Force", "%.2f", 0.0, 70.0, getDefinition()::getMaxForce, getDefinition()::setMaxForce);
       maxForceWidget.addButton("Disable Wrench", () -> getDefinition().setMaxForce(0.0));
+      maxForceWidget.addWidgetAligner(widgetAligner);
       maxTorqueWidget = new ImGuiSliderDoubleWrapper("Max Torque", "%.2f", 0.5, 20.0, getDefinition()::getMaxTorque, getDefinition()::setMaxTorque);
       maxTorqueWidget.addButton("Disable Wrench", () -> getDefinition().setMaxTorque(0.0));
+      maxTorqueWidget.addWidgetAligner(widgetAligner);
       linearPositionWeightWidget = new ImGuiSliderDoubleWrapper("Linear Position Weight", "%.2f", 0.0, 70.0,
                                                                 getDefinition()::getLinearPositionWeight,
                                                                 getDefinition()::setLinearPositionWeight);
       linearPositionWeightWidget.addButton("Use Default Weights", () -> getDefinition().setLinearPositionWeight(-1.0));
+      linearPositionWeightWidget.addWidgetAligner(widgetAligner);
       angularPositionWeightWidget = new ImGuiSliderDoubleWrapper("Angular Position Weight", "%.2f", 0.0, 70.0,
                                                                 getDefinition()::getAngularPositionWeight,
                                                                 getDefinition()::setAngularPositionWeight);
       angularPositionWeightWidget.addButton("Use Default Weights", () -> getDefinition().setAngularPositionWeight(-1.0));
+      angularPositionWeightWidget.addWidgetAligner(widgetAligner);
    }
 
    @Override
