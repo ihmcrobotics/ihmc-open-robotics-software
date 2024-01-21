@@ -4,6 +4,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -26,6 +27,7 @@ public class BodyPathLSTraversibilityCalculator
    private final Pose2D bodyPose = new Pose2D();
    private final Pose2D stepPose = new Pose2D();
 
+   private final FootstepPlannerEnvironmentHandler internalEnvironmentHandler = new FootstepPlannerEnvironmentHandler();
    private final HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
    private final Map<BodyPathLatticePoint, Double> gridHeightMap;
 
@@ -168,6 +170,7 @@ public class BodyPathLSTraversibilityCalculator
       TDoubleArrayList inclineAlphas = new TDoubleArrayList();
 
       Pose2D rotatedBodyPose = new Pose2D();
+      internalEnvironmentHandler.setHeightMap(heightMapData);
 
       for (int ti = 0; ti < yawOffsets.size(); ti++)
       {
@@ -191,7 +194,7 @@ public class BodyPathLSTraversibilityCalculator
 
                double heightWindow = 0.2;
                RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon,
-                                                                                 heightMapData,
+                                                                                 internalEnvironmentHandler,
                                                                                  parameters.getHeightMapSnapThreshold(),
                                                                                  parameters.getMinimumSurfaceInclineRadians(),
                                                                                  parentHeight - heightWindow);
