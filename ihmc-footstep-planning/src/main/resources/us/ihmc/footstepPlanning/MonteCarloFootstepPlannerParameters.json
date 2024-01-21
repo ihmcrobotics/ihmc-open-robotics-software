@@ -2,12 +2,12 @@
   "title" : "MonteCarloFootstepPlannerParameters",
   "Reset" : false,
   "Number of iterations" : {
-    "value" : 120,
+    "value" : 90,
     "lowerBound" : 1,
     "upperBound" : 400
   },
   "Number of simulations" : {
-    "value" : 20,
+    "value" : 4,
     "lowerBound" : 1,
     "upperBound" : 400
   },
@@ -17,12 +17,12 @@
     "upperBound" : 1.0
   },
   "Feasible Contact Reward" : {
-    "value" : 1000.0,
+    "value" : 533.980608,
     "lowerBound" : 0.0,
     "upperBound" : 1000.0
   },
   "Goal Reward" : {
-    "value" : 14.16309,
+    "value" : 97.647059,
     "lowerBound" : 0.0,
     "upperBound" : 100.0
   },
@@ -57,7 +57,7 @@
     "upperBound" : 5.0
   },
   "Initial value cutoff" : {
-    "value" : 337,
+    "value" : 211,
     "lowerBound" : -1000,
     "upperBound" : 1000
   },
@@ -82,7 +82,7 @@
     "upperBound" : 10
   },
   "Maximum step width" : {
-    "value" : 0.45,
+    "value" : 0.5,
     "lowerBound" : 0.2,
     "upperBound" : 0.5
   },
@@ -92,17 +92,17 @@
     "upperBound" : 0.7
   },
   "Minimum step width" : {
-    "value" : 0.3,
+    "value" : 0.2,
     "lowerBound" : 0.1,
     "upperBound" : 0.3
   },
   "Minimum step length" : {
-    "value" : 0.15,
+    "value" : 0.1,
     "lowerBound" : 0.1,
     "upperBound" : 0.3
   },
   "Decay factor" : {
-    "value" : 0.922747,
+    "value" : 0.888235,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },

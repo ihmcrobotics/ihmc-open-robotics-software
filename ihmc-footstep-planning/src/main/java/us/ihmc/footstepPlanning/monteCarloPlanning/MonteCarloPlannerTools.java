@@ -336,12 +336,12 @@ public class MonteCarloPlannerTools
          float nodeZ = request.getTerrainMapData().getHeightInWorld(nodeX, nodeY);
          float nodeYaw = footstepNode.getState().getZ32();
 
-         ConvexPolygon2D footPolygon = PlannerTools.createFootPolygon(0.25, 0.12, 0.8);
+         ConvexPolygon2D footPolygon = PlannerTools.createFootPolygon(0.25, 0.12, 0.08);
          FramePose3D footstepPose = getFramePose3D(nodeX, nodeY, nodeZ, nodeYaw);
          footPolygon.applyTransform(footstepPose);
 
-         //         LogTools.warn("Attempting to snap footstep pose to height map");
-         //         MonteCarloPlannerTools.snapFootPoseToHeightMap(request.getHeightMapData(), footstepPose, heightMapSnapper, footPolygon);
+         LogTools.warn("Attempting to snap footstep pose to height map");
+         MonteCarloPlannerTools.snapFootPoseToHeightMap(request.getHeightMapData(), footstepPose, heightMapSnapper, footPolygon);
 
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
@@ -530,10 +530,11 @@ public class MonteCarloPlannerTools
       //      double stepHeightCost = (request.getTerrainMapData().getHeightLocal(rIndex, cIndex) - request.getTerrainMapData().getHeightLocal(rIndex, cIndex)) * 0.01f;
       //      double edgeCost = stepYawCost + stepDistanceCost + stepHeightCost;
 
-      if (debug)
-         LogTools.info(String.format("Rewards -> Goal: %.2f, Contact: %.2f", goalReward, contactReward));
-
       score = goalReward + contactReward;
+
+      if (debug)
+         LogTools.info(String.format("Rewards -> Goal: %.2f, Contact: %.2f, Total: %.2f (%d)", goalReward, contactReward, score, plannerParameters.getInitialValueCutoff()));
+
       return score;
    }
 

@@ -339,7 +339,7 @@ public class RapidHeightMapExtractor
 
          sequenceNumber++;
 
-         terrainMapStatistics.setPrintToConsole(true); // uncommint this to print time statistics to the console
+         terrainMapStatistics.setPrintToConsole(false); // uncommint this to print time statistics to the console
          terrainMapStatistics.logToFile(heightMapParameters.getStatisticsLoggingEnabled());
       }
    }
