@@ -11,6 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
@@ -50,7 +51,7 @@ public class HeightMapSnapWiggler
    }
 
    public void computeWiggleTransform(DiscreteFootstep footstepToWiggle,
-                                      HeightMapData heightMapData,
+                                      FootstepPlannerEnvironmentHandler environmentHandler,
                                       FootstepSnapData snapData,
                                       double snapHeightThreshold,
                                       double minSurfaceInclineRadians)
@@ -70,14 +71,14 @@ public class HeightMapSnapWiggler
             Point2D offsetPosition = new Point2D(currentPosition);
             offsetPosition.add(offsets[wiggleIndex]);
 
-            FootstepSnapData footstepSnapData = computeSnapData(offsetPosition, footstepToWiggle.getYaw(), robotSide, heightMapData, snapHeightThreshold, minSurfaceInclineRadians);
+            FootstepSnapData footstepSnapData = computeSnapData(offsetPosition, footstepToWiggle.getYaw(), robotSide, environmentHandler, snapHeightThreshold, minSurfaceInclineRadians);
 
             double area = footstepSnapData.getCroppedFoothold().getArea();
             wiggleAreas[wiggleIndex] = Double.isNaN(area) ? 0.0 : Math.min(area / maxArea, 1.0);
             wiggleRMSErrors[wiggleIndex] = Double.isNaN(footstepSnapData.getSnapRMSError()) ? 1.0 : footstepSnapData.getSnapRMSError();
          }
 
-         FootstepSnapData currentSnapData = computeSnapData(currentPosition, footstepToWiggle.getYaw(), robotSide, heightMapData, snapHeightThreshold, minSurfaceInclineRadians);
+         FootstepSnapData currentSnapData = computeSnapData(currentPosition, footstepToWiggle.getYaw(), robotSide, environmentHandler, snapHeightThreshold, minSurfaceInclineRadians);
 
          double area = currentSnapData.getCroppedFoothold().getArea();
          double normalizedArea = Math.min(area / maxArea, 1.0);
@@ -103,7 +104,7 @@ public class HeightMapSnapWiggler
          }
       }
 
-      FootstepSnapData wiggledSnapData = computeSnapData(currentPosition, footstepToWiggle.getYaw(), robotSide, heightMapData, snapHeightThreshold, minSurfaceInclineRadians);
+      FootstepSnapData wiggledSnapData = computeSnapData(currentPosition, footstepToWiggle.getYaw(), robotSide, environmentHandler, snapHeightThreshold, minSurfaceInclineRadians);
 
       FramePose3D snappedPose = new FramePose3D();
       snappedPose.getPosition().set(originalPosition);
@@ -140,7 +141,7 @@ public class HeightMapSnapWiggler
    private FootstepSnapData computeSnapData(Point2DReadOnly position,
                                             double yaw,
                                             RobotSide robotSide,
-                                            HeightMapData heightMapData,
+                                            FootstepPlannerEnvironmentHandler environmentHandler,
                                             double snapHeightThreshold,
                                             double minSurfaceInclineRadians)
    {
@@ -148,7 +149,7 @@ public class HeightMapSnapWiggler
                                               position.getY(),
                                               yaw,
                                               footPolygonsInSoleFrame.get(robotSide),
-                                              heightMapData,
+                                              environmentHandler,
                                               snapHeightThreshold,
                                               minSurfaceInclineRadians);
    }

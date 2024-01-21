@@ -658,7 +658,7 @@ public class SwingOverHeightMapTest
             }
          }
 
-         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.evaluateCollision(collisionBox, heightMapData, null);
+         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.evaluateCollision(collisionBox, heightMapData);
          if (collisionResult.getSignedDistance() < closestDistance)
          {
             closestDistance = collisionResult.getSignedDistance();
