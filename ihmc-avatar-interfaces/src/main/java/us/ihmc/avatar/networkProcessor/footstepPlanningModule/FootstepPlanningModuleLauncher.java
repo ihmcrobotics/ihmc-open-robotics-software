@@ -100,7 +100,6 @@ public class FootstepPlanningModuleLauncher
    {
       String moduleName = robotModel.getSimpleRobotName();
 
-      VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters(suffix);
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
@@ -109,7 +108,6 @@ public class FootstepPlanningModuleLauncher
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);
 
       return new FootstepPlanningModule(moduleName,
-                                        visibilityGraphsParameters,
                                         robotModel.getAStarBodyPathPlannerParameters(),
                                         footstepPlannerParameters,
                                         swingPlannerParameters,

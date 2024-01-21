@@ -219,7 +219,7 @@ public class TerrainMapData
 
    private static float getNormalLocalUnsafe(Mat normalImage, int rIndex, int cIndex)
    {
-      return ((float) ((normalImage.ptr(rIndex, cIndex).get() & 0xFF))) / 255 - 1.0f;
+      return ((float) ((normalImage.ptr(rIndex, cIndex).get() & 0xFF))) * 2 / 255 - 1.0f;
    }
 
    private float getContactScoreLocal(int rIndex, int cIndex)

@@ -796,7 +796,7 @@ void kernel computeSnappedValuesKernel(global float* params,
 
     // TODO include this?
     // snap_height = getZOnPlane(foot_position, (float3) (x_solution, y_solution, z_solution), normal);
-    int snap_height_int = (snap_height * params[SNAP_HEIGHT_OFFSET]) * params[SNAP_HEIGHT_SCALING_FACTOR];
+    int snap_height_int = (snap_height + params[SNAP_HEIGHT_OFFSET]) * params[SNAP_HEIGHT_SCALING_FACTOR];
 
     /////////////// Make sure there's enough step area.
 
@@ -873,9 +873,9 @@ void kernel computeSnappedValuesKernel(global float* params,
     }
 
     uint area_fraction =  255 * n / max_points_possible_under_support;
-    uint normal_x_int = 255 * (normal.x + 1.0f);
-    uint normal_y_int = 255 * (normal.y + 1.0f);
-    uint normal_z_int = 255 * (normal.z + 1.0f);
+    uint normal_x_int = (uint) (255 * (normal.x + 1.0f) / 2.0f);
+    uint normal_y_int = (uint) (255 * (normal.y + 1.0f) / 2.0f);
+    uint normal_z_int = (uint) (255 * (normal.z + 1.0f) / 2.0f);
     int2 storage_key = (int2) (idx_x, idx_y);
 
     write_imageui(steppable_map, storage_key, (uint4)(snap_result,0,0,0));

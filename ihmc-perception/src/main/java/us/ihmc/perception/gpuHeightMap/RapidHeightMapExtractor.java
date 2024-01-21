@@ -23,6 +23,7 @@ import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersBa
 import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
 import us.ihmc.perception.steppableRegions.data.SteppableCell;
 import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
@@ -46,7 +47,7 @@ public class RapidHeightMapExtractor
    private int globalCellsPerAxis;
    public int sequenceNumber = 0;
 
-   private static final boolean computeSteppability = false;
+   private static final boolean computeSteppability = true;
 
    private boolean initialized = false;
    private boolean modified = true;
@@ -321,7 +322,7 @@ public class RapidHeightMapExtractor
          //PerceptionDebugTools.printMat("Cropped Height Map", croppedHeightMapImage, 4);
          //PerceptionDebugTools.printMat("Cropped Snap Height Map", croppedSnappedMapImage, 4);
 
-         if (computeSteppability)
+         if (false && computeSteppability)
          {
             SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.createEnvironmentByMergingCellsIntoRegions(steppabilityImage,
                                                                                                                                  snapHeightImage,
@@ -353,7 +354,7 @@ public class RapidHeightMapExtractor
 
          sequenceNumber++;
 
-         terrainMapStatistics.setPrintToConsole(true); // uncommint this to print time statistics to the console
+//         terrainMapStatistics.setPrintToConsole(true); // uncommint this to print time statistics to the console
          terrainMapStatistics.logToFile(heightMapParameters.getStatisticsLoggingEnabled());
       }
    }
