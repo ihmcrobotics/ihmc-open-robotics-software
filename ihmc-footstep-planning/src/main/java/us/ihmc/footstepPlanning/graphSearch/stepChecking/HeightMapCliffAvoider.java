@@ -104,10 +104,6 @@ public class HeightMapCliffAvoider
       /* Transform to step location */
       FootstepSnapDataReadOnly snapData = snapper.snapFootstep(candidateStep);
 
-      // Something went wrong when snapping the data, this is a bad step
-      if (!snapData.getSnappedToHeightMap())
-         return false;
-
       DiscreteFootstepTools.getFootPolygon(candidateStep, scaledFootPolygons.get(candidateStep.getRobotSide()), scaledFootPolygon);
       RigidBodyTransformReadOnly snapTransform = snapData.getSnapTransform();
       scaledFootPolygon.applyTransform(snapTransform, false);
