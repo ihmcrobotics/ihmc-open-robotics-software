@@ -42,6 +42,12 @@ public class TerrainMapData
    private Mat steppabilityConnectionsImage;
 
    public TerrainMapData(Mat heightMap,
+                         Mat contactMap)
+   {
+      this(heightMap, null, contactMap, null, null, null, null, null);
+   }
+
+   public TerrainMapData(Mat heightMap,
                          Mat snapHeightImage,
                          Mat contactMap,
                          Mat terrainCostMap,
