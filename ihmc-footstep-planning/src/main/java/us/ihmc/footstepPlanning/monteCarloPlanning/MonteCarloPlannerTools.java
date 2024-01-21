@@ -341,7 +341,7 @@ public class MonteCarloPlannerTools
          footPolygon.applyTransform(footstepPose);
 
          LogTools.warn("Attempting to snap footstep pose to height map");
-         MonteCarloPlannerTools.snapFootPoseToHeightMap(request.getHeightMapData(), footstepPose, heightMapSnapper, footPolygon);
+         MonteCarloPlannerTools.snapFootPoseToHeightMap(request.getHeightMapData(), footstepPose, heightMapSnapper, footPolygons.get(footstepNode.getRobotSide()));
 
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
@@ -352,24 +352,28 @@ public class MonteCarloPlannerTools
 
    public static void snapFootPoseToHeightMap(HeightMapData heightMapData, FramePose3D poseToSnap, HeightMapPolygonSnapper snapper, ConvexPolygon2D footPolygon)
    {
-      footPolygon.applyTransform(poseToSnap);
-      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMapData, 0.1);
-      if (snapTransform != null)
+      ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(footPolygon);
+      footPolygonInWorld.applyTransform(poseToSnap);
+      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygonInWorld, heightMapData, 0.05);
+      double area = snapper.getArea();
+      double maxArea = footPolygon.getArea();
+      if (snapTransform != null && (area / maxArea > 0.75))
       {
-         snapTransform.getTranslation().setZ(0);
-         snapTransform.getRotation().setYawPitchRoll(0, snapTransform.getRotation().getPitch(), snapTransform.getRotation().getRoll());
-         poseToSnap.getRotation().applyTransform(snapTransform);
-         LogTools.warn("SUCCESS: Snapped footstep pose to height map");
+         poseToSnap.getTranslation().setZ(0.0);
+//         snapTransform.getTranslation().setZ(0);
+//         snapTransform.getRotation().setYawPitchRoll(0, snapTransform.getRotation().getPitch(), snapTransform.getRotation().getRoll());
+         poseToSnap.applyTransform(snapTransform);
+         LogTools.info("SUCCESS: Snapped footstep pose to height map");
       }
       else
       {
-         LogTools.warn("Failed to snap footstep pose to height map");
+         LogTools.info("Failed to snap footstep pose to height map");
       }
    }
 
    private static FramePose3D getFramePose3D(double xPosition, double yPosition, float zPosition, double yaw)
    {
-      Point3D position = new Point3D(xPosition, yPosition, zPosition);
+      Point3D position = new Point3D(xPosition, yPosition, 0);
       Quaternion orientation = new Quaternion(yaw, 0, 0);
       return new FramePose3D(ReferenceFrame.getWorldFrame(), position, orientation);
    }
