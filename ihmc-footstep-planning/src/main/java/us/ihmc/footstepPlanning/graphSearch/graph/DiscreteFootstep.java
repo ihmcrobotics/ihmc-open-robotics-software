@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.graph;
 
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ public class DiscreteFootstep
    private Point2D midFootPoint;
    private final int hashCode;
 
-   private final List<DiscreteFootstep> childNodes = new ArrayList<>();
+   private FootstepSnapData snapData;
 
    public DiscreteFootstep(double x, double y)
    {
@@ -38,6 +39,26 @@ public class DiscreteFootstep
       this.latticePoint = latticePoint;
       this.robotSide = robotSide;
       hashCode = computeHashCode(this);
+   }
+
+   public void setSnapData(FootstepSnapData snapData)
+   {
+      this.snapData = snapData;
+   }
+
+   public void clearSnapData()
+   {
+      snapData = null;
+   }
+
+   public boolean hasSnapData()
+   {
+      return snapData != null;
+   }
+
+   public FootstepSnapData getSnapData()
+   {
+      return snapData;
    }
 
    public double getX()
@@ -78,31 +99,6 @@ public class DiscreteFootstep
    public RobotSide getRobotSide()
    {
       return robotSide;
-   }
-
-   public List<DiscreteFootstep> getChildNodes()
-   {
-      return childNodes;
-   }
-
-   public void addChildNode(DiscreteFootstep childNode)
-   {
-      if (!childNodes.contains(childNode))
-      {
-         childNodes.add(childNode);
-      }
-   }
-
-   public double euclideanDistance(DiscreteFootstep other)
-   {
-      return Math.sqrt(euclideanDistanceSquared(other));
-   }
-
-   public double euclideanDistanceSquared(DiscreteFootstep other)
-   {
-      double dx = getX() - other.getX();
-      double dy = getY() - other.getY();
-      return dx * dx + dy * dy;
    }
 
    public int computeYawIndexDistance(DiscreteFootstep other)
