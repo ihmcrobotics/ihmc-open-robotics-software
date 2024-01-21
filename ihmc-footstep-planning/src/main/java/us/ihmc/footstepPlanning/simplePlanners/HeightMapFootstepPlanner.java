@@ -10,6 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
@@ -30,6 +31,8 @@ public class HeightMapFootstepPlanner
 
       FootstepPlan footstepPlan = new FootstepPlan();
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+      environmentHandler.setHeightMap(heightMap);
 
       for (int i = 0; i < stepsToDebug.size(); i++)
       {
@@ -47,7 +50,7 @@ public class HeightMapFootstepPlanner
                                                              pose.getY(),
                                                              pose.getYaw(),
                                                              footPolygons.get(RobotSide.LEFT),
-                                                             heightMap,
+                                                             environmentHandler,
                                                              0.06,
                                                              Math.toRadians(45.0));
 
@@ -82,6 +85,8 @@ public class HeightMapFootstepPlanner
 
       FootstepPlan footstepPlan = new FootstepPlan();
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+      environmentHandler.setHeightMap(heightMap);
 
       List<Pose2D> poses = generateTurnWalkTurnPoses(start, goal, parameters);
       RobotSide stepSide = RobotSide.LEFT;
@@ -99,7 +104,7 @@ public class HeightMapFootstepPlanner
                                                              pose.getY(),
                                                              pose.getYaw(),
                                                              footPolygons.get(RobotSide.LEFT),
-                                                             heightMap,
+                                                             environmentHandler,
                                                              parameters.getHeightMapSnapThreshold(),
                                                              parameters.getMinimumSurfaceInclineRadians());
 

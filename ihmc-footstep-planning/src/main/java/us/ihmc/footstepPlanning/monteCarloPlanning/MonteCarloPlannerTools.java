@@ -20,6 +20,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
@@ -350,10 +351,10 @@ public class MonteCarloPlannerTools
       return footstepPlan;
    }
 
-   public static void snapFootPoseToHeightMap(HeightMapData heightMapData, FramePose3D poseToSnap, HeightMapPolygonSnapper snapper, ConvexPolygon2D footPolygon)
+   public static void snapFootPoseToHeightMap(FootstepPlannerEnvironmentHandler environmentHandler, FramePose3D poseToSnap, HeightMapPolygonSnapper snapper, ConvexPolygon2D footPolygon)
    {
       footPolygon.applyTransform(poseToSnap);
-      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMapData, 0.1, Math.toRadians(60.0));
+      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, environmentHandler, 0.1, Math.toRadians(60.0));
       if (snapTransform != null)
       {
          snapTransform.getTranslation().setZ(0);
