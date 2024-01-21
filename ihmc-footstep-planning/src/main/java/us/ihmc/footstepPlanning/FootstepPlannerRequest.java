@@ -10,6 +10,7 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -99,6 +100,7 @@ public class FootstepPlannerRequest
     * Height map. May be null to enable flat ground mode.
     */
    private HeightMapData heightMapData;
+   private TerrainMapData terrainMapData;
 
    /**
     * If true, will ignore planar regions and plan on flat ground.
@@ -149,6 +151,7 @@ public class FootstepPlannerRequest
       maximumIterations = -1;
       horizonLength = Double.MAX_VALUE;
       heightMapData = null;
+      terrainMapData = null;
       assumeFlatGround = false;
       bodyPathWaypoints.clear();
       statusPublishPeriod = 1.0;
@@ -276,6 +279,11 @@ public class FootstepPlannerRequest
       this.heightMapData = heightMapData;
    }
 
+   public void setTerrainMapData(TerrainMapData terrainMapData)
+   {
+      this.terrainMapData = terrainMapData;
+   }
+
    public void setAssumeFlatGround(boolean assumeFlatGround)
    {
       this.assumeFlatGround = assumeFlatGround;
@@ -377,6 +385,11 @@ public class FootstepPlannerRequest
    public HeightMapData getHeightMapData()
    {
       return heightMapData;
+   }
+
+   public TerrainMapData getTerrainMapData()
+   {
+      return terrainMapData;
    }
 
    public boolean getAssumeFlatGround()
@@ -490,6 +503,7 @@ public class FootstepPlannerRequest
          HeightMapMessage heightMapMessage = HeightMapMessageTools.toMessage(getHeightMapData());
          requestPacket.getHeightMapMessage().set(heightMapMessage);
       }
+      // TODO need to add a message for the terrain map.
 
       if (referencePlan != null && !referencePlan.isEmpty())
       {
