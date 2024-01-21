@@ -23,6 +23,7 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
+import us.ihmc.rdx.ui.widgets.ImGuiFootstepsWidget;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -43,6 +44,7 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
    private final ImDoubleWrapper swingDurationWidget;
    private final ImDoubleWrapper transferDurationWidget;
    private final RDX3DPanelTooltip tooltip;
+   private final ImGuiFootstepsWidget footstepsWidget = new ImGuiFootstepsWidget();
 
    public RDXWalkAction(long id,
                         CRDTInfo crdtInfo,
@@ -133,6 +135,15 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
          }
          footstepPlanGraphic.update();
       }
+   }
+
+   @Override
+   public void renderTreeViewIconArea()
+   {
+      super.renderTreeViewIconArea();
+
+      ImGui.sameLine();
+      footstepsWidget.render();
    }
 
    @Override
