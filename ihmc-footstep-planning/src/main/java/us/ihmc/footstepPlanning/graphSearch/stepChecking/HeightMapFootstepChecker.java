@@ -193,6 +193,13 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
    private BipedalFootstepPlannerNodeRejectionReason doValidityCheckForTerrainMap(DiscreteFootstep candidateStep)
    {
+      double areaFraction = candidateStepSnapData.getSnapAreaFraction();
+      if (Double.isFinite(areaFraction))
+         footAreaPercentage.set(areaFraction);
+      else
+         footAreaPercentage.set(1.0);
+      rmsError.set(candidateStepSnapData.getSnapRMSError());
+
       SnapResult snapResult = environmentHandler.getTerrainMapData().getSnapResultInWorld(candidateStep.getX(), candidateStep.getY());
       return switch (snapResult)
             {
