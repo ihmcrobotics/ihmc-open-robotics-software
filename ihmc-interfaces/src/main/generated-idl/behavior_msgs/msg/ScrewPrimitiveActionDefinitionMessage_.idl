@@ -1,0 +1,72 @@
+#ifndef __behavior_msgs__msg__ScrewPrimitiveActionDefinitionMessage__idl__
+#define __behavior_msgs__msg__ScrewPrimitiveActionDefinitionMessage__idl__
+
+#include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::ScrewPrimitiveActionDefinitionMessage_")
+      struct ScrewPrimitiveActionDefinitionMessage
+      {
+        /**
+         * Parent definition fields
+         */
+        behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
+        /**
+         * Specifies the side of the robot that this message refers to.
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
+         * Name of the frame the this action is expressed in
+         */
+        string object_frame_name;
+        /**
+         * The pose of the screw axis in the object frame
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage screw_axis_pose;
+        /**
+         * The magnitude of the translation component
+         */
+        double translation;
+        /**
+         * The magnitude of the rotation component
+         */
+        double rotation;
+        /**
+         * The max linear velocity
+         */
+        double max_linear_velocity;
+        /**
+         * The max angular velocity
+         */
+        double max_angular_velocity;
+        /**
+         * The max force
+         */
+        double max_force;
+        /**
+         * The max torque
+         */
+        double max_torque;
+        double linear_position_weight;
+        double angular_position_weight;
+        /**
+         * The pose of the wrench contact in hand control frame
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage wrench_contact_pose;
+        /**
+         * Whether maintaining the rigid body controlled in world after the action is complete
+         */
+        boolean hold_pose_in_world;
+      };
+    };
+  };
+};
+
+#endif

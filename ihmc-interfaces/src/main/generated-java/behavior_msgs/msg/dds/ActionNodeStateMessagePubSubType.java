@@ -15,7 +15,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8413be31cffb8a134c6fd2459c3c637600b53b7030a3c24a3e90c865aa78e8c4";
+   		return "930601fa4b8fba2300cecea0698be2ea1ab676ad76151469f0b00e7a0b60aa5e";
    }
    
    @Override
@@ -70,7 +70,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 500; ++i0)
       {
           current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -154,7 +154,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       cdr.write_type_6(data.getElapsedExecutionTime());
 
-      if(data.getDesiredTrajectory().size() <= 50)
+      if(data.getDesiredTrajectory().size() <= 500)
       cdr.write_type_e(data.getDesiredTrajectory());else
           throw new RuntimeException("desired_trajectory field exceeds the maximum length");
 
