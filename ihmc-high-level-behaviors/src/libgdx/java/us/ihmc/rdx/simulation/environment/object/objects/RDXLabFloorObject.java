@@ -17,8 +17,8 @@ public class RDXLabFloorObject extends RDXEnvironmentObject
       Model realisticModel = RDXModelLoader.load("environmentObjects/labFloor/LabFloor.g3dj");
       setRealisticModel(realisticModel);
 
-      double sizeX = 0.3;
-      double sizeY = 0.3;
+      double sizeX = 6.0;
+      double sizeY = 6.0;
       double sizeZ = 0.01;
       setMass(10000.0f);
       getBoundingSphere().setRadius(0.7);

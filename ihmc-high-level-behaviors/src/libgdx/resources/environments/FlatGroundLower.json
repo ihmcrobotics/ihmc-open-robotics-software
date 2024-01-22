@@ -1,0 +1,49 @@
+{
+  "ambientLight" : 0.914,
+  "objects" : [ {
+    "type" : "RDXPointLightObject",
+    "x" : 10.0,
+    "y" : 10.0,
+    "z" : 10.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0
+  }, {
+    "type" : "RDXPointLightObject",
+    "x" : -10.0,
+    "y" : 10.0,
+    "z" : 10.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0
+  }, {
+    "type" : "RDXPointLightObject",
+    "x" : -10.0,
+    "y" : -10.0,
+    "z" : 10.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0
+  }, {
+    "type" : "RDXPointLightObject",
+    "x" : 10.0,
+    "y" : -10.0,
+    "z" : 10.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0
+  }, {
+    "type" : "RDXLabFloorObject",
+    "x" : 0.10627291050151033,
+    "y" : 0.0062557560223903685,
+    "z" : -0.8827064688119707,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0
+  } ]
+}
