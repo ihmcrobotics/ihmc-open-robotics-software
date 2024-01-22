@@ -13,6 +13,8 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
@@ -39,7 +41,7 @@ public class FootstepPoseHeuristicChecker
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FootstepPlannerParametersReadOnly parameters;
-   private final FootstepSnapAndWiggler snapper;
+   private final FootstepSnapperReadOnly snapper;
 
    private final TransformReferenceFrame startOfSwingFrame = new TransformReferenceFrame("startOfSwingFrame", ReferenceFrame.getWorldFrame());
    private final TransformReferenceFrame stanceFootFrame = new TransformReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
@@ -71,7 +73,7 @@ public class FootstepPoseHeuristicChecker
       this(parameters, null, parentRegistry);
    }
 
-   public FootstepPoseHeuristicChecker(FootstepPlannerParametersReadOnly parameters, FootstepSnapAndWiggler snapper, YoRegistry parentRegistry)
+   public FootstepPoseHeuristicChecker(FootstepPlannerParametersReadOnly parameters, FootstepSnapperReadOnly snapper, YoRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.snapper = snapper;
@@ -84,16 +86,16 @@ public class FootstepPoseHeuristicChecker
    {
       RobotSide stepSide = candidateStep.getRobotSide();
 
-      FootstepSnapData candidateStepSnapData = snapper.snapFootstep(candidateStep);
-      FootstepSnapData stanceStepSnapData = snapper.snapFootstep(stanceStep);
+      FootstepSnapDataReadOnly candidateStepSnapData = snapper.snapFootstep(candidateStep);
+      FootstepSnapDataReadOnly stanceStepSnapData = snapper.snapFootstep(stanceStep);
 
-      RigidBodyTransform candidateStepTransform = candidateStepSnapData.getSnappedStepTransform(candidateStep);
-      RigidBodyTransform stanceStepTransform = stanceStepSnapData.getSnappedStepTransform(stanceStep);
-      RigidBodyTransform startOfSwingTransform = null;
+      RigidBodyTransformReadOnly candidateStepTransform = candidateStepSnapData.getSnappedStepTransform(candidateStep);
+      RigidBodyTransformReadOnly stanceStepTransform = stanceStepSnapData.getSnappedStepTransform(stanceStep);
+      RigidBodyTransformReadOnly startOfSwingTransform = null;
 
       if (startOfSwingStep != null)
       {
-         FootstepSnapData startOfSwingSnapData = snapper.snapFootstep(startOfSwingStep);
+         FootstepSnapDataReadOnly startOfSwingSnapData = snapper.snapFootstep(startOfSwingStep);
          startOfSwingTransform = startOfSwingSnapData.getSnappedStepTransform(startOfSwingStep);
       }
 

@@ -17,7 +17,7 @@
   "Min step Z when fully pitched" : 0.35,
   "Min foothold percent" : 0.9,
   "Min clearance from stance" : 0.0,
-  "RMS Error Threshold" : 0.011,
+  "RMS Error Threshold" : 0.3,
   "RMS Error Cost" : 1.5,
   "RMS Min Error To Penalize" : 0.007,
   "Height map snap threshold" : 0.06,

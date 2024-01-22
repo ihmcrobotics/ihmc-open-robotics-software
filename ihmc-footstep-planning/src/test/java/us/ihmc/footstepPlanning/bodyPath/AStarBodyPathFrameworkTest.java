@@ -347,7 +347,6 @@ public class AStarBodyPathFrameworkTest
    {
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setHeightMapData(heightMapData);
-      request.setPlanarRegionsList(planarRegionsList);
       request.setPlanBodyPath(true);
       request.setPlanFootsteps(false);
       request.setAssumeFlatGround(false);
