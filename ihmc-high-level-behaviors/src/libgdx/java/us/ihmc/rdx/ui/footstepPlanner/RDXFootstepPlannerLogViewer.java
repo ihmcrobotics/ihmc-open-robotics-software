@@ -124,8 +124,6 @@ public class RDXFootstepPlannerLogViewer
       if (logLoadedNotification.poll())
       {
          footstepPlannerLog = logLoadedNotification.read();
-         planarRegionsGraphic.generateMeshesAsync(PlanarRegionMessageConverter.convertToPlanarRegionsList(footstepPlannerLog.getRequestPacket()
-                                                                                                                            .getPlanarRegionsListMessage()));
          footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(footstepPlannerLog.getStatusPacket().getFootstepDataList());
          footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlan, "Footstep plan"));
 
