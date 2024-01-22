@@ -30,7 +30,6 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    private final NonWallTimer executionTimer = new NonWallTimer();
    private final FramePose3D desiredChestPose = new FramePose3D();
    private final FramePose3D syncedChestPose = new FramePose3D();
-   private double startOrientationDistanceToGoal;
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
 
    public ChestOrientationActionExecutor(long id,
@@ -83,7 +82,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
 
          desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
          syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
-         startOrientationDistanceToGoal = syncedChestPose.getRotation().distance(desiredChestPose.getRotation(), true);
+         state.getDesiredTrajectory().setSingleSegmentTrajectory(syncedChestPose, desiredChestPose, getDefinition().getTrajectoryDuration());
       }
       else
       {
@@ -111,8 +110,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
 
          state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
          state.setElapsedExecutionTime(executionTimer.getElapsedTime());
-         state.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-         state.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
+         state.getCurrentPose().getValue().set(syncedChestPose);
          state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
 
          if (!state.getIsExecuting() && wasExecuting && !getDefinition().getHoldPoseInWorldLater())
