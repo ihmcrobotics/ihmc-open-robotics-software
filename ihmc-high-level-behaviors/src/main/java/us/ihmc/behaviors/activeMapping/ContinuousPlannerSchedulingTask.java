@@ -161,8 +161,11 @@ public class ContinuousPlannerSchedulingTask
       continuousPlanner.initialize();
       continuousPlanner.setGoalWaypointPoses();
       continuousPlanner.planToGoal(commandMessage.get());
-      debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
-      debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
+      if (commandMessage.get().getUseMonteCarloFootstepPlanner() || commandMessage.get().getUseMonteCarloPlanAsReference() || commandMessage.get().getUseHybridPlanner())
+      {
+         debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
+         debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
+      }
 
       if (continuousPlanner.isPlanAvailable())
       {
@@ -196,8 +199,11 @@ public class ContinuousPlannerSchedulingTask
          debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
          continuousPlanner.setGoalWaypointPoses();
          continuousPlanner.planToGoal(commandMessage.get());
-         debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
-         debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
+         if (commandMessage.get().getUseHybridPlanner() || commandMessage.get().getUseMonteCarloFootstepPlanner() || commandMessage.get().getUseMonteCarloPlanAsReference())
+         {
+            debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
+            debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
+         }
 
          if (continuousPlanner.isPlanAvailable())
          {
@@ -221,8 +227,11 @@ public class ContinuousPlannerSchedulingTask
          FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(parameters, controllerQueue);
 
          debugger.publishPlannedFootsteps(footstepDataList);
-         debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
-         debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
+         if (commandMessage.get().getUseHybridPlanner() || commandMessage.get().getUseMonteCarloFootstepPlanner() || commandMessage.get().getUseMonteCarloPlanAsReference())
+         {
+            debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
+            debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
+         }
 
          if (parameters.getStepPublisherEnabled())
          {
