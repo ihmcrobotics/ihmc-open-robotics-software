@@ -25,7 +25,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
-import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
@@ -41,6 +40,7 @@ import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXIKSolverColors;
+import us.ihmc.rdx.ui.tools.ImGuiSceneGraphFramesCombo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.interaction.MouseCollidable;
@@ -76,7 +76,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
    private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
-   private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
+   private final ImGuiSceneGraphFramesCombo parentFrameComboBox;
    private final ImDoubleWrapper trajectoryDurationWidget;
    private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
@@ -172,10 +172,11 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          armGraphicOneDoFJoints.put(side, MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, armMultiBodyGraphics.get(side)));
       }
 
-      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
-                                                                referenceFrameLibrary,
-                                                                getDefinition()::getPalmParentFrameName,
-                                                                getState().getPalmFrame()::changeFrame);
+      parentFrameComboBox = new ImGuiSceneGraphFramesCombo("Parent frame",
+                                                           referenceFrameLibrary,
+                                                           sceneGraph,
+                                                           getDefinition()::getPalmParentFrameName,
+                                                           getState().getPalmFrame()::changeFrame);
 
       tooltip = new RDX3DPanelTooltip(panel3D);
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
