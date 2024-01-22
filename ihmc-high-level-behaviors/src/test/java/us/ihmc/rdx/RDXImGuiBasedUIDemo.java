@@ -15,6 +15,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImGuiLogWidget;
+import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
 import us.ihmc.tools.string.StringTools;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,7 @@ public class RDXImGuiBasedUIDemo
    private int pressCount = 0;
    private final ImString textForArea = new ImString();
    private RDX3DPanelToolbarButton flyingCarButton;
+   private final ImGuiHandWidget handWidget = new ImGuiHandWidget();
 
    public RDXImGuiBasedUIDemo()
    {
@@ -129,6 +131,13 @@ public class RDXImGuiBasedUIDemo
 
       ImGui.text("Toolbar button press count: " + pressCount);
       ImGuiTools.inputText("Text area", textForArea);
+
+      ImGui.newLine();
+      ImGui.newLine();
+      ImGui.newLine();
+      ImGui.sameLine(100);
+
+      handWidget.render();
    }
 
    private void renderWindow2()

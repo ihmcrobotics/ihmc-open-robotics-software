@@ -40,6 +40,7 @@ import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXIKSolverColors;
+import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.interaction.MouseCollidable;
@@ -65,6 +66,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final HandPoseActionState state;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiHandWidget handIconWidget = new ImGuiHandWidget();
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
    private final SideDependentList<String> handNames = new SideDependentList<>();
@@ -280,6 +282,15 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             }
          }
       }
+   }
+
+   @Override
+   public void renderTreeViewIconArea()
+   {
+      super.renderTreeViewIconArea();
+
+      ImGui.sameLine();
+      handIconWidget.render();
    }
 
    @Override
