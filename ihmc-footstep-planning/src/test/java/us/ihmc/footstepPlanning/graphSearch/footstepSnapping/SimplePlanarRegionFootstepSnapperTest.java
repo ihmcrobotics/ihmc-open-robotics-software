@@ -34,11 +34,10 @@ public class SimplePlanarRegionFootstepSnapperTest
    private final double epsilon = 1e-8;
    private final SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
    private final DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-   private final FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
-   private final FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
+   private final PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
    private final ConvexPolygon2D unitSquare = new ConvexPolygon2D();
 
-   private boolean visualize = true;
+   private boolean visualize = false;
    private PolygonSnapperVisualizer visualizer;
 
    @BeforeEach
@@ -127,7 +126,7 @@ public class SimplePlanarRegionFootstepSnapperTest
 
       PlanarRegion planarRegion = new PlanarRegion(transformToWorld, partialFootholdPolygon);
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegion);
-      environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+      snapper.setPlanarRegionsList(planarRegionsList);
       FootstepSnapData snapData = snapper.snapFootstep(nodeToSnap);
 
       if(visualize)
@@ -171,7 +170,7 @@ public class SimplePlanarRegionFootstepSnapperTest
 
       PlanarRegion planarRegion = createPlanarRegion(regionToWorldFrameTransform, footholdPolygon);
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegion);
-      environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+      snapper.setPlanarRegionsList(planarRegionsList);
 
       FootstepSnapData snapData = snapper.snapFootstep(nodeToSnap);
 
