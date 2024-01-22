@@ -21,7 +21,6 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
-import us.ihmc.rdx.ui.tools.ImGuiSceneGraphFramesCombo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.interaction.MouseCollidable;
@@ -40,7 +39,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
-   private final ImGuiSceneGraphFramesCombo parentFrameComboBox;
+   private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImDoubleWrapper yawWidget;
    private final ImDoubleWrapper pitchWidget;
    private final ImDoubleWrapper rollWidget;
@@ -82,11 +81,10 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
       holdPoseInWorldLaterWrapper = new ImBooleanWrapper(getDefinition()::getHoldPoseInWorldLater,
                                                          getDefinition()::setHoldPoseInWorldLater,
                                                          imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
-      parentFrameComboBox = new ImGuiSceneGraphFramesCombo("Parent frame",
-                                                           referenceFrameLibrary,
-                                                           sceneGraph,
-                                                           getDefinition()::getParentFrameName,
-                                                           getState().getChestFrame()::changeFrame);
+      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
+                                                                referenceFrameLibrary,
+                                                                getDefinition()::getParentFrameName,
+                                                                getState().getChestFrame()::changeFrame);
       yawWidget = new ImDoubleWrapper(getDefinition().getRotation()::getYaw, getDefinition()::setYaw,
                                       imDouble -> ImGuiTools.volatileInputDouble(labels.get("Yaw"), imDouble));
       pitchWidget = new ImDoubleWrapper(getDefinition().getRotation()::getPitch, getDefinition()::setPitch,
