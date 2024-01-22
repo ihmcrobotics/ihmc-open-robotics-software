@@ -44,6 +44,7 @@ public class BehaviorTreeModule
       referenceFrameLibrary = new ReferenceFrameLibrary();
       referenceFrameLibrary.addAll(Collections.singleton(ReferenceFrame.getWorldFrame()));
       referenceFrameLibrary.addAll(syncedRobot.getReferenceFrames().getCommonReferenceFrames());
+      referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
 
       behaviorTreeExecutor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
                                                           robotModel,
