@@ -41,7 +41,18 @@ public class ImGuiReferenceFrameLibraryCombo
 
    public void render()
    {
+      renderBefore();
+
+      renderAfter();
+   }
+
+   protected void renderBefore()
+   {
       referenceFrameLibraryNames.clear();
+   }
+
+   protected void renderAfter()
+   {
       referenceFrameLibrary.getAllFrameNames(referenceFrameLibraryNames::add);
 
       selectableReferenceFrameNames.add(currentFrameNameGetter.get());
@@ -74,5 +85,10 @@ public class ImGuiReferenceFrameLibraryCombo
 
          ImGui.endCombo();
       }
+   }
+
+   public SortedSet<String> getReferenceFrameLibraryNames()
+   {
+      return referenceFrameLibraryNames;
    }
 }

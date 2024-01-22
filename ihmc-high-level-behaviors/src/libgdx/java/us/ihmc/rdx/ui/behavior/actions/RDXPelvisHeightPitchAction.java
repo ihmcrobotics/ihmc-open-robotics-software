@@ -23,6 +23,7 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.rdx.ui.tools.ImGuiSceneGraphFramesCombo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.interaction.MouseCollidable;
@@ -51,7 +52,7 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
    private final RDXInteractableHighlightModel highlightModel;
-   private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
+   private final ImGuiSceneGraphFramesCombo parentFrameComboBox;
    private final RDX3DPanelTooltip tooltip;
    private final FullHumanoidRobotModel syncedFullRobotModel;
    private boolean wasConcurrent = false;
@@ -77,10 +78,11 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform().getValue(), getSelected());
       poseGizmo.create(panel3D);
 
-      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
-                                                                referenceFrameLibrary,
-                                                                getDefinition()::getParentFrameName,
-                                                                getState().getPelvisFrame()::changeFrame);
+      parentFrameComboBox = new ImGuiSceneGraphFramesCombo("Parent frame",
+                                                           referenceFrameLibrary,
+                                                           sceneGraph,
+                                                           getDefinition()::getParentFrameName,
+                                                           getState().getPelvisFrame()::changeFrame);
       heightWidget = new ImDoubleWrapper(getDefinition()::getHeight,
                                          getDefinition()::setHeight,
                                          imDouble -> ImGuiTools.volatileInputDouble(labels.get("Height"), imDouble));
