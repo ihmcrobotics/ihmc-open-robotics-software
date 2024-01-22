@@ -47,6 +47,7 @@ class CenterPoseModels(ArgTypeMixin, Enum):
     MUG = CenterposeObjectClass(7, "/cup_mug_v1_140.pth", "/cup_mug_15.pth", 10.0)
     LAPTOP = CenterposeObjectClass(8, "/laptop_v1_140.pth", "", 6.0)
     SHOE = CenterposeObjectClass(9, "/shoe_v1_140.pth", "", 7.5)
+    DRILL = CenterposeObjectClass(10, "/drill_85.pth", "", 5.3)
 
 class archType(Enum):
     NOTRACKING = 'dlav1_34'
