@@ -2,8 +2,10 @@ package us.ihmc.rdx.ui.widgets;
 
 import imgui.ImGui;
 import imgui.ImVec2;
+import imgui.flag.ImGuiCol;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 
@@ -60,7 +62,7 @@ public class ImGuiHandWidget
       }
    }
 
-   public void render()
+   public void render(RobotSide side)
    {
       float fontSize = ImGui.getFontSize();
 
@@ -75,7 +77,7 @@ public class ImGuiHandWidget
       {
          Point2D32 vertex = vertices.get(i);
 
-         polygon[i].set((vertices.get(i).getX32() * scale) + center.getX32(), (vertices.get(i).getY32() * scale) + center.getY32());
+         polygon[i].set((side.negateIfRightSide(vertices.get(i).getX32()) * scale) + center.getX32(), (vertices.get(i).getY32() * scale) + center.getY32());
 
          xMin = Math.min(xMin, polygon[i].x);
          xMax = Math.max(xMax, polygon[i].x);
@@ -88,18 +90,21 @@ public class ImGuiHandWidget
       cursorXDesktopFrame = ImGui.getWindowPosX() + cursorPosX - ImGui.getScrollX();
       cursorYDesktopFrame = ImGui.getWindowPosY() + cursorPosY - ImGui.getScrollY();
 
-      backgroundColor = ImGuiTools.DARK_GREEN;
+      backgroundColor = side == RobotSide.LEFT ? ImGuiTools.DARK_RED : ImGuiTools.DARK_GREEN;
 
-      lineColor = ImGuiTools.WHITE;
+      lineColor = ImGui.getColorU32(ImGuiCol.Text);
+
+      for (int i = 0; i < polygon.length; i++)
+      {
+         polygon[i].set(cursorXDesktopFrame + polygon[i].x, cursorYDesktopFrame + polygon[i].y);
+      }
+
+      ImGui.getWindowDrawList().addConvexPolyFilled(polygon, polygon.length, backgroundColor);
 
       for (int i = 0; i < polygon.length - 1; i++)
       {
          drawLine(polygon[i].x, polygon[i].y, polygon[i + 1].x, polygon[i + 1].y);
-
-//         polygon[i].set(cursorXDesktopFrame + polygon[i].x, cursorYDesktopFrame + polygon[i].y);
       }
-
-//      ImGui.getWindowDrawList().addConvexPolyFilled(polygon, polygon.length, backgroundColor);
 
       ImGui.setCursorPosX(ImGui.getCursorPosX() + (itemWidth * 1.2f));
 
@@ -108,8 +113,6 @@ public class ImGuiHandWidget
 
    private void drawLine(float x0, float y0, float x1, float y1)
    {
-      ImGui.getWindowDrawList().addLine(cursorXDesktopFrame + x0, cursorYDesktopFrame + y0,
-                                        cursorXDesktopFrame + x1, cursorYDesktopFrame + y1,
-                                        lineColor);
+      ImGui.getWindowDrawList().addLine(x0, y0, x1, y1, lineColor);
    }
 }
