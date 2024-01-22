@@ -7,6 +7,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -36,6 +37,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
                               RDXBaseUI baseUI,
                               RDX3DPanel panel3D,
                               ReferenceFrameLibrary referenceFrameLibrary,
+                              SceneGraph sceneGraph,
                               FootstepPlannerParametersBasics footstepPlannerParametersBasics,
                               ROS2ControllerPublishSubscribeAPI ros2)
    {
@@ -46,6 +48,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
             baseUI,
             panel3D,
             referenceFrameLibrary,
+            sceneGraph,
             footstepPlannerParametersBasics);
 
       ros2BehaviorTreeState = new ROS2BehaviorTreeState(getBehaviorTreeState(), this::setRootNode, ros2);

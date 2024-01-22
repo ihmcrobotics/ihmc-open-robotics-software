@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -19,6 +20,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final SceneGraph sceneGraph;
    private final WalkingFootstepTracker footstepTracker;
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -28,11 +30,13 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
    public BehaviorTreeExecutorNodeBuilder(DRCRobotModel robotModel,
                                           ROS2ControllerHelper ros2ControllerHelper,
                                           ROS2SyncedRobotModel syncedRobot,
-                                          ReferenceFrameLibrary referenceFrameLibrary)
+                                          ReferenceFrameLibrary referenceFrameLibrary,
+                                          SceneGraph sceneGraph)
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
+      this.sceneGraph = sceneGraph;
       this.ros2ControllerHelper = ros2ControllerHelper;
 
       footstepTracker = new WalkingFootstepTracker(ros2ControllerHelper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
@@ -58,7 +62,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == ChestOrientationActionDefinition.class)
       {
-         return new ChestOrientationActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);
+         return new ChestOrientationActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, sceneGraph);
       }
       if (nodeType == FootstepPlanActionDefinition.class)
       {
@@ -69,11 +73,12 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
                                                syncedRobot,
                                                footstepTracker,
                                                referenceFrameLibrary,
+                                               sceneGraph,
                                                walkingControllerParameters);
       }
       if (nodeType == HandPoseActionDefinition.class)
       {
-         return new HandPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot);
+         return new HandPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, sceneGraph, robotModel, syncedRobot);
       }
       if (nodeType == HandWrenchActionDefinition.class)
       {
@@ -81,7 +86,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == PelvisHeightPitchActionDefinition.class)
       {
-         return new PelvisHeightPitchActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
+         return new PelvisHeightPitchActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, sceneGraph, syncedRobot);
       }
       if (nodeType == SakeHandCommandActionDefinition.class)
       {
@@ -102,7 +107,8 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
                                        footstepPlanner,
                                        footstepPlannerParameters,
                                        walkingControllerParameters,
-                                       referenceFrameLibrary);
+                                       referenceFrameLibrary,
+                                       sceneGraph);
       }
 
       return null;

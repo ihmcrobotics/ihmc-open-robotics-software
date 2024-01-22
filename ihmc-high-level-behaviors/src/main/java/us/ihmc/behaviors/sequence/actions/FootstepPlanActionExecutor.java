@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -28,6 +29,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                      ROS2SyncedRobotModel syncedRobot,
                                      WalkingFootstepTracker footstepTracker,
                                      ReferenceFrameLibrary referenceFrameLibrary,
+                                     SceneGraph sceneGraph,
                                      WalkingControllerParameters walkingControllerParameters)
    {
       super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));

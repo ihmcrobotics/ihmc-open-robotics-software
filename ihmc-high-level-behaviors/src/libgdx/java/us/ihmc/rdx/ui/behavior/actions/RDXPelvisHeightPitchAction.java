@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
@@ -62,7 +63,8 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
                                      DRCRobotModel robotModel,
                                      FullHumanoidRobotModel syncedFullRobotModel,
                                      RobotCollisionModel selectionCollisionModel,
-                                     ReferenceFrameLibrary referenceFrameLibrary)
+                                     ReferenceFrameLibrary referenceFrameLibrary,
+                                     SceneGraph sceneGraph)
    {
       super(new PelvisHeightPitchActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 

@@ -17,6 +17,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -46,7 +47,8 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
                              FootstepPlanningModule footstepPlanner,
                              FootstepPlannerParametersBasics footstepPlannerParameters,
                              WalkingControllerParameters walkingControllerParameters,
-                             ReferenceFrameLibrary referenceFrameLibrary)
+                             ReferenceFrameLibrary referenceFrameLibrary,
+                             SceneGraph sceneGraph)
    {
       super(new WalkActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 

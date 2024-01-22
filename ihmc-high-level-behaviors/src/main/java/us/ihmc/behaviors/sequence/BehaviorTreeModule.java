@@ -49,7 +49,8 @@ public class BehaviorTreeModule
       behaviorTreeExecutor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
                                                           robotModel,
                                                           syncedRobot,
-                                                          referenceFrameLibrary);
+                                                          referenceFrameLibrary,
+                                                          sceneGraph);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
       ThreadTools.startAThread(this::actionThread, "ActionThread");

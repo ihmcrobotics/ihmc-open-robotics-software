@@ -4,6 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 /**
@@ -16,9 +17,10 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    public ROS2BehaviorTreeExecutor(ROS2ControllerHelper ros2ControllerHelper,
                                    DRCRobotModel robotModel,
                                    ROS2SyncedRobotModel syncedRobot,
-                                   ReferenceFrameLibrary referenceFrameLibrary)
+                                   ReferenceFrameLibrary referenceFrameLibrary,
+                                   SceneGraph sceneGraph)
    {
-      super(robotModel, syncedRobot, referenceFrameLibrary, ros2ControllerHelper);
+      super(robotModel, syncedRobot, referenceFrameLibrary, sceneGraph, ros2ControllerHelper);
 
       ros2BehaviorTreeState = new ROS2BehaviorTreeState(getState(), this::setRootNode, ros2ControllerHelper);
    }

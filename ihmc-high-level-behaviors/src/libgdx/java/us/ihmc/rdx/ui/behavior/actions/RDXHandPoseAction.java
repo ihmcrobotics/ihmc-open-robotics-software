@@ -22,6 +22,7 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
@@ -93,7 +94,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                             DRCRobotModel robotModel,
                             ROS2SyncedRobotModel syncedRobot,
                             RobotCollisionModel selectionCollisionModel,
-                            ReferenceFrameLibrary referenceFrameLibrary)
+                            ReferenceFrameLibrary referenceFrameLibrary,
+                            SceneGraph sceneGraph)
    {
       super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
