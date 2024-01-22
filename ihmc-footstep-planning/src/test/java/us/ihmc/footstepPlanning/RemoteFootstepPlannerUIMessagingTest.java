@@ -16,6 +16,7 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import perception_msgs.msg.dds.HeightMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
@@ -42,6 +43,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.starter.ApplicationRunner;
@@ -56,6 +58,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 public class RemoteFootstepPlannerUIMessagingTest
 {
@@ -220,6 +224,8 @@ public class RemoteFootstepPlannerUIMessagingTest
 
       RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
       PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
+      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, startLeftFootPose);
@@ -230,7 +236,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, performAStarSearch);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
       messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations, maxIterations);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
+      messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, heightMapMessage);
       messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, robotSide);
       messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, random.nextBoolean());
       messager.submitMessage(FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails, random.nextBoolean());
@@ -263,7 +269,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals(plannerRequestId, packet.getPlannerRequestId(), epsilon, "Planner Request Ids aren't equal.");
       assertEquals(horizonLength, packet.getHorizonLength(), epsilon, "Planner horizon lengths aren't equal.");
 
-      checkPlanarRegionListsAreEqual(planarRegionsList, PlanarRegionMessageConverter.convertToPlanarRegionsList(packet.getPlanarRegionsListMessage()));
+      checkHeightMapDataAreEqual(heightMapData, HeightMapMessageTools.unpackMessage(packet.getHeightMapMessage()));
    }
 
    private void runPlannerRequestToUI()
@@ -295,6 +301,7 @@ public class RemoteFootstepPlannerUIMessagingTest
 
       RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
       PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
+      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
       Pose3D leftFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
       Pose3D rightFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
       Pose3D leftFootGoalPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
@@ -312,7 +319,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       packet.setPlannerRequestId(plannerRequestId);
       packet.setSequenceId(sequenceId);
       packet.setHorizonLength(horizonLength);
-      packet.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+      packet.getHeightMapMessage().set(heightMapMessage);
 
       footstepPlanningRequestPublisher.publish(packet);
 
@@ -426,6 +433,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       goalPose.getPosition().set(EuclidCoreRandomTools.nextPoint2D(random));
       goalPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
       PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
+      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
       FootstepDataListMessage footstepDataListMessage = nextFootstepDataListMessage(random);
       int sequenceId = RandomNumbers.nextInt(random, 0, 100);
       int planId = RandomNumbers.nextInt(random, 0, 100);
@@ -443,7 +451,7 @@ public class RemoteFootstepPlannerUIMessagingTest
 
       FootstepPlanningToolboxOutputStatus outputPacket = new FootstepPlanningToolboxOutputStatus();
       outputPacket.getGoalPose().set(goalPose);
-      outputPacket.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+      outputPacket.getHeightMapMessage().set(heightMapMessage);
       outputPacket.getFootstepDataList().set(footstepDataListMessage);
       outputPacket.setPlanId(planId);
       outputPacket.setSequenceId(sequenceId);
@@ -586,50 +594,20 @@ public class RemoteFootstepPlannerUIMessagingTest
       return parameters;
    }
 
-   private static void checkPlanarRegionListsAreEqual(PlanarRegionsList listA, PlanarRegionsList listB)
+   private static void checkHeightMapDataAreEqual(HeightMapData dataA, HeightMapData dataB)
    {
-      assertEquals(listA.getNumberOfPlanarRegions(), listB.getNumberOfPlanarRegions(), "Planar region lists are different sizes.");
+      assertEquals(dataA.getCenterIndex(), dataB.getCenterIndex());
+      assertEquals(dataA.getGridResolutionXY(), dataB.getGridResolutionXY(), epsilon);
+      assertEquals(dataA.getGridSizeXY(), dataB.getGridSizeXY(), epsilon);
+      EuclidCoreTestTools.assertEquals(dataA.getGridCenter(), dataB.getGridCenter(), epsilon);
 
-      for (int i = 0; i < listA.getNumberOfPlanarRegions(); i++)
+      int cellsPerSide = 2 * dataA.getCenterIndex() + 1;
+      for (int x = 0; x < cellsPerSide; x++)
       {
-         PlanarRegion planarRegionA = listA.getPlanarRegion(i);
-         PlanarRegion planarRegionB = null;
-         for (int j = 0; j < listB.getNumberOfPlanarRegions(); j++)
+         for (int y = 0; y < cellsPerSide; y++)
          {
-            if (planarRegionA.getRegionId() == listB.getPlanarRegion(j).getRegionId())
-            {
-               planarRegionB = listB.getPlanarRegion(j);
-               break;
-            }
+            assertEquals(dataA.getHeightAt(x, y), dataB.getHeightAt(x, y), epsilon);
          }
-         assertNotNull(planarRegionB, "Unable to find equivalent planar region");
-         checkPlanarRegionsEqual(i, planarRegionA, planarRegionB);
-      }
-   }
-
-   private static void checkPlanarRegionsEqual(int regionId, PlanarRegion planarRegionA, PlanarRegion planarRegionB)
-   {
-      Point3D centerA = new Point3D();
-      Point3D centerB = new Point3D();
-
-      planarRegionA.getPointInRegion(centerA);
-      planarRegionB.getPointInRegion(centerB);
-
-      Vector3D normalA = new Vector3D();
-      Vector3D normalB = new Vector3D();
-
-      planarRegionA.getNormal(normalA);
-      planarRegionB.getNormal(normalB);
-
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Center of regions " + regionId + " are not equal.", centerA, centerB, epsilon);
-      EuclidCoreTestTools.assertVector3DGeometricallyEquals("Normal of regions " + regionId + " are not equal.", normalA, normalB, epsilon);
-
-      assertEquals(planarRegionA.getNumberOfConvexPolygons(), planarRegionB.getNumberOfConvexPolygons(),
-                   "Number of convex polygons of " + regionId + " not equal. ");
-      for (int i = 0; i < planarRegionA.getNumberOfConvexPolygons(); i++)
-      {
-         assertTrue(planarRegionA.getConvexPolygon(i).epsilonEquals(planarRegionB.getConvexPolygon(i), epsilon),
-                    "Convex polygon " + i + " of planar region " + regionId + " is not equal");
       }
    }
 

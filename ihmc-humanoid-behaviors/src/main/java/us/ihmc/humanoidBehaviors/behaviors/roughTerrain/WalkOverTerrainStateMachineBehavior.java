@@ -418,7 +418,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
                                                                                                               goalPose.get(),
                                                                                                               idealStanceWidth,
                                                                                                               planBodyPath);
-      request.getPlanarRegionsListMessage().set(planarRegions.get());
+      // TODO add height map
       request.setTimeout(swingTime.getDoubleValue() - 0.25);
       request.setPlannerRequestId(planId.getIntegerValue());
       request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());

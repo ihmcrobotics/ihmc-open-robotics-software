@@ -238,9 +238,9 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       userControlState.setWeights(userModeWeights);
    }
 
-   public void setGains(Map<String, PIDGainsReadOnly> jointspaceHighLevelGains, Map<String, PIDGainsReadOnly> jointspaceLowLevelGains)
+   public void setGains(Map<String, PIDGainsReadOnly> jointspaceGains)
    {
-      jointspaceControlState.setGains(jointspaceHighLevelGains, jointspaceLowLevelGains);
+      jointspaceControlState.setGains(jointspaceGains);
    }
 
    /**
@@ -592,11 +592,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    public JointDesiredOutputListReadOnly getJointDesiredData()
    {
       return stateMachine.getCurrentState().getJointDesiredData();
-   }
-
-   public void setEnableDirectJointPositionControl(boolean enable)
-   {
-      jointspaceControlState.setEnableDirectJointPositionControl(enable);
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()

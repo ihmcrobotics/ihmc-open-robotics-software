@@ -4,26 +4,35 @@ import org.bytedeco.opencv.global.*;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
-import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneObjectDefinitions;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+/**
+ * This class orchestrates:
+ * - Undistorting the fisheye input images
+ * - Performing ArUco marker detection
+ * - Filtering and publishing the results on the ROS 2 visualizer topic
+ *
+ * This class should not access or have reference to the scene graph.
+ */
 public class ArUcoDetectionUpdater
 {
    private final ROS2Helper ros2Helper;
-   private final ROS2SceneGraph sceneGraph;
 
-   private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
+   private OpenCVArUcoMarkerDetector arUcoMarkerDetector;
+   private OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private BytedecoImage arUcoBytedecoImage;
    private final Supplier<ReferenceFrame> blackflyFrameSupplier;
@@ -32,24 +41,33 @@ public class ArUcoDetectionUpdater
    private GpuMat undistortionMap1;
    private GpuMat undistortionMap2;
    private final Mat cameraMatrixEstimate = new Mat(3, 3, opencv_core.CV_64F);
+   private final TypedNotification<RawImage> distortedInputImage = new TypedNotification<>();
 
-   private final AtomicBoolean arUcoProcessInitialized = new AtomicBoolean(false);
-
-   public ArUcoDetectionUpdater(ROS2Helper ros2Helper, ROS2SceneGraph sceneGraph, BlackflyLensProperties blackflyLensProperties, Supplier<ReferenceFrame> blackflyFrameSupplier)
+   public ArUcoDetectionUpdater(ROS2Helper ros2Helper, BlackflyLensProperties blackflyLensProperties, Supplier<ReferenceFrame> blackflyFrameSupplier)
    {
-      this.sceneGraph = sceneGraph;
       this.blackflyLensProperties = blackflyLensProperties;
       this.blackflyFrameSupplier = blackflyFrameSupplier;
       this.ros2Helper = ros2Helper;
    }
 
-   public void undistortAndUpdateArUco(RawImage arUcoImage)
+   public void setNextDistortedImage(RawImage arUcoImage)
    {
-      if (arUcoProcessInitialized.get())
+      distortedInputImage.set(arUcoImage);
+   }
+
+   public boolean undistortAndUpdateArUco()
+   {
+      boolean newImageAvailable = distortedInputImage.poll();
+      if (newImageAvailable)
       {
+         RawImage arUcoImage = distortedInputImage.read();
+
+         if (arUcoBytedecoImage == null)
+            initialize(arUcoImage.getImageWidth(), arUcoImage.getImageHeight());
+
          // Convert color from BGR to RGB
          GpuMat imageForUndistortionRGB = new GpuMat(arUcoImage.getImageHeight(), arUcoImage.getImageWidth(), arUcoImage.getOpenCVType());
-         opencv_cudaimgproc.cvtColor(arUcoImage.getGpuImageMatrix(), imageForUndistortionRGB, opencv_imgproc.COLOR_BGR2RGB);
+         opencv_cudaimgproc.cvtColor(arUcoImage.getGpuImageMat(), imageForUndistortionRGB, opencv_imgproc.COLOR_BGR2RGB);
 
          // Undistort image
          GpuMat undistortedImageRGB = new GpuMat(arUcoImage.getImageHeight(), arUcoImage.getImageWidth(), arUcoImage.getOpenCVType());
@@ -58,45 +76,35 @@ public class ArUcoDetectionUpdater
          // Update the Bytedeco image
          undistortedImageRGB.download(arUcoBytedecoImage.getBytedecoOpenCVMat());
 
-         arUcoMarkerDetection.update();
+         arUcoMarkerDetector.update();
+         arUcoMarkerDetectionResults.copyOutputData(arUcoMarkerDetector);
          arUcoMarkerPublisher.update();
-         sceneGraph.updateSubscription();
-         ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetection, sceneGraph);
 
          // Close stuff
          imageForUndistortionRGB.close();
          undistortedImageRGB.close();
          arUcoImage.release();
       }
+      return newImageAvailable;
    }
 
-   public void destroy()
-   {
-      LogTools.info("Destroying {}", getClass().getSimpleName());
-      arUcoMarkerDetection.destroy();
-      LogTools.info("Destroyed {}", getClass().getSimpleName());
-   }
-
-   public boolean isInitialized()
-   {
-      return arUcoProcessInitialized.get();
-   }
-
-   public void initializeArUcoDetection(int imageWidth, int imageHeight)
+   private void initialize(int imageWidth, int imageHeight)
    {
       LogTools.info("Initializing ArUco process");
       LogTools.info("Image dimensions: {} x {}", imageWidth, imageHeight);
 
       initializeImageUndistortion(imageWidth, imageHeight);
       arUcoBytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
-      arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-      arUcoMarkerDetection.create(blackflyFrameSupplier.get());
-      arUcoMarkerDetection.setSourceImageForDetection(arUcoBytedecoImage);
-      cameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
-      arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection, ros2Helper, sceneGraph.getArUcoMarkerIDToNodeMap());
+      arUcoMarkerDetector = new OpenCVArUcoMarkerDetector();
+      arUcoMarkerDetector.setSourceImageForDetection(arUcoBytedecoImage);
+      cameraMatrixEstimate.copyTo(arUcoMarkerDetector.getCameraMatrix());
+      arUcoMarkerDetectionResults = new OpenCVArUcoMarkerDetectionResults();
 
+      arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetectionResults,
+                                                                ros2Helper,
+                                                                SceneObjectDefinitions.ARUCO_MARKER_SIZES,
+                                                                blackflyFrameSupplier.get());
       LogTools.info("ArUco process initialized");
-      arUcoProcessInitialized.set(true);
    }
 
    private void initializeImageUndistortion(int imageWidth, int imageHeight)
@@ -156,5 +164,10 @@ public class ArUcoDetectionUpdater
       sourceImageSize.close();
       distortionCoefficients.close();
       cameraMatrix.close();
+   }
+
+   public OpenCVArUcoMarkerDetector getArUcoMarkerDetector()
+   {
+      return arUcoMarkerDetector;
    }
 }

@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -17,6 +18,7 @@ import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.tools.ActiveMappingTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -140,7 +142,7 @@ public class ActiveMapper
          request = new FootstepPlannerRequest();
          request.setTimeout(1.5);
          request.setStartFootPoses(leftSolePose, rightSolePose);
-         request.setPlanarRegionsList(planarRegionMap.getMapRegions());
+         request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionMap.getMapRegions())));
          request.setPlanBodyPath(false);
          request.setGoalFootPoses(leftGoalPose, rightGoalPose);
          request.setPerformAStarSearch(true);

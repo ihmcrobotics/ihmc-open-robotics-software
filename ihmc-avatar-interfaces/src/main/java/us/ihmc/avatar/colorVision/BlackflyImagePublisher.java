@@ -86,11 +86,11 @@ public class BlackflyImagePublisher
       {
          // Compress image
          BytePointer distortedImageJPEGPointer = new BytePointer((long) imageToPublish.getImageHeight() * imageToPublish.getImageWidth());
-         imageEncoder.encodeBGR(imageToPublish.getGpuImageMatrix().data(),
+         imageEncoder.encodeBGR(imageToPublish.getGpuImageMat().data(),
                                 distortedImageJPEGPointer,
                                 imageToPublish.getImageWidth(),
                                 imageToPublish.getImageHeight(),
-                                imageToPublish.getGpuImageMatrix().step());
+                                imageToPublish.getGpuImageMat().step());
          
          // Publish intrinsics
          ousterFisheyeColoringIntrinsicsROS2.updateAndPublishThrottledStatus();

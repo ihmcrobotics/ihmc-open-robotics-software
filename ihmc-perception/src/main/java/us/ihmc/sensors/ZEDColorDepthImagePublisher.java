@@ -29,7 +29,7 @@ public class ZEDColorDepthImagePublisher
    private final SideDependentList<IHMCROS2Publisher<ImageMessage>> ros2ColorImagePublishers;
    private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
 
-   private final SideDependentList<CUDAImageEncoder> imageEncoders = new SideDependentList<>(new CUDAImageEncoder(), new CUDAImageEncoder());
+   private final SideDependentList<CUDAImageEncoder> imageEncoders = new SideDependentList<>();
 
    private long lastDepthSequenceNumber = -1L;
    private final SideDependentList<Long> lastColorSequenceNumbers = new SideDependentList<>(-1L, -1L);
@@ -92,7 +92,7 @@ public class ZEDColorDepthImagePublisher
       {
          // Encode depth image to png
          BytePointer depthPNGPointer = new BytePointer();
-         OpenCVTools.compressImagePNG(depthImageToPublish.getCpuImageMatrix(), depthPNGPointer);
+         OpenCVTools.compressImagePNG(depthImageToPublish.getCpuImageMat(), depthPNGPointer);
 
          // Publish image
          ImageMessage depthImageMessage = new ImageMessage();
@@ -175,14 +175,17 @@ public class ZEDColorDepthImagePublisher
       // Perform safety checks
       if (colorImageToPublish != null && !colorImageToPublish.isEmpty() && colorImageToPublish.getSequenceNumber() != lastColorSequenceNumbers.get(side))
       {
+         if (imageEncoders.get(side) == null)
+            imageEncoders.put(side, new CUDAImageEncoder());
+
          // Compress image
          BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getImageHeight() * colorImageToPublish.getImageWidth());
          imageEncoders.get(side)
-                      .encodeBGR(colorImageToPublish.getGpuImageMatrix().data(),
+                      .encodeBGR(colorImageToPublish.getGpuImageMat().data(),
                                  colorJPEGPointer,
                                  colorImageToPublish.getImageWidth(),
                                  colorImageToPublish.getImageHeight(),
-                                 colorImageToPublish.getGpuImageMatrix().step());
+                                 colorImageToPublish.getGpuImageMat().step());
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();
@@ -241,7 +244,8 @@ public class ZEDColorDepthImagePublisher
             colorPublishLocks.get(side).unlock();
          }
          publishColorThreads.get(side).blockingStop();
-         imageEncoders.get(side).destroy();
+         if (imageEncoders.get(side) != null)
+            imageEncoders.get(side).destroy();
          if (nextGpuColorImages.get(side) != null)
             nextGpuColorImages.get(side).release();
          ros2ColorImagePublishers.get(side).destroy();

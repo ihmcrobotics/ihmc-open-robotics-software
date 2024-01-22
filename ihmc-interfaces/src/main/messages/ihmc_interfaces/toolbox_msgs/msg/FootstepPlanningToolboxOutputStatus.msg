@@ -35,8 +35,8 @@ byte body_path_planning_result 255
 # Footstep planner result. Null if no result is available
 byte footstep_planning_result 255
 
-# (deprecated) Regions that correspond to the request message. Originally used for debugging networking
-perception_msgs/PlanarRegionsListMessage planar_regions_list
+# (deprecated) Height map that correspond to the request message. Originally used for debugging networking
+perception_msgs/HeightMapMessage height_map_message
 
 # Planned body path. Empty if planner failed
 geometry_msgs/Pose[] body_path
