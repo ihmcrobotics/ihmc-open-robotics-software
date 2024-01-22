@@ -10,7 +10,7 @@ import us.ihmc.pathPlanning.PlannerInput;
 import java.util.Arrays;
 import java.util.function.Predicate;
 
-public class FootstepPlannerVisGraphAStarDataSetTest extends FootstepPlannerDataSetTest
+public class FootstepPlannerBodyPathAStarDataSetTest extends FootstepPlannerDataSetTest
 {
    @Override
    protected boolean getPlanBodyPath()
@@ -59,7 +59,7 @@ public class FootstepPlannerVisGraphAStarDataSetTest extends FootstepPlannerData
 
    public static void main(String[] args) throws Exception
    {
-      FootstepPlannerVisGraphAStarDataSetTest test = new FootstepPlannerVisGraphAStarDataSetTest();
+      FootstepPlannerBodyPathAStarDataSetTest test = new FootstepPlannerBodyPathAStarDataSetTest();
       DataSetName dataSetName = DataSetName._20171026_131304_PlanarRegion_Ramp_2Story_UnitTest;
       test.testDataSets(Arrays.asList(DataSetIOTools.loadDataSet(dataSetName)));
    }

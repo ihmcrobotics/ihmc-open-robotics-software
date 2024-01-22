@@ -3,8 +3,6 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.HeightMapMessage;
-import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.EnvironmentConstraintHandler;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
@@ -21,7 +19,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -30,14 +27,11 @@ import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -48,7 +42,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-public class FootstepSnapAndWigglerTest
+public class PlanarRegionFootstepSnapAndWigglerTest
 {
    private static boolean visualize = false;
 
@@ -57,8 +51,7 @@ public class FootstepSnapAndWigglerTest
    private SimulationConstructionSet scs;
    private YoGraphicsListRegistry graphicsListRegistry;
    private YoRegistry registry;
-   private FootstepPlannerEnvironmentHandler environmentHandler;
-   private FootstepSnapAndWiggler snapAndWiggler;
+   private PlanarRegionFootstepSnapAndWiggler snapAndWiggler;
    private final FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
    private YoDouble achievedDeltaInside;
 
@@ -74,8 +67,7 @@ public class FootstepSnapAndWigglerTest
          scs.setGroundVisible(false);
          registry = new YoRegistry(getClass().getSimpleName());
          graphicsListRegistry = new YoGraphicsListRegistry();
-         environmentHandler = new FootstepPlannerEnvironmentHandler();
-         snapAndWiggler = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
+         snapAndWiggler = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
          graphicsListRegistry.addArtifactListsToPlotter(scs.createSimulationOverheadPlotterFactory().createOverheadPlotter().getPlotter());
 
          Graphics3DObject graphics3DObject = new Graphics3DObject();
@@ -88,11 +80,70 @@ public class FootstepSnapAndWigglerTest
       }
       else
       {
-         environmentHandler = new FootstepPlannerEnvironmentHandler();
-         snapAndWiggler = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
+         snapAndWiggler = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       }
    }
 
+   @Test
+   public void testQPNotSolvedIfFootSufficientlyInside()
+   {
+      DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+      footstepPlannerParameters.setMaximumXYWiggleDistance(0.1);
+      footstepPlannerParameters.setMaximumYawWiggle(0.1);
+      footstepPlannerParameters.setWiggleInsideDeltaTarget(0.05);
+
+      double epsilon = 1e-5;
+      double wiggleInsideDelta = footstepPlannerParameters.getWiggleInsideDeltaTarget();
+      double pX = 0.5 * PlannerTools.footLength;
+      double pY = 0.5 * PlannerTools.footWidth;
+
+      ConvexPolygon2D largeEnoughPolygon = new ConvexPolygon2D();
+      largeEnoughPolygon.addVertex(pX + (wiggleInsideDelta + epsilon), pY + (wiggleInsideDelta + epsilon));
+      largeEnoughPolygon.addVertex(pX + (wiggleInsideDelta + epsilon), -pY - (wiggleInsideDelta + epsilon));
+      largeEnoughPolygon.addVertex(-pX - (wiggleInsideDelta + epsilon), pY + (wiggleInsideDelta + epsilon));
+      largeEnoughPolygon.addVertex(-pX - (wiggleInsideDelta + epsilon), -pY - (wiggleInsideDelta + epsilon));
+      largeEnoughPolygon.update();
+
+      ConvexPolygon2D tooSmallPolygon = new ConvexPolygon2D();
+      tooSmallPolygon.addVertex(pX + (wiggleInsideDelta - epsilon), pY + (wiggleInsideDelta - epsilon));
+      tooSmallPolygon.addVertex(pX + (wiggleInsideDelta - epsilon), -pY - (wiggleInsideDelta - epsilon));
+      tooSmallPolygon.addVertex(-pX - (wiggleInsideDelta - epsilon), pY + (wiggleInsideDelta - epsilon));
+      tooSmallPolygon.addVertex(-pX - (wiggleInsideDelta - epsilon), -pY - (wiggleInsideDelta - epsilon));
+      tooSmallPolygon.update();
+
+      SideDependentList<ConvexPolygon2D> defaultFootPolygons = PlannerTools.createDefaultFootPolygons();
+      FootstepSnapAndWiggleTester snapAndWiggler = new FootstepSnapAndWiggleTester(defaultFootPolygons, footstepPlannerParameters);
+
+      // test region meeting wiggleInsideDelta requirement doesn't call wiggle method
+      DiscreteFootstep footstepNode = new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.LEFT);
+      snapAndWiggler.setPlanarRegionsList(new PlanarRegionsList(new PlanarRegion(new RigidBodyTransform(), largeEnoughPolygon)));
+      snapAndWiggler.snapFootstep(footstepNode, null, true);
+      Assertions.assertFalse(snapAndWiggler.dirtyBit);
+
+      // test region not meeting wiggleInsideDelta requirement calls wiggle method
+      snapAndWiggler.snapFootstep(footstepNode);
+      snapAndWiggler.setPlanarRegionsList(new PlanarRegionsList(new PlanarRegion(new RigidBodyTransform(), tooSmallPolygon)));
+      snapAndWiggler.snapFootstep(footstepNode, null, true);
+      Assertions.assertTrue(snapAndWiggler.dirtyBit);
+   }
+
+   private class FootstepSnapAndWiggleTester extends PlanarRegionFootstepSnapAndWiggler
+   {
+      boolean dirtyBit = false;
+
+      public FootstepSnapAndWiggleTester(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
+                                         FootstepPlannerParametersReadOnly parameters)
+      {
+         super(footPolygonsInSoleFrame, parameters);
+      }
+
+      @Override
+      protected RigidBodyTransform wiggleIntoConvexHull(ConvexPolygon2D footPolygonInRegionFrame)
+      {
+         dirtyBit = true;
+         return super.wiggleIntoConvexHull(footPolygonInRegionFrame);
+      }
+   }
 
    @Test
    public void testMaximumSnapHeightOnFlatRegions()
@@ -139,11 +190,8 @@ public class FootstepSnapAndWigglerTest
       PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       footstepPlannerParameters.setMaximumSnapHeight(maximumSnapHeight);
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-      FootstepSnapAndWiggler snapper  = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters, environmentHandler);
-
-      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-      environmentHandler.setHeightMap(HeightMapMessageTools.unpackMessage(heightMapMessage));
+      PlanarRegionFootstepSnapAndWiggler snapper  = new PlanarRegionFootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters);
+      snapper.setPlanarRegionsList(planarRegionsList);
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       double epsilon = 1e-8;
@@ -194,11 +242,8 @@ public class FootstepSnapAndWigglerTest
       PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       footstepPlannerParameters.setMaximumSnapHeight(maximumSnapHeight);
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-      FootstepSnapAndWiggler snapper  = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters, environmentHandler);
-
-      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-      environmentHandler.setHeightMap(HeightMapMessageTools.unpackMessage(heightMapMessage));
+      PlanarRegionFootstepSnapAndWiggler snapper  = new PlanarRegionFootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters);
+      snapper.setPlanarRegionsList(planarRegionsList);
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       double epsilon = 1e-8;
@@ -233,8 +278,7 @@ public class FootstepSnapAndWigglerTest
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       parameters.setMinClearanceFromStance(0.0);
 
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
+      PlanarRegionFootstepSnapAndWiggler snapper  = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
 
       FootstepSnapData snapData1 = new FootstepSnapData();
       FootstepSnapData snapData2 = new FootstepSnapData();
@@ -268,13 +312,112 @@ public class FootstepSnapAndWigglerTest
       Assertions.assertFalse(overlap);
    }
 
+   @Test
+   public void testDeltaInsideComputationForConvexRegion()
+   {
+      ConvexPolygon2D regionPolygon = new ConvexPolygon2D();
+      regionPolygon.addVertex(-1.0, -1.0);
+      regionPolygon.addVertex(-1.0, 1.0);
+      regionPolygon.addVertex(1.0, -1.0);
+      regionPolygon.addVertex(1.0, 1.0);
+      regionPolygon.update();
+      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(), regionPolygon);
+
+      Random random = new Random(392032);
+      for (int i = 0; i < 50; i++)
+      {
+         ConvexPolygon2D stepPolygon = new ConvexPolygon2D(regionPolygon);
+         double scale = EuclidCoreRandomTools.nextDouble(random, 0.1, 2.0);
+         stepPolygon.scale(scale);
+         stepPolygon.update();
+
+         double distance = PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, false);
+
+         // distance measured from step vertex to closest region edge
+         double expectedDistance = (scale > 1.0) ? (- Math.sqrt(2.0) * (scale - 1.0)) : (1.0 - scale);
+         double epsilon = 1e-6;
+
+         Assertions.assertTrue(Math.abs(expectedDistance - distance) < epsilon, "PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside failing for convex region");
+      }
+   }
+
+   @Test
+   public void testDeltaInsideComputationForConcaveRegion()
+   {
+      List<Point2D> concaveHullVertices = new ArrayList<>();
+      concaveHullVertices.add(new Point2D(-2.0, -2.0));
+      concaveHullVertices.add(new Point2D(-2.0, 2.0));
+      concaveHullVertices.add(new Point2D(0.0, 0.0));
+      concaveHullVertices.add(new Point2D(0.0, 2.0));
+      concaveHullVertices.add(new Point2D(2.0, 2.0));
+      concaveHullVertices.add(new Point2D(2.0, -2.0));
+
+      ConvexPolygon2D convexHull = new ConvexPolygon2D();
+      convexHull.addVertex(-2.0, -2.0);
+      convexHull.addVertex(-2.0, 2.0);
+      convexHull.addVertex(2.0, -2.0);
+      convexHull.addVertex(2.0, 2.0);
+      convexHull.update();
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      ConvexPolygon2D stepPolygon = new ConvexPolygon2D(convexHull);
+      stepPolygon.scale(0.5);
+      stepPolygon.update();
+
+      FrameConvexPolygon2D p;
+
+      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(), concaveHullVertices, Arrays.asList(convexHull));
+      double epsilon = 1e-6;
+
+      double distance = PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
+      double expectedDistance = 0.0;
+      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
+
+      double dx = 0.01, dy = 0.0;
+      transform.getTranslation().set(dx, dy, 0.0);
+      stepPolygon.applyTransform(transform);
+
+      distance = PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
+      expectedDistance = - dx / Math.sqrt(2.0);
+      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
+
+      stepPolygon.applyInverseTransform(transform);
+      dx = -0.01;
+      dy = 0.0;
+      transform.getTranslation().set(dx, dy, 0.0);
+      stepPolygon.applyTransform(transform);
+
+      distance = PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
+      expectedDistance = - dx / Math.sqrt(2.0);
+      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
+
+      stepPolygon.applyInverseTransform(transform);
+      dx = 0.0;
+      dy = 0.01;
+      transform.getTranslation().set(dx, dy, 0.0);
+      stepPolygon.applyTransform(transform);
+
+      distance = PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
+      expectedDistance = - dy / Math.sqrt(2.0);
+      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
+
+      stepPolygon.applyInverseTransform(transform);
+      dx = 0.0;
+      dy = -0.01;
+      transform.getTranslation().set(dx, dy, 0.0);
+      stepPolygon.applyTransform(transform);
+
+      distance = PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
+      expectedDistance = - dy / Math.sqrt(2.0);
+      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "PlanarRegionFootstepSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
+   }
 
    @Test
    public void testSnappingToFlatGroundHeight()
    {
       double flatGroundHeight = 0.7;
       snapAndWiggler.setFlatGroundHeight(flatGroundHeight);
-      environmentHandler.setHeightMap(null);
+      snapAndWiggler.setPlanarRegionsList(null);
 
       DiscreteFootstep footstep = new DiscreteFootstep(3, -2, 5, RobotSide.LEFT);
       FootstepSnapData snapData = snapAndWiggler.snapFootstep(footstep);
@@ -296,9 +439,7 @@ public class FootstepSnapAndWigglerTest
 
       snapAndWiggler.initialize();
 
-      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-      environmentHandler.setHeightMap(HeightMapMessageTools.unpackMessage(heightMapMessage));
-
+      snapAndWiggler.setPlanarRegionsList(planarRegionsList);
       DiscreteFootstep stanceStep = new DiscreteFootstep(105, 82, 3, RobotSide.LEFT);
       DiscreteFootstep candidateStep = new DiscreteFootstep(109, 80, 2, RobotSide.RIGHT);
 
@@ -320,7 +461,7 @@ public class FootstepSnapAndWigglerTest
 
    public static void main(String[] args)
    {
-      FootstepSnapAndWigglerTest footstepSnapAndWigglerTest = new FootstepSnapAndWigglerTest();
+      PlanarRegionFootstepSnapAndWigglerTest footstepSnapAndWigglerTest = new PlanarRegionFootstepSnapAndWigglerTest();
       visualize = true;
       footstepSnapAndWigglerTest.setup();
       footstepSnapAndWigglerTest.testStanceFootClearance();

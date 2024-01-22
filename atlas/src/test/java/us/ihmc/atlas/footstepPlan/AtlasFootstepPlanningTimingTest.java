@@ -8,11 +8,16 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,7 +37,7 @@ public class AtlasFootstepPlanningTimingTest
       request.setStartFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), initialMidFootPose);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
-      request.setPlanarRegionsList(dataSet.getPlanarRegionsList());
+      request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(dataSet.getPlanarRegionsList())));
       request.setPlanBodyPath(false);
       request.setAbortIfBodyPathPlannerFails(false);
 

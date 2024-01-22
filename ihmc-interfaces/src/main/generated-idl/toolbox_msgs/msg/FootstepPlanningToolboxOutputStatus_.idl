@@ -4,7 +4,7 @@
 #include "controller_msgs/msg/./FootstepDataListMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
-#include "perception_msgs/msg/./PlanarRegionsListMessage_.idl"
+#include "perception_msgs/msg/./HeightMapMessage_.idl"
 #include "toolbox_msgs/msg/./FootstepPlanningTimingsMessage_.idl"
 module toolbox_msgs
 {
@@ -94,9 +94,9 @@ module toolbox_msgs
         @defaultValue(value=255)
         octet footstep_planning_result;
         /**
-         * (deprecated) Regions that correspond to the request message. Originally used for debugging networking
+         * (deprecated) Height map that correspond to the request message. Originally used for debugging networking
          */
-        perception_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list;
+        perception_msgs::msg::dds::HeightMapMessage height_map_message;
         /**
          * Planned body path. Empty if planner failed
          */

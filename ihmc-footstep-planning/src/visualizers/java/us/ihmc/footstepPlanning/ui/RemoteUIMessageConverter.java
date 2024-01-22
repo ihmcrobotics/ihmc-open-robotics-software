@@ -34,6 +34,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -501,8 +502,6 @@ public class RemoteUIMessageConverter
          packet.setPlannerRequestId(plannerRequestIdReference.get());
       if (plannerHorizonLengthReference.get() != null)
          packet.setHorizonLength(plannerHorizonLengthReference.get());
-      if (plannerPlanarRegionReference.get() != null)
-         packet.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(plannerPlanarRegionReference.get()));
       if (heightMapReference.get() != null)
          packet.getHeightMapMessage().set(heightMapReference.get());
       packet.setAssumeFlatGround(assumeFlatGround.get());
