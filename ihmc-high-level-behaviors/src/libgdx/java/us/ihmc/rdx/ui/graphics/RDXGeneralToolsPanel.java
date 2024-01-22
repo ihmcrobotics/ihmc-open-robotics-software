@@ -1,27 +1,36 @@
 package us.ihmc.rdx.ui.graphics;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
 
 import java.util.ArrayList;
 import java.util.Set;
 
 public class RDXGeneralToolsPanel extends RDXPanel implements RDXRenderableProvider
 {
-   private final ArrayList<RDXVisualizer> visualizers = new ArrayList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+
+   private final ArrayList<RDXVisualizer> visualizers = new ArrayList<>();
+   private final RDXBaseUI baseUI;
+   private final RDXBallAndArrowPosePlacement ballAndArrowPose = new RDXBallAndArrowPosePlacement();
    private boolean created = false;
 
-   public RDXGeneralToolsPanel()
+   public RDXGeneralToolsPanel(RDXBaseUI baseUI)
    {
       super("General Tools");
       setRenderMethod(this::renderImGuiWidgets);
+
+      this.baseUI = baseUI;
    }
 
    public void addVisualizer(RDXVisualizer visualizer)
@@ -41,6 +50,9 @@ public class RDXGeneralToolsPanel extends RDXPanel implements RDXRenderableProvi
       {
          visualizer.create();
       }
+
+      ballAndArrowPose.create(null, Color.YELLOW);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowPose::processImGui3DViewInput);
    }
 
    public void update()
@@ -63,6 +75,8 @@ public class RDXGeneralToolsPanel extends RDXPanel implements RDXRenderableProvi
          visualizer.renderImGuiWidgets();
          ImGui.separator();
       }
+
+      ballAndArrowPose.renderPlaceGoalButton();
    }
 
    @Override
@@ -75,6 +89,8 @@ public class RDXGeneralToolsPanel extends RDXPanel implements RDXRenderableProvi
             visualizer.getRenderables(renderables, pool, sceneLevels);
          }
       }
+
+      ballAndArrowPose.getRenderables(renderables, pool);
    }
 
    public void destroy()

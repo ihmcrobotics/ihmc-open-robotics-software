@@ -43,7 +43,7 @@ public class RDXCenterposeSceneGraphDemo
             ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "centerpose_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);
 
-            globalVisualizersPanel = new RDXGeneralToolsPanel();
+            globalVisualizersPanel = new RDXGeneralToolsPanel(baseUI);
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersPanel);
 

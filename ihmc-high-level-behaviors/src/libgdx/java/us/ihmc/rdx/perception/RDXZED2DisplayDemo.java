@@ -14,11 +14,12 @@ import us.ihmc.ros2.ROS2Node;
 public class RDXZED2DisplayDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("ZED 2 Display Demo");
-   private final RDXGeneralToolsPanel globalVisualizersPanel = new RDXGeneralToolsPanel();
+   private final RDXGeneralToolsPanel globalVisualizersPanel;
 
    public RDXZED2DisplayDemo()
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "zed_2_demo_node");
+      globalVisualizersPanel  = new RDXGeneralToolsPanel(baseUI);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
