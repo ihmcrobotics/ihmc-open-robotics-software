@@ -10,6 +10,9 @@ float64 swing_duration
 # Transfer duration
 float64 transfer_duration
 
+# Is using the footstep planner or manually placing
+bool is_manually_placed
+
 # The footsteps, with a maximum of 50
 behavior_msgs/FootstepPlanActionFootstepDefinitionMessage[<=50] footsteps
 
