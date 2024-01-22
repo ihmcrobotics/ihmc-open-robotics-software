@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousPlannerSchedulingTask
 {
-   private final static int MAX_STEPS_PER_SESSION = 15;
+   private final static int MAX_STEPS_PER_SESSION = 20;
    private final static long CONTINUOUS_PLANNING_DELAY_MS = 16;
 
    private ContinuousWalkingState state = ContinuousWalkingState.NOT_STARTED;
@@ -338,8 +338,10 @@ public class ContinuousPlannerSchedulingTask
    private void setImminentStanceToCurrent()
    {
       RobotSide closerSide = continuousPlanner.getCloserSideToGoal();
-      FramePose3D closerToGoalFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), referenceFrames.getSoleFrame(closerSide).getTransformToWorldFrame());
-      FramePose3D fartherToGoalFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), referenceFrames.getSoleFrame(closerSide.getOppositeSide()).getTransformToWorldFrame());
+      FramePose3D closerToGoalFootPose = new FramePose3D(referenceFrames.getSoleFrame(closerSide));
+      FramePose3D fartherToGoalFootPose = new FramePose3D(referenceFrames.getSoleFrame(closerSide.getOppositeSide()));
+      closerToGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      fartherToGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       if (continuousPlanner.updateImminentStance(fartherToGoalFootPose, closerToGoalFootPose, closerSide))
       {
