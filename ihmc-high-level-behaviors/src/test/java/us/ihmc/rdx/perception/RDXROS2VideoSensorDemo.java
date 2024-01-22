@@ -44,7 +44,7 @@ public class RDXROS2VideoSensorDemo
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
             PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
-            globalVisualizersPanel = new RDXGeneralToolsPanel();
+            globalVisualizersPanel = new RDXGeneralToolsPanel(baseUI);
 
             RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video",
                                                                                       pubSubImplementation,

@@ -40,7 +40,7 @@ public class RDXPerceptionUI
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "perception_ui_node");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      globalVisualizersUI = new RDXGeneralToolsPanel();
+      globalVisualizersUI = new RDXGeneralToolsPanel(baseUI);
       baseUI = new RDXBaseUI("Perception UI");
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()

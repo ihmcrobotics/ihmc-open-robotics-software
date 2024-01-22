@@ -20,13 +20,15 @@ import us.ihmc.sensors.ZEDModelData;
 public class RDXCenterposeObjectDetectionDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("Centerpose Object Detection Demo");
-   private final RDXGeneralToolsPanel globalVisualizersPanel = new RDXGeneralToolsPanel();
+   private final RDXGeneralToolsPanel globalVisualizersPanel;
    private final ROS2Helper ros2Helper;
 
    public RDXCenterposeObjectDetectionDemo()
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "zed_2_demo_node");
       ros2Helper = new ROS2Helper(ros2Node);
+
+       globalVisualizersPanel = new RDXGeneralToolsPanel(baseUI);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {

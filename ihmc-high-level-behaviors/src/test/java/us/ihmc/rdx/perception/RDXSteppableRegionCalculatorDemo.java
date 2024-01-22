@@ -60,7 +60,7 @@ public class RDXSteppableRegionCalculatorDemo
       baseUI.getImGuiPanelManager().addPanel(heightMapUI.getPanel());
 
       // Configure the height map visualizer
-      globalVisualizersUI = new RDXGeneralToolsPanel();
+      globalVisualizersUI = new RDXGeneralToolsPanel(baseUI);
 
       RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer();
       heightMapVisualizer.setActive(true);
