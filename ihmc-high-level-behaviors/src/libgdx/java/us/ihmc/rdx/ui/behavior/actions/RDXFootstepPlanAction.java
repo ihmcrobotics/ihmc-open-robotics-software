@@ -14,13 +14,12 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
+import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
-import us.ihmc.rdx.ui.tools.ImGuiSceneGraphFramesCombo;
 import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -33,7 +32,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final FootstepPlanActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiSceneGraphFramesCombo parentFrameComboBox;
+   private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImDoubleWrapper swingDurationWidget;
    private final ImDoubleWrapper transferDurationWidget;
    private int numberOfAllocatedFootsteps = 0;
@@ -48,8 +47,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                                 RDXBaseUI baseUI,
                                 DRCRobotModel robotModel,
                                 ROS2SyncedRobotModel syncedRobot,
-                                ReferenceFrameLibrary referenceFrameLibrary,
-                                SceneGraph sceneGraph)
+                                ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
@@ -61,11 +59,10 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
       getDefinition().setDescription("Footstep plan");
 
-      parentFrameComboBox = new ImGuiSceneGraphFramesCombo("Parent frame",
-                                                           referenceFrameLibrary,
-                                                           sceneGraph,
-                                                           getDefinition().getBasics()::getParentFrameName,
-                                                           this::changeParentFrame);
+      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
+                                                                referenceFrameLibrary,
+                                                                getDefinition().getBasics()::getParentFrameName,
+                                                                this::changeParentFrame);
       swingDurationWidget = new ImDoubleWrapper(getDefinition().getBasics()::getSwingDuration,
                                                 getDefinition().getBasics()::setSwingDuration,
                                                 imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));

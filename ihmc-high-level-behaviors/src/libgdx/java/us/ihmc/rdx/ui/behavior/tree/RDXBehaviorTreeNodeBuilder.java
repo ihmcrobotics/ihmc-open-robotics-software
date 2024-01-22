@@ -84,7 +84,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       }
       if (nodeType == FootstepPlanActionDefinition.class)
       {
-         return new RDXFootstepPlanAction(id, crdtInfo, saveFileDirectory, baseUI, robotModel, syncedRobot, referenceFrameLibrary, sceneGraph);
+         return new RDXFootstepPlanAction(id, crdtInfo, saveFileDirectory, baseUI, robotModel, syncedRobot, referenceFrameLibrary);
       }
       if (nodeType == HandPoseActionDefinition.class)
       {

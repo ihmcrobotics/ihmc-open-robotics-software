@@ -14,6 +14,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
+import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -23,7 +24,6 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
-import us.ihmc.rdx.ui.tools.ImGuiSceneGraphFramesCombo;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,7 +34,7 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
 {
    private final WalkActionState state;
    private final RDXFootstepPlanGraphic footstepPlanGraphic;
-   private final ImGuiSceneGraphFramesCombo parentFrameComboBox;
+   private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final SideDependentList<RDXFootstepGraphic> goalFeetGraphics = new SideDependentList<>();
    private final RDXSelectablePathControlRingGizmo footstepPlannerGoalGizmo;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -72,11 +72,10 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
       footstepPlannerGoalGizmo.create(panel3D);
       footstepPlanGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
 
-      parentFrameComboBox = new ImGuiSceneGraphFramesCombo("Parent frame",
-                                                           referenceFrameLibrary,
-                                                           sceneGraph,
-                                                           getDefinition().getBasics()::getParentFrameName,
-                                                           getState().getGoalFrame()::changeFrame);
+      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
+                                                                referenceFrameLibrary,
+                                                                getDefinition().getBasics()::getParentFrameName,
+                                                                getState().getGoalFrame()::changeFrame);
       executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
                                                           getDefinition()::setExecuteWithNextAction,
                                                           imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
