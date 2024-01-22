@@ -27,6 +27,7 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObject;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -187,8 +188,13 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
          case "DRILL" ->
          {
             interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            RigidBodyTransform transform = new RigidBodyTransform();
+            EuclidCoreMissingTools.setYawPitchRollDegrees(transform.getRotation(), 0, 90, -90);
+            transform.getTranslation().addX(0.01);
+            transform.getTranslation().addY(-0.05);
+            transform.getTranslation().addZ(0.01);
             interactableObject.load(RigidBodySceneObjectDefinitions.DRILL_VISUAL_MODEL_FILE_PATH,
-                                    RigidBodySceneObjectDefinitions.DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                    transform);
          }
       }
    }
