@@ -50,17 +50,23 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       jsonNode.put("parentFrame", parentFrameName.getValue());
       jsonNode.put("isManuallyPlaced", isManuallyPlaced.getValue());
 
-      ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
-      for (int i = 0; i < footsteps.getSize(); i++)
+      if (isManuallyPlaced.getValue())
       {
-         ObjectNode footstepNode = foostepsArrayNode.addObject();
-         footsteps.getValueReadOnly(i).saveToFile(footstepNode);
+         ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
+         for (int i = 0; i < footsteps.getSize(); i++)
+         {
+            ObjectNode footstepNode = foostepsArrayNode.addObject();
+            footsteps.getValueReadOnly(i).saveToFile(footstepNode);
+         }
       }
-      JSONTools.toJSON(jsonNode, goalToParentTransform.getValueReadOnly());
-      for (RobotSide side : RobotSide.values)
+      else
       {
-         ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootTransform");
-         JSONTools.toJSON(goalFootNode, goalFootstepToGoalTransforms.get(side).getValueReadOnly());
+         JSONTools.toJSON(jsonNode, goalToParentTransform.getValueReadOnly());
+         for (RobotSide side : RobotSide.values)
+         {
+            ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootTransform");
+            JSONTools.toJSON(goalFootNode, goalFootstepToGoalTransforms.get(side).getValueReadOnly());
+         }
       }
    }
 
@@ -75,12 +81,18 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       isManuallyPlaced.setValue(jsonNode.get("isManuallyPlaced").booleanValue());
 
       footsteps.getValue().clear();
-      JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.getValue().add().loadFromFile(footstepNode));
-      JSONTools.toEuclid(jsonNode, goalToParentTransform.getValue());
-      for (RobotSide side : RobotSide.values)
+      if (isManuallyPlaced.getValue())
       {
-         JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
-         JSONTools.toEuclid(goalFootNode, goalFootstepToGoalTransforms.get(side).getValue());
+         JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.getValue().add().loadFromFile(footstepNode));
+      }
+      else
+      {
+         JSONTools.toEuclid(jsonNode, goalToParentTransform.getValue());
+         for (RobotSide side : RobotSide.values)
+         {
+            JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
+            JSONTools.toEuclid(goalFootNode, goalFootstepToGoalTransforms.get(side).getValue());
+         }
       }
    }
 
