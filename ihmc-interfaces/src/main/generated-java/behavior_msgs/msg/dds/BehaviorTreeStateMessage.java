@@ -26,7 +26,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public static final byte WAIT_DURATION_ACTION = (byte) 17;
    public static final byte WALK_ACTION = (byte) 18;
    /**
-            * Monotonically increasing message ID
+            * Monotonically increasing message ID that matches the CRDTInfo update number
             */
    public long sequence_id_;
    /**
@@ -109,14 +109,14 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    }
 
    /**
-            * Monotonically increasing message ID
+            * Monotonically increasing message ID that matches the CRDTInfo update number
             */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Monotonically increasing message ID
+            * Monotonically increasing message ID that matches the CRDTInfo update number
             */
    public long getSequenceId()
    {
