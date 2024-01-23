@@ -94,9 +94,12 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       setRenderMethod(this::renderImGuiWidgets);
       this.remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper, this);
 
+      steppableRegionsParameterTuner = new RDXStoredPropertySetTuner("Steppable Regions Parameters");
+
       if (humanoidPerception != null)
       {
          this.humanoidPerception = humanoidPerception;
+         addChild(steppableRegionsParameterTuner);
          this.humanoidPerception.setPerceptionConfigurationParameters(remotePerceptionUI.getPerceptionConfigurationParameters());
       }
    }
@@ -290,8 +293,6 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          ImGui.unindent();
       }
 
-      steppableRegionsParameterTuner.renderImGuiWidgets();
-
       if (ImGui.collapsingHeader("Map Regions", mapRegionsCollapsedHeader))
       {
          ImGui.indent();
@@ -382,8 +383,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
                                                           humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage().rows(),
                                                           RDXImagePanel.FLIP_Y);
 
-         steppableRegionsParameterTuner = new RDXStoredPropertySetTuner(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionParameters().getTitle());
-         steppableRegionsParameterTuner.create(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionParameters(), true);
+         steppableRegionsParameterTuner.create(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionParameters());
 
          addChild(localHeightMapPanel.getImagePanel());
          addChild(croppedHeightMapPanel.getImagePanel());
