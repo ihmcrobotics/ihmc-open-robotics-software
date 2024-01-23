@@ -123,8 +123,8 @@ public class InertialParameterManager
          {
             inertialParameters.add(new RigidBodyInertialParameters(body.getInertia()));
 
-            inertialParametersPiBasisWatchers.add(new YoMatrix(body.getName() + "_PiBasis", RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1, getRowNames(ParameterRepresentation.PI_BASIS), registry));
-            inertialParametersThetaBasisWatchers.add(new YoMatrix(body.getName() + "_ThetaBasis", RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1, getRowNames(ParameterRepresentation.THETA_BASIS), registry));
+            inertialParametersPiBasisWatchers.add(new YoMatrix(body.getName() + "_PiBasis", RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1, ParameterRepresentation.getRowNames(ParameterRepresentation.PI_BASIS), registry));
+            inertialParametersThetaBasisWatchers.add(new YoMatrix(body.getName() + "_ThetaBasis", RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1, ParameterRepresentation.getRowNames(ParameterRepresentation.THETA_BASIS), registry));
 
             inertialParameters.get(inertialParameters.size() - 1).getParameterVectorPiBasis(inertialParameterPiBasisContainer);
             inertialParametersPiBasisWatchers.get(inertialParametersPiBasisWatchers.size() - 1).set(inertialParameterPiBasisContainer);
@@ -254,44 +254,44 @@ public class InertialParameterManager
 
    private enum ParameterRepresentation
    {
-      PI_BASIS, THETA_BASIS
-   }
+      PI_BASIS, THETA_BASIS;
 
-   private String[] getRowNames(ParameterRepresentation representation)
-   {
-      String[] rowNames = new String[RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
-      switch (representation)
+      private static String[] getRowNames(ParameterRepresentation representation)
       {
-      case PI_BASIS:
-      {
-         rowNames[0] = "m";
-         rowNames[1] = "comX";
-         rowNames[2] = "comY";
-         rowNames[3] = "comZ";
-         rowNames[4] = "Ixx";
-         rowNames[5] = "Ixy";
-         rowNames[6] = "Iyy";
-         rowNames[7] = "Ixz";
-         rowNames[8] = "Iyz";
-         rowNames[9] = "Izz";
-         return rowNames;
-      }
-      case THETA_BASIS:
-      {
-         rowNames[0] = "alpha";
-         rowNames[1] = "dx";
-         rowNames[2] = "dy";
-         rowNames[3] = "dz";
-         rowNames[4] = "sxy";
-         rowNames[5] = "sxz";
-         rowNames[6] = "syz";
-         rowNames[7] = "tx";
-         rowNames[8] = "ty";
-         rowNames[9] = "tz";
-         return rowNames;
-      }
-      default:
-         throw new RuntimeException("Unhandled case: " + representation);
+         String[] rowNames = new String[RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
+         switch (representation)
+         {
+            case PI_BASIS:
+            {
+               rowNames[0] = "m";
+               rowNames[1] = "comX";
+               rowNames[2] = "comY";
+               rowNames[3] = "comZ";
+               rowNames[4] = "Ixx";
+               rowNames[5] = "Ixy";
+               rowNames[6] = "Iyy";
+               rowNames[7] = "Ixz";
+               rowNames[8] = "Iyz";
+               rowNames[9] = "Izz";
+               return rowNames;
+            }
+            case THETA_BASIS:
+            {
+               rowNames[0] = "alpha";
+               rowNames[1] = "dx";
+               rowNames[2] = "dy";
+               rowNames[3] = "dz";
+               rowNames[4] = "sxy";
+               rowNames[5] = "sxz";
+               rowNames[6] = "syz";
+               rowNames[7] = "tx";
+               rowNames[8] = "ty";
+               rowNames[9] = "tz";
+               return rowNames;
+            }
+            default:
+               throw new RuntimeException("Unhandled case: " + representation);
+         }
       }
    }
 
