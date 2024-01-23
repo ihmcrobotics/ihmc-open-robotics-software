@@ -2,26 +2,23 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
+import us.ihmc.communication.crdt.CRDTUnidirectionalString;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class FootstepPlanActionFootstepState
 {
-   private final FootstepPlanActionState footstepPlan;
    private final FootstepPlanActionFootstepDefinition definition;
    private final CRDTDetachableReferenceFrame soleFrame;
    /** The index is not CRDT synced because it's a simple local calculation. */
    private int index = -1;
 
    public FootstepPlanActionFootstepState(ReferenceFrameLibrary referenceFrameLibrary,
-                                          FootstepPlanActionState footstepPlan,
+                                          CRDTUnidirectionalString parentFrameName,
                                           FootstepPlanActionFootstepDefinition definition)
    {
-      this.footstepPlan = footstepPlan;
       this.definition = definition;
 
-      soleFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
-                                                   footstepPlan.getDefinition().getCRDTParentFrameName(),
-                                                   definition.getSoleToPlanFrameTransform());
+      soleFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary, parentFrameName, definition.getSoleToPlanFrameTransform());
    }
 
    public void update()
