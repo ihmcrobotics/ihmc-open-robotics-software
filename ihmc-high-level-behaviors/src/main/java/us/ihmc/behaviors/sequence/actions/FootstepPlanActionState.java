@@ -34,7 +34,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       footsteps = new RecyclingArrayList<>(() ->
          new FootstepPlanActionFootstepState(referenceFrameLibrary,
-                                             this,
+                                             getDefinition().getCRDTParentFrameName(),
                                              RecyclingArrayListTools.getUnsafe(getDefinition().getFootsteps().getValueUnsafe(), numberOfAllocatedFootsteps++)));
 
       totalNumberOfFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
