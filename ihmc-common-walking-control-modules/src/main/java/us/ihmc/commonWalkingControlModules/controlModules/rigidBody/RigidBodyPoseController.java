@@ -210,6 +210,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    @Override
    public void onEntry()
    {
+      positionHelper.resetFunctionGenerators();
+      orientationHelper.resetFunctionGenerator();
    }
 
    @Override
