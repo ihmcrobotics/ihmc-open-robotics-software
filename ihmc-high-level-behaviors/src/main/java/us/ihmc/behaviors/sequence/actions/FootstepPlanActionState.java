@@ -4,16 +4,29 @@ import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
 import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
+import us.ihmc.communication.crdt.CRDTUnidirectionalInteger;
+import us.ihmc.communication.crdt.CRDTUnidirectionalPose3D;
+import us.ihmc.communication.crdt.CRDTUnidirectionalSE3Trajectory;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionDefinition>
 {
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<FootstepPlanActionFootstepState> footsteps;
-   private final FootstepPlanActionStateBasics footstepPlanStateBasics;
+   private final CRDTUnidirectionalInteger totalNumberOfFootsteps;
+   private final CRDTUnidirectionalInteger numberOfIncompleteFootsteps;
+   private final SideDependentList<CRDTUnidirectionalSE3Trajectory> desiredFootPoses = new SideDependentList<>();
+   private final SideDependentList<CRDTUnidirectionalPose3D> currentFootPoses = new SideDependentList<>();
+   private final CRDTDetachableReferenceFrame goalFrame;
+   private final CRDTUnidirectionalEnumField<WalkActionExecutionState> executionState;
 
    public FootstepPlanActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -24,7 +37,17 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
                                              this,
                                              RecyclingArrayListTools.getUnsafe(getDefinition().getFootsteps().getValueUnsafe(), numberOfAllocatedFootsteps++)));
 
-      footstepPlanStateBasics = new FootstepPlanActionStateBasics(crdtInfo);
+      totalNumberOfFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
+      numberOfIncompleteFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
+      for (RobotSide side : RobotSide.values)
+      {
+         desiredFootPoses.set(side, new CRDTUnidirectionalSE3Trajectory(ROS2ActorDesignation.ROBOT, crdtInfo));
+         currentFootPoses.set(side, new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, crdtInfo));
+      }
+      goalFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
+                                                   getDefinition().getCRDTParentFrameName(),
+                                                   getDefinition().getGoalToParentTransform());
+      executionState = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.ROBOT, crdtInfo, WalkActionExecutionState.PLAN_EXECUTION_COMPLETE);
    }
 
    @Override
@@ -37,6 +60,8 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
          footsteps.get(i).setIndex(i);
          footsteps.get(i).update();
       }
+
+      goalFrame.update();
    }
 
    public void toMessage(FootstepPlanActionStateMessage message)
@@ -45,13 +70,20 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       super.toMessage(message.getState());
 
-      footstepPlanStateBasics.toMessage(message.getFootstepPlanStateBasics());
+      message.setTotalNumberOfFootsteps(totalNumberOfFootsteps.toMessage());
+      message.setNumberOfIncompleteFootsteps(numberOfIncompleteFootsteps.toMessage());
+      desiredFootPoses.get(RobotSide.LEFT).toMessage(message.getDesiredLeftFootsteps());
+      desiredFootPoses.get(RobotSide.RIGHT).toMessage(message.getDesiredRightFootsteps());
+      currentFootPoses.get(RobotSide.LEFT).toMessage(message.getCurrentLeftFootPose());
+      currentFootPoses.get(RobotSide.RIGHT).toMessage(message.getCurrentRightFootPose());
 
       message.getFootsteps().clear();
       for (FootstepPlanActionFootstepState footstep : footsteps)
       {
          footstep.toMessage(message.getFootsteps().add());
       }
+
+      message.setExecutionState(executionState.toMessage().toByte());
    }
 
    public void fromMessage(FootstepPlanActionStateMessage message)
@@ -60,13 +92,20 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       getDefinition().fromMessage(message.getDefinition());
 
-      footstepPlanStateBasics.fromMessage(message.getFootstepPlanStateBasics());
+      totalNumberOfFootsteps.fromMessage(message.getTotalNumberOfFootsteps());
+      numberOfIncompleteFootsteps.fromMessage(message.getNumberOfIncompleteFootsteps());
+      desiredFootPoses.get(RobotSide.LEFT).fromMessage(message.getDesiredLeftFootsteps());
+      desiredFootPoses.get(RobotSide.RIGHT).fromMessage(message.getDesiredRightFootsteps());
+      currentFootPoses.get(RobotSide.LEFT).fromMessage(message.getCurrentLeftFootPose());
+      currentFootPoses.get(RobotSide.RIGHT).fromMessage(message.getCurrentRightFootPose());
 
       footsteps.clear();
       for (FootstepPlanActionFootstepStateMessage footstep : message.getFootsteps())
       {
          footsteps.add().fromMessage(footstep);
       }
+
+      executionState.fromMessage(WalkActionExecutionState.fromByte(message.getExecutionState()));
    }
 
    public RecyclingArrayList<FootstepPlanActionFootstepState> getFootsteps()
@@ -74,8 +113,43 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       return footsteps;
    }
 
-   public FootstepPlanActionStateBasics getBasics()
+   public int getTotalNumberOfFootsteps()
    {
-      return footstepPlanStateBasics;
+      return totalNumberOfFootsteps.getValue();
+   }
+
+   public void setTotalNumberOfFootsteps(int totalNumberOfFootsteps)
+   {
+      this.totalNumberOfFootsteps.setValue(totalNumberOfFootsteps);
+   }
+
+   public int getNumberOfIncompleteFootsteps()
+   {
+      return numberOfIncompleteFootsteps.getValue();
+   }
+
+   public void setNumberOfIncompleteFootsteps(int numberOfIncompleteFootsteps)
+   {
+      this.numberOfIncompleteFootsteps.setValue(numberOfIncompleteFootsteps);
+   }
+
+   public SideDependentList<CRDTUnidirectionalSE3Trajectory> getDesiredFootPoses()
+   {
+      return desiredFootPoses;
+   }
+
+   public SideDependentList<CRDTUnidirectionalPose3D> getCurrentFootPoses()
+   {
+      return currentFootPoses;
+   }
+
+   public CRDTDetachableReferenceFrame getGoalFrame()
+   {
+      return goalFrame;
+   }
+
+   public CRDTUnidirectionalEnumField<WalkActionExecutionState> getExecutionState()
+   {
+      return executionState;
    }
 }
