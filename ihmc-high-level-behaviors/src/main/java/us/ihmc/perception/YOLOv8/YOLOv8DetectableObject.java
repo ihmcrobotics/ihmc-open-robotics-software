@@ -1,5 +1,7 @@
 package us.ihmc.perception.YOLOv8;
 
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
+
 public enum YOLOv8DetectableObject
 {
    PERSON,
@@ -22,12 +24,15 @@ public enum YOLOv8DetectableObject
    SHEEP,
    COW,
    ELEPHANT
+   // TODO: Finish adding the detectable object types
    ;
 
    public int getClassId()
    {
       return ordinal();
    }
+
+   PrimitiveRigidBodyShape correspondingShape;
 
    @Override
    public String toString()
