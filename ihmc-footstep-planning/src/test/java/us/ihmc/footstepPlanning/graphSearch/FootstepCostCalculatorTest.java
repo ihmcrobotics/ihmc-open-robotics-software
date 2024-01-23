@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnappingTools;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionFootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculatorInterface;
@@ -35,15 +36,13 @@ public class FootstepCostCalculatorTest
 
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       SideDependentList<ConvexPolygon2D> defaultFootPolygons = PlannerTools.createDefaultFootPolygons();
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(defaultFootPolygons);
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(defaultFootPolygons, footstepPlannerParameters, environmentHandler);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(defaultFootPolygons, footstepPlannerParameters);
 
       HashMap<DiscreteFootstep, DiscreteFootstep> idealStepMap = new HashMap<>();
       IdealStepCalculatorInterface idealStepCalculator = (stance, startOfSwing) -> idealStepMap.computeIfAbsent(stance, n -> DiscreteFootstep.generateRandomFootstep(random, 2.0, n.getRobotSide().getOppositeSide()));
 
       YoRegistry registry = new YoRegistry("testRegistry");
       FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, node -> 10.0, defaultFootPolygons,
-                                                                             environmentHandler,
                                                                              registry);
       int numberOfTests = 1000;
 
