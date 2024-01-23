@@ -28,7 +28,6 @@ public class CenterposeDetectionManager
       CENTERPOSE_DETECTION_TO_IHMC_ZUP_TRANSFORM.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
    }
 
-//   private final IHMCROS2Input<DetectedObjectPacket> subscriber;
    private final Map<Integer, TimeBasedDetectionFilter> centerposeNodeDetectionFilters = new HashMap<>();
    private final ReferenceFrame centerposeOutputFrame;
    private final MutableReferenceFrame imageAquisitionSensorFrame = new MutableReferenceFrame();
