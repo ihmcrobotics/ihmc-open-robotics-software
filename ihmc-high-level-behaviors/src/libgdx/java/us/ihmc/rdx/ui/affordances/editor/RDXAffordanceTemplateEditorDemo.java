@@ -1,15 +1,12 @@
 package us.ihmc.rdx.ui.affordances.editor;
 
-import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class RDXAffordanceTemplateEditorDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXAffordanceTemplateEditorUI editor;
-   private final SceneGraph sceneGraph = new SceneGraph(null);
 
    public RDXAffordanceTemplateEditorDemo()
    {
@@ -19,7 +16,7 @@ public class RDXAffordanceTemplateEditorDemo
          public void create()
          {
             baseUI.create();
-            editor = new RDXAffordanceTemplateEditorUI(baseUI, sceneGraph);
+            editor = new RDXAffordanceTemplateEditorUI(baseUI);
          }
 
          @Override
