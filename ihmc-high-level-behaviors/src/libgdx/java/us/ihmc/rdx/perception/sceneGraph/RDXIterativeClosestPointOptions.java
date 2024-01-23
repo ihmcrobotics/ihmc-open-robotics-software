@@ -12,13 +12,11 @@ import imgui.type.ImInt;
 import perception_msgs.msg.dds.DetectedObjectPacket;
 import perception_msgs.msg.dds.IterativeClosestPointRequest;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -30,8 +28,6 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.tools.thread.SwapReference;
-
-import java.util.ArrayList;
 
 public class RDXIterativeClosestPointOptions implements RenderableProvider
 {
@@ -142,14 +138,7 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
          ImGui.checkbox(labels.get("Use ICP Pose"), useICPPose);
 
          ImGui.sameLine();
-         if (ImGui.checkbox(labels.get("Show ICP Point Cloud"), showICPPointCloud))
-         {
-            if (!showICPPointCloud.get())
-            {
-               objectPointCloudRenderer.setPointsToRender(new ArrayList<>());
-               segmentationRenderer.setPointsToRender(new ArrayList<>());
-            }
-         }
+         ImGui.checkbox(labels.get("Show ICP Point Cloud"), showICPPointCloud);
 
          ImGui.endDisabled();
 
@@ -174,17 +163,23 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
             DetectedObjectPacket resultMessage = icpResultSwapReference.getForThreadTwo();
             icpFrameGraphic.setPoseInWorldFrame(resultMessage.getPose());
 
-            objectPointCloudRenderer.setPointsToRender(resultMessage.getObjectPointCloud(), Color.GOLD);
-            objectPointCloudRenderer.updateMesh();
+            if (showICPPointCloud.get())
+            {
+               objectPointCloudRenderer.setPointsToRender(resultMessage.getObjectPointCloud(), Color.GOLD);
+               objectPointCloudRenderer.updateMesh();
 
-            segmentationRenderer.setPointsToRender(resultMessage.getSegmentedPointCloud(), Color.LIGHT_GRAY);
-            segmentationRenderer.updateMesh();
+               segmentationRenderer.setPointsToRender(resultMessage.getSegmentedPointCloud(), Color.LIGHT_GRAY);
+               segmentationRenderer.updateMesh();
+            }
          }
       }
 
       icpFrameGraphic.getRenderables(renderables, pool);
-      objectPointCloudRenderer.getRenderables(renderables, pool);
-      segmentationRenderer.getRenderables(renderables, pool);
+      if (showICPPointCloud.get())
+      {
+         objectPointCloudRenderer.getRenderables(renderables, pool);
+         segmentationRenderer.getRenderables(renderables, pool);
+      }
    }
 
    public void destroy()
