@@ -25,6 +25,9 @@ int8 WAIT_DURATION_ACTION=17
 
 int8 WALK_ACTION=18
 
+# Monotonically increasing message ID
+uint32 sequence_id
+
 # The ID to assign to the next instantiated node
 uint32 next_id
 
