@@ -98,8 +98,6 @@ public class CenterposeDetectionManager
                centerposeNodeDetectionFilters.put(centerposeNode.getObjectID(), new TimeBasedDetectionFilter(1.0f, 2));
             }
 
-            System.out.println("centerposeNode.getName() " + centerposeNode.getName() + " centerposeNode.getObjectID() " + centerposeNode.getObjectID());
-
             centerposeNodeDetectionFilters.get(centerposeNode.getObjectID()).registerDetection();
          });
       }
