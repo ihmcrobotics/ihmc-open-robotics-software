@@ -81,9 +81,9 @@ public class RDXYOLOv8WithONNXRuntimeDemo
    private final int imageDepth = 3;
    private final Size detectionSize = new Size(1280, 736);
    private final Size maskSize = new Size(1280, 720);
-//   private final Size detectionSize = new Size(640, 640);
-   private final int shiftWidth = (int)(imageWidth - detectionSize.width())/2;
-   private final int shiftHeight = (int)(imageHeight - detectionSize.height())/2;
+   //   private final Size detectionSize = new Size(640, 640);
+   private final int shiftWidth = (int) (imageWidth - detectionSize.width()) / 2;
+   private final int shiftHeight = (int) (imageHeight - detectionSize.height()) / 2;
    int bytesIfUncompressed = imageWidth * imageHeight * imageDepth;
    ByteBuffer incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
    BytePointer incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
@@ -154,7 +154,7 @@ public class RDXYOLOv8WithONNXRuntimeDemo
 
             WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(YOLOv8ONNX.class, "/yolo/");
             WorkspaceFile onnxFile = new WorkspaceFile(directory, "yolov8n-seg_736x1280.onnx");
-//            WorkspaceFile onnxFile = new WorkspaceFile(directory, "yolov8n-seg_640x640.onnx");
+            //            WorkspaceFile onnxFile = new WorkspaceFile(directory, "yolov8n-seg_640x640.onnx");
             net = opencv_dnn.readNet(onnxFile.getFilesystemFile().toString());
             if (opencv_core.getCudaEnabledDeviceCount() > 0)
             {
@@ -272,183 +272,195 @@ public class RDXYOLOv8WithONNXRuntimeDemo
 
             updateImageDimensions(imageMessage.getImageWidth(), imageMessage.getImageHeight());
             opencv_imgproc.cvtColor(decompressedImage, bgra8Mat, opencv_imgproc.COLOR_BGR2BGRA);
-//            opencv_imgproc.cvtColor(decompressedImage, bgr8Mat, opencv_imgproc.COLOR_BGR2RGB);
+            //            opencv_imgproc.cvtColor(decompressedImage, bgr8Mat, opencv_imgproc.COLOR_BGR2RGB);
             decompressedImage.copyTo(bgr8Mat);
 
             incomingCompressedImageBuffer.clear();
             decompressedImage.close();
             compressedBytesMat.close();
-
-
-
          }
 
          public void updateYOLORender()
          {
-              if (bgra8Mat != null) {
-                  try{
+            if (bgra8Mat != null)
+            {
+               try
+               {
 
-                      blob = opencv_dnn.blobFromImage(bgr8Mat, 1 / 255.0, detectionSize, new Scalar(), true, true, opencv_core.CV_32F);
-                      net.setInput(blob);
-                      outputBlobs.resize(outNames.size());
+                  blob = opencv_dnn.blobFromImage(bgr8Mat, 1 / 255.0, detectionSize, new Scalar(), true, true, opencv_core.CV_32F);
+                  net.setInput(blob);
+                  outputBlobs.resize(outNames.size());
 
-                      long time1 = System.nanoTime();
-                      net.forward(outputBlobs, outNames);
-//                      long time2 = System.nanoTime();
-                      postprocess(outputBlobs);
-//                      long time3 = System.nanoTime();
-                      detectInFrame();
-//                      long time4 = System.nanoTime();
-                     segmentCup();
-                     segmentInFrame();
-                     long time5 = System.nanoTime();
+                  long time1 = System.nanoTime();
+                  net.forward(outputBlobs, outNames);
+                  //                      long time2 = System.nanoTime();
+                  postprocess(outputBlobs);
+                  //                      long time3 = System.nanoTime();
+                  detectInFrame();
+                  //                      long time4 = System.nanoTime();
+                  segmentCup();
+                  segmentInFrame();
+                  long time5 = System.nanoTime();
 
-                      calculateICPTime(time1, time5);
+                  calculateICPTime(time1, time5);
 
+                  outputBlobs.get(0).release();
+                  outputBlobs.get(1).release();
+               }
+               catch (Exception exception)
+               {
+                  exception.printStackTrace();
+               }
 
-                      outputBlobs.get(0).release();
-                      outputBlobs.get(1).release();
-                  }
-                  catch(Exception exception){
-                      exception.printStackTrace();
-                  }
-
-
-              YOLOv8ImagePanel.drawColorImage(bgra8Mat);
+               YOLOv8ImagePanel.drawColorImage(bgra8Mat);
                blob.release();
-              }
+            }
          }
 
-          public void postprocess(MatVector outputs){
-              Mat output0 = outputs.get(0);
-              data0 = output0.createIndexer();
-              Mat output1 = outputs.get(1);
-              data1 = output1.createIndexer();
+         public void postprocess(MatVector outputs)
+         {
+            Mat output0 = outputs.get(0);
+            data0 = output0.createIndexer();
+            Mat output1 = outputs.get(1);
+            data1 = output1.createIndexer();
 
-              IntVector detectedClassIds = new IntVector();
-              FloatVector detectedConfidences = new FloatVector();
-              RectVector detectedBoxes = new RectVector();
-             FloatVector detectedMaskWeights = new FloatVector();
-              for (long i = 0; i < data0.sizes()[2]; i++) {
-                  float maxConfidence = 0;
-                  long maxConfidenceClass = 0;
-                  for (long j = 0; j < 80; j++) {
-                      float confidence = data0.get(0,4+j, i);
-                      if (confidence > maxConfidence){
-                          maxConfidence = confidence;
-                          maxConfidenceClass = j;
-                      }
+            IntVector detectedClassIds = new IntVector();
+            FloatVector detectedConfidences = new FloatVector();
+            RectVector detectedBoxes = new RectVector();
+            FloatVector detectedMaskWeights = new FloatVector();
+            for (long i = 0; i < data0.sizes()[2]; i++)
+            {
+               float maxConfidence = 0;
+               long maxConfidenceClass = 0;
+               for (long j = 0; j < 80; j++)
+               {
+                  float confidence = data0.get(0, 4 + j, i);
+                  if (confidence > maxConfidence)
+                  {
+                     maxConfidence = confidence;
+                     maxConfidenceClass = j;
                   }
-                  if(maxConfidence >= confidenceThreshold){
-                      int centerX = (int) (data0.get(0, 0, i));
-                      int centerY = (int) (data0.get(0, 1, i));
-                      int width   = (int) (data0.get(0, 2, i));
-                      int height  = (int) (data0.get(0, 3, i));
-                      int left = centerX - width / 2;
-                      int top = centerY - height / 2;
+               }
+               if (maxConfidence >= confidenceThreshold)
+               {
+                  int centerX = (int) (data0.get(0, 0, i));
+                  int centerY = (int) (data0.get(0, 1, i));
+                  int width = (int) (data0.get(0, 2, i));
+                  int height = (int) (data0.get(0, 3, i));
+                  int left = centerX - width / 2;
+                  int top = centerY - height / 2;
 
-                      detectedClassIds.push_back((int)maxConfidenceClass);
-                      detectedConfidences.push_back(maxConfidence);
-                      detectedBoxes.push_back(new Rect(left, top, width, height));
-                      for (long k = 0; k < 32; k++){
-                         detectedMaskWeights.push_back(data0.get(0,84+k,i));
-                      }
-
+                  detectedClassIds.push_back((int) maxConfidenceClass);
+                  detectedConfidences.push_back(maxConfidence);
+                  detectedBoxes.push_back(new Rect(left, top, width, height));
+                  for (long k = 0; k < 32; k++)
+                  {
+                     detectedMaskWeights.push_back(data0.get(0, 84 + k, i));
                   }
-              }
-             IntPointer reducedIndices = new IntPointer(detectedConfidences.size());
-             FloatPointer confidencesPointer = new FloatPointer(detectedConfidences.size());
-              if (detectedBoxes.size() > 0 ){
-                  // remove overlapping bounding boxes with NMS
-                  confidencesPointer.put(detectedConfidences.get());
-                  opencv_dnn.NMSBoxes(detectedBoxes, confidencesPointer, confidenceThreshold, nmsThreshold, reducedIndices, 1.f, 0);
-              }
-              detections.clear();
-              for (int i = 0; i < reducedIndices.limit(); i++) {
-                  final int finalIdx = reducedIndices.get(i);
-                  ObjectDetectionResult tempDetection = detections.add();
-                 float[] tempMaskWeights = new float[32];
-                 for (int j = 0; j < 32; j++) {
-                    tempMaskWeights[j] = detectedMaskWeights.get((32*finalIdx)+j);
-                 }
-                 tempDetection.setClassId(detectedClassIds.get(finalIdx));
-                 tempDetection.setClassName(classNames.get(detectedClassIds.get(finalIdx)));
-                 tempDetection.setConfidence(detectedConfidences.get(finalIdx));
-                 tempDetection.setX(detectedBoxes.get(finalIdx).x()+shiftWidth);
-                 tempDetection.setY(detectedBoxes.get(finalIdx).y()+shiftHeight);
-                 tempDetection.setWidth(detectedBoxes.get(finalIdx).width());
-                 tempDetection.setHeight(detectedBoxes.get(finalIdx).height());
-                 tempDetection.setMaskWeights(tempMaskWeights);
+               }
+            }
+            IntPointer reducedIndices = new IntPointer(detectedConfidences.size());
+            FloatPointer confidencesPointer = new FloatPointer(detectedConfidences.size());
+            if (detectedBoxes.size() > 0)
+            {
+               // remove overlapping bounding boxes with NMS
+               confidencesPointer.put(detectedConfidences.get());
+               opencv_dnn.NMSBoxes(detectedBoxes, confidencesPointer, confidenceThreshold, nmsThreshold, reducedIndices, 1.f, 0);
+            }
+            detections.clear();
+            for (int i = 0; i < reducedIndices.limit(); i++)
+            {
+               final int finalIdx = reducedIndices.get(i);
+               ObjectDetectionResult tempDetection = detections.add();
+               float[] tempMaskWeights = new float[32];
+               for (int j = 0; j < 32; j++)
+               {
+                  tempMaskWeights[j] = detectedMaskWeights.get((32 * finalIdx) + j);
+               }
+               tempDetection.setClassId(detectedClassIds.get(finalIdx));
+               tempDetection.setClassName(classNames.get(detectedClassIds.get(finalIdx)));
+               tempDetection.setConfidence(detectedConfidences.get(finalIdx));
+               tempDetection.setX(detectedBoxes.get(finalIdx).x() + shiftWidth);
+               tempDetection.setY(detectedBoxes.get(finalIdx).y() + shiftHeight);
+               tempDetection.setWidth(detectedBoxes.get(finalIdx).width());
+               tempDetection.setHeight(detectedBoxes.get(finalIdx).height());
+               tempDetection.setMaskWeights(tempMaskWeights);
+            }
+         }
 
-              }
-          }
+         public void detectInFrame()
+         {
+            if (plotBoundingBoxes == true)
+            {
+               for (int index = 0; index < detections.size(); index++)
+               {
+                  if (detections.get(index).className.equals("cup"))
+                  {
+                     pointTopLeft.x(detections.get(index).x);
+                     pointTopLeft.y(detections.get(index).y);
+                     pointBottomRight.x(detections.get(index).x + detections.get(index).width);
+                     pointBottomRight.y(detections.get(index).y + detections.get(index).height);
+                     opencv_imgproc.rectangle(bgra8Mat, pointTopLeft, pointBottomRight, Scalar.BLACK, 2, LINE_8, 0);
+                     opencv_imgproc.putText(bgra8Mat, detections.get(index).className, pointTopLeft, opencv_imgproc.CV_FONT_HERSHEY_PLAIN, 2, Scalar.GREEN);
+                  }
+               }
+            }
+         }
 
-          public void detectInFrame(){
-              if (plotBoundingBoxes == true) {
-                  for (int index = 0; index < detections.size(); index++) {
-                     if (detections.get(index).className.equals("cup")){
-                        pointTopLeft.x(detections.get(index).x);
-                        pointTopLeft.y(detections.get(index).y);
-                        pointBottomRight.x(detections.get(index).x + detections.get(index).width);
-                        pointBottomRight.y(detections.get(index).y + detections.get(index).height);
-                        opencv_imgproc.rectangle(bgra8Mat, pointTopLeft, pointBottomRight, Scalar.BLACK, 2, LINE_8, 0);
-                        opencv_imgproc.putText(bgra8Mat, detections.get(index).className, pointTopLeft, opencv_imgproc.CV_FONT_HERSHEY_PLAIN, 2, Scalar.GREEN);
+         public void segmentCup()
+         {
+            if (plotSegmentations)
+            {
+               if (!detections.isEmpty())
+               {
+                  for (ObjectDetectionResult detection : detections)
+                  {
+                     if (detection.className.equals("cup"))
+                     {
+                        //                         Mat output1 = outputs.get(1);
+                        //                         FloatIndexer data1 = output1.createIndexer();
+                        float[][] maskFloatArray = new float[(int) data1.sizes()[2]][(int) data1.sizes()[3]];
+                        byte[][] maskByteArray = new byte[(int) data1.sizes()[2]][(int) data1.sizes()[3]];
+                        mask = new Mat((int) data1.sizes()[2], (int) data1.sizes()[3], opencv_core.CV_8U, new Scalar(0));
+
+                        for (int i = 0; i < 31; i++)
+                        {
+                           for (int j = 0; j < (int) data1.sizes()[2]; j++)
+                           {
+                              for (int k = 0; k < (int) data1.sizes()[3]; k++)
+                              {
+                                 maskFloatArray[j][k] += detection.maskWeights[i] * data1.get(0, i, j, k);
+                              }
+                           }
+                        }
+                        //use cv threshold here instead
+                        for (int j = 0; j < (int) data1.sizes()[2]; j++)
+                        {
+                           for (int k = 0; k < (int) data1.sizes()[3]; k++)
+                           {
+                              if (maskFloatArray[j][k] >= maskThreshold && j >= (detection.y) / 4 && j <= (detection.y + detection.height) / 4
+                                  && k >= (detection.x) / 4 && k <= (detection.x + detection.width) / 4)
+                              {
+                                 maskByteArray[j][k] = (byte) 255;
+                                 mask.data().put((long) j * data1.sizes()[3] + k, (byte) 150);
+                              }
+                              else
+                              {
+                                 //                                  maskByteArray[j][k] = (byte)0;
+                                 mask.data().put((long) j * data1.sizes()[3] + k, (byte) 0);
+                              }
+                           }
+                        }
                      }
                   }
-              }
-          }
+               }
+            }
+         }
 
-          public void segmentCup(){
-             if (plotSegmentations == true) {
-                if (detections.size() > 0)
-                {
-                   for (int index = 0; index < detections.size(); index++)
-                   {
-                      if (detections.get(index).className.equals("cup"))
-                      {
-//                         Mat output1 = outputs.get(1);
-//                         FloatIndexer data1 = output1.createIndexer();
-                         float[][] maskFloatArray = new float[(int) data1.sizes()[2]][(int) data1.sizes()[3]];
-                         byte[][] maskByteArray = new byte[(int) data1.sizes()[2]][(int) data1.sizes()[3]];
-                         mask = new Mat((int) data1.sizes()[2], (int) data1.sizes()[3], opencv_core.CV_8U, new Scalar(0));
-
-                         for (int i = 0; i < 31; i++)
-                         {
-                            for (int j = 0; j < (int) data1.sizes()[2]; j++)
-                            {
-                               for (int k = 0; k < (int) data1.sizes()[3]; k++)
-                               {
-                                  maskFloatArray[j][k] += detections.get(index).maskWeights[i] * data1.get(0, i, j, k);
-                               }
-                            }
-                         }
-                         //use cv threshold here instead
-                         for (int j = 0; j < (int) data1.sizes()[2]; j++)
-                         {
-                            for (int k = 0; k < (int) data1.sizes()[3]; k++)
-                            {
-                               if (maskFloatArray[j][k] >= maskThreshold && j>= (detections.get(index).y)/4 && j<= (detections.get(index).y+detections.get(index).height)/4 && k>= (detections.get(index).x)/4 && k<= (detections.get(index).x+detections.get(index).width)/4)
-                               {
-                                  maskByteArray[j][k] = (byte)255;
-                                  mask.data().put((long) j * data1.sizes()[3] + k, (byte) 150);
-                               }
-                               else
-                               {
-//                                  maskByteArray[j][k] = (byte)0;
-                                  mask.data().put((long) j * data1.sizes()[3] + k, (byte) 0);
-                               }
-                            }
-                         }
-
-
-                      }
-                   }
-                }
-             }
-          }
-
-          public void segmentInFrame(){
-            if (mask !=null){
+         public void segmentInFrame()
+         {
+            if (mask != null)
+            {
                Mat maskImageBRG = new Mat((int) data1.sizes()[2], (int) data1.sizes()[3], opencv_imgproc.COLOR_BGR2BGRA);
                opencv_imgproc.cvtColor(mask, maskImageBRG, opencv_imgproc.COLOR_BGR2BGRA);
                //                         opencv_imgproc.applyColorMap(mask, maskImageBRG, COLORMAP_DEEPGREEN);
@@ -458,7 +470,7 @@ public class RDXYOLOv8WithONNXRuntimeDemo
                opencv_imgproc.resize(maskImageBRG, maskImageBRG, maskSize);
                opencv_core.addWeighted(bgra8Mat, 1.0, maskImageBRG, 0.5, 0.0, bgra8Mat);
             }
-          }
+         }
 
          protected void updateImageDimensions(int imageWidth, int imageHeight)
          {
@@ -490,7 +502,7 @@ public class RDXYOLOv8WithONNXRuntimeDemo
          {
             long timeDiffNanos = time2 - time1;
             icpGuiICPRunTimeInSeconds = Conversions.nanosecondsToSeconds(timeDiffNanos);
-            System.out.println(icpGuiICPRunTimeInSeconds);
+//            System.out.println(icpGuiICPRunTimeInSeconds);
          }
 
          @Override
@@ -589,5 +601,8 @@ class ObjectDetectionResult
       this.height = height;
    }
 
-   public void setMaskWeights(float[] maskWeights) {this.maskWeights = maskWeights;}
+   public void setMaskWeights(float[] maskWeights)
+   {
+      this.maskWeights = maskWeights;
+   }
 }
