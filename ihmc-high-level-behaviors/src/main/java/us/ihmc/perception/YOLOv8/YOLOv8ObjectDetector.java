@@ -1,5 +1,153 @@
 package us.ihmc.perception.YOLOv8;
 
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.indexer.FloatIndexer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_dnn;
+import org.bytedeco.opencv.opencv_core.*;
+import org.bytedeco.opencv.opencv_dnn.Net;
+import org.bytedeco.opencv.opencv_text.FloatVector;
+import org.bytedeco.opencv.opencv_text.IntVector;
+import us.ihmc.perception.neural.YOLOv8ONNX;
+import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class YOLOv8ObjectDetector
 {
+   private static final String ONNX_FILE_NAME = "yolov8n-seg_736x1280.onnx";
+   private static final double SCALE_FACTOR = 1.0 / 255.0;
+   private static final Size DETECTION_SIZE = new Size(1280, 736);
+   private static final float NON_MAXIMUM_SUPPRESSION_THRESHOLD = 0.1f;
+
+   private final Net yoloNet;
+   private final StringVector outputNames;
+
+   public YOLOv8ObjectDetector()
+   {
+      WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(YOLOv8ONNX.class, "/yolo/");
+      WorkspaceFile onnxFile = new WorkspaceFile(directory, ONNX_FILE_NAME);
+
+      if (onnxFile.getFilesystemFile() == null)
+         throw new NullPointerException("YOLOv8 ONNX file could not be found");
+
+      yoloNet = opencv_dnn.readNet(onnxFile.getFilesystemFile().toString());
+      if (opencv_core.getCudaEnabledDeviceCount() > 0)
+      {
+         yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_CUDA);
+         yoloNet.setPreferableTarget(opencv_dnn.DNN_TARGET_CUDA);
+      }
+      else
+      {
+         yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_OPENCV);
+         yoloNet.setPreferableTarget(opencv_dnn.DNN_TARGET_CPU);
+      }
+
+      outputNames = yoloNet.getUnconnectedOutLayersNames();
+   }
+
+   public YOLOv8DetectionResults runOnImage(Mat bgrImageMat, float confidenceThreshold)
+   {
+      Mat blob = opencv_dnn.blobFromImage(bgrImageMat, SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
+      yoloNet.setInput(blob);
+      MatVector outputBlobs = new MatVector(outputNames.size());
+      yoloNet.forward(outputBlobs, outputNames);
+
+      List<YOLOv8Detection> detections = processOutput(outputBlobs.get(0), confidenceThreshold, bgrImageMat.cols(), bgrImageMat.rows());
+      YOLOv8DetectionResults results = new YOLOv8DetectionResults(detections, outputBlobs.get(1).createIndexer());
+
+      outputBlobs.get(0).release();
+      outputBlobs.get(1).release();
+      blob.release();
+
+      return results;
+   }
+
+   public void destroy()
+   {
+      DETECTION_SIZE.close();
+   }
+
+   private List<YOLOv8Detection> processOutput(Mat yoloOutput, float confidenceThreshold, int imageWidth, int imageHeight)
+   {
+      int shiftWidth = (imageWidth - DETECTION_SIZE.width()) / 2;
+      int shiftHeight = (imageHeight - DETECTION_SIZE.height()) / 2;
+
+      List<YOLOv8Detection> detections = new ArrayList<>();
+
+      try (FloatIndexer output0Indexer = yoloOutput.createIndexer();
+           IntVector detectedClassIds = new IntVector();
+           FloatVector detectedConfidences = new FloatVector();
+           RectVector detectedBoxes = new RectVector();
+           FloatVector detectedMaskWeights = new FloatVector())
+      {
+         for (long i = 0; i < output0Indexer.size(2); i++)
+         {
+            // Find most confident class detection
+            float maxConfidence = 0;
+            long maxConfidenceClass = 0;
+            for (long j = 0; j < 80; j++) // TODO: find out where this 80 comes from
+            {
+               float confidence = output0Indexer.get(0, 4 + j, i);
+               if (confidence > maxConfidence)
+               {
+                  maxConfidence = confidence;
+                  maxConfidenceClass = j;
+               }
+            }
+            // Ensure confidence is above threshold
+            if (maxConfidence >= confidenceThreshold)
+            {
+               int centerX = (int) (output0Indexer.get(0, 0, i));
+               int centerY = (int) (output0Indexer.get(0, 1, i));
+               int width = (int) (output0Indexer.get(0, 2, i));
+               int height = (int) (output0Indexer.get(0, 3, i));
+               int left = centerX - width / 2;
+               int top = centerY - height / 2;
+
+               detectedClassIds.push_back((int) maxConfidenceClass);
+               detectedConfidences.push_back(maxConfidence);
+               detectedBoxes.push_back(new Rect(left, top, width, height));
+               for (long k = 0; k < 32; k++)
+               {
+                  detectedMaskWeights.push_back(output0Indexer.get(0, 84 + k, i));
+               }
+            }
+         }
+         IntPointer reducedIndices = new IntPointer(detectedConfidences.size());
+         FloatPointer confidencesPointer = new FloatPointer(detectedConfidences.size());
+
+         if (detectedBoxes.size() > 0)
+         {
+            // remove overlapping bounding boxes with NMS
+            confidencesPointer.put(detectedConfidences.get());
+            opencv_dnn.NMSBoxes(detectedBoxes, confidencesPointer, confidenceThreshold, NON_MAXIMUM_SUPPRESSION_THRESHOLD, reducedIndices, 1.0f, 0);
+         }
+
+         for (int i = 0; i < reducedIndices.limit(); i++)
+         {
+            int index = reducedIndices.get(i);
+            float[] maskWeights = new float[32];
+            for (int j = 0; j < 32; j++)
+            {
+               maskWeights[j] = detectedMaskWeights.get((32L * index) + j);
+            }
+            detections.add(new YOLOv8Detection(YOLOv8DetectableObject.values()[detectedClassIds.get(index)],
+                                               detectedConfidences.get(index),
+                                               detectedBoxes.get(index).x() + shiftWidth,
+                                               detectedBoxes.get(index).y() + shiftHeight,
+                                               detectedBoxes.get(index).width(),
+                                               detectedBoxes.get(index).height(),
+                                               maskWeights));
+         }
+
+         confidencesPointer.close();
+         reducedIndices.close();
+      }
+
+      return detections;
+   }
 }
