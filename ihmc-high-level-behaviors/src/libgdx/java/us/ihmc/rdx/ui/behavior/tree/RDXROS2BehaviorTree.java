@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
-import imgui.ImVec2;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
@@ -27,7 +26,6 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    private final Throttler communicationThrottler = new Throttler().setFrequency(ROS2BehaviorTreeState.SYNC_FREQUENCY);
    private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
    private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
-   private final transient ImVec2 statusTextSize = new ImVec2();
 
    public RDXROS2BehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                               DRCRobotModel robotModel,
@@ -77,19 +75,17 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       super.renderImGuiWidgetsPre();
 
       // Prevent jumping around when it changes
-      ImGui.calcTextSize(statusTextSize, "Operator: 999 Robot: 999 ");
-      float nodeCountsTextWidth = statusTextSize.x;
-      ImGui.calcTextSize(statusTextSize, "State: Frozen (999)");
-      float frozenStatusTextWidth = statusTextSize.x;
-      ImGui.calcTextSize(statusTextSize, "999 Hz");
-      float frequencyTextWidth = statusTextSize.x;
+      float nodeCountsTextWidth = ImGuiTools.calcTextSizeX("Operator: 000 Robot: 000 ");
+      float frozenStatusTextWidth = ImGuiTools.calcTextSizeX("State: Frozen (000)");
+      float frequencyTextWidth = ImGuiTools.calcTextSizeX("000 Hz ");
+      float droppedTextWidth = ImGuiTools.calcTextSizeX("Dropped: 0000");
       float rightMargin = 20.0f;
 
-      ImGui.sameLine(ImGui.getWindowSizeX() - nodeCountsTextWidth - frozenStatusTextWidth - frequencyTextWidth - rightMargin);
+      ImGui.sameLine(ImGui.getWindowSizeX() - nodeCountsTextWidth - frozenStatusTextWidth - frequencyTextWidth - droppedTextWidth - rightMargin);
       int numberOfLocalNodes = ros2BehaviorTreeState.getBehaviorTreeState().getNumberOfNodes();
       ImGui.text("Operator: %3d  Robot: %3d".formatted(numberOfLocalNodes, ros2BehaviorTreeState.getBehaviorTreeSubscription().getNumberOfOnRobotNodes()));
 
-      ImGui.sameLine(ImGui.getWindowSizeX() - frozenStatusTextWidth - frequencyTextWidth - rightMargin);
+      ImGui.sameLine(ImGui.getWindowSizeX() - frozenStatusTextWidth - frequencyTextWidth - droppedTextWidth - rightMargin);
       int numberOfFrozenNodes = ros2BehaviorTreeState.getBehaviorTreeState().getNumberOfFrozenNodes();
       ImGui.text("State:");
       ImGui.sameLine();
@@ -98,8 +94,11 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       else
          ImGui.text("Normal");
 
-      ImGui.sameLine(ImGui.getWindowSizeX() - frequencyTextWidth - rightMargin);
+      ImGui.sameLine(ImGui.getWindowSizeX() - frequencyTextWidth - droppedTextWidth - rightMargin);
       subscriptionFrequencyText.render();
+
+      ImGui.sameLine(ImGui.getWindowSizeX() - droppedTextWidth - rightMargin);
+      ImGui.text("Dropped: %4d".formatted(ros2BehaviorTreeState.getBehaviorTreeSubscription().getMessageDropCount()));
 
       super.renderImGuiWidgetsPost();
    }

@@ -17,6 +17,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.math.functionGenerator.FunctionGeneratorErrorCalculator;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
@@ -630,6 +631,15 @@ public class RigidBodyJointControlHelper
          desiredAcceleration += functionGenerators.get(jointIdx).getValueDDot();
       }
       return desiredAcceleration;
+   }
+
+   public void resetFunctionGenerators()
+   {
+      for (int i = 0; i < functionGenerators.size(); i++)
+      {
+         functionGenerators.get(i).setMode(YoFunctionGeneratorMode.OFF);
+         functionGenerators.get(i).reset();
+      }
    }
 
    public JointspaceFeedbackControlCommand getJointspaceCommand()

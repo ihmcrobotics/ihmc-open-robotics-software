@@ -21,6 +21,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXKeyBindings;
 import us.ihmc.rdx.RDXSettings;
+import us.ihmc.rdx.imgui.ImGuiFrequencyDisplay;
 import us.ihmc.rdx.imgui.RDXPanelManager;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -104,7 +105,7 @@ public class RDXBaseUI
    private final String windowTitle;
    private String configurationExtraPath;
    private final HybridResourceDirectory configurationBaseDirectory;
-   private final RDXBaseUIFrameRateDisplay frameRateDisplay = new RDXBaseUIFrameRateDisplay();
+   private final ImGuiFrequencyDisplay frameRateDisplay = new ImGuiFrequencyDisplay("frameRateDisplay");
    private final Stopwatch runTime = new Stopwatch().start();
    private String statusText = ""; // TODO: Add status at bottom of window
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -491,6 +492,8 @@ public class RDXBaseUI
 
          ImGui.endMenu();
       }
+
+      frameRateDisplay.ping();
 
       if (plotFrameRate.get())
       {
