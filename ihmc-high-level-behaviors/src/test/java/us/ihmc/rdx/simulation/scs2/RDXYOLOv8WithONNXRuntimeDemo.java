@@ -1,16 +1,11 @@
 package us.ihmc.rdx.simulation.scs2;
 
 import com.badlogic.gdx.graphics.Pixmap;
-import com.vividsolutions.jts.util.Memory;
 import imgui.internal.ImGui;
-import javafx.application.Application;
-import javafx.stage.Stage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
-import org.bytedeco.javacpp.indexer.FloatRawIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_dnn;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
@@ -19,22 +14,12 @@ import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_dnn.Net;
 import org.bytedeco.opencv.opencv_text.FloatVector;
 import org.bytedeco.opencv.opencv_text.IntVector;
-import org.opencv.core.MatOfFloat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.neural.YOLOv8ONNX;
-import us.ihmc.perception.opencv.OpenCVArUcoMarker;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
@@ -42,7 +27,6 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
-import us.ihmc.rdx.perception.RDXOpenCVArUcoMarkerDetectionUI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
@@ -50,26 +34,21 @@ import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2CenterposeVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.string.StringTools;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Vector;
 
-import static org.bytedeco.opencv.global.opencv_imgproc.*;
+import static org.bytedeco.opencv.global.opencv_imgproc.COLORMAP_OCEAN;
+import static org.bytedeco.opencv.global.opencv_imgproc.LINE_8;
 
 public class RDXYOLOv8WithONNXRuntimeDemo
 {
