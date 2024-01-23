@@ -24,6 +24,8 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
    private final BehaviorTreeState behaviorTreeState;
    private final Consumer<T> rootNodeSetter;
    private long numberOfMessagesReceived = 0;
+   private long previousUpdateNumber = -1;
+   private long messageDropCount = 0;
    private int numberOfOnRobotNodes = 0;
    private final SwapReference<BehaviorTreeStateMessage> behaviorTreeStateMessageSwapReference;
    private final Notification recievedMessageNotification = new Notification();
@@ -54,6 +56,14 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
             {
                messageRecievedCallback.run();
             }
+
+            long nextUpdateNumber = behaviorTreeStateMessage.getSequenceId();
+            if (previousUpdateNumber > -1)
+            {
+               long expectedUpdateNumber = previousUpdateNumber + 1;
+               messageDropCount += nextUpdateNumber - expectedUpdateNumber;
+            }
+            previousUpdateNumber = nextUpdateNumber;
 
             numberOfOnRobotNodes = behaviorTreeStateMessage.getBehaviorTreeIndices().size();
 
@@ -193,6 +203,11 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
    public long getNumberOfMessagesReceived()
    {
       return numberOfMessagesReceived;
+   }
+
+   public long getMessageDropCount()
+   {
+      return messageDropCount;
    }
 
    public int getNumberOfOnRobotNodes()
