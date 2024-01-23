@@ -141,8 +141,7 @@ public class RigidBodySceneObjectDefinitions
    static
    {
       EuclidCoreMissingTools.setYawPitchRollDegrees(DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 0, 90, -90);
-      DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addX(0.01);
-      DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(-0.20);
+      DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.05);
    }
 
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
