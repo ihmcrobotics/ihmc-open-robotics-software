@@ -32,12 +32,12 @@ public class CenterposeDetectionManager
    private final ReferenceFrame centerposeOutputFrame;
    private final MutableReferenceFrame imageAquisitionSensorFrame = new MutableReferenceFrame();
 
-   private ConcurrentLinkedQueue<DetectedObjectPacket> messageQueue = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<DetectedObjectPacket> messageQueue = new ConcurrentLinkedQueue<>();
 
-   public CenterposeDetectionManager(ROS2Helper ros2Helper, ReferenceFrame sensorFrame)
+   public CenterposeDetectionManager(ROS2Helper ros2Helper)
    {
       ROS2Topic<DetectedObjectPacket> topicName = PerceptionAPI.CENTERPOSE_DETECTED_OBJECT;
-      ros2Helper.subscribeViaCallback(topicName, detectedObjectPacket -> messageQueue.add(detectedObjectPacket));
+      ros2Helper.subscribeViaCallback(topicName, messageQueue::add);
 
       centerposeOutputFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("CenterposeOutputFrame",
                                                                                                 imageAquisitionSensorFrame.getReferenceFrame(),
