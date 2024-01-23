@@ -7,6 +7,8 @@ import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -16,7 +18,7 @@ public class RDXAvailableBehaviorTreeFile
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private String name;
    private final SortedSet<String> referenceFrameNames = new TreeSet<>();
-   private int numberOfFramesInWorld = 0;
+   private final Set<String> referenceFramesInWorld = new HashSet<>();
 
    public RDXAvailableBehaviorTreeFile(WorkspaceResourceFile treeFile, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -27,14 +29,13 @@ public class RDXAvailableBehaviorTreeFile
 
    public void update()
    {
-      numberOfFramesInWorld = 0;
-
+      referenceFramesInWorld.clear();
       for (String referenceFrameName : referenceFrameNames)
       {
          ReferenceFrame frameByName = referenceFrameLibrary.findFrameByName(referenceFrameName);
          if (frameByName != null && frameByName.getRootFrame() == ReferenceFrame.getWorldFrame())
          {
-            ++numberOfFramesInWorld;
+            referenceFramesInWorld.add(referenceFrameName);
          }
       }
    }
@@ -75,6 +76,11 @@ public class RDXAvailableBehaviorTreeFile
 
    public int getNumberOfFramesInWorld()
    {
-      return numberOfFramesInWorld;
+      return referenceFramesInWorld.size();
+   }
+
+   public Set<String> getReferenceFramesInWorld()
+   {
+      return referenceFramesInWorld;
    }
 }

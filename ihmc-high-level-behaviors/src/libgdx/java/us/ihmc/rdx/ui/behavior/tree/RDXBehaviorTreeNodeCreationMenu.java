@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
@@ -66,13 +67,16 @@ public class RDXBehaviorTreeNodeCreationMenu
          indexedTreeFile.update();
       }
 
-      indexedTreeFiles.sort(Comparator.comparing(RDXAvailableBehaviorTreeFile::getNumberOfFramesInWorld).reversed()
+      indexedTreeFiles.sort(Comparator.comparing((RDXAvailableBehaviorTreeFile file) -> file.getNumberOfFramesInWorld() > 0).reversed()
                                       .thenComparing(RDXAvailableBehaviorTreeFile::getName));
 
       ImGui.indent();
       for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
       {
-         String textToDisplay = "%s (%d/%d frames in scene)".formatted(indexedTreeFile.getTreeFile().getFileName(),
+         if (indexedTreeFile.getReferenceFramesInWorld().isEmpty())
+            ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
+
+         String textToDisplay = "%s".formatted(indexedTreeFile.getTreeFile().getFileName(),
                                                                        indexedTreeFile.getNumberOfFramesInWorld(),
                                                                        indexedTreeFile.getReferenceFrameNames().size());
          if (ImGuiTools.textWithUnderlineOnHover(textToDisplay))
@@ -86,6 +90,36 @@ public class RDXBehaviorTreeNodeCreationMenu
 
                complete(insertionDefinition);
             }
+         }
+
+         if (indexedTreeFile.getReferenceFramesInWorld().isEmpty())
+            ImGui.popStyleColor();
+
+         if (ImGui.isItemHovered())
+         {
+            ImGui.beginTooltip();
+
+            ImGui.text("Reference frames:");
+
+            if (indexedTreeFile.getReferenceFrameNames().isEmpty())
+            {
+               ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
+               ImGui.text("\t(Contains no reference frames.)");
+               ImGui.popStyleColor();
+            }
+
+            for (String referenceFrameName : indexedTreeFile.getReferenceFrameNames())
+            {
+               if (!indexedTreeFile.getReferenceFramesInWorld().contains(referenceFrameName))
+                  ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
+
+               ImGui.text("\t" + referenceFrameName);
+
+               if (!indexedTreeFile.getReferenceFramesInWorld().contains(referenceFrameName))
+                  ImGui.popStyleColor();
+            }
+
+            ImGui.endTooltip();
          }
       }
       ImGui.unindent();
