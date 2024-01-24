@@ -172,7 +172,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       return isManuallyPlaced.getValue();
    }
 
-   public void setInManuallyPlaced(boolean isManuallyPlaced)
+   public void setIsManuallyPlaced(boolean isManuallyPlaced)
    {
       this.isManuallyPlaced.setValue(isManuallyPlaced);
    }

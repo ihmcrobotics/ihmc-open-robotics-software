@@ -4,7 +4,6 @@ import imgui.internal.ImGui;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.ui.behavior.actions.RDXFootstepPlanAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXHandPoseAction;
-import us.ihmc.rdx.ui.behavior.actions.RDXWalkAction;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ public class RDXActionProgressWidgetsManager
       {
          action.getProgressWidgets().update();
 
-         if (action instanceof RDXWalkAction || action instanceof RDXFootstepPlanAction)
+         if (action instanceof RDXFootstepPlanAction)
             containsFootsteps = true;
          if (action instanceof RDXHandPoseAction)
             containsHandMovements = true;
@@ -66,7 +65,7 @@ public class RDXActionProgressWidgetsManager
       handleRenderingBlankBar(true);
       for (int i = 0; i < actionNodesToRender.size(); i++)
       {
-         if (actionNodesToRender.get(i) instanceof RDXWalkAction || actionNodesToRender.get(i) instanceof RDXFootstepPlanAction)
+         if (actionNodesToRender.get(i) instanceof RDXFootstepPlanAction)
             actionNodesToRender.get(i).getProgressWidgets().renderFootPositions(dividedBarWidth, renderAsPlots);
          else
             actionNodesToRender.get(i).getProgressWidgets().renderPositionError(dividedBarWidth, renderAsPlots);
@@ -78,7 +77,7 @@ public class RDXActionProgressWidgetsManager
       handleRenderingBlankBar(true);
       for (int i = 0; i < actionNodesToRender.size(); i++)
       {
-         if (actionNodesToRender.get(i) instanceof RDXWalkAction || actionNodesToRender.get(i) instanceof RDXFootstepPlanAction)
+         if (actionNodesToRender.get(i) instanceof RDXFootstepPlanAction)
             actionNodesToRender.get(i).getProgressWidgets().renderFootOrientations(dividedBarWidth, renderAsPlots);
          else
             actionNodesToRender.get(i).getProgressWidgets().renderOrientationError(dividedBarWidth, renderAsPlots);
