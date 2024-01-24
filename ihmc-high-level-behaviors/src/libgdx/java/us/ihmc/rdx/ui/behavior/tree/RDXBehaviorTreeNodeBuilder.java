@@ -79,7 +79,14 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       }
       if (nodeType == FootstepPlanActionDefinition.class)
       {
-         return new RDXFootstepPlanAction(id, crdtInfo, saveFileDirectory, baseUI, robotModel, syncedRobot, referenceFrameLibrary);
+         return new RDXFootstepPlanAction(id,
+                                          crdtInfo,
+                                          saveFileDirectory,
+                                          baseUI,
+                                          robotModel,
+                                          syncedRobot,
+                                          referenceFrameLibrary,
+                                          footstepPlannerParametersBasics);
       }
       if (nodeType == HandPoseActionDefinition.class)
       {
@@ -118,10 +125,6 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       if (nodeType == WaitDurationActionDefinition.class)
       {
          return new RDXWaitDurationAction(id, crdtInfo, saveFileDirectory);
-      }
-      if (nodeType == WalkActionDefinition.class)
-      {
-         return new RDXWalkAction(id, crdtInfo, saveFileDirectory, panel3D, robotModel, referenceFrameLibrary, footstepPlannerParametersBasics);
       }
       else
       {

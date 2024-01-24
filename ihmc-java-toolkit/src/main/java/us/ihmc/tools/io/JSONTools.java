@@ -28,7 +28,7 @@ public class JSONTools
       ObjectNode transformObject = (ObjectNode) jsonNode.get(name);
       toEuclid(transformObject, rigidBodyTransform);
    }
-
+   
    /**
     * When saving we reduce the precision of the numbers so that infintesimal changes
     * do not show up as changes to the actions. We choose half a millimeter as the smallest
