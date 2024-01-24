@@ -69,7 +69,9 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
                                                syncedRobot,
                                                footstepTracker,
                                                referenceFrameLibrary,
-                                               walkingControllerParameters);
+                                               walkingControllerParameters,
+                                               footstepPlanner,
+                                               footstepPlannerParameters);
       }
       if (nodeType == HandPoseActionDefinition.class)
       {
@@ -90,19 +92,6 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       if (nodeType == WaitDurationActionDefinition.class)
       {
          return new WaitDurationActionExecutor(id, crdtInfo, saveFileDirectory, syncedRobot);
-      }
-      if (nodeType == WalkActionDefinition.class)
-      {
-         return new WalkActionExecutor(id,
-                                       crdtInfo,
-                                       saveFileDirectory,
-                                       ros2ControllerHelper,
-                                       syncedRobot,
-                                       footstepTracker,
-                                       footstepPlanner,
-                                       footstepPlannerParameters,
-                                       walkingControllerParameters,
-                                       referenceFrameLibrary);
       }
 
       return null;
