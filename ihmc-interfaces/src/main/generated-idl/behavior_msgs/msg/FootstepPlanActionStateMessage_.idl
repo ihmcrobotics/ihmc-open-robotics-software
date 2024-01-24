@@ -12,23 +12,17 @@ module behavior_msgs
   {
     module dds
     {
-      const octet TRIGGERED =
+      const octet FOOTSTEP_PLANNING =
       0;
 
-      const octet FOOTSTEP_PLANNING =
+      const octet PLANNING_FAILED =
       1;
 
-      const octet PLANNING_FAILED =
+      const octet PLANNING_SUCCEEDED =
       2;
 
-      const octet PLANNING_SUCCEEDED =
-      3;
-
       const octet PLAN_COMMANDED =
-      4;
-
-      const octet PLAN_EXECUTION_COMPLETE =
-      5;
+      3;
 
 
       @TypeCode(type="behavior_msgs::msg::dds_::FootstepPlanActionStateMessage_")
