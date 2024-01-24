@@ -11,7 +11,6 @@
 #include "behavior_msgs/msg/./PelvisHeightPitchActionStateMessage_.idl"
 #include "behavior_msgs/msg/./SakeHandCommandActionStateMessage_.idl"
 #include "behavior_msgs/msg/./WaitDurationActionStateMessage_.idl"
-#include "behavior_msgs/msg/./WalkActionStateMessage_.idl"
 #include "ihmc_common_msgs/msg/./ConfirmableRequestMessage_.idl"
 module behavior_msgs
 {
@@ -48,9 +47,6 @@ module behavior_msgs
 
       const octet WAIT_DURATION_ACTION =
       17;
-
-      const octet WALK_ACTION =
-      18;
 
 
       /**
@@ -94,7 +90,6 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::HandWrenchActionStateMessage, 200> hand_wrench_actions;
         sequence<behavior_msgs::msg::dds::PelvisHeightPitchActionStateMessage, 200> pelvis_height_actions;
         sequence<behavior_msgs::msg::dds::WaitDurationActionStateMessage, 200> wait_duration_actions;
-        sequence<behavior_msgs::msg::dds::WalkActionStateMessage, 200> walk_actions;
       };
     };
   };

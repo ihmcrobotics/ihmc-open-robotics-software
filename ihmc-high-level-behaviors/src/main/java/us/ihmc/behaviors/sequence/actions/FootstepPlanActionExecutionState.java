@@ -1,22 +1,20 @@
 package us.ihmc.behaviors.sequence.actions;
 
-public enum WalkActionExecutionState
+public enum FootstepPlanActionExecutionState
 {
-   TRIGGERED,
    FOOTSTEP_PLANNING,
    PLANNING_FAILED,
    PLANNING_SUCCEEDED,
-   PLAN_COMMANDED,
-   PLAN_EXECUTION_COMPLETE;
+   PLAN_COMMANDED;
 
-   public static final WalkActionExecutionState[] values = values();
+   public static final FootstepPlanActionExecutionState[] values = values();
 
    public byte toByte()
    {
       return (byte) ordinal();
    }
 
-   public static WalkActionExecutionState fromByte(byte enumAsByte)
+   public static FootstepPlanActionExecutionState fromByte(byte enumAsByte)
    {
       if (enumAsByte == -1)
          return null;
