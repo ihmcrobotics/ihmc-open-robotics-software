@@ -1,9 +1,7 @@
-byte TRIGGERED = 0
-byte FOOTSTEP_PLANNING = 1
-byte PLANNING_FAILED = 2
-byte PLANNING_SUCCEEDED = 3
-byte PLAN_COMMANDED = 4
-byte PLAN_EXECUTION_COMPLETE = 5
+byte FOOTSTEP_PLANNING = 0
+byte PLANNING_FAILED = 1
+byte PLANNING_SUCCEEDED = 2
+byte PLAN_COMMANDED = 3
 
 # Parent state fields
 behavior_msgs/ActionNodeStateMessage state
