@@ -115,10 +115,6 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       {
          return new RDXWaitDurationAction(id, crdtInfo, saveFileDirectory);
       }
-      if (nodeType == WalkActionDefinition.class)
-      {
-         return new RDXWalkAction(id, crdtInfo, saveFileDirectory, panel3D, robotModel, referenceFrameLibrary, footstepPlannerParametersBasics);
-      }
       else
       {
          return null;
