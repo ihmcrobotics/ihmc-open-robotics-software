@@ -32,6 +32,8 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.math.QuaternionCalculus;
@@ -1285,6 +1287,18 @@ public class MessageTools
       trajectoryPoint.getOrientation().set(trajectoryPointMessage.getOrientation());
       trajectoryPoint.getLinearVelocity().set(trajectoryPointMessage.getLinearVelocity());
       trajectoryPoint.getAngularVelocity().set(trajectoryPointMessage.getAngularVelocity());
+   }
+
+   public static void toMessage(SpatialVectorReadOnly spatialVector, SpatialVectorMessage spatialVectorMessage)
+   {
+      spatialVectorMessage.getLinearPart().set(spatialVector.getLinearPart());
+      spatialVectorMessage.getAngularPart().set(spatialVector.getAngularPart());
+   }
+
+   public static void fromMessage(SpatialVectorMessage spatialVectorMessage, SpatialVector spatialVector)
+   {
+      spatialVector.getLinearPart().set(spatialVectorMessage.getLinearPart());
+      spatialVector.getAngularPart().set(spatialVectorMessage.getAngularPart());
    }
 
    public static void toMessage(Instant instant, InstantMessage instantMessage)

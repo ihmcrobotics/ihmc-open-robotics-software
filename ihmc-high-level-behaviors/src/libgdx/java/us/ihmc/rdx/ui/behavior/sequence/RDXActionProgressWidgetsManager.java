@@ -74,6 +74,15 @@ public class RDXActionProgressWidgetsManager
       }
       ImGui.spacing();
 
+      widgetAligner.text("Velocity error (m/s):");
+      handleRenderingBlankBar(true);
+      for (int i = 0; i < actionNodesToRender.size(); i++)
+      {
+         actionNodesToRender.get(i).getProgressWidgets().renderVelocityError(dividedBarWidth, renderAsPlots);
+         sameLineExceptLast(i);
+      }
+      ImGui.spacing();
+
       widgetAligner.text("Orientation error (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
       handleRenderingBlankBar(true);
       for (int i = 0; i < actionNodesToRender.size(); i++)

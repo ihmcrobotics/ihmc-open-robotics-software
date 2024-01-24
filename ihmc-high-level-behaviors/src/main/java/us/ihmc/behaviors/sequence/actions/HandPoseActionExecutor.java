@@ -11,6 +11,7 @@ import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotUpdateNotification;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.*;
@@ -22,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -38,11 +40,13 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
+   private final Twist syncedHandTwist = new Twist();
    private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
    private final RigidBodyTransform chestToPelvisZeroAngles = new RigidBodyTransform();
    private final FramePose3D chestInPelvis = new FramePose3D();
    private final FramePose3D goalChestFrame = new FramePose3D();
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
+   private final ROS2SyncedRobotUpdateNotification syncedRobotUpdateNotification = new ROS2SyncedRobotUpdateNotification();
 
    public HandPoseActionExecutor(long id,
                                  CRDTInfo crdtInfo,
@@ -75,6 +79,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    {
       super.update();
 
+      syncedRobotUpdateNotification.update(syncedRobot, syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
       trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
       state.setCanExecute(state.getPalmFrame().isChildOfWorld());
@@ -248,28 +253,36 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
       if (state.getPalmFrame().isChildOfWorld())
       {
-         desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
-         syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
-
-         trackingCalculator.computePoseTrackingData(desiredHandControlPose, syncedHandControlPose);
-         trackingCalculator.factorInR3Errors(POSITION_TOLERANCE);
-         trackingCalculator.factoryInSO3Errors(ORIENTATION_TOLERANCE);
-
-         boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
-         meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
-         state.getCurrentPose().getValue().set(syncedHandControlPose);
-         state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-         state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-         state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getLinearPart());
-         state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getAngularPart());
-
-         if (meetsDesiredCompletionCriteria)
+         // Make sure not to run an update unless we got updated data from the robot
+         if (syncedRobotUpdateNotification.getNotification().poll())
          {
-            state.setIsExecuting(false);
+            desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
+            syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
 
-            if (!getDefinition().getJointspaceOnly() && !getDefinition().getHoldPoseInWorldLater())
+            syncedHandTwist.setIncludingFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()).getTwistOfFrame());
+            syncedHandTwist.changeFrame(ReferenceFrame.getWorldFrame());
+
+            trackingCalculator.computePoseTrackingData(desiredHandControlPose, syncedHandControlPose);
+            trackingCalculator.factorInR3Errors(POSITION_TOLERANCE);
+            trackingCalculator.factoryInSO3Errors(ORIENTATION_TOLERANCE);
+
+            boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
+            meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
+            state.getCurrentPose().getValue().set(syncedHandControlPose);
+            state.getCurrentTwist().getValue().getLinearPart().set(syncedHandTwist.getLinearPart());
+            state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
+            state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+            state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getLinearPart());
+            state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getAngularPart());
+
+            if (meetsDesiredCompletionCriteria)
             {
-               disengageHoldPoseInWorld();
+               state.setIsExecuting(false);
+
+               if (!getDefinition().getJointspaceOnly() && !getDefinition().getHoldPoseInWorldLater())
+               {
+                  disengageHoldPoseInWorld();
+               }
             }
          }
       }

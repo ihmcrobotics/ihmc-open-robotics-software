@@ -8,6 +8,7 @@ import us.ihmc.behaviors.sequence.actions.FootstepPlanActionStateBasics;
 import us.ihmc.communication.crdt.CRDTUnidirectionalVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.ui.behavior.actions.RDXFootstepPlanAction;
@@ -30,6 +31,9 @@ public class RDXActionProgressWidgets
    private final ImPlotPlot positionErrorPlot = new ImPlotPlot();
    private final ImPlotBasicDoublePlotLine currentPositionErrorPlotLine = new ImPlotBasicDoublePlotLine();
    private final ImPlotBasicDoublePlotLine desiredPositionErrorPlotLine = new ImPlotBasicDoublePlotLine();
+   private final ImPlotPlot velocityErrorPlot = new ImPlotPlot();
+   private final ImPlotBasicDoublePlotLine currentVelocityErrorPlotLine = new ImPlotBasicDoublePlotLine();
+   private final ImPlotBasicDoublePlotLine desiredVelocityErrorPlotLine = new ImPlotBasicDoublePlotLine();
    private final ImPlotPlot orientationErrorPlot = new ImPlotPlot();
    private final ImPlotBasicDoublePlotLine currentOrientationPlotLine = new ImPlotBasicDoublePlotLine();
    private final ImPlotBasicDoublePlotLine desiredOrientationPlotLine = new ImPlotBasicDoublePlotLine();
@@ -63,6 +67,7 @@ public class RDXActionProgressWidgets
       this.action = action;
 
       setupPlot(positionErrorPlot, 0.1, currentPositionErrorPlotLine, desiredPositionErrorPlotLine);
+      setupPlot(velocityErrorPlot, 0.1, currentVelocityErrorPlotLine, desiredVelocityErrorPlotLine);
       setupPlot(orientationErrorPlot, 45.0, currentOrientationPlotLine, desiredOrientationPlotLine);
       setupPlot(footstepsRemainingPlot, 1.0, footstepsRemainingPlotLine);
       for (RobotSide side : RobotSide.values)
@@ -105,6 +110,8 @@ public class RDXActionProgressWidgets
       {
          currentPositionErrorPlotLine.clear();
          desiredPositionErrorPlotLine.clear();
+         currentVelocityErrorPlotLine.clear();
+         desiredVelocityErrorPlotLine.clear();
          currentOrientationPlotLine.clear();
          desiredOrientationPlotLine.clear();
          footstepsRemainingPlotLine.clear();
@@ -165,6 +172,63 @@ public class RDXActionProgressWidgets
          if (renderAsPlots)
          {
             positionErrorPlot.render(dividedBarWidth, PLOT_HEIGHT);
+         }
+         else
+         {
+            double barEndValue = Math.max(Math.min(initialToEnd, currentToEnd), 2.0 * tolerance);
+            double toleranceMarkPercent = tolerance / barEndValue;
+            double percentLeft = currentToEnd / barEndValue;
+            ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
+                                         dividedBarWidth,
+                                         dataColor,
+                                         percentLeft,
+                                         toleranceMarkPercent,
+                                         "%.2f / %.2f".formatted(currentToEnd, initialToEnd));
+         }
+      }
+      else
+      {
+         renderBlankProgress(dividedBarWidth, renderAsPlots, true);
+      }
+   }
+
+   public void renderVelocityError(float dividedBarWidth, boolean renderAsPlots)
+   {
+      if (!action.getState().getDesiredTrajectory().isEmpty())
+      {
+         if (elapsedTimeIsValid)
+         {
+            positionTrajectoryGenerator.clear();
+            for (int i = 0; i < action.getState().getDesiredTrajectory().getSize(); i++)
+            {
+               positionTrajectoryGenerator.appendWaypoint(action.getState().getDesiredTrajectory().getValueReadOnly(i));
+            }
+            positionTrajectoryGenerator.initialize();
+            positionTrajectoryGenerator.compute(elapsedExecutionTime);
+         }
+
+         Vector3DReadOnly initialVelocity = action.getState().getDesiredTrajectory().getFirstValueReadOnly().getLinearVelocity();
+         Vector3DReadOnly endVelocity = action.getState().getDesiredTrajectory().getLastValueReadOnly().getLinearVelocity();
+         Vector3DReadOnly currentVelocity = action.getState().getCurrentTwist().getValueReadOnly().getLinearPart();
+         Vector3DReadOnly desiredVelocity = elapsedTimeIsValid ? positionTrajectoryGenerator.getVelocity() : endVelocity;
+
+         double initialToEnd = initialVelocity.differenceNorm(endVelocity);
+         double currentToEnd = currentVelocity.differenceNorm(endVelocity);
+         double desiredToEnd = desiredVelocity.differenceNorm(endVelocity);
+         double tolerance = 1.0;
+         double error = Math.abs(currentToEnd - desiredToEnd);
+         int dataColor = error < tolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
+
+         if (action.getState().getIsExecuting())
+         {
+            currentVelocityErrorPlotLine.setDataColor(dataColor);
+            currentVelocityErrorPlotLine.addValue(currentToEnd);
+            desiredVelocityErrorPlotLine.setDataColor(ImGuiTools.GRAY);
+            desiredVelocityErrorPlotLine.addValue(desiredToEnd);
+         }
+         if (renderAsPlots)
+         {
+            velocityErrorPlot.render(dividedBarWidth, PLOT_HEIGHT);
          }
          else
          {
