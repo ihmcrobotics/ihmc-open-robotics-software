@@ -7,11 +7,10 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
@@ -137,6 +136,8 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public void renderTreeNodeImGuiWidgets()
    {
+      ImGui.text("Goal Planning");
+      ImGui.sameLine();
       goalAffordance.renderPlaceGoalButton();
       ImGui.sameLine();
       ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");

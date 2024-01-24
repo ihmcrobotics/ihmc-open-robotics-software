@@ -3,7 +3,6 @@ package us.ihmc.tools.time;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.ArrayDeque;
@@ -25,15 +24,21 @@ public class DurationStatisticPrinter
 
    private final Stopwatch stopwatch = new Stopwatch();
 
+   /** Used to identify printers. */
+   private final String prefix;
    private final PausablePeriodicThread pausablePeriodicThread;
    private double expiration = 1.0;
    private final Timer expirationTimer = new Timer();
    private final int history;
-   private String name;
 
    public DurationStatisticPrinter()
    {
       this(null, 10, 1.0, "");
+   }
+
+   public DurationStatisticPrinter(String prefix)
+   {
+      this(null, 10, 1.0, prefix);
    }
 
    public DurationStatisticPrinter(int history)
@@ -46,15 +51,15 @@ public class DurationStatisticPrinter
       this(onLogReport, 10, 1.0, "");
    }
 
-   public DurationStatisticPrinter(Runnable onLogReport, int history, double expirationTime, String name)
+   public DurationStatisticPrinter(Runnable onLogReport, int history, double expirationTime, String prefix)
    {
-      this(onLogReport, history, expirationTime, 1.0, name);
+      this(onLogReport, history, expirationTime, 1.0, prefix);
    }
 
-   public DurationStatisticPrinter(Runnable onLogReport, int history, double expirationTime, double printFrequency, String name)
+   public DurationStatisticPrinter(Runnable onLogReport, int history, double expirationTime, double printFrequency, String prefix)
    {
       this.history = history;
-      this.name = name;
+      this.prefix = prefix.isEmpty() ? "" : prefix + ": ";
       this.expiration = expirationTime;
 
       reset();
@@ -74,7 +79,7 @@ public class DurationStatisticPrinter
       if (!newEvents)
       {
          reset();
-         LogTools.info("no new events");
+         LogTools.info("%sno new events".formatted(prefix));
       }
       else if (!expirationTimer.isRunning(expiration))
       {
@@ -82,8 +87,8 @@ public class DurationStatisticPrinter
       }
       else
       {
-         LogTools.info(2, StringTools.format3SF(name + ": average duration: {}\n        min: {}s max: {}s std dev: {}s window: {}",
-                                                averageDuration, minDuration, maxDuration, standardDeviation, window).get());
+         LogTools.info(2, "%saverage duration: %.3f (s)\n        min: %.3f (s) max: %.3f (s) std dev: %.3f (s) window: %d"
+                                .formatted(prefix, averageDuration, minDuration, maxDuration, standardDeviation, window));
       }
    }
 

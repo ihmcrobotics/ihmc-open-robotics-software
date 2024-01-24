@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.editor.RDXUIActionMap;
 import us.ihmc.rdx.input.editor.RDXUITrigger;
@@ -35,6 +36,9 @@ import java.util.function.Consumer;
 public class RDXBallAndArrowPosePlacement implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
+   private String startPlacementButtonText = "Place pose";
+   private String startPlacementButtonDisabledText = "Placing";
+   private String stopPlacementButtonText = "Clear";
    private ModelInstance sphere;
    private ModelInstance arrow;
    private RDXUIActionMap placeGoalActionMap;
@@ -47,7 +51,6 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    private final RotationMatrix arrowRotationMatrix = new RotationMatrix();
    private Consumer<Pose3D> placedPoseConsumer;
    private final Notification placedNotification = new Notification();
-   private RDXIconTexture locationFlagIcon;
    private Runnable onStartPositionPlacement;
    private Runnable onEndPositionPlacement;
 
@@ -56,7 +59,21 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       create(null, color);
    }
 
+   public void create(Color color, String startPlacementButtonText, String startPlacementButtonDisabledText, String stopPlacementButtonText)
+   {
+      create(null, color, startPlacementButtonText, startPlacementButtonDisabledText, stopPlacementButtonText);
+   }
+
    public void create(Consumer<Pose3D> placedPoseConsumer, Color color)
+   {
+      create(placedPoseConsumer, color, startPlacementButtonText, startPlacementButtonDisabledText, stopPlacementButtonText);
+   }
+
+   public void create(Consumer<Pose3D> placedPoseConsumer,
+                      Color color,
+                      String startPlacementButtonText,
+                      String startPlacementButtonDisabledText,
+                      String stopPlacementButtonText)
    {
       this.placedPoseConsumer = placedPoseConsumer;
       float sphereRadius = 0.03f;
@@ -91,9 +108,11 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
             onEndPositionPlacement.run();
       });
 
-      clear();
+      this.startPlacementButtonText = startPlacementButtonText;
+      this.startPlacementButtonDisabledText = startPlacementButtonDisabledText;
+      this.stopPlacementButtonText = stopPlacementButtonText;
 
-      locationFlagIcon = new RDXIconTexture("icons/locationFlag.png");
+      clear();
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -174,14 +193,6 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    {
       boolean placementStarted = false;
 
-      ImGui.text("Goal Planning");
-      ImGui.sameLine();
-
-      if (locationFlagIcon != null)
-      {
-         ImGui.image(locationFlagIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
-         ImGui.sameLine();
-      }
       boolean pushedFlags = false;
       if (placingGoal)
       {
@@ -189,7 +200,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          ImGui.pushStyleVar(ImGuiStyleVar.Alpha, 0.6f);
          pushedFlags = true;
       }
-      if (ImGui.button(labels.get(pushedFlags ? "Placing" : "Place goal")))
+      if (ImGui.button(labels.get(pushedFlags ? startPlacementButtonDisabledText : startPlacementButtonText)))
       {
          placementStarted = true;
          placeGoalActionMap.start();
@@ -205,11 +216,14 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       }
       ImGui.sameLine();
       ImGui.beginDisabled(!isPlaced());
-      if (ImGui.button(labels.get("Clear")))
+      if (ImGui.button(labels.get(stopPlacementButtonText)))
       {
          clear();
       }
       ImGui.endDisabled();
+
+      if ((isPlacingGoal() || isPlacingPosition()) && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
+         clear();
 
       return placementStarted;
    }
@@ -292,5 +306,15 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    public Notification getPlacedNotification()
    {
       return placedNotification;
+   }
+
+   public void setStartPlacementButtonText(String startPlacementButtonText)
+   {
+      this.startPlacementButtonText = startPlacementButtonText;
+   }
+
+   public void setStartPlacementButtonDisabledText(String startPlacementButtonDisabledText)
+   {
+      this.startPlacementButtonDisabledText = startPlacementButtonDisabledText;
    }
 }

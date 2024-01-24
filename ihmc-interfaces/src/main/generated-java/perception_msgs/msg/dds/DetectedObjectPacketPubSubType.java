@@ -15,7 +15,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c3629262e54c9df5a5580f9c0bfcd71ff5e4dc255ac5a8f7e341ef0893d1e4fd";
+   		return "d5b2d0d188042835c4c287069a45a56543d2087df8e356f20961e2f7d13ce48b";
    }
    
    @Override
@@ -69,6 +69,12 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       for(int i0 = 0; i0 < (8); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 32768; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.Point32PubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 32768; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.Point32PubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -105,6 +111,16 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       {
               current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBoundingBoxVertices()[i0], current_alignment);
       }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getObjectPointCloud().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.Point32PubSubType.getCdrSerializedSize(data.getObjectPointCloud().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getSegmentedPointCloud().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.Point32PubSubType.getCdrSerializedSize(data.getSegmentedPointCloud().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -133,6 +149,14 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
         	geometry_msgs.msg.dds.PointPubSubType.write(data.getBoundingBoxVertices()[i0], cdr);		
       }
 
+      if(data.getObjectPointCloud().size() <= 32768)
+      cdr.write_type_e(data.getObjectPointCloud());else
+          throw new RuntimeException("object_point_cloud field exceeds the maximum length");
+
+      if(data.getSegmentedPointCloud().size() <= 32768)
+      cdr.write_type_e(data.getSegmentedPointCloud());else
+          throw new RuntimeException("segmented_point_cloud field exceeds the maximum length");
+
    }
 
    public static void read(perception_msgs.msg.dds.DetectedObjectPacket data, us.ihmc.idl.CDR cdr)
@@ -156,6 +180,8 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
         	geometry_msgs.msg.dds.PointPubSubType.read(data.getBoundingBoxVertices()[i0], cdr);	
       }
       	
+      cdr.read_type_e(data.getObjectPointCloud());	
+      cdr.read_type_e(data.getSegmentedPointCloud());	
 
    }
 
@@ -172,6 +198,8 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       ser.write_type_d("object_type", data.getObjectType());
       ser.write_type_f("bounding_box_2d_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBox2dVertices());
       ser.write_type_f("bounding_box_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBoxVertices());
+      ser.write_type_e("object_point_cloud", data.getObjectPointCloud());
+      ser.write_type_e("segmented_point_cloud", data.getSegmentedPointCloud());
    }
 
    @Override
@@ -187,6 +215,8 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       ser.read_type_d("object_type", data.getObjectType());
       ser.read_type_f("bounding_box_2d_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBox2dVertices());
       ser.read_type_f("bounding_box_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBoxVertices());
+      ser.read_type_e("object_point_cloud", data.getObjectPointCloud());
+      ser.read_type_e("segmented_point_cloud", data.getSegmentedPointCloud());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.DetectedObjectPacket src, perception_msgs.msg.dds.DetectedObjectPacket dest)

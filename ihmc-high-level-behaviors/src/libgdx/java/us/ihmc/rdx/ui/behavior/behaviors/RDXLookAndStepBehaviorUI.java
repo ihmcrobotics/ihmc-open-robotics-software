@@ -14,9 +14,8 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import std_msgs.msg.dds.Bool;
 import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonMessage;
 import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonsMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -246,6 +245,8 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       }
       ImGui.sameLine();
 
+      ImGui.text("Goal Planning");
+      ImGui.sameLine();
       goalAffordance.renderPlaceGoalButton();
       ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
       ImGui.checkbox(labels.get("Show height map"), showHeightMap);

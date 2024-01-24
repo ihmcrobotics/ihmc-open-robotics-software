@@ -87,6 +87,7 @@ public class BehaviorTreeState extends RequestConfirmFreezable
 
    public void toMessage(BehaviorTreeStateMessage message)
    {
+      message.setSequenceId(getCRDTInfo().getUpdateNumber());
       message.setNextId(nextID.longValue());
       toMessage(message.getConfirmableRequest());
    }

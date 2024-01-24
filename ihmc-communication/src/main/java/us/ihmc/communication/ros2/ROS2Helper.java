@@ -4,15 +4,18 @@ import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.ros2.*;
+import us.ihmc.tools.thread.SwapReference;
 
+import java.io.IOException;
 import java.util.function.Consumer;
 
 /**
@@ -40,6 +43,60 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
       ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, callback);
+   }
+
+   @Override
+   public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback)
+   {
+      try
+      {
+         TopicDataType<T> topicDataType = IHMCROS2Callback.newMessageTopicDataTypeInstance(topic.getType());
+         SwapReference<T> swapReference = new SwapReference<>(topicDataType::createData);
+         ros2NodeInterface.createSubscription(topicDataType, subscriber ->
+         {
+            if (subscriber.takeNextData(swapReference.getForThreadOne(), null))
+            {
+               swapReference.swap();
+               callback.set();
+            }
+         }, topic.getName(), ROS2QosProfile.DEFAULT());
+         return swapReference;
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   @Override
+   public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic)
+   {
+      try
+      {
+         TopicDataType<T> topicDataType = IHMCROS2Callback.newMessageTopicDataTypeInstance(topic.getType());
+         int queueSize = 16;
+         ConcurrentRingBuffer<T> concurrentQueue = new ConcurrentRingBuffer<>(topicDataType::createData, queueSize);
+         ros2NodeInterface.createSubscription(topicDataType, subscriber ->
+         {
+            T nextData = concurrentQueue.next();
+            if (nextData != null)
+            {
+               if (subscriber.takeNextData(nextData, null))
+               {
+                  concurrentQueue.commit();
+               }
+            }
+            else
+            {
+               LogTools.warn("Concurrent ring buffer is full! Queue size: {}", queueSize);
+            }
+         }, topic.getName(), ROS2QosProfile.DEFAULT());
+         return concurrentQueue;
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 
    @Override
