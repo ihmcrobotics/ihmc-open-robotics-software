@@ -857,6 +857,12 @@ public class SCS2AvatarSimulationFactory
       this.simulationDataBufferSize.set(simulationDataBufferSize);
    }
 
+   /** Must be set after record tick period in order to be correct. */
+   public void setSimulationDataBufferDuration(double bufferDuration)
+   {
+      this.simulationDataBufferSize.set((int) (bufferDuration / simulationDT.get() / simulationDataRecordTickPeriod.get()));
+   }
+
    public void setSimulationDataRecordTimePeriod(double simulationDataRecordTimePeriod)
    {
       simulationDataRecordTickPeriod.set((int) Math.max(1.0, simulationDataRecordTimePeriod / simulationDT.get()));

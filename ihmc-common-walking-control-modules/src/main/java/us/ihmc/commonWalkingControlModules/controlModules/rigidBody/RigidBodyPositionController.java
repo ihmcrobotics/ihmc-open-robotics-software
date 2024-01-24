@@ -22,6 +22,15 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * A rigid body control mode for position only. See {@link RigidBodyPositionControlHelper}.
+ * <p>
+ * This class also features a hybrid control mode, where the jointspace control commands from
+ * {@link RigidBodyJointControlHelper} are also included. This is useful for more control over, for example,
+ * the arms of the robot by specifying desireds in both taskspace and jointspace, which can help avoid
+ * singularities and instabilities.
+ * </p>
+ */
 public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
 {
    private final YoBoolean usingWeightFromMessage;
@@ -140,6 +149,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    @Override
    public void onEntry()
    {
+      positionHelper.resetFunctionGenerators();
    }
 
    @Override

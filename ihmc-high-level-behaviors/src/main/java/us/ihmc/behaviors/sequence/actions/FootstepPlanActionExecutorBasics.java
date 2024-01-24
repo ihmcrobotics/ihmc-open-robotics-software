@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -39,8 +40,6 @@ public class FootstepPlanActionExecutorBasics
    private double nominalExecutionDuration;
    private final NonWallTimer executionTimer = new NonWallTimer();
    private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
-   private double startPositionDistanceToGoal;
-   private double startOrientationDistanceToGoal;
 
    public FootstepPlanActionExecutorBasics(FootstepPlanActionStateBasics state,
                                            FootstepPlanActionDefinitionBasics definition,
@@ -99,8 +98,6 @@ public class FootstepPlanActionExecutorBasics
             indexOfLastFoot.put(footstepPlanToExecute.getFootstep(i).getRobotSide(), i);
          }
 
-         startPositionDistanceToGoal = 0;
-         startOrientationDistanceToGoal = 0;
          for (RobotSide side : RobotSide.values)
          {
             int indexOfLastFootSide = indexOfLastFoot.get(side);
@@ -113,8 +110,20 @@ public class FootstepPlanActionExecutorBasics
                commandedGoalFeetPoses.get(side).setIncludingFrame(syncedFeetPoses.get(side));
             }
 
-            startPositionDistanceToGoal += syncedFeetPoses.get(side).getTranslation().differenceNorm(commandedGoalFeetPoses.get(side).getTranslation());
-            startOrientationDistanceToGoal += syncedFeetPoses.get(side).getRotation().distance(commandedGoalFeetPoses.get(side).getRotation(), true);
+            state.getDesiredFootPoses().get(side).getValue().clear();
+            state.getDesiredFootPoses().get(side).addTrajectoryPoint(syncedFeetPoses.get(side), 0.0);
+         }
+
+         for (int i = 0; i < footstepPlanToExecute.getNumberOfSteps(); i++)
+         {
+            PlannedFootstep footstep = footstepPlanToExecute.getFootstep(i);
+            double stepCompletionTime = PlannerTools.calculateFootstepCompletionTime(footstepPlanToExecute,
+                                                                                     definition.getSwingDuration(),
+                                                                                     walkingControllerParameters.getDefaultInitialTransferTime(),
+                                                                                     definition.getTransferDuration(),
+                                                                                     walkingControllerParameters.getDefaultFinalTransferTime(),
+                                                                                     i + 1);
+            state.getDesiredFootPoses().get(footstep.getRobotSide()).addTrajectoryPoint(footstep.getFootstepPose(), stepCompletionTime);
          }
       }
    }
@@ -145,12 +154,10 @@ public class FootstepPlanActionExecutorBasics
          actionNodeExecutor.getState().setElapsedExecutionTime(executionTimer.getElapsedTime());
          state.setTotalNumberOfFootsteps(footstepPlanToExecute.getNumberOfSteps());
          state.setNumberOfIncompleteFootsteps(incompleteFootsteps);
-         actionNodeExecutor.getState().setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-         actionNodeExecutor.getState().setStartPositionDistanceToGoal(startPositionDistanceToGoal);
-         actionNodeExecutor.getState().setCurrentOrientationDistanceToGoal(
-               completionCalculator.get(RobotSide.LEFT).getRotationError() + completionCalculator.get(RobotSide.RIGHT).getRotationError());
-         actionNodeExecutor.getState().setCurrentPositionDistanceToGoal(
-               completionCalculator.get(RobotSide.LEFT).getTranslationError() + completionCalculator.get(RobotSide.RIGHT).getTranslationError());
+         for (RobotSide side : RobotSide.values)
+         {
+            state.getCurrentFootPoses().get(side).getValue().set(syncedFeetPoses.get(side));
+         }
       }
       else
       {
@@ -159,6 +166,11 @@ public class FootstepPlanActionExecutorBasics
          actionNodeExecutor.getState().setElapsedExecutionTime(0.0);
          state.setTotalNumberOfFootsteps(0);
          state.setNumberOfIncompleteFootsteps(0);
+         for (RobotSide side : RobotSide.values)
+         {
+            state.getCurrentFootPoses().get(side).getValue().set(syncedFeetPoses.get(side));
+            state.getDesiredFootPoses().get(side).getValue().clear();
+         }
          // TODO: Mark action failed and abort execution
       }
 

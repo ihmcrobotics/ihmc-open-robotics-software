@@ -5,6 +5,10 @@ import imgui.flag.ImGuiCond;
 
 import java.text.DecimalFormat;
 
+/**
+ * Implementation of {@link ImPlotWallTimeScrollingPlotLine} for double
+ * data values.
+ */
 public class ImPlotDoublePlotLine extends ImPlotWallTimeScrollingPlotLine
 {
    private final DecimalFormat decimalFormatter;
@@ -40,7 +44,12 @@ public class ImPlotDoublePlotLine extends ImPlotWallTimeScrollingPlotLine
    {
       double limitY = minLimitY;
       for (int i = 0; i < getBufferSize(); i++)
-         limitY = Math.max(doubleSwapBuffer.getValue(i), limitY);
+      {
+         if (!Double.isNaN(doubleSwapBuffer.getValue(i)))
+         {
+            limitY = Math.max(doubleSwapBuffer.getValue(i), limitY);
+         }
+      }
       ImPlot.setNextPlotLimitsY(0.0, limitY, ImGuiCond.Always);
    }
 }

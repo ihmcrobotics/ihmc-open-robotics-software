@@ -9,6 +9,9 @@ import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * API for position, orientation, and pose control modes.
+ */
 public abstract class RigidBodyTaskspaceControlState extends RigidBodyControlState
 {
    public static final double timeEpsilonForInitialPoint = 0.05;

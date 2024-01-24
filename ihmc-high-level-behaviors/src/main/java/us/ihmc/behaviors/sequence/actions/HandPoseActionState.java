@@ -19,7 +19,8 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
     */
    private final CRDTUnidirectionalRigidBodyTransform goalChestToWorldTransform;
    private final ReferenceFrame goalChestFrame;
-   private final CRDTUnidirectionalDouble handWrenchMagnitudeLinear;
+   private final CRDTUnidirectionalVector3D force;
+   private final CRDTUnidirectionalVector3D torque;
    private final CRDTUnidirectionalDoubleArray jointAngles;
    private final CRDTUnidirectionalDouble solutionQuality;
 
@@ -33,7 +34,8 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
       goalChestToWorldTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);
       goalChestFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                               goalChestToWorldTransform.getValueReadOnly());
-      handWrenchMagnitudeLinear = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      force = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
+      torque = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
       jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS);
       solutionQuality = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
    }
@@ -51,7 +53,8 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
       super.toMessage(message.getState());
 
       goalChestToWorldTransform.toMessage(message.getGoalChestTransformToWorld());
-      message.setHandWrenchMagnitudeLinear(handWrenchMagnitudeLinear.toMessage());
+      force.toMessage(message.getForce());
+      torque.toMessage(message.getTorque());
       for (int i = 0; i < ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS; i++)
       {
          jointAngles.toMessage(message.getJointAngles());
@@ -65,7 +68,8 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
 
       getDefinition().fromMessage(message.getDefinition());
 
-      handWrenchMagnitudeLinear.fromMessage(message.getHandWrenchMagnitudeLinear());
+      force.fromMessage(message.getForce());
+      torque.fromMessage(message.getTorque());
       jointAngles.fromMessage(message.getJointAngles());
       solutionQuality.fromMessage(message.getSolutionQuality());
       goalChestToWorldTransform.fromMessage(message.getGoalChestTransformToWorld());
@@ -87,14 +91,14 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
       return goalChestFrame;
    }
 
-   public double getHandWrenchMagnitudeLinear()
+   public CRDTUnidirectionalVector3D getForce()
    {
-      return handWrenchMagnitudeLinear.getValue();
+      return force;
    }
 
-   public void setHandWrenchMagnitudeLinear(double handWrenchMagnitudeLinear)
+   public CRDTUnidirectionalVector3D getTorque()
    {
-      this.handWrenchMagnitudeLinear.setValue(handWrenchMagnitudeLinear);
+      return torque;
    }
 
    public CRDTUnidirectionalDoubleArray getJointAngles()

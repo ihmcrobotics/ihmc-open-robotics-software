@@ -20,6 +20,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3Trajector
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
@@ -33,9 +34,22 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * The base functionality of the taskspace orientation control state for a rigid body.
+ * <p>
+ * This class triages QP weights and PD control gains, user selection of rotation axes,
+ * and reference frames. It generates a cubic orientation trajectory for user provided
+ * waypoints and packs the desireds into an orientation feedback control command for
+ * submission to the whole body controller core.
+ * </p>
+ * <p>
+ * This class also supports kinematics streaming by accommodating for network
+ * delay when using {@link ExecutionMode#STREAM}.
+ * </p>
+ * <p>
+ * Additionally, it supports the use of function generators to perform diagnostic trajectories.
+ * </p>
+ */
 public class RigidBodyOrientationControlHelper
 {
    private final OrientationFeedbackControlCommand feedbackControlCommand = new OrientationFeedbackControlCommand();
@@ -132,7 +146,7 @@ public class RigidBodyOrientationControlHelper
       if (enableFunctionGenerators)
       {
          functionGenerator = new YoFunctionGeneratorNew(prefix + "_FG", time, registry);
-         functionGeneratorAxis = new YoEnum<>(prefix + "_FGAxis", registry, Axis3D.class);
+         functionGeneratorAxis = new YoEnum<>(prefix + "_FGAxis", registry, Axis3D.class, true);
       }
       else
       {
@@ -480,7 +494,7 @@ public class RigidBodyOrientationControlHelper
          desiredVelocity.addY(functionGenerator.getValueDot());
          feedForwardAcceleration.addY(functionGenerator.getValueDDot());
       }
-      else
+      else if (functionGeneratorAxis.getValue() == Axis3D.Z)
       {
          desiredOrientation.appendYawRotation(functionGenerator.getValue());
          desiredVelocity.addZ(functionGenerator.getValueDot());
@@ -560,6 +574,16 @@ public class RigidBodyOrientationControlHelper
          return false;
       }
       return trajectoryGenerator.isDone();
+   }
+
+   public void resetFunctionGenerator()
+   {
+      if (functionGenerator != null)
+      {
+         functionGenerator.setMode(YoFunctionGeneratorMode.OFF);
+         functionGenerator.reset();
+         functionGeneratorAxis.set(null);
+      }
    }
 
    public double getLastTrajectoryPointTime()

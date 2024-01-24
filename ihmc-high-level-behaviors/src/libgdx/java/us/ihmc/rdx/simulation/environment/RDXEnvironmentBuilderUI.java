@@ -12,7 +12,7 @@ public class RDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
 
    public RDXEnvironmentBuilderUI()
    {
-      baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getWindowName(), environmentBuilder::renderImGuiWidgets);
+      baseUI.getImGuiPanelManager().addPanel(environmentBuilder);
       baseUI.launchRDXApplication(this);
    }
 
