@@ -48,7 +48,6 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       jsonNode.put("swingDuration", swingDuration.getValue());
       jsonNode.put("transferDuration", transferDuration.getValue());
       jsonNode.put("parentFrame", parentFrameName.getValue());
-      jsonNode.put("isManuallyPlaced", isManuallyPlaced.getValue());
 
       if (isManuallyPlaced.getValue())
       {
@@ -61,7 +60,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       }
       else
       {
-         JSONTools.toJSON(jsonNode, goalToParentTransform.getValueReadOnly());
+         JSONTools.toJSON(jsonNode, "goalToParentTransform", goalToParentTransform.getValueReadOnly());
          for (RobotSide side : RobotSide.values)
          {
             ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootTransform");
@@ -78,7 +77,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       swingDuration.setValue(jsonNode.get("swingDuration").asDouble());
       transferDuration.setValue(jsonNode.get("transferDuration").asDouble());
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
-      isManuallyPlaced.setValue(jsonNode.get("isManuallyPlaced").booleanValue());
+      isManuallyPlaced.setValue(jsonNode.get("footsteps") != null);
 
       footsteps.getValue().clear();
       if (isManuallyPlaced.getValue())
@@ -87,7 +86,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       }
       else
       {
-         JSONTools.toEuclid(jsonNode, goalToParentTransform.getValue());
+         JSONTools.toEuclid(jsonNode, "goalToParentTransform", goalToParentTransform.getValue());
          for (RobotSide side : RobotSide.values)
          {
             JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
