@@ -400,8 +400,8 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       LinearMomentumRateControlModule linearMomentumRateControlModule = wholeBodyControllerCoreFactory.getLinearMomentumRateControlModule();
       if (linearMomentumRateControlModule != null)
          group.addChild(linearMomentumRateControlModule.getSCS2YoGraphics());
-      if (inertialParameterEstimator != null)
-         group.addChild(inertialParameterEstimator.getSCS2YoGraphics());
+      if (inertialExtendedKalmanFilter != null)
+         group.addChild(inertialExtendedKalmanFilter.getSCS2YoGraphics());
       group.addChild(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getSCS2YoGraphics());
       group.addChild(controllerFactoryHelper.getManagerFactory().getSCS2YoGraphics());
       for (HighLevelControllerState controllerState : highLevelControllerStates.values())
