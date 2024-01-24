@@ -328,7 +328,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          {
             for (RobotSide side : RobotSide.values)
             {
-               ImGui.checkbox(labels.get("Edit " + side.getPascalCaseName()), goalFeetPosesSelected.get(side));
+               ImGui.checkbox(labels.get("Edit Goal " + side.getPascalCaseName()), goalFeetPosesSelected.get(side));
                if (side == RobotSide.LEFT)
                   ImGui.sameLine();
             }
@@ -359,22 +359,22 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                footstep.getVirtualRenderables(renderables, pool);
             }
          }
-      }
-      else
-      {
-         footstepPlannerGoalGizmo.getVirtualRenderables(renderables, pool);
-         if (getSelected().get())
+         else
          {
-            for (RobotSide side : RobotSide.values)
+            footstepPlannerGoalGizmo.getVirtualRenderables(renderables, pool);
+            if (getSelected().get())
             {
-               if (goalFeetPosesSelected.get(side).get())
+               for (RobotSide side : RobotSide.values)
                {
-                  goalFeetGizmos.get(side).getRenderables(renderables, pool);
+                  if (goalFeetPosesSelected.get(side).get())
+                  {
+                     goalFeetGizmos.get(side).getRenderables(renderables, pool);
+                  }
                }
             }
+            for (RobotSide side : RobotSide.values)
+               goalFeetGraphics.get(side).getRenderables(renderables, pool);
          }
-         for (RobotSide side : RobotSide.values)
-            goalFeetGraphics.get(side).getRenderables(renderables, pool);
       }
    }
 
