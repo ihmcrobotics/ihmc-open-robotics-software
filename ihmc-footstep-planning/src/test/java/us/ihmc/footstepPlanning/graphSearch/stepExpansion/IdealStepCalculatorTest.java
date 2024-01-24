@@ -37,7 +37,7 @@ public class IdealStepCalculatorTest
       Pose3D goalPose = new Pose3D(0.5 * pathLength, 0.0, 0.0, 0.0, 0.0, 0.0);
       bodyPathPlanHolder.setPoseWaypoints(Arrays.asList(startPose, goalPose));
 
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(PlannerTools.createDefaultFootPolygons());
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       IdealStepCalculator idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters,
                                                                         checker,
                                                                         bodyPathPlanHolder,
