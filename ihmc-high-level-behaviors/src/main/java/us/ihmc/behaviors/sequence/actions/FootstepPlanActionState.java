@@ -19,6 +19,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionDefinition>
 {
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<FootstepPlanActionFootstepState> footsteps;
    private final CRDTUnidirectionalInteger totalNumberOfFootsteps;
@@ -26,17 +27,18 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private final SideDependentList<CRDTUnidirectionalSE3Trajectory> desiredFootPoses = new SideDependentList<>();
    private final SideDependentList<CRDTUnidirectionalPose3D> currentFootPoses = new SideDependentList<>();
    private final CRDTDetachableReferenceFrame goalFrame;
-   private final CRDTUnidirectionalEnumField<WalkActionExecutionState> executionState;
+   private final CRDTUnidirectionalEnumField<FootstepPlanActionExecutionState> executionState;
 
    public FootstepPlanActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(id, new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
+      this.referenceFrameLibrary = referenceFrameLibrary;
+
       footsteps = new RecyclingArrayList<>(() ->
          new FootstepPlanActionFootstepState(referenceFrameLibrary,
                                              getDefinition().getCRDTParentFrameName(),
                                              RecyclingArrayListTools.getUnsafe(getDefinition().getFootsteps().getValueUnsafe(), numberOfAllocatedFootsteps++)));
-
       totalNumberOfFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
       numberOfIncompleteFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
       for (RobotSide side : RobotSide.values)
@@ -47,7 +49,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       goalFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
                                                    getDefinition().getCRDTParentFrameName(),
                                                    getDefinition().getGoalToParentTransform());
-      executionState = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.ROBOT, crdtInfo, WalkActionExecutionState.PLAN_EXECUTION_COMPLETE);
+      executionState = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.ROBOT, crdtInfo, FootstepPlanActionExecutionState.PLAN_EXECUTION_COMPLETE);
    }
 
    @Override
@@ -105,7 +107,12 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
          footsteps.add().fromMessage(footstep);
       }
 
-      executionState.fromMessage(WalkActionExecutionState.fromByte(message.getExecutionState()));
+      executionState.fromMessage(FootstepPlanActionExecutionState.fromByte(message.getExecutionState()));
+   }
+
+   public boolean areFramesInWorld()
+   {
+      return referenceFrameLibrary.containsFrame(getDefinition().getParentFrameName());
    }
 
    public RecyclingArrayList<FootstepPlanActionFootstepState> getFootsteps()
@@ -148,7 +155,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       return goalFrame;
    }
 
-   public CRDTUnidirectionalEnumField<WalkActionExecutionState> getExecutionState()
+   public CRDTUnidirectionalEnumField<FootstepPlanActionExecutionState> getExecutionState()
    {
       return executionState;
    }
