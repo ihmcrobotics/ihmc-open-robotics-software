@@ -39,7 +39,7 @@ public class RDXVisualTools
     * It's possible that 10% is too much, if you feel it is, it probably is, and
     * change it.
     */
-   public static final double DESIRED_ROBOT_SCALING = 1.1;
+   public static final double DESIRED_ROBOT_SCALING = 1.15;
    private static final Color DEFAULT_COLOR = Color.BLUE;
 
    private static final Object modelDataLoadingSyncObject = new Object();
