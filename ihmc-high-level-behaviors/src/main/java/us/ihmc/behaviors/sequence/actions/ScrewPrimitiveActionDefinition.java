@@ -23,14 +23,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    private final CRDTUnidirectionalDouble rotation;
    private final CRDTUnidirectionalDouble maxLinearVelocity;
    private final CRDTUnidirectionalDouble maxAngularVelocity;
-   private final CRDTUnidirectionalDouble maxForce;
-   private final CRDTUnidirectionalDouble maxTorque;
    private final CRDTUnidirectionalDouble linearPositionWeight;
    private final CRDTUnidirectionalDouble angularPositionWeight;
-   /** The operator specifies the estimated point of contact relative to the hand's control frame. */
-   private final CRDTUnidirectionalRigidBodyTransform wrenchContactPoseInHandControlFrame;
-   // TODO: Remove?
-   private final CRDTUnidirectionalBoolean holdPoseInWorldLater;
 
    public ScrewPrimitiveActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -43,12 +37,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       rotation = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
       maxLinearVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.1);
       maxAngularVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.6);
-      maxForce = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0); // 20 N is 4.5 pounds; lift a full two liter of soda
-      maxTorque = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0); // 7 Nm is 5.2 ft-lbs; unscrewing a typical jar lid
       linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
       angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
-      wrenchContactPoseInHandControlFrame = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
-      holdPoseInWorldLater = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, true);
    }
 
    @Override
@@ -63,12 +53,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       jsonNode.put("rotation", rotation.getValue());
       jsonNode.put("maxLinearVelocity", maxLinearVelocity.getValue());
       jsonNode.put("maxAngularVelocity", maxAngularVelocity.getValue());
-      jsonNode.put("maxTorque", maxTorque.getValue());
-      jsonNode.put("maxForce", maxForce.getValue());
       jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
       jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
-      JSONTools.toJSON(jsonNode, "wrenchContactPose", wrenchContactPoseInHandControlFrame.getValueReadOnly());
-      jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater.getValue());
    }
 
    @Override
@@ -83,12 +69,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       rotation.setValue(jsonNode.get("rotation").asDouble());
       maxLinearVelocity.setValue(jsonNode.get("maxLinearVelocity").asDouble());
       maxAngularVelocity.setValue(jsonNode.get("maxAngularVelocity").asDouble());
-      maxTorque.setValue(jsonNode.get("maxTorque").asDouble());
-      maxForce.setValue(jsonNode.get("maxForce").asDouble());
       linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
       angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
-      JSONTools.toEuclid(jsonNode, "wrenchContactPose", wrenchContactPoseInHandControlFrame.getValue());
-      holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
    }
 
    public void toMessage(ScrewPrimitiveActionDefinitionMessage message)
@@ -102,12 +84,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       message.setTranslation(translation.toMessage());
       message.setMaxLinearVelocity(maxLinearVelocity.toMessage());
       message.setMaxAngularVelocity(maxAngularVelocity.toMessage());
-      message.setMaxForce(maxForce.toMessage());
-      message.setMaxTorque(maxTorque.toMessage());
       message.setLinearPositionWeight(linearPositionWeight.toMessage());
       message.setAngularPositionWeight(angularPositionWeight.toMessage());
-      wrenchContactPoseInHandControlFrame.toMessage(message.getWrenchContactPose());
-      message.setHoldPoseInWorld(holdPoseInWorldLater.toMessage());
    }
 
    public void fromMessage(ScrewPrimitiveActionDefinitionMessage message)
@@ -121,12 +99,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       translation.fromMessage(message.getTranslation());
       maxLinearVelocity.fromMessage(message.getMaxLinearVelocity());
       maxAngularVelocity.fromMessage(message.getMaxAngularVelocity());
-      maxForce.fromMessage(message.getMaxForce());
-      maxTorque.fromMessage(message.getMaxTorque());
       linearPositionWeight.fromMessage(message.getLinearPositionWeight());
       angularPositionWeight.fromMessage(message.getAngularPositionWeight());
-      wrenchContactPoseInHandControlFrame.fromMessage(message.getWrenchContactPose());
-      holdPoseInWorldLater.fromMessage(message.getHoldPoseInWorld());
    }
 
    @Override
@@ -195,26 +169,6 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       this.maxAngularVelocity.setValue(maxAngularVelocity);
    }
 
-   public double getMaxTorque()
-   {
-      return maxTorque.getValue();
-   }
-
-   public void setMaxTorque(double maxTorque)
-   {
-      this.maxTorque.setValue(maxTorque);
-   }
-
-   public double getMaxForce()
-   {
-      return maxForce.getValue();
-   }
-
-   public void setMaxForce(double maxForce)
-   {
-      this.maxForce.setValue(maxForce);
-   }
-
    public double getLinearPositionWeight()
    {
       return linearPositionWeight.getValue();
@@ -233,20 +187,5 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    public void setAngularPositionWeight(double angularPositionWeight)
    {
       this.angularPositionWeight.setValue(angularPositionWeight);
-   }
-
-   public CRDTUnidirectionalRigidBodyTransform getWrenchContactPoseInHandControlFrame()
-   {
-      return wrenchContactPoseInHandControlFrame;
-   }
-
-   public boolean getHoldPoseInWorldLater()
-   {
-      return holdPoseInWorldLater.getValue();
-   }
-
-   public void setHoldPoseInWorldLater(boolean holdPoseInWorldLater)
-   {
-      this.holdPoseInWorldLater.setValue(holdPoseInWorldLater);
    }
 }
