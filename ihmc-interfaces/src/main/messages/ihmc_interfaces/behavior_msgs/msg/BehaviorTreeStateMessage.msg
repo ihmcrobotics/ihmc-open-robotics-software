@@ -15,6 +15,9 @@ byte HAND_WRENCH_ACTION = 15
 byte PELVIS_HEIGHT_PITCH_ACTION = 16
 byte WAIT_DURATION_ACTION = 17
 
+# Monotonically increasing message ID that matches the CRDTInfo update number
+uint32 sequence_id
+
 # The ID to assign to the next instantiated node
 uint32 next_id
 

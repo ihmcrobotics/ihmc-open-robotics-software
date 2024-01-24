@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "69d8bc45f4a54fd70c30cae21660e4d440e92e69181fd7eca5969d279f555a96";
+   		return "c8ca3785819b8e51f1a26c7b056b23a4d7ad6b60c56398d7dcc84ef311b5fec2";
    }
    
    @Override
@@ -51,6 +51,8 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    public static int getMaxCdrSerializedSize(int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -102,6 +104,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    public final static int getCdrSerializedSize(behavior_msgs.msg.dds.BehaviorTreeStateMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -172,6 +177,8 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(behavior_msgs.msg.dds.BehaviorTreeStateMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
+
       cdr.write_type_4(data.getNextId());
 
       ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.write(data.getConfirmableRequest(), cdr);
@@ -227,6 +234,8 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeStateMessage data, us.ihmc.idl.CDR cdr)
    {
+      data.setSequenceId(cdr.read_type_4());
+      	
       data.setNextId(cdr.read_type_4());
       	
       ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.read(data.getConfirmableRequest(), cdr);	
@@ -248,6 +257,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(behavior_msgs.msg.dds.BehaviorTreeStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_4("next_id", data.getNextId());
       ser.write_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
 
@@ -268,6 +278,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BehaviorTreeStateMessage data)
    {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setNextId(ser.read_type_4("next_id"));
       ser.read_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
 

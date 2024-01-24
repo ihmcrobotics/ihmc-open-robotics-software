@@ -184,6 +184,12 @@ public class RDXSceneGraphUI
                      modificationQueue.accept(new SceneGraphNodeAddition(bike.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(bike);
                   }
+                  if (ImGui.button(labels.get("Add Drill")))
+                  {
+                     RDXPredefinedRigidBodySceneNode drill = predefinedRigidBodySceneNodeBuilder.build("Drill");
+                     modificationQueue.accept(new SceneGraphNodeAddition(drill.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(drill);
+                  }
                   ImGui.endTable();
                }
                ImGui.endDisabled();
