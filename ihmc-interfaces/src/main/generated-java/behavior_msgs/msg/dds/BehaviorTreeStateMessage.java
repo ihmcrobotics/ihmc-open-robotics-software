@@ -27,6 +27,10 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public static final byte WAIT_DURATION_ACTION = (byte) 18;
    public static final byte WALK_ACTION = (byte) 19;
    /**
+            * Monotonically increasing message ID that matches the CRDTInfo update number
+            */
+   public long sequence_id_;
+   /**
             * The ID to assign to the next instantiated node
             */
    public long next_id_;
@@ -87,6 +91,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
    public void set(BehaviorTreeStateMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       next_id_ = other.next_id_;
 
       ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.staticCopy(other.confirmable_request_, confirmable_request_);
@@ -104,6 +110,21 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       pelvis_height_actions_.set(other.pelvis_height_actions_);
       wait_duration_actions_.set(other.wait_duration_actions_);
       walk_actions_.set(other.walk_actions_);
+   }
+
+   /**
+            * Monotonically increasing message ID that matches the CRDTInfo update number
+            */
+   public void setSequenceId(long sequence_id)
+   {
+      sequence_id_ = sequence_id;
+   }
+   /**
+            * Monotonically increasing message ID that matches the CRDTInfo update number
+            */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -240,6 +261,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.next_id_, other.next_id_, epsilon)) return false;
 
       if (!this.confirmable_request_.epsilonEquals(other.confirmable_request_, epsilon)) return false;
@@ -344,6 +367,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       BehaviorTreeStateMessage otherMyClass = (BehaviorTreeStateMessage) other;
 
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
+
       if(this.next_id_ != otherMyClass.next_id_) return false;
 
       if (!this.confirmable_request_.equals(otherMyClass.confirmable_request_)) return false;
@@ -371,6 +396,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       StringBuilder builder = new StringBuilder();
 
       builder.append("BehaviorTreeStateMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("next_id=");
       builder.append(this.next_id_);      builder.append(", ");
       builder.append("confirmable_request=");
