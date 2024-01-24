@@ -280,6 +280,10 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       LogTools.info("Commanding {} footsteps", footstepDataListMessage.getFootstepDataList().size());
       ros2ControllerHelper.publishToController(footstepDataListMessage);
+      for (RobotSide side : RobotSide.values)
+      {
+         trackingCalculators.get(side).reset();
+      }
 
       nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanToExecute,
                                                                                          definition.getSwingDuration(),
