@@ -196,11 +196,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          case PLAN_COMMANDED ->
          {
             updateProgress();
-
-            if (!state.getIsExecuting())
-            {
-               state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLAN_EXECUTION_COMPLETE);
-            }
          }
       }
    }
