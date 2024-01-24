@@ -67,14 +67,14 @@ import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.*;
 public class RDXPose3DGizmo implements RenderableProvider
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImFloat torusRadius = new ImFloat(0.5f);
+   private final ImFloat torusRadius = new ImFloat(0.15f);
    private final ImFloat torusCameraSize = new ImFloat(0.067f);
    private final ImFloat torusTubeRadiusRatio = new ImFloat(0.074f);
    private final ImFloat arrowLengthRatio = new ImFloat(0.431f);
    private final ImFloat arrowHeadBodyLengthRatio = new ImFloat(0.480f);
    private final ImFloat arrowHeadBodyRadiusRatio = new ImFloat(2.0f);
    private final ImFloat arrowSpacingFactor = new ImFloat(2.22f);
-   private final ImBoolean resizeAutomatically = new ImBoolean(true);
+   private final ImBoolean resizeAutomatically = new ImBoolean(false);
    private double arrowBodyRadius;
    private double arrowLength;
    private double arrowBodyLength;
