@@ -99,14 +99,11 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       state.setCanExecute(referenceFrameLibrary.containsFrame(getDefinition().getParentFrameName()));
       if (state.getCanExecute() && !definition.getIsManuallyPlaced())
       {
-         if (state.getGoalFrame().isChildOfWorld())
+         for (RobotSide side : RobotSide.values)
          {
-            for (RobotSide side : RobotSide.values)
-            {
-               liveGoalFeetPoses.get(side).setIncludingFrame(state.getGoalFrame().getReferenceFrame(),
-                                                             getDefinition().getGoalFootstepToGoalTransform(side).getValueReadOnly());
-               liveGoalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
-            }
+            liveGoalFeetPoses.get(side).setIncludingFrame(state.getGoalFrame().getReferenceFrame(),
+                                                          getDefinition().getGoalFootstepToGoalTransform(side).getValueReadOnly());
+            liveGoalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
       }
    }
