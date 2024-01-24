@@ -49,7 +49,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       goalFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
                                                    getDefinition().getCRDTParentFrameName(),
                                                    getDefinition().getGoalToParentTransform());
-      executionState = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.ROBOT, crdtInfo, FootstepPlanActionExecutionState.PLAN_EXECUTION_COMPLETE);
+      executionState = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.ROBOT, crdtInfo, FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
    }
 
    @Override

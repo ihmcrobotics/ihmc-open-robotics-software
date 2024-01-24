@@ -106,7 +106,6 @@ public class RDXBehaviorTreeNodeCreationMenu
          ImGui.popFont();
          ImGui.indent();
 
-         renderNodeCreationClickable(relativeNode, insertionType, "Walk Action", WalkActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Footstep Plan", FootstepPlanActionDefinition.class, null);
          ImGui.text("Hand Pose: ");
          for (RobotSide side : RobotSide.values)
