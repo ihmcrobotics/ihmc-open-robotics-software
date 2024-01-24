@@ -39,7 +39,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final FootstepPlanActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
@@ -72,7 +71,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
-      this.referenceFrameLibrary = referenceFrameLibrary;
 
       getDefinition().setDescription("Footstep plan");
 
