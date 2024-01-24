@@ -8,12 +8,10 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionStateMessage> implements Settable<FootstepPlanActionStateMessage>, EpsilonComparable<FootstepPlanActionStateMessage>
 {
-   public static final byte TRIGGERED = (byte) 0;
-   public static final byte FOOTSTEP_PLANNING = (byte) 1;
-   public static final byte PLANNING_FAILED = (byte) 2;
-   public static final byte PLANNING_SUCCEEDED = (byte) 3;
-   public static final byte PLAN_COMMANDED = (byte) 4;
-   public static final byte PLAN_EXECUTION_COMPLETE = (byte) 5;
+   public static final byte FOOTSTEP_PLANNING = (byte) 0;
+   public static final byte PLANNING_FAILED = (byte) 1;
+   public static final byte PLANNING_SUCCEEDED = (byte) 2;
+   public static final byte PLAN_COMMANDED = (byte) 3;
    /**
             * Parent state fields
             */
