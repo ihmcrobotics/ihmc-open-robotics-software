@@ -14,6 +14,8 @@ import java.util.TreeSet;
 
 public class RDXAvailableBehaviorTreeFile
 {
+   public static final String[] FRAME_FIELD_NAMES = new String[] {"parentFrame", "objectFrame"};
+
    private final WorkspaceResourceFile treeFile;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private String name;
@@ -49,11 +51,13 @@ public class RDXAvailableBehaviorTreeFile
 
    private void loadChildrenData(JsonNode childNode)
    {
-      JsonNode parentFrameNode = childNode.get("parentFrame");
-
-      if (parentFrameNode != null)
+      for (String frameFieldName : FRAME_FIELD_NAMES)
       {
-         referenceFrameNames.add(parentFrameNode.textValue());
+         JsonNode frameNameNode = childNode.get(frameFieldName);
+         if (frameNameNode != null)
+         {
+            referenceFrameNames.add(frameNameNode.textValue());
+         }
       }
 
       JSONTools.forEachArrayElement(childNode, "children", this::loadChildrenData);
