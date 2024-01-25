@@ -171,6 +171,42 @@ def compute_contact_map(terrain_cost_map):
     return contact_map
 
     
+def compute_pattern_stats(height_map):
+    # create height map for plotting between 0 and 255
+    height_map_for_plotting = height_map - np.min(height_map)
+    height_map_for_plotting = height_map_for_plotting / np.max(height_map_for_plotting) * 255
+
+
+    # create colored image for plotting
+    height_map_image = np.stack([height_map_for_plotting, height_map_for_plotting, height_map_for_plotting], axis=2).astype(np.uint8)
+    
+
+    terrain_cost = compute_terrain_cost_map(height_map)
+
+    contact_map = compute_contact_map(terrain_cost)
+
+    # convert to opencv colored image
+    contact_map = np.stack([contact_map, contact_map, contact_map], axis=2).astype(np.uint8)
+
+    # Visualize the contact map with green color
+    contact_map[:, :, 1] = contact_map[:, :, 0]
+    contact_map[:, :, 0] = 0
+    contact_map[:, :, 2] = 0
+
+    # convert terrain_cost to color image and stack both images side by side
+    terrain_cost = np.stack([terrain_cost, terrain_cost, terrain_cost], axis=2).astype(np.uint8)
+
+    # stack but preserve width of each image
+    stacked_image = np.hstack((height_map_image, terrain_cost, contact_map))
+
+    # enlarge image for plotting
+    stacked_image = cv2.resize(stacked_image, (2400, 800), interpolation=cv2.INTER_NEAREST)
+
+
+    cv2.imshow("Contact Map", stacked_image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     
@@ -180,43 +216,8 @@ if __name__ == "__main__":
     for name, height_map in maps.items():
         print("Number", number, "Terrain:", name)
 
-        # create height map for plotting between 0 and 255
-        height_map_for_plotting = height_map - np.min(height_map)
-        height_map_for_plotting = height_map_for_plotting / np.max(height_map_for_plotting) * 255
-
-
-        # create colored image for plotting
-        height_map_image = np.stack([height_map_for_plotting, height_map_for_plotting, height_map_for_plotting], axis=2).astype(np.uint8)
+        plot_and_compute_stats(height_map)        
         
-        # plot_and_compute_stats(height_map)
-
-        terrain_cost = compute_terrain_cost_map(height_map)
-
-        contact_map = compute_contact_map(terrain_cost)
-
-        # convert to opencv colored image
-        contact_map = np.stack([contact_map, contact_map, contact_map], axis=2).astype(np.uint8)
-
-        # Visualize the contact map with green color
-        contact_map[:, :, 1] = contact_map[:, :, 0]
-        contact_map[:, :, 0] = 0
-        contact_map[:, :, 2] = 0
-
-        # convert terrain_cost to color image and stack both images side by side
-        terrain_cost = np.stack([terrain_cost, terrain_cost, terrain_cost], axis=2).astype(np.uint8)
-
-        # stack but preserve width of each image
-        stacked_image = np.hstack((height_map_image, terrain_cost, contact_map))
-
-        # enlarge image for plotting
-        stacked_image = cv2.resize(stacked_image, (2400, 800), interpolation=cv2.INTER_NEAREST)
-
-
-        cv2.imshow("Contact Map", stacked_image)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
-
         print("\n\n")
         number += 1
 
