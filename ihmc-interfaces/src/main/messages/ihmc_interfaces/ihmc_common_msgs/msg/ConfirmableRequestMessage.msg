@@ -2,14 +2,10 @@
 # it is received by peers. A message can be a request
 # and confirmation at the same time.
 
-# If this message is a request to change something.
-bool is_request
+# Recent request numbers, monotonically increasing
+# The size of this is roughly the max amount of expected dropped messages in 1 second
+uint32[<=10] request_numbers
 
-# If this message is a confirmation that the request has been received by the other side.
-bool is_confirmation
-
-# Request number, monotonically increasing
-uint32 request_number
-
-# Confirmation number, the value of the last received request number
-uint32 confirmation_number
+# Recent confirmation numbers, the values of received request numbers
+# The size of this is roughly the max amount of expected dropped messages in 1 second
+uint32[<=10] confirmation_numbers
