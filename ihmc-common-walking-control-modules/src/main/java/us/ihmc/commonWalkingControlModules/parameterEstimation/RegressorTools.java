@@ -66,11 +66,11 @@ public class RegressorTools
          if (collectionPartitionToPack.numCols + collectionComplementPartitionToPack.numCols != regressor.numCols)
             throw new IllegalArgumentException("The number of columns over both partition matrices must sum to the number of columns in the regressor.");
 
-         // The total number of entries in the list of basis sets must sum to the number of columns in the regressor
+         // The total number of entries in the list of basis sets must sum to the number of columns in the collected partition matrix
          int totalNumberOfBasisEntries = 0;
          for (Set<SpatialInertiaBasisOption> basisSet : basisSets)
             totalNumberOfBasisEntries += basisSet.size();
-         if (totalNumberOfBasisEntries != regressor.numCols)
+         if (totalNumberOfBasisEntries != collectionPartitionToPack.numCols)
             throw new IllegalArgumentException("The total number of entries in the list of basis sets must sum to the number of columns in the regressor.");
       }
 
@@ -148,11 +148,11 @@ public class RegressorTools
          if (collectionPartitionToPack.getNumElements() + collectionComplementPartitionToPack.getNumElements() != vector.getNumElements())
             throw new IllegalArgumentException(
                   "The sum of the number of entries in the partitioned vectors must sum to the number of entries in the original vector.");
-         // The total number of entries in the list of basis sets must sum to the number of entries in the original vector
+         // The total number of entries in the list of basis sets must sum to the number of entries in the collected partition vector
          int totalNumberOfBasisEntries = 0;
          for (Set<SpatialInertiaBasisOption> basisSet : basisSets)
             totalNumberOfBasisEntries += basisSet.size();
-         if (totalNumberOfBasisEntries != vector.getNumElements())
+         if (totalNumberOfBasisEntries != collectionPartitionToPack.getNumElements())
             throw new IllegalArgumentException("The total number of entries in the list of basis sets must sum to the number of entries in the original vector.");
       }
 
