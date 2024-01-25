@@ -15,7 +15,7 @@ public class HandPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "45c50a69c2f4e2f3ea9959455f92f51103dc867cd7f7c703b5abcd7e4e18848b";
+   		return "3ee480603dd0e84932eebb1c9a91ecee9ececb88c8466b2b2b308fe90fc21c62";
    }
    
    @Override
