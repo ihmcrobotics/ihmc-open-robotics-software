@@ -45,6 +45,13 @@ public class ActionNodeInitialization
          }
          handPoseAction.update();
       }
+      else if (newAction instanceof ScrewPrimitiveActionState screwPrimitiveAction)
+      {
+         screwPrimitiveAction.getDefinition().setSide(sideOfNewAction);
+         screwPrimitiveAction.getDefinition()
+                             .setObjectFrameName(findConvenientParentFrameName(actionSequence, HandPoseActionState.class, indexOfInsertion, sideOfNewAction));
+         screwPrimitiveAction.getState().update();
+      }
       else if (newAction instanceof ChestOrientationActionState chestOrientationAction)
       {
          ChestOrientationActionState nextPreviousAction = findNextPreviousAction(actionSequence, ChestOrientationActionState.class, indexOfInsertion, null);

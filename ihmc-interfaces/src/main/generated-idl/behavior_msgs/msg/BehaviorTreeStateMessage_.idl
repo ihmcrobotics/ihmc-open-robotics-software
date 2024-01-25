@@ -10,6 +10,7 @@
 #include "behavior_msgs/msg/./HandWrenchActionStateMessage_.idl"
 #include "behavior_msgs/msg/./PelvisHeightPitchActionStateMessage_.idl"
 #include "behavior_msgs/msg/./SakeHandCommandActionStateMessage_.idl"
+#include "behavior_msgs/msg/./ScrewPrimitiveActionStateMessage_.idl"
 #include "behavior_msgs/msg/./WaitDurationActionStateMessage_.idl"
 #include "ihmc_common_msgs/msg/./ConfirmableRequestMessage_.idl"
 module behavior_msgs
@@ -42,11 +43,14 @@ module behavior_msgs
       const octet HAND_WRENCH_ACTION =
       15;
 
-      const octet PELVIS_HEIGHT_PITCH_ACTION =
+      const octet SCREW_PRIMITIVE_ACTION =
       16;
 
-      const octet WAIT_DURATION_ACTION =
+      const octet PELVIS_HEIGHT_PITCH_ACTION =
       17;
+
+      const octet WAIT_DURATION_ACTION =
+      18;
 
 
       /**
@@ -88,6 +92,7 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::SakeHandCommandActionStateMessage, 200> sake_hand_command_actions;
         sequence<behavior_msgs::msg::dds::HandPoseActionStateMessage, 200> hand_pose_actions;
         sequence<behavior_msgs::msg::dds::HandWrenchActionStateMessage, 200> hand_wrench_actions;
+        sequence<behavior_msgs::msg::dds::ScrewPrimitiveActionStateMessage, 200> screw_primitive_actions;
         sequence<behavior_msgs::msg::dds::PelvisHeightPitchActionStateMessage, 200> pelvis_height_actions;
         sequence<behavior_msgs::msg::dds::WaitDurationActionStateMessage, 200> wait_duration_actions;
       };
