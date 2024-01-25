@@ -23,6 +23,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -66,6 +67,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final List<DMatrixRMaj> parametersFromUrdf = new ArrayList<>();
 
+   private final ArrayList<YoInertiaEllipsoid> yoInertiaEllipsoids;
+   private final YoGraphicDefinition ellipsoidGraphicGroup;
+
    // DEBUG variables
    private static final boolean DEBUG = true;
 
@@ -89,6 +93,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                                                      "_estimate");
       estimateRobotModel = new FullHumanoidRobotModelWrapper(clonedElevator, true);
       estimateModelJoints = estimateRobotModel.getRootJoint().subtreeList();
+
+      yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(actualRobotModel.getRootBody(), registry);
+      ellipsoidGraphicGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(actualRobotModel.getRootBody(), yoInertiaEllipsoids);
 
       totalNumberOfDoFs = actualRobotModel.getRootJoint().getDegreesOfFreedom() + actualRobotModel.getOneDoFJoints().length;
 
@@ -119,7 +126,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       inertialParameterPiBasisContainer = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1);
       inertialParameterThetaBasisContainer = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1);
-      for (RigidBodyBasics body : estimateRobotModel.getElevator().subtreeList())
+      for (RigidBodyBasics body : estimateRobotModel.getRootBody().subtreeArray())
       {
          if (body.getInertia() != null)
          {
@@ -180,6 +187,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          updateContactJacobians();
          updateContactWrenches();
          updateWholeSystemTorques();
+         updateVisuals();
 
          regressorCalculator.compute();
 
@@ -239,6 +247,22 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          compactContactJacobians.get(side).compute();
          jointIndexHandler.compactBlockToFullBlock(legJoints.get(side), compactContactJacobians.get(side).getJacobianMatrix(), fullContactJacobians.get(side));
+      }
+   }
+
+   private void updateVisuals()
+   {
+      for (int i = 0; i < estimateRobotModel.getRootBody().subtreeArray().length; i++)
+      {
+         RigidBodyReadOnly actualBody = actualRobotModel.getRootBody().subtreeArray()[i];
+         RigidBodyReadOnly estimateBody = estimateRobotModel.getRootBody().subtreeArray()[i];
+         // TODO: Verify this is working when the EKF is plugged in. Right now estimateBody
+         double scale = estimateBody.getInertia().getMass() / actualBody.getInertia().getMass() / 2.0;
+
+         if (estimateBody.getInertia() != null && actualBody.getInertia() != null)
+         {
+            InertiaVisualizationTools.updateEllipsoid(yoInertiaEllipsoids.get(i), scale);
+         }
       }
    }
 
@@ -525,6 +549,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
-      return null;
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(ellipsoidGraphicGroup);
+      return group;
    }
 }
