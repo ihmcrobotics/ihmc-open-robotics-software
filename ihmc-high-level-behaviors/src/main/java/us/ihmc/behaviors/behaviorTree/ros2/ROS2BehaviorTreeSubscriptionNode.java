@@ -18,9 +18,9 @@ public class ROS2BehaviorTreeSubscriptionNode
    private SakeHandCommandActionStateMessage sakeHandCommandActionStateMessage;
    private HandPoseActionStateMessage handPoseActionStateMessage;
    private HandWrenchActionStateMessage handWrenchActionStateMessage;
+   private ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage;
    private PelvisHeightPitchActionStateMessage pelvisHeightPitchActionStateMessage;
    private WaitDurationActionStateMessage waitDurationActionStateMessage;
-   private WalkActionStateMessage walkActionStateMessage;
    private final List<ROS2BehaviorTreeSubscriptionNode> children = new ArrayList<>();
 
    public void clear()
@@ -36,9 +36,9 @@ public class ROS2BehaviorTreeSubscriptionNode
       sakeHandCommandActionStateMessage = null;
       handPoseActionStateMessage = null;
       handWrenchActionStateMessage = null;
+      screwPrimitiveActionStateMessage = null;
       pelvisHeightPitchActionStateMessage = null;
       waitDurationActionStateMessage = null;
-      walkActionStateMessage = null;
       children.clear();
    }
 
@@ -152,6 +152,16 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.handWrenchActionStateMessage = handWrenchActionStateMessage;
    }
 
+   public ScrewPrimitiveActionStateMessage getScrewPrimitiveActionStateMessage()
+   {
+      return screwPrimitiveActionStateMessage;
+   }
+
+   public void setScrewPrimitiveActionStateMessage(ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage)
+   {
+      this.screwPrimitiveActionStateMessage = screwPrimitiveActionStateMessage;
+   }
+
    public PelvisHeightPitchActionStateMessage getPelvisHeightPitchActionStateMessage()
    {
       return pelvisHeightPitchActionStateMessage;
@@ -170,16 +180,6 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setWaitDurationActionStateMessage(WaitDurationActionStateMessage waitDurationActionStateMessage)
    {
       this.waitDurationActionStateMessage = waitDurationActionStateMessage;
-   }
-
-   public WalkActionStateMessage getWalkActionStateMessage()
-   {
-      return walkActionStateMessage;
-   }
-
-   public void setWalkActionStateMessage(WalkActionStateMessage walkActionStateMessage)
-   {
-      this.walkActionStateMessage = walkActionStateMessage;
    }
 
    public List<ROS2BehaviorTreeSubscriptionNode> getChildren()

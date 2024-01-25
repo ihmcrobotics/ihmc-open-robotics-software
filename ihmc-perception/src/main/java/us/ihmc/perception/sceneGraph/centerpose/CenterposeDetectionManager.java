@@ -1,7 +1,6 @@
 package us.ihmc.perception.sceneGraph.centerpose;
 
 import perception_msgs.msg.dds.DetectedObjectPacket;
-import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -19,6 +18,7 @@ import us.ihmc.ros2.ROS2Topic;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class CenterposeDetectionManager
 {
@@ -28,16 +28,16 @@ public class CenterposeDetectionManager
       CENTERPOSE_DETECTION_TO_IHMC_ZUP_TRANSFORM.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
    }
 
-   private final IHMCROS2Input<DetectedObjectPacket> subscriber;
    private final Map<Integer, TimeBasedDetectionFilter> centerposeNodeDetectionFilters = new HashMap<>();
    private final ReferenceFrame centerposeOutputFrame;
    private final MutableReferenceFrame imageAquisitionSensorFrame = new MutableReferenceFrame();
 
-   public CenterposeDetectionManager(ROS2Helper ros2Helper, ReferenceFrame sensorFrame)
+   private final ConcurrentLinkedQueue<DetectedObjectPacket> messageQueue = new ConcurrentLinkedQueue<>();
+
+   public CenterposeDetectionManager(ROS2Helper ros2Helper)
    {
       ROS2Topic<DetectedObjectPacket> topicName = PerceptionAPI.CENTERPOSE_DETECTED_OBJECT;
-      subscriber = ros2Helper.subscribe(topicName);
-
+      ros2Helper.subscribeViaCallback(topicName, messageQueue::add);
 
       centerposeOutputFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("CenterposeOutputFrame",
                                                                                                 imageAquisitionSensorFrame.getReferenceFrame(),
@@ -47,9 +47,9 @@ public class CenterposeDetectionManager
    public void updateSceneGraph(ROS2SceneGraph sceneGraph)
    {
       // Handle a new DetectedObjectPacket message
-      if (subscriber.getMessageNotification().poll())
+      while (!messageQueue.isEmpty())
       {
-         DetectedObjectPacket detectedObjectPacket = subscriber.getMessageNotification().read();
+         DetectedObjectPacket detectedObjectPacket = messageQueue.remove();
 
          imageAquisitionSensorFrame.getTransformToParent().set(detectedObjectPacket.getSensorPose());
          imageAquisitionSensorFrame.getReferenceFrame().update();
@@ -116,6 +116,6 @@ public class CenterposeDetectionManager
 
    public void destroy()
    {
-      subscriber.destroy();
+      messageQueue.clear();
    }
 }
