@@ -22,29 +22,34 @@ public class RDXSelectablePose3DGizmo
    private final RDXPose3DGizmo poseGizmo;
    private final ImBoolean selected;
 
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo()} */
    public RDXSelectablePose3DGizmo()
    {
       this.selected = new ImBoolean(false);
       poseGizmo = new RDXPose3DGizmo();
    }
 
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(ReferenceFrame)} */
    public RDXSelectablePose3DGizmo(ReferenceFrame parentReferenceFrame)
    {
       this.selected = new ImBoolean(false);
       poseGizmo = new RDXPose3DGizmo(parentReferenceFrame);
    }
 
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(ReferenceFrame, RigidBodyTransform)} */
    public RDXSelectablePose3DGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
    {
       this(gizmoFrame, gizmoTransformToParentFrameToModify, new ImBoolean(false));
    }
 
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(ReferenceFrame, RigidBodyTransform)} */
    public RDXSelectablePose3DGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify, ImBoolean selected)
    {
       this.selected = selected;
       poseGizmo = new RDXPose3DGizmo(gizmoFrame, gizmoTransformToParentFrameToModify);
    }
 
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(RigidBodyTransform, ReferenceFrame)} */
    public RDXSelectablePose3DGizmo(RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame, ImBoolean selected)
    {
       this.selected = selected;
