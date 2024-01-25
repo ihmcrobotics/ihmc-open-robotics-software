@@ -12,8 +12,9 @@ byte FOOTSTEP_PLAN_ACTION = 12
 byte SAKE_HAND_COMMAND_ACTION = 13
 byte HAND_POSE_ACTION = 14
 byte HAND_WRENCH_ACTION = 15
-byte PELVIS_HEIGHT_PITCH_ACTION = 16
-byte WAIT_DURATION_ACTION = 17
+byte SCREW_PRIMITIVE_ACTION = 16
+byte PELVIS_HEIGHT_PITCH_ACTION = 17
+byte WAIT_DURATION_ACTION = 18
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint32 sequence_id
@@ -47,6 +48,8 @@ behavior_msgs/SakeHandCommandActionStateMessage[<=200] sake_hand_command_actions
 behavior_msgs/HandPoseActionStateMessage[<=200] hand_pose_actions
 
 behavior_msgs/HandWrenchActionStateMessage[<=200] hand_wrench_actions
+
+behavior_msgs/ScrewPrimitiveActionStateMessage[<=200] screw_primitive_actions
 
 behavior_msgs/PelvisHeightPitchActionStateMessage[<=200] pelvis_height_actions
 

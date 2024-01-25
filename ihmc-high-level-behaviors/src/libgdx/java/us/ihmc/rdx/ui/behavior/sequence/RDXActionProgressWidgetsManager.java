@@ -4,6 +4,7 @@ import imgui.internal.ImGui;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.ui.behavior.actions.RDXFootstepPlanAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXHandPoseAction;
+import us.ihmc.rdx.ui.behavior.actions.RDXScrewPrimitiveAction;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class RDXActionProgressWidgetsManager
 
          if (action instanceof RDXFootstepPlanAction)
             containsFootsteps = true;
-         if (action instanceof RDXHandPoseAction)
+         if (action instanceof RDXHandPoseAction || action instanceof RDXScrewPrimitiveAction)
             containsHandMovements = true;
       }
 
