@@ -1,0 +1,40 @@
+#ifndef __behavior_msgs__msg__ScrewPrimitiveActionStateMessage__idl__
+#define __behavior_msgs__msg__ScrewPrimitiveActionStateMessage__idl__
+
+#include "behavior_msgs/msg/./ActionNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./ScrewPrimitiveActionDefinitionMessage_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::ScrewPrimitiveActionStateMessage_")
+      struct ScrewPrimitiveActionStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::ActionNodeStateMessage state;
+        /**
+         * Definition
+         */
+        behavior_msgs::msg::dds::ScrewPrimitiveActionDefinitionMessage definition;
+        sequence<geometry_msgs::msg::dds::Pose, 200> trajectory;
+        /**
+         * Hand force
+         */
+        geometry_msgs::msg::dds::Vector3 force;
+        /**
+         * Hand torque
+         */
+        geometry_msgs::msg::dds::Vector3 torque;
+      };
+    };
+  };
+};
+
+#endif

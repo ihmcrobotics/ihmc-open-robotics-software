@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.ui.behavior.actions.RDXFootstepPlanAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXHandPoseAction;
+import us.ihmc.rdx.ui.behavior.actions.RDXScrewPrimitiveAction;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
@@ -246,6 +247,8 @@ public class RDXActionProgressWidgets
       CRDTUnidirectionalVector3D forceCRDT = null;
       if (action instanceof RDXHandPoseAction handPoseAction)
          forceCRDT = handPoseAction.getState().getForce();
+      else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)
+         forceCRDT = screwPrimitiveAction.getState().getForce();
 
       if (forceCRDT != null)
       {
@@ -278,6 +281,8 @@ public class RDXActionProgressWidgets
       CRDTUnidirectionalVector3D torqueCRDT = null;
       if (action instanceof RDXHandPoseAction handPoseAction)
          torqueCRDT = handPoseAction.getState().getTorque();
+      else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)
+         torqueCRDT = screwPrimitiveAction.getState().getTorque();
 
       if (torqueCRDT != null)
       {
