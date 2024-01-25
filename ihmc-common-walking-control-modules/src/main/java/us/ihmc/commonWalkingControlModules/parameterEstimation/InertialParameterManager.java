@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
@@ -29,6 +30,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class InertialParameterManager implements SCS2YoGraphicHolder
 {
@@ -77,6 +79,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final InertialExtendedKalmanFilter inertialExtendedKalmanFilter;
 
+   private final Random random = new Random(4567L);  // TODO: remove eventually
+
    public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, YoRegistry parentRegistry)
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -94,7 +98,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       estimateRobotModel = new FullHumanoidRobotModelWrapper(clonedElevator, true);
       estimateModelJoints = estimateRobotModel.getRootJoint().subtreeList();
 
-      yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(actualRobotModel.getRootBody(), registry);
+      yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(estimateRobotModel.getRootBody(), registry);
       ellipsoidGraphicGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(actualRobotModel.getRootBody(), yoInertiaEllipsoids);
 
       totalNumberOfDoFs = actualRobotModel.getRootJoint().getDegreesOfFreedom() + actualRobotModel.getOneDoFJoints().length;
@@ -187,6 +191,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          updateContactJacobians();
          updateContactWrenches();
          updateWholeSystemTorques();
+
+         setDummyEstimateBodies();
          updateVisuals();
 
          regressorCalculator.compute();
@@ -250,6 +256,23 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       }
    }
 
+   private void setDummyEstimateBodies()
+   {
+      for (int i = 0; i < estimateRobotModel.getRootBody().subtreeArray().length; i++)
+      {
+         RigidBodyReadOnly actualBody = actualRobotModel.getRootBody().subtreeArray()[i];
+         RigidBodyBasics estimateBody = estimateRobotModel.getRootBody().subtreeArray()[i];
+
+         double multiplier = random.nextDouble(0.9, 1.1);
+
+         estimateBody.getInertia().setMass(actualBody.getInertia().getMass() * multiplier);
+
+         // TODO: print out only the pelvis mass to show that randomisation is working
+         if (i == 0)
+            System.out.println("Pelvis mass: " + estimateBody.getInertia().getMass());
+      }
+   }
+
    private void updateVisuals()
    {
       for (int i = 0; i < estimateRobotModel.getRootBody().subtreeArray().length; i++)
@@ -257,7 +280,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          RigidBodyReadOnly actualBody = actualRobotModel.getRootBody().subtreeArray()[i];
          RigidBodyReadOnly estimateBody = estimateRobotModel.getRootBody().subtreeArray()[i];
          // TODO: Verify this is working when the EKF is plugged in. Right now estimateBody
-         double scale = estimateBody.getInertia().getMass() / actualBody.getInertia().getMass() / 2.0;
+         double scale = EuclidCoreTools.clamp(estimateBody.getInertia().getMass() / actualBody.getInertia().getMass(), 0.0, 1.0);
 
          if (estimateBody.getInertia() != null && actualBody.getInertia() != null)
          {
