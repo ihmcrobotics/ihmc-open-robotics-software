@@ -3,7 +3,6 @@ package us.ihmc.behaviors.sequence;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.annotation.Nullable;
@@ -16,13 +15,7 @@ public class ActionNodeInitialization
                                        @Nullable RobotSide sideOfNewAction,
                                        ROS2SyncedRobotModel syncedRobot)
    {
-      if (newAction instanceof WalkActionState walkAction)
-      {
-         MovingReferenceFrame parentFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
-         walkAction.getDefinition().getBasics().setParentFrameName(parentFrame.getName());
-         walkAction.getState().update();
-      }
-      else if (newAction instanceof HandPoseActionState handPoseAction)
+      if (newAction instanceof HandPoseActionState handPoseAction)
       {
          // Set the new action to where the last one was for faster authoring
          handPoseAction.getDefinition().setSide(sideOfNewAction);
@@ -95,11 +88,11 @@ public class ActionNodeInitialization
          FootstepPlanActionState nextPreviousFootstepPlanAction = findNextPreviousAction(actionSequence, FootstepPlanActionState.class, indexOfInsertion, null);
          if (nextPreviousFootstepPlanAction != null)
          {
-            footstepPlanAction.getDefinition().getBasics().setParentFrameName(nextPreviousFootstepPlanAction.getDefinition().getBasics().getParentFrameName());
+            footstepPlanAction.getDefinition().setParentFrameName(nextPreviousFootstepPlanAction.getDefinition().getParentFrameName());
          }
          else // set to current robot's pelvis pose
          {
-            footstepPlanAction.getDefinition().getBasics().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+            footstepPlanAction.getDefinition().setParentFrameName(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getName());
          }
          footstepPlanAction.update();
       }
@@ -121,15 +114,11 @@ public class ActionNodeInitialization
 
       if (nextPreviousAction instanceof FootstepPlanActionState footstepPlanAction)
       {
-         return footstepPlanAction.getDefinition().getBasics().getParentFrameName();
+         return footstepPlanAction.getDefinition().getParentFrameName();
       }
       else if (nextPreviousAction instanceof HandPoseActionState handPoseAction)
       {
          return handPoseAction.getDefinition().getPalmParentFrameName();
-      }
-      else if (nextPreviousAction instanceof WalkActionState walkAction)
-      {
-         return walkAction.getDefinition().getBasics().getParentFrameName();
       }
 
       return ReferenceFrame.getWorldFrame().getName();

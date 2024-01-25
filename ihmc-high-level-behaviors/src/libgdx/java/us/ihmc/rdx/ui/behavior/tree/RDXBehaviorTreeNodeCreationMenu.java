@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
@@ -13,6 +14,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
@@ -25,14 +27,16 @@ public class RDXBehaviorTreeNodeCreationMenu
 {
    private final RDXBehaviorTree tree;
    private final WorkspaceResourceDirectory treeFilesDirectory;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final BehaviorTreeTopologyOperationQueue topologyOperationQueue;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ArrayList<RDXAvailableBehaviorTreeFile> indexedTreeFiles = new ArrayList<>();
 
-   public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree tree, WorkspaceResourceDirectory treeFilesDirectory)
+   public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree tree, WorkspaceResourceDirectory treeFilesDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.tree = tree;
       this.treeFilesDirectory = treeFilesDirectory;
+      this.referenceFrameLibrary = referenceFrameLibrary;
 
       topologyOperationQueue = tree.getBehaviorTreeState().getTopologyChangeQueue();
 
@@ -58,11 +62,24 @@ public class RDXBehaviorTreeNodeCreationMenu
       ImGui.text("From file:");
       ImGui.popFont();
 
+      for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
+      {
+         indexedTreeFile.update();
+      }
+
+      indexedTreeFiles.sort(Comparator.comparing((RDXAvailableBehaviorTreeFile file) -> file.getNumberOfFramesInWorld() > 0).reversed()
+                                      .thenComparing(RDXAvailableBehaviorTreeFile::getName));
+
       ImGui.indent();
       for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
       {
-         String fileName = indexedTreeFile.getTreeFile().getFileName();
-         if (ImGuiTools.textWithUnderlineOnHover(fileName))
+         if (indexedTreeFile.getReferenceFramesInWorld().isEmpty())
+            ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
+
+         String textToDisplay = "%s".formatted(indexedTreeFile.getTreeFile().getFileName(),
+                                                                       indexedTreeFile.getNumberOfFramesInWorld(),
+                                                                       indexedTreeFile.getReferenceFrameNames().size());
+         if (ImGuiTools.textWithUnderlineOnHover(textToDisplay))
          {
             if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
             {
@@ -73,6 +90,36 @@ public class RDXBehaviorTreeNodeCreationMenu
 
                complete(insertionDefinition);
             }
+         }
+
+         if (indexedTreeFile.getReferenceFramesInWorld().isEmpty())
+            ImGui.popStyleColor();
+
+         if (ImGui.isItemHovered())
+         {
+            ImGui.beginTooltip();
+
+            ImGui.text("Reference frames:");
+
+            if (indexedTreeFile.getReferenceFrameNames().isEmpty())
+            {
+               ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
+               ImGui.text("\t(Contains no reference frames.)");
+               ImGui.popStyleColor();
+            }
+
+            for (String referenceFrameName : indexedTreeFile.getReferenceFrameNames())
+            {
+               if (!indexedTreeFile.getReferenceFramesInWorld().contains(referenceFrameName))
+                  ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
+
+               ImGui.text("\t" + referenceFrameName);
+
+               if (!indexedTreeFile.getReferenceFramesInWorld().contains(referenceFrameName))
+                  ImGui.popStyleColor();
+            }
+
+            ImGui.endTooltip();
          }
       }
       ImGui.unindent();
@@ -106,7 +153,6 @@ public class RDXBehaviorTreeNodeCreationMenu
          ImGui.popFont();
          ImGui.indent();
 
-         renderNodeCreationClickable(relativeNode, insertionType, "Walk Action", WalkActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Footstep Plan", FootstepPlanActionDefinition.class, null);
          ImGui.text("Hand Pose: ");
          for (RobotSide side : RobotSide.values)
@@ -182,10 +228,7 @@ public class RDXBehaviorTreeNodeCreationMenu
       indexedTreeFiles.clear();
       for (WorkspaceResourceFile queryContainedFile : treeFilesDirectory.queryContainedFiles())
       {
-         indexedTreeFiles.add(new RDXAvailableBehaviorTreeFile(queryContainedFile));
+         indexedTreeFiles.add(new RDXAvailableBehaviorTreeFile(queryContainedFile, referenceFrameLibrary));
       }
-
-      // Keep them in alphabetical order
-      indexedTreeFiles.sort(Comparator.comparing(RDXAvailableBehaviorTreeFile::getName));
    }
 }

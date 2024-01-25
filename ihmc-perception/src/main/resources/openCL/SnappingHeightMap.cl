@@ -7,6 +7,7 @@
 #define HEIGHT_OFFSET 6
 #define FOOT_LENGTH 7
 #define FOOT_WIDTH 8
+
 #define MIN_DISTANCE_FROM_CLIFF_TOPS 9
 #define MIN_DISTANCE_FROM_CLIFF_BOTTOMS 10
 #define CLIFF_START_HEIGHT_TO_AVOID 11
@@ -310,6 +311,7 @@ void kernel computeSnappedValuesKernel(global float* params,
     bool failed = false;
     int snap_result = VALID;
 
+    // Fixme THIS ARGUABLy should never happen
     if (n < 0.0001f)
     {
         snap_result = SNAP_FAILED;
@@ -418,4 +420,56 @@ void kernel computeSnappedValuesKernel(global float* params,
     write_imageui(snapped_normal_x_map, storage_key, (uint4)((int)(normal.x * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
     write_imageui(snapped_normal_y_map, storage_key, (uint4)((int)(normal.y * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
     write_imageui(snapped_normal_z_map, storage_key, (uint4)((int)(normal.z * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
+}
+
+void kernel computeSteppabilityConnectionsKernel(global float* params,
+                                                 read_only image2d_t steppable_map,
+                                                 write_only image2d_t steppable_connections)
+{
+    int idx_x = get_global_id(0);
+    int idx_y = get_global_id(1);
+
+    int cells_per_side = 2 * params[CROPPED_WINDOW_CENTER_INDEX] + 1;
+
+    int2 key = (int2) (idx_x, idx_y);
+
+    uint boundaryConnectionsEncodedAsOnes = (uint)(0);
+
+    int counter = 0;
+    if (read_imageui(steppable_map, key).x == VALID)
+    {
+        for (int x_offset = -1; x_offset <= 1; x_offset++)
+        {
+            for (int y_offset = -1; y_offset <= 1; y_offset++)
+            {
+                if (x_offset == 0 && y_offset == 0)
+                    continue;
+
+                int x_query = idx_x + x_offset;
+                int y_query = idx_y + y_offset;
+
+                // out of bounds, so skip it
+                if (x_query < 0 || x_query >= cells_per_side || y_query < 0 || y_query >= cells_per_side)
+                {
+                    boundaryConnectionsEncodedAsOnes = (0 << counter) | boundaryConnectionsEncodedAsOnes;
+                }
+                else
+                {
+                    int2 query_key = (int2) (x_query, y_query);
+                    if (read_imageui(steppable_map, query_key).x == VALID)
+                    {
+                        boundaryConnectionsEncodedAsOnes = (1 << counter) | boundaryConnectionsEncodedAsOnes;
+                    }
+                    else
+                    {
+                        boundaryConnectionsEncodedAsOnes = (0 << counter) | boundaryConnectionsEncodedAsOnes;
+                    }
+                }
+
+                counter++;
+            }
+        }
+    }
+
+    write_imageui(steppable_connections, key, (uint4)(boundaryConnectionsEncodedAsOnes, 0, 0, 0));
 }

@@ -53,7 +53,6 @@ public class CollisionFreeSwingCalculatorLogViewer
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage());
       HeightMapMessage heightMapMessage = log.getRequestPacket().getHeightMapMessage();
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
 

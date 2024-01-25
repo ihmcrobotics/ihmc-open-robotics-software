@@ -11,7 +11,6 @@
 #include "behavior_msgs/msg/./PelvisHeightPitchActionStateMessage_.idl"
 #include "behavior_msgs/msg/./SakeHandCommandActionStateMessage_.idl"
 #include "behavior_msgs/msg/./WaitDurationActionStateMessage_.idl"
-#include "behavior_msgs/msg/./WalkActionStateMessage_.idl"
 #include "ihmc_common_msgs/msg/./ConfirmableRequestMessage_.idl"
 module behavior_msgs
 {
@@ -49,9 +48,6 @@ module behavior_msgs
       const octet WAIT_DURATION_ACTION =
       17;
 
-      const octet WALK_ACTION =
-      18;
-
 
       /**
        * Gives the current state of the complete collection of behavior tree nodes.
@@ -62,6 +58,10 @@ module behavior_msgs
       @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeStateMessage_")
       struct BehaviorTreeStateMessage
       {
+        /**
+         * Monotonically increasing message ID that matches the CRDTInfo update number
+         */
+        unsigned long sequence_id;
         /**
          * The ID to assign to the next instantiated node
          */
@@ -90,7 +90,6 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::HandWrenchActionStateMessage, 200> hand_wrench_actions;
         sequence<behavior_msgs::msg::dds::PelvisHeightPitchActionStateMessage, 200> pelvis_height_actions;
         sequence<behavior_msgs::msg::dds::WaitDurationActionStateMessage, 200> wait_duration_actions;
-        sequence<behavior_msgs::msg::dds::WalkActionStateMessage, 200> walk_actions;
       };
     };
   };

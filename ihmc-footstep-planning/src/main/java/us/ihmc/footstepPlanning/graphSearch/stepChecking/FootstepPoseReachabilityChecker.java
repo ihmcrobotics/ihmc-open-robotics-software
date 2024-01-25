@@ -6,6 +6,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -20,7 +22,7 @@ public class FootstepPoseReachabilityChecker
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FootstepPlannerParametersReadOnly parameters;
-   private final FootstepSnapAndWiggler snapper;
+   private final FootstepSnapperReadOnly snapper;
    private final StepReachabilityData stepReachabilityData;
 
    private final TransformReferenceFrame stanceFootFrame = new TransformReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
@@ -40,7 +42,7 @@ public class FootstepPoseReachabilityChecker
    private final YoFramePoseUsingYawPitchRoll yoCandidateFootPose = new YoFramePoseUsingYawPitchRoll("candidate", stanceFootZUpFrame, registry);
 
    public FootstepPoseReachabilityChecker(FootstepPlannerParametersReadOnly parameters,
-                                          FootstepSnapAndWiggler snapper,
+                                          FootstepSnapperReadOnly snapper,
                                           StepReachabilityData stepReachabilityData,
                                           YoRegistry parentRegistry)
    {
@@ -54,8 +56,8 @@ public class FootstepPoseReachabilityChecker
    {
       RobotSide stepSide = candidateStep.getRobotSide();
 
-      FootstepSnapData candidateStepSnapData = snapper.snapFootstep(candidateStep);
-      FootstepSnapData stanceStepSnapData = snapper.snapFootstep(stanceStep);
+      FootstepSnapDataReadOnly candidateStepSnapData = snapper.snapFootstep(candidateStep);
+      FootstepSnapDataReadOnly stanceStepSnapData = snapper.snapFootstep(stanceStep);
 
       candidateFootFrame.setTransformAndUpdate(candidateStepSnapData.getSnappedStepTransform(candidateStep));
       stanceFootFrame.setTransformAndUpdate(stanceStepSnapData.getSnappedStepTransform(stanceStep));
