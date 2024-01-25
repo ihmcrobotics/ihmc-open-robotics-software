@@ -72,7 +72,7 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
 
       getDefinition().setDescription("Pelvis height and pitch");
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform().getValue(), getSelected());
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform().getValue());
       poseGizmo.create(panel3D);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
@@ -158,6 +158,7 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    @Override
    protected void renderImGuiWidgetsInternal()
    {
+      ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
       ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
       parentFrameComboBox.render();
@@ -207,7 +208,7 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
          boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
          if (isClickedOn)
          {
-            getSelected().set(true);
+            poseGizmo.setSelected(true);
          }
 
          poseGizmo.process3DViewInput(input, isMouseHovering);
