@@ -1,6 +1,5 @@
 package us.ihmc.robotics;
 
-import org.ejml.EjmlParameters;
 import org.ejml.MatrixDimensionException;
 import org.ejml.UtilEjml;
 import org.ejml.data.DMatrix;
@@ -8,16 +7,15 @@ import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrix3x3;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
-import org.ejml.dense.row.mult.MatrixVectorMult_DDRM;
 import org.ejml.simple.SimpleMatrix;
-
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.matrixlib.MatrixTools;
+
+import static georegression.misc.test.GeometryUnitTest.assertTrue;
 
 public class MatrixMissingTools
 {
@@ -464,26 +462,52 @@ public class MatrixMissingTools
     * powerNuber should be larger than 1.
     * if power number is 1, output matrix is input matrix
     * outputMatrix = inputMatrix^{powerNumber}
-    * @param inputMatrix input matrix will be powered
+    *
+    * @param inputMatrix  input matrix will be powered
     * @param outputMatrix output matrix after power
-    * @param powerNumber number of power
+    * @param powerNumber  number of power
     */
    public static void power(DMatrixRMaj inputMatrix, DMatrixRMaj outputMatrix, int powerNumber)
    {
-      UtilEjml.checkSameInstance(inputMatrix,outputMatrix);
+      UtilEjml.checkSameInstance(inputMatrix, outputMatrix);
 
       DMatrixRMaj temp = new DMatrixRMaj(inputMatrix);
-      DMatrixRMaj temp_result = new DMatrixRMaj(inputMatrix.numRows,inputMatrix.numCols);
+      DMatrixRMaj temp_result = new DMatrixRMaj(inputMatrix.numRows, inputMatrix.numCols);
 
-      if (powerNumber >1)
+      if (powerNumber > 1)
       {
-         for (int k=0; k<powerNumber-1; k++){
-            CommonOps_DDRM.mult(inputMatrix,temp,temp_result);
-            MatrixTools.setMatrixBlock(temp,0,0,temp_result,0,0,temp_result.numRows,temp_result.numCols,1);
+         for (int k = 0; k < powerNumber - 1; k++)
+         {
+            CommonOps_DDRM.mult(inputMatrix, temp, temp_result);
+            MatrixTools.setMatrixBlock(temp, 0, 0, temp_result, 0, 0, temp_result.numRows, temp_result.numCols, 1);
             temp_result.zero();
          }
       }
 
-      MatrixTools.setMatrixBlock(outputMatrix,0,0,temp,0,0,temp.numRows,temp.numCols,1);
+      MatrixTools.setMatrixBlock(outputMatrix, 0, 0, temp, 0, 0, temp.numRows, temp.numCols, 1);
+   }
+
+   public static void assetElementWiseLessThan(DMatrixRMaj a, DMatrixRMaj b, double epsilon)
+   {
+      if (a.numCols != b.numCols)
+         throw new IllegalArgumentException("The A and B must have the same number of cols : [A cols: " + a.getNumCols() + ", b cols: " + b.getNumCols());
+      if (a.numRows != b.numRows)
+         throw new IllegalArgumentException("The A and B must have the same number of rows : [A cols: " + a.getNumRows() + ", b cols: " + b.getNumRows());
+
+      for (int i = 0; i < a.numRows; i++)
+      {
+         for (int j = 0; j < a.numCols; j++)
+         {
+            double valA = a.get(i, j);
+            double valB = b.get(i, j);
+
+            assertTrue(!Double.isNaN(valA) && !Double.isNaN(valB), "At (" + i + "," + j + ") A = " + valA + " B = " + valB);
+            assertTrue(!Double.isInfinite(valA) && !Double.isInfinite(valB), "At (" + i + "," + j + ") A = " + valA + " B = " + valB);
+
+            double error = valB - valA;
+            assertTrue(error > epsilon,
+                       "At (" + i + "," + j + ") A = " + valA + " B = " + valB + " error = " + error + " tol = " + epsilon + ", valA should be less than valB");
+         }
+      }
    }
 }
