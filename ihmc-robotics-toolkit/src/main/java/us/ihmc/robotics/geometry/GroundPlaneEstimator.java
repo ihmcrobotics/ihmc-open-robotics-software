@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -20,14 +21,9 @@ public class GroundPlaneEstimator
 {
    private final static int MAX_GROUND_PLANE_POINTS = 100;
    private final Plane3D groundPlane = new Plane3D();
-   private final Vector3D groundPlaneNormal = new Vector3D();
    private final Point3D groundPlanePoint = new Point3D();
    private final ArrayList<Point3DReadOnly> groundPlanePoints = new ArrayList<>(MAX_GROUND_PLANE_POINTS);
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
-
-   protected final FramePoint3D groundPlaneFramePoint = new FramePoint3D();
-   protected final FrameQuaternion groundPlaneOrientation = new FrameQuaternion();
-   protected final FrameVector3D groundPlaneFrameNormal = new FrameVector3D();
 
    private final FramePose3D groundPlanePose = new FramePose3D();
    private final PoseReferenceFrame groundPlaneFrame = new PoseReferenceFrame("groundPlaneFrame", ReferenceFrame.getWorldFrame());
@@ -39,8 +35,7 @@ public class GroundPlaneEstimator
    public double getPitch()
    {
       // reproducing for speed
-      groundPlaneNormal.set(groundPlane.getNormal());
-      return Math.atan2(groundPlaneNormal.getX(), groundPlaneNormal.getZ());
+      return Math.atan2(groundPlane.getNormal().getX(), groundPlane.getNormal().getZ());
 //      return getPitch(0.0);
    }
 
@@ -50,8 +45,7 @@ public class GroundPlaneEstimator
    public double getRoll()
    {
       // reproducing for speed
-      groundPlaneNormal.set(groundPlane.getNormal());
-      return Math.atan2(-groundPlaneNormal.getY(), groundPlaneNormal.getZ());
+      return Math.atan2(-groundPlane.getNormal().getY(), groundPlane.getNormal().getZ());
 //      return getRoll(0.0);
    }
 
@@ -61,8 +55,7 @@ public class GroundPlaneEstimator
     */
    public double getPitch(double yaw)
    {
-      groundPlaneNormal.set(groundPlane.getNormal());
-      return Math.atan2(Math.cos(yaw) * groundPlaneNormal.getX() + Math.sin(yaw) * groundPlaneNormal.getY(), groundPlaneNormal.getZ());
+      return Math.atan2(Math.cos(yaw) * groundPlane.getNormal().getX() + Math.sin(yaw) * groundPlane.getNormal().getY(), groundPlane.getNormal().getZ());
    }
 
    /**
@@ -71,8 +64,7 @@ public class GroundPlaneEstimator
     */
    public double getRoll(double yaw)
    {
-      groundPlaneNormal.set(groundPlane.getNormal());
-      return Math.atan2(Math.sin(yaw) * groundPlaneNormal.getX() - Math.cos(yaw) * groundPlaneNormal.getY(), groundPlaneNormal.getZ());
+      return Math.atan2(Math.sin(yaw) * groundPlane.getNormal().getX() - Math.cos(yaw) * groundPlane.getNormal().getY(), groundPlane.getNormal().getZ());
    }
 
    /**
@@ -104,34 +96,18 @@ public class GroundPlaneEstimator
    /**
     * @param point : point to be vertically projected onto ground plane
     */
-   public void projectZ(FramePoint3D point)
+   public void projectZ(FramePoint3DBasics point)
    {
       point.changeFrame(ReferenceFrame.getWorldFrame());
-      point.setZ(groundPlane.getZOnPlane(point.getX(), point.getY()));
-   }
-
-   /**
-    * @param point : point in world frame to be vertically projected onto ground plane
-    */
-   public void projectZ(Point3D point)
-   {
       point.setZ(groundPlane.getZOnPlane(point.getX(), point.getY()));
    }
 
    /**
     * @param point : point to be orthogonally projected onto ground plane
     */
-   public void projectOrthogonal(FramePoint3D point)
+   public void projectOrthogonal(FramePoint3DBasics point)
    {
       point.changeFrame(ReferenceFrame.getWorldFrame());
-      groundPlane.orthogonalProjection(point);
-   }
-
-   /**
-    * @param point : point in world frame to be orthogonally projected onto ground plane
-    */
-   public void projectOrthogonal(Point3D point)
-   {
       groundPlane.orthogonalProjection(point);
    }
 
@@ -158,15 +134,10 @@ public class GroundPlaneEstimator
    public void compute()
    {
       planeFitter.fitPlaneToPoints(groundPlanePoints, groundPlane);
-      groundPlaneNormal.set(groundPlane.getNormal());
-      groundPlaneFrameNormal.set(groundPlaneNormal);
       groundPlanePoint.set(groundPlane.getPoint());
 
-      groundPlaneFramePoint.set(groundPlanePoint);
-      groundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
-
-      groundPlanePose.getPosition().set(groundPlaneFramePoint);
-      groundPlanePose.getOrientation().set(groundPlaneOrientation);
+      groundPlanePose.getPosition().set(groundPlane.getPoint());
+      groundPlanePose.getOrientation().setYawPitchRoll(0.0, getPitch(), getRoll());
       groundPlaneFrame.setPoseAndUpdate(groundPlanePose);
    }
 
