@@ -99,12 +99,92 @@ public class RegressorTools
    }
 
    /**
+    * Partition a vector into two vectors, one vector containing the entries corresponding to the spatial inertia bases in the list of
+    * {@code SpatialInertiaBasisOption} sets, and the other vector containing the remaining entries.
+    * <p>
+    * NOTE: This method assumes that the two partition vectors, {@code collectionPartitionToPack} and {@code collectionComplementPartitionToPack}, have been
+    * correctly sized. See {@link #sizePartitionVectors(Set[])}.
+    * </p>
+    *
+    * @param vector                              the vector to be partitioned. Not modified.
+    * @param basisSets                           the list of {@code SpatialInertiaBasisOption} sets to use for partitioning the vector. Not modified.
+    * @param collectionPartitionToPack           the vector in which the entries corresponding to the spatial inertia bases in the list of basis sets are
+    *                                            stored. Modified.
+    * @param collectionComplementPartitionToPack the vector in which the remaining entries are stored. Modified.
+    */
+   public static void partitionVector(DMatrixRMaj vector,
+                                      Set<SpatialInertiaBasisOption>[] basisSets,
+                                      DMatrixRMaj collectionPartitionToPack,
+                                      DMatrixRMaj collectionComplementPartitionToPack)
+   {
+      partitionVector(vector, basisSets, collectionPartitionToPack, collectionComplementPartitionToPack, false);
+   }
+
+   /**
+    * Partition a vector into two vectors, one vector containing the entries corresponding to the spatial inertia bases in the list of
+    * {@code SpatialInertiaBasisOption} sets, and the other vector containing the remaining entries.
+    * <p>
+    * NOTE: This method will perform checks to ensure that the two partition vectors, {@code collectionPartitionToPack} and
+    * {@code collectionComplementPartitionToPack}, have been correctly sized, as well as the list of sets {@code basisSets}. For how to appropriately size the
+    * partition vectors, see {@link #sizePartitionVectors(Set[])}.
+    * </p>
+    *
+    * @param vector                              the vector to be partitioned. Not modified.
+    * @param basisSets                           the list of {@code SpatialInertiaBasisOption} sets to use for partitioning the vector. Not modified.
+    * @param collectionPartitionToPack           the vector in which the entries corresponding to the spatial inertia bases in the list of basis sets are
+    *                                            stored. Modified.
+    * @param collectionComplementPartitionToPack the vector in which the remaining entries are stored. Modified.
+    * @param checkInputs                         whether to perform sanity sizing checks on the inputs.
+    */
+   public static void partitionVector(DMatrixRMaj vector,
+                                      Set<SpatialInertiaBasisOption>[] basisSets,
+                                      DMatrixRMaj collectionPartitionToPack,
+                                      DMatrixRMaj collectionComplementPartitionToPack,
+                                      boolean checkInputs)
+   {
+      if (checkInputs)
+      {
+         // The sum of the number of entries in the partitioned vectors must sum to the number of entries in the original vector
+         if (collectionPartitionToPack.getNumElements() + collectionComplementPartitionToPack.getNumElements() != vector.getNumElements())
+            throw new IllegalArgumentException(
+                  "The sum of the number of entries in the partitioned vectors must sum to the number of entries in the original vector.");
+         // The total number of entries in the list of basis sets must sum to the number of entries in the original vector
+         int totalNumberOfBasisEntries = 0;
+         for (Set<SpatialInertiaBasisOption> basisSet : basisSets)
+            totalNumberOfBasisEntries += basisSet.size();
+         if (totalNumberOfBasisEntries != vector.getNumElements())
+            throw new IllegalArgumentException("The total number of entries in the list of basis sets must sum to the number of entries in the original vector.");
+      }
+
+      int collectionPartitionIndex = 0;
+      int collectionComplementPartitionIndex = 0;
+
+      for (int i = 0; i < basisSets.length; ++i)
+      {
+         for (SpatialInertiaBasisOption option : SpatialInertiaBasisOption.values)
+         {
+            int vectorIndex = (i * PARAMETERS_PER_RIGID_BODY) + option.ordinal();
+            if (basisSets[i].contains(option))
+            {
+               collectionPartitionToPack.set(collectionPartitionIndex, vector.get(vectorIndex));
+               collectionPartitionIndex += 1;
+            }
+            else
+            {
+               collectionComplementPartitionToPack.set(collectionComplementPartitionIndex, vector.get(vectorIndex));
+               collectionComplementPartitionIndex += 1;
+            }
+         }
+      }
+   }
+
+   /**
     * A helper method for sizing the partition matrices for {@link #partitionRegressor(DMatrixRMaj, Set[], DMatrixRMaj, DMatrixRMaj)}.
     *
     * @param basisSets the list of {@code SpatialInertiaBasisOption} sets to use for partitioning the regressor. Not modified.
     * @return an array containing the sizes (specifically, the number of columns) of the two partition matrices.
     */
-   public static int[] getPartitionSizes(Set<SpatialInertiaBasisOption>[] basisSets)
+   public static int[] sizePartitions(Set<SpatialInertiaBasisOption>[] basisSets)
    {
       int collectionPartitionSize = 0;
       int collectionComplementPartitionSize = 0;
@@ -135,8 +215,24 @@ public class RegressorTools
     */
    public static DMatrixRMaj[] sizePartitionMatrices(DMatrixRMaj regressor, Set<SpatialInertiaBasisOption>[] basisSets)
    {
-      int[] partitionSizes = getPartitionSizes(basisSets);
+      int[] partitionSizes = sizePartitions(basisSets);
 
       return new DMatrixRMaj[] {new DMatrixRMaj(regressor.numRows, partitionSizes[0]), new DMatrixRMaj(regressor.numRows, partitionSizes[1])};
+   }
+
+   /**
+    * A helper method for sizing the partition vectors for {@link #partitionVector(DMatrixRMaj, Set[], DMatrixRMaj, DMatrixRMaj)}.
+    * <p>
+    * This method creates garbage. Try to only use it on construction.
+    * </p>
+    *
+    * @param basisSets the list of {@code SpatialInertiaBasisOption} sets to use for partitioning the vector. Not modified.
+    * @return an array containing the two correctly sized partition vectors.
+    */
+   public static DMatrixRMaj[] sizePartitionVectors(Set<SpatialInertiaBasisOption>[] basisSets)
+   {
+      int[] partitionSizes = sizePartitions(basisSets);
+
+      return new DMatrixRMaj[] {new DMatrixRMaj(partitionSizes[0], 1), new DMatrixRMaj(partitionSizes[1], 1)};
    }
 }
