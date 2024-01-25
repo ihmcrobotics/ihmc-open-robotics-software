@@ -6,17 +6,16 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
+import us.ihmc.parameterEstimation.NadiaInertialExtendedKalmanFilterParameters;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
-import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -45,8 +44,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final int totalNumberOfDoFs;
 
    private final JointTorqueRegressorCalculator regressorCalculator;
-   private final DMatrixRMaj regressor;
-   private final DMatrixRMaj regressorBlockContainer;
 
    private final SideDependentList<? extends FootSwitchInterface> footSwitches;
    private final SideDependentList<DMatrixRMaj> contactWrenches;
@@ -64,13 +61,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final List<RigidBodyInertialParameters> inertialParameters = new ArrayList<>();
    private final List<YoMatrix> inertialParametersPiBasisWatchers = new ArrayList<>();
    private final List<YoMatrix> inertialParametersThetaBasisWatchers = new ArrayList<>();
-   private final DMatrixRMaj inertialParameterPiBasisContainer;
-   private final DMatrixRMaj inertialParameterThetaBasisContainer;
 
    private final List<DMatrixRMaj> parametersFromUrdf = new ArrayList<>();
 
    private final ArrayList<YoInertiaEllipsoid> yoInertiaEllipsoids;
    private final YoGraphicDefinition ellipsoidGraphicGroup;
+
+   private final DMatrixRMaj[] regressorPartitions;
+   private final DMatrixRMaj[] parameterPartitions;
 
    // DEBUG variables
    private static final boolean DEBUG = true;
@@ -105,8 +103,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       regressorCalculator = new JointTorqueRegressorCalculator(estimateRobotModel.getElevator());
       regressorCalculator.setGravitationalAcceleration(-toolbox.getGravityZ());
-      regressor = new DMatrixRMaj(totalNumberOfDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY * estimateRobotModel.getRootBody().subtreeArray().length);
-      regressorBlockContainer = new DMatrixRMaj(totalNumberOfDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
 
       this.footSwitches = toolbox.getFootSwitches();
       contactWrenches = new SideDependentList<>(new DMatrixRMaj(6 ,1),
@@ -128,26 +124,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       generalizedForcesContainer = new DMatrixRMaj(totalNumberOfDoFs, 1);
 
-      inertialParameterPiBasisContainer = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1);
-      inertialParameterThetaBasisContainer = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1);
-      for (RigidBodyBasics body : estimateRobotModel.getRootBody().subtreeArray())
-      {
-         if (body.getInertia() != null)
-         {
-            inertialParameters.add(new RigidBodyInertialParameters(body.getInertia()));
-
-            inertialParametersPiBasisWatchers.add(new YoMatrix(body.getName() + "_PiBasis", RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1, ParameterRepresentation.getRowNames(ParameterRepresentation.PI_BASIS), registry));
-            inertialParametersThetaBasisWatchers.add(new YoMatrix(body.getName() + "_ThetaBasis", RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1, ParameterRepresentation.getRowNames(ParameterRepresentation.THETA_BASIS), registry));
-
-            inertialParameters.get(inertialParameters.size() - 1).getParameterVectorPiBasis(inertialParameterPiBasisContainer);
-            inertialParametersPiBasisWatchers.get(inertialParametersPiBasisWatchers.size() - 1).set(inertialParameterPiBasisContainer);
-            inertialParameters.get(inertialParameters.size() - 1).getParameterVectorThetaBasis(inertialParameterThetaBasisContainer);
-            inertialParametersThetaBasisWatchers.get(inertialParametersThetaBasisWatchers.size() - 1).set(inertialParameterThetaBasisContainer);
-
-            parametersFromUrdf.add(new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1));
-            parametersFromUrdf.get(parametersFromUrdf.size() - 1).set(inertialParameterPiBasisContainer);
-         }
-      }
+      regressorPartitions = RegressorTools.sizePartitionMatrices(regressorCalculator.getJointTorqueRegressorMatrix(),
+                                                                 NadiaInertialExtendedKalmanFilterParameters.inertialParametersToEstimateHandsMass(estimateRobotModel));
+      parameterPartitions = RegressorTools.sizePartitionVectors(NadiaInertialExtendedKalmanFilterParameters.inertialParametersToEstimateHandsMass(estimateRobotModel));
 
       if (DEBUG)
       {
@@ -204,23 +183,30 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          for (RobotSide side : RobotSide.values)
             CommonOps_DDRM.multAddTransA(fullContactJacobians.get(side), contactWrenches.get(side), generalizedForcesContainer);
 
-         regressor.set(regressorCalculator.getJointTorqueRegressorMatrix());
+         RegressorTools.partitionRegressor(regressorCalculator.getJointTorqueRegressorMatrix(),
+                                           NadiaInertialExtendedKalmanFilterParameters.inertialParametersToEstimateHandsMass(estimateRobotModel),
+                                           regressorPartitions[0],
+                                           regressorPartitions[1],
+                                           true);
+         RegressorTools.partitionVector(regressorCalculator.getParameterVector(),
+                                        NadiaInertialExtendedKalmanFilterParameters.inertialParametersToEstimateHandsMass(estimateRobotModel),
+                                        parameterPartitions[0],
+                                        parameterPartitions[1],
+                                        true);
 
          if(DEBUG)
          {
             DMatrixRMaj residualToPack = new DMatrixRMaj(generalizedForcesContainer);
 
             // Iterate over each rigid body and subtract the contribution of its inertial parameters
-            for (int i = 0; i < inertialParameters.size(); ++i)
+            for (int i = 0; i < regressorPartitions.length; ++i)
             {
-               inertialParameters.get(i).getParameterVectorPiBasis(inertialParameterPiBasisContainer);
-               MatrixMissingTools.setMatrixBlock(regressorBlockContainer, 0, 0, regressor, 0, i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, totalNumberOfDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1.0);
-               CommonOps_DDRM.multAdd(-1.0, regressorBlockContainer, inertialParameterPiBasisContainer, residualToPack);
+               CommonOps_DDRM.multAdd(-1.0, regressorPartitions[i], parameterPartitions[i], residualToPack);
             }
             residual.set(residualToPack);
          }
 
-         updateWatchers();
+//         updateWatchers();
       }
    }
 
@@ -289,17 +275,17 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       }
    }
 
-   private void updateWatchers()
-   {
-      for (int i = 0; i < inertialParameters.size(); i++)
-      {
-         inertialParameters.get(i).getParameterVectorPiBasis(inertialParameterPiBasisContainer);
-         inertialParametersPiBasisWatchers.get(i).set(inertialParameterPiBasisContainer);
-
-         inertialParameters.get(i).getParameterVectorThetaBasis(inertialParameterThetaBasisContainer);
-         inertialParametersThetaBasisWatchers.get(i).set(inertialParameterThetaBasisContainer);
-      }
-   }
+//   private void updateWatchers()
+//   {
+//      for (int i = 0; i < inertialParameters.size(); i++)
+//      {
+//         inertialParameters.get(i).getParameterVectorPiBasis(inertialParameterPiBasisContainer);
+//         inertialParametersPiBasisWatchers.get(i).set(inertialParameterPiBasisContainer);
+//
+//         inertialParameters.get(i).getParameterVectorThetaBasis(inertialParameterThetaBasisContainer);
+//         inertialParametersThetaBasisWatchers.get(i).set(inertialParameterThetaBasisContainer);
+//      }
+//   }
 
    private enum ParameterRepresentation
    {
@@ -425,7 +411,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          {
             if (isBodyEstimated.get(i))
             {
-               packRegressorBlockForBodyIndex(i);  // packs the relevant regressor block into regressorBlockContainer
+//               packRegressorBlockForBodyIndex(i);  // packs the relevant regressor block into regressorBlockContainer
                packMeasurementModelJacobianForBodyIndex(index);  // packs the relevant regressor block into G, note the use of index rather than i
                index++;
             }
@@ -480,14 +466,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          {
             if (isBodyEstimated.get(i))
             {
-               packRegressorBlockForBodyIndex(i);
+//               packRegressorBlockForBodyIndex(i);
                packParameterVectorForBodyIndex(index); // note the use of index here
                CommonOps_DDRM.multAdd(regressorBlockContainer, parameterContainer, measurement);
                index++;
             }
             else  // The parameters are assumed known if they are not being estimated
             {
-               packRegressorBlockForBodyIndex(i);
+//               packRegressorBlockForBodyIndex(i);
                packUrdfParameterVectorForBodyIndex(i);
                CommonOps_DDRM.multAdd(regressorBlockContainer, parameterContainer, measurement);
             }
@@ -523,10 +509,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       /**
        * TODO: note this only packs one regressor block at a time into {@code regressorBlockContainer}
        */
-      private void packRegressorBlockForBodyIndex(int index)
-      {
-         CommonOps_DDRM.extract(regressor,0, index * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, regressorBlockContainer);
-      }
+//      private void packRegressorBlockForBodyIndex(int index)
+//      {
+//         CommonOps_DDRM.extract(regressor,0, index * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, regressorBlockContainer);
+//      }
 
       private void packMeasurementModelJacobianForBodyIndex(int index)
       {
