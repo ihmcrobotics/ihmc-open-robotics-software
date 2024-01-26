@@ -176,27 +176,28 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
          regressorCalculator.compute();
 
-         // Start with system torques
-         generalizedForcesContainer.set(wholeSystemTorques);
-
-         // Minus contribution from contact wrenches
-         for (RobotSide side : RobotSide.values)
-            CommonOps_DDRM.multAddTransA(fullContactJacobians.get(side), contactWrenches.get(side), generalizedForcesContainer);
-
-         RegressorTools.partitionRegressor(regressorCalculator.getJointTorqueRegressorMatrix(),
-                                           NadiaInertialExtendedKalmanFilterParameters.inertialParametersToEstimateHandsMass(estimateRobotModel),
-                                           regressorPartitions[0],
-                                           regressorPartitions[1],
-                                           true);
-         RegressorTools.partitionVector(regressorCalculator.getParameterVector(),
-                                        NadiaInertialExtendedKalmanFilterParameters.inertialParametersToEstimateHandsMass(estimateRobotModel),
-                                        parameterPartitions[0],
-                                        parameterPartitions[1],
-                                        true);
-
          if(DEBUG)
          {
+            // Size the residual off of the generalized forces container
             DMatrixRMaj residualToPack = new DMatrixRMaj(generalizedForcesContainer);
+
+            // Start with system torques
+            generalizedForcesContainer.set(wholeSystemTorques);
+
+            // Minus contribution from contact wrenches
+            for (RobotSide side : RobotSide.values)
+               CommonOps_DDRM.multAddTransA(fullContactJacobians.get(side), contactWrenches.get(side), generalizedForcesContainer);
+
+            RegressorTools.partitionRegressor(regressorCalculator.getJointTorqueRegressorMatrix(),
+                                              NadiaInertialExtendedKalmanFilterParameters.inertialParametersToEstimateHandsMass(estimateRobotModel),
+                                              regressorPartitions[0],
+                                              regressorPartitions[1],
+                                              true);
+            RegressorTools.partitionVector(regressorCalculator.getParameterVector(),
+                                           NadiaInertialExtendedKalmanFilterParameters.inertialParametersToEstimateHandsMass(estimateRobotModel),
+                                           parameterPartitions[0],
+                                           parameterPartitions[1],
+                                           true);
 
             // Iterate over each rigid body and subtract the contribution of its inertial parameters
             for (int i = 0; i < regressorPartitions.length; ++i)

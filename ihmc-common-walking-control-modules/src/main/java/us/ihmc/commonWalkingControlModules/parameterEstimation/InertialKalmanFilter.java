@@ -13,6 +13,8 @@ import java.util.Set;
 
 public class InertialKalmanFilter extends ExtendedKalmanFilter
 {
+   private static final int WRENCH_DIMENSION = 6;
+
    private final DMatrixRMaj identity;
 
    private final DMatrixRMaj regressorForEstimates;
@@ -43,8 +45,8 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
 
       for (RobotSide side : RobotSide.values)
       {
-         contactJacobians.put(side, new DMatrixRMaj(6, nDoFs));
-         contactWrenches.put(side, new DMatrixRMaj(6, 1));
+         contactJacobians.put(side, new DMatrixRMaj(WRENCH_DIMENSION, nDoFs));
+         contactWrenches.put(side, new DMatrixRMaj(WRENCH_DIMENSION, 1));
       }
 
       measurement = new DMatrixRMaj(nDoFs, 1);
