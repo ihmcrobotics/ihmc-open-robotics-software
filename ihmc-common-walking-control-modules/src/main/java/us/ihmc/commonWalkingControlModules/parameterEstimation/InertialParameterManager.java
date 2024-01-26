@@ -98,7 +98,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       estimateRobotModel = new FullHumanoidRobotModelWrapper(clonedElevator, true);
       estimateModelJoints = estimateRobotModel.getRootJoint().subtreeList();
 
-      yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(estimateRobotModel.getRootBody(), registry);
+      yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(actualRobotModel.getRootBody(), registry);
       ellipsoidGraphicGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(actualRobotModel.getRootBody(), yoInertiaEllipsoids);
 
       totalNumberOfDoFs = actualRobotModel.getRootJoint().getDegreesOfFreedom() + actualRobotModel.getOneDoFJoints().length;
@@ -263,7 +263,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          RigidBodyReadOnly actualBody = actualRobotModel.getRootBody().subtreeArray()[i];
          RigidBodyBasics estimateBody = estimateRobotModel.getRootBody().subtreeArray()[i];
 
-         double multiplier = random.nextDouble(0.9, 1.1);
+         double multiplier = random.nextDouble(0.0, 2.0);
 
          estimateBody.getInertia().setMass(actualBody.getInertia().getMass() * multiplier);
 
@@ -280,11 +280,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          RigidBodyReadOnly actualBody = actualRobotModel.getRootBody().subtreeArray()[i];
          RigidBodyReadOnly estimateBody = estimateRobotModel.getRootBody().subtreeArray()[i];
          // TODO: Verify this is working when the EKF is plugged in. Right now estimateBody
-         double scale = EuclidCoreTools.clamp(estimateBody.getInertia().getMass() / actualBody.getInertia().getMass(), 0.0, 1.0);
+         double scale = EuclidCoreTools.clamp(estimateBody.getInertia().getMass() / actualBody.getInertia().getMass()/2.0, 0.0, 1.0);
 
          if (estimateBody.getInertia() != null && actualBody.getInertia() != null)
          {
-            InertiaVisualizationTools.updateEllipsoid(yoInertiaEllipsoids.get(i), scale);
+            yoInertiaEllipsoids.get(i).update(scale);
          }
       }
    }
