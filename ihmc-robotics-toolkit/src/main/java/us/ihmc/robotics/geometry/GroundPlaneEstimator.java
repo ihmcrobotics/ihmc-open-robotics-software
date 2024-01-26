@@ -76,7 +76,7 @@ public class GroundPlaneEstimator
    }
 
    /**
-    * @param point : ground plane point in World Frame
+    * @param pointToPack : ground plane point in World Frame
     */
    public void getPlanePoint(FramePoint3DBasics pointToPack)
    {
