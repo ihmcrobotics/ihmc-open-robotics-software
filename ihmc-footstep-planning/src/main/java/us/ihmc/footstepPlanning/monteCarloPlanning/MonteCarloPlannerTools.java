@@ -234,7 +234,7 @@ public class MonteCarloPlannerTools
 
       if (maxNode != null)
       {
-         LogTools.warn("Optimal Node: {} {} {}", maxNode.getId(), maxNode.getChildren().size(), maxNode.getLevel());
+         //LogTools.warn("Optimal Node: {} {} {}", maxNode.getId(), maxNode.getChildren().size(), maxNode.getLevel());
          path.add(maxNode);
          getOptimalPath(maxNode, path);
       }
@@ -340,9 +340,7 @@ public class MonteCarloPlannerTools
          FramePose3D footstepPose = getFramePose3D(nodeX, nodeY, nodeZ, nodeYaw);
          footPolygon.applyTransform(footstepPose);
 
-         LogTools.warn("Attempting to snap footstep pose to height map");
          MonteCarloPlannerTools.snapFootPoseToHeightMap(request.getHeightMapData(), footstepPose, heightMapSnapper, footPolygons.get(footstepNode.getRobotSide()));
-
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
          LogTools.debug("Footstep Node -> Position: {}, Yaw: {}", footstepPose.getPosition(), footstepPose.getYaw());
@@ -363,7 +361,6 @@ public class MonteCarloPlannerTools
 //         snapTransform.getTranslation().setZ(0);
 //         snapTransform.getRotation().setYawPitchRoll(0, snapTransform.getRotation().getPitch(), snapTransform.getRotation().getRoll());
          poseToSnap.applyTransform(snapTransform);
-         LogTools.info("[SNAP] -> SUCCESS: Snapped footstep pose to height map");
       }
       else if (snapTransform != null && area / maxArea < 0.75)
       {
@@ -371,7 +368,7 @@ public class MonteCarloPlannerTools
       }
       else
       {
-         LogTools.info("[SNAP] Failed to snap footstep pose. Null.");
+         LogTools.warn("[SNAP] Failed to snap footstep pose. Null.");
       }
    }
 
