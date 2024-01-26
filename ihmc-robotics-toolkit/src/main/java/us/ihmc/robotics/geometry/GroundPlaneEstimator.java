@@ -10,9 +10,13 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -34,9 +38,7 @@ public class GroundPlaneEstimator
     */
    public double getPitch()
    {
-      // reproducing for speed
       return Math.atan2(groundPlane.getNormal().getX(), groundPlane.getNormal().getZ());
-//      return getPitch(0.0);
    }
 
    /**
@@ -44,9 +46,7 @@ public class GroundPlaneEstimator
     */
    public double getRoll()
    {
-      // reproducing for speed
       return Math.atan2(-groundPlane.getNormal().getY(), groundPlane.getNormal().getZ());
-//      return getRoll(0.0);
    }
 
    /**
@@ -78,37 +78,61 @@ public class GroundPlaneEstimator
    /**
     * @param point : ground plane point in World Frame
     */
-   public void getPlanePoint(FramePoint3D point)
+   public void getPlanePoint(FramePoint3DBasics pointToPack)
    {
-      point.changeFrame(ReferenceFrame.getWorldFrame());
-      point.set(groundPlane.getPoint());
+      ReferenceFrame originalFrame = pointToPack.getReferenceFrame();
+      pointToPack.changeFrame(ReferenceFrame.getWorldFrame());
+      pointToPack.set(groundPlane.getPoint());
+      pointToPack.changeFrame(originalFrame);
    }
 
    /**
-    * @param normal : ground plane normal in World Frame
+    * returns ground plane point in World Frame
     */
-   public void getPlaneNormal(FrameVector3D normal)
+   public Point3DReadOnly getPlanePoint()
    {
-      normal.changeFrame(ReferenceFrame.getWorldFrame());
-      normal.set(groundPlane.getNormal());
+      return groundPlane.getPoint();
    }
 
    /**
-    * @param point : point to be vertically projected onto ground plane
+    * @param normalToPack : ground plane normal in World Frame
     */
-   public void projectZ(FramePoint3DBasics point)
+   public void getPlaneNormal(FrameVector3DBasics normalToPack)
    {
-      point.changeFrame(ReferenceFrame.getWorldFrame());
-      point.setZ(groundPlane.getZOnPlane(point.getX(), point.getY()));
+      ReferenceFrame originalFrame = normalToPack.getReferenceFrame();
+      normalToPack.changeFrame(ReferenceFrame.getWorldFrame());
+      normalToPack.set(groundPlane.getNormal());
+      normalToPack.changeFrame(originalFrame);
    }
 
    /**
-    * @param point : point to be orthogonally projected onto ground plane
+    * returns ground plane normal in World Frame
     */
-   public void projectOrthogonal(FramePoint3DBasics point)
+   public Vector3DReadOnly getPlaneNormal()
    {
-      point.changeFrame(ReferenceFrame.getWorldFrame());
-      groundPlane.orthogonalProjection(point);
+      return groundPlane.getNormal();
+   }
+
+   /**
+    * @param pointToPack : point to be vertically projected onto ground plane
+    */
+   public void projectZ(FramePoint3DBasics pointToPack)
+   {
+      ReferenceFrame originalFrame = pointToPack.getReferenceFrame();
+      pointToPack.changeFrame(ReferenceFrame.getWorldFrame());
+      pointToPack.setZ(groundPlane.getZOnPlane(pointToPack.getX(), pointToPack.getY()));
+      pointToPack.changeFrame(originalFrame);
+   }
+
+   /**
+    * @param pointToPack : point to be orthogonally projected onto ground plane
+    */
+   public void projectOrthogonal(FramePoint3DBasics pointToPack)
+   {
+      ReferenceFrame originalFrame = pointToPack.getReferenceFrame();
+      pointToPack.changeFrame(ReferenceFrame.getWorldFrame());
+      groundPlane.orthogonalProjection(pointToPack);
+      pointToPack.changeFrame(originalFrame);
    }
 
    /**
@@ -145,7 +169,7 @@ public class GroundPlaneEstimator
     * Set the list of ground contact points and compute the ground plane.
     * @param contactPoints : list of ground contact points
     */
-   public void compute(List<FramePoint3D> contactPoints)
+   public void compute(List<? extends FramePoint3DBasics> contactPoints)
    {
       int nPoints = Math.min(contactPoints.size(), MAX_GROUND_PLANE_POINTS);
       groundPlanePoints.clear();
@@ -161,7 +185,7 @@ public class GroundPlaneEstimator
     * Set the list of ground contact points and compute the ground plane.
     * @param contactPoints : quadrant dependent list of contact points
     */
-   public void compute(QuadrantDependentList<FramePoint3D> contactPoints)
+   public void compute(QuadrantDependentList<? extends FramePoint3DBasics> contactPoints)
    {
       groundPlanePoints.clear();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
