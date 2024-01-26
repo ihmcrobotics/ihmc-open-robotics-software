@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionState;
@@ -36,6 +37,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
 {
    private final ChestOrientationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImBoolean adjustGoalPose = new ImBoolean();
    private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
@@ -69,7 +71,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
 
       getDefinition().setDescription("Chest orientation");
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getChestToParentTransform().getValue(), getSelected());
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getChestToParentTransform().getValue(), adjustGoalPose);
       poseGizmo.create(panel3D);
 
       // TODO: Can all this be condensed?
@@ -151,6 +153,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    @Override
    protected void renderImGuiWidgetsInternal()
    {
+      ImGui.checkbox(labels.get("Adjust Goal Pose"), adjustGoalPose);
       ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
       holdPoseInWorldLaterWrapper.renderImGuiWidget();
@@ -199,7 +202,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
       boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
       if (isClickedOn)
       {
-         getSelected().set(true);
+         adjustGoalPose.set(true);
       }
 
       poseGizmo.process3DViewInput(input, isMouseHovering);
