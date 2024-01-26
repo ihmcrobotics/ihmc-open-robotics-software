@@ -23,7 +23,7 @@ module behavior_msgs
          * Definition
          */
         behavior_msgs::msg::dds::ScrewPrimitiveActionDefinitionMessage definition;
-        sequence<geometry_msgs::msg::dds::Pose, 200> trajectory;
+        sequence<geometry_msgs::msg::dds::Pose, 50> trajectory;
         /**
          * Hand force
          */

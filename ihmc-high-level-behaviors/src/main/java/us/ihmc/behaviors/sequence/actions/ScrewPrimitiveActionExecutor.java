@@ -117,9 +117,18 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                   workPose.changeFrame(ReferenceFrame.getWorldFrame());
                   firstPose.set(workPose);
 
-                  int segments = (int) Math.ceil(Math.abs(getDefinition().getRotation()) / 0.15 + Math.abs(getDefinition().getTranslation()) / 0.01);
+                  // These contants could be adjusted
+                  double rotationPerPoint = Math.toRadians(8.6);
+                  double translationPerPoint = 0.01;
+                  int segments = (int) Math.ceil(Math.abs(getDefinition().getRotation()) / rotationPerPoint
+                                               + Math.abs(getDefinition().getTranslation()) / translationPerPoint);
                   double rotationPerSegment = getDefinition().getRotation() / segments;
                   double translationPerSegment = getDefinition().getTranslation() / segments;
+
+                  if (segments > ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT - 1)
+                  {
+                     segments = ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT - 1; // We have to fit within the message size limit
+                  }
 
                   for (int i = 0; i < segments; i++)
                   {

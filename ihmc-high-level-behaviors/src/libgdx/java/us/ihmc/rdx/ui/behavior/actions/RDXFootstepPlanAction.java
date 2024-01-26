@@ -42,6 +42,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final FootstepPlanActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
+   private final ImBoolean showAdjustmentInteractables = new ImBoolean();
    private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImBooleanWrapper manuallyPlaceStepsWrapper;
    private final ImDoubleWrapper swingDurationWidget;
@@ -105,7 +106,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
       footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(ReferenceFrame.getWorldFrame(),
                                                                        getDefinition().getGoalToParentTransform().getValue(),
-                                                                       getSelected());
+                                                                       showAdjustmentInteractables);
       footstepPlannerGoalGizmo.create(baseUI.getPrimary3DPanel());
 
       for (RobotSide side : RobotSide.values)
@@ -192,7 +193,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             }
          }
 
-         if (!getSelected().get())
+         if (!showAdjustmentInteractables.get())
             goalFeetPosesSelected.forEach(imBoolean -> imBoolean.set(false));
 
          footstepPlannerGoalGizmo.getPathControlRingGizmo().update();
@@ -243,7 +244,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          else
          {
             footstepPlannerGoalGizmo.calculate3DViewPick(input);
-            if (getSelected().get())
+            if (showAdjustmentInteractables.get())
             {
                for (RobotSide side : RobotSide.values)
                {
@@ -273,7 +274,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          {
             footstepPlannerGoalGizmo.process3DViewInput(input);
             tooltip.setInput(input);
-            if (getSelected().get())
+            if (showAdjustmentInteractables.get())
             {
                for (RobotSide side : RobotSide.values)
                {
@@ -290,6 +291,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    protected void renderImGuiWidgetsInternal()
    {
+      ImGui.checkbox(labels.get("Show Adjustment Interactables"), showAdjustmentInteractables);
       ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
       parentFrameComboBox.render();
@@ -362,7 +364,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          else
          {
             footstepPlannerGoalGizmo.getVirtualRenderables(renderables, pool);
-            if (getSelected().get())
+            if (showAdjustmentInteractables.get())
             {
                for (RobotSide side : RobotSide.values)
                {
@@ -391,5 +393,10 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       {
          footstepState.getSoleFrame().changeFrame(newParentFrameName);
       }
+   }
+
+   public ImBoolean getShowAdjustmentInteractables()
+   {
+      return showAdjustmentInteractables;
    }
 }
