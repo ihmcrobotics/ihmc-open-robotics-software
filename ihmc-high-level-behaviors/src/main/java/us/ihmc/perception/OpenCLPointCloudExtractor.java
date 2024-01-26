@@ -18,7 +18,7 @@ import java.nio.FloatBuffer;
  */
 public class OpenCLPointCloudExtractor
 {
-   private static final int FLOATS_PER_PIXEL = 3;
+   private static final int FLOATS_PER_PIXEL = 4;
    private final OpenCLManager openCLManager;
    private final _cl_program openCLProgram;
    private final _cl_kernel kernel;
@@ -80,11 +80,14 @@ public class OpenCLPointCloudExtractor
       RecyclingArrayList<Point3D32> pointCloud = new RecyclingArrayList<>(Point3D32::new);
       for (int i = 0; i < numberOfPixels * FLOATS_PER_PIXEL; i += FLOATS_PER_PIXEL)
       {
-         float x = pointCloudBuffer.get(i + 0);
-         float y = pointCloudBuffer.get(i + 1);
-         float z = pointCloudBuffer.get(i + 2);
-         Point3D32 addedPoint = pointCloud.add();
-         addedPoint.set(x, y, z);
+         if (pointCloudBuffer.get(i) > 0.0f)
+         {
+            float x = pointCloudBuffer.get(i + 1);
+            float y = pointCloudBuffer.get(i + 2);
+            float z = pointCloudBuffer.get(i + 3);
+            Point3D32 addedPoint = pointCloud.add();
+            addedPoint.set(x, y, z);
+         }
       }
 
       return pointCloud;
