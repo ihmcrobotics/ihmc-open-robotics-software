@@ -47,9 +47,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
 
       getDefinition().setDescription("Screw primitive");
 
-      screwAxisGizmo = new RDXSelectablePose3DGizmo(getDefinition().getScrewAxisPoseInObjectFrame().getValue(),
-                                                    ReferenceFrame.getWorldFrame(),
-                                                    getSelected());
+      screwAxisGizmo = new RDXSelectablePose3DGizmo(getDefinition().getScrewAxisPoseInObjectFrame().getValue(), ReferenceFrame.getWorldFrame());
       screwAxisGizmo.create(panel3D);
 
       objectFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Object frame",
@@ -107,6 +105,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    @Override
    protected void renderImGuiWidgetsInternal()
    {
+      ImGui.checkbox(labels.get("Adjust Screw Axis Pose"), screwAxisGizmo.getSelected());
       objectFrameComboBox.render();
       translationWidget.renderImGuiWidget();
       rotationWidget.renderImGuiWidget();
@@ -114,7 +113,6 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       maxAngularVelocityWidget.renderImGuiWidget();
       linearPositionWeightWidget.renderImGuiWidget();
       angularPositionWeightWidget.renderImGuiWidget();
-      ImGui.checkbox(labels.get("Adjust Screw Axis Pose"), getSelected());
    }
 
    @Override

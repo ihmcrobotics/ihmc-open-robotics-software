@@ -50,6 +50,12 @@ public class RDXSelectablePose3DGizmo
    }
 
    /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(RigidBodyTransform, ReferenceFrame)} */
+   public RDXSelectablePose3DGizmo(RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame)
+   {
+      this(gizmoTransformToParentFrameToModify, parentReferenceFrame, new ImBoolean(false));
+   }
+
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(RigidBodyTransform, ReferenceFrame)} */
    public RDXSelectablePose3DGizmo(RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame, ImBoolean selected)
    {
       this.selected = selected;
