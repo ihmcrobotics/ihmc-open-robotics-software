@@ -20,8 +20,9 @@ kernel void convertDepthImageToPointCloud(read_only image2d_t depthImage,
 
    float3 worldFramePoint = transformPoint3D32(depthFramePoint, depthToWorldTransform);
 
-   int pointStartIndex = (parameters[DEPTH_IMAGE_WIDTH] * y + x) * 3;
-   pointCloudOutput[pointStartIndex + 0] = worldFramePoint.x;
-   pointCloudOutput[pointStartIndex + 1] = worldFramePoint.y;
-   pointCloudOutput[pointStartIndex + 2] = worldFramePoint.z;
+   int pointStartIndex = (parameters[DEPTH_IMAGE_WIDTH] * y + x) * 4;
+   pointCloudOutput[pointStartIndex + 0] = depthInMeters;
+   pointCloudOutput[pointStartIndex + 1] = worldFramePoint.x;
+   pointCloudOutput[pointStartIndex + 2] = worldFramePoint.y;
+   pointCloudOutput[pointStartIndex + 3] = worldFramePoint.z;
 }
