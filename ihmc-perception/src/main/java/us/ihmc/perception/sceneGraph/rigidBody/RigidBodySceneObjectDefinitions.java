@@ -135,6 +135,15 @@ public class RigidBodySceneObjectDefinitions
 //      CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(-0.05);
    }
 
+   public static final String DRILL_NAME = "Drill";
+   public static final String DRILL_VISUAL_MODEL_FILE_PATH = "environmentObjects/drill/drill.g3dj";
+   public static final RigidBodyTransform DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      EuclidCoreMissingTools.setYawPitchRollDegrees(DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 0, 90, -90);
+      DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.05);
+   }
+
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
       ArUcoMarkerNode boxArUcoMarker = sceneGraph.getArUcoMarkerIDToNodeMap().get(BOX_MARKER_ID);
@@ -276,5 +285,17 @@ public class RigidBodySceneObjectDefinitions
                                                        BIKE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       LogTools.info("Adding Bike to scene graph.");
       modificationQueue.accept(new SceneGraphNodeAddition(bike, parentNode));
+   }
+
+   public static void ensureDrillNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   {
+      SceneNode drill = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                        DRILL_NAME,
+                                                        sceneGraph.getIDToNodeMap(),
+                                                        parentNode.getID(),
+                                                        new RigidBodyTransform(), DRILL_VISUAL_MODEL_FILE_PATH,
+                                                        DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      LogTools.info("Adding Drill to scene graph.");
+      modificationQueue.accept(new SceneGraphNodeAddition(drill, parentNode));
    }
 }

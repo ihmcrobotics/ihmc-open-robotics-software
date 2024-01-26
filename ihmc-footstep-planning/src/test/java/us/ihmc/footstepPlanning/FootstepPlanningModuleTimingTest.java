@@ -2,11 +2,13 @@ package us.ihmc.footstepPlanning;
 
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,7 +28,7 @@ public class FootstepPlanningModuleTimingTest
       request.setStartFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), initialMidFootPose);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
-      request.setPlanarRegionsList(dataSet.getPlanarRegionsList());
+      request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(dataSet.getPlanarRegionsList())));
       request.setPlanBodyPath(false);
       request.setAbortIfBodyPathPlannerFails(false);
 
