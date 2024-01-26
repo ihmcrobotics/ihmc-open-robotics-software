@@ -85,54 +85,17 @@ def create_random_block_field(number_of_blocks, block_size, block_height):
         height_map[row_start:row_start + block_size, col_start:col_start + block_size] = block_height
     return height_map
 
-def plot_and_compute_stats(height_map):
-    # Compute mean and standard deviation for the full grid
-    mean_height = np.mean(height_map)
-    stddev_height = np.std(height_map)
-
-    # Compute the FFT of the height map
-    fft_height = np.fft.fft2(height_map)
-
-    # Compute the power spectral density
-    psd_height = np.abs(fft_height) ** 2
-
-    # compute roughness of terrain as a scalar
-    roughness = np.sum(psd_height) / (200 * 200)
-
-    # print the mean, standard deviation, and roughness
-    print("Mean Height:", mean_height)
-    print("Standard Deviation of Height:", stddev_height)
-    print("Roughness of Terrain:", roughness)
-
-    # enlarge image for plotting
-    height_map = cv2.resize(height_map, (800, 800), interpolation=cv2.INTER_NEAREST)
-
-    # Visualize the height map using OpenCV plotting function
-    cv2.imshow("Height Map", height_map)
-    cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-
-    # Plot the height map and power spectral density
-    # plt.subplot(1, 2, 1)
-    # plt.imshow(height_map, cmap='gray')
-    # plt.title("Height Map")
-    # plt.colorbar()
-
-    # plt.subplot(1, 2, 2)
-    # plt.imshow(np.log1p(psd_height), cmap='gray') 
-    # plt.title("Power Spectral Density")
-    # plt.colorbar()
-
-    # plt.show()
-
 def compute_terrain_cost_map(height_map):
-    # for each cell compute teh dot product of the normal vector with the Z axis. Use sobel filter to compute the normal vector
+    # convert height map to float32
+    height_map = height_map.astype(np.float32)
+
+    # for each cell compute the dot product of the normal vector with the Z axis. Use sobel filter to compute the normal vector
     # use sobel filter to compute the normal vector
     sobel_x = cv2.Sobel(height_map, cv2.CV_32F, 1, 0, ksize=3)
     sobel_y = cv2.Sobel(height_map, cv2.CV_32F, 0, 1, ksize=3)
 
     # compute the normal vector
-    normal_vector = np.zeros((200, 200, 3), dtype=np.float32)
+    normal_vector = np.zeros((height_map.shape[0], height_map.shape[1], 3), dtype=np.float32)
     normal_vector[:, :, 0] = -sobel_x
     normal_vector[:, :, 1] = -sobel_y
     normal_vector[:, :, 2] = 1
@@ -155,21 +118,12 @@ def compute_terrain_cost_map(height_map):
     return cost_map
 
 def compute_contact_map(terrain_cost_map):
-    contact_map = np.zeros((200, 200), dtype=np.float32)
-    
-    # compute the contact map by setting value of each cell as the euclidean distance to the nearest obstacle. 
-    # compute around a window of 16 x 16 around each cell
-    # use numpy vectorized operations to compute the distance transform fast. DO NOT USE OPENCV
-    contact_map = cv2.distanceTransform(terrain_cost_map.astype(np.uint8), cv2.DIST_HUBER, 0)  
-
-    # the possible distance metrics include cv2.DIST_L1, cv2.DIST_L2, cv2.DIST_C, cv2.DIST_L12, cv2.DIST_FAIR, cv2.DIST_WELSCH, cv2.DIST_HUBER
-    
-
-    # set the values to be between 0 and 255
+    # the possible distance metrics include cv2.DIST_L1, cv2.DIST_L2, cv2.DIST_C, 
+    # cv2.DIST_L12, cv2.DIST_FAIR, cv2.DIST_WELSCH, and cv2.DIST_HUBER
+    contact_map = np.zeros((terrain_cost_map.shape[0], terrain_cost_map.shape[1]), dtype=np.float32)
+    contact_map = cv2.distanceTransform(terrain_cost_map.astype(np.uint8), cv2.DIST_L2, 5)  
     contact_map = contact_map / np.max(contact_map) * 255
-
     return contact_map
-
     
 def compute_pattern_stats(height_map):
     # create height map for plotting between 0 and 255
@@ -180,9 +134,7 @@ def compute_pattern_stats(height_map):
     # create colored image for plotting
     height_map_image = np.stack([height_map_for_plotting, height_map_for_plotting, height_map_for_plotting], axis=2).astype(np.uint8)
     
-
     terrain_cost = compute_terrain_cost_map(height_map)
-
     contact_map = compute_contact_map(terrain_cost)
 
     # convert to opencv colored image
@@ -207,18 +159,5 @@ def compute_pattern_stats(height_map):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-
-if __name__ == "__main__":
-    
-    maps = generate_height_map()
-
-    number = 0
-    for name, height_map in maps.items():
-        print("Number", number, "Terrain:", name)
-
-        plot_and_compute_stats(height_map)        
-        
-        print("\n\n")
-        number += 1
 
     

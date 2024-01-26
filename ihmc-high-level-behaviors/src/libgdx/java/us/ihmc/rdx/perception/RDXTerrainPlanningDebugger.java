@@ -132,12 +132,6 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
 
    public void generateFootstepPlanGraphic(FootstepDataListMessage message)
    {
-      FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(message);
-      for (int i = 0; i < plan.getNumberOfSteps(); i++)
-      {
-         LogTools.info("({})[A* Footstep: {}, {}]", i, plan.getFootstep(i).getRobotSide(), plan.getFootstep(i).getFootstepPose());
-      }
-
       footstepPlanGraphic.generateMeshesAsync(message, "Continuous Walking");
    }
 
@@ -163,7 +157,7 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
 
    public void onMonteCarloPlanReceived(FootstepDataListMessage message)
    {
-      LogTools.warn("Received Monte-Carlo Plan: {}", message.getFootstepDataList().size());
+      LogTools.debug("Received Monte-Carlo Plan: {}", message.getFootstepDataList().size());
       this.monteCarloPlanDataListMessage.set(message);
    }
 

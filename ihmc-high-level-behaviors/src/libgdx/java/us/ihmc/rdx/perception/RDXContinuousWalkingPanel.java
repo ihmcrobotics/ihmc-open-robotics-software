@@ -210,13 +210,13 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
 
    public void onPlannedFootstepsReceived(FootstepDataListMessage message)
    {
-      LogTools.warn("Received footstep plan: {}", message.getFootstepDataList().size());
+      LogTools.debug("Received footstep plan: {}", message.getFootstepDataList().size());
       this.footstepDataListMessage.set(message);
    }
 
    public void onMonteCarloPlanReceived(FootstepDataListMessage message)
    {
-      LogTools.warn("Received Monte-Carlo Plan: {}", message.getFootstepDataList().size());
+      LogTools.debug("Received Monte-Carlo Plan: {}", message.getFootstepDataList().size());
       this.monteCarloPlanDataListMessage.set(message);
    }
 
