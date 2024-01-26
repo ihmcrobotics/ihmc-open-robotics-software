@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionDefinition;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -108,6 +109,13 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    protected void renderImGuiWidgetsInternal()
    {
       objectFrameComboBox.render();
+      int size = getState().getTrajectory().getSize();
+      int limit = ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT;
+      if (size == limit)
+         ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
+      ImGui.text("Trajectory points: %d/%d".formatted(size, limit));
+      if (size == limit)
+         ImGui.popStyleColor();
       translationWidget.renderImGuiWidget();
       rotationWidget.renderImGuiWidget();
       maxLinearVelocityWidget.renderImGuiWidget();
