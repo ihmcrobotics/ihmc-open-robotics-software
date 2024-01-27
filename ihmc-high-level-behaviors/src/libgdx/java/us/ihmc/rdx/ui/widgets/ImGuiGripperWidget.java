@@ -16,21 +16,21 @@ public class ImGuiGripperWidget
 {
    private final ArrayList<Point2D32> vertices = new ArrayList<>();
    {
-      vertices.add(new Point2D32(2.177f, 3.823f));
-      vertices.add(new Point2D32(2.442f, 4.023f));
-      vertices.add(new Point2D32(2.805f, 3.941f));
-      vertices.add(new Point2D32(2.956f, 4.109f));
-      vertices.add(new Point2D32(3.177f, 3.909f));
-      vertices.add(new Point2D32(3.005f, 3.774f));
-      vertices.add(new Point2D32(3.167f, 3.471f));
-      vertices.add(new Point2D32(2.934f, 3.174f));
-      vertices.add(new Point2D32(2.507f, 3.195f));
-      vertices.add(new Point2D32(2.545f, 3.331f));
-      vertices.add(new Point2D32(2.891f, 3.390f));
-      vertices.add(new Point2D32(2.859f, 3.693f));
-      vertices.add(new Point2D32(2.426f, 3.806f));
-      vertices.add(new Point2D32(2.388f, 3.504f));
-      vertices.add(new Point2D32(2.177f, 3.823f));
+      vertices.add(new Point2D32(-0.500f, 0.181f));
+      vertices.add(new Point2D32(-0.235f, 0.381f));
+      vertices.add(new Point2D32(0.127f, 0.300f));
+      vertices.add(new Point2D32(0.278f, 0.468f));
+      vertices.add(new Point2D32(0.500f, 0.268f));
+      vertices.add(new Point2D32(0.327f, 0.132f));
+      vertices.add(new Point2D32(0.489f, -0.170f));
+      vertices.add(new Point2D32(0.257f, -0.468f));
+      vertices.add(new Point2D32(-0.170f, -0.446f));
+      vertices.add(new Point2D32(-0.132f, -0.311f));
+      vertices.add(new Point2D32(0.214f, -0.251f));
+      vertices.add(new Point2D32(0.181f, 0.051f));
+      vertices.add(new Point2D32(-0.251f, 0.165f));
+      vertices.add(new Point2D32(-0.289f, -0.138f));
+      vertices.add(new Point2D32(-0.500f, 0.181f));
    }
    private final Point2D32 center = new Point2D32();
    private final ImVec2[] polygon = new ImVec2[vertices.size()];
@@ -96,7 +96,7 @@ public class ImGuiGripperWidget
          drawLine(polygon[i].x, polygon[i].y, polygon[i + 1].x, polygon[i + 1].y);
       }
 
-      ImGui.setCursorPosX(ImGui.getCursorPosX() + (itemWidth * 1.2f));
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + (itemWidth * 0.8f));
 
       if (side == RobotSide.LEFT)
       {

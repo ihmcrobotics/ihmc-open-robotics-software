@@ -20,7 +20,7 @@ public class ImGuiSVGWidgetNormalizer
       // Paste SVG path n here
       String pathDString =
             """
-            M 54.998117,120.67206 V 149.66372 L 58.944634,157.70852 65.775127,158.77105 74.27529,159.07461 82.016528,157.25316 85.659448,152.6995 89.302385,144.5029 92.793522,133.87768 93.552467,128.4133 87.632698,126.28825 85.052301,128.71686 84.596924,134.78841 84.293357,138.58313 V 115.96661 111.41295 L 82.927252,107.77002 77.462863,109.4397 77.614647,112.77904 77.311066,131.29727 77.007486,109.4397 V 106.85929 L 75.489598,104.43066 72.150257,105.3414 70.328789,109.4397 70.784153,130.53833 V 109.74327 L 67.90016,103.67172 63.498295,104.58246 63.194715,107.77002 63.498295,129.47581 62.891135,109.89506 61.525046,106.70749 57.882109,107.01107 55.757061,111.86832 Z        
+            M 75.186018,102.25503 73.21275,110.75519 80.650436,116.37138 90.820271,114.09455 95.070368,118.79999 101.29367,113.18382 96.436443,109.3891 100.99011,100.88892 94.463176,92.540541 82.471889,93.147694 83.5344,96.942414 93.248855,98.612091 92.338159,107.11227 80.195059,110.29983 79.132551,101.79966 Z        
             """;
 
       String[] commands = pathDString.split("\\s+");
@@ -54,7 +54,8 @@ public class ImGuiSVGWidgetNormalizer
          if (command.equalsIgnoreCase("m")) // A vertex
          {
             String[] coordinates = commands[i].split(",");
-            vertices.add(new FramePoint2D(drawFrame, Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1])));
+            ReferenceFrame vertexFrame = ReferenceFrame.getWorldFrame(); // When using absolute mode this is world apparently
+            vertices.add(new FramePoint2D(vertexFrame, Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1])));
          }
          else if (command.equals("L")) // Line to
          {
@@ -76,6 +77,11 @@ public class ImGuiSVGWidgetNormalizer
             FramePoint2D newPoint = new FramePoint2D(drawFrame, lastPoint.getX32(), lastPoint.getY32() + Double.parseDouble(commands[i]));
             vertices.add(newPoint);
          }
+      }
+
+      for (FramePoint2D vertex : vertices)
+      {
+         vertex.changeFrame(ReferenceFrame.getWorldFrame());
       }
 
       double xMin = Double.MAX_VALUE;
