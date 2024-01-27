@@ -28,9 +28,11 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    /** This is used as a container to build up a measurement from different contributions, see {@link #measurementModel(DMatrixRMaj)}. */
    private final DMatrixRMaj measurement;
 
-   public InertialKalmanFilter(FullRobotModel model, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets)
+   public InertialKalmanFilter(FullRobotModel model, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets,
+                               DMatrixRMaj initialParametersForEstimate, DMatrixRMaj initialParameterCovariance,
+                               DMatrixRMaj processCovariance, DMatrixRMaj measurementCovariance)
    {
-      super(RegressorTools.sizePartitions(basisSets)[0], MultiBodySystemTools.computeDegreesOfFreedom(model.getRootJoint().subtreeArray()));
+      super(initialParametersForEstimate, initialParameterCovariance, processCovariance, measurementCovariance);
 
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(model.getRootJoint().subtreeArray());
@@ -83,9 +85,10 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    {
       CommonOps_DDRM.mult(regressorForEstimates, parametersForEstimate, measurement);
       CommonOps_DDRM.multAdd(regressorForNominal, parametersForNominal, measurement);
-      for (int i = 0; i < contactWrenches.size(); i++)
+      for (RobotSide side : RobotSide.values)
       {
-         CommonOps_DDRM.multAdd(contactJacobians.get(i), contactWrenches.get(i), measurement);
+         // NOTE: the minus for the contact wrench contribution
+         CommonOps_DDRM.multAddTransA(-1.0, contactJacobians.get(side), contactWrenches.get(side), measurement);
       }
       return measurement;
    }

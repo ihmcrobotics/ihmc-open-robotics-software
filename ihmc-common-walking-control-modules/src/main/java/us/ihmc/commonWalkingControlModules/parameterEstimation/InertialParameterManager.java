@@ -28,9 +28,12 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class InertialParameterManager implements SCS2YoGraphicHolder
 {
+   private static final int WRENCH_DIMENSION = 6;
+
    private final YoBoolean enableFilter;
 
    private final FullHumanoidRobotModel actualRobotModel;
@@ -38,8 +41,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final FullHumanoidRobotModel estimateRobotModel;
    private final List<? extends JointBasics> estimateModelJoints;
-
-   private final int totalNumberOfDoFs;
 
    private final JointTorqueRegressorCalculator regressorCalculator;
 
@@ -60,8 +61,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final List<YoMatrix> inertialParametersPiBasisWatchers = new ArrayList<>();
    private final List<YoMatrix> inertialParametersThetaBasisWatchers = new ArrayList<>();
 
-   private final List<DMatrixRMaj> parametersFromUrdf = new ArrayList<>();
-
    private final ArrayList<YoInertiaEllipsoid> yoInertiaEllipsoids;
    private final YoGraphicDefinition ellipsoidGraphicGroup;
 
@@ -75,7 +74,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final InertialKalmanFilter inertialKalmanFilter;
 
+   private final YoMatrix kfEstimate;
+
    private final Random random = new Random(4567L);  // TODO: remove eventually
+   private final Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets;
 
    public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, YoRegistry parentRegistry)
    {
@@ -97,14 +99,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(estimateRobotModel.getRootBody(), registry);
       ellipsoidGraphicGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(actualRobotModel.getRootBody(), yoInertiaEllipsoids);
 
-      totalNumberOfDoFs = actualRobotModel.getRootJoint().getDegreesOfFreedom() + actualRobotModel.getOneDoFJoints().length;
+      int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(estimateRobotModel.getRootJoint().subtreeArray());
 
       regressorCalculator = new JointTorqueRegressorCalculator(estimateRobotModel.getElevator());
       regressorCalculator.setGravitationalAcceleration(-toolbox.getGravityZ());
 
       this.footSwitches = toolbox.getFootSwitches();
-      contactWrenches = new SideDependentList<>(new DMatrixRMaj(6 ,1),
-                                                new DMatrixRMaj(6, 1));  // TODO(jfoster): magic numbers
+      contactWrenches = new SideDependentList<>(new DMatrixRMaj(WRENCH_DIMENSION, 1),
+                                                new DMatrixRMaj(WRENCH_DIMENSION, 1));
 
       jointIndexHandler = new JointIndexHandler(actualRobotModel.getElevator().subtreeJointStream().toArray(JointBasics[]::new));
       legJoints = new SideDependentList<>();
@@ -115,20 +117,21 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          legJoints.set(side, MultiBodySystemTools.createJointPath(actualRobotModel.getElevator(), actualRobotModel.getFoot(side)));
          compactContactJacobians.set(side, new GeometricJacobian(legJoints.get(side), footSwitches.get(side).getMeasurementFrame()));
-         fullContactJacobians.set(side, new DMatrixRMaj(6, totalNumberOfDoFs));
+         fullContactJacobians.set(side, new DMatrixRMaj(6, nDoFs));
       }
 
-      wholeSystemTorques = new DMatrixRMaj(totalNumberOfDoFs, 1);
+      wholeSystemTorques = new DMatrixRMaj(nDoFs, 1);
 
-      generalizedForcesContainer = new DMatrixRMaj(totalNumberOfDoFs, 1);
+      generalizedForcesContainer = new DMatrixRMaj(nDoFs, 1);
 
-      regressorPartitions = RegressorTools.sizePartitionMatrices(regressorCalculator.getJointTorqueRegressorMatrix(),
-                                                                 NadiaInertialExtendedKalmanFilterParameters.inertialParametersToEstimateHandsMass(estimateRobotModel));
-      parameterPartitions = RegressorTools.sizePartitionVectors(NadiaInertialExtendedKalmanFilterParameters.inertialParametersToEstimateHandsMass(estimateRobotModel));
+      basisSets = NadiaInertialExtendedKalmanFilterParameters.inertialParametersToEstimateHandsMass(estimateRobotModel);
+
+      regressorPartitions = RegressorTools.sizePartitionMatrices(regressorCalculator.getJointTorqueRegressorMatrix(), basisSets);
+      parameterPartitions = RegressorTools.sizePartitionVectors(basisSets);
 
       if (DEBUG)
       {
-         String[] rowNames = new String[totalNumberOfDoFs];
+         String[] rowNames = new String[nDoFs];
          int index = 0;
          for (JointReadOnly joint : actualModelJoints)
          {
@@ -143,22 +146,16 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
             }
             index += joint.getDegreesOfFreedom();
          }
-         residual = new YoMatrix("residual", totalNumberOfDoFs, 1, rowNames, registry);
+         residual = new YoMatrix("residual", nDoFs, 1, rowNames, registry);
       }
 
-      List<RigidBodyReadOnly> bodies = new ArrayList<>();
-      List<Boolean> isBodyEstimated = new ArrayList<>();
-      for (RigidBodyReadOnly body : estimateRobotModel.getRootBody().subtreeArray())
-      {
-         if (body.getInertia() != null)
-         {
-            bodies.add(body);
-            isBodyEstimated.add(false);
-         }
-      }
-
-      // TODO: don't know if we're using the right robot model here
-      inertialKalmanFilter = new InertialKalmanFilter(estimateRobotModel, NadiaInertialExtendedKalmanFilterParameters.inertialParametersToEstimateHandsMass(estimateRobotModel));
+      inertialKalmanFilter = new InertialKalmanFilter(estimateRobotModel,
+                                                      basisSets,
+                                                      NadiaInertialExtendedKalmanFilterParameters.getURDFParameters(estimateRobotModel, basisSets),
+                                                      CommonOps_DDRM.identity(RegressorTools.sizePartitions(basisSets)[0]),
+                                                      CommonOps_DDRM.identity(RegressorTools.sizePartitions(basisSets)[0]),
+                                                      CommonOps_DDRM.identity(nDoFs));
+      kfEstimate = new YoMatrix("kfEstimate", RegressorTools.sizePartitions(basisSets)[0], 1, registry);
    }
 
    public void update()
@@ -176,6 +173,27 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
          regressorCalculator.compute();
 
+         // TODO: perhaps a small inner data structure that has a nice interface for a pair of partition matrices/vectors?
+
+         RegressorTools.partitionRegressor(regressorCalculator.getJointTorqueRegressorMatrix(),
+                                           basisSets,
+                                           regressorPartitions[0],
+                                           regressorPartitions[1],
+                                           true);  // TODO: eventually remove checks
+         RegressorTools.partitionVector(regressorCalculator.getParameterVector(),
+                                        basisSets,
+                                        parameterPartitions[0],
+                                        parameterPartitions[1],
+                                        true);  // TODO: eventually remove checks
+
+         // KF stuff
+         inertialKalmanFilter.setRegressorForEstimates(regressorPartitions[0]);
+         inertialKalmanFilter.setRegressorForNominal(regressorPartitions[1]);
+         inertialKalmanFilter.setParametersForNominal(parameterPartitions[1]);
+         inertialKalmanFilter.setContactJacobians(fullContactJacobians);
+         inertialKalmanFilter.setContactWrenches(contactWrenches);
+         kfEstimate.set(inertialKalmanFilter.calculateEstimate(wholeSystemTorques));
+
          if(DEBUG)
          {
             // Size the residual off of the generalized forces container
@@ -189,12 +207,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                CommonOps_DDRM.multAddTransA(fullContactJacobians.get(side), contactWrenches.get(side), generalizedForcesContainer);
 
             RegressorTools.partitionRegressor(regressorCalculator.getJointTorqueRegressorMatrix(),
-                                              NadiaInertialExtendedKalmanFilterParameters.inertialParametersToEstimateHandsMass(estimateRobotModel),
+                                              basisSets,
                                               regressorPartitions[0],
                                               regressorPartitions[1],
                                               true);
             RegressorTools.partitionVector(regressorCalculator.getParameterVector(),
-                                           NadiaInertialExtendedKalmanFilterParameters.inertialParametersToEstimateHandsMass(estimateRobotModel),
+                                           basisSets,
                                            parameterPartitions[0],
                                            parameterPartitions[1],
                                            true);
@@ -253,10 +271,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          double multiplier = random.nextDouble(0.9, 1.1);
 
          estimateBody.getInertia().setMass(actualBody.getInertia().getMass() * multiplier);
-
-         // TODO: print out only the pelvis mass to show that randomisation is working
-         if (i == 0)
-            System.out.println("Pelvis mass: " + estimateBody.getInertia().getMass());
       }
    }
 
