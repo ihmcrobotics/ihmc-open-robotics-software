@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.widgets;
 
 import imgui.ImGui;
 import imgui.ImVec2;
+import imgui.flag.ImGuiCol;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -17,7 +18,7 @@ public class ImGuiFootstepsWidget
    private final Point2D32 bottomRight = new Point2D32();
    private final Point2D32 heelLeft = new Point2D32();
    private final Point2D32 heelRight = new Point2D32();
-   private final ImVec2[] polygon = new ImVec2[8];
+   private final ImVec2[] polygon = new ImVec2[9];
    private float cursorXDesktopFrame;
    private float cursorYDesktopFrame;
    private int lineColor;
@@ -43,10 +44,9 @@ public class ImGuiFootstepsWidget
 
    public void render(RobotSide side)
    {
-
       float fontSize = ImGui.getFontSize();
 
-      float scale = 0.7f; // Make parameter if desired
+      float scale = 0.6f; // Make parameter if desired
       scale *= fontSize;
 
       center.set(0.3f * fontSize, 0.5f * fontSize);
@@ -84,8 +84,6 @@ public class ImGuiFootstepsWidget
       cursorXDesktopFrame = ImGui.getWindowPosX() + cursorPosX - ImGui.getScrollX();
       cursorYDesktopFrame = ImGui.getWindowPosY() + cursorPosY - ImGui.getScrollY();
 
-      backgroundColor = side == RobotSide.LEFT ? ImGuiTools.DARK_RED : ImGuiTools.DARK_GREEN;
-
       polygon[0].set(cursorXDesktopFrame + bottomRight.getX32(), cursorYDesktopFrame + bottomRight.getY32());
       polygon[1].set(cursorXDesktopFrame + heelRight.getX32(), cursorYDesktopFrame + heelRight.getY32());
       polygon[2].set(cursorXDesktopFrame + heelLeft.getX32(), cursorYDesktopFrame + heelLeft.getY32());
@@ -94,11 +92,25 @@ public class ImGuiFootstepsWidget
       polygon[5].set(cursorXDesktopFrame + toeLeft.getX32(), cursorYDesktopFrame + toeLeft.getY32());
       polygon[6].set(cursorXDesktopFrame + toeRight.getX32(), cursorYDesktopFrame + toeRight.getY32());
       polygon[7].set(cursorXDesktopFrame + topRight.getX32(), cursorYDesktopFrame + topRight.getY32());
+      polygon[8].set(cursorXDesktopFrame + bottomRight.getX32(), cursorYDesktopFrame + bottomRight.getY32());
 
-      ImGui.getWindowDrawList().addConvexPolyFilled(polygon, polygon.length, backgroundColor);
+      backgroundColor = side == RobotSide.LEFT ? ImGuiTools.DARK_RED : ImGuiTools.DARK_GREEN;
+      lineColor = ImGui.getColorU32(ImGuiCol.Text);
 
-      ImGui.setCursorPosX(ImGui.getCursorPosX() + (itemWidth * 1.2f));
+//      ImGui.getWindowDrawList().addConvexPolyFilled(polygon, polygon.length, backgroundColor);
+
+      for (int i = 0; i < polygon.length - 1; i++)
+      {
+         drawLine(polygon[i].x, polygon[i].y, polygon[i + 1].x, polygon[i + 1].y);
+      }
+
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + (itemWidth * 1.1f));
 
       ImGui.newLine();
+   }
+
+   private void drawLine(float x0, float y0, float x1, float y1)
+   {
+      ImGui.getWindowDrawList().addLine(x0, y0, x1, y1, lineColor);
    }
 }

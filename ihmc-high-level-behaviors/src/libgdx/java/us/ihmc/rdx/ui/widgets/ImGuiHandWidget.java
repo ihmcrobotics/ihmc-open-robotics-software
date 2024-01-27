@@ -66,7 +66,13 @@ public class ImGuiHandWidget
    {
       float fontSize = ImGui.getFontSize();
 
-      float scale = 0.7f; // Make parameter if desired
+      float spaceToDifferentiateLeftAndRight = 0.5f;
+      if (side == RobotSide.RIGHT)
+      {
+         ImGui.setCursorPosX(ImGui.getCursorPosX() + fontSize * spaceToDifferentiateLeftAndRight);
+      }
+
+      float scale = 0.85f; // Make parameter if desired
       scale *= fontSize;
 
       center.set(0.3f * fontSize, 0.5f * fontSize);
@@ -90,16 +96,15 @@ public class ImGuiHandWidget
       cursorXDesktopFrame = ImGui.getWindowPosX() + cursorPosX - ImGui.getScrollX();
       cursorYDesktopFrame = ImGui.getWindowPosY() + cursorPosY - ImGui.getScrollY();
 
-      backgroundColor = side == RobotSide.LEFT ? ImGuiTools.DARK_RED : ImGuiTools.DARK_GREEN;
-
-      lineColor = ImGui.getColorU32(ImGuiCol.Text);
-
       for (int i = 0; i < polygon.length; i++)
       {
          polygon[i].set(cursorXDesktopFrame + polygon[i].x, cursorYDesktopFrame + polygon[i].y);
       }
 
-      ImGui.getWindowDrawList().addConvexPolyFilled(polygon, polygon.length, backgroundColor);
+      backgroundColor = side == RobotSide.LEFT ? ImGuiTools.DARK_RED : ImGuiTools.DARK_GREEN;
+      lineColor = ImGui.getColorU32(ImGuiCol.Text);
+
+//      ImGui.getWindowDrawList().addConvexPolyFilled(polygon, polygon.length, backgroundColor);
 
       for (int i = 0; i < polygon.length - 1; i++)
       {
@@ -107,6 +112,11 @@ public class ImGuiHandWidget
       }
 
       ImGui.setCursorPosX(ImGui.getCursorPosX() + (itemWidth * 1.2f));
+
+      if (side == RobotSide.LEFT)
+      {
+         ImGui.setCursorPosX(ImGui.getCursorPosX() + fontSize * spaceToDifferentiateLeftAndRight);
+      }
 
       ImGui.newLine();
    }
