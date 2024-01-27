@@ -16,7 +16,7 @@ public class ImGuiHandWidget
 {
    private final ArrayList<Point2D32> vertices = new ArrayList<>();
    {
-      vertices.add(new Point2D32(-0.284f, 0.475f));
+      vertices.add(new Point2D32(-0.32f, 0.4f));
       vertices.add(new Point2D32(-0.160f, 0.495f));
       vertices.add(new Point2D32(-0.007f, 0.500f));
       vertices.add(new Point2D32(0.133f, 0.467f));
@@ -45,7 +45,7 @@ public class ImGuiHandWidget
       vertices.add(new Point2D32(-0.237f, -0.445f));
       vertices.add(new Point2D32(-0.303f, -0.440f));
       vertices.add(new Point2D32(-0.341f, -0.352f));
-      vertices.add(new Point2D32(-0.284f, 0.475f));
+      vertices.add(new Point2D32(-0.32f, 0.4f));
    }
    private final Point2D32 center = new Point2D32();
    private final ImVec2[] polygon = new ImVec2[vertices.size()];
