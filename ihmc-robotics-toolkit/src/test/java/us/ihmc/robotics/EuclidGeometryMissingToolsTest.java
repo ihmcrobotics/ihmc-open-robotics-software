@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EuclidGeometryMissingToolsTest

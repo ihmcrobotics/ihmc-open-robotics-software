@@ -2,13 +2,12 @@ package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
-import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
@@ -21,6 +20,7 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
    private final YoFramePoint3D yoGroundPlanePoint;
    private final YoFrameVector3D yoGroundPlaneNormal;
    private final YoFrameYawPitchRoll yoGroundPlaneOrientation;
+   private  YoGraphicPolygon groundPlaneVisualizer;
 
    public YoGroundPlaneEstimator(YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
@@ -42,10 +42,16 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
 
       if (graphicsListRegistry != null)
       {
-         Graphics3DObject groundPlaneGraphic = new Graphics3DObject();
-         groundPlaneGraphic.addCylinder(0.005, 0.5, groundPlaneAppearance);
-         YoGraphicShape yoGroundPlaneGraphic = new YoGraphicShape(prefix + "GroundPlaneEstimate", groundPlaneGraphic, yoGroundPlanePoint, yoGroundPlaneOrientation, 1.0);
-         graphicsListRegistry.registerYoGraphic(prefix + "GroundPlaneEstimate", yoGroundPlaneGraphic);
+         YoFrameConvexPolygon2D yoGroundPlaneEstimate = new YoFrameConvexPolygon2D("groundPlaneEstimate", "", ReferenceFrame.getWorldFrame(), 4, parentRegistry);
+         yoGroundPlaneEstimate.addVertex(2.0, 2.0);
+         yoGroundPlaneEstimate.addVertex(2.0, -2.0);
+         yoGroundPlaneEstimate.addVertex(-2.0, 2.0);
+         yoGroundPlaneEstimate.addVertex(-2.0, -2.0);
+
+         groundPlaneVisualizer = new YoGraphicPolygon("groundPlaneEstimateVisualizer", yoGroundPlaneEstimate,
+                                                      yoGroundPlanePoint, yoGroundPlaneOrientation,
+                                                      1, YoAppearance.Glass());
+         graphicsListRegistry.registerYoGraphic(prefix + "GroundPlaneEstimate", groundPlaneVisualizer);
       }
    }
 
@@ -61,6 +67,8 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
       yoGroundPlanePoint.set(getPlanePoint());
 
       yoGroundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
+
+      groundPlaneVisualizer.update();
    }
 
    /**
@@ -76,6 +84,8 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
       yoGroundPlanePoint.set(getPlanePoint());
 
       yoGroundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
+
+      groundPlaneVisualizer.update();
    }
 
    /**
@@ -91,5 +101,7 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
       yoGroundPlanePoint.set(getPlanePoint());
 
       yoGroundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
+
+      groundPlaneVisualizer.update();
    }
 }
