@@ -352,7 +352,7 @@ public class MonteCarloPlannerTools
    {
       ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(footPolygon);
       footPolygonInWorld.applyTransform(poseToSnap);
-      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygonInWorld, heightMapData, 0.1);
+      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygonInWorld, heightMapData, 0.1, Math.toRadians(45));
       double area = snapper.getArea();
       double maxArea = footPolygon.getArea();
       if (snapTransform != null && (area / maxArea > 0.75))

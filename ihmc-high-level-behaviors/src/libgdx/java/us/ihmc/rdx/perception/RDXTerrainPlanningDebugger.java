@@ -43,8 +43,8 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
 {
    private final ImBoolean showMonteCarloPlan = new ImBoolean(true);
    private final ImBoolean showContinuousWalkingPlan = new ImBoolean(true);
-   private final ImBoolean showStateSpheres = new ImBoolean(true);
-   private final ImBoolean showExpansionSpheres = new ImBoolean(true);
+   private final ImBoolean showStateSpheres = new ImBoolean(false);
+   private final ImBoolean showExpansionSpheres = new ImBoolean(false);
    private final ImBoolean showStartPoses = new ImBoolean(true);
    private final ImBoolean showGoalPoses = new ImBoolean(true);
    private final ImBoolean showRightActionSet = new ImBoolean(false);

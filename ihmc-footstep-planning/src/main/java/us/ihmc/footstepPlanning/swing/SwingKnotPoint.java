@@ -278,8 +278,7 @@ public class SwingKnotPoint
       return percentage;
    }
 
-   public boolean doCollisionCheck(ExpandingPolytopeAlgorithm collisionDetector, PlanarRegionsList planarRegionsList, HeightMapData heightMapData,
-                                   SwingKnotOptimizationResult knotResult)
+   public boolean doCollisionCheck(ExpandingPolytopeAlgorithm collisionDetector, PlanarRegionsList planarRegionsList, HeightMapData heightMapData)
    {
       this.collisionResult.setToZero();
       this.collisionResult.setSignedDistance(Double.POSITIVE_INFINITY);
@@ -302,7 +301,7 @@ public class SwingKnotPoint
       }
       if (heightMapData != null && !heightMapData.isEmpty())
       {
-         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.evaluateCollision(collisionBox, heightMapData, knotResult);
+         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.evaluateCollision(collisionBox, heightMapData);
 
          if (collisionResult.getSignedDistance() < this.collisionResult.getSignedDistance())
          {

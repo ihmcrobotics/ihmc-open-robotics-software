@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
@@ -24,6 +25,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -46,8 +48,7 @@ public class AdaptiveSwingTrajectoryCalculator
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
    private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
-   private PlanarRegionsList planarRegionsList;
+   private HeightMapData heightMapData;
 
    private final FramePose3D startOfSwingPose = new FramePose3D();
    private final FramePose3D endOfSwingPose = new FramePose3D();
@@ -123,7 +124,7 @@ public class AdaptiveSwingTrajectoryCalculator
 
    public void checkForFootCollision(Pose3DReadOnly startPose, PlannedFootstep step)
    {      
-      if(planarRegionsList == null)
+      if (heightMapData == null || heightMapData.isEmpty())
       {
          return;
       }
@@ -169,20 +170,22 @@ public class AdaptiveSwingTrajectoryCalculator
 
    private boolean collisionDetected(Box3DReadOnly collisionBox)
    {
-      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
-      {
-         if(collisionDetector.evaluateCollision(collisionBox, planarRegionsList.getPlanarRegion(i)).areShapesColliding())
-         {
-            return true;
-         }
-      }
+//      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+//      {
+//         if(collisionDetector.evaluateCollision(collisionBox, planarRegionsList.getPlanarRegion(i)).areShapesColliding())
+//         {
+//            return true;
+//         }
+//      }
+//
+//      return false;
 
-      return false;
+      return HeightMapCollisionDetector.evaluateCollision(collisionBox, heightMapData).areShapesColliding();
    }
    
-   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
+   public void setHeightMapData(HeightMapData heightMapData)
    {
-      this.planarRegionsList = planarRegionsList;
+      this.heightMapData = heightMapData;
    }
 
    public void setSwingParameters(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)

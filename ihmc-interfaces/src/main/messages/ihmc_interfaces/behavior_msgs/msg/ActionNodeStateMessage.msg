@@ -26,7 +26,7 @@ float64 nominal_execution_duration
 float64 elapsed_execution_time
 
 # Desired trajectory
-ihmc_common_msgs/SE3TrajectoryPointMessage[<=50] desired_trajectory
+ihmc_common_msgs/SE3TrajectoryPointMessage[<=500] desired_trajectory
 
 # Current pose
 geometry_msgs/Pose current_pose

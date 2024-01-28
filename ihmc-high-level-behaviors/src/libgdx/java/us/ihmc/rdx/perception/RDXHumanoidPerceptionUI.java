@@ -99,9 +99,12 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       this.remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper, this);
       this.terrainGridGraphic = new RDXTerrainGridGraphic();
 
+      steppableRegionsParameterTuner = new RDXStoredPropertySetTuner("Steppable Regions Parameters");
+
       if (humanoidPerception != null)
       {
          this.humanoidPerception = humanoidPerception;
+         addChild(steppableRegionsParameterTuner);
          this.humanoidPerception.setPerceptionConfigurationParameters(remotePerceptionUI.getPerceptionConfigurationParameters());
       }
    }
@@ -409,8 +412,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
                                                           RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
                                                           RDXImagePanel.FLIP_Y);
 
-         steppableRegionsParameterTuner = new RDXStoredPropertySetTuner(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionParameters().getTitle());
-         steppableRegionsParameterTuner.create(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionParameters(), true);
+         steppableRegionsParameterTuner.create(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionParameters());
 
          addChild(localHeightMapPanel.getImagePanel());
          addChild(croppedHeightMapPanel.getImagePanel());

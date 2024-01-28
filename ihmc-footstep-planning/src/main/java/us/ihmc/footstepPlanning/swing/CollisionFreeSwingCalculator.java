@@ -367,7 +367,7 @@ public class CollisionFreeSwingCalculator
             SwingKnotPoint knotPoint = swingKnotPoints.get(j);
 
             // collision gradient
-            boolean collisionDetected = knotPoint.doCollisionCheck(collisionDetector, planarRegionsList, heightMapData, swingKnotOptimizationResult);
+            boolean collisionDetected = knotPoint.doCollisionCheck(collisionDetector, planarRegionsList, heightMapData);
             swingKnotOptimizationResult.setKnotCollisions(j, collisionDetected);
             if (collisionDetected)
             {
