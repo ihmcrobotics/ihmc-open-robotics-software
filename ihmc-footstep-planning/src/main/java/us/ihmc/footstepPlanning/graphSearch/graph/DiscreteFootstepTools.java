@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -37,7 +38,6 @@ public class DiscreteFootstepTools
    /**
     * Computes a step-to-world RigidBodyTransform from the step's x, y and yaw. This transform
     * will always have no z translation, pitch and roll.
-    * @param step
     * @param stepToWorldTransformToPack
     */
    public static void getStepTransform(double x, double y, double yaw, RigidBodyTransform stepToWorldTransformToPack)
@@ -91,7 +91,7 @@ public class DiscreteFootstepTools
 
    /**
     * Computes the foot polygon in world frame that corresponds to the give footstep step
-    *
+    *snappedFootstepTransform
     * @param step
     * @param footPolygonInSoleFrame
     * @param footPolygonToPack
@@ -104,7 +104,6 @@ public class DiscreteFootstepTools
    /**
     * Computes the foot polygon in world frame that corresponds to the give footstep step
     *
-    * @param step
     * @param footPolygonInSoleFrame
     * @param footPolygonToPack
     */
@@ -118,9 +117,11 @@ public class DiscreteFootstepTools
       footPolygonToPack.applyTransform(footstepTransform);
    }
 
-   public static double getSnappedStepHeight(DiscreteFootstep step, RigidBodyTransform snapTransform)
+   public static double getSnappedStepHeight(DiscreteFootstep step, RigidBodyTransformReadOnly snapTransform)
    {
-      return snapTransform.getRotation().getM20() * step.getX() + snapTransform.getRotation().getM21() * step.getY() + snapTransform.getTranslationZ();
+      // FIXME there may be a faster way that doesn't require the additional object creation.
+      RotationMatrix rotationMatrix = new RotationMatrix(snapTransform.getRotation());
+      return rotationMatrix.getM20() * step.getX() + rotationMatrix.getM21() * step.getY() + snapTransform.getTranslationZ();
    }
 
    public static LatticePoint interpolate(LatticePoint pointA, LatticePoint pointB, double alpha)

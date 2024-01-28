@@ -15,7 +15,6 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.avatar.sensors.realsense.MapsenseTools;
-import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
@@ -61,7 +60,6 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    protected final ROS2ControllerHelper ros2Helper;
 
    private RemoteHumanoidRobotInterface robot;
-   private RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private RemoteREAInterface rea;
    private RemoteEnvironmentMapInterface environmentMap;
    private VisibilityGraphPathPlanner bodyPathPlanner;
@@ -87,13 +85,6 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
       if (robot == null)
          robot = new RemoteHumanoidRobotInterface(ros2Helper.getROS2NodeInterface(), robotModel);
       return robot;
-   }
-
-   public RemoteFootstepPlannerInterface getOrCreateFootstepPlannerToolboxInterface()
-   {
-      if (footstepPlannerToolbox == null)
-         footstepPlannerToolbox = new RemoteFootstepPlannerInterface(ros2Helper.getROS2NodeInterface(), robotModel, null);
-      return footstepPlannerToolbox; // planner toolbox
    }
 
    public RemoteREAInterface getOrCreateREAInterface()

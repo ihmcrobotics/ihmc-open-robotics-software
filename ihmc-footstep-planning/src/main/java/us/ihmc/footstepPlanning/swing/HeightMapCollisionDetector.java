@@ -1,23 +1,21 @@
 package us.ihmc.footstepPlanning.swing;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
+import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 public class HeightMapCollisionDetector
 {
-   public static EuclidShape3DCollisionResult evaluateCollision(FrameBox3DReadOnly collisionBox, HeightMapData heightMap, SwingKnotOptimizationResult knotResult)
+   public static EuclidShape3DCollisionResult evaluateCollision(Box3DReadOnly collisionBox, HeightMapData heightMap)
    {
       EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
 
@@ -26,8 +24,9 @@ public class HeightMapCollisionDetector
       double centerX = heightMap.getGridCenter().getX();
       double centerY = heightMap.getGridCenter().getY();
       // get the indices of the corners of the box drawn on the ground
-      FramePoint3DReadOnly minPoint = collisionBox.getBoundingBox().getMinPoint();
-      FramePoint3DReadOnly maxPoint = collisionBox.getBoundingBox().getMaxPoint();
+      // TODO switch to using the pose of the body box
+      Point3DReadOnly minPoint = collisionBox.getBoundingBox().getMinPoint();
+      Point3DReadOnly maxPoint = collisionBox.getBoundingBox().getMaxPoint();
       int minXIndex = HeightMapTools.coordinateToIndex(minPoint.getX(), centerX, resolution, centerIndex);
       int minYIndex = HeightMapTools.coordinateToIndex(minPoint.getY(), centerY, resolution, centerIndex);
       int maxXIndex = HeightMapTools.coordinateToIndex(maxPoint.getX(), centerX, resolution, centerIndex);
@@ -54,6 +53,9 @@ public class HeightMapCollisionDetector
             double groundHeight = heightMap.getHeightAt(xIndex, yIndex);
             double xQuery = HeightMapTools.indexToCoordinate(xIndex, centerX, resolution, centerIndex);
             double yQuery = HeightMapTools.indexToCoordinate(yIndex, centerY, resolution, centerIndex);
+
+            // TODO check to see if this is within the body box 2D, which should account for the yaw.
+
 
             // find the penetration depth at this point
             double heightOnFootAtPoint = getLowestHeightOnBoxAtPoint(collisionBox, xQuery, yQuery);
@@ -158,7 +160,7 @@ public class HeightMapCollisionDetector
       }
    }
 
-   private static double getLowestHeightOnBoxAtPoint(FrameBox3DReadOnly collisionBox, double xQuery, double yQuery)
+   private static double getLowestHeightOnBoxAtPoint(Box3DReadOnly collisionBox, double xQuery, double yQuery)
    {
       Point3D pointQuery = new Point3D(xQuery, yQuery, 0.0);
       Point3D collision1 = new Point3D();
@@ -179,7 +181,7 @@ public class HeightMapCollisionDetector
    }
 
    private static void computeCollisionDataAtPointWhenTheWholeBottomPenetrates(Point3DReadOnly groundPoint,
-                                                                               FrameBox3DReadOnly collisionBox,
+                                                                               Box3DReadOnly collisionBox,
                                                                                HeightMapData heightMap,
                                                                                EuclidShape3DCollisionResult collisionResult)
    {
@@ -202,7 +204,7 @@ public class HeightMapCollisionDetector
       collisionResult.getNormalOnB().set(groundNormal);
    }
 
-   static Point3DReadOnly getPointOnBoxWhenTheWholeBottomPenetrates(Point3DReadOnly groundPoint, FrameBox3DReadOnly collisionBox)
+   static Point3DReadOnly getPointOnBoxWhenTheWholeBottomPenetrates(Point3DReadOnly groundPoint, Box3DReadOnly collisionBox)
    {
       Point3DBasics pointToProjectInLocal = new Point3D();
       collisionBox.getPose().inverseTransform(groundPoint, pointToProjectInLocal);

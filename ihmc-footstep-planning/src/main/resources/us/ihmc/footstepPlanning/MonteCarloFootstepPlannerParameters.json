@@ -27,12 +27,12 @@
     "upperBound" : 100.0
   },
   "Max number of visited nodes" : {
-    "value" : 14409,
+    "value" : 4000,
     "lowerBound" : 1000,
     "upperBound" : 1000000
   },
   "Max number of child nodes" : {
-    "value" : 8,
+    "value" : 6,
     "lowerBound" : 5,
     "upperBound" : 1000
   },
