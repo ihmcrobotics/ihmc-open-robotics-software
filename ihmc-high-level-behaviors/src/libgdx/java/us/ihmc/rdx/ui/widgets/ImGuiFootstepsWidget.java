@@ -19,8 +19,6 @@ public class ImGuiFootstepsWidget
    private final Point2D32 heelLeft = new Point2D32();
    private final Point2D32 heelRight = new Point2D32();
    private final ImVec2[] polygon = new ImVec2[9];
-   private float cursorXDesktopFrame;
-   private float cursorYDesktopFrame;
    private int lineColor;
    private int backgroundColor;
    private boolean isHovered = false;
@@ -79,25 +77,23 @@ public class ImGuiFootstepsWidget
       float itemWidth = bottomRight.getX32() - bottomLeft.getX32();
       isHovered = ImGuiTools.isItemHovered(itemWidth);
 
-      float cursorPosX = ImGui.getCursorPosX();
-      float cursorPosY = ImGui.getCursorPosY();
-      cursorXDesktopFrame = ImGui.getWindowPosX() + cursorPosX - ImGui.getScrollX();
-      cursorYDesktopFrame = ImGui.getWindowPosY() + cursorPosY - ImGui.getScrollY();
-
-      polygon[0].set(cursorXDesktopFrame + bottomRight.getX32(), cursorYDesktopFrame + bottomRight.getY32());
-      polygon[1].set(cursorXDesktopFrame + heelRight.getX32(), cursorYDesktopFrame + heelRight.getY32());
-      polygon[2].set(cursorXDesktopFrame + heelLeft.getX32(), cursorYDesktopFrame + heelLeft.getY32());
-      polygon[3].set(cursorXDesktopFrame + bottomLeft.getX32(), cursorYDesktopFrame + bottomLeft.getY32());
-      polygon[4].set(cursorXDesktopFrame + topLeft.getX32(), cursorYDesktopFrame + topLeft.getY32());
-      polygon[5].set(cursorXDesktopFrame + toeLeft.getX32(), cursorYDesktopFrame + toeLeft.getY32());
-      polygon[6].set(cursorXDesktopFrame + toeRight.getX32(), cursorYDesktopFrame + toeRight.getY32());
-      polygon[7].set(cursorXDesktopFrame + topRight.getX32(), cursorYDesktopFrame + topRight.getY32());
-      polygon[8].set(cursorXDesktopFrame + bottomRight.getX32(), cursorYDesktopFrame + bottomRight.getY32());
+      float cursorScreenPosX = ImGui.getCursorScreenPosX();
+      float cursorScreenPosY = ImGui.getCursorScreenPosY();
+      polygon[0].set(cursorScreenPosX + bottomRight.getX32(), cursorScreenPosY + bottomRight.getY32());
+      polygon[1].set(cursorScreenPosX + heelRight.getX32(), cursorScreenPosY + heelRight.getY32());
+      polygon[2].set(cursorScreenPosX + heelLeft.getX32(), cursorScreenPosY + heelLeft.getY32());
+      polygon[3].set(cursorScreenPosX + bottomLeft.getX32(), cursorScreenPosY + bottomLeft.getY32());
+      polygon[4].set(cursorScreenPosX + topLeft.getX32(), cursorScreenPosY + topLeft.getY32());
+      polygon[5].set(cursorScreenPosX + toeLeft.getX32(), cursorScreenPosY + toeLeft.getY32());
+      polygon[6].set(cursorScreenPosX + toeRight.getX32(), cursorScreenPosY + toeRight.getY32());
+      polygon[7].set(cursorScreenPosX + topRight.getX32(), cursorScreenPosY + topRight.getY32());
+      polygon[8].set(cursorScreenPosX + bottomRight.getX32(), cursorScreenPosY + bottomRight.getY32());
 
       backgroundColor = side == RobotSide.LEFT ? ImGuiTools.DARK_RED : ImGuiTools.DARK_GREEN;
       lineColor = ImGui.getColorU32(ImGuiCol.Text);
 
-//      ImGui.getWindowDrawList().addConvexPolyFilled(polygon, polygon.length, backgroundColor);
+      if (isHovered)
+         ImGui.getWindowDrawList().addConvexPolyFilled(polygon, polygon.length, backgroundColor);
 
       for (int i = 0; i < polygon.length - 1; i++)
       {

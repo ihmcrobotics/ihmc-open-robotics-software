@@ -38,8 +38,6 @@ public class ImGuiGripperWidget
    }
    private final Point2D32 center = new Point2D32();
    private final ImVec2[] polygon = new ImVec2[vertices.size()];
-   private float cursorXDesktopFrame;
-   private float cursorYDesktopFrame;
    private int lineColor;
    private int backgroundColor;
 
@@ -64,14 +62,12 @@ public class ImGuiGripperWidget
       float scale = 0.81f; // Make parameter if desired
       scale *= fontSize;
 
-      center.set(0.3f * fontSize, 0.5f * fontSize);
+      center.set(0.4f * fontSize, 0.5f * fontSize);
 
       float xMin = Float.MAX_VALUE;
       float xMax = Float.MIN_VALUE;
       for (int i = 0; i < vertices.size(); i++)
       {
-         Point2D32 vertex = vertices.get(i);
-
          polygon[i].set((side.negateIfLeftSide(vertices.get(i).getX32()) * scale) + center.getX32(), (vertices.get(i).getY32() * scale) + center.getY32());
 
          xMin = Math.min(xMin, polygon[i].x);
@@ -79,21 +75,20 @@ public class ImGuiGripperWidget
       }
 
       float itemWidth = xMax - xMin;
+      boolean isHovered = ImGuiTools.isItemHovered(itemWidth);
 
-      float cursorPosX = ImGui.getCursorPosX();
-      float cursorPosY = ImGui.getCursorPosY();
-      cursorXDesktopFrame = ImGui.getWindowPosX() + cursorPosX - ImGui.getScrollX();
-      cursorYDesktopFrame = ImGui.getWindowPosY() + cursorPosY - ImGui.getScrollY();
-
+      float cursorScreenPosX = ImGui.getCursorScreenPosX();
+      float cursorScreenPosY = ImGui.getCursorScreenPosY();
       for (int i = 0; i < polygon.length; i++)
       {
-         polygon[i].set(cursorXDesktopFrame + polygon[i].x, cursorYDesktopFrame + polygon[i].y);
+         polygon[i].set(cursorScreenPosX + polygon[i].x, cursorScreenPosY + polygon[i].y);
       }
 
       backgroundColor = side == RobotSide.LEFT ? ImGuiTools.DARK_RED : ImGuiTools.DARK_GREEN;
       lineColor = ImGui.getColorU32(ImGuiCol.Text);
 
-//      ImGui.getWindowDrawList().addConvexPolyFilled(polygon, polygon.length, backgroundColor);
+      if (isHovered)
+         ImGui.getWindowDrawList().addConvexPolyFilled(polygon, polygon.length, backgroundColor);
 
       for (int i = 0; i < polygon.length - 1; i++)
       {
