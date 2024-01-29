@@ -175,8 +175,11 @@ public class RDXBehaviorTree
 
          treeWidgetsVerticalLayout.renderImGuiWidgets(rootNode);
 
-         ImGui.separator();
-         renderSelectedNodeSettingsWidgets(rootNode);
+         if (rootNode != null) // It can become null above
+         {
+            ImGui.separator();
+            renderSelectedNodeSettingsWidgets(rootNode);
+         }
       }
       else
       {
