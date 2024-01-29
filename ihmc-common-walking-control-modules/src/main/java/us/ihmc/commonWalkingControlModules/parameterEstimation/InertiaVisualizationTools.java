@@ -11,15 +11,19 @@ import java.util.List;
 
 public class InertiaVisualizationTools
 {
+   /**
+    * Creates a list of ellipsoids visuals corresponding to all the rigid bodies in the system given the root rigid body. The update() can be called for each
+    * element of this list in a loop to update the visuals.
+    *
+    * @param rootBody - The root body of the robot. This is expected to be the pelvis or first physical body, not the elevator.
+    * @param registry - The registry for the ellipsoids.
+    */
    public static ArrayList<YoInertiaEllipsoid> createYoInertiaEllipsoids(RigidBodyReadOnly rootBody, YoRegistry registry)
    {
       ArrayList<YoInertiaEllipsoid> yoInertiaEllipsoids = new ArrayList<>();
       // This rootBody is expected to be the pelvis or first physical body, not the elevator.
       List<? extends RigidBodyReadOnly> bodies = rootBody.subtreeList();
-      if (rootBody.getName().equals("elevator"))
-      {
-         bodies.remove(0);
-      }
+
       for (int i = 0; i < bodies.size(); i++)
       {
          if (bodies.get(i).isRootBody())
@@ -31,27 +35,23 @@ public class InertiaVisualizationTools
       return yoInertiaEllipsoids;
    }
 
-   public static YoGraphicDefinition getInertiaEllipsoidGroup(RigidBodyReadOnly rootBody, ArrayList<YoInertiaEllipsoid> yoInertiaEllipsoids)
+   /**
+    * Creates a graphic group to be returned by getSCS2YoGraphics().
+    *
+    * @param yoInertiaEllipsoids - The list of inertia ellipsoids to be converted to definitions and added to the group.
+    * */
+   public static YoGraphicDefinition getInertiaEllipsoidGroup(ArrayList<YoInertiaEllipsoid> yoInertiaEllipsoids)
    {
       YoGraphicGroupDefinition ellipsoidGroup = new YoGraphicGroupDefinition("Inertia Ellipsoids");
-      // This rootBody is expected to be the pelvis or first physical body, not the elevator.
-      List<? extends RigidBodyReadOnly> bodies = rootBody.subtreeList();
-      if (rootBody.getName().equals("elevator"))
-      {
-         bodies.remove(0);
-      }
 
-      for (int i = 0; i < bodies.size(); i++)
+      for (YoInertiaEllipsoid yoInertiaEllipsoid : yoInertiaEllipsoids)
       {
-         RigidBodyReadOnly body = bodies.get(i);
-         if (body.isRootBody())
+         YoGraphicEllipsoid3DDefinition ellipsoidDefinition = yoInertiaEllipsoid.getEllipsoidDefinition();
+
+         if (ellipsoidDefinition == null)
             continue;
 
-         YoGraphicEllipsoid3DDefinition ellipsoid = yoInertiaEllipsoids.get(i).getEllipsoidDefinition();
-         if (ellipsoid == null)
-            continue;
-
-         ellipsoidGroup.addChild(ellipsoid);
+         ellipsoidGroup.addChild(ellipsoidDefinition);
       }
 
       return ellipsoidGroup;

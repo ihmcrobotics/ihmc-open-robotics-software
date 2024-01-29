@@ -29,6 +29,12 @@ public class YoInertiaEllipsoid
    private final RigidBodyReadOnly rigidBody;
    private final YoGraphicEllipsoid3DDefinition ellipsoidDefinition;
 
+   /**
+    * Creates an ellipsoid visual which corresponds to the inertia of a rigid body. The color and size are backed by YoVariables and can be updated.
+    *
+    * @param rigidBody - The rigid body for which the inertia ellipsoid should be created.
+    * @param registry  - The registry for the ellipsoid.
+    */
    public YoInertiaEllipsoid(RigidBodyReadOnly rigidBody, YoRegistry registry)
    {
       this.rigidBody = rigidBody;
@@ -36,7 +42,7 @@ public class YoInertiaEllipsoid
       rgba = new YoInteger(rigidBody.getName() + "_RGBAInteger", registry);
       color = new YoColorRGBASingleDefinition(rgba.getName());
 
-      //Initialize to some color
+      // Initialize to some color
       int[] rgbColor = InertiaVisualizationTools.getRGBForCoolwarmColorMap(0.2);
       int opacityAlpha = (int) (0.5 * 255);
       int rgbInt = ColorDefinitions.toRGBA(rgbColor[0], rgbColor[1], rgbColor[2], opacityAlpha);
@@ -47,6 +53,14 @@ public class YoInertiaEllipsoid
       ellipsoidDefinition = convertRobotMassPropertiesToInertiaEllipsoid(rigidBodyDefinition);
    }
 
+   /**
+    * Updates the color, size, and location of the ellipsoid.
+    * <p>
+    * NOTE: Right now only the color update is implemented.
+    * </p>
+    *
+    * @param scale - The scale of the color map. Should be between 0 and 1.
+    */
    public void update(double scale)
    {
       //TODO: Add more functionality to the update for radii and COM offset
@@ -57,8 +71,10 @@ public class YoInertiaEllipsoid
    }
 
    /**
-    * Copies functionality from a simimlar method in YoGraphicTools. Exposes more of the method so that the color of the inertial ellipsoids can be set
-    * individually.
+    * Converts a RigidBodyDefinition into a YoGraphicEllipsoid3DDefinition. Copies functionality from a similar method in YoGraphicTools. Exposes more of the
+    * method so that the color of the inertial ellipsoids can be set individually.
+    *
+    * @param rigidBodyDefinition - The rigid body definition to convert to an ellipsoid definition.
     */
    private YoGraphicEllipsoid3DDefinition convertRobotMassPropertiesToInertiaEllipsoid(RigidBodyDefinition rigidBodyDefinition)
    {
@@ -187,17 +203,9 @@ public class YoInertiaEllipsoid
       this.rgba.set(rgba);
    }
 
-   /**
-    * Gets the RGBA YoInteger which defines the color. Change this integer to change the color.
-    */
    public YoInteger getColorInteger()
    {
       return rgba;
-   }
-
-   public YoColorRGBASingleDefinition getColor()
-   {
-      return color;
    }
 
    public RigidBodyReadOnly getRigidBody()
