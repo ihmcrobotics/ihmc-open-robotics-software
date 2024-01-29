@@ -15,6 +15,16 @@ public class ImGuiSliderDoubleWrapper extends ImGuiFancyWidget
                                    double minValue,
                                    double maxValue,
                                    DoubleSupplier wrappedValueGetter,
+                                   DoubleConsumer wrappedValueSetter)
+   {
+      this(label, format, minValue, maxValue, wrappedValueGetter, wrappedValueSetter, () -> { });
+   }
+
+   public ImGuiSliderDoubleWrapper(String label,
+                                   String format,
+                                   double minValue,
+                                   double maxValue,
+                                   DoubleSupplier wrappedValueGetter,
                                    DoubleConsumer wrappedValueSetter,
                                    Runnable onUserModified)
    {
@@ -25,14 +35,14 @@ public class ImGuiSliderDoubleWrapper extends ImGuiFancyWidget
 
    private void render(double minValue, double maxValue, ImDouble imDouble)
    {
-      beforeWidgetRender();
       if (ImGuiTools.sliderDouble(label, imDouble, minValue, maxValue, format))
          onUserModified.run();
-      afterWidgetRender();
    }
 
-   public void render()
+   public void renderImGuiWidget()
    {
+      beforeWidgetRender();
       imDoubleWrapper.renderImGuiWidget();
+      afterWidgetRender();
    }
 }

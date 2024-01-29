@@ -76,16 +76,16 @@ public class CoPTrajectoryGeneratorStateTest
          CoPTrajectoryGeneratorTestTools.assertFootstepEqual(randomFootstep1, stateB.getFootstep(1), epsilon);
 
          EuclidFrameTestTools.assertGeometricallyEquals(randomLeftFootPose.getPosition(),
-                                                                    stateB.getFootPose(RobotSide.LEFT).getPosition(),
+                                                                    stateB.getCurrentFootPose(RobotSide.LEFT).getPosition(),
                                                                     epsilon);
          EuclidFrameTestTools.assertGeometricallyEquals(randomRightFootPose.getPosition(),
-                                                                    stateB.getFootPose(RobotSide.RIGHT).getPosition(),
+                                                                    stateB.getCurrentFootPose(RobotSide.RIGHT).getPosition(),
                                                                     epsilon);
          EuclidFrameTestTools.assertGeometricallyEquals(randomLeftFootPose.getOrientation(),
-                                                                       stateB.getFootPose(RobotSide.LEFT).getOrientation(),
+                                                                       stateB.getCurrentFootPose(RobotSide.LEFT).getOrientation(),
                                                                        epsilon);
          EuclidFrameTestTools.assertGeometricallyEquals(randomRightFootPose.getOrientation(),
-                                                                       stateB.getFootPose(RobotSide.RIGHT).getOrientation(),
+                                                                       stateB.getCurrentFootPose(RobotSide.RIGHT).getOrientation(),
                                                                        epsilon);
          EuclidCoreTestTools.assertGeometricallyEquals(randomLeftFootPolygon, stateB.getFootPolygonInSole(RobotSide.LEFT), epsilon);
          EuclidCoreTestTools.assertGeometricallyEquals(randomRightFootPolygon, stateB.getFootPolygonInSole(RobotSide.RIGHT), epsilon);

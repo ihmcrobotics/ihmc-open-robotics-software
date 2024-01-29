@@ -28,7 +28,6 @@ public class ROS2SceneGraphSubscription
    private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
    private final SceneGraph sceneGraph;
    private final BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier;
-   private final ROS2IOTopicQualifier ioQualifier;
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
    private long numberOfMessagesReceived = 0;
    private boolean localTreeFrozen = false;
@@ -56,7 +55,6 @@ public class ROS2SceneGraphSubscription
          this.newNodeSupplier = newNodeSupplier;
       else
          this.newNodeSupplier = (uneeded, subscriptionNode) -> ROS2SceneGraphTools.createNodeFromMessage(subscriptionNode, sceneGraph);
-      this.ioQualifier = ioQualifier;
 
       sceneGraphSubscription = ros2PublishSubscribeAPI.subscribe(PerceptionAPI.SCENE_GRAPH.getTopic(ioQualifier));
    }
@@ -66,10 +64,9 @@ public class ROS2SceneGraphSubscription
     * This method runs on the robot and on every connected UI.
     * @return if a new message was used to update the scene nodes on this call
     */
-   public boolean update()
+   public void update()
    {
-      boolean newMessageAvailable = sceneGraphSubscription.getMessageNotification().poll();
-      if (newMessageAvailable)
+      if (sceneGraphSubscription.getMessageNotification().poll())
       {
          ++numberOfMessagesReceived;
          latestSceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
@@ -92,9 +89,10 @@ public class ROS2SceneGraphSubscription
                modificationQueue.accept(new SceneGraphClearSubtree(sceneGraph.getRootNode()));
 
             updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), null, modificationQueue);
+
+            // FIXME: We seem to be missing now the destroy functionality if nodes didn't get added back
          });
       }
-      return newMessageAvailable;
    }
 
    private void updateLocalTreeFromSubscription(ROS2SceneGraphSubscriptionNode subscriptionNode,
@@ -102,9 +100,7 @@ public class ROS2SceneGraphSubscription
                                                 SceneNode localParentNode,
                                                 SceneGraphModificationQueue modificationQueue)
    {
-      // If tree is frozen and the ID isn't in the local tree, we don't have anything to update
-      // This'll happen if a node is deleted locally. We want that change to propagate and not add
-      // it right back.
+      // Set fields only modifiable by the robot
       if (localNode instanceof DetectableSceneNode detectableSceneNode)
       {
          detectableSceneNode.setCurrentlyDetected(subscriptionNode.getDetectableSceneNodeMessage().getCurrentlyDetected());
@@ -133,7 +129,7 @@ public class ROS2SceneGraphSubscription
             centerposeNode.setObjectType(subscriptionNode.getCenterposeNodeMessage().getObjectTypeAsString());
             centerposeNode.setVertices3D(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices());
             centerposeNode.setVertices2D(subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices());
-            centerposeNode.setBreakFrequency(subscriptionNode.getCenterposeNodeMessage().getBreakFrequency());
+            centerposeNode.setEnableTracking(subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
          }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {
@@ -164,7 +160,7 @@ public class ROS2SceneGraphSubscription
 
    private void checkTreeModified(SceneNode localNode)
    {
-      localTreeFrozen |= localNode.isFrozenFromModification();
+      localTreeFrozen |= localNode.isFrozen();
 
       for (SceneNode child : localNode.getChildren())
       {

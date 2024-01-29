@@ -4,7 +4,6 @@ import perception_msgs.msg.dds.DetectedFiducialPacket;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
@@ -20,6 +19,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorS
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.Timer;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * A behavior tree layer on top of the door behavior that John wrote for Atlas.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
-public class DoorBehavior extends ResettingNode implements BehaviorInterface
+public class DoorBehavior extends ResettingNode implements Destroyable
 {
    private BehaviorHelper helper;
    private ROS2SyncedRobotModel syncedRobot;
@@ -106,7 +106,7 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       if (firstTick)
       {
@@ -166,7 +166,6 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
       return distanceToDoor;
    }
 
-   @Override
    public String getName()
    {
       return "Door";

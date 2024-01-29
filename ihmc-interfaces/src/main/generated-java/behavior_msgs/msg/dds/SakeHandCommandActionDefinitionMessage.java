@@ -11,7 +11,7 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
    /**
             * Specifies the side of the robot that this message refers to.
             */
@@ -28,14 +28,10 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
             * Goal torque as ratio from 0.0 (closed) to 1.0 (open)
             */
    public double torque_ratio_;
-   /**
-            * Whether the next action can be executed at the same time of this one
-            */
-   public boolean execute_with_next_action_;
 
    public SakeHandCommandActionDefinitionMessage()
    {
-      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
    }
 
    public SakeHandCommandActionDefinitionMessage(SakeHandCommandActionDefinitionMessage other)
@@ -46,7 +42,7 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
 
    public void set(SakeHandCommandActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       robot_side_ = other.robot_side_;
 
       configuration_ = other.configuration_;
@@ -55,17 +51,15 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
 
       torque_ratio_ = other.torque_ratio_;
 
-      execute_with_next_action_ = other.execute_with_next_action_;
-
    }
 
 
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getDefinition()
    {
-      return action_definition_;
+      return definition_;
    }
 
    /**
@@ -128,21 +122,6 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       return torque_ratio_;
    }
 
-   /**
-            * Whether the next action can be executed at the same time of this one
-            */
-   public void setExecuteWithNextAction(boolean execute_with_next_action)
-   {
-      execute_with_next_action_ = execute_with_next_action;
-   }
-   /**
-            * Whether the next action can be executed at the same time of this one
-            */
-   public boolean getExecuteWithNextAction()
-   {
-      return execute_with_next_action_;
-   }
-
 
    public static Supplier<SakeHandCommandActionDefinitionMessagePubSubType> getPubSubType()
    {
@@ -161,7 +140,7 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_definition_.epsilonEquals(other.action_definition_, epsilon)) return false;
+      if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.configuration_, other.configuration_, epsilon)) return false;
@@ -169,8 +148,6 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_ratio_, other.position_ratio_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.torque_ratio_, other.torque_ratio_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_with_next_action_, other.execute_with_next_action_, epsilon)) return false;
 
 
       return true;
@@ -185,7 +162,7 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
 
       SakeHandCommandActionDefinitionMessage otherMyClass = (SakeHandCommandActionDefinitionMessage) other;
 
-      if (!this.action_definition_.equals(otherMyClass.action_definition_)) return false;
+      if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if(this.configuration_ != otherMyClass.configuration_) return false;
@@ -193,8 +170,6 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       if(this.position_ratio_ != otherMyClass.position_ratio_) return false;
 
       if(this.torque_ratio_ != otherMyClass.torque_ratio_) return false;
-
-      if(this.execute_with_next_action_ != otherMyClass.execute_with_next_action_) return false;
 
 
       return true;
@@ -206,8 +181,8 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       StringBuilder builder = new StringBuilder();
 
       builder.append("SakeHandCommandActionDefinitionMessage {");
-      builder.append("action_definition=");
-      builder.append(this.action_definition_);      builder.append(", ");
+      builder.append("definition=");
+      builder.append(this.definition_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("configuration=");
@@ -215,9 +190,7 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       builder.append("position_ratio=");
       builder.append(this.position_ratio_);      builder.append(", ");
       builder.append("torque_ratio=");
-      builder.append(this.torque_ratio_);      builder.append(", ");
-      builder.append("execute_with_next_action=");
-      builder.append(this.execute_with_next_action_);
+      builder.append(this.torque_ratio_);
       builder.append("}");
       return builder.toString();
    }

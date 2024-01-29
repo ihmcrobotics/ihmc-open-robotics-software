@@ -9,6 +9,7 @@ import geometry_msgs.PoseStamped;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.targetFollowing.TargetFollowingBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -113,7 +114,7 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    public void update()
    {
       if (publishTestLoop.get())
-         periodicThread.setRunning(wasTickedRecently(0.5));
+         periodicThread.setRunning(getState().getIsActive());
       else
          periodicThread.setRunning(false);
 
@@ -130,6 +131,8 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public void renderTreeNodeImGuiWidgets()
    {
+      ImGui.text("Goal Planning");
+      ImGui.sameLine();
       manualTargetAffordance.renderPlaceGoalButton();
       ImGui.sameLine();
       ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
@@ -153,7 +156,7 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      return wasTickedRecently(0.5);
+      return getState().getIsActive();
    }
 
    @Override
@@ -163,7 +166,6 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
       periodicThread.destroy();
    }
 
-   @Override
    public String getName()
    {
       return "Target Following";

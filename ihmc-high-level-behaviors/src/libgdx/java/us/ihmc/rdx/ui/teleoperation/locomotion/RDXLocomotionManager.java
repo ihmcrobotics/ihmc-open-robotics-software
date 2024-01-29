@@ -128,12 +128,6 @@ public class RDXLocomotionManager
       interactableFootstepPlan = new RDXInteractableFootstepPlan(controllerStatusTracker);
 
       // TODO remove ros from this module, and have it call from the higher level.
-      ros2Helper.subscribeViaCallback(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, regions ->
-      {
-         PlanarRegionsList planarRegionsList = getPlanarRegionListInWorld(regions);
-         footstepPlanning.setPlanarRegionsList(planarRegionsList);
-         interactableFootstepPlan.setPlanarRegionsList(planarRegionsList);
-      });
       ros2Helper.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, heightMap ->
       {
          footstepPlanning.setHeightMapData(heightMap);
@@ -141,15 +135,6 @@ public class RDXLocomotionManager
       });
 
       controllerFootstepQueueGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
-   }
-
-   private PlanarRegionsList getPlanarRegionListInWorld(FramePlanarRegionsListMessage message)
-   {
-      FramePlanarRegionsList framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(message);
-      PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList().copy();
-      planarRegionsList.applyTransform(framePlanarRegionsList.getSensorToWorldFrameTransform());
-
-      return planarRegionsList;
    }
 
    public void create(RDXBaseUI baseUI)
@@ -291,8 +276,6 @@ public class RDXLocomotionManager
       boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
       boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
 
-      ImGui.text("Queued footsteps: " + controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps());
-
       if (ImGui.button(labels.get("Disable Leg Mode")))
       {
          legControlMode = RDXLegControlMode.DISABLED;
@@ -342,6 +325,8 @@ public class RDXLocomotionManager
 
       manualFootstepPlacement.renderImGuiWidgets();
 
+      ImGui.text("Goal Planning");
+      ImGui.sameLine();
       if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
 
@@ -517,7 +502,7 @@ public class RDXLocomotionManager
       }
    }
 
-   public void submitHeightMapData(HeightMapMessage heightMapData)
+   public void setHeightMapData(HeightMapMessage heightMapData)
    {
       footstepPlanning.setHeightMapData(heightMapData);
       interactableFootstepPlan.setHeightMapMessage(heightMapData);
@@ -526,5 +511,10 @@ public class RDXLocomotionManager
    public RDXLocomotionParameters getLocomotionParameters()
    {
       return locomotionParameters;
+   }
+
+   public RDXInteractableFootstepPlan getInteractableFootstepPlan()
+   {
+      return interactableFootstepPlan;
    }
 }

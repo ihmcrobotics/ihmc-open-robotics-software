@@ -53,10 +53,13 @@ public class ReferenceFrameLibrary
 
       for (ReferenceFrameDynamicCollection dynamicCollection : dynamicCollections)
       {
-         for (String dynamicFrameName : dynamicCollection.getFrameNameList())
+         synchronized (dynamicCollection.getFrameNameList()) // Avoid scene graph concurrently modifying list
          {
-            if (referenceFrameName.equals(dynamicFrameName))
-               return true;
+            for (String dynamicFrameName : dynamicCollection.getFrameNameList())
+            {
+               if (referenceFrameName.equals(dynamicFrameName))
+                  return true;
+            }
          }
       }
 
@@ -93,9 +96,12 @@ public class ReferenceFrameLibrary
 
       for (ReferenceFrameDynamicCollection dynamicCollection : dynamicCollections)
       {
-         for (String dynamicFrameName : dynamicCollection.getFrameNameList())
+         synchronized (dynamicCollection.getFrameNameList()) // Avoid scene graph concurrently modifying list
          {
-            frameNameConsumer.accept(dynamicFrameName);
+            for (String dynamicFrameName : dynamicCollection.getFrameNameList())
+            {
+               frameNameConsumer.accept(dynamicFrameName);
+            }
          }
       }
    }

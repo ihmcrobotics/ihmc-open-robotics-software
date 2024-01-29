@@ -1,49 +1,76 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ChestOrientationActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
-import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
+import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class ChestOrientationActionState extends BehaviorActionState
+public class ChestOrientationActionState extends ActionNodeState<ChestOrientationActionDefinition>
 {
-   private final ChestOrientationActionDefinition definition = new ChestOrientationActionDefinition();
-   private final DetachableReferenceFrame chestFrame;
+   private final CRDTDetachableReferenceFrame chestFrame;
+   /**
+    * This is the estimated goal pelvis frame as the robot executes a potential whole body action.
+    * This is used to compute joint angles that achieve the desired and previewed end pose
+    * even when the pelvis and/or chest might also move.
+    */
+   private final CRDTUnidirectionalRigidBodyTransform goalPelvisToWorldTransform;
+   private final ReferenceFrame goalPelvisFrame;
 
-   public ChestOrientationActionState(ReferenceFrameLibrary referenceFrameLibrary)
+   public ChestOrientationActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      chestFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getChestToParentTransform());
+      super(id, new ChestOrientationActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+
+      chestFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
+                                                    getDefinition().getCRDTParentFrameName(),
+                                                    getDefinition().getChestToParentTransform());
+      goalPelvisToWorldTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);
+      goalPelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                               goalPelvisToWorldTransform.getValueReadOnly());
    }
 
    @Override
    public void update()
    {
-      chestFrame.update(definition.getParentFrameName());
-      setCanExecute(chestFrame.isChildOfWorld());
+      chestFrame.update();
    }
 
    public void toMessage(ChestOrientationActionStateMessage message)
    {
-      super.toMessage(message.getActionState());
+      getDefinition().toMessage(message.getDefinition());
 
-      definition.toMessage(message.getDefinition());
+      super.toMessage(message.getState());
+
+      goalPelvisToWorldTransform.toMessage(message.getGoalPelvisTransformToWorld());
    }
 
    public void fromMessage(ChestOrientationActionStateMessage message)
    {
-      super.fromMessage(message.getActionState());
+      super.fromMessage(message.getState());
 
-      definition.fromMessage(message.getDefinition());
+      getDefinition().fromMessage(message.getDefinition());
+
+      goalPelvisToWorldTransform.fromMessage(message.getGoalPelvisTransformToWorld());
+      goalPelvisFrame.update();
    }
 
-   @Override
-   public ChestOrientationActionDefinition getDefinition()
-   {
-      return definition;
-   }
-
-   public DetachableReferenceFrame getChestFrame()
+   public CRDTDetachableReferenceFrame getChestFrame()
    {
       return chestFrame;
+   }
+
+   public CRDTUnidirectionalRigidBodyTransform getGoalPelvisToWorldTransform()
+   {
+      return goalPelvisToWorldTransform;
+   }
+
+   public ReferenceFrame getGoalPelvisFrame()
+   {
+      return goalPelvisFrame;
    }
 }

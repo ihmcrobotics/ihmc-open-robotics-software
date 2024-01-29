@@ -1,28 +1,30 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
-import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.tools.Timer;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
+public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCommandActionState, SakeHandCommandActionDefinition>
 {
    /** TODO: Make this variable. */
    private static final double WAIT_TIME = 0.5;
 
-   private final SakeHandCommandActionState state = new SakeHandCommandActionState();
-   private final SakeHandCommandActionDefinition definition = state.getDefinition();
+   private final SakeHandCommandActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final Timer executionTimer = new Timer();
-   private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
-   public SakeHandCommandActionExecutor(BehaviorActionSequence sequence, ROS2ControllerHelper ros2ControllerHelper)
+   public SakeHandCommandActionExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2ControllerHelper ros2ControllerHelper)
    {
-      super(sequence);
+      super(new SakeHandCommandActionState(id, crdtInfo, saveFileDirectory));
+
+      state = getState();
 
       this.ros2ControllerHelper = ros2ControllerHelper;
    }
@@ -36,13 +38,36 @@ public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
    @Override
    public void triggerActionExecution()
    {
-      SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
-      message.setRobotSide(definition.getSide().toByte());
-      message.setDesiredHandConfiguration((byte) SakeHandCommandOption.values[definition.getHandConfigurationIndex()].getCommandNumber());
-      message.setPostionRatio(definition.getGoalPosition());
-      message.setTorqueRatio(definition.getGoalTorque());
+      super.triggerActionExecution();
 
-      ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
+      // FIXME: Needs major work
+      if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.GOTO)
+      {
+         SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
+         message.setRobotSide(getDefinition().getSide().toByte());
+         message.setDesiredHandConfiguration((byte) SakeHandCommandOption.values[getDefinition().getHandConfigurationIndex()].getCommandNumber());
+         message.setPostionRatio(getDefinition().getGoalPosition());
+         message.setTorqueRatio(-1.0);
+
+         ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
+
+         message.setPostionRatio(-1.0);
+         message.setTorqueRatio(getDefinition().getGoalTorque());
+
+         ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
+      }
+      else if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.OPEN)
+      {
+         ros2ControllerHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                      HumanoidMessageTools.createHandDesiredConfigurationMessage(getDefinition().getSide(),
+                                                                                                 HandConfiguration.OPEN));
+      }
+      else if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.CLOSE)
+      {
+         ros2ControllerHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                      HumanoidMessageTools.createHandDesiredConfigurationMessage(getDefinition().getSide(),
+                                                                                                 HandConfiguration.CLOSE));
+      }
 
       executionTimer.reset();
    }
@@ -52,26 +77,7 @@ public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
    {
       state.setIsExecuting(executionTimer.isRunning(WAIT_TIME));
 
-      executionStatusMessage.setActionIndex(state.getActionIndex());
-      executionStatusMessage.setNominalExecutionDuration(WAIT_TIME);
-      executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-   }
-
-   @Override
-   public ActionExecutionStatusMessage getExecutionStatusMessage()
-   {
-      return executionStatusMessage;
-   }
-
-   @Override
-   public SakeHandCommandActionState getState()
-   {
-      return state;
-   }
-
-   @Override
-   public SakeHandCommandActionDefinition getDefinition()
-   {
-      return definition;
+      state.setNominalExecutionDuration(WAIT_TIME);
+      state.setElapsedExecutionTime(executionTimer.getElapsedTime());
    }
 }

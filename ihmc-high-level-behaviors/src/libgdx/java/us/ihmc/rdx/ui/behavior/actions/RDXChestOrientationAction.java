@@ -1,17 +1,15 @@
 package us.ihmc.rdx.ui.behavior.actions;
 
-import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionState;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.rdx.imgui.*;
@@ -21,8 +19,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -31,16 +28,16 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXChestOrientationAction extends RDXBehaviorAction
+public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationActionState, ChestOrientationActionDefinition>
 {
    private final ChestOrientationActionState state;
-   private final ChestOrientationActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImBoolean adjustGoalPose = new ImBoolean();
    private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
@@ -57,48 +54,45 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
    private final RDXInteractableHighlightModel highlightModel;
    private final RDX3DPanelTooltip tooltip;
-   private final ROS2PublishSubscribeAPI ros2;
-   private final BodyPartPoseStatusMessage chestPoseStatus = new BodyPartPoseStatusMessage();
-   private final Throttler throttler = new Throttler().setFrequency(10.0);
    private boolean wasConcurrent = false;
 
-   public RDXChestOrientationAction(RDXBehaviorActionSequenceEditor editor,
+   public RDXChestOrientationAction(long id,
+                                    CRDTInfo crdtInfo,
+                                    WorkspaceResourceDirectory saveFileDirectory,
                                     RDX3DPanel panel3D,
                                     DRCRobotModel robotModel,
                                     FullHumanoidRobotModel syncedFullRobotModel,
                                     RobotCollisionModel selectionCollisionModel,
-                                    ReferenceFrameLibrary referenceFrameLibrary,
-                                    ROS2PublishSubscribeAPI ros2)
+                                    ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(editor);
+      super(new ChestOrientationActionState(id, crdtInfo,saveFileDirectory, referenceFrameLibrary));
 
-      this.ros2 = ros2;
+      state = getState();
 
-      state = new ChestOrientationActionState(referenceFrameLibrary);
-      definition = state.getDefinition();
+      getDefinition().setDescription("Chest orientation");
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getChestToParentTransform());
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getChestToParentTransform().getValue(), adjustGoalPose);
       poseGizmo.create(panel3D);
 
       // TODO: Can all this be condensed?
-      executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
-                                                          definition::setExecuteWithNextAction,
+      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
+                                                          getDefinition()::setExecuteWithNextAction,
                                                           imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
-      holdPoseInWorldLaterWrapper = new ImBooleanWrapper(definition::getHoldPoseInWorldLater,
-                                                         definition::setHoldPoseInWorldLater,
+      holdPoseInWorldLaterWrapper = new ImBooleanWrapper(getDefinition()::getHoldPoseInWorldLater,
+                                                         getDefinition()::setHoldPoseInWorldLater,
                                                          imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                definition::getParentFrameName,
-                                                                definition::setParentFrameName);
-      yawWidget = new ImDoubleWrapper(definition.getRotation()::getYaw, definition::setYaw,
+                                                                getDefinition()::getParentFrameName,
+                                                                getState().getChestFrame()::changeFrame);
+      yawWidget = new ImDoubleWrapper(getDefinition().getRotation()::getYaw, getDefinition()::setYaw,
                                       imDouble -> ImGuiTools.volatileInputDouble(labels.get("Yaw"), imDouble));
-      pitchWidget = new ImDoubleWrapper(definition.getRotation()::getPitch, definition::setPitch,
+      pitchWidget = new ImDoubleWrapper(getDefinition().getRotation()::getPitch, getDefinition()::setPitch,
                                         imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
-      rollWidget = new ImDoubleWrapper(definition.getRotation()::getRoll, definition::setRoll,
+      rollWidget = new ImDoubleWrapper(getDefinition().getRotation()::getRoll, getDefinition()::setRoll,
                                        imDouble -> ImGuiTools.volatileInputDouble(labels.get("Roll"), imDouble));
-      trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
-                                                     definition::setTrajectoryDuration,
+      trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
+                                                     getDefinition()::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
 
       String chestBodyName = syncedFullRobotModel.getChest().getName();
@@ -143,39 +137,23 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
             highlightModel.setTransparency(0.5);
          }
 
-         chestPoseStatus.setParentFrameName(definition.getParentFrameName());
-         MessageTools.toMessage(definition.getChestToParentTransform(), chestPoseStatus.getTransformToParent());
          // if the action is part of a group of concurrent actions that is currently executing or about to be executed
          // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
          if (state.getIsNextForExecution() && state.getIsToBeExecutedConcurrently())
          {
             wasConcurrent = true;
-            chestPoseStatus.setCurrentAndConcurrent(true);
-            if (throttler.run())
-            {
-               if (state.getActionIndex() >= 0)
-                  ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
-            }
          }
          else if (wasConcurrent)
          {
-            chestPoseStatus.setCurrentAndConcurrent(false);
-            ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
             wasConcurrent = false;
          }
       }
    }
 
    @Override
-   public void updateBeforeRemoving()
-   {
-      chestPoseStatus.setCurrentAndConcurrent(false);
-      ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
-   }
-
-   @Override
    protected void renderImGuiWidgetsInternal()
    {
+      ImGui.checkbox(labels.get("Adjust Goal Pose"), adjustGoalPose);
       ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
       holdPoseInWorldLaterWrapper.renderImGuiWidget();
@@ -196,7 +174,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       {
          tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(),
                                                                           state.getActionIndex(),
-                                                                          definition.getDescription()));
+                                                                          getDefinition().getDescription()));
       }
    }
 
@@ -224,7 +202,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
       if (isClickedOn)
       {
-         getSelected().set(true);
+         adjustGoalPose.set(true);
       }
 
       poseGizmo.process3DViewInput(input, isMouseHovering);
@@ -251,17 +229,5 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    public String getActionTypeTitle()
    {
       return "Chest Orientation";
-   }
-
-   @Override
-   public ChestOrientationActionState getState()
-   {
-      return state;
-   }
-
-   @Override
-   public ChestOrientationActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

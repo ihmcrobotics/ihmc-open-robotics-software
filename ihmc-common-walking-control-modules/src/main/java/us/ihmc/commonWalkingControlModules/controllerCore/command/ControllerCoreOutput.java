@@ -99,9 +99,9 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
    }
 
    @Override
-   public void getDesiredExternalWrench(WrenchBasics desiredExternalWrenchToPack, RigidBodyBasics rigidBody)
+   public boolean getDesiredExternalWrench(WrenchBasics desiredExternalWrenchToPack, RigidBodyBasics rigidBody)
    {
-      desiredExternalWrenchHolder.getDesiredExternalWrench(desiredExternalWrenchToPack, rigidBody);
+      return desiredExternalWrenchHolder.getDesiredExternalWrench(desiredExternalWrenchToPack, rigidBody);
    }
 
    public void setLinearMomentumRate(FrameVector3DReadOnly linearMomentumRate)

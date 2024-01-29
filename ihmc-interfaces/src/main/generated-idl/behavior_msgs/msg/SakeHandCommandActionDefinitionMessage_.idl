@@ -1,7 +1,7 @@
 #ifndef __behavior_msgs__msg__SakeHandCommandActionDefinitionMessage__idl__
 #define __behavior_msgs__msg__SakeHandCommandActionDefinitionMessage__idl__
 
-#include "behavior_msgs/msg/./BehaviorActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -15,7 +15,7 @@ module behavior_msgs
         /**
          * Parent definition fields
          */
-        behavior_msgs::msg::dds::BehaviorActionDefinitionMessage action_definition;
+        behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
         /**
          * Specifies the side of the robot that this message refers to.
          */
@@ -33,10 +33,6 @@ module behavior_msgs
          * Goal torque as ratio from 0.0 (closed) to 1.0 (open)
          */
         double torque_ratio;
-        /**
-         * Whether the next action can be executed at the same time of this one
-         */
-        boolean execute_with_next_action;
       };
     };
   };

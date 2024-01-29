@@ -1,18 +1,20 @@
 package us.ihmc.behaviors.behaviorTree.utility;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeAction;
+import us.ihmc.behaviors.behaviorTree.LocalOnlyBehaviorTreeNodeExecutor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Based on Dave Mark Architecture Tricks: Managing Behaviors in Time, Space, and Depth
  * https://gdcvault.com/play/1018040
  */
-public abstract class UtilityBasedAction extends BehaviorTreeAction
+public abstract class UtilityBasedAction extends LocalOnlyBehaviorTreeNodeExecutor
 {
    private final ArrayList<UtilityAxis> axes = new ArrayList<>();
 
-   @Override
+   private final List<UtilityBasedAction> children = new ArrayList<>();
+
    public double evaluateUtility()
    {
       if (axes.isEmpty())
@@ -32,5 +34,11 @@ public abstract class UtilityBasedAction extends BehaviorTreeAction
    public void addUtilityAxis(UtilityAxis axis)
    {
       axes.add(axis);
+   }
+
+   // TODO: Fix
+   public List<UtilityBasedAction> getUtilityChildren()
+   {
+      return children;
    }
 }

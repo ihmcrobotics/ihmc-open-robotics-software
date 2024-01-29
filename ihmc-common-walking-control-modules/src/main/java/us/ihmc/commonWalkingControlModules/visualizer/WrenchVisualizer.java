@@ -139,12 +139,12 @@ public class WrenchVisualizer
       public ContactablePlaneBodyWrenchVisualizer(ContactablePlaneBody contactablePlaneBody)
       {
          String prefix = contactablePlaneBody.getName() + name;
+         soleFrame = contactablePlaneBody.getSoleFrame();
          forceWorld = new YoFrameVector3D(prefix + "ForceWorldFrame", worldFrame, registry);
          torqueWorld = new YoFrameVector3D(prefix + "TorqueWorldFrame", worldFrame, registry);
-         forceSole = new YoFrameVector3D(prefix + "ForceSoleFrame", worldFrame, registry);
-         torqueSole = new YoFrameVector3D(prefix + "TorqueSoleFrame", worldFrame, registry);
+         forceSole = new YoFrameVector3D(prefix + "ForceSoleFrame", soleFrame, registry);
+         torqueSole = new YoFrameVector3D(prefix + "TorqueSoleFrame", soleFrame, registry);
          centerOfPressure = new YoFramePoint3D(prefix + "CenterOfPressure", worldFrame, registry);
-         soleFrame = contactablePlaneBody.getSoleFrame();
 
          YoGraphicVector forceViz = new YoGraphicVector(prefix + "ForceViz",
                                                         centerOfPressure,

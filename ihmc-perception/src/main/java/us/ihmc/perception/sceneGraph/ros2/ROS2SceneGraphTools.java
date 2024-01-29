@@ -68,7 +68,8 @@ public class ROS2SceneGraphTools
                                         nodeName,
                                         subscriptionNode.getCenterposeNodeMessage().getObjectId(),
                                         subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices(),
-                                        subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices());
+                                        subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices(),
+                                        subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
       }
       else if (nodeType == SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE)
       {
@@ -91,7 +92,7 @@ public class ROS2SceneGraphTools
          sceneNode = new SceneNode(nodeID, nodeName);
       }
 
-      sceneGraph.getIDToNodeMap().put(nodeID, sceneNode); // Make sure any new nodes are in the map
+      sceneGraph.getIDToNodeMap().put(nodeID, sceneNode); // Make sure any new nodes are in the map // TODO: Probably remove not necessary
 
       return sceneNode;
    }

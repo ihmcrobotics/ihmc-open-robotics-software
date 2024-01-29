@@ -11,7 +11,7 @@ public class ChestOrientationActionDefinitionMessage extends Packet<ChestOrienta
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
    /**
             * Name of the frame the this action is expressed in
             */
@@ -31,7 +31,7 @@ public class ChestOrientationActionDefinitionMessage extends Packet<ChestOrienta
 
    public ChestOrientationActionDefinitionMessage()
    {
-      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       parent_frame_name_ = new java.lang.StringBuilder(255);
       chest_transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
@@ -44,7 +44,7 @@ public class ChestOrientationActionDefinitionMessage extends Packet<ChestOrienta
 
    public void set(ChestOrientationActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       parent_frame_name_.setLength(0);
       parent_frame_name_.append(other.parent_frame_name_);
 
@@ -59,9 +59,9 @@ public class ChestOrientationActionDefinitionMessage extends Packet<ChestOrienta
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getDefinition()
    {
-      return action_definition_;
+      return definition_;
    }
 
    /**
@@ -145,7 +145,7 @@ public class ChestOrientationActionDefinitionMessage extends Packet<ChestOrienta
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_definition_.epsilonEquals(other.action_definition_, epsilon)) return false;
+      if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.parent_frame_name_, other.parent_frame_name_, epsilon)) return false;
 
       if (!this.chest_transform_to_parent_.epsilonEquals(other.chest_transform_to_parent_, epsilon)) return false;
@@ -166,7 +166,7 @@ public class ChestOrientationActionDefinitionMessage extends Packet<ChestOrienta
 
       ChestOrientationActionDefinitionMessage otherMyClass = (ChestOrientationActionDefinitionMessage) other;
 
-      if (!this.action_definition_.equals(otherMyClass.action_definition_)) return false;
+      if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if (!us.ihmc.idl.IDLTools.equals(this.parent_frame_name_, otherMyClass.parent_frame_name_)) return false;
 
       if (!this.chest_transform_to_parent_.equals(otherMyClass.chest_transform_to_parent_)) return false;
@@ -184,8 +184,8 @@ public class ChestOrientationActionDefinitionMessage extends Packet<ChestOrienta
       StringBuilder builder = new StringBuilder();
 
       builder.append("ChestOrientationActionDefinitionMessage {");
-      builder.append("action_definition=");
-      builder.append(this.action_definition_);      builder.append(", ");
+      builder.append("definition=");
+      builder.append(this.definition_);      builder.append(", ");
       builder.append("parent_frame_name=");
       builder.append(this.parent_frame_name_);      builder.append(", ");
       builder.append("chest_transform_to_parent=");

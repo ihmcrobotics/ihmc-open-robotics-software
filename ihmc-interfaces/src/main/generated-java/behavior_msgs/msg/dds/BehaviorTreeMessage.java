@@ -9,6 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 public class BehaviorTreeMessage extends Packet<BehaviorTreeMessage> implements Settable<BehaviorTreeMessage>, EpsilonComparable<BehaviorTreeMessage>
 {
    /**
+            * DEPRECATED: This is an old message replaced by BehaviorTreeStateMessage
             * Nodes in the tree in "depth first" order.
             * We must reconstruct the tree on the subscription end.
             * This is because messages cannot be recursive.
@@ -34,6 +35,7 @@ public class BehaviorTreeMessage extends Packet<BehaviorTreeMessage> implements 
 
 
    /**
+            * DEPRECATED: This is an old message replaced by BehaviorTreeStateMessage
             * Nodes in the tree in "depth first" order.
             * We must reconstruct the tree on the subscription end.
             * This is because messages cannot be recursive.

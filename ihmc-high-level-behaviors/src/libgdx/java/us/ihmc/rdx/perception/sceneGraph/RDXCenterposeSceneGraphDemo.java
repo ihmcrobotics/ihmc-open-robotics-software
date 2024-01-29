@@ -1,22 +1,23 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
-import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
+import com.badlogic.gdx.graphics.Color;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2DetectedObjectBoundingBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.sensors.ZEDModelData;
 import us.ihmc.tools.thread.Throttler;
 
 public class RDXCenterposeSceneGraphDemo
@@ -30,6 +31,7 @@ public class RDXCenterposeSceneGraphDemo
    private ReferenceFrameLibrary referenceFrameLibrary;
    private RDXSceneGraphUI sceneGraphUI;
    private final Throttler perceptionThottler = new Throttler().setFrequency(30.0);
+   private RDXReferenceFrameGraphic messageAquisitionFrameGraphic;
 
    public RDXCenterposeSceneGraphDemo()
    {
@@ -76,11 +78,14 @@ public class RDXCenterposeSceneGraphDemo
             baseUI.getPrimaryScene().addRenderableProvider(sceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(sceneGraphUI.getPanel());
 
+            messageAquisitionFrameGraphic = new RDXReferenceFrameGraphic(0.1, Color.ORANGE);
+            baseUI.getPrimaryScene().addRenderableProvider(messageAquisitionFrameGraphic);
+
             referenceFrameLibrary = new ReferenceFrameLibrary();
             referenceFrameLibrary.addDynamicCollection(sceneGraphUI.getSceneGraph().asNewDynamicReferenceFrameCollection());
 
             onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
-            centerposeProcess = new CenterposeDetectionManager(ros2Helper, ZEDModelData.createCameraReferenceFrame(RobotSide.LEFT, ReferenceFrame.getWorldFrame()));
+            centerposeProcess = new CenterposeDetectionManager(ros2Helper);
 
             globalVisualizersPanel.create();
          }
@@ -94,6 +99,7 @@ public class RDXCenterposeSceneGraphDemo
             {
                onRobotSceneGraph.updateSubscription();
                centerposeProcess.updateSceneGraph(onRobotSceneGraph);
+               messageAquisitionFrameGraphic.setTransformToWorldFrame(centerposeProcess.getImageAquisitionSensorFrameTransformToRoot());
                onRobotSceneGraph.updateOnRobotOnly(ReferenceFrame.getWorldFrame());
                onRobotSceneGraph.updatePublication();
             }

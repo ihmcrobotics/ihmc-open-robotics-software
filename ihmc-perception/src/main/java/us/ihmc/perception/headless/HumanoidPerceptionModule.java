@@ -113,7 +113,6 @@ public class HumanoidPerceptionModule
                              Mat incomingDepth,
                              ReferenceFrame cameraFrame,
                              ReferenceFrame cameraZUpFrame,
-                             boolean initialized,
                              boolean metricDepth)
    {
       if (localizationAndMappingTask != null)

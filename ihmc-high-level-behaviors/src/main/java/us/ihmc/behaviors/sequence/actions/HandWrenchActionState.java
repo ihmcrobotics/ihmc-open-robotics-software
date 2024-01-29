@@ -1,29 +1,28 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.HandWrenchActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class HandWrenchActionState extends BehaviorActionState
+public class HandWrenchActionState extends ActionNodeState<HandWrenchActionDefinition>
 {
-   private final HandWrenchActionDefinition definition = new HandWrenchActionDefinition();
+   public HandWrenchActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   {
+      super(id, new HandWrenchActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+   }
 
    public void toMessage(HandWrenchActionStateMessage message)
    {
-      super.toMessage(message.getActionState());
+      getDefinition().toMessage(message.getDefinition());
 
-      definition.toMessage(message.getDefinition());
+      super.toMessage(message.getState());
    }
 
    public void fromMessage(HandWrenchActionStateMessage message)
    {
-      super.fromMessage(message.getActionState());
+      super.fromMessage(message.getState());
 
-      definition.fromMessage(message.getDefinition());
-   }
-
-   @Override
-   public HandWrenchActionDefinition getDefinition()
-   {
-      return definition;
+      getDefinition().fromMessage(message.getDefinition());
    }
 }

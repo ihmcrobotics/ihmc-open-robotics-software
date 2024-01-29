@@ -9,7 +9,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
 import us.ihmc.behaviors.lookAndStep.LookAndStepFootstepPlanningTask.LookAndStepFootstepPlanning;
 import us.ihmc.behaviors.lookAndStep.LookAndStepLocalizationTask.LookAndStepBodyPathLocalization;
@@ -24,6 +23,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.List;
@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
-public class LookAndStepBehavior extends ResettingNode implements BehaviorInterface
+public class LookAndStepBehavior extends ResettingNode implements Destroyable
 {
    final BehaviorHelper helper;
    final StatusLogger statusLogger;
@@ -184,7 +184,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       return BehaviorTreeNodeStatus.RUNNING;
    }
@@ -203,7 +203,6 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       reset.destroy();
    }
 
-   @Override
    public String getName()
    {
       return "Look and Step";

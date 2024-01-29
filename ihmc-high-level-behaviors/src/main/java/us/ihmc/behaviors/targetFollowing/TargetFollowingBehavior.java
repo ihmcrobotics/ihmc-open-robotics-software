@@ -2,7 +2,6 @@ package us.ihmc.behaviors.targetFollowing;
 
 import geometry_msgs.PoseStamped;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
@@ -13,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.Timer;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * are good videos of it following Bhavyansh.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
-public class TargetFollowingBehavior extends ResettingNode implements BehaviorInterface
+public class TargetFollowingBehavior extends ResettingNode implements Destroyable
 {
    private final BehaviorHelper helper;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -44,7 +44,7 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
       LogTools.info("Constructing");
       targetFollowingParameters = new TargetFollowingBehaviorParameters();
       lookAndStepBehavior = new LookAndStepBehavior(helper);
-      addChild(lookAndStepBehavior);
+      getChildren().add(lookAndStepBehavior);
 //      helper.subscribeViaCallback(TargetFollowingParameters, parameters ->
 //      {
 //         helper.getOrCreateStatusLogger().info("Accepting new target following parameters");
@@ -55,7 +55,7 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       PoseStamped latestSemanticTargetPose = latestSemanticTargetPoseReference.getAndSet(null);
       if (latestSemanticTargetPose != null)
@@ -93,7 +93,7 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
          }
       }
 
-      return lookAndStepBehavior.tick();
+      return lookAndStepBehavior.tickAndGetStatus();
    }
 
    @Override
@@ -102,7 +102,6 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
 
    }
 
-   @Override
    public String getName()
    {
       return "Target Following";

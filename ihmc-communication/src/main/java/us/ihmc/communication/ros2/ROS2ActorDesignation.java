@@ -5,6 +5,7 @@ package us.ihmc.communication.ros2;
  * robot or operator, for the purposes of ROS 2 communication.
  *
  * See {@link ROS2IOTopicQualifier}.
+ * See {@link CRDTActorDesignation}.
  */
 public enum ROS2ActorDesignation
 {

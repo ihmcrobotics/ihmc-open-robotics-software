@@ -477,6 +477,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
    {
       this.controllerCoreOutput = controllerCoreOutput;
+
+      for (int i = 0; i < bodyManagers.size(); i++)
+      { // Controller core output informs load-bearing state of load status
+         bodyManagers.get(i).setControllerCoreOutput(controllerCoreOutput);
+      }
    }
 
    public void setLinearMomentumRateControlModuleOutput(LinearMomentumRateControlModuleOutput output)
@@ -657,7 +662,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       currentState.handleChangeInContactState();
 
-      submitControllerCoreCommands();
+      submitControllerCoreCommands(currentState);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -867,9 +872,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       return pelvisStatusMessage;
    }
 
-   private void submitControllerCoreCommands()
+   private void submitControllerCoreCommands(WalkingState currentState)
    {
       planeContactStateCommandPool.clear();
+
+      controllerCoreCommand.addInverseDynamicsCommand(currentState.getInverseDynamicsCommand());
 
       if (naturalPostureManager != null && naturalPostureManager.isEnabled())
       {

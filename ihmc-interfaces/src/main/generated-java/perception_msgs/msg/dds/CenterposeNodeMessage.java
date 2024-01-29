@@ -40,10 +40,7 @@ public class CenterposeNodeMessage extends Packet<CenterposeNodeMessage> impleme
             * 3d Vertices of the 3d object Bounding box
             */
    public us.ihmc.euclid.tuple3D.Point3D[] bounding_box_vertices_;
-   /**
-            * Break frequency filter value for nodes that are alpha filtered
-            */
-   public float break_frequency_;
+   public boolean enable_tracking_;
 
    public CenterposeNodeMessage()
    {
@@ -89,7 +86,7 @@ public class CenterposeNodeMessage extends Packet<CenterposeNodeMessage> impleme
       {
             geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.bounding_box_vertices_[i7], bounding_box_vertices_[i7]);}
 
-      break_frequency_ = other.break_frequency_;
+      enable_tracking_ = other.enable_tracking_;
 
    }
 
@@ -183,19 +180,13 @@ public class CenterposeNodeMessage extends Packet<CenterposeNodeMessage> impleme
       return bounding_box_vertices_;
    }
 
-   /**
-            * Break frequency filter value for nodes that are alpha filtered
-            */
-   public void setBreakFrequency(float break_frequency)
+   public void setEnableTracking(boolean enable_tracking)
    {
-      break_frequency_ = break_frequency;
+      enable_tracking_ = enable_tracking;
    }
-   /**
-            * Break frequency filter value for nodes that are alpha filtered
-            */
-   public float getBreakFrequency()
+   public boolean getEnableTracking()
    {
-      return break_frequency_;
+      return enable_tracking_;
    }
 
 
@@ -234,7 +225,7 @@ public class CenterposeNodeMessage extends Packet<CenterposeNodeMessage> impleme
               if (!this.bounding_box_vertices_[i11].epsilonEquals(other.bounding_box_vertices_[i11], epsilon)) return false;
       }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.break_frequency_, other.break_frequency_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_tracking_, other.enable_tracking_, epsilon)) return false;
 
 
       return true;
@@ -265,7 +256,7 @@ public class CenterposeNodeMessage extends Packet<CenterposeNodeMessage> impleme
       {
                 if (!this.bounding_box_vertices_[i15].equals(otherMyClass.bounding_box_vertices_[i15])) return false;
       }
-      if(this.break_frequency_ != otherMyClass.break_frequency_) return false;
+      if(this.enable_tracking_ != otherMyClass.enable_tracking_) return false;
 
 
       return true;
@@ -291,8 +282,8 @@ public class CenterposeNodeMessage extends Packet<CenterposeNodeMessage> impleme
       builder.append(java.util.Arrays.toString(this.bounding_box_2d_vertices_));      builder.append(", ");
       builder.append("bounding_box_vertices=");
       builder.append(java.util.Arrays.toString(this.bounding_box_vertices_));      builder.append(", ");
-      builder.append("break_frequency=");
-      builder.append(this.break_frequency_);
+      builder.append("enable_tracking=");
+      builder.append(this.enable_tracking_);
       builder.append("}");
       return builder.toString();
    }

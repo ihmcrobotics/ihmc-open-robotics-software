@@ -44,7 +44,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    private final ImBoolean renderGroundPlane = new ImBoolean(false);
    private final ImBoolean renderGroundCells = new ImBoolean(false);
    private final ImBoolean enableHeightMapVisualizer = new ImBoolean(false);
-   private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
+   private final ImBoolean enableHeightMapRenderer = new ImBoolean(false);
    private final ImBoolean displayGlobalHeightMapImage = new ImBoolean(false);
 
    private final RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
@@ -72,13 +72,13 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    public void setupForHeightMapMessage(ROS2PublishSubscribeAPI ros2)
    {
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, this::acceptHeightMapMessage);
-      activeHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.PUBLISH_HEIGHT_MAP);
+      activeHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
    }
 
    public void setupForImageMessage(ROS2Helper ros2)
    {
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_CROPPED, this::acceptImageMessage);
-      activeHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.PUBLISH_HEIGHT_MAP);
+      activeHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
    }
 
    @Override

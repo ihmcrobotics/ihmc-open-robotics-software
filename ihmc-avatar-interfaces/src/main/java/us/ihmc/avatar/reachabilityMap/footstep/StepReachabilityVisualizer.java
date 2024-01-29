@@ -38,7 +38,7 @@ public class StepReachabilityVisualizer
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
    private final DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-   private final FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
+   private final FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
    private final FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
    private final FootstepPoseHeuristicChecker checker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
    private final StepReachabilityData stepReachabilityData;

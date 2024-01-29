@@ -1,0 +1,28 @@
+#ifndef __behavior_msgs__msg__ActionNodeDefinitionMessage__idl__
+#define __behavior_msgs__msg__ActionNodeDefinitionMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorTreeNodeDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::ActionNodeDefinitionMessage_")
+      struct ActionNodeDefinitionMessage
+      {
+        /**
+         * Parent definition fields
+         */
+        behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
+        /**
+         * Execute with next action
+         */
+        boolean execute_with_next_action;
+      };
+    };
+  };
+};
+
+#endif

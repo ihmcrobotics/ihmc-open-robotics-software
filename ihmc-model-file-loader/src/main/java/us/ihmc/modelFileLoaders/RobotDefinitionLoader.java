@@ -48,10 +48,29 @@ public class RobotDefinitionLoader
                                                JointNameMap<?> jointNameMap,
                                                boolean removeCollisionMeshes)
    {
+      return loadURDFModel(stream,
+                           resourceDirectories,
+                           classLoader,
+                           modelName,
+                           contactPointDefinitionHolder,
+                           jointNameMap,
+                           removeCollisionMeshes,
+                           URDFTools.DEFAULT_URDF_PARSER_PROPERTIES);
+   }
+
+   public static RobotDefinition loadURDFModel(InputStream stream,
+                                               Collection<String> resourceDirectories,
+                                               ClassLoader classLoader,
+                                               String modelName,
+                                               ContactPointDefinitionHolder contactPointDefinitionHolder,
+                                               JointNameMap<?> jointNameMap,
+                                               boolean removeCollisionMeshes,
+                                               URDFTools.URDFParserProperties urdfParserProperties)
+   {
       try
       {
          URDFModel urdfRoot = URDFTools.loadURDFModel(stream, resourceDirectories, classLoader);
-         RobotDefinition robotDefinition = URDFTools.toRobotDefinition(urdfRoot);
+         RobotDefinition robotDefinition = URDFTools.toRobotDefinition(urdfRoot, urdfParserProperties);
          // By default SDFTools names the root body "rootBody", for backward compatibility it is renamed "elevator".
          robotDefinition.getRootBodyDefinition().setName(DEFAULT_ROOT_BODY_NAME);
 

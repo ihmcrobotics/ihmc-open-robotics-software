@@ -23,7 +23,7 @@ public class RDXArUcoMarkerNode extends RDXDetectableSceneNode
                                                            5.0,
                                                            arUcoMarkerNode::getBreakFrequency,
                                                            arUcoMarkerNode::setBreakFrequency,
-                                                           arUcoMarkerNode::freezeFromModification);
+                                                           arUcoMarkerNode::freeze);
       alphaFilterValueSlider.setWidgetWidth(100.0f);
    }
 
@@ -33,6 +33,6 @@ public class RDXArUcoMarkerNode extends RDXDetectableSceneNode
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
       ImGui.text("Marker ID: %d   Size: %.2f m".formatted(arUcoMarkerNode.getMarkerID(), arUcoMarkerNode.getMarkerSize()));
       ImGui.sameLine();
-      alphaFilterValueSlider.render();
+      alphaFilterValueSlider.renderImGuiWidget();
    }
 }

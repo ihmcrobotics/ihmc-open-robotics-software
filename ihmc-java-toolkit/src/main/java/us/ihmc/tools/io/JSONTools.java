@@ -12,6 +12,24 @@ import java.util.function.Consumer;
 public class JSONTools
 {
    /**
+    * {@link #toJSON(ObjectNode, RigidBodyTransformReadOnly)} but embedded in a named object.
+    */
+   public static void toJSON(ObjectNode jsonNode, String name, RigidBodyTransformReadOnly rigidBodyTransform)
+   {
+      ObjectNode transformObject = jsonNode.putObject(name);
+      toJSON(transformObject, rigidBodyTransform);
+   }
+
+   /**
+    * {@link #toEuclid(JsonNode, RigidBodyTransformBasics)} but embedded in a named object.
+    */
+   public static void toEuclid(JsonNode jsonNode, String name, RigidBodyTransformBasics rigidBodyTransform)
+   {
+      ObjectNode transformObject = (ObjectNode) jsonNode.get(name);
+      toEuclid(transformObject, rigidBodyTransform);
+   }
+   
+   /**
     * When saving we reduce the precision of the numbers so that infintesimal changes
     * do not show up as changes to the actions. We choose half a millimeter as the smallest
     * increment of translation you might care about and 1/50th of a degree for orientations.

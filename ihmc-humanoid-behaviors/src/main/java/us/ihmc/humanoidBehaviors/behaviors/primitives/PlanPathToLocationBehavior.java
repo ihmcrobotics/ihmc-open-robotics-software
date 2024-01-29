@@ -184,7 +184,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             request.setAssumeFlatGround(assumeFlatGround);
             if (planarRegions.get() != null && !assumeFlatGround)
             {
-               request.getPlanarRegionsListMessage().set(planarRegions.get());
+               // TODO replace with heightt map
             }
             else if (assumeFlatGround)
             {

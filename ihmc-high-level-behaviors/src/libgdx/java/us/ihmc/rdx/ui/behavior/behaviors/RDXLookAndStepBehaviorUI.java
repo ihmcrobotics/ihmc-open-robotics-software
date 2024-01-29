@@ -15,7 +15,7 @@ import std_msgs.msg.dds.Bool;
 import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonMessage;
 import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonsMessage;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -245,6 +245,8 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       }
       ImGui.sameLine();
 
+      ImGui.text("Goal Planning");
+      ImGui.sameLine();
       goalAffordance.renderPlaceGoalButton();
       ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
       ImGui.checkbox(labels.get("Show height map"), showHeightMap);
@@ -280,8 +282,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       stopForImpassibilities.renderImGuiWidget();
       impassibilityDetectedPlot.setNextValue(impassibilityDetected.getLatest().getData() ? 1.0f : 0.0f);
       impassibilityDetectedPlot.calculate(impassibilityDetected.getLatest().getData() ? "OBSTRUCTED" : "ALL CLEAR");
-
-      ImGui.text(ReferenceBasedIdealStepCalculator.statusMessage);
 
       referenceAlpha.renderImGuiWidget();
 
@@ -346,7 +346,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      boolean wasTickedRecently = wasTickedRecently(0.5);
+      boolean wasTickedRecently = getState().getIsActive();
       boolean currentStateIsNotEmpty = !currentState.isEmpty();
       boolean isInResetState = currentState.equals(LookAndStepBehavior.State.RESET.name());
       boolean isPlacingGoal = goalAffordance.isPlacingGoal();
@@ -416,7 +416,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       return "Look and Step";
    }
 
-   @Override
    public String getName()
    {
       return "Look and Step";
