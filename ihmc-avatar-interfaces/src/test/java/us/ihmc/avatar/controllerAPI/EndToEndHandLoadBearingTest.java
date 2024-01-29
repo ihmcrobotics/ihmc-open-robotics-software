@@ -4,6 +4,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.List;
 
+import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
    @Test
    public void testUsingHand() throws SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       TestingEnvironment testingEnvironment = new TestingEnvironment();
@@ -73,61 +75,58 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       ReferenceFrame chestFrame = referenceFrames.getChestFrame();
 
       // Position hand above table
-//      Quaternion chestOrientation = new Quaternion();
-//      chestOrientation.appendPitchRotation(Math.PI / 4.0);
-//      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(1.0, chestOrientation, worldFrame, pelvisZUpFrame);
-//      simulationTestHelper.publishToController(chestTrajectoryMessage);
-//      success = simulationTestHelper.simulateNow(1.5);
-//      assertTrue(success);
-//
-//      Quaternion handOrientation = new Quaternion();
-//      handOrientation.appendYawRotation(-Math.PI / 2.0);
-//      handOrientation.appendPitchRotation(Math.PI / 2.0);
-//
-//      HandTrajectoryMessage handTrajectoryMessage1 = new HandTrajectoryMessage();
-//      handTrajectoryMessage1.setRobotSide(RobotSide.LEFT.toByte());
-//      SE3TrajectoryMessage se3Trajectory1 = handTrajectoryMessage1.getSe3Trajectory();
-//      se3Trajectory1.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
-//      se3Trajectory1.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
-//      se3Trajectory1.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D()));
-//      simulationTestHelper.publishToController(handTrajectoryMessage1);
-//      success = simulationTestHelper.simulateNow(2.0);
-//      assertTrue(success);
-//
-//      HandTrajectoryMessage handTrajectoryMessage2 = new HandTrajectoryMessage();
-//      handTrajectoryMessage2.setRobotSide(RobotSide.LEFT.toByte());
-//      SE3TrajectoryMessage se3Trajectory2 = handTrajectoryMessage2.getSe3Trajectory();
-//      se3Trajectory2.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
-//      se3Trajectory2.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
-//      se3Trajectory2.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.55), handOrientation, new Vector3D(), new Vector3D()));
-//      simulationTestHelper.publishToController(handTrajectoryMessage2);
-//      success = simulationTestHelper.simulateNow(1.5);
-//      assertTrue(success);
-//
-//      HandLoadBearingMessage loadBearingMessage = HumanoidMessageTools.createHandLoadBearingMessage(RobotSide.LEFT);
-//      loadBearingMessage.getLoadBearingMessage().setLoad(true);
-//      loadBearingMessage.getLoadBearingMessage().setCoefficientOfFriction(0.8);
-//      loadBearingMessage.getLoadBearingMessage().getContactPoseInBodyFrame().getPosition().set(0.0, 0.09, 0.0);
-//
-//      FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
-//      contactNormal.changeFrame(simulationTestHelper.getControllerFullRobotModel().getHand(RobotSide.LEFT).getBodyFixedFrame());
-//      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, contactNormal, loadBearingMessage.getLoadBearingMessage().getContactPoseInBodyFrame().getRotation());
-//
-//      simulationTestHelper.publishToController(loadBearingMessage);
-//      success = simulationTestHelper.simulateNow(1.0);
-//      assertTrue(success);
-//
-//      // Now push the robot
-//      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
-//      double percentWeight = 0.1;
-//      double magnitude = percentWeight * totalMass * 9.81;
-//      double duration = 2.0;
-//      pushRobotController.applyForce(forceDirection, magnitude, duration);
-//
-//      success = simulationTestHelper.simulateNow(3.0);
-//      assertTrue(success);
-//
-//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      Quaternion chestOrientation = new Quaternion();
+      chestOrientation.appendPitchRotation(Math.PI / 4.0);
+      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(1.0, chestOrientation, worldFrame, pelvisZUpFrame);
+      simulationTestHelper.publishToController(chestTrajectoryMessage);
+      success = simulationTestHelper.simulateNow(1.5);
+      assertTrue(success);
+
+      Quaternion handOrientation = new Quaternion();
+      handOrientation.appendYawRotation(-Math.PI / 2.0);
+      handOrientation.appendPitchRotation(Math.PI / 2.0);
+
+      HandTrajectoryMessage handTrajectoryMessage1 = new HandTrajectoryMessage();
+      handTrajectoryMessage1.setRobotSide(RobotSide.LEFT.toByte());
+      SE3TrajectoryMessage se3Trajectory1 = handTrajectoryMessage1.getSe3Trajectory();
+      se3Trajectory1.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
+      se3Trajectory1.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
+      se3Trajectory1.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D()));
+      simulationTestHelper.publishToController(handTrajectoryMessage1);
+      success = simulationTestHelper.simulateNow(2.0);
+      assertTrue(success);
+
+      HandTrajectoryMessage handTrajectoryMessage2 = new HandTrajectoryMessage();
+      handTrajectoryMessage2.setRobotSide(RobotSide.LEFT.toByte());
+      SE3TrajectoryMessage se3Trajectory2 = handTrajectoryMessage2.getSe3Trajectory();
+      se3Trajectory2.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
+      se3Trajectory2.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
+      se3Trajectory2.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.5), handOrientation, new Vector3D(), new Vector3D()));
+      simulationTestHelper.publishToController(handTrajectoryMessage2);
+      success = simulationTestHelper.simulateNow(1.5);
+      assertTrue(success);
+
+      HandLoadBearingMessage loadBearingMessage = HumanoidMessageTools.createHandLoadBearingMessage(RobotSide.LEFT);
+      loadBearingMessage.setLoad(true);
+      loadBearingMessage.setCoefficientOfFriction(0.8);
+      loadBearingMessage.getContactPointInBodyFrame().set(0.0, 0.09, 0.0);
+      loadBearingMessage.getContactNormalInWorld().set(0.0, 0.0, 1.0);
+
+      simulationTestHelper.publishToController(loadBearingMessage);
+      success = simulationTestHelper.simulateNow(1.0);
+      assertTrue(success);
+
+      // Now push the robot
+      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
+      double percentWeight = 0.1;
+      double magnitude = percentWeight * totalMass * 9.81;
+      double duration = 2.0;
+      pushRobotController.applyForce(forceDirection, magnitude, duration);
+
+      success = simulationTestHelper.simulateNow(3.0);
+      assertTrue(success);
+
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public class TestingEnvironment implements CommonAvatarEnvironmentInterface

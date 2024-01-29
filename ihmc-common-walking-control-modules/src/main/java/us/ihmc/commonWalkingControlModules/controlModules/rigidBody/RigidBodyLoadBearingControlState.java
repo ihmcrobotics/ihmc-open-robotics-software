@@ -340,7 +340,20 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    @Override
    public void onEntry()
    {
+      // Set to barely loaded during first tick
       bodyBarelyLoaded.set(true);
+
+      // Reset trajectory time
+      trajectoryDone.set(false);
+      setTrajectoryStartTimeToCurrentTime();
+
+      // Reset joint trajectory
+      jointControlHelper.overrideTrajectory();
+      jointControlHelper.startTrajectoryExecution();
+      jointControlHelper.queueInitialPointsAtCurrent();
+
+      // Reset orientation trajectory
+      orientationControlHelper.holdCurrent();
    }
 
    @Override
