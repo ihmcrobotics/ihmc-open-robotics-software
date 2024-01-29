@@ -36,7 +36,7 @@ public class InertiaVisualizationToolsTest
       RigidBody body = new RigidBody(bodyName, joint, 0.5, 0.4, 0.3, 0.2, centerOfMassOffset);
 
       ArrayList<YoInertiaEllipsoid> inertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(body, registry);
-      YoGraphicDefinition ellipsoidGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(rootBody, inertiaEllipsoids);
+      YoGraphicDefinition ellipsoidGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(inertiaEllipsoids);
 
       //      assertEquals(inertiaEllipsoids.get(0).getRadii().getX(),rootBody.getInertia().getMomentOfInertia().get)
    }
