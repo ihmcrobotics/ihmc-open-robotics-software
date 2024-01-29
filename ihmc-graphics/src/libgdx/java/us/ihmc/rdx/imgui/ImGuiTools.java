@@ -355,6 +355,31 @@ public class ImGuiTools
       return isHovered;
    }
 
+   public static void separatorText(String text)
+   {
+      float cursorScreenPosX = ImGui.getCursorScreenPosX();
+      float cursorScreenPosY = ImGui.getCursorScreenPosY();
+      int fontSize = ImGui.getFontSize();
+      float itemSpacingX = ImGui.getStyle().getItemSpacingX();
+      float lineThickness = fontSize * 0.2f;
+      float lineY = ImGui.getTextLineHeight() / 2.0f;
+      float initialLineWidth = fontSize * 1.5f;
+      int separatorColor = ImGui.getColorU32(ImGuiCol.Separator);
+      ImGui.getWindowDrawList().addLine(cursorScreenPosX, cursorScreenPosY + lineY,
+                                        cursorScreenPosX + initialLineWidth, cursorScreenPosY + lineY,
+                                        separatorColor, lineThickness);
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + initialLineWidth + itemSpacingX);
+      ImGui.text(text);
+      ImGui.sameLine();
+      float startX = ImGui.getCursorPosX() - itemSpacingX;
+      float endX = ImGui.getContentRegionMaxX();
+      float secondLineWidth = endX - startX;
+      ImGui.getWindowDrawList().addLine(cursorScreenPosX + startX, cursorScreenPosY + lineY,
+                                        cursorScreenPosX + endX, cursorScreenPosY + lineY,
+                                        separatorColor, lineThickness);
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + secondLineWidth);
+   }
+
    public static float calcTextSizeX(String text)
    {
       ImGui.calcTextSize(calcTextSize, text);

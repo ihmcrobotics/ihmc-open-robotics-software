@@ -177,7 +177,7 @@ public class RDXBehaviorTree
 
          if (rootNode != null) // It can become null above
          {
-            ImGui.separator();
+            ImGuiTools.separatorText("Node Settings");
             renderSelectedNodeSettingsWidgets(rootNode);
          }
       }
