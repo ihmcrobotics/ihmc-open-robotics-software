@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.MatrixMissingTools;
 
 import java.util.Set;
@@ -234,5 +236,62 @@ public class RegressorTools
       int[] partitionSizes = sizePartitions(basisSets);
 
       return new DMatrixRMaj[] {new DMatrixRMaj(partitionSizes[0], 1), new DMatrixRMaj(partitionSizes[1], 1)};
+   }
+
+   /**
+    * TODO: there should be as many basisSets as bodies
+    * @param basisSets
+    * @param vector
+    * @param bodies
+    */
+   public static void packRigidBodies(Set<SpatialInertiaBasisOption>[] basisSets, DMatrix vector, RigidBodyBasics[] bodies)
+   {
+      int vectorIndex = 0;
+      for (int i = 0; i < basisSets.length; ++i)
+      {
+         for (SpatialInertiaBasisOption option : SpatialInertiaBasisOption.values)
+         {
+            if (basisSets[i].contains(option))
+            {
+               switch(option)
+               {
+                  case M:
+                     bodies[i].getInertia().setMass(vector.get(vectorIndex, 0));
+                     break;
+                  case MCOM_X:
+                     bodies[i].getInertia().getCenterOfMassOffset().setX(vector.get(vectorIndex, 0));
+                     break;
+                  case MCOM_Y:
+                     bodies[i].getInertia().getCenterOfMassOffset().setY(vector.get(vectorIndex, 0));
+                     break;
+                  case MCOM_Z:
+                     bodies[i].getInertia().getCenterOfMassOffset().setZ(vector.get(vectorIndex, 0));
+                     break;
+                  case I_XX:
+                     bodies[i].getInertia().getMomentOfInertia().setM00(vector.get(vectorIndex, 0));
+                     break;
+                  case I_XY:
+                     bodies[i].getInertia().getMomentOfInertia().setM01(vector.get(vectorIndex, 0));
+                     bodies[i].getInertia().getMomentOfInertia().setM10(vector.get(vectorIndex, 0));
+                     break;
+                  case I_XZ:
+                     bodies[i].getInertia().getMomentOfInertia().setM02(vector.get(vectorIndex, 0));
+                     bodies[i].getInertia().getMomentOfInertia().setM20(vector.get(vectorIndex, 0));
+                     break;
+                  case I_YY:
+                     bodies[i].getInertia().getMomentOfInertia().setM11(vector.get(vectorIndex, 0));
+                     break;
+                  case I_YZ:
+                     bodies[i].getInertia().getMomentOfInertia().setM12(vector.get(vectorIndex, 0));
+                     bodies[i].getInertia().getMomentOfInertia().setM21(vector.get(vectorIndex, 0));
+                     break;
+                  case I_ZZ:
+                     bodies[i].getInertia().getMomentOfInertia().setM22(vector.get(vectorIndex, 0));
+                     break;
+               }
+               vectorIndex += 1;
+            }
+         }
+      }
    }
 }
