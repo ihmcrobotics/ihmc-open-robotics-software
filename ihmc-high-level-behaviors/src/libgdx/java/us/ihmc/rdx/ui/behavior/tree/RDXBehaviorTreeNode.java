@@ -7,6 +7,7 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
+import imgui.flag.ImGuiSelectableFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.behaviors.behaviorTree.*;
@@ -33,6 +34,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private transient RDXBehaviorTreeNode<?, ?> parent;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImBoolean selected = new ImBoolean();
    private ImStringWrapper descriptionWrapper;
    private boolean treeWidgetExpanded = false;
    private boolean isDescriptionBeingEdited = false;
@@ -91,6 +93,34 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public void process3DViewInput(ImGui3DViewInput input)
    {
 
+   }
+
+   ImVec2 rowMin = new ImVec2();
+   ImVec2 rowMax = new ImVec2();
+
+   public void renderSelectable()
+   {
+
+      ImGui.getCursorScreenPos(rowMin);
+      rowMax.set(rowMin.x + ImGui.getContentRegionAvailX(), rowMin.y + ImGui.getTextLineHeightWithSpacing());
+
+//      float cursorXDesktopFrame = ImGui.getWindowPosX() + ImGui.getCursorPosX() - ImGui.getScrollX();
+//      float cursorYDesktopFrame = ImGui.getWindowPosY() + ImGui.getCursorPosY() - ImGui.getScrollY();
+
+      if (ImGui.isMouseHoveringRect(rowMin.x, rowMin.y, rowMax.x, rowMax.y))
+      {
+         ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.FrameBgHovered));
+
+      }
+
+//      int selectableFlags = ImGuiSelectableFlags.None;
+//      selectableFlags |= ImGuiSelectableFlags.AllowDoubleClick;
+//      selectableFlags |= ImGuiSelectableFlags.SpanAllColumns;
+//      if (ImGui.selectable(labels.getHidden("Selectable"), selected, selectableFlags))
+//      {
+//         LogTools.info("Clicked {}:{}", getDefinition().getDescription(), getState().getID());
+//      }
+//      ImGui.sameLine();
    }
 
    public void renderTreeViewIconArea()
@@ -197,6 +227,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    {
       LogTools.info("Destroying node: {}:{}", getState().getDefinition().getDescription(), getState().getID());
       getState().destroy();
+   }
+
+   public boolean getSelected()
+   {
+      return selected.get();
    }
 
    public ImStringWrapper getDescriptionWrapper()

@@ -29,8 +29,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
    public void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> node)
    {
-      ImGui.selectable("Selectable");
-      ImGui.sameLine();
+      node.renderSelectable();
 
       if (expandCollapseRenderer.render(node.getTreeWidgetExpanded()))
       {
