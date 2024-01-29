@@ -6,7 +6,8 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueu
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.imgui.*;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 
@@ -30,6 +31,9 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
    {
       node.renderGeneralRowBeginWidgets();
       node.renderTreeViewIconArea();
+
+      if (node.getParent() != null)
+         node.getParent().getChildrenDescriptionAligner().align();
       node.renderNodeDescription();
 
       if (ImGui.beginPopup(node.getNodePopupID()))

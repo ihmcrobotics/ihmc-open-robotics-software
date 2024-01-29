@@ -15,6 +15,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.ImGuiVerticalAligner;
 import us.ihmc.rdx.imgui.ImStringWrapper;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -50,6 +51,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private final String nodePopupID = labels.get("Node popup");
    private String modalPopupID = labels.get("Create node");
    private boolean nodeContextMenuShowing = false;
+   private final ImGuiVerticalAligner childrenDescriptionAligner = new ImGuiVerticalAligner();
 
    /** For extending types. */
    public RDXBehaviorTreeNode(S state)
@@ -275,6 +277,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public boolean getTreeWidgetExpanded()
    {
       return treeWidgetExpanded;
+   }
+
+   public ImGuiVerticalAligner getChildrenDescriptionAligner()
+   {
+      return childrenDescriptionAligner;
    }
 
    public String getNodePopupID()
