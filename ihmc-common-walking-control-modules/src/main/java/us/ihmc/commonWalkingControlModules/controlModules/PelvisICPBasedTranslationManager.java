@@ -178,7 +178,7 @@ public class PelvisICPBasedTranslationManager
          return;
       }
 
-      if (isUpperBodyLoadBearing && multiContactCoMRegionCalculator.getFeasibleCoMRegion().getNumberOfVertices() >= 3)
+      if (isUpperBodyLoadBearing && multiContactCoMRegionCalculator.hasSolvedWholeRegion())
       {
          supportFrame = multiContactCoMRegionCalculator.getFeasibleCoMRegion().getReferenceFrame();
          supportPolygon = multiContactCoMRegionCalculator.getFeasibleCoMRegion();

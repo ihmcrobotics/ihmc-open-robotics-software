@@ -6,7 +6,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.robotics.screwTheory.MassMatrixCalculator;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
@@ -22,6 +25,9 @@ import java.awt.*;
 
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.MAX_CONTACT_POINTS;
 
+/**
+ * Helper class for using {@link CenterOfMassStabilityMarginOptimizationModule} to update and manage a multi-contact stability region.
+ */
 public class CenterOfMassStaticStabilityRegionCalculator implements SCS2YoGraphicHolder
 {
    private static final int DEFAULT_DIRECTIONS_TO_OPTIMIZE = 18;

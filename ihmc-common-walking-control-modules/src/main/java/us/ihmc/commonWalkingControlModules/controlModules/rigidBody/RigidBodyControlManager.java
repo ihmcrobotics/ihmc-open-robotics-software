@@ -85,6 +85,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   PID3DGainsReadOnly taskspaceOrientationGains,
                                   PID3DGainsReadOnly taskspacePositionGains,
                                   ContactablePlaneBody contactableBody,
+                                  LoadBearingParameters loadBearingParameters,
                                   RigidBodyControlMode defaultControlMode,
                                   boolean enableFunctionGenerators,
                                   YoDouble yoTime,
@@ -185,6 +186,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                         yoTime,
                                                                         jointControlHelper,
                                                                         taskspaceControlState.getOrientationControlHelper(),
+                                                                        loadBearingParameters,
                                                                         graphicsListRegistry,
                                                                         registry);
       }
@@ -524,8 +526,31 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " cannot go to load bearing.");
          return;
       }
+      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
+      {
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " is already load bearing. Changing contact point must be done first be exiting state.");
+         return;
+      }
 
-      loadBearingControlState.load(coefficientOfFriction, contactPointInBodyFrame, contactNormalInWorldFrame);
+      boolean jointspaceControlActive;
+      boolean orientationControlActive;
+
+      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.JOINTSPACE)
+      {
+         jointspaceControlActive = true;
+         orientationControlActive = false;
+      }
+      else if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.TASKSPACE)
+      {
+         jointspaceControlActive = taskspaceControlState.isHybridModeActive();
+         orientationControlActive = taskspaceControlState.getOrientationControlHelper() != null;
+      }
+      else
+      { // Transition from user mode not supported
+         return;
+      }
+
+      loadBearingControlState.load(coefficientOfFriction, contactPointInBodyFrame, contactNormalInWorldFrame, jointspaceControlActive, orientationControlActive);
       requestState(loadBearingControlState.getControlMode());
    }
 

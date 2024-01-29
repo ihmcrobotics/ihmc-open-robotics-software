@@ -12,7 +12,10 @@ import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactSta
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -31,11 +34,9 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandCon
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
-import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.*;
+import us.ihmc.robotics.controllers.pidGains.GainCalculator;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -49,7 +50,6 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
  * A load bearing state for a rigid body. This is currently for using the hands
@@ -59,17 +59,10 @@ import us.ihmc.yoVariables.variable.YoEnum;
 public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final int dofs = Twist.SIZE;
-
-   private final FramePoint3D tempPoint = new FramePoint3D();
-   private final FrameVector3D tempVector = new FrameVector3D();
-
-   private final RigidBodyBasics bodyToControl;
-   private final LoadBearingParameters loadBearingParameters;
-   private final SelectionMatrix3D positionFeedbackSelectionMatrix = new SelectionMatrix3D();
-   private final SelectionMatrix6D spatialAccelerationSelectionMatrix = new SelectionMatrix6D();
+   private static final FrameVector3D zeroWorld = new FrameVector3D();
 
    /* Controller Commands */
+   private final RigidBodyBasics bodyToControl;
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
    private final PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
@@ -77,29 +70,34 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final PlaneContactStateCommand planeContactStateCommand = new PlaneContactStateCommand();
 
    /* Control gains, weights and axis selection */
-   private final YoBoolean[] isLinearAxisFeedbackControlled = new YoBoolean[3];
-   private final PID3DGainsReadOnly holdHandPositionGains;
-   private final Vector3DReadOnly handLoadedLinearWeight = new Vector3D(5.0, 5.0, 5.0);
+   private final LoadBearingParameters loadBearingParameters;
+   private final Vector3DReadOnly linearWeight = new Vector3D(5.0, 5.0, 5.0);
+   private final SelectionMatrix3D positionFeedbackSelectionMatrix = new SelectionMatrix3D();
+   private final SelectionMatrix6D spatialAccelerationSelectionMatrix = new SelectionMatrix6D();
 
    /* Hand load status */
-   private final YoBoolean bodyBarelyLoaded;
+   private final GlitchFilteredYoBoolean bodyBarelyLoaded;
    private ControllerCoreOutputReadOnly controllerCoreOutput;
    private final Wrench controllerDesiredWrench = new Wrench();
    private final FrameVector3D controllerDesiredForce = new FrameVector3D();
    private final YoFrameVector3D yoControllerDesiredForce;
 
+   /* Active control modes */
+   private final YoBoolean jointspaceControlActive;
+   private final YoBoolean orientationControlActive;
+
    /* Reference frames */
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame elevatorFrame;
    private final FramePoint3D contactPointInBody = new FramePoint3D();
-   private final FramePose3D contactControlPoseInWorld = new FramePose3D();
+   private final FramePose3D desiredContactPoseWorld = new FramePose3D();
    private final PoseReferenceFrame contactControlFrame;
 
    /* Yo-Contact frame components */
    private final YoFrameVector3D contactNormal;
    private final YoFramePoint3D currentContactPointInWorld;
-   private final YoFramePoint3D yoContactControlFramePosition;
-   private final YoFrameQuaternion yoContactControlFrameOrientation;
+   private final YoFramePoint3D yoDesiredContactPosition;
+   private final YoFrameQuaternion yoDesiredContactOrientation;
    private final YoFramePoint3D yoContactPointInBodyFrame;
 
    /* Trajectory handlers */
@@ -119,13 +117,18 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
                                            YoDouble yoTime,
                                            RigidBodyJointControlHelper jointControlHelper,
                                            RigidBodyOrientationControlHelper orientationControlHelper,
+                                           LoadBearingParameters loadBearingParameters,
                                            YoGraphicsListRegistry graphicsListRegistry,
                                            YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.LOADBEARING, bodyToControl.getName(), yoTime, parentRegistry);
+
       this.bodyToControl = bodyToControl;
       this.bodyFrame = bodyToControl.getBodyFixedFrame();
       this.elevatorFrame = elevator.getBodyFixedFrame();
+      this.loadBearingParameters = loadBearingParameters;
+
+      LogTools.info("Setting up load bearing state " + bodyToControl.getName());
 
       String bodyName = bodyToControl.getName();
 
@@ -135,16 +138,15 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       spatialAccelerationCommand.set(elevator, bodyToControl);
       yoContactPointInBodyFrame = new YoFramePoint3D("contactPointInBody" + bodyName, bodyFrame, registry);
 
-      // TODO move this up so left/right have same gains
-      this.holdHandPositionGains = getHoldPositionHandControlGains();
-
       coefficientOfFriction = new YoDouble(bodyName + "CoefficientOfFriction", registry);
       contactNormal = new YoFrameVector3D(bodyName + "ContactNormal", worldFrame, parentRegistry);
       currentContactPointInWorld = new YoFramePoint3D(bodyName + "currentContactPoint", worldFrame, registry);
-      yoContactControlFramePosition = new YoFramePoint3D(bodyName + "contactControlFramePosition", worldFrame, registry);
-      yoContactControlFrameOrientation = new YoFrameQuaternion(bodyName + "contactControlFrameOrientation", worldFrame, registry);
+      yoDesiredContactPosition = new YoFramePoint3D(bodyName + "_DesiredContactPosition", worldFrame, registry);
+      yoDesiredContactOrientation = new YoFrameQuaternion(bodyName + "_DesiredContactOrientation", worldFrame, registry);
 
-      bodyBarelyLoaded = new YoBoolean(bodyName + "BarelyLoaded", registry);
+      bodyBarelyLoaded = new GlitchFilteredYoBoolean(bodyName + "BarelyLoaded", registry, 60);
+      jointspaceControlActive = new YoBoolean(bodyName + "JointspaceControlActive", registry);
+      orientationControlActive = new YoBoolean(bodyName + "OrientationControlActive", registry);
       yoControllerDesiredForce = new YoFrameVector3D(bodyName + "DesiredForce", ReferenceFrame.getWorldFrame(), parentRegistry);
 
       positionError = new YoFramePoint3D(bodyName + "PositionError", contactControlFrame, registry);
@@ -152,14 +154,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
       planeContactStateCommand.setContactingRigidBody(bodyToControl);
 
-      this.loadBearingParameters = new LoadBearingParameters(bodyName, registry);
       this.jointControlHelper = jointControlHelper;
       this.orientationControlHelper = orientationControlHelper;
-
-      for (int i = 0; i < 3; i++)
-      {
-         isLinearAxisFeedbackControlled[i] = new YoBoolean("isLinear" + Axis3D.values[i] + "FeedbackControlled", registry);
-      }
 
       setupViz(graphicsListRegistry, bodyName);
    }
@@ -187,9 +183,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       graphicsListRegistry.registerYoGraphic(listName, controllerDesiredForce);
       graphics.add(controllerDesiredForce);
 
-      YoGraphicCoordinateSystem contactControlFrame = new YoGraphicCoordinateSystem(bodyName + "LoadBearingControlFrame",
-                                                                                    yoContactControlFramePosition,
-                                                                                    yoContactControlFrameOrientation,
+      YoGraphicCoordinateSystem contactControlFrame = new YoGraphicCoordinateSystem(bodyName + "LoadBearingControlFrame", yoDesiredContactPosition,
+                                                                                    yoDesiredContactOrientation,
                                                                                     0.17,
                                                                                     YoAppearance.LightGray());
       graphicsListRegistry.registerYoGraphic(listName, contactControlFrame);
@@ -206,7 +201,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       if (controllerCoreOutput.getDesiredExternalWrench(controllerDesiredWrench, bodyToControl))
       { // Determine load status from controller core desired, assume it tracks
          double desiredForceLoadMagnitudeSquared = controllerDesiredWrench.getLinearPart().normSquared();
-         bodyBarelyLoaded.set(desiredForceLoadMagnitudeSquared < MathTools.square(loadBearingParameters.getNormalForceThresholdForLoaded()));
+         bodyBarelyLoaded.update(desiredForceLoadMagnitudeSquared < MathTools.square(loadBearingParameters.getNormalForceThresholdForLoaded()));
 
          controllerDesiredForce.setIncludingFrame(controllerDesiredWrench.getReferenceFrame(), controllerDesiredWrench.getLinearPart());
          controllerDesiredForce.changeFrame(ReferenceFrame.getWorldFrame());
@@ -224,50 +219,58 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       planeContactStateCommand.addPointInContact(getYoContactPointInBodyFrame());
       planeContactStateCommand.setHasContactStateChanged(false);
 
-      positionError.setMatchingFrame(yoContactControlFramePosition);
-      orientationError.setMatchingFrame(yoContactControlFrameOrientation);
-
-      // assemble spatial feedback command
-      pointFeedbackControlCommand.setBodyFixedPointToControl(contactPointInBody);
-      pointFeedbackControlCommand.setGainsFrame(contactControlFrame);
-
-      tempVector.setToZero(ReferenceFrame.getWorldFrame());
-      pointFeedbackControlCommand.setInverseDynamics(contactControlPoseInWorld.getPosition(), tempVector, tempVector);
-      pointFeedbackControlCommand.setWeightsForSolver(handLoadedLinearWeight);
-      pointFeedbackControlCommand.setGains(holdHandPositionGains);
-
       // assemble zero acceleration command
       bodyAcceleration.setToZero(contactControlFrame, elevatorFrame, contactControlFrame);
       bodyAcceleration.setBodyFrame(bodyFrame);
       spatialAccelerationCommand.setSpatialAcceleration(contactControlFrame, bodyAcceleration);
+      spatialAccelerationSelectionMatrix.getAngularPart().clearSelection();
+      spatialAccelerationSelectionMatrix.getLinearPart().selectAxis(Axis3D.X.ordinal(), !bodyBarelyLoaded.getValue());
+      spatialAccelerationSelectionMatrix.getLinearPart().selectAxis(Axis3D.Y.ordinal(), !bodyBarelyLoaded.getValue());
+      spatialAccelerationSelectionMatrix.getLinearPart().selectAxis(Axis3D.Z.ordinal(), true);
+      spatialAccelerationCommand.setSelectionMatrix(spatialAccelerationSelectionMatrix);
+      spatialAccelerationCommand.getWeightMatrix().getLinearPart().setWeights(linearWeight);
 
-      // set axis control strategies
-      isLinearAxisFeedbackControlled[0].set(bodyBarelyLoaded.getValue());
-      isLinearAxisFeedbackControlled[1].set(bodyBarelyLoaded.getValue());
-      isLinearAxisFeedbackControlled[2].set(false);
+      positionError.setMatchingFrame(yoDesiredContactPosition);
+      orientationError.setMatchingFrame(yoDesiredContactOrientation);
 
-      // Selection matrices
-      for (int axisIdx = 0; axisIdx < 3; axisIdx++)
+      // assemble spatial feedback command
+      if (bodyBarelyLoaded.getValue())
       {
-         positionFeedbackSelectionMatrix.selectAxis(axisIdx, loadBearingParameters.isLinearAxisEnabled(axisIdx) && isLinearAxisFeedbackControlled[axisIdx].getValue());
-         spatialAccelerationSelectionMatrix.getLinearPart().selectAxis(axisIdx, loadBearingParameters.isLinearAxisEnabled(axisIdx) && !isLinearAxisFeedbackControlled[axisIdx].getValue());
-         spatialAccelerationSelectionMatrix.getAngularPart().selectAxis(axisIdx, false);
+         pointFeedbackControlCommand.setBodyFixedPointToControl(contactPointInBody);
+         pointFeedbackControlCommand.setGainsFrame(contactControlFrame);
+         pointFeedbackControlCommand.setInverseDynamics(desiredContactPoseWorld.getPosition(), zeroWorld, zeroWorld);
+         pointFeedbackControlCommand.setWeightsForSolver(linearWeight);
+
+         double kp = loadBearingParameters.getHoldPositionStiffness();
+         double zeta = loadBearingParameters.getHoldPositionDampingRatio();
+         double kd = GainCalculator.computeDerivativeGain(kp, zeta);
+         pointFeedbackControlCommand.getGains().setProportialAndDerivativeGains(kp, kd);
+
+         positionFeedbackSelectionMatrix.selectAxis(Axis3D.X.ordinal(), true);
+         positionFeedbackSelectionMatrix.selectAxis(Axis3D.Y.ordinal(), true);
+         positionFeedbackSelectionMatrix.selectAxis(Axis3D.Z.ordinal(), false);
+         pointFeedbackControlCommand.setSelectionMatrix(positionFeedbackSelectionMatrix);
       }
 
-      pointFeedbackControlCommand.setSelectionMatrix(positionFeedbackSelectionMatrix);
-      spatialAccelerationCommand.setSelectionMatrix(spatialAccelerationSelectionMatrix);
-
+      // update jointspace and orientation trajectories if active
       double timeInTrajectory = getTimeInTrajectory();
-
-      // TODO
-      jointControlHelper.doAction(timeInTrajectory);
-//      orientationControlHelper.doAction(timeInTrajectory);
-      spatialAccelerationCommand.getWeightMatrix().getLinearPart().setWeights(handLoadedLinearWeight);
+      if (jointspaceControlActive.getValue())
+      {
+         jointControlHelper.doAction(timeInTrajectory);
+      }
+      if (orientationControlActive.getValue())
+      {
+         orientationControlHelper.doAction(timeInTrajectory);
+      }
 
       updateGraphics();
    }
 
-   public void load(double coefficientOfFriction, Point3D contactPointInBodyFrame, Vector3D contactNormalInWorldFrame)
+   public void load(double coefficientOfFriction,
+                    Point3D contactPointInBodyFrame,
+                    Vector3D contactNormalInWorldFrame,
+                    boolean jointspaceControlActive,
+                    boolean orientationControlActive)
    {
       this.coefficientOfFriction.set(coefficientOfFriction);
 
@@ -275,16 +278,20 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       this.contactPointInBody.setIncludingFrame(bodyFrame, contactPointInBodyFrame);
       this.contactNormal.set(contactNormalInWorldFrame);
 
-      // Compute contact control frame, which  is static in world, has an origin at the contact point and has Z pointing parallel to the contact normal
-      contactControlPoseInWorld.setReferenceFrame(ReferenceFrame.getWorldFrame());
-      contactControlPoseInWorld.getPosition().setMatchingFrame(this.contactPointInBody);
-      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, contactNormalInWorldFrame, contactControlPoseInWorld.getOrientation());
-      contactControlFrame.setPoseAndUpdate(contactControlPoseInWorld);
+      // Compute desired contact pose, which is static in world, has an origin at the contact point and has Z pointing parallel to the contact normal
+      desiredContactPoseWorld.setReferenceFrame(ReferenceFrame.getWorldFrame());
+      desiredContactPoseWorld.getPosition().setMatchingFrame(this.contactPointInBody);
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, contactNormalInWorldFrame, desiredContactPoseWorld.getOrientation());
+      contactControlFrame.setPoseAndUpdate(desiredContactPoseWorld);
 
       // Update yovariables
-      yoContactControlFramePosition.setMatchingFrame(contactControlPoseInWorld.getPosition());
-      yoContactControlFrameOrientation.setMatchingFrame(contactControlPoseInWorld.getOrientation());
+      yoDesiredContactPosition.setMatchingFrame(desiredContactPoseWorld.getPosition());
+      yoDesiredContactOrientation.setMatchingFrame(desiredContactPoseWorld.getOrientation());
       this.yoContactPointInBodyFrame.set(contactPointInBodyFrame);
+
+      // Update active control modes
+      this.jointspaceControlActive.set(jointspaceControlActive);
+      this.orientationControlActive.set(orientationControlActive);
    }
 
    public boolean handleJointTrajectoryCommand(JointspaceTrajectoryCommand jointspaceCommand, double[] initialJointPositions)
@@ -330,26 +337,10 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       return true;
    }
 
-   public ParameterizedPID3DGains getHoldPositionHandControlGains()
-   {
-      GainCoupling gainCoupling = GainCoupling.XY;
-      double kpXYZ = 150.0;
-      double zetaXYZ = 0.7;
-      double maxAcceleration = 8.0;
-      double maxJerk = 100.0;
-
-      DefaultPID3DGains holdPositionGains = new DefaultPID3DGains();
-      holdPositionGains.setProportionalGains(kpXYZ);
-      holdPositionGains.setDampingRatios(zetaXYZ);
-      holdPositionGains.setMaxFeedbackAndFeedbackRate(maxAcceleration, maxJerk);
-
-      return new ParameterizedPID3DGains("Hold" + bodyToControl.getName(), new PID3DConfiguration(gainCoupling, false, holdPositionGains), registry);
-   }
-
    @Override
    public void onEntry()
    {
-
+      bodyBarelyLoaded.set(true);
    }
 
    @Override
@@ -357,8 +348,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    {
       hideGraphics();
 
-      yoContactControlFramePosition.setToNaN();
-      yoContactControlFrameOrientation.setToNaN();
+      yoDesiredContactPosition.setToNaN();
+      yoDesiredContactOrientation.setToNaN();
       currentContactPointInWorld.setToNaN();
 
       // from RigidBodyJointspaceControlState.holdCurrent
@@ -380,24 +371,31 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       feedbackControlCommandList.clear();
-      feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
-      feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
-      return feedbackControlCommandList;
 
-      //      if (controlMode.getValue() == LoadBearingControlMode.JOINTSPACE)
-      //      else
-      //         feedbackControlCommandList.addCommand(orientationControlHelper.getFeedbackControlCommand());
+      if (bodyBarelyLoaded.getValue())
+      {
+         feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
+      }
+      if (jointspaceControlActive.getValue())
+      {
+         feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
+      }
+      if (orientationControlActive.getValue())
+      {
+         feedbackControlCommandList.addCommand(orientationControlHelper.getFeedbackControlCommand());
+      }
+
+      return feedbackControlCommandList;
    }
 
    @Override
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
    {
       feedbackControlCommandList.clear();
-      feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
       feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
+      feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
+      feedbackControlCommandList.addCommand(orientationControlHelper.getFeedbackControlCommand());
       return feedbackControlCommandList;
-
-      //      feedbackControlCommandList.addCommand(orientationControlHelper.getFeedbackControlCommand());
    }
 
    @Override
@@ -448,9 +446,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
                                                                     yoControllerDesiredForce,
                                                                     0.01,
                                                                     ColorDefinitions.Red()));
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D(bodyToControl.getName() + "ContactControlFrame",
-                                                                               yoContactControlFramePosition,
-                                                                               yoContactControlFrameOrientation,
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D(bodyToControl.getName() + "ContactControlFrame", yoDesiredContactPosition,
+                                                                               yoDesiredContactOrientation,
                                                                                0.13,
                                                                                ColorDefinitions.LightGray()));
       return group;
