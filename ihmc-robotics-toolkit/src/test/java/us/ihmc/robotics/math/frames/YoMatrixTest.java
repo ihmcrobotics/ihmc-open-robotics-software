@@ -23,8 +23,8 @@ public class YoMatrixTest
       int maxNumberOfColumns = 8;
       YoRegistry registry = new YoRegistry("testRegistry");
       YoMatrix yoMatrix = new YoMatrix("testMatrix", maxNumberOfRows, maxNumberOfColumns, registry);
-      assertEquals(maxNumberOfRows, yoMatrix.getNumberOfRows());
-      assertEquals(maxNumberOfColumns, yoMatrix.getNumberOfColumns());
+      assertEquals(maxNumberOfRows, yoMatrix.getNumRows());
+      assertEquals(maxNumberOfColumns, yoMatrix.getNumCols());
 
       DMatrixRMaj denseMatrix = new DMatrixRMaj(maxNumberOfRows, maxNumberOfColumns);
       yoMatrix.get(denseMatrix);
@@ -72,8 +72,8 @@ public class YoMatrixTest
       assertEquals(maxNumberOfRows, denseMatrix.getNumRows());
       assertEquals(maxNumberOfColumns, denseMatrix.getNumCols());
 
-      assertEquals(maxNumberOfRows, yoMatrix.getNumberOfRows());
-      assertEquals(maxNumberOfColumns, yoMatrix.getNumberOfColumns());
+      assertEquals(maxNumberOfRows, yoMatrix.getNumRows());
+      assertEquals(maxNumberOfColumns, yoMatrix.getNumCols());
 
       Random random = new Random(1984L);
 
@@ -91,8 +91,8 @@ public class YoMatrixTest
       assertEquals(smallerRows, smallerMatrix.getNumRows());
       assertEquals(smallerColumns, smallerMatrix.getNumCols());
 
-      assertEquals(smallerRows, yoMatrix.getNumberOfRows());
-      assertEquals(smallerColumns, yoMatrix.getNumberOfColumns());
+      assertEquals(smallerRows, yoMatrix.getNumRows());
+      assertEquals(smallerColumns, yoMatrix.getNumCols());
 
       DMatrixRMaj checkMatrix2 = new DMatrixRMaj(1, 1);
       yoMatrix.getAndReshape(checkMatrix2);
@@ -119,7 +119,7 @@ public class YoMatrixTest
       
       int numberOfRows = 2;
       int numberOfColumns = 6;
-      yoMatrix.setToZero(numberOfRows, numberOfColumns);
+      yoMatrix.zero();
       
       DMatrixRMaj zeroMatrix = new DMatrixRMaj(numberOfRows, numberOfColumns);
       checkMatrixYoVariablesEqualsCheckMatrixAndOutsideValuesAreNaN(name, maxNumberOfRows, maxNumberOfColumns, zeroMatrix, registry);  
