@@ -212,8 +212,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    {
       super.renderTreeViewIconArea();
 
-      ImGui.sameLine();
       footstepsWidget.render();
+      ImGui.sameLine();
    }
 
    @Override

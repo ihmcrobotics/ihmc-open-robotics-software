@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.behavior.actions;
 
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionState;
@@ -94,8 +94,8 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    {
       super.renderTreeViewIconArea();
 
-      imgui.ImGui.sameLine();
       gripperWidget.render(getDefinition().getSide());
+      ImGui.sameLine();
    }
 
    @Override
