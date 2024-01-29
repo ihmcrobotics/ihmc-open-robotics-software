@@ -1,7 +1,8 @@
 package us.ihmc.robotics.math.frames;
 
-import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.*;
 
+import org.ejml.ops.MatrixIO;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -14,59 +15,43 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * 
  * @author JerryPratt
  */
-public class YoMatrix
+public class YoMatrix implements DMatrix, ReshapeMatrix
 {
+   // TODO: eventually consolidate YoMatrix implementations
+
+   private static final long serialVersionUID = 2156411740647948028L;
+
    private final int maxNumberOfRows, maxNumberOfColumns;
 
    private final YoInteger numberOfRows, numberOfColumns;
    private final YoDouble[][] variables;
 
-   /**
-    * Create a YoMatrix with the given name, number of rows, and number of columns. The constituent YoDoubles are named by index.
-    *
-    * @param name               common name component of the YoMatrix entries.
-    * @param maxNumberOfRows    maximum number of rows in the YoMatrix.
-    * @param maxNumberOfColumns maximum number of columns in the YoMatrix.
-    * @param registry           YoRegistry to register the YoMatrix with.
-    */
    public YoMatrix(String name, int maxNumberOfRows, int maxNumberOfColumns, YoRegistry registry)
    {
-      this(name, maxNumberOfRows, maxNumberOfColumns, null, null, registry);
+      this(name, null, maxNumberOfRows, maxNumberOfColumns, null, null, registry);
    }
 
-   /**
-    * Create a YoMatrix with the given name, number of rows, and number of columns. The constituent YoDoubles are named by row name.
-    * <p>
-    * The number of columns must be equal to 1, that is, the YoMatrix must be a column vector. Otherwise, it is difficult to provide an API that will name the
-    * YoDoubles uniquely.
-    * </p>
-    *
-    * @param name               common name component of the YoMatrix entries.
-    * @param maxNumberOfRows    maximum number of rows in the YoMatrix.
-    * @param maxNumberOfColumns maximum number of columns in the YoMatrix.
-    * @param rowNames           names of the rows.
-    * @param registry           YoRegistry to register the YoMatrix with.
-    */
    public YoMatrix(String name, int maxNumberOfRows, int maxNumberOfColumns, String[] rowNames, YoRegistry registry)
    {
-      this(name, maxNumberOfRows, maxNumberOfColumns, rowNames, null, registry);
+      this(name, null, maxNumberOfRows, maxNumberOfColumns, rowNames, null, registry);
    }
 
-   /**
-    * Create a YoMatrix with the given name, number of rows, and number of columns. The constituent YoDoubles are named by the entries in {@code rowNames} and
-    * {@code columnNames}.
-    * <p>
-    * NOTE: the entries in {@code rowNames} and {@code columnNames} must be unique. Otherwise, the YoDoubles will not have unique names.
-    * </p>
-    *
-    * @param name               common name component of the YoMatrix entries.
-    * @param maxNumberOfRows    maximum number of rows in the YoMatrix.
-    * @param maxNumberOfColumns maximum number of columns in the YoMatrix.
-    * @param rowNames           names of the rows.
-    * @param columnNames        names of the columns.
-    * @param registry           YoRegistry to register the YoMatrix with.
-    */
    public YoMatrix(String name, int maxNumberOfRows, int maxNumberOfColumns, String[] rowNames, String[] columnNames, YoRegistry registry)
+   {
+      this(name, null, maxNumberOfRows, maxNumberOfColumns, rowNames, columnNames, registry);
+   }
+
+   public YoMatrix(String name, String description, int maxNumberOfRows, int maxNumberOfColumns, YoRegistry registry)
+   {
+      this(name, description, maxNumberOfRows, maxNumberOfColumns, null, null, registry);
+   }
+
+   public YoMatrix(String name, String description, int maxNumberOfRows, int maxNumberOfColumns, String[] rowNames, YoRegistry registry)
+   {
+      this(name, description, maxNumberOfRows, maxNumberOfColumns, rowNames, null, registry);
+   }
+
+   public YoMatrix(String name, String description, int maxNumberOfRows, int maxNumberOfColumns, String[] rowNames, String[] columnNames, YoRegistry registry)
    {
       this.maxNumberOfRows = maxNumberOfRows;
       this.maxNumberOfColumns = maxNumberOfColumns;
@@ -87,7 +72,7 @@ public class YoMatrix
             {
                case NONE:
                {
-                  variables[row][column] = new YoDouble(name + "_" + row + "_" + column, registry);  // names are simply the row and column indices
+                  variables[row][column] = new YoDouble(name + "_" + row + "_" + column, description, registry);  // names are simply the row and column indices
                   break;
                }
                case ROWS:
@@ -95,12 +80,12 @@ public class YoMatrix
                   if (maxNumberOfColumns > 1)
                      throw new IllegalArgumentException("The YoMatrix must be a column vector if only row names are provided, else unique names cannot be generated.");
 
-                  variables[row][column] = new YoDouble(name + "_" + rowNames[row], registry);  // names are the row names, no column identifier
+                  variables[row][column] = new YoDouble(name + "_" + rowNames[row], description, registry);  // names are the row names, no column identifier
                   break;
                }
                case ROWS_AND_COLUMNS:
                {
-                  variables[row][column] = new YoDouble(name + "_" + rowNames[row] + "_" + columnNames[column], registry);  // names are the row and column names
+                  variables[row][column] = new YoDouble(name + "_" + rowNames[row] + "_" + columnNames[column], description, registry);  // names are the row and column names
                   break;
                }
             }
@@ -121,6 +106,147 @@ public class YoMatrix
          return NamesProvided.ROWS;
       else
          return NamesProvided.ROWS_AND_COLUMNS;
+   }
+
+   @Override
+   public double get(int row, int col)
+   {
+      if (col < 0 || col >= getNumCols() || row < 0 || row >= getNumRows())
+         throw new IllegalArgumentException("Specified element is out of bounds: (" + row + " , " + col + ")");
+      return unsafe_get(row, col);
+   }
+
+   @Override
+   public double unsafe_get(int row, int col)
+   {
+      return variables[row][col].getValue();
+   }
+
+   @Override
+   public void set(int row, int col, double val)
+   {
+      if (col < 0 || col >= getNumCols() || row < 0 || row >= getNumRows())
+         throw new IllegalArgumentException("Specified element is out of bounds: (" + row + " , " + col + ")");
+      unsafe_set(row, col, val);
+   }
+
+   @Override
+   public void unsafe_set(int row, int col, double val)
+   {
+      variables[row][col].set(val);
+   }
+
+   @Override
+   public int getNumElements()
+   {
+      return numberOfRows.getValue() * numberOfColumns.getValue();
+   }
+
+   @Override
+   public int getNumRows()
+   {
+      return numberOfRows.getValue();
+   }
+
+   @Override
+   public int getNumCols()
+   {
+      return numberOfColumns.getValue();
+   }
+
+   @Override
+   public void zero()
+   {
+      for (int row = 0; row < getNumRows(); row++)
+      {
+         for (int col = 0; col < getNumCols(); col++)
+         {
+            variables[row][col].set(0.0);
+         }
+      }
+   }
+
+   @Override
+   public <T extends Matrix> T copy()
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   @Override
+   public <T extends Matrix> T createLike()
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   @Override
+   public <T extends Matrix> T create(int numRows, int numCols)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   @Override
+   public void set(Matrix original)
+   {
+      if (original instanceof DMatrix)
+      {
+         DMatrix otherMatrix = (DMatrix) original;
+         reshape(otherMatrix.getNumRows(), otherMatrix.getNumRows());
+         for (int row = 0; row < getNumRows(); row++)
+         {
+            for (int col = 0; col < getNumCols(); col++)
+            {
+               set(row, col, otherMatrix.unsafe_get(row, col));
+            }
+         }
+      }
+   }
+
+   @Override
+   public void print()
+   {
+      MatrixIO.printFancy(System.out, this, MatrixIO.DEFAULT_LENGTH);
+   }
+
+   @Override
+   public void print(String format)
+   {
+      MatrixIO.print(System.out, this, format);
+   }
+
+   @Override
+   public MatrixType getType()
+   {
+      return MatrixType.UNSPECIFIED;
+   }
+
+   @Override
+   public void reshape(int numRows, int numCols)
+   {
+      if (numRows > maxNumberOfRows)
+         throw new IllegalArgumentException("Too many rows. Expected less or equal to " + maxNumberOfRows + ", was " + numRows);
+      else if (numCols > maxNumberOfColumns)
+         throw new IllegalArgumentException("Too many columns. Expected less or equal to " + maxNumberOfColumns + ", was " + numCols);
+      else if (numRows < 0 || numCols < 0)
+         throw new IllegalArgumentException("Cannot reshape with a negative number of rows or columns.");
+
+      numberOfRows.set(numRows);
+      numberOfColumns.set(numCols);
+
+      for (int row = 0; row < numRows; row++)
+      {
+         for (int col = numCols; col < maxNumberOfColumns; col++)
+         {
+            unsafe_set(row, col, Double.NaN);
+         }
+      }
+
+      for (int row = numRows; row < maxNumberOfRows; row++)
+      {
+         for (int col = 0; col < maxNumberOfColumns; col++)
+         {
+            unsafe_set(row, col, Double.NaN);
+         }
+      }
    }
 
    public void set(DMatrixRMaj matrix)
@@ -152,7 +278,7 @@ public class YoMatrix
 
    public void getAndReshape(DMatrixRMaj matrixToPack)
    {
-      matrixToPack.reshape(getNumberOfRows(), getNumberOfColumns());
+      matrixToPack.reshape(getNumRows(), getNumCols());
       get(matrixToPack);
    }
 
@@ -175,53 +301,14 @@ public class YoMatrix
       }
    }
 
-   public int getNumberOfRows()
-   {
-      return numberOfRows.getIntegerValue();
-   }
-
-   public int getNumberOfColumns()
-   {
-      return numberOfColumns.getIntegerValue();
-   }
-
-   public void setToZero(int numberOfRows, int numberOfColumns)
-   {
-      if (((numberOfRows > maxNumberOfRows) || (numberOfColumns > maxNumberOfColumns)) && (numberOfRows > 0) && (numberOfColumns > 0))
-         throw new RuntimeException("Not enough rows or columns: " + numberOfRows + " by " + numberOfColumns);
-
-      this.numberOfRows.set(numberOfRows);
-      this.numberOfColumns.set(numberOfColumns);
-
-      for (int row = 0; row < maxNumberOfRows; row++)
-      {
-         for (int column = 0; column < maxNumberOfColumns; column++)
-         {
-            if ((row < numberOfRows) && (column < numberOfColumns))
-            {
-               variables[row][column].set(0.0);
-            }
-            else
-            {
-               variables[row][column].set(Double.NaN);
-            }
-         }
-      }
-   }
-
    public void setToNaN(int numberOfRows, int numberOfColumns)
    {
-      if (((numberOfRows > maxNumberOfRows) || (numberOfColumns > maxNumberOfColumns)) && (numberOfRows > 0) && (numberOfColumns > 0))
-         throw new RuntimeException("Not enough rows or columns: " + numberOfRows + " by " + numberOfColumns);
-
-      this.numberOfRows.set(numberOfRows);
-      this.numberOfColumns.set(numberOfColumns);
-
-      for (int row = 0; row < maxNumberOfRows; row++)
+      reshape(numberOfRows, numberOfColumns);
+      for (int row = 0; row < numberOfRows; row++)
       {
-         for (int column = 0; column < maxNumberOfColumns; column++)
+         for (int col = 0; col < numberOfColumns; col++)
          {
-            variables[row][column].set(Double.NaN);
+            unsafe_set(row, col, Double.NaN);
          }
       }
    }
