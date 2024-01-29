@@ -12,7 +12,6 @@ import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 
 public class RDXBehaviorTreeWidgetsVerticalLayout
 {
-   private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
    private final RDXBehaviorTree tree;
    private final BehaviorTreeTopologyOperationQueue topologyOperationQueue;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -29,17 +28,8 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
    public void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> node)
    {
-      node.renderSelectable();
-
-      if (expandCollapseRenderer.render(node.getTreeWidgetExpanded()))
-      {
-         node.setTreeWidgetExpanded(!node.getTreeWidgetExpanded());
-      }
-
-      ImGui.sameLine();
+      node.renderGeneralRowBeginWidgets();
       node.renderTreeViewIconArea();
-
-      ImGui.sameLine();
       node.renderNodeDescription();
 
       if (ImGui.beginPopup(node.getNodePopupID()))
@@ -117,7 +107,15 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          float indentAmount = 10.0f;
          ImGui.indent(indentAmount);
 
-         node.renderImGuiWidgets();
+         // The action sequence is kinda special here because we want to
+         // see the control and progress widgets all the time
+         if (node instanceof RDXActionSequence actionSequence)
+         {
+            actionSequence.renderExecutionControlAndProgressWidgets();
+            // Try to leave space for the longest rendering node so the
+            // rest don't glitch up and down.
+            ImGui.setCursorPosY(ImGui.getTextLineHeightWithSpacing() * 18.0f);
+         }
 
          for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
          {

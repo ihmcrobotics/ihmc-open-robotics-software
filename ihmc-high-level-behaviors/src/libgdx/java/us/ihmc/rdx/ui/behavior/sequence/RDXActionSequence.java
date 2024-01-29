@@ -82,8 +82,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
          progressWidgetsManager.setRenderAsPlots(!progressWidgetsManager.getRenderAsPlots());
    }
 
-   @Override
-   public void renderImGuiWidgets()
+   public void renderExecutionControlAndProgressWidgets()
    {
       if (ImGui.button(labels.get("<")))
       {

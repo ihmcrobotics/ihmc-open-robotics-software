@@ -7,12 +7,12 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
-import imgui.flag.ImGuiSelectableFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImStringWrapper;
@@ -35,7 +35,12 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean selected = new ImBoolean();
+   private transient final ImVec2 rowMin = new ImVec2();
+   private transient final ImVec2 rowMax = new ImVec2();
+   private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
    private ImStringWrapper descriptionWrapper;
+   private boolean mouseHoveringNodeRow;
+   private boolean anySpecificWidgetOnRowClicked = false;
    private boolean treeWidgetExpanded = false;
    private boolean isDescriptionBeingEdited = false;
    private transient final ImString imDescriptionText = new ImString();
@@ -95,32 +100,32 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    }
 
-   ImVec2 rowMin = new ImVec2();
-   ImVec2 rowMax = new ImVec2();
-
-   public void renderSelectable()
+   public void renderGeneralRowBeginWidgets()
    {
+      anySpecificWidgetOnRowClicked = false;
 
       ImGui.getCursorScreenPos(rowMin);
       rowMax.set(rowMin.x + ImGui.getContentRegionAvailX(), rowMin.y + ImGui.getTextLineHeightWithSpacing());
 
-//      float cursorXDesktopFrame = ImGui.getWindowPosX() + ImGui.getCursorPosX() - ImGui.getScrollX();
-//      float cursorYDesktopFrame = ImGui.getWindowPosY() + ImGui.getCursorPosY() - ImGui.getScrollY();
-
-      if (ImGui.isMouseHoveringRect(rowMin.x, rowMin.y, rowMax.x, rowMax.y))
+      mouseHoveringNodeRow = ImGui.isMouseHoveringRect(rowMin.x, rowMin.y, rowMax.x, rowMax.y);
+      if (mouseHoveringNodeRow)
       {
          ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.FrameBgHovered));
-
       }
 
-//      int selectableFlags = ImGuiSelectableFlags.None;
-//      selectableFlags |= ImGuiSelectableFlags.AllowDoubleClick;
-//      selectableFlags |= ImGuiSelectableFlags.SpanAllColumns;
-//      if (ImGui.selectable(labels.getHidden("Selectable"), selected, selectableFlags))
-//      {
-//         LogTools.info("Clicked {}:{}", getDefinition().getDescription(), getState().getID());
-//      }
-//      ImGui.sameLine();
+      if (!getChildren().isEmpty())
+      {
+         if (expandCollapseRenderer.render(treeWidgetExpanded))
+         {
+            anySpecificWidgetOnRowClicked = true;
+            treeWidgetExpanded = !treeWidgetExpanded;
+         }
+         ImGui.sameLine();
+      }
+      else
+      {
+         treeWidgetExpanded = false;
+      }
    }
 
    public void renderTreeViewIconArea()
@@ -134,9 +139,9 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       ImGui.calcTextSize(descriptionTextSize, descriptionText);
       boolean textHovered = ImGuiTools.isItemHovered(descriptionTextSize.x);
 
-      if (textHovered && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+      if (selected.get())
       {
-         treeWidgetExpanded = !treeWidgetExpanded;
+         ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.FrameBgActive));
       }
 
       if (isDescriptionBeingEdited)
@@ -149,18 +154,21 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       }
       else
       {
-         ImGui.pushFont(ImGuiTools.getSmallBoldFont());
-         // We want the text to stay highlighted when the context menu is showing to help the operator
-         // know which node they're operating on.
-         boolean highlightText = textHovered || nodeContextMenuShowing;
-         ImGui.textColored(highlightText ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : getDescriptionColor(), descriptionText);
+         ImGui.textColored(getDescriptionColor(), descriptionText);
          nodeContextMenuShowing = false;
-         ImGui.popFont();
       }
 
       if (textHovered && !isDescriptionBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
       {
          ImGui.openPopup(nodePopupID);
+      }
+
+      // We try to make anywhere on the row clickable to select the node,
+      // execpt for specific interactions
+      if (!anySpecificWidgetOnRowClicked && mouseHoveringNodeRow && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+      {
+         RDXBehaviorTreeTools.runForSubtreeNodes(RDXBehaviorTreeTools.findRootNode(this), node -> node.selected.set(false));
+         selected.set(true);
       }
    }
 
@@ -212,7 +220,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       }
    }
 
-   public void renderImGuiWidgets()
+   public void renderNodeSettingsWidgets()
    {
 
    }
@@ -232,6 +240,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public boolean getSelected()
    {
       return selected.get();
+   }
+
+   protected void setSpecificWidgetOnRowClicked()
+   {
+      anySpecificWidgetOnRowClicked = true;
    }
 
    public ImStringWrapper getDescriptionWrapper()

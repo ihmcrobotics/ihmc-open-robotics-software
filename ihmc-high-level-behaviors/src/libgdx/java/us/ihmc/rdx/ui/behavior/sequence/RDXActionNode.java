@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.behavior.sequence;
 
 import imgui.ImGui;
-import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
@@ -22,7 +21,6 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
       extends RDXBehaviorTreeNode<S, D>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean expanded = new ImBoolean(true);
    private final ImString rejectionTooltip = new ImString();
    private final RDXActionProgressWidgets progressWidgets = new RDXActionProgressWidgets(this);
    private final ImGuiHollowArrowRenderer hollowArrowRenderer = new ImGuiHollowArrowRenderer();
@@ -51,22 +49,21 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    {
       if (hollowArrowRenderer.render(getState().getIsNextForExecution()))
       {
+         setSpecificWidgetOnRowClicked();
          RDXActionSequence actionSequence = RDXBehaviorTreeTools.findActionSequenceAncestor(this);
          if (actionSequence != null)
          {
             actionSequence.getState().setExecutionNextIndex(getState().getActionIndex());
          }
       }
+      ImGui.sameLine();
    }
 
    @Override
-   public void renderImGuiWidgets()
+   public void renderNodeSettingsWidgets()
    {
-      if (expanded.get())
-      {
-         ImGui.text("Type: %s   Index: %d".formatted(getActionTypeTitle(), getState().getActionIndex()));
-         renderImGuiWidgetsInternal();
-      }
+      ImGui.text("Type: %s   Index: %d".formatted(getActionTypeTitle(), getState().getActionIndex()));
+      renderImGuiWidgetsInternal();
    }
 
    protected void renderImGuiWidgetsInternal()
@@ -75,11 +72,6 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    }
 
    public abstract String getActionTypeTitle();
-
-   public ImBoolean getExpanded()
-   {
-      return expanded;
-   }
 
    @Override
    public int getDescriptionColor()

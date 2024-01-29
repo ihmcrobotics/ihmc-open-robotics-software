@@ -19,7 +19,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -49,7 +48,6 @@ public class RDXBehaviorTree
    private final RDXBehaviorTreeFileLoader fileLoader;
    private final ImGuiExpandCollapseRenderer expandCollapseAllRenderer = new ImGuiExpandCollapseRenderer();
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
-   private final RDXPanel nodeSettingsPanel = new RDXPanel("Behavior Node Settings", this::renderNodeSettingsImGuiWidgets);
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                           DRCRobotModel robotModel,
@@ -76,7 +74,6 @@ public class RDXBehaviorTree
       fileLoader = new RDXBehaviorTreeFileLoader(behaviorTreeState, nodeBuilder);
       nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory, referenceFrameLibrary);
       treeWidgetsVerticalLayout = new RDXBehaviorTreeWidgetsVerticalLayout(this);
-      baseUI.getImGuiPanelManager().addPanel(nodeSettingsPanel);
    }
 
    public void createAndSetupDefault(RDXBaseUI baseUI)
@@ -177,6 +174,9 @@ public class RDXBehaviorTree
             ImGui.setTooltip("Collapse all nodes");
 
          treeWidgetsVerticalLayout.renderImGuiWidgets(rootNode);
+
+         ImGui.separator();
+         renderSelectedNodeSettingsWidgets(rootNode);
       }
       else
       {
@@ -187,11 +187,6 @@ public class RDXBehaviorTree
       }
    }
 
-   private void renderNodeSettingsImGuiWidgets()
-   {
-
-   }
-
    private void expandCollapseAll(boolean expandOrCollapse, RDXBehaviorTreeNode<?, ?> node)
    {
       node.setTreeWidgetExpanded(expandOrCollapse);
@@ -199,6 +194,17 @@ public class RDXBehaviorTree
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
       {
          expandCollapseAll(expandOrCollapse, child);
+      }
+   }
+
+   private void renderSelectedNodeSettingsWidgets(RDXBehaviorTreeNode<?, ?> node)
+   {
+      if (node.getSelected())
+         node.renderNodeSettingsWidgets();
+
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+      {
+         renderSelectedNodeSettingsWidgets(child);
       }
    }
 
