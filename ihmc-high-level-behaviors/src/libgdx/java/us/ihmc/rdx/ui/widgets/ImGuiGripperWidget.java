@@ -16,21 +16,25 @@ public class ImGuiGripperWidget
 {
    private final ArrayList<Point2D32> vertices = new ArrayList<>();
    {
-      vertices.add(new Point2D32(-0.500f, 0.181f));
-      vertices.add(new Point2D32(-0.235f, 0.381f));
-      vertices.add(new Point2D32(0.127f, 0.300f));
-      vertices.add(new Point2D32(0.278f, 0.468f));
-      vertices.add(new Point2D32(0.500f, 0.268f));
-      vertices.add(new Point2D32(0.327f, 0.132f));
-      vertices.add(new Point2D32(0.489f, -0.170f));
-      vertices.add(new Point2D32(0.257f, -0.468f));
-      vertices.add(new Point2D32(-0.170f, -0.446f));
-      vertices.add(new Point2D32(-0.132f, -0.311f));
-      vertices.add(new Point2D32(0.214f, -0.251f));
-      vertices.add(new Point2D32(0.181f, 0.051f));
-      vertices.add(new Point2D32(-0.251f, 0.165f));
-      vertices.add(new Point2D32(-0.289f, -0.138f));
-      vertices.add(new Point2D32(-0.500f, 0.181f));
+      vertices.add(new Point2D32(-0.500f, 0.126f));
+      vertices.add(new Point2D32(-0.268f, 0.360f));
+      vertices.add(new Point2D32(0.122f, 0.326f));
+      vertices.add(new Point2D32(0.276f, 0.490f));
+      vertices.add(new Point2D32(0.500f, 0.270f));
+      vertices.add(new Point2D32(0.351f, 0.117f));
+      vertices.add(new Point2D32(0.403f, -0.215f));
+      vertices.add(new Point2D32(0.133f, -0.472f));
+      vertices.add(new Point2D32(-0.183f, -0.490f));
+      vertices.add(new Point2D32(-0.190f, -0.324f));
+      vertices.add(new Point2D32(0.067f, -0.302f));
+      vertices.add(new Point2D32(0.214f, -0.147f));
+      vertices.add(new Point2D32(0.174f, 0.067f));
+      vertices.add(new Point2D32(0.072f, 0.159f));
+      vertices.add(new Point2D32(-0.175f, 0.178f));
+      vertices.add(new Point2D32(-0.326f, 0.038f));
+      vertices.add(new Point2D32(-0.329f, -0.207f));
+      vertices.add(new Point2D32(-0.5f, -0.22f));
+      vertices.add(new Point2D32(-0.500f, 0.126f));
    }
    private final Point2D32 center = new Point2D32();
    private final ImVec2[] polygon = new ImVec2[vertices.size()];
@@ -57,7 +61,7 @@ public class ImGuiGripperWidget
          ImGui.setCursorPosX(ImGui.getCursorPosX() + fontSize * spaceToDifferentiateLeftAndRight);
       }
 
-      float scale = 0.85f; // Make parameter if desired
+      float scale = 0.81f; // Make parameter if desired
       scale *= fontSize;
 
       center.set(0.3f * fontSize, 0.5f * fontSize);
