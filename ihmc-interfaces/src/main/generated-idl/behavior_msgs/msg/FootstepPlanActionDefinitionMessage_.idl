@@ -1,8 +1,9 @@
 #ifndef __behavior_msgs__msg__FootstepPlanActionDefinitionMessage__idl__
 #define __behavior_msgs__msg__FootstepPlanActionDefinitionMessage__idl__
 
-#include "behavior_msgs/msg/./BehaviorActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionFootstepDefinitionMessage_.idl"
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -16,7 +17,7 @@ module behavior_msgs
         /**
          * Parent definition fields
          */
-        behavior_msgs::msg::dds::BehaviorActionDefinitionMessage action_definition;
+        behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
         /**
          * Name of the parent frame the footsteps are expressed in
          */
@@ -30,9 +31,25 @@ module behavior_msgs
          */
         double transfer_duration;
         /**
+         * Is using the footstep planner or manually placing
+         */
+        boolean is_manually_placed;
+        /**
          * The footsteps, with a maximum of 50
          */
         sequence<behavior_msgs::msg::dds::FootstepPlanActionFootstepDefinitionMessage, 50> footsteps;
+        /**
+         * Transform that expresses the planning goal pose in the parent frame
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage goal_transform_to_parent;
+        /**
+         * Left goal foot transform to the goal pose
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage left_goal_foot_transform_to_gizmo;
+        /**
+         * Right goal foot transform to the goal pose
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage right_goal_foot_transform_to_gizmo;
       };
     };
   };

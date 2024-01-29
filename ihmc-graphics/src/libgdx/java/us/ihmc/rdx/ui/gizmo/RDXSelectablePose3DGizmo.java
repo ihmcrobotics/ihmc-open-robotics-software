@@ -10,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 
@@ -23,27 +22,44 @@ public class RDXSelectablePose3DGizmo
    private final RDXPose3DGizmo poseGizmo;
    private final ImBoolean selected;
 
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo()} */
    public RDXSelectablePose3DGizmo()
    {
       this.selected = new ImBoolean(false);
       poseGizmo = new RDXPose3DGizmo();
    }
 
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(ReferenceFrame)} */
    public RDXSelectablePose3DGizmo(ReferenceFrame parentReferenceFrame)
    {
       this.selected = new ImBoolean(false);
       poseGizmo = new RDXPose3DGizmo(parentReferenceFrame);
    }
 
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(ReferenceFrame, RigidBodyTransform)} */
    public RDXSelectablePose3DGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
    {
       this(gizmoFrame, gizmoTransformToParentFrameToModify, new ImBoolean(false));
    }
 
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(ReferenceFrame, RigidBodyTransform)} */
    public RDXSelectablePose3DGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify, ImBoolean selected)
    {
       this.selected = selected;
       poseGizmo = new RDXPose3DGizmo(gizmoFrame, gizmoTransformToParentFrameToModify);
+   }
+
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(RigidBodyTransform, ReferenceFrame)} */
+   public RDXSelectablePose3DGizmo(RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame)
+   {
+      this(gizmoTransformToParentFrameToModify, parentReferenceFrame, new ImBoolean(false));
+   }
+
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(RigidBodyTransform, ReferenceFrame)} */
+   public RDXSelectablePose3DGizmo(RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame, ImBoolean selected)
+   {
+      this.selected = selected;
+      poseGizmo = new RDXPose3DGizmo(gizmoTransformToParentFrameToModify, parentReferenceFrame);
    }
 
    public void create(RDX3DPanel panel3D)

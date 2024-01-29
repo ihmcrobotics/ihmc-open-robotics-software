@@ -1,9 +1,9 @@
 package us.ihmc.perception.sceneGraph;
 
+import us.ihmc.communication.crdt.DurationFreezable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.tools.Timer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,26 +15,13 @@ import java.util.List;
  *
  * We give each node a name and a reference frame.
  */
-public class SceneNode
+public class SceneNode extends DurationFreezable
 {
    /** The node's unique ID. */
    private final long id;
    private final String name;
    private final MutableReferenceFrame nodeFrame;
    private final List<SceneNode> children = new ArrayList<>();
-   /**
-    * Certain changes to this node will cause a freeze of that data
-    * from being modified from incoming messages.
-    * Scene nodes are usually being synced at 30 Hz or faster, so 1 second
-    * should allow plenty of time for changes to propagate.
-    */
-   public static final double FREEZE_DURATION_ON_MODIFICATION = 1.0;
-   /**
-    * This timer is used in the case that an operator can "mark modified" this node's
-    * data so it won't accept updates from other sources for a short period of time.
-    * This is to allow the changes to propagate elsewhere.
-    */
-   private final Timer modifiedTimer = new Timer();
 
    public SceneNode(long id, String name)
    {
@@ -99,15 +86,5 @@ public class SceneNode
    public List<SceneNode> getChildren()
    {
       return children;
-   }
-
-   public void freezeFromModification()
-   {
-      modifiedTimer.reset();
-   }
-
-   public boolean isFrozenFromModification()
-   {
-      return modifiedTimer.isRunning(FREEZE_DURATION_ON_MODIFICATION);
    }
 }

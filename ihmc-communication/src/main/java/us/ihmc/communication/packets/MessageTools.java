@@ -35,6 +35,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.math.QuaternionCalculus;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -42,10 +44,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class MessageTools
 {
@@ -1270,6 +1269,24 @@ public class MessageTools
       ellipsoidToSet.getRadii().set(ellipsoidMessage.getRadii());
    }
 
+   public static void toMessage(SE3TrajectoryPointReadOnly trajectoryPoint, SE3TrajectoryPointMessage trajectoryPointMessage)
+   {
+      trajectoryPointMessage.setTime(trajectoryPoint.getTime());
+      trajectoryPointMessage.getPosition().set(trajectoryPoint.getPosition());
+      trajectoryPointMessage.getOrientation().set(trajectoryPoint.getOrientation());
+      trajectoryPointMessage.getLinearVelocity().set(trajectoryPoint.getLinearVelocity());
+      trajectoryPointMessage.getAngularVelocity().set(trajectoryPoint.getAngularVelocity());
+   }
+
+   public static void fromMessage(SE3TrajectoryPointMessage trajectoryPointMessage, SE3TrajectoryPoint trajectoryPoint)
+   {
+      trajectoryPoint.setTime(trajectoryPointMessage.getTime());
+      trajectoryPoint.getPosition().set(trajectoryPointMessage.getPosition());
+      trajectoryPoint.getOrientation().set(trajectoryPointMessage.getOrientation());
+      trajectoryPoint.getLinearVelocity().set(trajectoryPointMessage.getLinearVelocity());
+      trajectoryPoint.getAngularVelocity().set(trajectoryPointMessage.getAngularVelocity());
+   }
+
    public static void toMessage(Instant instant, InstantMessage instantMessage)
    {
       instantMessage.setSecondsSinceEpoch(instant.getEpochSecond());
@@ -1284,6 +1301,20 @@ public class MessageTools
    public static Instant toInstant(InstantMessage instantMessage)
    {
       return Instant.ofEpochSecond(instantMessage.getSecondsSinceEpoch(), instantMessage.getAdditionalNanos());
+   }
+
+   public static void toMessage(UUID uuid, UUIDMessage uuidMessage)
+   {
+      uuidMessage.setLeastSignificantBits(uuid.getLeastSignificantBits());
+      uuidMessage.setMostSignificantBits(uuid.getMostSignificantBits());
+   }
+
+   /**
+    * UUID is immutable so there is no allocation free option.
+    */
+   public static UUID toUUID(UUIDMessage uuidMessage)
+   {
+      return new UUID(uuidMessage.getMostSignificantBits(), uuidMessage.getLeastSignificantBits());
    }
 
    public static double calculateDelay(ImageMessage imageMessage)

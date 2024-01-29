@@ -5,17 +5,30 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.bullet.RDXBulletPhysicsAsyncDebugger;
+import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletRobot;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngine;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 public class RDXSCS2SimulationSession extends RDXSCS2Session
 {
+   private final RDX3DPanel primary3DPanel;
    private PhysicsEngine physicsEngine;
    private RDXBulletPhysicsAsyncDebugger bulletPhysicsDebugger;
+   private final ArrayList<RDXSCS2BulletRobotMover> robotMovers = new ArrayList<>();
+
+   public RDXSCS2SimulationSession(RDXBaseUI baseUI)
+   {
+      super(baseUI);
+
+      primary3DPanel = baseUI.getPrimary3DPanel();
+   }
 
    /**
     * Bring your own session.
@@ -43,6 +56,23 @@ public class RDXSCS2SimulationSession extends RDXSCS2Session
             session.setSessionMode(SessionMode.PAUSE);
          }
       });
+
+      robotMovers.clear();
+      if (physicsEngine instanceof BulletPhysicsEngine bulletPhysicsEngine)
+      {
+         for (BulletRobot bulletRobot : bulletPhysicsEngine.getBulletRobots())
+         {
+            RDXSCS2BulletRobotMover robotMover = new RDXSCS2BulletRobotMover(primary3DPanel, bulletRobot);
+            robotMovers.add(robotMover);
+            simulationSession.addBeforePhysicsCallback(robotMover::beforePhysics);
+            getAdditionalImGuiWidgets().add(robotMover::renderMoveJointCheckbox);
+         }
+      }
+
+      for (Runnable onSessionStartedRunnable : getOnSessionStartedRunnables())
+      {
+         onSessionStartedRunnable.run();
+      }
    }
 
    @Override
@@ -52,6 +82,9 @@ public class RDXSCS2SimulationSession extends RDXSCS2Session
 
       if (physicsEngine instanceof BulletPhysicsEngine)
          bulletPhysicsDebugger.update();
+
+      for (RDXSCS2BulletRobotMover robotMover : robotMovers)
+         robotMover.update();
    }
 
    @Override
@@ -77,8 +110,14 @@ public class RDXSCS2SimulationSession extends RDXSCS2Session
       super.renderImGuiWidgetsPartTwo();
    }
 
-   public SimulationSession getSimulationSession()
+   @Override
+   public SimulationSession getSession()
    {
       return (SimulationSession) session;
+   }
+
+   public RDXBulletPhysicsAsyncDebugger getBulletPhysicsDebugger()
+   {
+      return bulletPhysicsDebugger;
    }
 }

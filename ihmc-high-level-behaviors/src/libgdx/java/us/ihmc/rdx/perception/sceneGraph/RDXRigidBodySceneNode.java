@@ -1,7 +1,12 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -10,11 +15,16 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
+
+import java.util.Set;
 
 public abstract class RDXRigidBodySceneNode extends RDXSceneNode
 {
@@ -26,6 +36,7 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
    private final RigidBodyTransform visualModelToNodeTransform = new RigidBodyTransform();
    private final RDX3DPanel panel3D;
 
+   private final RDXBallAndArrowPosePlacement posePlacement = new RDXBallAndArrowPosePlacement();
    private final RDXSelectablePose3DGizmo offsetPoseGizmo;
    private String initialParentName;
    private final ImBooleanWrapper trackDetectedPoseWrapper;
@@ -44,12 +55,33 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
       this.visualModelToNodeTransform.set(visualModelToNodeTransform);
       this.panel3D = panel3D;
 
+      posePlacement.create(Color.YELLOW, "Place Node Pose", "Placing Node", "Stop Placement");
+      RDXBaseUI.getInstance().getPrimary3DPanel().addImGui3DViewInputProcessor(posePlacement::processImGui3DViewInput);
+      posePlacement.setOnStartPositionPlacement(() -> RDXBaseUI.getInstance().setModelSceneMouseCollisionEnabled(true));
+      posePlacement.setOnEndPositionPlacement(() ->
+      {
+         if (posePlacement.isPlacingPosition())
+            posePlacement.clear();
+         RDXBaseUI.getInstance().setModelSceneMouseCollisionEnabled(false);
+      });
+
       offsetPoseGizmo = new RDXSelectablePose3DGizmo(rigidBodySceneNode.getNodeFrame(), rigidBodySceneNode.getNodeToParentFrameTransform());
       offsetPoseGizmo.createAndSetupDefault(panel3D);
       initialParentName = "Node " + rigidBodySceneNode.getInitialParentNodeID();
       trackDetectedPoseWrapper = new ImBooleanWrapper(rigidBodySceneNode::getTrackingInitialParent,
                                                       trackDetectedPoseChanged::set,
                                                       imBoolean -> ImGui.checkbox(labels.get("Track " + initialParentName), imBoolean));
+   }
+
+   public void place()
+   {
+      posePlacement.getPlaceGoalActionMap().start();
+      ImGui.setWindowFocus(RDXBaseUI.getInstance().getPrimary3DPanel().getPanelName());
+   }
+
+   public RDXBallAndArrowPosePlacement getPosePlacement()
+   {
+      return posePlacement;
    }
 
    public void update(SceneGraphModificationQueue modificationQueue)
@@ -72,7 +104,19 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
 
       if (offsetPoseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
       {
-         rigidBodySceneNode.freezeFromModification();
+         rigidBodySceneNode.freeze();
+      }
+
+      if (posePlacement.isPlacingGoal())
+      {
+         rigidBodySceneNode.getModifiableNodeFrame().update(transformToParent -> transformToParent.set(posePlacement.getGoalPose()));
+      }
+
+      if (posePlacement.getPlacedNotification().poll())
+      {
+         rigidBodySceneNode.freeze();
+         posePlacement.setGoalPoseNoCallbacks(new Pose3D());
+         posePlacement.clear();
       }
 
       nodePose.setToZero(rigidBodySceneNode.getNodeFrame());
@@ -96,15 +140,25 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
       ImGui.sameLine();
       ImGui.text(" Parent: " + rigidBodySceneNode.getNodeFrame().getParent().getName());
 
-      trackDetectedPoseWrapper.renderImGuiWidget();
-      ImGui.sameLine();
-      ImGui.checkbox(labels.get("Show Offset Gizmo"), offsetPoseGizmo.getSelected());
+      posePlacement.renderPlaceGoalButton();
       ImGui.sameLine();
       if (ImGui.button(labels.get("Clear Offset")))
       {
          rigidBodySceneNode.clearOffset();
-         rigidBodySceneNode.freezeFromModification();
+         rigidBodySceneNode.freeze();
       }
+      trackDetectedPoseWrapper.renderImGuiWidget();
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Show Offset Gizmo"), offsetPoseGizmo.getSelected());
+   }
+
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
+   {
+      super.getRenderables(renderables, pool, sceneLevels);
+
+      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+         posePlacement.getRenderables(renderables, pool);
    }
 
    @Override

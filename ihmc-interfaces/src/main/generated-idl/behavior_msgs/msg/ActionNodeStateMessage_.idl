@@ -1,0 +1,74 @@
+#ifndef __behavior_msgs__msg__ActionNodeStateMessage__idl__
+#define __behavior_msgs__msg__ActionNodeStateMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "ihmc_common_msgs/msg/./SE3TrajectoryPointMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::ActionNodeStateMessage_")
+      struct ActionNodeStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::BehaviorTreeNodeStateMessage state;
+        /**
+         * The action's unique ID
+         */
+        unsigned long id;
+        /**
+         * If the action is next for execution
+         */
+        boolean is_next_for_execution;
+        /**
+         * If the action is to be executed concurrently
+         */
+        boolean is_to_be_executed_concurrently;
+        /**
+         * If the node is able to execution
+         */
+        boolean can_execute;
+        /**
+         * If the node is currently executing
+         */
+        boolean is_executing;
+        /**
+         * If the node had a failure during it's last execution
+         */
+        boolean failed;
+        /**
+         * Nominal execution duration
+         */
+        double nominal_execution_duration;
+        /**
+         * Time since execution started
+         */
+        double elapsed_execution_time;
+        /**
+         * Desired trajectory
+         */
+        sequence<ihmc_common_msgs::msg::dds::SE3TrajectoryPointMessage, 500> desired_trajectory;
+        /**
+         * Current pose
+         */
+        geometry_msgs::msg::dds::Pose current_pose;
+        /**
+         * Position distance to goal tolerance
+         */
+        double position_distance_to_goal_tolerance;
+        /**
+         * Orientation distance to goal tolerance
+         */
+        double orientation_distance_to_goal_tolerance;
+      };
+    };
+  };
+};
+
+#endif

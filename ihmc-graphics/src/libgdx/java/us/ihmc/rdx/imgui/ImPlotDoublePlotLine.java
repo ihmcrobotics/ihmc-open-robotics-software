@@ -1,7 +1,14 @@
 package us.ihmc.rdx.imgui;
 
+import imgui.extension.implot.ImPlot;
+import imgui.flag.ImGuiCond;
+
 import java.text.DecimalFormat;
 
+/**
+ * Implementation of {@link ImPlotWallTimeScrollingPlotLine} for double
+ * data values.
+ */
 public class ImPlotDoublePlotLine extends ImPlotWallTimeScrollingPlotLine
 {
    private final DecimalFormat decimalFormatter;
@@ -31,5 +38,18 @@ public class ImPlotDoublePlotLine extends ImPlotWallTimeScrollingPlotLine
    public String getValueString(int bufferIndex)
    {
       return decimalFormatter.format(doubleSwapBuffer.getValue(bufferIndex));
+   }
+
+   public void setLimitYMin(double minLimitY)
+   {
+      double limitY = minLimitY;
+      for (int i = 0; i < getBufferSize(); i++)
+      {
+         if (!Double.isNaN(doubleSwapBuffer.getValue(i)))
+         {
+            limitY = Math.max(doubleSwapBuffer.getValue(i), limitY);
+         }
+      }
+      ImPlot.setNextPlotLimitsY(0.0, limitY, ImGuiCond.Always);
    }
 }

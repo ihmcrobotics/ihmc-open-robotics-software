@@ -15,7 +15,7 @@ public class ChestOrientationActionStateMessagePubSubType implements us.ihmc.pub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a77019ef67232914aaef13d5519de4a4e8f44b5c582bd15298596d628790a741";
+   		return "c2e66019fdf39b9e1acf5393345935902d3786b43d54e1b67f607d50fa3a0257";
    }
    
    @Override
@@ -52,9 +52,11 @@ public class ChestOrientationActionStateMessagePubSubType implements us.ihmc.pub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.ChestOrientationActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -69,9 +71,11 @@ public class ChestOrientationActionStateMessagePubSubType implements us.ihmc.pub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.getCdrSerializedSize(data.getActionState(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.getCdrSerializedSize(data.getState(), current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.ChestOrientationActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
+
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getGoalPelvisTransformToWorld(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -79,32 +83,38 @@ public class ChestOrientationActionStateMessagePubSubType implements us.ihmc.pub
 
    public static void write(behavior_msgs.msg.dds.ChestOrientationActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.write(data.getActionState(), cdr);
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getState(), cdr);
       behavior_msgs.msg.dds.ChestOrientationActionDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getGoalPelvisTransformToWorld(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.ChestOrientationActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.read(data.getActionState(), cdr);	
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.ChestOrientationActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getGoalPelvisTransformToWorld(), cdr);	
 
    }
 
    @Override
    public final void serialize(behavior_msgs.msg.dds.ChestOrientationActionStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("action_state", new behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType(), data.getActionState());
+      ser.write_type_a("state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getState());
 
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ChestOrientationActionDefinitionMessagePubSubType(), data.getDefinition());
+
+      ser.write_type_a("goal_pelvis_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getGoalPelvisTransformToWorld());
 
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ChestOrientationActionStateMessage data)
    {
-      ser.read_type_a("action_state", new behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType(), data.getActionState());
+      ser.read_type_a("state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getState());
 
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ChestOrientationActionDefinitionMessagePubSubType(), data.getDefinition());
+
+      ser.read_type_a("goal_pelvis_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getGoalPelvisTransformToWorld());
 
    }
 

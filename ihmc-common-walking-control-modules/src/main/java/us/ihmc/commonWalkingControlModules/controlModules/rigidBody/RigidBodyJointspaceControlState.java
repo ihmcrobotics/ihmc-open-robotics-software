@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -28,6 +29,25 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * Manages control of a rigid body by controlling a number of joint ancestors
+ * in joint space through jointspace feedback control commands.
+ * <p>
+ * When robot hardware requires direct position control instead of
+ * torque control, this class supports disabling acceleration integration on those
+ * joints and instead provides joint desired output data for those joints to
+ * the controller core, which will bypass the optimizer. The user
+ * specifies this via {@link ArmTrajectoryCommand.RequestedMode}.
+ * </p>
+ * <p>
+ * This class is also responsible for commanding the "home" configuration
+ * to the whole body controller when requested by the user.
+ * </p>
+ * <p>
+ * Finally, this class reports status messages with the current and desired
+ * joint positions.
+ * </p>
+ */
 public class RigidBodyJointspaceControlState extends RigidBodyControlState
 {
    public static final int maxPoints = 10000;
@@ -36,17 +56,14 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    private final RigidBodyJointControlHelper jointControlHelper;
 
    private final JointspaceTrajectoryStatusMessageHelper statusHelper;
+   private final OneDoFJointBasics[] jointsToControl;
 
    private final int numberOfJoints;
    private final double[] jointsHomeConfiguration;
    private final JointDesiredOutputList jointDesiredOutputList;
 
-   private final BooleanParameter defaultDirectPositionControlMode;
-   private final YoBoolean directPositionControlMode;
-   private final JointAccelerationIntegrationCommand disableAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
-   private final InverseDynamicsOptimizationSettingsCommand activateJointsCommand = new InverseDynamicsOptimizationSettingsCommand();
-   private final InverseDynamicsOptimizationSettingsCommand deactivateJointsCommand = new InverseDynamicsOptimizationSettingsCommand();
-   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
+   private final BooleanParameter[] bypassAccelerationIntegration;
+   private final JointAccelerationIntegrationCommand accelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
 
    public RigidBodyJointspaceControlState(String bodyName,
                                           OneDoFJointBasics[] jointsToControl,
@@ -57,9 +74,13 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    {
       super(RigidBodyControlMode.JOINTSPACE, bodyName, yoTime, parentRegistry);
       this.jointControlHelper = jointControlHelper;
+      this.jointsToControl = jointsToControl;
+      this.bypassAccelerationIntegration = new BooleanParameter[jointsToControl.length];
 
-      defaultDirectPositionControlMode = new BooleanParameter(bodyName + "DefaultDirectPositionControlMode", parentRegistry, false);
-      directPositionControlMode = new YoBoolean(bodyName + "DirectPositionControlMode", parentRegistry);
+      for (int i = 0; i < jointsToControl.length; i++)
+      {
+         bypassAccelerationIntegration[i] = new BooleanParameter(jointsToControl[i].getName() + "BypassAccelerationIntegration", parentRegistry);
+      }
 
       jointDesiredOutputList = new JointDesiredOutputList(jointsToControl);
 
@@ -75,11 +96,6 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          if (!homeConfiguration.contains(jointName))
             throw new RuntimeException(warningPrefix + "Can not create control manager since joint home configuration is not defined.");
          jointsHomeConfiguration[jointIdx] = homeConfiguration.get(jointName);
-         JointAccelerationIntegrationParameters jointParameters = disableAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(joint);
-         jointParameters.setDisableAccelerationIntegration(true);
-
-         activateJointsCommand.getJointsToActivate().add(joint);
-         deactivateJointsCommand.getJointsToDeactivate().add(joint);
       }
    }
 
@@ -96,55 +112,30 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    @Override
    public JointDesiredOutputListReadOnly getJointDesiredData()
    {
-      if (directPositionControlMode.getValue())
+      boolean bypassAccelerationIntegration = false;
+
+      for (int jointIdx = 0; jointIdx < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); jointIdx++)
       {
-         for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+         if (this.bypassAccelerationIntegration[jointIdx].getValue())
          {
-            JointDesiredOutput lowLevelJointData = jointDesiredOutputList.getJointDesiredOutput(i);
-            PIDGainsReadOnly lowLevelJointGain = jointControlHelper.getLowLevelJointGain(i);
-            OneDoFJointReadOnly joint = jointDesiredOutputList.getOneDoFJoint(i);
-
-            // Clamp desired position based on maximum feedback
-            double desiredPosition = getJointDesiredPosition(i);
-            double maximumFeedback = lowLevelJointGain.getMaximumFeedback();
-            if (!Double.isNaN(maximumFeedback) && Double.isFinite(maximumFeedback) && lowLevelJointGain.getKp() > 1.0e-3)
-            {
-               double maxPositionError = maximumFeedback / lowLevelJointGain.getKp();
-               desiredPosition = EuclidCoreTools.clamp(desiredPosition, joint.getQ() - maxPositionError, joint.getQ() + maxPositionError);
-            }
-
-            // Clamp desired velocity based on maximum feedback rate
-            double desiredVelocity = getJointDesiredVelocity(i);
-            double maximumFeedbackRate = lowLevelJointGain.getMaximumFeedbackRate();
-            if (!Double.isNaN(maximumFeedbackRate) && Double.isFinite(maximumFeedbackRate) && lowLevelJointGain.getKd() > 1.0e-3)
-            {
-               double maxVelocityError = maximumFeedbackRate / lowLevelJointGain.getKd();
-               desiredVelocity = EuclidCoreTools.clamp(desiredVelocity, joint.getQd() - maxVelocityError, joint.getQd() + maxVelocityError);
-            }
-
-            lowLevelJointData.setControlMode(JointDesiredControlMode.POSITION);
-            lowLevelJointData.setDesiredPosition(desiredPosition);
-            lowLevelJointData.setDesiredVelocity(desiredVelocity);
-            lowLevelJointData.setStiffness(lowLevelJointGain.getKp());
-            lowLevelJointData.setDamping(lowLevelJointGain.getKd());
+            bypassAccelerationIntegration = true;
+            JointDesiredOutput lowLevelJointData = jointDesiredOutputList.getJointDesiredOutput(jointIdx);
+            lowLevelJointData.setDesiredPosition(getJointDesiredPosition(jointIdx));
+            lowLevelJointData.setDesiredVelocity(getJointDesiredVelocity(jointIdx));
          }
+      }
 
-         return jointDesiredOutputList;
-      }
-      else
-      {
-         return null;
-      }
+      return bypassAccelerationIntegration ? jointDesiredOutputList : null;
    }
 
-   public void setGains(Map<String, PIDGainsReadOnly> jointspaceHighLevelGains, Map<String, PIDGainsReadOnly> jointspaceLowLevelGains)
+   public void setGains(Map<String, PIDGainsReadOnly> jointspaceHighLevelGains)
    {
-      jointControlHelper.setGains(jointspaceHighLevelGains, jointspaceLowLevelGains);
+      jointControlHelper.setGains(jointspaceHighLevelGains);
    }
 
    public void setGains(YoPIDGains highLevelGains)
    {
-      jointControlHelper.setHighLevelGains(highLevelGains);
+      jointControlHelper.setGains(highLevelGains);
    }
 
    public void holdCurrent()
@@ -253,7 +244,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    @Override
    public void onEntry()
    {
-      setEnableDirectJointPositionControl(defaultDirectPositionControlMode.getValue() && jointControlHelper.hasLowLevelJointGains());
+      jointControlHelper.resetFunctionGenerators();
    }
 
    @Override
@@ -264,19 +255,15 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      inverseDynamicsCommandList.clear();
+      accelerationIntegrationCommand.clear();
 
-      if (directPositionControlMode.getValue())
+      for (int jointIdx = 0; jointIdx < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); jointIdx++)
       {
-         inverseDynamicsCommandList.addCommand(deactivateJointsCommand);
-         inverseDynamicsCommandList.addCommand(disableAccelerationIntegrationCommand);
-      }
-      else
-      {
-         inverseDynamicsCommandList.addCommand(activateJointsCommand);
+         accelerationIntegrationCommand.addJointToComputeDesiredPositionFor(jointsToControl[jointIdx])
+                                       .setDisableAccelerationIntegration(bypassAccelerationIntegration[jointIdx].getValue());
       }
 
-      return inverseDynamicsCommandList;
+      return accelerationIntegrationCommand;
    }
 
    @Override
@@ -289,11 +276,6 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    public JointspaceTrajectoryStatusMessage pollStatusToReport()
    {
       return statusHelper.pollStatusMessage(jointControlHelper.getJointspaceCommand());
-   }
-
-   public void setEnableDirectJointPositionControl(boolean enable)
-   {
-      directPositionControlMode.set(enable && jointControlHelper.hasLowLevelJointGains());
    }
 
    @Override

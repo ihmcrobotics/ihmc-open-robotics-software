@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionFootstepDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionFootstepState;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFootstep;
@@ -61,17 +60,17 @@ public class RDXFootstepPlanActionFootstep
 
          if (getGizmo().getGizmoModifiedByUser().poll())
          {
-            definition.getSoleToPlanFrameTransform().set(getGizmo().getTransformToParent()); // Update action data based on user input
+            definition.getSoleToPlanFrameTransform().getValue().set(getGizmo().getTransformToParent()); // Update action data based on user input
          }
          else
          {
-            getGizmo().getTransformToParent().set(definition.getSoleToPlanFrameTransform()); // Update gizmo in case action data changes
+            getGizmo().getTransformToParent().set(definition.getSoleToPlanFrameTransform().getValueReadOnly()); // Update gizmo in case action data changes
             getGizmo().update();
          }
 
          interactableFootstep.update();
 
-         flatFootstepGraphic.setPose(getGizmo().getPose());
+         flatFootstepGraphic.setPoseFromReferenceFrame(getState().getSoleFrame().getReferenceFrame());
       }
    }
 
@@ -85,7 +84,7 @@ public class RDXFootstepPlanActionFootstep
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (state.getSoleFrame().isChildOfWorld() && footstepPlan.getSelected().get())
+      if (state.getSoleFrame().isChildOfWorld() && footstepPlan.getShowAdjustmentInteractables().get())
       {
          interactableFootstep.calculate3DViewPick(input);
       }
@@ -93,7 +92,7 @@ public class RDXFootstepPlanActionFootstep
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (state.getSoleFrame().isChildOfWorld() && footstepPlan.getSelected().get())
+      if (state.getSoleFrame().isChildOfWorld() && footstepPlan.getShowAdjustmentInteractables().get())
       {
          interactableFootstep.process3DViewInput(input, false);
       }
@@ -103,16 +102,11 @@ public class RDXFootstepPlanActionFootstep
    {
       if (state.getSoleFrame().isChildOfWorld())
       {
-         if (footstepPlan.getSelected().get())
+         if (footstepPlan.getShowAdjustmentInteractables().get())
             interactableFootstep.getVirtualRenderables(renderables, pool);
          else
             flatFootstepGraphic.getRenderables(renderables, pool);
       }
-   }
-
-   public ReferenceFrame getFootstepFrame()
-   {
-      return state.getSoleFrame().getReferenceFrame();
    }
 
    private RDXPose3DGizmo getGizmo()
@@ -123,5 +117,10 @@ public class RDXFootstepPlanActionFootstep
    public FootstepPlanActionFootstepDefinition getDefinition()
    {
       return definition;
+   }
+
+   public FootstepPlanActionFootstepState getState()
+   {
+      return state;
    }
 }
