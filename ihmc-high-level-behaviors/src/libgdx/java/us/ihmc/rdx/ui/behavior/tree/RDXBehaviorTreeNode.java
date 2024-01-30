@@ -46,7 +46,6 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private boolean isDescriptionBeingEdited = false;
    private transient final ImString imDescriptionText = new ImString();
    private transient final ImString imJSONFileNameText = new ImString();
-   private transient final ImVec2 descriptionTextSize = new ImVec2();
    private transient final ImBoolean isJSONFileRoot = new ImBoolean();
    private final String nodePopupID = labels.get("Node popup");
    private String modalPopupID = labels.get("Create node");
@@ -109,7 +108,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       ImGui.dummy(0.0f, ImGui.getFrameHeight()); // Make the rows as tall as when they have and input box
       ImGui.sameLine(0.0f, 0.0f);
 
-      ImGui.alignTextToFramePadding();
+      ImGui.alignTextToFramePadding(); // Centers the node descriptions vertically in the frame height area
 
       ImGui.getCursorScreenPos(rowMin);
       rowMax.set(rowMin.x + ImGui.getContentRegionAvailX(), rowMin.y + ImGui.getFrameHeightWithSpacing());
@@ -143,8 +142,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public void renderNodeDescription()
    {
       String descriptionText = getDefinition().getDescription();
-      ImGui.calcTextSize(descriptionTextSize, descriptionText);
-      boolean textHovered = ImGuiTools.isItemHovered(descriptionTextSize.x, ImGui.getFrameHeight());
+      boolean textHovered = ImGuiTools.isItemHovered(ImGuiTools.calcTextSizeX(descriptionText), ImGui.getFrameHeight());
 
       if (selected.get())
       {

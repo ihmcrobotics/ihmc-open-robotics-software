@@ -359,6 +359,10 @@ public class ImGuiTools
       return isHovered;
    }
 
+   /**
+    * A separator with a label in it.
+    * This is in the newer versions of ImGui.
+    */
    public static void separatorText(String text)
    {
       float cursorScreenPosX = ImGui.getCursorScreenPosX();

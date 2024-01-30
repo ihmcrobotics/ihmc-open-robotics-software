@@ -15,8 +15,6 @@ import java.util.ArrayList;
 public class ImGuiHandWidget
 {
    private final ArrayList<Point2D32> vertices = new ArrayList<>();
-   private boolean isHovered;
-
    {
       vertices.add(new Point2D32(-0.32f, 0.4f));
       vertices.add(new Point2D32(-0.160f, 0.495f));
@@ -53,6 +51,7 @@ public class ImGuiHandWidget
    private final ImVec2[] polygon = new ImVec2[vertices.size()];
    private int lineColor;
    private int backgroundColor;
+   private boolean isHovered;
 
    public ImGuiHandWidget()
    {
