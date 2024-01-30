@@ -11,6 +11,7 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.InertialParameterManagerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
@@ -104,6 +105,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final HighLevelControlManagerFactory managerFactory;
    private final WholeBodyControllerCoreFactory controllerCoreFactory;
    private final PushRecoveryControlManagerFactory pushRecoveryManagerFactory;
+   private InertialParameterManagerFactory inertialParameterManagerFactory = null;
    private final WalkingControllerParameters walkingControllerParameters;
    private final PushRecoveryControllerParameters pushRecoveryControllerParameters;
    private final ArrayList<Updatable> updatables = new ArrayList<>();
@@ -182,6 +184,12 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerCoreFactory = new WholeBodyControllerCoreFactory(registry);
       controllerCoreFactory.setWalkingControllerParameters(walkingControllerParameters);
       controllerCoreFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
+   }
+
+   public void createInertialParameterManager(InertialParameterManagerParameters parameters)
+   {
+      inertialParameterManagerFactory = new InertialParameterManagerFactory(registry);
+      inertialParameterManagerFactory.setInertialParameterManagerProperties(parameters);
    }
 
    private ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory;
@@ -549,6 +557,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       pushRecoveryManagerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       controllerCoreFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
 
+      if (inertialParameterManagerFactory != null)
+         inertialParameterManagerFactory.setControllerToolbox(controllerToolbox);
+
       ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = controllerToolbox.getReferenceFrameHashCodeResolver();
       FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
       commandInputManager.registerConversionHelper(commandConversionHelper);
@@ -566,6 +577,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                   managerFactory,
                                                                                   controllerCoreFactory,
                                                                                   controllerToolbox,
+                                                                                  inertialParameterManagerFactory,
                                                                                   centerOfPressureDataHolderForEstimator,
                                                                                   forceSensorDataHolder,
                                                                                   lowLevelControllerOutput);
