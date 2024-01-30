@@ -56,6 +56,11 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
       return desiredFullRobotModel;
    }
 
+   public DRCRobotModel getDesiredRobotModel()
+   {
+      return robotModel;
+   }
+
    @Override
    public void create()
    {

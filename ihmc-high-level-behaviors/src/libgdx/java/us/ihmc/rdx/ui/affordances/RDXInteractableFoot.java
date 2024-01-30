@@ -25,7 +25,7 @@ public class RDXInteractableFoot extends RDXInteractableRobotLink
    {
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(robotCollidable.getRigidBodyName()));
       create(robotCollidable,
-             fullRobotModel.getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL),
+             fullRobotModel.getFoot(side).getBodyFixedFrame(),
              modelFileName,
              baseUI.getPrimary3DPanel());
    }
