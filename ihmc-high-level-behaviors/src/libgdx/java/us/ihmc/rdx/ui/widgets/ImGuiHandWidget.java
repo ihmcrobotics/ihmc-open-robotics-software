@@ -15,6 +15,8 @@ import java.util.ArrayList;
 public class ImGuiHandWidget
 {
    private final ArrayList<Point2D32> vertices = new ArrayList<>();
+   private boolean isHovered;
+
    {
       vertices.add(new Point2D32(-0.32f, 0.4f));
       vertices.add(new Point2D32(-0.160f, 0.495f));
@@ -86,7 +88,7 @@ public class ImGuiHandWidget
       }
 
       float itemWidth = xMax - xMin;
-      boolean isHovered = ImGuiTools.isItemHovered(itemWidth);
+      isHovered = ImGuiTools.isItemHovered(itemWidth);
 
       float cursorScreenPosX = ImGui.getCursorScreenPosX();
       float cursorScreenPosY = ImGui.getCursorScreenPosY();
@@ -119,5 +121,10 @@ public class ImGuiHandWidget
    private void drawLine(float x0, float y0, float x1, float y1)
    {
       ImGui.getWindowDrawList().addLine(x0, y0, x1, y1, lineColor);
+   }
+
+   public boolean getIsHovered()
+   {
+      return isHovered;
    }
 }

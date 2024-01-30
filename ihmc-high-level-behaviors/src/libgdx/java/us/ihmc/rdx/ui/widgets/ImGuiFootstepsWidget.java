@@ -6,6 +6,7 @@ import imgui.flag.ImGuiCol;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ImGuiFootstepsWidget
 {
@@ -21,7 +22,7 @@ public class ImGuiFootstepsWidget
    private final ImVec2[] polygon = new ImVec2[9];
    private int lineColor;
    private int backgroundColor;
-   private boolean isHovered = false;
+   private final SideDependentList<Boolean> isHovered = new SideDependentList<>(false, false);
 
    public ImGuiFootstepsWidget()
    {
@@ -75,7 +76,7 @@ public class ImGuiFootstepsWidget
       heelRight.scaleAdd(scale, center);
 
       float itemWidth = bottomRight.getX32() - bottomLeft.getX32();
-      isHovered = ImGuiTools.isItemHovered(itemWidth);
+      isHovered.set(side, ImGuiTools.isItemHovered(itemWidth));
 
       float cursorScreenPosX = ImGui.getCursorScreenPosX();
       float cursorScreenPosY = ImGui.getCursorScreenPosY();
@@ -92,7 +93,7 @@ public class ImGuiFootstepsWidget
       backgroundColor = side == RobotSide.LEFT ? ImGuiTools.DARK_RED : ImGuiTools.DARK_GREEN;
       lineColor = ImGui.getColorU32(ImGuiCol.Text);
 
-      if (isHovered)
+      if (isHovered.get(side))
          ImGui.getWindowDrawList().addConvexPolyFilled(polygon, polygon.length, backgroundColor);
 
       for (int i = 0; i < polygon.length - 1; i++)
@@ -108,5 +109,10 @@ public class ImGuiFootstepsWidget
    private void drawLine(float x0, float y0, float x1, float y1)
    {
       ImGui.getWindowDrawList().addLine(x0, y0, x1, y1, lineColor);
+   }
+
+   public SideDependentList<Boolean> getIsHovered()
+   {
+      return isHovered;
    }
 }

@@ -386,7 +386,10 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                }
             }
             for (RobotSide side : RobotSide.values)
+            {
+               goalFeetGraphics.get(side).setHighlighted(footstepsWidget.getIsHovered().get(side));
                goalFeetGraphics.get(side).getRenderables(renderables, pool);
+            }
          }
       }
    }
