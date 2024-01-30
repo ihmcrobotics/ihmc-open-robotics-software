@@ -146,6 +146,14 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
          ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.FrameBgActive));
       }
 
+      if (textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
+      {
+         setSpecificWidgetOnRowClicked();
+         RDXBehaviorTreeTools.runForSubtreeNodes(RDXBehaviorTreeTools.findRootNode(this), node -> node.setDescriptionBeingEdited(false));
+         isDescriptionBeingEdited = true;
+         imDescriptionText.set(getDefinition().getDescription());
+      }
+
       if (isDescriptionBeingEdited)
       {
          if (ImGuiTools.inputText(labels.getHidden("description"), imDescriptionText))
@@ -167,7 +175,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
       // We try to make anywhere on the row clickable to select the node,
       // execpt for specific interactions
-      if (!anySpecificWidgetOnRowClicked && mouseHoveringNodeRow && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+      if (!anySpecificWidgetOnRowClicked && mouseHoveringNodeRow && ImGui.isMouseClicked(ImGuiMouseButton.Left) && !isDescriptionBeingEdited)
       {
          boolean desiredValue = !selected.get();
          RDXBehaviorTreeTools.runForSubtreeNodes(RDXBehaviorTreeTools.findRootNode(this), node -> node.selected.set(false));

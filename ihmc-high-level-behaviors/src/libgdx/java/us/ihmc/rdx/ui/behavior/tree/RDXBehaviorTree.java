@@ -49,6 +49,7 @@ public class RDXBehaviorTree
    private final ImGuiExpandCollapseRenderer expandCollapseAllRenderer = new ImGuiExpandCollapseRenderer();
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
    private boolean anyNodeSelected;
+   private RDXBehaviorTreeNode<?, ?> selectedNode;
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                           DRCRobotModel robotModel,
@@ -173,7 +174,7 @@ public class RDXBehaviorTree
          float treeExplorerHeight = availableHeight * treeExplorerPercentage;
          float nodeSettingsHeight = availableHeight * (1.0f - treeExplorerPercentage);
 
-         if (anyNodeSelected)
+//         if (anyNodeSelected)
             ImGui.beginChild(labels.get("Tree Explorer Scroll Area"), 0.0f, treeExplorerHeight);
 
          if (expandCollapseAllRenderer.render(false, true))
@@ -188,12 +189,23 @@ public class RDXBehaviorTree
 
          treeWidgetsVerticalLayout.renderImGuiWidgets(rootNode);
 
-         if (anyNodeSelected)
+//         if (anyNodeSelected)
             ImGui.endChild();
 
-         if (rootNode != null && anyNodeSelected) // It can become null above
+         anyNodeSelected = false;
+         RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, node ->
          {
-            ImGuiTools.separatorText("Node Settings");
+            anyNodeSelected |= node.getSelected();
+            if (node.getSelected())
+               selectedNode = node;
+         });
+
+         if (rootNode != null) // It can become null above
+         {
+            if (anyNodeSelected)
+               ImGuiTools.separatorText("Node Settings > \"%s\"".formatted(selectedNode.getDefinition().getDescription()));
+            else
+               ImGuiTools.separatorText("Node Settings");
             ImGui.beginChild(labels.get("Node Settings Scroll Area"), 0.0f, nodeSettingsHeight);
             renderSelectedNodeSettingsWidgets(rootNode);
             ImGui.endChild();
