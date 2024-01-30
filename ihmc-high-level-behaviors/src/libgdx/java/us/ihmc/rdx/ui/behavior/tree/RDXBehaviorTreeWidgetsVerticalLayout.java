@@ -118,7 +118,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
             actionSequence.renderExecutionControlAndProgressWidgets();
             // Try to leave space for the longest rendering node so the
             // rest don't glitch up and down.
-            ImGui.setCursorPosY(ImGui.getTextLineHeightWithSpacing() * 18.0f);
+            // ImGui.setCursorPosY(ImGui.getTextLineHeightWithSpacing() * 18.0f);
          }
 
          for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
