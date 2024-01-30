@@ -106,18 +106,26 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    {
       anySpecificWidgetOnRowClicked = false;
 
+      ImGui.dummy(0.0f, ImGui.getFrameHeight()); // Make the rows as tall as when they have and input box
+      ImGui.sameLine(0.0f, 0.0f);
+
+      ImGui.alignTextToFramePadding();
+
       ImGui.getCursorScreenPos(rowMin);
-      rowMax.set(rowMin.x + ImGui.getContentRegionAvailX(), rowMin.y + ImGui.getTextLineHeightWithSpacing());
+      rowMax.set(rowMin.x + ImGui.getContentRegionAvailX(), rowMin.y + ImGui.getFrameHeightWithSpacing());
 
       mouseHoveringNodeRow = ImGuiTools.isItemHovered(ImGui.getContentRegionAvailX());
       if (mouseHoveringNodeRow)
       {
-         ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.FrameBgHovered));
+         if (ImGui.isMouseDown(ImGuiMouseButton.Left))
+            ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.HeaderActive));
+         else
+            ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.HeaderHovered));
       }
 
       if (!getChildren().isEmpty())
       {
-         if (expandCollapseRenderer.render(treeWidgetExpanded))
+         if (expandCollapseRenderer.render(treeWidgetExpanded, false, ImGui.getFrameHeight()))
          {
             anySpecificWidgetOnRowClicked = true;
             treeWidgetExpanded = !treeWidgetExpanded;
@@ -143,13 +151,14 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
       if (selected.get())
       {
-         ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.FrameBgActive));
+         ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.Header));
       }
 
       if (textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
       {
          setSpecificWidgetOnRowClicked();
-         RDXBehaviorTreeTools.runForSubtreeNodes(RDXBehaviorTreeTools.findRootNode(this), node -> node.setDescriptionBeingEdited(false));
+         RDXBehaviorTreeTools.runForEntireTree(this, RDXBehaviorTreeNode::clearSelections);
+         selected.set(true);
          isDescriptionBeingEdited = true;
          imDescriptionText.set(getDefinition().getDescription());
       }
@@ -168,8 +177,10 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
          nodeContextMenuShowing = false;
       }
 
-      if (textHovered && !isDescriptionBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
+      if (mouseHoveringNodeRow && !isDescriptionBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
       {
+         RDXBehaviorTreeTools.runForEntireTree(this, RDXBehaviorTreeNode::clearSelections);
+         selected.set(true);
          ImGui.openPopup(nodePopupID);
       }
 
@@ -178,7 +189,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       if (!anySpecificWidgetOnRowClicked && mouseHoveringNodeRow && ImGui.isMouseClicked(ImGuiMouseButton.Left) && !isDescriptionBeingEdited)
       {
          boolean desiredValue = !selected.get();
-         RDXBehaviorTreeTools.runForSubtreeNodes(RDXBehaviorTreeTools.findRootNode(this), node -> node.selected.set(false));
+         RDXBehaviorTreeTools.runForEntireTree(this, RDXBehaviorTreeNode::clearSelections);
          selected.set(desiredValue);
       }
    }
@@ -189,7 +200,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
       if (ImGui.menuItem(labels.get("Rename...")))
       {
-         RDXBehaviorTreeTools.runForSubtreeNodes(RDXBehaviorTreeTools.findRootNode(this), node -> node.setDescriptionBeingEdited(false));
+         RDXBehaviorTreeTools.runForEntireTree(this, node -> node.setDescriptionBeingEdited(false));
          isDescriptionBeingEdited = true;
          imDescriptionText.set(getDefinition().getDescription());
       }
@@ -234,6 +245,12 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public void renderNodeSettingsWidgets()
    {
 
+   }
+
+   public void clearSelections()
+   {
+      selected.set(false);
+      isDescriptionBeingEdited = false;
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

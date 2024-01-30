@@ -32,16 +32,16 @@ public class ImGuiFootstepsWidget
       }
    }
 
-   public void render()
+   public void render(float rowHeight)
    {
-      render(RobotSide.LEFT);
+      render(RobotSide.LEFT, rowHeight);
       float fontSize = ImGui.getFontSize();
       ImGui.sameLine();
       ImGui.setCursorPosX(ImGui.getCursorPosX() - fontSize * 0.2f);
-      render(RobotSide.RIGHT);
+      render(RobotSide.RIGHT, rowHeight);
    }
 
-   public void render(RobotSide side)
+   public void render(RobotSide side, float rowHeight)
    {
       float fontSize = ImGui.getFontSize();
 
@@ -49,6 +49,9 @@ public class ImGuiFootstepsWidget
       scale *= fontSize;
 
       center.set(0.3f * fontSize, 0.5f * fontSize);
+
+      if (rowHeight == ImGui.getFrameHeight())
+         center.addY(ImGui.getStyle().getFramePaddingY());
 
       float halfWidth = 0.34f;
       float halfHeight = 0.7f;

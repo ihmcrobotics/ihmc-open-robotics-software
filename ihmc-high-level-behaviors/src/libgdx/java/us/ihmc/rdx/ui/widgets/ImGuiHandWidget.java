@@ -62,7 +62,7 @@ public class ImGuiHandWidget
       }
    }
 
-   public void render(RobotSide side)
+   public void render(RobotSide side, float rowHeight)
    {
       float fontSize = ImGui.getFontSize();
 
@@ -76,6 +76,9 @@ public class ImGuiHandWidget
       scale *= fontSize;
 
       center.set(0.3f * fontSize, 0.5f * fontSize);
+
+      if (rowHeight == ImGui.getFrameHeight())
+         center.addY(ImGui.getStyle().getFramePaddingY());
 
       float xMin = Float.MAX_VALUE;
       float xMax = Float.MIN_VALUE;

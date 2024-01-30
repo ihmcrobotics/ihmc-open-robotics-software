@@ -289,7 +289,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    {
       super.renderTreeViewIconArea();
 
-      handIconWidget.render(getDefinition().getSide());
+      handIconWidget.render(getDefinition().getSide(), ImGui.getFrameHeight());
       ImGui.sameLine();
    }
 

@@ -323,7 +323,7 @@ public class ImGuiTools
       boolean isHovered = mousePosXInWidgetFrame >= ImGui.getCursorPosX();
       isHovered &= mousePosXInWidgetFrame <= ImGui.getCursorPosX() + itemWidth + ImGui.getStyle().getFramePaddingX();
       isHovered &= mousePosYInWidgetFrame >= ImGui.getCursorPosY();
-      isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + ImGui.getFontSize() + ImGui.getStyle().getFramePaddingY();
+      isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + ImGui.getFrameHeight();
       isHovered &= ImGui.isWindowHovered();
 
       return isHovered;
@@ -385,6 +385,12 @@ public class ImGuiTools
    {
       ImGui.calcTextSize(calcTextSize, text);
       return calcTextSize.x;
+   }
+
+   public static float calcTextSizeY(String text)
+   {
+      ImGui.calcTextSize(calcTextSize, text);
+      return calcTextSize.y;
    }
 
    public static float calcButtonWidth(String buttonText)

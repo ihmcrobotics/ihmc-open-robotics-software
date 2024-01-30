@@ -47,7 +47,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    @Override
    public void renderTreeViewIconArea()
    {
-      if (hollowArrowRenderer.render(getState().getIsNextForExecution()))
+      if (hollowArrowRenderer.render(getState().getIsNextForExecution(), ImGui.getFrameHeight()))
       {
          setSpecificWidgetOnRowClicked();
          RDXActionSequence actionSequence = RDXBehaviorTreeTools.findActionSequenceAncestor(this);

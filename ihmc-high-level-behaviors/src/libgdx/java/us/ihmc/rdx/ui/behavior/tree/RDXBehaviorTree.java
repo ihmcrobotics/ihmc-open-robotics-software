@@ -192,16 +192,17 @@ public class RDXBehaviorTree
 //         if (anyNodeSelected)
             ImGui.endChild();
 
-         anyNodeSelected = false;
-         RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, node ->
-         {
-            anyNodeSelected |= node.getSelected();
-            if (node.getSelected())
-               selectedNode = node;
-         });
 
          if (rootNode != null) // It can become null above
          {
+            anyNodeSelected = false;
+            RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, node ->
+            {
+               anyNodeSelected |= node.getSelected();
+               if (node.getSelected())
+                  selectedNode = node;
+            });
+
             if (anyNodeSelected)
                ImGuiTools.separatorText("Node Settings > \"%s\"".formatted(selectedNode.getDefinition().getDescription()));
             else

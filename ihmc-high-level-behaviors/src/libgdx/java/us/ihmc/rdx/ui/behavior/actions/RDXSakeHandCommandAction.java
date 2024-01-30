@@ -94,7 +94,7 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    {
       super.renderTreeViewIconArea();
 
-      gripperWidget.render(getDefinition().getSide());
+      gripperWidget.render(getDefinition().getSide(), ImGui.getFrameHeight());
       ImGui.sameLine();
    }
 

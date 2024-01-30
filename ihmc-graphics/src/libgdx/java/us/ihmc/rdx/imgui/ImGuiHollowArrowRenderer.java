@@ -22,7 +22,7 @@ public class ImGuiHollowArrowRenderer
 
    private boolean isHovered = false;
 
-   public boolean render(boolean active)
+   public boolean render(boolean active, float rowHeight)
    {
       lineColor = ImGui.getColorU32(ImGuiCol.Text);
 
@@ -33,6 +33,9 @@ public class ImGuiHollowArrowRenderer
 
       // Center is base of arrowhead
       center.set(0.7f * fontSize, 0.5f * fontSize);
+
+      if (rowHeight == ImGui.getFrameHeight())
+         center.addY(ImGui.getStyle().getFramePaddingY());
 
       float zero = 0.0f;
       float arrowheadHalfheight = 0.4f;
