@@ -5,10 +5,7 @@ import java.util.List;
 
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -38,7 +35,7 @@ public class GroundPlaneEstimator
    }
 
    /**
-    * @return pitch angle of ground plane in World Frame
+    * @return roll angle of ground plane in World Frame
     */
    public double getRoll()
    {
@@ -74,12 +71,9 @@ public class GroundPlaneEstimator
    /**
     * @param pointToPack : ground plane point in World Frame
     */
-   public void getPlanePoint(FramePoint3DBasics pointToPack)
+   public void getPlanePoint(FixedFramePoint3DBasics pointToPack)
    {
-      ReferenceFrame originalFrame = pointToPack.getReferenceFrame();
-      pointToPack.changeFrame(ReferenceFrame.getWorldFrame());
-      pointToPack.set(groundPlane.getPoint());
-      pointToPack.changeFrame(originalFrame);
+      pointToPack.setMatchingFrame(ReferenceFrame.getWorldFrame(), groundPlane.getPoint());
    }
 
    /**
@@ -93,12 +87,9 @@ public class GroundPlaneEstimator
    /**
     * @param normalToPack : ground plane normal in World Frame
     */
-   public void getPlaneNormal(FrameVector3DBasics normalToPack)
+   public void getPlaneNormal(FixedFrameVector3DBasics normalToPack)
    {
-      ReferenceFrame originalFrame = normalToPack.getReferenceFrame();
-      normalToPack.changeFrame(ReferenceFrame.getWorldFrame());
-      normalToPack.set(groundPlane.getNormal());
-      normalToPack.changeFrame(originalFrame);
+      normalToPack.setMatchingFrame(ReferenceFrame.getWorldFrame(), normalToPack);
    }
 
    /**
