@@ -10,6 +10,7 @@ import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.OpenCLPointCloudExtractor;
 import us.ihmc.perception.RawImage;
@@ -29,6 +30,8 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 public class RDXYOLOv8PointCloudSegmentationDemo
@@ -78,8 +81,8 @@ public class RDXYOLOv8PointCloudSegmentationDemo
          {
             RawImage segmentedDepth = segmenter.removeBackground(zedDepthImage, objectMask);
 
-            RecyclingArrayList<Point3D32> ptcld = extractor.extractPointCloud(segmentedDepth);
-            ptcld.shuffle(random);
+            List<Point3DReadOnly> ptcld = extractor.extractPointCloud(segmentedDepth);
+            Collections.shuffle(ptcld, random);
             synchronized (segmentedPointCloudRenderer)
             {
                if (segmentedPointCloud != null)
