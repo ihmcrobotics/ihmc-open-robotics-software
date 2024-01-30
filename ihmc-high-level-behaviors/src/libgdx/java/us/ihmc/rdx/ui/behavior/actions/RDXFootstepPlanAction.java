@@ -28,6 +28,7 @@ import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
+import us.ihmc.rdx.ui.widgets.ImGuiFootstepsWidget;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -56,6 +57,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final SideDependentList<ImBoolean> goalFeetPosesSelected = new SideDependentList<>();
    private final SideDependentList<RDXPose3DGizmo> goalFeetGizmos = new SideDependentList<>();
    private final RDX3DPanelTooltip tooltip;
+   private final ImGuiFootstepsWidget footstepsWidget = new ImGuiFootstepsWidget();
 
    public RDXFootstepPlanAction(long id,
                                 CRDTInfo crdtInfo,
@@ -203,6 +205,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             goalFeetGraphics.get(side).setPose(goalFeetGizmos.get(side).getPose());
          }
       }
+   }
+
+   @Override
+   public void renderTreeViewIconArea()
+   {
+      super.renderTreeViewIconArea();
+
+      ImGui.sameLine();
+      footstepsWidget.render();
    }
 
    @Override

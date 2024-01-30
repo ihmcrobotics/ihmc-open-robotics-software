@@ -7,6 +7,7 @@ import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.ui.widgets.ImGuiGripperWidget;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_ANGLE_BETWEEN_FINGERS;
@@ -16,13 +17,12 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImIntegerWrapper sideWidget;
-
    private final String[] handConfigurationNames = new String[SakeHandCommandOption.values.length];
    private final ImIntegerWrapper handCommandEnumWidget;
    private final ImDoubleWrapper positionWidget;
    private final ImDoubleWrapper torqueWidget;
-
    private final ImBooleanWrapper executeWithNextActionWrapper;
+   private final ImGuiGripperWidget gripperWidget = new ImGuiGripperWidget();
 
    public RDXSakeHandCommandAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -87,6 +87,15 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
       {
          getDefinition().setHandConfigurationIndex(SakeHandCommandOption.GOTO.ordinal());
       }
+   }
+
+   @Override
+   public void renderTreeViewIconArea()
+   {
+      super.renderTreeViewIconArea();
+
+      imgui.ImGui.sameLine();
+      gripperWidget.render(getDefinition().getSide());
    }
 
    @Override
