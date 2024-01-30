@@ -18,7 +18,7 @@ import java.nio.FloatBuffer;
  */
 public class OpenCLPointCloudExtractor
 {
-   private static final int FLOATS_PER_PIXEL = 4;
+   private static final int FLOATS_PER_PIXEL = 4; // [0] = depth value, [1] = x, [2] = y, [3] = z (coordinates in world)
    private final OpenCLManager openCLManager;
    private final _cl_program openCLProgram;
    private final _cl_kernel kernel;

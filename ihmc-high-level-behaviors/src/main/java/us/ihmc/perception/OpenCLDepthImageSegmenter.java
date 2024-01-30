@@ -29,43 +29,49 @@ public class OpenCLDepthImageSegmenter
    public RawImage removeBackground(RawImage depthImage, Mat imageMask)
    {
       depthImage.get();
+      Mat segmentMat = depthImage.getCpuImageMat();
+      // Stupid amount of checking to avoid errors
+      if (segmentMat != null && !segmentMat.isNull() && !segmentMat.empty())
+      {
 
-      if (bytedecoDepthImage != null)
-         bytedecoDepthImage.destroy(openCLManager);
-      bytedecoDepthImage = new BytedecoImage(depthImage.getCpuImageMat());
-      bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-      bytedecoDepthImage.writeOpenCLImage(openCLManager);
+         if (bytedecoDepthImage != null)
+            bytedecoDepthImage.destroy(openCLManager);
+         bytedecoDepthImage = new BytedecoImage(segmentMat);
+         bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+         bytedecoDepthImage.writeOpenCLImage(openCLManager);
 
-      if (bytedecoMaskImage != null)
-         bytedecoMaskImage.destroy(openCLManager);
-      Mat resizedMask = new Mat(depthImage.getImageWidth(), depthImage.getImageHeight(), opencv_core.CV_8UC1);
-      opencv_imgproc.resize(imageMask, resizedMask, new Size(depthImage.getImageWidth(), depthImage.getImageHeight()));
-      bytedecoMaskImage = new BytedecoImage(resizedMask);
-      bytedecoMaskImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-      bytedecoMaskImage.writeOpenCLImage(openCLManager);
+         if (bytedecoMaskImage != null)
+            bytedecoMaskImage.destroy(openCLManager);
+         Mat resizedMask = new Mat(depthImage.getImageWidth(), depthImage.getImageHeight(), opencv_core.CV_8UC1);
+         opencv_imgproc.resize(imageMask, resizedMask, new Size(depthImage.getImageWidth(), depthImage.getImageHeight()));
+         bytedecoMaskImage = new BytedecoImage(resizedMask);
+         bytedecoMaskImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+         bytedecoMaskImage.writeOpenCLImage(openCLManager);
 
-      if (bytedecoSegmentedDepth != null)
-         bytedecoSegmentedDepth.destroy(openCLManager);
-      bytedecoSegmentedDepth = new BytedecoImage(depthImage.getImageWidth(), depthImage.getImageHeight(), depthImage.getOpenCVType());
-      bytedecoSegmentedDepth.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+         if (bytedecoSegmentedDepth != null)
+            bytedecoSegmentedDepth.destroy(openCLManager);
+         bytedecoSegmentedDepth = new BytedecoImage(depthImage.getImageWidth(), depthImage.getImageHeight(), depthImage.getOpenCVType());
+         bytedecoSegmentedDepth.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
 
-      openCLManager.setKernelArgument(kernel, 0, bytedecoDepthImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(kernel, 1, bytedecoMaskImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(kernel, 2, bytedecoSegmentedDepth.getOpenCLImageObject());
+         openCLManager.setKernelArgument(kernel, 0, bytedecoDepthImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(kernel, 1, bytedecoMaskImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(kernel, 2, bytedecoSegmentedDepth.getOpenCLImageObject());
 
-      openCLManager.execute2D(kernel, depthImage.getImageWidth(), depthImage.getImageHeight());
+         openCLManager.execute2D(kernel, depthImage.getImageWidth(), depthImage.getImageHeight());
 
-      bytedecoSegmentedDepth.readOpenCLImage(openCLManager);
+         bytedecoSegmentedDepth.readOpenCLImage(openCLManager);
+         segmentMat = bytedecoSegmentedDepth.getBytedecoOpenCVMat();
+
+         resizedMask.release();
+      }
 
       depthImage.release();
-      resizedMask.release();
-
       return new RawImage(depthImage.getSequenceNumber(),
                           depthImage.getAcquisitionTime(),
                           depthImage.getImageWidth(),
                           depthImage.getImageHeight(),
                           depthImage.getDepthDiscretization(),
-                          bytedecoSegmentedDepth.getBytedecoOpenCVMat(),
+                          segmentMat,
                           null,
                           depthImage.getOpenCVType(),
                           depthImage.getFocalLengthX(),

@@ -8,8 +8,11 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.perception.IterativeClosestPointWorker;
 import us.ihmc.perception.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.OpenCLPointCloudExtractor;
 import us.ihmc.perception.RawImage;
@@ -28,34 +31,40 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
+import us.ihmc.tools.thread.Throttler;
 
 import java.util.Random;
 
-public class RDXYOLOv8PointCloudSegmentationDemo
+public class RDXYOLOv8IterativeClosestPointDemo
 {
    private static final float CONFIDENCE_THRESHOLD = 0.5f;
    private static final float NMS_THRESHOLD = 0.1f;
    private static final float MASK_THRESHOLD = 0.0f;
    private static final YOLOv8DetectableObject OBJECT_TYPE = YOLOv8DetectableObject.CUP;
+   private static final Vector3D32 OBJECT_LENGTHS = new Vector3D32(0.0f, 0.0f, 0.1f);
+   private static final Vector3D32 OBJECT_RADII = new Vector3D32(0.05f, 0.0f, 0.0f);
    private static final Random random = new Random();
 
    private final OpenCLManager openCLManager = new OpenCLManager();
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor(openCLManager);
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter(openCLManager);
 
-   private final ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "icp_worker_demo");
+   private final ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "yolo_icp_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(node);
    private final ZEDColorDepthImageRetriever zedImageRetriever;
    private final ZEDColorDepthImagePublisher zedImagePublisher;
 
    private final YOLOv8ObjectDetector yoloObjectDetector = new YOLOv8ObjectDetector();
 
+   private final IterativeClosestPointWorker icpWorker;
+
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
    private final RDXPointCloudRenderer segmentedPointCloudRenderer = new RDXPointCloudRenderer();
    private final RecyclingArrayList<Point3D32> segmentedPointCloud = new RecyclingArrayList<>(Point3D32::new);
+   private final RDXPointCloudRenderer icpObjectPointCloudRenderer = new RDXPointCloudRenderer();
 
-   public RDXYOLOv8PointCloudSegmentationDemo()
+   public RDXYOLOv8IterativeClosestPointDemo()
    {
       zedImageRetriever = new ZEDColorDepthImageRetriever(0,
                                                           ReferenceFrame::getWorldFrame,
@@ -63,12 +72,18 @@ public class RDXYOLOv8PointCloudSegmentationDemo
                                                           new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR));
       zedImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH);
 
+      icpWorker = new IterativeClosestPointWorker(OBJECT_TYPE.getCorrespondingShape(), OBJECT_LENGTHS, OBJECT_RADII, 500, 500, new Pose3D(), random);
+      icpWorker.useProvidedTargetPoint(false);
+
       zedImageRetriever.start();
 
       ThreadTools.startAThread(this::runUI, getClass().getSimpleName() + "UI");
 
+      Throttler throttler = new Throttler();
+      throttler.setFrequency(30.0);
       while (true)
       {
+         throttler.waitAndRun();
          RawImage zedDepthImage = zedImageRetriever.getLatestRawDepthImage();
          RawImage zedColorImage = zedImageRetriever.getLatestRawColorImage(RobotSide.LEFT);
 
@@ -80,8 +95,7 @@ public class RDXYOLOv8PointCloudSegmentationDemo
 
             RecyclingArrayList<Point3D32> ptcld = extractor.extractPointCloud(segmentedDepth);
             ptcld.shuffle(random);
-            synchronized (segmentedPointCloudRenderer)
-            {
+
                if (segmentedPointCloud != null)
                   segmentedPointCloud.clear();
                for (int i = 0; i < Short.MAX_VALUE && i < ptcld.size(); ++i)
@@ -89,15 +103,21 @@ public class RDXYOLOv8PointCloudSegmentationDemo
                   Point3D32 point = segmentedPointCloud.add();
                   point.set(ptcld.get(i));
                }
-               segmentedPointCloudRenderer.setPointsToRender(segmentedPointCloud, Color.GREEN);
+               segmentedPointCloudRenderer.setPointsToRender(segmentedPointCloud, Color.GRAY);
+
+            icpWorker.setEnvironmentPointCloud(segmentedPointCloud);
+            if (icpWorker.runICP(1))
+            {
+
+                  icpObjectPointCloudRenderer.setPointsToRender(icpWorker.getObjectPointCloud(), Color.YELLOW);
             }
 
-            zedImagePublisher.setNextColorImage(zedColorImage.get(), RobotSide.LEFT);
-            zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
             segmentedDepth.release();
          }
-         if (objectMask != null)
-            objectMask.release();
+
+         zedImagePublisher.setNextColorImage(zedColorImage.get(), RobotSide.LEFT);
+         zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
+
          zedDepthImage.release();
          zedColorImage.release();
          results.destroy();
@@ -113,6 +133,9 @@ public class RDXYOLOv8PointCloudSegmentationDemo
          {
             segmentedPointCloudRenderer.create(Short.MAX_VALUE);
             baseUI.getPrimaryScene().addRenderableProvider(segmentedPointCloudRenderer);
+
+            icpObjectPointCloudRenderer.create(Short.MAX_VALUE);
+            baseUI.getPrimaryScene().addRenderableProvider(icpObjectPointCloudRenderer);
 
             RDXROS2ImageMessageVisualizer zedColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED2 Color Image",
                                                                                                       DomainFactory.PubSubImplementation.FAST_RTPS,
@@ -133,10 +156,8 @@ public class RDXYOLOv8PointCloudSegmentationDemo
          @Override
          public void render()
          {
-            synchronized (segmentedPointCloudRenderer)
-            {
-               segmentedPointCloudRenderer.updateMesh();
-            }
+            segmentedPointCloudRenderer.updateMesh();
+            icpObjectPointCloudRenderer.updateMesh();
             perceptionVisualizerPanel.update();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -155,6 +176,6 @@ public class RDXYOLOv8PointCloudSegmentationDemo
 
    public static void main(String[] args)
    {
-      new RDXYOLOv8PointCloudSegmentationDemo();
+      new RDXYOLOv8IterativeClosestPointDemo();
    }
 }
