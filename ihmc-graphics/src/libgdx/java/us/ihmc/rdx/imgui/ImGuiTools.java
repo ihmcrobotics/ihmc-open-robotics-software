@@ -48,6 +48,7 @@ public class ImGuiTools
    private static int deleteKey;
    private static int escapeKey;
    private static int enterKey;
+   private static int keyPadEnterKey;
    private static int upArrowKey;
    private static int downArrowKey;
    private static int leftArrowKey;
@@ -264,7 +265,7 @@ public class ImGuiTools
    public static boolean inputText(String label, ImString text)
    {
       ImGui.inputText(label, text);
-      return ImGui.isItemFocused() && ImGui.isKeyReleased(ImGuiTools.getEnterKey());
+      return ImGui.isItemFocused() && (ImGui.isKeyReleased(ImGuiTools.getEnterKey()) || ImGui.isKeyReleased(ImGuiTools.getKeyPadEnterKey()));
    }
 
    public static void textColored(Color color, String text)
@@ -625,6 +626,7 @@ public class ImGuiTools
       deleteKey = ImGui.getKeyIndex(ImGuiKey.Delete);
       escapeKey = ImGui.getKeyIndex(ImGuiKey.Escape);
       enterKey = ImGui.getKeyIndex(ImGuiKey.Enter);
+      keyPadEnterKey = ImGui.getKeyIndex(ImGuiKey.KeyPadEnter);
       upArrowKey = ImGui.getKeyIndex(ImGuiKey.UpArrow);
       downArrowKey = ImGui.getKeyIndex(ImGuiKey.DownArrow);
       leftArrowKey = ImGui.getKeyIndex(ImGuiKey.LeftArrow);
@@ -657,6 +659,13 @@ public class ImGuiTools
       if (!userKeysHaveBeenMapped)
          initializeUserMappedKeys();
       return enterKey;
+   }
+
+   public static int getKeyPadEnterKey()
+   {
+      if (!userKeysHaveBeenMapped)
+         initializeUserMappedKeys();
+      return keyPadEnterKey;
    }
 
    public static int getUpArrowKey()
