@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.configurations.InertialParameterManagerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -10,7 +11,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.parameterEstimation.NadiaInertialExtendedKalmanFilterParameters;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
@@ -72,7 +72,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private static final boolean DEBUG = true;
    private final YoMatrix residual;
 
-   public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, YoRegistry parentRegistry)
+   public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialParameterManagerParameters parameters, YoRegistry parentRegistry)
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
@@ -122,16 +122,19 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       wholeSystemTorques = new DMatrixRMaj(nDoFs, 1);
 
-      basisSets = NadiaInertialExtendedKalmanFilterParameters.inertialParametersToEstimateHandsMass(estimateRobotModel);
+      basisSets = parameters.getParametersToEstimate();
       regressorPartitions = RegressorTools.sizePartitionMatrices(regressorCalculator.getJointTorqueRegressorMatrix(), basisSets);
       parameterPartitions = RegressorTools.sizePartitionVectors(basisSets);
       inertialKalmanFilter = new InertialKalmanFilter(estimateRobotModel,
                                                       basisSets,
-                                                      NadiaInertialExtendedKalmanFilterParameters.getURDFParameters(estimateRobotModel, basisSets),
+                                                      parameters.getURDFParameters(basisSets),
                                                       CommonOps_DDRM.identity(RegressorTools.sizePartitions(basisSets)[0]),
                                                       CommonOps_DDRM.identity(RegressorTools.sizePartitions(basisSets)[0]),
                                                       CommonOps_DDRM.identity(nDoFs));
-      inertialKalmanFilterEstimate = new YoMatrix("kfEstimate", RegressorTools.sizePartitions(basisSets)[0], 1, registry);
+      inertialKalmanFilterEstimate = new YoMatrix("inertialParameterEstimate",
+                                                  RegressorTools.sizePartitions(basisSets)[0], 1,
+                                                  getRowNames(basisSets, estimateModelBodies), null,
+                                                  registry);
 
       if (DEBUG)
       {
@@ -295,6 +298,21 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          CommonOps_DDRM.multAdd(-1.0, regressorPartitions[i], parameterPartitions[i], residualToPack);
       }
       residual.set(residualToPack);
+   }
+
+   private String[] getRowNames(Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets, RigidBodyReadOnly[] bodies)
+   {
+      List<String> rowNames = new ArrayList<>();
+      for (int i = 0; i < basisSets.length; ++i)
+      {
+         for (JointTorqueRegressorCalculator.SpatialInertiaBasisOption option : JointTorqueRegressorCalculator.SpatialInertiaBasisOption.values)
+         {
+            if (basisSets[i].contains(option))
+               rowNames.add(bodies[i].getName() + "_" + option.name());
+         }
+      }
+
+      return rowNames.toArray(new String[0]);
    }
 
    private enum ParameterRepresentation
