@@ -53,14 +53,14 @@ public class YOLOv8ObjectDetector
    {
       bgrImage.get();
       Mat blob = opencv_dnn.blobFromImage(bgrImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
-      yoloNet.setInput(blob);
       MatVector outputBlobs = new MatVector(outputNames.size());
+
+      yoloNet.setInput(blob);
       yoloNet.forward(outputBlobs, outputNames);
 
       List<YOLOv8Detection> detections = processOutput(outputBlobs, confidenceThreshold, nonMaximumSuppressionThreshold, bgrImage.getImageWidth(), bgrImage.getImageHeight());
-      YOLOv8DetectionResults results = new YOLOv8DetectionResults(detections, outputBlobs.get(1));
+      YOLOv8DetectionResults results = new YOLOv8DetectionResults(detections, outputBlobs);
 
-      outputBlobs.get(0).release();
       blob.release();
       bgrImage.release();
 
