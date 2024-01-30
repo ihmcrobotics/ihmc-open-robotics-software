@@ -3,10 +3,11 @@ package us.ihmc.rdx.ui.affordances;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
+import imgui.flag.ImGuiMouseButton;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -37,10 +38,14 @@ public class RDXInteractableRobotLink
 {
    private final ArrayList<RDXRobotCollidable> robotCollidables = new ArrayList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   /** The frame tracks the real robot's live pose. */
+   /**
+    * The frame tracks the real robot's live pose.
+    */
    private ReferenceFrame syncedControlFrame;
    private ReferenceFrame graphicFrame;
-   /** Link frame is used to specify the collidables for user selection. */
+   /**
+    * Link frame is used to specify the collidables for user selection.
+    */
    private ReferenceFrame linkFrame;
    private RDXInteractableHighlightModel highlightModel;
    private boolean modified = false;
@@ -52,13 +57,17 @@ public class RDXInteractableRobotLink
    private final SideDependentList<Boolean> isVRPointing = new SideDependentList<>(false, false);
    private final Notification becomesModified = new Notification();
 
-   /** For when the graphic, the link, and control frame are all the same. */
+   /**
+    * For when the graphic, the link, and control frame are all the same.
+    */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
    {
       create(robotCollidable, syncedControlFrame, new RigidBodyTransform(), new RigidBodyTransform(), graphicFileName, panel3D);
    }
 
-   /** Used for the hands especially, which have 3 frames each. */
+   /**
+    * Used for the hands especially, which have 3 frames each.
+    */
    public void create(RDXRobotCollidable robotCollidable,
                       ReferenceFrame syncedControlFrame,
                       RigidBodyTransformReadOnly graphicToControlFrameTransform,
@@ -97,11 +106,8 @@ public class RDXInteractableRobotLink
 
       highlightModel.setPose(graphicFrame);
 
-      if (modified && !selectablePose3DGizmo.isSelected() && (isMouseHovering
-                                                           || isVRHovering.get(RobotSide.LEFT)
-                                                           || isVRHovering.get(RobotSide.RIGHT)
-                                                           || isVRPointing.get(RobotSide.LEFT)
-                                                           || isVRPointing.get(RobotSide.RIGHT)))
+      if (modified && !selectablePose3DGizmo.isSelected() && (isMouseHovering || isVRHovering.get(RobotSide.LEFT) || isVRHovering.get(RobotSide.RIGHT)
+                                                              || isVRPointing.get(RobotSide.LEFT) || isVRPointing.get(RobotSide.RIGHT)))
       {
          highlightModel.setTransparency(0.7);
       }
@@ -136,52 +142,57 @@ public class RDXInteractableRobotLink
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
-         {
-            for (RDXRobotCollidable robotCollidable : robotCollidables)
-            {
-               if (robotCollidable.getVRHovering(side))
-                  isVRHovering.put(side, true);
-               if (robotCollidable.getVRPointing(side))
-                  isVRPointing.put(side, true);
-            }
+                                                      {
+                                                         for (RDXRobotCollidable robotCollidable : robotCollidables)
+                                                         {
+                                                            if (robotCollidable.getVRHovering(side))
+                                                               isVRHovering.put(side, true);
+                                                            if (robotCollidable.getVRPointing(side))
+                                                               isVRPointing.put(side, true);
+                                                         }
 
-            RDXVRDragData triggerDragData = controller.getTriggerDragData();
-            InputDigitalActionData aButton = controller.getAButtonActionData();
-            InputDigitalActionData bButton = controller.getBButtonActionData();
+                                                         RDXVRDragData triggerDragData = controller.getTriggerDragData();
+                                                         InputDigitalActionData aButton = controller.getAButtonActionData();
+                                                         InputDigitalActionData bButton = controller.getBButtonActionData();
 
-            // We want the delete and execute buttons to work when dragging, but
-            // sometimes it's not hovering while dragging due to lag, so we also
-            // enter this block if it's just being dragged.
-            if (isVRHovering.get(side) || triggerDragData.isBeingDragged(this))
-            {
-               if (triggerDragData.getDragJustStarted())
-               {
-                  modified = true;
-                  triggerDragData.setObjectBeingDragged(this);
-                  triggerDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
-               }
+                                                         // We want the delete and execute buttons to work when dragging, but
+                                                         // sometimes it's not hovering while dragging due to lag, so we also
+                                                         // enter this block if it's just being dragged.
+                                                         if (isVRHovering.get(side) || triggerDragData.isBeingDragged(this))
+                                                         {
+                                                            if (triggerDragData.getDragJustStarted())
+                                                            {
+                                                               modified = true;
+                                                               triggerDragData.setObjectBeingDragged(this);
+                                                               triggerDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo()
+                                                                                                                                    .getGizmoFrame());
+                                                            }
 
-               if (modified)
-               {
-                  controller.setBButtonText("Delete");
-                  controller.setAButtonText("Execute");
-                  if (aButton.bState() && aButton.bChanged())
-                  {
-                     onSpacePressed.run();
-                  }
-                  if (bButton.bState() && bButton.bChanged())
-                  {
-                     delete();
-                  }
-               }
-            }
+                                                            if (modified)
+                                                            {
+                                                               controller.setBButtonText("Delete");
+                                                               controller.setAButtonText("Execute");
+                                                               if (aButton.bState() && aButton.bChanged())
+                                                               {
+                                                                  onSpacePressed.run();
+                                                               }
+                                                               if (bButton.bState() && bButton.bChanged())
+                                                               {
+                                                                  delete();
+                                                               }
+                                                            }
+                                                         }
 
-            if (triggerDragData.isBeingDragged(this))
-            {
-               triggerDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
-                                                                      selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
-            }
-         });
+                                                         if (triggerDragData.isBeingDragged(this))
+                                                         {
+                                                            triggerDragData.getDragFrame()
+                                                                           .getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo()
+                                                                                                                            .getTransformToParent(),
+                                                                                                       selectablePose3DGizmo.getPoseGizmo()
+                                                                                                                            .getGizmoFrame()
+                                                                                                                            .getParent());
+                                                         }
+                                                      });
       }
    }
 
@@ -339,10 +350,33 @@ public class RDXInteractableRobotLink
    /**
     * Disables the specified DoF on the gizmo.
     * Should only be called after `create()`
+    *
     * @param dof
     */
    public void disableDoF(SixDoFSelection dof)
    {
       selectablePose3DGizmo.disableDoF(dof);
+   }
+
+   public FramePose3D getRigidBodyPose()
+   {
+      FramePose3D tempFrame = new FramePose3D();
+      if (selectablePose3DGizmo.isSelected())
+      {
+//         RDXRobotCollidable collidable = this.robotCollidables.get(0);
+//         tempFrame.set(collidable.getShape().getPose().getShapePosition(), collidable.getShape().getPose().getShapeOrientation());
+         tempFrame.setFromReferenceFrame(selectablePose3DGizmo.getGizmoFrame());
+      }
+      else
+      {
+         tempFrame.setFromReferenceFrame(selectablePose3DGizmo.getGizmoFrame());
+      }
+      tempFrame.changeFrame(ReferenceFrame.getWorldFrame());
+      return tempFrame;
+
+      //      FramePose3D pose = new FramePose3D();
+      //      pose.setReferenceFrame(ReferenceFrame.getWorldFrame());
+      //      pose.set(linkFrame.getTransformToWorldFrame());
+      //      return pose;
    }
 }
