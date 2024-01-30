@@ -1,5 +1,6 @@
 package us.ihmc.rdx.perception;
 
+import boofcv.struct.flow.ImageFlow;
 import com.badlogic.gdx.graphics.Color;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -12,19 +13,20 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.perception.IterativeClosestPointWorker;
-import us.ihmc.perception.OpenCLDepthImageSegmenter;
-import us.ihmc.perception.OpenCLPointCloudExtractor;
-import us.ihmc.perception.RawImage;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.perception.*;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectableObject;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionResults;
 import us.ihmc.perception.YOLOv8.YOLOv8ObjectDetector;
+import us.ihmc.perception.iterativeClosestPoint.IterativeClosestPointTools;
+import us.ihmc.perception.iterativeClosestPoint.IterativeClosestPointWorker;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -33,7 +35,12 @@ import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 import us.ihmc.tools.thread.Throttler;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RDXYOLOv8IterativeClosestPointDemo
 {
@@ -63,6 +70,7 @@ public class RDXYOLOv8IterativeClosestPointDemo
    private final RDXPointCloudRenderer segmentedPointCloudRenderer = new RDXPointCloudRenderer();
    private final RecyclingArrayList<Point3D32> segmentedPointCloud = new RecyclingArrayList<>(Point3D32::new);
    private final RDXPointCloudRenderer icpObjectPointCloudRenderer = new RDXPointCloudRenderer();
+   private RDXReferenceFrameGraphic centroidGraphic;
 
    public RDXYOLOv8IterativeClosestPointDemo()
    {
@@ -93,17 +101,23 @@ public class RDXYOLOv8IterativeClosestPointDemo
          {
             RawImage segmentedDepth = segmenter.removeBackground(zedDepthImage, objectMask);
 
-            RecyclingArrayList<Point3D32> ptcld = extractor.extractPointCloud(segmentedDepth);
-            ptcld.shuffle(random);
+            List<Point3DReadOnly> ptcld = extractor.extractPointCloud(segmentedDepth);
 
-               if (segmentedPointCloud != null)
-                  segmentedPointCloud.clear();
-               for (int i = 0; i < Short.MAX_VALUE && i < ptcld.size(); ++i)
-               {
-                  Point3D32 point = segmentedPointCloud.add();
-                  point.set(ptcld.get(i));
-               }
-               segmentedPointCloudRenderer.setPointsToRender(segmentedPointCloud, Color.GRAY);
+            Collections.shuffle(ptcld, random);
+            Point3DReadOnly centroid = IterativeClosestPointTools.computeCentroidOfPointCloud(ptcld, 500);
+            centroidGraphic.setPositionInWorldFrame(centroid);
+            Stream<Point3DReadOnly> pointCloudStream = ptcld.parallelStream();
+            ptcld = pointCloudStream.sorted(Comparator.comparingDouble(point -> point.distanceSquared(centroid))).limit((int) (0.75 * ptcld.size())).collect(Collectors.toList());
+
+
+            if (segmentedPointCloud != null)
+               segmentedPointCloud.clear();
+            for (int i = 0; i < Short.MAX_VALUE && i < ptcld.size(); ++i)
+            {
+               Point3D32 point = segmentedPointCloud.add();
+               point.set(ptcld.get(i));
+            }
+            segmentedPointCloudRenderer.setPointsToRender(segmentedPointCloud, Color.GRAY);
 
             icpWorker.setEnvironmentPointCloud(segmentedPointCloud);
             if (icpWorker.runICP(1))
@@ -136,6 +150,9 @@ public class RDXYOLOv8IterativeClosestPointDemo
 
             icpObjectPointCloudRenderer.create(Short.MAX_VALUE);
             baseUI.getPrimaryScene().addRenderableProvider(icpObjectPointCloudRenderer);
+
+            centroidGraphic = new RDXReferenceFrameGraphic(0.3);
+            baseUI.getPrimaryScene().addRenderableProvider(centroidGraphic);
 
             RDXROS2ImageMessageVisualizer zedColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED2 Color Image",
                                                                                                       DomainFactory.PubSubImplementation.FAST_RTPS,
