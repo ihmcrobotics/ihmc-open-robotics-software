@@ -180,7 +180,7 @@ public class RDXBehaviorTree
 
          float menuBarHeight = ImGui.getFrameHeightWithSpacing();
          float availableHeight = ImGui.getContentRegionAvailY() - menuBarHeight;
-         float tallestNodeSettings = 8 * ImGui.getFrameHeight();
+         float tallestNodeSettings = 9 * ImGui.getFrameHeightWithSpacing();
 
          float treeExplorerPercentage = 0.6f;
          float treeExplorerHeight = availableHeight * treeExplorerPercentage;
@@ -201,18 +201,27 @@ public class RDXBehaviorTree
 
          treeWidgetsVerticalLayout.renderImGuiWidgets(rootNode);
 
-         float cursorPosY = ImGui.getCursorPosY();
          boolean updatedEnableChildScrollableAreas;
+         float treeContentHeight;
          if (enableChildScrollableAreas)
-            updatedEnableChildScrollableAreas = cursorPosY >= treeExplorerHeight;
+         {
+            float scrollMaxY = ImGui.getScrollMaxY();
+            float windowHeight = ImGui.getWindowHeight();
+            treeContentHeight = windowHeight + scrollMaxY;
+         }
          else
-            updatedEnableChildScrollableAreas = availableHeight - cursorPosY < tallestNodeSettings;
+         {
+            float frameHeight = ImGui.getFrameHeightWithSpacing();
+            treeContentHeight = ImGui.getCursorPosY() - menuBarHeight - frameHeight;
+         }
+         updatedEnableChildScrollableAreas = availableHeight - treeContentHeight < tallestNodeSettings;
 
          if (enableChildScrollableAreas)
             ImGui.endChild();
 
          enableChildScrollableAreas = updatedEnableChildScrollableAreas;
 
+         ImGui.spacing();
          ImGui.spacing();
 
          if (rootNode != null) // It can become null above
