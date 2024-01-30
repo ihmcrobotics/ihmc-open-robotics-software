@@ -29,3 +29,5 @@ wget -nc --no-check-certificate 'https://docs.google.com/uc?export=download&id=1
 wget -nc --no-check-certificate 'https://docs.google.com/uc?export=download&id=16ybW3O1-86LzGxWzP6vS_0Dv6BNTA1p3' -O models/shoe_v1_140.pth
 # drill
 wget -nc --no-check-certificate 'http://10.100.3.250/drill_85.pth' -O models/drill_85.pth
+# door handle
+wget -nc --no-check-certificate 'http://10.100.3.250/doorhandle_140.pth' -O models/doorhandle_140.pth
