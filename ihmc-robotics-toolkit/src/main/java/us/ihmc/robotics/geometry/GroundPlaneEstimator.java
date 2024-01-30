@@ -89,7 +89,7 @@ public class GroundPlaneEstimator
     */
    public void getPlaneNormal(FixedFrameVector3DBasics normalToPack)
    {
-      normalToPack.setMatchingFrame(ReferenceFrame.getWorldFrame(), normalToPack);
+      normalToPack.setMatchingFrame(ReferenceFrame.getWorldFrame(), groundPlane.getNormal());
    }
 
    /**
