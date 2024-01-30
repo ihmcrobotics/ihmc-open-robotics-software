@@ -1,4 +1,4 @@
-package us.ihmc.perception;
+package us.ihmc.perception.iterativeClosestPoint;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Pose3D;

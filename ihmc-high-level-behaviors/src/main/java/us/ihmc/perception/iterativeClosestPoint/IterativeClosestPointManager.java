@@ -1,21 +1,23 @@
-package us.ihmc.perception;
+package us.ihmc.perception.iterativeClosestPoint;
 
 import perception_msgs.msg.dds.IterativeClosestPointRequest;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.OpenCLPointCloudExtractor;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,7 +39,7 @@ public class IterativeClosestPointManager
    private final IHMCROS2Input<IterativeClosestPointRequest> requestMessageSubscription;
    private final RestartableThrottledThread workerThread;
 
-   private RecyclingArrayList<Point3D32> environmentPointCloud;
+   private List<Point3DReadOnly> environmentPointCloud;
 
    public IterativeClosestPointManager(ROS2Helper ros2Helper, SceneGraph sceneGraph)
    {
