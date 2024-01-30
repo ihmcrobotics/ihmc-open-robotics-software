@@ -199,10 +199,6 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          ImGui.popItemFlag();
          ImGui.popStyleVar();
       }
-      if (ImGui.isItemHovered())
-      {
-         ImGui.setTooltip("Hold Ctrl and scroll the mouse wheel while placing to adjust Z.");
-      }
       ImGui.sameLine();
       ImGui.beginDisabled(!isPlaced());
       if (ImGui.button(labels.get("Clear")))
