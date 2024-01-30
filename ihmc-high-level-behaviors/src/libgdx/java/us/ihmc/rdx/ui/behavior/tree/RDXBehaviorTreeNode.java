@@ -117,10 +117,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       mouseHoveringNodeRow = ImGuiTools.isItemHovered(ImGui.getContentRegionAvailX());
       if (mouseHoveringNodeRow)
       {
-         if (ImGui.isMouseDown(ImGuiMouseButton.Left))
-            ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.HeaderActive));
-         else
-            ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.HeaderHovered));
+         ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.MenuBarBg));
       }
 
       if (!getChildren().isEmpty())
