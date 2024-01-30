@@ -43,6 +43,7 @@ public class RDXBehaviorTree
     * back together.
     */
    private transient final TLongObjectMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
+   private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXBehaviorTreeFileMenu fileMenu;
    private final RDXBehaviorTreeNodeCreationMenu nodeCreationMenu;
@@ -51,7 +52,7 @@ public class RDXBehaviorTree
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
    private boolean anyNodeSelected;
    private RDXBehaviorTreeNode<?, ?> selectedNode;
-   private final RDXPanel nodeSettingsPanel = new RDXPanel("Behavior Node Settings", this::renderNodeSettingsImGuiWidgets);
+   private boolean enableChildScrollableAreas;
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                           DRCRobotModel robotModel,
@@ -78,7 +79,7 @@ public class RDXBehaviorTree
       fileLoader = new RDXBehaviorTreeFileLoader(behaviorTreeState, nodeBuilder);
       nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory, referenceFrameLibrary);
       treeWidgetsVerticalLayout = new RDXBehaviorTreeWidgetsVerticalLayout(this);
-      baseUI.getImGuiPanelManager().addPanel(nodeSettingsPanel);
+      baseUI.getImGuiPanelManager().addPanel(panel);
    }
 
    public void createAndSetupDefault(RDXBaseUI baseUI)
@@ -156,6 +157,12 @@ public class RDXBehaviorTree
       }
    }
 
+   public void renderImGuiWidgets()
+   {
+      renderImGuiWidgetsPre();
+      renderImGuiWidgetsPost();
+   }
+
    protected void renderImGuiWidgetsPre()
    {
       ImGui.beginMenuBar();
@@ -173,11 +180,13 @@ public class RDXBehaviorTree
 
          float menuBarHeight = ImGui.getFrameHeightWithSpacing();
          float availableHeight = ImGui.getContentRegionAvailY() - menuBarHeight;
+         float tallestNodeSettings = 8 * ImGui.getFrameHeight();
+
          float treeExplorerPercentage = 0.6f;
          float treeExplorerHeight = availableHeight * treeExplorerPercentage;
          float nodeSettingsHeight = availableHeight * (1.0f - treeExplorerPercentage);
 
-//         if (anyNodeSelected)
+         if (enableChildScrollableAreas)
             ImGui.beginChild(labels.get("Tree Explorer Scroll Area"), 0.0f, treeExplorerHeight);
 
          if (expandCollapseAllRenderer.render(false, true))
@@ -192,9 +201,19 @@ public class RDXBehaviorTree
 
          treeWidgetsVerticalLayout.renderImGuiWidgets(rootNode);
 
-//         if (anyNodeSelected)
+         float cursorPosY = ImGui.getCursorPosY();
+         boolean updatedEnableChildScrollableAreas;
+         if (enableChildScrollableAreas)
+            updatedEnableChildScrollableAreas = cursorPosY >= treeExplorerHeight;
+         else
+            updatedEnableChildScrollableAreas = availableHeight - cursorPosY < tallestNodeSettings;
+
+         if (enableChildScrollableAreas)
             ImGui.endChild();
 
+         enableChildScrollableAreas = updatedEnableChildScrollableAreas;
+
+         ImGui.spacing();
 
          if (rootNode != null) // It can become null above
          {
@@ -210,9 +229,14 @@ public class RDXBehaviorTree
                ImGuiTools.separatorText("Node Settings > \"%s\"".formatted(selectedNode.getDefinition().getDescription()));
             else
                ImGuiTools.separatorText("Node Settings");
-            ImGui.beginChild(labels.get("Node Settings Scroll Area"), 0.0f, nodeSettingsHeight);
+
+            if (enableChildScrollableAreas)
+               ImGui.beginChild(labels.get("Node Settings Scroll Area"), 0.0f, nodeSettingsHeight);
+
             renderSelectedNodeSettingsWidgets(rootNode);
-            ImGui.endChild();
+
+            if (enableChildScrollableAreas)
+               ImGui.endChild();
          }
       }
       else
@@ -222,11 +246,6 @@ public class RDXBehaviorTree
          ImGui.popFont();
          nodeCreationMenu.renderImGuiWidgets(rootNode, BehaviorTreeNodeInsertionType.INSERT_ROOT);
       }
-   }
-
-   private void renderNodeSettingsImGuiWidgets()
-   {
-
    }
 
    private void expandCollapseAll(boolean expandOrCollapse, RDXBehaviorTreeNode<?, ?> node)
