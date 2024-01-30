@@ -121,16 +121,6 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          float indentAmount = 10.0f;
          ImGui.indent(indentAmount);
 
-         // The action sequence is kinda special here because we want to
-         // see the control and progress widgets all the time
-         if (node instanceof RDXActionSequence actionSequence)
-         {
-            actionSequence.renderExecutionControlAndProgressWidgets();
-            // Try to leave space for the longest rendering node so the
-            // rest don't glitch up and down.
-            // ImGui.setCursorPosY(ImGui.getTextLineHeightWithSpacing() * 18.0f);
-         }
-
          for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
          {
             renderImGuiWidgets(child);

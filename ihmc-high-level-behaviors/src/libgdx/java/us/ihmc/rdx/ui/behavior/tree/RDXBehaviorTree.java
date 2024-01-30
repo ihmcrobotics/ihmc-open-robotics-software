@@ -24,6 +24,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -175,16 +176,27 @@ public class RDXBehaviorTree
 
       if (rootNode != null)
       {
+         if (rootNode instanceof RDXActionSequence actionSequence)
+         {
+            actionSequence.renderExecutionControlAndProgressWidgets();
+         }
+
+         float cursorYAfterControlWidgets = ImGui.getCursorPosY();
+
          anyNodeSelected = false;
          RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, node -> anyNodeSelected |= node.getSelected());
 
+         float titleHeight = ImGui.getFrameHeightWithSpacing();
          float menuBarHeight = ImGui.getFrameHeightWithSpacing();
-         float availableHeight = ImGui.getContentRegionAvailY() - menuBarHeight;
+         float windowHeight = ImGui.getWindowHeight();
+         float availableHeight = windowHeight - titleHeight - menuBarHeight - cursorYAfterControlWidgets;
          float tallestNodeSettings = 9 * ImGui.getFrameHeightWithSpacing();
 
          float treeExplorerPercentage = 0.6f;
          float treeExplorerHeight = availableHeight * treeExplorerPercentage;
          float nodeSettingsHeight = availableHeight * (1.0f - treeExplorerPercentage);
+
+         float treeContentStartY = ImGui.getCursorPosY();
 
          if (enableChildScrollableAreas)
             ImGui.beginChild(labels.get("Tree Explorer Scroll Area"), 0.0f, treeExplorerHeight);
@@ -206,15 +218,17 @@ public class RDXBehaviorTree
          if (enableChildScrollableAreas)
          {
             float scrollMaxY = ImGui.getScrollMaxY();
-            float windowHeight = ImGui.getWindowHeight();
-            treeContentHeight = windowHeight + scrollMaxY;
+            float childWindowHeight = ImGui.getWindowHeight();
+            if (scrollMaxY == 0.0)
+               treeContentHeight = ImGui.getCursorPosY();
+            else
+               treeContentHeight = childWindowHeight + scrollMaxY;
          }
          else
          {
-            float frameHeight = ImGui.getFrameHeightWithSpacing();
-            treeContentHeight = ImGui.getCursorPosY() - menuBarHeight - frameHeight;
+            treeContentHeight = ImGui.getCursorPosY() - treeContentStartY;
          }
-         updatedEnableChildScrollableAreas = availableHeight - treeContentHeight < tallestNodeSettings;
+         updatedEnableChildScrollableAreas = windowHeight - treeContentStartY - treeContentHeight < tallestNodeSettings;
 
          if (enableChildScrollableAreas)
             ImGui.endChild();
