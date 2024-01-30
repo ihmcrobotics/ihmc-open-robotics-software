@@ -1,7 +1,8 @@
 package us.ihmc.rdx.perception;
 
-import boofcv.struct.flow.ImageFlow;
 import com.badlogic.gdx.graphics.Color;
+import imgui.ImGui;
+import imgui.type.ImFloat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
@@ -12,15 +13,18 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.perception.*;
+import us.ihmc.perception.OpenCLDepthImageSegmenter;
+import us.ihmc.perception.OpenCLPointCloudExtractor;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectableObject;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionResults;
 import us.ihmc.perception.YOLOv8.YOLOv8ObjectDetector;
 import us.ihmc.perception.iterativeClosestPoint.IterativeClosestPointTools;
 import us.ihmc.perception.iterativeClosestPoint.IterativeClosestPointWorker;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -44,12 +48,9 @@ import java.util.stream.Stream;
 
 public class RDXYOLOv8IterativeClosestPointDemo
 {
-   private static final float CONFIDENCE_THRESHOLD = 0.5f;
-   private static final float NMS_THRESHOLD = 0.1f;
-   private static final float MASK_THRESHOLD = 0.0f;
+   private static final String CSV_FILE_PATH = "/home/tbialek/.ihmc/icpPointCloudFiles/mug_modified_accurate.csv";
+   private static final boolean USE_CUSTOM_OBJECT = true;
    private static final YOLOv8DetectableObject OBJECT_TYPE = YOLOv8DetectableObject.CUP;
-   private static final Vector3D32 OBJECT_LENGTHS = new Vector3D32(0.0f, 0.0f, 0.1f);
-   private static final Vector3D32 OBJECT_RADII = new Vector3D32(0.05f, 0.0f, 0.0f);
    private static final Random random = new Random();
 
    private final OpenCLManager openCLManager = new OpenCLManager();
@@ -72,6 +73,19 @@ public class RDXYOLOv8IterativeClosestPointDemo
    private final RDXPointCloudRenderer icpObjectPointCloudRenderer = new RDXPointCloudRenderer();
    private RDXReferenceFrameGraphic centroidGraphic;
 
+   private final Vector3D objectLengths = new Vector3D(0.1, 0.1, 0.1);
+   private final Vector3D objectRadii = new Vector3D(0.05, 0.03, 0.02);
+   private final ImFloat xLength = new ImFloat(objectLengths.getX32());
+   private final ImFloat yLength = new ImFloat(objectLengths.getY32());
+   private final ImFloat zLength = new ImFloat(objectLengths.getZ32());
+   private final ImFloat xRadius = new ImFloat(objectRadii.getX32());
+   private final ImFloat yRadius = new ImFloat(objectRadii.getY32());
+   private final ImFloat zRadius = new ImFloat(objectRadii.getZ32());
+
+   private final ImFloat confidenceThreshold = new ImFloat(0.5f);
+   private final ImFloat nmsThreshold = new ImFloat(0.1f);
+   private final ImFloat maskThreshold = new ImFloat(0.0f);
+
    public RDXYOLOv8IterativeClosestPointDemo()
    {
       zedImageRetriever = new ZEDColorDepthImageRetriever(0,
@@ -80,8 +94,13 @@ public class RDXYOLOv8IterativeClosestPointDemo
                                                           new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR));
       zedImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH);
 
-      icpWorker = new IterativeClosestPointWorker(OBJECT_TYPE.getCorrespondingShape(), OBJECT_LENGTHS, OBJECT_RADII, 500, 500, new Pose3D(), random);
+      icpWorker = new IterativeClosestPointWorker(OBJECT_TYPE.getCorrespondingShape(), objectLengths, objectRadii, 500, 500, new Pose3D(), random);
       icpWorker.useProvidedTargetPoint(false);
+      icpWorker.setSegmentSphereRadius(Double.MAX_VALUE);
+      if (USE_CUSTOM_OBJECT)
+      {
+         icpWorker.setDetectionShape(PrimitiveRigidBodyShape.CUSTOM, CSV_FILE_PATH);
+      }
 
       zedImageRetriever.start();
 
@@ -95,8 +114,8 @@ public class RDXYOLOv8IterativeClosestPointDemo
          RawImage zedDepthImage = zedImageRetriever.getLatestRawDepthImage();
          RawImage zedColorImage = zedImageRetriever.getLatestRawColorImage(RobotSide.LEFT);
 
-         YOLOv8DetectionResults results = yoloObjectDetector.runOnImage(zedColorImage, CONFIDENCE_THRESHOLD, NMS_THRESHOLD);
-         Mat objectMask = results.getSegmentationMatrixForObject(OBJECT_TYPE, MASK_THRESHOLD);
+         YOLOv8DetectionResults results = yoloObjectDetector.runOnImage(zedColorImage, confidenceThreshold.get(), nmsThreshold.get());
+         Mat objectMask = results.getSegmentationMatrixForObject(OBJECT_TYPE, maskThreshold.get());
          if (objectMask != null)
          {
             RawImage segmentedDepth = segmenter.removeBackground(zedDepthImage, objectMask);
@@ -117,16 +136,16 @@ public class RDXYOLOv8IterativeClosestPointDemo
                Point3D32 point = segmentedPointCloud.add();
                point.set(ptcld.get(i));
             }
-            segmentedPointCloudRenderer.setPointsToRender(segmentedPointCloud, Color.GRAY);
+            segmentedPointCloudRenderer.setPointsToRender(segmentedPointCloud, Color.GREEN);
 
             icpWorker.setEnvironmentPointCloud(segmentedPointCloud);
-            if (icpWorker.runICP(1))
-            {
-
-                  icpObjectPointCloudRenderer.setPointsToRender(icpWorker.getObjectPointCloud(), Color.YELLOW);
-            }
 
             segmentedDepth.release();
+         }
+
+         if (icpWorker.runICP(1))
+         {
+            icpObjectPointCloudRenderer.setPointsToRender(icpWorker.getObjectPointCloud(), Color.YELLOW);
          }
 
          zedImagePublisher.setNextColorImage(zedColorImage.get(), RobotSide.LEFT);
@@ -168,6 +187,7 @@ public class RDXYOLOv8IterativeClosestPointDemo
             baseUI.create();
             baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
             perceptionVisualizerPanel.create();
+            baseUI.getImGuiPanelManager().addPanel("Settings", this::renderSettings);
          }
 
          @Override
@@ -178,6 +198,26 @@ public class RDXYOLOv8IterativeClosestPointDemo
             perceptionVisualizerPanel.update();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
+         }
+
+         private void renderSettings()
+         {
+            ImGui.sliderFloat("xLength", xLength.getData(), 0.0f, 1.0f);
+            ImGui.sliderFloat("yLength", yLength.getData(), 0.0f, 1.0f);
+            ImGui.sliderFloat("zLength", zLength.getData(), 0.0f, 1.0f);
+            ImGui.sliderFloat("xRadius", xRadius.getData(), 0.0f, 1.0f);
+            ImGui.sliderFloat("yRadius", yRadius.getData(), 0.0f, 1.0f);
+            ImGui.sliderFloat("zRadius", zRadius.getData(), 0.0f, 1.0f);
+            if (ImGui.button("Apply Size"))
+            {
+               objectLengths.set(xLength.get(), yLength.get(), zLength.get());
+               objectRadii.set(xRadius.get(), yRadius.get(), zRadius.get());
+               icpWorker.changeSize(objectLengths, objectRadii, 500);
+            }
+
+            ImGui.sliderFloat("confidenceThreshold", confidenceThreshold.getData(), 0.0f, 1.0f);
+            ImGui.sliderFloat("nmsThreshold", nmsThreshold.getData(), 0.0f, 1.0f);
+            ImGui.sliderFloat("maskThreshold", maskThreshold.getData(), -1.0f, 1.0f);
          }
 
          @Override
