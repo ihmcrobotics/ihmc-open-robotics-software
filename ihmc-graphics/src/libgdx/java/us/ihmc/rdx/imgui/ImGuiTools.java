@@ -378,6 +378,7 @@ public class ImGuiTools
                                         cursorScreenPosX + endX, cursorScreenPosY + lineY,
                                         separatorColor, lineThickness);
       ImGui.setCursorPosX(ImGui.getCursorPosX() + secondLineWidth);
+      ImGui.newLine();
    }
 
    public static float calcTextSizeX(String text)
