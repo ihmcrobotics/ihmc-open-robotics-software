@@ -109,7 +109,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       ImGui.getCursorScreenPos(rowMin);
       rowMax.set(rowMin.x + ImGui.getContentRegionAvailX(), rowMin.y + ImGui.getTextLineHeightWithSpacing());
 
-      mouseHoveringNodeRow = ImGui.isMouseHoveringRect(rowMin.x, rowMin.y, rowMax.x, rowMax.y);
+      mouseHoveringNodeRow = ImGuiTools.isItemHovered(ImGui.getContentRegionAvailX());
       if (mouseHoveringNodeRow)
       {
          ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.FrameBgHovered));
@@ -169,8 +169,9 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       // execpt for specific interactions
       if (!anySpecificWidgetOnRowClicked && mouseHoveringNodeRow && ImGui.isMouseClicked(ImGuiMouseButton.Left))
       {
+         boolean desiredValue = !selected.get();
          RDXBehaviorTreeTools.runForSubtreeNodes(RDXBehaviorTreeTools.findRootNode(this), node -> node.selected.set(false));
-         selected.set(true);
+         selected.set(desiredValue);
       }
    }
 
