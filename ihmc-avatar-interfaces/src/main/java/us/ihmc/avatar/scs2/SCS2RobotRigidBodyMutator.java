@@ -7,7 +7,6 @@ import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.tools.YoGeometryNameTools;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,13 +34,18 @@ public class SCS2RobotRigidBodyMutator implements Controller
          mutator.mutate();
    }
 
+   public List<RigidBodyMutator> getRigidBodyMutators()
+   {
+      return rigidBodyMutators;
+   }
+
    @Override
    public YoRegistry getYoRegistry()
    {
       return registry;
    }
 
-   private static class RigidBodyMutator
+   public static class RigidBodyMutator
    {
       private static final double DEFAULT_MASS_PERCENTAGE_MIN_MAX = 0.1;
       private static final double DEFAULT_COM_OFFSET_MIN_MAX = 0.1;  // 10cm offset
@@ -63,9 +67,21 @@ public class SCS2RobotRigidBodyMutator implements Controller
          massMutator.setAmplitude(defaultMass * DEFAULT_MASS_PERCENTAGE_MIN_MAX);
 
          comOffsetMutators = new YoFunctionGenerator[3];
-         comOffsetMutators[0] = new YoFunctionGenerator(YoGeometryNameTools.createXName(rigidBody.getName() + "_CoMOffset", "Mutator"), time, registry, false, dt);
-         comOffsetMutators[1] = new YoFunctionGenerator(YoGeometryNameTools.createYName(rigidBody.getName() + "_CoMOffset", "Mutator"), time, registry, false, dt);
-         comOffsetMutators[2] = new YoFunctionGenerator(YoGeometryNameTools.createZName(rigidBody.getName() + "_CoMOffset", "Mutator"), time, registry, false, dt);
+         comOffsetMutators[0] = new YoFunctionGenerator(YoGeometryNameTools.createXName(rigidBody.getName() + "_CoMOffset", "Mutator"),
+                                                        time,
+                                                        registry,
+                                                        false,
+                                                        dt);
+         comOffsetMutators[1] = new YoFunctionGenerator(YoGeometryNameTools.createYName(rigidBody.getName() + "_CoMOffset", "Mutator"),
+                                                        time,
+                                                        registry,
+                                                        false,
+                                                        dt);
+         comOffsetMutators[2] = new YoFunctionGenerator(YoGeometryNameTools.createZName(rigidBody.getName() + "_CoMOffset", "Mutator"),
+                                                        time,
+                                                        registry,
+                                                        false,
+                                                        dt);
          for (YoFunctionGenerator mutator : comOffsetMutators)
          {
             mutator.setOffset(0.0);  // CoM offsets are nearly always default zero
@@ -94,14 +110,31 @@ public class SCS2RobotRigidBodyMutator implements Controller
       {
          rigidBody.getInertia().setMass(massMutator.getValue());
 
-         rigidBody.getInertia().setCenterOfMassOffset(comOffsetMutators[0].getValue(),
-                                                      comOffsetMutators[1].getValue(),
-                                                      comOffsetMutators[2].getValue());
+         rigidBody.getInertia().setCenterOfMassOffset(comOffsetMutators[0].getValue(), comOffsetMutators[1].getValue(), comOffsetMutators[2].getValue());
 
          // Only mutating the diagonals of the moment of inertia: Ixx, Iyy, Izz
-         rigidBody.getInertia().setMomentOfInertia(momentOfInertiaMutators[0].getValue(),
-                                                   momentOfInertiaMutators[1].getValue(),
-                                                   momentOfInertiaMutators[2].getValue());
+         rigidBody.getInertia()
+                  .setMomentOfInertia(momentOfInertiaMutators[0].getValue(), momentOfInertiaMutators[1].getValue(), momentOfInertiaMutators[2].getValue());
+      }
+
+      public YoFunctionGenerator getMassMutator()
+      {
+         return massMutator;
+      }
+
+      public YoFunctionGenerator[] getCoMOffsetMutators()
+      {
+         return comOffsetMutators;
+      }
+
+      public YoFunctionGenerator[] getMomentOfInertiaMutators()
+      {
+         return momentOfInertiaMutators;
+      }
+
+      public String getName()
+      {
+         return rigidBody.getName();
       }
    }
 }
