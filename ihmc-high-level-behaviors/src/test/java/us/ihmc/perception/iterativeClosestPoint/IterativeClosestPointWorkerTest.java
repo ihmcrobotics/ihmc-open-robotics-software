@@ -12,6 +12,8 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.perception.iterativeClosestPoint.IterativeClosestPointTools;
+import us.ihmc.perception.iterativeClosestPoint.IterativeClosestPointWorker;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
 import java.util.List;
