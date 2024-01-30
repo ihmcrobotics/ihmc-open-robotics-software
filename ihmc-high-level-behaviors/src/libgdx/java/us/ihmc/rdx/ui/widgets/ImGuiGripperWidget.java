@@ -78,7 +78,7 @@ public class ImGuiGripperWidget
       }
 
       float itemWidth = xMax - xMin;
-      boolean isHovered = ImGuiTools.isItemHovered(itemWidth);
+      boolean isHovered = ImGuiTools.isItemHovered(itemWidth, rowHeight);
 
       float cursorScreenPosX = ImGui.getCursorScreenPosX();
       float cursorScreenPosY = ImGui.getCursorScreenPosY();

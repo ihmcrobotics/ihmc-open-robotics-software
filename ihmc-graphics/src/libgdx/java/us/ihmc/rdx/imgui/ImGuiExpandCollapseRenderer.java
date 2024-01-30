@@ -66,7 +66,7 @@ public class ImGuiExpandCollapseRenderer
       shiftAll(centering, centering);
 
       float itemWidth = boxTopRight.getX32() - boxTopLeft.getX32();
-      isHovered = ImGuiTools.isItemHovered(itemWidth);
+      isHovered = ImGuiTools.isItemHovered(itemWidth, rowHeight);
 
       backgroundColor = isHovered ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Button);
 

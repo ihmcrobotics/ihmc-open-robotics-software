@@ -114,7 +114,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       ImGui.getCursorScreenPos(rowMin);
       rowMax.set(rowMin.x + ImGui.getContentRegionAvailX(), rowMin.y + ImGui.getFrameHeightWithSpacing());
 
-      mouseHoveringNodeRow = ImGuiTools.isItemHovered(ImGui.getContentRegionAvailX());
+      mouseHoveringNodeRow = ImGuiTools.isItemHovered(ImGui.getContentRegionAvailX(), ImGui.getFrameHeight());
       if (mouseHoveringNodeRow)
       {
          ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.MenuBarBg));
@@ -144,7 +144,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    {
       String descriptionText = getDefinition().getDescription();
       ImGui.calcTextSize(descriptionTextSize, descriptionText);
-      boolean textHovered = ImGuiTools.isItemHovered(descriptionTextSize.x);
+      boolean textHovered = ImGuiTools.isItemHovered(descriptionTextSize.x, ImGui.getFrameHeight());
 
       if (selected.get())
       {

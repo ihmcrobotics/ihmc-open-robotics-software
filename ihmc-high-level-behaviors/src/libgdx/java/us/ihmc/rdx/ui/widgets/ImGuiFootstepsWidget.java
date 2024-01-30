@@ -79,7 +79,7 @@ public class ImGuiFootstepsWidget
       heelRight.scaleAdd(scale, center);
 
       float itemWidth = bottomRight.getX32() - bottomLeft.getX32();
-      isHovered.set(side, ImGuiTools.isItemHovered(itemWidth));
+      isHovered.set(side, ImGuiTools.isItemHovered(itemWidth, rowHeight));
 
       float cursorScreenPosX = ImGui.getCursorScreenPosX();
       float cursorScreenPosY = ImGui.getCursorScreenPosY();

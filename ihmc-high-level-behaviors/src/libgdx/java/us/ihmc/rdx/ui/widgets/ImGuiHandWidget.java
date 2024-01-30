@@ -91,7 +91,7 @@ public class ImGuiHandWidget
       }
 
       float itemWidth = xMax - xMin;
-      isHovered = ImGuiTools.isItemHovered(itemWidth);
+      isHovered = ImGuiTools.isItemHovered(itemWidth, rowHeight);
 
       float cursorScreenPosX = ImGui.getCursorScreenPosX();
       float cursorScreenPosY = ImGui.getCursorScreenPosY();

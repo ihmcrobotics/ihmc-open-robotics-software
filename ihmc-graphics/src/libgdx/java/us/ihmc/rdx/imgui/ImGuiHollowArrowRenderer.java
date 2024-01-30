@@ -62,7 +62,7 @@ public class ImGuiHollowArrowRenderer
       baseBottomRight.scaleAdd(scale, center);
 
       float itemWidth = arrowheadTip.getX32() - baseTopLeft.getX32();
-      isHovered = ImGuiTools.isItemHovered(itemWidth);
+      isHovered = ImGuiTools.isItemHovered(itemWidth, rowHeight);
 
       cursorXDesktopFrame = ImGui.getWindowPosX() + ImGui.getCursorPosX() - ImGui.getScrollX();
       cursorYDesktopFrame = ImGui.getWindowPosY() + ImGui.getCursorPosY() - ImGui.getScrollY();
