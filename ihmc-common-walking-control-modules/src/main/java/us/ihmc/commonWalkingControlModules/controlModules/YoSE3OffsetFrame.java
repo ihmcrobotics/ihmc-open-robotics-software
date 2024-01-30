@@ -54,6 +54,24 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
    }
 
    /**
+    * Sets the offset to be a pure rotation.
+    * <p>
+    * This method resets the position offset.
+    * </p>
+    *
+    * @param rotationToParent the orientation of this frame origin expressed in its parent frame.
+    *           Not modified.
+    * @throws ReferenceFrameMismatchException if the argument is not expressed in
+    *            {@code this.getParent()}.
+    */
+   public void setOffsetToParentToRotationOnly(FrameQuaternionReadOnly rotationToParent)
+   {
+      this.translationToParent.setToZero();
+      this.rotationToParent.set(rotationToParent);
+      update();
+   }
+
+   /**
     * Sets the offset of this frame to its parent.
     * 
     * @param translationToParent the position of this frame origin expressed in its parent frame.
