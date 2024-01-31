@@ -483,6 +483,15 @@ public class MatrixMissingTools
       }
    }
 
+   /**
+    * Comparing elements of two matrices.
+    * This method results true when all elements in a is less than b. <br>
+    *
+    *  !!!!!!! a < b !!!!!!!!!  not  a > b
+    * @param a compare matrix. all elements should be less than those of b matrix
+    * @param b compare matirx. all elements should be larger than those of a matrix
+    * @return returns true when a < b  and returns false when b > a
+    */
    public static boolean elementWiseLessThan(DMatrixRMaj a, DMatrixRMaj b)
    {
       if (a.numCols != b.numCols)
