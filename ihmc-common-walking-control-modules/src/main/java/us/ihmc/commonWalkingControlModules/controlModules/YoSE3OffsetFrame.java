@@ -18,11 +18,9 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
 
    /**
     * Creates a new reference frame with a mutable offset to its parent frame.
-    * <p>
-    * The offset to the parent frame is backed by a {@link YoFrameVector3D} and a
-    * {@link YoFrameQuaternion} internally.
-    * </p>
-    * 
+    * <br>
+    * The offset to the parent frame is backed by a {@link YoFrameVector3D} and a {@link YoFrameQuaternion} internally.
+    *
     * @param frameName the name of this reference frame.
     * @param parentFrame the frame to which this is attached.
     * @param registry the registry to which the internal {@code YoVariable}s are registered.
@@ -33,6 +31,24 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
 
       translationToParent = new YoFrameVector3D(frameName, parentFrame, registry);
       rotationToParent = new YoFrameQuaternion(frameName, parentFrame, registry);
+   }
+
+   /**
+    * Creates a new reference frame with a mutable offset to its parent frame.
+    * <br>
+    * The offset to the parent frame is stored in {@code translationToParent} and {@code rotationToParent}.
+    *
+    * @param frameName the name of this reference frame.
+    * @param translationToParent translation offset to parent frame
+    * @param rotationToParent rotation offset to parent frame
+    * @param parentFrame the frame to which this is attached.
+    */
+   public YoSE3OffsetFrame(String frameName, YoFrameVector3D translationToParent, YoFrameQuaternion rotationToParent, ReferenceFrame parentFrame)
+   {
+      super(frameName, parentFrame);
+
+      this.translationToParent = translationToParent;
+      this.rotationToParent = rotationToParent;
    }
 
    /**
@@ -95,6 +111,7 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
    {
       translationToParent.setToZero();
       rotationToParent.setToZero();
+      update();
    }
 
    @Override

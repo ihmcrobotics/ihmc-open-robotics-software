@@ -14,6 +14,7 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDBACK;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
 
+import us.ihmc.commonWalkingControlModules.controlModules.YoOrientationFrame;
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -114,7 +115,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
    private final RigidBodyBasics rootBody;
    private final RigidBodyBasics endEffector;
-   private final YoSE3OffsetFrame controlFrame;
+   private final YoOrientationFrame controlFrame;
 
    private final double dt;
    private final boolean isRootBody;
@@ -163,7 +164,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       gains = fbToolbox.getOrCreateOrientationGains(endEffector, controllerIndex, computeIntegralTerm, true);
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
-      controlFrame = fbToolbox.getOrCreateControlFrame(endEffector, controllerIndex, true);
+      controlFrame = fbToolbox.getOrCreateOrientationFeedbackControlFrame(endEffector, controllerIndex, true);
 
       isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "IsOrientationFBControllerEnabled", fbToolbox.getRegistry());
       isEnabled.set(false);
@@ -314,7 +315,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       angularGainsFrame = command.getAngularGainsFrame();
 
       command.getControlFrameOrientationIncludingFrame(controlFrameOrientation);
-      controlFrame.setOffsetToParentToRotationOnly(controlFrameOrientation);
+      controlFrame.setRotationToParent(controlFrameOrientation);
 
       yoDesiredOrientation.setIncludingFrame(command.getReferenceOrientation());
       yoDesiredOrientation.getRotationVector(yoDesiredRotationVector);
