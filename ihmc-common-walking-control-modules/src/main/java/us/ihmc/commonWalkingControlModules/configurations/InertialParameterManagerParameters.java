@@ -11,4 +11,6 @@ public interface InertialParameterManagerParameters
    public abstract Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] getParametersToEstimate();
 
    public abstract DMatrixRMaj getURDFParameters(Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets);
+
+   public abstract double getBreakFrequencyForFiltering();
 }
