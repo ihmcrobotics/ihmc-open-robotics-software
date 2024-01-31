@@ -15,6 +15,7 @@ import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoMatrix;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -67,6 +68,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final DMatrixRMaj[] parameterPartitions;
    private final InertialKalmanFilter inertialKalmanFilter;
    private final YoMatrix inertialKalmanFilterEstimate;
+
+   private final AlphaFilteredYoMatrix filteredEstimate;
 
    /** DEBUG variables */
    private static final boolean DEBUG = true;
@@ -136,6 +139,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                   getRowNames(basisSets, estimateModelBodies), null,
                                                   registry);
 
+      filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate", 0.0,
+                                                   RegressorTools.sizePartitions(basisSets)[0], 1,
+                                                   getRowNames(basisSets, estimateModelBodies), null,
+                                                   registry);
+
       if (DEBUG)
       {
          String[] rowNames = new String[nDoFs];
@@ -191,6 +199,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
          // Pack estimate back into estimate robot bodies
          RegressorTools.packRigidBodies(basisSets, inertialKalmanFilterEstimate, estimateModelBodies);
+
+         filteredEstimate.setAndSolve(inertialKalmanFilterEstimate);
 
          updateVisuals();
 
