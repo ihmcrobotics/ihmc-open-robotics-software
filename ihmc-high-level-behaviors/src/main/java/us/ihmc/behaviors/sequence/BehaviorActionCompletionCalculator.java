@@ -13,6 +13,11 @@ public class BehaviorActionCompletionCalculator
    private double translationError;
    private double rotationError;
 
+   public BehaviorActionCompletionCalculator()
+   {
+      reset();
+   }
+
    public boolean isComplete(FramePose3DReadOnly desired,
                              FramePose3DReadOnly actual,
                              double translationTolerance,
@@ -46,7 +51,14 @@ public class BehaviorActionCompletionCalculator
             default -> throw new IllegalStateException("Unexpected value: " + component);
          }
       }
-      return desiredPoseAchieved;
+      return desiredPoseAchieved || hitTimeLimit;
+   }
+
+   /** Resetting prevent old values from being sent on next execution. */
+   public void reset()
+   {
+      translationError = Double.NaN;
+      rotationError = Double.NaN;
    }
 
    public double getTranslationError()

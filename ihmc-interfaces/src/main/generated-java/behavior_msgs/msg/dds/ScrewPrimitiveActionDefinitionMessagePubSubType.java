@@ -15,7 +15,7 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ddeb17a10efdeeef69dc81c3b5491a0acb9af7a49bcf477e6f22a09471d964e9";
+   		return "7e6a12dd0a302749c5dc395ade5d89cc3a506ef7d48deaa6bfa2595b44d5114a";
    }
    
    @Override
@@ -71,6 +71,12 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -111,6 +117,14 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getWrenchContactPose(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -133,10 +147,15 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
 
       cdr.write_type_6(data.getMaxAngularVelocity());
 
+      cdr.write_type_6(data.getMaxForce());
+
+      cdr.write_type_6(data.getMaxTorque());
+
       cdr.write_type_6(data.getLinearPositionWeight());
 
       cdr.write_type_6(data.getAngularPositionWeight());
 
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getWrenchContactPose(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -154,10 +173,15 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       	
       data.setMaxAngularVelocity(cdr.read_type_6());
       	
+      data.setMaxForce(cdr.read_type_6());
+      	
+      data.setMaxTorque(cdr.read_type_6());
+      	
       data.setLinearPositionWeight(cdr.read_type_6());
       	
       data.setAngularPositionWeight(cdr.read_type_6());
       	
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getWrenchContactPose(), cdr);	
 
    }
 
@@ -174,8 +198,12 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       ser.write_type_6("rotation", data.getRotation());
       ser.write_type_6("max_linear_velocity", data.getMaxLinearVelocity());
       ser.write_type_6("max_angular_velocity", data.getMaxAngularVelocity());
+      ser.write_type_6("max_force", data.getMaxForce());
+      ser.write_type_6("max_torque", data.getMaxTorque());
       ser.write_type_6("linear_position_weight", data.getLinearPositionWeight());
       ser.write_type_6("angular_position_weight", data.getAngularPositionWeight());
+      ser.write_type_a("wrench_contact_pose", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getWrenchContactPose());
+
    }
 
    @Override
@@ -191,8 +219,12 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       data.setRotation(ser.read_type_6("rotation"));
       data.setMaxLinearVelocity(ser.read_type_6("max_linear_velocity"));
       data.setMaxAngularVelocity(ser.read_type_6("max_angular_velocity"));
+      data.setMaxForce(ser.read_type_6("max_force"));
+      data.setMaxTorque(ser.read_type_6("max_torque"));
       data.setLinearPositionWeight(ser.read_type_6("linear_position_weight"));
       data.setAngularPositionWeight(ser.read_type_6("angular_position_weight"));
+      ser.read_type_a("wrench_contact_pose", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getWrenchContactPose());
+
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage src, behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage dest)
