@@ -1,10 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import com.google.common.primitives.Doubles;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
@@ -47,8 +43,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -144,29 +138,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private boolean firstTick = true;
 
-   // for checking singularity
-   private final GeometricJacobianCalculator geometricJacobianCalculator_left = new GeometricJacobianCalculator();
-   private DMatrixRMaj leftAnkleJacobianMatrix;
-   private final GeometricJacobianCalculator geometricJacobianCalculator_right = new GeometricJacobianCalculator();
-
-   private DMatrixRMaj rightAnkleJacobianMatrix;
-
-//   private YoDouble left_hip_yaw_condition_number = new YoDouble("left_hip_yaw_condition_number",registry);
-//   private YoDouble left_hip_roll_condition_number = new YoDouble("left_roll_yaw_condition_number",registry);
-//   private YoDouble left_hip_pitch_condition_number = new YoDouble("left_hip_pitch_condition_number",registry);
-//   private YoDouble left_knee_pitch_condition_number = new YoDouble("left_knee_pitch_condition_number",registry);
-//   private YoDouble left_ankle_pitch_condition_number = new YoDouble("left_ankle_pitch_condition_number",registry);
-//   private YoDouble left_ankle_roll_condition_number = new YoDouble("left_ankle_roll_condition_number",registry);
-//
-//   private YoDouble right_hip_yaw_condition_number = new YoDouble("right_hip_yaw_condition_number",registry);
-//   private YoDouble right_hip_roll_condition_number = new YoDouble("right_roll_yaw_condition_number",registry);
-//   private YoDouble right_hip_pitch_condition_number = new YoDouble("right_hip_pitch_condition_number",registry);
-//   private YoDouble right_knee_pitch_condition_number = new YoDouble("right_knee_pitch_condition_number",registry);
-//   private YoDouble right_ankle_pitch_condition_number = new YoDouble("right_ankle_pitch_condition_number",registry);
-//   private YoDouble right_ankle_roll_condition_number = new YoDouble("right_ankle_roll_condition_number",registry);
-
-   private YoDouble leftConditionNumber = new YoDouble("leftConditionNumber", registry);
-   private YoDouble rightConditionNumber = new YoDouble("rightConditionNumber", registry);
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager,
                                              StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory,
@@ -296,12 +267,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          legElasticityDebuggator = null;
       }
-
-      //for checking singularity occurrence
-      geometricJacobianCalculator_left.setKinematicChain(fullRobotModel.getPelvis(), fullRobotModel.getFoot(RobotSide.LEFT));
-//      geometricJacobianCalculator_left.setJacobianFrame(fullRobotModel.get);
-
-      geometricJacobianCalculator_right.setKinematicChain(fullRobotModel.getPelvis(), fullRobotModel.getFoot(RobotSide.RIGHT));
 
       ControllerCoreOptimizationSettings defaultControllerCoreOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
@@ -714,8 +679,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       updateAndPublishFootstepQueueStatus();
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
 
-      checkingSingularity();
-
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          legElasticityDebuggator.update();
 
@@ -1043,39 +1006,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       return false;
-   }
-
-   private void checkingSingularity(){
-      //for checking singularity occurrence
-      geometricJacobianCalculator_left.reset();
-      leftAnkleJacobianMatrix = geometricJacobianCalculator_left.getJacobianMatrix();
-
-      SingularValueDecomposition_F64<DMatrixRMaj> svd_left = DecompositionFactory_DDRM.svd(leftAnkleJacobianMatrix.numRows,
-                                                                                           leftAnkleJacobianMatrix.numCols,
-                                                                                           false,
-                                                                                           false,
-                                                                                           true);
-      svd_left.decompose(leftAnkleJacobianMatrix);
-      double[] singularValues_left = svd_left.getSingularValues();
-
-      double condition_number_left = Doubles.max(singularValues_left) / Doubles.min(singularValues_left);
-
-      leftConditionNumber.set(condition_number_left);
-      geometricJacobianCalculator_right.reset();
-      rightAnkleJacobianMatrix = geometricJacobianCalculator_right.getJacobianMatrix();
-
-      SingularValueDecomposition_F64<DMatrixRMaj> svd_right = DecompositionFactory_DDRM.svd(leftAnkleJacobianMatrix.numRows,
-                                                                                           leftAnkleJacobianMatrix.numCols,
-                                                                                           false,
-                                                                                           false,
-                                                                                           true);
-      svd_right.decompose(rightAnkleJacobianMatrix);
-      double[] singularValues_right = svd_right.getSingularValues();
-
-      double condition_number_right = Doubles.max(singularValues_right) / Doubles.min(singularValues_right);
-      rightConditionNumber.set(condition_number_right);
-
-
    }
 
    @Override
