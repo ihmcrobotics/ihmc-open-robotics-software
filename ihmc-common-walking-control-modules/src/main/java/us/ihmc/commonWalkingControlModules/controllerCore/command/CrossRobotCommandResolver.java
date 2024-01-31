@@ -860,7 +860,7 @@ public class CrossRobotCommandResolver
    {
       resolveSpatialAccelerationCommand(in.getSpatialAccelerationCommand(), out.getSpatialAccelerationCommand());
       out.setControlMode(in.getControlMode());
-      resolveFrameQuaternion(in.getBodyFixedOrientationToControl(), out.getBodyFixedOrientationToControl());
+      resolveFrameQuaternion(in.getControlFrameOrientation(), out.getControlFrameOrientation());
       resolveFrameQuaternion(in.getReferenceOrientation(), out.getReferenceOrientation());
       resolveFrameTuple3D(in.getReferenceAngularVelocity(), out.getReferenceAngularVelocity());
       resolveFrameTuple3D(in.getReferenceAngularAcceleration(), out.getReferenceAngularAcceleration());
