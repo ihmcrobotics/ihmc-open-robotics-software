@@ -1,13 +1,12 @@
 package us.ihmc.robotics.geometry;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -18,8 +17,7 @@ public class GroundPlaneEstimator
 {
    private final static int MAX_GROUND_PLANE_POINTS = 100;
    private final Plane3D groundPlane = new Plane3D();
-   private final Point3D groundPlanePoint = new Point3D();
-   private final ArrayList<Point3DReadOnly> groundPlanePoints = new ArrayList<>(MAX_GROUND_PLANE_POINTS);
+   private final RecyclingArrayList<FramePoint3D> groundPlanePoints = new RecyclingArrayList<>(FramePoint3D.class);
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
 
    private final FramePose3D groundPlanePose = new FramePose3D();
@@ -61,15 +59,23 @@ public class GroundPlaneEstimator
    }
 
    /**
-    * @param plane3d : ground plane in World Frame
+    * @param plane3dToPack : ground plane to pack in World Frame
     */
-   public void getPlane(Plane3D plane3d)
+   public void getPlane(Plane3D plane3dToPack)
    {
-      plane3d.set(groundPlane);
+      plane3dToPack.set(groundPlane);
    }
 
    /**
-    * @param pointToPack : ground plane point in World Frame
+    * returns ground plane
+    */
+   public Plane3DReadOnly getPlane()
+   {
+      return groundPlane;
+   }
+
+   /**
+    * @param pointToPack : ground plane point to pack
     */
    public void getPlanePoint(FixedFramePoint3DBasics pointToPack)
    {
@@ -85,7 +91,7 @@ public class GroundPlaneEstimator
    }
 
    /**
-    * @param normalToPack : ground plane normal in World Frame
+    * @param normalToPack : ground plane normal to pack
     */
    public void getPlaneNormal(FixedFrameVector3DBasics normalToPack)
    {
@@ -131,12 +137,12 @@ public class GroundPlaneEstimator
    }
 
    /**
-    * Add a point to the list of ground contact points.
-    * @param contactPoint : ground contact point in world frame
+    * Add a point to the list of points to fit ground plane to.
+    * @param contactPoint : ground point
     */
-   public void addContactPoint(Point3DReadOnly contactPoint)
+   public void addContactPoint(FramePoint3DReadOnly contactPoint)
    {
-      groundPlanePoints.add(contactPoint);
+      groundPlanePoints.add().setMatchingFrame(contactPoint);
    }
 
    /**
@@ -145,7 +151,6 @@ public class GroundPlaneEstimator
    public void compute()
    {
       planeFitter.fitPlaneToPoints(groundPlanePoints, groundPlane);
-      groundPlanePoint.set(groundPlane.getPoint());
 
       groundPlanePose.getPosition().set(groundPlane.getPoint());
       groundPlanePose.getOrientation().setYawPitchRoll(0.0, getPitch(), getRoll());
@@ -156,15 +161,14 @@ public class GroundPlaneEstimator
     * Set the list of ground contact points and compute the ground plane.
     * @param contactPoints : list of ground contact points
     */
-   public void compute(List<? extends FramePoint3DBasics> contactPoints)
+   public void compute(List<? extends FramePoint3DReadOnly> contactPoints)
    {
-      int nPoints = Math.min(contactPoints.size(), MAX_GROUND_PLANE_POINTS);
       groundPlanePoints.clear();
+
+      int nPoints = Math.min(contactPoints.size(), MAX_GROUND_PLANE_POINTS);
       for (int i = 0; i < nPoints; i++)
-      {
-         contactPoints.get(i).changeFrame(ReferenceFrame.getWorldFrame());
-         groundPlanePoints.add(contactPoints.get(i));
-      }
+         addContactPoint(contactPoints.get(i));
+
       compute();
    }
 
@@ -172,14 +176,13 @@ public class GroundPlaneEstimator
     * Set the list of ground contact points and compute the ground plane.
     * @param contactPoints : quadrant dependent list of contact points
     */
-   public void compute(QuadrantDependentList<? extends FramePoint3DBasics> contactPoints)
+   public void compute(QuadrantDependentList<? extends FramePoint3DReadOnly> contactPoints)
    {
       groundPlanePoints.clear();
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         contactPoints.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-         groundPlanePoints.add(contactPoints.get(robotQuadrant));
-      }
+         addContactPoint(contactPoints.get(robotQuadrant));
+
       compute();
    }
 

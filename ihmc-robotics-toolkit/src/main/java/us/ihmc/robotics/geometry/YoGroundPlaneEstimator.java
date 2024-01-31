@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
@@ -76,7 +77,7 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
     * @param contactPoints : list of ground contact points
     */
    @Override
-   public void compute(List<? extends FramePoint3DBasics> contactPoints)
+   public void compute(List<? extends FramePoint3DReadOnly> contactPoints)
    {
       super.compute(contactPoints);
 
@@ -93,7 +94,7 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
     * @param contactPoints : quadrant dependent list of contact points
     */
    @Override
-   public void compute(QuadrantDependentList<? extends FramePoint3DBasics> contactPoints)
+   public void compute(QuadrantDependentList<? extends FramePoint3DReadOnly> contactPoints)
    {
       super.compute(contactPoints);
 
