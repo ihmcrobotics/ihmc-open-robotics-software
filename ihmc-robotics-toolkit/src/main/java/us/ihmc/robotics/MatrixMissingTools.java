@@ -2,7 +2,10 @@ package us.ihmc.robotics;
 
 import org.ejml.MatrixDimensionException;
 import org.ejml.UtilEjml;
-import org.ejml.data.*;
+import org.ejml.data.DMatrix;
+import org.ejml.data.DMatrix1Row;
+import org.ejml.data.DMatrix3x3;
+import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.simple.SimpleMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
@@ -11,8 +14,6 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.matrixlib.MatrixTools;
-
-import static georegression.misc.test.GeometryUnitTest.assertTrue;
 
 public class MatrixMissingTools
 {
@@ -484,28 +485,23 @@ public class MatrixMissingTools
       MatrixTools.setMatrixBlock(outputMatrix, 0, 0, temp, 0, 0, temp.numRows, temp.numCols, 1);
    }
 
-   public static void assetElementWiseLessThan(DMatrixRMaj a, DMatrixRMaj b)
+   public static boolean elementWiseLessThan(DMatrixRMaj a, DMatrixRMaj b)
    {
       if (a.numCols != b.numCols)
          throw new IllegalArgumentException("The A and B must have the same number of cols : [A cols: " + a.getNumCols() + ", b cols: " + b.getNumCols());
       if (a.numRows != b.numRows)
          throw new IllegalArgumentException("The A and B must have the same number of rows : [A cols: " + a.getNumRows() + ", b cols: " + b.getNumRows());
 
-      BMatrixRMaj compareOutput = new BMatrixRMaj(a.numRows, a.numCols);
-      CommonOps_DDRM.elementLessThan(a, b, compareOutput);
       for (int i = 0; i < a.numRows; i++)
       {
          for (int j = 0; j < a.numCols; j++)
          {
             double valA = a.get(i, j);
             double valB = b.get(i, j);
-
-            assertTrue(!Double.isNaN(valA) && !Double.isNaN(valB), "At (" + i + "," + j + ") A = " + valA + " B = " + valB);
-            assertTrue(!Double.isInfinite(valA) && !Double.isInfinite(valB), "At (" + i + "," + j + ") A = " + valA + " B = " + valB);
-
-            assertTrue(compareOutput.get(i, j),
-                       "At (" + i + "," + j + ") A = " + valA + " B = " + valB + ", valA should be less than valB");
+            if (valA >= valB)
+               return false;
          }
       }
+      return true;
    }
 }
