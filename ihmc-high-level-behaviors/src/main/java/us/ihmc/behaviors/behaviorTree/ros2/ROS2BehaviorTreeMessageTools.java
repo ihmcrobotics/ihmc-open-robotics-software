@@ -27,7 +27,6 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getPelvisHeightActions().clear();
       treeStateMessage.getSakeHandCommandActions().clear();
       treeStateMessage.getWaitDurationActions().clear();
-      treeStateMessage.getWalkActions().clear();
    }
 
    public static void packMessage(BehaviorTreeNodeState nodeState, BehaviorTreeStateMessage treeStateMessage)
@@ -92,12 +91,6 @@ public class ROS2BehaviorTreeMessageTools
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getWaitDurationActions().size());
          waitDurationActionState.toMessage(treeStateMessage.getWaitDurationActions().add());
       }
-      else if (nodeState instanceof WalkActionState walkActionState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.WALK_ACTION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getWalkActions().size());
-         walkActionState.toMessage(treeStateMessage.getWalkActions().add());
-      }
       else
       {
          treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.BASIC_NODE);
@@ -149,10 +142,6 @@ public class ROS2BehaviorTreeMessageTools
       else if (nodeState instanceof WaitDurationActionState waitDurationActionState)
       {
          waitDurationActionState.fromMessage(subscriptionNode.getWaitDurationActionStateMessage());
-      }
-      else if (nodeState instanceof WalkActionState walkActionState)
-      {
-         walkActionState.fromMessage(subscriptionNode.getWalkActionStateMessage());
       }
       else
       {
@@ -242,13 +231,6 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setWaitDurationActionStateMessage(waitDurationActionStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(waitDurationActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(waitDurationActionStateMessage.getDefinition().getDefinition().getDefinition());
-         }
-         case BehaviorTreeStateMessage.WALK_ACTION ->
-         {
-            WalkActionStateMessage walkActionStateMessage = treeStateMessage.getWalkActions().get(indexInTypesList);
-            subscriptionNode.setWalkActionStateMessage(walkActionStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(walkActionStateMessage.getState().getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(walkActionStateMessage.getDefinition().getDefinition().getDefinition());
          }
       }
    }

@@ -30,7 +30,7 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
    {
       state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage();
-      trajectory_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (200, new geometry_msgs.msg.dds.PosePubSubType());
+      trajectory_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (50, new geometry_msgs.msg.dds.PosePubSubType());
       force_ = new us.ihmc.euclid.tuple3D.Vector3D();
       torque_ = new us.ihmc.euclid.tuple3D.Vector3D();
 

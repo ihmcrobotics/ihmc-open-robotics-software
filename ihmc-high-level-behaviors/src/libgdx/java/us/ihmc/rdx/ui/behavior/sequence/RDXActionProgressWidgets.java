@@ -4,7 +4,7 @@ import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
 import imgui.internal.ImGui;
-import us.ihmc.behaviors.sequence.actions.FootstepPlanActionStateBasics;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.communication.crdt.CRDTUnidirectionalVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -13,7 +13,6 @@ import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.ui.behavior.actions.RDXFootstepPlanAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXHandPoseAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXScrewPrimitiveAction;
-import us.ihmc.rdx.ui.behavior.actions.RDXWalkAction;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
@@ -313,14 +312,9 @@ public class RDXActionProgressWidgets
 
    public void renderFootstepCompletion(float dividedBarWidth, boolean renderAsPlots)
    {
-      FootstepPlanActionStateBasics footstepPlanActionState = null;
-      if (action instanceof RDXWalkAction walkAction)
-         footstepPlanActionState = walkAction.getState().getBasics();
-      if (action instanceof RDXFootstepPlanAction footstepPlanAction)
-         footstepPlanActionState = footstepPlanAction.getState().getBasics();
-
-      if (footstepPlanActionState != null && footstepPlanActionState.getTotalNumberOfFootsteps() > 0)
+      if (action instanceof RDXFootstepPlanAction footstepPlanAction && footstepPlanAction.getState().getTotalNumberOfFootsteps() > 0)
       {
+         FootstepPlanActionState footstepPlanActionState = footstepPlanAction.getState();
          double percentLeft = footstepPlanActionState.getNumberOfIncompleteFootsteps() / (double) footstepPlanActionState.getTotalNumberOfFootsteps();
          String overlay = "%d / %d".formatted(footstepPlanActionState.getNumberOfIncompleteFootsteps(), footstepPlanActionState.getTotalNumberOfFootsteps());
 
@@ -345,18 +339,14 @@ public class RDXActionProgressWidgets
 
    public void renderFootPositions(float dividedBarWidth, boolean renderAsPlots)
    {
-      FootstepPlanActionStateBasics footstepPlanActionState = null;
-      if (action instanceof RDXWalkAction walkAction)
-         footstepPlanActionState = walkAction.getState().getBasics();
-      if (action instanceof RDXFootstepPlanAction footstepPlanAction)
-         footstepPlanActionState = footstepPlanAction.getState().getBasics();
-
       float halfDividedBarWidth = dividedBarWidth / 2.0f - ImGui.getStyle().getItemSpacingX() / 2.0f;
 
       for (RobotSide side : RobotSide.values)
       {
-         if (!footstepPlanActionState.getDesiredFootPoses().get(side).isEmpty())
+         if (action instanceof RDXFootstepPlanAction footstepPlanAction
+             && !footstepPlanAction.getState().getDesiredFootPoses().get(side).isEmpty())
          {
+            FootstepPlanActionState footstepPlanActionState = footstepPlanAction.getState();
             int i = 0;
             SE3TrajectoryPointReadOnly nextDesiredPoint = footstepPlanActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
             while (i < footstepPlanActionState.getDesiredFootPoses().get(side).getSize()
@@ -411,18 +401,14 @@ public class RDXActionProgressWidgets
 
    public void renderFootOrientations(float dividedBarWidth, boolean renderAsPlots)
    {
-      FootstepPlanActionStateBasics footstepPlanActionState = null;
-      if (action instanceof RDXWalkAction walkAction)
-         footstepPlanActionState = walkAction.getState().getBasics();
-      if (action instanceof RDXFootstepPlanAction footstepPlanAction)
-         footstepPlanActionState = footstepPlanAction.getState().getBasics();
-
       float halfDividedBarWidth = dividedBarWidth / 2.0f - ImGui.getStyle().getItemSpacingX() / 2.0f;
 
       for (RobotSide side : RobotSide.values)
       {
-         if (!footstepPlanActionState.getDesiredFootPoses().get(side).isEmpty())
+         if (action instanceof RDXFootstepPlanAction footstepPlanAction
+             && !footstepPlanAction.getState().getDesiredFootPoses().get(side).isEmpty())
          {
+            FootstepPlanActionState footstepPlanActionState = footstepPlanAction.getState();
             int i = 0;
             SE3TrajectoryPointReadOnly nextDesiredPoint = footstepPlanActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
             while (i < footstepPlanActionState.getDesiredFootPoses().get(side).getSize()

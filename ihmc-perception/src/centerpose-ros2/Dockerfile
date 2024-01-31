@@ -25,7 +25,7 @@ RUN apt-get update && \
 
 # Install IHMC ROS2 interfaces
 WORKDIR /root/ihmc_ros2_ws
-RUN git clone -b ICP-testing https://github.com/ihmcrobotics/ihmc-open-robotics-software.git /opt/ihmc-open-robotics-software
+RUN git clone https://github.com/ihmcrobotics/ihmc-open-robotics-software.git /opt/ihmc-open-robotics-software
 RUN mkdir src
 RUN cp -r /opt/ihmc-open-robotics-software/ihmc-interfaces/src/main/messages/ihmc_interfaces /root/ihmc_ros2_ws/src/ihmc_interfaces
 RUN rm -rf /opt/ihmc-open-robotics-software

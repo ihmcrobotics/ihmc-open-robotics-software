@@ -25,7 +25,8 @@ int8 PELVIS_HEIGHT_PITCH_ACTION=17
 
 int8 WAIT_DURATION_ACTION=18
 
-int8 WALK_ACTION=19
+# Monotonically increasing message ID that matches the CRDTInfo update number
+uint32 sequence_id
 
 # The ID to assign to the next instantiated node
 uint32 next_id
@@ -62,7 +63,5 @@ behavior_msgs/ScrewPrimitiveActionStateMessage[] screw_primitive_actions
 behavior_msgs/PelvisHeightPitchActionStateMessage[] pelvis_height_actions
 
 behavior_msgs/WaitDurationActionStateMessage[] wait_duration_actions
-
-behavior_msgs/WalkActionStateMessage[] walk_actions
 
 
