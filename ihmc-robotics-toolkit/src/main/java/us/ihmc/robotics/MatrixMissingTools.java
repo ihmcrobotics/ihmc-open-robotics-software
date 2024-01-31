@@ -1,7 +1,6 @@
 package us.ihmc.robotics;
 
 import org.ejml.MatrixDimensionException;
-import org.ejml.UtilEjml;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrix3x3;
@@ -455,34 +454,33 @@ public class MatrixMissingTools
    }
 
    /**
-    * Method of matrix power calculation
-    * The size of input matrix and output matrix should be equal
-    * powerNuber should be larger than 1.
-    * if power number is 1, output matrix is input matrix
-    * outputMatrix = inputMatrix^{powerNumber}
+    * Garbage-free matrix power calculation.
+    * <p>
+    * The addition of a temporary matrix in the method signature is to ensure this method performs no allocations.
+    * </p>
     *
-    * @param inputMatrix  input matrix will be powered
-    * @param outputMatrix output matrix after power
-    * @param powerNumber  number of power
+    * @param input        the matrix that will be raised to {@code power}. Not modified.
+    * @param power        power to raise {@code matrix} to.
+    * @param temporary    matrix to use for intermediate operations. Modified.
+    * @param resultToPack matrix to store result in. Modified.
     */
-   public static void power(DMatrixRMaj inputMatrix, DMatrixRMaj outputMatrix, int powerNumber)
+   public static void power(DMatrixRMaj input, int power, DMatrixRMaj temporary, DMatrixRMaj resultToPack)
    {
-      UtilEjml.checkSameInstance(inputMatrix, outputMatrix);
+      if (input.numCols != resultToPack.numCols && input.numCols != temporary.numCols)
+         throw new IllegalArgumentException("The matrices have incompatible column sizes.");
+      if (input.numRows != resultToPack.numRows && input.numRows != temporary.numCols)
+         throw new IllegalArgumentException("The matrices have incompatible row sizes.");
 
-      DMatrixRMaj temp = new DMatrixRMaj(inputMatrix);
-      DMatrixRMaj temp_result = new DMatrixRMaj(inputMatrix.numRows, inputMatrix.numCols);
+      resultToPack.set(input);
 
-      if (powerNumber > 1)
+      if (power > 1)
       {
-         for (int k = 0; k < powerNumber - 1; k++)
+         for (int k = 0; k < power - 1; k++)
          {
-            CommonOps_DDRM.mult(inputMatrix, temp, temp_result);
-            MatrixTools.setMatrixBlock(temp, 0, 0, temp_result, 0, 0, temp_result.numRows, temp_result.numCols, 1);
-            temp_result.zero();
+            CommonOps_DDRM.mult(input, resultToPack, temporary);
+            resultToPack.set(temporary);
          }
       }
-
-      MatrixTools.setMatrixBlock(outputMatrix, 0, 0, temp, 0, 0, temp.numRows, temp.numCols, 1);
    }
 
    public static boolean elementWiseLessThan(DMatrixRMaj a, DMatrixRMaj b)

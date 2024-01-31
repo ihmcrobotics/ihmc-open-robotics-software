@@ -230,10 +230,46 @@ public class MatrixMissingToolsTest
       }
    }
 
+   @Test
+   public void testPower()
+   {
+      Random random = new Random(21543L);
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int dimension = random.nextInt(1, 20);
+         DMatrixRMaj matrix = new DMatrixRMaj(dimension, dimension);
+         matrix.setData(RandomNumbers.nextDoubleArray(random, dimension * dimension, 10.0));
+         int power = random.nextInt(1, 10);
+
+         DMatrixRMaj expected = power(matrix, power);
+
+         DMatrixRMaj temporary = new DMatrixRMaj(dimension, dimension);
+         DMatrixRMaj actual = new DMatrixRMaj(dimension, dimension);
+         MatrixMissingTools.power(matrix, power, temporary, actual);
+         assertArrayEquals(expected.getData(), actual.getData(), EPSILON);
+      }
+   }
+
    private boolean elementWiseLessThan(DMatrixRMaj a, DMatrixRMaj b)
    {
       BMatrixRMaj compareOutput = new BMatrixRMaj(a.numRows, a.numCols);
       CommonOps_DDRM.elementLessThan(a, b, compareOutput);
       return compareOutput.sum() >= compareOutput.getNumElements();
+   }
+
+   private DMatrixRMaj power(DMatrixRMaj input, int power)
+   {
+      DMatrixRMaj temporary = new DMatrixRMaj(input);
+      DMatrixRMaj result = new DMatrixRMaj(input);
+
+      if (power > 1)
+      {
+         for (int k = 0; k < power - 1; k++)
+         {
+            CommonOps_DDRM.mult(input, temporary, result);
+            temporary.set(result);
+         }
+      }
+      return result;
    }
 }
