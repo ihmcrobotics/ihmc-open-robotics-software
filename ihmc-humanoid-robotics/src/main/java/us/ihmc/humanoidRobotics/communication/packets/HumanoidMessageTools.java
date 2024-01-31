@@ -8,37 +8,27 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import atlas_msgs.msg.dds.AtlasDesiredPumpPSIPacket;
 import atlas_msgs.msg.dds.AtlasElectricMotorAutoEnableFlagPacket;
 import atlas_msgs.msg.dds.AtlasElectricMotorEnablePacket;
 import atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import atlas_msgs.msg.dds.AtlasWristSensorCalibrationRequestPacket;
-import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
 import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
 import atlas_msgs.msg.dds.BDIBehaviorStatusPacket;
-import toolbox_msgs.msg.dds.BehaviorControlModePacket;
-import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
-import toolbox_msgs.msg.dds.BehaviorStatusPacket;
-import perception_msgs.msg.dds.BlackFlyParameterPacket;
+import boofcv.struct.calib.CameraPinholeBrown;
+import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.ChestHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.ClearDelayQueueMessage;
 import controller_msgs.msg.dds.DesiredAccelerationsMessage;
-import perception_msgs.msg.dds.DetectedObjectPacket;
-import perception_msgs.msg.dds.DoorLocationPacket;
-import ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
-import perception_msgs.msg.dds.FisheyePacket;
 import controller_msgs.msg.dds.FootLoadBearingMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import ihmc_common_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandCollisionDetectedPacket;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
@@ -49,22 +39,15 @@ import controller_msgs.msg.dds.HandPowerCyclePacket;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import toolbox_msgs.msg.dds.HeightQuadTreeToolboxRequestMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
-import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
-import perception_msgs.msg.dds.IntrinsicParametersMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.LegCompliancePacket;
+import controller_msgs.msg.dds.LegTrajectoryMessage;
 import controller_msgs.msg.dds.LocalizationPacket;
 import controller_msgs.msg.dds.LocalizationPointMapPacket;
 import controller_msgs.msg.dds.LocalizationStatusPacket;
 import controller_msgs.msg.dds.ManualHandControlPacket;
-import perception_msgs.msg.dds.MultisenseParameterPacket;
 import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.NeckTrajectoryMessage;
 import controller_msgs.msg.dds.ObjectWeightPacket;
@@ -75,36 +58,54 @@ import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisPoseErrorPacket;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.PlanOffsetStatus;
-import perception_msgs.msg.dds.PointCloudWorldPacket;
 import controller_msgs.msg.dds.PrepareForLocomotionMessage;
+import controller_msgs.msg.dds.SnapFootstepPacket;
+import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
+import controller_msgs.msg.dds.SpineTrajectoryMessage;
+import controller_msgs.msg.dds.StateEstimatorModePacket;
+import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
+import controller_msgs.msg.dds.WholeBodyStreamingMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
+import gnu.trove.list.array.TDoubleArrayList;
+import ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage;
+import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.FrameInformation;
 import ihmc_common_msgs.msg.dds.QueueableMessage;
-import toolbox_msgs.msg.dds.ReachingManifoldMessage;
-import toolbox_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
-import toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
-import controller_msgs.msg.dds.SnapFootstepPacket;
-import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.SpineTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
-import controller_msgs.msg.dds.StateEstimatorModePacket;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import perception_msgs.msg.dds.BlackFlyParameterPacket;
+import perception_msgs.msg.dds.DetectedObjectPacket;
+import perception_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.FisheyePacket;
+import perception_msgs.msg.dds.IntrinsicParametersMessage;
+import perception_msgs.msg.dds.MultisenseParameterPacket;
+import perception_msgs.msg.dds.PointCloudWorldPacket;
 import perception_msgs.msg.dds.ValveLocationPacket;
 import perception_msgs.msg.dds.VehiclePosePacket;
 import perception_msgs.msg.dds.VideoPacket;
-import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
-import toolbox_msgs.msg.dds.WalkToGoalBehaviorPacket;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import perception_msgs.msg.dds.WallPosePacket;
+import toolbox_msgs.msg.dds.BehaviorControlModePacket;
+import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
+import toolbox_msgs.msg.dds.BehaviorStatusPacket;
+import toolbox_msgs.msg.dds.HeightQuadTreeToolboxRequestMessage;
+import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.ReachingManifoldMessage;
+import toolbox_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
+import toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
+import toolbox_msgs.msg.dds.WalkToGoalBehaviorPacket;
 import toolbox_msgs.msg.dds.WaypointBasedTrajectoryMessage;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
-import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
-import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
@@ -841,10 +842,11 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static ChestTrajectoryMessage createChestTrajectoryMessage(SO3TrajectoryMessage so3Trajectory)
+   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime,
+                                                                       Orientation3DReadOnly desiredOrientation)
    {
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
-      message.getSo3Trajectory().set(new SO3TrajectoryMessage(so3Trajectory));
+      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, ReferenceFrame.getWorldFrame()));
       return message;
    }
 
@@ -2249,6 +2251,100 @@ public class HumanoidMessageTools
       ValveLocationPacket message = new ValveLocationPacket();
       message.getValvePoseInWorld().set(valvePoseInWorld);
       message.setValveRadius(valveRadius);
+      return message;
+   }
+
+   public static LegTrajectoryMessage createLegTrajectoryMessage(RobotSide robotSide, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   {
+      LegTrajectoryMessage message = new LegTrajectoryMessage();
+      message.getJointspaceTrajectory().set(new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage));
+      message.setRobotSide(robotSide.toByte());
+      return message;
+   }
+
+   /**
+    * Use this constructor to go straight to the given end points. Set the id of the message to
+    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param robotSide             is used to define which leg is performing the trajectory.
+    * @param trajectoryTime        how long it takes to reach the desired pose.
+    * @param desiredJointPositions desired joint positions. The array length should be equal to the
+    *                              number of leg joints.
+    */
+   public static LegTrajectoryMessage createLegTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions)
+   {
+      return createLegTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions, null, null);
+   }
+
+   /**
+    * Use this constructor to go straight to the given end points using the specified qp weights. Set
+    * the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param robotSide             is used to define which leg is performing the trajectory.
+    * @param trajectoryTime        how long it takes to reach the desired pose.
+    * @param desiredJointPositions desired joint positions. The array length should be equal to the
+    *                              number of leg joints.
+    * @param weights               the qp weights for the joint accelerations. If any index is set to
+    *                              NaN, that joint will use the controller default weight
+    */
+   public static LegTrajectoryMessage createLegTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions, double[] weights)
+   {
+      return createLegTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions, null, weights);
+   }
+
+   /**
+    * Use this constructor to go straight to the given end points with final velocity using the
+    * specified qp weights. Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param robotSide              is used to define which leg is performing the trajectory.
+    * @param trajectoryTime         how long it takes to reach the desired pose.
+    * @param desiredJointPositions  desired joint positions. The array length should be equal to the
+    *                               number of leg joints.
+    * @param desiredJointVelocities desired final joint velocities. The array length should be equal to
+    *                               the number of leg joints. Can be {@code null}.
+    * @param weights                the qp weights for the joint accelerations. If any index is set to
+    *                               NaN, that joint will use the controller default weight. Can be
+    *                               {@code null}.
+    */
+   public static LegTrajectoryMessage createLegTrajectoryMessage(RobotSide robotSide,
+                                                                 double trajectoryTime,
+                                                                 double[] desiredJointPositions,
+                                                                 double[] desiredJointVelocities,
+                                                                 double[] weights)
+   {
+      LegTrajectoryMessage message = new LegTrajectoryMessage();
+      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, desiredJointVelocities, weights));
+      message.setRobotSide(robotSide.toByte());
+      return message;
+   }
+
+   /**
+    * Create a message using the given joint trajectory points. Set the id of the message to
+    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param robotSide                     is used to define which leg is performing the trajectory.
+    * @param jointTrajectory1DListMessages joint trajectory points to be executed.
+    */
+   public static LegTrajectoryMessage createLegTrajectoryMessage(RobotSide robotSide, OneDoFJointTrajectoryMessage[] jointTrajectory1DListMessages)
+   {
+      LegTrajectoryMessage message = new LegTrajectoryMessage();
+      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(jointTrajectory1DListMessages));
+      message.setRobotSide(robotSide.toByte());
+      return message;
+   }
+
+   /**
+    * Use this constructor to build a message with more than one trajectory point. This constructor
+    * only allocates memory for the trajectories, you need to call
+    * {@link #setTrajectory1DMessage(int, OneDoFJointTrajectoryMessage)} for each joint afterwards. Set
+    * the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param robotSide is used to define which leg is performing the trajectory.
+    */
+   public static LegTrajectoryMessage createLegTrajectoryMessage(RobotSide robotSide)
+   {
+      LegTrajectoryMessage message = new LegTrajectoryMessage();
+      message.setRobotSide(robotSide.toByte());
       return message;
    }
 

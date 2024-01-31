@@ -1,5 +1,7 @@
 package us.ihmc.behaviors.lookAndStep;
 
+import ihmc_common_msgs.msg.dds.PoseListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -59,7 +61,7 @@ public class LookAndStepReset
       lookAndStep.behaviorStateReference.set(LookAndStepBehavior.State.RESET);
 
       lookAndStep.operatorReviewEnabledInput.set(true);
-      lookAndStep.helper.publish(OperatorReviewEnabledToUI, true);
+      lookAndStep.helper.publish(OPERATOR_REVIEW_ENABLED_STATUS, true);
 
       lookAndStep.bodyPathPlanning.reset();
       lookAndStep.bodyPathLocalization.reset();
@@ -72,7 +74,7 @@ public class LookAndStepReset
    private void runAfterWaitingForWalkingToFinish()
    {
       lookAndStep.bodyPathPlanning.acceptGoal(null);
-      lookAndStep.helper.publish(ResetForUI);
+      lookAndStep.helper.publish(RESET_FOR_UI);
       lookAndStep.imminentStanceTracker.clear();
       lookAndStep.controllerStatusTracker.reset();
 
@@ -81,8 +83,8 @@ public class LookAndStepReset
       // statusLogger.info("Requesting clear REA");
       // helper.publish(PerceptionAPI.REA_STATE_REQUEST, clearMessage);
 
-      lookAndStep.helper.publish(PlanarRegionsForUI, new PlanarRegionsList());
-      lookAndStep.helper.publish(BodyPathPlanForUI, new ArrayList<>());
+      lookAndStep.helper.publish(PLANAR_REGIONS_FOR_UI, new PlanarRegionsListMessage());
+      lookAndStep.helper.publish(BODY_PATH_PLAN_FOR_UI, new PoseListMessage());
 
       lookAndStep.statusLogger.info("Clearing SLAM");
       lookAndStep.helper.publish(SLAMModuleAPI.CLEAR);

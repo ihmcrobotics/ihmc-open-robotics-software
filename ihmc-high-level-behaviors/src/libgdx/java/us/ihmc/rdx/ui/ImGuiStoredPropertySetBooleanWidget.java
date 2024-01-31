@@ -24,7 +24,7 @@ public class ImGuiStoredPropertySetBooleanWidget implements ImGuiStoredPropertyS
    }
 
    @Override
-   public void render()
+   public void renderImGuiWidget()
    {
       imBooleanWrapper.renderImGuiWidget();
    }

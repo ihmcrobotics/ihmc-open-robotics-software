@@ -1,25 +1,11 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
-import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
-import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -28,13 +14,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolver;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolverInput;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -55,6 +38,8 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -62,6 +47,12 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.*;
+
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
+import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
 
 public class HumanoidKinematicsToolboxController extends KinematicsToolboxController
 {
@@ -82,8 +73,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final CommonHumanoidReferenceFrames currentReferenceFrames;
    private final OneDoFJointBasics[] currentOneDoFJoints;
    private final TIntObjectHashMap<RigidBodyBasics> rigidBodyHashCodeMap = new TIntObjectHashMap<>();
+   private final TIntObjectHashMap<OneDoFJointBasics> jointHashCodeMap = new TIntObjectHashMap<>();
 
    private final Map<RigidBodyBasics, RigidBodyBasics> endEffectorToPrimaryBaseMap = new HashMap<>();
+   private final Map<RigidBodyBasics, GeometricJacobian> rootJacobians = new HashMap<>();
 
    private final YoBoolean enableAutoSupportPolygon = new YoBoolean("enableAutoSupportPolygon", registry);
    /**
@@ -111,10 +104,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private final YoFramePoint3D initialCenterOfMassPosition = new YoFramePoint3D("initialCenterOfMass", worldFrame, registry);
 
-   /** Multi-contact support region solver */
-   private final YoBoolean enableMultiContactSupportRegionSolver = new YoBoolean("enableMultiContactSupportRegionSolver", registry);
-   private final MultiContactSupportRegionSolver supportRegionSolver = new MultiContactSupportRegionSolver();
-   private final MultiContactSupportRegionSolverInput supportRegionSolverInput = new MultiContactSupportRegionSolverInput();
    /**
     * Indicates whether the rigid-bodies currently in contact as reported per:
     * {@link CapturabilityBasedStatus} or {@link MultiContactBalanceStatus} should be held in place for
@@ -145,7 +134,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * joint such that a factor of 0.05 for the hip yaw will effectively reduce the allowed range of
     * motion by 2.5% on the upper and lower end of the joint.
     */
-   private final EnumMap<LegJointName, YoDouble> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
+   private final HashMap<String, YoDouble> jointLimitReductionFactors = new HashMap<>();
    /**
     * Reference to the most recent data received from the controller relative to the balance control.
     * It is used for identifying which foot is in support and thus which foot should be held in place.
@@ -153,6 +142,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final ConcurrentCopier<CapturabilityBasedStatus> concurrentCapturabilityBasedStatusCopier = new ConcurrentCopier<>(CapturabilityBasedStatus::new);
    private boolean hasCapturabilityBasedStatus = false;
    private final CapturabilityBasedStatus capturabilityBasedStatusInternal = new CapturabilityBasedStatus();
+   /**
+    * Whether to add a JointLimitReductionCommand by calling {{@link #addJointLimitReductionCommand}}.
+    */
+   private final YoBoolean enableJointLimitReduction = new YoBoolean("enableJointLimitReduction", registry);
 
    /**
     * Reference to the most recent data received from the controller relative to the balance control.
@@ -162,6 +155,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final ConcurrentCopier<MultiContactBalanceStatus> concurrentMultiContactBalanceStatusCopier = new ConcurrentCopier<>(MultiContactBalanceStatus::new);
    private boolean hasMultiContactBalanceStatus = false;
    private final MultiContactBalanceStatus multiContactBalanceStatusInternal = new MultiContactBalanceStatus();
+   private final ExecutionTimer executionTimer = new ExecutionTimer("ikTotal", registry);
 
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
                                               StatusMessageOutputManager statusOutputManager,
@@ -193,6 +187,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       currentOneDoFJoints = getAllJointsExcludingHands(currentFullRobotModel);
       currentReferenceFrames = new HumanoidReferenceFrames(currentFullRobotModel);
       desiredFullRobotModel.getElevator().subtreeStream().forEach(rigidBody -> rigidBodyHashCodeMap.put(rigidBody.hashCode(), rigidBody));
+      desiredFullRobotModel.getRootBody().subtreeStream().forEach(rigidBody -> rootJacobians.put(rigidBody, new GeometricJacobian(desiredFullRobotModel.getElevator(), rigidBody, ReferenceFrame.getWorldFrame())));
+      Arrays.stream(currentOneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
 
       supportRigidBodyWeight.set(200.0);
       momentumWeight.set(0.001);
@@ -218,27 +214,35 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          endEffectorToPrimaryBaseMap.put(desiredFullRobotModel.getPelvis(), desiredFullRobotModel.getFoot(robotSide));
       }
 
-      populateJointLimitReductionFactors();
+      populateDefaultJointLimitReductionFactors();
    }
 
    /**
-    * Setting up the map holding the joint limit reduction factors. If more reduction is needed, add it
-    * there. If it has to be updated on the fly, it should then be added this toolbox API, probably
-    * added to the message {@link HumanoidKinematicsToolboxConfigurationMessage}.
+    * Setting up the map holding the joint limit reduction factors and setting to default values.
+    * To modify reduction factors on-the-fly use {@link HumanoidKinematicsToolboxConfigurationMessage}.
     */
-   private void populateJointLimitReductionFactors()
+   private void populateDefaultJointLimitReductionFactors()
    {
-      YoDouble hipReductionFactor = new YoDouble("hipLimitReductionFactor", registry);
-      YoDouble kneeReductionFactor = new YoDouble("kneeLimitReductionFactor", registry);
-      YoDouble ankleReductionFactor = new YoDouble("ankleLimitReductionFactor", registry);
-      hipReductionFactor.set(0.05);
+      for (int i = 0; i < currentOneDoFJoints.length; i++)
+      {
+         OneDoFJointBasics joint = currentOneDoFJoints[i];
+         YoDouble limitReductionFactor = new YoDouble(joint.getName() + "LimitReductionFactor", registry);
+         jointLimitReductionFactors.put(joint.getName(), limitReductionFactor);
+      }
 
-      legJointLimitReductionFactors.put(LegJointName.HIP_PITCH, hipReductionFactor);
-      legJointLimitReductionFactors.put(LegJointName.HIP_ROLL, hipReductionFactor);
-      legJointLimitReductionFactors.put(LegJointName.HIP_YAW, hipReductionFactor);
-      legJointLimitReductionFactors.put(LegJointName.KNEE_PITCH, kneeReductionFactor);
-      legJointLimitReductionFactors.put(LegJointName.ANKLE_PITCH, ankleReductionFactor);
-      legJointLimitReductionFactors.put(LegJointName.ANKLE_ROLL, ankleReductionFactor);
+      double defaultHipJointReduction = 0.05;
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         setJointLimitReductionFactor(currentFullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).getName(), defaultHipJointReduction);
+         setJointLimitReductionFactor(currentFullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL).getName(), defaultHipJointReduction);
+         setJointLimitReductionFactor(currentFullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW).getName(), defaultHipJointReduction);
+      }
+   }
+   
+   private void setJointLimitReductionFactor(String jointName, double jointLimitReductionFactor)
+   {
+      if (jointLimitReductionFactors.containsKey(jointName))
+         jointLimitReductionFactors.get(jointName).set(jointLimitReductionFactor);      
    }
 
    private static Collection<RigidBodyBasics> createListOfControllableRigidBodies(FullHumanoidRobotModel desiredFullRobotModel)
@@ -252,6 +256,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       for (RobotSide robotSide : RobotSide.values)
       {
          listOfControllableRigidBodies.add(desiredFullRobotModel.getHand(robotSide));
+         listOfControllableRigidBodies.add(desiredFullRobotModel.getForearm(robotSide));
          listOfControllableRigidBodies.add(desiredFullRobotModel.getFoot(robotSide));
       }
 
@@ -275,7 +280,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       FullHumanoidRobotModel robot = robotModel.createFullRobotModel();
       defaultRobotInitialSetup.initializeFullRobotModel(robot);
 
-      for (OneDoFJointBasics joint : getDesiredOneDoFJoint())
+      for (OneDoFJointBasics joint : getDesiredOneDoFJoints())
       {
          double q_priv = robot.getOneDoFJointByName(joint.getName()).getQ();
          privilegedConfiguration.put(joint, q_priv);
@@ -315,20 +320,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       if (hasCapturabilityBasedStatus)
          capturabilityBasedStatusInternal.set(capturabilityBasedStatus);
 
-      MultiContactBalanceStatus multiContactBalanceStatus = concurrentMultiContactBalanceStatusCopier.getCopyForReading();
-      hasMultiContactBalanceStatus = multiContactBalanceStatus != null;
-      if (hasMultiContactBalanceStatus)
-         multiContactBalanceStatusInternal.set(multiContactBalanceStatus);
-
       contactingRigidBodies.clear();
 
       if (hasCapturabilityBasedStatus)
       {
          processCapturabilityBasedStatus(capturabilityBasedStatus);
-      }
-      else if (hasMultiContactBalanceStatus)
-      {
-         processMultiContactBalanceStatus(multiContactBalanceStatus);
       }
       else
       {
@@ -394,6 +390,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       holdSupportRigidBodies.set(true);
       enableAutoSupportPolygon.set(true);
       holdCenterOfMassXYPosition.set(true);
+      enableJointLimitReduction.set(true);
 
       status.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL);
       reportMessage(status);
@@ -404,16 +401,47 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    @Override
    public void updateInternal()
    {
+      executionTimer.startMeasurement();
+
       if (commandInputManager.isNewCommandAvailable(HumanoidKinematicsToolboxConfigurationCommand.class))
       {
          HumanoidKinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(HumanoidKinematicsToolboxConfigurationCommand.class);
 
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          holdSupportRigidBodies.set(command.holdSupportRigidBodies());
-         enableMultiContactSupportRegionSolver.set(command.enableMultiContactSupportRegionSolver());
+         enableJointLimitReduction.set(command.enableJointLimitReduction());
+         
+         if (command.hasCustomJointRestrictionLimits())
+         {
+            // Clear joint limit restrictions
+            for (int i = 0; i < currentOneDoFJoints.length; i++)
+            {
+               jointLimitReductionFactors.get(currentOneDoFJoints[i].getName()).set(0.0);
+            }
+            
+            // Update joint limit restrictions
+            for (int i = 0; i < command.getNumberOfCustomJointRestrictionLimits(); i++)
+            {
+               OneDoFJointBasics joint = jointHashCodeMap.get(command.getJointLimitReductionHashCode(i));
+               if (joint == null)
+                  continue;
+               double jointLimitReductionFactor = command.getJointRestrictionLimitFactor(i);
+               jointLimitReductionFactors.get(joint.getName()).set(jointLimitReductionFactor);
+            }
+         }
+      }
+
+      MultiContactBalanceStatus multiContactBalanceStatus = concurrentMultiContactBalanceStatusCopier.getCopyForReading();
+      hasMultiContactBalanceStatus = multiContactBalanceStatus != null;
+      if (hasMultiContactBalanceStatus)
+      {
+         multiContactBalanceStatusInternal.set(multiContactBalanceStatus);
+         processMultiContactBalanceStatus(multiContactBalanceStatusInternal);
       }
 
       super.updateInternal();
+
+      executionTimer.stopMeasurement();
    }
 
    /**
@@ -544,24 +572,25 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    /**
     * Creates and sets up the {@code JointLimitReductionCommand} from the map
-    * {@link #legJointLimitReductionFactors}.
+    * {@link #jointLimitReductionFactors}.
     *
     * @param bufferToPack the buffer used to store the command for reducing the allowed range of motion
     *                     of the leg joints.
     */
    private void addJointLimitReductionCommand(InverseKinematicsCommandBuffer bufferToPack)
    {
+      if (!enableJointLimitReduction.getValue())
+         return;
+      
       JointLimitReductionCommand jointLimitReductionCommand = bufferToPack.addJointLimitReductionCommand();
       jointLimitReductionCommand.clear();
 
-      for (RobotSide robotSide : RobotSide.values)
+      for (int i = 0; i < desiredOneDoFJoints.length; i++)
       {
-         for (LegJointName legJointName : desiredFullRobotModel.getRobotSpecificJointNames().getLegJointNames())
-         {
-            OneDoFJointBasics joint = desiredFullRobotModel.getLegJoint(robotSide, legJointName);
-            double reductionFactor = legJointLimitReductionFactors.get(legJointName).getDoubleValue();
-            jointLimitReductionCommand.addReductionFactor(joint, reductionFactor);
-         }
+         double reductionFactor = jointLimitReductionFactors.get(desiredOneDoFJoints[i].getName()).getValue();
+         if (reductionFactor <= 0.0 || reductionFactor > 1.0)
+            continue;
+         jointLimitReductionCommand.addReductionFactor(desiredOneDoFJoints[i], reductionFactor);
       }
    }
 
@@ -604,42 +633,18 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       Object<Point3D> supportPolygon = multiContactBalanceStatus.getContactPointsInWorld();
       Integer supportRigidBodyIds = multiContactBalanceStatus.getSupportRigidBodyIds();
 
+      if (multiContactBalanceStatus.getContactPointsInWorld().size() < 3)
+      {
+         shrunkSupportPolygon.clear();
+         shrunkSupportPolygonVertices.clear();
+         return;
+      }
+
       for (int i = 0; i < supportPolygon.size(); i++)
       {
          ContactingRigidBody contactingRigidBody = contactingRigidBodies.add();
          contactingRigidBody.initialize(rigidBodyHashCodeMap.get(supportRigidBodyIds.get(i)), worldFrame, supportPolygon.get(i));
       }
-
-      /* Update active contact points */
-      if (solveForMultiContactSupportRegion(multiContactBalanceStatus))
-      {
-         activeContactPointPositions.clear();
-         getSolution().getSupportRegion().clear();
-
-         ConvexPolygon2DReadOnly supportRegion = supportRegionSolver.getSupportRegion();
-         for (int i = 0; i < supportRegion.getNumberOfVertices(); i++)
-         {
-            getSolution().getSupportRegion().add().set(supportRegion.getVertex(i));
-            activeContactPointPositions.add().set(supportRegion.getVertex(i));
-         }
-
-         updateSupportPolygonConstraint(activeContactPointPositions);
-      }
-   }
-
-   private boolean solveForMultiContactSupportRegion(MultiContactBalanceStatus multiContactBalanceStatus)
-   {
-      if (isUserProvidingSupportPolygon())
-         return false;
-      if (!enableMultiContactSupportRegionSolver.getValue())
-         return false;
-      boolean hasSurfaceNormalData = multiContactBalanceStatus.getSurfaceNormalsInWorld().size() == multiContactBalanceStatus.getContactPointsInWorld().size();
-      if (!hasSurfaceNormalData)
-         return false;
-
-      supportRegionSolverInput.setFromMessage(multiContactBalanceStatus);
-      supportRegionSolver.initialize(supportRegionSolverInput);
-      return supportRegionSolver.solve();
    }
 
    @Override

@@ -15,7 +15,7 @@ public class RequestStereoPointCloudMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7751d5cc52c7e8f0ad7bd2de21ceaa455a52d2119955f671b6835bf36533e764";
+   		return "bd89dee037898c230033efbd5b7865731e8d0d2584b984ca4459cd25f76f75e9";
    }
    
    @Override

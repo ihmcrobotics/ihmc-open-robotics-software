@@ -67,7 +67,7 @@ public class ImGuiStoredPropertySetIntegerWidget implements ImGuiStoredPropertyS
    }
 
    @Override
-   public void render()
+   public void renderImGuiWidget()
    {
       imIntegerWrapper.renderImGuiWidget();
    }

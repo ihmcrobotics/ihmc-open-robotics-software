@@ -15,7 +15,7 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8858b12874e0b37682535fbc8a03bd9530373d35169a3b991bbb66ac3494820b";
+   		return "70a70eaaa174d769f0367d30ac3e06bd47987bdcfbed5d5ea30ab5287354e65e";
    }
    
    @Override

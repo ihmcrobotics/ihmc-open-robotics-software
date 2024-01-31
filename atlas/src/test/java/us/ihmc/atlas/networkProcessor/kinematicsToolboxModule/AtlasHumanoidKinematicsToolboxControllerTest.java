@@ -54,22 +54,7 @@ public class AtlasHumanoidKinematicsToolboxControllerTest extends HumanoidKinema
    {
       super.testCenterOfMassConstraint();
    }
-
-   @Disabled // TODO Need to implement createMultiContactConstraintData()
-   @Override
-   @Tag("humanoid-toolbox")
-   @Test
-   public void testMultiContactCenterOfMassConstraint() throws Exception
-   {
-      super.testMultiContactCenterOfMassConstraint();
-   }
-
-   @Override
-   protected MultiContactConstraintData createMultiContactConstraintData()
-   {
-      return null;
-   }
-
+   
    @Override
    public DRCRobotModel getRobotModel()
    {

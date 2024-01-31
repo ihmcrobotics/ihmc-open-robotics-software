@@ -84,16 +84,17 @@ public class ROS2Heartbeat
    {
       while (alive)
       {
-         throttler.waitAndRun(HEARTBEAT_PERIOD);
          if (ros2 != null)
             ros2.publish(heartbeatTopic);
          else
             heartbeatPublisher.publish(emptyMessage);
+         throttler.waitAndRun(HEARTBEAT_PERIOD);
       }
    }
 
    public void destroy()
    {
+      setAlive(false);
       if (heartbeatPublisher != null)
          heartbeatPublisher.destroy();
    }

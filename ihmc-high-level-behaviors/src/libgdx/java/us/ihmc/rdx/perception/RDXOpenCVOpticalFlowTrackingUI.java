@@ -8,7 +8,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.global.opencv_video;
 import org.bytedeco.opencv.opencv_core.*;
 
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.perception.BytedecoImage;
 
 public class RDXOpenCVOpticalFlowTrackingUI
@@ -17,7 +17,7 @@ public class RDXOpenCVOpticalFlowTrackingUI
    private int imageHeight;
    private BytedecoImage sourceImage;
    private RDXBytedecoImagePanel trackingImagePanel;
-   private final ImGuiPanel mainPanel;
+   private final RDXPanel mainPanel;
 
    private final Point2f previousPoint2f = new Point2f(0, 0);
    private final Point2f nextPoint2f = new Point2f(0, 0);
@@ -40,7 +40,7 @@ public class RDXOpenCVOpticalFlowTrackingUI
 
    public RDXOpenCVOpticalFlowTrackingUI()
    {
-      mainPanel = new ImGuiPanel("Door Handle Detection", this::renderImGuiWidgets);
+      mainPanel = new RDXPanel("Door Handle Detection", this::renderImGuiWidgets);
    }
 
    public void create(BytedecoImage sourceImage)
@@ -167,7 +167,7 @@ public class RDXOpenCVOpticalFlowTrackingUI
       }
    }
 
-   public ImGuiPanel getMainPanel()
+   public RDXPanel getMainPanel()
    {
       return mainPanel;
    }

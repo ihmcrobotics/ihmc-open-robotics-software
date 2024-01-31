@@ -1,16 +1,41 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import gnu.trove.list.array.TIntArrayList;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPSolver.QPInputDomain.MOTION;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPSolver.QPInputDomain.MOTION_AND_RHO;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPSolver.QPInputDomain.RHO;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointTorqueAndPowerConstraintHandler;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings.JointPowerLimitEnforcementMethod;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings.JointTorqueLimitEnforcementMethod;
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.commons.MathTools;
@@ -18,7 +43,12 @@ import us.ihmc.convexOptimization.quadraticProgram.NativeActiveSetQPSolverWithIn
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
@@ -32,13 +62,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPSolver.QPInputDomain.*;
 
 public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHolder
 {
@@ -76,6 +99,13 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    private final JointIndexHandler jointIndexHandler;
    private final TIntArrayList inactiveJointIndices = new TIntArrayList();
+   private final ArrayList<OneDoFJointBasics> torqueConstrainedJoints = new ArrayList<>();
+   private final ArrayList<OneDoFJointBasics> powerConstrainedJoints = new ArrayList<>();
+   private final TObjectDoubleHashMap<OneDoFJointBasics> jointPowerLimits = new TObjectDoubleHashMap<OneDoFJointBasics>();
+   private final JointTorqueCommand torqueConstraintMinimumCommand = new JointTorqueCommand();
+   private final JointTorqueCommand torqueConstraintMaximumCommand = new JointTorqueCommand();
+   private final JointTorqueAndPowerConstraintHandler torqueConstraintHandler = new JointTorqueAndPowerConstraintHandler();
+
    private final YoDouble absoluteMaximumJointAcceleration = new YoDouble("absoluteMaximumJointAcceleration", registry);
    private final Map<OneDoFJointBasics, YoDouble> jointMaximumAccelerations = new HashMap<>();
    private final Map<OneDoFJointBasics, YoDouble> jointMinimumAccelerations = new HashMap<>();
@@ -147,6 +177,33 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
       CommonOps_DDRM.fill(qDDotMinMatrix, Double.NEGATIVE_INFINITY);
       CommonOps_DDRM.fill(qDDotMaxMatrix, Double.POSITIVE_INFINITY);
+
+      JointTorqueLimitEnforcementMethod jointTorqueEnforcementMethod = optimizationSettings.getJointTorqueLimitEnforcementMethod();
+      if (jointTorqueEnforcementMethod == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_QP
+          || jointTorqueEnforcementMethod == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_QP_AND_CONTROLLER)
+      {
+         for (int i = 0; i < oneDoFJoints.length; i++)
+         {
+            OneDoFJointBasics joint = oneDoFJoints[i];
+            torqueConstrainedJoints.add(joint);
+         }
+      }
+
+      JointPowerLimitEnforcementMethod jointPowerEnforcementMethod = optimizationSettings.getJointPowerLimitEnforcementMethod();
+      if ((jointPowerEnforcementMethod == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_QP
+           || jointPowerEnforcementMethod == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_QP_AND_CONTROLLER)
+          && !optimizationSettings.getJointPowerLimits().isEmpty())
+      {
+         for (int i = 0; i < oneDoFJoints.length; i++)
+         {
+            OneDoFJointBasics joint = oneDoFJoints[i];
+            if (optimizationSettings.getJointPowerLimits().containsKey(joint.getName()))
+            {
+               powerConstrainedJoints.add(joint);
+               jointPowerLimits.put(joint, optimizationSettings.getJointPowerLimits().get(joint.getName()));
+            }
+         }
+      }
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -236,14 +293,14 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       for (int i = 0; i < kinematicLoopFunctions.size(); i++)
       {
          List<? extends OneDoFJointReadOnly> loopJoints = kinematicLoopFunctions.get(i).getLoopJoints();
-         
+
          // Check if the kinematic loop has joints. If no joints are returned, do not add a substitution
-         if(loopJoints != null && !loopJoints.isEmpty())
+         if (loopJoints != null && !loopJoints.isEmpty())
          {
             motionQPInputCalculator.convertKinematicLoopFunction(kinematicLoopFunctions.get(i), motionQPVariableSubstitution);
             qpSolver.addAccelerationSubstitution(motionQPVariableSubstitution);
          }
-         
+
       }
 
       qpSolver.setMaxNumberOfIterations(maximumNumberOfIterations.getIntegerValue());
@@ -385,6 +442,109 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       qpSolver.addTorqueMinimizationObjective(dynamicsMatrixCalculator.getBodyMassMatrix(),
                                               dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
                                               dynamicsMatrixCalculator.getTorqueMinimizationObjective());
+   }
+
+   /*
+    * If called, constrains (inside the QP) the torques of the joints specified in
+    * torqueConstrainedJoints to respect their effort limits (or some other limit if we send it). Can
+    * also handle power constraints (which are converted to torque constraints).
+    */
+   public void setupTorqueConstraintCommand()
+   {
+      if (torqueConstrainedJoints.isEmpty() && powerConstrainedJoints.isEmpty())
+         return;
+
+      torqueConstraintMinimumCommand.clear();
+      torqueConstraintMaximumCommand.clear();
+
+      torqueConstraintMinimumCommand.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+      torqueConstraintMaximumCommand.setConstraintType(ConstraintType.LEQ_INEQUALITY);
+
+      /* only torque constraints */
+      if (!torqueConstrainedJoints.isEmpty() && powerConstrainedJoints.isEmpty())
+      {
+         for (int i = 0; i < torqueConstrainedJoints.size(); i++)
+         {
+            OneDoFJointBasics joint = torqueConstrainedJoints.get(i);
+            torqueConstraintMinimumCommand.addJoint(joint, joint.getEffortLimitLower());
+            torqueConstraintMaximumCommand.addJoint(joint, joint.getEffortLimitUpper());
+         }
+      }
+
+      /* only power constraints */
+      if (torqueConstrainedJoints.isEmpty() && !powerConstrainedJoints.isEmpty())
+      {
+         setupPowerConstraintCommand();
+      }
+
+      /* handle both torque and power constraints */
+      if (!torqueConstrainedJoints.isEmpty() && !powerConstrainedJoints.isEmpty())
+      {
+         setupTorqueAndPowerConstraintCommand();
+      }
+
+      submitJointTorqueCommand(torqueConstraintMinimumCommand);
+      submitJointTorqueCommand(torqueConstraintMaximumCommand);
+   }
+
+   /*
+    * Handles the case when only power constraints are present. Since joint velocity is given, the
+    * power constraint is converted into a torque constraint (taking care to watch the sign on qd).
+    */
+   private void setupPowerConstraintCommand()
+   {
+      double powerLimitLower = Double.NEGATIVE_INFINITY;
+      double powerLimitUpper = Double.POSITIVE_INFINITY;
+
+      for (int i = 0; i < powerConstrainedJoints.size(); i++)
+      {
+         OneDoFJointBasics joint = powerConstrainedJoints.get(i);
+         powerLimitLower = -jointPowerLimits.get(joint);
+         powerLimitUpper = jointPowerLimits.get(joint);
+
+         torqueConstraintHandler.computeTorqueConstraints(joint, powerLimitLower, powerLimitUpper, false);
+         torqueConstraintMinimumCommand.addJoint(joint, torqueConstraintHandler.getTorqueLimitLower());
+         torqueConstraintMaximumCommand.addJoint(joint, torqueConstraintHandler.getTorqueLimitUpper());
+      }
+   }
+
+   /*
+    * Handles the case when torque and power constraints are present. Iterates through the joints and
+    * checks whether the torque or power constraint is more restrictive at the current time step,
+    * adding only the more restrictive constraint for each joint.
+    */
+   private void setupTorqueAndPowerConstraintCommand()
+   {
+      double powerLimitLower = Double.NEGATIVE_INFINITY;
+      double powerLimitUpper = Double.POSITIVE_INFINITY;
+
+      double torqueLimitLower = Double.NEGATIVE_INFINITY;
+      double torqueLimitUpper = Double.POSITIVE_INFINITY;
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         OneDoFJointBasics joint = oneDoFJoints[i];
+
+         if (powerConstrainedJoints.contains(joint))
+         {
+            /* this joint has a power constraint and may have a torque constraint */
+            powerLimitLower = -jointPowerLimits.get(joint);
+            powerLimitUpper = jointPowerLimits.get(joint);
+
+            torqueConstraintHandler.computeTorqueConstraints(joint, powerLimitLower, powerLimitUpper, torqueConstrainedJoints.contains(joint));
+            torqueLimitLower = torqueConstraintHandler.getTorqueLimitLower();
+            torqueLimitUpper = torqueConstraintHandler.getTorqueLimitUpper();
+         }
+         else
+         {
+            /* this joint has only a torque constraint */
+            torqueLimitLower = joint.getEffortLimitLower();
+            torqueLimitUpper = joint.getEffortLimitUpper();
+         }
+
+         torqueConstraintMinimumCommand.addJoint(joint, torqueLimitLower);
+         torqueConstraintMaximumCommand.addJoint(joint, torqueLimitUpper);
+      }
    }
 
    public void submitQPObjectiveCommand(QPObjectiveCommand command)

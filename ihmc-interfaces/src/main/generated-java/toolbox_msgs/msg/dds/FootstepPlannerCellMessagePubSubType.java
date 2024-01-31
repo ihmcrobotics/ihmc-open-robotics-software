@@ -15,7 +15,7 @@ public class FootstepPlannerCellMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4f89d56f002497b0b1f90876d4d19e3abcacf32641a0911b7a130c2fdee802f0";
+   		return "ee2f1328603d3b53822d11395ac340a0cbb73805e988f6e081b70841ee214668";
    }
    
    @Override

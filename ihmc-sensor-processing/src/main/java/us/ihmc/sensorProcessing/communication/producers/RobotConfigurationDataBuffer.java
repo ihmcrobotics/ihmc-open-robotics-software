@@ -121,12 +121,11 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
    /**
     * Update a full robot model with data from timestamp. Optionally update force sensors
     *
-    * @param waitForTimestamp Will block if no timestamp is not received yet
-    * @param timestamp Timestamp to get. Will return the data for the last received that is smaller
-    *           or equal to timestamp.
-    * @param model Model to update. Will call updateFramesRecursively()
+    * @param waitForTimestamp      Will block if no timestamp is not received yet
+    * @param timestamp             Timestamp to get. Will return the data for the last received that is
+    *                              smaller or equal to timestamp.
+    * @param model                 Model to update. Will call updateFramesRecursively()
     * @param forceSensorDataHolder Optional, update force sensor data holders
-    *
     * @return monotonic time in nanoseconds of the selected frame, or -1 if the data wasn't there
     */
    public long updateFullRobotModel(boolean waitForTimestamp, long timestamp, FullRobotModel model, ForceSensorDataHolder forceSensorDataHolder)
@@ -205,8 +204,8 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
          for (int i = 0; i < forceSensorDataHolder.getForceSensorDefinitions().size(); i++)
          {
             SpatialVectorMessage momentAndForceVectorForSensor = robotConfigurationData.getForceSensorData().get(i);
-            forceSensorDataHolder.get(forceSensorDataHolder.getForceSensorDefinitions().get(i)).setWrench(momentAndForceVectorForSensor.getAngularPart(),
-                                                                                                          momentAndForceVectorForSensor.getLinearPart());
+            forceSensorDataHolder.getData(forceSensorDataHolder.getForceSensorDefinitions().get(i))
+                                 .setWrench(momentAndForceVectorForSensor.getAngularPart(), momentAndForceVectorForSensor.getLinearPart());
          }
       }
    }
@@ -236,8 +235,9 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
             allJoints = FullRobotModelUtils.getAllJointsExcludingHands((FullHumanoidRobotModel) fullRobotModel);
          else
             allJoints = fullRobotModel.getOneDoFJoints();
-         jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(),
-                                                                       fullRobotModel.getIMUDefinitions());
+         jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints,
+                                                                              fullRobotModel.getForceSensorDefinitions(),
+                                                                              fullRobotModel.getIMUDefinitions());
       }
    }
 

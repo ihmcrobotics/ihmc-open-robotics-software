@@ -1,0 +1,44 @@
+#ifndef __controller_msgs__msg__MultiContactTimedContactSequenceMessage__idl__
+#define __controller_msgs__msg__MultiContactTimedContactSequenceMessage__idl__
+
+#include "ihmc_common_msgs/msg/./TimeIntervalMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC multi-contact controller API.
+       * Message for commanding whole-body jointspace trajectory as well as precomputed load status
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::MultiContactTimedContactSequenceMessage_")
+      struct MultiContactTimedContactSequenceMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Timed intervals that left arm is in contact
+         */
+        sequence<ihmc_common_msgs::msg::dds::TimeIntervalMessage, 25> left_arm_contact_intervals;
+        /**
+         * Timed intervals that right arm is in contact
+         */
+        sequence<ihmc_common_msgs::msg::dds::TimeIntervalMessage, 25> right_arm_contact_intervals;
+        /**
+         * Timed intervals that left leg is in contact
+         */
+        sequence<ihmc_common_msgs::msg::dds::TimeIntervalMessage, 25> left_leg_contact_intervals;
+        /**
+         * Timed intervals that right leg is in contact
+         */
+        sequence<ihmc_common_msgs::msg::dds::TimeIntervalMessage, 25> right_leg_contact_intervals;
+      };
+    };
+  };
+};
+
+#endif

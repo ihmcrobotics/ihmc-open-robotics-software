@@ -1,18 +1,15 @@
 package us.ihmc.rdx.logging;
 
 import imgui.ImGui;
-import org.bytedeco.ffmpeg.ffmpeg;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoTools;
-import us.ihmc.tools.thread.Activator;
 
 import java.nio.ByteOrder;
 import java.util.Random;
@@ -22,7 +19,6 @@ public class RDXFFMPEGMP4LoggingDemo
    public static final int WIDTH = 256;
    public static final int HEIGHT = 256;
    public static final int NICE_COLOR = 0xFFAA6600;
-   private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXBytedecoImagePanel imagePanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -50,29 +46,21 @@ public class RDXFFMPEGMP4LoggingDemo
 
             baseUI.create();
 
-            ImGuiPanel panel = new ImGuiPanel("Image", this::renderImGuiWidgets);
+            RDXPanel panel = new RDXPanel("Image", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
+
+            ffmpegLoggerDemoHelper.create(WIDTH, HEIGHT, this::prepareSourceImage);
+
+            image = new BytedecoImage(WIDTH, HEIGHT, opencv_core.CV_8UC4);
+            imagePanel = new RDXBytedecoImagePanel("Sample Image", image);
+
+            baseUI.getImGuiPanelManager().addPanel(imagePanel.getImagePanel());
          }
 
          @Override
          public void render()
          {
-            if (nativesLoadedActivator.poll())
-            {
-               if (nativesLoadedActivator.isNewlyActivated())
-               {
-                  ffmpegLoggerDemoHelper.create(WIDTH, HEIGHT, this::prepareSourceImage);
-
-                  image = new BytedecoImage(WIDTH, HEIGHT, opencv_core.CV_8UC4);
-                  imagePanel = new RDXBytedecoImagePanel("Sample Image", image);
-
-                  baseUI.getImGuiPanelManager().addPanel(imagePanel.getImagePanel());
-                  baseUI.getLayoutManager().reloadLayout();
-               }
-
-               imagePanel.draw();
-            }
-
+            imagePanel.draw();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
@@ -84,10 +72,7 @@ public class RDXFFMPEGMP4LoggingDemo
 
             ffmpegLoggerDemoHelper.renderImGuiBasicInfo();
 
-            if (nativesLoadedActivator.peek())
-            {
-               ffmpegLoggerDemoHelper.renderImGuiNativesLoaded();
-            }
+            ffmpegLoggerDemoHelper.renderImGuiWidgets();
          }
 
          private void prepareSourceImage()

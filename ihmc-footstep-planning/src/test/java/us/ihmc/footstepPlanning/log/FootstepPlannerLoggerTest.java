@@ -13,10 +13,12 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.io.File;
 
@@ -42,7 +44,7 @@ public class FootstepPlannerLoggerTest
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
       request.setStartFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), initialMidFootPose);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
-      request.setPlanarRegionsList(dataSet.getPlanarRegionsList());
+      request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(dataSet.getPlanarRegionsList())));
       request.setAssumeFlatGround(false);
       request.setPlanBodyPath(true);
 
@@ -50,8 +52,6 @@ public class FootstepPlannerLoggerTest
       planningModule.getFootstepPlannerParameters().setYawWeight(0.17);
       planningModule.getFootstepPlannerParameters().setMaximumStepZWhenSteppingUp(0.4);
       planningModule.getFootstepPlannerParameters().setMaximumZPenetrationOnValleyRegions(1.0);
-      planningModule.getVisibilityGraphParameters().setNavigableExtrusionDistance(0.01);
-      planningModule.getVisibilityGraphParameters().setExplorationDistanceFromStartGoal(50.0);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
 
@@ -72,7 +72,6 @@ public class FootstepPlannerLoggerTest
 
       request.setPacket(expectedRequestPacket);
       FootstepPlannerMessageTools.copyParametersToPacket(expectedFootstepParameters, planningModule.getFootstepPlannerParameters());
-      FootstepPlannerMessageTools.copyParametersToPacket(expectedBodyPathParameters, planningModule.getVisibilityGraphParameters());
       plannerOutput.setPacket(expectedOutputStatusPacket);
 
       Assertions.assertTrue(expectedRequestPacket.epsilonEquals(log.getRequestPacket(), 1e-5));

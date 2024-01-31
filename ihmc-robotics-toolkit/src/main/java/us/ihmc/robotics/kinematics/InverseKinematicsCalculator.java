@@ -1,6 +1,5 @@
 package us.ihmc.robotics.kinematics;
 
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
 public interface InverseKinematicsCalculator

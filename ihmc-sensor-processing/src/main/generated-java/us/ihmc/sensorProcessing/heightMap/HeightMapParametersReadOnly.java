@@ -10,6 +10,126 @@ import static us.ihmc.sensorProcessing.heightMap.HeightMapParameters.*;
  */
 public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
 {
+   default boolean getResetHeightMap()
+   {
+      return get(resetHeightMap);
+   }
+
+   default int getSearchWindowHeight()
+   {
+      return get(searchWindowHeight);
+   }
+
+   default int getSearchWindowWidth()
+   {
+      return get(searchWindowWidth);
+   }
+
+   default double getMinHeightRegistration()
+   {
+      return get(minHeightRegistration);
+   }
+
+   default double getMaxHeightRegistration()
+   {
+      return get(maxHeightRegistration);
+   }
+
+   default double getMinHeightDifference()
+   {
+      return get(minHeightDifference);
+   }
+
+   default double getMaxHeightDifference()
+   {
+      return get(maxHeightDifference);
+   }
+
+   default double getHeightFilterAlpha()
+   {
+      return get(heightFilterAlpha);
+   }
+
+   default double getSpatialAlpha()
+   {
+      return get(spatialAlpha);
+   }
+
+   default double getHeightOffset()
+   {
+      return get(heightOffset);
+   }
+
+   default double getMinClampHeight()
+   {
+      return get(minClampHeight);
+   }
+
+   default double getMaxClampHeight()
+   {
+      return get(maxClampHeight);
+   }
+
+   default double getLocalWidthInMeters()
+   {
+      return get(localWidthInMeters);
+   }
+
+   default double getLocalCellSizeInMeters()
+   {
+      return get(localCellSizeInMeters);
+   }
+
+   default double getGlobalWidthInMeters()
+   {
+      return get(globalWidthInMeters);
+   }
+
+   default double getGlobalCellSizeInMeters()
+   {
+      return get(globalCellSizeInMeters);
+   }
+
+   default double getRobotCollisionCylinderRadius()
+   {
+      return get(robotCollisionCylinderRadius);
+   }
+
+   default double getInternalGlobalWidthInMeters()
+   {
+      return get(internalGlobalWidthInMeters);
+   }
+
+   default double getInternalGlobalCellSizeInMeters()
+   {
+      return get(internalGlobalCellSizeInMeters);
+   }
+
+   default double getHeightScaleFactor()
+   {
+      return get(heightScaleFactor);
+   }
+
+   default int getCropWindowSize()
+   {
+      return get(cropWindowSize);
+   }
+
+   default int getSteppingContactThreshold()
+   {
+      return get(steppingContactThreshold);
+   }
+
+   default int getContactWindowSize()
+   {
+      return get(contactWindowSize);
+   }
+
+   default double getSteppingCosineThreshold()
+   {
+      return get(steppingCosineThreshold);
+   }
+
    /**
     * Resolution of the height map grid
     */

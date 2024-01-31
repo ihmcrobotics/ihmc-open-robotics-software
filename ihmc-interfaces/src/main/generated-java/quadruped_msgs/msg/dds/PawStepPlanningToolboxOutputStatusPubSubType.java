@@ -15,7 +15,7 @@ public class PawStepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f2c43efafa1980b1f46fccec2c22dad58241729092dc9881f23fd3cbbbd12fd7";
+   		return "88ed33e6a7221a7fad588b7f1806e6720fe3d4a59937c6dd9c0aa6055cf19149";
    }
    
    @Override

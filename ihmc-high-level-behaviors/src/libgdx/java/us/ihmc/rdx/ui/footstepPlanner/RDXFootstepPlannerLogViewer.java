@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -25,7 +25,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
@@ -37,10 +37,10 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
-import us.ihmc.rdx.ui.tools.ImGuiDirectory;
+import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.rdx.visualizers.RDXSphereAndArrowGraphic;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -66,9 +66,9 @@ public class RDXFootstepPlannerLogViewer
    private final ImBoolean probeMode = new ImBoolean(false);
    private final RDXModelInstance probeSphere;
    private RDX3DPanelTooltip tooltip;
-   private final SideDependentList<ModifiableReferenceFrame> probedFootFrames
-         = new SideDependentList<>(new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame()),
-                                   new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame()));
+   private final SideDependentList<MutableReferenceFrame> probedFootFrames
+         = new SideDependentList<>(new MutableReferenceFrame(ReferenceFrame.getWorldFrame()),
+                                   new MutableReferenceFrame(ReferenceFrame.getWorldFrame()));
    private final FramePose3D probePose = new FramePose3D();
 
    public RDXFootstepPlannerLogViewer(RDXBaseUI baseUI, DRCRobotModel robotModel)
@@ -78,7 +78,7 @@ public class RDXFootstepPlannerLogViewer
       scene3D.addDefaultLighting();
       panel3D = new RDX3DPanel("Footstep Planner Log 3D View");
       baseUI.add3DPanel(panel3D, scene3D);
-      panel3D.getImGuiPanel().addChild(new ImGuiPanel("Footstep Planner Log Viewer Controls", this::renderImGuiWidgets));
+      panel3D.addChild(new RDXPanel("Footstep Planner Log Viewer Controls", this::renderImGuiWidgets));
       scene3D.addRenderableProvider(this::getRenderables);
       panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
 
@@ -124,8 +124,6 @@ public class RDXFootstepPlannerLogViewer
       if (logLoadedNotification.poll())
       {
          footstepPlannerLog = logLoadedNotification.read();
-         planarRegionsGraphic.generateMeshesAsync(PlanarRegionMessageConverter.convertToPlanarRegionsList(footstepPlannerLog.getRequestPacket()
-                                                                                                                            .getPlanarRegionsListMessage()));
          footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(footstepPlannerLog.getStatusPacket().getFootstepDataList());
          footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlan, "Footstep plan"));
 

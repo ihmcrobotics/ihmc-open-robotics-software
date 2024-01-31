@@ -15,7 +15,7 @@ public class EuclideanStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9a93502d06e893ce058864b378ae028bd7d76fbda9166289c69afcf8a3b4824d";
+   		return "f2159964e1c5d65bb6ef8ceb009b0ded6b3b146646e493af3304a764a2f9f1bd";
    }
    
    @Override

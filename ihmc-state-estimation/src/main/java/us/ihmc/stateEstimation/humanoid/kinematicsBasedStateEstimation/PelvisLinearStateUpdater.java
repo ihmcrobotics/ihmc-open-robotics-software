@@ -138,7 +138,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    private final IntegerProvider lowestFootWindowSize = new IntegerParameter("LowestFootWindowSize", registry, 0);
    private final GlitchFilteredYoInteger lowestFootInContactIndex = new GlitchFilteredYoInteger("LowestFootInContact", lowestFootWindowSize, registry);
 
-   private final BooleanParameter zeroRootXYPositionAtInitialization = new BooleanParameter("zeroRootXYPositionAtInitialization", registry, false);
+   private final BooleanParameter zeroRootXYPositionAtInitialization = new BooleanParameter("zeroRootXYPositionAtInitialization", registry, true);
    private final BooleanParameter zeroFootHeightAtInitialization = new BooleanParameter("zeroFootHeightAtInitialization", registry, true);
 
    public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure,
@@ -310,6 +310,8 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
             // By setting the root joint to be at -footZ, the foot will be at a height of zero.
             rootJointPosition.setZ(-footPositionInWorld.getZ());
+            System.out.println(-footPositionInWorld.getZ());
+            System.out.println(rootJointPosition.getZ());
          }
       }
       else

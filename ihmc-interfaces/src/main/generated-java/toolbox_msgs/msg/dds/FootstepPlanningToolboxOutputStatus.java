@@ -49,9 +49,9 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
             */
    public byte footstep_planning_result_ = (byte) 255;
    /**
-            * (deprecated) Regions that correspond to the request message. Originally used for debugging networking
+            * (deprecated) Height map that correspond to the request message. Originally used for debugging networking
             */
-   public perception_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_;
+   public perception_msgs.msg.dds.HeightMapMessage height_map_message_;
    /**
             * Planned body path. Empty if planner failed
             */
@@ -77,7 +77,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public FootstepPlanningToolboxOutputStatus()
    {
       footstep_data_list_ = new controller_msgs.msg.dds.FootstepDataListMessage();
-      planar_regions_list_ = new perception_msgs.msg.dds.PlanarRegionsListMessage();
+      height_map_message_ = new perception_msgs.msg.dds.HeightMapMessage();
       body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, new geometry_msgs.msg.dds.PosePubSubType());
       body_path_unsmoothed_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
       goal_pose_ = new us.ihmc.euclid.geometry.Pose3D();
@@ -104,7 +104,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
       footstep_planning_result_ = other.footstep_planning_result_;
 
-      perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.planar_regions_list_, planar_regions_list_);
+      perception_msgs.msg.dds.HeightMapMessagePubSubType.staticCopy(other.height_map_message_, height_map_message_);
       body_path_.set(other.body_path_);
       body_path_unsmoothed_.set(other.body_path_unsmoothed_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.goal_pose_, goal_pose_);
@@ -186,11 +186,11 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
 
    /**
-            * (deprecated) Regions that correspond to the request message. Originally used for debugging networking
+            * (deprecated) Height map that correspond to the request message. Originally used for debugging networking
             */
-   public perception_msgs.msg.dds.PlanarRegionsListMessage getPlanarRegionsList()
+   public perception_msgs.msg.dds.HeightMapMessage getHeightMapMessage()
    {
-      return planar_regions_list_;
+      return height_map_message_;
    }
 
 
@@ -286,7 +286,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_planning_result_, other.footstep_planning_result_, epsilon)) return false;
 
-      if (!this.planar_regions_list_.epsilonEquals(other.planar_regions_list_, epsilon)) return false;
+      if (!this.height_map_message_.epsilonEquals(other.height_map_message_, epsilon)) return false;
       if (this.body_path_.size() != other.body_path_.size()) { return false; }
       else
       {
@@ -329,7 +329,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
       if(this.footstep_planning_result_ != otherMyClass.footstep_planning_result_) return false;
 
-      if (!this.planar_regions_list_.equals(otherMyClass.planar_regions_list_)) return false;
+      if (!this.height_map_message_.equals(otherMyClass.height_map_message_)) return false;
       if (!this.body_path_.equals(otherMyClass.body_path_)) return false;
       if (!this.body_path_unsmoothed_.equals(otherMyClass.body_path_unsmoothed_)) return false;
       if (!this.goal_pose_.equals(otherMyClass.goal_pose_)) return false;
@@ -357,8 +357,8 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       builder.append(this.body_path_planning_result_);      builder.append(", ");
       builder.append("footstep_planning_result=");
       builder.append(this.footstep_planning_result_);      builder.append(", ");
-      builder.append("planar_regions_list=");
-      builder.append(this.planar_regions_list_);      builder.append(", ");
+      builder.append("height_map_message=");
+      builder.append(this.height_map_message_);      builder.append(", ");
       builder.append("body_path=");
       builder.append(this.body_path_);      builder.append(", ");
       builder.append("body_path_unsmoothed=");

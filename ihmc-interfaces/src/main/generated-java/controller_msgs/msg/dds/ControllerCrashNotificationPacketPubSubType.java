@@ -15,7 +15,7 @@ public class ControllerCrashNotificationPacketPubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bdda2de356da1c64a8888ce22dfe56dd53cb592edb83b29b64b21b124e82fed3";
+   		return "362fee3583dc05c1bca1ba57654271befaa2cbcc665cb502be87fbbcf86b0ec4";
    }
    
    @Override

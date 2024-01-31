@@ -1,14 +1,14 @@
 package us.ihmc.rdx.perception;
 
-import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
+import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 
 public class RDXParameterTunerDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private ImGuiStoredPropertySetTuner parametersTuner;
+   private RDXStoredPropertySetTuner parametersTuner;
 
    public RDXParameterTunerDemo()
    {
@@ -19,8 +19,8 @@ public class RDXParameterTunerDemo
          {
             baseUI.create();
 
-            GPUPlanarRegionExtractionParameters parameters = new GPUPlanarRegionExtractionParameters();
-            parametersTuner = new ImGuiStoredPropertySetTuner(parameters.getTitle());
+            RapidRegionsExtractorParameters parameters = new RapidRegionsExtractorParameters();
+            parametersTuner = new RDXStoredPropertySetTuner(parameters.getTitle());
             parametersTuner.create(parameters);
             baseUI.getImGuiPanelManager().addPanel(parametersTuner);
          }

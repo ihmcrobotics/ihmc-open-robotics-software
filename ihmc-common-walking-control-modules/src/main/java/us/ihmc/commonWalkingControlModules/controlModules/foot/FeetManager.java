@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.CentroidPr
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.DynamicStateInspectorParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.GeometricToeOffManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.ToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -29,6 +30,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -84,6 +86,7 @@ public class FeetManager implements SCS2YoGraphicHolder
                       PIDSE3GainsReadOnly swingFootGains,
                       PIDSE3GainsReadOnly holdFootGains,
                       PIDSE3GainsReadOnly toeOffFootGains,
+                      SideDependentList<RigidBodyControlManager> flamingoFootControlManagers,
                       YoRegistry parentRegistry,
                       YoGraphicsListRegistry graphicsListRegistry)
    {
@@ -151,6 +154,7 @@ public class FeetManager implements SCS2YoGraphicHolder
                                                                      swingFootGains,
                                                                      holdFootGains,
                                                                      toeOffFootGains,
+                                                                     flamingoFootControlManagers.get(robotSide),
                                                                      controllerToolbox,
                                                                      explorationParameters,
                                                                      footholdRotationParameters,
@@ -252,6 +256,16 @@ public class FeetManager implements SCS2YoGraphicHolder
          setContactStateForMoveViaWaypoints(robotSide);
    }
 
+   public void handleLegTrajectoryCommand(LegTrajectoryCommand command)
+   {
+      RobotSide robotSide = command.getRobotSide();
+      FootControlModule footControlModule = footControlModules.get(robotSide);
+      footControlModule.handleLegTrajectoryCommand(command);
+
+      if (footControlModule.getCurrentConstraintType() != ConstraintType.MOVE_VIA_WAYPOINTS)
+         setContactStateForMoveViaWaypoints(robotSide);
+   }
+
    public ConstraintType getCurrentConstraintType(RobotSide robotSide)
    {
       return footControlModules.get(robotSide).getCurrentConstraintType();
@@ -273,7 +287,8 @@ public class FeetManager implements SCS2YoGraphicHolder
                                      FrameVector3DReadOnly finalCoMAcceleration,
                                      double swingTime)
    {
-      footControlModules.get(swingSide).setAdjustedFootstepAndTime(adjustedFootstep, finalCoMVelocity, finalCoMAcceleration, swingTime);
+//      if (!getCurrentConstraintType(swingSide).isLoadBearing())
+         footControlModules.get(swingSide).setAdjustedFootstepAndTime(adjustedFootstep, finalCoMVelocity, finalCoMAcceleration, swingTime);
    }
 
    public void requestMoveStraightTouchdownForDisturbanceRecovery(RobotSide swingSide)

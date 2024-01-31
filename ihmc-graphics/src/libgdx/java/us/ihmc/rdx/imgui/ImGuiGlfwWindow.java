@@ -5,7 +5,6 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
@@ -178,7 +177,7 @@ public class ImGuiGlfwWindow
     */
    public void runWithSinglePanel(Runnable renderImGuiWidgets)
    {
-      ImGuiPanel mainPanel = new ImGuiPanel("Main Panel", renderImGuiWidgets);
+      RDXPanel mainPanel = new RDXPanel("Main Panel", renderImGuiWidgets);
       mainPanel.getIsShowing().set(true);
       imGuiWindowAndDockSystem.getPanelManager().addPanel(mainPanel);
       run(null, () -> {}, () -> System.exit(0));
@@ -195,7 +194,7 @@ public class ImGuiGlfwWindow
       glfwWindowForImGui.setVSyncEnabled(enableVsync);
    }
 
-   public ImGuiPanelManager getPanelManager()
+   public RDXPanelManager getPanelManager()
    {
       return imGuiWindowAndDockSystem.getPanelManager();
    }

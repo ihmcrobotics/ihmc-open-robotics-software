@@ -14,16 +14,26 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 
+/**
+ * Uses OpenCV to load an encoded image (i.e. PNG/JPEG) icon from file or as a resource
+ * and writes it to an OpenGL texture to be rendered by libGDX.
+ */
 public class RDXIconTexture
 {
    private final Texture texture;
 
-   public RDXIconTexture(Path pngFile)
+   /**
+    * Load from a file path on disk.
+    */
+   public RDXIconTexture(Path imagePath)
    {
-      Mat readImage = opencv_imgcodecs.imread(pngFile.toString());
+      Mat readImage = opencv_imgcodecs.imread(imagePath.toString());
       texture = initialize(readImage);
    }
 
+   /**
+    * Load from classpath resource path.
+    */
    public RDXIconTexture(String iconResourceAbsolutePath)
    {
       if (!iconResourceAbsolutePath.startsWith("/"))
@@ -41,7 +51,8 @@ public class RDXIconTexture
       BytePointer bytePointer = new BytePointer(directByteBuffer);
       Mat encodedDataMat = new Mat(bytes.length, 1, opencv_core.CV_8UC1, bytePointer);
 
-      Mat readImage = opencv_imgcodecs.imdecode(encodedDataMat, opencv_imgcodecs.IMREAD_COLOR);
+      // IMREAD_UNCHANGED will keep the 4th channel, the alpha channel; IMREAD_COLOR drops it.
+      Mat readImage = opencv_imgcodecs.imdecode(encodedDataMat, opencv_imgcodecs.IMREAD_UNCHANGED);
       texture = initialize(readImage);
    }
 

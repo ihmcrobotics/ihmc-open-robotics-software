@@ -7,7 +7,10 @@ public interface SensorProcessingConfiguration
 {
    public abstract void configureSensorProcessing(SensorProcessing sensorProcessing);
 
-   public abstract SensorNoiseParameters getSensorNoiseParameters();
-   
+   default SensorNoiseParameters getSensorNoiseParameters()
+   {
+      return null;
+   }
+
    public abstract double getEstimatorDT();
 }

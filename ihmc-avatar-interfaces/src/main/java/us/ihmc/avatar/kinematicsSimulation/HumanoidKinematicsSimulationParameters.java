@@ -13,6 +13,7 @@ public class HumanoidKinematicsSimulationParameters
    private double initialRobotYaw = 0.0;
    private double initialRobotX = 0.0;
    private double initialRobotY = 0.0;
+   private double initialRobotZ = 0.0;
    private double playbackSpeedMultiplier = 10.0;
    private double dt = UnitConversions.hertzToSeconds(70);
    private boolean runNoFasterThanMaxRealtimeRate = true;
@@ -56,6 +57,16 @@ public class HumanoidKinematicsSimulationParameters
    public void setInitialRobotY(double initialRobotY)
    {
       this.initialRobotY = initialRobotY;
+   }
+   
+   public double getInitialRobotZ()
+   {
+      return initialRobotZ;
+   }
+
+   public void setInitialRobotZ(double initialRobotZ)
+   {
+      this.initialRobotZ = initialRobotZ;
    }
 
    public void setCreateYoVariableServer(boolean createYoVariableServer)

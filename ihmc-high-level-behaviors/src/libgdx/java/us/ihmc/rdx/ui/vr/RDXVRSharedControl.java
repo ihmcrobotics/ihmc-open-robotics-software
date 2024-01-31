@@ -4,13 +4,12 @@ import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
-import perception_msgs.msg.dds.DetectableSceneNodeMessage;
-import perception_msgs.msg.dds.DetectableSceneNodesMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sharedControl.ProMPAssistant;
 import us.ihmc.behaviors.sharedControl.TeleoperationAssistant;
 import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -20,7 +19,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.visualizers.RDXEdgeDefinedShapeGraphic;
@@ -40,7 +38,7 @@ import java.util.Map;
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
    private final ROS2PublishSubscribeAPI ros2;
-   private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneObjectsSubscription;
+//   private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
    private final ImBoolean enabledReplay;
    private final ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
@@ -81,7 +79,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
 
-      detectableSceneObjectsSubscription = ros2.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
+//      sceneGraphSubscription = ros2.subscribe(PerceptionAPI.SCENE_GRAPH.getStatusTopic());
    }
 
    public void processInput(InputDigitalActionData triggerButton)
@@ -220,15 +218,15 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      if (detectableSceneObjectsSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
-      {
-         DetectableSceneNodesMessage detectableSceneNodeMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
-         DetectableSceneNodeMessage selectedObject = null; // TODO: Search for desired object
-         objectName = selectedObject.getNameAsString();
-
-         MessageTools.toEuclid(selectedObject.getTransformToWorld(), objectTransformToWorld);
-         objectFrame.update();
-      }
+//      if (sceneGraphSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
+//      {
+//         DetectableSceneNodesMessage detectableSceneNodeMessage = sceneGraphSubscription.getMessageNotification().read();
+//         DetectableSceneNodeMessage selectedObject = null; // TODO: Search for desired object
+//         objectName = selectedObject.getNameAsString();
+//
+//         MessageTools.toEuclid(selectedObject.getTransformToWorld(), objectTransformToWorld);
+//         objectFrame.update();
+//      }
 
       if (proMPAssistant.startedProcessing())
       {
@@ -294,7 +292,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
 
    public void renderWidgets(ImGuiUniqueLabelMap labels)
    {
-      if (ImGui.checkbox(labels.get("Shared Control"), enabled))
+      if (ImGui.checkbox(labels.get("Use Assistance"), enabled))
       {
          setEnabled(enabled.get());
       }

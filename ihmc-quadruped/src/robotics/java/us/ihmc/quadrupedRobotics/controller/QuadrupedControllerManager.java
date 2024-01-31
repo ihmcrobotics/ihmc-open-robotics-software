@@ -325,11 +325,13 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
                                                                                                  standReadyState,
                                                                                                  walkingState,
                                                                                                  controlledJoints,
-                                                                                                 highLevelControllerParameters);
+                                                                                                 highLevelControllerParameters,
+                                                                                                 commandInputManager);
       SmoothTransitionControllerState exitWalkingState = new QuadrupedExitWalkingControllerState(walkingState,
                                                                                                  freezeState,
                                                                                                  controlledJoints,
-                                                                                                 highLevelControllerParameters);
+                                                                                                 highLevelControllerParameters,
+                                                                                                 commandInputManager);
 
       QuadrupedSitDownControllerState sitDownState = new QuadrupedSitDownControllerState(sitDownStateName,
                                                                                          controlledJoints,

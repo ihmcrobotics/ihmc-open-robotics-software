@@ -15,7 +15,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "245e61c0125f66894c29d4e44b2793325065e12f545fbe6eae85d839a967b688";
+   		return "9f4c09037986ee8bc68cafe131002e6dcb6e6ccdd2deb718eeca1807a292d5dd";
    }
    
    @Override

@@ -12,9 +12,9 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.netty.NettyOuster;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
+import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -24,16 +24,16 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
 import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
 import us.ihmc.rdx.ui.interactable.RDXInteractableOuster;
-import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
-import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
+import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
 import java.nio.ByteOrder;
 import java.util.Set;
 
 public class RDXNettyOusterUI
 {
-   private NettyOuster ouster;
+   private OusterNetServer ouster;
    private RDXBytedecoImagePanel imagePanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private OpenCLManager openCLManager;
@@ -42,7 +42,7 @@ public class RDXNettyOusterUI
    private RDXOusterFisheyeColoredPointCloudKernel ousterFisheyeKernel;
    private RDXPointCloudRenderer pointCloudRenderer;
    private final ImFloat pointSize = new ImFloat(0.01f);
-   private ModifiableReferenceFrame sensorFrame;
+   private MutableReferenceFrame sensorFrame;
    private RDXInteractableOuster ousterInteractable;
    private int depthWidth;
    private int depthHeight;
@@ -63,17 +63,14 @@ public class RDXNettyOusterUI
 
    public void create(RDXBaseUI baseUI)
    {
-      sensorFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+      sensorFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
       ousterInteractable = new RDXInteractableOuster(baseUI.getPrimary3DPanel(),
                                                      sensorFrame.getReferenceFrame(),
                                                      sensorFrame.getTransformToParent());
-      ouster = new NettyOuster();
+      ouster = new OusterNetServer();
       ouster.setOnFrameReceived(this::onFrameReceived);
-      ouster.bind();
-   }
+      ouster.start();
 
-   public void createAfterNativesLoaded()
-   {
       openCLManager = new OpenCLManager();
       ousterFisheyeKernel = new RDXOusterFisheyeColoredPointCloudKernel(openCLManager);
    }
@@ -239,7 +236,7 @@ public class RDXNettyOusterUI
       return imagePanel;
    }
 
-   public ModifiableReferenceFrame getSensorFrame()
+   public MutableReferenceFrame getSensorFrame()
    {
       return sensorFrame;
    }

@@ -1,16 +1,18 @@
 package us.ihmc.behaviors.tools.walkingController;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.*;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
 import static us.ihmc.tools.string.StringTools.format;
@@ -23,16 +25,46 @@ import static us.ihmc.tools.string.StringTools.format;
  */
 public class WalkingFootstepTracker
 {
+   private final IHMCROS2Callback<FootstepDataListMessage> footstepDataListSubscriber;
+   private final IHMCROS2Callback<FootstepStatusMessage> footstepStatusSubscriber;
+   private final IHMCROS2Callback<FootstepQueueStatusMessage> footstepQueueStatusSubscriber;
+
    private final ArrayList<FootstepDataMessage> footsteps = new ArrayList<>();
+   private List<QueuedFootstepStatusMessage> queuedFootsteps = new ArrayList<>();
+   private transient FramePose3D previousFootstepPose;
    private volatile int completedIndex = 0;
    private volatile int totalStepsCompleted = 0;
+   private volatile int totalIncompleteFootsteps = 0;
+
+   private final List<TypedNotification<FootstepQueueStatusMessage>> footstepQueueListeners = new ArrayList<>();
 
    public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {
-      new IHMCROS2Callback<>(ros2Node, getTopic(FootstepDataListMessage.class, robotName), this::interceptFootstepDataListMessage);
-      new IHMCROS2Callback<>(ros2Node, getTopic(FootstepStatusMessage.class, robotName), this::acceptFootstepStatusMessage);
+      footstepDataListSubscriber = new IHMCROS2Callback<>(ros2Node,
+                                                          getTopic(FootstepDataListMessage.class, robotName),
+                                                          this::interceptFootstepDataListMessage);
+      footstepStatusSubscriber = new IHMCROS2Callback<>(ros2Node,
+                                                        getTopic(FootstepStatusMessage.class, robotName),
+                                                        this::acceptFootstepStatusMessage);
+      footstepQueueStatusSubscriber = new IHMCROS2Callback<>(ros2Node,
+                                                             getTopic(FootstepQueueStatusMessage.class, robotName),
+                                                             this::acceptFootstepQueueStatusMessage);
+   }
 
-      // TODO: Observe when footsteps are cancelled / walking aborted?
+   public void registerFootstepQueuedMessageListener(TypedNotification<FootstepQueueStatusMessage> footstepQueueListener)
+   {
+      footstepQueueListeners.add(footstepQueueListener);
+   }
+
+   private void acceptFootstepQueueStatusMessage(FootstepQueueStatusMessage footstepQueueStatusMessage)
+   {
+      for (TypedNotification<FootstepQueueStatusMessage> footstepQueueListener : footstepQueueListeners)
+      {
+         footstepQueueListener.set(footstepQueueStatusMessage);
+      }
+
+      totalIncompleteFootsteps = footstepQueueStatusMessage.getQueuedFootstepList().size();
+      queuedFootsteps = footstepQueueStatusMessage.getQueuedFootstepList();
    }
 
    private void acceptFootstepStatusMessage(FootstepStatusMessage footstepStatusMessage)
@@ -102,19 +134,27 @@ public class WalkingFootstepTracker
                            ids));
    }
 
-   public int getNumberOfIncompleteFootsteps()
+   /**
+    * This method assumes the list is not empty; you need to check outside this method that the list has at least one in it
+    */
+   public FramePose3DReadOnly getLastFootstepQueuedOnOppositeSide(RobotSide candidateFootstepSide)
    {
-      int numberOfIncompleteFootsteps;
-      synchronized (this)
-      {
-         numberOfIncompleteFootsteps = footsteps.size() - completedIndex;
-      }
-      return numberOfIncompleteFootsteps;
+      previousFootstepPose = new FramePose3D();
+
+      int i = queuedFootsteps.size() - 1;
+      // Moved the index of the list to the last step on the other side
+      while (i >= 1 && queuedFootsteps.get(i).getRobotSide() == candidateFootstepSide.toByte())
+         --i;
+
+      previousFootstepPose.getPosition().set(queuedFootsteps.get(i).getLocation());
+      previousFootstepPose.getRotation().setToYawOrientation(queuedFootsteps.get(i).getOrientation().getYaw());
+
+      return previousFootstepPose;
    }
 
-   public int getNumberOfCompletedFootsteps()
+   public int getNumberOfIncompleteFootsteps()
    {
-      return completedIndex;
+      return totalIncompleteFootsteps;
    }
 
    public void reset()
@@ -124,5 +164,12 @@ public class WalkingFootstepTracker
          footsteps.clear();
          completedIndex = 0;
       }
+   }
+
+   public void destroy()
+   {
+      footstepDataListSubscriber.destroy();
+      footstepStatusSubscriber.destroy();
+      footstepQueueStatusSubscriber.destroy();
    }
 }

@@ -146,7 +146,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlannerParameters.setMaximumStepZWhenForwardAndDown(height - 0.05);
       footstepPlannerParameters.setMaximumStepXWhenForwardAndDown(0.22);
       footstepPlannerParameters.setIdealFootstepLength(0.28);
-      footstepPlanningModule.getVisibilityGraphParameters().setTooHighToStepDistance(height + 0.05);
 
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(1.0);
@@ -166,7 +165,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
                                                          footstepPlannerParameters);
       //      request.setRequestedPathHeading(Math.toRadians(30.0));
 
-      request.setRequestedSwingPlanner(SwingPlannerType.TWO_WAYPOINT_POSITION.toByte());
+      request.setRequestedSwingPlanner(SwingPlannerType.MULTI_WAYPOINT_POSITION.toByte());
 
       runTest(request);
    }
@@ -184,6 +183,10 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlannerParameters.setBodyBoxBaseZ(0.4);
       footstepPlannerParameters.setCheckForBodyBoxCollisions(false);
       footstepPlannerParameters.setCheckForPathCollisions(false);
+      footstepPlannerParameters.setMinimumFootholdPercent(0.99);
+      footstepPlannerParameters.setMaximumStepZ(0.32);
+      footstepPlannerParameters.setMinimumDistanceFromCliffBottoms(-1.0);
+      footstepPlannerParameters.setMinimumDistanceFromCliffTops(-1.0);
 
       ThreadTools.sleep(1000);
       simulationTestHelper.simulateNow(1.0);
@@ -197,7 +200,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
                                                                goalPose,
                                                                footstepPlannerParameters);
       requestPacket.setTimeout(10.0);
-      requestPacket.setRequestedSwingPlanner(SwingPlannerType.TWO_WAYPOINT_POSITION.toByte());
+      requestPacket.setRequestedSwingPlanner(SwingPlannerType.MULTI_WAYPOINT_POSITION.toByte());
 
       runTest(requestPacket);
    }
@@ -402,7 +405,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       request.getGoalLeftFootPose().set(goalSteps.get(RobotSide.LEFT));
       request.getGoalRightFootPose().set(goalSteps.get(RobotSide.RIGHT));
 
-      request.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
       request.setPlanBodyPath(false);
 
       double timeout = 12.0;
@@ -429,10 +431,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       request.setFromPacket(requestPacket);
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
-      footstepPlanningModule.getFootstepPlannerParameters().setMinimumFootholdPercent(0.99);
-      footstepPlanningModule.getFootstepPlannerParameters().setMaximumStepZ(0.32);
-      footstepPlanningModule.getFootstepPlannerParameters().setMinimumDistanceFromCliffBottoms(-1.0);
-      footstepPlanningModule.getFootstepPlannerParameters().setMinimumDistanceFromCliffTops(-1.0);
       FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
 
       LogTools.info("output. " + plannerOutput.getFootstepPlanningResult());

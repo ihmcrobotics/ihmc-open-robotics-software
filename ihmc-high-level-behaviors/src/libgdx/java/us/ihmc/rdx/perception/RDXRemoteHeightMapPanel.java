@@ -6,13 +6,12 @@ import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
+import us.ihmc.perception.heightMap.HeightMapAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
-import us.ihmc.rdx.visualizers.RDXGridMapGraphic;
+import us.ihmc.rdx.ui.graphics.RDXGridMapGraphic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
@@ -24,7 +23,7 @@ public class RDXRemoteHeightMapPanel
 {
    private final HeightMapParameters heightMapParameters = new HeightMapParameters();
    private final HeightMapFilterParameters heightMapFilterParameters = new HeightMapFilterParameters();
-   private final ImGuiPanel panel = new ImGuiPanel("CPU Height Map", this::renderImGuiWidgets);
+   private final RDXPanel panel = new RDXPanel("CPU Height Map", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
 
@@ -112,7 +111,7 @@ public class RDXRemoteHeightMapPanel
    {
    }
 
-   public ImGuiPanel getPanel()
+   public RDXPanel getPanel()
    {
       return panel;
    }

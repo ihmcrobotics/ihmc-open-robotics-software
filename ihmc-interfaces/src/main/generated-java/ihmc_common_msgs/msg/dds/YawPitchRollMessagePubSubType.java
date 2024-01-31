@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class YawPitchRollMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.YawPitchRollMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::YawPitchRollMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "b8c37af85ea83126c0b1af35c8ad7e6c18d61ff31f8dcfe945e2a7f4a5be2e51";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

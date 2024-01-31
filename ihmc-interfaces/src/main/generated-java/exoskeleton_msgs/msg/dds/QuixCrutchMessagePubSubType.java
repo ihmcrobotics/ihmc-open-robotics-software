@@ -15,7 +15,7 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e1b3a0c439c7850aa6e42cd9b16697390d74499fd0bf7b7556a0fdbf015f1cd4";
+   		return "a6b5bfc05c64ca27f2039e2d378daf883960dcaa0f987a6d8341d9fba8632e28";
    }
    
    @Override

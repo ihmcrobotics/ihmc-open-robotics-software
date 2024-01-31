@@ -10,39 +10,53 @@ public class ChirpLinearFunctionGenerator
    private DoubleProvider lowFrequency = zeroDoubleProvider;
    private DoubleProvider highFrequency = zeroDoubleProvider;
    private DoubleProvider chirpDuration = zeroDoubleProvider;
+   private final DoubleProvider frequencyProvider;
 
    private final TriangleWaveFunctionGenerator frequencyFunction = new TriangleWaveFunctionGenerator();
-   private final SineWaveFunctionGenerator sinewave = new SineWaveFunctionGenerator();
+   private BaseFunctionGenerator baseFunction = new SineWaveFunctionGenerator();
 
    public ChirpLinearFunctionGenerator()
    {
       frequencyFunction.setOffset(() -> 0.5);
       frequencyFunction.setAmplitude(() -> 0.5);
       frequencyFunction.setFrequency(() -> 0.5 / chirpDuration.getValue());
-      sinewave.setFrequency(() -> EuclidCoreTools.interpolate(lowFrequency.getValue(), highFrequency.getValue(), frequencyFunction.getValue()));
+      frequencyProvider = () -> EuclidCoreTools.interpolate(lowFrequency.getValue(), highFrequency.getValue(), frequencyFunction.getValue());
+      setBaseFunction(new SineWaveFunctionGenerator());
+   }
+
+   public void setBaseFunction(BaseFunctionGenerator baseFunction)
+   {
+      this.baseFunction = baseFunction;
+   }
+
+   public DoubleProvider getFrequencyProvider()
+   {
+      return frequencyProvider;
    }
 
    private void markDirty()
    {
       frequencyFunction.markDirty();
-      sinewave.markDirty();
+      baseFunction.markDirty();
    }
 
    public void resetChirp()
    {
       frequencyFunction.resetAngle();
-      sinewave.resetAngle();
+      baseFunction.setFrequency(frequencyProvider);
+      baseFunction.resetAngle();
    }
 
    public void integrateAngle(double dt)
    {
       frequencyFunction.integrateAngle(dt);
-      sinewave.integrateAngle(dt);
+      baseFunction.setFrequency(frequencyProvider);
+      baseFunction.integrateAngle(dt);
    }
 
    public void setAngle(double angle)
    {
-      sinewave.setAngle(angle);
+      baseFunction.setAngle(angle);
    }
 
    public void setOffset(double offset)
@@ -52,7 +66,7 @@ public class ChirpLinearFunctionGenerator
 
    public void setOffset(DoubleProvider offset)
    {
-      sinewave.setOffset(offset);
+      baseFunction.setOffset(offset);
    }
 
    public void setAmplitude(double amplitude)
@@ -62,7 +76,7 @@ public class ChirpLinearFunctionGenerator
 
    public void setAmplitude(DoubleProvider amplitude)
    {
-      sinewave.setAmplitude(amplitude);
+      baseFunction.setAmplitude(amplitude);
    }
 
    public void setLowFrequency(double lowFrequency)
@@ -105,22 +119,22 @@ public class ChirpLinearFunctionGenerator
 
    public void setPhase(DoubleProvider phase)
    {
-      sinewave.setPhase(phase);
+      baseFunction.setPhase(phase);
    }
 
    public double getOffset()
    {
-      return sinewave.getOffset();
+      return baseFunction.getOffset();
    }
 
    public double getAmplitude()
    {
-      return sinewave.getAmplitude();
+      return baseFunction.getAmplitude();
    }
 
    public double getFrequency()
    {
-      return sinewave.getFrequency();
+      return baseFunction.getFrequency();
    }
 
    public double getLowFrequency()
@@ -140,31 +154,31 @@ public class ChirpLinearFunctionGenerator
 
    public double getPhase()
    {
-      return sinewave.getPhase();
+      return baseFunction.getPhase();
    }
 
    public double getAngle()
    {
-      return sinewave.getAngle();
+      return baseFunction.getAngle();
    }
 
    public double getAngleDot()
    {
-      return sinewave.getAngleDot();
+      return baseFunction.getAngleDot();
    }
 
    public double getValue()
    {
-      return sinewave.getValue();
+      return baseFunction.getValue();
    }
 
    public double getValueDot()
    {
-      return sinewave.getValueDot();
+      return baseFunction.getValueDot();
    }
 
    public double getValueDDot()
    {
-      return sinewave.getValueDDot();
+      return baseFunction.getValueDDot();
    }
 }

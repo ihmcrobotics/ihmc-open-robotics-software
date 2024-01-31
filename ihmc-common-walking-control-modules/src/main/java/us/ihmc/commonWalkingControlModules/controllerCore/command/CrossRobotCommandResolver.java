@@ -163,10 +163,10 @@ public class CrossRobotCommandResolver
       for (int i = 0; i < in.getNumberOfForceSensors(); i++)
       {
          ForceSensorDefinition inDefinition = in.getForceSensorDefinitions().get(i);
-         ForceSensorData inData = in.get(inDefinition);
+         ForceSensorData inData = in.getData(inDefinition);
          out.registerForceSensor(inDefinition);
          ForceSensorDefinition outDefinition = out.getForceSensorDefinitions().get(i);
-         ForceSensorData outData = out.get(outDefinition);
+         ForceSensorData outData = out.getData(outDefinition);
 
          resolveForceSensorDefinition(inDefinition, outDefinition);
          resolveForceSensorData(inData, outData);

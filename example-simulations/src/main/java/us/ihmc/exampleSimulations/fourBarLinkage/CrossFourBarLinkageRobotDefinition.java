@@ -13,7 +13,6 @@ import us.ihmc.scs2.definition.robot.LoopClosureDefinition;
 import us.ihmc.scs2.definition.robot.RevoluteJointDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.robot.urdf.URDFTools;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -143,11 +142,11 @@ public class CrossFourBarLinkageRobotDefinition extends RobotDefinition
       {
          Vector3D upperarmOffset = new Vector3D(0.5 * upperarmLength, 0.0, 0.0);
          upperarm = newCylinderRigidBodyDefinition("upperarm", upperarmLength, 0.025, 1.0, Axis3D.X, upperarmOffset, aliceBlueMaterial, true);
-         upperarm = URDFTools.merge("upperarm", linkDA, upperarm);
+         upperarm = RobotDefinition.merge("upperarm", linkDA, upperarm);
       }
       Vector3D forearmOffset = new Vector3D(0.5 * forearmLength, 0.0, 0.5 * lengthBC);
       RigidBodyDefinition forearm = newCylinderRigidBodyDefinition("forearm", forearmLength, 0.025, 1.0, Axis3D.X, forearmOffset, blueVioletMaterial, true);
-      forearm = URDFTools.merge("forearm", linkBC, forearm);
+      forearm = RobotDefinition.merge("forearm", linkBC, forearm);
 
       RigidBodyDefinition hand = null;
 

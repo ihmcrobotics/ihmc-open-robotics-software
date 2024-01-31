@@ -1,0 +1,41 @@
+#ifndef __controller_msgs__msg__FootstepQueueStatusMessage__idl__
+#define __controller_msgs__msg__FootstepQueueStatusMessage__idl__
+
+#include "controller_msgs/msg/./QueuedFootstepStatusMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message gives the status of the footstep queue in the controller in world coordinates.
+       * See QueuedFootstepStatusMessage for more information about defining a footstep.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::FootstepQueueStatusMessage_")
+      struct FootstepQueueStatusMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Specifies whether the first step in the queue list is currently being taken in swing
+         */
+        boolean is_first_step_in_swing;
+        /**
+         * Specifies the time in the current support sequence of the current step. This could be in transfer, or in swing
+         */
+        double time_in_support_sequence;
+        /**
+         * Defines the list of footsteps contained in the queue.
+         */
+        sequence<controller_msgs::msg::dds::QueuedFootstepStatusMessage, 50> queued_footstep_list;
+      };
+    };
+  };
+};
+
+#endif

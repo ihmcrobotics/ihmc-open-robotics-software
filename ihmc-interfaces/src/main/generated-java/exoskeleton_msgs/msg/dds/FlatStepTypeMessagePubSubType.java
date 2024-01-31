@@ -15,7 +15,7 @@ public class FlatStepTypeMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "fd20e80e03143fbc55d057087f207db57b40fa8769ab0a4e54802aa3c92cfdb5";
+   		return "1adf2da80a68e95174200da699a620051c4db40ee09ccbb15b1aa7880b647580";
    }
    
    @Override

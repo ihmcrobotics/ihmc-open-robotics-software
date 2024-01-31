@@ -15,7 +15,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessagePubSubType implement
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b669bd06f90f22cac90cdac62a1690a24ce05cce75c46bb9aead54ca829fccef";
+   		return "5509eae047c36be6dfa62a027a85359226176969bea531a9932fa4e6a4f36508";
    }
    
    @Override

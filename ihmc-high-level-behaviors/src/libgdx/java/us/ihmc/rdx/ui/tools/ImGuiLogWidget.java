@@ -29,9 +29,14 @@ public class ImGuiLogWidget
 
    public void submitEntry(Level level, String message)
    {
+      submitEntry(level.intLevel(), message);
+   }
+
+   public void submitEntry(int intLevel, String message)
+   {
       synchronized (logEntries)
       {
-         logEntries.addLast(Pair.of(level.intLevel(), message));
+         logEntries.addLast(Pair.of(intLevel, message));
       }
    }
 

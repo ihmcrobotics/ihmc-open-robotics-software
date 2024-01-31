@@ -1,8 +1,8 @@
 package us.ihmc.rdx.ui.affordances;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiWindowFlags;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -10,55 +10,78 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDX3DPanelHandWrenchIndicator
 {
-   private RDX3DPanel panel;
+   private final RDX3DPanel panel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private boolean showAndUpdate = true;
-   private SideDependentList<Double> linearParts = new SideDependentList<>((double) 0, (double) 0);
-   private SideDependentList<Double> angularParts = new SideDependentList<>((double) 0, (double) 0);
+   private final SideDependentList<RDX3DPanelHandWrenchIndicatorSide> sides = new SideDependentList<>();
+   private final String contextMenuLabel = labels.get("Context Menu");
 
    public RDX3DPanelHandWrenchIndicator(RDX3DPanel panel)
    {
       this.panel = panel;
+
+      for (RobotSide side : RobotSide.values)
+      {
+         sides.put(side, new RDX3DPanelHandWrenchIndicatorSide(side));
+      }
    }
 
    public void renderImGuiOverlay()
    {
-      if (showAndUpdate)
-      {
-         // temporarily set arbitrary width height
-         float panelWidth = 200;
-         float panelHeight = 110;
+      // temporarily set arbitrary width height
+      float panelWidth = 200;
+      float panelHeight = ImGui.getFrameHeight(); // Start with space for separator
 
-         ImGui.setNextWindowSize(panelWidth, panelHeight);
-         float startX = panel.getWindowPositionX() + (panel.getWindowSizeX() - panelWidth - 5);
-         float startY = (panel.getWindowPositionY() + 10);
-         ImGui.setNextWindowPos(startX, startY);
-         ImGui.setNextWindowBgAlpha(0.2f);
-         int windowFlags = ImGuiWindowFlags.NoTitleBar; // undecorated
-         ImGui.begin(labels.get("WrenchMagnitudeIndicator"), windowFlags);
-         ImGui.pushFont(ImGuiTools.getMediumFont());
-         for (RobotSide side : RobotSide.values)
-         {
-            ImGui.text(side.getPascalCaseName() + " Linear: " + String.format("%.2f", linearParts.get(side)) + " N");
-            ImGui.text(side.getPascalCaseName() + " Angular: " + String.format("%.2f", angularParts.get(side)) + " Nm");
-            ImGui.separator();
-         }
-         ImGui.popFont();
-         ImGui.end();
+      for (RobotSide side : RobotSide.values)
+      {
+         panelHeight += sides.get(side).getHeight();
       }
+
+      ImGui.setNextWindowSize(panelWidth, panelHeight);
+      float startX = panel.getWindowPositionX() + (panel.getWindowSizeX() - panelWidth - 5);
+      float startY = (panel.getWindowPositionY() + 10);
+      ImGui.setNextWindowPos(startX, startY);
+      ImGui.setNextWindowBgAlpha(0.2f);
+      int windowFlags = ImGuiWindowFlags.NoTitleBar; // undecorated
+      ImGui.begin(labels.get("WrenchMagnitudeIndicator"), windowFlags);
+      for (RobotSide side : RobotSide.values)
+      {
+         sides.get(side).renderImGuiWidgets();
+         if (side == RobotSide.LEFT)
+            ImGui.separator();
+      }
+
+      if (ImGui.isWindowHovered() && ImGui.isMouseClicked(ImGuiMouseButton.Right))
+      {
+         ImGui.openPopup(contextMenuLabel);
+      }
+      if (ImGui.beginPopup(contextMenuLabel))
+      {
+         if (ImGui.menuItem(labels.get("Show Plots"), null, sides.get(RobotSide.LEFT).getShowPlots()))
+         {
+            boolean newValue = !sides.get(RobotSide.LEFT).getShowPlots();
+            for (RobotSide side : RobotSide.values)
+            {
+               sides.get(side).setShowPlots(newValue);
+            }
+         }
+         if (ImGui.menuItem("Cancel"))
+            ImGui.closeCurrentPopup();
+         ImGui.endPopup();
+      }
+      
+      ImGui.end();
    }
 
    public void update(RobotSide side, double linearWrenchMagnitude, double angularWrenchMagnitude)
    {
-      if (showAndUpdate)
-      {
-         linearParts.set(side, linearWrenchMagnitude);
-         angularParts.set(side, angularWrenchMagnitude);
-      }
+      sides.get(side).update(linearWrenchMagnitude, angularWrenchMagnitude);
    }
 
-   public void setShowAndUpdate(boolean showAndUpdate)
+   public void setShowPlots(boolean showPlots)
    {
-      this.showAndUpdate = showAndUpdate;
+      for (RobotSide side : RobotSide.values)
+      {
+         sides.get(side).setShowPlots(showPlots);
+      }
    }
 }

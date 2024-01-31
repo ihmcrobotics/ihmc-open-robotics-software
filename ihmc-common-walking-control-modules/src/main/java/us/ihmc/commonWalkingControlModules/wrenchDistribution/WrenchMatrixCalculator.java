@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
@@ -15,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
@@ -27,20 +29,29 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class WrenchMatrixCalculator
+public class WrenchMatrixCalculator implements SCS2YoGraphicHolder
 {
    private final int nContactableBodies;
    private final int maxNumberOfContactPoints;
@@ -86,6 +97,8 @@ public class WrenchMatrixCalculator
    private final List<RigidBodyBasics> rigidBodies = new ArrayList<>();
    private final Map<RigidBodyBasics, PlaneContactStateToWrenchMatrixHelper> planeContactStateToWrenchMatrixHelpers = new HashMap<>();
    private final TObjectIntMap<RigidBodyBasics> bodyRhoOffsets = new TObjectIntHashMap<RigidBodyBasics>();
+
+   private final Map<RigidBodyBasics, YoFramePoint3D>  commandedCoPs = new HashMap<>();
 
    private final List<FramePoint3D> basisVectorsOrigin = new ArrayList<>();
    private final List<FrameVector3D> basisVectors = new ArrayList<>();
@@ -142,6 +155,10 @@ public class WrenchMatrixCalculator
          ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
          RigidBodyBasics rigidBody = contactablePlaneBody.getRigidBody();
 
+         String copName = contactablePlaneBody.getSoleFrame().getName() + "CommandedCoP";
+         YoFramePoint3D cop = new YoFramePoint3D(copName, ReferenceFrame.getWorldFrame(), registry);
+         commandedCoPs.put(rigidBody, cop);
+
          rigidBodies.add(rigidBody);
 
          FrictionConeRotationCalculator frictionConeRotation = toolbox.getOptimizationSettings().getFrictionConeRotation();
@@ -166,6 +183,12 @@ public class WrenchMatrixCalculator
 
          Wrench wrench = new Wrench(bodyFixedFrame, bodyFixedFrame);
          wrenchesFromRho.put(rigidBody, wrench);
+
+         if (toolbox.getYoGraphicsListRegistry() != null)
+         {
+            YoGraphicPosition copViz = new YoGraphicPosition(copName, cop, 0.005, YoAppearance.Navy(), YoGraphicPosition.GraphicType.BALL);
+            copViz.setVisible(PlaneContactWrenchProcessor.VISUALIZE);
+         }
       }
 
       ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
@@ -222,7 +245,10 @@ public class WrenchMatrixCalculator
          CenterOfPressureCommand command = centerOfPressureCommands.get(i);
          RigidBodyBasics rigidBody = command.getContactingRigidBody();
          if (rigidBody != null)
+         {
             rigidBodies.add(rigidBody);
+            commandedCoPs.get(rigidBody).setMatchingFrame(command.getDesiredCoP(), 0.0);
+         }
       }
    }
 
@@ -411,6 +437,8 @@ public class WrenchMatrixCalculator
             CommonOps_DDRM.insert(helper.getCoPRegularizationJacobian(), copRegularizationJacobian, copStartIndex, rhoStartIndex);
             CommonOps_DDRM.insert(helper.getCoPRegularizationObjective(), copRegularizationObjective, copStartIndex, 0);
             CommonOps_DDRM.insert(helper.getCoPRegularizationWeight(), copRegularizationWeight, copStartIndex, copStartIndex);
+
+            commandedCoPs.get(rigidBody).setMatchingFrame(helper.getDesiredCoP(), 0.0);
          }
 
          CommonOps_DDRM.insert(helper.getCoPRateRegularizationJacobian(), copRateRegularizationJacobian, copStartIndex, rhoStartIndex);
@@ -576,5 +604,18 @@ public class WrenchMatrixCalculator
    public PlaneContactStateToWrenchMatrixHelper getPlaneContactStateToWrenchMatrixHelper(RigidBodyBasics rigidBody)
    {
       return planeContactStateToWrenchMatrixHelpers.get(rigidBody);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      for (int i = 0; i < rigidBodies.size(); i++)
+      {
+         YoFramePoint3D cop = commandedCoPs.get(rigidBodies.get(i));
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(cop.getNamePrefix(), cop, 0.010, ColorDefinitions.Black(), YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE));
+      }
+      group.setVisible(PlaneContactWrenchProcessor.VISUALIZE);
+      return group;
    }
 }

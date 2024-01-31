@@ -162,7 +162,7 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
          {
             final WrenchCalculatorInterface forceTorqueSensor = forceTorqueSensorEntry.getValue();
             forceTorqueSensor.calculate();
-            forceSensorDataHolderToUpdate.setForceSensorValue(forceTorqueSensorEntry.getKey(), forceTorqueSensor.getWrench());
+            forceSensorDataHolderToUpdate.getData(forceTorqueSensorEntry.getKey()).setWrench(forceTorqueSensor.getWrench());
          }
       }
    }

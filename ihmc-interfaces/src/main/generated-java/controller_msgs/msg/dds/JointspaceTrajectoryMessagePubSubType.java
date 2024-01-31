@@ -15,7 +15,7 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4ea260163d91505e728ed11ab0c101810a21770ce1c5cc8b24d18468cecc8b05";
+   		return "71a12532eed9275797cf8388153ea2fc402c96a463721a4c31a6d7ea1968bf6c";
    }
    
    @Override

@@ -45,7 +45,7 @@ public class PlaneContactStateToWrenchMatrixHelper
     */
    private static final double minFootholdSizeForCoPObjectives = 1.0e-3;
 
-   public static final boolean useOldCoPObjectiveFormulation = false;
+   public static final boolean useOldCoPObjectiveFormulation = true;
 
    private final int maxNumberOfContactPoints;
    private final int numberOfBasisVectorsPerContactPoint;
@@ -399,6 +399,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       basisVectorOrigin.setToZero(centerOfMassFrame);
       basisVector.setToZero(centerOfMassFrame);
 
+      rhoMatrix.set(rhoIndex, 0, 0.0);
       rhoMaxMatrix.set(rhoIndex, 0, Double.POSITIVE_INFINITY);
       rhoWeightMatrix.set(rhoIndex, rhoIndex, 1.0); // FIXME why is this setting to 1.0????
       rhoRateWeightMatrix.set(rhoIndex, rhoIndex, 0.0);
@@ -549,6 +550,11 @@ public class PlaneContactStateToWrenchMatrixHelper
    public DMatrixRMaj getCoPRateRegularizationWeight()
    {
       return copRateRegularizationWeightMatrix;
+   }
+
+   public FramePoint2DReadOnly getDesiredCoP()
+   {
+      return desiredCoP;
    }
 
    public FramePoint3D[] getBasisVectorsOrigin()

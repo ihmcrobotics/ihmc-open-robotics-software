@@ -1,6 +1,6 @@
 package us.ihmc.avatar.networkProcessor.lidarScanPublisher;
 
-import us.ihmc.ihmcPerception.depthData.PointCloudData;
+import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.communication.packets.ScanPointFilter;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;

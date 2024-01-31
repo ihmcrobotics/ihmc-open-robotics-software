@@ -31,4 +31,18 @@ public class StepConstraintListConverter
       constraintRegion.set(planarRegion.getTransformToWorld(), planarRegion.getConcaveHull());
       constraintRegion.setRegionId(planarRegion.getRegionId());
    }
+
+   public static PlanarRegion convertStepConstraintRegionToPlanarRegion(StepConstraintRegion constraintRegionToConvert)
+   {
+      PlanarRegion planarRegion = new PlanarRegion();
+      convertStepConstraintRegionToPlanarRegion(constraintRegionToConvert, planarRegion);
+
+      return planarRegion;
+
+   }
+   public static void convertStepConstraintRegionToPlanarRegion(StepConstraintRegion constraintRegionToConvert, PlanarRegion planarRegionToPack)
+   {
+      planarRegionToPack.set(constraintRegionToConvert.getTransformToWorld(), constraintRegionToConvert.getConcaveHull());
+      planarRegionToPack.setRegionId(constraintRegionToConvert.getRegionId());
+   }
 }

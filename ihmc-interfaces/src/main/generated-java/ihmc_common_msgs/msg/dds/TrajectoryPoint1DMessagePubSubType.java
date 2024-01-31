@@ -15,7 +15,7 @@ public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2b134903286cabd5d7d90f757980053976b29597042ee5f9063584297fda2fe2";
+   		return "6581462b3cc4a8092bac9c9a4f04b20aea254465914055999ba442e4a6f8c557";
    }
    
    @Override

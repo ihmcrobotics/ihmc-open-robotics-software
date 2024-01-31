@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
-import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
+import us.ihmc.robotics.interaction.CylinderRayIntersection;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 /**

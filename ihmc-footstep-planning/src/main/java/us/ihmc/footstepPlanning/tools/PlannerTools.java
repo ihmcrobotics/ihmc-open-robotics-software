@@ -262,4 +262,73 @@ public class PlannerTools
       double alphaToQuery = MathTools.clamp(alpha + horizonDistanceToCheck / totalPathLength, 0.0, 1.0);
       bodyPathPlanHolder.getPointAlongPath(alphaToQuery, poseToPack);
    }
+
+   /**
+    * Calculates the total expected duration of a footstep plan, which depends
+    * on parameters outside of {@link FootstepPlannerParametersReadOnly}.
+    */
+   public static double calculateNominalTotalPlanExecutionDuration(FootstepPlan footstepPlan,
+                                                                   double defaultSwingDuration,
+                                                                   double defaultInitialTransferDuration,
+                                                                   double defaultTransferDuration,
+                                                                   double defaultFinalTransferDuration)
+   {
+      return calculateFootstepCompletionTime(footstepPlan,
+                                             defaultSwingDuration,
+                                             defaultInitialTransferDuration,
+                                             defaultTransferDuration,
+                                             defaultFinalTransferDuration,
+                                             footstepPlan.getNumberOfSteps());
+   }
+
+   /**
+    * Calculates as per {@link #calculateNominalTotalPlanExecutionDuration},
+    * however only adds up the durations of the first n footsteps as specified
+    * by the numberOfFootstepsToAddUp parameter.
+    */
+   public static double calculateFootstepCompletionTime(FootstepPlan footstepPlan,
+                                                        double defaultSwingDuration,
+                                                        double defaultInitialTransferDuration,
+                                                        double defaultTransferDuration,
+                                                        double defaultFinalTransferDuration,
+                                                        int numberOfFootstepsToAddUp)
+   {
+      int numberOfSteps = footstepPlan.getNumberOfSteps();
+      double planExecutionTime = 0.0;
+      for (int i = 0; i < numberOfFootstepsToAddUp; i++)
+      {
+         PlannedFootstep footstep = footstepPlan.getFootstep(i);
+         double transferDuration = footstep.getTransferDuration();
+         double swingDuration = footstep.getSwingDuration();
+         if (transferDuration < 0.0)
+         {
+            if (i == 0)
+            {
+               planExecutionTime += defaultInitialTransferDuration;
+            }
+            else if (i == numberOfSteps - 1)
+            {
+               planExecutionTime += defaultFinalTransferDuration;
+            }
+            else
+            {
+               planExecutionTime += defaultTransferDuration;
+            }
+         }
+         else
+         {
+            planExecutionTime += transferDuration;
+         }
+
+         if (swingDuration < 0.0)
+         {
+            planExecutionTime += defaultSwingDuration;
+         }
+         else
+         {
+            planExecutionTime += swingDuration;
+         }
+      }
+      return planExecutionTime;
+   }
 }

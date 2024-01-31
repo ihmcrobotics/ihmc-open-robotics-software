@@ -9,10 +9,13 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.RDXImagePanel;
-import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
-import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
+import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class RDXOpenCVVideoVisualizer extends RDXVisualizer
 {
@@ -26,6 +29,7 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
    private Pixmap pixmap;
    private Texture texture;
    private final RDXImagePanel imagePanel;
+   private final List<Consumer<Mat>> overlays = new ArrayList<>();
 
    public RDXOpenCVVideoVisualizer(String title, String panelName, boolean flipY)
    {
@@ -90,6 +94,11 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
                   imagePanel.setTexture(texture);
                }
 
+               for (Consumer<Mat> overlay : overlays)
+               {
+                  overlay.accept(rgba8Mat);
+               }
+
                texture.draw(pixmap, 0, 0);
             }
          }
@@ -100,6 +109,12 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
    public RDXImagePanel getPanel()
    {
       return imagePanel;
+   }
+
+   /** An overlay allows users to draw over this image using OpenCV calls before it gets rendered. */
+   public void addOverlay(Consumer<Mat> overlay)
+   {
+      overlays.add(overlay);
    }
 
    protected Mat getRGBA8Mat()

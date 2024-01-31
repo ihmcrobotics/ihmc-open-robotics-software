@@ -1,9 +1,7 @@
 package us.ihmc.footstepPlanning;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import perception_msgs.msg.dds.HeightMapMessage;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -15,9 +13,10 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class FootstepPlannerRequest
 {
@@ -97,14 +96,9 @@ public class FootstepPlannerRequest
    private double horizonLength;
 
    /**
-    * Planar regions. May be null or empty to enable flat ground mode.
-    */
-   private PlanarRegionsList planarRegionsList;
-
-   /**
     * Height map. May be null to enable flat ground mode.
     */
-   private HeightMapMessage heightMapMessage;
+   private HeightMapData heightMapData;
 
    /**
     * If true, will ignore planar regions and plan on flat ground.
@@ -154,8 +148,7 @@ public class FootstepPlannerRequest
       timeout = 5.0;
       maximumIterations = -1;
       horizonLength = Double.MAX_VALUE;
-      planarRegionsList = null;
-      heightMapMessage = null;
+      heightMapData = null;
       assumeFlatGround = false;
       bodyPathWaypoints.clear();
       statusPublishPeriod = 1.0;
@@ -278,14 +271,9 @@ public class FootstepPlannerRequest
       this.horizonLength = horizonLength;
    }
 
-   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
+   public void setHeightMapData(HeightMapData heightMapData)
    {
-      this.planarRegionsList = planarRegionsList;
-   }
-
-   public void setHeightMapMessage(HeightMapMessage heightMapMessage)
-   {
-      this.heightMapMessage = heightMapMessage;
+      this.heightMapData = heightMapData;
    }
 
    public void setAssumeFlatGround(boolean assumeFlatGround)
@@ -386,14 +374,9 @@ public class FootstepPlannerRequest
       return horizonLength;
    }
 
-   public PlanarRegionsList getPlanarRegionsList()
+   public HeightMapData getHeightMapData()
    {
-      return planarRegionsList;
-   }
-
-   public HeightMapMessage getHeightMapMessage()
-   {
-      return heightMapMessage;
+      return heightMapData;
    }
 
    public boolean getAssumeFlatGround()
@@ -465,9 +448,11 @@ public class FootstepPlannerRequest
          bodyPathWaypoints.add(new Pose3D(requestPacket.getBodyPathWaypoints().get(i)));
       }
 
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(requestPacket.getPlanarRegionsListMessage());
-      setPlanarRegionsList(planarRegionsList);
-      setHeightMapMessage(requestPacket.getHeightMapMessage());
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(requestPacket.getHeightMapMessage());
+      if (!heightMapData.isEmpty())
+         setHeightMapData(heightMapData);
+      else
+         setHeightMapData(null);
    }
 
    public void setPacket(FootstepPlanningRequestPacket requestPacket)
@@ -500,15 +485,10 @@ public class FootstepPlannerRequest
          requestPacket.getBodyPathWaypoints().add().set(bodyPathWaypoints.get(i));
       }
 
-      if (getPlanarRegionsList() != null)
+      if (getHeightMapData() != null)
       {
-         PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList());
-         requestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
-      }
-
-      if (getHeightMapMessage() != null)
-      {
-         requestPacket.getHeightMapMessage().set(getHeightMapMessage());
+         HeightMapMessage heightMapMessage = HeightMapMessageTools.toMessage(getHeightMapData());
+         requestPacket.getHeightMapMessage().set(heightMapMessage);
       }
 
       if (referencePlan != null && !referencePlan.isEmpty())
@@ -544,17 +524,13 @@ public class FootstepPlannerRequest
       this.statusPublishPeriod = other.statusPublishPeriod;
       this.swingPlannerType = other.swingPlannerType;
 
-      if(other.planarRegionsList != null)
-      {
-         this.planarRegionsList = other.planarRegionsList.copy();
-      }
-
       for (int i = 0; i < other.bodyPathWaypoints.size(); i++)
       {
          this.bodyPathWaypoints.add(new Pose3D(other.bodyPathWaypoints.get(i)));
       }
 
-      this.heightMapMessage = other.heightMapMessage;
+      // todo should be a copy
+      this.heightMapData = other.heightMapData;
 
       if (other.referencePlan != null)
          this.referencePlan = new FootstepPlan(other.referencePlan);

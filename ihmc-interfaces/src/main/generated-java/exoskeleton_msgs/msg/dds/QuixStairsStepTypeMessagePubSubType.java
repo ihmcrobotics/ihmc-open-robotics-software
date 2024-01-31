@@ -15,7 +15,7 @@ public class QuixStairsStepTypeMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "251955d4cf732b6ca52627691558acd0207c01903fcfb014535f213ce5332497";
+   		return "c74d0a2463be70d5c1737a5cde374564edb775e253e9ed9b7cfac4301c28ebc8";
    }
    
    @Override

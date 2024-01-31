@@ -2,6 +2,7 @@ package us.ihmc.atlas;
 
 import java.io.InputStream;
 
+import us.ihmc.avatar.drcRobot.RobotVersion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -9,7 +10,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCHandType;
 
-public enum AtlasRobotVersion
+public enum AtlasRobotVersion implements RobotVersion
 {
    ATLAS_UNPLUGGED_V5_NO_FOREARMS,
    ATLAS_UNPLUGGED_V5_NO_HANDS,

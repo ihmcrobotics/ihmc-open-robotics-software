@@ -7,7 +7,7 @@ import mission_control_msgs.msg.dds.SystemServiceLogRefreshMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.ros2.ROS2Node;
 
@@ -23,7 +23,7 @@ public class ImGuiMachineService
    private final UUID instanceId;
    @Nullable
    private String status;
-   private final ImGuiPanel logPanel;
+   private final RDXPanel logPanel;
    private IHMCROS2Publisher<SystemServiceLogRefreshMessage> logRefreshPublisher;
    private IHMCROS2Publisher<SystemServiceActionMessage> serviceActionPublisher;
    private final ImGuiConsoleArea consoleArea;
@@ -39,12 +39,12 @@ public class ImGuiMachineService
     */
    private boolean waitingOnStatusChange = false;
 
-   public ImGuiMachineService(String serviceName, String hostname, UUID instanceId, ImGuiPanel machinePanel, ROS2Node ros2Node)
+   public ImGuiMachineService(String serviceName, String hostname, UUID instanceId, RDXPanel machinePanel, ROS2Node ros2Node)
    {
       this.serviceName = serviceName;
       this.hostname = hostname;
       this.instanceId = instanceId;
-      logPanel = new ImGuiPanel(serviceName + " Log##" + instanceId, this::renderImGuiLogPanelWidgets);
+      logPanel = new RDXPanel(serviceName + " Log##" + instanceId, this::renderImGuiLogPanelWidgets);
       machinePanel.queueAddChild(logPanel);
 
       ThreadTools.startAsDaemon(() ->

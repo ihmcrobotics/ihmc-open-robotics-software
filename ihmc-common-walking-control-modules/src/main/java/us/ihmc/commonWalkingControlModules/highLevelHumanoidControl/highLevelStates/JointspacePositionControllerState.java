@@ -411,7 +411,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
          if (!isEmpty() && wantToQueue && !previousIdMatch)
          {
             LogTools.warn(warningPrefix + "Unexpected command ID. Msg previous id: " + queueingProperties.getPreviousCommandId() + " but was "
-                  + lastCommandId.getLongValue());
+                          + lastCommandId.getLongValue());
             return false;
          }
 

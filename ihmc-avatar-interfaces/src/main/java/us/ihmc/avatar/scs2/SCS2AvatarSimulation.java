@@ -26,6 +26,7 @@ import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.state.interfaces.SixDoFJointStateBasics;
 import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -47,6 +48,7 @@ public class SCS2AvatarSimulation
    private AvatarEstimatorThread estimatorThread;
    private AvatarControllerThread controllerThread;
    private AvatarStepGeneratorThread stepGeneratorThread;
+   private JointDesiredOutputWriter outputWriter;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private FullHumanoidRobotModel controllerFullRobotModel;
    private RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
@@ -427,6 +429,16 @@ public class SCS2AvatarSimulation
    public AvatarStepGeneratorThread getStepGeneratorThread()
    {
       return stepGeneratorThread;
+   }
+
+   public void setOutputWriter(JointDesiredOutputWriter outputWriter)
+   {
+      this.outputWriter = outputWriter;
+   }
+
+   public JointDesiredOutputWriter getOutputWriter()
+   {
+      return outputWriter;
    }
 
    public void setSimulatedRobotTimeProvider(SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider)

@@ -11,9 +11,9 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
-import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
+import us.ihmc.rdx.imgui.ImPlotDoublePlot;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.robotics.time.TimeTools;
@@ -94,12 +94,12 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
                normalizedScaledImage = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_32FC1);
             }
 
-            BytedecoOpenCVTools.clampTo8BitUnsignedChar(inputDepthMat, normalizedScaledImage, 0.0, 255.0);
+            OpenCVTools.clampTo8BitUnsignedChar(inputDepthMat, normalizedScaledImage, 0.0, 255.0);
 
             synchronized (this) // synchronize with the update method
             {
                updateImageDimensions(videoPacket.getImageWidth(), videoPacket.getImageHeight());
-               BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage, getRGBA8Mat());
+               OpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage, getRGBA8Mat());
             }
          });
       });

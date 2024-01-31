@@ -1,0 +1,27 @@
+#ifndef __toolbox_msgs__msg__FootstepPlannerRejectionReasonMessage__idl__
+#define __toolbox_msgs__msg__FootstepPlannerRejectionReasonMessage__idl__
+
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="toolbox_msgs::msg::dds_::FootstepPlannerRejectionReasonMessage_")
+      struct FootstepPlannerRejectionReasonMessage
+      {
+        /**
+         * Reason ordinal
+         */
+        unsigned long reason;
+        /**
+         * Rejection percentage
+         */
+        float rejection_percentage;
+      };
+    };
+  };
+};
+
+#endif

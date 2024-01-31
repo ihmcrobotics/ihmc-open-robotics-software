@@ -4,6 +4,8 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.polytope.FrameConvexPolytope3D;
+import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameConvexPolytope3DReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
 import us.ihmc.euclid.shape.primitives.Box3D;
@@ -155,9 +157,9 @@ public class ContactableShape
    }
 
    private boolean doCollisionCheck(List<FramePoint3DReadOnly> contactPoints,
-                             List<FrameVector3DReadOnly> contactNormals,
-                             double distanceThreshold,
-                             FrameShape3DBasics otherShape)
+                                    List<FrameVector3DReadOnly> contactNormals,
+                                    double distanceThreshold,
+                                    FrameShape3DBasics otherShape)
    {
       FrameShape3DReadOnly thisShape = collidable.getShape();
       ReferenceFrame thisShapeFrame = thisShape.getReferenceFrame();
@@ -220,13 +222,5 @@ public class ContactableShape
       collidable.getShape().getReferenceFrame().update();
       collidable.getShape().getBoundingBox(ReferenceFrame.getWorldFrame(), shapeBoundingBoxInWorld);
       return shapeBoundingBoxInWorld;
-   }
-
-   public static int getMaximumNumberOfContactPoints(Collidable collidable)
-   {
-      if (collidable.getShape() instanceof FrameBox3DReadOnly)
-         return 4;
-      else
-         return 1;
    }
 }

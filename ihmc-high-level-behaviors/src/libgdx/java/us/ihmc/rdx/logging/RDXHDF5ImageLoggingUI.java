@@ -13,15 +13,13 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.perception.logging.HDF5Tools;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
-import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
+import us.ihmc.rdx.imgui.ImPlotIntegerPlot;
+import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
 import us.ihmc.tools.IHMCCommonPaths;
-import us.ihmc.tools.thread.Activator;
 
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -40,14 +38,15 @@ public class RDXHDF5ImageLoggingUI
    private final Object syncObject = new Object();
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiPanel panel = new ImGuiPanel("Logging", this::renderImGuiWidgets);
-   private Activator nativesLoadedActivator;
+   private final RDXPanel panel = new RDXPanel("Logging", this::renderImGuiWidgets);
    private H5File h5File = null;
    private final ImString logDirectory = new ImString(IHMCCommonPaths.LOGS_DIRECTORY.toString());
    private String logFile;
    private final ImPlotStopwatchPlot encodeDurationPlot = new ImPlotStopwatchPlot("Encode duration");
    private final ImPlotIntegerPlot compressedBytesPlot = new ImPlotIntegerPlot("Compressed bytes");
-   private enum Encoding { PNG, JPEG }
+
+   private enum Encoding {PNG, JPEG}
+
    private Encoding encodingSelection = Encoding.JPEG;
    private final ImInt jpegQuality = new ImInt(95);
    private final IntPointer pngCompressionParameters;
@@ -58,9 +57,8 @@ public class RDXHDF5ImageLoggingUI
    private Group imageGroup;
    private long imageIndex;
 
-   public RDXHDF5ImageLoggingUI(Activator nativesLoadedActivator, int imageWidth, int imageHeight)
+   public RDXHDF5ImageLoggingUI(int imageWidth, int imageHeight)
    {
-      this.nativesLoadedActivator = nativesLoadedActivator;
       pngCompressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
       jpegCompressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, jpegQuality.get());
       yuv420Image = new Mat();
@@ -87,11 +85,8 @@ public class RDXHDF5ImageLoggingUI
 
    private void renderImGuiWidgets()
    {
-      if (nativesLoadedActivator.peek())
-      {
-         encodeDurationPlot.renderImGuiWidgets();
-         compressedBytesPlot.renderImGuiWidgets();
-      }
+      encodeDurationPlot.renderImGuiWidgets();
+      compressedBytesPlot.renderImGuiWidgets();
 
       if (h5File == null)
       {
@@ -124,10 +119,9 @@ public class RDXHDF5ImageLoggingUI
             logFile = Paths.get(logDirectory.get(), logFileName).toString();
             h5File = new H5File(logFile, hdf5.H5F_ACC_TRUNC);
 
-            BytePointer encodingNameBytes = encodingSelection == Encoding.PNG ? new BytePointer("png".getBytes())
-                  : new BytePointer("jpeg".getBytes());
+            BytePointer encodingNameBytes = encodingSelection == Encoding.PNG ? new BytePointer("png".getBytes()) : new BytePointer("jpeg".getBytes());
             int rank = 1;
-            long[] dimensions = { encodingNameBytes.limit() };
+            long[] dimensions = {encodingNameBytes.limit()};
             DataSpace dataSpace = new DataSpace(rank, dimensions);
             DataType dataType = new DataType(PredType.NATIVE_CHAR());
             DataSet dataSet = h5File.createDataSet(ENCODING_NAME, dataType, dataSpace);
@@ -167,7 +161,7 @@ public class RDXHDF5ImageLoggingUI
             compressedBytesPlot.addValue((int) compressedImageBuffer.limit());
 
             int rank = 1;
-            long[] dimensions = {compressedImageBuffer.limit() };
+            long[] dimensions = {compressedImageBuffer.limit()};
             DataSpace dataSpace = new DataSpace(rank, dimensions);
             DataSet dataSet = imageGroup.createDataSet(String.valueOf(imageIndex), nativeByteType, dataSpace);
             dataSet.write((Pointer) compressedImageBuffer, nativeByteType);
@@ -193,7 +187,7 @@ public class RDXHDF5ImageLoggingUI
          closeHDF5File();
    }
 
-   public ImGuiPanel getPanel()
+   public RDXPanel getPanel()
    {
       return panel;
    }

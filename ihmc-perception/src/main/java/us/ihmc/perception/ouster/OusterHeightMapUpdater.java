@@ -2,10 +2,8 @@ package us.ihmc.perception.ouster;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -16,19 +14,16 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.ihmcPerception.depthData.PointCloudData;
-import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
-import us.ihmc.ihmcPerception.heightMap.HeightMapInputData;
-import us.ihmc.ihmcPerception.heightMap.HeightMapUpdater;
+import us.ihmc.perception.depthData.PointCloudData;
+import us.ihmc.perception.heightMap.HeightMapAPI;
+import us.ihmc.perception.heightMap.HeightMapInputData;
+import us.ihmc.perception.heightMap.HeightMapUpdater;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.nio.FloatBuffer;
 import java.time.Instant;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -36,6 +31,7 @@ import java.util.function.Consumer;
 public class OusterHeightMapUpdater
 {
    private static final long updateDTMillis = 100;
+   private static final double updateDTSeconds = (double) updateDTMillis / 1000;
    private static final int initialPublishFrequency = 5;
 
    private final RealtimeROS2Node realtimeROS2Node;
@@ -46,9 +42,7 @@ public class OusterHeightMapUpdater
 
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
-   private final ScheduledExecutorService executorService
-         = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()),
-                                                                 ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+   private final PausablePeriodicThread updateThread = new PausablePeriodicThread("OusterHeightMapUpdater", updateDTSeconds, this::update);
 
    public OusterHeightMapUpdater(ROS2ControllerPublishSubscribeAPI ros2)
    {
@@ -73,7 +67,7 @@ public class OusterHeightMapUpdater
 
    public void start()
    {
-      executorService.scheduleAtFixedRate(this::update, 0, updateDTMillis, TimeUnit.MILLISECONDS);
+      updateThread.start();
    }
 
    public void attachHeightMapConsumer(Consumer<HeightMapMessage> heightMapConsumer)
@@ -159,7 +153,7 @@ public class OusterHeightMapUpdater
 
    public void stop()
    {
-      executorService.shutdown();
+      updateThread.stop();
    }
 
    public void destroy()

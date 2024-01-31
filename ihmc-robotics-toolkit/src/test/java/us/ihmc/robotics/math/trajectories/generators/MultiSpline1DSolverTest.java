@@ -12,11 +12,140 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.robotics.linearDynamicSystems.MatlabChart;
 import us.ihmc.robotics.math.functionGenerator.BaseFunctionGenerator;
 
 public class MultiSpline1DSolverTest
 {
+   @Test
+   public void testAddPositionObjective()
+   {
+      Random random = new Random(1231);
+
+      for (int i = 0; i < 1000; i++)
+      {
+         double t = random.nextDouble();
+         double xd = random.nextDouble();
+         double weight = random.nextDouble();
+         int numberOfCoefficients = random.nextInt(10) + 1;
+
+         DMatrixRMaj tMatrix = new DMatrixRMaj(numberOfCoefficients, 1);
+         { // Computing the tDot matrix
+            double tPow = 1.0;
+            int row = numberOfCoefficients - 1;
+
+            for (int coeff = 0; coeff < numberOfCoefficients; coeff++)
+            {
+               tMatrix.set(row--, 0, tPow);
+               tPow *= t;
+            }
+         }
+
+         DMatrixRMaj H_expected = new DMatrixRMaj(numberOfCoefficients, numberOfCoefficients);
+         DMatrixRMaj f_expected = new DMatrixRMaj(numberOfCoefficients, 1);
+         CommonOps_DDRM.multOuter(tMatrix, H_expected);
+         CommonOps_DDRM.scale(weight, H_expected);
+         f_expected.set(tMatrix);
+         CommonOps_DDRM.scale(-xd * weight, f_expected);
+
+         DMatrixRMaj H_actual = new DMatrixRMaj(numberOfCoefficients, numberOfCoefficients);
+         DMatrixRMaj f_actual = new DMatrixRMaj(numberOfCoefficients, 1);
+         MultiSpline1DSolver.addPositionObjective(t, xd, weight, numberOfCoefficients, 0, 0, H_actual, f_actual);
+
+         MecanoTestTools.assertDMatrixEquals(H_expected, H_actual, 1.0e-12);
+         MecanoTestTools.assertDMatrixEquals(f_expected, f_actual, 1.0e-12);
+      }
+   }
+
+   @Test
+   public void testAddVelocityObjective()
+   {
+      Random random = new Random(1231);
+
+      for (int i = 0; i < 1000; i++)
+      {
+         double t = random.nextDouble();
+         double xd = random.nextDouble();
+         double weight = random.nextDouble();
+         int numberOfCoefficients = random.nextInt(10) + 1;
+
+         DMatrixRMaj tDotMatrix = new DMatrixRMaj(numberOfCoefficients, 1);
+         { // Computing the tDot matrix
+            double tPow = 1.0;
+            int row = numberOfCoefficients - 1;
+
+            tDotMatrix.set(row--, 0, 0);
+
+            for (int coeff = 1; coeff < numberOfCoefficients; coeff++)
+            {
+               tDotMatrix.set(row--, 0, coeff * tPow);
+               tPow *= t;
+            }
+         }
+
+         DMatrixRMaj H_expected = new DMatrixRMaj(numberOfCoefficients, numberOfCoefficients);
+         DMatrixRMaj f_expected = new DMatrixRMaj(numberOfCoefficients, 1);
+         CommonOps_DDRM.multOuter(tDotMatrix, H_expected);
+         CommonOps_DDRM.scale(weight, H_expected);
+         f_expected.set(tDotMatrix);
+         CommonOps_DDRM.scale(-xd * weight, f_expected);
+
+         DMatrixRMaj H_actual = new DMatrixRMaj(numberOfCoefficients, numberOfCoefficients);
+         DMatrixRMaj f_actual = new DMatrixRMaj(numberOfCoefficients, 1);
+         MultiSpline1DSolver.addVelocityObjective(t, xd, weight, numberOfCoefficients, 0, 0, H_actual, f_actual);
+
+         MecanoTestTools.assertDMatrixEquals(H_expected, H_actual, 1.0e-12);
+         MecanoTestTools.assertDMatrixEquals(f_expected, f_actual, 1.0e-12);
+      }
+   }
+
+   @Test
+   public void testAddAccelerationObjective()
+   {
+      Random random = new Random(1231);
+
+      for (int i = 0; i < 1000; i++)
+      {
+         double t = random.nextDouble();
+         double xd = random.nextDouble();
+         double weight = random.nextDouble();
+         int numberOfCoefficients = random.nextInt(10) + 1;
+
+         DMatrixRMaj tDDotMatrix = new DMatrixRMaj(numberOfCoefficients, 1);
+         { // Computing the tDot matrix
+            int row = numberOfCoefficients - 1;
+
+            tDDotMatrix.set(row--, 0, 0);
+            if (row >= 0)
+            {
+               tDDotMatrix.set(row--, 0, 0);
+               double tPow = 1.0;
+
+               for (int coeff = 2; coeff < numberOfCoefficients; coeff++)
+               {
+                  tDDotMatrix.set(row--, 0, coeff * (coeff - 1.0) * tPow);
+                  tPow *= t;
+               }
+            }
+         }
+
+         DMatrixRMaj H_expected = new DMatrixRMaj(numberOfCoefficients, numberOfCoefficients);
+         DMatrixRMaj f_expected = new DMatrixRMaj(numberOfCoefficients, 1);
+         CommonOps_DDRM.multOuter(tDDotMatrix, H_expected);
+         CommonOps_DDRM.scale(weight, H_expected);
+         f_expected.set(tDDotMatrix);
+         CommonOps_DDRM.scale(-xd * weight, f_expected);
+
+         DMatrixRMaj H_actual = new DMatrixRMaj(numberOfCoefficients, numberOfCoefficients);
+         DMatrixRMaj f_actual = new DMatrixRMaj(numberOfCoefficients, 1);
+         MultiSpline1DSolver.addAccelerationObjective(t, xd, weight, numberOfCoefficients, 0, 0, H_actual, f_actual);
+
+         MecanoTestTools.assertDMatrixEquals(H_expected, H_actual, 1.0e-11);
+         MecanoTestTools.assertDMatrixEquals(f_expected, f_actual, 1.0e-11);
+      }
+   }
+
    @Test
    public void testEndpointsObjective()
    {
@@ -203,8 +332,8 @@ public class MultiSpline1DSolverTest
       double xErr2 = Math.abs(x2 - solver.computePosition(t2));
       double xdErr0 = Math.abs(xd0 - solver.computeVelocity(t0));
       double xdErr2 = Math.abs(xd2 - solver.computeVelocity(t2));
-//      System.out.println("xErr0: " + xErr0 + ", xErr1: " + xErr1 + ", xErr2: " + xErr2 + ", xdErr0: " + xdErr0 + ", xdErr2: " + xdErr2);
-//      plot(solver, null, true);
+      //      System.out.println("xErr0: " + xErr0 + ", xErr1: " + xErr1 + ", xErr2: " + xErr2 + ", xdErr0: " + xdErr0 + ", xdErr2: " + xdErr2);
+      //      plot(solver, null, true);
 
       assertEquals(0.0, xErr0, 1.0e-12);
       assertEquals(0.0, xErr1, 1.0e-12);

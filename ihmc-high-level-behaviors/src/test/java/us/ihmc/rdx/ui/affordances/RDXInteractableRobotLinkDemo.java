@@ -9,7 +9,7 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.scs2.simulation.collision.Collidable;
 
 public class RDXInteractableRobotLinkDemo
@@ -33,14 +33,14 @@ public class RDXInteractableRobotLinkDemo
             FrameSphere3D frameShape = new FrameSphere3D(ReferenceFrame.getWorldFrame(), 0.03);
             Collidable collidable = new Collidable(rigidBody, 0, 0, frameShape);
 
-            robotRobotCollidable = new RDXRobotCollidable(collidable, Color.GRAY);
+            robotRobotCollidable = new RDXRobotCollidable(collidable, 0, Color.GRAY);
             baseUI.getVRManager().getContext().addVRPickCalculator(robotRobotCollidable::calculateVRPick);
             baseUI.getVRManager().getContext().addVRInputProcessor(robotRobotCollidable::processVRInput);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(robotRobotCollidable::calculatePick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotRobotCollidable::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(robotRobotCollidable, RDXSceneLevel.VIRTUAL);
 
-            ModifiableReferenceFrame controlFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+            MutableReferenceFrame controlFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
             interactableRobotLink = new RDXInteractableRobotLink();
             interactableRobotLink.create(robotRobotCollidable,
                                          controlFrame.getReferenceFrame(),

@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.simulation.bullet.RDXBulletTools;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXLabFloorObject;
@@ -260,7 +260,7 @@ public class RDXBulletPhysicsInteractionForcesDemo
                }
             });
 
-            ImGuiPanel experimentPanel = new ImGuiPanel("Demo", () ->
+            RDXPanel experimentPanel = new RDXPanel("Demo", () ->
             {
                if (ImGui.button("Replace Block"))
                {
@@ -268,34 +268,10 @@ public class RDXBulletPhysicsInteractionForcesDemo
                }
                ImGui.sliderFloat("Block transparency", blockTransparency.getData(), 0.0f, 1.0f);
                LibGDXTools.setOpacity(fallingBlock.getRealisticModelInstance(), blockTransparency.get());
-               numberOfContactPointsPlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               pointAPlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               pointBPlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               normalPlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               distancePlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               appliedImpulsePlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               appliedImpulseLateral1Plot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               appliedImpulseLateral2Plot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               combinedContactDamping1Plot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               combinedFrictionPlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               combinedRestitutionPlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               combinedRollingFrictionPlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               combinedSpinningFrictionPlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               contactCFMPlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               contactERPPlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               contactMotion1Plot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               contactMotion2Plot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               contactPointFlagsPlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               distance1Plot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               frictionCFMPlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               lateralFrictionDirection1Plot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               lateralFrictionDirection2Plot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
-               lifeTimePlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
             });
             baseUI.getImGuiPanelManager().addPanel(experimentPanel);
 
             baseUI.getPrimary3DPanel().getCamera3D().changeCameraPosition(2.0, 1.0, 1.0);
-            environmentBuilder.getBulletPhysicsManager().getSimulationRate().set(0.1f);
          }
 
          public void recreateAndPlace()

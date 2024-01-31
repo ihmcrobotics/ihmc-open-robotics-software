@@ -6,8 +6,8 @@ buildscript {
 
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.7"
-   id("us.ihmc.ihmc-cd") version "1.24"
+   id("us.ihmc.ihmc-ci") version "8.3"
+   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
@@ -21,7 +21,6 @@ ihmc {
 }
 
 mainDependencies {
-   api(ihmc.sourceSetProject("javacv"))
    api(ihmc.sourceSetProject("slam-wrapper"))
    api(ihmc.sourceSetProject("mapsense-wrapper"))
    // For experimenting with local OpenCV:
@@ -39,8 +38,68 @@ mainDependencies {
    api("org.boofcv:boofcv-calibration:0.36")
    api("org.ddogleg:ddogleg:0.18")
 
-   api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:simulation-construction-set:0.23.4")
+   api("org.bytedeco:javacpp:1.5.9")
+   val openblasVersion = "0.3.23-1.5.9"
+   api("org.bytedeco:openblas:$openblasVersion")
+   api("org.bytedeco:openblas:$openblasVersion:linux-x86_64")
+   api("org.bytedeco:openblas:$openblasVersion:linux-arm64")
+   api("org.bytedeco:openblas:$openblasVersion:windows-x86_64")
+   val opencvVersion = "4.7.0-1.5.9"
+   api("org.bytedeco:opencv:$opencvVersion")
+   api("org.bytedeco:opencv:$opencvVersion:linux-x86_64")
+   api("org.bytedeco:opencv:$opencvVersion:linux-arm64")
+   api("org.bytedeco:opencv:$opencvVersion:windows-x86_64")
+   api("org.bytedeco:opencv:$opencvVersion:linux-x86_64-gpu")
+   api("org.bytedeco:opencv:$opencvVersion:windows-x86_64-gpu")
+   val ffmpegVersion = "6.0-1.5.9"
+   api("org.bytedeco:ffmpeg:$ffmpegVersion")
+   api("org.bytedeco:ffmpeg:$ffmpegVersion:linux-x86_64")
+   api("org.bytedeco:ffmpeg:$ffmpegVersion:linux-arm64")
+   api("org.bytedeco:ffmpeg:$ffmpegVersion:windows-x86_64")
+   val openclVersion = "3.0-1.5.9"
+   api("org.bytedeco:opencl:$openclVersion")
+   api("org.bytedeco:opencl:$openclVersion:linux-x86_64")
+   api("org.bytedeco:opencl:$openclVersion:linux-arm64")
+   api("org.bytedeco:opencl:$openclVersion:windows-x86_64")
+   val librealsense2Version = "2.53.1-1.5.9"
+   api("org.bytedeco:librealsense2:$librealsense2Version")
+   api("org.bytedeco:librealsense2:$librealsense2Version:linux-x86_64")
+   api("org.bytedeco:librealsense2:$librealsense2Version:linux-arm64")
+   api("org.bytedeco:librealsense2:$librealsense2Version:windows-x86_64")
+   // Spinnaker released under us.ihmc for arm64 support
+   val spinnakerVersion = "3.0.0.118-1.5.9-ihmc1"
+   api("us.ihmc:spinnaker:$spinnakerVersion") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
+   api("us.ihmc:spinnaker:$spinnakerVersion:linux-x86_64") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
+   api("us.ihmc:spinnaker:$spinnakerVersion:linux-arm64") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
+   api("us.ihmc:spinnaker:$spinnakerVersion:windows-x86_64") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
+   val hdf5Version = "1.14.1-1.5.9"
+   api("org.bytedeco:hdf5:$hdf5Version")
+   api("org.bytedeco:hdf5:$hdf5Version:linux-x86_64")
+   // No arm64 version
+   api("org.bytedeco:hdf5:$hdf5Version:windows-x86_64")
+   val cudaVersion = "12.1-8.9-1.5.9"
+   api("org.bytedeco:cuda:$cudaVersion")
+   api("org.bytedeco:cuda:$cudaVersion:linux-x86_64")
+   api("org.bytedeco:cuda:$cudaVersion:linux-arm64")
+   api("org.bytedeco:cuda:$cudaVersion:windows-x86_64")
+   val zedVersion = "4.0.6-1.5.9"
+   api("us.ihmc:zed:$zedVersion") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
+   api("us.ihmc:zed:$zedVersion:linux-x86_64") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
+
+   api("us.ihmc:euclid:0.21.0")
+   api("us.ihmc:simulation-construction-set:0.25.0")
    api("us.ihmc:ihmc-native-library-loader:2.0.2")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
@@ -54,64 +113,9 @@ mainDependencies {
 
 //   api("com.microsoft.onnxruntime:onnxruntime:1.14.0")
    api("com.microsoft.onnxruntime:onnxruntime_gpu:1.14.0")
-}
 
-openpnpDependencies {
-   api("org.openpnp:opencv:4.3.0-2")
-}
-
-val javaCPPVersion = "1.5.9-SNAPSHOT"
-
-bytedecoDependencies {
-   api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:ihmc-commons:0.31.0")
-   apiCommonBytedecoNatives()
-}
-
-javacvDependencies {
-   apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion")
-   apiCommonBytedecoNatives()
-}
-
-slamWrapperDependencies {
-   apiBytedecoNatives("javacpp", "")
-   api("us.ihmc:ihmc-java-toolkit:source")
-}
-
-mapsenseWrapperDependencies {
-   apiBytedecoNatives("javacpp", "")
-   api("us.ihmc:ihmc-java-toolkit:source")
-}
-
-fun us.ihmc.build.IHMCDependenciesExtension.apiCommonBytedecoNatives()
-{
-   apiBytedecoNatives("javacpp", "")
-   apiBytedecoNatives("openblas", "0.3.23-")
-   apiBytedecoNatives("opencv", "4.7.0-")
-   apiBytedecoNatives("opencl", "3.0-")
-   apiBytedecoNatives("librealsense2", "2.53.1-")
-   apiBytedecoNatives("spinnaker", "3.0.0.118-")
-   apiBytedecoNatives("ffmpeg", "6.0-")
-   apiBytedecoNatives("hdf5", "1.14.0-")
-}
-
-// We are trying to avoid downloading binaries that aren't used by anyone
-fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
-{
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
-   if (name != "spinnaker" && name != "hdf5")
-      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-arm64")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:windows-x86_64")
-   if (name != "spinnaker")
-      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:macosx-x86_64")
-}
-
-fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
-{
-   api(dependencyNotation) {
-      exclude(group = "org.bytedeco") // This is required in order for the above to work
-   }
+   api("com.microsoft.onnxruntime:onnxruntime:1.11.0")
+   api("com.microsoft.onnxruntime:onnxruntime_gpu:1.11.0")
 }
 
 testDependencies {
@@ -121,17 +125,12 @@ testDependencies {
    api("us.ihmc:simulation-construction-set-tools-test:source")
 }
 
-visualizersDependencies {
-   api(ihmc.sourceSetProject("main"))
-
-   api("us.ihmc:simulation-construction-set:0.23.4")
-
-   api("us.ihmc:simulation-construction-set-tools:source")
-   api("us.ihmc:simulation-construction-set-tools-test:source")
+slamWrapperDependencies {
+   api("org.bytedeco:javacpp:1.5.9")
+   api("us.ihmc:ihmc-java-toolkit:source")
 }
 
-tasks.create("generateMappings", Exec::class)
-{
-   workingDir = file("src/slam-wrapper/cpp")
-   commandLine = listOf("./generate-java-mappings-docker.sh")
+mapsenseWrapperDependencies {
+   api("org.bytedeco:javacpp:1.5.9")
+   api("us.ihmc:ihmc-java-toolkit:source")
 }

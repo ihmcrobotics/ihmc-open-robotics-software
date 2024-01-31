@@ -7,7 +7,7 @@ import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -100,7 +100,7 @@ public class LogVideoLoader
          YUVPicture nextFrame = demuxer.getNextFrame();
          BufferedImage bufImage = converter.toBufferedImage(nextFrame);
 
-         Mat mat = BytedecoOpenCVTools.convertBufferedImageToMat(bufImage);
+         Mat mat = OpenCVTools.convertBufferedImageToMat(bufImage);
 
          return mat;
       }

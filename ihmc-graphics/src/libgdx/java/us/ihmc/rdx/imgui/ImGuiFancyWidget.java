@@ -1,7 +1,6 @@
 package us.ihmc.rdx.imgui;
 
 import imgui.ImGui;
-import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
 
 /**
@@ -21,10 +20,13 @@ public abstract class ImGuiFancyWidget
    /** Used by a lot of widgets that extend this class. Just here for brevity for those.*/
    protected final String format;
    private final String prefixLabel;
-   private float prefixTextWidth;
-   private boolean textWidthCalculated = false;
+   /** Negative values fill available width. */
+   private float widgetWidth = -1.0f;
    private boolean widgetTextColoring = false;
    private int widgetTextColor = 0;
+   private String buttonText;
+   private Runnable onButtonPressed;
+   private ImGuiLabelledWidgetAligner widgetAligner;
 
    protected ImGuiFancyWidget(String label)
    {
@@ -42,17 +44,23 @@ public abstract class ImGuiFancyWidget
 
    protected void beforeWidgetRender()
    {
-      if (!textWidthCalculated)
+      if (widgetAligner != null)
       {
-         textWidthCalculated = true;
-         ImVec2 size = new ImVec2();
-         ImGui.calcTextSize(size, prefixLabel);
-         prefixTextWidth = size.x;
+         widgetAligner.text(prefixLabel);
+      }
+      else
+      {
+         ImGui.text(prefixLabel);
+         ImGui.sameLine();
       }
 
-      ImGui.text(prefixLabel);
-      ImGui.sameLine();
-      ImGui.pushItemWidth(ImGuiTools.getUsableWindowWidth() - prefixTextWidth);
+      float itemWidth = ImGui.getColumnWidth();
+      if (widgetWidth >= 0.0f)
+         itemWidth = widgetWidth;
+      if (buttonText != null)
+         itemWidth -= ImGuiTools.calcButtonWidth(buttonText) + ImGui.getStyle().getItemSpacingX();
+
+      ImGui.pushItemWidth(itemWidth);
 
       if (widgetTextColoring)
          ImGui.pushStyleColor(ImGuiCol.Text, widgetTextColor);
@@ -64,6 +72,13 @@ public abstract class ImGuiFancyWidget
 
       if (widgetTextColoring)
          ImGui.popStyleColor();
+
+      if (buttonText != null)
+      {
+         ImGui.sameLine();
+         if (ImGui.button(labels.get(buttonText, prefixLabel)))
+            onButtonPressed.run();
+      }
    }
 
    /**
@@ -86,5 +101,23 @@ public abstract class ImGuiFancyWidget
    public void clearWidgetTextColor()
    {
       widgetTextColoring = false;
+   }
+
+   public void setWidgetWidth(float widgetWidth)
+   {
+      this.widgetWidth = widgetWidth;
+   }
+
+   /** Use this to add a button after the widget on the same line. */
+   public void addButton(String buttonText, Runnable onButtonPressed)
+   {
+      this.buttonText = buttonText;
+      this.onButtonPressed = onButtonPressed;
+   }
+
+   /** Use this to line up the widgets more cleanly. */
+   public void addWidgetAligner(ImGuiLabelledWidgetAligner widgetAligner)
+   {
+      this.widgetAligner = widgetAligner;
    }
 }

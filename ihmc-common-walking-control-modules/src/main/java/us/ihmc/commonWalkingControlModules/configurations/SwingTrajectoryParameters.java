@@ -6,6 +6,67 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 public abstract class SwingTrajectoryParameters
 {
    /**
+    * Returns the maximum swing height from the stance foot for this robot
+    */
+   public double getMaxSwingHeight()
+   {
+      return 0.3;
+   }
+
+   /**
+    * Returns the minimum swing height from the stance foot for this robot
+    */
+   public double getMinSwingHeight()
+   {
+      return 0.1;
+   }
+
+   /**
+    * Default swing height used by the controller. If a swing height is not specified or lies outside
+    * of the allowable range, this value is used.
+    */
+   public double getDefaultSwingHeight()
+   {
+      return getMinSwingHeight();
+   }
+
+   /**
+    * When {@code true}, the waypoints of the swing trajectory will be positioned z-wise with respect
+    * to the height of the toe instead of the center of the sole.
+    * <p>
+    * This essentially renders the height of the waypoints independent from the foot toeing off.
+    * </p>
+    */
+   public boolean useInitialToeHeight()
+   {
+      return false;
+   }
+
+   /**
+    * When {@code true}, the waypoints of the swing trajectory will be positioned z-wise with respect
+    * to the height of the heel instead of the center of the sole.
+    * <p>
+    * This essentially renders the height of the waypoints independent from the foot pitch at
+    * touchdown.
+    * </p>
+    */
+   public boolean useFinalHeelHeight()
+   {
+      return false;
+   }
+
+   /**
+    * Custom waypoint positions are precomputed externally. During execution the initial foot pose
+    * might be different than expected, and the preplanned trajectory might have the foot go backward
+    * before moving forward, for example. This provides a threshold for the maximum angle from forward
+    * to use - lower is more restrictive, 90 deg max recommended.
+    */
+   public double getCustomWaypointAngleThreshold()
+   {
+      return Math.toRadians(50.0);
+   }
+
+   /**
     * Useful to force the swing foot to end up with an height offset with respect to the given
     * footstep.
     */
@@ -35,7 +96,7 @@ public abstract class SwingTrajectoryParameters
    {
       return 0.0;
    }
-   
+
    /**
     * Ratio used to modify the x and y components of the desired swing final acceleration by adding a
     * portion of the predicted center of mass acceleration at the end of swing.
@@ -55,7 +116,8 @@ public abstract class SwingTrajectoryParameters
    }
 
    /**
-    * When this value is 0.0, the initial foot velocity is 0.0. When it is 1.0, the initial swing foot velocity is the pelvis velocity.
+    * When this value is 0.0, the initial foot velocity is 0.0. When it is 1.0, the initial swing foot
+    * velocity is the pelvis velocity.
     */
    public double getPelvisVelocityInjectionRatio()
    {
@@ -90,12 +152,69 @@ public abstract class SwingTrajectoryParameters
    }
 
    /**
-    * Returns the percent of the step length which will be used to determine the swing waypoints when
-    * taking a step of the type obstacle clearance
+    * Default swing height used by the controller used when stepping up.
     */
-   public double[] getObstacleClearanceProportions()
+   public double getDefaultSwingStepUpHeight()
    {
-      return new double[] {0.15, 0.85};
+      return getDefaultSwingHeight();
+   }
+
+   /**
+    * Default swing height used by the controller used when stepping down.
+    */
+   public double getDefaultSwingStepDownHeight()
+   {
+      return getDefaultSwingHeight();
+   }
+
+   /**
+    * Returns the percent of the step length which will be used to determine the swing waypoints when
+    * taking a step up
+    */
+   public double[] getSwingStepUpWaypointProportions()
+   {
+      return getSwingWaypointProportions();
+   }
+
+   /**
+    * Returns the percent of the step length which will be used to determine the swing waypoints when
+    * taking a step up
+    */
+   public double[] getSwingStepDownWaypointProportions()
+   {
+      return getSwingWaypointProportions();
+   }
+
+   /**
+    * Returns a factor in [0, 1] for controlling the first waypoint's z coordinate when performing a
+    * step up.
+    * <ul>
+    * <li>a value of 0 sets the waypoint to be at the initial stance foot height plus
+    * {@link #getDefaultSwingStepUpHeight()}.
+    * <li>a value of 1 sets the waypoint to be at the final stance foot height plus
+    * {@link #getDefaultSwingStepUpHeight()}.
+    * <li>a value in ]0, 1[ linearly interpolates between the two previous examples.
+    * </ul>
+    */
+   public double getFirstWaypointHeightFactorForSteppingUp()
+   {
+      return 1.0;
+   }
+
+   /**
+    * Returns a factor in [0, 1] for controlling the first waypoint's z coordinate when performing a
+    * step down.
+    * <ul>
+    * <li>a value of 0 sets the waypoint to be at the final stance foot height plus
+    * {@link #getDefaultSwingStepUpHeight()}.
+    * <li>a value of 1 sets the waypoint to be at the initial stance foot height plus
+    * {@link #getDefaultSwingStepUpHeight()}.
+    * <li>a value in ]0, 1[ linearly interpolates between the two previous examples.
+    * </ul>
+    */
+   public double getSecondWaypointHeightFactorForSteppingDown()
+   {
+      return 1.0;
    }
 
    /**
@@ -113,6 +232,32 @@ public abstract class SwingTrajectoryParameters
    public double midpointOrientationInterpolationForObstacleClearance()
    {
       return 0.4;
+   }
+
+   /**
+    * Specifies whether or not to pitch the foot down to help avoid heel strike when stepping down.
+    */
+   public boolean addFootPitchToAvoidHeelStrikeWhenSteppingDown()
+   {
+      return false;
+   }
+
+   /**
+    * When {@link #addFootPitchToAvoidHeelStrikeWhenSteppingDown()} is true, this specifies the fraction
+    * through swing to add the additional foot pitch waypoint
+    */
+   public double getFractionOfSwingToPitchFootDown()
+   {
+      return 0.25;
+  }
+
+   /**
+    * When {@link #addFootPitchToAvoidHeelStrikeWhenSteppingDown()} is true, this specifies the amount
+    * of angle to pitch the foot down
+    */
+   public double getFootPitchAngleToAvoidHeelStrike()
+   {
+      return Math.toRadians(20.0);
    }
 
    /**

@@ -28,6 +28,7 @@ import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.robot.SixDoFJointDefinition;
 import us.ihmc.scs2.definition.state.OneDoFJointState;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.definition.state.interfaces.OneDoFJointStateBasics;
@@ -146,6 +147,46 @@ public class RobotDefinitionTools
    public static CollisionShapeDefinition toCollisionShapeDefinition(Collidable source)
    {
       return TerrainObjectDefinitionTools.toCollisionShapeDefinition(source);
+   }
+
+   /**
+    * This is useful to get a detached copy of an arm or a leg, or perhaps a finger.
+    * The base can't be moved from world, as there's no elevator and 6 DoF joint.
+    */
+   public static RobotDefinition cloneLimbOnlyDefinition(RobotDefinition originalRobotDefinition, String rootBodyName, String jointNameToFollow)
+   {
+      RobotDefinition robotDefinition = new RobotDefinition();
+
+      RigidBodyDefinition clonedRootBody = originalRobotDefinition.getRigidBodyDefinition(rootBodyName).copyRecursive();
+      JointDefinition clonedJointToFollow = originalRobotDefinition.getJointDefinition(jointNameToFollow).copyRecursive();
+
+      clonedRootBody.addChildJoint(clonedJointToFollow);
+
+      robotDefinition.setRootBodyDefinition(clonedRootBody);
+      return robotDefinition;
+   }
+
+   /**
+    * This is useful to get a detached copy of an arm or a leg, or perhaps a finger.
+    * The base canbe moved from world, using the elevator and 6 DoF joint.
+    */
+   public static RobotDefinition cloneLimbOnlyDefinitionWithElevator(RobotDefinition originalRobotDefinition, String rootBodyName, String jointNameToFollow)
+   {
+      RobotDefinition robotDefinition = new RobotDefinition();
+
+      RigidBodyDefinition elevator = new RigidBodyDefinition("elevator");
+      SixDoFJointDefinition sixDoFJointDefinition = new SixDoFJointDefinition(rootBodyName);
+      elevator.addChildJoint(sixDoFJointDefinition);
+
+      RigidBodyDefinition clonedRootBody = originalRobotDefinition.getRigidBodyDefinition(rootBodyName).copyRecursive();
+      JointDefinition clonedJointToFollow = originalRobotDefinition.getJointDefinition(jointNameToFollow).copyRecursive();
+
+      clonedRootBody.addChildJoint(clonedJointToFollow);
+
+      sixDoFJointDefinition.setSuccessor(clonedRootBody);
+
+      robotDefinition.setRootBodyDefinition(elevator);
+      return robotDefinition;
    }
 
    // --------------------------------------------------------

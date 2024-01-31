@@ -318,7 +318,7 @@ public class RobotConfigurationDataPublisherFactory
 
       for (ForceSensorDefinition forceSensor : forceSensorSelection)
       {
-         ForceSensorDataReadOnly sensorData = allSensorData.get(forceSensor);
+         ForceSensorDataReadOnly sensorData = allSensorData.getData(forceSensor);
 
          ReferenceFrame forceSensorFrame = forceSensor.getSensorFrame();
          frameDataToPublish.add(forceSensorFrame);

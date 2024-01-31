@@ -15,7 +15,7 @@ public class PolygonizerParametersMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e86c43e39d73d4b7517df7a65db7f1fb8c258ab70f9a4a47505b905de38367b9";
+   		return "5796ab7dac2bc9ebc03ec7251a70a35027ffae3d06e329407472b3c68141f7a6";
    }
    
    @Override

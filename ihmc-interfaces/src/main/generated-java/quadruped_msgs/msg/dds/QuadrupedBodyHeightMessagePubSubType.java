@@ -15,7 +15,7 @@ public class QuadrupedBodyHeightMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ee2445bf4fd0cdfd057738d5f919cdda0e320b9e078dc41cd896a68a0f2a0edd";
+   		return "74788f09f6022203bd776f229ce5d819a086f880d02d76a42c15eb85ac33cb68";
    }
    
    @Override

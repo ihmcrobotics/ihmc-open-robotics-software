@@ -21,7 +21,8 @@ public class EstimatorTask extends HumanoidRobotControlTask
    private final ThreadTimer timer;
    private final YoLong ticksBehindScheduled;
 
-   private final List<Runnable> taskThreadRunnables = new ArrayList<>();
+   private final List<Runnable> preEstimatorCallbacks = new ArrayList<>();
+   private final List<Runnable> postEstimatorCallbacks = new ArrayList<>();
    private final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
    // This is needed for the single threaded mode as the master context will be updated after the first execute call.
@@ -58,8 +59,9 @@ public class EstimatorTask extends HumanoidRobotControlTask
       {
          long schedulerTick = estimatorThread.getHumanoidRobotContextData().getSchedulerTick();
          ticksBehindScheduled.set(schedulerTick - timer.getTickCount() * divisor);
+         runAll(preEstimatorCallbacks);
          estimatorThread.run();
-         runAll(taskThreadRunnables);
+         runAll(postEstimatorCallbacks);
       }
       timer.stop();
    }
@@ -80,9 +82,15 @@ public class EstimatorTask extends HumanoidRobotControlTask
    }
 
    @Override
-   public void addRunnableOnTaskThread(Runnable runnable)
+   public void addCallbackPreTask(Runnable callback)
    {
-      taskThreadRunnables.add(runnable);
+      preEstimatorCallbacks.add(callback);
+   }
+
+   @Override
+   public void addCallbackPostTask(Runnable runnable)
+   {
+      postEstimatorCallbacks.add(runnable);
    }
 
    @Override

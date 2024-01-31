@@ -12,14 +12,8 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
-import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
+import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.SCS2DefinitionMissingTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.visual.ColorDefinition;
-import us.ihmc.scs2.definition.visual.ColorDefinitions;
-import us.ihmc.scs2.definition.visual.MaterialDefinition;
 
 import java.util.function.Supplier;
 
@@ -72,16 +66,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
       if (baseUI != null)
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
       cameraForTracking = cameraForTrackingSupplier.get();
-      RobotDefinition robotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
-      // We are just making the hands black here
-      MaterialDefinition material = new MaterialDefinition(ColorDefinitions.Black());
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         String handName = robotModel.getJointMap().getHandName(robotSide);
-         RobotDefinition.forEachRigidBodyDefinition(robotDefinition.getRigidBodyDefinition(handName),
-                                                    body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
-      }
-      loadRobotModelAndGraphics(robotDefinition, syncedRobot.getFullRobotModel().getElevator());
+      loadRobotModelAndGraphics(robotModel.getRobotDefinition(), syncedRobot.getFullRobotModel().getElevator());
    }
 
    @Override
@@ -131,7 +116,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
       {
          teleportCameraToRobotPelvis();
       }
-      ImGuiTools.previousWidgetTooltip("Moves the camera focus point to the robot's current location.\nKeybind: Ctrl + P");
+      ImGuiTools.previousWidgetTooltip("Moves the camera focus point to the robot's current location.\n (Ctrl + P)");
       ImGui.sameLine();
 
       if (ImGui.checkbox(labels.get("Track robot"), trackRobot))

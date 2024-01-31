@@ -15,7 +15,7 @@ public class ExoskeletonBehaviorStatePacketPubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "774f5f7ca98d332846e2567fe975fc2dc336b09593bf84ae7a249581a1e24ed4";
+   		return "773f32508676ef2c0d1ea18f1151d494cd5e939ac4586132c8c721e528e79157";
    }
    
    @Override

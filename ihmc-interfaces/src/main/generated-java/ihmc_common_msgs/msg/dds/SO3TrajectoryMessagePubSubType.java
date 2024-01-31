@@ -15,7 +15,7 @@ public class SO3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2a547086c4a7f6cbdff8b687eeb788a2340b1832b78621ca8bcb11e73baa0c41";
+   		return "1bf9fea96e32dac5417c2c4d69c654888fb9905ca1d80a3c0b664c2a2c6c9747";
    }
    
    @Override

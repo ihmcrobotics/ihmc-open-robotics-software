@@ -20,6 +20,7 @@ file(GLOB msg_files RELATIVE ${CMAKE_CURRENT_LIST_DIR} "msg/*.msg")
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
   DEPENDENCIES std_msgs
+               ihmc_common_msgs
                builtin_interfaces
 )
 

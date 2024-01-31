@@ -174,6 +174,16 @@ public class KinematicsToolboxPrivilegedConfigurationCommand
       return privilegedGain;
    }
 
+   public void setPrivilegedWeight(double privilegedWeight)
+   {
+      this.privilegedWeight = privilegedWeight;
+   }
+
+   public void setPrivilegedGain(double privilegedGain)
+   {
+      this.privilegedGain = privilegedGain;
+   }
+
    @Override
    public Class<KinematicsToolboxPrivilegedConfigurationMessage> getMessageClass()
    {

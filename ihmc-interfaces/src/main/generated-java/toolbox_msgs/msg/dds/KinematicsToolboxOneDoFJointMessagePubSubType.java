@@ -15,7 +15,7 @@ public class KinematicsToolboxOneDoFJointMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c37a89e7d7f2bdee3ab33e3adf032648c6fe3d7116fb38e190e3a5ef6e24d78f";
+   		return "90ecace412c00eab0ec4667102d1928f97825b5fdbd3c8db701e7e66756fb2ee";
    }
    
    @Override

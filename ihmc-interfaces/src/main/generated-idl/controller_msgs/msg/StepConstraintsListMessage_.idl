@@ -51,7 +51,7 @@ module controller_msgs
         /**
          * Single buffer used to store for each constraint the vertices of the concave hull and the convex polygons.
          */
-        sequence<geometry_msgs::msg::dds::Point, 500> vertex_buffer;
+        sequence<geometry_msgs::msg::dds::Point, 50000> vertex_buffer;
       };
     };
   };

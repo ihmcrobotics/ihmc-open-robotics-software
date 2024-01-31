@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.contact.HandWrenchCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -115,6 +116,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final Wrench wristTempWrench = new Wrench();
    private final FrameVector3D tempWristForce = new FrameVector3D();
    private final FrameVector3D tempWristTorque = new FrameVector3D();
+   private final SideDependentList<HandWrenchCalculator> handWrenchCalculators;
 
    private final SideDependentList<YoDouble> handsMass;
 
@@ -291,6 +293,12 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          wristTorquesHandWeightCancelled = null;
          handCenterOfMassFrames = null;
          handsMass = null;
+         handWrenchCalculators = new SideDependentList<>();
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (fullRobotModel.getHand(robotSide) != null)
+               handWrenchCalculators.put(robotSide, new HandWrenchCalculator(robotSide, fullRobotModel, registry, controlDT));
+         }
       }
       else
       {
@@ -301,6 +309,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          wristTorquesHandWeightCancelled = new SideDependentList<>();
          handCenterOfMassFrames = new SideDependentList<>();
          handsMass = new SideDependentList<>();
+         handWrenchCalculators = null;
 
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -409,6 +418,14 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       readWristSensorData();
 
       computeAngularAndLinearMomentum();
+      if (handWrenchCalculators != null)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (handWrenchCalculators.get(robotSide) != null)
+               handWrenchCalculators.get(robotSide).compute();
+         }
+      }
 
       for (int i = 0; i < updatables.size(); i++)
          updatables.get(i).update(yoTime.getDoubleValue());
@@ -543,7 +560,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          copError.setToZero(planeFrame);
          copError.sub(copDesired, copActual);
          yoCoPError.get(robotSide).set(copError);
-         yoCoPErrorMagnitude.get(robotSide).set(copError.length());
+         yoCoPErrorMagnitude.get(robotSide).set(copError.norm());
 
          footSwitch.getMeasuredWrench(footWrench);
          footForceVector.setIncludingFrame(footWrench.getLinearPart());
@@ -608,7 +625,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       {
          ForceSensorDataReadOnly wristForceSensor = wristForceSensors.get(robotSide);
          ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
-         wristForceSensor.getWrench(wristTempWrench);
+         wristTempWrench.setIncludingFrame(wristForceSensor.getWrench());
 
          tempWristForce.setIncludingFrame(wristTempWrench.getLinearPart());
          tempWristTorque.setIncludingFrame(wristTempWrench.getAngularPart());
@@ -974,16 +991,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public YoDouble getOmega0Provider()
    {
       return omega0;
-   }
-
-   public void getCoP(FramePoint3D copToPack)
-   {
-      copToPack.setIncludingFrame(yoCenterOfPressure, 0.0);
-   }
-
-   public void getCoP(FramePoint2D copToPack)
-   {
-      copToPack.setIncludingFrame(yoCenterOfPressure);
    }
 
    public FrameVector3DReadOnly getAngularMomentum()

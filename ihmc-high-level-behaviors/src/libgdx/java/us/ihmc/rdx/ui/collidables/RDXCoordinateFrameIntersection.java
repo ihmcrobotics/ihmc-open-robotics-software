@@ -5,8 +5,8 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.rdx.ui.gizmo.Axis3DRotations;
-import us.ihmc.rdx.ui.gizmo.DiscreteArrowRayIntersection;
+import us.ihmc.robotics.interaction.Axis3DRotations;
+import us.ihmc.robotics.interaction.DiscreteArrowRayIntersection;
 
 import java.util.EnumMap;
 

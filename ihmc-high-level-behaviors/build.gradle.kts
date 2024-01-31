@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.7"
-   id("us.ihmc.ihmc-cd") version "1.24"
+   id("us.ihmc.ihmc-ci") version "8.3"
+   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
@@ -22,19 +22,10 @@ mainDependencies {
    api("us.ihmc:promp:source")
 }
 
-javafxDependencies {
-   api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.3")
-   api("us.ihmc:ihmc-graphics-javafx:source")
-   api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
-   api("us.ihmc:ihmc-path-planning-visualizers:source")
-   api("us.ihmc:robot-environment-awareness-visualizers:source")
-}
-
 missionControlDependencies {
    api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:log-tools:0.6.3")
-   api("us.ihmc:ihmc-ros2-library:0.22.6")
+   api("us.ihmc:ihmc-ros2-library:0.23.1")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-interfaces:source")
@@ -46,11 +37,9 @@ libgdxDependencies {
    api(ihmc.sourceSetProject("mission-control"))
    api("org.abego.treelayout:org.abego.treelayout.core:1.0.3")
    api("us.ihmc:ihmc-graphics-libgdx:source")
-   api("us.ihmc:ihmc-perception-javacv:source")
-   api("us.ihmc:ihmc-perception-bytedeco:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
-   api("us.ihmc:scs2-definition:17-0.14.3")
-   api("us.ihmc:mecano-graphviz:17-0.12.3")
+   api("us.ihmc:scs2-definition:17-0.19.0")
+   api("us.ihmc:mecano-graphviz:17-0.16.0")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.1")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.1")
    api("com.badlogicgames.gdx:gdx-bullet:1.11.0")
@@ -59,14 +48,13 @@ libgdxDependencies {
 }
 
 testDependencies {
-   api(ihmc.sourceSetProject("javafx"))
    api(ihmc.sourceSetProject("libgdx"))
    api("us.ihmc:ihmc-graphics-libgdx-test:source")
    api("us.ihmc:ihmc-path-planning-test:source")
    api("org.cartesiantheatrics:bag-reader-java:0.0.1")
    api("com.github.stephengold:Libbulletjme:12.6.0")
-   api("us.ihmc:scs2-examples:17-0.14.3")
-   api("us.ihmc:scs2-bullet-simulation-test:17-0.14.3")
+   api("us.ihmc:scs2-examples:17-0.19.0")
+   api("us.ihmc:scs2-bullet-simulation-test:17-0.19.0")
    api("us.ihmc:example-simulations:source")
 }
 

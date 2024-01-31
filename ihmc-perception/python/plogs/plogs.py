@@ -31,6 +31,19 @@ def convert_main(path, src_file_name, dst_file_name):
 
     convert_hdf5_file(path, src_file_name, new_file, conversions)
 
+# Converts all unfixed files with int32 data types to uint8 and gives the option to delete the old version.
+def convert_all(path, files):
+    for file in files:
+        if("Fixed" not in file and ".hdf5" in file):
+            convert_main(path, file, None)
+
+    print_file_sizes(path, files)
+
+    if(input("Files are fixed, would you like to delete the old versions? [y/n] ").lower == 'y' or 'yes'):
+        for file in files:
+            if("Fixed" not in file):
+                os.remove(file)
+
 
 
 def player_main(data, indices = None):
@@ -238,7 +251,10 @@ if __name__ == '__main__':
     parser.add_argument("--play", help="file name to play", type=str)
     parser.add_argument("--plot", help="file name to plot", type=str)
     parser.add_argument("--fix", help="file name to fix", type=str)
+    parser.add_argument("--fixAll", help="fixes all files that need fixing in the logs/perception directory", action="store_true")
     parser.add_argument("--dst", help="destination file name", type=str)
+    parser.add_argument("--rename", help="rename file to include sensors used", type=str)
+    parser.add_argument("--renameAll", help="renames ALL files in the logs/perception directory", action="store_true")
 
     args = parser.parse_args()
     home = os.path.expanduser('~')
@@ -262,3 +278,15 @@ if __name__ == '__main__':
 
     if args.fix:
         convert_main(path, args.fix, args.dst)
+
+    if args.fixAll:
+        files = sorted(os.listdir(path))
+        convert_all(path, files)
+    
+    if args.rename:
+        data = h5py.File(path + args.rename, 'r')
+        rename_file(path, data, args.rename)
+
+    if args.renameAll:
+        files = sorted(os.listdir(path))
+        rename_all_files(path, files)

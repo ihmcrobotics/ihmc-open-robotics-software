@@ -1,23 +1,16 @@
 package us.ihmc.perception.sceneGraph;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-
 /**
  * An object that is currently detected or not currently detected,
  * as such with objects tracked via ArUco markers or YOLO.
  */
-public abstract class DetectableSceneNode extends SceneNode
+public class DetectableSceneNode extends SceneNode
 {
    private boolean currentlyDetected;
 
-   public DetectableSceneNode(String name)
+   public DetectableSceneNode(long id, String name)
    {
-      super(name);
-   }
-
-   public DetectableSceneNode(String name, ReferenceFrame parentFrame)
-   {
-      super(name, parentFrame);
+      super(id, name);
    }
 
    public void setCurrentlyDetected(boolean currentlyDetected)

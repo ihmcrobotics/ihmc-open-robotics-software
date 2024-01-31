@@ -4,13 +4,12 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.MessagerSyncedRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.rdx.ui.graphics.RDXRobotModelGraphic;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
-public class RDXMessagerRobotVisualizer extends RDXRobotModelGraphic
+public class RDXMessagerRobotVisualizer extends RDXMultiBodyGraphic
 {
    private final MessagerSyncedRobotModel syncedRobot;
    private final ExceptionHandlingThreadScheduler scheduler;

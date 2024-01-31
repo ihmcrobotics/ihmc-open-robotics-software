@@ -28,19 +28,13 @@
                               <fx:include fx:id="mainTab" source="MainTab.fxml" />
                           </content>
                       </Tab>
-      
-                      <Tab text="Visibility Graph Parameters">
-                          <content>
-                              <fx:include fx:id="visibilityGraphsParametersUI" source="VisibilityGraphsParametersUI.fxml" />
-                          </content>
-                      </Tab>
 
                       <Tab text="A Star Body Path Parameters">
                           <content>
                               <fx:include fx:id="aStarBodyPathParametersUI" source="AStarBodyPathParametersUI.fxml" />
                           </content>
                       </Tab>
-      
+
                       <Tab text="Footstep Parameters">
                           <content>
                               <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml" />
@@ -70,13 +64,7 @@
                               <fx:include fx:id="visibilityGraphsUI" source="VisualizationDashboard.fxml" />
                           </content>
                       </Tab>
-      
-                      <Tab text="Robot Operation">
-                          <content>
-                              <fx:include fx:id="robotOperationTab" source="RobotOperationTab.fxml" />
-                          </content>
-                      </Tab>
-      
+
                   </tabs>
               </TabPane>
          </items>

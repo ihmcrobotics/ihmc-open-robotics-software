@@ -10,10 +10,15 @@ import com.badlogic.gdx.graphics.*;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImString;
-import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import std_msgs.msg.dds.Bool;
+import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonMessage;
+import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonsMessage;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
+import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -25,14 +30,13 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySet;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
-import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.yo.ImGuiYoDoublePlot;
 import us.ihmc.rdx.ui.yo.ImPlotYoHelperDoublePlotLine;
-import us.ihmc.rdx.visualizers.RDXHeightMapGraphic;
+import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
@@ -40,19 +44,13 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.rdx.visualizers.RDXSphereAndArrowGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.ArrayList;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 {
-   public static final RDXBehaviorUIDefinition DEFINITION = new RDXBehaviorUIDefinition(LookAndStepBehavior.DEFINITION,
-                                                                                        RDXLookAndStepBehaviorUI::new);
    private final BehaviorHelper helper;
-   private final AtomicReference<ArrayList<MinimalFootstep>> latestPlannedFootsteps;
-   private final AtomicReference<ArrayList<MinimalFootstep>> latestCommandedFootsteps;
    private String currentState = "";
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean operatorReview = new ImBoolean(true);
@@ -60,7 +58,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private long numberOfSteppingRegionsReceived = 0;
    private final ImGuiPlot steppingRegionsPlot = new ImGuiPlot("", 1000, 250, 15);
    private final ImGuiMovingPlot impassibilityDetectedPlot = new ImGuiMovingPlot("Impassibility", 1000, 250, 15);
-   private final AtomicReference<Boolean> impassibilityDetected;
+   private final IHMCROS2Input<Bool> impassibilityDetected;
    private ImBooleanWrapper stopForImpassibilities;
    private final ImPlotYoHelperDoublePlotLine footstepPlanningDurationPlot;
    private final ImGuiYoDoublePlot footholdVolumePlot;
@@ -72,7 +70,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean reviewingBodyPath = true;
    private final ImString latestFootstepPlannerLogPath = new ImString();
-   private ArrayList<Pair<Integer, Double>> latestFootstepPlannerRejectionReasons = new ArrayList<>();
+   private FootstepPlannerRejectionReasonsMessage latestFootstepPlannerRejectionReasons = new FootstepPlannerRejectionReasonsMessage();
 
    private final RDXSphereAndArrowGraphic subGoalGraphic = new RDXSphereAndArrowGraphic();
    private final RDXPlanarRegionsGraphic planarRegionsGraphic = new RDXPlanarRegionsGraphic();
@@ -98,63 +96,65 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    public RDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {
       this.helper = helper;
-      helper.subscribeViaCallback(CurrentState, state -> currentState = state);
-      helper.subscribeViaCallback(OperatorReviewEnabledToUI, operatorReview::set);
-      helper.subscribeViaCallback(PlanarRegionsForUI, regions ->
+      helper.subscribeViaCallback(CURRENT_STATE, state -> currentState = state.getDataAsString());
+      helper.subscribeViaCallback(OPERATOR_REVIEW_ENABLED_STATUS, message -> operatorReview.set(message.getData()));
+      helper.subscribeViaCallback(PLANAR_REGIONS_FOR_UI, regions ->
       {
          ++numberOfSteppingRegionsReceived;
          if (regions != null)
-            planarRegionsGraphic.generateMeshesAsync(regions.copy());
+            planarRegionsGraphic.generateMeshesAsync(PlanarRegionMessageConverter.convertToPlanarRegionsList(regions));
       });
       heightMapGraphic.getRenderGroundPlane().set(false);
       helper.subscribeViaCallback(HEIGHT_MAP_FOR_UI, heightMapGraphic::generateMeshesAsync);
-      helper.subscribeViaCallback(ReceivedPlanarRegionsForUI, regions ->
+      helper.subscribeViaCallback(RECEIVED_PLANAR_REGIONS_FOR_UI, regions ->
       {
          if (regions != null)
-            receivedRegionsGraphic.generateMeshesAsync(regions.copy());
+            receivedRegionsGraphic.generateMeshesAsync(PlanarRegionMessageConverter.convertToPlanarRegionsList(regions));
       });
-      helper.subscribeViaCallback(GoalForUI, goalAffordance::setGoalPoseNoCallbacks);
-      helper.subscribeViaCallback(SubGoalForUI, subGoalGraphic::setToPose);
-      helper.subscribeViaCallback(BodyPathPlanForUI, bodyPath ->
+      helper.subscribeViaCallback(GOAL_STATUS, goalAffordance::setGoalPoseNoCallbacks);
+      helper.subscribeViaCallback(SUB_GOAL_FOR_UI, subGoalGraphic::setToPose);
+      helper.subscribeViaCallback(BODY_PATH_PLAN_FOR_UI, bodyPath ->
       {
          if (bodyPath != null)
-            Gdx.app.postRunnable(() -> bodyPathPlanGraphic.generateMeshes(bodyPath));
+            Gdx.app.postRunnable(() -> bodyPathPlanGraphic.generateMeshes(bodyPath.getPoses()));
       });
       footstepPlanGraphic = new RDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
       commandedFootstepsGraphic = new RDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
       startAndGoalFootstepsGraphic = new RDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
-      footstepPlanGraphic.setTransparency(0.2);
-      latestPlannedFootsteps = helper.subscribeViaReference(PlannedFootstepsForUI, new ArrayList<>());
-      latestCommandedFootsteps = helper.subscribeViaReference(LastCommandedFootsteps, new ArrayList<>());
-      helper.subscribeViaCallback(PlannedFootstepsForUI, footsteps ->
+      footstepPlanGraphic.setOpacity(0.2);
+      helper.subscribeViaCallback(PLANNED_FOOTSTEPS_FOR_UI, footsteps ->
       {
          reviewingBodyPath = false;
-         numberOfPlannedSteps = footsteps.size();
-         footstepPlanGraphic.generateMeshesAsync(footsteps);
+         numberOfPlannedSteps = footsteps.getMinimalFootsteps().size();
+         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertMinimalFootstepListMessage(footsteps));
       });
-      helper.subscribeViaCallback(LastCommandedFootsteps, commandedFootstepsGraphic::generateMeshesAsync);
+      helper.subscribeViaCallback(LAST_COMMANDED_FOOTSTEPS, footsteps ->
+      {
+         commandedFootstepsGraphic.generateMeshesAsync(MinimalFootstep.convertMinimalFootstepListMessage(footsteps));
+      });
       startAndGoalFootstepsGraphic.setColor(RobotSide.LEFT, Color.BLUE);
       startAndGoalFootstepsGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
-      startAndGoalFootstepsGraphic.setTransparency(0.4);
-      helper.subscribeViaCallback(ImminentFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
+      startAndGoalFootstepsGraphic.setOpacity(0.4);
+      helper.subscribeViaCallback(IMMINENT_FOOT_POSES_FOR_UI, message ->
+            startAndGoalFootstepsGraphic.generateMeshesAsync(MinimalFootstep.convertMinimalFootstepListMessage(message)));
       footstepPlanningDurationPlot = new ImPlotYoHelperDoublePlotLine("LookAndStepBehavior.footstepPlanningDuration", 10.0, helper);
-      helper.subscribeViaCallback(FootstepPlannerLatestLogPath, latestFootstepPlannerLogPath::set);
-      helper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons ->
+      helper.subscribeViaCallback(FOOTSTEP_PLANNER_LATEST_LOG_PATH, message -> latestFootstepPlannerLogPath.set(message.getDataAsString()));
+      helper.subscribeViaCallback(FOOTSTEP_PLANNER_REJECTION_REASONS, reasons ->
       {
          latestFootstepPlannerRejectionReasons = reasons;
          numberOfPlannedSteps = 0;
          planningFailedNotification.set();
       });
       footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", helper, 1000, 250, 15);
-      impassibilityDetected = helper.subscribeViaReference(ImpassibilityDetected, false);
+      impassibilityDetected = helper.subscribe(IMPASSIBILITY_DETECTED);
       obstacleBoxVisualizer.setColor(Color.RED);
-      helper.subscribeViaCallback(Obstacle, boxDescription ->
+      helper.subscribeViaCallback(OBSTACLE, box3DMessage ->
       {
          Box3D box3D = new Box3D();
-         box3D.set(boxDescription.getLeft(), boxDescription.getRight());
+         box3D.set(box3DMessage.getPose(), box3DMessage.getSize());
          obstacleBoxVisualizer.generateMeshAsync(box3D);
       });
-      helper.subscribeViaCallback(ResetForUI, goalAffordance::clear);
+      helper.subscribeViaCallback(RESET_FOR_UI, goalAffordance::clear);
       lookAndStepRemotePropertySet = new ImGuiRemoteROS2StoredPropertySet(helper, helper.getRobotModel().getLookAndStepParameters(), PARAMETERS);
       footstepPlannerRemotePropertySet = new ImGuiRemoteROS2StoredPropertySet(helper,
                                                                               helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep"),
@@ -185,7 +185,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public void create(RDXBaseUI baseUI)
    {
-      goalAffordance.create(goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.CYAN);
+      goalAffordance.create(goalPose -> helper.publish(GOAL_COMMAND, goalPose), Color.CYAN);
       goalAffordance.setOnStartPositionPlacement(() -> baseUI.setModelSceneMouseCollisionEnabled(true));
       goalAffordance.setOnEndPositionPlacement(() -> baseUI.setModelSceneMouseCollisionEnabled(false));
       subGoalGraphic.create(0.027, 0.027 * 6.0, Color.YELLOW);
@@ -245,6 +245,8 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       }
       ImGui.sameLine();
 
+      ImGui.text("Goal Planning");
+      ImGui.sameLine();
       goalAffordance.renderPlaceGoalButton();
       ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
       ImGui.checkbox(labels.get("Show height map"), showHeightMap);
@@ -263,25 +265,23 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 
       if (ImGui.checkbox("Operator review", operatorReview))
       {
-         helper.publish(OperatorReviewEnabled, operatorReview.get());
+         helper.publish(LookAndStepBehaviorAPI.OPERATOR_REVIEW_ENABLED_COMMAND, operatorReview.get());
       }
       if (ImGui.button("Reject"))
       {
-         helper.publish(ReviewApproval, false);
+         helper.publish(REVIEW_APPROVAL, false);
       }
       ImGui.sameLine();
       if (ImGui.button("Approve"))
       {
-         helper.publish(ReviewApproval, true);
+         helper.publish(REVIEW_APPROVAL, true);
       }
       footstepPlanningDurationPlot.renderImGuiWidgets();
       ImGui.text("Footstep planning regions recieved:");
       steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
       stopForImpassibilities.renderImGuiWidget();
-      impassibilityDetectedPlot.setNextValue(impassibilityDetected.get() ? 1.0f : 0.0f);
-      impassibilityDetectedPlot.calculate(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
-
-      ImGui.text(ReferenceBasedIdealStepCalculator.statusMessage);
+      impassibilityDetectedPlot.setNextValue(impassibilityDetected.getLatest().getData() ? 1.0f : 0.0f);
+      impassibilityDetectedPlot.calculate(impassibilityDetected.getLatest().getData() ? "OBSTRUCTED" : "ALL CLEAR");
 
       referenceAlpha.renderImGuiWidget();
 
@@ -312,18 +312,23 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       ImGui.pushItemWidth(340.0f);
       ImGui.text("Latest log:");
       int flags2 = ImGuiInputTextFlags.ReadOnly;
-      ImGui.inputText("", latestFootstepPlannerLogPath, flags2);
+      ImGui.inputText(labels.getHidden("Planner log path"), latestFootstepPlannerLogPath, flags2);
       ImGui.popItemWidth();
 //      ImGui.checkbox("Show tuner", showFootstepPlanningParametersTuner);
 
       ImGui.text("Rejection reasons:");
       for (int i = 0; i < 5; i++) // Variable number of lines was crashing rendering in imgui-node-editor
       {
-         if (latestFootstepPlannerRejectionReasons.size() > i && latestFootstepPlannerRejectionReasons.get(i) != null)
-            ImGui.text(latestFootstepPlannerRejectionReasons.get(i).getRight() + "%: "
-                       + BipedalFootstepPlannerNodeRejectionReason.values[latestFootstepPlannerRejectionReasons.get(i).getLeft()].name());
+         if (latestFootstepPlannerRejectionReasons.getRejectionReasons().size() > i)
+         {
+            FootstepPlannerRejectionReasonMessage rejectionReasonMessage = latestFootstepPlannerRejectionReasons.getRejectionReasons().get(i);
+            ImGui.text(rejectionReasonMessage.getRejectionPercentage() + "%: "
+                       + BipedalFootstepPlannerNodeRejectionReason.values[(int) rejectionReasonMessage.getReason()].name());
+         }
          else
+         {
             ImGui.text("");
+         }
       }
 //      if (ImGui.collapsingHeader("Swing Planning"))
 //      {
@@ -332,7 +337,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    }
 
    @Override
-   public void addChildPanels(ImGuiPanel parentPanel)
+   public void addChildPanels(RDXPanel parentPanel)
    {
       parentPanel.addChild(lookAndStepRemotePropertySet.createPanel());
       parentPanel.addChild(footstepPlannerRemotePropertySet.createPanel());
@@ -341,7 +346,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      boolean wasTickedRecently = wasTickedRecently(0.5);
+      boolean wasTickedRecently = getState().getIsActive();
       boolean currentStateIsNotEmpty = !currentState.isEmpty();
       boolean isInResetState = currentState.equals(LookAndStepBehavior.State.RESET.name());
       boolean isPlacingGoal = goalAffordance.isPlacingGoal();
@@ -369,7 +374,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
          }
          if (sceneLevels.contains(RDXSceneLevel.MODEL))
          {
-            if (impassibilityDetected.get())
+            if (impassibilityDetected.getLatest().getData())
                obstacleBoxVisualizer.getRenderables(renderables, pool);
             planarRegionsGraphic.getRenderables(renderables, pool);
             if (showHeightMap.get())
@@ -408,12 +413,11 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 
    public String getWindowName()
    {
-      return LookAndStepBehavior.DEFINITION.getName();
+      return "Look and Step";
    }
 
-   @Override
    public String getName()
    {
-      return DEFINITION.getName();
+      return "Look and Step";
    }
 }

@@ -7,3 +7,6 @@ uint32 sequence_id
 
 # True to pause walking, false to unpause and resume an existing footstep plan.
 bool pause
+
+# True to clear the remaining footstep queue, if the robot is told to pause walking
+bool clear_remaining_footstep_queue false

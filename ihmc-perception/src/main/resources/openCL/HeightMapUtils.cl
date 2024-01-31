@@ -40,3 +40,8 @@ float2 key_to_coordinate(int key, float2 center, float resolution, int center_in
    int2 index = (int2) (key_to_x_index(key, center_index), key_to_y_index(key, center_index));
    return indices_to_coordinate(index, center, resolution, center_index);
 }
+
+int2 coordinate_to_indices(float2 coordinates, float2 center, float resolution, int center_index)
+{
+   return (int2) (coordinate_to_index(coordinates.x, center.x, resolution, center_index), coordinate_to_index(coordinates.y, center.y, resolution, center_index));
+}

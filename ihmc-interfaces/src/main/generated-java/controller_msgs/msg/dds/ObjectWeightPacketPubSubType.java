@@ -15,7 +15,7 @@ public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7371465eccf7f19fff6be69ea128a1720e3a5278e2fba047445997a8ebf973f9";
+   		return "4836725d2faa66af4d9039c2643aecbbfee8e9103ab7147b5bf78fc1361062b0";
    }
    
    @Override

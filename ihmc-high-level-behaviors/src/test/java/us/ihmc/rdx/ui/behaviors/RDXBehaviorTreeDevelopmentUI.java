@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.behaviors;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.behaviors.tools.behaviorTree.*;
+import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -21,7 +21,7 @@ public class RDXBehaviorTreeDevelopmentUI
    private final RDXBaseUI baseUI;
 
    private final RDXImNodesBehaviorTreeUI treePanel;
-   private final BehaviorTreeControlFlowNode tree;
+   private final BehaviorTreeNodeExecutor tree;
    private final RDXBehaviorUIInterface treeGui;
 
    private final Timer timer;
@@ -39,11 +39,11 @@ public class RDXBehaviorTreeDevelopmentUI
       timer = new Timer();
 
       tree = new SequenceNode();
-      BehaviorTreeControlFlowNode node = new FallbackNode();
-      node.addChild(new BehaviorTreeNode()
+      BehaviorTreeNodeExecutor node = new FallbackNode();
+      node.getChildren().add(new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
-         public BehaviorTreeNodeStatus tickInternal()
+         public BehaviorTreeNodeStatus determineStatus()
          {
             if (FALLBACK_PRIMARY.get())
                return BehaviorTreeNodeStatus.SUCCESS;
@@ -51,15 +51,15 @@ public class RDXBehaviorTreeDevelopmentUI
                return BehaviorTreeNodeStatus.FAILURE;
          }
 
-         @Override
-         public String getName() {
+         public String getName()
+         {
             return "Primary";
          }
       });
-      node.addChild(new BehaviorTreeNode()
+      node.getChildren().add(new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
-         public BehaviorTreeNodeStatus tickInternal()
+         public BehaviorTreeNodeStatus determineStatus()
          {
             if (FALLBACK_SECONDARY.get())
                return BehaviorTreeNodeStatus.SUCCESS;
@@ -67,15 +67,15 @@ public class RDXBehaviorTreeDevelopmentUI
                return BehaviorTreeNodeStatus.FAILURE;
          }
 
-         @Override
-         public String getName() {
+         public String getName()
+         {
             return "Secondary";
          }
       });
-      node.addChild(new BehaviorTreeNode()
+      node.getChildren().add(new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
-         public BehaviorTreeNodeStatus tickInternal()
+         public BehaviorTreeNodeStatus determineStatus()
          {
             if (FALLBACK_TERTIARY.get())
                return BehaviorTreeNodeStatus.SUCCESS;
@@ -83,18 +83,18 @@ public class RDXBehaviorTreeDevelopmentUI
                return BehaviorTreeNodeStatus.FAILURE;
          }
 
-         @Override
-         public String getName() {
+         public String getName()
+         {
             return "Tertiary";
          }
       });
 
-      tree.addChild(node);
+      tree.getChildren().add(node);
 
-      tree.addChild(new BehaviorTreeNode()
+      tree.getChildren().add(new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
-         public BehaviorTreeNodeStatus tickInternal()
+         public BehaviorTreeNodeStatus determineStatus()
          {
             if (SEQUENCE_SECONDARY.get())
                return BehaviorTreeNodeStatus.SUCCESS;
@@ -102,12 +102,11 @@ public class RDXBehaviorTreeDevelopmentUI
                return BehaviorTreeNodeStatus.FAILURE;
          }
 
-         @Override
-         public String getName() {
+         public String getName()
+         {
             return "Other thing";
          }
       });
-
 
       treeGui = new ExampleSimpleNodeInterface("SequenceNode");
       treePanel = new RDXImNodesBehaviorTreeUI();

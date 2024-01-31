@@ -14,4 +14,6 @@ public interface DirectionalControlMessenger
     * Submits the request to the controller.
     */
    void submitDirectionalControlRequest(double desiredXVelocity, double desiredYVelocity, double desiredTurningSpeed);
+
+   void submitGaitParameters(double swingHeight, double swingDuration, double doubleSupportFraction);
 }

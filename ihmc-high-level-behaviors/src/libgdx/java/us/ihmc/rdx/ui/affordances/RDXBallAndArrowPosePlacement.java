@@ -20,8 +20,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.editor.RDXUIActionMap;
 import us.ihmc.rdx.input.editor.RDXUITrigger;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -35,6 +36,9 @@ import java.util.function.Consumer;
 public class RDXBallAndArrowPosePlacement implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
+   private String startPlacementButtonText = "Place pose";
+   private String startPlacementButtonDisabledText = "Placing";
+   private String stopPlacementButtonText = "Clear";
    private ModelInstance sphere;
    private ModelInstance arrow;
    private RDXUIActionMap placeGoalActionMap;
@@ -47,7 +51,6 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    private final RotationMatrix arrowRotationMatrix = new RotationMatrix();
    private Consumer<Pose3D> placedPoseConsumer;
    private final Notification placedNotification = new Notification();
-   private RDXIconTexture locationFlagIcon;
    private Runnable onStartPositionPlacement;
    private Runnable onEndPositionPlacement;
 
@@ -56,7 +59,21 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       create(null, color);
    }
 
+   public void create(Color color, String startPlacementButtonText, String startPlacementButtonDisabledText, String stopPlacementButtonText)
+   {
+      create(null, color, startPlacementButtonText, startPlacementButtonDisabledText, stopPlacementButtonText);
+   }
+
    public void create(Consumer<Pose3D> placedPoseConsumer, Color color)
+   {
+      create(placedPoseConsumer, color, startPlacementButtonText, startPlacementButtonDisabledText, stopPlacementButtonText);
+   }
+
+   public void create(Consumer<Pose3D> placedPoseConsumer,
+                      Color color,
+                      String startPlacementButtonText,
+                      String startPlacementButtonDisabledText,
+                      String stopPlacementButtonText)
    {
       this.placedPoseConsumer = placedPoseConsumer;
       float sphereRadius = 0.03f;
@@ -91,9 +108,11 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
             onEndPositionPlacement.run();
       });
 
-      clear();
+      this.startPlacementButtonText = startPlacementButtonText;
+      this.startPlacementButtonDisabledText = startPlacementButtonDisabledText;
+      this.stopPlacementButtonText = stopPlacementButtonText;
 
-      locationFlagIcon = new RDXIconTexture("icons/locationFlag.png");
+      clear();
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -105,6 +124,10 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          if (placingPosition)
          {
             sphere.transform.setTranslation(pickPointInWorld.getX32(), pickPointInWorld.getY32(), pickPointInWorld.getZ32());
+            LibGDXTools.toEuclid(sphere.transform, tempSpherePosition);
+
+            goalPoseForReading.setToZero();
+            goalPoseForReading.prependTranslation(tempSpherePosition);
 
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -169,11 +192,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    public boolean renderPlaceGoalButton()
    {
       boolean placementStarted = false;
-      if (locationFlagIcon != null)
-      {
-         ImGui.image(locationFlagIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
-         ImGui.sameLine();
-      }
+
       boolean pushedFlags = false;
       if (placingGoal)
       {
@@ -181,7 +200,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          ImGui.pushStyleVar(ImGuiStyleVar.Alpha, 0.6f);
          pushedFlags = true;
       }
-      if (ImGui.button(labels.get(pushedFlags ? "Placing" : "Place goal")))
+      if (ImGui.button(labels.get(pushedFlags ? startPlacementButtonDisabledText : startPlacementButtonText)))
       {
          placementStarted = true;
          placeGoalActionMap.start();
@@ -196,17 +215,16 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          ImGui.setTooltip("Hold Ctrl and scroll the mouse wheel while placing to adjust Z.");
       }
       ImGui.sameLine();
-      if (!isPlaced())
+      ImGui.beginDisabled(!isPlaced());
+      if (ImGui.button(labels.get(stopPlacementButtonText)))
       {
-         ImGui.text("Not placed.");
+         clear();
       }
-      else
-      {
-         if (ImGui.button(labels.get("Clear")))
-         {
-            clear();
-         }
-      }
+      ImGui.endDisabled();
+
+      if ((isPlacingGoal() || isPlacingPosition()) && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
+         clear();
+
       return placementStarted;
    }
 
@@ -230,12 +248,24 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       return placingGoal;
    }
 
+   public boolean isPlacingPosition()
+   {
+      return placingPosition;
+   }
+
+   public RDXUIActionMap getPlaceGoalActionMap()
+   {
+      return placeGoalActionMap;
+   }
+
    public void clear()
    {
       placingGoal = false;
       placingPosition = true;
       if (sphere != null)
          sphere.transform.val[Matrix4.M03] = Float.NaN;
+      if (arrow != null)
+         arrow.transform.val[Matrix4.M03] = Float.NaN;
    }
 
    public Pose3DReadOnly getGoalPose()
@@ -276,5 +306,15 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    public Notification getPlacedNotification()
    {
       return placedNotification;
+   }
+
+   public void setStartPlacementButtonText(String startPlacementButtonText)
+   {
+      this.startPlacementButtonText = startPlacementButtonText;
+   }
+
+   public void setStartPlacementButtonDisabledText(String startPlacementButtonDisabledText)
+   {
+      this.startPlacementButtonDisabledText = startPlacementButtonDisabledText;
    }
 }

@@ -51,7 +51,7 @@ public class AtlasStepInPlaceTest extends AvatarStepInPlaceTest
       super.testStepInPlace();
    }
 
-   @Tag("humanoid-flat-ground")
+   @Tag("humanoid-flat-ground-slow")
    @Test
    @Override
    public void testStepInPlaceWithPush()

@@ -320,7 +320,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
       commandInputManager.clearAllCommands();
       walkingMessageHandler.clearFootsteps();
-      walkingMessageHandler.clearFootTrajectory();
+      walkingMessageHandler.clearFlamingoCommands();
 
       balanceManager.initialize();
 

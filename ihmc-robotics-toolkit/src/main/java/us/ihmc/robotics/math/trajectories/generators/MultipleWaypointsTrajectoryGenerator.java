@@ -15,6 +15,11 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * A tool to generate a one degree of freedom trajectory as a cubic spline through a series
+ * of provided waypoints. Given a query time, it provides the corresponding position,
+ * velocity, and acceleration.
+ */
 public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGenerator
 {
    public static final int defaultMaximumNumberOfWaypoints = 30;

@@ -5,6 +5,8 @@ import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
 
 import java.nio.ByteBuffer;
@@ -38,8 +40,8 @@ public class BytedecoImage
 
    public BytedecoImage(Mat suppliedMat)
    {
-      this(BytedecoOpenCVTools.getImageWidth(suppliedMat),
-           BytedecoOpenCVTools.getImageHeight(suppliedMat),
+      this(OpenCVTools.getImageWidth(suppliedMat),
+           OpenCVTools.getImageHeight(suppliedMat),
            suppliedMat.type(),
            suppliedMat.data().asByteBuffer(),
            suppliedMat);
@@ -132,6 +134,7 @@ public class BytedecoImage
 
    public void changeAddress(long address)
    {
+      bytedecoByteBufferPointer.deallocate();
       bytedecoByteBufferPointer.setAddress(address);
       backingDirectByteBuffer = bytedecoByteBufferPointer.asByteBuffer(); // Allocates, but on the native side?
       bytedecoOpenCVMat.data(bytedecoByteBufferPointer);
@@ -157,6 +160,12 @@ public class BytedecoImage
    public void readOpenCLImage(OpenCLManager openCLManager)
    {
       openCLManager.enqueueReadImage(openCLImageObject, imageWidth, imageHeight, bytedecoByteBufferPointer);
+   }
+
+   public void fill(OpenCLManager openCLManager, byte value)
+   {
+      bytedecoByteBufferPointer.fill(value);
+      openCLManager.enqueueFillBuffer(openCLImageObject, 1, value);
    }
 
    public void resize(int imageWidth, int imageHeight, OpenCLManager openCLManager, ByteBuffer externalByteBuffer)
@@ -213,7 +222,7 @@ public class BytedecoImage
     */
    public void ensureDimensionsMatch(BytedecoImage other, OpenCLManager openCLManager)
    {
-      if (!BytedecoOpenCVTools.dimensionsMatch(this, other))
+      if (!OpenCVTools.dimensionsMatch(this, other))
       {
          resize(other.getImageWidth(), other.getImageHeight(), openCLManager, backingDirectByteBuffer);
       }

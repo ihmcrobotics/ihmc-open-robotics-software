@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.javafx.IdMappedColorFunction;
 import us.ihmc.javafx.JavaFXGraphicTools;
-import us.ihmc.javafx.graphics.LabelGraphic;
+import us.ihmc.javafx.graphics.JavaFXLabelGraphic;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
@@ -88,10 +88,10 @@ public class PlanarRegionsGraphic extends Group
          totalArea += convexPolygon.getArea();
       }
 
-      LabelGraphic sizeLabel = null;
+      JavaFXLabelGraphic sizeLabel = null;
       if (drawAreaText)
       {
-         sizeLabel = new LabelGraphic(FormattingTools.getFormattedToSignificantFigures(totalArea, 3));
+         sizeLabel = new JavaFXLabelGraphic(FormattingTools.getFormattedToSignificantFigures(totalArea, 3));
          sizeLabel.getPose().appendTransform(transformToWorld);
          sizeLabel.update();
       }

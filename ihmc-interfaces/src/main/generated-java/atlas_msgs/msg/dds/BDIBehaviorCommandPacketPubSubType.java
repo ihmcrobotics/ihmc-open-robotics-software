@@ -15,7 +15,7 @@ public class BDIBehaviorCommandPacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ade2ac3627f47630d971b702b1a2305ea674c5b1907ced8b9ee3dc04e9bc2367";
+   		return "1779cc82c07724cab0feb4aa41e65263b721b3959eaa02ea2f2fe40b180018f4";
    }
    
    @Override

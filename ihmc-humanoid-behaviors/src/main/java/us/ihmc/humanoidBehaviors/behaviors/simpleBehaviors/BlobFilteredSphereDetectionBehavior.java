@@ -15,7 +15,6 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ColoredCircularBlobDetectorBehaviorService;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
 
@@ -43,11 +42,11 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 
       this.headFrame = fullRobotModel.getHead().getBodyFixedFrame();
    }
-
-   public void addHSVRange(HSVRange hsvRange)
-   {
-      coloredCircularBlobDetectorBehaviorService.addHSVRange(hsvRange);
-   }
+//
+//   public void addHSVRange(HSVRange hsvRange)
+//   {
+//      coloredCircularBlobDetectorBehaviorService.addHSVRange(hsvRange);
+//   }
 
    public void resetHSVRanges()
    {

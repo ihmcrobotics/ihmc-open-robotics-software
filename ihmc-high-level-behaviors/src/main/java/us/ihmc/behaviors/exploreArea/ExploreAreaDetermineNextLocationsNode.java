@@ -1,8 +1,8 @@
 package us.ihmc.behaviors.exploreArea;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.tools.behaviorTree.AsynchronousActionNode;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.AsynchronousActionNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -25,11 +25,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.*;
-import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.*;
-import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.FoundBodyPath;
 
 public class ExploreAreaDetermineNextLocationsNode extends AsynchronousActionNode
 {
@@ -89,7 +84,7 @@ public class ExploreAreaDetermineNextLocationsNode extends AsynchronousActionNod
    @Override
    public BehaviorTreeNodeStatus doActionInternal()
    {
-      helper.publish(CurrentState, ExploreAreaBehaviorState.DetermineNextLocations);
+//      helper.publish(CurrentState, ExploreAreaBehaviorState.DetermineNextLocations);
 
       helper.getOrCreateRobotInterface().requestChestGoHome(parameters.getTurnChestTrajectoryDuration());
 
@@ -173,7 +168,7 @@ public class ExploreAreaDetermineNextLocationsNode extends AsynchronousActionNod
             bestBodyPath.add(new Pose3D(position, orientation));
          }
 
-         helper.publish(FoundBodyPath, bestBodyPath.stream().map(Pose3D::new).collect(Collectors.toList()));
+//         helper.publish(FoundBodyPath, bestBodyPath.stream().map(Pose3D::new).collect(Collectors.toList()));
 
          Pose3DReadOnly finalBodyPathPoint = bestBodyPath.get(bestBodyPath.size() - 1);
          Point3D goalPoint = new Point3D(finalBodyPathPoint.getX(), finalBodyPathPoint.getY(), 0.0);
@@ -198,7 +193,7 @@ public class ExploreAreaDetermineNextLocationsNode extends AsynchronousActionNod
          explorationBoundingBoxes.add(concatenatedMapBoundingBox);
          explorationBoundingBoxes.add(intersectionBoundingBox);
 
-         helper.publish(ExplorationBoundingBoxes, explorationBoundingBoxes);
+//         helper.publish(ExplorationBoundingBoxes, explorationBoundingBoxes);
 
          for (double x = intersectionBoundingBox.getMinX() + exploreGridXSteps / 2.0; x <= intersectionBoundingBox.getMaxX(); x = x + exploreGridXSteps)
          {
@@ -219,7 +214,7 @@ public class ExploreAreaDetermineNextLocationsNode extends AsynchronousActionNod
 
          ArrayList<Point3D> potentialPointsToSend = new ArrayList<>();
          potentialPointsToSend.addAll(potentialPoints);
-         helper.publish(PotentialPointsToExplore, potentialPointsToSend);
+//         helper.publish(PotentialPointsToExplore, potentialPointsToSend);
 
          // Compute distances to each.
 
@@ -263,7 +258,7 @@ public class ExploreAreaDetermineNextLocationsNode extends AsynchronousActionNod
             if (bodyPathPlanningResult == BodyPathPlanningResult.FOUND_SOLUTION)
             {
                //            LogTools.info("Found body path to " + testGoal);
-               helper.publish(FoundBodyPath, bodyPath.stream().map(Pose3D::new).collect(Collectors.toList())); // deep copy
+//               helper.publish(FoundBodyPath, bodyPath.stream().map(Pose3D::new).collect(Collectors.toList())); // deep copy
 
                feasibleGoalPoints.add(testGoal);
                potentialBodyPaths.put(testGoal, bodyPath);

@@ -17,7 +17,6 @@ import us.ihmc.rdx.tools.RDXModelInstanceScaler;
  */
 public class RDXInteractableHighlightModel implements RenderableProvider
 {
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RDXModelInstanceScaler scaledModelInstance;
 
    public RDXInteractableHighlightModel(String modelFileName)
@@ -33,17 +32,9 @@ public class RDXInteractableHighlightModel implements RenderableProvider
       setTransparency(0.5);
    }
 
-   public void setPose(RigidBodyTransform transformToWorld, RigidBodyTransform additionalTransform)
-   {
-      tempTransform.set(additionalTransform);
-      transformToWorld.transform(tempTransform);
-      setPose(tempTransform);
-   }
-
    public void setPose(ReferenceFrame referenceFrame)
    {
-      referenceFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-      setPose(tempTransform);
+      setPose(referenceFrame.getTransformToRoot());
    }
 
    public void setPose(RigidBodyTransform transformToWorld)

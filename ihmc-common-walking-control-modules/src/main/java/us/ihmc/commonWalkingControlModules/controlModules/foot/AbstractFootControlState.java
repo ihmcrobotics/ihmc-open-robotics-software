@@ -57,6 +57,11 @@ public abstract class AbstractFootControlState implements State, SCS2YoGraphicHo
 
    public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
 
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return getFeedbackControlCommand();
+   }
+
    @Override
    public void doAction(double timeInState)
    {

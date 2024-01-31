@@ -1,0 +1,79 @@
+#ifndef __exoskeleton_msgs__msg__TreadmillMessage__idl__
+#define __exoskeleton_msgs__msg__TreadmillMessage__idl__
+
+module exoskeleton_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet START_BELT_TIMEOUT_ENABLED =
+      0;
+
+      const octet START_BELT_TIMEOUT_DISABLED =
+      1;
+
+      const octet STOP_BELT =
+      2;
+
+      const octet SET_SPEED =
+      3;
+
+      const octet SET_ELEVATION =
+      4;
+
+      const octet AUTO_STOP =
+      5;
+
+      const octet AUTO_MINIMUM =
+      6;
+
+      const octet ACK_FLAG_TOGGLE =
+      7;
+
+      const octet BELT_STATUS =
+      8;
+
+      const octet GET_CURRENT_SPEED =
+      9;
+
+      const octet GET_CURRENT_ELEVATION =
+      10;
+
+      const octet GET_COMMANDED_SPEED =
+      11;
+
+      const octet GET_COMMANDED_ELEVATION =
+      12;
+
+
+      /**
+       * This message is part of the Tufftread to Eva Exoskeleton Interface
+       * This message acts as a go-between between the Tufftread treadmill controller and Eva
+       */
+      @TypeCode(type="exoskeleton_msgs::msg::dds_::TreadmillMessage_")
+      struct TreadmillMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * bool to dictate activation of communication between the treadmill and the computer. If true, activate and if false, deactivate
+         */
+        boolean activate;
+        /**
+         * byte to decide current action based on the previously defined byte values
+         */
+        octet action;
+        /**
+         * This is the data being sent to and from the treadmill. Speed is in MPH and incline is in percent incline
+         */
+        double speed;
+        double incline;
+      };
+    };
+  };
+};
+
+#endif

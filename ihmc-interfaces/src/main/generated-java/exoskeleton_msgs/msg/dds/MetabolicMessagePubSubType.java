@@ -15,7 +15,7 @@ public class MetabolicMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b2b37bf1a7dfd193bc300daa466c93015108318e1648e2e3706da58f1f3bceab";
+   		return "844d3023552eb76a56fcb2bd7d13d0931c0fa125faa46e39fce01bac859728dd";
    }
    
    @Override

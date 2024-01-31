@@ -88,7 +88,7 @@ public class SCS2BehaviorTestHelper implements YoVariableHolder
 
       this.drcRobotModel = avatarTestingSimulation.getRobotModel();
       robotName = drcRobotModel.getSimpleRobotName();
-      this.fullRobotModel = drcRobotModel.createFullRobotModel();
+      this.fullRobotModel = drcRobotModel.createFullRobotModel(false);
       yoTimeLastFullRobotModelUpdate = new YoDouble("yoTimeRobotModelUpdate", registry);
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));

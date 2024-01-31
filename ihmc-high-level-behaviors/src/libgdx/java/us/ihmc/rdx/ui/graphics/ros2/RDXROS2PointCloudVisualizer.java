@@ -16,7 +16,6 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
@@ -29,12 +28,12 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
-import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
-import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLIntBuffer;
-import us.ihmc.perception.OpenCLManager;
-import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
+import us.ihmc.rdx.imgui.ImPlotIntegerPlot;
+import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
+import us.ihmc.perception.opencl.OpenCLIntBuffer;
+import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -86,7 +85,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
 
       if (topic.getType().equals(LidarScanMessage.class))
       {
-         lidarActiveHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.PUBLISH_LIDAR_SCAN);
+         lidarActiveHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_LIDAR_SCAN);
       }
    }
 

@@ -26,10 +26,10 @@ int8[] data
 # The image format. Ordinal of OpenCVImageFormat
 uint8 format
 
-# Position of the focal point at sensor data aquisition
+# Position of the focal point at sensor data acquisition
 geometry_msgs/Point position
 
-# Orientation of the focal point at sensor data aquisition
+# Orientation of the focal point at sensor data acquisition
 geometry_msgs/Quaternion orientation
 
 # Camera model of the sensor. Ordinal of us.ihmc.perception.CameraModel

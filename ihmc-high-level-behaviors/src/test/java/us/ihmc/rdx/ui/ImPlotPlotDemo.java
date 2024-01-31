@@ -3,10 +3,10 @@ package us.ihmc.rdx.ui;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.imgui.ImGuiGlfwWindow;
-import us.ihmc.rdx.ui.yo.ImPlotIntegerPlotLine;
-import us.ihmc.rdx.ui.yo.ImPlotPlot;
-import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
-import us.ihmc.rdx.ui.yo.ImPlotPlotPanel;
+import us.ihmc.rdx.imgui.ImPlotIntegerPlotLine;
+import us.ihmc.rdx.imgui.ImPlotPlot;
+import us.ihmc.rdx.imgui.ImPlotDoublePlotLine;
+import us.ihmc.rdx.imgui.ImPlotPlotPanel;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.util.Random;

@@ -10,7 +10,6 @@ import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.Face3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -28,58 +27,124 @@ public class ConvexPolytopeTerrainObject implements TerrainObject3D, HeightMapWi
 
    private static final double EPSILON = 1.0e-12;
 
-   public ConvexPolytopeTerrainObject(Vector3D normal, ConvexPolytope3D convexPolytope)
+   public ConvexPolytopeTerrainObject(ConvexPolytope3D convexPolytope)
    {
-      this(normal, convexPolytope, YoAppearance.StoneTexture());
+      this(convexPolytope, YoAppearance.StoneTexture());
    }
 
-   public ConvexPolytopeTerrainObject(Vector3D normal, ConvexPolytope3D convexPolytope, AppearanceDefinition appearance)
+   public ConvexPolytopeTerrainObject(ConvexPolytope3D convexPolytope, AppearanceDefinition appearance)
    {
-      if (normal.getZ() <= 0.0)
-         throw new RuntimeException("Top surface normal must have a positive z-value. Normal.z = " + normal.getZ());
-
       this.convexPolytope = new ConvexPolytope3D(convexPolytope);
       this.boundingBox = new BoundingBox3D(convexPolytope.getBoundingBox().getMinPoint(), convexPolytope.getBoundingBox().getMaxPoint());
       this.linkGraphics = new Graphics3DObject();
       this.linkGraphics.addMeshData(CollidableVisualizer.newConvexPolytope3DMesh(convexPolytope), appearance);
    }
 
-   public double heightAt(double x, double y, double z)
+   public IntersectionResult intersectionWithVerticalLine(double x, double y)
    {
-      Point3D point = new Point3D(x, y, z);
+      Point3D point = new Point3D(x, y, 0);
+
       double highest = Double.NEGATIVE_INFINITY;
       double lowest = Double.POSITIVE_INFINITY;
 
-      //Find the highest and lowest points on the faces of the ConvexPolytope that the point passes through along the Z-Axis.
-      //If may go through multiple points or no point.
+      Face3DReadOnly highestFace = null;
+      Face3DReadOnly lowestFace = null;
+
+      // Find the highest and lowest points on the faces of the ConvexPolytope that
+      // the point passes through along the Z-Axis.
+      // If may go through multiple points or no point.
       for (Face3DReadOnly face : convexPolytope.getFaces())
       {
          Point3D pointIntersectionLineAndFace = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(face.getCentroid(), face.getNormal(), point, Axis3D.Z);
-
          if (pointIntersectionLineAndFace != null)
          {
             if (face.distance(pointIntersectionLineAndFace) <= EPSILON)
             {
-               highest = Math.max(highest, pointIntersectionLineAndFace.getZ());
-               lowest = Math.min(lowest, pointIntersectionLineAndFace.getZ());
+               if (pointIntersectionLineAndFace.getZ() > highest)
+               {
+                  highest = pointIntersectionLineAndFace.getZ();
+                  highestFace = face;
+               }
+               if (pointIntersectionLineAndFace.getZ() < lowest)
+               {
+                  lowest = pointIntersectionLineAndFace.getZ();
+                  lowestFace = face;
+               }
             }
          }
       }
 
-      //Determine the height of the point on the zAxis of the ConvexPolytope - returns boundingBox.getMinZ() if it does
-      //not pass through the ConvexPolytope or the point is completely below the ConvexPolytope
-      if (highest != Double.NEGATIVE_INFINITY && z >= lowest)
-         return highest;
+      return new IntersectionResult(new Point3D(x, y, highest), highestFace, new Point3D(x, y, lowest), lowestFace);
+
+   }
+
+   static class IntersectionResult
+   {
+      private final Point3D highestIntersection;
+      private final Face3DReadOnly highestFace;
+
+      private final Point3D lowestIntersection;
+      private final Face3DReadOnly lowestFace;
+
+      public IntersectionResult(Point3D highestIntersection, Face3DReadOnly highestFace, Point3D lowestIntersection, Face3DReadOnly lowestFace)
+      {
+         this.highestIntersection = highestIntersection;
+         this.highestFace = highestFace;
+         this.lowestIntersection = lowestIntersection;
+         this.lowestFace = lowestFace;
+      }
+
+      public boolean isHighestPointValid()
+      {
+         return highestIntersection.getZ() != Double.NEGATIVE_INFINITY;
+      }
+
+      public Point3D getHighestIntersection()
+      {
+         return highestIntersection;
+      }
+
+      public Face3DReadOnly getHighestFace()
+      {
+         return highestFace;
+      }
+
+      public Point3D getLowestIntersection()
+      {
+         return lowestIntersection;
+      }
+
+      public Face3DReadOnly getLowestFace()
+      {
+         return lowestFace;
+      }
+   }
+
+   @Override
+   public double heightAt(double x, double y, double z)
+   {
+      IntersectionResult result = intersectionWithVerticalLine(x, y);
+      // Determine the height of the point on the zAxis of the ConvexPolytope -
+      // returns boundingBox.getMinZ() if it does
+      // not pass through the ConvexPolytope or the point is completely below the
+      // ConvexPolytope
+      if (result.isHighestPointValid() && z >= result.lowestIntersection.getZ())
+         return result.highestIntersection.getZ();
 
       return Double.NEGATIVE_INFINITY;
    }
 
-   private final Point3D tempIntersection = new Point3D();
-
    @Override
    public boolean checkIfInside(double x, double y, double z, Point3DBasics intersectionToPack, Vector3DBasics normalToPack)
    {
-      double heightAt = heightAt(x, y, z);
+      IntersectionResult result = intersectionWithVerticalLine(x, y);
+
+      double heightAt;
+
+      if (result.isHighestPointValid() && z >= result.lowestIntersection.getZ())
+         heightAt = result.highestIntersection.getZ();
+      else
+         heightAt = Double.NEGATIVE_INFINITY;
 
       if (intersectionToPack != null)
       {
@@ -88,13 +153,9 @@ public class ConvexPolytopeTerrainObject implements TerrainObject3D, HeightMapWi
          intersectionToPack.setZ(heightAt);
       }
 
-      if (normalToPack != null)
+      if (normalToPack != null && heightAt > Double.NEGATIVE_INFINITY)
       {
-         if (heightAt > Double.NEGATIVE_INFINITY)
-         {
-            tempIntersection.set(x, y, heightAt);
-            normalToPack.set(convexPolytope.getClosestFace(tempIntersection).getNormal());
-         }
+         normalToPack.set(result.highestFace.getNormal());
       }
 
       return (z < heightAt);
@@ -103,9 +164,20 @@ public class ConvexPolytopeTerrainObject implements TerrainObject3D, HeightMapWi
    @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
    {
-      checkIfInside(x, y, z, null, normalToPack);
+      IntersectionResult result = intersectionWithVerticalLine(x, y);
 
-      return heightAt(x, y, z);
+      double heightAt;
+
+      if (result.isHighestPointValid() && z >= result.lowestIntersection.getZ())
+         heightAt = result.highestIntersection.getZ();
+      else
+         heightAt = Double.NEGATIVE_INFINITY;
+      if (normalToPack != null && heightAt > Double.NEGATIVE_INFINITY)
+      {
+         normalToPack.set(result.highestFace.getNormal());
+      }
+
+      return heightAt;
    }
 
    @Override

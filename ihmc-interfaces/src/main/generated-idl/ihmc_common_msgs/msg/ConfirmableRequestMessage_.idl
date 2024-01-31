@@ -1,0 +1,34 @@
+#ifndef __ihmc_common_msgs__msg__ConfirmableRequestMessage__idl__
+#define __ihmc_common_msgs__msg__ConfirmableRequestMessage__idl__
+
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * A way of avoiding local data get overriden before
+       * it is received by peers. A message can be a request
+       * and confirmation at the same time.
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::ConfirmableRequestMessage_")
+      struct ConfirmableRequestMessage
+      {
+        /**
+         * Recent request numbers, monotonically increasing
+         * The size of this is roughly the max amount of expected dropped messages in 1 second
+         */
+        sequence<unsigned long, 10> request_numbers;
+        /**
+         * Recent confirmation numbers, the values of received request numbers
+         * The size of this is roughly the max amount of expected dropped messages in 1 second
+         */
+        sequence<unsigned long, 10> confirmation_numbers;
+      };
+    };
+  };
+};
+
+#endif

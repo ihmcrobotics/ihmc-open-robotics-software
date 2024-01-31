@@ -18,6 +18,30 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
+   public static final BooleanStoredPropertyKey resetHeightMap = keys.addBooleanKey("Reset Height Map");
+   public static final IntegerStoredPropertyKey searchWindowHeight = keys.addIntegerKey("Search window height");
+   public static final IntegerStoredPropertyKey searchWindowWidth = keys.addIntegerKey("Search window width");
+   public static final DoubleStoredPropertyKey minHeightRegistration = keys.addDoubleKey("Min height registration");
+   public static final DoubleStoredPropertyKey maxHeightRegistration = keys.addDoubleKey("Max height registration");
+   public static final DoubleStoredPropertyKey minHeightDifference = keys.addDoubleKey("Min height difference");
+   public static final DoubleStoredPropertyKey maxHeightDifference = keys.addDoubleKey("Max height difference");
+   public static final DoubleStoredPropertyKey heightFilterAlpha = keys.addDoubleKey("Height filter alpha");
+   public static final DoubleStoredPropertyKey spatialAlpha = keys.addDoubleKey("Spatial alpha");
+   public static final DoubleStoredPropertyKey heightOffset = keys.addDoubleKey("Height offset");
+   public static final DoubleStoredPropertyKey minClampHeight = keys.addDoubleKey("Min Clamp Height");
+   public static final DoubleStoredPropertyKey maxClampHeight = keys.addDoubleKey("Max Clamp Height");
+   public static final DoubleStoredPropertyKey localWidthInMeters = keys.addDoubleKey("Local width in meters");
+   public static final DoubleStoredPropertyKey localCellSizeInMeters = keys.addDoubleKey("Local cell size in meters");
+   public static final DoubleStoredPropertyKey globalWidthInMeters = keys.addDoubleKey("Global width in meters");
+   public static final DoubleStoredPropertyKey globalCellSizeInMeters = keys.addDoubleKey("Global cell size in meters");
+   public static final DoubleStoredPropertyKey robotCollisionCylinderRadius = keys.addDoubleKey("Robot collision cylinder radius");
+   public static final DoubleStoredPropertyKey internalGlobalWidthInMeters = keys.addDoubleKey("Internal global width in meters");
+   public static final DoubleStoredPropertyKey internalGlobalCellSizeInMeters = keys.addDoubleKey("Internal global cell size in meters");
+   public static final DoubleStoredPropertyKey heightScaleFactor = keys.addDoubleKey("Height scale factor");
+   public static final IntegerStoredPropertyKey cropWindowSize = keys.addIntegerKey("Crop window size");
+   public static final IntegerStoredPropertyKey steppingContactThreshold = keys.addIntegerKey("Stepping contact threshold");
+   public static final IntegerStoredPropertyKey contactWindowSize = keys.addIntegerKey("Contact window size");
+   public static final DoubleStoredPropertyKey steppingCosineThreshold = keys.addDoubleKey("Stepping cosine threshold");
    /**
     * Resolution of the height map grid
     */

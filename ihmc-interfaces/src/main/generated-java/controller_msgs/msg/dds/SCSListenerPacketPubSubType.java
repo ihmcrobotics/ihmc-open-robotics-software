@@ -15,7 +15,7 @@ public class SCSListenerPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "94fed28cbab6628379fc80201cc23c60d692b49c7162fcf8faa1c53ccd6ef5ac";
+   		return "01b80c91854fa3d31a11becfd0b0499e16631e413b5501e0e21a41ed339b037b";
    }
    
    @Override

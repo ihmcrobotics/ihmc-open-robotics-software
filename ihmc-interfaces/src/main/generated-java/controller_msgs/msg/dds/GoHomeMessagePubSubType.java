@@ -15,7 +15,7 @@ public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<con
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2b36a536b555a13d4d74d286d92ffabc5bc58fe45b2f8c5b14c28fdbd4937453";
+   		return "4e3c534c7eb1358bfba06a6ba28190ac4d1393267c1ea44bb8b92707e8b9774c";
    }
    
    @Override

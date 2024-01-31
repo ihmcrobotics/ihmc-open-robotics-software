@@ -107,7 +107,7 @@ public class SplinedHeightTrajectory implements SCS2YoGraphicHolder
    private final TDoubleArrayList heightWaypoints = new TDoubleArrayList();
    private final TDoubleArrayList alphaWaypoints = new TDoubleArrayList();
 
-   public void computeSpline()
+   public void computeSpline(double initialSlope)
    {
       ListSorter.sort(waypoints, sorter);
       computeHeightsToUseByStretchingString(waypoints);
@@ -135,7 +135,7 @@ public class SplinedHeightTrajectory implements SCS2YoGraphicHolder
       }
 
       trajectoryGenerator.reset();
-      trajectoryGenerator.setEndpointConditions(startWaypoint.getHeight(), 0.0, endWaypoint.getHeight(), 0.0);
+      trajectoryGenerator.setEndpointConditions(startWaypoint.getHeight(), initialSlope, endWaypoint.getHeight(), 0.0);
       trajectoryGenerator.setWaypoints(heightWaypoints);
       trajectoryGenerator.setWaypointTimes(alphaWaypoints);
 
@@ -287,6 +287,11 @@ public class SplinedHeightTrajectory implements SCS2YoGraphicHolder
    public double getHeightSplineSetpoint()
    {
       return trajectoryGenerator.getPosition();
+   }
+
+   public double getPartialDzDs()
+   {
+      return partialDzDs.getDoubleValue();
    }
 
    @Override

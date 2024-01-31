@@ -11,6 +11,18 @@ package mission_control_msgs.msg.dds;
 public class SystemServiceLogRefreshMessagePubSubType implements us.ihmc.pubsub.TopicDataType<mission_control_msgs.msg.dds.SystemServiceLogRefreshMessage>
 {
    public static final java.lang.String name = "mission_control_msgs::msg::dds_::SystemServiceLogRefreshMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "8fb92d2a187ea3d6919d5c8479e0fb22b6d3e0e58300ad4a875264664886afcf";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

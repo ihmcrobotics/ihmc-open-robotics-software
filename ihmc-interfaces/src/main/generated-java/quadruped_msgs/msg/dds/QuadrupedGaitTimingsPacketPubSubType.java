@@ -15,7 +15,7 @@ public class QuadrupedGaitTimingsPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5b2cf3670f71288cfbab7f8f9a7745ba2eb5dacc55d9a7d9b1423f12b9fc3b56";
+   		return "12d65c62068c58c58481f8fffbdbb4a28d34a4628bf78595df658476727058cd";
    }
    
    @Override

@@ -1,8 +1,5 @@
 package us.ihmc.behaviors.upDownExploration;
 
-import static us.ihmc.behaviors.patrol.PatrolBehaviorAPI.UpDownCenter;
-import static us.ihmc.behaviors.patrol.PatrolBehaviorAPI.UpDownExplorationEnabled;
-
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
@@ -17,9 +14,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.behaviors.waypoints.Waypoint;
 import us.ihmc.behaviors.waypoints.WaypointManager;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -39,7 +36,7 @@ public class UpDownExplorer
 
    private final UpDownFlatAreaFinder upDownFlatAreaFinder;
    private TypedNotification<Optional<FramePose3D>> upDownSearchNotification = new TypedNotification<>();
-   private final AtomicReference<Point3D> upDownCenter;
+   private final AtomicReference<Point3D> upDownCenter = null;
 
    private double accumulatedTurnAmount = 0.0;
    private RobotSide turnDirection = RobotSide.LEFT;
@@ -64,11 +61,12 @@ public class UpDownExplorer
    public UpDownExplorer(BehaviorHelper behaviorHelper, RemoteREAInterface rea)
    {
       this.behaviorHelper = behaviorHelper;
-      upDownFlatAreaFinder = new UpDownFlatAreaFinder(behaviorHelper.getMessager());
+      upDownFlatAreaFinder = null;
+//      upDownFlatAreaFinder = new UpDownFlatAreaFinder(behaviorHelper.getMessager());
       this.rea = rea;
 
-      behaviorHelper.subscribeViaCallback(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.TRAVERSING; });
-      upDownCenter = behaviorHelper.subscribeViaReference(UpDownCenter, new Point3D(0.0, 0.0, 0.0));
+//      behaviorHelper.subscribeViaCallback(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.TRAVERSING; });
+//      upDownCenter = behaviorHelper.subscribeViaReference(UpDownCenter, new Point3D(0.0, 0.0, 0.0));
    }
 
    public void onNavigateEntry(ROS2SyncedRobotModel syncedRobot)
@@ -217,9 +215,9 @@ public class UpDownExplorer
       newWaypoint.getPose().appendYawRotation(randomTurn);
    }
 
-   public void onPlanFinished(RemoteFootstepPlannerResult result)
+   public void onPlanFinished(FootstepPlannerOutput result)
    {
-      if (!result.isValidForExecution())
+      if (!result.getFootstepPlanningResult().validForExecution())
       {
          plannerFailedOnLastRun.set();
       }

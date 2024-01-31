@@ -6,7 +6,7 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.22.6"
+      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.23.1"
    }
 }
 
@@ -27,8 +27,8 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-pub-sub:0.18.5")
-   api("us.ihmc:ros2-common-interfaces:0.22.6")
+   api("us.ihmc:ihmc-pub-sub:0.19.0")
+   api("us.ihmc:ros2-common-interfaces:0.23.1")
 }
 
 def generator = new us.ihmc.ros2.rosidl.ROS2InterfaceGenerator();

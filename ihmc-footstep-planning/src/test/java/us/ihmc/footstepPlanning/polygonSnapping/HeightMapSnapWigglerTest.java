@@ -55,9 +55,11 @@ public class HeightMapSnapWigglerTest
       FootstepSnapData snapData = new FootstepSnapData();
       DiscreteFootstep footstep = new DiscreteFootstep(0.0, 0.0);
 
-      snapData.getSnapTransform().set(snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData, 0.05));
+      double snapHeightThreshold = 0.05;
+      double minInclineAngle = Math.toRadians(45.0);
+      snapData.getSnapTransform().set(snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData, snapHeightThreshold, minInclineAngle));
 
-      wiggler.computeWiggleTransform(footstep, heightMapData, snapData, 0.05);
+      wiggler.computeWiggleTransform(footstep, heightMapData, snapData, snapHeightThreshold, minInclineAngle);
 
       Assertions.assertFalse(snapData.getWiggleTransformInWorld().hasRotation());
       Assertions.assertFalse(snapData.getWiggleTransformInWorld().hasTranslation());
@@ -65,7 +67,7 @@ public class HeightMapSnapWigglerTest
       // make the foot overhang by a fair bit
       footstep = new DiscreteFootstep(-0.03, 0.0);
 
-      wiggler.computeWiggleTransform(footstep, heightMapData, snapData, 0.05);
+      wiggler.computeWiggleTransform(footstep, heightMapData, snapData, snapHeightThreshold, minInclineAngle);
 
       Assertions.assertFalse(snapData.getWiggleTransformInWorld().hasRotation());
       Assertions.assertTrue(snapData.getWiggleTransformInWorld().hasTranslation());

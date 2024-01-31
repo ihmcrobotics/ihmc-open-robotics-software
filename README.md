@@ -7,7 +7,7 @@
 
 #### Robots
 
-- Atlas
+- DRC-Atlas
 - Valkyrie
 - [Nadia](https://boardwalkrobotics.com/Nadia.html)
 

@@ -15,7 +15,7 @@ public class MessageCollectionNotificationPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "08f82b51b14772eb31fb403162a6c2d140572da6ff44efde22c98577b8dfcb77";
+   		return "fd4ad86429a46561f9a8b2b484e5d955c22e42bbf67f10aaaf56e6e39878a3c4";
    }
    
    @Override

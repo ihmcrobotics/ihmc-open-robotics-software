@@ -5,11 +5,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.rdx.ui.RDXImagePanel;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLManager;
 
 /**
  * Possible to render grayscale images directly? Pixmap format Alpha texture?
@@ -56,7 +57,7 @@ public class RDXBytedecoImagePanel
 
       normalizedScaledImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
 
-      BytedecoOpenCVTools.setRGBA8888ImageAlpha(bytedecoImage.getBytedecoOpenCVMat(), 255);
+      OpenCVTools.setRGBA8888ImageAlpha(bytedecoImage.getBytedecoOpenCVMat(), 255);
    }
 
    /**
@@ -66,8 +67,20 @@ public class RDXBytedecoImagePanel
    {
       if (imagePanel.getIsShowing().get())
       {
-         BytedecoOpenCVTools.clampTo8BitUnsignedChar(singleChannelImage, normalizedScaledImage.getBytedecoOpenCVMat(), 0.0, 255.0);
-         BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage.getBytedecoOpenCVMat(), bytedecoImage.getBytedecoOpenCVMat());
+         OpenCVTools.clampTo8BitUnsignedChar(singleChannelImage, normalizedScaledImage.getBytedecoOpenCVMat(), 0.0, 255.0);
+         OpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage.getBytedecoOpenCVMat(), bytedecoImage.getBytedecoOpenCVMat());
+         draw();
+      }
+   }
+
+   /**
+    * @param colorImage Color image to display
+    */
+   public void drawColorImage(Mat colorImage)
+   {
+      if (imagePanel.getIsShowing().get())
+      {
+         opencv_imgproc.cvtColor(colorImage, bytedecoImage.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_BGRA2RGBA);
          draw();
       }
    }
@@ -106,7 +119,7 @@ public class RDXBytedecoImagePanel
 
    public void resize(BytedecoImage bytedecoImage)
    {
-      if (!BytedecoOpenCVTools.dimensionsMatch(this.bytedecoImage, bytedecoImage))
+      if (!OpenCVTools.dimensionsMatch(this.bytedecoImage, bytedecoImage))
       {
          int imageWidth = bytedecoImage.getImageWidth();
          int imageHeight = bytedecoImage.getImageHeight();
@@ -117,7 +130,7 @@ public class RDXBytedecoImagePanel
 
          normalizedScaledImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
 
-         BytedecoOpenCVTools.setRGBA8888ImageAlpha(this.bytedecoImage.getBytedecoOpenCVMat(), 255);
+         OpenCVTools.setRGBA8888ImageAlpha(this.bytedecoImage.getBytedecoOpenCVMat(), 255);
       }
    }
 
@@ -133,7 +146,7 @@ public class RDXBytedecoImagePanel
       bytedecoImage.resize(imageWidth, imageHeight, openCLManager, pixmap.getPixels());
       normalizedScaledImage.resize(imageWidth, imageHeight, openCLManager, null);
 
-      BytedecoOpenCVTools.setRGBA8888ImageAlpha(bytedecoImage.getBytedecoOpenCVMat(), 255);
+      OpenCVTools.setRGBA8888ImageAlpha(bytedecoImage.getBytedecoOpenCVMat(), 255);
    }
 
    public void updateDataAddress(long address)

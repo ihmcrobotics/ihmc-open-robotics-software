@@ -15,7 +15,7 @@ public class PlanarRegionSegmentationParametersMessagePubSubType implements us.i
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5ce97ae4316da0f036400f92f6a10c9f2034b7db1c4c59fa46dedc796b6d9a7e";
+   		return "350467b4eb244e4cbfe551640ab387d8ac91f1b3af14cc6f62f40e038b61fc46";
    }
    
    @Override

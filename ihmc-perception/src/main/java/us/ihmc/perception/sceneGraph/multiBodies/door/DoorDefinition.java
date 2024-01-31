@@ -1,17 +1,18 @@
 package us.ihmc.perception.sceneGraph.multiBodies.door;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.scs2.definition.robot.RevoluteJointDefinition;
-import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
-import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.robot.SixDoFJointDefinition;
+import us.ihmc.scs2.definition.robot.*;
 import us.ihmc.scs2.definition.state.OneDoFJointState;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.SimPrismaticJoint;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
+
+import static us.ihmc.perception.sceneGraph.multiBodies.door.DoorModelParameters.*;
 
 /**
  * SCS 2 definition of the door we have in the lab.
@@ -29,6 +30,7 @@ public class DoorDefinition extends RobotDefinition
    private SixDoFJointState initialSixDoFState;
    private OneDoFJointState initialHingeState;
    private OneDoFJointState initialLeverState;
+   private OneDoFJointState initialBoltState;
 
    private final DoorPanelDefinition doorPanelDefinition = new DoorPanelDefinition();
 
@@ -60,11 +62,12 @@ public class DoorDefinition extends RobotDefinition
       doorFrameDefinition.addChildJoint(doorHingeJoint);
       doorHingeJoint.getTransformToParent()
                     .getTranslation()
-                    .add(0.0, DoorModelParameters.DOOR_PANEL_HINGE_OFFSET, DoorModelParameters.DOOR_PANEL_GROUND_GAP_HEIGHT);
+                    .add(-DOOR_PANEL_THICKNESS, DOOR_PANEL_HINGE_OFFSET, DOOR_PANEL_GROUND_GAP_HEIGHT);
       initialHingeState = new OneDoFJointState();
       doorHingeJoint.setInitialJointState(initialHingeState);
-      doorHingeJoint.setPositionLowerLimit(-1.7);
-      doorHingeJoint.setPositionUpperLimit(1.7);
+      double hingeJointLimit = 1.7;
+      doorHingeJoint.setPositionLowerLimit(-hingeJointLimit);
+      doorHingeJoint.setPositionUpperLimit(hingeJointLimit);
 
       doorPanelDefinition.build();
       doorHingeJoint.setSuccessor(doorPanelDefinition);
@@ -72,16 +75,27 @@ public class DoorDefinition extends RobotDefinition
       RevoluteJointDefinition doorLeverJoint = new RevoluteJointDefinition("doorLeverJoint");
       doorLeverJoint.setAxis(Axis3D.X);
       doorPanelDefinition.addChildJoint(doorLeverJoint);
-      doorLeverJoint.getTransformToParent()
-                    .getTranslation()
-                    .add(-DoorModelParameters.DOOR_PANEL_THICKNESS / 2.0,
-                         DoorModelParameters.DOOR_PANEL_WIDTH - DoorModelParameters.DOOR_LEVER_HANDLE_INSET,
-                         (DoorModelParameters.DOOR_PANEL_HEIGHT / 2.0) - DoorModelParameters.DOOR_LEVER_HANDLE_DISTANCE_BELOW_MID_HEIGHT);
+      doorLeverJoint.getTransformToParent().getTranslation().add(0.0,
+                                                                 DOOR_PANEL_WIDTH - DOOR_OPENER_INSET,
+                                                                 DOOR_OPENER_FROM_BOTTOM_OF_PANEL);
       initialLeverState = new OneDoFJointState();
       doorLeverJoint.setInitialJointState(initialLeverState);
 
       DoorLeverHandleDefinition doorLeverHandleDefinition = new DoorLeverHandleDefinition();
       doorLeverJoint.setSuccessor(doorLeverHandleDefinition);
+
+      PrismaticJointDefinition doorBoltJoint = new PrismaticJointDefinition("doorBoltJoint");
+      doorBoltJoint.setAxis(Axis3D.Y);
+      doorBoltJoint.setPositionLimits(-DOOR_BOLT_TRAVEL, 0.0);
+      doorPanelDefinition.addChildJoint(doorBoltJoint);
+      doorBoltJoint.getTransformToParent().getTranslation().add(0.01,
+                                                                DOOR_PANEL_WIDTH + DOOR_BOLT_TRAVEL / 2.0,
+                                                                DOOR_OPENER_FROM_BOTTOM_OF_PANEL);
+      initialBoltState = new OneDoFJointState();
+      doorBoltJoint.setInitialJointState(initialBoltState);
+
+      DoorBoltDefinition doorBoltDefinition = new DoorBoltDefinition();
+      doorBoltJoint.setSuccessor(doorBoltDefinition);
 
       setRootBodyDefinition(rootBodyDefinition);
    }
@@ -89,6 +103,9 @@ public class DoorDefinition extends RobotDefinition
    public static void applyPDController(Robot robot)
    {
       SimRevoluteJoint doorLeverJoint = (SimRevoluteJoint) robot.getJoint("doorLeverJoint");
+      SimPrismaticJoint doorBoltJoint = (SimPrismaticJoint) robot.getJoint("doorBoltJoint");
+
+      // TODO: Make this happen at simulation rate instead of control rate
       robot.getControllerManager().addController(() ->
       {
          double p = 2.0;
@@ -98,6 +115,22 @@ public class DoorDefinition extends RobotDefinition
          double errorQd = doorLeverJoint.getQd();
 
          doorLeverJoint.setTau(-p * errorQ - d * errorQd);
+
+         double angleOfFullPull = 0.4 * Math.PI / 2.0;
+         double pullAmountQ = -Math.abs(doorLeverJoint.getQ()) * DOOR_BOLT_TRAVEL / angleOfFullPull;
+
+         double boltFromPullAmountQ = doorBoltJoint.getQ() - pullAmountQ;
+         if (boltFromPullAmountQ < 0.0)
+            boltFromPullAmountQ = 0.0;
+
+         d = 5.0;
+
+         double springK = 8.0;
+         double mechanismK = 50.0;
+         errorQ = springK * doorBoltJoint.getQ() + mechanismK * boltFromPullAmountQ;
+         errorQd = doorBoltJoint.getQd();
+
+         doorBoltJoint.setTau(-errorQ - d * errorQd);
       });
    }
 

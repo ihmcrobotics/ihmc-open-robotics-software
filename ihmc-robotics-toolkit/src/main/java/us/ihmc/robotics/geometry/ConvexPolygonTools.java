@@ -727,6 +727,13 @@ public class ConvexPolygonTools
          {
             intersectingPolygon.clear();
             intersectingPolygon.addVertex(intersection1);
+
+            // check if one end of the line segment is inside the other polygon
+            if (polygonWithAtLeastTwoVertices.isPointInside(polygonWithExactlyTwoVertices.getVertex(0)))
+               intersectingPolygon.addVertex(polygonWithExactlyTwoVertices.getVertex(0));
+            else if (polygonWithAtLeastTwoVertices.isPointInside(polygonWithExactlyTwoVertices.getVertex(1)))
+               intersectingPolygon.addVertex(polygonWithExactlyTwoVertices.getVertex(1));
+
             intersectingPolygon.update();
          }
          return true;

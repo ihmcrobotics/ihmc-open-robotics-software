@@ -15,7 +15,7 @@ public class BlackFlyParameterPacketPubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d0dfb53379e17d5c938106c9a5d3088729fef0b4b3687b99a6d4fb70509b382e";
+   		return "756cfc09d296ba1a816954b61fb0673000f3b15f9e1a8981c53baef0ae4ba9ee";
    }
    
    @Override

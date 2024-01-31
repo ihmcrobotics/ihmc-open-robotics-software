@@ -1,7 +1,5 @@
 package us.ihmc.avatar.heightMap;
 
-import org.apache.commons.lang3.tuple.Triple;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -18,8 +16,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
-import us.ihmc.ihmcPerception.depthData.PointCloudData;
-import us.ihmc.ihmcPerception.heightMap.HeightMapInputData;
+import us.ihmc.perception.depthData.PointCloudData;
+import us.ihmc.perception.heightMap.HeightMapInputData;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.messager.javafx.JavaFXMessager;

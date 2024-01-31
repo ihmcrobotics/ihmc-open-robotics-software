@@ -73,4 +73,9 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
    {
       robotConfigurationDataInput.addCallback(callback);
    }
+
+   public void destroy()
+   {
+      robotConfigurationDataInput.destroy();
+   }
 }

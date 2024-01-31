@@ -15,7 +15,7 @@ public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c9684d31614f05b6a6bcb1d43ba1a5ecb3349bf0a9eb46b44c728aa6193efa18";
+   		return "d1dd82a283bf7b28135506e69d962d66e8ac8aa809af99f535557af3922e75ac";
    }
    
    @Override
