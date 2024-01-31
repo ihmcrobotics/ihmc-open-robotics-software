@@ -54,10 +54,6 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
             * The pose of the wrench contact in hand control frame
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage wrench_contact_pose_;
-   /**
-            * Whether maintaining the rigid body controlled in world after the action is complete
-            */
-   public boolean hold_pose_in_world_;
 
    public ScrewPrimitiveActionDefinitionMessage()
    {
@@ -99,8 +95,6 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
       angular_position_weight_ = other.angular_position_weight_;
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.wrench_contact_pose_, wrench_contact_pose_);
-      hold_pose_in_world_ = other.hold_pose_in_world_;
-
    }
 
 
@@ -277,21 +271,6 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
       return wrench_contact_pose_;
    }
 
-   /**
-            * Whether maintaining the rigid body controlled in world after the action is complete
-            */
-   public void setHoldPoseInWorld(boolean hold_pose_in_world)
-   {
-      hold_pose_in_world_ = hold_pose_in_world;
-   }
-   /**
-            * Whether maintaining the rigid body controlled in world after the action is complete
-            */
-   public boolean getHoldPoseInWorld()
-   {
-      return hold_pose_in_world_;
-   }
-
 
    public static Supplier<ScrewPrimitiveActionDefinitionMessagePubSubType> getPubSubType()
    {
@@ -333,8 +312,6 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.angular_position_weight_, other.angular_position_weight_, epsilon)) return false;
 
       if (!this.wrench_contact_pose_.epsilonEquals(other.wrench_contact_pose_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_pose_in_world_, other.hold_pose_in_world_, epsilon)) return false;
-
 
       return true;
    }
@@ -371,8 +348,6 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
       if(this.angular_position_weight_ != otherMyClass.angular_position_weight_) return false;
 
       if (!this.wrench_contact_pose_.equals(otherMyClass.wrench_contact_pose_)) return false;
-      if(this.hold_pose_in_world_ != otherMyClass.hold_pose_in_world_) return false;
-
 
       return true;
    }
@@ -408,9 +383,7 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
       builder.append("angular_position_weight=");
       builder.append(this.angular_position_weight_);      builder.append(", ");
       builder.append("wrench_contact_pose=");
-      builder.append(this.wrench_contact_pose_);      builder.append(", ");
-      builder.append("hold_pose_in_world=");
-      builder.append(this.hold_pose_in_world_);
+      builder.append(this.wrench_contact_pose_);
       builder.append("}");
       return builder.toString();
    }

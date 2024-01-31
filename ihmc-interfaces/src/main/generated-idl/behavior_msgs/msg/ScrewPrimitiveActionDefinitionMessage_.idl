@@ -60,10 +60,6 @@ module behavior_msgs
          * The pose of the wrench contact in hand control frame
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage wrench_contact_pose;
-        /**
-         * Whether maintaining the rigid body controlled in world after the action is complete
-         */
-        boolean hold_pose_in_world;
       };
     };
   };

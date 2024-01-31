@@ -37,7 +37,4 @@ float64 angular_position_weight
 # The pose of the wrench contact in hand control frame
 controller_msgs/RigidBodyTransformMessage wrench_contact_pose
 
-# Whether maintaining the rigid body controlled in world after the action is complete
-bool hold_pose_in_world
-
 

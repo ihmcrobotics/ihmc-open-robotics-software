@@ -15,7 +15,7 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0e0905e191d793c01b72234cb29f0ec32de640c5512b09f456996d3425d78dce";
+   		return "7e6a12dd0a302749c5dc395ade5d89cc3a506ef7d48deaa6bfa2595b44d5114a";
    }
    
    @Override
@@ -77,8 +77,6 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       return current_alignment - initial_alignment;
    }
@@ -127,9 +125,6 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getWrenchContactPose(), current_alignment);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
 
       return current_alignment - initial_alignment;
    }
@@ -161,8 +156,6 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       cdr.write_type_6(data.getAngularPositionWeight());
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getWrenchContactPose(), cdr);
-      cdr.write_type_7(data.getHoldPoseInWorld());
-
    }
 
    public static void read(behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -189,8 +182,6 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       data.setAngularPositionWeight(cdr.read_type_6());
       	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getWrenchContactPose(), cdr);	
-      data.setHoldPoseInWorld(cdr.read_type_7());
-      	
 
    }
 
@@ -213,7 +204,6 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       ser.write_type_6("angular_position_weight", data.getAngularPositionWeight());
       ser.write_type_a("wrench_contact_pose", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getWrenchContactPose());
 
-      ser.write_type_7("hold_pose_in_world", data.getHoldPoseInWorld());
    }
 
    @Override
@@ -235,7 +225,6 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       data.setAngularPositionWeight(ser.read_type_6("angular_position_weight"));
       ser.read_type_a("wrench_contact_pose", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getWrenchContactPose());
 
-      data.setHoldPoseInWorld(ser.read_type_7("hold_pose_in_world"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage src, behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage dest)

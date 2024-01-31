@@ -29,8 +29,6 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    private final CRDTUnidirectionalDouble angularPositionWeight;
    /** The operator specifies the estimated point of contact relative to the hand's control frame. */
    private final CRDTUnidirectionalRigidBodyTransform wrenchContactPoseInHandControlFrame;
-   // TODO: Remove?
-   private final CRDTUnidirectionalBoolean holdPoseInWorldLater;
 
    public ScrewPrimitiveActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -48,7 +46,6 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
       angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
       wrenchContactPoseInHandControlFrame = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
-      holdPoseInWorldLater = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, true);
    }
 
    @Override
@@ -68,7 +65,6 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
       jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
       JSONTools.toJSON(jsonNode, "wrenchContactPose", wrenchContactPoseInHandControlFrame.getValueReadOnly());
-      jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater.getValue());
    }
 
    @Override
@@ -88,7 +84,6 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
       angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
       JSONTools.toEuclid(jsonNode, "wrenchContactPose", wrenchContactPoseInHandControlFrame.getValue());
-      holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
    }
 
    public void toMessage(ScrewPrimitiveActionDefinitionMessage message)
@@ -107,7 +102,6 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       message.setLinearPositionWeight(linearPositionWeight.toMessage());
       message.setAngularPositionWeight(angularPositionWeight.toMessage());
       wrenchContactPoseInHandControlFrame.toMessage(message.getWrenchContactPose());
-      message.setHoldPoseInWorld(holdPoseInWorldLater.toMessage());
    }
 
    public void fromMessage(ScrewPrimitiveActionDefinitionMessage message)
@@ -126,7 +120,6 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       linearPositionWeight.fromMessage(message.getLinearPositionWeight());
       angularPositionWeight.fromMessage(message.getAngularPositionWeight());
       wrenchContactPoseInHandControlFrame.fromMessage(message.getWrenchContactPose());
-      holdPoseInWorldLater.fromMessage(message.getHoldPoseInWorld());
    }
 
    @Override
@@ -238,15 +231,5 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    public CRDTUnidirectionalRigidBodyTransform getWrenchContactPoseInHandControlFrame()
    {
       return wrenchContactPoseInHandControlFrame;
-   }
-
-   public boolean getHoldPoseInWorldLater()
-   {
-      return holdPoseInWorldLater.getValue();
-   }
-
-   public void setHoldPoseInWorldLater(boolean holdPoseInWorldLater)
-   {
-      this.holdPoseInWorldLater.setValue(holdPoseInWorldLater);
    }
 }
