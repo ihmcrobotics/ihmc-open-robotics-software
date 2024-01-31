@@ -254,7 +254,7 @@ public class MatrixMissingToolsTest
    {
       BMatrixRMaj compareOutput = new BMatrixRMaj(a.numRows, a.numCols);
       CommonOps_DDRM.elementLessThan(a, b, compareOutput);
-      return compareOutput.sum() >= compareOutput.getNumElements();
+      return compareOutput.sum() == compareOutput.getNumElements();
    }
 
    private DMatrixRMaj power(DMatrixRMaj input, int power)
