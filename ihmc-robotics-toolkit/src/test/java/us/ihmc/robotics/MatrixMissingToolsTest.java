@@ -1,5 +1,6 @@
 package us.ihmc.robotics;
 
+import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MatrixMissingToolsTest
 {
    private static final double EPSILON = 1.0e-9;
+   private static final int ITERATIONS = 1000;
 
    @Test
    public void testSetDiagonalValues()
@@ -210,20 +212,28 @@ public class MatrixMissingToolsTest
    }
 
    @Test
-   public void testAssetElementWiseLessThan()
+   public void testElementWiseLessThan()
    {
-      int iters = 1000;
-      double epsilon = 1e-8;
-      Random random = new Random(45348L);
-      for (int i = 0; i < iters; i++)
+      Random random = new Random(342765L);
+      for (int i = 0; i < ITERATIONS; i++)
       {
-         DMatrixRMaj matrixA = new DMatrixRMaj(5, 4);
-         DMatrixRMaj matrixB = new DMatrixRMaj(5, 4);
+         int rowDimension = random.nextInt(1, 20);
+         int colDimension = random.nextInt(1, 20);
+         DMatrixRMaj matrixA = new DMatrixRMaj(rowDimension, colDimension);
+         DMatrixRMaj matrixB = new DMatrixRMaj(rowDimension, colDimension);
 
-         matrixA.setData(RandomNumbers.nextDoubleArray(random, 20, 10.0));
-         CommonOps_DDRM.add(matrixA, 0.001, matrixB);
-
-         MatrixMissingTools.assetElementWiseLessThan(matrixA, matrixB);
+         matrixA.setData(RandomNumbers.nextDoubleArray(random, rowDimension * colDimension, 10.0));
+         matrixB.setData(RandomNumbers.nextDoubleArray(random, rowDimension * colDimension, 10.0));
+         boolean expected = elementWiseLessThan(matrixA, matrixB);
+         boolean actual = MatrixMissingTools.elementWiseLessThan(matrixA, matrixB);
+         assertEquals(expected, actual);
       }
+   }
+
+   private boolean elementWiseLessThan(DMatrixRMaj a, DMatrixRMaj b)
+   {
+      BMatrixRMaj compareOutput = new BMatrixRMaj(a.numRows, a.numCols);
+      CommonOps_DDRM.elementLessThan(a, b, compareOutput);
+      return compareOutput.sum() >= compareOutput.getNumElements();
    }
 }
