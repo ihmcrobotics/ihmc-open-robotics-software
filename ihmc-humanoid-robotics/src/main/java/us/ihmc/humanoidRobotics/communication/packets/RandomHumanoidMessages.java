@@ -331,24 +331,13 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static LoadBearingMessage nextLoadBearingMessage(Random random)
-   {
-      LoadBearingMessage next = new LoadBearingMessage();
-      next.setLoad(random.nextBoolean());
-      next.setCoefficientOfFriction(RandomNumbers.nextDoubleWithEdgeCases(random, 0.1));
-      next.getBodyFrameToContactFrame().set(EuclidGeometryRandomTools.nextPose3D(random));
-      next.getContactNormalInWorldFrame().set(EuclidCoreRandomTools.nextVector3D(random));
-      return next;
-   }
-
-   public static HandLoadBearingMessage nextHandLoadBearingMessage(Random random)
+   public static HandLoadBearingMessage nextLoadBearingMessage(Random random)
    {
       HandLoadBearingMessage next = new HandLoadBearingMessage();
-      next.setRobotSide(RobotSide.generateRandomRobotSide(random).toByte());
-      next.setUseJointspaceCommand(random.nextBoolean());
-      next.getJointspaceTrajectory().set(nextJointspaceTrajectoryMessage(random));
-      next.setExecutionDelayTime(RandomNumbers.nextDoubleWithEdgeCases(random, 0.1));
-      next.getLoadBearingMessage().set(nextLoadBearingMessage(random));
+      next.setLoad(random.nextBoolean());
+      next.setCoefficientOfFriction(RandomNumbers.nextDoubleWithEdgeCases(random, 0.1));
+      next.getContactPointInBodyFrame().set(EuclidCoreRandomTools.nextPoint3D(random));
+      next.getContactNormalInWorld().set(EuclidCoreRandomTools.nextVector3D(random));
       return next;
    }
 
