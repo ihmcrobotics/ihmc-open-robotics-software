@@ -12,9 +12,8 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.semantic.ONNXRuntime;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -22,7 +21,6 @@ import us.ihmc.perception.zedDriver.ZEDOpenDriver;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.sensors.ZED2ColorStereoPublisher;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
@@ -81,14 +79,11 @@ public class VisualPerceptionProcess
       this.colorTopic = colorTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
 
-      BytedecoTools.loadZEDDriverNative();
       zed = new ZEDOpenDriver.ZEDOpenDriverExternal(imageHeight, fps);
       dims = new int[] {0, 0, 0};
       zed.getFrameDimensions(dims);
 
       imageYUVBytes = new byte[dims[0] * dims[1] * dims[2]];
-
-      BytedecoTools.loadOpenCV();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed2_combined_publisher_node");
       ros2Helper = new ROS2Helper(ros2Node);
@@ -136,7 +131,7 @@ public class VisualPerceptionProcess
 
       if (valid)
       {
-         BytedecoOpenCVTools.compressRGBImageJPG(color8UC3CombinedImage, yuvCombinedImage, compressedColorPointer);
+         OpenCVTools.compressRGBImageJPG(color8UC3CombinedImage, yuvCombinedImage, compressedColorPointer);
          CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
          PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer,
                                                                colorTopic,

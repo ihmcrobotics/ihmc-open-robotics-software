@@ -56,10 +56,10 @@ public class ZED2ColorStereoPublisher
       ZedDriverNativeLibrary.load();
    }
 
-   private final ROS2Helper ros2Helper;
-   private final Supplier<ReferenceFrame> sensorFrameUpdater;
-   private final FramePose3D cameraPose = new FramePose3D();
+   private ROS2Helper ros2Helper;
+   private FramePose3D cameraPose = new FramePose3D();
 
+   private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final Mat yuvCombinedImage = new Mat();
    private final Mat color8UC3CombinedImage = new Mat();
 
