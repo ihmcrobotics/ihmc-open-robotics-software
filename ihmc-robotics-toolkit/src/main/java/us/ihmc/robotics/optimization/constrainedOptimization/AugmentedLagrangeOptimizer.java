@@ -58,6 +58,14 @@ public class AugmentedLagrangeOptimizer
             System.out.println("===== Lagrange Iteration: " + iteration + " ==========");
             problem.printResults(optimumParameters);
          }
+         if (problem.constraintsHaveBeenSatisfied(optimumParameters))
+         {
+            if (verbose)
+            {
+               System.out.println("Constraints have been satisfied this iteration.");
+            }
+            break;
+         }
          iteration += 1;
       }
 

@@ -160,7 +160,7 @@ public class SO3TrajectoryPointCalculator
       GradientDescentModule optimizer = new GradientDescentModule(function, initialAngularVelocitiesInDoubleArray);
       optimizer.setMaximumIterations(maxIterations);
       optimizer.setConvergenceThreshold(convergenceThreshold);
-      optimizer.setStepSize(optimizerStepSize);
+      optimizer.setUnboundedStepSize(optimizerStepSize);
       optimizer.setPerturbationSize(optimizerPerturbationSize);
 
       List<Vector3DBasics> initialAngularVelocities = new ArrayList<>();

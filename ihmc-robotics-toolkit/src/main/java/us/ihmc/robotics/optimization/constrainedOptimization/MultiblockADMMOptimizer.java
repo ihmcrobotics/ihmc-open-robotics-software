@@ -1,8 +1,11 @@
 package us.ihmc.robotics.optimization.constrainedOptimization;
 
 import org.ejml.data.DMatrixD1;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.optimization.Optimizer;
+
+import java.util.Arrays;
 
 /**
  * Solves a {@link MultiblockADMMProblem} iteratively using the augmented lagrangian method
@@ -15,6 +18,7 @@ public class MultiblockADMMOptimizer
    private final MultiblockADMMProblem admm;
    private final Optimizer[] optimizers;
    private boolean verbose = true;
+   private boolean runSubproblemsParallel = false;
 
    public MultiblockADMMOptimizer(MultiblockADMMProblem admm, Optimizer[] optimizers)
    {
@@ -22,6 +26,11 @@ public class MultiblockADMMOptimizer
       this.optimizers = optimizers;
       if (optimizers.length != admm.getNumBlocks())
          throw new RuntimeException("Not enough optimizers " + optimizers.length + " were provided for all blocks of the problem " + admm.getNumBlocks());
+   }
+
+   public void runSubproblemsParallel(boolean runSubproblemsParallel)
+   {
+      this.runSubproblemsParallel = runSubproblemsParallel;
    }
 
    public void setVerbose(boolean verbose)
@@ -37,14 +46,45 @@ public class MultiblockADMMOptimizer
 
       int numBlocks = admm.getNumBlocks();
       DMatrixD1[] optima = new DMatrixD1[numBlocks];
+      // Copy over data structure
+      for (int i = 0; i < numBlocks; i++)
+      {
+         optima[i] = new DMatrixRMaj(initialValues[i]);
+      }
 
-      // Seed the admm optimization
+      // Seed the admm problem by running the optimization
       for (int i = 0; i < numBlocks; i++)
       {
          AugmentedLagrangeOptimizationProblem problem = admm.getIsolatedOptimizationProblems().get(i);
          optimizers[i].setCostFunction(problem.getAugmentedCostFunction());
-         optima[i] = optimizers[i].optimize(initialValues[i]);
       }
+      if (runSubproblemsParallel)
+      {
+         // TODO this is terrible but it was the simplest fix
+         record OptimizerInitialValueCouple(Optimizer optimizer, DMatrixD1 initialValue){}
+         OptimizerInitialValueCouple[] optimizerCoupleList = new OptimizerInitialValueCouple[optimizers.length];
+         for (int i = 0; i < optimizerCoupleList.length; i++)
+         {
+            optimizerCoupleList[i] = new OptimizerInitialValueCouple(optimizers[i], initialValues[i]);
+         }
+         Arrays.stream(optimizerCoupleList).parallel().forEach((optimizerCouple)->{
+            optimizerCouple.optimizer().optimize(optimizerCouple.initialValue());
+         });
+      }
+      else
+      {
+         for (int i = 0; i < numBlocks; i++)
+         {
+            // seed optimization using last optimum found
+            optimizers[i].optimize(initialValues[i]);
+         }
+      }
+      // Save results
+      for (int i = 0; i < numBlocks; i++)
+      {
+         optima[i].set(optimizers[i].getOptimalParameters());
+      }
+
 
       if (verbose)
       {
@@ -67,11 +107,28 @@ public class MultiblockADMMOptimizer
       while (iteration < numLagrangeIterations)
       {
          // Run optimization
-         for (int i = 0; i < numBlocks; i++)
+         if (runSubproblemsParallel)
          {
-            optima[i] = optimizers[i].optimize(optima[i]);
+            // seed optimization using last optimum found
+            Arrays.stream(optimizers).parallel().forEach((optimizer)->{
+               optimizer.optimize(optimizer.getOptimalParameters());
+            });
+         }
+         else
+         {
+            for (int i = 0; i < numBlocks; i++)
+            {
+               // seed optimization using last optimum found
+               optimizers[i].optimize(optimizers[i].getOptimalParameters());
+            }
          }
 
+         // Save results
+         for (int i = 0; i < numBlocks; i++)
+         {
+            optima[i].set(optimizers[i].getOptimalParameters());
+         }
+         // Update
          admm.updateLagrangeMultipliers(optima);
          admm.saveOptimalBlocksForLastIteration(optima);
 
@@ -84,6 +141,12 @@ public class MultiblockADMMOptimizer
             admm.printResults(optima);
          }
       }
+
       return optima;
+   }
+
+   public MultiblockADMMProblem getADMMProblem()
+   {
+      return admm;
    }
 }

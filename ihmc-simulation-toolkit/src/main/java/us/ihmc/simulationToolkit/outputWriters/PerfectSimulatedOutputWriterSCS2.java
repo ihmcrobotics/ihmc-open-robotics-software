@@ -3,6 +3,7 @@ package us.ihmc.simulationToolkit.outputWriters;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -104,11 +105,17 @@ public class PerfectSimulatedOutputWriterSCS2 implements JointDesiredOutputWrite
    {
       private final FloatingJointBasics idJoint;
       private final SimFloatingJointBasics scsJoint;
+      private FramePoint3D rootJointOffset= new FramePoint3D();
 
       public FloatingJointOutputWriter(FloatingJointBasics idJoint, SimFloatingJointBasics scsJoint)
       {
          this.idJoint = idJoint;
          this.scsJoint = scsJoint;
+      }
+      
+      public void setRootJointOffset(FramePoint3D framePoint3D)
+      {
+         this.rootJointOffset.set(framePoint3D);
       }
 
       @Override
@@ -126,6 +133,8 @@ public class PerfectSimulatedOutputWriterSCS2 implements JointDesiredOutputWrite
       {
          RigidBodyTransform transform = new RigidBodyTransform();
          idJoint.getJointConfiguration(transform);
+         
+         transform.prependTranslation(rootJointOffset);
          scsJoint.setJointConfiguration(transform);
          //         scsJoint.setRotationAndTranslation(transform);
       }
@@ -176,5 +185,18 @@ public class PerfectSimulatedOutputWriterSCS2 implements JointDesiredOutputWrite
          scsJoint.setQd(idJoint.getQd());
          scsJoint.setQdd(idJoint.getQdd());
       }
+   }
+
+   public void setRootJointOffset(FramePoint3D framePoint3D)
+   {
+      for(JointOutputWriter writer : jointOutputWriters)
+      {
+         if(writer instanceof FloatingJointOutputWriter)
+         {
+            FloatingJointOutputWriter rootJointWriter = (FloatingJointOutputWriter) writer;
+            rootJointWriter.setRootJointOffset(framePoint3D);
+         }
+      }
+      
    }
 }

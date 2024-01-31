@@ -46,6 +46,7 @@ public class AugmentedLagrangeOptimizationProblem
    private final List<ConstraintFunction> equalityConstraints = new ArrayList<>();
 
    private AugmentedLagrangeConstructor augmentedLagrangeConstructor;
+   private final static double CONSTRAINT_SATISFIED_THRESHOLD = 1e-6;
 
    // ============= Setup =======================
 
@@ -62,6 +63,11 @@ public class AugmentedLagrangeOptimizationProblem
       inequalityConstraints.add(constraint);
    }
 
+   public void addInequalityConstraints(List<ConstraintFunction> constraints)
+   {
+      inequalityConstraints.addAll(constraints);
+   }
+
    /**
     * @param constraint g(x) == 0
     */
@@ -70,6 +76,12 @@ public class AugmentedLagrangeOptimizationProblem
       equalityConstraints.add(constraint);
    }
 
+   public void addEqualityConstraints(List<ConstraintFunction> constraints)
+   {
+      equalityConstraints.addAll(constraints);
+   }
+
+
    public void clearConstraints()
    {
       equalityConstraints.clear();
@@ -77,6 +89,7 @@ public class AugmentedLagrangeOptimizationProblem
    }
 
    /**
+    * Call this after the problem has been fully specified and just before optimization.
     * @param initialPenalty Keep the initial penalty small
     * @param penaltyIncreaseFactor
     */
@@ -158,6 +171,27 @@ public class AugmentedLagrangeOptimizationProblem
       augmentedLagrangeConstructor.updateLagrangeMultipliers(evaluateEqualityConstraints(xOptimal), evaluateInequalityConstraints(xOptimal));
    }
 
+   public boolean constraintsHaveBeenSatisfied(DMatrixD1 x)
+   {
+      DMatrixD1 inequalityConstraintEvaluations = evaluateInequalityConstraints(x);
+      DMatrixD1 equalityConstraintEvaluations = evaluateEqualityConstraints(x);
+      for (int i = 0; i < inequalityConstraintEvaluations.getNumElements(); i++)
+      {
+         if (inequalityConstraintEvaluations.get(i) < 0)
+         {
+            return false;
+         }
+      }
+      for (int i = 0; i < equalityConstraintEvaluations.getNumElements(); i++)
+      {
+         if (Math.abs(inequalityConstraintEvaluations.get(i)) > CONSTRAINT_SATISFIED_THRESHOLD)
+         {
+            return false;
+         }
+      }
+      return true;
+   }
+
    // ================================ Getter/Setter ========================================
 
    public void printResults(DMatrixD1 x)
@@ -167,11 +201,11 @@ public class AugmentedLagrangeOptimizationProblem
 
    public void printResults(DMatrixD1 x, double cost, DMatrixD1 equalityEvaluations, DMatrixD1 inequalityEvaluations)
    {
-      LogTools.info("");
+      LogTools.info("\n==================");
       System.out.println("Solution x:");
       for (int i = 0; i < x.getNumElements(); i++)
       {
-         LogTools.debug("\t" + x.get(i) + ",");
+         System.out.println("\t" + x.get(i) + ",");
       }
 
       System.out.println("Cost f(x):");
@@ -194,5 +228,7 @@ public class AugmentedLagrangeOptimizationProblem
             System.out.println("\t" + inequalityEvaluations.get(i) + " >= 0");
          }
       }
+      LogTools.info("==================\n");
+
    }
 }

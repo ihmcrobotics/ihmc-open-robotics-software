@@ -1,6 +1,7 @@
 package us.ihmc.robotics.optimization;
 
 import org.ejml.data.DMatrixD1;
+import us.ihmc.log.LogTools;
 
 /**
  * Interface for a R^n -> R optimizer
@@ -25,8 +26,11 @@ public interface Optimizer
 
    double getOptimumCost();
 
+   void setRealDomain(RealDomainBounds[] bounds);
+
    default void printResults()
    {
+      LogTools.info("");
       System.out.println("Solution x*: ");
       for (int i = 0; i < getOptimalParameters().getNumElements(); i++)
       {

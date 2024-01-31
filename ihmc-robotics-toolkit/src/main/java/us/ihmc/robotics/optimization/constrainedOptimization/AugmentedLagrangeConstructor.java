@@ -25,6 +25,7 @@ import us.ihmc.robotics.linearAlgebra.careSolvers.MatrixToolsLocal;
  */
 public class AugmentedLagrangeConstructor
 {
+   private final double initialPenalty;
    private double penalty;
    private final double penaltyIncreaseFactor;
 
@@ -36,8 +37,22 @@ public class AugmentedLagrangeConstructor
       equalityMultiplier = new DMatrixRMaj(numEqualityConstraints, 1);
       inequalityMultiplier = new DMatrixRMaj(numInequalityConstraints, 1);
 
+      this.initialPenalty = initialPenalty;
       this.penalty = initialPenalty;
       this.penaltyIncreaseFactor = penaltyIncreaseFactor;
+   }
+
+   public void reinitialize()
+   {
+      for (int i = 0; i < equalityMultiplier.getNumRows(); i++)
+      {
+         equalityMultiplier.set(i, 0);
+      }
+      for (int i = 0; i < inequalityMultiplier.getNumRows(); i++)
+      {
+         inequalityMultiplier.set(i, 0);
+      }
+      penalty = initialPenalty;
    }
 
    /**
