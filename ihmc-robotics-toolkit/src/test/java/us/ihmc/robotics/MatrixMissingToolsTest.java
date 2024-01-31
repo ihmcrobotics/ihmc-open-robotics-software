@@ -223,7 +223,7 @@ public class MatrixMissingToolsTest
          matrixA.setData(RandomNumbers.nextDoubleArray(random, 20, 10.0));
          CommonOps_DDRM.add(matrixA, 0.001, matrixB);
 
-         MatrixMissingTools.assetElementWiseLessThan(matrixA, matrixB, epsilon);
+         MatrixMissingTools.assetElementWiseLessThan(matrixA, matrixB);
       }
    }
 }
