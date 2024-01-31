@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.missionControl.MissionControlTools;
 import us.ihmc.ros2.ROS2Node;
@@ -90,8 +91,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
       for (String logLine : logLines)
          builder.append(logLine + "\n");
 
-      byte[] logBytes = builder.toString().getBytes(StandardCharsets.US_ASCII); // Use ASCII - UTF8 causes issues when publishing over DDS
-      message.getLogData().addAll(logBytes);
+      MessageTools.packLongStringToByteSequence(builder.toString(), message.getLogData());
 
       serviceStatusPublisher.publish(message);
    }

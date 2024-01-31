@@ -76,7 +76,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
 
       robotConfigurationData.setJointNameHash(RobotConfigurationDataFactory.calculateJointNameHash(jointSensorData, forceSensorData, imuSensorData));
       robotConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, RobotConfigurationData.class, outputTopic);
-    
+
       // Create RobotFrameDataPublishers here.
       for (ReferenceFrame frame : frameData)
       {
@@ -146,7 +146,8 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
          for (int i = 0; i < forceSensorData.size(); i++)
          {
             SpatialVectorMessage forceDataToPack = robotConfigurationData.getForceSensorData().add();
-            forceSensorData.get(i).getWrench(forceDataToPack.getAngularPart(), forceDataToPack.getLinearPart());
+            forceDataToPack.getAngularPart().set(forceSensorData.get(i).getWrench().getAngularPart());
+            forceDataToPack.getLinearPart().set(forceSensorData.get(i).getWrench().getLinearPart());
          }
       }
 

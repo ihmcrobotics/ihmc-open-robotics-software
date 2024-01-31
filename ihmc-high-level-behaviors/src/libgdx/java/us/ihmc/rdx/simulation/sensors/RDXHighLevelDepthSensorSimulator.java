@@ -45,14 +45,18 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.*;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
+import us.ihmc.perception.opencl.OpenCLIntBuffer;
+import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -75,13 +79,15 @@ import us.ihmc.utilities.ros.types.PointType;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.function.LongSupplier;
 
 import static us.ihmc.rdx.simulation.sensors.RDXLowLevelDepthSensorSimulator.FLOATS_PER_POINT;
 
-public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
+public class RDXHighLevelDepthSensorSimulator extends RDXPanel
 {
    private static final MutableInt INDEX = new MutableInt();
 
@@ -168,6 +174,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final float[] color = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
    private final ImInt segmentationDivisor = new ImInt(8);
+   private final List<Point3D> pointCloud = new ArrayList<>();
    private int segmentIndex = 0;
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
@@ -671,8 +678,8 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
       {
          depthExecutor.execute(() -> {
 
-            BytedecoOpenCVTools.convertFloatToShort(depthSensorSimulator.getMetersDepthOpenCVMat(),
-                                                    depthImageMat, 1000.0, 0.0);
+            OpenCVTools.convertFloatToShort(depthSensorSimulator.getMetersDepthOpenCVMat(),
+                                            depthImageMat, 1000.0, 0.0);
 
             depthImageMessage.setImageHeight(depthSensorSimulator.getImageHeight());
             depthImageMessage.setImageWidth(depthSensorSimulator.getImageWidth());
@@ -684,7 +691,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             Instant now = Instant.now();
             sensorPose.setToZero(sensorFrame);
             sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
-            BytedecoOpenCVTools.compressImagePNG(depthImageMat, compressedDepthPointer);
+            OpenCVTools.compressImagePNG(depthImageMat, compressedDepthPointer);
             PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer, ros2DepthTopic, depthImageMessage, ros2Helper, sensorPose, now, depthSequenceNumber++,
                                                                    depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth(), 0.001f);
 
@@ -708,7 +715,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             opencv_imgproc.cvtColor(rgba8Mat, rgb8Mat, opencv_imgproc.COLOR_RGBA2RGB);
 
             Instant now = Instant.now();
-            BytedecoOpenCVTools.compressRGBImageJPG(rgb8Mat, yuv420Image, compressedColorPointer);
+            OpenCVTools.compressRGBImageJPG(rgb8Mat, yuv420Image, compressedColorPointer);
             PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer, ros2ColorTopic, colorImageMessage, ros2Helper, sensorPose, now, colorSequenceNumber++,
                                                                   depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth(), 0.001f);
          });
@@ -745,6 +752,21 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             });
          }
       }
+   }
+
+   public List<Point3D> getPointCloud()
+   {
+      pointCloud.clear();
+      for (int i = 0; i < depthSensorSimulator.getNumberOfPoints()
+                      && (FLOATS_PER_POINT * i + 2) < depthSensorSimulator.getPointCloudBuffer().limit(); i++)
+      {
+         float x = depthSensorSimulator.getPointCloudBuffer().get(FLOATS_PER_POINT * i);
+         float y = depthSensorSimulator.getPointCloudBuffer().get(FLOATS_PER_POINT * i + 1);
+         float z = depthSensorSimulator.getPointCloudBuffer().get(FLOATS_PER_POINT * i + 2);
+         pointCloud.add(new Point3D(x, y, z));
+      }
+
+      return pointCloud;
    }
 
    public void dispose()
@@ -787,6 +809,11 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    public void setRenderPointCloudDirectly(boolean renderPointCloudDirectly)
    {
       this.renderPointCloudDirectly.set(renderPointCloudDirectly);
+   }
+
+   public void setPointSize(double size)
+   {
+      pointSize.set((float) size);
    }
 
    public void setRenderDepthVideoDirectly(boolean renderDepthVideoDirectly)
@@ -857,6 +884,16 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    public CameraPinholeBrown getDepthCameraIntrinsics()
    {
       return depthCameraIntrinsics;
+   }
+
+   public CameraIntrinsics getCopyOfCameraParameters()
+   {
+      return new CameraIntrinsics(imageHeight,
+                                  imageWidth,
+                                  getLowLevelSimulator().getFocalLengthPixels().get(),
+                                  getLowLevelSimulator().getFocalLengthPixels().get(),
+                                  getLowLevelSimulator().getPrincipalOffsetXPixels().get(),
+                                  getLowLevelSimulator().getPrincipalOffsetYPixels().get());
    }
 
    public Color getPointColorFromPicker()

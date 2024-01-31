@@ -15,7 +15,7 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f404b9119cc3b19a135951deb3f5d0d29d80ac5045ca2ca3b4fe1e59b19837ea";
+   		return "2b98f626dbbc242f4d6e4ef51f9d7794218553dcac7153ee28e2e7b52aa11a8d";
    }
    
    @Override

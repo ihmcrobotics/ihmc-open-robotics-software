@@ -15,7 +15,7 @@ public class QuadrupedSupportPlanarRegionParametersMessagePubSubType implements 
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5c2e76d111edc752d0f71524e20d04d6f78adab3d5f2fc5dd0572f738f30d8ee";
+   		return "a03f44ed44faa2f5f5a869b8604abc43908eebca980e70a0e4697739340c4e43";
    }
    
    @Override

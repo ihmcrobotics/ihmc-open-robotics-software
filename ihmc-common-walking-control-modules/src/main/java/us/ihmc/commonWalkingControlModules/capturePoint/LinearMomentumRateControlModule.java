@@ -115,9 +115,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private final FixedFramePoint2DBasics desiredCoP = new FramePoint2D();
    private final FixedFramePoint2DBasics achievedCMP = new FramePoint2D();
-   private final FramePoint2D desiredCoPFootFrame;
-
-   private boolean controlHeightWithMomentum;
 
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
    private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
@@ -135,25 +132,27 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final ICPControlPlane icpControlPlane;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPControlPolygons icpControlPolygons;
-   private final SideDependentList<ContactableFoot> contactableFeet;
 
    private final FixedFrameVector2DBasics perfectCMPDelta = new FrameVector2D();
 
+   private final YoBoolean controlHeightWithMomentum = new YoBoolean("controlHeightWithMomentum", registry);
    private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
    private final YoFramePoint2D yoDesiredCoP = new YoFramePoint2D("desiredCoP", worldFrame, registry);
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
+   private final YoFrameVector3D yoCenterOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", worldFrame, registry);
    private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
 
    private final FilteredVelocityYoFrameVector2d capturePointVelocity;
+   private final BooleanProvider useCenterOfPressureCommandOnly = new BooleanParameter("useCenterOfPressureCommandOnly", registry, false);
    private final DoubleProvider capturePointVelocityBreakFrequency = new DoubleParameter("capturePointVelocityBreakFrequency", registry, 26.5);
 
-   private final DoubleParameter centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 0.0);
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
-   private final ReferenceFrame midFootZUpFrame;
 
    private boolean initializeOnStateChange;
    private boolean keepCoPInsideSupportPolygon;
+
+   private final CenterOfPressureCommandCalculator centerOfPressureCommandCalculator;
 
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
@@ -187,7 +186,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    {
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       this.gravityZ = gravityZ;
-      this.contactableFeet = contactableFeet;
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
@@ -208,12 +206,11 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
                                                                      worldFrame);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      midFootZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
       centerOfMass = new FramePoint3D(centerOfMassFrame);
       controlledCoMAcceleration = new YoFrameVector3D("ControlledCoMAcceleration", "", centerOfMassFrame, registry);
-      desiredCoPFootFrame = new FramePoint2D(midFootZUpFrame);
 
       capturePointCalculator = new CapturePointCalculator(centerOfMassStateProvider);
+      centerOfPressureCommandCalculator = new CenterOfPressureCommandCalculator(referenceFrames.getMidFeetZUpFrame(), contactableFeet, registry);
 
       pelvisHeightController = new PelvisHeightController(referenceFrames.getPelvisFrame(), elevator.getBodyFixedFrame(), registry);
       comHeightController = new CoMHeightController(centerOfMassStateProvider, registry);
@@ -239,11 +236,15 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       yoDesiredCoP.setToNaN();
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
+      yoCenterOfMassVelocity.setToNaN();
       yoCapturePoint.setToNaN();
 
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
       icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry, yoGraphicsListRegistry);
-      bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null); // TODO: This is not being visualized since it is a duplicate for now.
+      /*
+       * TODO: The following is not being visualized since it is a duplicate for now.
+       */
+      bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null);
 
       ICPControllerParameters icpControllerParameters = walkingControllerParameters.getICPControllerParameters();
 
@@ -269,6 +270,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       yoDesiredCoP.setToNaN();
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
+      yoCenterOfMassVelocity.setToNaN();
       yoCapturePoint.setToNaN();
    }
 
@@ -298,7 +300,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       this.minimizingAngularMomentumRateZ.set(input.getMinimizeAngularMomentumRateZ());
       this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
       this.perfectCoP.setMatchingFrame(input.getPerfectCoP());
-      this.controlHeightWithMomentum = input.getControlHeightWithMomentum();
+      this.controlHeightWithMomentum.set(input.getControlHeightWithMomentum());
       this.initializeOnStateChange = input.getInitializeOnStateChange();
       this.keepCoPInsideSupportPolygon = input.getKeepCoPInsideSupportPolygon();
       for (RobotSide robotSide : RobotSide.values)
@@ -382,70 +384,23 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       yoDesiredCMP.set(desiredCMP);
       yoDesiredCoP.set(desiredCoP);
       yoCenterOfMass.setFromReferenceFrame(centerOfMassFrame);
+      yoCenterOfMassVelocity.set(capturePointCalculator.getCenterOfMassVelocity());
       yoCapturePoint.set(capturePoint);
 
       success = success && computeDesiredLinearMomentumRateOfChange();
 
       selectionMatrix.setToLinearSelectionOnly();
-      selectionMatrix.selectLinearZ(controlHeightWithMomentum);
+      selectionMatrix.selectLinearX(!useCenterOfPressureCommandOnly.getValue());
+      selectionMatrix.selectLinearY(!useCenterOfPressureCommandOnly.getValue());
+      selectionMatrix.selectLinearZ(controlHeightWithMomentum.getBooleanValue());
       selectionMatrix.selectAngularZ(minimizingAngularMomentumRateZ.getValue());
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
       momentumRateCommand.setWeights(angularMomentumRateWeight, desiredLinearMomentumRateWeight);
 
-      computeCenterOfPressureCommand();
+      centerOfPressureCommandCalculator.computeCenterOfPressureCommand(desiredCoP, contactStateCommands, bipedSupportPolygons.getFootPolygonsInSoleFrame());
 
       return success;
-   }
-
-   private void computeCenterOfPressureCommand()
-   {
-      boolean leftInContact = contactStateCommands.get(RobotSide.LEFT).getNumberOfContactPoints() > 0;
-      boolean rightInContact = contactStateCommands.get(RobotSide.RIGHT).getNumberOfContactPoints() > 0;
-
-      if (leftInContact != rightInContact)
-      {
-         if (leftInContact)
-            centerOfPressureCommand.setContactingRigidBody(contactableFeet.get(RobotSide.LEFT).getRigidBody());
-         else
-            centerOfPressureCommand.setContactingRigidBody(contactableFeet.get(RobotSide.RIGHT).getRigidBody());
-
-         desiredCoPFootFrame.setIncludingFrame(desiredCoP);
-         desiredCoPFootFrame.changeFrame(midFootZUpFrame);
-         centerOfPressureCommand.setDesiredCoP(desiredCoPFootFrame);
-         centerOfPressureCommand.setWeight(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
-      }
-      else if (leftInContact)
-      {
-         // check if it's to the outside of the foot
-         boolean setCommand = false;
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            desiredCoPFootFrame.setIncludingFrame(desiredCoP);
-            desiredCoPFootFrame.changeFrameAndProjectToXYPlane(contactableFeet.get(robotSide).getSoleFrame());
-            if (robotSide.negateIfRightSide(desiredCoPFootFrame.getY()) > 0.0)
-            {
-               // it is to the outside of the foot, so add the command
-               centerOfPressureCommand.setContactingRigidBody(contactableFeet.get(robotSide).getRigidBody());
-               centerOfPressureCommand.setDesiredCoP(desiredCoPFootFrame);
-               centerOfPressureCommand.setWeight(contactableFeet.get(robotSide).getSoleFrame(), centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
-               setCommand = true;
-               break;
-            }
-         }
-
-         if (!setCommand)
-         {
-            centerOfPressureCommand.setContactingRigidBody(null);
-            centerOfPressureCommand.setDesiredCoP(desiredCoP);
-            centerOfPressureCommand.setWeight(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
-         }
-      }
-      else
-      {
-         centerOfPressureCommand.setContactingRigidBody(null);
-         centerOfPressureCommand.setWeight(midFootZUpFrame, 0.0, 0.0);
-      }
    }
 
    /**
@@ -502,6 +457,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
             break;
          default:
             throw new IllegalArgumentException("This command type has not been set up for height control.");
+
       }
    }
 

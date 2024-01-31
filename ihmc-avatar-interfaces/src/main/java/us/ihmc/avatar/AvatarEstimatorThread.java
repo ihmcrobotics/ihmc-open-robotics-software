@@ -28,7 +28,7 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -42,7 +42,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
    private final FullHumanoidRobotModel estimatorFullRobotModel;
    private final StateEstimatorController mainStateEstimator;
    private final PairList<BooleanSupplier, StateEstimatorController> secondaryStateEstimators;
-   private final ForceSensorStateUpdater forceSensorStateUpdater;
 
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
 
@@ -59,7 +58,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
                                 HumanoidRobotContextData humanoidRobotContextData,
                                 StateEstimatorController mainStateEstimator,
                                 PairList<BooleanSupplier, StateEstimatorController> secondaryStateEstimators,
-                                ForceSensorStateUpdater forceSensorStateUpdater,
                                 IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher,
                                 YoRegistry estimatorRegistry,
                                 YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -71,7 +69,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
       this.humanoidRobotContextData = humanoidRobotContextData;
       this.mainStateEstimator = mainStateEstimator;
       this.secondaryStateEstimators = secondaryStateEstimators;
-      this.forceSensorStateUpdater = forceSensorStateUpdater;
       this.controllerCrashPublisher = controllerCrashPublisher;
       this.estimatorRegistry = estimatorRegistry;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
@@ -106,9 +103,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
          {
             initialize();
 
-            if (forceSensorStateUpdater != null)
-               forceSensorStateUpdater.initialize();
-
             firstTick.set(false);
          }
 
@@ -124,11 +118,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
          for (int i = 0; i < runnables.size(); i++)
          {
             runnables.get(i).run();
-         }
-
-         if (forceSensorStateUpdater != null)
-         {
-            forceSensorStateUpdater.updateForceSensorState();
          }
 
          HumanoidRobotContextTools.updateContext(estimatorFullRobotModel, humanoidRobotContextData.getProcessedJointData());
@@ -221,13 +210,16 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
       {
          group.addChild(entry.getRight().getSCS2YoGraphics());
       }
-      if (forceSensorStateUpdater != null)
-         group.addChild(forceSensorStateUpdater.getSCS2YoGraphics());
       return group;
    }
 
    public HumanoidRobotContextData getHumanoidRobotContextData()
    {
       return humanoidRobotContextData;
+   }
+
+   public ForceSensorCalibrationModule getForceSensorCalibrationModule()
+   {
+      return mainStateEstimator.getForceSensorCalibrationModule();
    }
 }

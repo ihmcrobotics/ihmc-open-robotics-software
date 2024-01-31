@@ -1,7 +1,7 @@
 package us.ihmc.rdx.perception;
 
-import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
-import us.ihmc.rdx.ui.yo.ImPlotPlot;
+import us.ihmc.rdx.imgui.ImPlotDoublePlotLine;
+import us.ihmc.rdx.imgui.ImPlotPlot;
 
 public class RDXOpenCVArUcoTrackedMarker
 {

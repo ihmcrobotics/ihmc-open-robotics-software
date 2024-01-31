@@ -15,7 +15,7 @@ public class QuadrupedXGaitSettingsPacketPubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6ba347abaffd0fe498cf38537bdc37d4b3abfa5633d7353357e4853bc4641e45";
+   		return "090c8f92734182b12dcc63f9395305656b25370d1ef1e8ee27781cee5caf5234";
    }
    
    @Override

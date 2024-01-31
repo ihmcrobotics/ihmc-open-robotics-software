@@ -15,7 +15,7 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "193178e9e1c07fa3cf0fa684743ded4ff9feccf12d4e636a259936cc674c16d8";
+   		return "874efe0012164d2149034a6eeb88064c1d7f80652f8354ecdef13023b22597c3";
    }
    
    @Override

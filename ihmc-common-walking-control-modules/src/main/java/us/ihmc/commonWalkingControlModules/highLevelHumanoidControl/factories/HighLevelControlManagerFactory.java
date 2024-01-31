@@ -1,9 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
@@ -12,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -25,7 +22,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
@@ -35,12 +35,17 @@ import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGai
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDSE3Gains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
 {
@@ -61,6 +66,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private CenterOfMassHeightManager centerOfMassHeightManager;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
+   private NaturalPostureManager naturalPostureManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
@@ -70,8 +76,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private SplitFractionCalculatorParametersReadOnly splitFractionParameters = new DefaultSplitFractionCalculatorParameters();
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
-   private final Map<String, PIDGainsReadOnly> jointspaceHighLevelGainMap = new HashMap<>();
-   private final Map<String, PIDGainsReadOnly> jointspaceLowLevelGainMap = new HashMap<>();
+   private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspaceOrientationGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspacePositionGainMap = new HashMap<>();
 
@@ -110,8 +115,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
 
       // Transform weights and gains to their parameterized versions.
-      ParameterTools.extractJointGainMap(walkingControllerParameters.getHighLevelJointSpaceControlGains(), jointspaceHighLevelGainMap, jointGainRegistry);
-      ParameterTools.extractJointGainMap(walkingControllerParameters.getLowLevelJointSpaceControlGains(), jointspaceLowLevelGainMap, jointGainRegistry);
+      ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, jointGainRegistry);
       ParameterTools.extract3DGainMap("Orientation",
                                       walkingControllerParameters.getTaskspaceOrientationControlGains(),
                                       taskspaceOrientationGainMap,
@@ -231,10 +235,12 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       Pose3D homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);
       RigidBodyBasics elevator = controllerToolbox.getFullRobotModel().getElevator();
       YoDouble yoTime = controllerToolbox.getYoTime();
+      double controlDT = controllerToolbox.getControlDT();
 
       ContactablePlaneBody contactableBody = controllerToolbox.getContactableBody(bodyToControl);
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
+      boolean enableFunctionGenerators = walkingControllerParameters.enableFunctionGeneratorMode(bodyName);
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
@@ -249,10 +255,12 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     taskspacePositionGains,
                                                                     contactableBody,
                                                                     defaultControlMode,
+                                                                    enableFunctionGenerators,
                                                                     yoTime,
+                                                                    controlDT,
                                                                     graphicsListRegistry,
                                                                     registry);
-      manager.setGains(jointspaceHighLevelGainMap, jointspaceLowLevelGainMap);
+      manager.setGains(jointGainMap);
       manager.setWeights(jointspaceWeightMap, userModeWeightMap);
 
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
@@ -271,22 +279,57 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       if (!hasMomentumOptimizationSettings(FeetManager.class))
          return null;
 
+      SideDependentList<RigidBodyControlManager> flamingoFootControlManagers = new SideDependentList<>();
+
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
+
+      TObjectDoubleHashMap<String> jointHomeConfiguration = walkingControllerParameters.getOrCreateJointHomeConfiguration();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
+         if (!taskspaceOrientationGainMap.containsKey(foot.getName()))
+            taskspaceOrientationGainMap.put(foot.getName(), swingFootGains.getOrientationGains());
+         if (!taskspacePositionGainMap.containsKey(foot.getName()))
+            taskspacePositionGainMap.put(foot.getName(), swingFootGains.getPositionGains());
+         RigidBodyBasics pelvis = fullRobotModel.getPelvis();
+
+         for (OneDoFJointBasics joint : MultiBodySystemTools.createOneDoFJointPath(pelvis, foot))
+         {
+            if (!jointHomeConfiguration.contains(joint.getName()))
+            {
+               /*
+                * Adding default values for the home configuration. They're not really useful for the flamingo
+                * stance but required by the RigidBodyControlManager.
+                */
+               jointHomeConfiguration.put(joint.getName(), 0.5 * (joint.getJointLimitLower() + joint.getJointLimitUpper()));
+            }
+         }
+
+         RigidBodyControlManager controlManager = getOrCreateRigidBodyManager(foot,
+                                                                              pelvis,
+                                                                              foot.getParentJoint().getFrameAfterJoint(),
+                                                                              pelvis.getBodyFixedFrame());
+         flamingoFootControlManagers.put(robotSide, controlManager);
+      }
+
       feetManager = new FeetManager(controllerToolbox,
                                     walkingControllerParameters,
                                     swingFootGains,
                                     holdFootGains,
                                     toeOffFootGains,
+                                    flamingoFootControlManagers,
                                     registry,
                                     controllerToolbox.getYoGraphicsListRegistry());
 
-      String footName = controllerToolbox.getFullRobotModel().getFoot(RobotSide.LEFT).getName();
+      String footName = fullRobotModel.getFoot(RobotSide.LEFT).getName();
       Vector3DReadOnly angularWeight = taskspaceAngularWeightMap.get(footName);
       Vector3DReadOnly linearWeight = taskspaceLinearWeightMap.get(footName);
       if (angularWeight == null || linearWeight == null)
       {
          throw new RuntimeException("Not all weights defined for the foot control: " + footName + " needs weights.");
       }
-      String otherFootName = controllerToolbox.getFullRobotModel().getFoot(RobotSide.RIGHT).getName();
+      String otherFootName = fullRobotModel.getFoot(RobotSide.RIGHT).getName();
       if (taskspaceAngularWeightMap.get(otherFootName) != angularWeight || taskspaceLinearWeightMap.get(otherFootName) != linearWeight)
       {
          throw new RuntimeException("There can only be one weight defined for both feet. Make sure they are in the same GroupParameter");
@@ -316,6 +359,29 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
       pelvisOrientationManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
       return pelvisOrientationManager;
+   }
+
+   public NaturalPostureManager getOrCreateNaturalPostureManager()
+   {
+      if (naturalPostureManager != null)
+         return naturalPostureManager;
+
+      if (!hasHighLevelHumanoidControllerToolbox(NaturalPostureManager.class))
+         return null;
+      if (!hasWalkingControllerParameters(NaturalPostureManager.class))
+         return null;
+      if (walkingControllerParameters.getNaturalPostureParameters() == null)
+         return null;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (controllerToolbox.getFullRobotModel().getHand(robotSide) == null)
+            return null;
+      }
+      
+      naturalPostureManager = new NaturalPostureManager(walkingControllerParameters.getNaturalPostureParameters(), controllerToolbox, registry);
+
+      return naturalPostureManager;
    }
 
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)

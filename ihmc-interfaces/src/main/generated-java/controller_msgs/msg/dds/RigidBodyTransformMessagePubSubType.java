@@ -15,7 +15,7 @@ public class RigidBodyTransformMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bd08e6337f536060366ddff8d50f7fd33049638241aa0921121043aabe4b0b49";
+   		return "748bf6f331ed9d3d3b8da0edf07d91422f9ff59111d75aa8c3ab15e2c43aec92";
    }
    
    @Override

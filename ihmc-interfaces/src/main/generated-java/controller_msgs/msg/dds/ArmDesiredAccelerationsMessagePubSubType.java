@@ -15,7 +15,7 @@ public class ArmDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1251fccc687c49d3029a3c38d838fb9789dad924e5f2da10a36cf079e6b2eef5";
+   		return "592d45b54ba2badd9268fb234991f0e34fdb59adf811c69958f3d872e7a6ec4d";
    }
    
    @Override

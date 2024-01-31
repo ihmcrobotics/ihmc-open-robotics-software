@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FixedJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -163,6 +164,10 @@ public class SCSToInverseDynamicsJointMap
          else if (inverseDynamicsJoint instanceof OneDoFJointBasics)
          {
             inverseDynamicsJointsByName.put(inverseDynamicsJoint.getName(), (OneDoFJointBasics) inverseDynamicsJoint);
+         }
+         else if (inverseDynamicsJoint instanceof FixedJointBasics)
+         {
+            // We skip it
          }
          else
          {

@@ -8,10 +8,10 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -21,11 +21,15 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class IMUBasedJointVelocityEstimator
 {
-   private final GeometricJacobian jacobian;
+   private final GeometricJacobianCalculator jacobian;
    private final IMUSensorReadOnly parentIMU;
    private final IMUSensorReadOnly childIMU;
+   /**
+    * Array with 1-element per DoF. This is not necessarily of same length as {@link #joints} as the
+    * joints are not necessarily only 1-DoF joints.
+    */
    private final YoDouble[] jointVelocitiesFromIMU;
-   private final OneDoFJointBasics[] joints;
+   private final JointBasics[] joints;
    private final FrameVector3D childAngularVelocity = new FrameVector3D();
    private final FrameVector3D parentAngularVelocity = new FrameVector3D();
 
@@ -34,39 +38,57 @@ public class IMUBasedJointVelocityEstimator
    private final DMatrixRMaj qd_estimated;
    private final DampedLeastSquaresSolver solver;
 
-   public IMUBasedJointVelocityEstimator(GeometricJacobian jacobian, IMUSensorReadOnly parentIMU, IMUSensorReadOnly childIMU, YoRegistry registry)
-         throws IllegalArgumentException
+   private final int degreesOfFreedom;
+
+   public IMUBasedJointVelocityEstimator(IMUSensorReadOnly parentIMU, IMUSensorReadOnly childIMU, YoRegistry registry) throws IllegalArgumentException
    {
       this.parentIMU = parentIMU;
       this.childIMU = childIMU;
-      this.jacobian = jacobian;
 
-      joints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
-      if (joints.length > 3)
-      {
-         throw new IllegalArgumentException("Cannot solve for more than 3 DoF betwen IMUs. " + joints.length + " DoF were given");
-      }
-      if (joints.length != jacobian.getJointsInOrder().length)
-      {
-         throw new IllegalArgumentException("Can only solve for a chain of OneDoFJoints");
-      }
+      this.jacobian = new GeometricJacobianCalculator();
+      jacobian.setKinematicChain(parentIMU.getMeasurementLink(), childIMU.getMeasurementLink());
+      jacobian.setJacobianFrame(childIMU.getMeasurementLink().getBodyFixedFrame());
 
-      jointVelocitiesFromIMU = new YoDouble[joints.length];
-      for (int i = 0; i < joints.length; i++)
+      joints = MultiBodySystemTools.filterJoints(jacobian.getJointsFromBaseToEndEffector(), JointBasics.class).toArray(JointBasics[]::new);
+      degreesOfFreedom = jacobian.getNumberOfDegreesOfFreedom();
+
+      if (degreesOfFreedom > 3)
       {
-         OneDoFJointBasics joint = joints[i];
-         jointVelocitiesFromIMU[i] = new YoDouble("qd_" + joint.getName() + "_IMUBased", registry);
+         throw new IllegalArgumentException("Cannot solve for more than 3 DoF betwen IMUs. " + degreesOfFreedom + " DoF were given");
       }
 
-      solver = new DampedLeastSquaresSolver(joints.length);
-      jacobianAngularPart64F = new DMatrixRMaj(3, joints.length);
-      qd_estimated = new DMatrixRMaj(joints.length, 1);
-   }
+      jointVelocitiesFromIMU = new YoDouble[degreesOfFreedom];
 
-   public IMUBasedJointVelocityEstimator(IMUSensorReadOnly parentIMU, IMUSensorReadOnly childIMU, YoRegistry registry)
-   {
-      this(new GeometricJacobian(parentIMU.getMeasurementLink(), childIMU.getMeasurementLink(), childIMU.getMeasurementLink().getBodyFixedFrame()), parentIMU,
-           childIMU, registry);
+      int dof = 0;
+
+      for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
+      {
+         JointBasics joint = joints[jointIndex];
+
+         String jointName = joint.getName();
+
+         if (joint.getDegreesOfFreedom() == 0)
+         {
+            continue;
+         }
+         else if (joint.getDegreesOfFreedom() == 1)
+         {
+            jointVelocitiesFromIMU[dof] = new YoDouble("qd_" + jointName + "_IMUBased", registry);
+            dof++;
+         }
+         else
+         {
+            for (int i = 0; i < joint.getDegreesOfFreedom(); i++)
+            {
+               jointVelocitiesFromIMU[dof] = new YoDouble("qd_" + jointName + "_IMUBased" + dof, registry);
+               dof++;
+            }
+         }
+      }
+
+      solver = new DampedLeastSquaresSolver(degreesOfFreedom);
+      jacobianAngularPart64F = new DMatrixRMaj(3, degreesOfFreedom);
+      qd_estimated = new DMatrixRMaj(degreesOfFreedom, 1);
    }
 
    /**
@@ -79,9 +101,9 @@ public class IMUBasedJointVelocityEstimator
          joints[i].updateFrame();
       }
 
-      jacobian.compute();
+      jacobian.reset();
       // jacobian is 6xn
-      CommonOps_DDRM.extract(jacobian.getJacobianMatrix(), 0, 3, 0, joints.length, jacobianAngularPart64F, 0, 0);
+      CommonOps_DDRM.extract(jacobian.getJacobianMatrix(), 0, 3, 0, degreesOfFreedom, jacobianAngularPart64F, 0, 0);
 
       childAngularVelocity.setToZero(childIMU.getMeasurementFrame());
       childAngularVelocity.set(childIMU.getAngularVelocityMeasurement());
@@ -95,31 +117,30 @@ public class IMUBasedJointVelocityEstimator
       solver.setA(jacobianAngularPart64F);
       solver.solve(omega, qd_estimated);
 
-      for (int i = 0; i < joints.length; i++)
+      for (int i = 0; i < degreesOfFreedom; i++)
       {
          double qd_IMU = qd_estimated.get(i, 0);
          jointVelocitiesFromIMU[i].set(qd_IMU);
       }
    }
 
-   public double getEstimatedJointVelocity(OneDoFJointBasics joint)
+   public JointBasics[] getJoints()
    {
-      for (int i = 0; i < joints.length; i++)
-      {
-         if (joints[i] == joint)
-         {
-            return jointVelocitiesFromIMU[i].getDoubleValue();
-         }
-      }
-      return Double.NaN;
+      return joints;
    }
 
-   public double getEstimatedJointVelocity(int jointIndex)
+   public JointBasics getJoint(int jointIndex)
    {
-      if (jointIndex < 0 || jointIndex >= joints.length)
-      {
-         throw new IndexOutOfBoundsException("Joint index out of bounds");
-      }
-      return jointVelocitiesFromIMU[jointIndex].getDoubleValue();
+      return joints[jointIndex];
+   }
+
+   public int getDegreesOfFreedom()
+   {
+      return degreesOfFreedom;
+   }
+
+   public double getEstimatedVelocity(int dofIndex)
+   {
+      return jointVelocitiesFromIMU[dofIndex].getValue();
    }
 }

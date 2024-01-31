@@ -10,6 +10,7 @@ find_package(ament_cmake REQUIRED)
 
 find_package(rosidl_default_generators REQUIRED)
 
+find_package(ihmc_common_msgs REQUIRED)
 find_package(perception_msgs REQUIRED)
 
 #In order to update the list in case new files, "touch" this CMakeLists.txt file
@@ -17,7 +18,7 @@ file(GLOB msg_files RELATIVE ${CMAKE_CURRENT_LIST_DIR} "msg/*.msg")
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
-  DEPENDENCIES perception_msgs
+  DEPENDENCIES ihmc_common_msgs perception_msgs
 )
 
 ament_export_dependencies(rosidl_default_runtime)

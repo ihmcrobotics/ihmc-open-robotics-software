@@ -1,8 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static us.ihmc.robotics.Assert.assertEquals;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +14,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionFootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -30,6 +29,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class FootstepPoseCheckerTest
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -40,7 +41,7 @@ public class FootstepPoseCheckerTest
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
 
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       FootstepPoseHeuristicChecker checker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
       parameters.setMaximumStepXWhenFullyPitched(0.3);
       parameters.setMinimumStepZWhenFullyPitched(0.05);
@@ -64,7 +65,7 @@ public class FootstepPoseCheckerTest
 
       PlanarRegionsList flatGround = planarRegionGenerator.getPlanarRegionsList();
 
-      snapper.setPlanarRegions(flatGround);
+      snapper.setPlanarRegionsList(flatGround);
 
       DiscreteFootstep stanceNode = new DiscreteFootstep(0.0, 0.15, 0.0, RobotSide.LEFT);
       DiscreteFootstep childNode = new DiscreteFootstep(0.3, -0.15, 0.0, RobotSide.RIGHT);
@@ -72,7 +73,7 @@ public class FootstepPoseCheckerTest
       BipedalFootstepPlannerNodeRejectionReason rejectionReason = checker.snapAndCheckValidity(childNode, stanceNode, null);
       assertNull(rejectionReason);
 
-      snapper.setPlanarRegions(angledGround);
+      snapper.setPlanarRegionsList(angledGround);
 
       rejectionReason = checker.snapAndCheckValidity(childNode, stanceNode, null);
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED, rejectionReason);
@@ -85,7 +86,7 @@ public class FootstepPoseCheckerTest
    {
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
@@ -121,7 +122,7 @@ public class FootstepPoseCheckerTest
    {
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
@@ -157,7 +158,7 @@ public class FootstepPoseCheckerTest
    {
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
@@ -209,7 +210,7 @@ public class FootstepPoseCheckerTest
    {
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
@@ -261,7 +262,7 @@ public class FootstepPoseCheckerTest
    {
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
@@ -289,7 +290,7 @@ public class FootstepPoseCheckerTest
 
       PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
 
-      snapper.setPlanarRegions(planarRegionsList);
+      snapper.setPlanarRegionsList(planarRegionsList);
 
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH, nodeChecker.snapAndCheckValidity(childNodeAtMaxYaw, parentNode, null));
    }

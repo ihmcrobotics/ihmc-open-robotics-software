@@ -106,6 +106,7 @@ public class ConvexStepConstraintOptimizer
                                                              ConstraintOptimizerParametersReadOnly parameters,
                                                              int[] startingVerticesToIgnore)
    {
+      iterations.set(-1);
       if (!parameters.shouldPerformOptimization())
       {
          transformToReturn.setToZero();

@@ -15,7 +15,7 @@ public class EuclideanTrajectoryPointMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2413c23669bf8e4ec77ed0994e71e95361d3b4eff2c361297e699a65b5d50e72";
+   		return "b3585feaf39ab81154b98086cd2909da929f19a2c01a7a243d197689f08c52ff";
    }
    
    @Override

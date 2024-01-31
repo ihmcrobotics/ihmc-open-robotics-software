@@ -15,7 +15,7 @@ public class BehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e0dbadcc987400a654ada63c92ae1f5af09adfded9942198a86dc8c250c045c6";
+   		return "7d83efec22c6b3ca50b9c97e17c5c23e663a515a17e6c2e2fb02ade532777d4c";
    }
    
    @Override

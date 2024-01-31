@@ -190,7 +190,7 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
 
    private void computeSwingWaypoints(DRCRobotModel robotModel, FootstepDataListMessage footsteps)
    {
-      double swingHeight = 1.5 * robotModel.getWalkingControllerParameters().getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
+      double swingHeight = 1.5 * robotModel.getWalkingControllerParameters().getSwingTrajectoryParameters().getDefaultSwingHeight();
 
       for (int i = 2; i < footsteps.getFootstepDataList().size(); i++)
       {

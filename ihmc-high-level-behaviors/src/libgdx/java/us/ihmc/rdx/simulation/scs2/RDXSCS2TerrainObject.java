@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXVisualModelInstance;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletTerrainObject;
 
@@ -14,7 +14,7 @@ public class RDXSCS2TerrainObject
    private final TerrainObjectDefinition terrainObjectDefinition;
    private RDXFrameGraphicsNode visualFrameGraphicsNode;
    private RDXFrameGraphicsNode collisionFrameGraphicsNode;
-   private final ModifiableReferenceFrame centerOfMassFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private final MutableReferenceFrame centerOfMassFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
    private BulletTerrainObject bulletTerrainObject;
 
    public RDXSCS2TerrainObject(TerrainObjectDefinition terrainObjectDefinition)

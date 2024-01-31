@@ -22,13 +22,15 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
-import us.ihmc.perception.*;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
+import us.ihmc.perception.opencl.OpenCLFloatMemory;
+import us.ihmc.perception.opencl.OpenCLIntBuffer;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.thread.Activator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -103,7 +105,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
    private final List<BodyPathLatticePoint> neighbors = new ArrayList<>();
 
    /////// all the open cl memory, programs, and kernels /////
-   private final OpenCLManager openCLManager;
+   private final OpenCLManager openCLManager = new OpenCLManager();
    private _cl_program pathPlannerProgram;
    private _cl_kernel computeNormalsWithLeastSquaresKernel;
    private _cl_kernel computeNormalsWithRansacKernel;
@@ -181,28 +183,13 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       // These are the 16 neighbor offsets
       packNeighborOffsets(neighborsOffsetX, neighborsOffsetY);
 
-      openCLManager = new OpenCLManager();
       // Makes sure to destroy the open CL memory by adding a shutdown hook
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroyOpenCLStuff));
 
       // Sets up the post-processing waypoint smoother
       smoother = new GPUAStarBodyPathSmoother(plannerParameters, null, openCLManager, null, null);
 
-      // Load all the native data on the thread. This effectively just loads all the bytedeco stuff to be used by the planner
-      Activator nativeLoader = BytedecoTools.loadNativesOnAThread();
-      boolean doneLoading = false;
-
-      while (!doneLoading)
-      {
-         if (nativeLoader.poll())
-         {
-            if (nativeLoader.isNewlyActivated())
-            {
-               createOpenCLStuff(defaultCells, defaultNodes);
-               doneLoading = true;
-            }
-         }
-      }
+      createOpenCLStuff(defaultCells, defaultNodes);
 
       // this sets up all the data to be stored by the logger. This callback is called whenever the graph is expanded, where it then creates a new big of edge
       // data, and stores it in a map, and resets all the variables. This gets called inside the planning loop.
@@ -340,15 +327,6 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       openCLManager.destroy();
    }
 
-   /**
-    * Sets the height map data for the path planner to use.
-    */
-   @Override
-   public void setHeightMapData(HeightMapData heightMapData)
-   {
-      this.heightMapData = heightMapData;
-   }
-
    private enum RejectionReason
    {
       INVALID_SNAP,
@@ -359,12 +337,12 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
    }
 
    /**
-    * Computes the body path plan using the information contained in {@param request}, and packs into the output {@param outputToPack}. For this to work,
-    * {@link #setHeightMapData(HeightMapData)} must be called first.
+    * Computes the body path plan using the information contained in {@param request}, and packs into the output {@param outputToPack}.
     */
    @Override
    public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
+      heightMapData = request.getHeightMapData();
       if (firstTick)
       {
          firstTickSetup();

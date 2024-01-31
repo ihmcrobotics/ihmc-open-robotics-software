@@ -2,28 +2,24 @@ package us.ihmc.rdx.logging;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import imgui.ImGui;
-import org.bytedeco.ffmpeg.ffmpeg;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.perception.BytedecoTools;
-import us.ihmc.tools.thread.Activator;
 
 import java.nio.ByteOrder;
 
 public class RDXFFMPEGL515DepthLoggingDemo
 {
-   private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final boolean lossless = false;
    private final int framerate = 15;
@@ -52,7 +48,7 @@ public class RDXFFMPEGL515DepthLoggingDemo
          {
             baseUI.create();
 
-            ImGuiPanel panel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
+            RDXPanel panel = new RDXPanel("Diagnostics", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
@@ -72,63 +68,57 @@ public class RDXFFMPEGL515DepthLoggingDemo
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(l515PoseGizmo, RDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
+
+            double publishRateHz = 5.0;
+            double verticalFOV = 55.0;
+            imageWidth = 1024;
+            imageHeight = 768;
+            double minRange = 0.105;
+            double maxRange = 5.0;
+            l515 = new RDXHighLevelDepthSensorSimulator("Stepping L515",
+                                                        l515PoseGizmo.getGizmoFrame(),
+                                                        () -> 0L,
+                                                        verticalFOV,
+                                                        imageWidth,
+                                                        imageHeight,
+                                                        minRange,
+                                                        maxRange,
+                                                        0.005,
+                                                        0.005,
+                                                        true,
+                                                        publishRateHz);
+            baseUI.getImGuiPanelManager().addPanel(l515);
+            l515.setSensorEnabled(true);
+            l515.setPublishPointCloudROS2(false);
+            l515.setRenderPointCloudDirectly(false);
+            l515.setPublishDepthImageROS1(false);
+            l515.setDebugCoordinateFrame(false);
+            l515.setRenderColorVideoDirectly(true);
+            l515.setRenderDepthVideoDirectly(true);
+            l515.setPublishColorImageROS1(false);
+            l515.setPublishColorImageROS2(false);
+            CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
+            baseUI.getPrimaryScene().addRenderableProvider(l515::getRenderables);
+
+            normalizedDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
+            rgbaDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
+
+            ffmpegLoggerDemoHelper.create(imageWidth, imageHeight, () ->
+            {
+               OpenCVTools.clampTo8BitUnsignedChar(l515.getLowLevelSimulator().getMetersDepthOpenCVMat(),
+                                                   normalizedDepthImage.getBytedecoOpenCVMat(),
+                                                   0.0,
+                                                   255.0);
+               OpenCVTools.convert8BitGrayTo8BitRGBA(normalizedDepthImage.getBytedecoOpenCVMat(), rgbaDepthImage.getBytedecoOpenCVMat());
+
+               ffmpegLoggerDemoHelper.getLogger().put(rgbaDepthImage);
+            });
          }
 
          @Override
          public void render()
          {
-            if (nativesLoadedActivator.poll())
-            {
-               if (nativesLoadedActivator.isNewlyActivated())
-               {
-                  double publishRateHz = 5.0;
-                  double verticalFOV = 55.0;
-                  imageWidth = 1024;
-                  imageHeight = 768;
-                  double minRange = 0.105;
-                  double maxRange = 5.0;
-                  l515 = new RDXHighLevelDepthSensorSimulator("Stepping L515",
-                                                              l515PoseGizmo.getGizmoFrame(),
-                                                              () -> 0L,
-                                                              verticalFOV,
-                                                              imageWidth,
-                                                              imageHeight,
-                                                              minRange,
-                                                              maxRange,
-                                                              0.005,
-                                                              0.005,
-                                                              true,
-                                                              publishRateHz);
-                  baseUI.getImGuiPanelManager().addPanel(l515);
-                  l515.setSensorEnabled(true);
-                  l515.setPublishPointCloudROS2(false);
-                  l515.setRenderPointCloudDirectly(false);
-                  l515.setPublishDepthImageROS1(false);
-                  l515.setDebugCoordinateFrame(false);
-                  l515.setRenderColorVideoDirectly(true);
-                  l515.setRenderDepthVideoDirectly(true);
-                  l515.setPublishColorImageROS1(false);
-                  l515.setPublishColorImageROS2(false);
-                  CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
-                  baseUI.getPrimaryScene().addRenderableProvider(l515::getRenderables);
-
-                  normalizedDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
-                  rgbaDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
-
-                  ffmpegLoggerDemoHelper.create(imageWidth, imageHeight, () ->
-                  {
-                     BytedecoOpenCVTools.clampTo8BitUnsignedChar(l515.getLowLevelSimulator().getMetersDepthOpenCVMat(), normalizedDepthImage.getBytedecoOpenCVMat(), 0.0, 255.0);
-                     BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedDepthImage.getBytedecoOpenCVMat(), rgbaDepthImage.getBytedecoOpenCVMat());
-
-                     ffmpegLoggerDemoHelper.getLogger().put(rgbaDepthImage);
-                  });
-
-                  baseUI.getLayoutManager().reloadLayout();
-               }
-
-               l515.render(baseUI.getPrimaryScene());
-            }
-
+            l515.render(baseUI.getPrimaryScene());
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
@@ -137,13 +127,8 @@ public class RDXFFMPEGL515DepthLoggingDemo
          {
             ImGui.text("System native byte order: " + ByteOrder.nativeOrder().toString());
             ffmpegLoggerDemoHelper.renderImGuiBasicInfo();
-
-            if (nativesLoadedActivator.peek())
-            {
-               ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
-
-               ffmpegLoggerDemoHelper.renderImGuiNativesLoaded();
-            }
+            ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
+            ffmpegLoggerDemoHelper.renderImGuiWidgets();
          }
 
          @Override

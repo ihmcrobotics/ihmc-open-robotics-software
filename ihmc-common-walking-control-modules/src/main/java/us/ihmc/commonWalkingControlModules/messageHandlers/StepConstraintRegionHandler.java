@@ -7,6 +7,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstrai
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class StepConstraintRegionHandler
@@ -15,7 +16,8 @@ public class StepConstraintRegionHandler
 
    private final YoBoolean hasNewConstraintRegion = new YoBoolean("hasNewConstraintRegion", registry);
 
-   private final RecyclingArrayList<StepConstraintRegion> stepConstraintRegions = new RecyclingArrayList<>(StepConstraintRegion::new);
+   private final RecyclingArrayList<StepConstraintRegion> stepConstraintRegionPool = new RecyclingArrayList<>(StepConstraintRegion::new);
+   private final List<StepConstraintRegion> stepConstraintRegions = new ArrayList<>();
 
    private final YoBoolean waitingOnNewConstraintRegion = new YoBoolean("waitingOnNewConstraintRegion", registry);
 
@@ -27,7 +29,10 @@ public class StepConstraintRegionHandler
    public void handleStepConstraintRegionCommand(StepConstraintRegionCommand stepConstraintRegionCommand)
    {
       stepConstraintRegions.clear();
-      stepConstraintRegionCommand.getStepConstraintRegion(stepConstraintRegions.add());
+      stepConstraintRegionPool.clear();
+      StepConstraintRegion stepConstraintRegion = stepConstraintRegionPool.add();
+      stepConstraintRegionCommand.getStepConstraintRegion(stepConstraintRegion);
+      stepConstraintRegions.add(stepConstraintRegion);
 
       hasNewConstraintRegion.set(true);
       waitingOnNewConstraintRegion.set(false);
@@ -35,15 +40,32 @@ public class StepConstraintRegionHandler
 
    public void handleStepConstraintsListCommand(StepConstraintsListCommand stepConstraintsListCommand)
    {
+      stepConstraintRegionPool.clear();
       stepConstraintRegions.clear();
       for (int i = 0; i < stepConstraintsListCommand.getNumberOfConstraints(); i++)
       {
-         stepConstraintsListCommand.getStepConstraint(i).getStepConstraintRegion(stepConstraintRegions.add());
+         StepConstraintRegion constraintRegion = stepConstraintRegionPool.add();
+         stepConstraintsListCommand.getStepConstraint(i).getStepConstraintRegion(constraintRegion);
+         stepConstraintRegions.add(constraintRegion);
       }
 
       hasNewConstraintRegion.set(true);
       waitingOnNewConstraintRegion.set(false);
    }
+
+   public void handleStepConstraintsList(List<StepConstraintRegion> stepConstraintRegions)
+   {
+      stepConstraintRegionPool.clear();
+      this.stepConstraintRegions.clear();
+      for (int i = 0; i < stepConstraintRegions.size(); i++)
+      {
+         this.stepConstraintRegions.add(stepConstraintRegions.get(i));
+      }
+
+      hasNewConstraintRegion.set(true);
+      waitingOnNewConstraintRegion.set(false);
+   }
+
 
    public boolean hasNewStepConstraintRegion()
    {

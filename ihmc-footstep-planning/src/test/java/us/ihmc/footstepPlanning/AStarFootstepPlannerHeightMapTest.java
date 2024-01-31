@@ -1,13 +1,11 @@
 package us.ihmc.footstepPlanning;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
-import us.ihmc.footstepPlanning.messager.FootstepPlannerAStarDataSetTest;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
@@ -18,6 +16,8 @@ import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -163,12 +163,13 @@ public class AStarFootstepPlannerHeightMapTest
 
       double heightMapResolution = 0.03;
       HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(dataset.getPlanarRegionsList(), heightMapResolution);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
 
       request.setStartFootPoses(startSteps.get(RobotSide.LEFT), startSteps.get(RobotSide.RIGHT));
       request.setGoalFootPoses(goalSteps.get(RobotSide.LEFT), goalSteps.get(RobotSide.RIGHT));
       request.setPlanBodyPath(false);
       request.setPerformAStarSearch(true);
-      request.setHeightMapMessage(heightMapMessage);
+      request.setHeightMapData(heightMapData);
       request.setMaximumIterations(1000);
       request.setTimeout(Double.MAX_VALUE);
       request.setHorizonLength(Double.MAX_VALUE);

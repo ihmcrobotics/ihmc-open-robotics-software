@@ -10,13 +10,10 @@ import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.perception.BytedecoTools;
-import us.ihmc.tools.thread.Activator;
 
 public class RDXDoorHandleDetectionDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
    private RDXEnvironmentBuilder environmentBuilder;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
    private RDXHighLevelDepthSensorSimulator cameraSensor;
@@ -57,35 +54,24 @@ public class RDXDoorHandleDetectionDemo
             sensorPoseGizmo.getTransformToParent().appendTranslation(0.0, 0.0, 1.0);
 
             baseUI.getImGuiPanelManager().addPanel("Door Handle Tracking Demo", this::renderImGuiWidgets);
+
+            cameraSensor = RDXSimulatedSensorFactory.createBlackflyFisheyeImageOnlyNoComms(sensorPoseGizmo.getGizmoFrame());
+            cameraSensor.setSensorEnabled(true);
+            cameraSensor.setRenderColorVideoDirectly(true);
+            baseUI.getImGuiPanelManager().addPanel(cameraSensor);
+            baseUI.getPrimaryScene().addRenderableProvider(cameraSensor::getRenderables);
+
+            doorHandleDetectionUI = new RDXOpenCVOpticalFlowTrackingUI();
+            doorHandleDetectionUI.create(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage());
+            baseUI.getImGuiPanelManager().addPanel(doorHandleDetectionUI.getMainPanel());
          }
 
          @Override
          public void render()
          {
             environmentBuilder.update();
-
-            if (nativesLoadedActivator.poll())
-            {
-               if (nativesLoadedActivator.isNewlyActivated())
-               {
-                  cameraSensor = RDXSimulatedSensorFactory.createBlackflyFisheyeImageOnlyNoComms(sensorPoseGizmo.getGizmoFrame());
-                  cameraSensor.setSensorEnabled(true);
-                  cameraSensor.setRenderColorVideoDirectly(true);
-                  baseUI.getImGuiPanelManager().addPanel(cameraSensor);
-                  baseUI.getPrimaryScene().addRenderableProvider(cameraSensor::getRenderables);
-
-                  doorHandleDetectionUI = new RDXOpenCVOpticalFlowTrackingUI();
-                  doorHandleDetectionUI.create(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage());
-                  baseUI.getImGuiPanelManager().addPanel(doorHandleDetectionUI.getMainPanel());
-
-                  baseUI.getLayoutManager().reloadLayout();
-               }
-
-               cameraSensor.render(baseUI.getPrimaryScene());
-
-               doorHandleDetectionUI.update();
-            }
-
+            cameraSensor.render(baseUI.getPrimaryScene());
+            doorHandleDetectionUI.update();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }

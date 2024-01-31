@@ -15,7 +15,7 @@ public class AtlasDesiredPumpPSIPacketPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "07d889baa1d401cc38e3085262cf9e795b92b1ca57af0edcbc7e2ad27498a89c";
+   		return "741c3effd15815663dfddb994e2bd9c7c91e308000d8ff0c82a23faafb66045f";
    }
    
    @Override

@@ -29,6 +29,18 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * A rigid body control mode for position and orientation. It combines the functionalities from
+ * the {@link RigidBodyPositionControlHelper position} and {@link RigidBodyOrientationControlHelper orientation}
+ * control helpers to provide combined spatial feedback control commands for submission to the whole body
+ * controller core.
+ * <p>
+ * This class also features a hybrid control mode, where the jointspace control commands from
+ * {@link RigidBodyJointControlHelper} are also included. This is useful for more control over, for example,
+ * the arms of the robot by specifying desireds in both taskspace and jointspace, which can help avoid
+ * singularities and instabilities.
+ * </p>
+ */
 public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 {
    private final SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
@@ -45,16 +57,23 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final RigidBodyPositionControlHelper positionHelper;
-   private final RigidBodyOrientationControlHelper orienationHelper;
+   private final RigidBodyOrientationControlHelper orientationHelper;
 
    private final YoBoolean hybridModeActive;
    private final RigidBodyJointControlHelper jointControlHelper;
 
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper;
 
-   public RigidBodyPoseController(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator, ReferenceFrame controlFrame,
-                                  ReferenceFrame baseFrame, YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper,
-                                  YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
+   public RigidBodyPoseController(RigidBodyBasics bodyToControl,
+                                  RigidBodyBasics baseBody,
+                                  RigidBodyBasics elevator,
+                                  ReferenceFrame controlFrame,
+                                  ReferenceFrame baseFrame,
+                                  YoDouble yoTime,
+                                  RigidBodyJointControlHelper jointControlHelper,
+                                  boolean enableFunctionGenerators,
+                                  YoGraphicsListRegistry graphicsListRegistry,
+                                  YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
       String bodyName = bodyToControl.getName();
@@ -66,10 +85,29 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
-      positionHelper = new RigidBodyPositionControlHelper(warningPrefix, bodyToControl, baseBody, elevator, controlFrame, baseFrame, useBaseFrameForControl,
-                                                          usingWeightFromMessage, yoTime, registry, graphicsListRegistry);
-      orienationHelper = new RigidBodyOrientationControlHelper(warningPrefix, bodyToControl, baseBody, elevator, controlFrame, baseFrame,
-                                                                useBaseFrameForControl, usingWeightFromMessage, yoTime, registry);
+      positionHelper = new RigidBodyPositionControlHelper(warningPrefix,
+                                                          bodyToControl,
+                                                          baseBody,
+                                                          elevator,
+                                                          controlFrame,
+                                                          baseFrame,
+                                                          useBaseFrameForControl,
+                                                          usingWeightFromMessage,
+                                                          enableFunctionGenerators,
+                                                          yoTime,
+                                                          registry,
+                                                          graphicsListRegistry);
+      orientationHelper = new RigidBodyOrientationControlHelper(warningPrefix,
+                                                                bodyToControl,
+                                                                baseBody,
+                                                                elevator,
+                                                                controlFrame,
+                                                                baseFrame,
+                                                                useBaseFrameForControl,
+                                                                usingWeightFromMessage,
+                                                                enableFunctionGenerators,
+                                                                yoTime,
+                                                                registry);
 
       this.jointControlHelper = jointControlHelper;
       hybridModeActive = new YoBoolean(prefix + "HybridModeActive", registry);
@@ -84,13 +122,33 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
    {
       positionHelper.setWeights(linearWeight);
-      orienationHelper.setWeights(angularWeight);
+      orientationHelper.setWeights(angularWeight);
+   }
+
+   public Vector3DReadOnly getAngularDefaultWeight()
+   {
+      return orientationHelper.getDefaultWeight();
+   }
+
+   public Vector3DReadOnly getLinearDefaultWeight()
+   {
+      return positionHelper.getDefaultWeight();
    }
 
    public void setGains(PID3DGainsReadOnly orientationGains, PID3DGainsReadOnly positionGains)
    {
       positionHelper.setGains(positionGains);
-      orienationHelper.setGains(orientationGains);
+      orientationHelper.setGains(orientationGains);
+   }
+
+   public PID3DGainsReadOnly getOrientationGains()
+   {
+      return orientationHelper.getGains();
+   }
+
+   public PID3DGainsReadOnly getPositionGains()
+   {
+      return positionHelper.getGains();
    }
 
    @Override
@@ -98,7 +156,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    {
       double timeInTrajectory = getTimeInTrajectory();
       boolean positionDone = positionHelper.doAction(timeInTrajectory);
-      boolean orientationDone = orienationHelper.doAction(timeInTrajectory);
+      boolean orientationDone = orientationHelper.doAction(timeInTrajectory);
       trajectoryDone.set(positionDone && orientationDone);
 
       updateCommand();
@@ -120,7 +178,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    private void updateCommand()
    {
       PointFeedbackControlCommand positionCommand = positionHelper.getFeedbackControlCommand();
-      OrientationFeedbackControlCommand orientationCommand = orienationHelper.getFeedbackControlCommand();
+      OrientationFeedbackControlCommand orientationCommand = orientationHelper.getFeedbackControlCommand();
 
       // Set weight and selection matrices
       SpatialAccelerationCommand accelerationCommand = feedbackControlCommand.getSpatialAccelerationCommand();
@@ -135,8 +193,12 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       feedbackControlCommand.setGainsFrames(orientationCommand.getAngularGainsFrame(), positionCommand.getLinearGainsFrame());
 
       // Copy over desired values
-      feedbackControlCommand.setInverseDynamics(positionCommand.getReferencePosition(), positionCommand.getReferenceLinearVelocity(), positionCommand.getReferenceLinearAcceleration());
-      feedbackControlCommand.setInverseDynamics(orientationCommand.getReferenceOrientation(), orientationCommand.getReferenceAngularVelocity(), orientationCommand.getReferenceAngularAcceleration());
+      feedbackControlCommand.setInverseDynamics(positionCommand.getReferencePosition(),
+                                                positionCommand.getReferenceLinearVelocity(),
+                                                positionCommand.getReferenceLinearAcceleration());
+      feedbackControlCommand.setInverseDynamics(orientationCommand.getReferenceOrientation(),
+                                                orientationCommand.getReferenceAngularVelocity(),
+                                                orientationCommand.getReferenceAngularAcceleration());
 
       // Copy from the position command since the orientation does not have a control frame.
       feedbackControlCommand.setControlFrameFixedInEndEffector(positionCommand.getBodyFixedPointToControl(),
@@ -148,13 +210,15 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    @Override
    public void onEntry()
    {
+      positionHelper.resetFunctionGenerators();
+      orientationHelper.resetFunctionGenerator();
    }
 
    @Override
    public void onExit(double timeInState)
    {
       positionHelper.onExit();
-      orienationHelper.onExit();
+      orientationHelper.onExit();
       hybridModeActive.set(false);
       hideGraphics();
       clear();
@@ -166,7 +230,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       clear();
       setTrajectoryStartTimeToCurrentTime();
       positionHelper.holdCurrent();
-      orienationHelper.holdCurrent();
+      orientationHelper.holdCurrent();
       hybridModeActive.set(false);
    }
 
@@ -176,9 +240,9 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       clear();
       setTrajectoryStartTimeToCurrentTime();
 
-      orienationHelper.getDesiredOrientation(desiredOrientation);
+      orientationHelper.getDesiredOrientation(desiredOrientation);
       positionHelper.holdCurrentDesired(desiredOrientation);
-      orienationHelper.holdCurrentDesired();
+      orientationHelper.holdCurrentDesired();
       hybridModeActive.set(false);
    }
 
@@ -188,7 +252,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       clear();
       setTrajectoryStartTimeToCurrentTime();
       positionHelper.goToPositionFromCurrent(pose.getPosition(), trajectoryTime);
-      orienationHelper.goToOrientationFromCurrent(pose.getOrientation(), trajectoryTime);
+      orientationHelper.goToOrientationFromCurrent(pose.getOrientation(), trajectoryTime);
       hybridModeActive.set(false);
    }
 
@@ -198,9 +262,9 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       clear();
       setTrajectoryStartTimeToCurrentTime();
 
-      orienationHelper.getDesiredOrientation(desiredOrientation);
+      orientationHelper.getDesiredOrientation(desiredOrientation);
       positionHelper.goToPosition(pose.getPosition(), desiredOrientation, trajectoryTime);
-      orienationHelper.goToOrientation(pose.getOrientation(), trajectoryTime);
+      orientationHelper.goToOrientation(pose.getOrientation(), trajectoryTime);
       hybridModeActive.set(false);
    }
 
@@ -209,9 +273,9 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    {
       positionHelper.disable();
 
-      if (handleCommandInternal(command) && orienationHelper.handleTrajectoryCommand(command))
+      if (handleCommandInternal(command) && orientationHelper.handleTrajectoryCommand(command))
       {
-         usingWeightFromMessage.set(orienationHelper.isMessageWeightValid());
+         usingWeightFromMessage.set(orientationHelper.isMessageWeightValid());
          hybridModeActive.set(false);
          if (command.getExecutionMode() != ExecutionMode.STREAM)
             statusHelper.registerNewTrajectory(command);
@@ -220,7 +284,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
       clear();
       positionHelper.clear();
-      orienationHelper.clear();
+      orientationHelper.clear();
       return false;
    }
 
@@ -231,18 +295,18 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       {
          clear();
          positionHelper.clear();
-         orienationHelper.clear();
+         orientationHelper.clear();
          return false;
       }
 
       CommandConversionTools.convertToEuclidean(command, euclideanCommand);
       CommandConversionTools.convertToSO3(command, so3Command);
 
-      orienationHelper.getDesiredOrientation(desiredOrientation);
+      orientationHelper.getDesiredOrientation(desiredOrientation);
 
-      if (positionHelper.handleTrajectoryCommand(euclideanCommand, desiredOrientation) && orienationHelper.handleTrajectoryCommand(so3Command))
+      if (positionHelper.handleTrajectoryCommand(euclideanCommand, desiredOrientation) && orientationHelper.handleTrajectoryCommand(so3Command))
       {
-         usingWeightFromMessage.set(positionHelper.isMessageWeightValid() && orienationHelper.isMessageWeightValid());
+         usingWeightFromMessage.set(positionHelper.isMessageWeightValid() && orientationHelper.isMessageWeightValid());
          hybridModeActive.set(false);
          if (command.getExecutionMode() != ExecutionMode.STREAM)
             statusHelper.registerNewTrajectory(command);
@@ -251,12 +315,13 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
       clear();
       positionHelper.clear();
-      orienationHelper.clear();
+      orientationHelper.clear();
       return false;
    }
 
    @Override
-   public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command, JointspaceTrajectoryCommand jointspaceCommand,
+   public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command,
+                                                JointspaceTrajectoryCommand jointspaceCommand,
                                                 double[] initialJointPositions)
    {
       if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
@@ -268,7 +333,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
       clear();
       positionHelper.clear();
-      orienationHelper.clear();
+      orientationHelper.clear();
       return false;
    }
 
@@ -308,6 +373,12 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    public boolean isEmpty()
    {
       return positionHelper.isEmpty();
+   }
+
+   @Override
+   public boolean isHybridModeActive()
+   {
+      return hybridModeActive.getValue();
    }
 
    private void clear()

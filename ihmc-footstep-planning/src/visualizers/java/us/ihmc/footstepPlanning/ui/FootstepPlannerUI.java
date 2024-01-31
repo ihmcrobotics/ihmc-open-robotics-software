@@ -78,7 +78,7 @@ import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
 import us.ihmc.footstepPlanning.ui.viewers.RobotIKVisualizer;
 import us.ihmc.footstepPlanning.ui.viewers.StartGoalPositionViewer;
 import us.ihmc.footstepPlanning.ui.viewers.SwingPlanMeshViewer;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javafx.JavaFXRobotVisualizer;
@@ -145,8 +145,6 @@ public class FootstepPlannerUI
    @FXML
    private MainTabController mainTabController;
    @FXML
-   private VisibilityGraphsParametersUIController visibilityGraphsParametersUIController;
-   @FXML
    private AStarBodyPathParametersUIController aStarBodyPathParametersUIController;
    @FXML
    private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
@@ -157,8 +155,6 @@ public class FootstepPlannerUI
    @FXML
    private BodyPathLogVisualizerController bodyPathLogVisualizerController;
    @FXML
-   private RobotOperationTabController robotOperationTabController;
-   @FXML
    private VisualizationController visibilityGraphsUIController;
 
    public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, boolean showTestDashboard, SideDependentList<List<Point2D>> defaultContactPoints)
@@ -166,7 +162,6 @@ public class FootstepPlannerUI
    {
       this(primaryStage,
            messager,
-           new DefaultVisibilityGraphParameters(),
            new AStarBodyPathPlannerParameters(),
            new DefaultFootstepPlannerParameters(),
            new DefaultSwingPlannerParameters(),
@@ -178,7 +173,6 @@ public class FootstepPlannerUI
 
    public FootstepPlannerUI(Stage primaryStage,
                             JavaFXMessager messager,
-                            VisibilityGraphsParametersBasics visibilityGraphsParameters,
                             AStarBodyPathPlannerParametersBasics aStarBodyPathParameters,
                             FootstepPlannerParametersBasics plannerParameters,
                             SwingPlannerParametersBasics swingPlannerParameters,
@@ -190,7 +184,6 @@ public class FootstepPlannerUI
    {
       this(primaryStage,
            messager,
-           visibilityGraphsParameters,
            aStarBodyPathParameters,
            plannerParameters,
            swingPlannerParameters,
@@ -206,7 +199,6 @@ public class FootstepPlannerUI
 
    public FootstepPlannerUI(Stage primaryStage,
                             JavaFXMessager messager,
-                            VisibilityGraphsParametersBasics visibilityGraphsParameters,
                             AStarBodyPathPlannerParametersBasics aStarBodyPathParameters,
                             FootstepPlannerParametersBasics plannerParameters,
                             SwingPlannerParametersBasics swingPlannerParameters,
@@ -237,7 +229,6 @@ public class FootstepPlannerUI
          centerBorderPane.getChildren().remove(testDashboard);
       }
 
-      visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
       aStarBodyPathParametersUIController.setAStarBodyPathParameters(aStarBodyPathParameters);
       footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
       swingPlannerParametersUIController.setParameters(swingPlannerParameters);
@@ -246,14 +237,12 @@ public class FootstepPlannerUI
       footstepPlannerStatusBarController.attachMessager(messager);
       footstepPlannerTestDashboardController.attachMessager(messager);
       footstepPlannerMenuUIController.attachMessager(messager);
-      visibilityGraphsParametersUIController.attachMessager(messager);
       aStarBodyPathParametersUIController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
       bodyPathLogVisualizerController.attachMessager(messager);
       swingPlannerParametersUIController.attachMessager(messager);
       footstepPlannerLogVisualizerController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
-      robotOperationTabController.attachMessager(messager);
 
       if (ENABLE_HEIGHT_MAP_VIZ)
       {
@@ -267,7 +256,6 @@ public class FootstepPlannerUI
       bodyPathLogVisualizerController.bindControls();
       footstepPlannerTestDashboardController.bindControls();
       footstepPlannerParametersUIController.bindControls();
-      visibilityGraphsParametersUIController.bindControls();
       aStarBodyPathParametersUIController.bindControls();
       footstepPlannerLogVisualizerController.bindControls();
       swingPlannerParametersUIController.bindControls();
@@ -307,7 +295,6 @@ public class FootstepPlannerUI
       this.bodyPathLogRenderer = new BodyPathLogRenderer(messager);
       new UIFootstepPlanManager(messager);
       this.manualFootstepAdjustmentListener = new ManualFootstepAdjustmentListener(messager, view3dFactory.getSubScene());
-      this.robotOperationTabController.setAuxiliaryRobotData(auxiliaryRobotData);
 
       startGoalPositionViewer.setShowStartGoalTopics(ShowStart, ShowGoal, ShowGoal);
 
@@ -332,7 +319,6 @@ public class FootstepPlannerUI
          messager.addTopicListener(RobotConfigurationData, robotVisualizer::submitNewConfiguration);
 
          mainTabController.setFullRobotModel(robotVisualizer.getFullRobotModel());
-         robotOperationTabController.setFullRobotModel(robotVisualizer.getFullRobotModel(), fullHumanoidRobotModelFactory);
          view3dFactory.addNodeToView(robotVisualizer.getRootNode());
          robotVisualizer.start();
          messager.addTopicListener(ShowRobot, show -> robotVisualizer.getRootNode().setVisible(show));
@@ -401,11 +387,7 @@ public class FootstepPlannerUI
       messager.addTopicListener(HeightMapData, data -> planarRegionViewer.clear());
       messager.addTopicListener(PlanarRegionData, data -> heightMapVisualizer.clear());
       messager.addTopicListener(ShowHeightMap, show -> heightMapVisualizer.getRoot().setVisible(show));
-
-      if (auxiliaryRobotData != null)
-      {
-         setupDataSetLoadBingings(auxiliaryRobotData);
-      }
+      setupDataSetLoadBingings(auxiliaryRobotData);
 
       centerBorderPane.setCenter(subScene);
 
@@ -441,7 +423,7 @@ public class FootstepPlannerUI
          messager.submitMessage(PlanarRegionData, dataSet.getPlanarRegionsList());
 
          RigidBodyTransform robotRootJoint = new RigidBodyTransform();
-         if (dataSet.hasPlannerInput())
+         if (dataSet.hasPlannerInput() && auxiliaryRobotData != null)
          {
             robotRootJoint.getTranslation().set(dataSet.getPlannerInput().getStartPosition());
             robotRootJoint.getRotation().setYawPitchRoll(dataSet.getPlannerInput().getStartYaw(), 0.0, 0.0);
@@ -463,14 +445,17 @@ public class FootstepPlannerUI
          HeightMapMessage message = dataSetName.getMessage();
          messager.submitMessage(HeightMapData, message);
 
-         RigidBodyTransform robotRootJoint = new RigidBodyTransform();
-         robotRootJoint.getTranslation().set(dataSetName.getStart().getPosition());
-         robotRootJoint.getRotation().setYawPitchRoll(dataSetName.getStart().getYaw(), 0.0, 0.0);
-         robotRootJoint.getTranslation().sub(auxiliaryRobotData.getRootJointToMidFootOffset());
-         robotVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
+         if (auxiliaryRobotData != null)
+         {
+            RigidBodyTransform robotRootJoint = new RigidBodyTransform();
+            robotRootJoint.getTranslation().set(dataSetName.getStart().getPosition());
+            robotRootJoint.getRotation().setYawPitchRoll(dataSetName.getStart().getYaw(), 0.0, 0.0);
+            robotRootJoint.getTranslation().sub(auxiliaryRobotData.getRootJointToMidFootOffset());
+            robotVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
 
-         if (robotIKVisualizer != null)
-            robotIKVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
+            if (robotIKVisualizer != null)
+               robotIKVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
+         }
 
          messager.submitMessage(GoalMidFootPosition, dataSetName.getGoal().getPosition());
          messager.submitMessage(GoalMidFootOrientation, new Quaternion(dataSetName.getGoal().getYaw(), 0.0, 0.0));
@@ -479,16 +464,6 @@ public class FootstepPlannerUI
 
       messager.addTopicListener(DataSetSelected, dataSetName -> Platform.runLater(() -> dataSetLoader.accept(dataSetName)));
       messager.addTopicListener(HeightMapDataSetSelected, dataSetName -> Platform.runLater(() -> heightMapDataSetLoader.accept(dataSetName)));
-   }
-
-   public void setRobotLowLevelMessenger(RobotLowLevelMessenger robotLowLevelMessenger)
-   {
-      robotOperationTabController.setRobotLowLevelMessenger(robotLowLevelMessenger);
-   }
-
-   public void setREAStateRequestPublisher(IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher)
-   {
-      robotOperationTabController.setREAStateRequestPublisher(reaStateRequestPublisher);
    }
 
    public JavaFXMessager getMessager()
@@ -503,7 +478,6 @@ public class FootstepPlannerUI
       footstepPlannerLogVisualizerController.onPrimaryStageLoaded();
       bodyPathLogVisualizerController.onPrimaryStageLoaded();
       footstepPlannerParametersUIController.onPrimaryStageLoaded();
-      visibilityGraphsParametersUIController.onPrimaryStageLoaded();
       aStarBodyPathParametersUIController.onPrimaryStageLoaded();
       swingPlannerParametersUIController.onPrimaryStageLoaded();
    }
@@ -553,7 +527,6 @@ public class FootstepPlannerUI
 
    public static FootstepPlannerUI createUI(Stage primaryStage,
                                             JavaFXMessager messager,
-                                            VisibilityGraphsParametersBasics visibilityGraphsParameters,
                                             AStarBodyPathPlannerParametersBasics aStarBodyPathParameters,
                                             FootstepPlannerParametersBasics plannerParameters,
                                             SwingPlannerParametersBasics swingPlannerParameters,
@@ -574,7 +547,6 @@ public class FootstepPlannerUI
 
       return new FootstepPlannerUI(primaryStage,
                                    messager,
-                                   visibilityGraphsParameters,
                                    aStarBodyPathParameters,
                                    plannerParameters,
                                    swingPlannerParameters,

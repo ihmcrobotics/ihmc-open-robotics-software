@@ -34,7 +34,6 @@ import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 
 public class GravityCoriolisExternalWrenchMatrixCalculatorTest
 {
@@ -219,8 +218,11 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
       }
    }
 
-   private void compareAgainstInverseDynamicsCalculator(Random random, int iteration, List<? extends JointBasics> joints,
-                                                        Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches, List<? extends JointReadOnly> jointsToIgnore,
+   private void compareAgainstInverseDynamicsCalculator(Random random,
+                                                        int iteration,
+                                                        List<? extends JointBasics> joints,
+                                                        Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
+                                                        List<? extends JointReadOnly> jointsToIgnore,
                                                         double epsilon)
    {
       MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
@@ -232,7 +234,9 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
       rootBody.updateFramesRecursively();
 
       double gravity = EuclidCoreRandomTools.nextDouble(random, -10.0, -1.0);
-      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(multiBodySystemInput, true, false);
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(multiBodySystemInput);
+      inverseDynamicsCalculator.setConsiderCoriolisAndCentrifugalForces(true);
+      inverseDynamicsCalculator.setConsiderJointAccelerations(false);
       inverseDynamicsCalculator.setGravitionalAcceleration(gravity);
       GravityCoriolisExternalWrenchMatrixCalculator gcewmCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(multiBodySystemInput);
       gcewmCalculator.setGravitionalAcceleration(gravity);
@@ -296,8 +300,8 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
                   }
                   else
                   {
-                     SpatialAccelerationReadOnly actualRelativeAcceleration = gcewmCalculator.getAccelerationProvider().getRelativeAcceleration(rigidBody,
-                                                                                                                                                otherRigidBody);
+                     SpatialAccelerationReadOnly actualRelativeAcceleration = gcewmCalculator.getAccelerationProvider()
+                                                                                             .getRelativeAcceleration(rigidBody, otherRigidBody);
                      MecanoTestTools.assertSpatialAccelerationEquals(expectedRelativeAcceleration, actualRelativeAcceleration, epsilon);
                   }
                }
@@ -312,7 +316,9 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
 
    public static Map<RigidBodyReadOnly, WrenchReadOnly> nextExternalWrenches(Random random, List<? extends JointReadOnly> joints)
    {
-      return joints.stream().filter(j -> random.nextBoolean()).map(j -> j.getSuccessor())
+      return joints.stream()
+                   .filter(j -> random.nextBoolean())
+                   .map(j -> j.getSuccessor())
                    .collect(Collectors.toMap(b -> b, b -> nextWrench(random, b.getBodyFixedFrame(), b.getBodyFixedFrame())));
    }
 }

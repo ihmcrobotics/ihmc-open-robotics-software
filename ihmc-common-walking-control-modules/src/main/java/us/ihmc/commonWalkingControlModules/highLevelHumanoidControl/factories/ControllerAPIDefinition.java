@@ -34,6 +34,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
+import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 
@@ -51,6 +52,7 @@ public class ControllerAPIDefinition
       /** Commands supported by bipedal walking controller {@link WalkingControllerState} */
       commands.add(ArmTrajectoryCommand.class);
       commands.add(HandTrajectoryCommand.class);
+      commands.add(LegTrajectoryCommand.class);
       commands.add(FootTrajectoryCommand.class);
       commands.add(HeadTrajectoryCommand.class);
       commands.add(NeckTrajectoryCommand.class);
@@ -78,17 +80,20 @@ public class ControllerAPIDefinition
       commands.add(ClearDelayQueueCommand.class);
       commands.add(MomentumTrajectoryCommand.class);
       commands.add(CenterOfMassTrajectoryCommand.class);
-      commands.add(StepConstraintRegionCommand.class);
-      commands.add(StepConstraintsListCommand.class);
       commands.add(HandWrenchTrajectoryCommand.class);
 
       /** Commands supported by the fast-walking controller, not in this repo */
       commands.add(DirectionalControlInputCommand.class);
+      commands.add(FastWalkingGaitParametersCommand.class);
 
       /** Commands supported by multi-contact controller, not in this repo */
       commands.add(MultiContactTrajectoryCommand.class);
       commands.add(MultiContactTrajectorySequenceCommand.class);
       commands.add(MultiContactBalanceStatusCommand.class);
+      commands.add(MultiContactTimedContactSequenceCommand.class);
+
+      /** Commands supported by the Crocoddyl control state */
+      commands.add(CrocoddylSolverTrajectoryCommand.class);
 
       /** Command supported by the joint-space controller {@link JointspacePositionControllerState} */
       commands.add(WholeBodyJointspaceTrajectoryCommand.class);
@@ -112,7 +117,8 @@ public class ControllerAPIDefinition
       statusMessages.add(TaskspaceTrajectoryStatusMessage.class);
       statusMessages.add(JointDesiredOutputMessage.class);
       statusMessages.add(RobotDesiredConfigurationData.class);
-      statusMessages.add(MultiContactBalanceStatus.class);
+      statusMessages.add(FootstepQueueStatusMessage.class);
+      statusMessages.add(QueuedFootstepStatusMessage.class);
 
       /** Statuses supported by multi-contact controller, not in this repo */
       statusMessages.add(MultiContactBalanceStatus.class);

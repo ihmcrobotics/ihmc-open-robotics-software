@@ -7,7 +7,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_features2d.SimpleBlobDetector;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -20,7 +20,7 @@ import us.ihmc.tools.thread.GuidedSwapReference;
 public class RDXCalibrationPatternDetectionUI
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiPanel panel = new ImGuiPanel("Calibration Pattern", this::renderImGuiWidgets);
+   private final RDXPanel panel = new RDXPanel("Calibration Pattern", this::renderImGuiWidgets);
    private final Mat bgrSourceCopy;
    private final Mat grayscaleImage;
    private final SimpleBlobDetector simpleBlobDetector;
@@ -148,7 +148,7 @@ public class RDXCalibrationPatternDetectionUI
       ImGui.text("Pattern found: " + patternFound);
    }
 
-   public ImGuiPanel getPanel()
+   public RDXPanel getPanel()
    {
       return panel;
    }

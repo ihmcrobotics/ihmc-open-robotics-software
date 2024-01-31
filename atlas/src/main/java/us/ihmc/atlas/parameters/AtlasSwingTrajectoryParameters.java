@@ -5,9 +5,9 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 
 public class AtlasSwingTrajectoryParameters extends SwingTrajectoryParameters
 {
-   private final RobotTarget target;
-   private final double modelScale;
-   private final boolean runningOnRealRobot;
+   protected final RobotTarget target;
+   protected final double modelScale;
+   protected final boolean runningOnRealRobot;
 
    public AtlasSwingTrajectoryParameters(RobotTarget target, double modelScale)
    {
@@ -15,6 +15,24 @@ public class AtlasSwingTrajectoryParameters extends SwingTrajectoryParameters
       this.modelScale = modelScale;
 
       runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
+   }
+
+   @Override
+   public double getMinSwingHeight()
+   {
+      return 0.10 * modelScale;
+   }
+
+   @Override
+   public double getDefaultSwingHeight()
+   {
+      return getMinSwingHeight();
+   }
+   
+   @Override
+   public double getMaxSwingHeight()
+   {
+      return 0.40 * modelScale;
    }
 
    @Override

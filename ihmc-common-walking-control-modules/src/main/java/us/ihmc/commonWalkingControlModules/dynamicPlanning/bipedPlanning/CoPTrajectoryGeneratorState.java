@@ -7,7 +7,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -37,8 +36,7 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
    private final YoFramePoint3D initialCoP;
 
    private final SideDependentList<FixedFrameConvexPolygon2DBasics> footPolygonsInSole = new SideDependentList<>();
-   private final SideDependentList<FixedFramePose3DBasics> footPoses = new SideDependentList<>();
-   private final SideDependentList<PoseReferenceFrame> soleContactFrames = new SideDependentList<>();
+   private final SideDependentList<FixedFramePose3DBasics> currentFootPoses = new SideDependentList<>();
 
    public CoPTrajectoryGeneratorState(YoRegistry registry)
    {
@@ -66,16 +64,14 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
       {
          YoFramePose3D footPose = new YoFramePose3D(robotSide.getCamelCaseName() + "FootPose", ReferenceFrame.getWorldFrame(), registry);
          YoSaveableModuleStateTools.registerYoFramePose3DToSave(footPose, this);
-         footPoses.put(robotSide, footPose);
+         currentFootPoses.put(robotSide, footPose);
 
          PoseReferenceFrame soleFrame = new PoseReferenceFrame(robotSide.getCamelCaseName() + "SoleFrame", footPose);
-         soleContactFrames.put(robotSide, soleFrame);
-
          footPose.attachVariableChangedListener(v -> soleFrame.setPoseAndUpdate(footPose));
 
          List<YoFramePoint2D> vertexBuffer = new ArrayList<>();
          String prefix = robotSide.getCamelCaseName() + "FootPolygonInSole";
-         for (int i = 0; i < 6; i++)
+         for (int i = 0; i < 8; i++)
          {
             YoFramePoint2D vertex = new YoFramePoint2D(prefix + "_" + i, soleFrame, registry);
             YoSaveableModuleStateTools.registerYoTuple2DToSave(vertex, this);
@@ -100,7 +96,7 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
 
    public void initializeStance(RobotSide robotSide, FrameConvexPolygon2DReadOnly supportPolygon, ReferenceFrame soleFrame)
    {
-      footPoses.get(robotSide).setFromReferenceFrame(soleFrame);
+      currentFootPoses.get(robotSide).setFromReferenceFrame(soleFrame);
       footPolygonsInSole.get(robotSide).setMatchingFrame(supportPolygon, false);
    }
 
@@ -124,9 +120,9 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
       return footstepTimings.get(index);
    }
 
-   public FramePose3DReadOnly getFootPose(RobotSide robotSide)
+   public FramePose3DReadOnly getCurrentFootPose(RobotSide robotSide)
    {
-      return footPoses.get(robotSide);
+      return currentFootPoses.get(robotSide);
    }
 
    public FrameConvexPolygon2DReadOnly getFootPolygonInSole(RobotSide robotSide)

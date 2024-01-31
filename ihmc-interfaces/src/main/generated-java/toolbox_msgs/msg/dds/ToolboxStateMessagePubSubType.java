@@ -15,7 +15,7 @@ public class ToolboxStateMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2ef84ac5bb57bd393272385767b8c1c6a6a48d6de3938c44b73bd096edcb1855";
+   		return "53fdde5b39d13d9984937a383e810a44bc8212d5d5014cf6c641f10988c67069";
    }
    
    @Override

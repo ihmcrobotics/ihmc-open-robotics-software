@@ -15,7 +15,7 @@ public class SwingPlanningRequestPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "39f19804222fad9e51c633e400f3ad95d572f388d93fc69f6f185411818455a5";
+   		return "ac6f8510725a3f8c0e50772c9d3e56e6d576a60aed233b4b793232b44101bb14";
    }
    
    @Override

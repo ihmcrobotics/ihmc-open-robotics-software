@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -17,7 +18,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
-import us.ihmc.rdx.ui.gizmo.BoxRayIntersection;
+import us.ihmc.robotics.interaction.BoxRayIntersection;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -43,7 +44,7 @@ public class RDXFootstepGraphic implements RenderableProvider
 
    public RDXFootstepGraphic(SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints, RobotSide side)
    {
-      this(controllerFootGroundContactPoints.get(side), FOOT_COLORS.get(side));
+      this(controllerFootGroundContactPoints.get(side), new Color(FOOT_COLORS.get(side)));
    }
 
    public RDXFootstepGraphic(ArrayList<Point2D> controllerFootGroundContactPoints, Color color)
@@ -67,6 +68,7 @@ public class RDXFootstepGraphic implements RenderableProvider
       {
          meshBuilder.addMultiLine(vertices, 0.01, color, true);
       }, "footstepGraphic" + INDEX.getAndIncrement()));
+      LibGDXTools.setOpacity(modelInstance, color.a);
    }
 
    public void setupTooltip(RDX3DPanel panel3D, String text)
@@ -98,9 +100,9 @@ public class RDXFootstepGraphic implements RenderableProvider
          tooltip.setInput(input);
    }
 
-   public void setTransparency(double opacity)
+   public void setOpacity(double opacity)
    {
-      color.a = (float) opacity; // TODO: Add blending mode attribute
+      color.a = (float) opacity;
    }
 
    public void setColor(Color color)
@@ -113,6 +115,11 @@ public class RDXFootstepGraphic implements RenderableProvider
    public void setPose(Pose3DReadOnly pose)
    {
       LibGDXTools.toLibGDX(pose, tempTransform, modelInstance.transform);
+   }
+
+   public void setPoseFromReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      modelInstance.setTransformToReferenceFrame(referenceFrame);
    }
 
    @Override

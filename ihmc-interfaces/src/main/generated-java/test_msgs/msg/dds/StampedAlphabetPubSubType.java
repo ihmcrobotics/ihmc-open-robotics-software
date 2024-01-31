@@ -11,6 +11,18 @@ package test_msgs.msg.dds;
 public class StampedAlphabetPubSubType implements us.ihmc.pubsub.TopicDataType<test_msgs.msg.dds.StampedAlphabet>
 {
    public static final java.lang.String name = "test_msgs::msg::dds_::StampedAlphabet_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "e1c233f99f6ac7ffddc7aec9cc66650c28744c0b82814444b76060e45c2083b8";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

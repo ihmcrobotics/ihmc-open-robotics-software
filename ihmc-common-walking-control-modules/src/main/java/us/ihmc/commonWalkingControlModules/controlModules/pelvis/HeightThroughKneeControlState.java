@@ -31,6 +31,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -243,8 +244,7 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
    @Override
    public boolean getControlHeightWithMomentum()
    {
-      // FIXME this should be false?
-      return true;
+      return false;
    }
 
    @Override

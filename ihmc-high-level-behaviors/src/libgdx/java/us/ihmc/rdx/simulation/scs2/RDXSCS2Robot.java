@@ -33,7 +33,7 @@ public class RDXSCS2Robot
 
    public void create(RDXYoManager yoManager)
    {
-      rootBody = RDXMultiBodySystemFactories.toYoGDXMultiBodySystem(originalRigidBody,
+      rootBody = RDXMultiBodySystemFactories.toYoRDXMultiBodySystem(originalRigidBody,
                                                                     ReferenceFrame.getWorldFrame(),
                                                                     robotDefinition,
                                                                     mirroredRobotRegistry,

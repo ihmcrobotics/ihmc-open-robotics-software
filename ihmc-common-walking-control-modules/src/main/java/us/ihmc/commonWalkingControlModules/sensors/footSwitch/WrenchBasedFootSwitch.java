@@ -10,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
@@ -62,7 +61,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    private final double footMaxX;
 
    private final YoFixedFrameSpatialVector yoFootForceTorque;
-   private final YoFixedFrameSpatialVector yoFootForceTorqueInFoot;
+   private final YoFixedFrameSpatialVector yoFootForceTorqueInSole;
    private final YoFixedFrameSpatialVector yoFootForceTorqueInWorld;
 
    private final double robotTotalWeight;
@@ -106,11 +105,11 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       ReferenceFrame measurementFrame = forceSensorData.getMeasurementFrame();
-      MovingReferenceFrame parentFrame = contactablePlaneBody.getFrameAfterParentJoint();
+      ReferenceFrame soleFrame = contactablePlaneBody.getSoleFrame();
       yoFootForceTorque = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "Torque", measurementFrame, registry),
                                                         new YoFrameVector3D(namePrefix + "Force", measurementFrame, registry));
-      yoFootForceTorqueInFoot = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "TorqueFootFrame", parentFrame, registry),
-                                                              new YoFrameVector3D(namePrefix + "ForceFootFrame", parentFrame, registry));
+      yoFootForceTorqueInSole = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "TorqueSoleFrame", soleFrame, registry),
+                                                              new YoFrameVector3D(namePrefix + "ForceSoleFrame", soleFrame, registry));
       yoFootForceTorqueInWorld = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "TorqueWorldFrame", worldFrame, registry),
                                                                new YoFrameVector3D(namePrefix + "ForceWorldFrame", worldFrame, registry));
 
@@ -130,7 +129,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
       alphaFootLoadFiltering.set(0.1);
       footLoadPercentage = new AlphaFilteredYoVariable(namePrefix + "FootLoadPercentage", registry, alphaFootLoadFiltering);
 
-      centerOfPressure = new YoFramePoint2D(namePrefix + "CenterOfPressure", "", contactablePlaneBody.getSoleFrame(), registry);
+      centerOfPressure = new YoFramePoint2D(namePrefix + "CenterOfPressure", "", soleFrame, registry);
 
       footWrench = new Wrench(measurementFrame, (ReferenceFrame) null);
 
@@ -144,17 +143,17 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    @Override
    public void update()
    {
-      forceSensorData.getWrench(footWrench);
+      footWrench.setIncludingFrame(forceSensorData.getWrench());
 
       yoFootForceTorque.set(footWrench);
-      yoFootForceTorqueInFoot.setMatchingFrame(footWrench);
+      yoFootForceTorqueInSole.setMatchingFrame(footWrench);
       yoFootForceTorqueInWorld.setMatchingFrame(footWrench);
 
       footForceMagnitude.set(footWrench.getLinearPart().norm());
 
       // Using the force in foot frame to ensure z is up when the foot is flat.
       // Sometimes the sensor can be mounted such that z is down.
-      double forceZUp = yoFootForceTorqueInFoot.getLinearPartZ();
+      double forceZUp = yoFootForceTorqueInSole.getLinearPartZ();
 
       double fZPlus = MathTools.clamp(forceZUp, 0.0, Double.POSITIVE_INFINITY);
       footLoadPercentage.update(fZPlus / robotTotalWeight);

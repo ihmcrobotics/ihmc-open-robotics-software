@@ -5,7 +5,6 @@ import java.util.Random;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.Face3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.tools.EuclidPolytopeFactories;
@@ -41,8 +40,7 @@ public class ConvexPolytopeTerrainObjectTest
    {
       if (SHOW_VISUALIZATION)
       {
-         ConvexPolytopeTerrainObject convexPolytopeTerrainObject = new ConvexPolytopeTerrainObject(new Vector3D(Axis3D.Z),
-                                                                                                   EuclidPolytopeFactories.newIcosahedron(1.0),
+         ConvexPolytopeTerrainObject convexPolytopeTerrainObject = new ConvexPolytopeTerrainObject(EuclidPolytopeFactories.newIcosahedron(1.0),
                                                                                                    YoAppearance.AliceBlue());
          scs = new SimulationConstructionSet(new Robot("dummy"));
          scs.addStaticLinkGraphics(convexPolytopeTerrainObject.getLinkGraphics());
@@ -83,7 +81,7 @@ public class ConvexPolytopeTerrainObjectTest
 
       //For a box, verify that a point along one of the edges of the box returns the top edge of the box. If it under the box, it should return
       //negative infinity
-      ConvexPolytopeTerrainObject convexPolytopeTerrainObject = new ConvexPolytopeTerrainObject(vectorNormal, EuclidPolytopeFactories.newCube(1.0));
+      ConvexPolytopeTerrainObject convexPolytopeTerrainObject = new ConvexPolytopeTerrainObject(EuclidPolytopeFactories.newCube(1.0));
       Double heightAt = convexPolytopeTerrainObject.heightAt(0.5, 0.5, -5.0);
       assertEquals(heightAt, Double.NEGATIVE_INFINITY);
       heightAt = convexPolytopeTerrainObject.heightAt(0.5, -0.5, 1.0);
@@ -104,7 +102,7 @@ public class ConvexPolytopeTerrainObjectTest
 
          ConvexPolytope3D convexPolytope = EuclidShapeRandomTools.nextTetrahedronContainingPoint3D(random, point);
 
-         ConvexPolytopeTerrainObject convexPolytopeTerraian = new ConvexPolytopeTerrainObject(vectorNormal, convexPolytope);
+         ConvexPolytopeTerrainObject convexPolytopeTerraian = new ConvexPolytopeTerrainObject(convexPolytope);
 
          //Find heightAt for a point inside the convexPolytope
          Double heightAtPointInsideConvexPolytope = convexPolytopeTerraian.heightAt(x, y, z);
@@ -162,7 +160,7 @@ public class ConvexPolytopeTerrainObjectTest
          Point3D point = new Point3D(x, y, z);
    
          ConvexPolytope3D convexPolytope = EuclidShapeRandomTools.nextTetrahedronContainingPoint3D(random, point);
-         ConvexPolytopeTerrainObject convexPolytopeTerraian = new ConvexPolytopeTerrainObject(vectorNormal, convexPolytope);
+         ConvexPolytopeTerrainObject convexPolytopeTerraian = new ConvexPolytopeTerrainObject(convexPolytope);
          
          //check point inside the convexPolytope
          intersectionToPack.set(0, 0, 0);
@@ -244,7 +242,7 @@ public class ConvexPolytopeTerrainObjectTest
          Point3D point = new Point3D(x, y, z);
    
          ConvexPolytope3D convexPolytope = EuclidShapeRandomTools.nextTetrahedronContainingPoint3D(random, point);
-         ConvexPolytopeTerrainObject convexPolytopeTerraian = new ConvexPolytopeTerrainObject(vectorNormal, convexPolytope);
+         ConvexPolytopeTerrainObject convexPolytopeTerraian = new ConvexPolytopeTerrainObject(convexPolytope);
          
          //check point inside the convexPolytope
          normalToPack.set(0, 0, 0);
@@ -297,7 +295,7 @@ public class ConvexPolytopeTerrainObjectTest
 
          ConvexPolytope3D convexPolytope = EuclidShapeRandomTools.nextTetrahedronContainingPoint3D(random, point);
 
-         ConvexPolytopeTerrainObject convexPolytopeTerraian = new ConvexPolytopeTerrainObject(vectorNormal, convexPolytope);
+         ConvexPolytopeTerrainObject convexPolytopeTerraian = new ConvexPolytopeTerrainObject(convexPolytope);
 
          //Verify a point inside the convexPolytopeTerraian's bounding box returns true
          assertTrue(convexPolytopeTerraian.isClose(x, y, z));

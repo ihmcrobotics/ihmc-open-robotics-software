@@ -121,6 +121,45 @@ public class CinderBlockFieldEnvironment implements CommonAvatarEnvironmentInter
          return descriptions;
       }
 
+      public static List<List<CinderBlockStackDescription>> eastHillCinderBlockField(RigidBodyTransformReadOnly startPose)
+      {
+         // @formatter:off
+         int[][] stackSizes = new int[][]
+               {
+                     {0, 0, 0, 0, 0},
+                     {2, 2, 1, 2, 1},
+                     {1, 2, 2, 2, 2},
+                     {1, 1, 1, 1, 0},
+                     {0, 1, 2, 1, 0},
+                     {0, 1, 2, 1, 0},
+                     {0, 0, 0, 0, 0}
+                     };
+         // @formatter:on
+
+         CinderBlockType FLAT = CinderBlockType.FLAT;
+         CinderBlockType SLLE = CinderBlockType.SLANTED_LEFT;
+         CinderBlockType SLFW = CinderBlockType.SLANTED_FORWARD;
+         CinderBlockType SLRI = CinderBlockType.SLANTED_RIGHT;
+         CinderBlockType SLBK = CinderBlockType.SLANTED_BACK;
+
+         // @formatter:off
+         CinderBlockType[][] types = new CinderBlockType[][]
+               {
+                     {null, null, null, null, null},
+                     {FLAT, FLAT, FLAT, FLAT, FLAT},
+                     {FLAT, SLFW, FLAT, SLFW, FLAT},
+                     {SLFW, FLAT, FLAT, FLAT, null},
+                     {null, FLAT, FLAT, FLAT, null},
+                     {null, FLAT, FLAT, FLAT, null},
+                     {null, null, null, null, null}
+               };
+         // @formatter:on
+
+         RigidBodyTransform centerBasePose = new RigidBodyTransform(startPose);
+         centerBasePose.appendTranslation(0.7 * stackSizes.length * cinderBlockLength, 0.0, -0.05);
+         return grid2D(centerBasePose, stackSizes, types);
+      }
+
       public static List<List<CinderBlockStackDescription>> drcCinderBlockField(RigidBodyTransformReadOnly startPose)
       {
          // @formatter:off
@@ -197,6 +236,11 @@ public class CinderBlockFieldEnvironment implements CommonAvatarEnvironmentInter
    public List<List<Pose3D>> addDRCCinderBlockField()
    {
       return addDRCCinderBlockField(new RigidBodyTransform());
+   }
+
+   public List<List<Pose3D>> addEastHillMountainCinderBlockField()
+   {
+      return addCustomCinderBlockField2D(CinderBlockStackDescription.eastHillCinderBlockField(new RigidBodyTransform()));
    }
 
    public List<List<Pose3D>> addDRCCinderBlockField(RigidBodyTransform startPose)

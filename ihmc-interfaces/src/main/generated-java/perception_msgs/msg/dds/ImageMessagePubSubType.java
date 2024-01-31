@@ -15,7 +15,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c598f7f4bafa50e8acb073bfd6ed679efeda69ffe0d28466d49188d569000af6";
+   		return "861742e3ba65a4001a48beb5dfe643935ac3c8bc1b1014cd07c2e7a9b324d057";
    }
    
    @Override

@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
 public class ConstraintOptimizerParameters implements ConstraintOptimizerParametersReadOnly
 {
-   private double maxX = 0.05;
-   private double maxY = 0.05;
+   private double maxX = 0.5;
+   private double maxY = 0.5;
    private double deltaInside = 0.0;
    private boolean constrainMaxAdjustment = true;
    private boolean shouldPerformOptimization = true;

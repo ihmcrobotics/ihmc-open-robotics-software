@@ -3,6 +3,9 @@ package us.ihmc.behaviors.lookAndStep;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
+/**
+ * An typed input to a module as in the subsumption style architecture.
+ */
 public class TypedInput<T>
 {
    private volatile T latestData = null;

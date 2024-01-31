@@ -9,6 +9,9 @@ import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * API for position, orientation, and pose control modes.
+ */
 public abstract class RigidBodyTaskspaceControlState extends RigidBodyControlState
 {
    public static final double timeEpsilonForInitialPoint = 0.05;
@@ -27,6 +30,8 @@ public abstract class RigidBodyTaskspaceControlState extends RigidBodyControlSta
    public abstract void holdCurrent();
 
    public abstract void holdCurrentDesired();
+   
+   public abstract boolean isHybridModeActive();
 
    public boolean handleTrajectoryCommand(EuclideanTrajectoryControllerCommand command)
    {

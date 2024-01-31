@@ -6,7 +6,9 @@ import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
+import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.*;
 
@@ -23,6 +25,7 @@ public class PerceptionAPI
    public static final String FIDUCIAL_MODULE_NAME = "toolbox/fiducial_detector";
    public static final String OBJECT_DETECTOR_MODULE_NAME = "toolbox/object_detector";
 
+   public static final String SCENE_GRAPH_MODULE_NAME = "scene_graph";
    public static final String REA_MODULE_NAME = "rea";
    public static final String MAPPING_MODULE_NAME = "map";
    public static final String PERCEPTION_MODULE_NAME = "perception";
@@ -49,6 +52,7 @@ public class PerceptionAPI
    public static final ROS2Topic<?> OBJECT_DETECTOR_TOOLBOX_INPUT = OBJECT_DETECTOR_TOOLBOX.withInput();
    public static final ROS2Topic<?> OBJECT_DETECTOR_TOOLBOX_OUTPUT = OBJECT_DETECTOR_TOOLBOX.withOutput();
 
+   public static final ROS2Topic<?> SCENE_GRAPH_MODULE = IHMC_ROOT.withModule(SCENE_GRAPH_MODULE_NAME);
    public static final ROS2Topic<?> REA = IHMC_ROOT.withModule(REA_MODULE_NAME);
    public static final ROS2Topic<?> MAPPING_MODULE = IHMC_ROOT.withModule(MAPPING_MODULE_NAME);
    public static final ROS2Topic<?> PERCEPTION_MODULE = IHMC_ROOT.withModule(PERCEPTION_MODULE_NAME);
@@ -87,11 +91,14 @@ public class PerceptionAPI
    public static final ROS2Topic<ImageMessage> L515_DEPTH_IMAGE = IHMC_ROOT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
    public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE = IHMC_ROOT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
    public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE = IHMC_ROOT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("color");
+   public static final ROS2Topic<BigVideoPacket> D455_DEPTH_LARGE = IHMC_ROOT.withModule(D455_NAME).withType(BigVideoPacket.class).withSuffix("depth");
+
    public static final ROS2Topic<ImageMessage> TERRAIN_DEBUG_IMAGE
          = IHMC_ROOT.withModule(L515_NAME).withType(ImageMessage.class).withSuffix("terrain_debug_image");
    public static final ROS2Topic<BigVideoPacket> L515_DEBUG_EXTRACTION = IHMC_ROOT.withModule(L515_NAME)
                                                                                   .withType(BigVideoPacket.class)
                                                                                   .withSuffix("debug_extraction");
+   public static final ROS2Topic<Empty> REQUEST_REALSENSE_POINT_CLOUD = PERCEPTION_MODULE.withSuffix("request_realsense_point_cloud").withType(Empty.class);
    public static final SideDependentList<ROS2Topic<BigVideoPacket>> BLACKFLY_VIDEO = new SideDependentList<>(IHMC_ROOT.withModule(BLACKFLY_NAME + "left")
                                                                                                                       .withType(BigVideoPacket.class)
                                                                                                                       .withSuffix("video"),
@@ -105,12 +112,35 @@ public class PerceptionAPI
                                    IHMC_ROOT.withModule(BLACKFLY_NAME + "_fisheye")
                                             .withType(ImageMessage.class)
                                             .withSuffix("right"));
+   public static final SideDependentList<ROS2Topic<Empty>> REQUEST_BLACKFLY_COLOR_IMAGE
+         = new SideDependentList<>(PERCEPTION_MODULE.withSuffix("request_left_blackfly_color").withType(Empty.class),
+                                   PERCEPTION_MODULE.withSuffix("request_right_blackfly_color").withType(Empty.class));
+
    public static final ROS2Topic<BigVideoPacket> OUSTER_DEPTH_LARGE = IHMC_ROOT.withModule("ouster").withType(BigVideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<VideoPacket> OUSTER_DEPTH = IHMC_ROOT.withModule("ouster").withType(VideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<ImageMessage> OUSTER_DEPTH_IMAGE = IHMC_ROOT.withModule("ouster").withTypeName(ImageMessage.class).withSuffix("depth");
    public static final ROS2Topic<BigVideoPacket> BIG_VIDEO_TEST = IHMC_ROOT.withModule(BLACKFLY_NAME).withType(BigVideoPacket.class).withSuffix("test");
+   public static final ROS2Topic<Empty> REQUEST_OUSTER_DEPTH = PERCEPTION_MODULE.withSuffix("request_ouster_depth").withType(Empty.class);
 
+   public static final ROS2Topic<Empty> REQUEST_ZED_COLOR = PERCEPTION_MODULE.withSuffix("request_zed_color").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_ZED_DEPTH = PERCEPTION_MODULE.withSuffix("request_zed_depth").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_ZED_POINT_CLOUD = PERCEPTION_MODULE.withSuffix("request_zed_point_cloud").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_CENTERPOSE = PERCEPTION_MODULE.withSuffix("request_centerpose").withType(Empty.class);
+   public static final ROS2Topic<DetectedObjectPacket> CENTERPOSE_DETECTED_OBJECT = IHMC_ROOT.withModule("centerpose").withType(DetectedObjectPacket.class);
    public static final ROS2Topic<ImageMessage> ZED2_STEREO_COLOR = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("color_stereo");
+   public static final SideDependentList<ROS2Topic<ImageMessage>> ZED2_COLOR_IMAGES = new SideDependentList<>(IHMC_ROOT.withModule(ZED2_NAME)
+                                                                                                                       .withType(ImageMessage.class)
+                                                                                                                       .withSuffix("left_color"),
+                                                                                                              IHMC_ROOT.withModule(ZED2_NAME)
+                                                                                                                       .withType(ImageMessage.class)
+                                                                                                                       .withSuffix("right_color"));
+   public static final ROS2Topic<ImageMessage> ZED2_DEPTH = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("depth");
+   public static final ROS2Topic<IterativeClosestPointRequest> ICP_REQUEST = IHMC_ROOT.withModule("iterative_closest_point")
+                                                                                      .withSuffix("request")
+                                                                                      .withType(IterativeClosestPointRequest.class);
+   public static final ROS2Topic<DetectedObjectPacket> ICP_RESULT = IHMC_ROOT.withModule("iterative_closest_point")
+                                                                             .withSuffix("result")
+                                                                             .withType(DetectedObjectPacket.class);
 
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
    public static final ROS2Topic<FusedSensorHeadPointCloudMessage> FUSED_SENSOR_HEAD_POINT_CLOUD = IHMC_ROOT.withTypeName(FusedSensorHeadPointCloudMessage.class);
@@ -126,6 +156,8 @@ public class PerceptionAPI
    public static final ROS2Topic<StereoVisionPointCloudMessage> L515_POINT_CLOUD = IHMC_ROOT.withSuffix(L515_NAME)
                                                                                             .withTypeName(StereoVisionPointCloudMessage.class);
    public static final ROS2Topic<StampedPosePacket> T265_POSE = IHMC_ROOT.withSuffix(T265_NAME).withTypeName(StampedPosePacket.class);
+
+   public static final ROS2IOTopicPair<SceneGraphMessage> SCENE_GRAPH = new ROS2IOTopicPair<>(SCENE_GRAPH_MODULE.withTypeName(SceneGraphMessage.class));
 
    /** MoCap Topics */
    public static final ROS2Topic<Pose3D> MOCAP_RIGID_BODY = IHMC_ROOT.withTypeName(Pose3D.class)
@@ -146,8 +178,8 @@ public class PerceptionAPI
    /** Rapid regions are generated in Java, come with epoch second and nano timestamp, are pre-filtered for body collisions, and in world frame.
     *  They are prre filtered using the polygonizer, segmentation, and concave hull filtering parameters. There is no need for delay compensation. */
 
-   public static final ROS2Topic<FramePlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS_WITH_POSE = PERCEPTION_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class).withSuffix("perspective");
-   public static final ROS2Topic<PlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class).withSuffix("perspective");
+   public static final ROS2Topic<FramePlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS
+         = PERCEPTION_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class).withSuffix("perspective");
 
    public static final ROS2Topic<FramePlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS_WITH_POSE = PERCEPTION_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class).withSuffix("spherical");
    public static final ROS2Topic<PlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class).withSuffix("spherical");
@@ -170,10 +202,39 @@ public class PerceptionAPI
    public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_OUTPUT = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapMessage.class);
    public static final ROS2Topic<HeightMapStateRequestMessage> HEIGHT_MAP_STATE_REQUEST = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapStateRequestMessage.class);
 
-   public static final ROS2Topic<Empty> PUBLISH_LIDAR_SCAN = PERCEPTION_MODULE.withSuffix("publish_lidar_scan").withType(Empty.class);
-   public static final ROS2Topic<Empty> PUBLISH_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("publish_height_map").withType(Empty.class);
+   public static final ROS2Topic<ImageMessage> OCCUPANCY_GRID_MESSAGE = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("occupancy_grid");
+   public static final ROS2Topic<ImageMessage> HEIGHT_MAP_CROPPED = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("height_map_cropped_global");
+   public static final ROS2Topic<ImageMessage> HEIGHT_MAP_GLOBAL = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("height_map_global");
+   public static final ROS2Topic<ImageMessage> HEIGHT_MAP_LOCAL = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("height_map_local");
+
+   public static final ROS2Topic<Empty> REQUEST_LIDAR_SCAN = PERCEPTION_MODULE.withSuffix("request_lidar_scan").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_height_map").withType(Empty.class);
 
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = PERCEPTION_MODULE.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
+   public static final ROS2Topic<Empty> REQUEST_ARUCO = PERCEPTION_MODULE.withSuffix("request_aruco").withType(Empty.class);
+
+   private static final ROS2Topic<RigidBodyTransformMessage> TRANSFORM_TUNING_BASE_TOPIC = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
+                                                                                                    .withModule("transform_tuning");
+   public static final ROS2IOTopicPair<RigidBodyTransformMessage> OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING
+         = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix("object_detection_camera_to_parent"));
+
+   public static final SideDependentList<ROS2IOTopicPair<RigidBodyTransformMessage>> SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING = new SideDependentList<>();
+   static
+   {
+      SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING.set(RobotSide.LEFT,
+                                                        new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix(
+                                                              "situational_awareness_left_camera_to_parent")));
+      SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING.set(RobotSide.RIGHT,
+                                                        new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix(
+                                                              "situational_awareness_right_camera_to_parent")));
+   }
+
+   public static final ROS2IOTopicPair<RigidBodyTransformMessage> STEPPING_CAMERA_TO_PARENT_TUNING
+         = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix("stepping_camera_to_parent"));
+   public static final ROS2IOTopicPair<RigidBodyTransformMessage> EXPERIMENTAL_CAMERA_TO_PARENT_TUNING
+         = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix("experimental_camera_to_parent"));
+   public static final ROS2IOTopicPair<RigidBodyTransformMessage> OUSTER_TO_CHEST_TUNING
+         = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix("ouster_to_chest"));
 
    public static ROS2Topic<DoorLocationPacket> getDoorLocationTopic(String robotName)
    {

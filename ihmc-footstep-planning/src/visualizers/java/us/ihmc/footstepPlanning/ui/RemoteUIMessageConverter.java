@@ -16,9 +16,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.BodyPathPlanningResult;
-import us.ihmc.footstepPlanning.FootstepPlannerRequestedAction;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerAPI;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -36,6 +34,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -87,6 +86,7 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Boolean> assumeFlatGround;
    private final AtomicReference<Double> goalDistanceProximity;
    private final AtomicReference<Double> goalYawProximity;
+   private final AtomicReference<FootstepPlan> referencePlan;
 
    private final AtomicReference<ConvexPolygon2D> postProcessingLeftFootSupportPolygonReference;
    private final AtomicReference<ConvexPolygon2D> postProcessingRightFootSupportPolygonReference;
@@ -162,6 +162,7 @@ public class RemoteUIMessageConverter
       assumeFlatGround = messager.createInput(FootstepPlannerMessagerAPI.AssumeFlatGround, false);
       goalDistanceProximity = messager.createInput(FootstepPlannerMessagerAPI.GoalDistanceProximity, 0.0);
       goalYawProximity = messager.createInput(FootstepPlannerMessagerAPI.GoalYawProximity, 0.0);
+      referencePlan = messager.createInput(FootstepPlannerMessagerAPI.ReferencePlan, null);
 
       postProcessingLeftFootSupportPolygonReference = messager.createInput(FootstepPlannerMessagerAPI.LeftFootStartSupportPolygon, null);
       postProcessingRightFootSupportPolygonReference = messager.createInput(FootstepPlannerMessagerAPI.RightFootStartSupportPolygon, null);
@@ -501,8 +502,6 @@ public class RemoteUIMessageConverter
          packet.setPlannerRequestId(plannerRequestIdReference.get());
       if (plannerHorizonLengthReference.get() != null)
          packet.setHorizonLength(plannerHorizonLengthReference.get());
-      if (plannerPlanarRegionReference.get() != null)
-         packet.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(plannerPlanarRegionReference.get()));
       if (heightMapReference.get() != null)
          packet.getHeightMapMessage().set(heightMapReference.get());
       packet.setAssumeFlatGround(assumeFlatGround.get());
@@ -511,6 +510,9 @@ public class RemoteUIMessageConverter
       packet.setSnapGoalSteps(snapGoalSteps.get());
       packet.setAbortIfGoalStepSnappingFails(abortIfGoalStepSnapFails.get());
       packet.setMaxIterations(maxIterations.get());
+
+      if (referencePlan.get() != null && !referencePlan.get().isEmpty())
+         packet.getReferencePlan().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(referencePlan.get(), -1.0, -1.0));
 
       footstepPlanningRequestPublisher.publish(packet);
    }

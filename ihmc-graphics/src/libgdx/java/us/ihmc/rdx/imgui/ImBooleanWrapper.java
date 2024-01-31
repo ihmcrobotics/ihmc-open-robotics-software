@@ -60,4 +60,14 @@ public class ImBooleanWrapper
    {
       return changed;
    }
+
+   public boolean get()
+   {
+      return wrappedValueGetter.get();
+   }
+
+   public void set(boolean value)
+   {
+      wrappedValueSetter.accept(value);
+   }
 }

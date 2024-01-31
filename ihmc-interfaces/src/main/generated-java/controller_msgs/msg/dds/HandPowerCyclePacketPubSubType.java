@@ -15,7 +15,7 @@ public class HandPowerCyclePacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e1be3504de37b6b78638898b12d09f98ef64da6fcc1b770276c9592b7bc0d8bc";
+   		return "305501093263c6dfd05e9cc906593bfc424c3dd914009566d3e8bf38ed1bfb20";
    }
    
    @Override

@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.7"
-   id("us.ihmc.ihmc-cd") version "1.24"
+   id("us.ihmc.ihmc-ci") version "8.3"
+   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -29,12 +29,12 @@ mainDependencies {
    api("org.boofcv:boofcv-recognition:0.36")
    api("com.github.wendykierp:JTransforms:3.1")
 
-   api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:euclid-geometry:0.20.0")
-   api("us.ihmc:euclid-frame:0.20.0")
-   api("us.ihmc:euclid-shape:0.20.0")
-   api("us.ihmc:euclid-frame-shape:0.20.0")
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.3")
+   api("us.ihmc:euclid:0.21.0")
+   api("us.ihmc:euclid-geometry:0.21.0")
+   api("us.ihmc:euclid-frame:0.21.0")
+   api("us.ihmc:euclid-shape:0.21.0")
+   api("us.ihmc:euclid-frame-shape:0.21.0")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.8")
    api("us.ihmc:ihmc-humanoid-behaviors:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-simple-whole-body-walking:source")
@@ -58,7 +58,6 @@ mainDependencies {
    api("us.ihmc:ihmc-parameter-tuner:source")
    api("us.ihmc:ihmc-footstep-planning-visualizers:source")
    api("us.ihmc:ihmc-high-level-behaviors:source")
-   api("us.ihmc:ihmc-high-level-behaviors-javafx:source")
 }
 
 testDependencies {

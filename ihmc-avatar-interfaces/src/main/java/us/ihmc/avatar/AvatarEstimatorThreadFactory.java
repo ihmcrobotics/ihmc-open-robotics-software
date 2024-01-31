@@ -27,7 +27,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -57,9 +56,10 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.stateEstimation.ekf.HumanoidRobotEKFWithSimpleJoints;
 import us.ihmc.stateEstimation.ekf.LeggedRobotEKF;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorControllerFactory;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
-import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -89,6 +89,7 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<YoGraphicsListRegistry> yoGraphicsListRegistryField = new OptionalFactoryField<>("yoGraphicsListRegistry");
    private final OptionalFactoryField<StateEstimatorController> mainStateEstimatorField = new OptionalFactoryField<>("mainEstimatorController");
    private final OptionalFactoryField<PairList<BooleanSupplier, StateEstimatorController>> secondaryStateEstimatorsField = new OptionalFactoryField<>("secondaryEstimatorControllers");
+   private final OptionalFactoryField<List<StateEstimatorControllerFactory>> secondaryStateEstimatorFactoriesField = new OptionalFactoryField<>("secondaryEstimatorControllerFactories");
 
    private final OptionalFactoryField<RobotConfigurationDataPublisher> robotConfigurationDataPublisherField = new OptionalFactoryField<>("robotConfigurationDataPublisher");
 
@@ -119,7 +120,6 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<SensorReader> sensorReaderField = new OptionalFactoryField<>("sensorReader");
    private final OptionalFactoryField<SensorOutputMapReadOnly> rawSensorOutputMapField = new OptionalFactoryField<>("rawSensorOutputMap");
    private final OptionalFactoryField<SensorOutputMapReadOnly> processedSensorOutputMapField = new OptionalFactoryField<>("processedSensorOutputMap");
-   private final OptionalFactoryField<ForceSensorStateUpdater> forceSensorStateUpdaterField = new OptionalFactoryField<>("forceSensorStateUpdater");
 
    private final OptionalFactoryField<JointDesiredOutputWriter> jointDesiredOutputWriterField = new OptionalFactoryField<>("jointDesiredOutputWriter");
 
@@ -377,6 +377,17 @@ public class AvatarEstimatorThreadFactory
       addSecondaryStateEstimators(() -> false, secondaryStateEstimator);
    }
 
+
+   /**
+    * Optional: adds a secondary state estimator factory to run in parallel to the main state estimator.
+    *
+    * @param secondaryStateEstimator the secondary state estimator.
+    */
+   public void addSecondaryStateEstimatorFactory(StateEstimatorControllerFactory secondaryStateEstimator)
+   {
+      getSecondaryStateEstimatorFactories().add(secondaryStateEstimator);
+   }
+
    /**
     * Optional: adds a secondary state estimator to run in parallel to the main state estimator.
     *
@@ -423,20 +434,24 @@ public class AvatarEstimatorThreadFactory
          jointDesiredOutputWriterField.get().setJointDesiredOutputList(getDesiredJointDataHolder());
          getEstimatorRegistry().addChild(jointDesiredOutputWriterField.get().getYoVariableRegistry());
       }
+      if (secondaryStateEstimatorFactoriesField.hasValue())
+      {
+         for (StateEstimatorControllerFactory stateEstimatorControllerFactory : secondaryStateEstimatorFactoriesField.get())
+            addSecondaryStateEstimator(stateEstimatorControllerFactory.createStateEstimator(getEstimatorFullRobotModel(), getSensorReader()));
+      }
 
       AvatarEstimatorThread avatarEstimatorThread = new AvatarEstimatorThread(getSensorReader(),
                                                                               getEstimatorFullRobotModel(),
                                                                               getHumanoidRobotContextData(),
                                                                               getMainStateEstimator(),
                                                                               getSecondaryStateEstimators(),
-                                                                              getForceSensorStateUpdater(),
                                                                               createControllerCrashPublisher(),
                                                                               getEstimatorRegistry(),
                                                                               getYoGraphicsListRegistry());
 
       avatarEstimatorThread.addRobotController(new RobotJointLimitWatcher(getEstimatorFullRobotModel().getOneDoFJoints(), getRawSensorOutputMap()));
       RobotConfigurationDataPublisher robotConfigurationDataPublisher = getRobotConfigurationDataPublisher();
-      if(robotConfigurationDataPublisher != null)
+      if (robotConfigurationDataPublisher != null)
       {
          avatarEstimatorThread.setRawOutputWriter(robotConfigurationDataPublisher);
       }
@@ -464,7 +479,18 @@ public class AvatarEstimatorThreadFactory
       estimatorFactory.setCenterOfPressureDataHolderFromController(getCenterOfPressureDataHolderFromController());
       estimatorFactory.setRobotMotionStatusFromController(getRobotMotionStatusFromController());
       estimatorFactory.setExternalPelvisCorrectorSubscriber(getExternalPelvisPoseSubscriberField());
-      return estimatorFactory.createStateEstimator(getEstimatorRegistry(), getYoGraphicsListRegistry());
+      DRCKinematicsBasedStateEstimator stateEstimator = estimatorFactory.createStateEstimator(getEstimatorRegistry(), getYoGraphicsListRegistry());
+
+      if (realtimeROS2NodeField.hasValue())
+      {
+         ForceSensorStateUpdater forceSensorStateUpdater = stateEstimator.getForceSensorStateUpdater();
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2NodeField.get(),
+                                                       RequestWristForceSensorCalibrationPacket.class,
+                                                       inputTopicField.get(),
+                                                       subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
+      }
+
+      return stateEstimator;
    }
 
    public StateEstimatorController createEKFStateEstimator()
@@ -519,35 +545,6 @@ public class AvatarEstimatorThreadFactory
          return inputTopicField.get();
       else
          return null;
-   }
-
-   public ForceSensorStateUpdater getForceSensorStateUpdater()
-   {
-      if (!useStateEstimator())
-         return null;
-      if (!forceSensorStateUpdaterField.hasValue())
-      {
-         // Updates the force sensor data when running with the estimator.
-         forceSensorStateUpdaterField.set(new ForceSensorStateUpdater(getRootJoint(),
-                                                                      getProcessedSensorOutputMap(),
-                                                                      getForceSensorDataHolder(),
-                                                                      stateEstimatorParametersField.get(),
-                                                                      getGravity(),
-                                                                      getRobotMotionStatusFromController(),
-                                                                      getYoGraphicsListRegistry(),
-                                                                      getEstimatorRegistry()));
-
-         if (realtimeROS2NodeField.hasValue())
-         {
-            RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
-            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2NodeField.get(),
-                                                          RequestWristForceSensorCalibrationPacket.class,
-                                                          inputTopicField.get(),
-                                                          subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
-            forceSensorStateUpdaterField.get().setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
-         }
-      }
-      return forceSensorStateUpdaterField.get();
    }
 
    private IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> createControllerCrashPublisher()
@@ -779,6 +776,13 @@ public class AvatarEstimatorThreadFactory
       return secondaryStateEstimatorsField.get();
    }
 
+   public List<StateEstimatorControllerFactory> getSecondaryStateEstimatorFactories()
+   {
+      if (!secondaryStateEstimatorFactoriesField.hasValue())
+         secondaryStateEstimatorFactoriesField.set(new ArrayList<>());
+      return secondaryStateEstimatorFactoriesField.get();
+   }
+
    public RobotConfigurationDataPublisher getRobotConfigurationDataPublisher()
    {
       if (!realtimeROS2NodeField.hasValue())
@@ -787,15 +791,15 @@ public class AvatarEstimatorThreadFactory
       if (!robotConfigurationDataPublisherField.hasValue())
       {
          ForceSensorDataHolderReadOnly forceSensorDataHolderToSend = getForceSensorDataHolder();
-         if (getForceSensorStateUpdater() != null && getForceSensorStateUpdater().getForceSensorOutputWithGravityCancelled() != null)
-            forceSensorDataHolderToSend = getForceSensorStateUpdater().getForceSensorOutputWithGravityCancelled();
+         if (getMainStateEstimator() != null && getMainStateEstimator().getForceSensorOutputWithGravityCancelled() != null)
+            forceSensorDataHolderToSend = getMainStateEstimator().getForceSensorOutputWithGravityCancelled();
 
          RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
          factory.setDefinitionsToPublish(getEstimatorFullRobotModel());
          factory.setSensorSource(getEstimatorFullRobotModel(), forceSensorDataHolderToSend, getRawSensorOutputMap());
          factory.setRobotMotionStatusHolder(getRobotMotionStatusFromController());
          factory.setROS2Info(realtimeROS2NodeField.get(), outputTopicField.get());
-         factory.setPublishPeriod(Conversions.secondsToNanoseconds(UnitConversions.hertzToSeconds(120)));
+         factory.setPublishPeriod(Conversions.secondsToNanoseconds(StateEstimatorParameters.ROBOT_CONFIGURATION_DATA_PUBLISH_DT));
          robotConfigurationDataPublisherField.set(factory.createRobotConfigurationDataPublisher());
       }
       return robotConfigurationDataPublisherField.get();

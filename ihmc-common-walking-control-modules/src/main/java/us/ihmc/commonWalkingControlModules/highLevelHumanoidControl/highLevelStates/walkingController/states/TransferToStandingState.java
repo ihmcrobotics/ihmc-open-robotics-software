@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -29,11 +28,9 @@ public class TransferToStandingState extends WalkingState
 
    private final WalkingMessageHandler walkingMessageHandler;
    private final TouchdownErrorCompensator touchdownErrorCompensator;
-   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final CenterOfMassHeightManager comHeightManager;
-   private final BalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
 
@@ -46,16 +43,14 @@ public class TransferToStandingState extends WalkingState
                                   WalkingFailureDetectionControlModule failureDetectionControlModule,
                                   YoRegistry parentRegistry)
    {
-      super(WalkingStateEnum.TO_STANDING, parentRegistry);
+      super(WalkingStateEnum.TO_STANDING, managerFactory, controllerToolbox, parentRegistry);
       maxICPErrorToSwitchToStanding.set(0.025);
 
       this.walkingMessageHandler = walkingMessageHandler;
       this.touchdownErrorCompensator = touchdownErrorCompensator;
-      this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
-      balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
 
@@ -66,8 +61,8 @@ public class TransferToStandingState extends WalkingState
    public void doAction(double timeInState)
    {
       balanceManager.computeICPPlan();
-      controllerToolbox.getWalkingTrajectoryPath().updateTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT),
-                                                                     feetManager.getCurrentConstraintType(RobotSide.RIGHT));
+      controllerToolbox.getWalkingTrajectoryPath()
+                       .updateTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT), feetManager.getCurrentConstraintType(RobotSide.RIGHT));
 
       switchToPointToeOffIfAlreadyInLine();
 
@@ -86,7 +81,7 @@ public class TransferToStandingState extends WalkingState
 
       // switch to point toe off from line toe off
       if (feetManager.getCurrentConstraintType(sideOnToes) == FootControlModule.ConstraintType.TOES && !feetManager.isUsingPointContactInToeOff(sideOnToes)
-            && !feetManager.useToeLineContactInTransfer())
+          && !feetManager.useToeLineContactInTransfer())
       {
          FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
          controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(sideOnToes), desiredCoP);

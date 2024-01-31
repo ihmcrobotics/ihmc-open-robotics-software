@@ -54,6 +54,10 @@ public class MultiSpline1DSolver
        * </p>
        */
       private double wd;
+      /**
+       * The weight associated with minimizing the acceleration at this waypoint.
+       */
+      private double wdd;
 
       private WaypointData(int index)
       {
@@ -69,6 +73,7 @@ public class MultiSpline1DSolver
          t = Double.NaN;
          clearPosition();
          clearVelocity();
+         wdd = 0.0;
       }
 
       /**
@@ -176,6 +181,13 @@ public class MultiSpline1DSolver
       {
          checkWeightValue(velocityWeight);
          wd = velocityWeight;
+      }
+
+      public void setAccelerationWeight(double accelerationWeight)
+      {
+         if (accelerationWeight < 0.0 || !Double.isFinite(accelerationWeight))
+            throw new IllegalArgumentException("The acceleration weight should be a finite positive number, was: " + accelerationWeight);
+         wdd = accelerationWeight;
       }
 
       private static void checkWeightValue(double weight)
@@ -300,6 +312,15 @@ public class MultiSpline1DSolver
       /** The number of coefficients for the spline succeeding this waypoint. */
       private int numberOfCoefficients;
 
+      /**
+       * Weight used to prioritize which segment acceleration should be minimize more.
+       * <p>
+       * This weight is used in the objective minimize the integral of the square acceleration of the
+       * spline.
+       * </p>
+       */
+      private double accelerationWeight = 1.0;
+
       public Spline1DSegment(int index)
       {
          this.index = index;
@@ -313,6 +334,7 @@ public class MultiSpline1DSolver
       {
          indexFirstCoefficient = -1;
          numberOfCoefficients = defaultCoefficients;
+         accelerationWeight = 1.0;
       }
 
       private void update()
@@ -335,6 +357,16 @@ public class MultiSpline1DSolver
       {
          this.numberOfCoefficients = numberOfCoefficients;
          splineSegments.getLast().update(); // Update the index offsets of all spline segments.
+      }
+
+      public double getAccelerationWeight()
+      {
+         return accelerationWeight;
+      }
+
+      public void setAccelerationWeight(double accelerationWeight)
+      {
+         this.accelerationWeight = accelerationWeight;
       }
 
       /**
@@ -549,7 +581,7 @@ public class MultiSpline1DSolver
    {
       if (!waypoints.isEmpty() && time <= waypoints.getLast().t)
          throw new IllegalArgumentException("The given time is not greater than the previous waypoint: time=" + time + ", previous waypoint time="
-               + waypoints.getLast().t);
+                                            + waypoints.getLast().t);
 
       WaypointData waypoint = addWaypoint();
       waypoint.set(time, position);
@@ -575,7 +607,7 @@ public class MultiSpline1DSolver
    {
       if (!waypoints.isEmpty() && time <= waypoints.getLast().t)
          throw new IllegalArgumentException("The given time is not greater than the previous waypoint: time=" + time + ", previous waypoint time="
-               + waypoints.getLast().t);
+                                            + waypoints.getLast().t);
 
       WaypointData waypoint = addWaypoint();
       waypoint.set(time, position);
@@ -596,7 +628,7 @@ public class MultiSpline1DSolver
    {
       if (!waypoints.isEmpty() && time <= waypoints.getLast().t)
          throw new IllegalArgumentException("The given time is not greater than the previous waypoint: time=" + time + ", previous waypoint time="
-               + waypoints.getLast().t);
+                                            + waypoints.getLast().t);
 
       WaypointData waypoint = addWaypoint();
       waypoint.set(time, position, velocity);
@@ -931,7 +963,7 @@ public class MultiSpline1DSolver
          WaypointData w0 = waypoints.get(i);
          WaypointData w1 = waypoints.get(i + 1);
          Spline1DSegment spline = w0.getNextSpline();
-         getMinAccelerationHBlock(w0.t, w1.t, spline.numberOfCoefficients, splineOffset, splineOffset, H);
+         getMinAccelerationHBlock(w0.t, w1.t, spline.numberOfCoefficients, spline.accelerationWeight, splineOffset, splineOffset, H);
          splineOffset += spline.numberOfCoefficients;
       }
    }
@@ -949,6 +981,8 @@ public class MultiSpline1DSolver
             addDesiredWaypointPositionObjective(waypoint, H, f);
          if (waypoint.wd != Double.POSITIVE_INFINITY && waypoint.wd > 0.0)
             addDesiredWaypointVelocityObjective(waypoint, H, f);
+         if (waypoint.wdd > 0.0)
+            addDesiredWaypointAccelerationObjective(waypoint, H, f);
       }
    }
 
@@ -974,6 +1008,18 @@ public class MultiSpline1DSolver
       int i = spline.getIndexFirstCoefficient();
       int n = spline.getNumberOfCoefficients();
       addVelocityObjective(waypoint.t, waypoint.xd, waypoint.wd, n, i, i, H, f);
+   }
+
+   static void addDesiredWaypointAccelerationObjective(WaypointData waypoint, DMatrixRMaj H, DMatrixRMaj f)
+   {
+      Spline1DSegment spline = waypoint.getNextSpline();
+
+      if (spline == null)
+         spline = waypoint.getPreviousSpline();
+
+      int i = spline.getIndexFirstCoefficient();
+      int n = spline.getNumberOfCoefficients();
+      addAccelerationObjective(waypoint.t, 0.0, waypoint.wdd, n, i, i, H, f);
    }
 
    public double computePosition(double time)
@@ -1117,24 +1163,33 @@ public class MultiSpline1DSolver
     * For {@code numberOfCoefficients <= 2} the acceleration is zero, {@code H} is unchanged.
     * </p>
     */
-   static void getMinAccelerationHBlock(double t0, double t1, int numberOfCoefficients, int startRow, int startColumn, DMatrixRMaj H)
+   static void getMinAccelerationHBlock(double t0, double t1, int numberOfCoefficients, double weight, int startRow, int startColumn, DMatrixRMaj H)
    {
+      if (weight == 0.0)
+         return;
+      if (weight < 0.0)
+         throw new IllegalArgumentException("Wight cannot be negative: " + weight);
+
       if (numberOfCoefficients == 4)
       {
          double t0pow = t0;
          double t1pow = t1;
-         H.set(startRow + 1, startColumn + 1, 4.0 * (t1pow - t0pow));
+         double h00 = weight * 4.0 * (t1pow - t0pow);
          t0pow *= t0;
          t1pow *= t1;
-         H.set(startRow + 1, startColumn + 0, 6.0 * (t1pow - t0pow));
-         H.set(startRow + 0, startColumn + 1, 6.0 * (t1pow - t0pow));
+         double h01 = weight * 6.0 * (t1pow - t0pow);
          t0pow *= t0;
          t1pow *= t1;
-         H.set(startRow + 0, startColumn + 0, 12.0 * (t1pow - t0pow));
+         double h11 = weight * 12.0 * (t1pow - t0pow);
+
+         H.set(startRow + 1, startColumn + 1, h00);
+         H.set(startRow + 1, startColumn + 0, h01);
+         H.set(startRow + 0, startColumn + 1, h01);
+         H.set(startRow + 0, startColumn + 0, h11);
       }
       else if (numberOfCoefficients == 3)
       {
-         H.set(startRow, startColumn, 4.0 * (t1 - t0));
+         H.set(startRow, startColumn, weight * 4.0 * (t1 - t0));
       }
       else if (numberOfCoefficients <= 2)
       {
@@ -1164,6 +1219,9 @@ public class MultiSpline1DSolver
     */
    static void addPositionObjective(double t, double x, double weight, int numberOfCoefficients, int startRow, int startColumn, DMatrixRMaj H, DMatrixRMaj f)
    {
+      if (weight == 0.0)
+         return;
+
       double tpow = weight;
 
       // We traverse the H matrix in diagonals
@@ -1184,13 +1242,16 @@ public class MultiSpline1DSolver
          tpow *= t;
       }
 
-      int f_index = startRow + numberOfCoefficients - 1;
-      tpow = -weight * x;
-
-      for (int i = 0; i < numberOfCoefficients; i++)
+      if (x != 0.0)
       {
-         f.add(f_index--, 0, tpow);
-         tpow *= t;
+         int f_index = startRow + numberOfCoefficients - 1;
+         tpow = -weight * x;
+
+         for (int i = 0; i < numberOfCoefficients; i++)
+         {
+            f.add(f_index--, 0, tpow);
+            tpow *= t;
+         }
       }
    }
 
@@ -1212,6 +1273,9 @@ public class MultiSpline1DSolver
     */
    static void addVelocityObjective(double t, double xd, double weight, int numberOfCoefficients, int startRow, int startColumn, DMatrixRMaj H, DMatrixRMaj f)
    {
+      if (weight == 0.0)
+         return;
+
       double tpow = weight;
 
       // We traverse the H matrix in diagonals, while skipping the last row and last column
@@ -1234,13 +1298,79 @@ public class MultiSpline1DSolver
          tpow *= t;
       }
 
-      int f_index = startRow + blockSize - 1;
-      tpow = -weight * xd;
-
-      for (int i = 0; i < blockSize; i++)
+      if (xd != 0.0)
       {
-         f.add(f_index--, 0, (i + 1) * tpow);
+         int f_index = startRow + blockSize - 1;
+         tpow = -weight * xd;
+
+         for (int i = 0; i < blockSize; i++)
+         {
+            f.add(f_index--, 0, (i + 1) * tpow);
+            tpow *= t;
+         }
+      }
+   }
+
+   /**
+    * Inserts the following matrix blocks into {@code H} at [{@code startRow}, {@code startColumn}] and
+    * into {@code f} at [{@code startRow}, {@code 0}]:
+    * 
+    * <pre>
+    *                   / 36t<sup>2</sup> 12t 0 0 \
+    * HBlock = weight * | 12t<sup> </sup>  4  0 0 | ( = A<sup>T</sup> W A )
+    *                   |   0<sup> </sup>  0  0 0 |
+    *                   \   0<sup> </sup>  0  0 0 /
+    * 
+    *                         / 6t \
+    * fBlock = -xd * weight * | 2  | ( = -A<sup>T</sup> W xd )
+    *                         | 0  |
+    *                         \ 0  /
+    * </pre>
+    */
+   static void addAccelerationObjective(double t,
+                                        double xdd,
+                                        double weight,
+                                        int numberOfCoefficients,
+                                        int startRow,
+                                        int startColumn,
+                                        DMatrixRMaj H,
+                                        DMatrixRMaj f)
+   {
+      if (weight == 0.0)
+         return;
+
+      double tpow = weight;
+
+      // We traverse the H matrix in diagonals, while skipping the last 2 rows and last 2 columns
+      int blockSize = numberOfCoefficients - 2;
+      int numberOfDiagonals = 2 * blockSize - 1;
+
+      for (int diagonal = numberOfDiagonals - 1; diagonal >= 0; diagonal--)
+      {
+         int offsetCol = Math.max(0, diagonal - blockSize + 1);
+         int offsetRow = Math.min(diagonal, blockSize - 1);
+         int size = min(diagonal + 1, blockSize - offsetCol, blockSize);
+
+         for (int i = 0; i < size; i++)
+         {
+            double scale = (blockSize - offsetRow) * (blockSize - offsetRow + 1) * (blockSize - offsetCol) * (blockSize - offsetCol + 1);
+            H.add(startRow + offsetRow, startColumn + offsetCol, scale * tpow);
+            offsetRow--;
+            offsetCol++;
+         }
          tpow *= t;
+      }
+
+      if (xdd != 0.0)
+      {
+         int f_index = startRow + blockSize - 1;
+         tpow = -weight * xdd;
+
+         for (int i = 0; i < blockSize; i++)
+         {
+            f.add(f_index--, 0, (i + 2) * (i + 1) * tpow);
+            tpow *= t;
+         }
       }
    }
 

@@ -12,11 +12,11 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.zedDriver.ZEDOpenDriver;
+import us.ihmc.perception.zedDriver.ZedDriverNativeLibrary;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
@@ -51,6 +51,11 @@ import java.util.function.Supplier;
 
 public class ZED2ColorStereoPublisher
 {
+   static
+   {
+      ZedDriverNativeLibrary.load();
+   }
+
    private final ROS2Helper ros2Helper;
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final FramePose3D cameraPose = new FramePose3D();
@@ -96,17 +101,11 @@ public class ZED2ColorStereoPublisher
       this.colorTopic = colorTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
 
-      BytedecoTools.loadZEDDriverNative();
       zed = new ZEDOpenDriver.ZEDOpenDriverExternal(imageHeight, fps);
       dims = new int[] {0, 0, 0};
       zed.getFrameDimensions(dims);
 
       imageYUVBytes = new byte[dims[0] * dims[1] * dims[2]];
-
-      BytedecoTools.loadOpenCV();
-
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed2_combined_publisher_node");
-      ros2Helper = new ROS2Helper(ros2Node);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
@@ -123,6 +122,12 @@ public class ZED2ColorStereoPublisher
 
    private void updateThread()
    {
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed2_combined_publisher_node");
+      ros2Helper = new ROS2Helper(ros2Node);
+
+      leftColorIntrinsics = new CameraPinholeBrown();
+      rightColorIntrinsics = new CameraPinholeBrown();
+
       while (running)
       {
          update();
@@ -149,7 +154,7 @@ public class ZED2ColorStereoPublisher
 
       if (valid)
       {
-         BytedecoOpenCVTools.compressRGBImageJPG(color8UC3CombinedImage, yuvCombinedImage, compressedColorPointer);
+         OpenCVTools.compressRGBImageJPG(color8UC3CombinedImage, yuvCombinedImage, compressedColorPointer);
          CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
          PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer,
                                                                colorTopic,

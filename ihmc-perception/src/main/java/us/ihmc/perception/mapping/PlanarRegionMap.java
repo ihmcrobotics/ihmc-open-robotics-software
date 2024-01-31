@@ -1,23 +1,22 @@
 package us.ihmc.perception.mapping;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.slamWrapper.SlamWrapper;
+import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
+import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.perception.tools.PerceptionEuclidTools;
 import us.ihmc.perception.tools.PlanarRegionCuttingTools;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
-import us.ihmc.perception.slamWrapper.SlamWrapper;
-import us.ihmc.perception.tools.PerceptionEuclidTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.*;
 
 import java.util.*;
 
@@ -32,6 +31,11 @@ import java.util.*;
  */
 public class PlanarRegionMap
 {
+   static
+   {
+      SlamWrapperNativeLibrary.load();
+   }
+
    public enum MergingMode
    {
       FILTERING, SMOOTHING
@@ -52,6 +56,7 @@ public class PlanarRegionMap
    private final float[] odomNoiseArray = new float[] {odomNoise, odomNoise, odomNoise, odomNoise, odomNoise, odomNoise};
 
    private boolean initialized = false;
+   private boolean initialSupportSquareEnabled = false;
    private boolean modified = false;
    private int uniqueRegionsFound = 0;
    private int currentTimeIndex = 0;
@@ -63,9 +68,13 @@ public class PlanarRegionMap
    private final RigidBodyTransform sensorToWorldTransformPrior = new RigidBodyTransform();
    private final RigidBodyTransform sensorToWorldTransformPosterior = new RigidBodyTransform();
    private final RigidBodyTransform initialTransformToWorld = new RigidBodyTransform();
-   private final RigidBodyTransform previousTransformToWorld = new RigidBodyTransform();
    private final RigidBodyTransform estimatedTransformToPrevious = new RigidBodyTransform();
-   private final PlanarRegionsList previousRegions = new PlanarRegionsList();
+   private final PlanarLandmarkList mapLandmarks = new PlanarLandmarkList();
+
+   private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
+   private final Stopwatch quaternionAveragingStopwatch = new Stopwatch();
+   private final Stopwatch factorGraphStopwatch = new Stopwatch();
+   private final Stopwatch regionMergingStopwatch = new Stopwatch();
 
    private MergingMode merger;
    private MatchingMode matcher;
@@ -80,9 +89,11 @@ public class PlanarRegionMap
    private final TIntArrayList incomingIDs = new TIntArrayList();
    private final HashSet<Integer> mapRegionIDSet = new HashSet<>();
 
+   private final PlanarLandmarkList previousLandmarks = new PlanarLandmarkList();
+   private final PlanarRegionsList previousRegions = new PlanarRegionsList();
 
    private PlanarRegionsList finalMap;
-
+   private PlanarRegionsList processedMap;
 
    public PlanarRegionMap(boolean useSmoothingMerger)
    {
@@ -95,7 +106,6 @@ public class PlanarRegionMap
       {
          this.merger = MergingMode.SMOOTHING;
 
-         BytedecoTools.loadSlamWrapper();
          factorGraph = new SlamWrapper.FactorGraphExternal();
       }
       else
@@ -105,12 +115,7 @@ public class PlanarRegionMap
 
       parameters = new PlanarRegionMappingParameters(version);
       finalMap = new PlanarRegionsList();
-   }
-
-   public void reset()
-   {
-      initialized = false;
-      finalMap.clear();
+      processedMap = new PlanarRegionsList();
    }
 
    /**
@@ -192,7 +197,7 @@ public class PlanarRegionMap
       }
       else
       {
-//         PerceptionPrintTools.printRegionIDs("Map", finalMap);
+         //         PerceptionPrintTools.printRegionIDs("Map", finalMap);
 
          PlanarRegionSLAMTools.findPlanarRegionMatches(finalMap,
                                                        priorRegionsInWorld,
@@ -202,7 +207,7 @@ public class PlanarRegionMap
                                                        (float) parameters.getOrthogonalDistanceThreshold(),
                                                        (float) parameters.getMinimumBoundingBoxSize());
 
-//         PerceptionPrintTools.printMatches("Cross Matches", finalMap, priorRegionsInWorld, incomingToMapMatches);
+         //         PerceptionPrintTools.printMatches("Cross Matches", finalMap, priorRegionsInWorld, incomingToMapMatches);
 
          if (merger == MergingMode.SMOOTHING)
          {
@@ -531,7 +536,7 @@ public class PlanarRegionMap
       LogTools.debug("Solving factor graph");
       factorGraph.optimizeISAM2((byte) 4);
 
-//      factorGraph.printResults();
+      //      factorGraph.printResults();
 
       LogTools.debug("+++++++++ --------- +++++++++ Done (Smoothing) +++++++++ --------- +++++++++");
    }
@@ -656,8 +661,15 @@ public class PlanarRegionMap
       return idToReturn;
    }
 
-   public RigidBodyTransform registerRegions(PlanarRegionsList incomingRegions, RigidBodyTransform estimatedTransformToWorld)
+   public RigidBodyTransform registerRegions(PlanarRegionsList incomingRegions,
+                                             RigidBodyTransform estimatedTransformToWorld,
+                                             RigidBodyTransform midFootTransform)
    {
+      if (merger != MergingMode.SMOOTHING)
+         return null;
+
+      wholeAlgorithmDurationStopwatch.resetLap();
+
       PlanarRegionsList regions = new PlanarRegionsList();
 
       // Remove all regions that are too small
@@ -666,6 +678,19 @@ public class PlanarRegionMap
          if (region.getArea() > parameters.getMinimumPlanarRegionArea())
             regions.addPlanarRegion(region);
       }
+
+      if (!initialized && initialSupportSquareEnabled)
+      {
+         LogTools.warn("Initializing Planar Region Map");
+         PlanarRegion initialSupportSquareRegion = PlanarRegionTools.createSquarePlanarRegion(0.6f,
+                                                                                              new Point3D(midFootTransform.getTranslation()),
+                                                                                              new Quaternion(midFootTransform.getRotation()));
+         initialSupportSquareRegion.setRegionId(uniqueIDtracker++);
+         initialSupportSquareRegion.incrementNumberOfTimesMatched();
+         finalMap.addPlanarRegion(initialSupportSquareRegion);
+      }
+
+      PlanarLandmarkList landmarks = new PlanarLandmarkList(regions);
 
       currentTimeIndex++;
       boolean isKeyframe = false;
@@ -681,48 +706,55 @@ public class PlanarRegionMap
             region.setRegionId(-uniqueIDtracker++);
       }
 
-      if(!initialized)
+      if (!initialized)
       {
-         // L515-only
-         //initialTransformToWorld.set(new RigidBodyTransform(new Quaternion(0.0, Math.toRadians(60.0), 0.0), new Point3D()));
          initialTransformToWorld.set(estimatedTransformToWorld);
-         previousTransformToWorld.set(initialTransformToWorld);
-
-         previousRegions.addPlanarRegionsList(regions.copy());
 
          regions.applyTransform(initialTransformToWorld);
-         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, initialTransformToWorld, regions.copy()));
+         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, initialTransformToWorld, estimatedTransformToWorld));
          finalMap.addPlanarRegionsList(regions);
+         mapLandmarks.addAll(finalMap);
 
          initializeFactorGraphForSmoothing(regions, initialTransformToWorld);
 
          initialized = true;
-         //submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, new RigidBodyTransform()));
       }
       else
       {
+         quaternionAveragingStopwatch.resetLap();
+
          transformToPrevious.setIdentity();
 
          LogTools.debug("Computing ICP transform [{} <- {}]", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
-         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousRegions, regions.copy(), transformToPrevious, parameters);
 
-//         PerceptionPrintTools.printTransform("Transform to previous", transformToPrevious);
+         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousLandmarks,
+                                                                                                     landmarks.copy(),
+                                                                                                     transformToPrevious,
+                                                                                                     parameters);
 
          if (!valid)
          {
-//            LogTools.warn("[FAILED] Last Index: {}, Current Index: {}", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
-//            return null;
+            //            LogTools.warn("[FAILED] Last Index: {}, Current Index: {}", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
+            //return null;
          }
 
-         //isKeyframe = performKeyframeCheck(transformToPrevious);
+         // Compute state estimator based odometry
+         estimatedTransformToPrevious.set(keyframes.get(keyframes.size() - 1).getTransformToWorld());
+         estimatedTransformToPrevious.invert();
+         estimatedTransformToPrevious.multiply(estimatedTransformToWorld);
 
-         isKeyframe = true;
+         isKeyframe = performKeyframeCheck(estimatedTransformToPrevious);
       }
 
       if (isKeyframe)
       {
+         LogTools.debug("Keyframe Insertion: {}", currentTimeIndex);
+
          previousRegions.clear();
          previousRegions.addPlanarRegionsList(regions.copy());
+
+         previousLandmarks.clear();
+         previousLandmarks.addAll(landmarks.copy());
 
          RigidBodyTransform transformToWorld = new RigidBodyTransform(transformToPrevious);
          transformToWorld.multiply(keyframes.get(keyframes.size() - 1).getTransformToWorld());
@@ -730,19 +762,16 @@ public class PlanarRegionMap
          regions.applyTransform(transformToWorld);
 
          RigidBodyTransform residualTransform = new RigidBodyTransform();
-         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(finalMap, regions.copy(), residualTransform, parameters);
+         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(mapLandmarks,
+                                                                                                     landmarks.copy(),
+                                                                                                     residualTransform,
+                                                                                                     parameters);
 
          if (valid)
          {
             transformToWorld.preMultiply(residualTransform);
             regions.applyTransform(residualTransform);
          }
-
-         //submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, transformToWorld));
-         //transformToWorld.set(sensorToWorldTransformPosterior);
-
-//         PerceptionPrintTools.printRegionIDs("Regions", regions);
-//         PerceptionPrintTools.printRegionIDs("Map", finalMap);
 
          PlanarRegionSLAMTools.findPlanarRegionMatches(finalMap,
                                                        regions,
@@ -752,22 +781,18 @@ public class PlanarRegionMap
                                                        (float) parameters.getOrthogonalDistanceThreshold(),
                                                        (float) parameters.getMinimumBoundingBoxSize());
 
-//         PerceptionPrintTools.printMatches("Cross Matches", finalMap, regions, incomingToMapMatches);
-
          RigidBodyTransform transformToSensor = new RigidBodyTransform(transformToWorld);
          transformToSensor.invert();
 
          PlanarRegionsList graphRegions = regions.copy();
          graphRegions.applyTransform(transformToSensor);
 
-         // Compute state estimator based odometry
-         previousTransformToWorld.invert();
-         estimatedTransformToPrevious.set(previousTransformToWorld);
-         estimatedTransformToPrevious.multiply(estimatedTransformToWorld);
-
-         LogTools.debug("Estimated Transform to previous: {}", estimatedTransformToPrevious);
          LogTools.debug("Transform to previous: {}", transformToPrevious);
 
+         quaternionAveragingStopwatch.lap();
+         //quaternionAveragingStopwatch.suspend();
+
+         factorGraphStopwatch.resetLap();
          applyFactorGraphBasedSmoothing(finalMap,
                                         graphRegions,
                                         transformToWorld,
@@ -785,65 +810,75 @@ public class PlanarRegionMap
          // Transform the incoming regions to the map frame with the optimal transform
          PlanarRegionsList posteriorRegionsInWorld = new PlanarRegionsList();
          graphRegions.getPlanarRegionsAsList().forEach(region ->
-          {
-             region.applyTransform(transformToWorld);
-             posteriorRegionsInWorld.addPlanarRegion(region);
-          });
+                                                       {
+                                                          region.applyTransform(transformToWorld);
+                                                          posteriorRegionsInWorld.addPlanarRegion(region);
+                                                       });
+
+         factorGraphStopwatch.lap();
+         //factorGraphStopwatch.suspend();
+
+         regionMergingStopwatch.resetLap();
 
          finalMap = crossReduceRegionsIteratively(finalMap, graphRegions);
          processUniqueRegions(finalMap);
-         //PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
 
-         //finalMap.addPlanarRegionsList(regions);
+         // TODO: Improve the intersection based chopping tool before enabling this.
+         //performMapCleanUp(false, true);
+
+         mapLandmarks.clear();
+         mapLandmarks.addAll(finalMap);
 
          factorGraph.clearISAM2();
          sensorPoseIndex++;
 
-         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, previousRegions.copy()));
+         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, estimatedTransformToWorld));
 
-         previousTransformToWorld.set(estimatedTransformToWorld);
+         regionMergingStopwatch.lap();
+         //regionMergingStopwatch.suspend();
 
-         PerceptionDebugTools.printTransform(String.valueOf(sensorPoseIndex), transformToWorld, true);
-
-         LogTools.debug("Adding keyframe: " + keyframes.size() + " Map: " + finalMap.getNumberOfPlanarRegions() + " regions");
+         wholeAlgorithmDurationStopwatch.lap();
+         //wholeAlgorithmDurationStopwatch.suspend();
 
          return transformToWorld;
       }
 
+      wholeAlgorithmDurationStopwatch.lap();
+      //wholeAlgorithmDurationStopwatch.suspend();
       return null;
    }
 
    private boolean performKeyframeCheck(RigidBodyTransform transformToPrevious)
    {
-      // Add a keyframe if either the translation or rotation is large enough in separate if blocks
       Point3D euler = new Point3D();
       Vector3DBasics translation = transformToPrevious.getTranslation();
       transformToPrevious.getRotation().getEuler(euler);
-
-      PerceptionDebugTools.printTransform("ICP", transformToPrevious, false);
-
-      boolean isKeyframe = (translation.norm() > parameters.getKeyframeDistanceThreshold()) || (euler.norm() > parameters.getKeyframeAngularThreshold());
-
-      if (translation.norm() > parameters.getKeyframeDistanceThreshold())
-         LogTools.warn("[Keyframe] High Translation: " + translation.norm());
-
-      if (euler.norm() > parameters.getKeyframeAngularThreshold())
-         LogTools.warn("[Keyframe] High Rotation: " + euler.norm());
-
-      return isKeyframe;
+      return (translation.norm() > parameters.getKeyframeDistanceThreshold()) || (euler.norm() > parameters.getKeyframeAngularThreshold());
    }
 
-   public void performMapCleanUp()
+   public void performMapCleanUp(boolean cleanIntersectionsEnabled, boolean mapCullingEnabled)
    {
-      PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
+      processedMap.clear();
 
-      for (PlanarRegion region : finalMap.getPlanarRegionsAsList())
+      if (mapCullingEnabled)
       {
-         if ((currentTimeIndex - region.getTickOfLastMeasurement() > 5) // Region has not been matched enough in a while. Not good region.
-             && (region.getNumberOfTimesMatched() < parameters.getMinimumNumberOfTimesMatched())) // Region has not been matched enough
+         for (PlanarRegion region : finalMap.getPlanarRegionsAsList())
          {
-            finalMap.getPlanarRegionsAsList().remove(region);
+            // Region has not been matched enough in a while. Not good region.
+            // Region has not been matched enough
+            boolean regionIsBad =
+                  (currentTimeIndex - region.getTickOfLastMeasurement() > 3) && (region.getNumberOfTimesMatched() < 2) && (region.getRegionId() > 1);
+
+            if (!regionIsBad)
+            {
+               processedMap.addPlanarRegion(region);
+            }
          }
+      }
+
+      if (cleanIntersectionsEnabled)
+      {
+         PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(processedMap);
       }
    }
 
@@ -852,9 +887,12 @@ public class PlanarRegionMap
       LogTools.debug("------------------------------- Processing Unique Region IDs ---------------------------------");
       for (PlanarRegion region : map.getPlanarRegionsAsList())
       {
-         region.setRegionId(Math.abs(region.getRegionId()));
-         region.incrementNumberOfTimesMatched();
-         region.setTickOfLastMeasurement(currentTimeIndex);
+         if (region.getRegionId() < 0)
+         {
+            region.incrementNumberOfTimesMatched();
+            region.setTickOfLastMeasurement(currentTimeIndex);
+            region.setRegionId(Math.abs(region.getRegionId()));
+         }
       }
       LogTools.debug("+++++++++ --------- +++++++++ Done (Processing Unique Region IDs) +++++++++ --------- +++++++++");
    }
@@ -862,6 +900,11 @@ public class PlanarRegionMap
    public PlanarRegionsList getMapRegions()
    {
       return finalMap;
+   }
+
+   public PlanarRegionsList getProcessedMapRegions()
+   {
+      return processedMap;
    }
 
    public boolean isModified()
@@ -902,6 +945,56 @@ public class PlanarRegionMap
    public void setInitialSensorPose(RigidBodyTransform transformToWorld)
    {
       initialTransformToWorld.set(transformToWorld);
+   }
+
+   public void printStatistics(boolean average)
+   {
+      if (average)
+      {
+         LogTools.info(String.format("Whole Algorithm: %.3f, Quaternion Averaging: %.3f, Factor Graph: %.3f, Region Merging: %.3f",
+                                     wholeAlgorithmDurationStopwatch.averageLap(),
+                                     quaternionAveragingStopwatch.averageLap(),
+                                     factorGraphStopwatch.averageLap(),
+                                     regionMergingStopwatch.averageLap()));
+      }
+      else
+      {
+         LogTools.info(String.format("Whole Algorithm: %.3f, Quaternion Averaging: %.3f, Factor Graph: %.3f, Region Merging: %.3f",
+                                     wholeAlgorithmDurationStopwatch.totalElapsed(),
+                                     quaternionAveragingStopwatch.totalElapsed(),
+                                     factorGraphStopwatch.totalElapsed(),
+                                     regionMergingStopwatch.totalElapsed()));
+      }
+   }
+
+   public Stopwatch getWholeAlgorithmDurationStopwatch()
+   {
+      return wholeAlgorithmDurationStopwatch;
+   }
+
+   public Stopwatch getQuaternionAveragingStopwatch()
+   {
+      return quaternionAveragingStopwatch;
+   }
+
+   public Stopwatch getFactorGraphStopwatch()
+   {
+      return factorGraphStopwatch;
+   }
+
+   public Stopwatch getRegionMergingStopwatch()
+   {
+      return regionMergingStopwatch;
+   }
+
+   public int getNumberOfKeyframes()
+   {
+      return keyframes.size();
+   }
+
+   public void setInitialSupportSquareEnabled(boolean supportSquareEnabled)
+   {
+      initialSupportSquareEnabled = supportSquareEnabled;
    }
 }
 

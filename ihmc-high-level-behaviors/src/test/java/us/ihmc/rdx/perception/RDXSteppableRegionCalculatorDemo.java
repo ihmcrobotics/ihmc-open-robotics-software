@@ -6,10 +6,8 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.ihmcPerception.heightMap.RemoteHeightMapUpdater;
-import us.ihmc.ihmcPerception.steppableRegions.RemoteSteppableRegionsUpdater;
-import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsAPI;
-import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.heightMap.RemoteHeightMapUpdater;
+import us.ihmc.perception.steppableRegions.RemoteSteppableRegionsUpdater;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -23,15 +21,13 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXSteppableRegionsVisualizer;
-import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.tools.thread.Activator;
 
 public class RDXSteppableRegionCalculatorDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private Activator nativesLoadedActivator;
    private RDXHighLevelDepthSensorSimulator ousterLidarSimulator;
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RDXPose3DGizmo ousterPoseGizmo = new RDXPose3DGizmo();
@@ -79,8 +75,6 @@ public class RDXSteppableRegionCalculatorDemo
          @Override
          public void create()
          {
-            nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
-
             heightMapUI.create();
             steppableRegionsUI.create();
             globalVisualizersUI.create();
@@ -122,48 +116,41 @@ public class RDXSteppableRegionCalculatorDemo
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ousterPoseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(ousterPoseGizmo, RDXSceneLevel.VIRTUAL);
             ousterPoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
+
+            ousterLidarSimulator = RDXSimulatedSensorFactory.createOusterLidar(ousterPoseGizmo.getGizmoFrame(), () -> 0L);
+            ousterLidarSimulator.setupForROS2PointCloud(ros2Node, PerceptionAPI.OUSTER_LIDAR_SCAN);
+            ousterLidarSimulator.setSensorEnabled(true);
+            ousterLidarSimulator.setRenderPointCloudDirectly(true);
+            ousterLidarSimulator.setPublishPointCloudROS2(true);
+            ousterLidarSimulator.setDebugCoordinateFrame(false);
+
+            RDXROS2PointCloudVisualizer ousterPointCloudVisualizer = new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
+                                                                                                     ros2Node,
+                                                                                                     PerceptionAPI.OUSTER_LIDAR_SCAN);
+            ousterPointCloudVisualizer.setSubscribed(true);
+            globalVisualizersUI.addVisualizer(ousterPointCloudVisualizer);
+
+            baseUI.getImGuiPanelManager().addPanel(ousterLidarSimulator);
+            baseUI.getPrimaryScene().addRenderableProvider(ousterLidarSimulator::getRenderables);
+
+            baseUI.getImGuiPanelManager().addPanel(steppableRegionsUI.getBasePanel());
+
+            realtimeRos2Node.spin();
+            heightMap.start();
          }
 
          @Override
          public void render()
          {
-            if (nativesLoadedActivator.poll())
-            {
-               if (nativesLoadedActivator.isNewlyActivated())
-               {
-                  ousterLidarSimulator = RDXSimulatedSensorFactory.createOusterLidar(ousterPoseGizmo.getGizmoFrame(), () -> 0L);
-                  ousterLidarSimulator.setupForROS2PointCloud(ros2Node, PerceptionAPI.OUSTER_LIDAR_SCAN);
-                  ousterLidarSimulator.setSensorEnabled(true);
-                  ousterLidarSimulator.setRenderPointCloudDirectly(true);
-                  ousterLidarSimulator.setPublishPointCloudROS2(true);
-                  ousterLidarSimulator.setDebugCoordinateFrame(false);
+            ousterLidarSimulator.render(baseUI.getPrimaryScene());
 
-                  RDXROS2PointCloudVisualizer ousterPointCloudVisualizer = new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
-                                                                                                           ros2Node,
-                                                                                                           PerceptionAPI.OUSTER_LIDAR_SCAN);
-                  ousterPointCloudVisualizer.setSubscribed(true);
-                  globalVisualizersUI.addVisualizer(ousterPointCloudVisualizer);
+            heightMap.update();
+            heightMapVisualizer.update();
+            steppableRegionsVisualizer.update();
 
-                  baseUI.getImGuiPanelManager().addPanel(ousterLidarSimulator);
-                  baseUI.getPrimaryScene().addRenderableProvider(ousterLidarSimulator::getRenderables);
-
-                  baseUI.getImGuiPanelManager().addPanel(steppableRegionsUI.getBasePanel());
-
-                  baseUI.getLayoutManager().reloadLayout();
-                  realtimeRos2Node.spin();
-                  heightMap.start();
-               }
-
-               ousterLidarSimulator.render(baseUI.getPrimaryScene());
-
-               heightMap.update();
-               heightMapVisualizer.update();
-               steppableRegionsVisualizer.update();
-
-               globalVisualizersUI.update();
-               heightMapUI.update();
-               steppableRegionsUI.update();
-            }
+            globalVisualizersUI.update();
+            heightMapUI.update();
+            steppableRegionsUI.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

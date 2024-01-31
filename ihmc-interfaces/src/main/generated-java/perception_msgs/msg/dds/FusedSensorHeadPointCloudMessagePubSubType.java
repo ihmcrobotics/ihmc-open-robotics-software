@@ -15,7 +15,7 @@ public class FusedSensorHeadPointCloudMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4f93384a3e09011badfda22a950a193559d5269b192e726a66d8d11c0e1319f4";
+   		return "df440dcd0c75ea10f504e3bd1df6029c069b28b3563709f5815d3e99c6064722";
    }
    
    @Override

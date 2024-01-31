@@ -66,7 +66,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       desired_root_linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       desired_root_angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
-      support_region_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (16, new geometry_msgs.msg.dds.PointPubSubType());
+      support_region_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (32, new geometry_msgs.msg.dds.PointPubSubType());
 
    }
 

@@ -12,8 +12,8 @@ public class ImGuiPlot
    private final String name;
    private final int bufferSize;
    private final float[] values;
-   private final int width;
-   private final int height;
+   private int width;
+   private int height;
    private int index = 0;
 
    public ImGuiPlot(String name)
@@ -67,5 +67,15 @@ public class ImGuiPlot
          index = 0;
       }
       values[index] = Float.NaN;
+   }
+
+   public void setWidth(int width)
+   {
+      this.width = width;
+   }
+
+   public void setHeight(int height)
+   {
+      this.height = height;
    }
 }

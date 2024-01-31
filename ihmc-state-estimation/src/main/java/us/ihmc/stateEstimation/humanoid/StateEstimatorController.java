@@ -4,8 +4,10 @@ import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 
 /**
  * Provides a common interface for state estimator implementations.
@@ -37,6 +39,16 @@ public interface StateEstimatorController extends RobotController, StateEstimato
 
    @Override
    default YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return null;
+   }
+
+   default ForceSensorCalibrationModule getForceSensorCalibrationModule()
+   {
+      return null;
+   }
+
+   default ForceSensorDataHolderReadOnly getForceSensorOutputWithGravityCancelled()
    {
       return null;
    }

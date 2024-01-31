@@ -9,13 +9,12 @@ import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
-import us.ihmc.perception.spinnaker.SpinnakerSystemManager;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
-import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
-import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
-import us.ihmc.tools.thread.Activator;
+import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
+import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
 
 import java.util.function.Consumer;
 
@@ -25,12 +24,11 @@ import java.util.function.Consumer;
  */
 public class RDXBlackflyReader
 {
-   private final ImGuiPanel panel = new ImGuiPanel("Blackfly Reader", this::renderImGuiWidgets);
-   private final Activator nativesLoadedActivator;
+   private final RDXPanel panel = new RDXPanel("Blackfly Reader", this::renderImGuiWidgets);
    private final String serialNumber;
    private volatile int imageWidth = -1;
    private volatile int imageHeight = -1;
-   private SpinnakerSystemManager spinnakerSystemManager;
+   private SpinnakerBlackflyManager spinnakerBlackflyManager;
    private SpinnakerBlackfly blackfly;
    private spinImage spinImage;
    private BytePointer spinImageDataPointer;
@@ -42,23 +40,16 @@ public class RDXBlackflyReader
    private long numberOfImagesRead = 0;
    private Consumer<RDXImagePanelTexture> monitorPanelUIThreadPreprocessor = null;
 
-   public RDXBlackflyReader(Activator nativesLoadedActivator, String serialNumber)
+   public RDXBlackflyReader(String serialNumber)
    {
-      this.nativesLoadedActivator = nativesLoadedActivator;
       this.serialNumber = serialNumber;
    }
 
    public void create()
    {
-      spinnakerSystemManager = new SpinnakerSystemManager();
-      blackfly = spinnakerSystemManager.createBlackfly(serialNumber);
-
+      spinnakerBlackflyManager = new SpinnakerBlackflyManager();
+      blackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(serialNumber);
       spinImage = new spinImage();
-
-      blackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
-      blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_BayerRG8);
-      blackfly.startAcquiringImages();
-
       swapImagePanel = new RDXOpenCVSwapVideoPanel("Blackfly Monitor");
    }
 
@@ -75,7 +66,7 @@ public class RDXBlackflyReader
    /**
     * This method works best if called asynchronously, as it runs slower
     * than UI framerates typically.
-    *
+    * <p>
     * However, it can also be called just before update() if in a pinch.
     */
    public void readBlackflyImage()
@@ -135,14 +126,11 @@ public class RDXBlackflyReader
 
    public void renderImGuiWidgets()
    {
-      if (nativesLoadedActivator.peek())
-      {
-         ImGui.text("Serial number: " + serialNumber);
-         ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
-         ImGui.text("Number of images read: " + numberOfImagesRead);
-         readFrequencyPlot.renderImGuiWidgets();
-         readDurationPlot.renderImGuiWidgets();
-      }
+      ImGui.text("Serial number: " + serialNumber);
+      ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
+      ImGui.text("Number of images read: " + numberOfImagesRead);
+      readFrequencyPlot.renderImGuiWidgets();
+      readDurationPlot.renderImGuiWidgets();
    }
 
    public void dispose()
@@ -150,7 +138,7 @@ public class RDXBlackflyReader
       ThreadTools.sleep(250);
       blackfly.stopAcquiringImages();
       ThreadTools.sleep(100);
-      spinnakerSystemManager.destroy();
+      spinnakerBlackflyManager.destroy();
    }
 
    public boolean getImageWasRead()
@@ -158,7 +146,7 @@ public class RDXBlackflyReader
       return imageWasRead;
    }
 
-   public ImGuiPanel getStatisticsPanel()
+   public RDXPanel getStatisticsPanel()
    {
       return panel;
    }

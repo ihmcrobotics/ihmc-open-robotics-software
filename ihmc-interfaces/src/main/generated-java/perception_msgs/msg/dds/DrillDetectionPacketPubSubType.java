@@ -15,7 +15,7 @@ public class DrillDetectionPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4c5bc278ac8fd31866161487064fe5540e19458c5a54c732a73be94e51d727ab";
+   		return "989bf816fca52ac22ff98f5d1e2fe99d0efc7db1efbcdfbc7410b0ae98526415";
    }
    
    @Override

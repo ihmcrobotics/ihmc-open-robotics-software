@@ -15,7 +15,7 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "228595c6baaa30a2b416a5a565bba47aea63a63cc82fec7be7940483c283b4bb";
+   		return "284a196eb06c22c2872f0d4f5ba911c2ec134e7192d43288f21f236b5e9acbfc";
    }
    
    @Override

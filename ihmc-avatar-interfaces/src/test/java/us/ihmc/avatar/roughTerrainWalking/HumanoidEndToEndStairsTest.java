@@ -85,14 +85,14 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       this.useExperimentalPhysicsEngine = useExperimentalPhysicsEngine;
    }
 
-   public void testStairs(TestInfo testInfo, boolean slow, boolean up, double swingDuration, double transferDuration, double heightOffset) throws Exception
+   public void testStairs(TestInfo testInfo, boolean squareUpSteps, boolean goingUp, double swingDuration, double transferDuration, double heightOffset) throws Exception
    {
-      testStairs(testInfo, slow, up, swingDuration, transferDuration, heightOffset, null);
+      testStairs(testInfo, squareUpSteps, goingUp, swingDuration, transferDuration, heightOffset, null);
    }
 
    public void testStairs(TestInfo testInfo,
-                          boolean slow,
-                          boolean up,
+                          boolean squareUpSteps,
+                          boolean goingUp,
                           double swingDuration,
                           double transferDuration,
                           double heightOffset,
@@ -101,8 +101,8 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
    {
       DRCRobotModel robotModel = getRobotModel();
       double actualFootLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootLength();
-      double startX = up ? 0.0 : 1.2 + numberOfSteps * stepLength + 0.3;
-      double startZ = up ? 0.0 : numberOfSteps * stepHeight;
+      double startX = goingUp ? 0.0 : 1.2 + numberOfSteps * stepLength + 0.3;
+      double startZ = goingUp ? 0.0 : numberOfSteps * stepHeight;
 
       StairsEnvironment environment = new StairsEnvironment(numberOfSteps, stepHeight, stepLength, true);
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel, environment, simulationTestingParameters);
@@ -116,8 +116,8 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
 
       assertTrue(simulationTestHelper.simulateNow(0.5));
 
-      FootstepDataListMessage footsteps = createStairsFootsteps(slow, up, stepHeight, stepLength, 0.25, numberOfSteps);
-      if (up)
+      FootstepDataListMessage footsteps = createStairsFootsteps(squareUpSteps, goingUp, stepHeight, stepLength, 0.25, numberOfSteps);
+      if (goingUp)
          translate(footsteps, new Vector3D(0.6 - 0.045 - actualFootLength / 2.0, 0.0, 0.0));
       else
          translate(footsteps, new Vector3D(1.8 - 0.045 - actualFootLength / 2.0 + (numberOfSteps + 1) * stepLength, 0.0, startZ));

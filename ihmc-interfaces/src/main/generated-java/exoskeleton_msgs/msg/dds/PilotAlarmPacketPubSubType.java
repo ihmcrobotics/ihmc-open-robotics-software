@@ -15,7 +15,7 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2711ed5f0c25b51b138bfb41341fc47ffc874d8e40274e10d680e520c56328b0";
+   		return "23b435888f94e54f7ebaca4bcf7938725797b9a2a007e149cd3e79ba01784863";
    }
    
    @Override

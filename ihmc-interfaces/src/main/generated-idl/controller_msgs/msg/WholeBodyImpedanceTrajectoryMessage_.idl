@@ -1,0 +1,48 @@
+#ifndef __controller_msgs__msg__WholeBodyImpedanceTrajectoryMessage__idl__
+#define __controller_msgs__msg__WholeBodyImpedanceTrajectoryMessage__idl__
+
+#include "controller_msgs/msg/./MultiContactTimedContactSequenceMessage_.idl"
+#include "controller_msgs/msg/./OneDoFJointTrajectoryMessage_.idl"
+#include "ihmc_common_msgs/msg/./QueueableMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the whole-body impedance controller API.
+       * Allows to send joint-space trajectory along with a timed contact sequence which determines limb stiffness.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::WholeBodyImpedanceTrajectoryMessage_")
+      struct WholeBodyImpedanceTrajectoryMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * The is the unique hash code of each of the joints to be controlled.
+         * It is used on the controller side to retrieve the desired joint to be controlled.
+         * See Joint.hashCode() for the computation of a joint hash code.
+         */
+        sequence<long> joint_hash_codes;
+        /**
+         * Trajectory for each joint.
+         */
+        sequence<controller_msgs::msg::dds::OneDoFJointTrajectoryMessage> joint_trajectory_messages;
+        /**
+         * Properties for queueing trajectories.
+         */
+        ihmc_common_msgs::msg::dds::QueueableMessage queueing_properties;
+        /**
+         * Contact sequence message
+         */
+        controller_msgs::msg::dds::MultiContactTimedContactSequenceMessage contact_sequence_message;
+      };
+    };
+  };
+};
+
+#endif

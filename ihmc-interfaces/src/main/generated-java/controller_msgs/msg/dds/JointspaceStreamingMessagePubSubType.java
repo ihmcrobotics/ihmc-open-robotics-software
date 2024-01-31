@@ -15,7 +15,7 @@ public class JointspaceStreamingMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "724591a02693b74e1391f73c68287eeb1391513c2602ed146f24959d88a8cbfa";
+   		return "ed43ac2c280c168387bec45fd8c328590629d7a917e57b8e946b85e2456294ee";
    }
    
    @Override

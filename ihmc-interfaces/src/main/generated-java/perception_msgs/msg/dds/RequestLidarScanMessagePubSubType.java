@@ -15,7 +15,7 @@ public class RequestLidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "20d16eaccf074335d5db020b02bb556567c48e45c318fd30396ba5dbc65ef748";
+   		return "b49e21c190b37f1f5a0b983d63d9910398dc472fcec9f0f47a76925affa9962c";
    }
    
    @Override

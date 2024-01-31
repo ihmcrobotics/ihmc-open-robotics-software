@@ -131,26 +131,29 @@ public class WrenchVisualizer
 
    private class ContactablePlaneBodyWrenchVisualizer implements SingleWrenchVisualizer
    {
-      private final YoFrameVector3D force;
-      private final YoFrameVector3D torque;
+      private final YoFrameVector3D forceWorld, torqueWorld;
+      private final YoFrameVector3D forceSole, torqueSole;
       private final YoFramePoint3D centerOfPressure;
       private final ReferenceFrame soleFrame;
 
       public ContactablePlaneBodyWrenchVisualizer(ContactablePlaneBody contactablePlaneBody)
       {
-         String prefix = name + contactablePlaneBody.getName();
-         force = new YoFrameVector3D(prefix + "Force", worldFrame, registry);
-         torque = new YoFrameVector3D(prefix + "Torque", worldFrame, registry);
-         centerOfPressure = new YoFramePoint3D(prefix + "CenterOfPressure", worldFrame, registry);
+         String prefix = contactablePlaneBody.getName() + name;
          soleFrame = contactablePlaneBody.getSoleFrame();
+         forceWorld = new YoFrameVector3D(prefix + "ForceWorldFrame", worldFrame, registry);
+         torqueWorld = new YoFrameVector3D(prefix + "TorqueWorldFrame", worldFrame, registry);
+         forceSole = new YoFrameVector3D(prefix + "ForceSoleFrame", soleFrame, registry);
+         torqueSole = new YoFrameVector3D(prefix + "TorqueSoleFrame", soleFrame, registry);
+         centerOfPressure = new YoFramePoint3D(prefix + "CenterOfPressure", worldFrame, registry);
 
-         double forceScale = FORCE_VECTOR_SCALE * vizScaling;
-         double torqueScale = TORQUE_VECTOR_SCALE * vizScaling;
-         YoGraphicVector forceViz = new YoGraphicVector(prefix + "ForceViz", centerOfPressure, force, forceScale, forceAppearance, true);
-         YoGraphicVector torqueViz = new YoGraphicVector(prefix + "TorqueViz", centerOfPressure, torque, torqueScale, torqueAppearance, true);
+         YoGraphicVector forceViz = new YoGraphicVector(prefix + "ForceViz",
+                                                        centerOfPressure,
+                                                        forceWorld,
+                                                        FORCE_VECTOR_SCALE * vizScaling,
+                                                        forceAppearance,
+                                                        true);
 
          yoGraphicsListRegistry.registerYoGraphic(name, forceViz);
-         yoGraphicsListRegistry.registerYoGraphic(name, torqueViz);
 
       }
 
@@ -161,30 +164,33 @@ public class WrenchVisualizer
          {
             tempWrench.setIncludingFrame(wrench);
             tempWrench.changeFrame(soleFrame);
-            double torqueZ = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, tempWrench, soleFrame);
+            centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, tempWrench, soleFrame);
 
-            force.setMatchingFrame(tempWrench.getLinearPart());
-            torque.set(0.0, 0.0, torqueZ);
-            soleFrame.transformFromThisToDesiredFrame(worldFrame, torque);
+            forceWorld.setMatchingFrame(tempWrench.getLinearPart());
+            torqueWorld.setMatchingFrame(tempWrench.getAngularPart());
+            forceSole.setMatchingFrame(tempWrench.getLinearPart());
+            torqueSole.setMatchingFrame(tempWrench.getAngularPart());
          }
          else
          {
-            force.set(Double.NaN, Double.NaN, Double.NaN);
-            torque.set(Double.NaN, Double.NaN, Double.NaN);
-            centerOfPressure.set(Double.NaN, Double.NaN, Double.NaN);
+            forceWorld.setToNaN();
+            torqueWorld.setToNaN();
+            forceSole.setToNaN();
+            torqueSole.setToNaN();
+            centerOfPressure.setToNaN();
          }
       }
 
       public YoGraphicDefinition getSCS2YoGraphics()
       {
-         return new YoGraphicListDefinition(newYoGraphicArrow3D(force.getNamePrefix(),
+         return new YoGraphicListDefinition(newYoGraphicArrow3D(forceWorld.getNamePrefix(),
                                                                 centerOfPressure,
-                                                                force,
+                                                                forceWorld,
                                                                 FORCE_VECTOR_SCALE * vizScaling,
                                                                 ColorDefinitions.OrangeRed()),
-                                            newYoGraphicArrow3D(torque.getNamePrefix(),
+                                            newYoGraphicArrow3D(torqueWorld.getNamePrefix(),
                                                                 centerOfPressure,
-                                                                torque,
+                                                                torqueWorld,
                                                                 TORQUE_VECTOR_SCALE * vizScaling,
                                                                 ColorDefinitions.CornflowerBlue()));
       }
@@ -198,9 +204,9 @@ public class WrenchVisualizer
 
       public RigidBodyWrenchVisualizer(RigidBodyReadOnly rigidBody)
       {
-         String prefix = name + rigidBody.getName();
-         force = new YoFrameVector3D(prefix + "Force", worldFrame, registry);
-         torque = new YoFrameVector3D(prefix + "Torque", worldFrame, registry);
+         String prefix = rigidBody.getName() + name;
+         force = new YoFrameVector3D(prefix + "ForceWorldFrame", worldFrame, registry);
+         torque = new YoFrameVector3D(prefix + "TorqueWorldFrame", worldFrame, registry);
          pointOfApplication = new YoFramePoint3D(prefix + "PointOfApplication", worldFrame, registry);
 
          double forceScale = FORCE_VECTOR_SCALE * vizScaling;

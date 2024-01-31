@@ -8,8 +8,9 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.*;
-import us.ihmc.perception.netty.NettyOuster;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
 import us.ihmc.perception.tools.NativeMemoryTools;
 
@@ -25,7 +26,7 @@ import java.util.function.Supplier;
  */
 public class OusterDepthExtractionKernel
 {
-   private final NettyOuster nettyOuster;
+   private final OusterNetServer ousterNetServer;
    private final BytePointer lidarFrameByteBufferPointer;
    private final ByteBuffer lidarFrameByteBufferCopy;
    private final Supplier<Boolean> computeHeightMap;
@@ -45,39 +46,39 @@ public class OusterDepthExtractionKernel
    private final OpenCLFloatBuffer azimuthAnglesOpenCLBuffer;
    private final OpenCLFloatBuffer pointCloudXYZBuffer;
 
-   public OusterDepthExtractionKernel(NettyOuster nettyOuster,
+   public OusterDepthExtractionKernel(OusterNetServer ousterNetServer,
                                       OpenCLManager openCLManager)
    {
-      this(nettyOuster, openCLManager, () -> true, () -> true);
+      this(ousterNetServer, openCLManager, () -> true, () -> true);
    }
 
-   public OusterDepthExtractionKernel(NettyOuster nettyOuster,
+   public OusterDepthExtractionKernel(OusterNetServer ousterNetServer,
                                       OpenCLManager openCLManager,
                                       Supplier<Boolean> computeLidarScan,
                                       Supplier<Boolean> computeHeightMap)
    {
-      this.nettyOuster = nettyOuster;
+      this.ousterNetServer = ousterNetServer;
       this.openCLManager = openCLManager;
       this.computeLidarScan = computeLidarScan;
       this.computeHeightMap = computeHeightMap;
 
-      lidarFrameByteBufferCopy = ByteBuffer.allocateDirect(nettyOuster.getLidarFrameByteBuffer().limit());
+      lidarFrameByteBufferCopy = ByteBuffer.allocateDirect(ousterNetServer.getLidarFrameByteBuffer().limit());
       lidarFrameByteBufferPointerCopy = new BytePointer(lidarFrameByteBufferCopy);
-      lidarFrameByteBufferPointer = new BytePointer(nettyOuster.getLidarFrameByteBuffer());
+      lidarFrameByteBufferPointer = new BytePointer(ousterNetServer.getLidarFrameByteBuffer());
 
-      extractedDepthImage = new BytedecoImage(nettyOuster.getImageWidth(), nettyOuster.getImageHeight(), opencv_core.CV_16UC1);
+      extractedDepthImage = new BytedecoImage(ousterNetServer.getImageWidth(), ousterNetServer.getImageHeight(), opencv_core.CV_16UC1);
       depthImageExtractionProgram = openCLManager.loadProgram("OusterDepthImageExtraction");
       extractDepthImageKernel = openCLManager.createKernel(depthImageExtractionProgram, "extractDepthImage");
       computePointCloudKernel = openCLManager.createKernel(depthImageExtractionProgram, "computePointCloud");
 
       lidarFrameBufferObject = openCLManager.createBufferObject(lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
       extractedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      altitudeAnglesOpenCLBuffer = new OpenCLFloatBuffer(nettyOuster.getBeamAltitudeAnglesBuffer());
+      altitudeAnglesOpenCLBuffer = new OpenCLFloatBuffer(ousterNetServer.getBeamAltitudeAnglesBuffer());
       altitudeAnglesOpenCLBuffer.createOpenCLBufferObject(openCLManager);
-      azimuthAnglesOpenCLBuffer = new OpenCLFloatBuffer(nettyOuster.getBeamAzimuthAnglesBuffer());
+      azimuthAnglesOpenCLBuffer = new OpenCLFloatBuffer(ousterNetServer.getBeamAzimuthAnglesBuffer());
       azimuthAnglesOpenCLBuffer.createOpenCLBufferObject(openCLManager);
 
-      pointCloudXYZBuffer = new OpenCLFloatBuffer(3 * nettyOuster.getImageHeight() * nettyOuster.getImageWidth());
+      pointCloudXYZBuffer = new OpenCLFloatBuffer(3 * ousterNetServer.getImageHeight() * ousterNetServer.getImageWidth());
       pointCloudXYZBuffer.createOpenCLBufferObject(openCLManager);
    }
 
@@ -90,10 +91,10 @@ public class OusterDepthExtractionKernel
 
    public void runKernel(RigidBodyTransform ousterToWorldTransform)
    {
-      depthImageExtractionParametersBuffer.setParameter(nettyOuster.getColumnsPerFrame());
-      depthImageExtractionParametersBuffer.setParameter(nettyOuster.getMeasurementBlockSize());
-      depthImageExtractionParametersBuffer.setParameter(NettyOuster.HEADER_BLOCK_BYTES);
-      depthImageExtractionParametersBuffer.setParameter(NettyOuster.CHANNEL_DATA_BLOCK_BYTES);
+      depthImageExtractionParametersBuffer.setParameter(ousterNetServer.getColumnsPerFrame());
+      depthImageExtractionParametersBuffer.setParameter(ousterNetServer.getMeasurementBlockSize());
+      depthImageExtractionParametersBuffer.setParameter(OusterNetServer.HEADER_BLOCK_BYTES);
+      depthImageExtractionParametersBuffer.setParameter(OusterNetServer.CHANNEL_DATA_BLOCK_BYTES);
 
       depthImageExtractionParametersBuffer.writeOpenCLBufferObject(openCLManager);
       openCLManager.enqueueWriteBuffer(lidarFrameBufferObject, lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
@@ -101,16 +102,16 @@ public class OusterDepthExtractionKernel
       openCLManager.setKernelArgument(extractDepthImageKernel, 0, depthImageExtractionParametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(extractDepthImageKernel, 1, lidarFrameBufferObject);
       openCLManager.setKernelArgument(extractDepthImageKernel, 2, extractedDepthImage.getOpenCLImageObject());
-      openCLManager.execute2D(extractDepthImageKernel, nettyOuster.getImageWidth(), nettyOuster.getImageHeight());
+      openCLManager.execute2D(extractDepthImageKernel, ousterNetServer.getImageWidth(), ousterNetServer.getImageHeight());
 
       extractedDepthImage.readOpenCLImage(openCLManager);
 
       if (computeLidarScan.get() || computeHeightMap.get())
       {
-         pointCloudComputationParametersBuffer.setParameter(nettyOuster.getImageWidth());
-         pointCloudComputationParametersBuffer.setParameter(nettyOuster.getImageHeight());
-         pointCloudComputationParametersBuffer.setParameter(nettyOuster.getLidarOriginToBeamOrigin());
-         pointCloudComputationParametersBuffer.setParameter(NettyOuster.DISCRETE_RESOLUTION);
+         pointCloudComputationParametersBuffer.setParameter(ousterNetServer.getImageWidth());
+         pointCloudComputationParametersBuffer.setParameter(ousterNetServer.getImageHeight());
+         pointCloudComputationParametersBuffer.setParameter(ousterNetServer.getLidarOriginToBeamOrigin());
+         pointCloudComputationParametersBuffer.setParameter(OusterNetServer.DISCRETE_RESOLUTION);
          ousterToWorldTransformParameter.setParameter(ousterToWorldTransform);
 
          pointCloudComputationParametersBuffer.writeOpenCLBufferObject(openCLManager);
@@ -122,7 +123,7 @@ public class OusterDepthExtractionKernel
          openCLManager.setKernelArgument(computePointCloudKernel, 3, ousterToWorldTransformParameter.getOpenCLBufferObject());
          openCLManager.setKernelArgument(computePointCloudKernel, 4, extractedDepthImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(computePointCloudKernel, 5, pointCloudXYZBuffer.getOpenCLBufferObject());
-         openCLManager.execute2D(computePointCloudKernel, nettyOuster.getImageWidth(), nettyOuster.getImageHeight());
+         openCLManager.execute2D(computePointCloudKernel, ousterNetServer.getImageWidth(), ousterNetServer.getImageHeight());
 
          pointCloudXYZBuffer.readOpenCLBufferObject(openCLManager);
       }

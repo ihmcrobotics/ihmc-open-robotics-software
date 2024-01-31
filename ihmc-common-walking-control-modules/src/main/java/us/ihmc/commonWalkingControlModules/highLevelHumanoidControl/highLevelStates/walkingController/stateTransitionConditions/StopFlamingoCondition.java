@@ -21,6 +21,7 @@ public class StopFlamingoCondition implements StateTransitionCondition
       if (!singleSupportState.isDone(timeInState))
          return false;
 
-      return !walkingMessageHandler.hasFootTrajectoryForFlamingoStance(singleSupportState.getSwingSide());
+      return !walkingMessageHandler.hasFootTrajectoryForFlamingoStance(singleSupportState.getSwingSide())
+             && !walkingMessageHandler.hasLegTrajectoryForFlamingoStance(singleSupportState.getSwingSide());
    }
 }

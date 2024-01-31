@@ -61,6 +61,7 @@ public class FootstepPlannerRejectionReasonReport
             GraphEdge<FootstepGraphNode> edgeKey = new GraphEdge<>(iterationData.getParentNode(), iterationData.getChildNodes().get(j));
             FootstepPlannerEdgeData edgeData = edgeDataMap.get(edgeKey);
 
+            // Null is a valid value for rejection reason
             BipedalFootstepPlannerNodeRejectionReason rejectionReason
                   = BipedalFootstepPlannerNodeRejectionReason.fromByte((byte) edgeData.getDataBuffer()[rejectionReasonIndex]);
             rejectionReasons.putIfAbsent(rejectionReason, new MutableInt());

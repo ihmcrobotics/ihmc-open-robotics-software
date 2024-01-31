@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiverInterface;
-import us.ihmc.ihmcPerception.depthData.PointCloudSource;
+import us.ihmc.perception.depthData.PointCloudDataReceiverInterface;
+import us.ihmc.perception.depthData.PointCloudSource;
 
 public class BlobDetectionPointCloudReceiver implements PointCloudDataReceiverInterface
 {

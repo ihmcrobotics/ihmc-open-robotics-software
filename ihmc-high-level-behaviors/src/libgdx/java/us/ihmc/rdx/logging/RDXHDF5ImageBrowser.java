@@ -14,11 +14,11 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
-import us.ihmc.rdx.ui.tools.ImGuiDirectory;
+import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.nio.file.Paths;
@@ -30,7 +30,7 @@ public class RDXHDF5ImageBrowser
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiDirectory logDirectory;
-   private final ImGuiPanel panel = new ImGuiPanel("HDF5 Browsing", this::renderImGuiWidgets);
+   private final RDXPanel panel = new RDXPanel("HDF5 Browsing", this::renderImGuiWidgets);
    private final RDXBytedecoImagePanel imagePanel;
    private H5File h5File = null;
    private String selectedFileName = "";
@@ -193,7 +193,7 @@ public class RDXHDF5ImageBrowser
       return imagePanel;
    }
 
-   public ImGuiPanel getControlPanel()
+   public RDXPanel getControlPanel()
    {
       return panel;
    }

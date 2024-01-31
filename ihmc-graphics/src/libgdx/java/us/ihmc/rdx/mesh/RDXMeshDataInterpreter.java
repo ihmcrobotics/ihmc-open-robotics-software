@@ -36,4 +36,59 @@ public class RDXMeshDataInterpreter
 
       return meshBuilder.end();
    }
+
+   public static void reorderMeshVertices(MeshDataHolder meshData, Mesh meshToPack)
+   {
+      meshToPack.getIndicesBuffer().clear();
+
+      for (int i = 0; i < meshData.getTriangleIndices().length; i += 3)
+      {
+         meshToPack.getIndicesBuffer().put((short) meshData.getTriangleIndices()[i]);
+         meshToPack.getIndicesBuffer().put((short) meshData.getTriangleIndices()[i + 1]);
+         meshToPack.getIndicesBuffer().put((short) meshData.getTriangleIndices()[i + 2]);
+      }
+
+      meshToPack.getIndicesBuffer().flip();
+
+      if (meshToPack.getVerticesBuffer().limit() == 0)
+      {
+         throw new RuntimeException("Mesh must have data. The application will SIGSEV on rendering if this continued.");
+      }
+   }
+
+   public static void repositionMeshVertices(MeshDataHolder meshData, Mesh meshToPack, Color color)
+   {
+      meshToPack.getVerticesBuffer().clear();
+
+      for (int i = 0; i < meshData.getVertices().length; i++)
+      {
+         // Position
+         meshToPack.getVerticesBuffer().put(meshData.getVertices()[i].getX32());
+         meshToPack.getVerticesBuffer().put(meshData.getVertices()[i].getY32());
+         meshToPack.getVerticesBuffer().put(meshData.getVertices()[i].getZ32());
+
+         // ColorUnpacked
+         meshToPack.getVerticesBuffer().put(Color.WHITE.r);
+         meshToPack.getVerticesBuffer().put(Color.WHITE.g);
+         meshToPack.getVerticesBuffer().put(Color.WHITE.b);
+         meshToPack.getVerticesBuffer().put(Color.WHITE.a);
+
+         // Normal
+         meshToPack.getVerticesBuffer().put(meshData.getVertexNormals()[i].getX32());
+         meshToPack.getVerticesBuffer().put(meshData.getVertexNormals()[i].getY32());
+         meshToPack.getVerticesBuffer().put(meshData.getVertexNormals()[i].getZ32());
+
+         // UV TextureCoordinates
+         float[] textureLocation = RDXMultiColorMeshBuilder.getTextureLocation(color);
+         meshToPack.getVerticesBuffer().put(textureLocation[0]);
+         meshToPack.getVerticesBuffer().put(textureLocation[1]);
+      }
+
+      meshToPack.getVerticesBuffer().flip();
+
+      if (meshToPack.getVerticesBuffer().limit() == 0)
+      {
+         throw new RuntimeException("Mesh must have data. The application will SIGSEV on rendering if this continued.");
+      }
+   }
 }

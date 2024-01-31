@@ -2,7 +2,7 @@ package us.ihmc.rdx.ui;
 
 public interface ImGuiStoredPropertySetWidget
 {
-   void render();
+   void renderImGuiWidget();
 
    boolean changed();
 }

@@ -15,7 +15,7 @@ public class PilotInterfacePacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "240bb803c4036249ae94d34944608d2b084e99e50613a8273782eaa60b41874c";
+   		return "afd3a7159f820393b19eac5f8f15f18d01224eb93a247a2a24f28e93865b7b46";
    }
    
    @Override

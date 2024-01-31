@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnappingTools;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionFootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculatorInterface;
@@ -35,7 +36,7 @@ public class FootstepCostCalculatorTest
 
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       SideDependentList<ConvexPolygon2D> defaultFootPolygons = PlannerTools.createDefaultFootPolygons();
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(defaultFootPolygons, footstepPlannerParameters);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(defaultFootPolygons, footstepPlannerParameters);
 
       HashMap<DiscreteFootstep, DiscreteFootstep> idealStepMap = new HashMap<>();
       IdealStepCalculatorInterface idealStepCalculator = (stance, startOfSwing) -> idealStepMap.computeIfAbsent(stance, n -> DiscreteFootstep.generateRandomFootstep(random, 2.0, n.getRobotSide().getOppositeSide()));

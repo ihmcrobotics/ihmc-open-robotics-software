@@ -5,15 +5,15 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.22.6")
+      classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.23.1")
       classpath("us.ihmc:log-tools:0.6.3") // removes vulnerable log4j versions from plugin classpath; can be removed later
    }
 }
 
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.7"
-   id("us.ihmc.ihmc-cd") version "1.24"
+   id("us.ihmc.ihmc-ci") version "8.3"
+   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
@@ -29,10 +29,10 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:euclid-geometry:0.20.0")
-   api("us.ihmc:ihmc-pub-sub:0.18.5")
-   api("us.ihmc:ros2-common-interfaces:0.22.6") {
+   api("us.ihmc:euclid:0.21.0")
+   api("us.ihmc:euclid-geometry:0.21.0")
+   api("us.ihmc:ihmc-pub-sub:0.19.0")
+   api("us.ihmc:ros2-common-interfaces:0.23.1") {
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
       exclude(group = "org.junit.platform", module = "junit-platform-commons")
@@ -42,13 +42,13 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-ros2-library:0.22.6")
+   api("us.ihmc:ihmc-ros2-library:0.23.1")
 }
 
 generatorDependencies {
-   api("us.ihmc:euclid:0.20.0")
+   api("us.ihmc:euclid:0.21.0")
    api("us.ihmc:ihmc-commons:0.32.0")
-   api("us.ihmc:ros2-msg-to-pubsub-generator:0.22.6")
+   api("us.ihmc:ros2-msg-to-pubsub-generator:0.23.1")
 }
 
 val generator = us.ihmc.ros2.rosidl.ROS2InterfaceGenerator()

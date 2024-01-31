@@ -132,7 +132,7 @@ public class SwingOverHeightMapTest
       endFoot.getOrientation().setYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+      checkForCollisions(footstepPlan.getKey(), generator.getPlanarRegionsList(), footstepPlan.getRight());
    }
 
    @Test
@@ -160,7 +160,7 @@ public class SwingOverHeightMapTest
       endFoot.getOrientation().setYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+      checkForCollisions(footstepPlan.getKey(), generator.getPlanarRegionsList(), footstepPlan.getRight());
    }
 
    @Test
@@ -182,7 +182,7 @@ public class SwingOverHeightMapTest
       endFoot.getPosition().set(0.2, -width / 2.0, 0.1);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+      checkForCollisions(footstepPlan.getKey(), generator.getPlanarRegionsList(), footstepPlan.getRight());
    }
 
    @Test
@@ -200,7 +200,7 @@ public class SwingOverHeightMapTest
       endFoot.getPosition().set(0.6, 0.0, 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+      checkForCollisions(footstepPlan.getKey(), generator.getPlanarRegionsList(), footstepPlan.getRight());
    }
 
    @Test
@@ -220,7 +220,7 @@ public class SwingOverHeightMapTest
       endFoot.getPosition().set(1.0, 0.0, 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+      checkForCollisions(footstepPlan.getKey(), generator.getPlanarRegionsList(), footstepPlan.getRight());
 
       for (int i = 0; i < footstepPlan.getRight().getNumberOfSteps(); i++)
       {
@@ -252,7 +252,7 @@ public class SwingOverHeightMapTest
       endFoot.getPosition().set(1.0, 0.0, 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+      checkForCollisions(footstepPlan.getKey(), generator.getPlanarRegionsList(), footstepPlan.getRight());
    }
 
    @Test
@@ -278,7 +278,7 @@ public class SwingOverHeightMapTest
       endFoot.getPosition().set(0.6, 0.0, 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+      checkForCollisions(footstepPlan.getKey(), generator.getPlanarRegionsList(), footstepPlan.getRight());
    }
 
    @Test
@@ -304,7 +304,7 @@ public class SwingOverHeightMapTest
       endFoot.getPosition().set(0.6, 0.0, 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+      checkForCollisions(footstepPlan.getKey(), generator.getPlanarRegionsList(), footstepPlan.getRight());
    }
 
    @Test
@@ -327,7 +327,7 @@ public class SwingOverHeightMapTest
       endFoot.getPosition().set(1.0, 0.0, 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+      checkForCollisions(footstepPlan.getKey(), generator.getPlanarRegionsList(), footstepPlan.getRight());
    }
 
    @Test
@@ -346,7 +346,7 @@ public class SwingOverHeightMapTest
       endFoot.getOrientation().set(0.0, 0.0, 0.174, 0.985);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+      checkForCollisions(footstepPlan.getKey(), environment.getPlanarRegionsList(), footstepPlan.getRight());
    }
 
    @Test
@@ -365,7 +365,7 @@ public class SwingOverHeightMapTest
       endFoot.getOrientation().set(0.0, 0.0, 0.087, 0.996);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+      checkForCollisions(footstepPlan.getKey(), environment.getPlanarRegionsList(), footstepPlan.getRight());
    }
 
    @Test
@@ -384,7 +384,7 @@ public class SwingOverHeightMapTest
       endFoot.getOrientation().set(0.0, 0.0, 0.174, 0.985);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+      checkForCollisions(footstepPlan.getKey(), environment.getPlanarRegionsList(), footstepPlan.getRight());
    }
 
    @Test
@@ -403,7 +403,7 @@ public class SwingOverHeightMapTest
       endFoot.getOrientation().set(0.0, 0.0, 0.087, 0.996);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+      checkForCollisions(footstepPlan.getKey(), environment.getPlanarRegionsList(), footstepPlan.getRight());
    }
 
    private Pair<FootstepPlannerRequest, FootstepPlan> runTest(FramePose3DReadOnly startFoot, FramePose3DReadOnly endFoot, PlanarRegionsList planarRegionsList)
@@ -411,7 +411,8 @@ public class SwingOverHeightMapTest
       WalkingControllerParameters walkingControllerParameters = getWalkingControllerParameters();
       ConvexPolygon2D foot = getFootPolygon();
 
-      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList, heightMapResolution);
+      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       SwingPlannerParametersBasics swingPlannerParameters = getParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side -> getFootPolygon());
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -481,8 +482,8 @@ public class SwingOverHeightMapTest
 
       request.getStartFootPoses().get(RobotSide.LEFT).set(stanceFoot);
       request.getStartFootPoses().get(RobotSide.RIGHT).set(startFoot);
-      request.setPlanarRegionsList(planarRegionsList);
-      request.setHeightMapMessage(heightMapMessage);
+      request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList)));
+      request.setHeightMapData(heightMapData);
 
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("environment", planarRegionsList, 1e-2, false);
 
@@ -517,7 +518,6 @@ public class SwingOverHeightMapTest
 //         scs.startSimulationThread();
       }
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       expander.setHeightMapData(heightMapData);
 //      expander.setPlanarRegionsList(planarRegionsList);
       expander.computeSwingTrajectories(request.getStartFootPoses(), footstepPlan);
@@ -525,14 +525,14 @@ public class SwingOverHeightMapTest
       return Pair.of(request, footstepPlan);
    }
 
-   private void checkForCollisions(FootstepPlannerRequest request, FootstepPlan footstepPlan)
+   private void checkForCollisions(FootstepPlannerRequest request, PlanarRegionsList planarRegionsList, FootstepPlan footstepPlan)
    {
-      SteppingParameters steppingParameters = getWalkingControllerParameters().getSteppingParameters();
+      SwingTrajectoryParameters swingTrajectoryParameters = getWalkingControllerParameters().getSwingTrajectoryParameters();
       TwoWaypointSwingGenerator twoWaypointSwingGenerator = new TwoWaypointSwingGenerator("",
-                                                                                          steppingParameters.getMinSwingHeightFromStanceFoot(),
-                                                                                          steppingParameters.getMaxSwingHeightFromStanceFoot(),
-                                                                                          steppingParameters.getMinSwingHeightFromStanceFoot(),
-                                                                                          steppingParameters.getCustomWaypointAngleThreshold(),
+                                                                                          swingTrajectoryParameters.getMinSwingHeight(),
+                                                                                          swingTrajectoryParameters.getMaxSwingHeight(),
+                                                                                          swingTrajectoryParameters.getMinSwingHeight(),
+                                                                                          swingTrajectoryParameters.getCustomWaypointAngleThreshold(),
                                                                                           new YoRegistry(getClass().getSimpleName()),
                                                                                           null);
 
@@ -606,7 +606,7 @@ public class SwingOverHeightMapTest
       };
       swingPlannerParameters.set(originalSwingPlannerParameters);
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(request.getHeightMapMessage());
+      HeightMapData heightMapData = request.getHeightMapData();
 
       for (double time = 0.0; time <= 1.0; time += dt)
       {
@@ -642,7 +642,7 @@ public class SwingOverHeightMapTest
          double closestDistance = Double.MAX_VALUE;
          Point3DReadOnly closestCollision = null;
 
-         for (PlanarRegion planarRegion : request.getPlanarRegionsList().getPlanarRegionsAsList())
+         for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
          {
             Point3DReadOnly collision = PlanarRegionTools.closestPointOnPlanarRegion(desiredPosition, planarRegion);
             FramePoint3D collisionRelativeToEndFoot = new FramePoint3D(ReferenceFrame.getWorldFrame(), collision);
@@ -871,24 +871,6 @@ public class SwingOverHeightMapTest
       return new SteppingParameters()
       {
          @Override
-         public double getMinSwingHeightFromStanceFoot()
-         {
-            return 0.10;
-         }
-
-         @Override
-         public double getDefaultSwingHeightFromStanceFoot()
-         {
-            return getMinSwingHeightFromStanceFoot();
-         }
-
-         @Override
-         public double getMaxSwingHeightFromStanceFoot()
-         {
-            return 0.30;
-         }
-
-         @Override
          public double getFootForwardOffset()
          {
             return getFootLength() - getFootBackwardOffset();
@@ -1000,6 +982,24 @@ public class SwingOverHeightMapTest
    {
       return new SwingTrajectoryParameters()
       {
+         @Override
+         public double getMinSwingHeight()
+         {
+            return 0.10;
+         }
+
+         @Override
+         public double getDefaultSwingHeight()
+         {
+            return getMinSwingHeight();
+         }
+
+         @Override
+         public double getMaxSwingHeight()
+         {
+            return 0.30;
+         }
+
          @Override
          public double getDesiredTouchdownHeightOffset()
          {

@@ -47,6 +47,7 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
@@ -289,6 +290,15 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       //TODO
    }
 
+   public void replaceControllerFactory(HighLevelControllerName controllerName, HighLevelControllerStateFactory controllerFactory)
+   {
+      if (controllerFactoriesMap.containsKey(controllerName))
+         controllerStateFactories.remove(controllerFactoriesMap.get(controllerName));
+
+      controllerStateFactories.add(controllerFactory);
+      controllerFactoriesMap.put(controllerName, controllerFactory);
+   }
+
    public void useDefaultDoNothingControlState()
    {
       DoNothingControllerStateFactory controllerStateFactory = new DoNothingControllerStateFactory();
@@ -493,7 +503,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       double totalRobotWeight = totalMass * gravityZ;
 
-      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, totalRobotWeight, yoGraphicsListRegistry, registry);
+      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, fullRobotModel.getRootBody(), totalRobotWeight, yoGraphicsListRegistry, registry);
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
@@ -568,27 +578,31 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<? extends ContactablePlaneBody> bipedFeet,
                                                                      ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                                                     RigidBodyBasics rootBody,
                                                                      double totalRobotWeight,
                                                                      YoGraphicsListRegistry yoGraphicsListRegistry,
                                                                      YoRegistry registry)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
 
-      FootSwitchFactory footSwitchFactory = walkingControllerParameters.getFootSwitchFactory();
+      SideDependentList<FootSwitchFactory> footSwitchFactories = walkingControllerParameters.getFootSwitchFactories();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String footName = bipedFeet.get(robotSide).getName();
-         ForceSensorDataReadOnly footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
+         ForceSensorDataReadOnly footForceSensor = forceSensorDataHolder.getData(footSensorNames.get(robotSide));
+         FootSwitchFactory footSwitchFactory = footSwitchFactories.get(robotSide);
          FootSwitchInterface footSwitch = footSwitchFactory.newFootSwitch(footName,
                                                                           bipedFeet.get(robotSide),
                                                                           Collections.singleton(bipedFeet.get(robotSide.getOppositeSide())),
+                                                                          rootBody,
                                                                           footForceSensor,
                                                                           totalRobotWeight,
                                                                           yoGraphicsListRegistry,
                                                                           registry);
          footSwitches.put(robotSide, footSwitch);
       }
+
 
       return footSwitches;
    }
@@ -605,7 +619,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          {
             return null;
          }
-         ForceSensorDataReadOnly wristForceSensor = forceSensorDataHolder.getByName(wristSensorNames.get(robotSide));
+         ForceSensorDataReadOnly wristForceSensor = forceSensorDataHolder.getData(wristSensorNames.get(robotSide));
          wristForceSensors.put(robotSide, wristForceSensor);
       }
       return wristForceSensors;

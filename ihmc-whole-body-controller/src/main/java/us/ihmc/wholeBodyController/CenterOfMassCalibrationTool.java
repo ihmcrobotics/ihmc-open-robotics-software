@@ -9,7 +9,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -49,8 +48,8 @@ public class CenterOfMassCalibrationTool implements Updatable
       this.fullRobotModel = fullRobotModel;
       this.forceSensorDataHolder = forceSensorDataHolder;
             
-      ForceSensorDataReadOnly leftAnkleForceSensor = forceSensorDataHolder.getByName("LeftAnkle");
-      ForceSensorDataReadOnly rightAnkleForceSensor = forceSensorDataHolder.getByName("RightAnkle");
+      ForceSensorDataReadOnly leftAnkleForceSensor = forceSensorDataHolder.getData("LeftAnkle");
+      ForceSensorDataReadOnly rightAnkleForceSensor = forceSensorDataHolder.getData("RightAnkle");
       ankleForceSensors.put(RobotSide.LEFT, leftAnkleForceSensor);
       ankleForceSensors.put(RobotSide.RIGHT, rightAnkleForceSensor);
       
@@ -127,12 +126,10 @@ public class CenterOfMassCalibrationTool implements Updatable
          RobotSide robotSide = RobotSide.LEFT;
          
       {
-         Wrench footWrench = new Wrench();
          ForceSensorDataReadOnly forceSensorData = ankleForceSensors.get(robotSide);
          ReferenceFrame measurementFrame = forceSensorData.getMeasurementFrame();
-         forceSensorData.getWrench(footWrench);
-         FrameVector3D footForce = new FrameVector3D(footWrench.getLinearPart());
-         FrameVector3D footTorque = new FrameVector3D(footWrench.getAngularPart());
+         FrameVector3D footForce = new FrameVector3D(forceSensorData.getWrench().getLinearPart());
+         FrameVector3D footTorque = new FrameVector3D(forceSensorData.getWrench().getAngularPart());
          
          ReferenceFrame jointFrame = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).getFrameAfterJoint();
          

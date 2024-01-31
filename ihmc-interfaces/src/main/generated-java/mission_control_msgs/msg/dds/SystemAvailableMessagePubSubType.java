@@ -15,7 +15,7 @@ public class SystemAvailableMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "525e41fd8a9e08cc6e69249e8f354ae678209397367f8a2ae6c33de2c13cf06f";
+   		return "674b31780e8b5a05e69c6a6db671ede9ba537a24dce562268f121f60517074af";
    }
    
    @Override

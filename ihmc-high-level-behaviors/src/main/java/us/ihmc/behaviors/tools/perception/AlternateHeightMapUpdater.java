@@ -4,7 +4,7 @@ import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.MathTools;
-import us.ihmc.ihmcPerception.depthData.PointCloudData;
+import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;

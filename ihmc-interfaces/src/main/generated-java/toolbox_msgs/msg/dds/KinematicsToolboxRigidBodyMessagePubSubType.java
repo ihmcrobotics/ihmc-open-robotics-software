@@ -15,7 +15,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a5af970863060b1133d537ab865a2f6d75e387d066fc261444b086f25603869b";
+   		return "7f0daf2fddf890bd8de47267860eab4c1a2790f1b6d75debeb0adfeaeb972a2d";
    }
    
    @Override

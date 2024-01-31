@@ -15,7 +15,7 @@ public class UIConnectedPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4e1f9e549a02059cbeddb862d35dbc4dcd0a394e5f5b5c3788c791d7c85db278";
+   		return "bfa14453a69091ce31c0426659bbb3856f27cbaa1ddff037b5df69edf6fdaadc";
    }
    
    @Override

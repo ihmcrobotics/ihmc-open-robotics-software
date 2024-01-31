@@ -69,9 +69,7 @@ public class StepConstraintToolboxController extends ToolboxController
 
       stepConstraintCalculator = new StepConstraintCalculator(walkingControllerParameters,
                                                               referenceFrames.getSoleZUpFrames(),
-                                                              referenceFrames.getCenterOfMassFrame(),
-                                                              time,
-                                                              gravityZ);
+                                                              time);
 
       parentRegistry.addChild(stepConstraintCalculator.getYoVariableRegistry());
       if (graphicsListRegistry != null)

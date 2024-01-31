@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -25,6 +26,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
@@ -41,6 +44,22 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * The base functionality of the taskspace position control state for a rigid body.
+ * <p>
+ * This class triages QP weights and PD control gains, user selection of translation axes,
+ * and reference frames. It generates a cubic position trajectory for user provided
+ * waypoints and packs the desireds into an point feedback control command for
+ * submission to the whole body controller core.
+ * </p>
+ * <p>
+ * This class also supports kinematics streaming by accommodating for network
+ * delay when using {@link ExecutionMode#STREAM}.
+ * </p>
+ * <p>
+ * Additionally, it supports the use of function generators to perform diagnostic trajectories.
+ * </p>
+ */
 public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 {
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
@@ -68,6 +87,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 
    private Vector3DReadOnly defaultWeight;
    private PID3DGainsReadOnly gains;
+   private final List<YoFunctionGeneratorNew> functionGenerators = new ArrayList<>();
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameVector3D desiredVelocity = new FrameVector3D();
@@ -101,6 +121,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
                                          ReferenceFrame baseFrame,
                                          BooleanProvider useBaseFrameForControl,
                                          BooleanProvider useWeightFromMessage,
+                                         boolean enableFunctionGenerators,
                                          DoubleProvider time,
                                          YoRegistry registry,
                                          YoGraphicsListRegistry graphicsListRegistry)
@@ -145,6 +166,14 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       streamTimestampOffset.setToNaN();
       streamTimestampSource = new YoDouble(prefix + "StreamTimestampSource", registry);
       streamTimestampSource.setToNaN();
+
+      if (enableFunctionGenerators)
+      {
+         for (int axisIdx = 0; axisIdx < Axis3D.values.length; axisIdx++)
+         {
+            functionGenerators.add(new YoFunctionGeneratorNew(prefix + Axis3D.values()[axisIdx] + "_FG", time, registry));
+         }
+      }
    }
 
    public void setGains(PID3DGainsReadOnly gains)
@@ -152,9 +181,19 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       this.gains = gains;
    }
 
+   public PID3DGainsReadOnly getGains()
+   {
+      return gains;
+   }
+
    public void setWeights(Vector3DReadOnly weights)
    {
       this.defaultWeight = weights;
+   }
+
+   public Vector3DReadOnly getDefaultWeight()
+   {
+      return defaultWeight;
    }
 
    private void setupViz(YoGraphicsListRegistry graphicsListRegistry, String bodyName)
@@ -281,6 +320,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 
       trajectoryGenerator.compute(timeInTrajectory);
       trajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, feedForwardAcceleration);
+      updateFunctionGenerators();
 
       desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
       desiredVelocity.changeFrame(ReferenceFrame.getWorldFrame());
@@ -495,6 +535,22 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       return true;
    }
 
+   private void updateFunctionGenerators()
+   {
+      if (functionGenerators.isEmpty())
+         return;
+
+      for (int axisIdx = 0; axisIdx < functionGenerators.size(); axisIdx++)
+      {
+         YoFunctionGeneratorNew functionGenerator = functionGenerators.get(axisIdx);
+         functionGenerator.update();
+
+         desiredPosition.setElement(axisIdx, desiredPosition.getElement(axisIdx) + functionGenerator.getValue());
+         desiredVelocity.setElement(axisIdx, desiredVelocity.getElement(axisIdx) + functionGenerator.getValueDot());
+         feedForwardAcceleration.setElement(axisIdx, feedForwardAcceleration.getElement(axisIdx) + functionGenerator.getValueDDot());
+      }
+   }
+
    public boolean isMessageWeightValid()
    {
       return messageWeightValid;
@@ -593,6 +649,15 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       pointQueue.clear();
       streamTimestampOffset.setToNaN();
       streamTimestampSource.setToNaN();
+   }
+
+   public void resetFunctionGenerators()
+   {
+      for (int i = 0; i < functionGenerators.size(); i++)
+      {
+         functionGenerators.get(i).setMode(YoFunctionGeneratorMode.OFF);
+         functionGenerators.get(i).reset();
+      }
    }
 
    public void disable()

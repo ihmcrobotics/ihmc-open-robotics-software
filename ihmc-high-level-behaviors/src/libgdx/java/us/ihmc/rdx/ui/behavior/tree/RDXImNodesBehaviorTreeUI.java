@@ -62,8 +62,8 @@ public class RDXImNodesBehaviorTreeUI
 
    public void setRootNode(RDXBehaviorUIInterface rootBehaviorUI)
    {
-      rootNode = new RDXImNodesTreeNode(rootBehaviorUI, rootBehaviorUI.generateUID(), pinIndex);
       allNodesList.clear();
+      rootNode = new RDXImNodesTreeNode(rootBehaviorUI, rootBehaviorUI.generateUID(), pinIndex);
       addNodesToList(rootNode);
    }
 
@@ -116,7 +116,7 @@ public class RDXImNodesBehaviorTreeUI
    private void loadLayoutNodesFromFile()
    {
       WorkspaceResourceFile file = new WorkspaceResourceFile(configurationsDirectory,
-                                                             rootNode.getBehaviorNodeUI().getUIChildren().get(0).getName() + ".json");
+                                                             rootNode.getBehaviorNodeUI().getUIChildren().get(0).getDefinition().getDescription() + ".json");
       LogTools.info("Loading imnodes layout from {}", file.getPathForResourceLoadingPathFiltered());
       JSONFileTools.load(file.getClasspathResourceAsStream(), jsonNode ->
       {
@@ -128,7 +128,7 @@ public class RDXImNodesBehaviorTreeUI
 
             for (RDXImNodesTreeNode node : allNodesList)
             {
-               if (node.getBehaviorNodeUI().getName().equals(entry.getKey()))
+               if (node.getBehaviorNodeUI().getDefinition().getDescription().equals(entry.getKey()))
                {
                   String[] pos = entry.getValue().asText().split(",");
                   float x = Float.parseFloat(pos[0]);
@@ -144,7 +144,7 @@ public class RDXImNodesBehaviorTreeUI
    public void saveLayoutToFile()
    {
       WorkspaceResourceFile file = new WorkspaceResourceFile(configurationsDirectory,
-                                                             rootNode.getBehaviorNodeUI().getUIChildren().get(0).getName() + ".json");
+                                                             rootNode.getBehaviorNodeUI().getUIChildren().get(0).getDefinition().getDescription() + ".json");
       if (file.isFileAccessAvailable())
       {
          LogTools.info("Saving imnodes layout to {}", WorkspacePathTools.removePathPartsBeforeProjectFolder(file.getFilesystemFile()));
@@ -153,7 +153,7 @@ public class RDXImNodesBehaviorTreeUI
             ObjectNode treeNodesNode = root.putObject("treeNodes");
             for (RDXImNodesTreeNode node : allNodesList)
             {
-               treeNodesNode.put(node.getBehaviorNodeUI().getName(),
+               treeNodesNode.put(node.getBehaviorNodeUI().getDefinition().getDescription(),
                                  ImNodes.getNodeGridSpacePosX(node.getNodeID()) + "," + ImNodes.getNodeGridSpacePosY(node.getNodeID()));
 
             }

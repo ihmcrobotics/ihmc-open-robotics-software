@@ -12,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -39,6 +38,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SCS2YoGraphicHolder
 {
+   private static final boolean DEBUG = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry;
@@ -47,11 +47,13 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
    private final ForceSensorDataHolder outputForceSensorDataHolder;
    private final ForceSensorDataHolder outputForceSensorDataHolderWithGravityCancelled;
+   private final List<YoFrameVector3D> outputForces;
 
    private final SideDependentList<ForceSensorDefinition> wristForceSensorDefinitions;
    private final SideDependentList<CenterOfMassReferenceFrame> wristsubtreeCenterOfMassFrames;
 
    private final YoBoolean calibrateWristForceSensors;
+   private final AtomicBoolean calibrateWristForceSensorsAtomic = new AtomicBoolean(false);
    private final SideDependentList<YoDouble> wristSubtreeMass;
    private final SideDependentList<YoFrameVector3D> wristForcesSubtreeWeightCancelled;
    private final SideDependentList<YoFrameVector3D> wristTorquesSubtreeWeightCancelled;
@@ -67,8 +69,6 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
 
    private final SideDependentList<YoFrameVector3D> footForceCalibrationOffsets;
    private final SideDependentList<YoFrameVector3D> footTorqueCalibrationOffsets;
-
-   private RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = null;
 
    private final Wrench wristWrenchDueToGravity = new Wrench();
    private final Wrench tempWrench = new Wrench();
@@ -113,7 +113,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            ForceSensorDefinition forceSensorDefinition = inputForceSensorDataHolder.findForceSensorDefinition(footForceSensorNames.get(robotSide));
+            ForceSensorDefinition forceSensorDefinition = inputForceSensorDataHolder.getDefinition(footForceSensorNames.get(robotSide));
             footForceSensorDefinitions.put(robotSide, forceSensorDefinition);
          }
 
@@ -178,7 +178,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            ForceSensorDefinition forceSensorDefinition = inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(robotSide));
+            ForceSensorDefinition forceSensorDefinition = inputForceSensorDataHolder.getDefinition(wristForceSensorNames.get(robotSide));
             wristForceSensorDefinitions.put(robotSide, forceSensorDefinition);
          }
 
@@ -225,7 +225,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
 
             for (RobotSide robotSide : RobotSide.values)
             {
-               ForceSensorDefinition forceSensorDefinition = inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(robotSide));
+               ForceSensorDefinition forceSensorDefinition = inputForceSensorDataHolder.getDefinition(wristForceSensorNames.get(robotSide));
                RigidBodyBasics measurementLink = forceSensorDefinition.getRigidBody();
                wrenches.put(measurementLink, new Wrench());
             }
@@ -252,6 +252,20 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
          wrenches = null;
          wrenchVisualizer = null;
       }
+
+      if (DEBUG)
+      {
+         outputForces = new ArrayList<>();
+         for (int i = 0; i < outputForceSensorDataHolder.getNumberOfForceSensors(); i++)
+         {
+            ForceSensorDefinition definition = outputForceSensorDataHolder.getForceSensorDefinitions().get(i);
+            outputForces.add(new YoFrameVector3D(definition.getSensorName() + "OutputForce", definition.getSensorFrame(), registry));
+         }
+      }
+      else
+      {
+         outputForces = null;
+      }
    }
 
    private boolean checkIfWristForceSensorsExist(StateEstimatorParameters stateEstimatorParameters)
@@ -264,8 +278,8 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
       }
 
       // Make sure that both sensors actually exist
-      if (inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(RobotSide.LEFT)) == null
-            || inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(RobotSide.RIGHT)) == null)
+      if (inputForceSensorDataHolder.getDefinition(wristForceSensorNames.get(RobotSide.LEFT)) == null
+          || inputForceSensorDataHolder.getDefinition(wristForceSensorNames.get(RobotSide.RIGHT)) == null)
       {
          return false;
       }
@@ -283,8 +297,8 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
       }
 
       // Make sure that both sensors actually exist
-      if (inputForceSensorDataHolder.findForceSensorDefinition(footForceSensorNames.get(RobotSide.LEFT)) == null
-            || inputForceSensorDataHolder.findForceSensorDefinition(footForceSensorNames.get(RobotSide.RIGHT)) == null)
+      if (inputForceSensorDataHolder.getDefinition(footForceSensorNames.get(RobotSide.LEFT)) == null
+          || inputForceSensorDataHolder.getDefinition(footForceSensorNames.get(RobotSide.RIGHT)) == null)
       {
          return false;
       }
@@ -316,6 +330,14 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
 
       if (wrenchVisualizer != null)
          wrenchVisualizer.visualize(wrenches);
+
+      if (DEBUG)
+      {
+         for (int i = 0; i < outputForceSensorDataHolder.getNumberOfForceSensors(); i++)
+         {
+            outputForces.get(i).set(outputForceSensorDataHolder.getForceSensorDatas().get(i).getWrench().getLinearPart());
+         }
+      }
    }
 
    private void updateFootForceSensorState()
@@ -334,24 +356,22 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
       for (RobotSide robotSide : RobotSide.values)
       {
          ForceSensorDefinition footForceSensorDefinition = footForceSensorDefinitions.get(robotSide);
-         ForceSensorDataReadOnly footForceSensor = inputForceSensorDataHolder.get(footForceSensorDefinition);
-         footForceSensor.getWrench(tempWrench);
+         ForceSensorDataReadOnly footForceSensor = inputForceSensorDataHolder.getData(footForceSensorDefinition);
 
-         tempForce.setIncludingFrame(footForceCalibrationOffsets.get(robotSide));
-         tempTorque.setIncludingFrame(footTorqueCalibrationOffsets.get(robotSide));
+         tempWrench.setIncludingFrame(footForceSensor.getWrench());
+         tempWrench.getLinearPart().sub(footForceCalibrationOffsets.get(robotSide));
+         tempWrench.getAngularPart().sub(footTorqueCalibrationOffsets.get(robotSide));
 
-         tempWrench.getLinearPart().sub(tempForce);
-         tempWrench.getAngularPart().sub(tempTorque);
          if (footWrenchSensorDriftEstimator != null)
             tempWrench.sub(footWrenchSensorDriftEstimator.getSensortDriftBias(footForceSensorDefinition));
 
-         outputForceSensorDataHolder.setForceSensorValue(footForceSensorDefinition, tempWrench);
+         outputForceSensorDataHolder.getData(footForceSensorDefinition).setWrench(tempWrench);
       }
    }
 
    private void updateWristForceSensorState()
    {
-      if (requestWristForceSensorCalibrationSubscriber != null && requestWristForceSensorCalibrationSubscriber.checkForNewCalibrationRequest())
+      if (calibrateWristForceSensorsAtomic.getAndSet(false))
          calibrateWristForceSensors.set(true);
 
       if (calibrateWristForceSensors.getBooleanValue())
@@ -360,10 +380,10 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
       for (RobotSide robotSide : RobotSide.values)
       {
          ForceSensorDefinition wristForceSensorDefinition = wristForceSensorDefinitions.get(robotSide);
-         ForceSensorDataReadOnly wristForceSensor = inputForceSensorDataHolder.get(wristForceSensorDefinition);
+         ForceSensorDataReadOnly wristForceSensor = inputForceSensorDataHolder.getData(wristForceSensorDefinition);
          ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
          RigidBodyBasics measurementLink = wristForceSensorDefinition.getRigidBody();
-         wristForceSensor.getWrench(tempWrench);
+         tempWrench.setIncludingFrame(wristForceSensor.getWrench());
 
          tempForce.setIncludingFrame(wristForceCalibrationOffsets.get(robotSide));
          tempTorque.setIncludingFrame(wristTorqueCalibrationOffsets.get(robotSide));
@@ -371,7 +391,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
          tempWrench.getLinearPart().sub(tempForce);
          tempWrench.getAngularPart().sub(tempTorque);
 
-         outputForceSensorDataHolder.setForceSensorValue(wristForceSensorDefinition, tempWrench);
+         outputForceSensorDataHolder.getData(wristForceSensorDefinition).setWrench(tempWrench);
 
          tempForce.setIncludingFrame(tempWrench.getLinearPart());
          tempTorque.setIncludingFrame(tempWrench.getAngularPart());
@@ -387,7 +407,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
          if (wrenches != null)
             wrenches.get(measurementLink).setIncludingFrame(tempWrench);
 
-         outputForceSensorDataHolderWithGravityCancelled.setForceSensorValue(wristForceSensorDefinition, tempWrench);
+         outputForceSensorDataHolderWithGravityCancelled.getData(wristForceSensorDefinition).setWrench(tempWrench);
       }
    }
 
@@ -395,11 +415,9 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         ForceSensorDataReadOnly footForceSensor = inputForceSensorDataHolder.get(footForceSensorDefinitions.get(robotSide));
-         footForceSensor.getWrench(tempWrench);
-
-         tempForce.setIncludingFrame(tempWrench.getLinearPart());
-         tempTorque.setIncludingFrame(tempWrench.getAngularPart());
+         ForceSensorDataReadOnly footForceSensor = inputForceSensorDataHolder.getData(footForceSensorDefinitions.get(robotSide));
+         tempForce.setIncludingFrame(footForceSensor.getWrench().getLinearPart());
+         tempTorque.setIncludingFrame(footForceSensor.getWrench().getAngularPart());
 
          footForceCalibrationOffsets.get(robotSide).setMatchingFrame(tempForce);
          footTorqueCalibrationOffsets.get(robotSide).setMatchingFrame(tempTorque);
@@ -411,10 +429,10 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         ForceSensorDataReadOnly wristForceSensor = inputForceSensorDataHolder.get(wristForceSensorDefinitions.get(robotSide));
+         ForceSensorDataReadOnly wristForceSensor = inputForceSensorDataHolder.getData(wristForceSensorDefinitions.get(robotSide));
          ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
 
-         wristForceSensor.getWrench(tempWrench);
+         tempWrench.setIncludingFrame(wristForceSensor.getWrench());
          cancelHandWeight(robotSide, tempWrench, measurementFrame);
 
          tempForce.setIncludingFrame(tempWrench.getLinearPart());
@@ -453,15 +471,15 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
       return outputForceSensorDataHolderWithGravityCancelled;
    }
 
-   public void setRequestWristForceSensorCalibrationSubscriber(RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber)
-   {
-      this.requestWristForceSensorCalibrationSubscriber = requestWristForceSensorCalibrationSubscriber;
-   }
-
    @Override
    public void requestFootForceSensorCalibrationAtomic()
    {
       calibrateFootForceSensorsAtomic.set(true);
+   }
+
+   public void requestWristForceSensorCalibrationAtomic()
+   {
+      calibrateWristForceSensorsAtomic.set(true);
    }
 
    @Override

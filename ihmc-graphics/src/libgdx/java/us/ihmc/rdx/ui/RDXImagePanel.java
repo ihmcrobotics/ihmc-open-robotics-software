@@ -2,9 +2,9 @@ package us.ihmc.rdx.ui;
 
 import com.badlogic.gdx.graphics.Texture;
 import imgui.internal.ImGui;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 
-public class RDXImagePanel extends ImGuiPanel
+public class RDXImagePanel extends RDXPanel
 {
    public static final boolean FLIP_Y = true;
    public static final boolean DO_NOT_FLIP_Y = false;

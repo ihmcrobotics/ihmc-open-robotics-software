@@ -1,22 +1,18 @@
 package us.ihmc.rdx.ui.affordances;
 
-import com.badlogic.gdx.graphics.Color;
-import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.footstepPlanning.SwingPlanningModule;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepPoseHeuristicChecker;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -25,148 +21,127 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 
 /**
- * Helps the operator confirm that manually placed footsteps are feasible in realtime.
+ * Tells the operator if a manually placed footstep is reasonable in realtime.
+ * Footsteps will flash if the footstep is unreasonable, and when the mouse hovers over the footstep a reason is displayed informing the user why that footstep
+ * is unreasonable.
  */
 public class RDXFootstepChecker
 {
-   private final RDX3DPanel primary3DPanel;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final ControllerStatusTracker controllerStatusTracker;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
-   private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepSnapAndWiggler snapper;
    private final FootstepPoseHeuristicChecker stepChecker;
-   private BipedalFootstepPlannerNodeRejectionReason reason = null;
    private final ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
+   private final RDX3DPanelTooltip tooltip;
 
-   // TODO: Swap stance and swing if candidate step for the very first step of the footsteparraylist is going to be on different side compared to swing's side.
-   private RigidBodyTransformReadOnly stanceStepPose;
-   private RobotSide stanceSide;
-   private RigidBodyTransformReadOnly swingStepPose;
-   private RobotSide swingSide;
-
+   private BipedalFootstepPlannerNodeRejectionReason reason = null;
    private String text = null;
-   private ImGui3DViewInput latestInput;
    private boolean renderTooltip = false;
 
    public RDXFootstepChecker(RDXBaseUI baseUI,
                              ROS2SyncedRobotModel syncedRobot,
+                             ControllerStatusTracker controllerStatusTracker,
                              SideDependentList<ConvexPolygon2D> footPolygons,
                              FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       this.syncedRobot = syncedRobot;
-      this.footPolygons = footPolygons;
-      primary3DPanel = baseUI.getPrimary3DPanel();
-      primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
-      this.footstepPlannerParameters = footstepPlannerParameters;
-      snapper = new FootstepSnapAndWiggler(footPolygons, this.footstepPlannerParameters);
-      stepChecker = new FootstepPoseHeuristicChecker(this.footstepPlannerParameters, snapper, registry);
-      setInitialFeet();
-   }
-
-   public void setInitialFeet()
-   {
-      swingStepPose = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToRoot();
-      swingSide = RobotSide.RIGHT;
-      stanceStepPose = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToRoot();
-      stanceSide = RobotSide.LEFT;
-   }
-
-   public void swapSides()
-   {
-      swingSide = swingSide.getOppositeSide();
-      stanceSide = stanceSide.getOppositeSide();
+      this.controllerStatusTracker = controllerStatusTracker;
+      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltips);
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+      tooltip = new RDX3DPanelTooltip(baseUI.getPrimary3DPanel());
+      snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters, environmentHandler);
+      stepChecker = new FootstepPoseHeuristicChecker(footstepPlannerParameters, snapper, registry);
    }
 
    public void getInput(ImGui3DViewInput input)
    {
-      latestInput = input;
+      tooltip.setInput(input);
    }
 
    private void renderTooltips()
    {
-      if (latestInput != null && renderTooltip)
+      if (renderTooltip)
       {
-         float offsetX = 10.0f;
-         float offsetY = 31.0f;
-         float mousePosX = latestInput.getMousePosX();
-         float mousePosY = latestInput.getMousePosY();
-         float drawStartX = primary3DPanel.getWindowDrawMinX() + mousePosX + offsetX;
-         float drawStartY = primary3DPanel.getWindowDrawMinY() + mousePosY + offsetY;
-
-         ImGui.getWindowDrawList()
-              .addRectFilled(drawStartX, drawStartY, drawStartX + text.length() * 7.2f, drawStartY + 21.0f, new Color(0.2f, 0.2f, 0.2f, 0.7f).toIntBits());
-
-         ImGui.getWindowDrawList()
-              .addText(ImGuiTools.getSmallFont(), ImGuiTools.getSmallFont().getFontSize(), drawStartX + 5.0f, drawStartY + 2.0f, Color.WHITE.toIntBits(), text);
+         tooltip.render(text);
       }
    }
 
-   // TODO: This should update candidate, stance, and swing in the ImGuiGDXManualFootstepPlacement,
-   //  updates RejectionReason, and generate warning message in the UI screen.
    public void checkValidStepList(RecyclingArrayList<RDXInteractableFootstep> stepList)
    {
       reasons.clear();
-      setInitialFeet();
-      // iterate through the list ( + current initial stance and swing) and check validity for all.
+
+      // Iterate through the footstep list and check the validity for all footsteps.
       for (int i = 0; i < stepList.size(); ++i)
       {
          checkValidSingleStep(stepList, stepList.get(i).getFootPose(), stepList.get(i).getFootstepSide(), i);
       }
    }
 
-   // Check validity of 1 step
    public void checkValidSingleStep(RecyclingArrayList<RDXInteractableFootstep> stepList,
-                                    FramePose3DReadOnly candidateStepPose,
+                                    FramePose3DReadOnly candidateFootstepPose,
                                     RobotSide candidateStepSide,
                                     int indexOfFootBeingChecked /* list.size() if not placed yet*/)
    {
-      // use current stance, swing
-      if (indexOfFootBeingChecked == 0)
+      FramePose3DReadOnly previousFootstepOnOtherSide = getPreviousFootstepOnOppositeSide(stepList, indexOfFootBeingChecked, candidateStepSide);
+      FramePose3DReadOnly previousFootstepOnSameSide = getPreviousFootstepOnOppositeSide(stepList,
+                                                                                         indexOfFootBeingChecked,
+                                                                                         candidateStepSide.getOppositeSide());
+      reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, previousFootstepOnOtherSide, previousFootstepOnSameSide);
+
+      reasons.add(reason);
+   }
+
+   /**
+    * Returns the previous footstep on the opposite side of the new footstep side if it exists, otherwise set it to the current robot foot
+    * First check against footsteps that have been placed but are not sent to the controller
+    * Second check against footsteps that are in the controller
+    * Lastly if those don't have footsteps, default to comparing against the synced robot feet
+    */
+   public FramePose3DReadOnly getPreviousFootstepOnOppositeSide(RecyclingArrayList<RDXInteractableFootstep> stepList,
+                                                                 int currentIndex,
+                                                                 RobotSide candidateFootstepSide)
+   {
+      FramePose3D previousFootstepPose = new FramePose3D();
+
+      // Need to subtract one if our current index is for the current step that is being placed cause its not in the list
+      if (currentIndex == stepList.size())
+         currentIndex = currentIndex - 1;
+
+      // Moved the index of the list to the last step on the other side
+      int i = currentIndex;
+      while (i >= 0 && stepList.get(i).getFootstepSide() == candidateFootstepSide)
+         --i;
+
+      if (i >= 0)
       {
-         // if futureStep has different footSide than current swing, swap current swing and stance.
-         if (candidateStepSide != swingSide)
-         {
-            swapSides();
-            reason = stepChecker.checkValidity(candidateStepSide, candidateStepPose, swingStepPose, stanceStepPose);
-         }
-         else
-         {
-            reason = stepChecker.checkValidity(candidateStepSide, candidateStepPose, stanceStepPose, swingStepPose);
-         }
+         previousFootstepPose.setIncludingFrame(stepList.get(i).getFootPose());
       }
-      // 0th element will be stance, previous stance will be swing
-      else if (indexOfFootBeingChecked == 1)
+      else if (controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0)
       {
-         RDXInteractableFootstep tempStance = stepList.get(0);
-         RigidBodyTransformReadOnly tempStanceTransform = tempStance.getFootPose();
-         reason = stepChecker.checkValidity(candidateStepSide, candidateStepPose, tempStanceTransform, stanceStepPose);
+         previousFootstepPose.set(controllerStatusTracker.getFootstepTracker().getLastFootstepQueuedOnOppositeSide(candidateFootstepSide));
       }
       else
       {
-         reason = stepChecker.checkValidity(candidateStepSide,
-                                            candidateStepPose,
-                                            stepList.get(indexOfFootBeingChecked - 1).getFootPose(),
-                                            stepList.get(indexOfFootBeingChecked - 2).getFootPose());
+         previousFootstepPose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(candidateFootstepSide.getOppositeSide()));
       }
-      reasons.add(reason);
+
+      return previousFootstepPose;
    }
 
    public void makeWarnings()
    {
-      // checkValidStepList(footstepArrayList);
       if (reason != null)
       {
-         text = " Warning ! : " + reason.name();
+         text = "Rejected for %s.".formatted(reason.name());
       }
       else
       {
-         text = "Looks Good !";
+         text = "Passes checks.";
       }
    }
 
-   // Should call this in walkFromSteps before clearing the stepList.
-   public void clear(RecyclingArrayList<RDXInteractableFootstep> stepList)
+   public void clear()
    {
       reasons.clear();
    }
@@ -181,59 +156,9 @@ public class RDXFootstepChecker
       return reasons;
    }
 
-   public BipedalFootstepPlannerNodeRejectionReason getReason()
-   {
-      return reason;
-   }
-
    public void setRenderTooltip(boolean renderTooltip)
    {
       this.renderTooltip = renderTooltip;
-   }
-
-   public RDX3DPanel getPrimary3DPanel()
-   {
-      return primary3DPanel;
-   }
-
-   public RigidBodyTransformReadOnly getStanceStepPose()
-   {
-      return stanceStepPose;
-   }
-
-   public void setPreviousStepPose(RigidBodyTransformReadOnly previousStepTransform)
-   {
-      this.stanceStepPose = previousStepTransform;
-   }
-
-   public RobotSide getStanceSide()
-   {
-      return stanceSide;
-   }
-
-   public void setStanceSide(RobotSide stanceSide)
-   {
-      this.stanceSide = stanceSide;
-   }
-
-   public RigidBodyTransformReadOnly getSwingStepPose()
-   {
-      return swingStepPose;
-   }
-
-   public void setSwingStepPose(RigidBodyTransformReadOnly swingStepTransform)
-   {
-      this.swingStepPose = swingStepTransform;
-   }
-
-   public RobotSide getSwingSide()
-   {
-      return swingSide;
-   }
-
-   public void setSwingSide(RobotSide swingSide)
-   {
-      this.swingSide = swingSide;
    }
 
    public void update(RecyclingArrayList<RDXInteractableFootstep> footstepArrayList)

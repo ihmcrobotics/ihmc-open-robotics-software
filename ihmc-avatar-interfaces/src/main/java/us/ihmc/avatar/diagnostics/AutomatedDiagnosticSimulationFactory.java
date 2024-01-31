@@ -45,8 +45,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
-import us.ihmc.wholeBodyController.DRCControllerThread;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
@@ -74,7 +73,6 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    private HumanoidFloatingRootJointRobot simulatedRobot;
    private HumanoidReferenceFrames humanoidReferenceFrames;
    private StateEstimatorController stateEstimator;
-   private ForceSensorStateUpdater forceSensorStateUpdater;
 
    private final SensorDataContext sensorDataContext = new SensorDataContext();
 
@@ -149,7 +147,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, estimatorDesiredJointDataHolder, simulationRegistry);
       sensorReader = sensorReaderFactory.getSensorReader();
 
-      FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(fullRobotModel);
+      FullInverseDynamicsStructure inverseDynamicsStructure = KinematicsBasedStateEstimatorFactory.createFullInverseDynamicsStructure(fullRobotModel);
       SensorOutputMapReadOnly processedSensorOutputMap = sensorReader.getProcessedSensorOutputMap();
       HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
@@ -170,7 +168,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       Map<RigidBodyBasics, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBodyBasics, FootSwitchInterface>();
       Map<RigidBodyBasics, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBodyBasics, ContactablePlaneBody>();
 
-      FootSwitchFactory footSwitchFactory = stateEstimatorParameters.getFootSwitchFactory();
+      SideDependentList<FootSwitchFactory> footSwitchFactories = stateEstimatorParameters.getFootSwitchFactories();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -179,12 +177,14 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
          bipedFeetMap.put(rigidBody, contactablePlaneBody);
 
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
-         ForceSensorDataReadOnly footForceSensorForEstimator = forceSensorDataHolderToUpdate.getByName(footForceSensorName);
+         ForceSensorDataReadOnly footForceSensorForEstimator = forceSensorDataHolderToUpdate.getData(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
+         FootSwitchFactory footSwitchFactory = footSwitchFactories.get(robotSide);
          FootSwitchInterface footSwitchInterface = footSwitchFactory.newFootSwitch(namePrefix,
                                                                                    contactablePlaneBody,
                                                                                    Collections.singleton(bipedFeet.get(robotSide.getOppositeSide())),
+                                                                                   fullRobotModel.getRootBody(),
                                                                                    footForceSensorForEstimator,
                                                                                    totalRobotWeight,
                                                                                    null,
@@ -204,17 +204,9 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
                                                             null,
                                                             robotMotionStatusHolder,
                                                             bipedFeetMap,
+                                                            forceSensorDataHolderToUpdate,
                                                             null);
       simulationRegistry.addChild(stateEstimator.getYoRegistry());
-
-      forceSensorStateUpdater = new ForceSensorStateUpdater(fullRobotModel.getRootJoint(),
-                                                            processedSensorOutputMap,
-                                                            forceSensorDataHolderToUpdate,
-                                                            stateEstimatorParameters,
-                                                            gravitationalAcceleration,
-                                                            robotMotionStatusHolder,
-                                                            null,
-                                                            simulationRegistry);
 
       return sensorReader.getProcessedSensorOutputMap();
    }
@@ -273,14 +265,12 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       if (firstControlTick)
       {
          stateEstimator.initialize();
-         forceSensorStateUpdater.initialize();
          automatedDiagnosticAnalysisController.initialize();
          firstControlTick = false;
       }
       else
       {
          stateEstimator.doControl();
-         forceSensorStateUpdater.updateForceSensorState();
          automatedDiagnosticAnalysisController.doControl();
       }
 

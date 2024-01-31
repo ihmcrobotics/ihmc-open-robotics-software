@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParam
 import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.YoPartialFootholdModuleParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.ToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
@@ -26,6 +27,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -113,6 +115,7 @@ public class FootControlModule implements SCS2YoGraphicHolder
                             PIDSE3GainsReadOnly swingFootControlGains,
                             PIDSE3GainsReadOnly holdPositionFootControlGains,
                             PIDSE3GainsReadOnly toeOffFootControlGains,
+                            RigidBodyControlManager moveViaWaypointControlManager,
                             HighLevelHumanoidControllerToolbox controllerToolbox,
                             ExplorationParameters explorationParameters,
                             YoPartialFootholdModuleParameters footholdRotationParameters,
@@ -155,7 +158,7 @@ public class FootControlModule implements SCS2YoGraphicHolder
       onToesState = new OnToesState(footControlHelper, toeOffCalculator, toeOffFootControlGains, registry);
       supportState = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
       swingState = new SwingState(footControlHelper, swingFootControlGains, registry);
-      moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, swingFootControlGains, registry);
+      moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, moveViaWaypointControlManager, registry);
 
       stateMachine = setupStateMachine(namePrefix);
 
@@ -249,14 +252,8 @@ public class FootControlModule implements SCS2YoGraphicHolder
                           Vector3DReadOnly footLinearWeight)
    {
       swingState.setWeights(footAngularWeight, footLinearWeight);
-      moveViaWaypointsState.setWeights(footAngularWeight, footLinearWeight);
       onToesState.setWeights(loadedFootAngularWeight, loadedFootLinearWeight);
       supportState.setWeights(loadedFootAngularWeight, loadedFootLinearWeight);
-   }
-
-   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
-   {
-      setAdjustedFootstepAndTime(adjustedFootstep, null, null, swingTime);
    }
 
    public void setAdjustedFootstepAndTime(Footstep adjustedFootstep,
@@ -437,6 +434,11 @@ public class FootControlModule implements SCS2YoGraphicHolder
       moveViaWaypointsState.handleFootTrajectoryCommand(command);
    }
 
+   public void handleLegTrajectoryCommand(LegTrajectoryCommand command)
+   {
+      moveViaWaypointsState.handleLegTrajectoryCommand(command);
+   }
+
    public void resetHeightCorrectionParametersForSingularityAvoidance()
    {
       if (workspaceLimiterControlModule != null)
@@ -505,8 +507,8 @@ public class FootControlModule implements SCS2YoGraphicHolder
       for (ConstraintType constraintType : ConstraintType.values())
       {
          AbstractFootControlState state = stateMachine.getState(constraintType);
-         if (state != null && state.getFeedbackControlCommand() != null)
-            ret.addCommand(state.getFeedbackControlCommand());
+         if (state != null && state.createFeedbackControlTemplate() != null)
+            ret.addCommand(state.createFeedbackControlTemplate());
       }
       return ret;
    }

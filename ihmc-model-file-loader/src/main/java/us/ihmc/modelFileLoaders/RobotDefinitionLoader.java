@@ -48,10 +48,29 @@ public class RobotDefinitionLoader
                                                JointNameMap<?> jointNameMap,
                                                boolean removeCollisionMeshes)
    {
+      return loadURDFModel(stream,
+                           resourceDirectories,
+                           classLoader,
+                           modelName,
+                           contactPointDefinitionHolder,
+                           jointNameMap,
+                           removeCollisionMeshes,
+                           URDFTools.DEFAULT_URDF_PARSER_PROPERTIES);
+   }
+
+   public static RobotDefinition loadURDFModel(InputStream stream,
+                                               Collection<String> resourceDirectories,
+                                               ClassLoader classLoader,
+                                               String modelName,
+                                               ContactPointDefinitionHolder contactPointDefinitionHolder,
+                                               JointNameMap<?> jointNameMap,
+                                               boolean removeCollisionMeshes,
+                                               URDFTools.URDFParserProperties urdfParserProperties)
+   {
       try
       {
          URDFModel urdfRoot = URDFTools.loadURDFModel(stream, resourceDirectories, classLoader);
-         RobotDefinition robotDefinition = URDFTools.toFloatingRobotDefinition(urdfRoot);
+         RobotDefinition robotDefinition = URDFTools.toRobotDefinition(urdfRoot, urdfParserProperties);
          // By default SDFTools names the root body "rootBody", for backward compatibility it is renamed "elevator".
          robotDefinition.getRootBodyDefinition().setName(DEFAULT_ROOT_BODY_NAME);
 
@@ -239,6 +258,11 @@ public class RobotDefinitionLoader
 
    public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder, boolean addVisualization)
    {
+      addGroundContactPoints(robotDefinition, contactPointHolder, addVisualization ? 0.01 : 0.0);
+   }
+
+   public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder, double contactPointVizSize)
+   {
       if (contactPointHolder == null)
          return;
 
@@ -276,11 +300,11 @@ public class RobotDefinitionLoader
 
          counters.put(jointName, count);
 
-         if (addVisualization)
+         if (Double.isFinite(contactPointVizSize) && contactPointVizSize > 0.0)
          {
             VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
             visualDefinitionFactory.appendTranslation(jointContactPoint.getRight());
-            visualDefinitionFactory.addSphere(0.01, ColorDefinitions.Orange());
+            visualDefinitionFactory.addSphere(contactPointVizSize, ColorDefinitions.Orange());
             jointDefinition.getSuccessor().getVisualDefinitions().addAll(visualDefinitionFactory.getVisualDefinitions());
          }
       }

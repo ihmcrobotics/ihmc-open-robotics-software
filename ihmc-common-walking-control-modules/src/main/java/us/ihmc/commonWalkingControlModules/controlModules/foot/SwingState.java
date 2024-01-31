@@ -42,7 +42,6 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3Tr
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -320,9 +319,12 @@ public class SwingState extends AbstractFootControlState
       swingTimeSpeedUpFactor.set(1.0);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
       replanTrajectory.set(false);
+//      footstepWasAdjusted.set(false);
 
       if (workspaceLimiterControlModule != null)
+      {
          workspaceLimiterControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
+      }
 
       YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
       contactState.notifyContactStateHasChanged();
@@ -582,11 +584,6 @@ public class SwingState extends AbstractFootControlState
       tempPoint.setToZero(originOfControlFrame);
       tempPoint.changeFrame(worldFrame);
       radialFrame.setPoseAndUpdate(tempPoint, anklePitchRotationToParentFrame);
-   }
-
-   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
-   {
-      setAdjustedFootstepAndTime(adjustedFootstep, null, null, swingTime);
    }
 
    public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, FrameVector3DReadOnly finalCoMVelocity, FrameVector3DReadOnly finalCoMAcceleration, double swingTime)
@@ -856,6 +853,7 @@ public class SwingState extends AbstractFootControlState
          return false;
 
       double timeToSwitchToLoadBearing = swingDuration.getValue() * (1.0 - fractionOfSwingToSwitchToLoaded.getValue());
-      return currentTimeWithSwingSpeedUp.getDoubleValue() > timeToSwitchToLoadBearing;
+      double time = currentTimeWithSwingSpeedUp.isNaN() ? currentTime.getValue() : currentTimeWithSwingSpeedUp.getDoubleValue();
+      return time > timeToSwitchToLoadBearing;
    }
 }

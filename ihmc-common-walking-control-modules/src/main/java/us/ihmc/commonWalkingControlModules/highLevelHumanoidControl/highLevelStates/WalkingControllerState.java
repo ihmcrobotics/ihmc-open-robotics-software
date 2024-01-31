@@ -77,8 +77,6 @@ public class WalkingControllerState extends HighLevelControllerState
 
       //      linearMomentumRateControlModule = new LinearMomentumRateControlModule(controllerToolbox, walkingControllerParameters, registry);
       linearMomentumRateControlModule = controllerCoreFactory.getOrCreateLinearMomentumRateControlModule(registry);
-      managerFactory.getOrCreateBalanceManager()
-                    .setStepConstraintRegionsHandler(controllerToolbox.getWalkingMessageHandler().getStepConstraintRegionHandler());
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }

@@ -32,7 +32,7 @@ public class BipedSupportPolygons implements SCS2YoGraphicHolder
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static boolean VISUALIZE = true;
-   private static final int maxNumberOfContactPointsPerFoot = 6;
+   private static final int maxNumberOfContactPointsPerFoot = 8;
 
    private final YoRegistry registry = new YoRegistry("BipedSupportPolygons");
 
@@ -258,6 +258,11 @@ public class BipedSupportPolygons implements SCS2YoGraphicHolder
    public FrameConvexPolygon2DReadOnly getFootPolygonInSoleZUpFrame(RobotSide robotSide)
    {
       return footPolygonsInSoleZUpFrame.get(robotSide);
+   }
+
+   public SideDependentList<? extends FrameConvexPolygon2DReadOnly> getFootPolygonsInSoleFrame()
+   {
+      return footPolygonsInSoleFrame;
    }
 
    public SideDependentList<? extends FrameConvexPolygon2DReadOnly> getFootPolygonsInSoleZUpFrame()

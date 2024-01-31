@@ -19,6 +19,7 @@ import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.log.LogTools;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.geometry.TriangleMesh3DDefinition;
+import us.ihmc.scs2.definition.visual.TriangleMesh3DFactories;
 
 import java.lang.reflect.Array;
 import java.util.HashMap;

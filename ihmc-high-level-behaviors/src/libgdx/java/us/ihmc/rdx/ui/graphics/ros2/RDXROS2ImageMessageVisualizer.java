@@ -10,7 +10,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -21,7 +21,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
-import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
+import us.ihmc.rdx.imgui.ImPlotDoublePlot;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -113,6 +113,16 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
                      compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
                      decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
                   }
+                  case COLOR_JPEG_BGR8 ->
+                  {
+                     LogTools.info("Creating Image Message Visualizer for {} with the type COLOR_JPEG_BGR8", topic.getName());
+                     bytesIfUncompressed = numberOfPixels * 3;
+                     incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
+                     incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
+
+                     compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
+                     decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+                  }
                }
             }
 
@@ -141,12 +151,16 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
             {
                case DEPTH_PNG_16UC1 ->
                {
-                  BytedecoOpenCVTools.clampTo8BitUnsignedChar(decompressedImage, normalizedScaledImage, 0.0, 255.0);
-                  BytedecoOpenCVTools.convertGrayToRGBA(normalizedScaledImage, getRGBA8Mat());
+                  OpenCVTools.clampTo8BitUnsignedChar(decompressedImage, normalizedScaledImage, 0.0, 255.0);
+                  OpenCVTools.convertGrayToRGBA(normalizedScaledImage, getRGBA8Mat());
                }
                case COLOR_JPEG_YUVI420 ->
                {
                   opencv_imgproc.cvtColor(decompressedImage, getRGBA8Mat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
+               }
+               case COLOR_JPEG_BGR8 ->
+               {
+                  opencv_imgproc.cvtColor(decompressedImage, getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA);
                }
             }
          }
@@ -166,10 +180,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
       ImGui.text(topic.getName());
       if (getHasReceivedOne())
       {
-         messageSizeReadout.renderImGuiWidgets();
-         getFrequencyPlot().renderImGuiWidgets();
-         delayPlot.renderImGuiWidgets();
-         sequenceDiscontinuityPlot.renderImGuiWidgets();
+         renderStatistics();
       }
    }
 
@@ -202,5 +213,13 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
    {
       super.destroy();
       setSubscribed(false);
+   }
+
+   public void renderStatistics()
+   {
+      messageSizeReadout.renderImGuiWidgets();
+      getFrequencyPlot().renderImGuiWidgets();
+      delayPlot.renderImGuiWidgets();
+      sequenceDiscontinuityPlot.renderImGuiWidgets();
    }
 }

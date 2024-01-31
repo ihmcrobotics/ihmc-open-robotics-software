@@ -15,7 +15,7 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2a1acc5f8f9bcf1ab724d8928cb9627cbee29f91e17fcb8a4b582d6d8a203922";
+   		return "539ba3bd7996534a788a9a164e3b2bc1cfa847c4fae7ffcef5184551f8c71dec";
    }
    
    @Override

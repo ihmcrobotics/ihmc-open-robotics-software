@@ -25,7 +25,6 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicPoint2DDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -36,7 +35,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class PlaneContactWrenchProcessor implements SCS2YoGraphicHolder
 {
-   private final static boolean VISUALIZE = false;
+   public final static boolean VISUALIZE = true;
 
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();

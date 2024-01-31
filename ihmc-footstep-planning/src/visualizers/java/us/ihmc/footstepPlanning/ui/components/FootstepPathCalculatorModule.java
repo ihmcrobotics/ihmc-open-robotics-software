@@ -20,6 +20,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphPa
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,7 +55,6 @@ public class FootstepPathCalculatorModule
 
    private final AtomicReference<FootstepPlannerParametersReadOnly> parameters;
    private final AtomicReference<AStarBodyPathPlannerParametersReadOnly> pathPlannerParameters;
-   private final AtomicReference<VisibilityGraphsParametersReadOnly> visibilityGraphsParameters;
 
    private final Messager messager;
    private final FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
@@ -71,7 +72,6 @@ public class FootstepPathCalculatorModule
       rightFootGoalPose = messager.createInput(RightFootGoalPose);
 
       parameters = messager.createInput(PlannerParameters, new DefaultFootstepPlannerParameters());
-      visibilityGraphsParameters = messager.createInput(VisibilityGraphsParameters, new DefaultVisibilityGraphParameters());
       pathPlannerParameters = messager.createInput(AStarBodyPathPlannerParameters, new AStarBodyPathPlannerParameters());
       performAStarSearch = messager.createInput(PerformAStarSearch, false);
       planBodyPath = messager.createInput(PlanBodyPath, true);
@@ -127,10 +127,9 @@ public class FootstepPathCalculatorModule
          LogTools.info("Starting to compute path...");
       }
 
-      PlanarRegionsList planarRegionsList = planarRegionsReference.get();
-      HeightMapMessage heightMapMessage = heightMapReference.get();
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapReference.get());
 
-      if (planarRegionsList == null && heightMapMessage == null)
+      if (heightMapData == null)
          return;
 
       if (leftFootStartPose.get() == null || rightFootStartPose.get() == null)
@@ -145,8 +144,7 @@ public class FootstepPathCalculatorModule
       try
       {
          FootstepPlannerRequest request = new FootstepPlannerRequest();
-         request.setPlanarRegionsList(planarRegionsList);
-         request.setHeightMapMessage(heightMapMessage);
+         request.setHeightMapData(heightMapData);
          request.setTimeout(plannerTimeoutReference.get());
          request.setMaximumIterations(plannerMaxIterationsReference.get());
          request.setHorizonLength(plannerHorizonLengthReference.get());
@@ -159,7 +157,6 @@ public class FootstepPathCalculatorModule
          request.setAbortIfGoalStepSnappingFails(abortIfGoalStepSnapFails.get());
 
          planningModule.getFootstepPlannerParameters().set(parameters.get());
-         planningModule.getVisibilityGraphParameters().set(visibilityGraphsParameters.get());
          planningModule.getAStarBodyPathPlannerParameters().set(pathPlannerParameters.get());
 
          planningModule.addStatusCallback(status -> messager.submitMessage(FootstepPlanningResultTopic, status.getFootstepPlanningResult()));

@@ -15,7 +15,7 @@ public class QuadrupedBodyPathPlanMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "01116ed85e61df58b068a9b4f614faab7b24e68c1cf333615ed94e576e98b1af";
+   		return "50d29888c505ec813d701afc459e9d3672f2a1096214a5a361db0658a905e888";
    }
    
    @Override

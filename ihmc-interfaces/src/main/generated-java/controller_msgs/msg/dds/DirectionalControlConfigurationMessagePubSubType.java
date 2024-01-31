@@ -15,7 +15,7 @@ public class DirectionalControlConfigurationMessagePubSubType implements us.ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "88b92c2beb2a2cb7357ed5e1a46ce5f32b187ff01d86c84cf7f43d3d8c72b8bf";
+   		return "2dbfb6aaf460a3c9a023793ef4044afe15188dcdf5c18ac6bcbebb630d9a3e57";
    }
    
    @Override

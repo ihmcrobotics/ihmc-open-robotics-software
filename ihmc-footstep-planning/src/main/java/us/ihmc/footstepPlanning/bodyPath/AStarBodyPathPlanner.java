@@ -243,6 +243,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       iterationData.clear();
       edgeDataMap.clear();
       gridHeightMap.clear();
+      setHeightMapData(request.getHeightMapData());
 
       packRadialOffsets(heightMapData, plannerParameters.getSnapRadius(), xSnapOffsets, ySnapOffsets);
 

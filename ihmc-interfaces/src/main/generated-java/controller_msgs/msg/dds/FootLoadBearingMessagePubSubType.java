@@ -15,7 +15,7 @@ public class FootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "24a504d3f0ce3963bc59922d6576953109c6ffb40ab433643990dc58bb312e5e";
+   		return "4bf668c63c8c31efba2f62875c8acb0321fffca7d21d1d827f23e2971b77e659";
    }
    
    @Override

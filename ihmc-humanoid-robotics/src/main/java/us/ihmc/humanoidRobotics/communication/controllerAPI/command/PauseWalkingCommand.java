@@ -7,6 +7,7 @@ public class PauseWalkingCommand implements Command<PauseWalkingCommand, PauseWa
 {
    private long sequenceId;
    private boolean isPauseRequested = false;
+   private boolean clearRemainingFootstepQueue = false;
 
    public PauseWalkingCommand()
    {
@@ -17,6 +18,7 @@ public class PauseWalkingCommand implements Command<PauseWalkingCommand, PauseWa
    {
       sequenceId = 0;
       isPauseRequested = false;
+      clearRemainingFootstepQueue = false;
    }
 
    @Override
@@ -24,6 +26,7 @@ public class PauseWalkingCommand implements Command<PauseWalkingCommand, PauseWa
    {
       sequenceId = other.sequenceId;
       isPauseRequested = other.isPauseRequested;
+      clearRemainingFootstepQueue = other.clearRemainingFootstepQueue;
    }
 
    @Override
@@ -31,6 +34,7 @@ public class PauseWalkingCommand implements Command<PauseWalkingCommand, PauseWa
    {
       sequenceId = message.getSequenceId();
       isPauseRequested = message.getPause();
+      clearRemainingFootstepQueue = message.getClearRemainingFootstepQueue();
    }
 
    public boolean isPauseRequested()
@@ -41,6 +45,11 @@ public class PauseWalkingCommand implements Command<PauseWalkingCommand, PauseWa
    public void setPauseRequested(boolean isPauseRequested)
    {
       this.isPauseRequested = isPauseRequested;
+   }
+
+   public boolean getClearRemainingFootstepQueue()
+   {
+      return clearRemainingFootstepQueue;
    }
 
    @Override

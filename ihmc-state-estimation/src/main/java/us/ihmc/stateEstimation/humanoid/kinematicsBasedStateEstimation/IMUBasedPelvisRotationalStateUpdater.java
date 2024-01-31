@@ -41,7 +41,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final YoFrameVector3D yoRootJointAngularVelocity;
    private final YoFrameVector3D yoRootJointAngularVelocityInWorld;
 
-   private final BooleanParameter zeroYawAtInitialization = new BooleanParameter("zeroEstimatedRootYawAtInitialization", registry, false);
+   private final BooleanParameter zeroYawAtInitialization = new BooleanParameter("zeroEstimatedRootYawAtInitialization", registry, true);
    private final YoDouble initialYaw = new YoDouble("initialEstimatedRootYaw", registry);
 
    private final FiniteDifferenceAngularVelocityYoFrameVector yoRootJointAngularVelocityFromFD;
@@ -215,7 +215,9 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       angularVelocityMeasurement.set(imuProcessedOutput.getAngularVelocityMeasurement());
       if (imuBiasProvider != null)
       {
-         angularVelocityMeasurement.sub(imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuProcessedOutput));
+         FrameVector3DReadOnly angularVelocityBiasInIMUFrame = imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuProcessedOutput);
+         if (angularVelocityBiasInIMUFrame != null)
+            angularVelocityMeasurement.sub(angularVelocityBiasInIMUFrame);
       }
       angularVelocityMeasurementLinkRelativeToWorld.setIncludingFrame(measurementFrame, angularVelocityMeasurement);
 

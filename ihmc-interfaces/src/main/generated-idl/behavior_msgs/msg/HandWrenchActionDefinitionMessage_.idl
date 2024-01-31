@@ -1,0 +1,37 @@
+#ifndef __behavior_msgs__msg__HandWrenchActionDefinitionMessage__idl__
+#define __behavior_msgs__msg__HandWrenchActionDefinitionMessage__idl__
+
+#include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::HandWrenchActionDefinitionMessage_")
+      struct HandWrenchActionDefinitionMessage
+      {
+        /**
+         * Parent definition fields
+         */
+        behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
+        /**
+         * Specifies the side of the robot that this message refers to.
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
+         * The trajectory duration
+         */
+        double trajectory_duration;
+        /**
+         * Amount of force to use
+         */
+        double force;
+      };
+    };
+  };
+};
+
+#endif

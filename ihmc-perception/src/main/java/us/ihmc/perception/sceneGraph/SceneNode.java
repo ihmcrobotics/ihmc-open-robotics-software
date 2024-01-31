@@ -1,28 +1,38 @@
 package us.ihmc.perception.sceneGraph;
 
+import us.ihmc.communication.crdt.DurationFreezable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Represents a node on the Scene Knowledge Graph (to be defined).
+ * Represents a node on the scene graph which is
+ * built as a CRDT, so part of this node are present
+ * only to address that.
  *
  * We give each node a name and a reference frame.
  */
-public abstract class SceneNode
+public class SceneNode extends DurationFreezable
 {
+   /** The node's unique ID. */
+   private final long id;
    private final String name;
-   private final ModifiableReferenceFrame nodeFrame;
+   private final MutableReferenceFrame nodeFrame;
+   private final List<SceneNode> children = new ArrayList<>();
 
-   public SceneNode(String name)
+   public SceneNode(long id, String name)
    {
-      this(name, ReferenceFrame.getWorldFrame());
+      this.id = id;
+      this.name = name;
+      this.nodeFrame = new MutableReferenceFrame(name, ReferenceFrame.getWorldFrame());
    }
 
-   public SceneNode(String name, ReferenceFrame parentFrame)
+   public long getID()
    {
-      this.name = name;
-      this.nodeFrame = new ModifiableReferenceFrame(name, parentFrame);
+      return id;
    }
 
    public String getName()
@@ -35,6 +45,11 @@ public abstract class SceneNode
       return nodeFrame.getReferenceFrame();
    }
 
+   public MutableReferenceFrame getModifiableNodeFrame()
+   {
+      return nodeFrame;
+   }
+
    /**
     * Used to get and set the transform to the parent frame.
     * If you modify this transform, you must then call {@link ReferenceFrame#update()} on {@link #getNodeFrame()}.
@@ -45,8 +60,31 @@ public abstract class SceneNode
       return nodeFrame.getTransformToParent();
    }
 
-   protected void changeParentFrame(ReferenceFrame newParentFrame)
+   /**
+    * This makes sure this node's ReferenceFrame's parent is the same instance
+    * as this node's parent node's ReferenceFrame.
+    */
+   public void ensureParentFrameIsConsistent(ReferenceFrame desiredParentFrame)
    {
-      nodeFrame.changeParentFrame(newParentFrame);
+      if (desiredParentFrame != nodeFrame.getReferenceFrame().getParent())
+         nodeFrame.setParentFrame(desiredParentFrame);
+   }
+
+   /** See {@link MutableReferenceFrame#changeFrame} */
+   public void changeFrame(ReferenceFrame newParentFrame)
+   {
+      nodeFrame.changeFrame(newParentFrame);
+   }
+
+   /**
+    * @return The scene node's children.
+    *
+    * Warning! Only modify this collection via queued modifications using
+    * {@link SceneGraph#modifyTree}. Otherwise, inconsistency can occur
+    * which may cause bad behavior or crashes.
+    */
+   public List<SceneNode> getChildren()
+   {
+      return children;
    }
 }

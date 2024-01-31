@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
+import us.ihmc.commonWalkingControlModules.contact.HandWrenchCalculator;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,6 +19,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshot;
 
@@ -27,7 +29,7 @@ import java.util.function.Function;
 
 public abstract class CommunicationsSyncedRobotModel
 {
-   private DRCRobotModel robotModel;
+   private final DRCRobotModel robotModel;
    private final FullHumanoidRobotModel fullRobotModel;
    private final SideDependentList<HandModel> handModels;
    private final Timer dataReceptionTimer;
@@ -39,6 +41,7 @@ public abstract class CommunicationsSyncedRobotModel
    private final HumanoidReferenceFrames referenceFrames;
    private final FramePose3D temporaryPoseForQuickReading = new FramePose3D();
    private final ArrayList<SpatialVectorMessage> forceSensorData = new ArrayList<>();
+   private final SideDependentList<HandWrenchCalculator> handWrenchCalculators = new SideDependentList<>();
 
    public CommunicationsSyncedRobotModel(DRCRobotModel robotModel,
                                          FullHumanoidRobotModel fullRobotModel,
@@ -60,6 +63,14 @@ public abstract class CommunicationsSyncedRobotModel
                                                                            fullRobotModel.getIMUDefinitions());
 
       dataReceptionTimer = new Timer();
+
+      if (handModels != null)
+      {
+         for (RobotSide side : handModels.sides())
+         {
+            handWrenchCalculators.put(side, new HandWrenchCalculator(side, fullRobotModel, null, StateEstimatorParameters.ROBOT_CONFIGURATION_DATA_PUBLISH_DT));
+         }
+      }
    }
 
    public void initializeToDefaultRobotInitialSetup(double groundHeight, double initialYaw, double x, double y)
@@ -116,14 +127,18 @@ public abstract class CommunicationsSyncedRobotModel
       }
 
       updateFramesForFullRobotModel();
+
+      for (RobotSide side : handWrenchCalculators.sides())
+      {
+         handWrenchCalculators.get(side).compute();
+      }
    }
 
    private void updateFramesForFullRobotModel()
    {
-      fullRobotModel.getElevator().updateFramesRecursively();
-
       try
       {
+         fullRobotModel.getElevator().updateFramesRecursively();
          referenceFrames.updateFrames();
       }
       catch (NotARotationMatrixException e)
@@ -171,5 +186,10 @@ public abstract class CommunicationsSyncedRobotModel
    public DRCRobotModel getRobotModel()
    {
       return robotModel;
+   }
+
+   public SideDependentList<HandWrenchCalculator> getHandWrenchCalculators()
+   {
+      return handWrenchCalculators;
    }
 }

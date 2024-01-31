@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.7"
-   id("us.ihmc.ihmc-cd") version "1.24"
+   id("us.ihmc.ihmc-ci") version "8.3"
+   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -14,7 +14,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.20.0")
+   api("us.ihmc:euclid:0.21.0")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models:source")
@@ -27,7 +27,7 @@ mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-state-estimation:source")
 
-   api("us.ihmc:scs2-definition:17-0.14.3")
+   api("us.ihmc:scs2-definition:17-0.19.0")
 }
 
 testDependencies {

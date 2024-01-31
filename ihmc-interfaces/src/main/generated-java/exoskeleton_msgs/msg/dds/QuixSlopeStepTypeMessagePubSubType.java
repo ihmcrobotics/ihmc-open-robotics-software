@@ -15,7 +15,7 @@ public class QuixSlopeStepTypeMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "54b771f0acff0e24fca534f079fbb21854e4834028066ab3847ffdf4876ae5a5";
+   		return "96fdcabc4d60edb6d4c888b346c6c4185c4f1a9d6c533067cbde93dcece0c692";
    }
    
    @Override

@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 public class StringTools
 {
@@ -157,6 +158,20 @@ public class StringTools
             camelCased.append(StringUtils.capitalize(parts[i]));
       }
       return camelCased.toString();
+   }
+
+   private static final Pattern UPPERCASE_LETTER = Pattern.compile("(?<=[a-z])[A-Z]+|[A-Z](?=[a-z])|[0-9]+");
+
+   /**
+    * PascalCase to sentence case. Can handle acronyms in some cases, but does struggle sometimes.
+    * @param pascalCaseString the pascal case string
+    * @return the sentence case string
+    */
+   public static String pascalCaseToSentenceCase(String pascalCaseString) {
+      return pascalCaseString.substring(0, 1).toUpperCase() + UPPERCASE_LETTER.matcher(pascalCaseString.substring(1))
+                                                                             .replaceAll(matchResult -> !matchResult.group().matches("[A-Z]{2,}")
+                                                                                   ? " " + matchResult.group().toLowerCase()
+                                                                                   : " " + matchResult.group());
    }
 
    /**

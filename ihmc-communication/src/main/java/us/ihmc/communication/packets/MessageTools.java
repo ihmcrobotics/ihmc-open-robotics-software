@@ -5,9 +5,11 @@ import gnu.trove.list.array.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.*;
 import perception_msgs.msg.dds.*;
+import std_msgs.msg.dds.Bool;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
@@ -26,21 +28,23 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.math.QuaternionCalculus;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class MessageTools
 {
@@ -1118,6 +1122,13 @@ public class MessageTools
                                                  rigidBodyTransformMessage.getM22());
    }
 
+   public static RigidBodyTransform toEuclid(RigidBodyTransformMessage rigidBodyTransformMessage)
+   {
+      RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
+      toEuclid(rigidBodyTransformMessage, rigidBodyTransform);
+      return rigidBodyTransform;
+   }
+
    public static Box3DMessage createBox3DMessage(Box3DReadOnly box)
    {
       Box3DMessage message = new Box3DMessage();
@@ -1258,6 +1269,24 @@ public class MessageTools
       ellipsoidToSet.getRadii().set(ellipsoidMessage.getRadii());
    }
 
+   public static void toMessage(SE3TrajectoryPointReadOnly trajectoryPoint, SE3TrajectoryPointMessage trajectoryPointMessage)
+   {
+      trajectoryPointMessage.setTime(trajectoryPoint.getTime());
+      trajectoryPointMessage.getPosition().set(trajectoryPoint.getPosition());
+      trajectoryPointMessage.getOrientation().set(trajectoryPoint.getOrientation());
+      trajectoryPointMessage.getLinearVelocity().set(trajectoryPoint.getLinearVelocity());
+      trajectoryPointMessage.getAngularVelocity().set(trajectoryPoint.getAngularVelocity());
+   }
+
+   public static void fromMessage(SE3TrajectoryPointMessage trajectoryPointMessage, SE3TrajectoryPoint trajectoryPoint)
+   {
+      trajectoryPoint.setTime(trajectoryPointMessage.getTime());
+      trajectoryPoint.getPosition().set(trajectoryPointMessage.getPosition());
+      trajectoryPoint.getOrientation().set(trajectoryPointMessage.getOrientation());
+      trajectoryPoint.getLinearVelocity().set(trajectoryPointMessage.getLinearVelocity());
+      trajectoryPoint.getAngularVelocity().set(trajectoryPointMessage.getAngularVelocity());
+   }
+
    public static void toMessage(Instant instant, InstantMessage instantMessage)
    {
       instantMessage.setSecondsSinceEpoch(instant.getEpochSecond());
@@ -1272,6 +1301,20 @@ public class MessageTools
    public static Instant toInstant(InstantMessage instantMessage)
    {
       return Instant.ofEpochSecond(instantMessage.getSecondsSinceEpoch(), instantMessage.getAdditionalNanos());
+   }
+
+   public static void toMessage(UUID uuid, UUIDMessage uuidMessage)
+   {
+      uuidMessage.setLeastSignificantBits(uuid.getLeastSignificantBits());
+      uuidMessage.setMostSignificantBits(uuid.getMostSignificantBits());
+   }
+
+   /**
+    * UUID is immutable so there is no allocation free option.
+    */
+   public static UUID toUUID(UUIDMessage uuidMessage)
+   {
+      return new UUID(uuidMessage.getMostSignificantBits(), uuidMessage.getLeastSignificantBits());
    }
 
    public static double calculateDelay(ImageMessage imageMessage)
@@ -1351,5 +1394,61 @@ public class MessageTools
          byteBufferToPack.putFloat(value);
       }
       byteBufferToPack.flip();
+   }
+
+   public static PoseListMessage createPoseListMessage(Collection<Pose3DReadOnly> poses)
+   {
+      PoseListMessage poseListMessage = new PoseListMessage();
+      packPoseListMessage(poses, poseListMessage);
+      return poseListMessage;
+   }
+
+   public static <T extends Pose3DReadOnly> void packPoseListMessage(Iterable<T> poses, PoseListMessage poseListMessage)
+   {
+      poseListMessage.getPoses().clear();
+      for (Pose3DReadOnly pose : poses)
+      {
+         Pose3D messagePose = poseListMessage.getPoses().add();
+         messagePose.set(pose);
+      }
+   }
+
+   public static List<Pose3D> unpackPoseListMessage(PoseListMessage poseListMessage)
+   {
+      ArrayList<Pose3D> poses = new ArrayList<>();
+      for (int i = 0; i < poseListMessage.getPoses().size(); i++)
+      {
+         Pose3D pose = new Pose3D(poseListMessage.getPoses().get(i));
+         poses.add(pose);
+      }
+      return poses;
+   }
+
+   public static Bool createBoolMessage(boolean data)
+   {
+      Bool bool = new Bool();
+      bool.setData(data);
+      return bool;
+   }
+
+   /**
+    * The regular string type in our DDS messages has a maximum length of 255.
+    * The get around this we declare `int8[] field_name` in the ".msg" file
+    * which creates a Byte sequence 25 MB in size.
+    * We use ASCII because UTF8 causes issues when publishing over DDS.
+    */
+   public static void packLongStringToByteSequence(String longString, IDLSequence.Byte byteSequence)
+   {
+      byte[] longStringBytes = longString.getBytes(StandardCharsets.US_ASCII);
+      byteSequence.addAll(longStringBytes);
+   }
+
+   /**
+    * See {@link #unpackLongStringFromByteSequence(IDLSequence.Byte)}.
+    */
+   public static String unpackLongStringFromByteSequence(IDLSequence.Byte byteSequence)
+   {
+      byte[] longStringData = byteSequence.toArray();
+      return new String(longStringData, StandardCharsets.US_ASCII);
    }
 }

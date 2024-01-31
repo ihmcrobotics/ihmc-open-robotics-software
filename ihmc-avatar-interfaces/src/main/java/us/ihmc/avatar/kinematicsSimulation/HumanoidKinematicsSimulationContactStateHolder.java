@@ -14,7 +14,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class HumanoidKinematicsSimulationContactStateHolder
@@ -29,7 +29,7 @@ public class HumanoidKinematicsSimulationContactStateHolder
    private final double zeta = 1.0;
    private final double kd = GainCalculator.computeDerivativeGain(kp, zeta);
    private final double weight = 50.0;
-   private final ModifiableReferenceFrame controlFrame;
+   private final MutableReferenceFrame controlFrame;
    private final RecyclingArrayList<SpatialAccelerationCommand> spatialAccelerationCommands
            = new RecyclingArrayList<>(SpatialAccelerationCommand::new);
 
@@ -47,7 +47,7 @@ public class HumanoidKinematicsSimulationContactStateHolder
    {
       this.contactStateToHold = contactStateToHold;
       currentPlaneFrame = (MovingReferenceFrame) contactStateToHold.getPlaneFrame();
-      controlFrame = new ModifiableReferenceFrame(currentPlaneFrame);
+      controlFrame = new MutableReferenceFrame(currentPlaneFrame);
 
       desiredPlaneFramePose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       desiredPlaneFrame = new PoseReferenceFrame("desiredPlaneFrame", desiredPlaneFramePose);

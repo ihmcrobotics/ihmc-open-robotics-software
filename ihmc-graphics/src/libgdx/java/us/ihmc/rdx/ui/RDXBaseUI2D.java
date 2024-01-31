@@ -14,8 +14,8 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
-import us.ihmc.rdx.imgui.ImGuiPanelManager;
-import us.ihmc.rdx.imgui.ImGuiPanelSizeHandler;
+import us.ihmc.rdx.imgui.RDXPanelManager;
+import us.ihmc.rdx.imgui.RDXPanelSizeHandler;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.RDXInputMode;
 import us.ihmc.rdx.input.ImGui2DViewInput;
@@ -46,7 +46,7 @@ public class RDXBaseUI2D
    private final HybridResourceDirectory configurationBaseDirectory;
    private HybridResourceFile libGDXSettingsFile;
    private final Stopwatch runTime = new Stopwatch().start();
-   private final ImGuiPanelSizeHandler view2DPanelSizeHandler = new ImGuiPanelSizeHandler();
+   private final RDXPanelSizeHandler view2DPanelSizeHandler = new RDXPanelSizeHandler();
    private ImGui2DViewInput inputCalculator;
    private final ArrayList<Consumer<ImGui2DViewInput>> imgui2DViewInputProcessors = new ArrayList<>();
    private GLFrameBuffer frameBuffer;
@@ -81,8 +81,8 @@ public class RDXBaseUI2D
       {
          Gdx.graphics.setWindowedMode(imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth(),
                                       imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight());
-         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(imGuiWindowAndDockSystem.getPrimaryWindowPosition().getX(),
-                                                                 imGuiWindowAndDockSystem.getPrimaryWindowPosition().getY());
+         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getX(),
+                                                                 imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getY());
          return true;
       });
       layoutManager.getSaveListeners().add(this::saveApplicationSettings);
@@ -277,7 +277,7 @@ public class RDXBaseUI2D
       Gdx.graphics.setForegroundFPS(foregroundFPS);
    }
 
-   public ImGuiPanelManager getImGuiPanelManager()
+   public RDXPanelManager getImGuiPanelManager()
    {
       return imGuiWindowAndDockSystem.getPanelManager();
    }

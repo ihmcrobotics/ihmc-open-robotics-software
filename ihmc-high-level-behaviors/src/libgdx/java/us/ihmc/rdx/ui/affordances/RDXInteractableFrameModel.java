@@ -25,6 +25,8 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
@@ -47,7 +49,6 @@ public class RDXInteractableFrameModel
    private final Notification contextMenuNotification = new Notification();
    private Runnable extendedContextMenu;
    private ROS2TunedRigidBodyTransform syncedTransformForTuning;
-   /** When interacting with the scene, sometimes the graphics will get in the way. TODO: Disable interactions too. */
    private boolean showing = true;
 
    public void create(ReferenceFrame parentFrame, RDX3DPanel panel3D, ModelData modelData, RDXMousePickRayCollisionCalculator collisionCalculator)
@@ -71,10 +72,10 @@ public class RDXInteractableFrameModel
       highlightModelInstance = new RDXInteractableHighlightModel(modelData);
       selectablePose3DGizmo = new RDXSelectablePose3DGizmo(representativeReferenceFrame, transformToParent);
       selectablePose3DGizmo.create(panel3D);
-      panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
-      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
-      panel3D.getScene().addRenderableProvider(this::getRenderables);
-      panel3D.addImGuiOverlayAddition(this::renderTooltipsAndContextMenu);
+      panel3D.addImGui3DViewPickCalculator(this, this::calculate3DViewPick);
+      panel3D.addImGui3DViewInputProcessor(this, this::process3DViewInput);
+      panel3D.getScene().addRenderableProvider(this, this::getRenderables);
+      panel3D.addImGuiOverlayAddition(this, this::renderTooltipsAndContextMenu);
    }
 
    public void addRemoteTuning(ROS2PublishSubscribeAPI ros2, ROS2IOTopicPair<RigidBodyTransformMessage> topicPair, RigidBodyTransform rigidBodyTransformToSync)
@@ -159,6 +160,14 @@ public class RDXInteractableFrameModel
       }
    }
 
+   public void destroy(RDX3DPanel panel3D)
+   {
+      panel3D.getScene().removeRenderable(this);
+      panel3D.removeImGui3DViewInputProcessor(this);
+      panel3D.removeImGui3DViewPickCalculator(this);
+      panel3D.removeImGuiOverlayAddition(this);
+   }
+
    public ReferenceFrame getReferenceFrame()
    {
       return representativeReferenceFrame;
@@ -180,13 +189,33 @@ public class RDXInteractableFrameModel
       this.extendedContextMenu = runnable;
    }
 
+   public RDXPose3DGizmo getPoseGizmo()
+   {
+      return selectablePose3DGizmo.getPoseGizmo();
+   }
+
+   public RDXModelInstance getModelInstance()
+   {
+      return modelInstance;
+   }
+
    public boolean isSelected()
    {
       return selectablePose3DGizmo.isSelected();
    }
 
+   public void setSelected(boolean selected)
+   {
+      selectablePose3DGizmo.setSelected(selected);
+   }
+
    public void setShowing(boolean showing)
    {
       this.showing = showing;
+   }
+
+   public boolean isShowing()
+   {
+      return showing;
    }
 }

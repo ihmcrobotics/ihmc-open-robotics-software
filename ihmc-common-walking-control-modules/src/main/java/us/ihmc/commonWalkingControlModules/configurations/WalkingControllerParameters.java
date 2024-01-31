@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetect
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
@@ -23,6 +22,7 @@ import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 
 public abstract class WalkingControllerParameters
@@ -193,24 +193,7 @@ public abstract class WalkingControllerParameters
     *
     * @return list containing jointspace PID gains and the corresponding joints
     */
-   public List<GroupParameter<PIDGainsReadOnly>> getHighLevelJointSpaceControlGains()
-   {
-      return new ArrayList<>();
-   }
-
-   /**
-    * Gains used for low-level joint position control intended to be sent directly to the motor, torque
-    * = kp * (q_des - q) + kd * (v_des - v)
-    * <p>
-    * Each {@link GroupParameter} contains gains for one joint group:</br>
-    * - The name of the joint group that the gain is used for (e.g. Arms).</br>
-    * - The gains for the joint group.</br>
-    * - The names of all rigid bodies in the joint group.
-    * </p>
-    * If a joint is not contained in the list, low-level jointspace control is not supported for that
-    * joint.
-    */
-   public List<GroupParameter<PIDGainsReadOnly>> getLowLevelJointSpaceControlGains()
+   public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
    {
       return new ArrayList<>();
    }
@@ -278,6 +261,15 @@ public abstract class WalkingControllerParameters
    public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
    {
       return new TObjectDoubleHashMap<String>();
+   }
+
+   /**
+    * If true, the rigid body jointspace control state for the given rigid body will be setup
+    * with function generators
+    */
+   public boolean enableFunctionGeneratorMode(String rigidBodyName)
+   {
+      return false;
    }
 
    /**
@@ -391,6 +383,12 @@ public abstract class WalkingControllerParameters
    }
 
    public abstract FootSwitchFactory getFootSwitchFactory();
+
+   public SideDependentList<FootSwitchFactory> getFootSwitchFactories()
+   {
+      FootSwitchFactory footSwitchFactory = getFootSwitchFactory();
+      return new SideDependentList<>(footSwitchFactory, footSwitchFactory);
+   }
 
    /**
     * Returns a list of joints that will not be used by the controller.
@@ -523,6 +521,20 @@ public abstract class WalkingControllerParameters
     * switch to trigger the transition.
     */
    public boolean finishSingleSupportWhenICPPlannerIsDone()
+   {
+      return false;
+   }
+
+   /**
+    * <ul>
+    * </li>When {@code true}, single support continues until the ICP planner is done even if the swing
+    * foot touches down, in which case the foot contact state is updated to be in contact. This kicks
+    * in when touchdown occurs early and allows to transition to transfer as planned by the ICP planner
+    * improving ICP plan continuity.
+    * <li>When {@code false}, single support ends as soon as the swing foot touches down.
+    * </ul>
+    */
+   public boolean waitInSingleSupportUntilICPPlannerIsDone()
    {
       return false;
    }
@@ -831,13 +843,34 @@ public abstract class WalkingControllerParameters
       return Double.POSITIVE_INFINITY;
    }
 
+   public NaturalPostureParameters getNaturalPostureParameters()
+   {
+      return null;
+   }
+
    /**
-    *  When there's less than this fraction of swing remaining, the robot joints in swing should switch to
-    *  "load bearing". Essentially, for hydraulic robots, this switches them from velocity to position controlled.
-    *  This can be used to help alleviate heavy impacts at touchdown.
+    * When there's less than this fraction of swing remaining, the robot joints in swing should switch
+    * to "load bearing". Essentially, for hydraulic robots, this switches them from velocity to
+    * position controlled. This can be used to help alleviate heavy impacts at touchdown.
     */
    public double getFractionOfSwingToSwitchToLoaded()
    {
       return Double.NaN;
+   }
+
+   /**
+    * Parameter for the duration of foot loading.
+    */
+   public double getLoadFootDuration()
+   {
+      return 1.2;
+   }
+
+   /**
+    * Parameter for the duration of transfer from single support to double support.
+    */
+   public double getLoadFootTransferDuration()
+   {
+      return 0.8;
    }
 }

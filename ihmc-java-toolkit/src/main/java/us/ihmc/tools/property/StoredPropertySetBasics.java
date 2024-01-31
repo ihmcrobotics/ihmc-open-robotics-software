@@ -1,5 +1,7 @@
 package us.ihmc.tools.property;
 
+import us.ihmc.commons.thread.Notification;
+
 import java.nio.file.Path;
 import java.util.List;
 
@@ -27,6 +29,10 @@ public interface StoredPropertySetBasics extends StoredPropertySetReadOnly
    void addPropertyChangedListener(StoredPropertyKey key, Runnable onPropertyChanged);
 
    void removePropertyChangedListener(StoredPropertyKey key, Runnable onPropertyChanged);
+
+   void addAnyPropertyChangedListener(Notification anyPropertyChangedNotification);
+
+   void removeAnyPropertyChangedListener(Notification anyPropertyChangedNotification);
 
    void updateBackingSaveFile(String versionSuffix);
 

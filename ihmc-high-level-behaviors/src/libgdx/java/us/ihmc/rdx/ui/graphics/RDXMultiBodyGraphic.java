@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.scs2.*;
-import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -27,7 +26,7 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
    public RDXMultiBodyGraphic(String title)
    {
       super(title);
-      setSceneLevels(RDXSceneLevel.GROUND_TRUTH, RDXSceneLevel.MODEL);
+      setSceneLevels(RDXSceneLevel.GROUND_TRUTH, RDXSceneLevel.VIRTUAL);
    }
 
    public void loadRobotModelAndGraphics(RobotDefinition robotDefinition, RigidBodyBasics originalRootBody)
@@ -54,9 +53,9 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
 
    private RDXRigidBody loadRigidBody(RigidBodyBasics rigidBody, RobotDefinition robotDefinition, double scaleFactor, boolean createReferenceFrameGraphics)
    {
-      RDXRigidBody RDXRigidBody;
+      RDXRigidBody rdxRigidBody;
       Executor executorToRunLaterOnThreadWithGraphicsContext = Gdx.app::postRunnable;
-      RDXRigidBody = RDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
+      rdxRigidBody = RDXMultiBodySystemFactories.toRDXRigidBody(rigidBody,
                                                                 robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
                                                                 executorToRunLaterOnThreadWithGraphicsContext,
                                                                 scaleFactor,
@@ -69,12 +68,12 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
             CrossFourBarJoint fourBarJoint = (CrossFourBarJoint) childrenJoint;
             CrossFourBarJointDefinition fourBarJointDefinition = (CrossFourBarJointDefinition) robotDefinition.getJointDefinition(fourBarJoint.getName());
 
-            fourBarJoint.getJointA().setSuccessor(RDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyDA(),
+            fourBarJoint.getJointA().setSuccessor(RDXMultiBodySystemFactories.toRDXRigidBody(fourBarJoint.getBodyDA(),
                                                                                              fourBarJointDefinition.getBodyDA(),
                                                                                              executorToRunLaterOnThreadWithGraphicsContext,
                                                                                              scaleFactor,
                                                                                              createReferenceFrameGraphics));
-            fourBarJoint.getJointB().setSuccessor(RDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyBC(),
+            fourBarJoint.getJointB().setSuccessor(RDXMultiBodySystemFactories.toRDXRigidBody(fourBarJoint.getBodyBC(),
                                                                                              fourBarJointDefinition.getBodyBC(),
                                                                                              executorToRunLaterOnThreadWithGraphicsContext,
                                                                                              scaleFactor,
@@ -84,7 +83,7 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
          childrenJoint.setSuccessor(loadRigidBody(childrenJoint.getSuccessor(), robotDefinition, scaleFactor, createReferenceFrameGraphics));
       }
 
-      return RDXRigidBody;
+      return rdxRigidBody;
    }
 
    @Override

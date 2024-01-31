@@ -28,6 +28,7 @@ import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.avatar.DRCSimulationOutputWriterForControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.drcRobot.RobotVersion;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
@@ -52,7 +53,7 @@ import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
@@ -350,6 +351,12 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    public AtlasRobotVersion getAtlasVersion()
+   {
+      return selectedVersion;
+   }
+
+   @Override
+   public RobotVersion getRobotVersion()
    {
       return selectedVersion;
    }

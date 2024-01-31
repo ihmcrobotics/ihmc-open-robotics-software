@@ -45,7 +45,7 @@ public class RDXGizmoDemo
 
             poseGizmo.getTransformToParent().getTranslation().set(-1.0, -2.0, 0.1);
 
-            footstepRingGizmo.create(focusBasedCamera);
+            footstepRingGizmo.create(baseUI.getPrimary3DPanel());
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(footstepRingGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(footstepRingGizmo);

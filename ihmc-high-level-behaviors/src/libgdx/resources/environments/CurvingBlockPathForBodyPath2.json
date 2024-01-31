@@ -1,7 +1,7 @@
 {
   "ambientLight" : 0.914,
   "objects" : [ {
-    "type" : "GDXPalletObject",
+    "type" : "RDXPalletObject",
     "x" : -0.33671803672431627,
     "y" : 0.009654007198705912,
     "z" : -0.3611393405899752,
@@ -10,7 +10,7 @@
     "qz" : -0.0017036744815460087,
     "qs" : -0.0018390268133597811
   }, {
-    "type" : "GDXLabFloorObject",
+    "type" : "RDXLabFloorObject",
     "x" : 6.098690242570955,
     "y" : -0.013119003080937235,
     "z" : -0.43923522451345587,
@@ -19,7 +19,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : 10.0,
     "y" : 10.0,
     "z" : 10.0,
@@ -28,7 +28,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : -10.0,
     "y" : 10.0,
     "z" : 10.0,
@@ -37,7 +37,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : -10.0,
     "y" : -10.0,
     "z" : 10.0,
@@ -46,7 +46,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : 10.0,
     "y" : -10.0,
     "z" : 10.0,
@@ -55,7 +55,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXLargeCinderBlockRoughed",
+    "type" : "RDXLargeCinderBlockRoughed",
     "x" : -0.04046100067141506,
     "y" : 0.22866011546140663,
     "z" : -0.17652594360037208,
@@ -64,7 +64,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : -0.1346853748668768,
     "y" : 0.12937280400858123,
     "z" : -0.03800743794185868,
@@ -73,7 +73,7 @@
     "qz" : 0.7083819876217533,
     "qs" : 0.7058292708672929
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 0.060705987110097295,
     "y" : 0.12966406536359987,
     "z" : -0.03614864913577812,
@@ -82,7 +82,7 @@
     "qz" : 0.7086037053445544,
     "qs" : 0.7056066813543987
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : -0.03792686516773,
     "y" : -0.16209801581214633,
     "z" : -0.03773589617081327,
@@ -91,7 +91,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXLargeCinderBlockRoughed",
+    "type" : "RDXLargeCinderBlockRoughed",
     "x" : -0.036276856901934044,
     "y" : 0.035476752178216164,
     "z" : -0.18045609524772022,
@@ -100,7 +100,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXLargeCinderBlockRoughed",
+    "type" : "RDXLargeCinderBlockRoughed",
     "x" : -0.03619460047964399,
     "y" : -0.16492042838197282,
     "z" : -0.18236408192878473,
@@ -109,7 +109,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXMediumCinderBlockRoughed",
+    "type" : "RDXMediumCinderBlockRoughed",
     "x" : 0.2926741576226821,
     "y" : -0.19927393910617894,
     "z" : -0.02952950853255988,
@@ -118,7 +118,7 @@
     "qz" : 0.6847947305746974,
     "qs" : 0.7166921697546408
   }, {
-    "type" : "GDXMediumCinderBlockRoughed",
+    "type" : "RDXMediumCinderBlockRoughed",
     "x" : 0.4814302400761305,
     "y" : -0.2099366502088322,
     "z" : -0.03256370124273069,
@@ -127,7 +127,7 @@
     "qz" : 0.6837234906338975,
     "qs" : 0.717289894255339
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 0.39048891373396344,
     "y" : 0.3085750514292771,
     "z" : -0.03804651541249998,
@@ -136,7 +136,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 0.389568246582444,
     "y" : 0.11625728532301216,
     "z" : -0.03394818957764862,
@@ -145,7 +145,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 0.9058799531889953,
     "y" : 0.20955969980040834,
     "z" : -0.09095215813423767,
@@ -154,7 +154,7 @@
     "qz" : 0.6636977902428934,
     "qs" : 0.7480008310334288
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 1.097022811756668,
     "y" : 0.18691100550875617,
     "z" : -0.08650291769812113,
@@ -163,7 +163,7 @@
     "qz" : 0.6562860790819817,
     "qs" : 0.754512148612068
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 1.5198967330474022,
     "y" : -0.0573797302939837,
     "z" : -0.10894161080621524,
@@ -172,7 +172,7 @@
     "qz" : 0.4599437994233067,
     "qs" : 0.8879480285309794
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 1.6744044126370792,
     "y" : -0.17150082381168852,
     "z" : -0.1062831842596871,
@@ -181,7 +181,7 @@
     "qz" : 0.4541248149345065,
     "qs" : 0.8909380744253218
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 0.929609152423766,
     "y" : -0.21721156856460352,
     "z" : -0.10279646359823394,
@@ -190,7 +190,7 @@
     "qz" : 0.5549999755993354,
     "qs" : 0.8318503633976108
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 1.0986216263775486,
     "y" : -0.2887717275777429,
     "z" : -0.1048751781086711,
@@ -199,7 +199,7 @@
     "qz" : 0.5460550002092868,
     "qs" : 0.837749328108615
   }, {
-    "type" : "GDXMediumCinderBlockRoughed",
+    "type" : "RDXMediumCinderBlockRoughed",
     "x" : 1.5034694804668338,
     "y" : -0.6236423008760592,
     "z" : -0.08712454763265111,
@@ -208,7 +208,7 @@
     "qz" : 0.06822271668003459,
     "qs" : 0.9913485482992234
   }, {
-    "type" : "GDXMediumCinderBlockRoughed",
+    "type" : "RDXMediumCinderBlockRoughed",
     "x" : 1.5335442513313606,
     "y" : -0.8132542038665408,
     "z" : -0.08814788330179398,
@@ -217,7 +217,7 @@
     "qz" : 0.06500147517994881,
     "qs" : 0.9918003392535453
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 1.9506916776157008,
     "y" : -0.5446238930211836,
     "z" : -0.11251852542977771,
@@ -226,7 +226,7 @@
     "qz" : 0.09108269504023332,
     "qs" : 0.9870315216001636
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 1.9872027956309635,
     "y" : -0.7342655678404665,
     "z" : -0.10947109445511698,
@@ -235,7 +235,7 @@
     "qz" : 0.09143392213610022,
     "qs" : 0.986858734761503
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 1.6261988846449937,
     "y" : -1.018578520440235,
     "z" : -0.09885017913253061,
@@ -244,7 +244,7 @@
     "qz" : 0.0575351936591831,
     "qs" : 0.9983434787139147
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 1.6504076913448968,
     "y" : -1.21104793567268,
     "z" : -0.10173114379078918,
@@ -253,7 +253,7 @@
     "qz" : 0.05416235765851975,
     "qs" : 0.9985321422031794
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 1.9338001962063363,
     "y" : -1.0797779143248225,
     "z" : -0.0976850244166373,
@@ -262,7 +262,7 @@
     "qz" : 0.7464642149739997,
     "qs" : 0.6654035115559785
   }, {
-    "type" : "GDXLargeCinderBlockRoughed",
+    "type" : "RDXLargeCinderBlockRoughed",
     "x" : 0.5349077080869306,
     "y" : -0.3837582917623408,
     "z" : -0.34632184594395443,
@@ -271,7 +271,7 @@
     "qz" : -0.12615324422145885,
     "qs" : 0.9920107655526733
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 1.918887005734061,
     "y" : -0.3562584481890723,
     "z" : -0.1108368515544585,
@@ -280,7 +280,7 @@
     "qz" : 0.09222320430941272,
     "qs" : 0.9862868155111427
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 1.3648913147747712,
     "y" : 0.05832865479139692,
     "z" : -0.10928803852150185,
@@ -289,7 +289,7 @@
     "qz" : 0.4619015770620425,
     "qs" : 0.8869311884851034
   }, {
-    "type" : "GDXMediumCinderBlockRoughed",
+    "type" : "RDXMediumCinderBlockRoughed",
     "x" : 0.6714022806955747,
     "y" : -0.21343664060322354,
     "z" : -0.0409748324564338,
@@ -298,7 +298,7 @@
     "qz" : -0.7139560167756136,
     "qs" : 0.6876198885342075
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 0.6846514178202858,
     "y" : 0.2068946133986205,
     "z" : -0.04051804344621308,
@@ -307,7 +307,7 @@
     "qz" : -0.7095401628344785,
     "qs" : 0.704664996523044
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 1.264670840563199,
     "y" : -0.38701733854708315,
     "z" : -0.11046635568311117,
@@ -316,7 +316,7 @@
     "qz" : 0.5451422929022923,
     "qs" : 0.8383435336956034
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 2.1248764877051767,
     "y" : -1.0545738473141553,
     "z" : -0.09631975908220068,
@@ -325,7 +325,7 @@
     "qz" : -0.6636840323410089,
     "qs" : 0.7480130381320761
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 1.5872549386911534,
     "y" : -1.5132475891620922,
     "z" : -0.09766798203509224,
@@ -334,7 +334,7 @@
     "qz" : -0.6699455921192141,
     "qs" : 0.7424101990140195
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 1.7726563087277498,
     "y" : -1.4911176340005023,
     "z" : -0.09874669486320542,
@@ -343,7 +343,7 @@
     "qz" : -0.6697027270294901,
     "qs" : 0.7426292866627765
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 2.073951452683197,
     "y" : -1.5585817743980186,
     "z" : -0.0981634474481833,
@@ -352,7 +352,7 @@
     "qz" : 0.04903707311313331,
     "qs" : 0.9987969590765168
   }, {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : 2.052032537430477,
     "y" : -1.364328374504697,
     "z" : -0.09436485498501622,

@@ -1,0 +1,55 @@
+#ifndef __perception_msgs__msg__CenterposeNodeMessage__idl__
+#define __perception_msgs__msg__CenterposeNodeMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * An perception scene node for an ArUco marker
+       * The topic name identifies the node.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::CenterposeNodeMessage_")
+      struct CenterposeNodeMessage
+      {
+        /**
+         * The detectable scene node information
+         */
+        perception_msgs::msg::dds::DetectableSceneNodeMessage detectable_scene_node;
+        /**
+         * Object ID
+         */
+        long object_id;
+        /**
+         * Position and Orientation of the object
+         */
+        geometry_msgs::msg::dds::Pose pose;
+        /**
+         * How confident are we about what object it is. Mostly used to NN based detections
+         */
+        double confidence;
+        /**
+         * Object Category
+         */
+        string object_type;
+        /**
+         * 2D Vertices of the 3d object bounding box projected onto image plane
+         */
+        geometry_msgs::msg::dds::Point bounding_box_2d_vertices[8];
+        /**
+         * 3d Vertices of the 3d object Bounding box
+         */
+        geometry_msgs::msg::dds::Point bounding_box_vertices[8];
+        boolean enable_tracking;
+      };
+    };
+  };
+};
+
+#endif

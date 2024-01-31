@@ -36,6 +36,8 @@ import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -227,12 +229,13 @@ public class AStarBodyPathFrameworkTest
 
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
       HeightMapMessage heightMap = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList, heightMapResolution);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMap);
 
       PlannerInput plannerInput = dataset.getPlannerInput();
       Point3D start = plannerInput.getStartPosition();
       Point3D goal = plannerInput.getGoalPosition();
 
-      String errorMessages = calculateAndTestAStarBodyPath(datasetName, start, goal, planarRegionsList, heightMap);
+      String errorMessages = calculateAndTestAStarBodyPath(datasetName, start, goal, planarRegionsList, heightMapData);
 
       return addPrefixToErrorMessages(datasetName, errorMessages);
    }
@@ -243,6 +246,7 @@ public class AStarBodyPathFrameworkTest
 
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
       HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList, heightMapResolution);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       HashMap<PlanarRegion, List<Point3D>> pointsInRegions = new HashMap<>();
       for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
          pointsInRegions.put(planarRegion, new ArrayList<>());
@@ -264,7 +268,7 @@ public class AStarBodyPathFrameworkTest
       while (!walkerPosition.geometricallyEquals(goal, 1.0e-2))
       {
          long startTime = System.currentTimeMillis();
-         errorMessages += calculateAndTestAStarBodyPath(datasetName, walkerPosition, goal, planarRegionsList, heightMapMessage);
+         errorMessages += calculateAndTestAStarBodyPath(datasetName, walkerPosition, goal, planarRegionsList, heightMapData);
          long endTime = System.currentTimeMillis();
          if (ENABLE_TIMERS)
          {
@@ -335,12 +339,14 @@ public class AStarBodyPathFrameworkTest
       return EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(point.getX(), point.getY(), lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY());
    }
 
-   private String calculateAndTestAStarBodyPath(String datasetName, Point3D start, Point3D goal, PlanarRegionsList planarRegionsList,
-                                                HeightMapMessage heightMapMessage)
+   private String calculateAndTestAStarBodyPath(String datasetName,
+                                                Point3D start,
+                                                Point3D goal,
+                                                PlanarRegionsList planarRegionsList,
+                                                HeightMapData heightMapData)
    {
       FootstepPlannerRequest request = new FootstepPlannerRequest();
-      request.setHeightMapMessage(heightMapMessage);
-      request.setPlanarRegionsList(planarRegionsList);
+      request.setHeightMapData(heightMapData);
       request.setPlanBodyPath(true);
       request.setPlanFootsteps(false);
       request.setAssumeFlatGround(false);

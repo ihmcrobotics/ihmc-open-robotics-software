@@ -20,6 +20,21 @@ public interface PerceptionConfigurationParametersReadOnly extends StoredPropert
       return get(ousterThrottlerFrequency);
    }
 
+   default int getOccupancyGridResolution()
+   {
+      return get(occupancyGridResolution);
+   }
+
+   default boolean getRapidRegionsEnabled()
+   {
+      return get(rapidRegionsEnabled);
+   }
+
+   default boolean getHeightMapEnabled()
+   {
+      return get(heightMapEnabled);
+   }
+
    default boolean getLoggingEnabled()
    {
       return get(loggingEnabled);
@@ -43,5 +58,35 @@ public interface PerceptionConfigurationParametersReadOnly extends StoredPropert
    default boolean getLogDepth()
    {
       return get(logDepth);
+   }
+
+   default boolean getSLAMEnabled()
+   {
+      return get(slamEnabled);
+   }
+
+   default boolean getSLAMReset()
+   {
+      return get(slamReset);
+   }
+
+   default boolean getSupportSquareEnabled()
+   {
+      return get(supportSquareEnabled);
+   }
+
+   default boolean getBoundingBoxFilter()
+   {
+      return get(boundingBoxFilter);
+   }
+
+   default boolean getConcaveHullFilters()
+   {
+      return get(concaveHullFilters);
+   }
+
+   default boolean getShadowFilter()
+   {
+      return get(shadowFilter);
    }
 }

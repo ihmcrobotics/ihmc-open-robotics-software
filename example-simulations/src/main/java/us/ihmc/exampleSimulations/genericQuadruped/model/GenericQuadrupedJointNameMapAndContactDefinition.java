@@ -23,7 +23,6 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
    private final HashMap<QuadrupedJointName, String> sdfJointNameMap = new HashMap<>();
    private final HashMap<String, JointRole> jointRoles = new HashMap<>();
 
-   private final LinkedHashMap<String, ImmutablePair<RobotQuadrant, LimbName>> limbNames = new LinkedHashMap<>();
    private final LinkedHashMap<String, ImmutablePair<RobotQuadrant, LegJointName>> legJointNamesMap = new LinkedHashMap<>();
 
    private final List<ImmutablePair<String, Vector3D>> jointNameGroundContactPointMap = new ArrayList<>();
@@ -40,8 +39,6 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
             quadrupedJointNameMap.put(quadrupedJointName.getUnderBarName(), quadrupedJointName);
             legJointNamesMap.put(quadrupedJointName.getUnderBarName(), new ImmutablePair<>(robotQuadrant, legJointName));
          }
-
-         limbNames.put(robotQuadrant.getCamelCaseNameForStartOfExpression() + "Foot", new ImmutablePair<>(robotQuadrant, LimbName.LEG));
 
          RigidBodyTransform soleToParentTransform = new RigidBodyTransform();
          soleToParentTransform.getTranslation().set(physicalProperties.getOffsetFromJointBeforeFootToSole(robotQuadrant));
@@ -188,12 +185,6 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
    public ImmutablePair<RobotQuadrant, LegJointName> getLegJointName(String jointName)
    {
       return legJointNamesMap.get(jointName);
-   }
-
-   @Override
-   public ImmutablePair<RobotQuadrant, LimbName> getLimbName(String limbName)
-   {
-      return limbNames.get(limbName);
    }
 
    @Override

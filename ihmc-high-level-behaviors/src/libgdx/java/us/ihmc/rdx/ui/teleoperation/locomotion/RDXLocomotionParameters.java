@@ -1,38 +1,26 @@
 package us.ihmc.rdx.ui.teleoperation.locomotion;
 
 import org.apache.commons.lang3.StringUtils;
-import us.ihmc.tools.property.BooleanStoredPropertyKey;
-import us.ihmc.tools.property.DoubleStoredPropertyKey;
-import us.ihmc.tools.property.StoredPropertyKeyList;
-import us.ihmc.tools.property.StoredPropertySet;
+import us.ihmc.tools.property.*;
 
 public class RDXLocomotionParameters extends StoredPropertySet
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
-   public static final BooleanStoredPropertyKey areFootstepsAdjustable = keys.addBooleanKey("Are footsteps adjustable");
    public static final DoubleStoredPropertyKey swingTime = keys.addDoubleKey("Swing time");
    public static final DoubleStoredPropertyKey transferTime = keys.addDoubleKey("Transfer time");
-   public static final DoubleStoredPropertyKey turnAggressiveness = keys.addDoubleKey("Turn aggressiveness");
-   public static final DoubleStoredPropertyKey straightStepLength = keys.addDoubleKey("Straight step length");
-   public static final DoubleStoredPropertyKey straightStepWidth = keys.addDoubleKey("Straight step width");
-   public static final DoubleStoredPropertyKey reverseStepLength = keys.addDoubleKey("Reverse step length");
-   public static final DoubleStoredPropertyKey reverseStepWidth = keys.addDoubleKey("Reverse step width");
-   public static final DoubleStoredPropertyKey shuffleStepLength = keys.addDoubleKey("Shuffle step length");
-   public static final DoubleStoredPropertyKey shuffleStepWidth = keys.addDoubleKey("Shuffle step width");
-   public static final DoubleStoredPropertyKey turningStepWidth = keys.addDoubleKey("Turning step width");
-   public static final DoubleStoredPropertyKey footstepLengthMultiplier = keys.addDoubleKey("Footstep length multiplier");
+   public static final BooleanStoredPropertyKey assumeFlatGround = keys.addBooleanKey("Assume flat ground");
+   public static final BooleanStoredPropertyKey areFootstepsAdjustable = keys.addBooleanKey("Are footsteps adjustable");
+   public static final BooleanStoredPropertyKey planSwingTrajectories = keys.addBooleanKey("Plan swing trajectories");
    public static final BooleanStoredPropertyKey planWidthBodyPath = keys.addBooleanKey("Plan with body path");
    public static final BooleanStoredPropertyKey replanSwingTrajectoriesOnChange = keys.addBooleanKey("Replan swing trajectories on change");
+   public static final IntegerStoredPropertyKey initialStanceSide = keys.addIntegerKey("Initial stance side");
+   public static final DoubleStoredPropertyKey footstepPlannerTimeout = keys.addDoubleKey("Footstep planner timeout");
+   public static final DoubleStoredPropertyKey idealGoalFootstepWidth = keys.addDoubleKey("Ideal goal footstep width");
 
    public RDXLocomotionParameters(String robotName)
    {
       super(keys, RDXLocomotionParameters.class, StringUtils.capitalize(robotName));
-   }
-
-   public boolean getAreFootstepsAdjustable()
-   {
-      return get(areFootstepsAdjustable);
    }
 
    public double getSwingTime()
@@ -45,49 +33,19 @@ public class RDXLocomotionParameters extends StoredPropertySet
       return get(transferTime);
    }
 
-   public double getTurnAggressiveness()
+   public boolean getAssumeFlatGround()
    {
-      return get(turnAggressiveness);
+      return get(assumeFlatGround);
    }
 
-   public double getStraightStepLength()
+   public boolean getAreFootstepsAdjustable()
    {
-      return get(straightStepLength);
+      return get(areFootstepsAdjustable);
    }
 
-   public double getStraightStepWidth()
+   public boolean getPlanSwingTrajectories()
    {
-      return get(straightStepWidth);
-   }
-
-   public double getReverseStepLength()
-   {
-      return get(reverseStepLength);
-   }
-
-   public double getReverseStepWidth()
-   {
-      return get(reverseStepWidth);
-   }
-
-   public double getShuffleStepLength()
-   {
-      return get(shuffleStepLength);
-   }
-
-   public double getShuffleStepWidth()
-   {
-      return get(shuffleStepWidth);
-   }
-
-   public double getTurningStepWidth()
-   {
-      return get(turningStepWidth);
-   }
-
-   public boolean getPlanWithBodyPath()
-   {
-      return get(planWidthBodyPath);
+      return get(planSwingTrajectories);
    }
 
    public boolean getReplanSwingTrajectoryOnChange()
@@ -95,8 +53,23 @@ public class RDXLocomotionParameters extends StoredPropertySet
       return get(replanSwingTrajectoriesOnChange);
    }
 
-   public double getFootstepLengthMultiplier()
+   public boolean getPlanWithBodyPath()
    {
-      return get(footstepLengthMultiplier);
+      return get(planWidthBodyPath);
+   }
+
+   public int getInitialStanceSide()
+   {
+      return get(initialStanceSide);
+   }
+
+   public double getFootstepPlannerTimeout()
+   {
+      return get(footstepPlannerTimeout);
+   }
+
+   public double getIdealGoalFootstepWidth()
+   {
+      return get(idealGoalFootstepWidth);
    }
 }

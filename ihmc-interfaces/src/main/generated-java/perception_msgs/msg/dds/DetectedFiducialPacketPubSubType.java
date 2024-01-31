@@ -15,7 +15,7 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "270b0a82e9354d9f34767da40e3176da3118633ff4cbe458eb1ff4fe75a7defa";
+   		return "42779ff520895c59f998e40723bb70a3324807f8d128b9e2399d26eab184eafd";
    }
    
    @Override

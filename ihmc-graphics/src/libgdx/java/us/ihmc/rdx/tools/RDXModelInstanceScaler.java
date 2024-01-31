@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
 import java.util.ArrayList;
 
@@ -47,7 +47,7 @@ public class RDXModelInstanceScaler
    private ModelInstance modelInstance;
    private final FramePoint3D scaledVertex = new FramePoint3D();
    private final Vector3D32 centroidToVertex = new Vector3D32();
-   private final ModifiableReferenceFrame centroidFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private final MutableReferenceFrame centroidFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
    private final Stopwatch stopwatch = new Stopwatch();
 
    public RDXModelInstanceScaler(String modelFileName)

@@ -243,6 +243,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       super.onExit(timeInState);
 
+      touchdownErrorCompensator.commitToFootTouchdownError(transferToSide);
       touchdownErrorCompensator.clear();
       firstTickInState = true;
       balanceManager.minimizeAngularMomentumRateZ(false);

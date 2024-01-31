@@ -2,10 +2,10 @@ package us.ihmc.avatar.sensors.multisense;
 
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.communication.producers.VideoControlSettings;
-import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
-import us.ihmc.ihmcPerception.camera.CameraLogger;
-import us.ihmc.ihmcPerception.camera.RosCameraCompressedImageReceiver;
-import us.ihmc.ihmcPerception.camera.VideoPacketHandler;
+import us.ihmc.perception.ros1.camera.CameraDataReceiver;
+import us.ihmc.perception.ros1.camera.CameraLogger;
+import us.ihmc.perception.ros1.camera.RosCameraCompressedImageReceiver;
+import us.ihmc.perception.ros1.camera.VideoPacketHandler;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.ros2.ROS2NodeInterface;

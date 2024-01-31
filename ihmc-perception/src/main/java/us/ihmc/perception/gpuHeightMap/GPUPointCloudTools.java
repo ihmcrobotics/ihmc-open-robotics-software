@@ -9,8 +9,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
+import us.ihmc.perception.opencl.OpenCLManager;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;

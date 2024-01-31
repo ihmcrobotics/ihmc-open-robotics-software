@@ -15,7 +15,7 @@ public class SteppableRegionsListCollectionMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6e9ce5a52ca18d4e3aefd1a7eb155d9986bb550efb8c23a5a3e9e9b884dc8d45";
+   		return "da9c10b8b757c40787dfee75ca8b92675b7507156e0007ec60716fffcb2d2411";
    }
    
    @Override

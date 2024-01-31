@@ -10,6 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -33,10 +34,10 @@ public class SimplePlanarRegionFootstepSnapperTest
    private final double epsilon = 1e-8;
    private final SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
    private final DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-   private final FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
+   private final PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
    private final ConvexPolygon2D unitSquare = new ConvexPolygon2D();
 
-   private boolean visualize = true;
+   private boolean visualize = false;
    private PolygonSnapperVisualizer visualizer;
 
    @BeforeEach
@@ -125,7 +126,7 @@ public class SimplePlanarRegionFootstepSnapperTest
 
       PlanarRegion planarRegion = new PlanarRegion(transformToWorld, partialFootholdPolygon);
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegion);
-      snapper.setPlanarRegions(planarRegionsList);
+      snapper.setPlanarRegionsList(planarRegionsList);
       FootstepSnapData snapData = snapper.snapFootstep(nodeToSnap);
 
       if(visualize)
@@ -169,7 +170,7 @@ public class SimplePlanarRegionFootstepSnapperTest
 
       PlanarRegion planarRegion = createPlanarRegion(regionToWorldFrameTransform, footholdPolygon);
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegion);
-      snapper.setPlanarRegions(planarRegionsList);
+      snapper.setPlanarRegionsList(planarRegionsList);
 
       FootstepSnapData snapData = snapper.snapFootstep(nodeToSnap);
 

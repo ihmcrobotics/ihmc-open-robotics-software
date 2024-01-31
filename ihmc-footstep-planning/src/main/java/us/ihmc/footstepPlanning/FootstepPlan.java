@@ -20,6 +20,11 @@ public class FootstepPlan implements FootstepPlanReadOnly
    /** deep copy */
    public FootstepPlan(FootstepPlanReadOnly otherFootstepPlan)
    {
+      set(otherFootstepPlan);
+   }
+
+   public void set(FootstepPlanReadOnly otherFootstepPlan)
+   {
       for (int i = 0; i < otherFootstepPlan.getNumberOfSteps(); i++)
       {
          footsteps.add(new PlannedFootstep(otherFootstepPlan.getFootstep(i)));

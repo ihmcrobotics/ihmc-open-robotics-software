@@ -45,11 +45,11 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
             */
    public byte format_;
    /**
-            * Position of the focal point at sensor data aquisition
+            * Position of the focal point at sensor data acquisition
             */
    public us.ihmc.euclid.tuple3D.Point3D position_;
    /**
-            * Orientation of the focal point at sensor data aquisition
+            * Orientation of the focal point at sensor data acquisition
             */
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
    /**
@@ -233,7 +233,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
 
    /**
-            * Position of the focal point at sensor data aquisition
+            * Position of the focal point at sensor data acquisition
             */
    public us.ihmc.euclid.tuple3D.Point3D getPosition()
    {
@@ -242,7 +242,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
 
    /**
-            * Orientation of the focal point at sensor data aquisition
+            * Orientation of the focal point at sensor data acquisition
             */
    public us.ihmc.euclid.tuple4D.Quaternion getOrientation()
    {

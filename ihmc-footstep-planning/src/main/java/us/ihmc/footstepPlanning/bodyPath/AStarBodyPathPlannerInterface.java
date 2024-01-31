@@ -15,8 +15,6 @@ public interface AStarBodyPathPlannerInterface
 {
     void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack);
 
-    void setHeightMapData(HeightMapData heightMapData);
-
     void clearLoggedData();
 
     BodyPathLatticePoint getNextNode();

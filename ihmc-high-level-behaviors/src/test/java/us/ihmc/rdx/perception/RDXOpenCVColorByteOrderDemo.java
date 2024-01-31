@@ -3,7 +3,7 @@ package us.ihmc.rdx.perception;
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
@@ -54,7 +54,7 @@ public class RDXOpenCVColorByteOrderDemo
             highLevelDepthSensorSimulator.setRenderColorVideoDirectly(true);
             baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);
 
-            ImGuiPanel panel = new ImGuiPanel("Color Byte Order Debugging", this::renderImGuiWidgets);
+            RDXPanel panel = new RDXPanel("Color Byte Order Debugging", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
             openCVImagePanel = new RDXBytedecoImagePanel("OpenCV Image Panel", highLevelDepthSensorSimulator.getLowLevelSimulator().getRGBA8888ColorImage());

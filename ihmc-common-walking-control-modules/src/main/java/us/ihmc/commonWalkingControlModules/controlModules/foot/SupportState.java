@@ -278,7 +278,7 @@ public class SupportState extends AbstractFootControlState
       }
 
       // determine foot state
-      copOnEdge.set(footControlHelper.isCoPOnEdge() && !isInLiftOffOrTouchDown());
+      copOnEdge.set((footControlHelper.isDesiredCoPOnEdge() || footControlHelper.isCurrentCoPOnEdge()) && !isInLiftOffOrTouchDown());
       footBarelyLoaded.set(footSwitch.getFootLoadPercentage() < supportStateParameters.getFootLoadThreshold());
 
       if (supportStateParameters.assumeCopOnEdge())
@@ -300,7 +300,7 @@ public class SupportState extends AbstractFootControlState
       if (footRotationCalculationModule.applyShrunkenFoothold(contactState))
          contactState.notifyContactStateHasChanged();
 
-      if (footRotationCalculationModule.isRotating() && dampFootRotations.getValue())
+      if (!copOnEdge.getBooleanValue() && footRotationCalculationModule.isRotating() && dampFootRotations.getValue())
       {
          PID3DGainsReadOnly orientationGains = gains.getOrientationGains();
          PID3DGains localOrientationGains = localGains.getOrientationGains();

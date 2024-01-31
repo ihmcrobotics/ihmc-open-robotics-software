@@ -7,10 +7,9 @@ import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLIntBuffer;
-import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.netty.NettyOuster;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
+import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
 
@@ -116,7 +115,7 @@ public class RDXOusterFisheyeColoredPointCloudKernel
       floatParameters.setParameter(ousterDepthImage.getImageWidth());
       floatParameters.setParameter(ousterDepthImage.getImageHeight());
       floatParameters.setParameter(lidarOriginToBeamOrigin);
-      floatParameters.setParameter(NettyOuster.DISCRETE_RESOLUTION);
+      floatParameters.setParameter(OusterNetServer.DISCRETE_RESOLUTION);
       floatParameters.setParameter(gradientMode);
       floatParameters.setParameter(useSinusoidalGradientPattern);
       floatParameters.setParameter(pointSize);

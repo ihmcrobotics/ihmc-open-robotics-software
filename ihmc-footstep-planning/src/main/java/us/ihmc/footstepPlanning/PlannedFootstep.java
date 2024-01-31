@@ -9,7 +9,12 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintListConverter;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
+import us.ihmc.perception.steppableRegions.SteppableRegion;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -33,6 +38,8 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
    private final TDoubleArrayList customWaypointProportions = new TDoubleArrayList();
    private final List<Point3D> customWaypointPositions = new ArrayList<>();
    private final List<FrameSE3TrajectoryPoint> swingTrajectory = new ArrayList<>();
+
+   private PlanarRegion regonSnappedTo = null;
 
    private double swingDuration = -1.0;
    private double transferDuration = -1.0;
@@ -88,6 +95,7 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
 
       this.swingDuration = other.getSwingDuration();
       this.transferDuration = other.getTransferDuration();
+      this.regonSnappedTo = other.getRegionSnappedTo();
    }
 
    public void reset()
@@ -98,6 +106,7 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       trajectoryType = null;
       customWaypointPositions.clear();
       customWaypointProportions.clear();
+      regonSnappedTo = null;
    }
 
    @Override
@@ -208,6 +217,17 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       }
    }
 
+   public void setRegionSnappedTo(PlanarRegion regionSnappedTo)
+   {
+      this.regonSnappedTo = regionSnappedTo;
+   }
+
+   @Override
+   public PlanarRegion getRegionSnappedTo()
+   {
+      return regonSnappedTo;
+   }
+
    @Override
    public List<FrameSE3TrajectoryPoint> getSwingTrajectory()
    {
@@ -259,6 +279,13 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
 
       plannedFootstep.setSwingDuration(footstepDataMessage.getSwingDuration());
       plannedFootstep.setTransferDuration(footstepDataMessage.getTransferDuration());
+
+      List<StepConstraintRegion> steppableRegions = StepConstraintMessageConverter.convertToStepConstraintRegionList(footstepDataMessage.getStepConstraints());
+      if (steppableRegions != null && steppableRegions.size() > 0)
+      {
+         PlanarRegion constraintRegion = StepConstraintListConverter.convertStepConstraintRegionToPlanarRegion(steppableRegions.get(0));
+         plannedFootstep.setRegionSnappedTo(constraintRegion);
+      }
 
       return plannedFootstep;
    }

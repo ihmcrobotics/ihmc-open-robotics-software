@@ -15,7 +15,7 @@ public class RequestFootstepPlannerParametersMessagePubSubType implements us.ihm
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b962fdfbf72afc95e08bf528829c32fd5123e5eef2b764bdb904a54b05bf0bbb";
+   		return "d6a067283b8d8fd9c0c4469c8486e9884809eb2878da60fae1d54fccfb2bf445";
    }
    
    @Override

@@ -7,6 +7,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.*;
 import us.ihmc.tools.string.StringTools;
@@ -89,6 +90,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    private WorkspaceResourceFile workspaceJSONFile;
 
    private final Map<StoredPropertyKey, List<Runnable>> propertyChangedListeners = new HashMap<>();
+   private final List<Notification> anyPropertyChangedListeners = new ArrayList<>();
 
    public StoredPropertySet(StoredPropertyKeyList keys, Class<?> classForLoading)
    {
@@ -295,6 +297,10 @@ public class StoredPropertySet implements StoredPropertySetBasics
                propertyChangedListener.run();
             }
          }
+         for (Notification anyPropertyChangedListener : anyPropertyChangedListeners)
+         {
+            anyPropertyChangedListener.set();
+         }
       }
    }
 
@@ -316,6 +322,18 @@ public class StoredPropertySet implements StoredPropertySetBasics
       {
          propertyChangedListeners.get(key).remove(onPropertyChanged);
       }
+   }
+
+   @Override
+   public void addAnyPropertyChangedListener(Notification anyPropertyChangedNotification)
+   {
+      anyPropertyChangedListeners.add(anyPropertyChangedNotification);
+   }
+
+   @Override
+   public void removeAnyPropertyChangedListener(Notification anyPropertyChangedNotification)
+   {
+      anyPropertyChangedListeners.remove(anyPropertyChangedNotification);
    }
 
    public void updateBackingSaveFile(String versionSuffix)

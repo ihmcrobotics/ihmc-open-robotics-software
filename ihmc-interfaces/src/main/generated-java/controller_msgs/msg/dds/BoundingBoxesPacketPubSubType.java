@@ -15,7 +15,7 @@ public class BoundingBoxesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "28486707014272b9611aaaedd71b8937ad468d117e3450d9617113639ff27b81";
+   		return "0cd676e84e192f81e02d1d8da8e2d1d24ede0f452717401e834829c5d4396f0a";
    }
    
    @Override

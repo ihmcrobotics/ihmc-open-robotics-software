@@ -6,9 +6,12 @@ import java.util.concurrent.atomic.AtomicLong;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import std_msgs.msg.dds.Bool;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.LocalOnlyBehaviorTreeNodeExecutor;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,23 +22,20 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.messager.MessagerAPIFactory.Category;
-import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
-import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.thread.ActivationReference;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
-public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
+/**
+ * A simple example behavior.
+ */
+public class StepInPlaceBehavior extends LocalOnlyBehaviorTreeNodeExecutor implements Destroyable
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Step in Place", StepInPlaceBehavior::new, API.create());
-
    private final BehaviorHelper helper;
 
-   private final ActivationReference<Boolean> stepping;
+   private final IHMCROS2Input<Bool> stepping;
    private final AtomicInteger footstepsTaken = new AtomicInteger(2);
    private final AtomicLong lastFootstepTakenID = new AtomicLong(0);
    private final AtomicLong footstepID = new AtomicLong();
@@ -52,14 +52,14 @@ public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements 
       syncedRobot = robotInterface.newSyncedRobot();
 
       robotInterface.createFootstepStatusCallback(this::consumeFootstepStatus);
-      stepping = helper.subscribeViaActivationReference(API.Stepping);
-      helper.subscribeViaCallback(API.Abort, this::doOnAbort);
+      stepping = helper.subscribe(API.STEPPING);
+      helper.subscribeViaCallback(API.ABORT, message -> doOnAbort(message.getData()));
 
       mainThread = helper.createPausablePeriodicThread(getClass(), 1.0, this::stepInPlace);
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       return BehaviorTreeNodeStatus.SUCCESS;
    }
@@ -94,9 +94,10 @@ public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements 
 
    private void stepInPlace()
    {
-      if (stepping.poll())
+      boolean wasStepping = stepping.hasReceivedFirstMessage() && stepping.getLatest().getData();
+      if (stepping.getMessageNotification().poll())
       {
-         if (stepping.hasChanged())
+         if (!wasStepping)
          {
             LogTools.info("Starting to step");
          }
@@ -111,7 +112,7 @@ public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements 
             robotInterface.requestWalk(footstepList);
          }
       }
-      else if (stepping.hasChanged())
+      else if (wasStepping)
       {
          LogTools.info("Stopped stepping");
       }
@@ -140,16 +141,10 @@ public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements 
 
    public static class API
    {
-      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final Category Root = apiFactory.createRootCategory("StepInPlaceBehavior");
-      private static final CategoryTheme StepInPlace = apiFactory.createCategoryTheme("StepInPlace");
+      private static final String MODULE_NAME = ROS2Tools.BEHAVIOR_MODULE_NAME + "/step_in_place";
+      private static final ROS2Topic<?> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule(MODULE_NAME);
 
-      public static final Topic<Boolean> Stepping = Root.child(StepInPlace).topic(apiFactory.createTypedTopicTheme("Stepping"));
-      public static final Topic<Boolean> Abort = Root.child(StepInPlace).topic(apiFactory.createTypedTopicTheme("Abort"));
-
-      public static final MessagerAPI create()
-      {
-         return apiFactory.getAPIAndCloseFactory();
-      }
+      public static final ROS2Topic<Bool> STEPPING = BASE_TOPIC.withType(Bool.class).withSuffix("stepping");
+      public static final ROS2Topic<Bool> ABORT = BASE_TOPIC.withType(Bool.class).withSuffix("abort");
    }
 }

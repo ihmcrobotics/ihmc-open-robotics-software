@@ -71,13 +71,13 @@ public class TrajectoryGroup extends Pointer {
         /**
          *   \brief    Normalize all trajectories to the mean length (number of timesteps)
          */
-        public native long normalize_length();
+        public native @Cast("size_t") @Function long normalize_length();
 
         /**
          *  \brief     Normalize all trajectories to the same desired length
          *	\param	len desired length
          */
-        
+        public native @Function void normalize_length(@Cast("size_t") long len);
 
         /**
          *   \brief    standardize each dof among the trajectories

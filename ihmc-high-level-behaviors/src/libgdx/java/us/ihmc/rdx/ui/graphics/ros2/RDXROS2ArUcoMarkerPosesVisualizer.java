@@ -12,8 +12,8 @@ import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
-import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
+import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
+import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
@@ -88,5 +88,20 @@ public class RDXROS2ArUcoMarkerPosesVisualizer extends RDXVisualizer
             markerCoordinateFrame.getRenderables(renderables, pool);
          }
       }
+   }
+
+   public ImGuiFrequencyPlot getFrequencyPlot()
+   {
+      return frequencyPlot;
+   }
+
+   public ImGuiPlot getNumberOfMarkersPlot()
+   {
+      return numberOfMarkersPlot;
+   }
+
+   public int getNumberOfArUcoMarkers()
+   {
+      return numberOfArUcoMarkers;
    }
 }

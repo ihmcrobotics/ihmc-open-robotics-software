@@ -1,0 +1,46 @@
+#ifndef __behavior_msgs__msg__BehaviorTreeNodeMessage__idl__
+#define __behavior_msgs__msg__BehaviorTreeNodeMessage__idl__
+
+#include "ihmc_common_msgs/msg/./InstantMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeNodeMessage_")
+      struct BehaviorTreeNodeMessage
+      {
+        /**
+         * The number of children
+         * This is used for a stack data structure to re-assemble the tree.
+         */
+        unsigned long number_of_children;
+        /**
+         * Last tick instant
+         */
+        ihmc_common_msgs::msg::dds::InstantMessage last_tick_instant;
+        /**
+         * Name of the node
+         */
+        string node_name;
+        /**
+         * The type of the node, as a string
+         */
+        string node_type;
+        /**
+         * Previous node status
+         */
+        octet previous_status;
+        /**
+         * Whether this node has been clocked
+         * This field is only for control flow nodes.
+         */
+        boolean has_been_clocked;
+      };
+    };
+  };
+};
+
+#endif

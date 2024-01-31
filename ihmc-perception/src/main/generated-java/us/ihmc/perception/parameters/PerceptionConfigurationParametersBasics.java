@@ -18,6 +18,21 @@ public interface PerceptionConfigurationParametersBasics extends PerceptionConfi
       set(PerceptionConfigurationParameters.ousterThrottlerFrequency, ousterThrottlerFrequency);
    }
 
+   default void setOccupancyGridResolution(int occupancyGridResolution)
+   {
+      set(PerceptionConfigurationParameters.occupancyGridResolution, occupancyGridResolution);
+   }
+
+   default void setRapidRegionsEnabled(boolean rapidRegionsEnabled)
+   {
+      set(PerceptionConfigurationParameters.rapidRegionsEnabled, rapidRegionsEnabled);
+   }
+
+   default void setHeightMapEnabled(boolean heightMapEnabled)
+   {
+      set(PerceptionConfigurationParameters.heightMapEnabled, heightMapEnabled);
+   }
+
    default void setLoggingEnabled(boolean loggingEnabled)
    {
       set(PerceptionConfigurationParameters.loggingEnabled, loggingEnabled);
@@ -41,5 +56,35 @@ public interface PerceptionConfigurationParametersBasics extends PerceptionConfi
    default void setLogDepth(boolean logDepth)
    {
       set(PerceptionConfigurationParameters.logDepth, logDepth);
+   }
+
+   default void setSLAMEnabled(boolean slamEnabled)
+   {
+      set(PerceptionConfigurationParameters.slamEnabled, slamEnabled);
+   }
+
+   default void setSLAMReset(boolean slamReset)
+   {
+      set(PerceptionConfigurationParameters.slamReset, slamReset);
+   }
+
+   default void setSupportSquareEnabled(boolean supportSquareEnabled)
+   {
+      set(PerceptionConfigurationParameters.supportSquareEnabled, supportSquareEnabled);
+   }
+
+   default void setBoundingBoxFilter(boolean boundingBoxFilter)
+   {
+      set(PerceptionConfigurationParameters.boundingBoxFilter, boundingBoxFilter);
+   }
+
+   default void setConcaveHullFilters(boolean concaveHullFilters)
+   {
+      set(PerceptionConfigurationParameters.concaveHullFilters, concaveHullFilters);
+   }
+
+   default void setShadowFilter(boolean shadowFilter)
+   {
+      set(PerceptionConfigurationParameters.shadowFilter, shadowFilter);
    }
 }
