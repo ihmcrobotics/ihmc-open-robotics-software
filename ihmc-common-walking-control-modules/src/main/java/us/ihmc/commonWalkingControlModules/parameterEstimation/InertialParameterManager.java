@@ -15,7 +15,9 @@ import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.robotics.math.filters.AlphaBasedOnBreakFrequencyProvider;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoMatrix;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -70,6 +72,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoMatrix inertialKalmanFilterEstimate;
 
    private final AlphaFilteredYoMatrix filteredEstimate;
+   private final AlphaFilteredYoMatrix doubleFilteredEstimate;
 
    /** DEBUG variables */
    private static final boolean DEBUG = true;
@@ -139,10 +142,16 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                   getRowNames(basisSets, estimateModelBodies), null,
                                                   registry);
 
-      filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate", 0.0,
+      filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate",
+                                                   AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForFiltering(), toolbox.getControlDT()),
                                                    RegressorTools.sizePartitions(basisSets)[0], 1,
                                                    getRowNames(basisSets, estimateModelBodies), null,
                                                    registry);
+      doubleFilteredEstimate = new AlphaFilteredYoMatrix("doubleFilteredInertialParameterEstimate",
+                                                         AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForFiltering(), toolbox.getControlDT()),
+                                                         RegressorTools.sizePartitions(basisSets)[0], 1,
+                                                         getRowNames(basisSets, estimateModelBodies), null,
+                                                         registry);
 
       if (DEBUG)
       {
@@ -201,6 +210,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          RegressorTools.packRigidBodies(basisSets, inertialKalmanFilterEstimate, estimateModelBodies);
 
          filteredEstimate.setAndSolve(inertialKalmanFilterEstimate);
+         doubleFilteredEstimate.setAndSolve(filteredEstimate);
 
          updateVisuals();
 
