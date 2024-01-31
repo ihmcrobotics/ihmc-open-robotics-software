@@ -133,7 +133,7 @@ public class RDXImGuiBasedUIDemo
       ImGui.text("Toolbar button press count: " + pressCount);
       ImGuiTools.inputText("Text area", textForArea);
 
-      handWidget.render(RobotSide.LEFT);
+      handWidget.render(RobotSide.LEFT, ImGui.getFontSize());
    }
 
    private void renderWindow2()

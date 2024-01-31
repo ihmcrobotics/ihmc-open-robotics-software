@@ -289,8 +289,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    {
       super.renderTreeViewIconArea();
 
+      handIconWidget.render(getDefinition().getSide(), ImGui.getFrameHeight());
       ImGui.sameLine();
-      handIconWidget.render(getDefinition().getSide());
    }
 
    @Override
@@ -377,7 +377,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    {
       if (state.getPalmFrame().isChildOfWorld())
       {
-         highlightModels.get(getDefinition().getSide()).getRenderables(renderables, pool);
+         if (getSelected() || poseGizmo.isSelected() || handIconWidget.getIsHovered())
+            highlightModels.get(getDefinition().getSide()).getRenderables(renderables, pool);
          poseGizmo.getVirtualRenderables(renderables, pool);
 
          if (state.getIsNextForExecution())
