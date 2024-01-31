@@ -468,7 +468,7 @@ public class MatrixMissingTools
    {
       if (input.numCols != resultToPack.numCols && input.numCols != temporary.numCols)
          throw new IllegalArgumentException("The matrices have incompatible column sizes.");
-      if (input.numRows != resultToPack.numRows && input.numRows != temporary.numCols)
+      if (input.numRows != resultToPack.numRows && input.numRows != temporary.numRows)
          throw new IllegalArgumentException("The matrices have incompatible row sizes.");
 
       resultToPack.set(input);
