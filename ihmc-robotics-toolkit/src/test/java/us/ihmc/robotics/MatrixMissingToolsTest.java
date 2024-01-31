@@ -1,5 +1,6 @@
 package us.ihmc.robotics;
 
+import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MatrixMissingToolsTest
 {
    private static final double EPSILON = 1.0e-9;
+   private static final int ITERATIONS = 1000;
 
    @Test
    public void testSetDiagonalValues()
@@ -207,5 +209,67 @@ public class MatrixMissingToolsTest
       {
          // good
       }
+   }
+
+   @Test
+   public void testElementWiseLessThan()
+   {
+      Random random = new Random(342765L);
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int rowDimension = random.nextInt(1, 20);
+         int colDimension = random.nextInt(1, 20);
+         DMatrixRMaj matrixA = new DMatrixRMaj(rowDimension, colDimension);
+         DMatrixRMaj matrixB = new DMatrixRMaj(rowDimension, colDimension);
+
+         matrixA.setData(RandomNumbers.nextDoubleArray(random, rowDimension * colDimension, 10.0));
+         matrixB.setData(RandomNumbers.nextDoubleArray(random, rowDimension * colDimension, 10.0));
+         boolean expected = elementWiseLessThan(matrixA, matrixB);
+         boolean actual = MatrixMissingTools.elementWiseLessThan(matrixA, matrixB);
+         assertEquals(expected, actual);
+      }
+   }
+
+   @Test
+   public void testPower()
+   {
+      Random random = new Random(21543L);
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int dimension = random.nextInt(1, 20);
+         DMatrixRMaj matrix = new DMatrixRMaj(dimension, dimension);
+         matrix.setData(RandomNumbers.nextDoubleArray(random, dimension * dimension, 10.0));
+         int power = random.nextInt(1, 10);
+
+         DMatrixRMaj expected = power(matrix, power);
+
+         DMatrixRMaj temporary = new DMatrixRMaj(dimension, dimension);
+         DMatrixRMaj actual = new DMatrixRMaj(dimension, dimension);
+         MatrixMissingTools.power(matrix, power, temporary, actual);
+         assertArrayEquals(expected.getData(), actual.getData(), EPSILON);
+      }
+   }
+
+   private boolean elementWiseLessThan(DMatrixRMaj a, DMatrixRMaj b)
+   {
+      BMatrixRMaj compareOutput = new BMatrixRMaj(a.numRows, a.numCols);
+      CommonOps_DDRM.elementLessThan(a, b, compareOutput);
+      return compareOutput.sum() == compareOutput.getNumElements();
+   }
+
+   private DMatrixRMaj power(DMatrixRMaj input, int power)
+   {
+      DMatrixRMaj temporary = new DMatrixRMaj(input);
+      DMatrixRMaj result = new DMatrixRMaj(input);
+
+      if (power > 1)
+      {
+         for (int k = 0; k < power - 1; k++)
+         {
+            CommonOps_DDRM.mult(input, temporary, result);
+            temporary.set(result);
+         }
+      }
+      return result;
    }
 }
