@@ -82,8 +82,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
          progressWidgetsManager.setRenderAsPlots(!progressWidgetsManager.getRenderAsPlots());
    }
 
-   @Override
-   public void renderImGuiWidgets()
+   public void renderExecutionControlAndProgressWidgets()
    {
       if (ImGui.button(labels.get("<")))
       {
@@ -185,5 +184,11 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
             progressWidgetsManager.getActionNodesToRender().add(nextForExecutionAction);
       }
       progressWidgetsManager.render();
+   }
+
+   @Override
+   public void renderNodeSettingsWidgets()
+   {
+      ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
    }
 }
