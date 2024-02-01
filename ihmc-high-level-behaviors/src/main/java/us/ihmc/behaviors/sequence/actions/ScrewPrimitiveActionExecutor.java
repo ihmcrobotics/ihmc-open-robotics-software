@@ -11,8 +11,7 @@ import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
-import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
-import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
+import us.ihmc.behaviors.sequence.TrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -31,7 +30,6 @@ import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.NonWallTimer;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimitiveActionState, ScrewPrimitiveActionDefinition>
@@ -43,7 +41,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
-   private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
+   private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
    private final FramePose3D workPose = new FramePose3D();
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = new HandHybridJointspaceTaskspaceTrajectoryMessage();
@@ -55,7 +53,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final FramePoint3D frameRotationVectorEnd = new FramePoint3D();
    private final MutableReferenceFrame previousPoseFrame = new MutableReferenceFrame();
    private final MutableReferenceFrame nextPoseFrame = new MutableReferenceFrame();
-   private final NonWallTimer executionTimer = new NonWallTimer();
+   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
    public ScrewPrimitiveActionExecutor(long id,
                                        CRDTInfo crdtInfo,
@@ -81,7 +79,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    {
       super.update();
 
-      executionTimer.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
+      trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
       getState().setCanExecute(getState().getScrewFrame().isChildOfWorld());
 
@@ -279,7 +277,10 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          }
          ros2ControllerHelper.publishToController(handHybridTrajectoryMessage);
 
-         executionTimer.reset();
+         trackingCalculator.reset();
+
+         SE3TrajectoryPointReadOnly lastTrajectoryPose = getState().getDesiredTrajectory().getLastValueReadOnly();
+         getState().setNominalExecutionDuration(lastTrajectoryPose.getTime());
       }
       else
       {
@@ -290,30 +291,41 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    @Override
    public void updateCurrentlyExecuting()
    {
+      trackingCalculator.computeExecutionTimings(getState().getNominalExecutionDuration());
+      getState().setElapsedExecutionTime(trackingCalculator.getElapsedTime());
+
+      if (trackingCalculator.getHitTimeLimit())
+      {
+         getState().setIsExecuting(false);
+         getState().setFailed(true);
+         LogTools.error("Task execution timed out. Publishing stop all trajectories message.");
+         ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+         return;
+      }
+
       if (getState().getScrewFrame().isChildOfWorld())
       {
          SE3TrajectoryPointReadOnly lastTrajectoryPose = getState().getDesiredTrajectory().getLastValueReadOnly();
          desiredHandControlPose.set(lastTrajectoryPose.getPosition(), lastTrajectoryPose.getOrientation());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
 
-         boolean isExecuting = !completionCalculator.isComplete(desiredHandControlPose,
-                                                                syncedHandControlPose,
-                                                                POSITION_TOLERANCE,
-                                                                ORIENTATION_TOLERANCE,
-                                                                lastTrajectoryPose.getTime(),
-                                                                executionTimer,
-                                                                getState(),
-                                                                BehaviorActionCompletionComponent.TRANSLATION,
-                                                                BehaviorActionCompletionComponent.ORIENTATION);
-         getState().setIsExecuting(isExecuting);
+         trackingCalculator.computePoseTrackingData(desiredHandControlPose, syncedHandControlPose);
+         trackingCalculator.factorInR3Errors(POSITION_TOLERANCE);
+         trackingCalculator.factoryInSO3Errors(ORIENTATION_TOLERANCE);
 
-         getState().setNominalExecutionDuration(lastTrajectoryPose.getTime());
-         getState().setElapsedExecutionTime(executionTimer.getElapsedTime());
+         boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
+         meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
+
          getState().getCurrentPose().getValue().set(syncedHandControlPose);
-         getState().getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getLinearPart());
-         getState().getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getAngularPart());
          getState().setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
          getState().setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+         getState().getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getLinearPart());
+         getState().getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getAngularPart());
+
+         if (meetsDesiredCompletionCriteria)
+         {
+            getState().setIsExecuting(false);
+         }
       }
    }
 }
