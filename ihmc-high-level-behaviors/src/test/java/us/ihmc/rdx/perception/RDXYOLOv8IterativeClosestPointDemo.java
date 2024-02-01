@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception;
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.type.ImFloat;
+import imgui.type.ImInt;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
@@ -25,6 +26,8 @@ import us.ihmc.perception.YOLOv8.YOLOv8DetectionResults;
 import us.ihmc.perception.YOLOv8.YOLOv8ObjectDetector;
 import us.ihmc.perception.iterativeClosestPoint.IterativeClosestPointWorker;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.realsense.RealsenseConfiguration;
+import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -36,6 +39,8 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensors.RealsenseColorDepthImagePublisher;
+import us.ihmc.sensors.RealsenseColorDepthImageRetriever;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -46,13 +51,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class RDXYOLOv8IterativeClosestPointDemo
 {
    private static final String CSV_FILE_NAME = "ihmc_mug_points.csv";
    private static final boolean USE_CUSTOM_OBJECT = true;
    private static final YOLOv8DetectableObject OBJECT_TYPE = YOLOv8DetectableObject.CUP;
+
+   private static final boolean USE_REALSENSE = true;
+   private static final String REALSENSE_NUMBER = "215122254074";
+
    private static final Random random = new Random();
 
    private final OpenCLManager openCLManager = new OpenCLManager();
@@ -63,6 +71,9 @@ public class RDXYOLOv8IterativeClosestPointDemo
    private final ROS2Helper ros2Helper = new ROS2Helper(node);
    private final ZEDColorDepthImageRetriever zedImageRetriever;
    private final ZEDColorDepthImagePublisher zedImagePublisher;
+   private final RealsenseDeviceManager realsenseManager = new RealsenseDeviceManager();
+   private final RealsenseColorDepthImageRetriever realsenseRetriever;
+   private final RealsenseColorDepthImagePublisher realsensePublisher;
 
    private final YOLOv8ObjectDetector yoloObjectDetector = new YOLOv8ObjectDetector();
 
@@ -88,15 +99,10 @@ public class RDXYOLOv8IterativeClosestPointDemo
    private final ImFloat nmsThreshold = new ImFloat(0.1f);
    private final ImFloat maskThreshold = new ImFloat(0.0f);
    private final ImFloat outlierRejectionThreshold = new ImFloat(10.0f);
+   private final ImInt erosionValue = new ImInt(3);
 
    public RDXYOLOv8IterativeClosestPointDemo()
    {
-      zedImageRetriever = new ZEDColorDepthImageRetriever(0,
-                                                          ReferenceFrame::getWorldFrame,
-                                                          new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_DEPTH),
-                                                          new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR));
-      zedImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH);
-
       icpWorker = new IterativeClosestPointWorker(OBJECT_TYPE.getCorrespondingShape(), objectLengths, objectRadii, 500, 500, new Pose3D(), random);
       icpWorker.useProvidedTargetPoint(false);
       icpWorker.setSegmentSphereRadius(Double.MAX_VALUE);
@@ -108,7 +114,25 @@ public class RDXYOLOv8IterativeClosestPointDemo
          icpWorker.setDetectionShape(PrimitiveRigidBodyShape.CUSTOM, file.getFilesystemFile().toFile());
       }
 
-      zedImageRetriever.start();
+      zedImageRetriever = new ZEDColorDepthImageRetriever(0,
+                                                          ReferenceFrame::getWorldFrame,
+                                                          new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_DEPTH),
+                                                          new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR));
+      zedImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH);
+
+      realsenseRetriever = new RealsenseColorDepthImageRetriever(realsenseManager,
+                                                                 REALSENSE_NUMBER,
+                                                                 RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
+                                                                 ReferenceFrame::getWorldFrame,
+                                                                 new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD));
+      realsensePublisher = new RealsenseColorDepthImagePublisher(PerceptionAPI.D455_DEPTH_IMAGE, PerceptionAPI.D455_COLOR_IMAGE);
+
+      if (USE_REALSENSE)
+         realsenseRetriever.start();
+      else
+         zedImageRetriever.start();
+
+
 
       ThreadTools.startAThread(this::runUI, getClass().getSimpleName() + "UI");
 
@@ -117,14 +141,14 @@ public class RDXYOLOv8IterativeClosestPointDemo
       while (true)
       {
          throttler.waitAndRun();
-         RawImage zedDepthImage = zedImageRetriever.getLatestRawDepthImage();
-         RawImage zedColorImage = zedImageRetriever.getLatestRawColorImage(RobotSide.LEFT);
+         RawImage depthImage = USE_REALSENSE ? realsenseRetriever.getLatestRawDepthImage() : zedImageRetriever.getLatestRawDepthImage();
+         RawImage colorImage = USE_REALSENSE ? realsenseRetriever.getLatestRawColorImage() : zedImageRetriever.getLatestRawColorImage(RobotSide.LEFT);
 
-         YOLOv8DetectionResults results = yoloObjectDetector.runOnImage(zedColorImage, confidenceThreshold.get(), nmsThreshold.get());
+         YOLOv8DetectionResults results = yoloObjectDetector.runOnImage(colorImage, confidenceThreshold.get(), nmsThreshold.get());
          Mat objectMask = results.getSegmentationMatrixForObject(OBJECT_TYPE, maskThreshold.get());
          if (objectMask != null)
          {
-            RawImage segmentedDepth = segmenter.removeBackground(zedDepthImage, objectMask);
+            RawImage segmentedDepth = segmenter.removeBackground(depthImage, objectMask, erosionValue.get());
 
             List<Point3DReadOnly> ptcld = extractor.extractPointCloud(segmentedDepth);
 
@@ -136,7 +160,7 @@ public class RDXYOLOv8IterativeClosestPointDemo
                Vector3D zVector = new Vector3D(point);
                zVector.sub(centroid);
                zVector.scale(1.0 / stdDev);
-               return zVector.normSquared() < outlierRejectionThreshold.get();
+               return zVector.norm() < outlierRejectionThreshold.get();
             }).collect(Collectors.toList());
 
             if (segmentedPointCloud != null)
@@ -158,11 +182,19 @@ public class RDXYOLOv8IterativeClosestPointDemo
             icpObjectPointCloudRenderer.setPointsToRender(icpWorker.getObjectPointCloud(), Color.YELLOW);
          }
 
-         zedImagePublisher.setNextColorImage(zedColorImage.get(), RobotSide.LEFT);
-         zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
+         if (USE_REALSENSE)
+         {
+            realsensePublisher.setNextColorImage(colorImage.get());
+            realsensePublisher.setNextDepthImage(depthImage.get());
+         }
+         else
+         {
+            zedImagePublisher.setNextColorImage(colorImage.get(), RobotSide.LEFT);
+            zedImagePublisher.setNextGpuDepthImage(depthImage.get());
+         }
 
-         zedDepthImage.release();
-         zedColorImage.release();
+         depthImage.release();
+         colorImage.release();
          results.destroy();
       }
    }
@@ -183,15 +215,24 @@ public class RDXYOLOv8IterativeClosestPointDemo
             centroidGraphic = new RDXReferenceFrameGraphic(0.3);
             baseUI.getPrimaryScene().addRenderableProvider(centroidGraphic);
 
-            RDXROS2ImageMessageVisualizer zedColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED2 Color Image",
+            RDXROS2ImageMessageVisualizer colorImageVisualizer = new RDXROS2ImageMessageVisualizer("Color Image",
                                                                                                       DomainFactory.PubSubImplementation.FAST_RTPS,
-                                                                                                      PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            perceptionVisualizerPanel.addVisualizer(zedColorImageVisualizer, PerceptionAPI.REQUEST_ZED_COLOR);
-            RDXROS2ColoredPointCloudVisualizer zedPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
+                                                                                                      USE_REALSENSE ?
+                                                                                                            PerceptionAPI.D455_COLOR_IMAGE :
+                                                                                                            PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
+            perceptionVisualizerPanel.addVisualizer(colorImageVisualizer,
+                                                    USE_REALSENSE ? PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD : PerceptionAPI.REQUEST_ZED_COLOR);
+            RDXROS2ColoredPointCloudVisualizer pointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("Colored Point Cloud",
                                                                                                                 DomainFactory.PubSubImplementation.FAST_RTPS,
-                                                                                                                PerceptionAPI.ZED2_DEPTH,
-                                                                                                                PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            perceptionVisualizerPanel.addVisualizer(zedPointCloudVisualizer, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
+                                                                                                                USE_REALSENSE ?
+                                                                                                                      PerceptionAPI.D455_DEPTH_IMAGE :
+                                                                                                                      PerceptionAPI.ZED2_DEPTH,
+                                                                                                                USE_REALSENSE ?
+                                                                                                                      PerceptionAPI.D455_COLOR_IMAGE :
+                                                                                                                      PerceptionAPI.ZED2_COLOR_IMAGES.get(
+                                                                                                                            RobotSide.LEFT));
+            perceptionVisualizerPanel.addVisualizer(pointCloudVisualizer,
+                                                    USE_REALSENSE ? PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD : PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
 
             baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
             baseUI.create();
@@ -229,6 +270,7 @@ public class RDXYOLOv8IterativeClosestPointDemo
             ImGui.sliderFloat("nmsThreshold", nmsThreshold.getData(), 0.0f, 1.0f);
             ImGui.sliderFloat("maskThreshold", maskThreshold.getData(), -1.0f, 1.0f);
             ImGui.sliderFloat("outlierRejectionThreshold", outlierRejectionThreshold.getData(), 0.0f, 50.0f);
+            ImGui.sliderInt("erosionValue", erosionValue.getData(), 0, 20);
          }
 
          @Override
@@ -236,6 +278,10 @@ public class RDXYOLOv8IterativeClosestPointDemo
          {
             yoloObjectDetector.destroy();
             zedImageRetriever.destroy();
+            zedImagePublisher.destroy();
+            realsenseManager.deleteContext();
+            realsenseRetriever.destroy();
+            realsensePublisher.destroy();
             perceptionVisualizerPanel.destroy();
             baseUI.dispose();
          }
@@ -253,7 +299,7 @@ public class RDXYOLOv8IterativeClosestPointDemo
     * @param maxComputations  Maximum number of points to use for the computation. First N points in the list will be used.
     * @param shuffle          Whether to shuffle the point cloud before computations. Can be used to find approximate values with N points
     * @param centroidToPack   Point object into which the centroid will be packed
-    * @return The variance of the points
+    * @return The standard deviation of the points
     */
    private double doMath(List<? extends Point3DReadOnly> pointCloud, int maxComputations, boolean shuffle, Point3DBasics centroidToPack)
    {
@@ -276,11 +322,11 @@ public class RDXYOLOv8IterativeClosestPointDemo
       Vector3D meanSquaredVector = new Vector3D(centroidToPack);
       meanSquaredVector.scale(meanSquaredVector.getX(), meanSquaredVector.getY(), meanSquaredVector.getZ());
 
-      Vector3D stdDevVector = new Vector3D(squaredSumVector);
-      stdDevVector.scale(1.0 / numberOfComputations);
-      stdDevVector.sub(meanSquaredVector);
+      Vector3D varianceVector = new Vector3D(squaredSumVector);
+      varianceVector.scale(1.0 / numberOfComputations);
+      varianceVector.sub(meanSquaredVector);
 
-      return stdDevVector.getX() + stdDevVector.getY() + stdDevVector.getZ();
+      return Math.sqrt(varianceVector.getX() + varianceVector.getY() + varianceVector.getZ());
    }
 
    public static void main(String[] args)
