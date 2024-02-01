@@ -12,7 +12,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 import java.awt.*;
-//this is a test for pushingggg
+//this is a test for pushinggggggg
 
 public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 {
