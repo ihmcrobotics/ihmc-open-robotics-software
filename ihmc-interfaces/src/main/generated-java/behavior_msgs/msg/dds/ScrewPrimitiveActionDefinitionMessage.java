@@ -40,14 +40,27 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
             * The max angular velocity
             */
    public double max_angular_velocity_;
+   /**
+            * The max force
+            */
+   public double max_force_;
+   /**
+            * The max torque
+            */
+   public double max_torque_;
    public double linear_position_weight_;
    public double angular_position_weight_;
+   /**
+            * The pose of the wrench contact in hand control frame
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage wrench_contact_pose_;
 
    public ScrewPrimitiveActionDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       object_frame_name_ = new java.lang.StringBuilder(255);
       screw_axis_pose_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
+      wrench_contact_pose_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
    public ScrewPrimitiveActionDefinitionMessage(ScrewPrimitiveActionDefinitionMessage other)
@@ -73,10 +86,15 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
 
       max_angular_velocity_ = other.max_angular_velocity_;
 
+      max_force_ = other.max_force_;
+
+      max_torque_ = other.max_torque_;
+
       linear_position_weight_ = other.linear_position_weight_;
 
       angular_position_weight_ = other.angular_position_weight_;
 
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.wrench_contact_pose_, wrench_contact_pose_);
    }
 
 
@@ -196,6 +214,36 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
       return max_angular_velocity_;
    }
 
+   /**
+            * The max force
+            */
+   public void setMaxForce(double max_force)
+   {
+      max_force_ = max_force;
+   }
+   /**
+            * The max force
+            */
+   public double getMaxForce()
+   {
+      return max_force_;
+   }
+
+   /**
+            * The max torque
+            */
+   public void setMaxTorque(double max_torque)
+   {
+      max_torque_ = max_torque;
+   }
+   /**
+            * The max torque
+            */
+   public double getMaxTorque()
+   {
+      return max_torque_;
+   }
+
    public void setLinearPositionWeight(double linear_position_weight)
    {
       linear_position_weight_ = linear_position_weight;
@@ -212,6 +260,15 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
    public double getAngularPositionWeight()
    {
       return angular_position_weight_;
+   }
+
+
+   /**
+            * The pose of the wrench contact in hand control frame
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage getWrenchContactPose()
+   {
+      return wrench_contact_pose_;
    }
 
 
@@ -246,10 +303,15 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_angular_velocity_, other.max_angular_velocity_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_force_, other.max_force_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_torque_, other.max_torque_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.linear_position_weight_, other.linear_position_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.angular_position_weight_, other.angular_position_weight_, epsilon)) return false;
 
+      if (!this.wrench_contact_pose_.epsilonEquals(other.wrench_contact_pose_, epsilon)) return false;
 
       return true;
    }
@@ -277,10 +339,15 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
 
       if(this.max_angular_velocity_ != otherMyClass.max_angular_velocity_) return false;
 
+      if(this.max_force_ != otherMyClass.max_force_) return false;
+
+      if(this.max_torque_ != otherMyClass.max_torque_) return false;
+
       if(this.linear_position_weight_ != otherMyClass.linear_position_weight_) return false;
 
       if(this.angular_position_weight_ != otherMyClass.angular_position_weight_) return false;
 
+      if (!this.wrench_contact_pose_.equals(otherMyClass.wrench_contact_pose_)) return false;
 
       return true;
    }
@@ -307,10 +374,16 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
       builder.append(this.max_linear_velocity_);      builder.append(", ");
       builder.append("max_angular_velocity=");
       builder.append(this.max_angular_velocity_);      builder.append(", ");
+      builder.append("max_force=");
+      builder.append(this.max_force_);      builder.append(", ");
+      builder.append("max_torque=");
+      builder.append(this.max_torque_);      builder.append(", ");
       builder.append("linear_position_weight=");
       builder.append(this.linear_position_weight_);      builder.append(", ");
       builder.append("angular_position_weight=");
-      builder.append(this.angular_position_weight_);
+      builder.append(this.angular_position_weight_);      builder.append(", ");
+      builder.append("wrench_contact_pose=");
+      builder.append(this.wrench_contact_pose_);
       builder.append("}");
       return builder.toString();
    }
