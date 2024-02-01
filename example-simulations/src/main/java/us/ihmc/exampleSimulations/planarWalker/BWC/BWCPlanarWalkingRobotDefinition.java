@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.planarWalker;
+package us.ihmc.exampleSimulations.planarWalker.BWC;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -12,23 +12,23 @@ import java.awt.*;
 public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 {
    // Names for everything
-   private static final String torsoName = "torso";
+   public static final String torsoName = "torso";
 
-   private static final String leftHipPitchName = "l_hip_pitch";
-   private static final String rightHipPitchName = "r_hip_pitch";
+   public static final String leftHipPitchName = "l_hip_pitch";
+   public static final String rightHipPitchName = "r_hip_pitch";
 
-   private static final String leftKneeName = "l_knee_pitch";
-   private static final String rightKneeName = "r_knee_pitch";
+   public static final String leftKneeName = "l_knee_pitch";
+   public static final String rightKneeName = "r_knee_pitch";
 
-   private static final String leftThighName = "l_thigh";
-   private static final String rightThighName = "r_thigh";
+   public static final String leftThighName = "l_thigh";
+   public static final String rightThighName = "r_thigh";
 
-   private static final String leftShinName = "l_shin";
-   private static final String rightShinName = "r_shin";
+   public static final String leftShinName = "l_shin";
+   public static final String rightShinName = "r_shin";
 
-   private static final double thighLength = 0.5;
-   private static final double torsoHeight = 0.5;
-   private static final double shinLength = 0.3;
+   public static final double thighLength = 0.5;
+   public static final double torsoHeight = 0.5;
+   public static final double shinLength = 0.3;
 
    // Joints
    private final PlanarJointDefinition floatingBaseJointDefinition;
@@ -91,6 +91,10 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 
       leftKneeJointDefinition.setSuccessor(leftShinBodyDefinition);
       rightKneeJointDefinition.setSuccessor(rightShinBodyDefinition);
+
+      GroundContactPointDefinition contactPointDefinition = new GroundContactPointDefinition("gcp", new Vector3D(0.0, 0.0, -shinLength/2.0));
+      leftKneeJointDefinition.addGroundContactPointDefinition(contactPointDefinition);
+      rightKneeJointDefinition.addGroundContactPointDefinition(contactPointDefinition);
    }
 
    private RigidBodyDefinition createTorso()
