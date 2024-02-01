@@ -79,7 +79,7 @@ public class RDXYOLOv8PointCloudSegmentationDemo
          Mat objectMask = results.getSegmentationMatrixForObject(OBJECT_TYPE, MASK_THRESHOLD);
          if (objectMask != null)
          {
-            RawImage segmentedDepth = segmenter.removeBackground(zedDepthImage, objectMask);
+            RawImage segmentedDepth = segmenter.removeBackground(zedDepthImage, objectMask, 3);
 
             List<Point3DReadOnly> ptcld = extractor.extractPointCloud(segmentedDepth);
             Collections.shuffle(ptcld, random);
