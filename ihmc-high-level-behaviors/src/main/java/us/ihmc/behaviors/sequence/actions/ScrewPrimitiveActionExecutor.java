@@ -45,8 +45,11 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final FramePose3D workPose = new FramePose3D();
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = new HandHybridJointspaceTaskspaceTrajectoryMessage();
+   private final HandWrenchTrajectoryMessage handWrenchTrajectoryMessage = new HandWrenchTrajectoryMessage();
    private final Vector3D linearVelocity = new Vector3D();
    private final Vector3D angularVelocity = new Vector3D();
+   private final Vector3D force = new Vector3D();
+   private final Vector3D torque = new Vector3D();
    private final Quaternion localRotationQuaternion = new Quaternion();
    private final Vector3D worldRotationVector = new Vector3D();;
    private final Vector3D localRotationVectorEnd = new Vector3D();
@@ -119,7 +122,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                   double rotationPerPoint = Math.toRadians(8.6);
                   double translationPerPoint = 0.01;
                   int segments = (int) Math.ceil(Math.abs(getDefinition().getRotation()) / rotationPerPoint
-                                               + Math.abs(getDefinition().getTranslation()) / translationPerPoint);
+                                                 + Math.abs(getDefinition().getTranslation()) / translationPerPoint);
                   double rotationPerSegment = getDefinition().getRotation() / segments;
                   double translationPerSegment = getDefinition().getTranslation() / segments;
 
@@ -178,8 +181,21 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          taskspaceTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
          taskspaceTrajectoryMessage.getTaskspaceTrajectoryPoints().clear();
 
+         handWrenchTrajectoryMessage.setRobotSide(getDefinition().getSide().toByte());
+         handWrenchTrajectoryMessage.setForceExecution(true);
+
+         WrenchTrajectoryMessage wrenchTrajectory = handWrenchTrajectoryMessage.getWrenchTrajectory();
+         wrenchTrajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
+         wrenchTrajectory.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
+         wrenchTrajectory.setUseCustomControlFrame(true);
+         // TODO: Translate to body fixed frame
+         wrenchTrajectory.getControlFramePose().set(getDefinition().getWrenchContactPoseInHandControlFrame().getValueReadOnly());
+         wrenchTrajectory.getWrenchTrajectoryPoints().clear();
+
          int numberOfPoints = getState().getTrajectory().getSize();
          double time = 0.0;
+         force.setToZero();
+         torque.setToZero();
 
          for (int i = 0; i < numberOfPoints; i++)
          {
@@ -219,6 +235,15 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                angularVelocity.set(worldRotationVector);
                angularVelocity.normalize();
                angularVelocity.scale(angularDistance / deltaTime);
+
+               // TODO: Calculate force/torque as tracking error
+               force.set(linearVelocity);
+               force.normalize();
+               force.scale(getDefinition().getMaxForce());
+
+               torque.set(angularVelocity);
+               torque.normalize();
+               torque.scale(getDefinition().getMaxTorque());
             }
 
             if (i == 0 || isLastPoint)
@@ -239,7 +264,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
             for (int j = 0; j < armIKSolver.getSolutionOneDoFJoints().length; j++)
             {
                OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = i == 0 ? jointspaceTrajectoryMessage.getJointTrajectoryMessages().add()
-                                                                                  : jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(j);
+                     : jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(j);
                if (i == 0)
                   oneDoFJointTrajectoryMessage.getTrajectoryPoints().clear();
                oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use default weight
@@ -266,16 +291,25 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
             se3TrajectoryPointMessage.getLinearVelocity().set(linearVelocity);
             se3TrajectoryPointMessage.getAngularVelocity().set(angularVelocity);
 
-            LogTools.info("Adding point time: %.2f  nextPose: %s %s  linearVel: %s  angularVel: %s"
-                    .formatted(time,
-                               nextPose.getPosition(),
-                               new YawPitchRoll(nextPose.getOrientation()),
-                               linearVelocity,
-                               angularVelocity));
+            WrenchTrajectoryPointMessage wrenchTrajectoryPointMessage = wrenchTrajectory.getWrenchTrajectoryPoints().add();
+            wrenchTrajectoryPointMessage.setTime(time);
+            wrenchTrajectoryPointMessage.getWrench().getForce().set(force);
+            wrenchTrajectoryPointMessage.getWrench().getTorque().set(torque);
+
+            LogTools.info("Adding point time: %.2f  nextPose: %s %s  linearVel: %s  angularVel: %s  force: %s  torque %s"
+                                .formatted(time,
+                                           nextPose.getPosition(),
+                                           new YawPitchRoll(nextPose.getOrientation()),
+                                           linearVelocity,
+                                           angularVelocity,
+                                           force,
+                                           torque));
 
             getState().getDesiredTrajectory().addTrajectoryPoint(nextPose, time);
          }
          ros2ControllerHelper.publishToController(handHybridTrajectoryMessage);
+         if (getDefinition().getMaxForce() > 0.0 || getDefinition().getMaxTorque() > 0.0)
+            ros2ControllerHelper.publishToController(handWrenchTrajectoryMessage);
 
          trackingCalculator.reset();
 

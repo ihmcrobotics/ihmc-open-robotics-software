@@ -22,6 +22,15 @@ float64 max_linear_velocity
 # The max angular velocity
 float64 max_angular_velocity
 
+# The max force
+float64 max_force
+
+# The max torque
+float64 max_torque
+
 float64 linear_position_weight
 
 float64 angular_position_weight
+
+# The pose of the wrench contact in hand control frame
+controller_msgs/RigidBodyTransformMessage wrench_contact_pose

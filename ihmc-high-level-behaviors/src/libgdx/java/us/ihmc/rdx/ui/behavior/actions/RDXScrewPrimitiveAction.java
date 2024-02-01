@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import imgui.flag.ImGuiCol;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionDefinition;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
@@ -20,20 +22,27 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionState, ScrewPrimitiveActionDefinition>
 {
+   private final FullHumanoidRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo objectFrameComboBox;
    private final ImGuiSliderDoubleWrapper translationWidget;
    private final ImGuiSliderDoubleWrapper rotationWidget;
    private final ImGuiSliderDoubleWrapper maxLinearVelocityWidget;
    private final ImGuiSliderDoubleWrapper maxAngularVelocityWidget;
+   private final ImGuiSliderDoubleWrapper maxForceWidget;
+   private final ImGuiSliderDoubleWrapper maxTorqueWidget;
    private final ImGuiSliderDoubleWrapper linearPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper angularPositionWeightWidget;
    private final RDXSelectablePose3DGizmo screwAxisGizmo;
+   private final ImBoolean adjustWrenchContactPose = new ImBoolean();
+   private final RDXSelectablePose3DGizmo wrenchContactPoseGizmo;
    private final RDXDashedLineMesh screwAxisGraphic = new RDXDashedLineMesh(Color.WHITE, Axis3D.X, 0.04);
    private final RDXTrajectoryGraphic trajectoryGraphic = new RDXTrajectoryGraphic();
    private final RecyclingArrayList<FramePose3D> trajectoryPoses = new RecyclingArrayList<>(FramePose3D::new);
@@ -42,14 +51,23 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
                                   CRDTInfo crdtInfo,
                                   WorkspaceResourceDirectory saveFileDirectory,
                                   RDX3DPanel panel3D,
+                                  DRCRobotModel robotModel,
+                                  FullHumanoidRobotModel syncedRobot,
+                                  RobotCollisionModel selectionCollisionModel,
                                   ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(new ScrewPrimitiveActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+
+      this.syncedRobot = syncedRobot;
 
       getDefinition().setDescription("Screw primitive");
 
       screwAxisGizmo = new RDXSelectablePose3DGizmo(getDefinition().getScrewAxisPoseInObjectFrame().getValue(), ReferenceFrame.getWorldFrame());
       screwAxisGizmo.create(panel3D);
+      wrenchContactPoseGizmo = new RDXSelectablePose3DGizmo(getDefinition().getWrenchContactPoseInHandControlFrame().getValue(),
+                                                            ReferenceFrame.getWorldFrame(),
+                                                            adjustWrenchContactPose);
+      wrenchContactPoseGizmo.create(panel3D);
 
       objectFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Object frame",
                                                                 referenceFrameLibrary,
@@ -70,14 +88,20 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
                                                               getDefinition()::getMaxAngularVelocity,
                                                               getDefinition()::setMaxAngularVelocity);
       maxAngularVelocityWidget.addWidgetAligner(widgetAligner);
+      maxForceWidget = new ImGuiSliderDoubleWrapper("Max Force", "%.2f", 0.0, 70.0, getDefinition()::getMaxForce, getDefinition()::setMaxForce);
+      maxForceWidget.addButton("Disable Wrench", () -> getDefinition().setMaxForce(0.0));
+      maxForceWidget.addWidgetAligner(widgetAligner);
+      maxTorqueWidget = new ImGuiSliderDoubleWrapper("Max Torque", "%.2f", 0.5, 20.0, getDefinition()::getMaxTorque, getDefinition()::setMaxTorque);
+      maxTorqueWidget.addButton("Disable Wrench", () -> getDefinition().setMaxTorque(0.0));
+      maxTorqueWidget.addWidgetAligner(widgetAligner);
       linearPositionWeightWidget = new ImGuiSliderDoubleWrapper("Linear Position Weight", "%.2f", 0.0, 70.0,
                                                                 getDefinition()::getLinearPositionWeight,
                                                                 getDefinition()::setLinearPositionWeight);
       linearPositionWeightWidget.addButton("Use Default Weights", () -> getDefinition().setLinearPositionWeight(-1.0));
       linearPositionWeightWidget.addWidgetAligner(widgetAligner);
       angularPositionWeightWidget = new ImGuiSliderDoubleWrapper("Angular Position Weight", "%.2f", 0.0, 70.0,
-                                                                getDefinition()::getAngularPositionWeight,
-                                                                getDefinition()::setAngularPositionWeight);
+                                                                 getDefinition()::getAngularPositionWeight,
+                                                                 getDefinition()::setAngularPositionWeight);
       angularPositionWeightWidget.addButton("Use Default Weights", () -> getDefinition().setAngularPositionWeight(-1.0));
       angularPositionWeightWidget.addWidgetAligner(widgetAligner);
    }
@@ -91,6 +115,12 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       {
          screwAxisGizmo.getPoseGizmo().setGizmoFrame(getState().getScrewFrame().getReferenceFrame());
          screwAxisGizmo.getPoseGizmo().update();
+         ReferenceFrame handControlFrame = syncedRobot.getHandControlFrame(getDefinition().getSide());
+         if (wrenchContactPoseGizmo.getPoseGizmo().getGizmoFrame().getParent() != handControlFrame)
+         {
+            wrenchContactPoseGizmo.getPoseGizmo().setParentFrame(handControlFrame);
+         }
+         wrenchContactPoseGizmo.getPoseGizmo().update();
 
          double screwAxisLineWidth = 0.005;
          screwAxisGraphic.update(screwAxisGizmo.getPoseGizmo().getPose(), screwAxisLineWidth, 1.0);
@@ -106,7 +136,9 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    @Override
    protected void renderImGuiWidgetsInternal()
    {
+      objectFrameComboBox.render();
       ImGui.checkbox(labels.get("Adjust Screw Axis Pose"), screwAxisGizmo.getSelected());
+      ImGui.checkbox(labels.get("Adjust Wrench Contact Pose"), adjustWrenchContactPose);
       objectFrameComboBox.render();
       int size = getState().getTrajectory().getSize();
       int limit = ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT;
@@ -119,6 +151,8 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       rotationWidget.renderImGuiWidget();
       maxLinearVelocityWidget.renderImGuiWidget();
       maxAngularVelocityWidget.renderImGuiWidget();
+      maxForceWidget.renderImGuiWidget();
+      maxTorqueWidget.renderImGuiWidget();
       linearPositionWeightWidget.renderImGuiWidget();
       angularPositionWeightWidget.renderImGuiWidget();
    }
@@ -129,6 +163,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       if (getState().getScrewFrame().isChildOfWorld())
       {
          screwAxisGizmo.calculate3DViewPick(input);
+         wrenchContactPoseGizmo.calculate3DViewPick(input);
       }
    }
 
@@ -138,6 +173,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       if (getState().getScrewFrame().isChildOfWorld())
       {
          screwAxisGizmo.process3DViewInput(input);
+         wrenchContactPoseGizmo.process3DViewInput(input);
       }
    }
 
@@ -147,6 +183,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       if (getState().getScrewFrame().isChildOfWorld())
       {
          screwAxisGizmo.getVirtualRenderables(renderables, pool);
+         wrenchContactPoseGizmo.getVirtualRenderables(renderables, pool);
          screwAxisGraphic.getRenderables(renderables, pool);
          trajectoryGraphic.getRenderables(renderables, pool);
       }
