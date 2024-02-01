@@ -17,7 +17,7 @@ public class BWCPlanarWalkingRobot
 
    public BWCPlanarWalkingRobot(Robot robot)
    {
-      robot.getFloatingRootJoint().setJointPosition(new Vector3D(0.0, 0.0, 1.5));
+      robot.getFloatingRootJoint().setJointPosition(new Vector3D(0.0, 0.0, 0.75));
 
       kneeJoints = new SideDependentList<>();
 
@@ -29,6 +29,7 @@ public class BWCPlanarWalkingRobot
          YoDouble legLength = new YoDouble(robotSide.getLowerCaseName() + "LegLength", registry);
          legLengths.put(robotSide, legLength);
       }
+      kneeJoints.get(RobotSide.LEFT).setQ(0.25);
    }
 
    public YoRegistry getYoRegistry()

@@ -9,7 +9,10 @@ public class BWCPlanarWalkerSimulation
 {
    public BWCPlanarWalkerSimulation()
    {
+      int simTicksPerControlTick = 3;
+
       SimulationConstructionSet2 scs = new SimulationConstructionSet2();
+      scs.setBufferRecordTickPeriod(simTicksPerControlTick);
 //      scs.getGravity().setToZero();
 
       BWCPlanarWalkingRobotDefinition robotDefinition = new BWCPlanarWalkingRobotDefinition();
@@ -22,7 +25,7 @@ public class BWCPlanarWalkerSimulation
       // create the robot controller
       BWCPlanarWalkingController controller = new BWCPlanarWalkingController(controllerRobot);
       // set the controller to control the robot.
-      robot.addController(controller);
+      robot.addThrottledController(controller, scs.getDT() * simTicksPerControlTick);
 
       scs.startSimulationThread();
       scs.simulate();
