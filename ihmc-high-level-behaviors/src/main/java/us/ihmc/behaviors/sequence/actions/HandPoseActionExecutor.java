@@ -1,14 +1,13 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.StopAllTrajectoryMessage;
+import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.QueueableMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
@@ -38,6 +37,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
+   private boolean hasSentCommand = false;
    private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
    private final RigidBodyTransform chestToPelvisZeroAngles = new RigidBodyTransform();
    private final FramePose3D chestInPelvis = new FramePose3D();
@@ -79,7 +79,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
       state.setCanExecute(state.getPalmFrame().isChildOfWorld());
 
-      if (state.getPalmFrame().isChildOfWorld() && state.getIsNextForExecution())
+      if (state.getPalmFrame().isChildOfWorld() && (state.getIsNextForExecution() || state.getIsExecuting()))
       {
          ChestOrientationActionExecutor concurrentChestOrientationAction = null;
          PelvisHeightPitchActionExecutor concurrentPelvisHeightPitchAction = null;
@@ -171,56 +171,10 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    {
       super.triggerActionExecution();
 
+      hasSentCommand = false;
+
       if (state.getPalmFrame().isChildOfWorld())
       {
-         JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildJointspaceTrajectoryMessage();
-
-         ReferenceFrame taskspaceTrajectoryFrame = ReferenceFrame.getWorldFrame();
-         long trajectoryReferenceFrameID = MessageTools.toFrameId(taskspaceTrajectoryFrame);
-         FramePose3D desiredControlFramePose = new FramePose3D(state.getPalmFrame().getReferenceFrame());
-         desiredControlFramePose.changeFrame(taskspaceTrajectoryFrame);
-
-         SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
-         se3TrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
-         // Select all axes and use default weights
-         // se3TrajectoryMessage.getLinearWeightMatrix().setXWeight(50.0);
-         // se3TrajectoryMessage.getLinearWeightMatrix().setYWeight(50.0);
-         // se3TrajectoryMessage.getLinearWeightMatrix().setZWeight(50.0);
-         // se3TrajectoryMessage.getAngularWeightMatrix().setXWeight(50.0);
-         // se3TrajectoryMessage.getAngularWeightMatrix().setYWeight(50.0);
-         // se3TrajectoryMessage.getAngularWeightMatrix().setZWeight(50.0);
-         se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameID);
-         SE3TrajectoryPointMessage se3TrajectoryPointMessage = se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add();
-         se3TrajectoryPointMessage.setTime(getDefinition().getTrajectoryDuration());
-         se3TrajectoryPointMessage.getPosition().set(desiredControlFramePose.getPosition());
-         se3TrajectoryPointMessage.getOrientation().set(desiredControlFramePose.getOrientation());
-         se3TrajectoryPointMessage.getLinearVelocity().setToZero();
-         se3TrajectoryPointMessage.getAngularVelocity().setToZero();
-
-         if (getDefinition().getJointspaceOnly())
-         {
-            ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
-            armTrajectoryMessage.setRobotSide(getDefinition().getSide().toByte());
-            armTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
-            armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
-            LogTools.info("Publishing arm jointspace trajectory");
-            ros2ControllerHelper.publishToController(armTrajectoryMessage);
-         }
-         else // Publishing taskspace only doesn't work well, so we use hybrid - @dcalvert
-         {
-            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridJointspaceTaskspaceTrajectoryMessage
-                  = new HandHybridJointspaceTaskspaceTrajectoryMessage();
-            handHybridJointspaceTaskspaceTrajectoryMessage.setRobotSide(getDefinition().getSide().toByte());
-            handHybridJointspaceTaskspaceTrajectoryMessage.getTaskspaceTrajectoryMessage().set(se3TrajectoryMessage);
-            handHybridJointspaceTaskspaceTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
-            LogTools.info("Publishing arm hybrid jointspace taskpace");
-            ros2ControllerHelper.publishToController(handHybridJointspaceTaskspaceTrajectoryMessage);
-         }
-
-         trackingCalculator.reset();
-
-         state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
-         
          desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
          state.getDesiredTrajectory().setSingleSegmentTrajectory(syncedHandControlPose, desiredHandControlPose, getDefinition().getTrajectoryDuration());
@@ -241,7 +195,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       {
          state.setIsExecuting(false);
          state.setFailed(true);
-         LogTools.error("Task execution timed out. Publishing stop all trajectories message.");
          ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
          return;
       }
@@ -251,9 +204,22 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
 
-         trackingCalculator.computePoseTrackingData(desiredHandControlPose, syncedHandControlPose);
-         trackingCalculator.factorInR3Errors(POSITION_TOLERANCE);
-         trackingCalculator.factoryInSO3Errors(ORIENTATION_TOLERANCE);
+         boolean wasExecuting = state.getIsExecuting();
+         boolean isExecuting = !hasSentCommand;
+         if (hasSentCommand)
+         {
+            trackingCalculator.computePoseTrackingData(desiredHandControlPose, syncedHandControlPose);
+            trackingCalculator.factorInR3Errors(POSITION_TOLERANCE);
+            trackingCalculator.factoryInSO3Errors(ORIENTATION_TOLERANCE);
+         }
+         state.setIsExecuting(isExecuting);
+
+         // Send command later, once the solution is good, as in task approach
+         if (state.getIsExecuting() && !hasSentCommand && getState().getSolutionQuality() <= ArmIKSolver.GOOD_QUALITY_MAX)
+         {
+            hasSentCommand = true;
+            sendCommand();
+         }
 
          boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
          meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
@@ -273,6 +239,57 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             }
          }
       }
+   }
+
+   private void sendCommand()
+   {
+      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildJointspaceTrajectoryMessage();
+
+      ReferenceFrame taskspaceTrajectoryFrame = ReferenceFrame.getWorldFrame();
+      long trajectoryReferenceFrameID = MessageTools.toFrameId(taskspaceTrajectoryFrame);
+      FramePose3D desiredControlFramePose = new FramePose3D(state.getPalmFrame().getReferenceFrame());
+      desiredControlFramePose.changeFrame(taskspaceTrajectoryFrame);
+
+      SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
+      se3TrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+      // Select all axes and use default weights
+      // se3TrajectoryMessage.getLinearWeightMatrix().setXWeight(50.0);
+      // se3TrajectoryMessage.getLinearWeightMatrix().setYWeight(50.0);
+      // se3TrajectoryMessage.getLinearWeightMatrix().setZWeight(50.0);
+      // se3TrajectoryMessage.getAngularWeightMatrix().setXWeight(50.0);
+      // se3TrajectoryMessage.getAngularWeightMatrix().setYWeight(50.0);
+      // se3TrajectoryMessage.getAngularWeightMatrix().setZWeight(50.0);
+      se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameID);
+      SE3TrajectoryPointMessage se3TrajectoryPointMessage = se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add();
+      se3TrajectoryPointMessage.setTime(getDefinition().getTrajectoryDuration());
+      se3TrajectoryPointMessage.getPosition().set(desiredControlFramePose.getPosition());
+      se3TrajectoryPointMessage.getOrientation().set(desiredControlFramePose.getOrientation());
+      se3TrajectoryPointMessage.getLinearVelocity().setToZero();
+      se3TrajectoryPointMessage.getAngularVelocity().setToZero();
+
+      if (getDefinition().getJointspaceOnly())
+      {
+         ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
+         armTrajectoryMessage.setRobotSide(getDefinition().getSide().toByte());
+         armTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
+         armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
+         LogTools.info("Publishing arm jointspace trajectory");
+         ros2ControllerHelper.publishToController(armTrajectoryMessage);
+      }
+      else // Publishing taskspace only doesn't work well, so we use hybrid - @dcalvert
+      {
+         HandHybridJointspaceTaskspaceTrajectoryMessage handHybridJointspaceTaskspaceTrajectoryMessage
+               = new HandHybridJointspaceTaskspaceTrajectoryMessage();
+         handHybridJointspaceTaskspaceTrajectoryMessage.setRobotSide(getDefinition().getSide().toByte());
+         handHybridJointspaceTaskspaceTrajectoryMessage.getTaskspaceTrajectoryMessage().set(se3TrajectoryMessage);
+         handHybridJointspaceTaskspaceTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
+         LogTools.info("Publishing arm hybrid jointspace taskpace");
+         ros2ControllerHelper.publishToController(handHybridJointspaceTaskspaceTrajectoryMessage);
+      }
+
+      trackingCalculator.reset();
+
+      state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
    }
 
    private void disengageHoldPoseInWorld()
