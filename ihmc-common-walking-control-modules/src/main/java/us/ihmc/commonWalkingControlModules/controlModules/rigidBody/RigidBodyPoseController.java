@@ -202,7 +202,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
       // Copy from the position command since the orientation does not have a control frame.
       feedbackControlCommand.setControlFrameFixedInEndEffector(positionCommand.getBodyFixedPointToControl(),
-                                                               orientationCommand.getBodyFixedOrientationToControl());
+                                                               orientationCommand.getControlFrameOrientation());
 
       feedbackControlCommand.setControlBaseFrame(positionCommand.getControlBaseFrame());
    }

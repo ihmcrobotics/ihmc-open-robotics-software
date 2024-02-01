@@ -4,6 +4,7 @@ import imgui.internal.ImGui;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.ui.behavior.actions.RDXFootstepPlanAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXHandPoseAction;
+import us.ihmc.rdx.ui.behavior.actions.RDXScrewPrimitiveAction;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import java.util.ArrayList;
@@ -19,10 +20,12 @@ public class RDXActionProgressWidgetsManager
    private final ArrayList<RDXActionNode<?, ?>> actionNodesToRender = new ArrayList<>();
    private boolean renderAsPlots = true;
    private int emptyPlotIndex;
+   private int numberOfLines;
 
    public void render()
    {
       emptyPlotIndex = 0;
+      numberOfLines = 0;
 
       actionNodesToRender.clear();
       actionNodesToRender.addAll(sortedActionNodesToRender);
@@ -35,7 +38,7 @@ public class RDXActionProgressWidgetsManager
 
          if (action instanceof RDXFootstepPlanAction)
             containsFootsteps = true;
-         if (action instanceof RDXHandPoseAction)
+         if (action instanceof RDXHandPoseAction || action instanceof RDXScrewPrimitiveAction)
             containsHandMovements = true;
       }
 
@@ -47,6 +50,7 @@ public class RDXActionProgressWidgetsManager
          actionNodesToRender.get(i).getProgressWidgets().renderElapsedTimeBar(dividedBarWidth);
          sameLineExceptLast(i);
       }
+      ++numberOfLines;
       ImGui.spacing();
 
       if (containsFootsteps)
@@ -58,6 +62,7 @@ public class RDXActionProgressWidgetsManager
             actionNodesToRender.get(i).getProgressWidgets().renderFootstepCompletion(dividedBarWidth, renderAsPlots);
             sameLineExceptLast(i);
          }
+         ++numberOfLines;
          ImGui.spacing();
       }
 
@@ -71,6 +76,7 @@ public class RDXActionProgressWidgetsManager
             actionNodesToRender.get(i).getProgressWidgets().renderPositionError(dividedBarWidth, renderAsPlots);
          sameLineExceptLast(i);
       }
+      ++numberOfLines;
       ImGui.spacing();
 
       widgetAligner.text("Orientation error (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
@@ -83,6 +89,7 @@ public class RDXActionProgressWidgetsManager
             actionNodesToRender.get(i).getProgressWidgets().renderOrientationError(dividedBarWidth, renderAsPlots);
          sameLineExceptLast(i);
       }
+      ++numberOfLines;
       ImGui.spacing();
 
       if (containsHandMovements)
@@ -94,6 +101,7 @@ public class RDXActionProgressWidgetsManager
             actionNodesToRender.get(i).getProgressWidgets().renderHandForce(dividedBarWidth, renderAsPlots);
             sameLineExceptLast(i);
          }
+         ++numberOfLines;
          ImGui.spacing();
 
          widgetAligner.text("Hand torque (Nm):");
@@ -103,6 +111,15 @@ public class RDXActionProgressWidgetsManager
             actionNodesToRender.get(i).getProgressWidgets().renderHandTorque(dividedBarWidth, renderAsPlots);
             sameLineExceptLast(i);
          }
+         ++numberOfLines;
+         ImGui.spacing();
+      }
+
+      while (numberOfLines < 5)
+      {
+         widgetAligner.text("");
+         renderBlankBar(true);
+         ++numberOfLines;
          ImGui.spacing();
       }
    }
@@ -131,8 +148,13 @@ public class RDXActionProgressWidgetsManager
    {
       if (actionNodesToRender.isEmpty())
       {
-         RDXActionProgressWidgets.renderBlankProgress(labels.get("Empty Plot", emptyPlotIndex++), ImGui.getColumnWidth(), renderAsPlots, supportsPlots);
+         renderBlankBar(supportsPlots);
       }
+   }
+
+   private void renderBlankBar(boolean supportsPlots)
+   {
+      RDXActionProgressWidgets.renderBlankProgress(labels.get("Empty Plot", emptyPlotIndex++), ImGui.getColumnWidth(), renderAsPlots, supportsPlots);
    }
 
    public boolean getRenderAsPlots()
