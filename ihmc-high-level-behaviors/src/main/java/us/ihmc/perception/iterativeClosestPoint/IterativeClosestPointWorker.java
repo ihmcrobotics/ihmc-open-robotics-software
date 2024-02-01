@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
+import java.io.File;
 import java.util.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -426,9 +427,9 @@ public class IterativeClosestPointWorker
       setDetectionShape(shape, null);
    }
 
-   public void setDetectionShape(PrimitiveRigidBodyShape shape, String pointCloudFileName)
+   public void setDetectionShape(PrimitiveRigidBodyShape shape, File pointCloudFile)
    {
-      if (shape == PrimitiveRigidBodyShape.CUSTOM && pointCloudFileName == null)
+      if (shape == PrimitiveRigidBodyShape.CUSTOM && pointCloudFile == null)
       {
          throw new RuntimeException("If using a custom shape, a file name needs to be specified to loud the point cloud from.");
       }
@@ -440,7 +441,7 @@ public class IterativeClosestPointWorker
       }
       else
       {
-         loadPointCloudFromFile(pointCloudFileName);
+         loadPointCloudFromFile(pointCloudFile);
       }
    }
 
@@ -465,14 +466,14 @@ public class IterativeClosestPointWorker
       setPoseGuess(resultPose);
    }
 
-   private void loadPointCloudFromFile(String pointCloudFileName)
+   private void loadPointCloudFromFile(File pointCloudFile)
    {
       // FIXME there's likely a better way to do this.
       int numberOfObjectSamples = localObjectPoints.size();
       localObjectPoints.clear();
 
       List<String[]> rowList = new ArrayList<>();
-      try (BufferedReader br = new BufferedReader(new FileReader(pointCloudFileName)))
+      try (BufferedReader br = new BufferedReader(new FileReader(pointCloudFile)))
       {
          String line;
          while ((line = br.readLine()) != null)
