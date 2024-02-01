@@ -69,7 +69,7 @@ public enum YOLOv8DetectableObject
    DINING_TABLE(null),
    TOILET(null),
    TV(PrimitiveRigidBodyShape.BOX),
-   LAPTOP(null),
+   LAPTOP(PrimitiveRigidBodyShape.BOX),
    MOUSE(PrimitiveRigidBodyShape.ELLIPSOID),
    REMOTE(PrimitiveRigidBodyShape.BOX),
    KEYBOARD(PrimitiveRigidBodyShape.BOX),

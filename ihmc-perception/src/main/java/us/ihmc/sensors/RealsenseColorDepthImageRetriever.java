@@ -79,6 +79,7 @@ public class RealsenseColorDepthImageRetriever
          }
          else if (realsense.readFrameData())
          {
+            numberOfFailedReads = 0;
             realsense.updateDataBytePointers();
             Instant acquisitionTime = Instant.now();
 

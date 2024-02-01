@@ -59,7 +59,7 @@ public class YOLOv8ObjectDetector
       yoloNet.forward(outputBlobs, outputNames);
 
       List<YOLOv8Detection> detections = processOutput(outputBlobs, confidenceThreshold, nonMaximumSuppressionThreshold, bgrImage.getImageWidth(), bgrImage.getImageHeight());
-      YOLOv8DetectionResults results = new YOLOv8DetectionResults(detections, outputBlobs);
+      YOLOv8DetectionResults results = new YOLOv8DetectionResults(detections, outputBlobs, bgrImage);
 
       blob.release();
       bgrImage.release();
