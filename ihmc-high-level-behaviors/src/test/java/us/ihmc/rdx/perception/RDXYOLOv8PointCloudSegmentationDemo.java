@@ -1,7 +1,6 @@
 package us.ihmc.rdx.perception;
 
 import com.badlogic.gdx.graphics.Color;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
@@ -76,7 +75,7 @@ public class RDXYOLOv8PointCloudSegmentationDemo
          RawImage zedColorImage = zedImageRetriever.getLatestRawColorImage(RobotSide.LEFT);
 
          YOLOv8DetectionResults results = yoloObjectDetector.runOnImage(zedColorImage, CONFIDENCE_THRESHOLD, NMS_THRESHOLD);
-         Mat objectMask = results.getSegmentationMatrixForObject(OBJECT_TYPE, MASK_THRESHOLD);
+         RawImage objectMask = results.getSegmentationMatrixForObject(OBJECT_TYPE, MASK_THRESHOLD);
          if (objectMask != null)
          {
             RawImage segmentedDepth = segmenter.removeBackground(zedDepthImage, objectMask, 3);

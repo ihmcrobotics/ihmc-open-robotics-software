@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
@@ -55,8 +54,8 @@ import java.util.stream.Collectors;
 public class RDXYOLOv8IterativeClosestPointDemo
 {
    private static final String CSV_FILE_NAME = "ihmc_mug_points.csv";
-   private static final boolean USE_CUSTOM_OBJECT = true;
-   private static final YOLOv8DetectableObject OBJECT_TYPE = YOLOv8DetectableObject.CUP;
+   private static final boolean USE_CUSTOM_OBJECT = false;
+   private static final YOLOv8DetectableObject OBJECT_TYPE = YOLOv8DetectableObject.KEYBOARD;
 
    private static final boolean USE_REALSENSE = true;
    private static final String REALSENSE_NUMBER = "215122254074";
@@ -86,8 +85,10 @@ public class RDXYOLOv8IterativeClosestPointDemo
    private final RDXPointCloudRenderer icpObjectPointCloudRenderer = new RDXPointCloudRenderer();
    private RDXReferenceFrameGraphic centroidGraphic;
 
-   private final Vector3D objectLengths = new Vector3D(0.1, 0.1, 0.1);
-   private final Vector3D objectRadii = new Vector3D(0.05, 0.03, 0.02);
+   private final ImInt numICPIterations = new ImInt(1);
+
+   private final Vector3D objectLengths = new Vector3D(0.135, 0.43, 0.015);
+   private final Vector3D objectRadii = new Vector3D(0.09, 0.2, 0.23);
    private final ImFloat xLength = new ImFloat(objectLengths.getX32());
    private final ImFloat yLength = new ImFloat(objectLengths.getY32());
    private final ImFloat zLength = new ImFloat(objectLengths.getZ32());
@@ -103,7 +104,7 @@ public class RDXYOLOv8IterativeClosestPointDemo
 
    public RDXYOLOv8IterativeClosestPointDemo()
    {
-      icpWorker = new IterativeClosestPointWorker(OBJECT_TYPE.getCorrespondingShape(), objectLengths, objectRadii, 500, 500, new Pose3D(), random);
+      icpWorker = new IterativeClosestPointWorker(OBJECT_TYPE.getCorrespondingShape(), objectLengths, objectRadii, 1000, 1000, new Pose3D(), random);
       icpWorker.useProvidedTargetPoint(false);
       icpWorker.setSegmentSphereRadius(Double.MAX_VALUE);
       if (USE_CUSTOM_OBJECT)
@@ -145,7 +146,7 @@ public class RDXYOLOv8IterativeClosestPointDemo
          RawImage colorImage = USE_REALSENSE ? realsenseRetriever.getLatestRawColorImage() : zedImageRetriever.getLatestRawColorImage(RobotSide.LEFT);
 
          YOLOv8DetectionResults results = yoloObjectDetector.runOnImage(colorImage, confidenceThreshold.get(), nmsThreshold.get());
-         Mat objectMask = results.getSegmentationMatrixForObject(OBJECT_TYPE, maskThreshold.get());
+         RawImage objectMask = results.getSegmentationMatrixForObject(OBJECT_TYPE, maskThreshold.get());
          if (objectMask != null)
          {
             RawImage segmentedDepth = segmenter.removeBackground(depthImage, objectMask, erosionValue.get());
@@ -175,11 +176,13 @@ public class RDXYOLOv8IterativeClosestPointDemo
             icpWorker.setEnvironmentPointCloud(segmentedPointCloud);
 
             segmentedDepth.release();
+            objectMask.release();
          }
 
-         if (icpWorker.runICP(1))
+         if (icpWorker.runICP(numICPIterations.get()))
          {
             icpObjectPointCloudRenderer.setPointsToRender(icpWorker.getObjectPointCloud(), Color.YELLOW);
+            centroidGraphic.setPoseInWorldFrame(icpWorker.getResultPose());
          }
 
          if (USE_REALSENSE)
@@ -253,6 +256,10 @@ public class RDXYOLOv8IterativeClosestPointDemo
 
          private void renderSettings()
          {
+            ImGui.sliderInt("numIterations", numICPIterations.getData(), 1, 10);
+
+            ImGui.newLine();
+
             ImGui.sliderFloat("xLength", xLength.getData(), 0.0f, 1.0f);
             ImGui.sliderFloat("yLength", yLength.getData(), 0.0f, 1.0f);
             ImGui.sliderFloat("zLength", zLength.getData(), 0.0f, 1.0f);
