@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.StereoVisionPointCloudMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::StereoVisionPointCloudMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "3e76445e4ac77629618271518702b598fc59e147ad9651760b5970d8284ae004";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

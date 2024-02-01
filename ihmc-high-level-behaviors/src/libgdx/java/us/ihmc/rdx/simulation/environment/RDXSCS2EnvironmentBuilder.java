@@ -19,7 +19,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -32,13 +32,14 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.util.*;
 
-public class RDXSCS2EnvironmentBuilder extends ImGuiPanel
+public class RDXSCS2EnvironmentBuilder extends RDXPanel
 {
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(RDXSCS2EnvironmentBuilder.class, "Environment");
    private final ArrayList<RDXSCS2EnvironmentObject> allObjects = new ArrayList<>();
@@ -57,7 +58,7 @@ public class RDXSCS2EnvironmentBuilder extends ImGuiPanel
    private RDXSCS2EnvironmentObject selectedObject;
    private RDXSCS2EnvironmentObject intersectedObject;
    private final RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo();
-   private final ImGuiPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
+   private final RDXPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
    private final Point3D tempIntersection = new Point3D();
 
    public RDXSCS2EnvironmentBuilder(RDX3DPanel panel3D)
@@ -291,9 +292,8 @@ public class RDXSCS2EnvironmentBuilder extends ImGuiPanel
             ambientLightAmount.set(ambientValue);
             panel3D.getScene().setAmbientLight(ambientLightAmount.get());
          }
-         for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
+         JSONTools.forEachArrayElement(node, "objects", objectNode ->
          {
-            JsonNode objectNode = it.next();
             String objectTypeName = objectNode.get("type").asText();
             RDXSCS2EnvironmentObject object = RDXSCS2EnvironmentObjectLibrary.loadBySimpleClassName(objectTypeName);
 
@@ -314,7 +314,7 @@ public class RDXSCS2EnvironmentBuilder extends ImGuiPanel
             {
                LogTools.warn("Skipping loading object: {}", objectTypeName);
             }
-         }
+         });
       });
    }
 

@@ -73,8 +73,12 @@ public class RDXModelBuilder
 
    public static Model buildModelFromMesh(ModelBuilder modelBuilder, RDXMultiColorMeshBuilder meshBuilder)
    {
+      return buildModelFromMesh(modelBuilder, meshBuilder.generateMesh());
+   }
+
+   public static Model buildModelFromMesh(ModelBuilder modelBuilder, Mesh mesh)
+   {
       modelBuilder.begin();
-      Mesh mesh = meshBuilder.generateMesh();
 
       MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
       Material material = new Material();
@@ -159,12 +163,24 @@ public class RDXModelBuilder
       return buildModelInstance(meshBuilder -> meshBuilder.addBox(lx, ly, lz, color), "box");
    }
 
-   public static ModelInstance createCylinder(double height, double radius, Color color)
+   public static ModelInstance createCylinder(float height, float radius, Point3D offset, Color color)
    {
-      return buildModelInstance(meshBuilder ->
-      {
-         meshBuilder.addCylinder(height, radius, new Point3D(), color);
-      }, "cylinder");
+      return buildModelInstance(meshBuilder -> meshBuilder.addCylinder(height, radius, offset, color), "cylinder");
+   }
+
+   public static ModelInstance createEllipsoid(float xRadius, float yRadius, float zRadius, Point3D offset, Color color)
+   {
+      return buildModelInstance(meshBuilder -> meshBuilder.addEllipsoid(xRadius, yRadius, zRadius, offset, color), "ellipsoid");
+   }
+
+   public static ModelInstance createPrism(float triangleWidth, float prismThickness, float triangleHeight, Point3D offset, Color color)
+   {
+      return buildModelInstance(meshBuilder -> meshBuilder.addIsoscelesTriangularPrism(triangleWidth, triangleHeight, prismThickness, offset, color), "prism");
+   }
+
+   public static ModelInstance createCone(float height, float radius, Point3D offset, Color color)
+   {
+      return buildModelInstance(meshBuilder -> meshBuilder.addCone(height, radius, offset, color), "cone");
    }
 
    public static ModelInstance createArrow(double length, Color color)
@@ -182,6 +198,14 @@ public class RDXModelBuilder
                              new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0),
                              color);
       }, "arrow");
+   }
+
+   public static ModelInstance createLine(Point3DReadOnly start, Point3DReadOnly end, double lineWidth, Color color)
+   {
+      return buildModelInstance(meshBuilder ->
+      {
+         meshBuilder.addLine(start, end, lineWidth, color);
+      }, "line");
    }
 
    public static ModelInstance createPose(double radius, Color color)

@@ -2,7 +2,7 @@ package us.ihmc.rdx.ui.yo;
 
 import imgui.ImGui;
 import imgui.type.ImString;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.scs2.sessionVisualizer.jfx.controllers.RegularExpression;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public class ImGuiYoVariableSearchPanel
 {
-   private final ImGuiPanel panel = new ImGuiPanel("YoVariable Search", this::renderImGuiWidgets);
+   private final RDXPanel panel = new RDXPanel("YoVariable Search", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString searchBar = new ImString();
    private YoRegistry yoRegistry;
@@ -107,7 +107,7 @@ public class ImGuiYoVariableSearchPanel
       }
    }
 
-   public ImGuiPanel getPanel()
+   public RDXPanel getPanel()
    {
       return panel;
    }

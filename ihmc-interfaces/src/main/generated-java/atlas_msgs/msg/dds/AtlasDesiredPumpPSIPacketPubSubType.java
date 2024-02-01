@@ -11,6 +11,18 @@ package atlas_msgs.msg.dds;
 public class AtlasDesiredPumpPSIPacketPubSubType implements us.ihmc.pubsub.TopicDataType<atlas_msgs.msg.dds.AtlasDesiredPumpPSIPacket>
 {
    public static final java.lang.String name = "atlas_msgs::msg::dds_::AtlasDesiredPumpPSIPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "741c3effd15815663dfddb994e2bd9c7c91e308000d8ff0c82a23faafb66045f";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

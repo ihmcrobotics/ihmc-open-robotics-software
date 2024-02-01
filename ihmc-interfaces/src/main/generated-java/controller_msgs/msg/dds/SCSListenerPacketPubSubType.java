@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class SCSListenerPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.SCSListenerPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::SCSListenerPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "01b80c91854fa3d31a11becfd0b0499e16631e413b5501e0e21a41ed339b037b";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

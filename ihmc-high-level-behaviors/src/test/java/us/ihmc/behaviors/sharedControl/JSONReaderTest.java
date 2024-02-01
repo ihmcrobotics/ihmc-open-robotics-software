@@ -2,19 +2,16 @@ package us.ihmc.behaviors.sharedControl;
 
 // Java program to read JSON from a file
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.junit.jupiter.api.Test;
+import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.Iterator;
-import java.util.Map;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.HashMap;
 
 public class JSONReaderTest
 {
@@ -22,13 +19,14 @@ public class JSONReaderTest
    public void testJSONReader()
    {
       System.out.println("parsing file \"ProMPAssistantTest.json\"");
-      try
+      String configurationFile = "ProMPAssistantTest.json";
+      LogTools.info("Loading parameters from resource: {}", configurationFile);
+      WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/us/ihmc/behaviors/sharedControl");
+      WorkspaceResourceFile file = new WorkspaceResourceFile(directory, configurationFile);
+      JSONFileTools.load(file, jsonNode ->
       {
-         JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(Paths.get(System.getProperty("user.home"),
-                                                                                              "repository-group/ihmc-open-robotics-software/ihmc-high-level-behaviors/src/main/resources/us/ihmc/behaviors/sharedControl/ProMPAssistantTest.json")
-                                                                                         .toString()));
-         int numberBasisFunctions = (int) ((long) jsonObject.get("numberBasisFunctions"));
-         boolean logEnabled = (boolean) jsonObject.get("logging");
+         int numberBasisFunctions = jsonNode.get("numberBasisFunctions").asInt();
+         boolean logEnabled = jsonNode.get("logging").asBoolean();
 
          System.out.println(numberBasisFunctions);
          assertTrue(numberBasisFunctions == 20);
@@ -36,63 +34,26 @@ public class JSONReaderTest
          assertTrue(logEnabled);
 
          // getting tasks
-         JSONArray tasksArray = (JSONArray) jsonObject.get("tasks");
+         JsonNode tasksArrayNode = jsonNode.get("tasks");
          //iterating tasks
-         Iterator taskIterator = tasksArray.iterator();
-         while (taskIterator.hasNext())
+         for (JsonNode taskNode : tasksArrayNode)
          {
-            Iterator<Map.Entry> taskPropertiesIterator = ((Map) taskIterator.next()).entrySet().iterator();
-            while (taskPropertiesIterator.hasNext())
+            String taskName = taskNode.get("name").asText();
+            System.out.println(taskName);
+            assertEquals(taskName, "PushDoor");
+
+            JsonNode bodyPartsArrayNode = taskNode.get("bodyParts");
+            HashMap<String, String> bodyPartsGeometry = new HashMap<>();
+            for (JsonNode bodyPartObject : bodyPartsArrayNode)
             {
-               Map.Entry taskPropertyMap = taskPropertiesIterator.next();
-               switch (taskPropertyMap.getKey().toString())
-               {
-                  case "name":
-                     String taskName = (String) taskPropertyMap.getValue();
-                     System.out.println(taskName);
-                     assertEquals(taskName, "PushDoor");
-                     break;
-                  case "bodyParts":
-                     JSONArray bodyPartsArray = (JSONArray) taskPropertyMap.getValue();
-                     for (Object bodyPartObject : bodyPartsArray)
-                     {
-                        JSONObject jsonBodyPartObject = (JSONObject) bodyPartObject;
-                        jsonBodyPartObject.keySet().forEach(bodyPartProperty ->
-                                                            {
-                                                               if ("name".equals(bodyPartProperty.toString()))
-                                                               {
-                                                                  // extract your value here
-                                                                  String name = String.valueOf(jsonBodyPartObject.get(bodyPartProperty));
-                                                                  System.out.println(name);
-                                                                  assertTrue(name.equals("leftHand") || name.equals("rightHand"));
-                                                               }
-                                                               else if ("geometry".equals(bodyPartProperty.toString()))
-                                                               {
-                                                                  // extract your value here
-                                                                  String geometry = String.valueOf(jsonBodyPartObject.get(bodyPartProperty));
-                                                                  System.out.println(geometry);
-                                                                  assertEquals(geometry, "Pose");
-                                                               }
-                                                            });
-                     }
-                     break;
-                  default:
-                     break;
-               }
+               String name = bodyPartObject.get("name").asText();
+               System.out.println(name);
+               assertTrue(name.equals("leftHand") || name.equals("rightHand"));
+               String geometry = bodyPartObject.get("geometry").asText();
+               System.out.println(geometry);
+               assertEquals(geometry, "Pose");
             }
          }
-      }
-      catch (FileNotFoundException ex)
-      {
-         ex.printStackTrace();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-      catch (ParseException e)
-      {
-         throw new RuntimeException(e);
-      }
+      });
    }
 }

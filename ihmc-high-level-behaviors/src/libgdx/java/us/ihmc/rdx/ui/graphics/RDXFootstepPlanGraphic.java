@@ -8,7 +8,9 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepQueueStatusMessage;
+import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.exceptions.OutdatedPolygonException;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -37,7 +39,7 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
    RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
    // visualization options
    private final Function<Integer, Color> colorFunction = new RDXIDMappedColorFunction();
-   public static final SideDependentList<Color> footstepColors = new SideDependentList<>();
+   private final SideDependentList<Color> footstepColors = new SideDependentList<>();
    {
       footstepColors.set(RobotSide.LEFT, new Color(RDXFootstepGraphic.LEFT_FOOT_RED_COLOR));
       footstepColors.set(RobotSide.RIGHT, new Color(RDXFootstepGraphic.RIGHT_FOOT_GREEN_COLOR));
@@ -72,7 +74,7 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
    {
    }
 
-   public void setTransparency(double opacity)
+   public void setOpacity(double opacity)
    {
       footstepColors.get(RobotSide.LEFT).a = (float) opacity;
       footstepColors.get(RobotSide.RIGHT).a = (float) opacity;
@@ -100,6 +102,16 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
       generateMeshesAsync(new ArrayList<>());
    }
 
+   public void generateMeshesAsync(FootstepQueueStatusMessage queueStatusMessage, String description)
+   {
+      generateMeshesAsync(MinimalFootstep.convertFootstepQueueMessage(queueStatusMessage, description));
+   }
+
+   public void generateMeshesAsync(FootstepDataListMessage footstepDataListMessage, String description)
+   {
+      generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage, description));
+   }
+
    public void generateMeshesAsync(ArrayList<MinimalFootstep> footsteps)
    {
       executorService.clearQueueAndExecute(() -> generateMeshes(footsteps));
@@ -117,9 +129,9 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
    public void generateMeshes(ArrayList<MinimalFootstep> footsteps)
    {
       // this prevents generating empty plans like crazy which is expensive
-      if (isEmpty && footsteps.size() == 0)
+      if (isEmpty && footsteps.isEmpty())
          return;
-      isEmpty = footsteps.size() == 0;
+      isEmpty = footsteps.isEmpty();
 
       meshBuilder.clear();
 
@@ -171,9 +183,9 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
          for (int i = 0; i < footsteps.size(); i++)
          {
             MinimalFootstep minimalFootstep = footsteps.get(i);
-            RDX3DSituatedText footstepIndexText = new RDX3DSituatedText("" + i);
+            float textHeight = 0.08f;
+            RDX3DSituatedText footstepIndexText = new RDX3DSituatedText("" + i, textHeight);
             minimalFootstep.getSolePoseInWorld().get(tempTransform);
-            double textHeight = 0.08;
             footstepFrame.update();
             textFramePose.setToZero(footstepFrame);
             textFramePose.getOrientation().prependYawRotation(-Math.PI / 2.0);
@@ -181,18 +193,16 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
             textFramePose.getPosition().addY(textHeight / 4.0);
             textFramePose.getPosition().addX(-textHeight / 2.0);
             textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-            LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepIndexText.getModelInstance().transform);
-            footstepIndexText.scale((float) textHeight);
+            LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepIndexText.getModelTransform());
             textRenderables.add(footstepIndexText);
 
             if (minimalFootstep.getDescription() != null && !minimalFootstep.getDescription().isEmpty())
             {
-               RDX3DSituatedText footstepListDescriptionText = new RDX3DSituatedText(minimalFootstep.getDescription());
+               RDX3DSituatedText footstepListDescriptionText = new RDX3DSituatedText(minimalFootstep.getDescription(), textHeight);
                textFramePose.changeFrame(footstepFrame);
                textFramePose.getPosition().subY(0.12);
                textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepListDescriptionText.getModelInstance().transform);
-               footstepListDescriptionText.scale((float) textHeight);
+               LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepListDescriptionText.getModelTransform());
                textRenderables.add(footstepListDescriptionText);
             }
          }
@@ -201,6 +211,7 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
             lastModel.dispose();
 
          lastModel = RDXModelBuilder.buildModelFromMesh(modelBuilder, meshBuilder);
+         LibGDXTools.setOpacity(lastModel, footstepColors.get(RobotSide.LEFT).a);
          modelInstance = new ModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
       };
    }

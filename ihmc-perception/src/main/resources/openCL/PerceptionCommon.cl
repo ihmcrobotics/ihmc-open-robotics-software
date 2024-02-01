@@ -54,39 +54,59 @@ int calculateInterpolatedGradientColorInt(double input)
    return color;
 }
 
+float4 calculateSinusoidalGradientFloat4(double input)
+{
+   // maximum depth value
+   float m = 3.0f;
+   float a = 5.0f * input * M_PI_F / (3.0f * m) + M_PI_F / 2.0f;
+   float r = sin(a) * 192.0f + 128.0f;
+   float alpha = 255.0f;
+
+   if (r < 0.0f)
+      r = 0.0f;
+   else if (r > 255.0f)
+      r = 255.0f;
+      // r = max(0.0f, min(255.0f, r));
+   float g = sin(a - 2.0f * M_PI_F / 3.0f) * 192.0f + 128.0f;
+   if (g < 0.0f)
+      g = 0.0f;
+   else if (g > 255.0f)
+      g = 255.0f;
+      // g = max(0.0f, min(255.0f, g));
+   float b = sin(a - 4.0f * M_PI_F / 3.0f) * 192.0f + 128.0f;
+   if (b < 0.0f)
+      b = 0.0f;
+   else if (b > 255.0f)
+      b = 255.0f;
+      // b = max(0.0f, min(255.0f, b));
+   return (float4) (r / 255.0f, g / 255.0f, b / 255.0f, 1.0);
+}
+
+float4 calculateGradientColorOptionFloat4(double input, bool sinusoidal)
+{
+   if (sinusoidal)
+   {
+      return calculateSinusoidalGradientFloat4(input);
+   }
+   else
+   {
+      return calculateInterpolatedGradientColorFloat4(input);
+   }
+}
+
 int calculateGradientColor(double input, bool sinusoidal)
 {
    if (sinusoidal)
    {
-      // maximum depth value
-      float m = 3;
-      float PI = 3.141592;
-      float a = 5 * input * PI / (3 * m) + PI / 2;
-      float r = sin(a) * 192 + 128;
-      float alpha = 255;
-
-      if (r < 0)
-         r = 0;
-      else if(r > 255)
-         r = 255;
-      //    r=max(0,min(255,r));
-      float g = sin(a - 2 * PI / 3) * 192 + 128;
-      if (g < 0)
-         g = 0;
-      else if (g > 255)
-         g =255;
-      //    g=max(0,min(255,g));
-      float b = sin(a - 4 * PI / 3) * 192 + 128;
-      if (b < 0)
-         b = 0;
-      else if (b > 255)
-         b = 255;
-      //    b=max(0,min(255,b));
-      int color = ((int)round(r) << 24) | ((int)round(g) << 16) | ((int)round(b) << 8) | 255;
+      float4 colorFloatRGBA = calculateSinusoidalGradientFloat4(input);
+      int color = ((int) round(colorFloatRGBA.x * 255.0f) << 24)
+                | ((int) round(colorFloatRGBA.y * 255.0f) << 16)
+                | ((int) round(colorFloatRGBA.z * 255.0f) << 8)
+                | 255;
       return color;
    }
    else
    {
-       return calculateInterpolatedGradientColorInt(input);
+      return calculateInterpolatedGradientColorInt(input);
    }
 }

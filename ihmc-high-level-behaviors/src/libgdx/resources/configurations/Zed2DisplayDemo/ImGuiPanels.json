@@ -1,0 +1,12 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "Global Visualizers" : true,
+    "/ihmc/depth###us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer:/ihmc/depth" : true,
+    "/ihmc/zed2/left_color###us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer:/ihmc/zed2/left_color" : true,
+    "/ihmc/zed2/right_color###us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer:/ihmc/zed2/right_color" : true,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}

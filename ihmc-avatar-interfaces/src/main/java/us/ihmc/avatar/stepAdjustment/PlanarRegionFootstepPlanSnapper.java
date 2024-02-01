@@ -62,11 +62,7 @@ public class PlanarRegionFootstepPlanSnapper implements FootstepPlanAdjustment
 
          RobotSide side = RobotSide.fromByte(dataMessage.getRobotSide());
 
-         if (snapper.adjustFootstep(stanceFootPose, unsnappedPose, side, snappedPose))
-         {
-            dataMessage.getLocation().set(snappedPose.getPosition());
-            dataMessage.getOrientation().set(snappedPose.getOrientation());
-         }
+         snapper.adjustFootstep(stanceFootPose, unsnappedPose, side, dataMessage);
       }
    }
 }

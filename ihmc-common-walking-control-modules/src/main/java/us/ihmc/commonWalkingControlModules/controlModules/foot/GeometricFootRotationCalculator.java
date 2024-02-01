@@ -1,8 +1,16 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicArrow3D;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicLineSegment2DDefinition;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
+
 import java.awt.Color;
 
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
@@ -18,6 +26,10 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -30,7 +42,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
  * that plane it can be assumed that there is no ground under that point.
  *
  * @author Georg
- *
  */
 public class GeometricFootRotationCalculator implements FootRotationCalculator
 {
@@ -57,9 +68,15 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final YoDouble angleThreshold;
    private final YoBoolean footRotating;
 
-   public GeometricFootRotationCalculator(String namePrefix, ContactablePlaneBody contactableFoot, ExplorationParameters explorationParameters,
-                                          YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   private final String namePrefix;
+
+   public GeometricFootRotationCalculator(String namePrefix,
+                                          ContactablePlaneBody contactableFoot,
+                                          ExplorationParameters explorationParameters,
+                                          YoGraphicsListRegistry yoGraphicsListRegistry,
+                                          YoRegistry parentRegistry)
    {
+      this.namePrefix = namePrefix;
       YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
@@ -82,13 +99,19 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
          ArtifactList artifactList = new ArtifactList(listName);
          YoGraphicsList graphicsList = new YoGraphicsList(listName);
 
-         YoGraphicPosition planePointViz = new YoGraphicPosition(namePrefix + "PlanePoint", measuredCoPFiltered, 0.005, YoAppearance.Blue(),
+         YoGraphicPosition planePointViz = new YoGraphicPosition(namePrefix + "PlanePoint",
+                                                                 measuredCoPFiltered,
+                                                                 0.005,
+                                                                 YoAppearance.Blue(),
                                                                  GraphicType.SOLID_BALL);
 
          YoGraphicVector planeNormalViz = new YoGraphicVector(namePrefix + "PlaneNormal", measuredCoPFiltered, groundPlaneNormal, YoAppearance.Blue());
 
-         YoArtifactLineSegment2d lineOfRotationArtifact = new YoArtifactLineSegment2d(namePrefix + "LineOfRotationGeometric", lineSegmentOfRotation, Color.GREEN,
-                                                                                      0.01, 0.01);
+         YoArtifactLineSegment2d lineOfRotationArtifact = new YoArtifactLineSegment2d(namePrefix + "LineOfRotationGeometric",
+                                                                                      lineSegmentOfRotation,
+                                                                                      Color.GREEN,
+                                                                                      0.01,
+                                                                                      0.01);
 
          graphicsList.add(planeNormalViz);
          artifactList.add(planePointViz.createArtifact());
@@ -156,7 +179,6 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       }
    }
 
-
    @Override
    public void reset()
    {
@@ -177,5 +199,16 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    public void getLineOfRotation(FrameLine2DBasics lineOfRotationToPack)
    {
       lineOfRotationToPack.setIncludingFrame(lineOfRotationInSoleFrame);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(newYoGraphicArrow3D(namePrefix + "PlaneNormal", measuredCoPFiltered, groundPlaneNormal, 1.0, ColorDefinitions.Blue()));
+      group.addChild(newYoGraphicPoint2D(namePrefix + "PlanePoint", measuredCoPFiltered, 0.01, ColorDefinitions.Blue(), DefaultPoint2DGraphic.CIRCLE_FILLED));
+      group.addChild(newYoGraphicLineSegment2DDefinition(namePrefix + "LineOfRotationGeometric", lineSegmentOfRotation, ColorDefinitions.Green()));
+      group.setVisible(VISUALIZE);
+      return group;
    }
 }

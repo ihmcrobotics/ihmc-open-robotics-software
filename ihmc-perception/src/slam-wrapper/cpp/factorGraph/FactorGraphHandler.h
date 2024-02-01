@@ -17,7 +17,8 @@
 
 #include <boost/bind.hpp>
 #include <boost/assign/std/vector.hpp>
-#include <bits/stdc++.h>
+
+#include <unordered_set>
 
 using namespace boost::assign;
 

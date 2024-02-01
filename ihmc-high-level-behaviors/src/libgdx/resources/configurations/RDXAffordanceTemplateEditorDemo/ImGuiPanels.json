@@ -1,0 +1,13 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "Affordance Template Panel" : true,
+    "Object Panel" : true,
+    "Pose3D Gizmo Tuner (left Hand)" : true,
+    "Pose3D Gizmo Tuner (object)" : true,
+    "Pose3D Gizmo Tuner (right Hand)" : true,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}

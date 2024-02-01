@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
@@ -22,6 +23,8 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 public class RemotePlannerMessageConverter
 {
@@ -34,7 +37,7 @@ public class RemotePlannerMessageConverter
 
    private IHMCRealtimeROS2Publisher<FootstepPlanningToolboxOutputStatus> outputStatusPublisher;
 
-   private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
+   private Optional<HeightMapMessage> heightMapData = Optional.empty();
 
    private final AtomicReference<FootstepPlanningResult> resultReference;
    private final AtomicReference<FootstepDataListMessage> footstepPlanReference;
@@ -88,15 +91,16 @@ public class RemotePlannerMessageConverter
                                                     FootstepPlannerAPI.inputTopic(robotName),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
-                                           s -> processIncomingPlanarRegionMessage(s.takeNextData()));
+      // TODO replace with height map
+//      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
+//                                           s -> processIncomingPlanarRegionMessage(s.takeNextData()));
 
       // publishers
       outputStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPlanningToolboxOutputStatus.class,
                                                                  FootstepPlannerAPI.outputTopic(robotName));
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, request -> checkAndPublishIfInvalidResult());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, request -> publishResultingPlan());
+      messager.addTopicListener(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, request -> checkAndPublishIfInvalidResult());
+      messager.addTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, request -> publishResultingPlan());
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
@@ -104,15 +108,14 @@ public class RemotePlannerMessageConverter
       if (verbose)
          PrintTools.info("Received planning request over the network.");
 
-      PlanarRegionsListMessage planarRegionsListMessage = packet.getPlanarRegionsListMessage();
-      if (planarRegionsListMessage == null)
+      HeightMapMessage heightMapMessage = packet.getHeightMapMessage();
+      if (heightMapMessage == null)
       {
-         this.planarRegionsList = Optional.empty();
+         this.heightMapData = Optional.empty();
       }
       else
       {
-         PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
-         this.planarRegionsList = Optional.of(planarRegionsList);
+         this.heightMapData = Optional.of(heightMapMessage);
       }
 
       RobotSide initialSupportSide = RobotSide.fromByte(packet.getRequestedInitialStanceSide());
@@ -121,7 +124,7 @@ public class RemotePlannerMessageConverter
       double timeout = packet.getTimeout();
       double horizonLength = packet.getHorizonLength();
 
-      this.planarRegionsList.ifPresent(regions -> messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, regions));
+      this.heightMapData.ifPresent(regions -> messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, regions));
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, packet.getStartLeftFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, packet.getStartRightFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, packet.getGoalLeftFootPose());
@@ -143,13 +146,12 @@ public class RemotePlannerMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.ComputePath, true);
    }
 
-   private void processIncomingPlanarRegionMessage(PlanarRegionsListMessage packet)
+   private void processIncomingHeightMapMessage(HeightMapMessage packet)
    {
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(packet);
-      this.planarRegionsList = Optional.of(planarRegionsList);
+      this.heightMapData = Optional.of(packet);
 
       if (acceptNewPlanarRegionsReference.get())
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
+         messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, packet);
    }
 
    private void publishResultingPlan()
@@ -179,7 +181,7 @@ public class RemotePlannerMessageConverter
       if (!planningResult.validForExecution())
          throw new RuntimeException("The result is completely invalid, which is a problem.");
 
-      planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
+      heightMapData.ifPresent(result.getHeightMapMessage()::set);
       result.setFootstepPlanningResult(planningResult.toByte());
       result.getFootstepDataList().set(footstepPlanReference.getAndSet(null));
       result.setPlanId(plannerRequestIdReference.get());
@@ -197,7 +199,7 @@ public class RemotePlannerMessageConverter
 
       FootstepPlanningResult planningResult = resultReference.getAndSet(null);
 
-      planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
+      heightMapData.ifPresent(result.getHeightMapMessage()::set);
       result.setFootstepPlanningResult(planningResult.toByte());
       result.setPlanId(plannerRequestIdReference.get());
 

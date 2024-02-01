@@ -11,6 +11,18 @@ package exoskeleton_msgs.msg.dds;
 public class QuixUrgentUserInfoMessagePubSubType implements us.ihmc.pubsub.TopicDataType<exoskeleton_msgs.msg.dds.QuixUrgentUserInfoMessage>
 {
    public static final java.lang.String name = "exoskeleton_msgs::msg::dds_::QuixUrgentUserInfoMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "891f14bb881e5522f5d8046319fd9f2a112b4d74e102c96756e935f1d2189b3b";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

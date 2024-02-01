@@ -1,29 +1,44 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerExceptionStackTrace;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTimings;
+
+import java.text.NumberFormat;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import controller_msgs.msg.dds.FootstepDataMessage;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.BorderWidths;
+import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.communication.UIStepAdjustmentFrame;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerStatusBarController.FootstepResponseTableRow;
 import us.ihmc.messager.TopicListener;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-
-import java.text.NumberFormat;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerExceptionStackTrace;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTimings;
 
 public class FootstepPlannerStatusBarController
 {
@@ -68,10 +83,10 @@ public class FootstepPlannerStatusBarController
 
    public void bindControls()
    {
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestId, new TextViewerListener<>(sentRequestId));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.ReceivedPlanId, new TextViewerListener<>(receivedRequestId));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.BodyPathPlanningResultTopic, new TextViewerListener<>(bodyPathPlanResult));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, new TextViewerListener<>(stepPlanResult));
+      messager.addFXTopicListener(FootstepPlannerMessagerAPI.PlannerRequestId, new TextViewerListener<>(sentRequestId));
+      messager.addFXTopicListener(FootstepPlannerMessagerAPI.ReceivedPlanId, new TextViewerListener<>(receivedRequestId));
+      messager.addFXTopicListener(FootstepPlannerMessagerAPI.BodyPathPlanningResultTopic, new TextViewerListener<>(bodyPathPlanResult));
+      messager.addFXTopicListener(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, new TextViewerListener<>(stepPlanResult));
 
       AtomicReference<String> stackTrace = messager.createInput(PlannerExceptionStackTrace, "No stack trace available");
       viewExceptionButton.setOnAction(e ->
@@ -88,7 +103,7 @@ public class FootstepPlannerStatusBarController
                                          alert.show();
                                       });
 
-      messager.registerTopicListener(PlannerTimings, timings ->
+      messager.addTopicListener(PlannerTimings, timings ->
       {
          totalPlanTime.setText(String.format("%.2f", timings.getTotalElapsedSeconds()));
          bodyPathPlanTime.setText(String.format("%.2f", timings.getTimePlanningBodyPathSeconds()));
@@ -97,7 +112,7 @@ public class FootstepPlannerStatusBarController
          stepIterationsTaken.setText(Long.toString(timings.getStepPlanningIterations()));
       });
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepPlanResponse ->
+      messager.addTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepPlanResponse ->
       {
          footstepPlanTableItems.clear();
          for (int i = 0; i < footstepPlanResponse.getFootstepDataList().size(); i++)
@@ -127,8 +142,8 @@ public class FootstepPlannerStatusBarController
 
       footstepPlanTable.setItems(footstepPlanTableItems);
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, c -> footstepPlanTableItems.clear());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.GlobalReset, c -> footstepPlanTableItems.clear());
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ComputePath, c -> footstepPlanTableItems.clear());
+      messager.addTopicListener(FootstepPlannerMessagerAPI.GlobalReset, c -> footstepPlanTableItems.clear());
 
       footstepPlanTable.getSelectionModel().selectedItemProperty().addListener((observer, oldValue, newValue) ->
                                                                                {
@@ -140,7 +155,7 @@ public class FootstepPlannerStatusBarController
                                                                                   }
                                                                                });
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepAdjustmentFrame, this::setFrame);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.FootstepAdjustmentFrame, this::setFrame);
       setFrame(UIStepAdjustmentFrame.getDefault());
    }
 

@@ -1,25 +1,31 @@
 package us.ihmc.rdx.ui;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import imgui.flag.ImGuiStyleVar;
+import imgui.flag.ImGuiTableFlags;
 import imgui.internal.ImGui;
+import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
-import imgui.type.ImFloat;
+import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
-import us.ihmc.rdx.imgui.ImGuiPanelManager;
+import us.ihmc.rdx.RDXKeyBindings;
+import us.ihmc.rdx.RDXSettings;
+import us.ihmc.rdx.imgui.ImGuiFrequencyDisplay;
+import us.ihmc.rdx.imgui.RDXPanelManager;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
 import us.ihmc.rdx.input.RDXInputMode;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
@@ -27,18 +33,12 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.vr.RDXVRManager;
-import us.ihmc.log.LogTools;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.io.HybridDirectory;
-import us.ihmc.tools.io.HybridFile;
-import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.time.FrequencyCalculator;
+import us.ihmc.tools.io.HybridResourceDirectory;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Method call order:
@@ -50,11 +50,11 @@ import java.util.function.Consumer;
  *     update()
  *     calculateVRPick(RDXVRContext)
  *     processVRInput(RDXVRContext)
+ *     renderImGuiWidgets()
  *     calculate3DViewPick(ImGui3DViewInput)
  *     process3DViewInput(ImGui3DViewInput)
- *     renderImGuiWidgets()
- *     renderTooltipsAndContextMenus()
  *     getRenderables()
+ *     renderTooltipsAndContextMenus()
  *
  * destroy()
  * </pre>
@@ -85,7 +85,16 @@ public class RDXBaseUI
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
    private static final String VIEW_3D_WINDOW_NAME = "3D View";
 
+   private static RDXBaseUI instance;
+
+   public static RDXBaseUI getInstance()
+   {
+      return instance;
+   }
+
    private GLProfiler glProfiler;
+   private RDXSettings settings;
+
    private final RDX3DScene primaryScene = new RDX3DScene();
    private final RDX3DPanel primary3DPanel;
    private final ArrayList<RDX3DPanel> additional3DPanels = new ArrayList<>();
@@ -94,23 +103,22 @@ public class RDXBaseUI
 //   private final RDXLinuxGUIRecorder guiRecorder;
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
    private final String windowTitle;
-   private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
    private String configurationExtraPath;
-   private final HybridDirectory configurationBaseDirectory;
-   private HybridFile libGDXSettingsFile;
-   private final FrequencyCalculator fpsCalculator = new FrequencyCalculator();
+   private final HybridResourceDirectory configurationBaseDirectory;
+   private final ImGuiFrequencyDisplay frameRateDisplay = new ImGuiFrequencyDisplay("frameRateDisplay");
    private final Stopwatch runTime = new Stopwatch().start();
    private String statusText = ""; // TODO: Add status at bottom of window
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImInt foregroundFPS = new ImInt(240);
+   private final ImInt foregroundFPSLimit = new ImInt(240);
+   private final ImBoolean plotFrameRate = new ImBoolean(false);
    private final ImBoolean vsync = new ImBoolean(false);
-   private final ImBoolean shadows = new ImBoolean(false);
    private final ImBoolean middleClickOrbit = new ImBoolean(false);
    private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(false);
-   private final ImFloat backgroundShade = new ImFloat(RDX3DSceneTools.CLEAR_COLOR);
+   private final ImDouble view3DBackgroundShade = new ImDouble(RDX3DSceneTools.CLEAR_COLOR);
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
-   private final ImFloat imguiFontScale = new ImFloat(1.0f);
+   private final ImDouble imguiFontScale = new ImDouble(1.0);
    private final RDXImGuiLayoutManager layoutManager;
+   private final RDXKeyBindings keyBindings = new RDXKeyBindings();
    private long renderIndex = 0;
    private double isoZoomOut = 0.7;
    private enum Theme
@@ -118,46 +126,64 @@ public class RDXBaseUI
       LIGHT, DARK, CLASSIC
    }
    private Theme theme = Theme.LIGHT;
-   private Path themeFilePath;
    private final String shadePrefix = "shade=";
 
-   public RDXBaseUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public RDXBaseUI()
    {
-      this(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading.getSimpleName());
+      this(0, null);
    }
 
-   public RDXBaseUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
+   /**
+    * @param windowTitle Title cased "My Window Title"; no symbols allowed
+    */
+   public RDXBaseUI(String windowTitle)
    {
-      this.windowTitle = windowTitle;
+      this(0, windowTitle);
+   }
 
-      configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
-      configurationBaseDirectory = new HybridDirectory(dotIHMCDirectory,
-                                                       directoryNameToAssumePresent,
-                                                       subsequentPathToResourceFolder,
-                                                       classForLoading,
-                                                       configurationExtraPath);
+   /**
+    * Typically you won't need this method. It's package private unless we find a use for it.
+    *
+    * @param additionalStackHeightForFindingCaller This is if you have something that sets up a RDXBaseUI for another class.
+    *                                              We want the highest level calling class to be the one used for loading resources.
+    * @param windowTitle Title cased "My Window Title"; no symbols allowed
+    */
+   /* package private*/ RDXBaseUI(int additionalStackHeightForFindingCaller, String windowTitle)
+   {
+      instance = this;
 
-      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem();
-      layoutManager = new RDXImGuiLayoutManager(classForLoading,
-                                                directoryNameToAssumePresent,
-                                                subsequentPathToResourceFolder,
-                                                configurationExtraPath,
-                                                configurationBaseDirectory);
-      layoutManager.getLayoutDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
-      layoutManager.getLayoutDirectoryUpdatedListeners().add(updatedLayoutDirectory ->
+      StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+      Class<?> classForLoading = ExceptionTools.handle(() -> Class.forName(stackTraceElements[3 + additionalStackHeightForFindingCaller].getClassName()),
+                                                       DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      LogTools.info("Using class for loading resources: {}", classForLoading.getName());
+
+      this.windowTitle = windowTitle = windowTitle == null ? classForLoading.getSimpleName() : windowTitle;
+
+      loadSettings();
+
+      configurationExtraPath = "configurations/" + windowTitle.replaceAll(" ", "");
+      configurationBaseDirectory = new HybridResourceDirectory(IHMCCommonPaths.DOT_IHMC_DIRECTORY, classForLoading, "/").resolve(configurationExtraPath);
+
+      if (!configurationBaseDirectory.isWorkspaceFileAccessAvailable())
       {
-         libGDXSettingsFile = new HybridFile(updatedLayoutDirectory, "GDXSettings.json");
-      });
+         LogTools.warn("We won't be able to write files to version controlled resources, because we probably aren't in a workspace.");
+      }
+
+      layoutManager = new RDXImGuiLayoutManager(classForLoading, configurationExtraPath, configurationBaseDirectory);
+      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem(layoutManager);
+      layoutManager.getLayoutDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
       layoutManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
-         Gdx.graphics.setWindowedMode(imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth(),
-                                      imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight());
-         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(imGuiWindowAndDockSystem.getPrimaryWindowPosition().getX(),
-                                                                 imGuiWindowAndDockSystem.getPrimaryWindowPosition().getY());
+         int width = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth();
+         int height = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight();
+         Gdx.graphics.setWindowedMode(width, height);
+         int x = imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getX();
+         int y = imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getY();
+         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(x, y);
          return true;
       });
-      layoutManager.getSaveListeners().add(this::saveApplicationSettings);
+      layoutManager.getSaveListeners().add(imGuiWindowAndDockSystem::saveConfiguration);
       layoutManager.applyLayoutDirectory();
 
 //      guiRecorder = new RDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
@@ -171,8 +197,47 @@ public class RDXBaseUI
       }
 
       primary3DPanel = new RDX3DPanel(VIEW_3D_WINDOW_NAME, ANTI_ALIASING, true);
+      primary3DPanel.setBackgroundShade((float) view3DBackgroundShade.get());
    }
 
+   /**
+    * Create and load RDXSettings from disk.
+    * If it can't load the settings from disk, the default settings will be used.
+    * synchronized because we don't want to ever run this twice at the same time.
+    */
+   public synchronized void loadSettings()
+   {
+      settings = new RDXSettings();
+      try
+      {
+         settings.load();
+      }
+      catch (IOException e)
+      {
+         LogTools.error("Unable to load RDXSettings.ini", e);
+      }
+      plotFrameRate.set(settings.plotFrameRateEnabled());
+      vsync.set(settings.vsyncEnabled());
+      foregroundFPSLimit.set(settings.getForegroundFPSLimit());
+      libGDXLogLevel.set(settings.getLibGDXLogLevel());
+      imguiFontScale.set(settings.getImguiFontScale());
+      try
+      {
+         theme = Theme.valueOf(settings.getThemeName());
+      }
+      catch (IllegalArgumentException e)
+      {
+         LogTools.error("Invalid theme name in RDXSettings.ini");
+      }
+      view3DBackgroundShade.set(settings.getView3DBackgroundShade());
+   }
+
+   /**
+    * Launches an RDX application using the specified adapter.
+    * Will block until a shutdown is requested.
+    *
+    * @param applicationAdapter the adapter for the application
+    */
    public void launchRDXApplication(Lwjgl3ApplicationAdapter applicationAdapter)
    {
       LogTools.info("Launching RDX application");
@@ -183,8 +248,7 @@ public class RDXBaseUI
       // consifusing and error-prone.
       applicationConfiguration.setInitialVisible(false);
       LibGDXApplicationCreator.launchGDXApplication(applicationConfiguration,
-                                                    applicationAdapter,
-                                                    windowTitle);
+                                                    applicationAdapter);
    }
 
    public void create()
@@ -203,15 +267,17 @@ public class RDXBaseUI
       primaryScene.create(sceneLevels);
       primaryScene.addDefaultLighting();
       primary3DPanel.create(RDXInputMode.ImGui, glProfiler, primaryScene);
-      imGuiWindowAndDockSystem.getPanelManager().addPanel(primary3DPanel.getImGuiPanel());
-      primary3DPanel.getImGuiPanel().getIsShowing().set(true);
+      imGuiWindowAndDockSystem.getPanelManager().addPanel(primary3DPanel);
+      primary3DPanel.getIsShowing().set(true);
 
       Gdx.input.setInputProcessor(null); // detach from getting input events from GDX. TODO: Should we do this here?
 
       primary3DPanel.getCamera3D().changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
       primaryScene.addCoordinateFrame(0.3);
 
-      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle(), layoutManager);
+      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
+      setTheme(theme); // TODO: move theme stuff to RDXImGuiWindowAndDockSystem?
+      ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 
@@ -222,32 +288,7 @@ public class RDXBaseUI
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Thread Debugger", vrManager::renderImGuiDebugWidgets);
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
 
-      themeFilePath = Paths.get(System.getProperty("user.home"), ".ihmc/themePreference.ini");
-      if (Files.exists(themeFilePath))
-      {
-         List<String> lines = FileTools.readAllLines(themeFilePath, DefaultExceptionHandler.PROCEED_SILENTLY);
-         int numberOfLines = lines.size();
-         String firstLine = "";
-         String secondLine = "";
-         if (numberOfLines > 0)
-            firstLine = lines.get(0);
-         if (numberOfLines > 1)
-            secondLine = lines.get(1);
-         for (Theme theme : Theme.values())
-            if (firstLine.contains(theme.name()))
-               setTheme(theme);
-         try
-         {
-            if (!secondLine.isEmpty())
-            {
-               backgroundShade.set(Float.parseFloat(secondLine.substring(shadePrefix.length())));
-               setBackgroundShade(backgroundShade.get());
-            }
-         }
-         catch (Exception ignored)
-         {
-         }
-      }
+      keyBindings.register("Show key bindings", "Tab");
    }
 
    public void renderBeforeOnScreenUI()
@@ -261,6 +302,8 @@ public class RDXBaseUI
          additional3DPanel.render();
       }
       renderMenuBar();
+
+      keyBindings.renderKeyBindingsTable();
    }
 
    public void renderEnd()
@@ -289,27 +332,124 @@ public class RDXBaseUI
       if (ImGui.beginMenu("Settings"))
       {
          ImGui.pushItemWidth(80.0f);
-         if (ImGuiTools.volatileInputInt(labels.get("Foreground FPS Limit"), foregroundFPS, 1))
+
+         if (ImGui.beginTable("settingsTable", 2, ImGuiTableFlags.None))
          {
-            Gdx.graphics.setForegroundFPS(foregroundFPS.get());
+            // First row (libgdx log level)
+            ImGui.tableNextRow();
+            ImGui.tableSetColumnIndex(0);
+            ImGui.alignTextToFramePadding();
+            ImGui.text("LibGDX log level: ");
+            ImGui.tableSetColumnIndex(1);
+            for (int i = 0; i <= Application.LOG_DEBUG; i++)
+            {
+               String logLevelName = "";
+               switch (i)
+               {
+                  case 0 -> logLevelName = "None";
+                  case 1 -> logLevelName = "Error";
+                  case 2 -> logLevelName = "Info";
+                  case 3 -> logLevelName = "Debug";
+               }
+               if (ImGui.radioButton(labels.get(logLevelName), Gdx.app.getLogLevel() == i)) {
+                  settings.setLibGDXLogLevel(i);
+                  Gdx.app.setLogLevel(i);
+               }
+               ImGui.sameLine();
+            }
+
+            // Second row (theme)
+            ImGui.tableNextRow();
+            ImGui.tableSetColumnIndex(0);
+            ImGui.alignTextToFramePadding();
+            ImGui.text("Theme: ");
+            ImGui.tableSetColumnIndex(1);
+            for (int i = 0; i < Theme.values().length; i++)
+            {
+               if (ImGui.radioButton(labels.get(StringUtils.capitalize(Theme.values()[i].name().toLowerCase())), this.theme == Theme.values()[i])) {
+                  Theme newTheme = Theme.values()[i];
+                  setTheme(newTheme);
+               }
+               if (i < Theme.values().length - 1)
+                  ImGui.sameLine();
+            }
+
+            // Third row (background shade)
+            ImGui.tableNextRow();
+            ImGui.tableSetColumnIndex(0);
+            ImGui.alignTextToFramePadding();
+            ImGui.text("Background shade: ");
+            ImGui.tableSetColumnIndex(1);
+            if (ImGuiTools.sliderDouble(labels.get("##view3DBackgroundShadeSlider"), view3DBackgroundShade, 0.0f, 1.0f)) {
+               setView3DBackgroundShade((float) view3DBackgroundShade.get());
+            }
+            // Only update the settings (which saves to disk) after you've let go of the slider
+            if (ImGui.isItemDeactivatedAfterEdit())
+            {
+               settings.setView3DBackgroundShade((float) view3DBackgroundShade.get());
+            }
+
+            ImGui.sameLine();
+            if (ImGui.button("Reset"))
+            {
+               view3DBackgroundShade.set(RDX3DSceneTools.CLEAR_COLOR);
+               settings.setView3DBackgroundShade((float) view3DBackgroundShade.get());
+               setView3DBackgroundShade((float) view3DBackgroundShade.get());
+            }
+
+            // Fourth row (foreground FPS limit)
+            ImGui.tableNextRow();
+            ImGui.tableSetColumnIndex(0);
+            ImGui.alignTextToFramePadding();
+            ImGui.text("FPS limit: ");
+            // If vsync is enabled, disable the FPS limit slider
+            if (vsync.get())
+            {
+               ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
+               ImGui.pushStyleVar(ImGuiStyleVar.Alpha, ImGui.getStyle().getAlpha() * 0.5f);
+            }
+            ImGui.tableSetColumnIndex(1);
+            if (ImGuiTools.sliderInt(labels.get("##foregroundFPSLimitSlider"), foregroundFPSLimit, 15, 240)) {
+               settings.setForegroundFPSLimit(foregroundFPSLimit.get());
+               Gdx.graphics.setForegroundFPS(foregroundFPSLimit.get());
+            }
+            if (vsync.get())
+            {
+               ImGui.popStyleVar();
+               ImGui.popItemFlag();
+            }
+
+            // Fifth row (font scale)
+            ImGui.tableNextRow();
+            ImGui.tableSetColumnIndex(0);
+            ImGui.alignTextToFramePadding();
+            ImGui.text("Font scale: ");
+            ImGui.tableSetColumnIndex(1);
+            if (ImGuiTools.sliderDouble(labels.get("##imguiFontScaleSlider"), imguiFontScale, 1.0, 2.0, "%.1f")) {
+               settings.setImguiFontScale(imguiFontScale.get());
+            }
+            // Change the font scale after you've let go of the slider
+            if (ImGui.isItemDeactivatedAfterEdit())
+            {
+               ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
+            }
+
+            ImGui.endTable();
+         }
+
+         /* Start checkbox settings */
+         if (ImGui.checkbox(labels.get("Frame rate plot"), plotFrameRate))
+         {
+            settings.setPlotFrameRate(plotFrameRate.get());
          }
          if (ImGui.checkbox(labels.get("Vsync"), vsync))
          {
+            settings.setVsync(vsync.get());
+            Gdx.graphics.setForegroundFPS(Integer.MAX_VALUE);
             Gdx.graphics.setVSync(vsync.get());
          }
-         if (ImGui.checkbox(labels.get("Shadows"), shadows))
-         {
-            primaryScene.setShadowsEnabled(shadows.get());
-         }
-         if (ImGuiTools.volatileInputInt(labels.get("libGDX log level"), libGDXLogLevel, 1))
-         {
-            Gdx.app.setLogLevel(libGDXLogLevel.get());
-         }
-         if (ImGuiTools.volatileInputFloat(labels.get("Font Size"), imguiFontScale, 0.1f))
-         {
-            ImGui.getIO().setFontGlobalScale(imguiFontScale.get());
-         }
-         ImGui.separator();
+
+         ImGui.separator(); // Environment section
          boolean renderingGroundTruthEnvironment = primaryScene.getSceneLevelsToRender().contains(RDXSceneLevel.GROUND_TRUTH);
          if (ImGui.checkbox(labels.get("Render Ground Truth Environment"), renderingGroundTruthEnvironment))
          {
@@ -334,76 +474,47 @@ public class RDXBaseUI
             else
                primaryScene.getSceneLevelsToRender().add(RDXSceneLevel.VIRTUAL);
          }
+         ImGui.separator(); // Mouse behavior section
          if (ImGui.checkbox(labels.get("Model scene mouse collision enabled"), modelSceneMouseCollisionEnabled))
          {
             setModelSceneMouseCollisionEnabled(modelSceneMouseCollisionEnabled.get());
          }
-         ImGui.separator();
          if (ImGui.checkbox(labels.get("Middle-click view orbit"), middleClickOrbit))
          {
             setUseMiddleClickViewOrbit(middleClickOrbit.get());
          }
-         float previousShade = backgroundShade.get();
-         if (ImGuiTools.volatileInputFloat(labels.get("Background shade"), backgroundShade))
+         /* End checkbox settings */
+
+         if (ImGui.menuItem("Show key bindings..."))
          {
-            setBackgroundShade(backgroundShade.get());
+            keyBindings.showKeybindings();
          }
 
-         ImGui.separator();
-         ImGui.text("UI Theme:");
-         ImGui.sameLine();
-         Theme previousTheme = theme;
-         for (int i = 0; i < Theme.values().length; ++i)
-         {
-            if (ImGui.radioButton(labels.get(StringUtils.capitalize(Theme.values()[i].name().toLowerCase())), this.theme == Theme.values()[i]))
-               setTheme(Theme.values()[i]);
-            if (i < Theme.values().length - 1)
-               ImGui.sameLine();
-         }
-         if (theme != previousTheme || previousShade != backgroundShade.get())
-         {
-            FileTools.ensureFileExists(themeFilePath, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-            FileTools.writeAllLines(List.of("theme=" + theme.name() + "\n" + shadePrefix + backgroundShade),
-                                    themeFilePath,
-                                    WriteOption.TRUNCATE,
-                                    DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-         }
-         ImGui.popItemWidth();
          ImGui.endMenu();
       }
 
-      ImGui.sameLine(ImGui.getWindowSizeX() - 220.0f);
-      fpsCalculator.ping();
-      String fpsString = String.valueOf((int) fpsCalculator.getFrequency());
-      while (fpsString.length() < 3)
-      {
-         fpsString = " " + fpsString;
-      }
-      ImGui.text(fpsString + " Hz");
-      ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
-      ImGui.sameLine(ImGui.getWindowSizeX() - 100.0f);
-      vrManager.renderImGuiEnableWidget();
-      ImGui.endMainMenuBar();
-   }
+      frameRateDisplay.ping();
 
-   private void saveApplicationSettings(ImGuiConfigurationLocation saveConfigurationLocation)
-   {
-      imGuiWindowAndDockSystem.saveConfiguration(saveConfigurationLocation);
-      Consumer<ObjectNode> rootConsumer = root ->
+      if (plotFrameRate.get())
       {
-         root.put("windowWidth", Gdx.graphics.getWidth());
-         root.put("windowHeight", Gdx.graphics.getHeight());
-      };
-      if (saveConfigurationLocation.isVersionControl())
-      {
-         LogTools.info("Saving libGDX settings to {}", libGDXSettingsFile.getWorkspaceFile().toString());
-         JSONFileTools.save(libGDXSettingsFile.getWorkspaceFile(), rootConsumer);
+         // Currently we manually tune this value when we change the stuff in the status a
+         float menuBarStatusWidth = 320.0f;
+         ImGui.sameLine(ImGui.getWindowSizeX() - menuBarStatusWidth);
+         frameRateDisplay.renderPlot();
       }
       else
       {
-         LogTools.info("Saving libGDX settings to {}", libGDXSettingsFile.getExternalFile().toString());
-         JSONFileTools.save(libGDXSettingsFile.getExternalFile(), rootConsumer);
+         float menuBarStatusWidth = 212.0f;
+         ImGui.sameLine(ImGui.getWindowSizeX() - menuBarStatusWidth);
       }
+
+      frameRateDisplay.renderHz();
+
+      ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
+      float enoughWidthForVRButton = 100.0f; // Currently we manually tune this value
+      ImGui.sameLine(ImGui.getWindowSizeX() - enoughWidthForVRButton);
+      vrManager.renderImGuiEnableWidget();
+      ImGui.endMainMenuBar();
    }
 
    public void dispose()
@@ -411,6 +522,8 @@ public class RDXBaseUI
       imGuiWindowAndDockSystem.dispose();
       vrManager.dispose();
       primaryScene.dispose();
+
+      instance = null;
    }
 
    public void add3DPanel(RDX3DPanel panel3D)
@@ -422,7 +535,7 @@ public class RDXBaseUI
    {
       panel3D.create(RDXInputMode.ImGui, glProfiler, scene3D);
       panel3D.getCamera3D().changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
-      imGuiWindowAndDockSystem.getPanelManager().addPanel(panel3D.getImGuiPanel());
+      imGuiWindowAndDockSystem.getPanelManager().addPanel(panel3D);
       additional3DPanels.add(panel3D);
    }
 
@@ -443,13 +556,13 @@ public class RDXBaseUI
       Gdx.graphics.setVSync(enabled);
    }
 
-   public void setForegroundFPS(int foregroundFPS)
+   public void setForegroundFPSLimit(int foregroundFPSLimit)
    {
-      this.foregroundFPS.set(foregroundFPS);
-      Gdx.graphics.setForegroundFPS(foregroundFPS);
+      this.foregroundFPSLimit.set(foregroundFPSLimit);
+      Gdx.graphics.setForegroundFPS(foregroundFPSLimit);
    }
 
-   public ImGuiPanelManager getImGuiPanelManager()
+   public RDXPanelManager getImGuiPanelManager()
    {
       return imGuiWindowAndDockSystem.getPanelManager();
    }
@@ -457,6 +570,11 @@ public class RDXBaseUI
    public RDXImGuiLayoutManager getLayoutManager()
    {
       return layoutManager;
+   }
+
+   public RDXKeyBindings getKeyBindings()
+   {
+      return keyBindings;
    }
 
    public RDX3DScene getPrimaryScene()
@@ -499,13 +617,13 @@ public class RDXBaseUI
       }
    }
 
-   public void setBackgroundShade(float backgroundShade)
+   public void setView3DBackgroundShade(float shade)
    {
-      this.backgroundShade.set(backgroundShade);
-      primary3DPanel.setBackgroundShade(backgroundShade);
+      this.view3DBackgroundShade.set(shade);
+      primary3DPanel.setBackgroundShade(shade);
       for (RDX3DPanel additional3DPanel : additional3DPanels)
       {
-         additional3DPanel.setBackgroundShade(backgroundShade);
+         additional3DPanel.setBackgroundShade(shade);
       }
    }
 
@@ -521,6 +639,7 @@ public class RDXBaseUI
 
    public void setTheme(Theme theme)
    {
+      settings.setThemeName(theme.name());
       switch (theme)
       {
          case LIGHT -> ImGui.styleColorsLight();

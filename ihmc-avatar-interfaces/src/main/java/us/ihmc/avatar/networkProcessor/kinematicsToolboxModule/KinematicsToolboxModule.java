@@ -22,6 +22,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
@@ -72,13 +73,13 @@ public class KinematicsToolboxModule extends ToolboxModule
    }
 
    @Override
-   public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
+   public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
       ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
       {
          if (kinematicsToolBoxController != null)
          {
@@ -89,7 +90,7 @@ public class KinematicsToolboxModule extends ToolboxModule
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
       {
          if (kinematicsToolBoxController != null)
          {
@@ -100,7 +101,7 @@ public class KinematicsToolboxModule extends ToolboxModule
 
       MultiContactBalanceStatus multiContactBalanceStatus = new MultiContactBalanceStatus();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, MultiContactBalanceStatus.class, controllerOutputTopic, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, MultiContactBalanceStatus.class, controllerOutputTopic, s ->
       {
          if (kinematicsToolBoxController != null)
          {

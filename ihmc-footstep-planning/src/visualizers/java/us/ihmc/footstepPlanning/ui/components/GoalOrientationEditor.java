@@ -43,7 +43,7 @@ public class GoalOrientationEditor extends AnimationTimer
       goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootPosition);
 
       planeIntersectionCalculator = new PlaneIntersectionCalculator(subScene.getCamera());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.SelectedRegion, planeIntersectionCalculator::setPlanarRegion);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.SelectedRegion, planeIntersectionCalculator::setPlanarRegion);
 
       leftClickInterceptor = (event) ->
       {

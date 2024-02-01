@@ -5,5 +5,11 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 public interface FullQuadrupedRobotModelFactory extends FullLeggedRobotModelFactory<RobotQuadrant>
 {
    @Override
-   FullQuadrupedRobotModel createFullRobotModel();
+   default FullQuadrupedRobotModel createFullRobotModel()
+   {
+      return createFullRobotModel(true);
+   }
+
+   @Override
+   FullQuadrupedRobotModel createFullRobotModel(boolean enforceUniqueReferenceFrames);
 }

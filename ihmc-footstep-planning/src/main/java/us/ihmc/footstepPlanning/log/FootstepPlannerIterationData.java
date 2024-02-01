@@ -10,6 +10,7 @@ public class FootstepPlannerIterationData
 {
    private FootstepGraphNode parentNode = null;
    private FootstepGraphNode idealChildNode = null;
+   private FootstepGraphNode nominalIdealChildNode = null;
    private final List<FootstepGraphNode> childNodes = new ArrayList<>();
 
    // TODO log all snap data separately, or do fancy graphics logging
@@ -29,6 +30,11 @@ public class FootstepPlannerIterationData
    public void setIdealChildNode(FootstepGraphNode idealChildNode)
    {
       this.idealChildNode = idealChildNode;
+   }
+
+   public void setNominalIdealChildNode(FootstepGraphNode nominalIdealChildNode)
+   {
+      this.nominalIdealChildNode = nominalIdealChildNode;
    }
 
    public void setParentEndSnapData(FootstepSnapData parentEndSnapData)
@@ -56,6 +62,11 @@ public class FootstepPlannerIterationData
       return idealChildNode;
    }
 
+   public FootstepGraphNode getNominalIdealChildNode()
+   {
+      return nominalIdealChildNode;
+   }
+
    public List<FootstepGraphNode> getChildNodes()
    {
       return childNodes;
@@ -75,6 +86,7 @@ public class FootstepPlannerIterationData
    {
       parentNode = null;
       idealChildNode = null;
+      nominalIdealChildNode = null;
       childNodes.clear();
       parentEndSnapData.clear();
       parentStartSnapData.clear();

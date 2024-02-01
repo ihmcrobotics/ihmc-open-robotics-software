@@ -22,6 +22,7 @@ import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 
 public abstract class WalkingControllerParameters
@@ -50,15 +51,38 @@ public abstract class WalkingControllerParameters
     */
    public abstract double getOmega0();
 
+   public enum SmoothFootUnloadMethod
+   {
+      HARD_CONSTRAINT, RHO_WEIGHT
+   };
+
    /**
     * Specifies if the desired ground reaction force for the force that is about to swing should
-    * smoothly be brought to zero by adding a inequality constraint on the z-force.
+    * smoothly be brought to zero by either:
+    * <ul>
+    * <li>adding a inequality constraint on the z-force,
+    * <li>or increasing the rho weights.
+    * </ul>
     * 
-    * @return whether to perform smooth unloading before swing or not. Default value is {@code false}.
+    * @return whether to perform smooth unloading before swing or not. Default value is {@code null}
+    *         for disabling the feature.
     */
-   public boolean enforceSmoothFootUnloading()
+   public SmoothFootUnloadMethod enforceSmoothFootUnloading()
    {
-      return false;
+      return null;
+   }
+
+   /**
+    * Only used when {@link #enforceSmoothFootUnloading()} equals
+    * {@code SmoothFootUnloadMethod.RHO_WEIGHT}, it specifies the final rho weight value of the foot
+    * being unloaded.
+    * 
+    * @return the final unloaded rho weight value, should be greater that the default rho weight
+    *         specified in {@link MomentumOptimizationSettings}.
+    */
+   public double getFinalUnloadedRhoWeight()
+   {
+      return 0.001;
    }
 
    /**
@@ -157,9 +181,8 @@ public abstract class WalkingControllerParameters
    public abstract PDGains getCoMHeightControlGains();
 
    /**
-    * Gains used to compute desired accelerations: joint acceleration = kp * (q_des - q) + kd * (v_des - v)
-    * The feedback in acceleration-space is used as an objective in the whole-body QP
-    *
+    * Gains used to compute desired accelerations: joint acceleration = kp * (q_des - q) + kd * (v_des
+    * - v) The feedback in acceleration-space is used as an objective in the whole-body QP
     * <p>
     * Each {@link GroupParameter} contains gains for one joint group:</br>
     * - The name of the joint group that the gain is used for (e.g. Arms).</br>
@@ -170,23 +193,7 @@ public abstract class WalkingControllerParameters
     *
     * @return list containing jointspace PID gains and the corresponding joints
     */
-   public List<GroupParameter<PIDGainsReadOnly>> getHighLevelJointSpaceControlGains()
-   {
-      return new ArrayList<>();
-   }
-
-   /**
-    * Gains used for low-level joint position control intended to be sent directly to the motor, torque = kp * (q_des - q) + kd * (v_des - v)
-    *
-    * <p>
-    * Each {@link GroupParameter} contains gains for one joint group:</br>
-    * - The name of the joint group that the gain is used for (e.g. Arms).</br>
-    * - The gains for the joint group.</br>
-    * - The names of all rigid bodies in the joint group.
-    * </p>
-    * If a joint is not contained in the list, low-level jointspace control is not supported for that joint.
-    */
-   public List<GroupParameter<PIDGainsReadOnly>> getLowLevelJointSpaceControlGains()
+   public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
    {
       return new ArrayList<>();
    }
@@ -254,6 +261,15 @@ public abstract class WalkingControllerParameters
    public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
    {
       return new TObjectDoubleHashMap<String>();
+   }
+
+   /**
+    * If true, the rigid body jointspace control state for the given rigid body will be setup
+    * with function generators
+    */
+   public boolean enableFunctionGeneratorMode(String rigidBodyName)
+   {
+      return false;
    }
 
    /**
@@ -367,6 +383,12 @@ public abstract class WalkingControllerParameters
    }
 
    public abstract FootSwitchFactory getFootSwitchFactory();
+
+   public SideDependentList<FootSwitchFactory> getFootSwitchFactories()
+   {
+      FootSwitchFactory footSwitchFactory = getFootSwitchFactory();
+      return new SideDependentList<>(footSwitchFactory, footSwitchFactory);
+   }
 
    /**
     * Returns a list of joints that will not be used by the controller.
@@ -499,6 +521,20 @@ public abstract class WalkingControllerParameters
     * switch to trigger the transition.
     */
    public boolean finishSingleSupportWhenICPPlannerIsDone()
+   {
+      return false;
+   }
+
+   /**
+    * <ul>
+    * </li>When {@code true}, single support continues until the ICP planner is done even if the swing
+    * foot touches down, in which case the foot contact state is updated to be in contact. This kicks
+    * in when touchdown occurs early and allows to transition to transfer as planned by the ICP planner
+    * improving ICP plan continuity.
+    * <li>When {@code false}, single support ends as soon as the swing foot touches down.
+    * </ul>
+    */
+   public boolean waitInSingleSupportUntilICPPlannerIsDone()
    {
       return false;
    }
@@ -710,6 +746,24 @@ public abstract class WalkingControllerParameters
    public abstract double maximumHeightAboveAnkle();
 
    /**
+    * This is a reduction factor of {@link #maximumHeightAboveAnkle()} that is applied during the
+    * exchange phase to the height trajectory when the robot is stepping down
+    */
+   public double getMaxLegLengthReductionSteppingDown()
+   {
+      return 0.0;
+   }
+
+   /**
+    * If the step height change is above this value, it indicates that the foot should not be
+    * considered "flat", and that the robot is either stepping up or down
+    */
+   public double getHeightChangeForNonFlatStep()
+   {
+      return 0.10;
+   }
+
+   /**
     * Whether the height of the pelvis should be controlled instead of the center of mass height.
     */
    public boolean controlPelvisHeightInsteadOfCoMHeight()
@@ -720,20 +774,13 @@ public abstract class WalkingControllerParameters
    /**
     * Whether the height should be controlled with the rate of change of momentum or using a feedback
     * controller on the pelvis. Note that the height of the pelvis should be controlled to set this
-    * flag to {@code false}, i.e. {@code controlPelvisHeightInsteadOfCoMHeight() == true}.
-    *
-    * Fixme does this do what we think it does?
+    * flag to {@code false}, i.e. {@code controlPelvisHeightInsteadOfCoMHeight() == true}. Fixme does
+    * this do what we think it does?
     */
    public boolean controlHeightWithMomentum()
    {
       return true;
    }
-
-   /**
-    * Parameter for the CoM height trajectory generation.
-    */
-   @Deprecated // Remove this. It is not actually doing anything.
-   public abstract double defaultOffsetHeightAboveAnkle();
 
    /**
     * Returns parameters related to stepping such as maximum step length etc.
@@ -794,5 +841,36 @@ public abstract class WalkingControllerParameters
    public double getSwingTimeOverrunToInitializeFreeFall()
    {
       return Double.POSITIVE_INFINITY;
+   }
+
+   public NaturalPostureParameters getNaturalPostureParameters()
+   {
+      return null;
+   }
+
+   /**
+    * When there's less than this fraction of swing remaining, the robot joints in swing should switch
+    * to "load bearing". Essentially, for hydraulic robots, this switches them from velocity to
+    * position controlled. This can be used to help alleviate heavy impacts at touchdown.
+    */
+   public double getFractionOfSwingToSwitchToLoaded()
+   {
+      return Double.NaN;
+   }
+
+   /**
+    * Parameter for the duration of foot loading.
+    */
+   public double getLoadFootDuration()
+   {
+      return 1.2;
+   }
+
+   /**
+    * Parameter for the duration of transfer from single support to double support.
+    */
+   public double getLoadFootTransferDuration()
+   {
+      return 0.8;
    }
 }

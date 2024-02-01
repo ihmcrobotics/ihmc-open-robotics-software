@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -13,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -29,11 +27,9 @@ public abstract class TransferState extends WalkingState
 
    protected final WalkingMessageHandler walkingMessageHandler;
    protected final WalkingTrajectoryPath walkingTrajectoryPath;
-   protected final HighLevelHumanoidControllerToolbox controllerToolbox;
    protected final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    protected final CenterOfMassHeightManager comHeightManager;
-   protected final BalanceManager balanceManager;
    protected final PelvisOrientationManager pelvisOrientationManager;
    protected final FeetManager feetManager;
 
@@ -58,17 +54,16 @@ public abstract class TransferState extends WalkingState
                         DoubleProvider rhoMin,
                         YoRegistry parentRegistry)
    {
-      super(transferStateEnum, parentRegistry);
+      super(transferStateEnum, managerFactory, controllerToolbox, parentRegistry);
+
       this.transferToSide = transferStateEnum.getTransferToSide();
       this.walkingMessageHandler = walkingMessageHandler;
       this.failureDetectionControlModule = failureDetectionControlModule;
-      this.controllerToolbox = controllerToolbox;
       this.unloadFraction = unloadFraction;
       this.rhoMin = rhoMin;
 
       walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
-      balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
 

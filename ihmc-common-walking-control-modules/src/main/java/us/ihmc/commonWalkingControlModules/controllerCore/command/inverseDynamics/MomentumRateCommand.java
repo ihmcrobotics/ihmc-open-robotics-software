@@ -399,6 +399,21 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * optimization will behave but the ratio between them. A command with a higher weight than other
     * commands value will be treated as more important than the other commands.
     * </p>
+    *
+    * @param angular the weights to use for the angular part of this command. Not modified.
+    */
+   public void setAngularWeight(double angular)
+   {
+      weightMatrix.setAngularWeights(angular, angular, angular);
+   }
+
+   /**
+    * Sets the weights to use in the optimization problem for each rotational degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
     * 
     * @param angular the weights to use for the angular part of this command. Not modified.
     */

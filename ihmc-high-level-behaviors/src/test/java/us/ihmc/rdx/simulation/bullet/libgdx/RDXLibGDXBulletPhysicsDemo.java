@@ -22,9 +22,7 @@ import java.util.Random;
 
 public class RDXLibGDXBulletPhysicsDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private BulletWorld world;
    private final ImBoolean simulate = new ImBoolean(false);
 

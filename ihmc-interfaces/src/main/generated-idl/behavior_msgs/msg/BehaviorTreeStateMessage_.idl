@@ -1,0 +1,103 @@
+#ifndef __behavior_msgs__msg__BehaviorTreeStateMessage__idl__
+#define __behavior_msgs__msg__BehaviorTreeStateMessage__idl__
+
+#include "behavior_msgs/msg/./ActionSequenceStateMessage_.idl"
+#include "behavior_msgs/msg/./ArmJointAnglesActionStateMessage_.idl"
+#include "behavior_msgs/msg/./BasicNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./ChestOrientationActionStateMessage_.idl"
+#include "behavior_msgs/msg/./FootstepPlanActionStateMessage_.idl"
+#include "behavior_msgs/msg/./HandPoseActionStateMessage_.idl"
+#include "behavior_msgs/msg/./HandWrenchActionStateMessage_.idl"
+#include "behavior_msgs/msg/./PelvisHeightPitchActionStateMessage_.idl"
+#include "behavior_msgs/msg/./SakeHandCommandActionStateMessage_.idl"
+#include "behavior_msgs/msg/./ScrewPrimitiveActionStateMessage_.idl"
+#include "behavior_msgs/msg/./WaitDurationActionStateMessage_.idl"
+#include "ihmc_common_msgs/msg/./ConfirmableRequestMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet BASIC_NODE =
+      0;
+
+      const octet ACTION_SEQUENCE =
+      1;
+
+      const octet ARM_JOINT_ANGLES_ACTION =
+      10;
+
+      const octet CHEST_ORIENTATION_ACTION =
+      11;
+
+      const octet FOOTSTEP_PLAN_ACTION =
+      12;
+
+      const octet SAKE_HAND_COMMAND_ACTION =
+      13;
+
+      const octet HAND_POSE_ACTION =
+      14;
+
+      const octet HAND_WRENCH_ACTION =
+      15;
+
+      const octet SCREW_PRIMITIVE_ACTION =
+      16;
+
+      const octet PELVIS_HEIGHT_PITCH_ACTION =
+      17;
+
+      const octet WAIT_DURATION_ACTION =
+      18;
+
+
+      /**
+       * Gives the current state of the complete collection of behavior tree nodes.
+       * Publishing all behavior tree nodes in one message can simplify synchronization and
+       * reduce the complexity of logic in figuring out when nodes are currently under
+       * consideration.
+       */
+      @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeStateMessage_")
+      struct BehaviorTreeStateMessage
+      {
+        /**
+         * Monotonically increasing message ID that matches the CRDTInfo update number
+         */
+        unsigned long sequence_id;
+        /**
+         * The ID to assign to the next instantiated node
+         */
+        unsigned long next_id;
+        /**
+         * A mechanism for confirming and ending a freeze early
+         */
+        ihmc_common_msgs::msg::dds::ConfirmableRequestMessage confirmable_request;
+        /**
+         * A depth first ordered list of types.
+         */
+        sequence<octet, 1000> behavior_tree_types;
+        /**
+         * A depth first ordered list of node indexes.
+         * The index is of that node in it's respective list for
+         * it's type.
+         */
+        sequence<unsigned long, 1000> behavior_tree_indices;
+        sequence<behavior_msgs::msg::dds::BasicNodeStateMessage, 200> basic_nodes;
+        sequence<behavior_msgs::msg::dds::ActionSequenceStateMessage, 200> action_sequences;
+        sequence<behavior_msgs::msg::dds::ArmJointAnglesActionStateMessage, 200> arm_joint_angles_actions;
+        sequence<behavior_msgs::msg::dds::ChestOrientationActionStateMessage, 200> chest_orientation_actions;
+        sequence<behavior_msgs::msg::dds::FootstepPlanActionStateMessage, 200> footstep_plan_actions;
+        sequence<behavior_msgs::msg::dds::SakeHandCommandActionStateMessage, 200> sake_hand_command_actions;
+        sequence<behavior_msgs::msg::dds::HandPoseActionStateMessage, 200> hand_pose_actions;
+        sequence<behavior_msgs::msg::dds::HandWrenchActionStateMessage, 200> hand_wrench_actions;
+        sequence<behavior_msgs::msg::dds::ScrewPrimitiveActionStateMessage, 200> screw_primitive_actions;
+        sequence<behavior_msgs::msg::dds::PelvisHeightPitchActionStateMessage, 200> pelvis_height_actions;
+        sequence<behavior_msgs::msg::dds::WaitDurationActionStateMessage, 200> wait_duration_actions;
+      };
+    };
+  };
+};
+
+#endif

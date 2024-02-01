@@ -5,8 +5,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.LocalOnlyBehaviorTreeNodeExecutor;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -15,8 +15,6 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.behaviors.BehaviorInterface;
-import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -25,23 +23,20 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.messager.MessagerAPIFactory.Category;
-import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
-import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
-public class FancyPosesBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
+/**
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
+public class FancyPosesBehavior extends LocalOnlyBehaviorTreeNodeExecutor implements Destroyable
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Fancy Poses", FancyPosesBehavior::new, API.create());
-
    private final BehaviorHelper helper;
 
-   private final ActivationReference<Boolean> stepping;
+   private final ActivationReference<Boolean> stepping = null;
    private final Notification goToSingleSupportNotification = new Notification();
    private final Notification goToDoubleSupportNotification = new Notification();
    private final Notification goToRunningManNotification = new Notification();
@@ -69,24 +64,24 @@ public class FancyPosesBehavior extends BehaviorTreeControlFlowNode implements B
       syncedRobot = robotInterface.newSyncedRobot();
 
       robotInterface.createFootstepStatusCallback(this::acceptFootstepStatus);
-      stepping = helper.subscribeViaActivationReference(API.Stepping);
+//      stepping = helper.subscribeViaActivationReference(API.Stepping);
 
-      helper.subscribeViaCallback(API.GoToSingleSupport, object -> goToSingleSupportNotification.set());
-      helper.subscribeViaCallback(API.GoToDoubleSupport, object -> goToDoubleSupportNotification.set());
-      helper.subscribeViaCallback(API.GoToRunningMan, object -> goToRunningManNotification.set());
-      helper.subscribeViaCallback(API.GoToKarateKid1, object -> goToKarateKid1Notification.set());
-      helper.subscribeViaCallback(API.GoToKarateKid2, object -> goToKarateKid2Notification.set());
-      helper.subscribeViaCallback(API.GoToKarateKid3, object -> goToKarateKid3Notification.set());
-      helper.subscribeViaCallback(API.GoToPresent, object -> goToPresentNotification.set());
-      helper.subscribeViaCallback(API.GoToShutdownPose, object -> goToShutdownPoseNotification.set());
-
-      helper.subscribeViaCallback(API.Abort, this::doOnAbort);
+//      helper.subscribeViaCallback(API.GoToSingleSupport, object -> goToSingleSupportNotification.set());
+//      helper.subscribeViaCallback(API.GoToDoubleSupport, object -> goToDoubleSupportNotification.set());
+//      helper.subscribeViaCallback(API.GoToRunningMan, object -> goToRunningManNotification.set());
+//      helper.subscribeViaCallback(API.GoToKarateKid1, object -> goToKarateKid1Notification.set());
+//      helper.subscribeViaCallback(API.GoToKarateKid2, object -> goToKarateKid2Notification.set());
+//      helper.subscribeViaCallback(API.GoToKarateKid3, object -> goToKarateKid3Notification.set());
+//      helper.subscribeViaCallback(API.GoToPresent, object -> goToPresentNotification.set());
+//      helper.subscribeViaCallback(API.GoToShutdownPose, object -> goToShutdownPoseNotification.set());
+//
+//      helper.subscribeViaCallback(API.Abort, this::doOnAbort);
 
       mainThread = helper.createPausablePeriodicThread(getClass(), 1.0, this::doBehavior);
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       return BehaviorTreeNodeStatus.SUCCESS;
    }
@@ -96,7 +91,6 @@ public class FancyPosesBehavior extends BehaviorTreeControlFlowNode implements B
       LogTools.info("Fancy poses behavior selected = {}", enabled);
 
       mainThread.setRunning(enabled);
-      helper.setCommunicationCallbacksEnabled(enabled);
    }
 
    private void doOnAbort(boolean abort)
@@ -406,26 +400,6 @@ public class FancyPosesBehavior extends BehaviorTreeControlFlowNode implements B
 
    public static class API
    {
-      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final Category RootCategory = apiFactory.createRootCategory("FancyPosesBehavior");
-      private static final CategoryTheme FancyPoses = apiFactory.createCategoryTheme("FancyPoses");
-      private static final Category FancyPosesCategory = RootCategory.child(FancyPoses);
 
-      public static final Topic<Boolean> Stepping = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("Stepping"));
-      public static final Topic<Boolean> Abort = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("Abort"));
-      public static final Topic<Boolean> Enable = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("Enable"));
-      public static final Topic<Boolean> GoToSingleSupport = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToSingleSupport"));
-      public static final Topic<Boolean> GoToDoubleSupport = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToDoubleSupport"));
-      public static final Topic<Boolean> GoToRunningMan = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToRunningMan"));
-      public static final Topic<Boolean> GoToKarateKid1 = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToKarateKid1"));
-      public static final Topic<Boolean> GoToKarateKid2 = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToKarateKid2"));
-      public static final Topic<Boolean> GoToKarateKid3 = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToKarateKid3"));
-      public static final Topic<Boolean> GoToPresent = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToPresent"));
-      public static final Topic<Boolean> GoToShutdownPose = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToShutdownPose"));
-
-      public static final MessagerAPI create()
-      {
-         return apiFactory.getAPIAndCloseFactory();
-      }
    }
 }

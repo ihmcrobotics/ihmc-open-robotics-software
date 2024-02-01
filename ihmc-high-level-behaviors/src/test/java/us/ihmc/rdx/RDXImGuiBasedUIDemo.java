@@ -15,16 +15,15 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImGuiLogWidget;
+import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.string.StringTools;
 
 import java.time.LocalDateTime;
 
 public class RDXImGuiBasedUIDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources",
-                                                  "Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI("Demo");
    private final Stopwatch stopwatch = new Stopwatch().start();
    private final ImGuiMovingPlot renderPlot = new ImGuiMovingPlot("render count", 1000, 300, 30);
    private final ImGuiLogWidget logWidget = new ImGuiLogWidget("Log");
@@ -32,6 +31,8 @@ public class RDXImGuiBasedUIDemo
    private final ImBoolean option = new ImBoolean();
    private int pressCount = 0;
    private final ImString textForArea = new ImString();
+   private RDX3DPanelToolbarButton flyingCarButton;
+   private final ImGuiHandWidget handWidget = new ImGuiHandWidget();
 
    public RDXImGuiBasedUIDemo()
    {
@@ -65,7 +66,7 @@ public class RDXImGuiBasedUIDemo
                }
             });
 
-            RDX3DPanelToolbarButton flyingCarButton = baseUI.getPrimary3DPanel().addToolbarButton();
+            flyingCarButton = baseUI.getPrimary3DPanel().addToolbarButton();
             flyingCarButton.loadAndSetIcon("icons/flyingCar.png");
             flyingCarButton.setOnPressed(() -> pressCount++);
             flyingCarButton.setTooltipText("Tooltip text");
@@ -89,6 +90,10 @@ public class RDXImGuiBasedUIDemo
          public void render()
          {
             // call update() methods here
+            if (flyingCarButton.getDown())
+               flyingCarButton.setTooltipText("Mouse down.");
+            else if (flyingCarButton.getHovered())
+               flyingCarButton.setTooltipText("Mouse hovered.");
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -127,14 +132,18 @@ public class RDXImGuiBasedUIDemo
 
       ImGui.text("Toolbar button press count: " + pressCount);
       ImGuiTools.inputText("Text area", textForArea);
+
+      handWidget.render(RobotSide.LEFT, ImGui.getFontSize());
    }
 
    private void renderWindow2()
    {
+      ImGui.text("I'm in Window 2!");
    }
 
    private void renderWindow3()
    {
+      ImGui.text("I'm in Window 3!");
    }
 
    public static void main(String[] args)

@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
@@ -96,7 +97,7 @@ public final class SpatialFeedbackControllerTest
       spatialFeedbackController.setEnabled(true);
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
-      QPInputTypeA motionQPInput = new QPInputTypeA(MultiBodySystemTools.computeDegreesOfFreedom(joints));
+      NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(MultiBodySystemTools.computeDegreesOfFreedom(joints));
       DMatrixRMaj jointAccelerations = new DMatrixRMaj(0, 0);
       double damping = 0.001;
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
@@ -106,7 +107,7 @@ public final class SpatialFeedbackControllerTest
          spatialFeedbackController.computeInverseDynamics();
          SpatialAccelerationCommand spatialAccelerationCommand = spatialFeedbackController.getInverseDynamicsOutput();
          Assert.assertTrue(motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput));
-         NativeCommonOps.solveDamped(motionQPInput.getTaskJacobian(), motionQPInput.getTaskObjective(), damping, jointAccelerations);
+         NativeCommonOps.solveDamped(new DMatrixRMaj(motionQPInput.getTaskJacobian()), new DMatrixRMaj(motionQPInput.getTaskObjective()), damping, jointAccelerations);
          integrator.integrateJointAccelerations(joints, jointAccelerations);
          integrator.integrateJointVelocities(joints, integrator.getJointVelocities());
          MultiBodySystemTools.insertJointsState(joints, JointStateType.VELOCITY, integrator.getJointVelocities());
@@ -173,7 +174,7 @@ public final class SpatialFeedbackControllerTest
       spatialFeedbackController.setEnabled(true);
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      QPInputTypeA motionQPInput = new QPInputTypeA(numberOfDoFs);
+      NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
       LinearSolverDense<DMatrixRMaj> pseudoInverseSolver = LinearSolverFactory_DDRM.pseudoInverse(true);
       DMatrixRMaj jInverse = new DMatrixRMaj(numberOfDoFs, 6);
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -196,9 +197,9 @@ public final class SpatialFeedbackControllerTest
          SpatialAccelerationCommand output = spatialFeedbackController.getInverseDynamicsOutput();
 
          motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
-         pseudoInverseSolver.setA(motionQPInput.taskJacobian);
+         pseudoInverseSolver.setA(new DMatrixRMaj(motionQPInput.taskJacobian));
          pseudoInverseSolver.invert(jInverse);
-         CommonOps_DDRM.mult(jInverse, motionQPInput.taskObjective, jointAccelerations);
+         CommonOps_DDRM.mult(jInverse, new DMatrixRMaj(motionQPInput.taskObjective), jointAccelerations);
 
          integrator.integrateJointAccelerations(jointsToOptimizeFor, jointAccelerations);
          integrator.integrateJointVelocities(jointsToOptimizeFor, integrator.getJointVelocities());
@@ -276,7 +277,7 @@ public final class SpatialFeedbackControllerTest
       spatialFeedbackController.setEnabled(true);
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      QPInputTypeA motionQPInput = new QPInputTypeA(numberOfDoFs);
+      NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
       LinearSolverDense<DMatrixRMaj> pseudoInverseSolver = LinearSolverFactory_DDRM.pseudoInverse(true);
       DMatrixRMaj jInverse = new DMatrixRMaj(numberOfDoFs, 6);
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -317,9 +318,9 @@ public final class SpatialFeedbackControllerTest
          SpatialAccelerationCommand output = spatialFeedbackController.getInverseDynamicsOutput();
          motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
 
-         MatrixTools.scaleTranspose(1.0, motionQPInput.taskJacobian, tempJtW); // J^T W
-         CommonOps_DDRM.mult(tempJtW, motionQPInput.taskJacobian, solverInput_H); // H = J^T W J
-         CommonOps_DDRM.mult(tempJtW, motionQPInput.taskObjective, solverInput_f); // f = - J^T W xDDot
+         MatrixTools.scaleTranspose(1.0, new DMatrixRMaj(motionQPInput.taskJacobian), tempJtW); // J^T W
+         CommonOps_DDRM.mult(tempJtW, new DMatrixRMaj(motionQPInput.taskJacobian), solverInput_H); // H = J^T W J
+         CommonOps_DDRM.mult(tempJtW, new DMatrixRMaj(motionQPInput.taskObjective), solverInput_f); // f = - J^T W xDDot
          CommonOps_DDRM.scale(-1.0, solverInput_f);
 
          for (int diag = 0; diag < numberOfDoFs; diag++)
@@ -331,9 +332,9 @@ public final class SpatialFeedbackControllerTest
          oasesQPSolver.solve(solverInput_H, solverInput_f, solverInput_Aeq, solverInput_beq, solverInput_Ain, solverInput_bin, solverInput_lb, solverInput_ub,
                              jointAccelerationsFromQPOASES, true);
 
-         pseudoInverseSolver.setA(motionQPInput.taskJacobian);
+         pseudoInverseSolver.setA(new DMatrixRMaj(motionQPInput.taskJacobian));
          pseudoInverseSolver.invert(jInverse);
-         CommonOps_DDRM.mult(jInverse, motionQPInput.taskObjective, jointAccelerations);
+         CommonOps_DDRM.mult(jInverse, new DMatrixRMaj(motionQPInput.taskObjective), jointAccelerations);
 
          integrator.integrateJointAccelerations(jointsToOptimizeFor, jointAccelerationsFromJerryQP);
          integrator.integrateJointVelocities(jointsToOptimizeFor, integrator.getJointVelocities());

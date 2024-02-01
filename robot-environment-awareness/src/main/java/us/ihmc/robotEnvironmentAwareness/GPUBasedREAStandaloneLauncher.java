@@ -4,10 +4,11 @@ import java.net.URI;
 
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.GPUPerceptionModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.GPUBasedEnvironmentAwarenessUI;
@@ -31,7 +32,7 @@ public class GPUBasedREAStandaloneLauncher extends ApplicationNoModule
    {
       URI rosMasterURI = NetworkParameters.getROSURI();
       rosMainNode = new RosMainNode(rosMasterURI, "GPUPlanarRegionSubscriber");
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.GPU_REA_NODE_NAME);
+      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, PerceptionAPI.GPU_REA_NODE_NAME);
 
       SharedMemoryJavaFXMessager messager = new SharedMemoryJavaFXMessager(GPUPerceptionModuleAPI.API);
       if (ENABLE_UI)

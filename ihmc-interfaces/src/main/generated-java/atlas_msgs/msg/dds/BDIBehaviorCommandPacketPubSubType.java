@@ -11,6 +11,18 @@ package atlas_msgs.msg.dds;
 public class BDIBehaviorCommandPacketPubSubType implements us.ihmc.pubsub.TopicDataType<atlas_msgs.msg.dds.BDIBehaviorCommandPacket>
 {
    public static final java.lang.String name = "atlas_msgs::msg::dds_::BDIBehaviorCommandPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "1779cc82c07724cab0feb4aa41e65263b721b3959eaa02ea2f2fe40b180018f4";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

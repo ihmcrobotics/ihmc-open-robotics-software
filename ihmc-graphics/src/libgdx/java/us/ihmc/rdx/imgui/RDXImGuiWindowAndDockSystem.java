@@ -2,12 +2,12 @@ package us.ihmc.rdx.imgui;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import imgui.*;
 import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImString;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.KHRDebug;
@@ -19,22 +19,17 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
-import us.ihmc.tools.io.HybridDirectory;
-import us.ihmc.tools.io.HybridFile;
-import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.*;
 import us.ihmc.tools.io.resources.ResourceTools;
 
-import java.nio.IntBuffer;
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class RDXImGuiWindowAndDockSystem
 {
    public static final String IMGUI_SETTINGS_INI_FILE_NAME = "ImGuiSettings.ini";
+   private final RDXImGuiLayoutManager layoutManager;
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
    private long context;
@@ -44,31 +39,29 @@ public class RDXImGuiWindowAndDockSystem
    private ImFont imFont;
    private int dockspaceId;
    private final ImString newDockPanelName = new ImString("", 100);
-   private final TreeSet<ImGuiDockspacePanel> dockPanelSet = new TreeSet<>(Comparator.comparing(ImGuiDockspacePanel::getName));
-   private final ImGuiPanelManager panelManager;
-   private HybridFile imGuiSettingsFile;
-   private HybridFile panelsFile;
+   private final TreeSet<RDXDockspacePanel> dockPanelSet = new TreeSet<>(Comparator.comparing(RDXDockspacePanel::getName));
+   private final TIntObjectHashMap<RDXDockspacePanel> dockIDMap = new TIntObjectHashMap<>();
+   private final RDXPanelManager panelManager;
+   private HybridResourceFile imGuiSettingsFile;
+   private HybridResourceFile panelsFile;
    private Callback debugMessageCallback;
-   private final IntBuffer frameSizeLeft = BufferUtils.createIntBuffer(1);
-   private final IntBuffer frameSizeTop = BufferUtils.createIntBuffer(1);
-   private final IntBuffer frameSizeRight = BufferUtils.createIntBuffer(1);
-   private final IntBuffer frameSizeBottom = BufferUtils.createIntBuffer(1);
    private final ImGuiSize calculatedPrimaryWindowSize = new ImGuiSize(LibGDXApplicationCreator.DEFAULT_WINDOW_WIDTH,
                                                                        LibGDXApplicationCreator.DEFAULT_WINDOW_HEIGHT);
-   private final ImGuiPosition primaryWindowPosition = new ImGuiPosition(0, 0);
+   private final ImGuiPosition primaryWindowContentAreaPosition = new ImGuiPosition(0, 0);
 
-   public RDXImGuiWindowAndDockSystem()
+   public RDXImGuiWindowAndDockSystem(RDXImGuiLayoutManager layoutManager)
    {
-      panelManager = new ImGuiPanelManager();
+      this.layoutManager = layoutManager;
+      panelManager = new RDXPanelManager();
    }
 
-   public void setDirectory(HybridDirectory configurationDirectory)
+   public void setDirectory(HybridResourceDirectory configurationDirectory)
    {
-      imGuiSettingsFile = new HybridFile(configurationDirectory, IMGUI_SETTINGS_INI_FILE_NAME);
-      panelsFile = new HybridFile(configurationDirectory, "ImGuiPanels.json");
+      imGuiSettingsFile = new HybridResourceFile(configurationDirectory, IMGUI_SETTINGS_INI_FILE_NAME);
+      panelsFile = new HybridResourceFile(configurationDirectory, "ImGuiPanels.json");
    }
 
-   public void create(long windowHandle, RDXImGuiLayoutManager layoutManager)
+   public void create(long windowHandle)
    {
       this.windowHandle = windowHandle;
 
@@ -116,20 +109,19 @@ public class RDXImGuiWindowAndDockSystem
       ImGuiTools.initializeColorStyle();
       imFont = ImGuiTools.setupFonts(io, fontSizeLevel);
 
+      // Add a 1px frame border to UI elements
+      ImGuiStyle style = ImGui.getStyle();
+      style.setFrameBorderSize(1.0f);
+
       // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
       if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable))
       {
-         final ImGuiStyle style = imgui.ImGui.getStyle();
          style.setWindowRounding(0.0f);
          style.setColor(ImGuiCol.WindowBg, imgui.ImGui.getColorU32(ImGuiCol.WindowBg, 1));
       }
 
       imGuiGlfw.init(windowHandle, true);
       imGuiGl3.init(glslVersion);
-
-      GLFW.glfwGetWindowFrameSize(windowHandle, frameSizeLeft, frameSizeTop, frameSizeRight, frameSizeBottom);
-
-      layoutManager.reloadLayout();
    }
 
    public void beforeWindowManagement()
@@ -140,6 +132,8 @@ public class RDXImGuiWindowAndDockSystem
       imGuiGlfw.newFrame();
       ImGui.newFrame();
 
+      layoutManager.loadInitialLayout();
+
       ImGui.pushFont(imFont);
 
       int flags = ImGuiDockNodeFlags.None;
@@ -148,18 +142,13 @@ public class RDXImGuiWindowAndDockSystem
 
       dockspaceId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), flags);
 
-      ImGuiDockspacePanel justClosedPanel = null;
-      for (ImGuiDockspacePanel dockspacePanel : dockPanelSet)
+      for (RDXDockspacePanel dockspacePanel : dockPanelSet)
       {
          dockspacePanel.renderPanel();
-         if (dockspacePanel.getWasJustClosed())
-         {
-            justClosedPanel = dockspacePanel;
-            LogTools.debug("Closed dockspace panel: {}", justClosedPanel.getName());
-         }
+         dockIDMap.put(dockspacePanel.getDockspaceID(), dockspacePanel);
       }
 
-      panelManager.renderPanels(justClosedPanel);
+      panelManager.renderPanels(dockIDMap);
    }
 
    public void renderMenuDockPanelItems()
@@ -172,11 +161,11 @@ public class RDXImGuiWindowAndDockSystem
       ImGui.sameLine();
       if (ImGui.button("Create###createNewDockPanelButton") && !newDockPanelName.get().isEmpty())
       {
-         dockPanelSet.add(new ImGuiDockspacePanel(newDockPanelName.get()));
+         dockPanelSet.add(new RDXDockspacePanel(newDockPanelName.get()));
       }
 
-      ImGuiDockspacePanel dockspacePanelToRemove = null;
-      for (ImGuiDockspacePanel dockspacePanel : dockPanelSet)
+      RDXDockspacePanel dockspacePanelToRemove = null;
+      for (RDXDockspacePanel dockspacePanel : dockPanelSet)
       {
          dockspacePanel.renderMenuItem();
          ImGui.sameLine();
@@ -213,17 +202,16 @@ public class RDXImGuiWindowAndDockSystem
       {
          String settingsINIAsString = ResourceTools.readResourceToString(inputStream);
          ImGuiTools.parsePrimaryWindowSizeFromSettingsINI(settingsINIAsString, calculatedPrimaryWindowSize);
-         calculatedPrimaryWindowSize.setWidth(calculatedPrimaryWindowSize.getWidth() + getFrameSizeLeft() + getFrameSizeRight());
-         calculatedPrimaryWindowSize.setHeight(calculatedPrimaryWindowSize.getHeight() + getFrameSizeTop() + getFrameSizeBottom()
-                                               + 22); // Menu bar height
-         ImGuiTools.parsePrimaryWindowPositionFromSettingsINI(settingsINIAsString, primaryWindowPosition);
-         primaryWindowPosition.setX(primaryWindowPosition.getX() - getFrameSizeLeft());
-         primaryWindowPosition.setY(primaryWindowPosition.getY() - getFrameSizeTop() - 22);
-         LogTools.debug(String.format("Calculated x: %d y: %d, width: %d, height: %d",
-                                      primaryWindowPosition.getX(),
-                                      primaryWindowPosition.getY(),
-                                      calculatedPrimaryWindowSize.getWidth(),
-                                      calculatedPrimaryWindowSize.getHeight()));
+         int widthFromINI = calculatedPrimaryWindowSize.getWidth();
+         int heightFromINI = calculatedPrimaryWindowSize.getHeight();
+         int menuBarHeight = (int) ImGui.getFrameHeight();
+         calculatedPrimaryWindowSize.setWidth(widthFromINI);
+         calculatedPrimaryWindowSize.setHeight(heightFromINI + menuBarHeight);
+         ImGuiTools.parsePrimaryWindowPositionFromSettingsINI(settingsINIAsString, primaryWindowContentAreaPosition);
+         int loadedX = primaryWindowContentAreaPosition.getX();
+         int loadedY = primaryWindowContentAreaPosition.getY();
+         primaryWindowContentAreaPosition.setX(loadedX);
+         primaryWindowContentAreaPosition.setY(loadedY - menuBarHeight);
          ImGui.loadIniSettingsFromMemory(settingsINIAsString);
       });
 
@@ -241,13 +229,13 @@ public class RDXImGuiWindowAndDockSystem
       JsonNode dockspacePanelsNode = jsonNode.get("dockspacePanels");
       if (dockspacePanelsNode != null)
       {
-         ImGuiDockspacePanel[] priorDockpanelSet = dockPanelSet.toArray(new ImGuiDockspacePanel[0]);
+         RDXDockspacePanel[] priorDockpanelSet = dockPanelSet.toArray(new RDXDockspacePanel[0]);
          dockPanelSet.clear();
          for (Iterator<Map.Entry<String, JsonNode>> it = dockspacePanelsNode.fields(); it.hasNext(); )
          {
             Map.Entry<String, JsonNode> dockspacePanelEntry = it.next();
-            ImGuiDockspacePanel dockspacePanel = null;
-            for (ImGuiDockspacePanel otherDockspacePanel : priorDockpanelSet)
+            RDXDockspacePanel dockspacePanel = null;
+            for (RDXDockspacePanel otherDockspacePanel : priorDockpanelSet)
             {
                if (otherDockspacePanel.getName().equals(dockspacePanelEntry.getKey()))
                {
@@ -256,7 +244,7 @@ public class RDXImGuiWindowAndDockSystem
             }
             if (dockspacePanel == null)
             {
-               dockspacePanel = new ImGuiDockspacePanel(dockspacePanelEntry.getKey());
+               dockspacePanel = new RDXDockspacePanel(dockspacePanelEntry.getKey());
             }
             dockPanelSet.add(dockspacePanel);
             dockspacePanel.getIsShowing().set(dockspacePanelEntry.getValue().asBoolean());
@@ -277,7 +265,7 @@ public class RDXImGuiWindowAndDockSystem
       Consumer<ObjectNode> rootConsumer = root ->
       {
          ObjectNode anchorJSON = root.putObject("dockspacePanels");
-         for (ImGuiDockspacePanel dockspacePanel : dockPanelSet)
+         for (RDXDockspacePanel dockspacePanel : dockPanelSet)
          {
             anchorJSON.put(dockspacePanel.getName(), dockspacePanel.getIsShowing().get());
          }
@@ -321,7 +309,7 @@ public class RDXImGuiWindowAndDockSystem
       return imGuiGl3;
    }
 
-   public ImGuiPanelManager getPanelManager()
+   public RDXPanelManager getPanelManager()
    {
       return panelManager;
    }
@@ -341,28 +329,8 @@ public class RDXImGuiWindowAndDockSystem
       return calculatedPrimaryWindowSize;
    }
 
-   public ImGuiPosition getPrimaryWindowPosition()
+   public ImGuiPosition getPrimaryWindowContentAreaPosition()
    {
-      return primaryWindowPosition;
-   }
-
-   public int getFrameSizeLeft()
-   {
-      return frameSizeLeft.get(0);
-   }
-
-   public int getFrameSizeRight()
-   {
-      return frameSizeRight.get(0);
-   }
-
-   public int getFrameSizeTop()
-   {
-      return frameSizeTop.get(0);
-   }
-
-   public int getFrameSizeBottom()
-   {
-      return frameSizeBottom.get(0);
+      return primaryWindowContentAreaPosition;
    }
 }

@@ -1,0 +1,31 @@
+{
+  "title" : "Perception configuration parameters",
+  "L515 throttler frequency" : {
+    "value" : 15,
+    "lowerBound" : 1,
+    "upperBound" : 30
+  },
+  "Ouster throttler frequency" : {
+    "value" : 10,
+    "lowerBound" : 1,
+    "upperBound" : 10
+  },
+  "Occupancy grid resolution" : {
+    "value" : 10,
+    "lowerBound" : 1,
+    "upperBound" : 100
+  },
+  "Rapid regions enabled" : false,
+  "Height map enabled" : true,
+  "Logging enabled" : false,
+  "Publish color" : true,
+  "Publish depth" : true,
+  "Log color" : false,
+  "Log depth" : false,
+  "SLAM enabled" : false,
+  "SLAM reset" : false,
+  "Support square enabled" : true,
+  "Bounding box filter" : true,
+  "Concave hull filters" : true,
+  "Shadow filter" : true
+}

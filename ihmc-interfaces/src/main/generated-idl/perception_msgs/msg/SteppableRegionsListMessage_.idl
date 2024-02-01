@@ -1,0 +1,69 @@
+#ifndef __perception_msgs__msg__SteppableRegionsListMessage__idl__
+#define __perception_msgs__msg__SteppableRegionsListMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+#include "ihmc_common_msgs/msg/./InstantMessage_.idl"
+#include "perception_msgs/msg/./HeightMapMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC environment modeling process.
+       * This message contains a list of steppable regions.
+       * It is defined by an origin, a normal, and a concave hull.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::SteppableRegionsListMessage_")
+      struct SteppableRegionsListMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Approximate last update time
+         */
+        ihmc_common_msgs::msg::dds::InstantMessage last_updated;
+        /**
+         * Foot yaw for the corresponding regions
+         */
+        double foot_yaw;
+        /**
+         * ID number referring to each steppable region, it should be unique.
+         */
+        sequence<long, 1000> region_id;
+        /**
+         * The coordinates in world of the origin of each steppable region
+         */
+        sequence<geometry_msgs::msg::dds::Point, 1000> region_origin;
+        /**
+         * The orientation with respect to world of each steppable region.
+         */
+        sequence<geometry_msgs::msg::dds::Quaternion, 1000> region_orientation;
+        /**
+         * The normal expressed in world of each steppable region.
+         */
+        sequence<geometry_msgs::msg::dds::Vector3, 1000> region_normal;
+        /**
+         * Indicates for each planar region the number of vertices for the concave hull.
+         */
+        sequence<long, 100> concave_hulls_size;
+        /**
+         * Single buffer used to store for each planar the vertices of the concave hull and the convex polygons.
+         */
+        sequence<geometry_msgs::msg::dds::Point, 3000> vertex_buffer;
+        /**
+         * Height map message used for each of the concave hulls
+         */
+        sequence<perception_msgs::msg::dds::HeightMapMessage, 100> local_height_map;
+      };
+    };
+  };
+};
+
+#endif

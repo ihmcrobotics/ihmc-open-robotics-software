@@ -31,12 +31,6 @@ public class AtlasToeOffParameters extends ToeOffParameters
       return true;
    }
 
-   @Override
-   public boolean checkECMPLocationToTriggerToeOff()
-   {
-      return true;
-   }
-
    /** {@inheritDoc} */
    @Override
    public double getMinStepLengthForToeOff()

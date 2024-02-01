@@ -1,15 +1,19 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
+
+import java.lang.annotation.Native;
 
 /**
  * This is a helper class to handle {@link SelectionMatrix3D}, {@link SelectionMatrix6D} in the context of QP objectives.
@@ -28,21 +32,26 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 public class SelectionCalculator
 {
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final DMatrixRMaj tempRotationMatrix = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj tempRotationMatrixWithSelection = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj tempTaskWeight = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj denseSelectionMatrix = new DMatrixRMaj(1, 1);
+   private final NativeMatrix tempRotationMatrix = new NativeMatrix(3, 3);
+   private final NativeMatrix tempRotationMatrixWithSelection = new NativeMatrix(1, 1);
+   private final NativeMatrix tempTaskWeight = new NativeMatrix(3, 3);
+   private final NativeMatrix denseSelectionMatrix = new NativeMatrix(1, 1);
 
-   private final DMatrixRMaj taskJacobian3D = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj taskObjective3D = new DMatrixRMaj(1, 1);
+   private final NativeMatrix taskJacobian3D = new NativeMatrix(1, 1);
+   private final NativeMatrix taskObjective3D = new NativeMatrix(1, 1);
 
-   private final DMatrixRMaj taskJacobianSelected3D = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj taskObjectiveSelected3D = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj taskWeightSelected3D = new DMatrixRMaj(1, 1);
+   private final NativeMatrix taskJacobianSelected3D = new NativeMatrix(1, 1);
+   private final NativeMatrix taskObjectiveSelected3D = new NativeMatrix(1, 1);
+   private final NativeMatrix taskWeightSelected3D = new NativeMatrix(1, 1);
 
-   public int applySelectionToTask(SelectionMatrix3D selectionMatrix, WeightMatrix3D weightMatrix, ReferenceFrame taskFrame, DMatrixRMaj taskJacobian,
-                                   DMatrixRMaj taskObjective, DMatrixRMaj taskJacobianToPack, DMatrixRMaj taskObjectiveToPack,
-                                   DMatrixRMaj taskWeightToPack)
+   public int applySelectionToTask(SelectionMatrix3D selectionMatrix,
+                                   WeightMatrix3D weightMatrix,
+                                   ReferenceFrame taskFrame,
+                                   NativeMatrix taskJacobian,
+                                   NativeMatrix taskObjective,
+                                   NativeMatrix taskJacobianToPack,
+                                   NativeMatrix taskObjectiveToPack,
+                                   NativeMatrix taskWeightToPack)
    {
       int problemSize = taskJacobian.getNumCols();
       int taskSize = 3;
@@ -60,12 +69,13 @@ public class SelectionCalculator
 
       // Pack the selection matrix in selection frame:
       denseSelectionMatrix.reshape(3, 3);
-      CommonOps_DDRM.setIdentity(denseSelectionMatrix);
+      denseSelectionMatrix.zero();
+      denseSelectionMatrix.fillDiagonal(1.0);
       for (int axis = taskSize - 1; axis >= 0; axis--)
       {
          if (!selectionMatrix.isAxisSelected(axis))
          {
-            MatrixTools.removeRow(denseSelectionMatrix, axis);
+            denseSelectionMatrix.removeRow(axis);
          }
       }
 
@@ -84,11 +94,11 @@ public class SelectionCalculator
          taskFrame.getTransformToDesiredFrame(tempTransform, selectionFrame);
          tempTransform.getRotation().get(tempRotationMatrix);
          tempRotationMatrixWithSelection.reshape(reducedTaskSize, 3);
-         CommonOps_DDRM.mult(denseSelectionMatrix, tempRotationMatrix, tempRotationMatrixWithSelection);
+         tempRotationMatrixWithSelection.mult(denseSelectionMatrix, tempRotationMatrix);
          taskJacobianToPack.reshape(reducedTaskSize, problemSize);
          taskObjectiveToPack.reshape(reducedTaskSize, 1);
-         CommonOps_DDRM.mult(tempRotationMatrixWithSelection, taskJacobian, taskJacobianToPack);
-         CommonOps_DDRM.mult(tempRotationMatrixWithSelection, taskObjective, taskObjectiveToPack);
+         taskJacobianToPack.mult(tempRotationMatrixWithSelection, taskJacobian);
+         taskObjectiveToPack.mult(tempRotationMatrixWithSelection, taskObjective);
       }
       else
       {
@@ -104,7 +114,7 @@ public class SelectionCalculator
          weightFrame = taskFrame;
       }
       taskWeightToPack.reshape(taskSize, taskSize);
-      CommonOps_DDRM.fill(taskWeightToPack, 0.0);
+      taskWeightToPack.zero();
       taskWeightToPack.set(0, 0, weightMatrix.getXAxisWeight());
       taskWeightToPack.set(1, 1, weightMatrix.getYAxisWeight());
       taskWeightToPack.set(2, 2, weightMatrix.getZAxisWeight());
@@ -115,11 +125,11 @@ public class SelectionCalculator
          weightFrame.getTransformToDesiredFrame(tempTransform, selectionFrame);
          tempTransform.getRotation().get(tempRotationMatrix);
          tempRotationMatrixWithSelection.reshape(reducedTaskSize, 3);
-         CommonOps_DDRM.mult(denseSelectionMatrix, tempRotationMatrix, tempRotationMatrixWithSelection);
+         tempRotationMatrixWithSelection.mult(denseSelectionMatrix, tempRotationMatrix);
          tempTaskWeight.reshape(reducedTaskSize, 3);
-         CommonOps_DDRM.mult(tempRotationMatrixWithSelection, taskWeightToPack, tempTaskWeight);
+         tempTaskWeight.mult(tempRotationMatrixWithSelection, taskWeightToPack);
          taskWeightToPack.reshape(reducedTaskSize, reducedTaskSize);
-         CommonOps_DDRM.multTransB(tempTaskWeight, tempRotationMatrixWithSelection, taskWeightToPack);
+         taskWeightToPack.multTransB(tempTaskWeight, tempRotationMatrixWithSelection);
       }
       else
       {
@@ -127,8 +137,8 @@ public class SelectionCalculator
          {
             if (!selectionMatrix.isAxisSelected(axis))
             {
-               MatrixTools.removeRow(taskWeightToPack, axis);
-               MatrixTools.removeColumn(taskWeightToPack, axis);
+               taskWeightToPack.removeRow(axis);
+               taskWeightToPack.removeColumn(axis);
             }
          }
       }
@@ -138,9 +148,14 @@ public class SelectionCalculator
       return reducedTaskSize;
    }
 
-   public int applySelectionToTask(SelectionMatrix6D selectionMatrix, WeightMatrix6D weightMatrix, ReferenceFrame taskFrame, DMatrixRMaj taskJacobian,
-                                   DMatrixRMaj taskObjective, DMatrixRMaj taskJacobianToPack, DMatrixRMaj taskObjectiveToPack,
-                                   DMatrixRMaj taskWeightToPack)
+   public int applySelectionToTask(SelectionMatrix6D selectionMatrix,
+                                   WeightMatrix6D weightMatrix,
+                                   ReferenceFrame taskFrame,
+                                   DMatrixRMaj taskJacobian,
+                                   DMatrixRMaj taskObjective,
+                                   NativeMatrix taskJacobianToPack,
+                                   NativeMatrix taskObjectiveToPack,
+                                   NativeMatrix taskWeightToPack)
    {
       int problemSize = taskJacobian.getNumCols();
       int taskSize = 6;
@@ -156,43 +171,55 @@ public class SelectionCalculator
       taskWeightToPack.reshape(reducedTaskSize, reducedTaskSize);
 
       // Do the angular part:
-      CommonOps_DDRM.extract(taskJacobian, 0, 3, 0, problemSize, taskJacobian3D, 0, 0);
-      CommonOps_DDRM.extract(taskObjective, 0, 3, 0, 1, taskObjective3D, 0, 0);
-      int offset = applySelectionToTask(selectionMatrix.getAngularPart(), weightMatrix.getAngularPart(), taskFrame, taskJacobian3D, taskObjective3D,
-                                        taskJacobianSelected3D, taskObjectiveSelected3D, taskWeightSelected3D);
-      CommonOps_DDRM.insert(taskJacobianSelected3D, taskJacobianToPack, 0, 0);
-      CommonOps_DDRM.insert(taskObjectiveSelected3D, taskObjectiveToPack, 0, 0);
-      CommonOps_DDRM.insert(taskWeightSelected3D, taskWeightToPack, 0, 0);
+      taskJacobian3D.insert(taskJacobian, 0, 3, 0, problemSize, 0, 0);
+      taskObjective3D.insert(taskObjective, 0, 3, 0, 1, 0, 0);
+      int offset = applySelectionToTask(selectionMatrix.getAngularPart(),
+                                        weightMatrix.getAngularPart(),
+                                        taskFrame,
+                                        taskJacobian3D,
+                                        taskObjective3D,
+                                        taskJacobianSelected3D,
+                                        taskObjectiveSelected3D,
+                                        taskWeightSelected3D);
+      taskJacobianToPack.insert(taskJacobianSelected3D, 0, 0);
+      taskObjectiveToPack.insert(taskObjectiveSelected3D, 0, 0);
+      taskWeightToPack.insert(taskWeightSelected3D, 0, 0);
 
       // Do the linear part:
-      CommonOps_DDRM.extract(taskJacobian, 3, 6, 0, problemSize, taskJacobian3D, 0, 0);
-      CommonOps_DDRM.extract(taskObjective, 3, 6, 0, 1, taskObjective3D, 0, 0);
-      applySelectionToTask(selectionMatrix.getLinearPart(), weightMatrix.getLinearPart(), taskFrame, taskJacobian3D, taskObjective3D, taskJacobianSelected3D,
-                           taskObjectiveSelected3D, taskWeightSelected3D);
-      CommonOps_DDRM.insert(taskJacobianSelected3D, taskJacobianToPack, offset, 0);
-      CommonOps_DDRM.insert(taskObjectiveSelected3D, taskObjectiveToPack, offset, 0);
-      CommonOps_DDRM.insert(taskWeightSelected3D, taskWeightToPack, offset, offset);
+      taskJacobian3D.insert(taskJacobian, 3, 6, 0, problemSize, 0, 0);
+      taskObjective3D.insert(taskObjective, 3, 6, 0, 1, 0, 0);
+      applySelectionToTask(selectionMatrix.getLinearPart(),
+                           weightMatrix.getLinearPart(),
+                           taskFrame,
+                           taskJacobian3D,
+                           taskObjective3D,
+                           taskJacobianSelected3D,
+                           taskObjectiveSelected3D,
+                           taskWeightSelected3D);
+      taskJacobianToPack.insert(taskJacobianSelected3D, offset, 0);
+      taskObjectiveToPack.insert(taskObjectiveSelected3D, offset, 0);
+      taskWeightToPack.insert(taskWeightSelected3D, offset, offset);
 
       return reducedTaskSize;
    }
 
-   private static void checkResult(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight)
+   private static void checkResult(NativeMatrix taskJacobian, NativeMatrix taskObjective, NativeMatrix taskWeight)
    {
-      if (MatrixTools.containsNaN(taskJacobian))
+      if (taskJacobian.containsNaN())
       {
          throw new RuntimeException("The task jacobian contained NaN.");
       }
-      if (MatrixTools.containsNaN(taskObjective))
+      if (taskObjective.containsNaN())
       {
          throw new RuntimeException("The task objective contained NaN.");
       }
-      if (MatrixTools.containsNaN(taskWeight))
+      if (taskWeight.containsNaN())
       {
          throw new RuntimeException("The task weight contained NaN.");
       }
    }
 
-   private static void checkMatrixSizes(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, int taskSize)
+   private static void checkMatrixSizes(DMatrix taskJacobian, DMatrix taskObjective, int taskSize)
    {
       if (taskJacobian.getNumRows() != taskSize || taskObjective.getNumRows() != taskSize || taskObjective.getNumCols() != 1)
       {

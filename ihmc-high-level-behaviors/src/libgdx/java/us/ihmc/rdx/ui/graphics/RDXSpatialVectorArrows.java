@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.rdx.tools.LibGDXTools;
 
 public class RDXSpatialVectorArrows
@@ -32,6 +33,10 @@ public class RDXSpatialVectorArrows
    private YoDoubleClientHelper angularZYoVariable;
    private final Vector3D tempVector = new Vector3D();
 
+   private double linearPartScale = 0.005;
+   private double angularPartScale = 0.02;
+   private boolean show = true;
+
    public RDXSpatialVectorArrows(ReferenceFrame originFrame, YoVariableClientHelper yoVariableClientHelper, String variablePrefix)
    {
       this.originFrame = originFrame;
@@ -44,10 +49,20 @@ public class RDXSpatialVectorArrows
       angularZYoVariable = yoVariableClientHelper.subscribeToYoDouble(variablePrefix + "TorqueZ");
    }
 
+   public RDXSpatialVectorArrows(ReferenceFrame originFrame)
+   {
+      this.originFrame = originFrame;
+   }
+
    public RDXSpatialVectorArrows(ReferenceFrame originFrame, int indexOfSensor)
    {
       this.originFrame = originFrame;
       this.indexOfSensor = indexOfSensor;
+   }
+
+   public void update(SpatialVectorReadOnly spatialVector)
+   {
+      update(spatialVector.getLinearPart(), spatialVector.getAngularPart());
    }
 
    public void update(Vector3DReadOnly linearPart, Vector3DReadOnly angularPart)
@@ -55,8 +70,8 @@ public class RDXSpatialVectorArrows
       origin.setToZero(originFrame);
       origin.changeFrame(ReferenceFrame.getWorldFrame());
 
-      transform(linearPartArrow, linearPart, 0.005);
-      transform(angularPartArrow, angularPart, 0.02);
+      transform(linearPartArrow, linearPart, linearPartScale);
+      transform(angularPartArrow, angularPart, angularPartScale);
    }
 
    public void updateFromYoVariables()
@@ -90,12 +105,35 @@ public class RDXSpatialVectorArrows
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      linearPartArrow.getRenderables(renderables, pool);
-      angularPartArrow.getRenderables(renderables, pool);
+      if (show)
+      {
+         linearPartArrow.getRenderables(renderables, pool);
+         angularPartArrow.getRenderables(renderables, pool);
+      }
    }
 
    public int getIndexOfSensor()
    {
       return indexOfSensor;
+   }
+
+   public void setLinearPartScale(double linearPartScale)
+   {
+      this.linearPartScale = linearPartScale;
+   }
+
+   public void setAngularPartScale(double angularPartScale)
+   {
+      this.angularPartScale = angularPartScale;
+   }
+
+   public boolean getShow()
+   {
+      return show;
+   }
+
+   public void setShow(boolean show)
+   {
+      this.show = show;
    }
 }

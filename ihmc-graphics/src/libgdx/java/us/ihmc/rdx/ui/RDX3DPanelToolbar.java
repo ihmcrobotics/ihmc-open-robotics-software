@@ -1,8 +1,8 @@
 package us.ihmc.rdx.ui;
 
 import imgui.ImGui;
-import imgui.flag.ImGuiWindowFlags;
-import us.ihmc.rdx.imgui.ImGuiTools;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiMouseButton;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.RDXIconTexture;
 
@@ -10,9 +10,9 @@ import java.util.ArrayList;
 
 public class RDX3DPanelToolbar
 {
+   private boolean show = true;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final float iconSize = 35.0f;
-   private final float gap = 17.7f;
+   private final float iconSize = 40.0f;
    private final ArrayList<RDX3DPanelToolbarButton> buttons = new ArrayList<>();
 
    public RDX3DPanelToolbarButton addButton()
@@ -24,39 +24,96 @@ public class RDX3DPanelToolbar
 
    public void render(float mainWindowWidth, float mainWindowPosX, float mainWindowPosY)
    {
-      if (buttons.size() > 0)
+      if (buttons.size() > 0 && show)
       {
-         int numButtons = buttons.size();
-         float offsetY = 12.0f;
-         float panelWidth = iconSize * numButtons + gap * numButtons;
-         float panelHeight = iconSize + 2 * offsetY;
+         float spaceBetweenButtons = 9.0f;
+         float toolbarWidth = buttons.size() * (iconSize + spaceBetweenButtons);
 
-         ImGui.setNextWindowSize(panelWidth, panelHeight);
-         float centerX = mainWindowPosX + mainWindowWidth / 2;
-         float startX = centerX - panelWidth / 2;
-         ImGui.setNextWindowPos(startX, mainWindowPosY + 15.0f);
+         float centerX = mainWindowWidth / 2.0f;
+         float startX = centerX - toolbarWidth / 2.0f;
+         float startY = 40.0f;
 
-         int windowFlags = ImGuiWindowFlags.NoTitleBar; // undecorated
-         ImGui.begin(labels.get("Toolbar"), windowFlags);
+         float upGray = 1.0f;
+         float hoverGray = 0.4f;
+         float downGray = 0.2f;
+         ImGui.pushStyleColor(ImGuiCol.Button, upGray, upGray, upGray, 0.5f);
+         ImGui.pushStyleColor(ImGuiCol.ButtonHovered, hoverGray, hoverGray, hoverGray, 0.8f);
+         ImGui.pushStyleColor(ImGuiCol.ButtonActive, downGray, downGray, downGray, 0.9f);
 
-         for (RDX3DPanelToolbarButton button : buttons)
+         for (int i = 0; i < buttons.size(); i++)
          {
-            RDXIconTexture icon = button.getIcon();
+            RDX3DPanelToolbarButton button = buttons.get(i);
+            RDXIconTexture icon = button.getIconTexture();
             if (icon == null)
                continue;
 
-            if (ImGui.imageButton(icon.getTexture().getTextureObjectHandle(), iconSize, iconSize))
+            ImGui.setCursorPos(startX + (i * (iconSize + spaceBetweenButtons)), startY);
+
+            float sizeX = iconSize;
+            float sizeY = iconSize;
+            float uv0X = 0.0f;
+            float uv0Y = 0.0f;
+            float uv1X = 1.0f;
+            float uv1Y = 1.0f;
+            // We are making this background fully transparent currently
+            float backgroundColorR = 1.0f;
+            float backgroundColorG = 1.0f;
+            float backgroundColorB = 1.0f;
+            float backgroundColorA = 0.0f;
+            // The "tint" is a fade of the full button look. White and 1.0f alpha
+            // is the only value that does not "tamper" with the button look.
+            float tintR = 1.0f;
+            float tintG = 1.0f;
+            float tintB = 1.0f;
+            float tintA = 1.0f;
+            int framePadding = 0;
+            // An ImGui imageButton must have a consistent texture object handle or it will not operate correctly.
+            // You must use UV coordinates to change the graphic based on state. (You could also reupload the texture
+            // to the GPU, but that's probably not the best method.)
+            if (ImGui.imageButton(icon.getTexture().getTextureObjectHandle(),
+                                  sizeX,
+                                  sizeY,
+                                  uv0X,
+                                  uv0Y,
+                                  uv1X,
+                                  uv1Y,
+                                  framePadding,
+                                  backgroundColorR,
+                                  backgroundColorG,
+                                  backgroundColorB,
+                                  backgroundColorA,
+                                  tintR,
+                                  tintG,
+                                  tintB,
+                                  tintA))
             {
                button.onPressed();
             }
+            button.setHovered(ImGui.isItemHovered());
+            button.setDown(button.getHovered() && ImGui.isMouseDown(ImGuiMouseButton.Left));
 
-            if (button.getTooltipText() != null)
+            if (!ImGui.isItemHovered())
             {
-               ImGuiTools.previousWidgetTooltip(button.getTooltipText());
+               button.getTooltipTimer().reset();
             }
-            ImGui.sameLine();
+
+            if (button.getTooltipText() != null && button.getTooltipTimer().isExpired(0.7))
+            {
+               ImGui.setTooltip(button.getTooltipText());
+            }
          }
-         ImGui.end();
+
+         ImGui.popStyleColor(3);
       }
+   }
+
+   public boolean isShow()
+   {
+      return show;
+   }
+
+   public void setShow(boolean show)
+   {
+      this.show = show;
    }
 }

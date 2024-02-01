@@ -7,44 +7,71 @@ import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.OpenCVImageFormat;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.tools.NativeMemoryTools;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
-import java.util.HashMap;
+import java.util.function.Supplier;
 
 /**
  * This class publishes a PNG compressed depth image from the Ouster as fast as the frames come in.
  */
 public class OusterDepthPublisher
 {
-   private final ROS2Topic<?>[] outputTopics;
-   private final HashMap<ROS2Topic<?>, IHMCRealtimeROS2Publisher> publisherMap;
+   private final RealtimeROS2Node realtimeROS2Node;
+   private final IHMCRealtimeROS2Publisher<ImageMessage> imagePublisher;
+   private final IHMCRealtimeROS2Publisher<LidarScanMessage> lidarScanPublisher;
 
    private final FramePose3D cameraPose = new FramePose3D();
-
-   private final IntPointer compressionParameters;
-   private final ByteBuffer pngImageBuffer;
-   private final BytePointer pngImageBytePointer;
-
+   private IntPointer compressionParameters;
+   private ByteBuffer pngImageBuffer;
+   private BytePointer pngImageBytePointer;
    private long sequenceNumber = 0;
-
    private final ImageMessage outputImageMessage = new ImageMessage();
+   private final Supplier<Boolean> publishLidarScan;
    private final LidarScanMessage lidarScanMessage = new LidarScanMessage();
-   private final int depthHeight;
-   private final int depthWidth;
-   private final int numberOfPointsPerFullScan;
+   private int depthHeight;
+   private int depthWidth;
+   private int numberOfPointsPerFullScan;
 
-   public OusterDepthPublisher(HashMap<ROS2Topic<?>, IHMCRealtimeROS2Publisher> publisherMap, int depthWidth, int depthHeight, ROS2Topic<?>... outputTopics)
+   public OusterDepthPublisher(ROS2Topic<ImageMessage> imageMessageTopic,
+                               ROS2Topic<LidarScanMessage> lidarScanTopic,
+                               Supplier<Boolean> publishLidarScan)
    {
-      this.outputTopics = outputTopics;
-      this.publisherMap = publisherMap;
+      this.publishLidarScan = publishLidarScan;
+
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.FAST_RTPS, "ouster_depth_publisher");
+
+      LogTools.info("Publishing ROS 2 ImageMessage: {}", imageMessageTopic);
+      imagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, imageMessageTopic, ROS2QosProfile.BEST_EFFORT());
+
+      if (lidarScanTopic != null)
+      {
+         LogTools.info("Publishing ROS 2 LidarScanMessage: {}", lidarScanTopic);
+         lidarScanPublisher = ROS2Tools.createPublisher(realtimeROS2Node, lidarScanTopic, ROS2QosProfile.BEST_EFFORT());
+      }
+      else
+      {
+         lidarScanPublisher = null;
+      }
+
+      realtimeROS2Node.spin();
+   }
+
+   public void initialize(int depthWidth, int depthHeight)
+   {
       this.depthHeight = depthHeight;
       this.depthWidth = depthWidth;
       numberOfPointsPerFullScan = depthWidth * depthHeight;
@@ -55,61 +82,59 @@ public class OusterDepthPublisher
       compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
    }
 
-   /**
-    * Synchronized to make sure it's only running ever once at a time.
-    * This should also be guaranteed by the ResettableExceptionHandlingExecutorService.
-    */
-   public synchronized void extractCompressAndPublish(ReferenceFrame sensorFrame, OusterDepthExtractionKernel depthExtractionKernel, Instant acquisitionInstant)
+   public void extractCompressAndPublish(ReferenceFrame ousterSensorFrame,
+                                         OusterDepthExtractionKernel depthExtractionKernel,
+                                         Instant acquisitionInstant,
+                                         ByteBuffer beamAltitudeAnglesBuffer,
+                                         ByteBuffer beamAzimuthAnglesBuffer)
    {
-      for (ROS2Topic<?> topic : outputTopics)
+      // Important not to store as a field, as update() needs to be called each frame
+      cameraPose.setToZero(ousterSensorFrame);
+      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      depthExtractionKernel.runKernel(ousterSensorFrame.getTransformToRoot());
+      // Encode as PNG which is lossless and handles single channel images.
+      opencv_imgcodecs.imencode(".png",
+                                depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat(),
+                                pngImageBytePointer,
+                                compressionParameters);
+
+      outputImageMessage.getPosition().set(cameraPose.getPosition());
+      outputImageMessage.getOrientation().set(cameraPose.getOrientation());
+      MessageTools.toMessage(acquisitionInstant, outputImageMessage.getAcquisitionTime());
+      // Sadly, Pub Sub makes us go through a TByteArrayList. If we rewrite our DDS layer, we should allow a memcpy to native DDS buffer.
+      outputImageMessage.getData().resetQuick();
+      for (int i = 0; i < pngImageBytePointer.limit(); i++)
       {
-         if (topic.getType().equals(ImageMessage.class))
-         {
-            // Important not to store as a field, as update() needs to be called each frame
-            cameraPose.setToZero(sensorFrame);
-            cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-            depthExtractionKernel.runKernel(cameraPose);
-            // Encode as PNG which is lossless and handles single channel images.
-            opencv_imgcodecs.imencode(".png",
-                                      depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat(),
-                                      pngImageBytePointer,
-                                      compressionParameters);
-
-            outputImageMessage.getPosition().set(cameraPose.getPosition());
-            outputImageMessage.getOrientation().set(cameraPose.getOrientation());
-            MessageTools.toMessage(acquisitionInstant, outputImageMessage.getAcquisitionTime());
-            // Sadly, Pub Sub makes us go through a TByteArrayList. If we rewrite our DDS layer, we should allow a memcpy to native DDS buffer.
-            outputImageMessage.getData().resetQuick();
-            for (int i = 0; i < pngImageBytePointer.limit(); i++)
-            {
-               outputImageMessage.getData().add(pngImageBytePointer.get(i));
-            }
-            outputImageMessage.setFormat(OpenCVImageFormat.PNG.ordinal());
-            outputImageMessage.setSequenceNumber(sequenceNumber++);
-            outputImageMessage.setImageWidth(depthWidth);
-            outputImageMessage.setImageHeight(depthHeight);
-
-            publisherMap.get(topic).publish(outputImageMessage);
-         }
-         else if (topic.getType().equals(LidarScanMessage.class))
-         {
-            lidarScanMessage.setUniqueId(sequenceNumber);
-            lidarScanMessage.getLidarPosition().set(cameraPose.getPosition());
-            lidarScanMessage.getLidarOrientation().set(cameraPose.getOrientation());
-            lidarScanMessage.setRobotTimestamp(Conversions.secondsToNanoseconds(acquisitionInstant.getEpochSecond()) + acquisitionInstant.getNano());
-            lidarScanMessage.getScan().reset();
-            //            compressedPointCloudBuffer.rewind();
-            LidarPointCloudCompression.compressPointCloud(numberOfPointsPerFullScan,
-                                                          lidarScanMessage,
-                                                          (i, j) -> depthExtractionKernel.getPointCloudInSensorFrame().get(3 * i + j));
-
-            publisherMap.get(topic).publish(lidarScanMessage);
-         }
-         else
-         {
-            throw new RuntimeException("We don't have the ability to publish this type of message");
-         }
+         outputImageMessage.getData().add(pngImageBytePointer.get(i));
       }
+      ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(outputImageMessage);
+      outputImageMessage.setSequenceNumber(sequenceNumber++);
+      outputImageMessage.setImageWidth(depthWidth);
+      outputImageMessage.setImageHeight(depthHeight);
+      outputImageMessage.setFocalLengthXPixels(depthWidth / (2.0f * (float) Math.PI)); // These are nominal values approximated by Duncan & Tomasz
+      outputImageMessage.setFocalLengthYPixels(depthHeight / ((float) Math.PI / 2.0f));
+      CameraModel.OUSTER.packMessageFormat(outputImageMessage);
+      MessageTools.packIDLSequence(beamAltitudeAnglesBuffer, outputImageMessage.getOusterBeamAltitudeAngles());
+      MessageTools.packIDLSequence(beamAzimuthAnglesBuffer, outputImageMessage.getOusterBeamAzimuthAngles());
+      imagePublisher.publish(outputImageMessage);
+
+      if (lidarScanPublisher != null && publishLidarScan.get())
+      {
+         lidarScanMessage.setUniqueId(sequenceNumber);
+         lidarScanMessage.getLidarPosition().set(cameraPose.getPosition());
+         lidarScanMessage.getLidarOrientation().set(cameraPose.getOrientation());
+         lidarScanMessage.setRobotTimestamp(Conversions.secondsToNanoseconds(acquisitionInstant.getEpochSecond()) + acquisitionInstant.getNano());
+         lidarScanMessage.getScan().reset();
+         LidarPointCloudCompression.compressPointCloud(numberOfPointsPerFullScan,
+                                                       lidarScanMessage,
+                                                       (i, j) -> depthExtractionKernel.getPointCloudInWorldFrame().get(3 * i + j));
+         lidarScanPublisher.publish(lidarScanMessage);
+      }
+   }
+
+   public void destroy()
+   {
+      realtimeROS2Node.destroy();
    }
 }

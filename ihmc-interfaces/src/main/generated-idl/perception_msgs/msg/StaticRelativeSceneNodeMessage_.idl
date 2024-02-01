@@ -1,0 +1,38 @@
+#ifndef __perception_msgs__msg__StaticRelativeSceneNodeMessage__idl__
+#define __perception_msgs__msg__StaticRelativeSceneNodeMessage__idl__
+
+#include "perception_msgs/msg/./PredefinedRigidBodySceneNodeMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * A static relative heuristic scene node
+       * The topic name identifies the node.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::StaticRelativeSceneNodeMessage_")
+      struct StaticRelativeSceneNodeMessage
+      {
+        /**
+         * The predefined rigid body information that this extends
+         */
+        perception_msgs::msg::dds::PredefinedRigidBodySceneNodeMessage predefined_rigid_body_scene_node;
+        /**
+         * Distance to robot to disable tracking.
+         * Used for automatically disabling tracking for static relative objects.
+         */
+        float distance_to_disable_tracking;
+        /**
+         * Current distance to robot.
+         * Used for automatically disabling tracking for static relative objects.
+         */
+        float current_distance_to_robot;
+      };
+    };
+  };
+};
+
+#endif

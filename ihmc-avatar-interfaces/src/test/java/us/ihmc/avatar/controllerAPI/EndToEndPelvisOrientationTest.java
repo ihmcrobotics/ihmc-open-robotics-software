@@ -52,6 +52,7 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -72,7 +73,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
    private FullHumanoidRobotModel fullRobotModel;
-   private HumanoidReferenceFrames humanoidReferenceFrames;
+   private CommonHumanoidReferenceFrames humanoidReferenceFrames;
 
    @Test
    public void testGoHome()
@@ -613,7 +614,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       assertTrue(simulationTestHelper.simulateNow(0.5));
 
       fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
-      humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();
 
       humanoidReferenceFrames.updateFrames();
    }

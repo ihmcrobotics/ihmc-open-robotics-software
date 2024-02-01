@@ -7,7 +7,7 @@
     "Second 3D View" : false,
     "VR Settings" : false,
     "VR Thread Debugger" : false,
-    "Window 1" : false,
+    "Window 1" : true,
     "Window 2" : false,
     "Window 3" : false
   }

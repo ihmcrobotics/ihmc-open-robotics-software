@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -21,7 +20,6 @@ public class ActuatorForceBasedTouchdownDetector implements TouchdownDetector
    private final YoDouble touchdownForceThreshold;
    private final YoDouble definitelyTouchdownForceThreshold;
 
-   private final Wrench wrenchToPack = new Wrench();
    private final Vector3D vectorToPack = new Vector3D();
 
    public ActuatorForceBasedTouchdownDetector(String name, ForceSensorDataReadOnly forceSensorData, double touchdownForceThreshold, double defintielyTouchdownForceThreshold,
@@ -54,11 +52,10 @@ public class ActuatorForceBasedTouchdownDetector implements TouchdownDetector
    @Override
    public void update()
    {
-      foreSensorData.getWrench(wrenchToPack);
-      vectorToPack.set(wrenchToPack.getLinearPart());
+      vectorToPack.set(foreSensorData.getWrench().getLinearPart());
 
-      touchdownDetected.set(vectorToPack.length() > touchdownForceThreshold.getDoubleValue());
-      touchdownForSureDetected.set(vectorToPack.length() > definitelyTouchdownForceThreshold.getDoubleValue());
+      touchdownDetected.set(vectorToPack.norm() > touchdownForceThreshold.getDoubleValue());
+      touchdownForSureDetected.set(vectorToPack.norm() > definitelyTouchdownForceThreshold.getDoubleValue());
       touchdownDetectedFiltered.update();
       touchdownForSureDetectedFiltered.update();
    }

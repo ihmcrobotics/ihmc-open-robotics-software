@@ -20,6 +20,7 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.MessagerStateListener;
 import us.ihmc.messager.TopicListener;
+import us.ihmc.messager.TopicListenerBase;
 
 /**
  * @deprecated This is an old implementation that imposes restrictions like having a NetClassList.
@@ -33,7 +34,7 @@ public class KryoMessager implements Messager
    private final MessagerAPI messagerAPI;
 
    private final ConcurrentHashMap<Topic<?>, List<AtomicReference<Object>>> inputVariablesMap = new ConcurrentHashMap<>();
-   private final ConcurrentHashMap<Topic<?>, List<TopicListener<Object>>> topicListenersMap = new ConcurrentHashMap<>();
+   private final ConcurrentHashMap<Topic<?>, List<TopicListenerBase<Object>>> topicListenersMap = new ConcurrentHashMap<>();
    private final List<MessagerStateListener> messagerStateListeners = new ArrayList<>();
 
    /**
@@ -77,6 +78,7 @@ public class KryoMessager implements Messager
       this.allowSelfSubmit = allowSelfSubmit;
    }
 
+   @SuppressWarnings("unchecked")
    private <T> void receiveREAMessage(Message<T> message)
    {
       if (message == null)
@@ -94,9 +96,9 @@ public class KryoMessager implements Messager
       if (inputVariablesForTopic != null)
          inputVariablesForTopic.forEach(variable -> variable.set(message.getMessageContent()));
 
-      List<TopicListener<Object>> topicListeners = topicListenersMap.get(messageTopic);
+      List<TopicListenerBase<Object>> topicListeners = topicListenersMap.get(messageTopic);
       if (topicListeners != null)
-         topicListeners.forEach(listener -> listener.receivedMessageForTopic(message.getMessageContent()));
+         topicListeners.forEach(listener -> listener.receivedMessageForTopic((Message<Object>) message));
    }
 
    @Override
@@ -133,6 +135,7 @@ public class KryoMessager implements Messager
    }
 
    /** {@inheritDoc} */
+   @SuppressWarnings("unchecked")
    @Override
    public <T> void attachInput(Topic<T> topic, AtomicReference<T> input)
    {
@@ -153,9 +156,9 @@ public class KryoMessager implements Messager
 
    @Override
    @SuppressWarnings("unchecked")
-   public <T> void registerTopicListener(Topic<T> topic, TopicListener<T> listener)
+   public <T> void addTopicListenerBase(Topic<T> topic, TopicListenerBase<T> listener)
    {
-      List<TopicListener<Object>> topicListeners = topicListenersMap.get(topic);
+      List<TopicListenerBase<Object>> topicListeners = topicListenersMap.get(topic);
       if (topicListeners == null)
       {
          topicListeners = new ArrayList<>();
@@ -166,7 +169,7 @@ public class KryoMessager implements Messager
 
    /** {@inheritDoc} */
    @Override
-   public <T> boolean removeTopicListener(Topic<T> topic, TopicListener<T> listener)
+   public <T> boolean removeTopicListener(Topic<T> topic, TopicListenerBase<T> listener)
    {
       List<?> topicListeners = topicListenersMap.get(topic);
       if (topicListeners == null)
@@ -196,7 +199,7 @@ public class KryoMessager implements Messager
    }
 
    @Override
-   public void registerMessagerStateListener(MessagerStateListener listener)
+   public void addMessagerStateListener(MessagerStateListener listener)
    {
       objectCommunicator.attachStateListener(new ConnectionStateListener()
       {

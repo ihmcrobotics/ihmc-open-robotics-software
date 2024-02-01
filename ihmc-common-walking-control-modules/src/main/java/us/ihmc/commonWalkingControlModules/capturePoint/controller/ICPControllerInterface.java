@@ -1,43 +1,43 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 
-public interface ICPControllerInterface
+public interface ICPControllerInterface extends SCS2YoGraphicHolder
 {
-   public abstract void initialize();
+   void initialize();
 
-   public abstract void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon);
+   void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon);
 
-   public abstract void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
-                                FramePoint2DReadOnly desiredICP,
-                                FrameVector2DReadOnly desiredICPVelocity,
-                                FramePoint2DReadOnly finalICP,
-                                FramePoint2DReadOnly perfectCoP,
-                                FramePoint2DReadOnly currentICP,
-                                FramePoint2DReadOnly currentCoMPosition,
-                                double omega0);
+   default void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
+                        FramePoint2DReadOnly desiredICP,
+                        FrameVector2DReadOnly desiredICPVelocity,
+                        FramePoint2DReadOnly finalICP,
+                        FramePoint2DReadOnly perfectCoP,
+                        FramePoint2DReadOnly currentICP,
+                        FramePoint2DReadOnly currentCoMPosition,
+                        double omega0)
+   {
+      compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, finalICP, perfectCoP, null, currentICP, currentCoMPosition, omega0);
+   }
 
-   public abstract void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
-                                FramePoint2DReadOnly desiredICP,
-                                FrameVector2DReadOnly desiredICPVelocity,
-                                FramePoint2DReadOnly finalICP,
-                                FramePoint2DReadOnly perfectCoP,
-                                FrameVector2DReadOnly perfectCMPOffset,
-                                FramePoint2DReadOnly currentICP,
-                                FramePoint2DReadOnly currentCoMPosition,
-                                double omega0);
+   void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
+                FramePoint2DReadOnly desiredICP,
+                FrameVector2DReadOnly desiredICPVelocity,
+                FramePoint2DReadOnly finalICP,
+                FramePoint2DReadOnly perfectCoP,
+                FrameVector2DReadOnly perfectCMPOffset,
+                FramePoint2DReadOnly currentICP,
+                FramePoint2DReadOnly currentCoMPosition,
+                double omega0);
 
+   FramePoint2DReadOnly getDesiredCMP();
 
-   public abstract void getDesiredCMP(FixedFramePoint2DBasics desiredCMPToPack);
+   FramePoint2DReadOnly getDesiredCoP();
 
-   public abstract void getDesiredCoP(FixedFramePoint2DBasics desiredCoPToPack);
+   FrameVector2DReadOnly getExpectedControlICPVelocity();
 
-   public abstract void getExpectedControlICPVelocity(FixedFrameVector2DBasics expectedControlICPVelocityToPack);
-
-   public abstract boolean useAngularMomentum();
-
+   boolean useAngularMomentum();
 }

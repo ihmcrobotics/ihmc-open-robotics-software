@@ -4,7 +4,7 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.ui.tools.ImPlotTools;
+import us.ihmc.rdx.imgui.ImPlotTools;
 import us.ihmc.log.LogTools;
 
 import java.util.*;
@@ -27,7 +27,7 @@ public class RDXImPlotStressTestDemo
    public RDXImPlotStressTestDemo()
    {
       LogTools.info("Starting UI");
-      baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", WINDOW_NAME);
+      baseUI = new RDXBaseUI(WINDOW_NAME);
    }
 
    public void launch()

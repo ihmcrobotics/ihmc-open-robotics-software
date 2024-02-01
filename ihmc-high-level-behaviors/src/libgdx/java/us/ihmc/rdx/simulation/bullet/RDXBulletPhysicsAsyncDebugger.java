@@ -12,7 +12,6 @@ import org.bytedeco.bullet.LinearMath.btVector3;
 import org.bytedeco.javacpp.BytePointer;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.log.LogTools;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletMultiBodyDynamicsWorld;
@@ -63,7 +62,7 @@ public class RDXBulletPhysicsAsyncDebugger
          @Override
          public void reportErrorWarning(BytePointer warningString)
          {
-            LogTools.error("Bullet: {}", BytedecoTools.stringFromByteBuffer(warningString));
+            LogTools.error("Bullet: {}", warningString.getString());
          }
 
          @Override
@@ -157,5 +156,10 @@ public class RDXBulletPhysicsAsyncDebugger
             }
          }
       }
+   }
+
+   public void setUpdateDebugDrawings(boolean updateDebugDrawings)
+   {
+      this.updateDebugDrawings.set(updateDebugDrawings);
    }
 }

@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.DetectedFacesPacket>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::DetectedFacesPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "3e9c0bab8af8d6ae5c0362b743269a9ec7e80feb9f1eb7700324c6435bb07e25";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

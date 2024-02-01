@@ -9,12 +9,9 @@ import us.ihmc.log.LogTools;
  */
 public class AtlasLookAndStepParameters extends LookAndStepBehaviorParameters
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "atlas/src/main/resources";
-
    public AtlasLookAndStepParameters()
    {
-      super(AtlasLookAndStepParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, "ForAtlas");
+      super(AtlasLookAndStepParameters.class, "ForAtlas");
    }
 
    public static void main(String[] args)

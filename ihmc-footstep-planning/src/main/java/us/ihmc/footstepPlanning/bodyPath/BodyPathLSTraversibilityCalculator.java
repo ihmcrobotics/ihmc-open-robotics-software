@@ -193,6 +193,7 @@ public class BodyPathLSTraversibilityCalculator
                RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon,
                                                                                  heightMapData,
                                                                                  parameters.getHeightMapSnapThreshold(),
+                                                                                 parameters.getMinimumSurfaceInclineRadians(),
                                                                                  parentHeight - heightWindow);
                if (snapTransform == null)
                {

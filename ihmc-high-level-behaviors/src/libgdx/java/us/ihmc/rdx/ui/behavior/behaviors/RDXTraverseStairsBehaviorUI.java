@@ -10,20 +10,22 @@ import imgui.type.ImBoolean;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.rdx.imgui.*;
+import us.ihmc.rdx.imgui.ImGuiEnumPlot;
+import us.ihmc.rdx.imgui.ImGuiLabelMap;
+import us.ihmc.rdx.imgui.ImGuiMovingPlot;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
-import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
@@ -36,9 +38,6 @@ import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
 
 public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
 {
-   public static final RDXBehaviorUIDefinition DEFINITION = new RDXBehaviorUIDefinition(TraverseStairsBehavior.DEFINITION,
-                                                                                        RDXTraverseStairsBehaviorUI::new);
-
    private final BehaviorHelper helper;
    private final RDXFootstepPlanGraphic footstepPlanGraphic;
    private final RDXPlanarRegionsGraphic planarRegionsGraphic = new RDXPlanarRegionsGraphic();
@@ -47,7 +46,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
    private String currentState = "";
    private String currentLifecycleState = "";
    private final ImBoolean operatorReviewEnabled = new ImBoolean(true);
-   private final AtomicReference<Double> distanceToStairs;
+   private final AtomicReference<Double> distanceToStairs = null;
    private final ImGuiEnumPlot currentLifecycleStatePlot = new ImGuiEnumPlot(1000, 250, 15);
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 15);
    private final ImGuiMovingPlot pauseTimeLeft = new ImGuiMovingPlot("Pause time left", 1000, 250, 15);
@@ -56,8 +55,8 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
    private long numberOfSupportRegionsReceived = 0;
    private final Timer supportRegionsReceivedTimer = new Timer();
    private final RDXBallAndArrowPosePlacement goalAffordance = new RDXBallAndArrowPosePlacement();
-   private final ImGuiStoredPropertySetTuner footstepPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Stairs behavior)");
-   private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Swing Planner Parameters (Stairs behavior)");
+   private final RDXStoredPropertySetTuner footstepPlannerParameterTuner = new RDXStoredPropertySetTuner("Footstep Planner Parameters (Stairs behavior)");
+   private final RDXStoredPropertySetTuner swingPlannerParameterTuner = new RDXStoredPropertySetTuner("Swing Planner Parameters (Stairs behavior)");
    private double timeLeftInPause = 0.0;
 
    public RDXTraverseStairsBehaviorUI(BehaviorHelper helper)
@@ -66,15 +65,15 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
       footstepPlanGraphic = new RDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
       helper.subscribeViaCallback(TraverseStairsBehaviorAPI.PLANNED_STEPS, footsteps ->
       {
-         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, DEFINITION.getName()));
+         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, getDefinition().getDescription()));
       });
-      footstepPlanGraphic.setTransparency(0.5);
-      distanceToStairs = helper.subscribeViaReference(DistanceToStairs, Double.NaN);
-      helper.subscribeViaCallback(TraverseStairsBehaviorAPI.COMPLETED, completedStopwatch::reset);
-      helper.subscribeViaCallback(State, state -> currentState = state);
-      helper.subscribeViaCallback(LifecycleState, state -> currentLifecycleState = state);
-      helper.subscribeViaCallback(TimeLeftInPause, timeLeftInPause -> this.timeLeftInPause = timeLeftInPause);
-      helper.subscribeViaCallback(ROS2Tools.BIPEDAL_SUPPORT_REGIONS, regions ->
+      footstepPlanGraphic.setOpacity(0.5);
+//      distanceToStairs = helper.subscribeViaReference(DistanceToStairs, Double.NaN);
+//      helper.subscribeViaCallback(TraverseStairsBehaviorAPI.COMPLETED, completedStopwatch::reset);
+//      helper.subscribeViaCallback(State, state -> currentState = state);
+//      helper.subscribeViaCallback(LifecycleState, state -> currentLifecycleState = state);
+//      helper.subscribeViaCallback(TimeLeftInPause, timeLeftInPause -> this.timeLeftInPause = timeLeftInPause);
+      helper.subscribeViaCallback(PerceptionAPI.BIPEDAL_SUPPORT_REGIONS, regions ->
       {
          if (regions.getConvexPolygonsSize().size() > 0 && regions.getConvexPolygonsSize().get(0) > 0)
          {
@@ -82,11 +81,11 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
             supportRegionsReceivedTimer.reset();
          }
       });
-      helper.subscribeViaCallback(PlanarRegionsForUI, regions ->
-      {
-         if (regions != null)
-            planarRegionsGraphic.generateMeshesAsync(regions);
-      });
+//      helper.subscribeViaCallback(PlanarRegionsForUI, regions ->
+//      {
+//         if (regions != null)
+//            planarRegionsGraphic.generateMeshesAsync(regions);
+//      });
    }
 
    public void setGoal(Pose3D goal)
@@ -102,10 +101,16 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
 
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("_Stairs");
       footstepPlannerParameterTuner.create(footstepPlannerParameters,
-                                           () -> helper.publish(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings()));
+                                           () ->
+                                           {
+//                                              helper.publish(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings());
+                                           });
       SwingPlannerParametersBasics swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters("_Stairs");
       swingPlannerParameterTuner.create(swingPlannerParameters,
-                                        () -> helper.publish(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings()));
+                                        () ->
+                                        {
+//                                           helper.publish(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings());
+                                        });
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -125,12 +130,14 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      return wasTickedRecently(0.5);
+      return getState().getIsActive();
    }
 
    @Override
    public void renderTreeNodeImGuiWidgets()
    {
+      ImGui.text("Goal Planning");
+      ImGui.sameLine();
       goalAffordance.renderPlaceGoalButton();
       ImGui.sameLine();
       ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
@@ -166,7 +173,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
       ImGui.text("Completed: " + FormattingTools.getFormattedDecimal2D(completedStopwatch.totalElapsed()) + " s ago.");
       if (ImGui.checkbox(labels.get("Operator review"), operatorReviewEnabled))
       {
-         helper.publish(OperatorReviewEnabled, operatorReviewEnabled.get());
+//         helper.publish(OperatorReviewEnabled, operatorReviewEnabled.get());
       }
       if (ImGui.button(labels.get("Start")))
       {
@@ -193,11 +200,11 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
    {
       BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
       supportRegionParametersMessage.setEnable(false);
-      helper.publish(ROS2Tools::getBipedalSupportRegionParametersTopic, supportRegionParametersMessage);
+      helper.publish(PerceptionAPI::getBipedalSupportRegionParametersTopic, supportRegionParametersMessage);
    }
 
    @Override
-   public void addChildPanels(ImGuiPanel parentPanel)
+   public void addChildPanels(RDXPanel parentPanel)
    {
       parentPanel.addChild(footstepPlannerParameterTuner);
       parentPanel.addChild(swingPlannerParameterTuner);
@@ -227,9 +234,8 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
       }
    }
 
-   @Override
    public String getName()
    {
-      return DEFINITION.getName();
+      return "Traverse Stairs";
    }
 }

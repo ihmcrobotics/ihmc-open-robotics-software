@@ -16,6 +16,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class DRCSCSInitialSetup
 {
@@ -114,7 +115,13 @@ public class DRCSCSInitialSetup
       robot.setGravity(gravity);
 
       LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, robot.getRobotsYoRegistry());
-      robotModel.getContactPointParameters().setupGroundContactModelParameters(groundContactModel, simulateDT);
+      RobotContactPointParameters.GroundContactModelParameters groundContactModelParameters = robotModel.getContactPointParameters().getGroundContactModelParameters(simulateDT);
+
+      groundContactModel.setZStiffness(groundContactModelParameters.getZStiffness());
+      groundContactModel.setZDamping(groundContactModelParameters.getZDamping());
+      groundContactModel.setXYStiffness(groundContactModelParameters.getXYStiffness());
+      groundContactModel.setXYDamping(groundContactModelParameters.getXYDamping());
+
       if (enableGroundSlipping)
          groundContactModel.enableSlipping();
       if (Double.isFinite(groundAlphaStick) && Double.isFinite(groundAlphaSlip))

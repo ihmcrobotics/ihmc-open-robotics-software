@@ -551,9 +551,9 @@ public class TrajectoryPointOptimizer
    public double getWaypointTime(int waypoint)
    {
       if (waypoint < 0)
-         throw new RuntimeException("Unexpected Waypoint Index");
+         throw new RuntimeException("Unexpected Waypoint Index " + waypoint);
       if (waypoint > nWaypoints.getIntegerValue() - 1)
-         throw new RuntimeException("Unexpected Waypoint Index");
+         throw new RuntimeException("Unexpected Waypoint Index " + waypoint);
 
       double time = intervalTimes.get(0);
       for (int i = 1; i < waypoint + 1; i++)
@@ -574,7 +574,7 @@ public class TrajectoryPointOptimizer
    public void getPolynomialCoefficients(List<TDoubleArrayList> coefficientsToPack, int dimension)
    {
       if (coefficientsToPack.size() != intervals.getIntegerValue())
-         throw new RuntimeException("Unexpected Size of Output");
+         throw new RuntimeException("Unexpected Size of Output. Coefficients : " + coefficientsToPack.size() + ", intervals : " + intervals.getIntegerValue());
       if (dimension > dimensions.getIntegerValue() - 1 || dimension < 0)
          throw new RuntimeException("Unknown Dimension");
 

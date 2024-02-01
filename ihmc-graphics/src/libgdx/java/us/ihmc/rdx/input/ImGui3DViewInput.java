@@ -198,7 +198,7 @@ public class ImGui3DViewInput
     */
    public boolean mouseReleasedWithoutDrag(int button)
    {
-      return ImGui.getMouseDragDeltaX() == 0.0f && ImGui.getMouseDragDeltaY() == 0.0f && ImGui.isMouseReleased(button);
+      return ImGui.getMouseDragDeltaX(button) == 0.0f && ImGui.getMouseDragDeltaY(button) == 0.0f && ImGui.isMouseReleased(button);
    }
 
    public boolean isWindowHovered()

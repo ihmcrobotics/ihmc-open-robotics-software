@@ -104,4 +104,14 @@ public interface HighLevelControllerParameters
    {
       return false;
    }
+
+   /**
+    * If a torque offset calibration controller is used, this defines the max torque offset that can be applied from each execution
+    * See {@link JointTorqueOffsetEstimatorController} for implementation details
+    * @return the max torque offset that can be applied in Nm. 
+    */
+   public default double getCalibrationMaxTorqueOffset()
+   {
+      return 5.0;
+   }
 }

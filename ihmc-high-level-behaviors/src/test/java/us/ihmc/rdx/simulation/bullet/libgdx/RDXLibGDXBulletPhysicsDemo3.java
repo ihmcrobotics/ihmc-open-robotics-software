@@ -1,6 +1,5 @@
 package us.ihmc.rdx.simulation.bullet.libgdx;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
@@ -21,9 +20,7 @@ import java.util.Random;
 
 public class RDXLibGDXBulletPhysicsDemo3
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXBulletPhysicsManager bulletPhysicsManager = new RDXBulletPhysicsManager();
    private final ImBoolean simulate = new ImBoolean(false);
    private final Vector3 tempVector = new Vector3();
@@ -86,11 +83,6 @@ public class RDXLibGDXBulletPhysicsDemo3
          @Override
          public void render()
          {
-            if (simulate.get())
-            {
-               bulletPhysicsManager.simulate(Gdx.graphics.getDeltaTime());
-            }
-
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }

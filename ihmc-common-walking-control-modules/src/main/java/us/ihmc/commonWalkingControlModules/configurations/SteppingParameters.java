@@ -24,38 +24,9 @@ public interface SteppingParameters extends FootstepParameters
 
    public abstract double getMaxStepDown();
 
-   public abstract double getMaxSwingHeightFromStanceFoot();
-
-   /**
-    * Returns the minimum swing height from the stance foot for this robot
-    */
-   public default double getMinSwingHeightFromStanceFoot()
-   {
-      return 0.1;
-   }
-
-   /**
-    * Default swing height used by the controller. If a swing height is not specified or lies outside of the allowable range,
-    * this value is used.
-    */
-   public default double getDefaultSwingHeightFromStanceFoot()
-   {
-      return getMinSwingHeightFromStanceFoot();
-   }
-
    public default double getTurningStepWidth()
    {
       return 0.2;
-   }
-
-   /**
-    * Custom waypoint positions are precomputed externally. During execution the initial foot pose might be different than expected,
-    * and the preplanned trajectory might have the foot go backward before moving forward, for example. This provides a threshold
-    * for the maximum angle from forward to use - lower is more restrictive, 90 deg max recommended.
-    */
-   public default double getCustomWaypointAngleThreshold()
-   {
-      return Math.toRadians(50.0);
    }
 
    /**

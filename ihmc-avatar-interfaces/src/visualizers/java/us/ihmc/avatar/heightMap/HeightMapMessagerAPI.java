@@ -1,10 +1,7 @@
 package us.ihmc.avatar.heightMap;
 
-import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
-import us.ihmc.ihmcPerception.depthData.PointCloudData;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.heightMap.HeightMapInputData;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
@@ -22,7 +19,7 @@ public class HeightMapMessagerAPI
    public static final MessagerAPIFactory.Topic<Double> yPosition = topic("yPosition");
    public static final MessagerAPIFactory.Topic<Double> zPosition = topic("zPosition");
 
-   public static final MessagerAPIFactory.Topic<Triple<PointCloudData, FramePose3D, Point3D>> PointCloudData = topic("PointCloudData");
+   public static final MessagerAPIFactory.Topic<HeightMapInputData> PointCloudData = topic("PointCloudData");
    public static final MessagerAPIFactory.Topic<HeightMapMessage> HeightMapData = topic("HeightMapData");
    public static final MessagerAPIFactory.Topic<HeightMapParameters> parameters = topic("Parameters");
    public static final MessagerAPIFactory.Topic<HeightMapFilterParameters> filterParameters = topic("FilterParameters");

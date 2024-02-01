@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import perception_msgs.msg.dds.DoorLocationPacket;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -52,7 +53,7 @@ public class SearchForDoorBehavior extends StateMachineBehavior<SearchForDoorBeh
    {
       super(robotName, "SearchForDoorBehavior", SearchForDoorBehaviorState.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
-      createSubscriber(DoorLocationPacket.class, ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationQueue::put);
+      createSubscriber(DoorLocationPacket.class, PerceptionAPI.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationQueue::put);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
       this.referenceFrames = referenceFrames;
 

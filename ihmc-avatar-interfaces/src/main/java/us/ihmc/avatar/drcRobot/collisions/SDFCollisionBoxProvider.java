@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBox;
-import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionCylinder;
-import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
-import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionSphere;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.collisionShapes.CollisionBox;
+import us.ihmc.perception.depthData.collisionShapes.CollisionCylinder;
+import us.ihmc.perception.depthData.collisionShapes.CollisionShape;
+import us.ihmc.perception.depthData.collisionShapes.CollisionSphere;
 import us.ihmc.log.LogTools;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;

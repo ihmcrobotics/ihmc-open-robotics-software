@@ -8,10 +8,7 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 
 public class RDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources",
-                                                  "3DSituatedPanelsDemo");
+   private final RDXBaseUI baseUI = new RDXBaseUI("3DSituatedPanelsDemo");
    private final RDXPose3DGizmo poseGizmo = new RDXPose3DGizmo();
    private final RDXPose3DGizmo poseGizmo2 = new RDXPose3DGizmo();
    private RDX3DSituatedImGuiPanel situatedImGuiPanel;

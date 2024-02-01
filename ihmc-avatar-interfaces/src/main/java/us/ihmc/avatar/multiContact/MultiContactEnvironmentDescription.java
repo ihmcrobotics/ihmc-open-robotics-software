@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import ihmc_common_msgs.msg.dds.*;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.referenceFrame.polytope.FrameConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
@@ -60,7 +61,7 @@ public class MultiContactEnvironmentDescription
       }
    }
 
-   public static FrameShape3DReadOnly fromJSON(JsonNode jsonNode)
+   public static FrameShape3DBasics fromJSON(JsonNode jsonNode)
    {
       try
       {
@@ -143,12 +144,12 @@ public class MultiContactEnvironmentDescription
       return arrayNode.toString();
    }
 
-   public static List<FrameShape3DReadOnly> deserializeEnvironmentData(String serializedEnvironmentData)
+   public static List<FrameShape3DBasics> deserializeEnvironmentData(String serializedEnvironmentData)
    {
       try
       {
          ArrayNode arrayNode = (ArrayNode) objectMapper.readTree(serializedEnvironmentData);
-         List<FrameShape3DReadOnly> environmentData = new ArrayList<>();
+         List<FrameShape3DBasics> environmentData = new ArrayList<>();
          for (int i = 0; i < arrayNode.size(); i++)
          {
             environmentData.add(fromJSON(arrayNode.get(i)));

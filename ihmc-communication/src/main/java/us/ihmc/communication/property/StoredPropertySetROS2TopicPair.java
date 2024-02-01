@@ -2,6 +2,7 @@ package us.ihmc.communication.property;
 
 import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.tools.string.StringTools;
@@ -13,8 +14,7 @@ import us.ihmc.tools.string.StringTools;
  */
 public class StoredPropertySetROS2TopicPair
 {
-   private final ROS2Topic<StoredPropertySetMessage> commandTopic;
-   private final ROS2Topic<StoredPropertySetMessage> statusTopic;
+   private final ROS2IOTopicPair<StoredPropertySetMessage> topicPair;
 
    public StoredPropertySetROS2TopicPair(String moduleTopicName, StoredPropertySetReadOnly storedPropertySetReadOnly)
    {
@@ -25,17 +25,16 @@ public class StoredPropertySetROS2TopicPair
    {
       ROS2Topic<?> baseTopic = ROS2Tools.IHMC_ROOT.withModule(moduleTopicName);
       ROS2Topic<StoredPropertySetMessage> propertySetTopic = baseTopic.withType(StoredPropertySetMessage.class).withSuffix(topicNameSuffix);
-      commandTopic = propertySetTopic.withIOQualifier("command");
-      statusTopic = propertySetTopic.withIOQualifier("status");
+      topicPair = new ROS2IOTopicPair<>(propertySetTopic);
    }
 
    public ROS2Topic<StoredPropertySetMessage> getCommandTopic()
    {
-      return commandTopic;
+      return topicPair.getCommandTopic();
    }
 
    public ROS2Topic<StoredPropertySetMessage> getStatusTopic()
    {
-      return statusTopic;
+      return topicPair.getStatusTopic();
    }
 }

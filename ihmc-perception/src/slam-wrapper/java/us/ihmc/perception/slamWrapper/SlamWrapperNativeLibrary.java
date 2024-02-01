@@ -15,7 +15,7 @@ public class SlamWrapperNativeLibrary implements NativeLibraryDescription
       {
          archPackage = switch (os)
                {
-                  // TODO: Windows support
+                  case WIN64 -> "windows-x86_64";
                   case LINUX64 -> "linux-x86_64";
                   default -> "unknown";
                };
@@ -29,15 +29,18 @@ public class SlamWrapperNativeLibrary implements NativeLibraryDescription
    {
       switch (os)
       {
-         // TODO: Windows support
+         case WIN64:
+            return NativeLibraryWithDependencies.fromFilename("jniSlamWrapper.dll",
+                                                              "gtsam.dll",
+                                                              "slam-wrapper.dll");
          case LINUX64:
             return NativeLibraryWithDependencies.fromFilename("libjniSlamWrapper.so",
+                                                              "libtbbmalloc.so",
                                                               "libtbb.so",
                                                               "libboost_filesystem.so",
                                                               "libboost_chrono.so",
                                                               "libboost_timer.so",
                                                               "libboost_serialization.so",
-                                                              "libmetis-gtsam.so",
                                                               "libgtsam.so",
                                                               "libslam-wrapper.so");
          default:

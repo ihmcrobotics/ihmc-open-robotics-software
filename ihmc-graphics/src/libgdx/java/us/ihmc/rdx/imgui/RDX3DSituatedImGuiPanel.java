@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
@@ -32,18 +31,16 @@ import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -65,7 +62,6 @@ public class RDX3DSituatedImGuiPanel
    private float halfPanelWidthInMeters;
    private float halfPanelHeightInMeters;
    private float metersToPixels;
-   private float pixelsToMeters;
    private FrameBuffer frameBuffer;
    private boolean useTransparentBackground = false;
    private int backgroundColor;
@@ -83,21 +79,17 @@ public class RDX3DSituatedImGuiPanel
          = ReferenceFrameTools.constructFrameWithChangingTransformToParent("graphicsXRightYDownFrame" + INDEX.getAndIncrement(),
                                                                            centerXThroughZUpFrame,
                                                                            graphicsXRightYDownToCenterXThroughZUpTransform);
-   private final FrameLine3D pickRay = new FrameLine3D();
-   private final FramePoint3D pickIntersection = new FramePoint3D();
    private final Plane3D plane = new Plane3D();
-   private ModelInstance centerFrameCoordinateFrame;
-   private ModelInstance graphicsFrameCoordinateFrame;
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final FramePose3D centerFrameCoordinateFramePose = new FramePose3D();
-   private final FramePose3D graphicsFrameCoordinateFramePose = new FramePose3D();
-   private boolean controllerRayCollidesPanel;
-   private final RDXVRPickResult pickResult = new RDXVRPickResult();
+   private final FramePoint3D pickIntersection = new FramePoint3D();
+   private final SideDependentList<RDXVRPickResult> pickResult = new SideDependentList<>(RDXVRPickResult::new);
 
    public RDX3DSituatedImGuiPanel(String name, Runnable renderImGuiWidgets)
    {
       this.name = name;
       this.renderImGuiWidgets = renderImGuiWidgets;
+
+      for (RobotSide side : RobotSide.values)
+         pickResult.get(side).setPickedObjectID(this, name + " ImGui Panel");
    }
 
    public void create(ImGuiImplGl3 imGuiGl3, double panelWidthInMeters, double panelHeightInMeters, int pixelsPerCentimeter)
@@ -108,7 +100,6 @@ public class RDX3DSituatedImGuiPanel
       halfPanelWidthInMeters = this.panelWidthInMeters / 2.0f;
       halfPanelHeightInMeters = this.panelHeightInMeters / 2.0f;
       metersToPixels = pixelsPerCentimeter * 100;
-      pixelsToMeters = 1.0f / metersToPixels;
 
       pixelsWidth = Math.round(panelWidthInMeters * metersToPixels);
       pixelsHeight = Math.round(panelHeightInMeters * metersToPixels);
@@ -123,9 +114,6 @@ public class RDX3DSituatedImGuiPanel
       ImGuiTools.initializeColorStyle();
 
       buildModel();
-
-      centerFrameCoordinateFrame = RDXModelBuilder.createCoordinateFrameInstance(0.3);
-      graphicsFrameCoordinateFrame = RDXModelBuilder.createCoordinateFrameInstance(0.3);
 
       // set up graphicsXRightYDownToCenterXThroughZUpTransform
       graphicsXRightYDownToCenterXThroughZUpTransform.appendYawRotation(-Math.toRadians(90.0));
@@ -223,8 +211,8 @@ public class RDX3DSituatedImGuiPanel
       if (ImGui.begin(name, windowFlags))
       {
          renderImGuiWidgets.run();
-         ImGui.end();
       }
+      ImGui.end();
       if (useTransparentBackground)
          ImGui.popStyleColor();
 
@@ -240,32 +228,30 @@ public class RDX3DSituatedImGuiPanel
 
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      pickResult.reset();
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
-         pickRay.setToZero(controller.getXForwardZUpControllerFrame());
-         pickRay.getDirection().set(Axis3D.X);
-         pickRay.changeFrame(ReferenceFrame.getWorldFrame());
-
-         pickIntersection.setToZero(ReferenceFrame.getWorldFrame());
-         plane.intersectionWith(pickRay, pickIntersection);
-         double distance = pickRay.getPoint().distance(pickIntersection);
-
-         pickIntersection.changeFrame(graphicsXRightYDownFrame);
-
-         float scaledX = Math.round((float) pickIntersection.getX() * metersToPixels);
-         float scaledY = Math.round((float) pickIntersection.getY() * metersToPixels);
-
-         boolean xInBounds = MathTools.intervalContains(scaledX, 0, pixelsWidth, true, false);
-         boolean yInBounds = MathTools.intervalContains(scaledY, 0, pixelsHeight, true, false);
-         controllerRayCollidesPanel = xInBounds && yInBounds;
-         if (controllerRayCollidesPanel)
+         // Check not facing the back of the panel
+         if (controller.getPickRay().getDirection().dot(plane.getNormal()) > 0.0)
          {
-            mousePosX = scaledX;
-            mousePosY = scaledY;
+            pickIntersection.setToZero(ReferenceFrame.getWorldFrame());
+            plane.intersectionWith(controller.getPickRay(), pickIntersection);
+            double distance = controller.getPickRay().getPoint().distance(pickIntersection);
 
-            pickResult.setDistanceToControllerPickPoint(distance);
-            vrContext.addPickResult(RobotSide.RIGHT, pickResult);
+            pickIntersection.changeFrame(graphicsXRightYDownFrame);
+
+            float scaledX = Math.round((float) pickIntersection.getX() * metersToPixels);
+            float scaledY = Math.round((float) pickIntersection.getY() * metersToPixels);
+
+            boolean xInBounds = MathTools.intervalContains(scaledX, 0, pixelsWidth, true, false);
+            boolean yInBounds = MathTools.intervalContains(scaledY, 0, pixelsHeight, true, false);
+            if (xInBounds && yInBounds)
+            {
+               mousePosX = scaledX;
+               mousePosY = scaledY;
+
+               pickResult.get(RobotSide.RIGHT).setPointingAtCollision(distance);
+               controller.addPickResult(pickResult.get(RobotSide.RIGHT));
+            }
          }
       });
    }
@@ -274,7 +260,7 @@ public class RDX3DSituatedImGuiPanel
    {
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
-         if (vrContext.getSelectedPick().get(RobotSide.RIGHT) == pickResult)
+         if (controller.getSelectedPick() == pickResult.get(RobotSide.RIGHT))
          {
             leftMouseDown = controller.getClickTriggerActionData().bState();
          }

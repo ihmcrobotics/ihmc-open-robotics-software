@@ -1,6 +1,6 @@
 {
   "title" : "ConcaveHullFactoryParameters",
-  "Edge length threshold" : 1.0,
+  "Edge length threshold" : 0.12000000000000001,
   "Remove all triangles with two border edges" : true,
   "Allow splitting concave hull" : true,
   "Max number of iterations" : 7306,

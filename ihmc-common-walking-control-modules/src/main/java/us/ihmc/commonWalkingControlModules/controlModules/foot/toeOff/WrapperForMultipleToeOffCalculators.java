@@ -4,6 +4,8 @@ import java.util.EnumMap;
 
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -68,5 +70,14 @@ public class WrapperForMultipleToeOffCalculators implements ToeOffCalculator
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(activeToeOffCalculator.getEnumValue());
       currentCalculator.getToeOffContactLine(contactLineToPack, trailingLeg);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      for (ToeOffCalculator calculator : toeOffCalculators.values())
+         group.addChild(calculator.getSCS2YoGraphics());
+      return group;
    }
 }

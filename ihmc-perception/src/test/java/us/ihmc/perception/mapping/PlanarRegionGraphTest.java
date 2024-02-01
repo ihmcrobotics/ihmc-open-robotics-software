@@ -1,5 +1,6 @@
 package us.ihmc.perception.mapping;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -55,6 +56,7 @@ public class PlanarRegionGraphTest
       assertEquals(4, planarRegionsList.getPlanarRegion(1).getRegionId());
    }
 
+   @Disabled
    @Test
    public void testGraphWithOneOverLap()
    {

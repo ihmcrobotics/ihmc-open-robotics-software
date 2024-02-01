@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::EuclideanTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "32f6cd72887fe06094e7ecb23ac2bd5554adaff6f92612da380f4454bcc32bd1";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

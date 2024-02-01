@@ -1,32 +1,34 @@
 package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
 
-import controller_msgs.msg.dds.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.StepConstraintMessage;
 import perception_msgs.msg.dds.PlanarRegionMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class StepConstraintToolboxModule extends ToolboxModule
 {
    private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 10;
 
    protected final StepConstraintToolboxController controller;
-   private IHMCRealtimeROS2Publisher<StepConstraintMessage> constraintRegionPublisher;
+   private IHMCROS2Publisher<StepConstraintMessage> constraintRegionPublisher;
 
    public StepConstraintToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation, double gravityZ)
    {
@@ -55,11 +57,11 @@ public class StepConstraintToolboxModule extends ToolboxModule
    }
 
    @Override
-   public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
+   public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
       ROS2Topic controllerPubGenerator = ControllerAPIDefinition.getOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
       {
          if (controller != null)
          {
@@ -69,7 +71,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
       {
          if (controller != null)
          {
@@ -80,7 +82,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
       {
          if (controller != null)
          {
@@ -91,7 +93,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
 
       FootstepStatusMessage statusMessage = new FootstepStatusMessage();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
       {
          if (controller != null)
          {
@@ -100,12 +102,12 @@ public class StepConstraintToolboxModule extends ToolboxModule
          }
       });
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PlanarRegionsListMessage.class,
                                                     REACommunicationProperties.outputTopic,
                                                     s -> updatePlanarRegion(s.takeNextData()));
 
-      constraintRegionPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, StepConstraintMessage.class, ControllerAPIDefinition.getInputTopic(robotName));
+      constraintRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, StepConstraintMessage.class, ControllerAPIDefinition.getInputTopic(robotName));
    }
 
    public void setSwitchPlanarRegionConstraintsAutomatically(boolean switchAutomatically)

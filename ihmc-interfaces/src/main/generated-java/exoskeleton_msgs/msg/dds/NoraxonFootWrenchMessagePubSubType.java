@@ -11,6 +11,18 @@ package exoskeleton_msgs.msg.dds;
 public class NoraxonFootWrenchMessagePubSubType implements us.ihmc.pubsub.TopicDataType<exoskeleton_msgs.msg.dds.NoraxonFootWrenchMessage>
 {
    public static final java.lang.String name = "exoskeleton_msgs::msg::dds_::NoraxonFootWrenchMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "9fa6ce6528459794b345a9dc6a61aeac31b8a11dbf9ac40cb598478a4a71c1a1";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

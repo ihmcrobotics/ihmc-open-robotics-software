@@ -18,15 +18,20 @@ public class FootstepPlan implements FootstepPlanReadOnly
    }
 
    /** deep copy */
-   public FootstepPlan(FootstepPlan otherFootstepPlan)
+   public FootstepPlan(FootstepPlanReadOnly otherFootstepPlan)
    {
-      for (PlannedFootstep otherFootstep : otherFootstepPlan.footsteps)
+      set(otherFootstepPlan);
+   }
+
+   public void set(FootstepPlanReadOnly otherFootstepPlan)
+   {
+      for (int i = 0; i < otherFootstepPlan.getNumberOfSteps(); i++)
       {
-         footsteps.add(new PlannedFootstep(otherFootstep));
+         footsteps.add(new PlannedFootstep(otherFootstepPlan.getFootstep(i)));
       }
 
-      this.finalTransferSplitFraction = otherFootstepPlan.finalTransferSplitFraction;
-      this.finalTransferWeightDistribution = otherFootstepPlan.finalTransferWeightDistribution;
+      this.finalTransferSplitFraction = otherFootstepPlan.getFinalTransferSplitFraction();
+      this.finalTransferWeightDistribution = otherFootstepPlan.getFinalTransferWeightDistribution();
    }
 
    @Override
@@ -53,11 +58,13 @@ public class FootstepPlan implements FootstepPlanReadOnly
       return simpleFootstep;
    }
 
+   @Override
    public double getFinalTransferSplitFraction()
    {
       return finalTransferSplitFraction;
    }
 
+   @Override
    public double getFinalTransferWeightDistribution()
    {
       return finalTransferWeightDistribution;

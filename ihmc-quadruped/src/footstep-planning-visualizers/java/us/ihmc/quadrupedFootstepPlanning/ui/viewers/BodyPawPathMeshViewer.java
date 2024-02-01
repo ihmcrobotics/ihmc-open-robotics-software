@@ -65,9 +65,9 @@ public class BodyPawPathMeshViewer extends AnimationTimer
       defaultSize.scale(1.5 * BODYPATH_LINE_THICKNESS);
 
       show = messager.createInput(showPathPathTopic, true);
-      messager.registerTopicListener(bodyPathDataTopic, this::processBodyPathOnThread);
+      messager.addTopicListener(bodyPathDataTopic, this::processBodyPathOnThread);
 
-      messager.registerTopicListener(computePathTopic, data -> reset.set(true));
+      messager.addTopicListener(computePathTopic, data -> reset.set(true));
 
 
       root.getChildren().addAll(bodyPathMeshView);

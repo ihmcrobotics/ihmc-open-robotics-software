@@ -11,9 +11,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 
 public class RDXPhysicsEnvironmentDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXEnvironmentBuilder environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
 
    public RDXPhysicsEnvironmentDemo()

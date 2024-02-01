@@ -54,4 +54,59 @@ public interface PlanarRegionMappingParametersReadOnly extends StoredPropertySet
    {
       return get(odometryNoiseVariance);
    }
+
+   default double getStateEstimatorNoiseVariance()
+   {
+      return get(stateEstimatorNoiseVariance);
+   }
+
+   default double getBestMatchAngularThreshold()
+   {
+      return get(bestMatchAngularThreshold);
+   }
+
+   default double getBestMatchDistanceThreshold()
+   {
+      return get(bestMatchDistanceThreshold);
+   }
+
+   default double getBestMinimumOverlapThreshold()
+   {
+      return get(bestMinimumOverlapThreshold);
+   }
+
+   default double getKeyframeDistanceThreshold()
+   {
+      return get(keyframeDistanceThreshold);
+   }
+
+   default double getKeyframeAngularThreshold()
+   {
+      return get(keyframeAngularThreshold);
+   }
+
+   default int getICPMaxIterations()
+   {
+      return get(icpMaxIterations);
+   }
+
+   default int getICPMinMatches()
+   {
+      return get(icpMinMatches);
+   }
+
+   default double getICPTerminationRatio()
+   {
+      return get(icpTerminationRatio);
+   }
+
+   default double getICPErrorCutoff()
+   {
+      return get(icpErrorCutoff);
+   }
+
+   default int getMinimumNumberOfTimesMatched()
+   {
+      return get(minimumNumberOfTimesMatched);
+   }
 }

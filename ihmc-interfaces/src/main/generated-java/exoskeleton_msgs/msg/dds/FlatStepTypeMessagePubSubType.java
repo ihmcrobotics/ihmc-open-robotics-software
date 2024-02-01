@@ -11,6 +11,18 @@ package exoskeleton_msgs.msg.dds;
 public class FlatStepTypeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<exoskeleton_msgs.msg.dds.FlatStepTypeMessage>
 {
    public static final java.lang.String name = "exoskeleton_msgs::msg::dds_::FlatStepTypeMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "1adf2da80a68e95174200da699a620051c4db40ee09ccbb15b1aa7880b647580";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

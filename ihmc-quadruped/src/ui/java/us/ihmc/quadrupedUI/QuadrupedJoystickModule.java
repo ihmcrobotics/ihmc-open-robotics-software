@@ -87,8 +87,8 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
       heightTeleopEnabled = messager.createInput(QuadrupedUIMessagerAPI.EnableHeightTeleopTopic, false);
       bodyPoseTeleopEnabled = messager.createInput(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, false);
 
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.CurrentControllerNameTopic, state ->
+      messager.addTopicListener(QuadrupedUIMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);
+      messager.addTopicListener(QuadrupedUIMessagerAPI.CurrentControllerNameTopic, state ->
       {
          if (state != HighLevelControllerName.WALKING)
          {

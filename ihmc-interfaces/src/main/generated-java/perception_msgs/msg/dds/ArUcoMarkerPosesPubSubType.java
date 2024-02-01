@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class ArUcoMarkerPosesPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.ArUcoMarkerPoses>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::ArUcoMarkerPoses_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "3f715fd2a14a20adfc990af912b8918e395d4327fa70447abe4ccbcc7ff713de";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

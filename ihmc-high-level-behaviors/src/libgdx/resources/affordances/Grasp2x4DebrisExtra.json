@@ -1,0 +1,47 @@
+{
+  "name" : "Grasp2x4Debris",
+  "object" : "2x4Debris",
+  "x" : 0.0,
+  "y" : 0.0,
+  "z" : 0.0,
+  "rollInDegrees" : 0.0,
+  "pitchInDegrees" : 0.0,
+  "yawInDegrees" : 0.0,
+  "frames" : [ {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "configuration": [ {
+      "side" : "right",
+      "type" : "OPEN"
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "configuration": [ {
+      "side" : "right",
+      "type": ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "configuration": [ {
+      "side" : "right",
+      "type": "GRIP_HARD"
+    } ]
+  } ],
+  "activeSides" : 1,
+  "numberPreGraspFrames" : 2,
+  "numberPostGraspFrames" : 0
+}

@@ -63,9 +63,9 @@ public class ManagedMessager extends MessagerCallbackManager implements Messager
    }
 
    @Override
-   public void registerMessagerStateListener(MessagerStateListener listener)
+   public void addMessagerStateListener(MessagerStateListener listener)
    {
-      messager.registerMessagerStateListener(listener);
+      messager.addMessagerStateListener(listener);
    }
 
    @Override

@@ -2,6 +2,10 @@ package us.ihmc.rdx.ui.yo;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.rdx.imgui.ImPlotDoublePlotLine;
+import us.ihmc.rdx.imgui.ImPlotIntegerPlotLine;
+import us.ihmc.rdx.imgui.ImPlotPlot;
+import us.ihmc.rdx.imgui.ImPlotPlotLine;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;

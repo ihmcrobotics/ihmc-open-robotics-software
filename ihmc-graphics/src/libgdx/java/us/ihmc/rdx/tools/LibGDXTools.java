@@ -28,10 +28,10 @@ import org.lwjgl.openvr.HmdMatrix34;
 import org.lwjgl.openvr.HmdMatrix44;
 import org.lwjgl.system.Callback;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -188,16 +188,23 @@ public class LibGDXTools
 
    public static void toEuclid(HmdMatrix34 openVRRigidBodyTransform, RigidBodyTransform rigidBodyTransformToPack)
    {
+      toEuclidUnsafe(openVRRigidBodyTransform, rigidBodyTransformToPack);
+      if (!rigidBodyTransformToPack.getRotation().isIdentity())
+         rigidBodyTransformToPack.getRotation().normalize();
+   }
+
+   public static void toEuclidUnsafe(HmdMatrix34 openVRRigidBodyTransform, RigidBodyTransform rigidBodyTransformToPack)
+   {
       FloatBuffer openVRValueBuffer = openVRRigidBodyTransform.m();
-      rigidBodyTransformToPack.getRotation().setAndNormalize(openVRValueBuffer.get(0),
-                                                             openVRValueBuffer.get(1),
-                                                             openVRValueBuffer.get(2),
-                                                             openVRValueBuffer.get(4),
-                                                             openVRValueBuffer.get(5),
-                                                             openVRValueBuffer.get(6),
-                                                             openVRValueBuffer.get(8),
-                                                             openVRValueBuffer.get(9),
-                                                             openVRValueBuffer.get(10));
+      rigidBodyTransformToPack.getRotation().setUnsafe(openVRValueBuffer.get(0),
+                                                       openVRValueBuffer.get(1),
+                                                       openVRValueBuffer.get(2),
+                                                       openVRValueBuffer.get(4),
+                                                       openVRValueBuffer.get(5),
+                                                       openVRValueBuffer.get(6),
+                                                       openVRValueBuffer.get(8),
+                                                       openVRValueBuffer.get(9),
+                                                       openVRValueBuffer.get(10));
       rigidBodyTransformToPack.getTranslation().setX(openVRValueBuffer.get(3));
       rigidBodyTransformToPack.getTranslation().setY(openVRValueBuffer.get(7));
       rigidBodyTransformToPack.getTranslation().setZ(openVRValueBuffer.get(11));
@@ -324,10 +331,18 @@ public class LibGDXTools
     * @param tempTransform temporary rigid body transform. Modified.
     * @param gdxAffine Matrix4 representation. Modified.
     */
-   public static void toLibGDX(Pose3DReadOnly euclidPose, RigidBodyTransform tempTransform, Matrix4 gdxAffine)
+   public static void toLibGDX(RigidBodyTransformReadOnly euclidPose, RigidBodyTransform tempTransform, Matrix4 gdxAffine)
    {
       tempTransform.set(euclidPose);
       toLibGDX(tempTransform, gdxAffine);
+   }
+
+   /**
+    * Setting the position to NaN will mean it doesn't get shown.
+    */
+   public static void hideGraphic(ModelInstance modelInstance)
+   {
+      modelInstance.transform.setTranslation(Float.NaN, Float.NaN, Float.NaN);
    }
 
    public static void toLibGDX(javafx.scene.paint.Color javaFXColor, Color gdxColor)
@@ -379,6 +394,21 @@ public class LibGDXTools
       gdxColor.g = (float) colorDefinition.getGreen();
       gdxColor.b = (float) colorDefinition.getBlue();
       gdxColor.a = (float) colorDefinition.getAlpha();
+   }
+
+   public static ColorDefinition toColorDefinition(Color gdxColor)
+   {
+      ColorDefinition colorDefinition = new ColorDefinition();
+      toColorDefinition(gdxColor, colorDefinition);
+      return colorDefinition;
+   }
+
+   public static void toColorDefinition(Color gdxColor, ColorDefinition colorDefinition)
+   {
+      colorDefinition.setRed(gdxColor.r);
+      colorDefinition.setGreen(gdxColor.g);
+      colorDefinition.setBlue(gdxColor.b);
+      colorDefinition.setAlpha(gdxColor.a);
    }
 
    public static void toLibGDX(Vector3 bulletColor, Color gdxColor)

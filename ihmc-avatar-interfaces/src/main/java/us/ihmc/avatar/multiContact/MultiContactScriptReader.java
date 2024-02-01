@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.log.LogTools;
@@ -19,7 +20,7 @@ import us.ihmc.log.LogTools;
 public class MultiContactScriptReader
 {
    private int currentMessageIndex = 0;
-   private final List<FrameShape3DReadOnly> loadedEnvironmentShapes = new ArrayList<>();
+   private final List<FrameShape3DBasics> loadedEnvironmentShapes = new ArrayList<>();
    private final List<KinematicsToolboxSnapshotDescription> loadedScriptKeyFrames = new ArrayList<>();
 
    public MultiContactScriptReader()
@@ -73,7 +74,10 @@ public class MultiContactScriptReader
          JsonNode environmentNode = jsonNode.get(MultiContactEnvironmentDescription.ENVIRONMENT_JSON);
          JsonNode scriptNode = jsonNode.get(KinematicsToolboxSnapshotDescription.SCRIPT_JSON);
 
-         List<FrameShape3DReadOnly> environmentShapes = new ArrayList<>();
+         if (environmentNode == null || scriptNode == null)
+            return false;
+
+         List<FrameShape3DBasics> environmentShapes = new ArrayList<>();
          List<KinematicsToolboxSnapshotDescription> scriptKeyFrames = new ArrayList<>();
 
          for (int i = 0; i < environmentNode.size(); i++)
@@ -157,7 +161,7 @@ public class MultiContactScriptReader
          return loadedScriptKeyFrames.get(currentMessageIndex);
    }
 
-   public List<FrameShape3DReadOnly> getEnvironmentShapes()
+   public List<FrameShape3DBasics> getEnvironmentShapes()
    {
       return loadedEnvironmentShapes;
    }

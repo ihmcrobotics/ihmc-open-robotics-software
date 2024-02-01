@@ -42,6 +42,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
@@ -56,7 +57,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
    private FullHumanoidRobotModel fullRobotModel;
-   private HumanoidReferenceFrames humanoidReferenceFrames;
+   private CommonHumanoidReferenceFrames humanoidReferenceFrames;
    private KinematicsStreamingToolboxMessageReplay kinematicsStreamingToolboxMessageReplay;
 
    protected CommandInputManager commandInputManager;
@@ -134,7 +135,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       assertTrue(simulationTestHelper.simulateNow(0.5));
 
       fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
-      humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();
 
       humanoidReferenceFrames.updateFrames();
 

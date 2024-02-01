@@ -30,7 +30,7 @@ public class AtlasLiftOffAndTouchDownTest
                @Override
                public double nominalHeightAboveAnkle()
                {
-                  return 0.765;
+                  return 0.849;
                }
             };
          }

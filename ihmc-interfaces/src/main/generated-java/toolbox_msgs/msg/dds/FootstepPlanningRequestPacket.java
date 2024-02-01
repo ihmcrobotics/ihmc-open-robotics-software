@@ -14,9 +14,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    public static final byte SWING_PLANNER_TYPE_NONE = (byte) 0;
-   public static final byte SWING_PLANNER_TYPE_TWO_WAYPOINT_POSITION = (byte) 1;
-   public static final byte SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION = (byte) 2;
-   public static final byte SWING_PLANNER_TYPE_PROPORTION = (byte) 3;
+   public static final byte SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION = (byte) 1;
+   public static final byte SWING_PLANNER_TYPE_PROPORTION = (byte) 2;
    public static final int NO_PLAN_ID = -1;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -92,11 +91,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public double horizon_length_;
    /**
-            * Planar regions to use, if you don't want to assume flat ground
-            */
-   public perception_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_message_;
-   /**
-            * Height map data, optional
+            * Height map data, if you don'ot want to assume flat ground.
             */
    public perception_msgs.msg.dds.HeightMapMessage height_map_message_;
    /**
@@ -117,6 +112,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public byte requested_swing_planner_;
    /**
+            * Reference plan to be used in ReferenceBasedIdealStepCalculator.
+            */
+   public controller_msgs.msg.dds.FootstepDataListMessage reference_plan_;
+   /**
             * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
             * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
             */
@@ -129,8 +128,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       goal_left_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       goal_right_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       body_path_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (50, new geometry_msgs.msg.dds.PosePubSubType());
-      planar_regions_list_message_ = new perception_msgs.msg.dds.PlanarRegionsListMessage();
       height_map_message_ = new perception_msgs.msg.dds.HeightMapMessage();
+      reference_plan_ = new controller_msgs.msg.dds.FootstepDataListMessage();
 
    }
 
@@ -173,7 +172,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       horizon_length_ = other.horizon_length_;
 
-      perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.planar_regions_list_message_, planar_regions_list_message_);
       perception_msgs.msg.dds.HeightMapMessagePubSubType.staticCopy(other.height_map_message_, height_map_message_);
       assume_flat_ground_ = other.assume_flat_ground_;
 
@@ -183,6 +181,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       requested_swing_planner_ = other.requested_swing_planner_;
 
+      controller_msgs.msg.dds.FootstepDataListMessagePubSubType.staticCopy(other.reference_plan_, reference_plan_);
       generate_log_ = other.generate_log_;
 
    }
@@ -430,16 +429,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Planar regions to use, if you don't want to assume flat ground
-            */
-   public perception_msgs.msg.dds.PlanarRegionsListMessage getPlanarRegionsListMessage()
-   {
-      return planar_regions_list_message_;
-   }
-
-
-   /**
-            * Height map data, optional
+            * Height map data, if you don'ot want to assume flat ground.
             */
    public perception_msgs.msg.dds.HeightMapMessage getHeightMapMessage()
    {
@@ -506,6 +496,15 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public byte getRequestedSwingPlanner()
    {
       return requested_swing_planner_;
+   }
+
+
+   /**
+            * Reference plan to be used in ReferenceBasedIdealStepCalculator.
+            */
+   public controller_msgs.msg.dds.FootstepDataListMessage getReferencePlan()
+   {
+      return reference_plan_;
    }
 
    /**
@@ -580,7 +579,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.horizon_length_, other.horizon_length_, epsilon)) return false;
 
-      if (!this.planar_regions_list_message_.epsilonEquals(other.planar_regions_list_message_, epsilon)) return false;
       if (!this.height_map_message_.epsilonEquals(other.height_map_message_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.assume_flat_ground_, other.assume_flat_ground_, epsilon)) return false;
 
@@ -590,6 +588,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_swing_planner_, other.requested_swing_planner_, epsilon)) return false;
 
+      if (!this.reference_plan_.epsilonEquals(other.reference_plan_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.generate_log_, other.generate_log_, epsilon)) return false;
 
 
@@ -636,7 +635,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.horizon_length_ != otherMyClass.horizon_length_) return false;
 
-      if (!this.planar_regions_list_message_.equals(otherMyClass.planar_regions_list_message_)) return false;
       if (!this.height_map_message_.equals(otherMyClass.height_map_message_)) return false;
       if(this.assume_flat_ground_ != otherMyClass.assume_flat_ground_) return false;
 
@@ -646,6 +644,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.requested_swing_planner_ != otherMyClass.requested_swing_planner_) return false;
 
+      if (!this.reference_plan_.equals(otherMyClass.reference_plan_)) return false;
       if(this.generate_log_ != otherMyClass.generate_log_) return false;
 
 
@@ -694,8 +693,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.max_iterations_);      builder.append(", ");
       builder.append("horizon_length=");
       builder.append(this.horizon_length_);      builder.append(", ");
-      builder.append("planar_regions_list_message=");
-      builder.append(this.planar_regions_list_message_);      builder.append(", ");
       builder.append("height_map_message=");
       builder.append(this.height_map_message_);      builder.append(", ");
       builder.append("assume_flat_ground=");
@@ -706,6 +703,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.status_publish_period_);      builder.append(", ");
       builder.append("requested_swing_planner=");
       builder.append(this.requested_swing_planner_);      builder.append(", ");
+      builder.append("reference_plan=");
+      builder.append(this.reference_plan_);      builder.append(", ");
       builder.append("generate_log=");
       builder.append(this.generate_log_);
       builder.append("}");

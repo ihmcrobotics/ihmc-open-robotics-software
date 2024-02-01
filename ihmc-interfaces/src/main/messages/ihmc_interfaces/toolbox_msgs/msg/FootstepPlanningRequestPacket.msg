@@ -7,9 +7,8 @@ byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
 byte SWING_PLANNER_TYPE_NONE = 0
-byte SWING_PLANNER_TYPE_TWO_WAYPOINT_POSITION = 1
-byte SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION = 2
-byte SWING_PLANNER_TYPE_PROPORTION = 3
+byte SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION = 1
+byte SWING_PLANNER_TYPE_PROPORTION = 2
 
 int32 NO_PLAN_ID = -1
 
@@ -50,9 +49,7 @@ float64 timeout 5.0
 int32 max_iterations -1
 # Max body path length if using body path
 float64 horizon_length
-# Planar regions to use, if you don't want to assume flat ground
-perception_msgs/PlanarRegionsListMessage planar_regions_list_message
-# Height map data, optional
+# Height map data, if you don'ot want to assume flat ground.
 perception_msgs/HeightMapMessage height_map_message
 # If true, steps are snapped assuming flat ground.
 # Note that collision checks will still be performed if enabled, such as FootstepPlannerParametersPacket.checkForBodyBoxCollisions
@@ -63,6 +60,9 @@ int32 planner_request_id -1
 float64 status_publish_period 1.0
 # Specifies swing planner to use. See the above enumeration
 byte requested_swing_planner 0
+
+# Reference plan to be used in ReferenceBasedIdealStepCalculator.
+controller_msgs/FootstepDataListMessage reference_plan
 
 # Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
 # For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/

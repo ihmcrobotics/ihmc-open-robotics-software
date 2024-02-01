@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class TaskspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::TaskspaceTrajectoryStatusMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "ac841515723edec442ec0e7736a2ccd828ad5d82e993f6a278eafa6895f245a8";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import std_msgs.msg.dds.Empty;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -17,8 +18,8 @@ import us.ihmc.ros2.ROS2Topic;
 
 public class SLAMModuleAPI
 {
-   public static final ROS2Topic<Empty> CLEAR = ROS2Tools.REALSENSE_SLAM_MODULE.withInput().withType(Empty.class).withSuffix("clear");
-   public static final ROS2Topic<Empty> SHUTDOWN = ROS2Tools.REALSENSE_SLAM_MODULE.withType(Empty.class).withSuffix("shutdown");
+   public static final ROS2Topic<Empty> CLEAR = PerceptionAPI.REALSENSE_SLAM_MODULE.withInput().withType(Empty.class).withSuffix("clear");
+   public static final ROS2Topic<Empty> SHUTDOWN = PerceptionAPI.REALSENSE_SLAM_MODULE.withType(Empty.class).withSuffix("shutdown");
 
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("SLAM"));

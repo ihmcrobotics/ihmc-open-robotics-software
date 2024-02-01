@@ -11,6 +11,18 @@ package quadruped_msgs.msg.dds;
 public class QuadrupedBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<quadruped_msgs.msg.dds.QuadrupedBodyTrajectoryMessage>
 {
    public static final java.lang.String name = "quadruped_msgs::msg::dds_::QuadrupedBodyTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "71152167f61b4ce776b4554e7b62efcf745b1ce49cc854dffa567a88d866e5d3";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

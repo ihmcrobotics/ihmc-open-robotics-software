@@ -32,10 +32,10 @@ public class FootPoseFromMidFootUpdater extends AnimationTimer
    {
       this.messager = messager;
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.StartMidFootPosition, position -> recomputeStart.set(true));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.StartMidFootOrientation, orientation -> recomputeStart.set(true));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.GoalMidFootPosition, position -> recomputeGoal.set(true));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.GoalMidFootOrientation, orientation -> recomputeGoal.set(true));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.StartMidFootPosition, position -> recomputeStart.set(true));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.StartMidFootOrientation, orientation -> recomputeStart.set(true));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.GoalMidFootPosition, position -> recomputeGoal.set(true));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.GoalMidFootOrientation, orientation -> recomputeGoal.set(true));
 
       startMidFootPosition = messager.createInput(FootstepPlannerMessagerAPI.StartMidFootPosition, new Point3D());
       startMidFootOrientation = messager.createInput(FootstepPlannerMessagerAPI.StartMidFootOrientation, new Quaternion());

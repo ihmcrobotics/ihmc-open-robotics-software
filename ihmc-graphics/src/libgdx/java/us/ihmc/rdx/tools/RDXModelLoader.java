@@ -18,6 +18,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.util.HashMap;
+import java.util.TreeSet;
 
 public class RDXModelLoader
 {
@@ -25,6 +26,7 @@ public class RDXModelLoader
 
    private final HashMap<String, Object> modelLoadingSynchronizers = new HashMap<>();
    private final HashMap<String, Model> loadedModels = new HashMap<>();
+   private final TreeSet<String> printedWarnings = new TreeSet<>();
 
    private RDXModelLoader()
    {
@@ -79,6 +81,10 @@ public class RDXModelLoader
    private ModelData loadModelDataInternal(String modelFileName)
    {
       LogTools.debug("Loading {}", modelFileName);
+
+      String requestedModelFileName = modelFileName;
+      boolean shouldPrintWarnings = !printedWarnings.contains(requestedModelFileName);
+     
       ModelData modelData = null;
       try
       {
@@ -102,14 +108,15 @@ public class RDXModelLoader
          }
          else
          {
-            LogTools.warn("Using Assimp to load {}. It is recommended to convert to G3DJ for more reliable and faster loading.", modelFileName);
+            if (shouldPrintWarnings)
+               LogTools.warn("Using Assimp to load {}. It is recommended to convert to G3DJ for more reliable and faster loading.", modelFileName);
             modelData = new RDXAssimpModelLoader(modelFileName).loadModelData();
          }
 
          long numberOfVertices = LibGDXTools.countVertices(modelData);
          LogTools.debug("Loaded {} ({} vertices)", modelFileName, numberOfVertices);
 
-         if (numberOfVertices > 15000)
+         if (shouldPrintWarnings && numberOfVertices > 15000)
          {
             LogTools.warn("{} has {} vertices, which is a lot! This will begin to affect frame rate.", modelFileName, numberOfVertices);
          }
@@ -120,6 +127,9 @@ public class RDXModelLoader
          LogTools.error("Failed to load {}", modelFileName);
          e.printStackTrace();
       }
+
+      printedWarnings.add(requestedModelFileName);
+     
       return modelData;
    }
 

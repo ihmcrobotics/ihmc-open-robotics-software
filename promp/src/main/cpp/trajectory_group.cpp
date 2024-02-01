@@ -102,4 +102,31 @@ std::pair<Eigen::VectorXd, Eigen::VectorXd> TrajectoryGroup::standardize_dims()
 	return std::make_pair(dofs_mean, dofs_std);
 }
 
+double TrajectoryGroup::get_mean_start_value(int dof)
+{
+    double mean_start_value = 0.0;
+    for (Trajectory traj : _trajs)
+    {
+        Eigen::MatrixXd dataTrajectory = traj.matrix();
+        mean_start_value += dataTrajectory(0,dof);
+    }
+    mean_start_value /= _trajs.size();
+
+    return mean_start_value;
+}
+
+double TrajectoryGroup::get_mean_end_value(int dof)
+{
+    double mean_end_value = 0.0;
+    for (Trajectory traj : _trajs)
+    {
+        Eigen::MatrixXd dataTrajectory = traj.matrix();
+        int rows = dataTrajectory.rows();
+        mean_end_value += dataTrajectory(rows-1,dof);
+    }
+    mean_end_value /= _trajs.size();
+
+    return mean_end_value;
+}
+
 } // end namespace promp

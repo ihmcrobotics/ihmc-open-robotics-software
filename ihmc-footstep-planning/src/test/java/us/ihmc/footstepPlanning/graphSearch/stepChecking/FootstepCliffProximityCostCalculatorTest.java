@@ -9,7 +9,8 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionFootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -30,7 +31,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FootstepCliffProximityCostCalculatorTest
 {
@@ -70,10 +71,10 @@ public class FootstepCliffProximityCostCalculatorTest
       double footLength = 0.2;
       double footWidth = 0.1;
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       FootstepCliffProximityCostCalculator avoider = new FootstepCliffProximityCostCalculator(parameters, snapper, footPolygons);
       avoider.setPlanarRegionsList(planarRegionsList);
-      snapper.setPlanarRegions(planarRegionsList);
+      snapper.setPlanarRegionsList(planarRegionsList);
 
       SimulationConstructionSet scs = null;
       if (visualize)
@@ -125,7 +126,7 @@ public class FootstepCliffProximityCostCalculatorTest
       parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
 
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
+      PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       FootstepCliffProximityCostCalculator cliffAvoider = new FootstepCliffProximityCostCalculator(parameters, snapper, footPolygons);
 
       double centerX = 1.0;
@@ -143,7 +144,7 @@ public class FootstepCliffProximityCostCalculatorTest
 
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
       cliffAvoider.setPlanarRegionsList(planarRegionsList);
-      snapper.setPlanarRegions(planarRegionsList);
+      snapper.setPlanarRegionsList(planarRegionsList);
 
       Vector2D frontNearNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength - LatticePoint.gridSizeXY, 0.0);
       Vector2D frontFarNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength + LatticePoint.gridSizeXY, 0.0);

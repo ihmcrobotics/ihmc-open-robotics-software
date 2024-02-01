@@ -7,13 +7,11 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoTools;
-import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
-import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
-import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
-import us.ihmc.tools.thread.Activator;
+import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVGuidedSwapVideoPanel;
+import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
+import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
 
 import java.util.function.Consumer;
 
@@ -22,8 +20,7 @@ import java.util.function.Consumer;
  */
 public class RDXOpenCVWebcamReader
 {
-   private final ImGuiPanel panel = new ImGuiPanel("Webcam Reader", this::renderImGuiWidgets);
-   private final Activator nativesLoadedActivator;
+   private final RDXPanel panel = new RDXPanel("Webcam Reader", this::renderImGuiWidgets);
    private VideoCapture videoCapture;
    private int imageWidth = 1920;
    private int imageHeight = 1080;
@@ -31,17 +28,12 @@ public class RDXOpenCVWebcamReader
    private double reportedFPS = 30.0;
    private String backendName = "";
    private Mat bgrImage;
-   private RDXOpenCVSwapVideoPanel swapCVPanel;
+   private RDXOpenCVGuidedSwapVideoPanel swapCVPanel;
    private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read duration");
    private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read frequency");
    private boolean imageWasRead = false;
    private long numberOfImagesRead = 0;
-   private Consumer<RDXOpenCVSwapVideoPanelData> monitorPanelUIThreadPreprocessor = null;
-
-   public RDXOpenCVWebcamReader(Activator nativesLoadedActivator)
-   {
-      this.nativesLoadedActivator = nativesLoadedActivator;
-   }
+   private Consumer<RDXImagePanelTexture> monitorPanelUIThreadPreprocessor = null;
 
    public void create()
    {
@@ -54,15 +46,15 @@ public class RDXOpenCVWebcamReader
       LogTools.info("Default resolution: {} x {}", reportedImageWidth, reportedImageHeight);
       LogTools.info("Default fps: {}", reportedFPS);
 
-      backendName = BytedecoTools.stringFromByteBuffer(videoCapture.getBackendName());
+      backendName = videoCapture.getBackendName().getString();
 
       // Set buffer size low to make sure not to get backed up
       videoCapture.set(opencv_videoio.CAP_PROP_BUFFERSIZE, 2);
 
       // Return an RGBA image so we don't have to do an extra conversion
       // These don't appear to work though
-//      videoCapture.set(opencv_videoio.CAP_PROP_FORMAT, opencv_core.CV_8UC4);
-//      videoCapture.set(opencv_videoio.CAP_PROP_CONVERT_RGB, 1);
+      //      videoCapture.set(opencv_videoio.CAP_PROP_FORMAT, opencv_core.CV_8UC4);
+      //      videoCapture.set(opencv_videoio.CAP_PROP_CONVERT_RGB, 1);
 
       videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, imageWidth);
       videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, imageHeight);
@@ -78,7 +70,7 @@ public class RDXOpenCVWebcamReader
 
       bgrImage = new Mat();
 
-      swapCVPanel = new RDXOpenCVSwapVideoPanel("Webcam Monitor", this::monitorPanelUpdateOnAsynchronousThread, this::monitorPanelUpdateOnUIThread);
+      swapCVPanel = new RDXOpenCVGuidedSwapVideoPanel("Webcam Monitor", this::monitorPanelUpdateOnAsynchronousThread, this::monitorPanelUpdateOnUIThread);
       swapCVPanel.allocateInitialTextures(imageWidth, imageHeight);
    }
 
@@ -87,7 +79,7 @@ public class RDXOpenCVWebcamReader
     * on the UI update thread. It's not ideal to do too much processing here,
     * just quick and easy stuff.
     */
-   public void setMonitorPanelUIThreadPreprocessor(Consumer<RDXOpenCVSwapVideoPanelData> monitorPanelUIThreadPreprocessor)
+   public void setMonitorPanelUIThreadPreprocessor(Consumer<RDXImagePanelTexture> monitorPanelUIThreadPreprocessor)
    {
       this.monitorPanelUIThreadPreprocessor = monitorPanelUIThreadPreprocessor;
    }
@@ -95,7 +87,7 @@ public class RDXOpenCVWebcamReader
    /**
     * This method works best if called asynchronously, as it runs slower
     * than UI framerates typically.
-    *
+    * <p>
     * However, it can also be called just before update() if in a pinch.
     */
    public void readWebcamImage()
@@ -106,10 +98,10 @@ public class RDXOpenCVWebcamReader
       readFrequencyPlot.ping();
    }
 
-   private void monitorPanelUpdateOnAsynchronousThread(RDXOpenCVSwapVideoPanelData data)
+   private void monitorPanelUpdateOnAsynchronousThread(RDXImagePanelTexture texture)
    {
       imageWasRead = videoCapture.read(bgrImage);
-      opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+      opencv_imgproc.cvtColor(bgrImage, texture.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
    }
 
    /**
@@ -121,32 +113,29 @@ public class RDXOpenCVWebcamReader
       swapCVPanel.updateOnUIThread();
    }
 
-   private void monitorPanelUpdateOnUIThread(RDXOpenCVSwapVideoPanelData data)
+   private void monitorPanelUpdateOnUIThread(RDXImagePanelTexture texture)
    {
       if (imageWasRead)
       {
          imageWasRead = false;
          ++numberOfImagesRead;
 
-         if (monitorPanelUIThreadPreprocessor != null && data.getRGBA8Image() != null)
-            monitorPanelUIThreadPreprocessor.accept(data);
+         if (monitorPanelUIThreadPreprocessor != null && texture.getRGBA8Image() != null)
+            monitorPanelUIThreadPreprocessor.accept(texture);
 
-         data.updateOnUIThread(swapCVPanel.getVideoPanel());
+         texture.updateTextureAndDraw(swapCVPanel.getImagePanel());
       }
    }
 
    public void renderImGuiWidgets()
    {
-      if (nativesLoadedActivator.peek())
-      {
-         ImGui.text("Is open: " + videoCapture.isOpened());
-         ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
-         ImGui.text("Reported fps: " + reportedFPS);
-         ImGui.text("Backend name: " + backendName);
-         ImGui.text("Number of images read: " + numberOfImagesRead);
-         readFrequencyPlot.renderImGuiWidgets();
-         readDurationPlot.renderImGuiWidgets();
-      }
+      ImGui.text("Is open: " + videoCapture.isOpened());
+      ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
+      ImGui.text("Reported fps: " + reportedFPS);
+      ImGui.text("Backend name: " + backendName);
+      ImGui.text("Number of images read: " + numberOfImagesRead);
+      readFrequencyPlot.renderImGuiWidgets();
+      readDurationPlot.renderImGuiWidgets();
    }
 
    public void dispose()
@@ -164,12 +153,12 @@ public class RDXOpenCVWebcamReader
       return bgrImage;
    }
 
-   public ImGuiPanel getStatisticsPanel()
+   public RDXPanel getStatisticsPanel()
    {
       return panel;
    }
 
-   public RDXOpenCVSwapVideoPanel getSwapCVPanel()
+   public RDXOpenCVGuidedSwapVideoPanel getSwapCVPanel()
    {
       return swapCVPanel;
    }

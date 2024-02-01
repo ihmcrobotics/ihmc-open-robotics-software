@@ -5,7 +5,7 @@ import us.ihmc.tools.Timer;
 
 /**
  * Throttler is used to allow things to happen at a slower rate
- * than than the parent update thread. It features a run method,
+ * than the parent update thread. It features a run method,
  * which returns whether or not enough time has passed to run something.
  * Alternatively, it features a waitAndRun method, which allows the
  * user to sleep until it is ready for the next thing.

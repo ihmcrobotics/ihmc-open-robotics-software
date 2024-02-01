@@ -18,30 +18,37 @@ public class ImDoubleWrapper
    private final ImDouble imDouble = new ImDouble();
    private final DoubleSupplier wrappedValueGetter;
    private final DoubleConsumer wrappedValueSetter;
+   private final Consumer<ImDouble> widgetRenderer;
    private boolean changed = false;
 
-   public ImDoubleWrapper(StoredPropertySetBasics storedPropertySet, DoubleStoredPropertyKey key)
+   /**
+    * Convenience method for wrapping a StoredPropertySet key.
+    */
+   public ImDoubleWrapper(StoredPropertySetBasics storedPropertySet, DoubleStoredPropertyKey key, Consumer<ImDouble> widgetRenderer)
    {
-      this(() -> storedPropertySet.get(key), doubleValue -> storedPropertySet.set(key, doubleValue));
-   }
-
-   public ImDoubleWrapper(DoubleSupplier wrappedValueGetter, DoubleConsumer wrappedValueSetter)
-   {
-      this.wrappedValueGetter = wrappedValueGetter;
-      this.wrappedValueSetter = wrappedValueSetter;
+      this(() -> storedPropertySet.get(key), doubleValue -> storedPropertySet.set(key, doubleValue), widgetRenderer);
    }
 
    /**
-    * This access method is used for rendering ImGui widgets with the ImGui
+    * @param wrappedValueGetter used for getting the underlying value
+    * @param wrappedValueSetter used for setting the underlying value
+    * @param widgetRenderer is used for rendering ImGui widgets with the ImGui
     * type provided to the given Consumer. This way, this class can ensure it
     * is synced to the external data before and after the widget is rendered
     * and modified by the ImGui user.
     */
-   public void accessImDouble(Consumer<ImDouble> imDoubleConsumer)
+   public ImDoubleWrapper(DoubleSupplier wrappedValueGetter, DoubleConsumer wrappedValueSetter, Consumer<ImDouble> widgetRenderer)
+   {
+      this.wrappedValueGetter = wrappedValueGetter;
+      this.wrappedValueSetter = wrappedValueSetter;
+      this.widgetRenderer = widgetRenderer;
+   }
+
+   public void renderImGuiWidget()
    {
       // This basic set has no effects to just set it even if the values are the same
       imDouble.set(wrappedValueGetter.getAsDouble());
-      imDoubleConsumer.accept(imDouble);
+      widgetRenderer.accept(imDouble);
       // wrappedValueSetter might be hooked to a callback, so let's prevent
       // that unless necessary
       double imDoubleValue = imDouble.get();

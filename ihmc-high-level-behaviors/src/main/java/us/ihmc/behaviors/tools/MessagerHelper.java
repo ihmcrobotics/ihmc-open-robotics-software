@@ -131,7 +131,7 @@ public class MessagerHelper implements MessagerPublishSubscribeAPI
    @Override
    public <T> void subscribeViaCallback(MessagerAPIFactory.Topic<T> topic, TopicListener<T> listener)
    {
-      managedMessager.registerTopicListener(topic, listener);
+      managedMessager.addTopicListener(topic, listener);
    }
 
    @Override

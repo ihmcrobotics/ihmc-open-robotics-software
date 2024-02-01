@@ -11,19 +11,9 @@ public class AtlasSwingPlannerParameters extends StoredPropertySet implements Sw
       this("");
    }
 
-   public AtlasSwingPlannerParameters(String fileNameSuffix)
+   public AtlasSwingPlannerParameters(String versionSuffix)
    {
-      this("ihmc-open-robotics-software", "atlas/src/main/resources", fileNameSuffix);
-   }
-
-   public AtlasSwingPlannerParameters(String projectName, String pathToResources)
-   {
-      this(projectName, pathToResources, "");
-   }
-
-   public AtlasSwingPlannerParameters(String projectName, String pathToResources, String fileNameSuffix)
-   {
-      super(SwingPlannerParameterKeys.keys, AtlasSwingPlannerParameters.class, projectName, pathToResources, fileNameSuffix);
+      super(SwingPlannerParameterKeys.keys, AtlasSwingPlannerParameters.class, versionSuffix);
       loadUnsafe();
    }
 

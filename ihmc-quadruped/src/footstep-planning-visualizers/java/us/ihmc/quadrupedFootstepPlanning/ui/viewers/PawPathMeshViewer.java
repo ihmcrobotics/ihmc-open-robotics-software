@@ -71,7 +71,7 @@ public class PawPathMeshViewer extends AnimationTimer
       this.showFootstepPlanTopic = showFootstepPlanTopic;
       this.showFootstepPreviewTopic = showFootstepPreviewTopic;
 
-      messager.registerTopicListener(footstepPlanTopic, footstepPlan -> executorService.submit(() -> {
+      messager.addTopicListener(footstepPlanTopic, footstepPlan -> executorService.submit(() -> {
          solutionWasReceived.set(true);
          processFootstepPath(footstepPlan);
       }));
@@ -89,9 +89,9 @@ public class PawPathMeshViewer extends AnimationTimer
          root.getChildren().add(previewSphere);
       }
 
-      messager.registerTopicListener(computePathTopic, data -> reset.set(true));
-      messager.registerTopicListener(showFootstepPlanTopic, this::handleShowSolution);
-      messager.registerTopicListener(showFootstepPreviewTopic, this::handleShowPreview);
+      messager.addTopicListener(computePathTopic, data -> reset.set(true));
+      messager.addTopicListener(showFootstepPlanTopic, this::handleShowSolution);
+      messager.addTopicListener(showFootstepPreviewTopic, this::handleShowPreview);
    }
 
    public void setFootstepColors(QuadrantDependentList<Color> colors)

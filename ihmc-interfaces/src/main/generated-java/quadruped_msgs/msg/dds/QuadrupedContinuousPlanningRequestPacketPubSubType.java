@@ -11,6 +11,18 @@ package quadruped_msgs.msg.dds;
 public class QuadrupedContinuousPlanningRequestPacketPubSubType implements us.ihmc.pubsub.TopicDataType<quadruped_msgs.msg.dds.QuadrupedContinuousPlanningRequestPacket>
 {
    public static final java.lang.String name = "quadruped_msgs::msg::dds_::QuadrupedContinuousPlanningRequestPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "ca8264b1f7caf16dbc388b3765b87a242cb815714d1be2d8141fd988f68ea48b";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

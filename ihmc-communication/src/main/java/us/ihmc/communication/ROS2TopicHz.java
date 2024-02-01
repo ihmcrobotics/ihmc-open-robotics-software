@@ -12,7 +12,7 @@ public class ROS2TopicHz
 {
    public static void main(String[] args)
    {
-      ROS2Topic<?> topic = ROS2Tools.BIG_VIDEO_TEST;
+      ROS2Topic<?> topic = PerceptionAPI.BIG_VIDEO_TEST;
       LogTools.info("Subscribing to {}", topic.toString());
       FrequencyStatisticPrinter hz = new FrequencyStatisticPrinter();
       ROS2Node node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "hz");

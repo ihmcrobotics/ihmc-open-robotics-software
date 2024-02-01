@@ -37,13 +37,16 @@ import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class WholeBodyControlCoreToolbox
+public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -564,7 +567,7 @@ public class WholeBodyControlCoreToolbox
          return null;
       if (wrenchVisualizer == null)
       {
-         wrenchVisualizer = new WrenchVisualizer("DesiredExternalWrench", 1.0, yoGraphicsListRegistry, registry);
+         wrenchVisualizer = new WrenchVisualizer("DesiredExternal", 1.0, yoGraphicsListRegistry, registry);
          wrenchVisualizer.registerContactablePlaneBodies(contactablePlaneBodies);
       }
       return wrenchVisualizer;
@@ -673,5 +676,18 @@ public class WholeBodyControlCoreToolbox
    public List<OneDoFJointBasics> getInactiveOneDoFJoints()
    {
       return inactiveOneDoFJoints;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      if (planeContactWrenchProcessor != null)
+         group.addChild(planeContactWrenchProcessor.getSCS2YoGraphics());
+      if (wrenchVisualizer != null)
+         group.addChild(wrenchVisualizer.getSCS2YoGraphics());
+      if (wrenchMatrixCalculator != null)
+         group.addChild(wrenchMatrixCalculator.getSCS2YoGraphics());
+      return group;
    }
 }

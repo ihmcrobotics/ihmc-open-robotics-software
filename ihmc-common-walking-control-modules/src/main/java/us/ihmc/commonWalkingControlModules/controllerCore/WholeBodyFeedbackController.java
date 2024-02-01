@@ -25,11 +25,13 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class WholeBodyFeedbackController
+public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final InverseDynamicsCommandList inverseDynamicsOutput = new InverseDynamicsCommandList();
@@ -39,6 +41,7 @@ public class WholeBodyFeedbackController
    private final List<FeedbackControllerInterface> allControllers = new ArrayList<>();
 
    private final YoBoolean dynamicControllerConstructionEnabled = new YoBoolean("dynamicControllerConstructionEnabled", registry);
+   private final YoBoolean hasBeenInitializedOnce = new YoBoolean("hasBeenInitializedOnce", registry);
 
    private CenterOfMassFeedbackController centerOfMassFeedbackController;
    private final Map<RigidBodyBasics, List<SpatialFeedbackController>> spatialFeedbackControllerMap = new HashMap<>();
@@ -71,71 +74,96 @@ public class WholeBodyFeedbackController
       }
    }
 
-   private void registerControllers(FeedbackControllerTemplate template)
+   public void registerControllers(FeedbackControllerTemplate template)
    {
       dynamicControllerConstructionEnabled.set(template.isDynamicControllerConstructionAllowed());
-      template.getSpatialFeedbackControllerTemplate().forEach(this::registerSpatialControllers);
-      template.getPointFeedbackControllerTemplate().forEach(this::registerPointControllers);
-      template.getOrientationFeedbackControllerTemplate().forEach(this::registerOrientationControllers);
-      template.getOneDoFJointFeedbackControllerTemplate().forEach(this::registerOneDoFJointControllers);
+      if (!dynamicControllerConstructionEnabled.getValue() && hasBeenInitializedOnce.getValue())
+         throw new RuntimeException("Cannot register new controllers after the feedback controller has been initialied.");
+
+      for (RigidBodyBasics rigidBody : coreToolbox.getRootBody().subtreeIterable())
+      { // Iterating through the robot instead of the templates to guarantee consistent ordering of the yoVariables
+         ensureSpatialControllersPresent(rigidBody, template.getSpatialFeedbackControllerTemplate().get(rigidBody));
+         ensurePointControllersPresent(rigidBody, template.getPointFeedbackControllerTemplate().get(rigidBody));
+         ensureOrientationControllersPresent(rigidBody, template.getOrientationFeedbackControllerTemplate().get(rigidBody));
+      }
+
+      for (OneDoFJointBasics joint : coreToolbox.getRootBody().subtreeJointList(OneDoFJointBasics.class))
+      { // Iterating through the robot instead of the templates to guarantee consistent ordering of the yoVariables
+         if (template.getOneDoFJointFeedbackControllerTemplate().contains(joint))
+            ensureOneDoFJointControllersPresent(joint);
+      }
+
       if (template.isCenterOfMassFeedbackControllerEnabled())
          registerCenterOfMassController();
    }
 
-   private void registerSpatialControllers(RigidBodyBasics endEffector, int numberOfControllers)
+   private void ensureSpatialControllersPresent(RigidBodyBasics endEffector, Integer desiredNumberOfControllers)
    {
-      List<SpatialFeedbackController> endEffectorControllers = new ArrayList<>();
-      spatialFeedbackControllerMap.put(endEffector, endEffectorControllers);
+      if (desiredNumberOfControllers == null)
+         return;
 
-      for (int controllerIndex = 0; controllerIndex < numberOfControllers; controllerIndex++)
+      List<SpatialFeedbackController> endEffectorControllers = spatialFeedbackControllerMap.computeIfAbsent(endEffector, k -> new ArrayList<>());
+
+      while (endEffectorControllers.size() < desiredNumberOfControllers)
       {
-         SpatialFeedbackController controller = feedbackControllerFactory.buildSpatialFeedbackController(endEffector, controllerIndex);
+         SpatialFeedbackController controller = feedbackControllerFactory.buildSpatialFeedbackController(endEffector, endEffectorControllers.size());
          endEffectorControllers.add(controller);
          allControllers.add(controller);
       }
    }
 
-   private void registerPointControllers(RigidBodyBasics endEffector, int numberOfControllers)
+   private void ensurePointControllersPresent(RigidBodyBasics endEffector, Integer desiredNumberOfControllers)
    {
-      List<PointFeedbackController> endEffectorControllers = new ArrayList<>();
-      pointFeedbackControllerMap.put(endEffector, endEffectorControllers);
+      if (desiredNumberOfControllers == null)
+         return;
 
-      for (int controllerIndex = 0; controllerIndex < numberOfControllers; controllerIndex++)
+      List<PointFeedbackController> endEffectorControllers = pointFeedbackControllerMap.computeIfAbsent(endEffector, k -> new ArrayList<>());
+
+      while (endEffectorControllers.size() < desiredNumberOfControllers)
       {
-         PointFeedbackController controller = feedbackControllerFactory.buildPointFeedbackController(endEffector, controllerIndex);
+         PointFeedbackController controller = feedbackControllerFactory.buildPointFeedbackController(endEffector, endEffectorControllers.size());
          endEffectorControllers.add(controller);
          allControllers.add(controller);
       }
    }
 
-   private void registerOrientationControllers(RigidBodyBasics endEffector, int numberOfControllers)
+   private void ensureOrientationControllersPresent(RigidBodyBasics endEffector, Integer numberOfControllers)
    {
-      List<OrientationFeedbackController> endEffectorControllers = new ArrayList<>();
-      orientationFeedbackControllerMap.put(endEffector, endEffectorControllers);
+      if (numberOfControllers == null)
+         return;
 
-      for (int controllerIndex = 0; controllerIndex < numberOfControllers; controllerIndex++)
+      List<OrientationFeedbackController> endEffectorControllers = orientationFeedbackControllerMap.computeIfAbsent(endEffector, k -> new ArrayList<>());
+
+      while (endEffectorControllers.size() < numberOfControllers)
       {
-         OrientationFeedbackController controller = feedbackControllerFactory.buildOrientationFeedbackController(endEffector, controllerIndex);
+         OrientationFeedbackController controller = feedbackControllerFactory.buildOrientationFeedbackController(endEffector, endEffectorControllers.size());
          endEffectorControllers.add(controller);
          allControllers.add(controller);
       }
    }
 
-   private void registerOneDoFJointControllers(OneDoFJointBasics joint)
+   private void ensureOneDoFJointControllersPresent(OneDoFJointBasics joint)
    {
-      OneDoFJointFeedbackController controller = feedbackControllerFactory.buildOneDoFJointFeedbackController(joint);
-      oneDoFJointFeedbackControllerMap.put(joint, controller);
-      allControllers.add(controller);
+      if (!oneDoFJointFeedbackControllerMap.containsKey(joint))
+      {
+         OneDoFJointFeedbackController controller = feedbackControllerFactory.buildOneDoFJointFeedbackController(joint);
+         oneDoFJointFeedbackControllerMap.put(joint, controller);
+         allControllers.add(controller);
+      }
    }
 
    private void registerCenterOfMassController()
    {
-      centerOfMassFeedbackController = feedbackControllerFactory.buildCenterOfMassFeedbackController();
-      allControllers.add(centerOfMassFeedbackController);
+      if (centerOfMassFeedbackController == null)
+      {
+         centerOfMassFeedbackController = feedbackControllerFactory.buildCenterOfMassFeedbackController();
+         allControllers.add(centerOfMassFeedbackController);
+      }
    }
 
    public void initialize()
    {
+      hasBeenInitializedOnce.set(true);
       for (int i = 0; i < allControllers.size(); i++)
       {
          FeedbackControllerInterface controller = allControllers.get(i);
@@ -154,6 +182,8 @@ public class WholeBodyFeedbackController
 
    public void computeInverseDynamics()
    {
+      hasBeenInitializedOnce.set(true);
+
       feedbackControllerTimer.startMeasurement();
       inverseDynamicsOutput.clear();
 
@@ -176,6 +206,8 @@ public class WholeBodyFeedbackController
 
    public void computeInverseKinematics()
    {
+      hasBeenInitializedOnce.set(true);
+
       feedbackControllerTimer.startMeasurement();
       inverseKinematicsOutput.clear();
 
@@ -199,6 +231,8 @@ public class WholeBodyFeedbackController
 
    public void computeVirtualModelControl()
    {
+      hasBeenInitializedOnce.set(true);
+
       feedbackControllerTimer.startMeasurement();
       virtualModelControlOutput.clear();
 
@@ -280,7 +314,7 @@ public class WholeBodyFeedbackController
          }
          else
          {
-            registerSpatialControllers(endEffector, 1);
+            ensureSpatialControllersPresent(endEffector, 1);
             endEffectorControllers = spatialFeedbackControllerMap.get(endEffector);
          }
       }
@@ -306,7 +340,7 @@ public class WholeBodyFeedbackController
          if (!dynamicControllerConstructionEnabled.getValue())
          {
             throw new FeedbackControllerException("Could not find a controller available for the end-effector: " + endEffector.getName()
-                  + ", number of controllers: " + endEffectorControllers.size());
+                                                  + ", number of controllers: " + endEffectorControllers.size());
          }
          else
          {
@@ -349,7 +383,7 @@ public class WholeBodyFeedbackController
          }
          else
          {
-            registerPointControllers(endEffector, 1);
+            ensurePointControllersPresent(endEffector, 1);
             endEffectorControllers = pointFeedbackControllerMap.get(endEffector);
          }
       }
@@ -373,7 +407,7 @@ public class WholeBodyFeedbackController
          if (!dynamicControllerConstructionEnabled.getValue())
          {
             throw new FeedbackControllerException("Could not find a controller available for the end-effector: " + endEffector.getName()
-                  + ", number of controllers: " + endEffectorControllers.size());
+                                                  + ", number of controllers: " + endEffectorControllers.size());
          }
          else
          {
@@ -410,7 +444,7 @@ public class WholeBodyFeedbackController
          }
          else
          {
-            registerOrientationControllers(endEffector, 1);
+            ensureOrientationControllersPresent(endEffector, 1);
             endEffectorControllers = orientationFeedbackControllerMap.get(endEffector);
          }
       }
@@ -434,7 +468,7 @@ public class WholeBodyFeedbackController
          if (!dynamicControllerConstructionEnabled.getValue())
          {
             throw new FeedbackControllerException("Could not find a controller available for the end-effector: " + endEffector.getName()
-                  + ", number of controllers: " + endEffectorControllers.size());
+                                                  + ", number of controllers: " + endEffectorControllers.size());
          }
          else
          {
@@ -505,7 +539,7 @@ public class WholeBodyFeedbackController
          }
          else
          {
-            registerOneDoFJointControllers(joint);
+            ensureOneDoFJointControllersPresent(joint);
             controller = oneDoFJointFeedbackControllerMap.get(joint);
          }
       }
@@ -513,7 +547,7 @@ public class WholeBodyFeedbackController
       if (controller.isEnabled())
       {
          throw new FeedbackControllerException("Cannot submit more than one feedback control command to the same controller. Controller joint: "
-               + joint.getName());
+                                               + joint.getName());
       }
 
       controller.submitFeedbackControlCommand(feedbackControlCommand);
@@ -541,7 +575,7 @@ public class WholeBodyFeedbackController
    {
       if (activeControlMode != requestedControlMode)
          throw new FeedbackControllerException("Incompatible feedback control command: command requires: " + requestedControlMode + ", current mode: "
-               + activeControlMode);
+                                               + activeControlMode);
    }
 
    public InverseDynamicsCommandList getInverseDynamicsOutput()
@@ -562,5 +596,11 @@ public class WholeBodyFeedbackController
    public FeedbackControllerDataHolderReadOnly getWholeBodyFeedbackControllerDataHolder()
    {
       return feedbackControllerToolbox;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return null;
    }
 }

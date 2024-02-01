@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.HeightQuadTreeMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::HeightQuadTreeMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "c5d5273afb994c5ea2860a5fbcd25182a1c3b101bf7a16a685f0852b5b82a7ce";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

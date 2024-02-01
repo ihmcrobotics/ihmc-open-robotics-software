@@ -1,214 +1,91 @@
 package us.ihmc.perception.tools;
 
+import boofcv.struct.calib.CameraPinhole;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencl._cl_kernel;
-import org.bytedeco.opencl._cl_program;
-import org.bytedeco.opencl.global.OpenCL;
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.LongPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.IntrinsicParametersMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.VideoPacket;
+import us.ihmc.commons.MathTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.comms.ImageMessageFormat;
-import us.ihmc.perception.realsense.BytedecoRealsense;
-import us.ihmc.perception.opencl.OpenCLFloatParameters;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.time.Instant;
+import java.util.stream.IntStream;
 
 public class PerceptionMessageTools
 {
-   private int totalNumberOfPoints;
-   private final OpenCLManager openCLManager;
-   private final _cl_program openCLProgram;
-   private final _cl_kernel unpackPointCloudKernel;
-
-   private ByteBuffer decompressionInputBuffer;
-   private BytePointer decompressionInputBytePointer;
-   private Mat decompressionInputMat;
-   private BytedecoImage decompressionOutputImage;
-   private OpenCLFloatBuffer pointCloudVertexBuffer;
-   private final OpenCLFloatParameters parametersOpenCLFloatBuffer = new OpenCLFloatParameters();
-   private int depthWidth;
-   private int depthHeight;
-   private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
-
-   public PerceptionMessageTools()
+   public static void setDepthIntrinsicsFromRealsense(RealsenseDevice sensor, ImageMessage imageMessageToPack)
    {
-      openCLManager = new OpenCLManager();
-      openCLManager.create();
-      openCLProgram = openCLManager.loadProgram("PerceptionMessageTools");
-      unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToPointCloud");
+      imageMessageToPack.setFocalLengthXPixels((float) sensor.getDepthFocalLengthPixelsX());
+      imageMessageToPack.setFocalLengthYPixels((float) sensor.getDepthFocalLengthPixelsY());
+      imageMessageToPack.setPrincipalPointXPixels((float) sensor.getDepthPrincipalOffsetXPixels());
+      imageMessageToPack.setPrincipalPointYPixels((float) sensor.getDepthPrincipalOffsetYPixels());
    }
 
-   public void destroy()
+   public static void setColorIntrinsicsFromRealsense(RealsenseDevice sensor, ImageMessage imageMessageToPack)
    {
-      openCLProgram.close();
-      unpackPointCloudKernel.close();
-
-      decompressionOutputImage.destroy(openCLManager);
-      pointCloudVertexBuffer.destroy(openCLManager);
-
-      openCLProgram.close();
+      imageMessageToPack.setFocalLengthXPixels((float) sensor.getColorFocalLengthPixelsX());
+      imageMessageToPack.setFocalLengthYPixels((float) sensor.getColorFocalLengthPixelsY());
+      imageMessageToPack.setPrincipalPointXPixels((float) sensor.getColorPrincipalOffsetXPixels());
+      imageMessageToPack.setPrincipalPointYPixels((float) sensor.getColorPrincipalOffsetYPixels());
    }
 
-   private void resizeDepthImageData(int depthHeight, int depthWidth)
+   public static void copyToMessage(CameraPinhole cameraPinhole, ImageMessage imageMessageToPack)
    {
-      if (this.depthHeight == depthHeight && this.depthWidth == depthWidth)
-         return;
-
-      this.depthWidth = depthWidth;
-      this.depthHeight = depthHeight;
-      totalNumberOfPoints = depthWidth * depthHeight;
-      decompressionInputBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
-      decompressionInputBytePointer = new BytePointer(decompressionInputBuffer);
-      decompressionOutputImage.resize(depthWidth, depthHeight, openCLManager, null);
-      pointCloudVertexBuffer.resize(totalNumberOfPoints * 3, openCLManager);
+      imageMessageToPack.setFocalLengthXPixels((float) cameraPinhole.getFx());
+      imageMessageToPack.setFocalLengthYPixels((float) cameraPinhole.getFy());
+      imageMessageToPack.setPrincipalPointXPixels((float) cameraPinhole.getCx());
+      imageMessageToPack.setPrincipalPointYPixels((float) cameraPinhole.getCy());
    }
 
-   public Point3D[] unpackDepthImage(ImageMessage imageMessage, double verticalFieldOfView, double horizontalFieldOfView)
+   public static void toBoofCV(ImageMessage imageMessage, CameraPinhole cameraPinholeToPack)
    {
-      int numberOfBytes;
-
-      if (decompressionInputBuffer == null)
-      {
-         depthWidth = imageMessage.getImageWidth();
-         depthHeight = imageMessage.getImageHeight();
-         totalNumberOfPoints = depthWidth * depthHeight;
-         decompressionInputBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
-         decompressionInputBytePointer = new BytePointer(decompressionInputBuffer);
-         decompressionInputMat = new Mat(1, 1, opencv_core.CV_8UC1);
-         decompressionOutputImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
-         decompressionOutputImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-         pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * 3);
-         pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
-         LogTools.info("Allocated new buffers. {} points.", totalNumberOfPoints);
-      }
-      else
-      {
-         resizeDepthImageData(imageMessage.getImageHeight(), imageMessage.getImageWidth());
-      }
-
-      numberOfBytes = imageMessage.getData().size();
-      decompressionInputBuffer.rewind();
-      decompressionInputBuffer.limit(totalNumberOfPoints * 2);
-      for (int i = 0; i < numberOfBytes; i++)
-      {
-         decompressionInputBuffer.put(imageMessage.getData().get(i));
-      }
-      decompressionInputBuffer.flip();
-
-      decompressionInputBytePointer.position(0);
-      decompressionInputBytePointer.limit(numberOfBytes);
-
-      decompressionInputMat.cols(numberOfBytes);
-      decompressionInputMat.data(decompressionInputBytePointer);
-
-      decompressionOutputImage.getBackingDirectByteBuffer().rewind();
-      opencv_imgcodecs.imdecode(decompressionInputMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressionOutputImage.getBytedecoOpenCVMat());
-      decompressionOutputImage.getBackingDirectByteBuffer().rewind();
-
-      sensorTransformToWorld.getTranslation().set(imageMessage.getPosition());
-      sensorTransformToWorld.getRotation().set(imageMessage.getOrientation());
-
-      parametersOpenCLFloatBuffer.setParameter((float) horizontalFieldOfView);
-      parametersOpenCLFloatBuffer.setParameter((float) verticalFieldOfView);
-      parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getX32());
-      parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getY32());
-      parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getZ32());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM00());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM01());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM02());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM10());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM11());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM12());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM20());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM21());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM22());
-      parametersOpenCLFloatBuffer.setParameter(depthWidth);
-      parametersOpenCLFloatBuffer.setParameter(depthHeight);
-
-      parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
-      decompressionOutputImage.writeOpenCLImage(openCLManager);
-      pointCloudVertexBuffer.syncWithBackingBuffer();
-
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 0, parametersOpenCLFloatBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 1, decompressionOutputImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
-      openCLManager.execute2D(unpackPointCloudKernel, depthWidth, depthHeight);
-
-      pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
-
-      openCLManager.finish();
-
-      Point3D[] pointCloud = new Point3D[totalNumberOfPoints];
-      FloatBuffer pointElementBuffer = pointCloudVertexBuffer.getBackingDirectFloatBuffer();
-      pointElementBuffer.rewind();
-      for (int i = 0; i < totalNumberOfPoints; i++)
-         pointCloud[i] = new Point3D(pointElementBuffer.get(), pointElementBuffer.get(), pointElementBuffer.get());
-
-      return pointCloud;
+      cameraPinholeToPack.setFx(imageMessage.getFocalLengthXPixels());
+      cameraPinholeToPack.setFy(imageMessage.getFocalLengthYPixels());
+      cameraPinholeToPack.setCx(imageMessage.getPrincipalPointXPixels());
+      cameraPinholeToPack.setCy(imageMessage.getPrincipalPointYPixels());
    }
 
-   public static void setDepthExtrinsicsFromRealsense(BytedecoRealsense sensor, IntrinsicParametersMessage intrinsicParametersMessage)
+   public static void publishCompressedDepthImage(BytePointer compressedDepthPointer,
+                                                  ROS2Topic<ImageMessage> topic,
+                                                  ImageMessage depthImageMessage,
+                                                  ROS2Helper helper,
+                                                  FramePose3D cameraPose,
+                                                  Instant aquisitionTime,
+                                                  long sequenceNumber,
+                                                  int height,
+                                                  int width,
+                                                  float depthToMetersRatio)
    {
-      intrinsicParametersMessage.setFx(sensor.getDepthFocalLengthPixelsX());
-      intrinsicParametersMessage.setFy(sensor.getDepthFocalLengthPixelsY());
-      intrinsicParametersMessage.setSkew(0.0);
-      intrinsicParametersMessage.setCx(sensor.getDepthPrincipalOffsetXPixels());
-      intrinsicParametersMessage.setCy(sensor.getDepthPrincipalOffsetYPixels());
-   }
+      packImageMessage(depthImageMessage, compressedDepthPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
 
-   public static void setColorExtrinsicsFromRealsense(BytedecoRealsense sensor, IntrinsicParametersMessage intrinsicParametersMessage)
-   {
-      intrinsicParametersMessage.setFx(sensor.getColorFocalLengthPixelsX());
-      intrinsicParametersMessage.setFy(sensor.getColorFocalLengthPixelsY());
-      intrinsicParametersMessage.setSkew(0.0);
-      intrinsicParametersMessage.setCx(sensor.getColorPrincipalOffsetXPixels());
-      intrinsicParametersMessage.setCy(sensor.getColorPrincipalOffsetYPixels());
-   }
-
-   public static void publishPNGCompressedDepthImage(Mat depth16UC1Image,
-                                                     ROS2Topic<ImageMessage> topic,
-                                                     ImageMessage depthImageMessage,
-                                                     ROS2Helper helper,
-                                                     FramePose3D cameraPose,
-                                                     Instant aquisitionTime,
-                                                     long sequenceNumber,
-                                                     int height,
-                                                     int width)
-   {
-      BytePointer compressedDepthPointer = new BytePointer();
-      BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
-      BytedecoOpenCVTools.packImageMessage(depthImageMessage,
-                                           compressedDepthPointer,
-                                           cameraPose,
-                                           aquisitionTime,
-                                           sequenceNumber,
-                                           height,
-                                           width,
-                                           ImageMessageFormat.DEPTH_PNG_16UC1);
+      ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
       helper.publish(topic, depthImageMessage);
    }
 
-   public static void publishJPGCompressedColorImage(Mat color8UC3Image,
-                                                     Mat yuvColorImage,
+   public static void publishJPGCompressedColorImage(BytePointer compressedColorPointer,
                                                      ROS2Topic<ImageMessage> topic,
                                                      ImageMessage colorImageMessage,
                                                      ROS2Helper helper,
@@ -216,24 +93,17 @@ public class PerceptionMessageTools
                                                      Instant aquisitionTime,
                                                      long sequenceNumber,
                                                      int height,
-                                                     int width)
+                                                     int width,
+                                                     float depthToMetersRatio)
    {
-      BytePointer compressedColorPointer = new BytePointer();
-      BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
-      BytedecoOpenCVTools.packImageMessage(colorImageMessage,
-                                           compressedColorPointer,
-                                           cameraPose,
-                                           aquisitionTime,
-                                           sequenceNumber,
-                                           height,
-                                           width,
-                                           ImageMessageFormat.COLOR_JPEG_RGB8);
+      packImageMessage(colorImageMessage, compressedColorPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
+      ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(colorImageMessage);
       helper.publish(topic, colorImageMessage);
    }
 
    public static void publishFramePlanarRegionsList(FramePlanarRegionsList framePlanarRegionsList,
-                                                       ROS2Topic<FramePlanarRegionsListMessage> topic,
-                                                       ROS2Helper ros2Helper)
+                                                    ROS2Topic<FramePlanarRegionsListMessage> topic,
+                                                    ROS2Helper ros2Helper)
    {
       ros2Helper.publish(topic, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
    }
@@ -241,5 +111,146 @@ public class PerceptionMessageTools
    public static void publishPlanarRegionsList(PlanarRegionsList planarRegionsList, ROS2Topic<PlanarRegionsListMessage> topic, ROS2Helper ros2Helper)
    {
       ros2Helper.publish(topic, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+   }
+
+   public static void extractImageMessageData(ImageMessage imageMessage, ByteBuffer dataByteBuffer)
+   {
+      MessageTools.extractIDLSequence(imageMessage.getData(), dataByteBuffer);
+   }
+
+   public static void packImageMessageData(ByteBuffer dataByteBuffer, ImageMessage imageMessage)
+   {
+      MessageTools.packIDLSequence(dataByteBuffer, imageMessage.getData());
+   }
+
+   public static void packImageMessageData(BytePointer dataBytePointer, ImageMessage imageMessage)
+   {
+      imageMessage.getData().resetQuick();
+      for (int i = 0; i < dataBytePointer.limit(); i++)
+      {
+         imageMessage.getData().add(dataBytePointer.get(i));
+      }
+   }
+
+   public static void packImageMessage(ImageMessage imageMessage,
+                                       BytePointer dataBytePointer,
+                                       FramePose3D cameraPose,
+                                       Instant aquisitionTime,
+                                       long sequenceNumber,
+                                       int height,
+                                       int width,
+                                       float depthToMetersRatio)
+   {
+      packImageMessageData(dataBytePointer, imageMessage);
+      imageMessage.setImageHeight(height);
+      imageMessage.setImageWidth(width);
+      imageMessage.getPosition().set(cameraPose.getPosition());
+      imageMessage.getOrientation().set(cameraPose.getOrientation());
+      imageMessage.setSequenceNumber(sequenceNumber);
+      MessageTools.toMessage(aquisitionTime, imageMessage.getAcquisitionTime());
+      imageMessage.setDepthDiscretization(depthToMetersRatio);
+   }
+
+   public static void packVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width, long nanoTime)
+   {
+      compressedBytes.asBuffer().get(heapArray, 0, compressedBytes.asBuffer().remaining());
+      packet.setTimestamp(nanoTime);
+      packet.getData().resetQuick();
+      packet.getData().add(heapArray);
+      packet.setImageHeight(height);
+      packet.setImageWidth(width);
+      packet.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
+   }
+
+   public static void displayVideoPacketColor(VideoPacket videoPacket)
+   {
+      Mat colorImage = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_8UC3);
+      byte[] compressedByteArray = videoPacket.getData().toArray();
+      OpenCVTools.decompressJPG(compressedByteArray, colorImage);
+      PerceptionDebugTools.display("Color Image", colorImage, 1);
+   }
+
+   public static void copyToBytePointer(IDLSequence.Byte sourceIDLSequence, BytePointer pointerToPack)
+   {
+      pointerToPack.position(0);
+      pointerToPack.limit(sourceIDLSequence.size());
+      for (int i = 0; i < sourceIDLSequence.size(); i++)
+      {
+         pointerToPack.put(i, sourceIDLSequence.get(i));
+      }
+   }
+
+   public static void copyToFloatPointer(IDLSequence.Float sourceIDLSequence, FloatPointer floatPointerToPack, int startIndex)
+   {
+      for (int i = 0; i < sourceIDLSequence.size(); i++)
+      {
+         floatPointerToPack.put(i + startIndex, sourceIDLSequence.get(i));
+      }
+   }
+
+   public static void copyToLongPointer(IDLSequence.Long sourceIDLSequence, LongPointer longPointerToPack, int startIndex)
+   {
+      for (int i = 0; i < sourceIDLSequence.size(); i++)
+      {
+         longPointerToPack.put(i + startIndex, sourceIDLSequence.get(i));
+      }
+   }
+
+   public static void copyToFloatPointer(Point3D point, FloatPointer floatPointer, int startIndex)
+   {
+      floatPointer.put(startIndex, (float) point.getX());
+      floatPointer.put(startIndex + 1, (float) point.getY());
+      floatPointer.put(startIndex + 2, (float) point.getZ());
+   }
+
+   public static void copyToFloatPointer(Quaternion quaternion, FloatPointer floatPointer, int startIndex)
+   {
+      floatPointer.put(startIndex, (float) quaternion.getX());
+      floatPointer.put(startIndex + 1, (float) quaternion.getY());
+      floatPointer.put(startIndex + 2, (float) quaternion.getZ());
+      floatPointer.put(startIndex + 3, (float) quaternion.getS());
+   }
+
+   public static void convertToHeightMapData(Mat heightMapPointer, HeightMapData heightMapData, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
+   {
+      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
+      int cellsPerAxis = 2 * centerIndex + 1;
+
+      heightMapData.setGridCenter(gridCenter.getX(), gridCenter.getY());
+
+      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
+      {
+         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
+         {
+            int height = ((int) heightMapPointer.ptr(xIndex, yIndex).getShort() & 0xFFFF);
+            float cellHeight = (float) ((float) (height) / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
+                               - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
+
+            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+            heightMapData.setHeightAt(key, cellHeight);
+         }
+      }
+   }
+
+   public static void convertToHeightMapImage(ImageMessage imageMessage,
+                                              Mat heightMapImageToPack,
+                                              ByteBuffer compressedByteBuffer,
+                                              BytePointer byteBufferAccessPointer,
+                                              Mat compressedBytesMat)
+   {
+      int numberOfBytes = imageMessage.getData().size();
+      compressedByteBuffer.rewind();
+      compressedByteBuffer.limit(numberOfBytes);
+      for (int i = 0; i < numberOfBytes; i++)
+      {
+         compressedByteBuffer.put(imageMessage.getData().get(i));
+      }
+      compressedByteBuffer.flip();
+
+      compressedBytesMat.cols(numberOfBytes);
+      compressedBytesMat.data(byteBufferAccessPointer);
+
+      // Decompress the height map image
+      opencv_imgcodecs.imdecode(compressedBytesMat, opencv_imgcodecs.IMREAD_UNCHANGED, heightMapImageToPack);
    }
 }

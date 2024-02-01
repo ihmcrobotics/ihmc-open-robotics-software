@@ -3,12 +3,12 @@ package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 import us.ihmc.javaFXToolkit.StringConverterTools;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphParametersKeys;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
-import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 
 public class VisibilityGraphsParametersAnchorPaneController
 {
@@ -65,7 +65,7 @@ public class VisibilityGraphsParametersAnchorPaneController
       javaFXStoredPropertyMap.put(regionOrthogonalAngleSlider, VisibilityGraphParametersKeys.regionOrthogonalAngle);
 
       // set messager updates to update all stored properties and select JavaFX properties
-      messager.registerTopicListener(UIVisibilityGraphsTopics.VisibilityGraphsParameters, parameters ->
+      messager.addTopicListener(UIVisibilityGraphsTopics.VisibilityGraphsParameters, parameters ->
       {
          planningParameters.set(parameters);
 

@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class ExternalForceEstimationConfigurationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::ExternalForceEstimationConfigurationMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "1cf66818d79ba2698e9270cc6ca538bcf7223057dcd605d4acdafe57eaa75a24";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ArmTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ArmTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "d996f0d93f33dc161df4bc7c9bfc99f2a7d2b3edc134be66aea6c3c26784d9a0";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -46,8 +58,6 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
       current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -72,9 +82,6 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
       current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getCdrSerializedSize(data.getJointspaceTrajectory(), current_alignment);
 
 
@@ -87,8 +94,6 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       cdr.write_type_7(data.getForceExecution());
 
-      cdr.write_type_9(data.getRequestedMode());
-
       cdr.write_type_9(data.getRobotSide());
 
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.write(data.getJointspaceTrajectory(), cdr);
@@ -99,8 +104,6 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       data.setSequenceId(cdr.read_type_4());
       	
       data.setForceExecution(cdr.read_type_7());
-      	
-      data.setRequestedMode(cdr.read_type_9());
       	
       data.setRobotSide(cdr.read_type_9());
       	
@@ -113,7 +116,6 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("force_execution", data.getForceExecution());
-      ser.write_type_9("requested_mode", data.getRequestedMode());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());
 
@@ -124,7 +126,6 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setForceExecution(ser.read_type_7("force_execution"));
-      data.setRequestedMode(ser.read_type_9("requested_mode"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());
 

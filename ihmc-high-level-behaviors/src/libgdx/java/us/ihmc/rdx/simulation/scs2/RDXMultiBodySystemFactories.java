@@ -22,49 +22,69 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class RDXMultiBodySystemFactories
 {
-   public static RDXRigidBody toGDXMultiBodySystem(RigidBodyReadOnly originalRootBody, ReferenceFrame cloneStationaryFrame, RobotDefinition robotDefinition)
+   public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody, RobotDefinition robotDefinition)
    {
-      return toGDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, MultiBodySystemFactories.DEFAULT_JOINT_BUILDER);
+      return toRDXMultiBodySystem(originalRootBody, null, robotDefinition);
    }
 
-   public static RDXRigidBody toGDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
+   public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody, RobotDefinition robotDefinition, double scaleFactor)
+   {
+      return (RDXRigidBody) MultiBodySystemFactories.cloneMultiBodySystem(originalRootBody,
+                                                                          null,
+                                                                          "",
+                                                                          newRDXRigidBodyBuilder(MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER,
+                                                                                                 robotDefinition,
+                                                                                                 null,
+                                                                                                 scaleFactor,
+                                                                                                 false),
+                                                                          MultiBodySystemFactories.DEFAULT_JOINT_BUILDER);
+   }
+
+   public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
+                                                   ReferenceFrame cloneStationaryFrame,
+                                                   RobotDefinition robotDefinition)
+   {
+      return toRDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, MultiBodySystemFactories.DEFAULT_JOINT_BUILDER);
+   }
+
+   public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
                                                    ReferenceFrame cloneStationaryFrame,
                                                    RobotDefinition robotDefinition,
                                                    Executor graphicLoader)
    {
-      return toGDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, MultiBodySystemFactories.DEFAULT_JOINT_BUILDER, graphicLoader);
+      return toRDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, MultiBodySystemFactories.DEFAULT_JOINT_BUILDER, graphicLoader);
    }
 
-   public static RDXRigidBody toYoGDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
+   public static RDXRigidBody toYoRDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
                                                      ReferenceFrame cloneStationaryFrame,
                                                      RobotDefinition robotDefinition,
                                                      YoRegistry registry)
    {
-      return toGDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, YoMultiBodySystemFactories.newYoJointBuilder(registry), null);
+      return toRDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, YoMultiBodySystemFactories.newYoJointBuilder(registry), null);
    }
 
-   public static RDXRigidBody toYoGDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
+   public static RDXRigidBody toYoRDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
                                                      ReferenceFrame cloneStationaryFrame,
                                                      RobotDefinition robotDefinition,
                                                      YoRegistry registry,
                                                      Executor graphicLoader)
    {
-      return toGDXMultiBodySystem(originalRootBody,
+      return toRDXMultiBodySystem(originalRootBody,
                                   cloneStationaryFrame,
                                   robotDefinition,
                                   YoMultiBodySystemFactories.newYoJointBuilder(registry),
                                   graphicLoader);
    }
 
-   public static RDXRigidBody toGDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
+   public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
                                                    ReferenceFrame cloneStationaryFrame,
                                                    RobotDefinition robotDefinition,
                                                    JointBuilder jointBuilder)
    {
-      return toGDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, jointBuilder, null);
+      return toRDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, jointBuilder, null);
    }
 
-   public static RDXRigidBody toGDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
+   public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
                                                    ReferenceFrame cloneStationaryFrame,
                                                    RobotDefinition robotDefinition,
                                                    JointBuilder jointBuilder,
@@ -73,32 +93,30 @@ public class RDXMultiBodySystemFactories
       return (RDXRigidBody) MultiBodySystemFactories.cloneMultiBodySystem(originalRootBody,
                                                                           cloneStationaryFrame,
                                                                           "",
-                                                                          newGDXRigidBodyBuilder(robotDefinition, graphicLoader),
+                                                                          newRDXRigidBodyBuilder(robotDefinition, graphicLoader),
                                                                           jointBuilder);
    }
 
-   public static RigidBodyBuilder newGDXRigidBodyBuilder(RobotDefinition robotDefinition)
+   public static RigidBodyBuilder newRDXRigidBodyBuilder(RobotDefinition robotDefinition)
    {
-      return newGDXRigidBodyBuilder(robotDefinition, null);
+      return newRDXRigidBodyBuilder(robotDefinition, null);
    }
 
-   public static RigidBodyBuilder newGDXRigidBodyBuilder(RobotDefinition robotDefinition, Executor graphicLoader)
+   public static RigidBodyBuilder newRDXRigidBodyBuilder(RobotDefinition robotDefinition, Executor graphicLoader)
    {
-      return newGDXRigidBodyBuilder(MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER,
-                                    robotDefinition,
-                                    graphicLoader,
-                                    robotDefinition.getResourceClassLoader());
+      return newRDXRigidBodyBuilder(MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER, robotDefinition, graphicLoader, RDXVisualTools.NO_SCALING, false);
    }
 
-   public static RigidBodyBuilder newGDXRigidBodyBuilder(RigidBodyBuilder rigidBodyBuilder, RobotDefinition robotDefinition)
+   public static RigidBodyBuilder newRDXRigidBodyBuilder(RigidBodyBuilder rigidBodyBuilder, RobotDefinition robotDefinition)
    {
-      return newGDXRigidBodyBuilder(rigidBodyBuilder, robotDefinition, null, robotDefinition.getResourceClassLoader());
+      return newRDXRigidBodyBuilder(rigidBodyBuilder, robotDefinition, null, RDXVisualTools.NO_SCALING, false);
    }
 
-   public static RigidBodyBuilder newGDXRigidBodyBuilder(RigidBodyBuilder rigidBodyBuilder,
+   public static RigidBodyBuilder newRDXRigidBodyBuilder(RigidBodyBuilder rigidBodyBuilder,
                                                          RobotDefinition robotDefinition,
                                                          Executor graphicLoader,
-                                                         ClassLoader resourceClassLoader)
+                                                         double scaleFactor,
+                                                         boolean createReferenceFrameGraphics)
    {
       return new RigidBodyBuilder()
       {
@@ -106,30 +124,35 @@ public class RDXMultiBodySystemFactories
          public RDXRigidBody buildRoot(String bodyName, RigidBodyTransformReadOnly transformToParent, ReferenceFrame parentStationaryFrame)
          {
             RigidBodyBasics rootBody = rigidBodyBuilder.buildRoot(bodyName, transformToParent, parentStationaryFrame);
-            return toGDXRigidBody(rootBody, robotDefinition.getRigidBodyDefinition(rootBody.getName()), graphicLoader, resourceClassLoader);
+            return toRDXRigidBody(rootBody,
+                                  robotDefinition.getRigidBodyDefinition(rootBody.getName()),
+                                  graphicLoader,
+                                  scaleFactor,
+                                  createReferenceFrameGraphics);
          }
 
          @Override
-         public RDXRigidBody build(String bodyName, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransformReadOnly inertiaPose)
+         public RDXRigidBody build(String bodyName,
+                                   JointBasics parentJoint,
+                                   Matrix3DReadOnly momentOfInertia,
+                                   double mass,
+                                   RigidBodyTransformReadOnly inertiaPose)
          {
             RigidBodyBasics rigidBody = rigidBodyBuilder.build(bodyName, parentJoint, momentOfInertia, mass, inertiaPose);
-            return toGDXRigidBody(rigidBody, robotDefinition.getRigidBodyDefinition(rigidBody.getName()), graphicLoader, resourceClassLoader);
+            return toRDXRigidBody(rigidBody,
+                                  robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
+                                  graphicLoader,
+                                  scaleFactor,
+                                  createReferenceFrameGraphics);
          }
       };
    }
 
-   public static RDXRigidBody toGDXRigidBody(RigidBodyBasics rigidBody, RigidBodyDefinition rigidBodyDefinition, ClassLoader resourceClassLoader)
-   {
-      return toGDXRigidBody(rigidBody, rigidBodyDefinition, null, resourceClassLoader);
-   }
-
-   public static RDXRigidBody toGDXRigidBody(RigidBodyBasics rigidBody,
+   public static RDXRigidBody toRDXRigidBody(RigidBodyBasics rigidBody,
                                              RigidBodyDefinition rigidBodyDefinition,
                                              Executor graphicLoader,
-                                             ClassLoader resourceClassLoader,
-                                             float x,
-                                             float y,
-                                             float z)
+                                             double scaleFactor,
+                                             boolean createReferenceFrameGraphics)
    {
       RDXRigidBody RDXRigidBody = new RDXRigidBody(rigidBody);
       List<VisualDefinition> visualDefinitions = rigidBodyDefinition.getVisualDefinitions();
@@ -137,32 +160,15 @@ public class RDXMultiBodySystemFactories
 
       if (graphicLoader != null)
       {
-         graphicLoader.execute(() -> loadRigidBodyGraphic(visualDefinitions, collisionShapeDefinitions, RDXRigidBody, resourceClassLoader, x, y, z));
+         graphicLoader.execute(() -> loadRigidBodyGraphic(visualDefinitions,
+                                                          collisionShapeDefinitions,
+                                                          RDXRigidBody,
+                                                          scaleFactor,
+                                                          createReferenceFrameGraphics));
       }
       else
       {
-         loadRigidBodyGraphic(visualDefinitions, collisionShapeDefinitions, RDXRigidBody, resourceClassLoader, x, y, z);
-      }
-
-      return RDXRigidBody;
-   }
-
-   public static RDXRigidBody toGDXRigidBody(RigidBodyBasics rigidBody,
-                                             RigidBodyDefinition rigidBodyDefinition,
-                                             Executor graphicLoader,
-                                             ClassLoader resourceClassLoader)
-   {
-      RDXRigidBody RDXRigidBody = new RDXRigidBody(rigidBody);
-      List<VisualDefinition> visualDefinitions = rigidBodyDefinition.getVisualDefinitions();
-      List<CollisionShapeDefinition> collisionShapeDefinitions = rigidBodyDefinition.getCollisionShapeDefinitions();
-
-      if (graphicLoader != null)
-      {
-         graphicLoader.execute(() -> loadRigidBodyGraphic(visualDefinitions, collisionShapeDefinitions, RDXRigidBody, resourceClassLoader));
-      }
-      else
-      {
-         loadRigidBodyGraphic(visualDefinitions, collisionShapeDefinitions, RDXRigidBody, resourceClassLoader);
+         loadRigidBodyGraphic(visualDefinitions, collisionShapeDefinitions, RDXRigidBody, scaleFactor, createReferenceFrameGraphics);
       }
 
       return RDXRigidBody;
@@ -170,58 +176,29 @@ public class RDXMultiBodySystemFactories
 
    private static void loadRigidBodyGraphic(List<VisualDefinition> visualDefinitions,
                                             List<CollisionShapeDefinition> collisionShapeDefinitions,
-                                            RDXRigidBody RDXRigidBody,
-                                            ClassLoader resourceClassLoader,
-                                            float x,
-                                            float y,
-                                            float z)
+                                            RDXRigidBody rdxRigidBody,
+                                            double scaleFactor,
+                                            boolean createReferenceFrameGraphics)
    {
-      ReferenceFrame graphicFrame = RDXRigidBody.isRootBody() ? RDXRigidBody.getBodyFixedFrame() : RDXRigidBody.getParentJoint().getFrameAfterJoint();
-      List<RDXVisualModelInstance> visualModels = RDXVisualTools.collectNodes(visualDefinitions, resourceClassLoader);
-      List<RDXVisualModelInstance> collisionModels = RDXVisualTools.collectCollisionNodes(collisionShapeDefinitions);
+      ReferenceFrame graphicFrame = rdxRigidBody.isRootBody() ? rdxRigidBody.getBodyFixedFrame() : rdxRigidBody.getParentJoint().getFrameAfterJoint();
+      List<RDXVisualModelInstance> visualModels = RDXVisualTools.collectNodes(visualDefinitions, scaleFactor);
+      List<RDXVisualModelInstance> collisionModels = RDXVisualTools.collectCollisionNodes(collisionShapeDefinitions, scaleFactor);
       if (!visualModels.isEmpty() || !collisionModels.isEmpty())
       {
-         RDXFrameGraphicsNode visualGraphicsNode = new RDXFrameGraphicsNode(graphicFrame);
+         RDXFrameGraphicsNode visualGraphicsNode = new RDXFrameGraphicsNode(graphicFrame, createReferenceFrameGraphics);
          int i = 0;
          for (RDXVisualModelInstance visualModel : visualModels)
          {
-            visualGraphicsNode.addModelPart(visualModel, RDXRigidBody.getName() + "Visual" + i, x, y, z);
+            visualGraphicsNode.addModelPart(visualModel, rdxRigidBody.getName() + "Visual" + i);
          }
-         RDXRigidBody.setVisualGraphics(visualGraphicsNode);
-         RDXFrameGraphicsNode collisionGraphicsNode = new RDXFrameGraphicsNode(graphicFrame);
+         rdxRigidBody.setVisualGraphics(visualGraphicsNode);
+         RDXFrameGraphicsNode collisionGraphicsNode = new RDXFrameGraphicsNode(graphicFrame, createReferenceFrameGraphics);
          i = 0;
          for (RDXVisualModelInstance collisionModel : collisionModels)
          {
-            collisionGraphicsNode.addModelPart(collisionModel, RDXRigidBody.getName() + "Collision" + i, x, y, z);
+            collisionGraphicsNode.addModelPart(collisionModel, rdxRigidBody.getName() + "Collision" + i);
          }
-         RDXRigidBody.setCollisionGraphics(collisionGraphicsNode);
-      }
-   }
-
-   private static void loadRigidBodyGraphic(List<VisualDefinition> visualDefinitions,
-                                            List<CollisionShapeDefinition> collisionShapeDefinitions,
-                                            RDXRigidBody RDXRigidBody,
-                                            ClassLoader resourceClassLoader)
-   {
-      ReferenceFrame graphicFrame = RDXRigidBody.isRootBody() ? RDXRigidBody.getBodyFixedFrame() : RDXRigidBody.getParentJoint().getFrameAfterJoint();
-      List<RDXVisualModelInstance> visualModels = RDXVisualTools.collectNodes(visualDefinitions, resourceClassLoader);
-      List<RDXVisualModelInstance> collisionModels = RDXVisualTools.collectCollisionNodes(collisionShapeDefinitions);
-      if (!visualModels.isEmpty() || !collisionModels.isEmpty())
-      {
-         RDXFrameGraphicsNode visualGraphicsNode = new RDXFrameGraphicsNode(graphicFrame);
-         int i = 0;
-         for (RDXVisualModelInstance visualModel : visualModels)
-         {
-            visualGraphicsNode.addModelPart(visualModel, RDXRigidBody.getName() + "Visual" + i);
-         }
-         RDXRigidBody.setVisualGraphics(visualGraphicsNode);
-         RDXFrameGraphicsNode collisionGraphicsNode = new RDXFrameGraphicsNode(graphicFrame);
-         i = 0;
-         for (RDXVisualModelInstance collisionModel : collisionModels)
-         {
-            collisionGraphicsNode.addModelPart(collisionModel, RDXRigidBody.getName() + "Collision" + i);
-         }
-         RDXRigidBody.setCollisionGraphics(collisionGraphicsNode);
+         rdxRigidBody.setCollisionGraphics(collisionGraphicsNode);
       }
    }
 }

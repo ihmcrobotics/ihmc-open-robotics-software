@@ -18,19 +18,24 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
- * @author twan
- *         Date: 5/11/13
+ * @author twan Date: 5/11/13
  */
-public class PlaneContactWrenchProcessor
+public class PlaneContactWrenchProcessor implements SCS2YoGraphicHolder
 {
-   private final static boolean VISUALIZE = false;
+   public final static boolean VISUALIZE = true;
 
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
@@ -47,8 +52,9 @@ public class PlaneContactWrenchProcessor
    private final CenterOfPressureDataHolder desiredCenterOfPressureDataHolder;
    private final DesiredExternalWrenchHolder desiredExternalWrenchHolder;
 
-   public PlaneContactWrenchProcessor(List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoRegistry parentRegistry)
+   public PlaneContactWrenchProcessor(List<? extends ContactablePlaneBody> contactablePlaneBodies,
+                                      YoGraphicsListRegistry yoGraphicsListRegistry,
+                                      YoRegistry parentRegistry)
    {
       List<RigidBodyBasics> feet = new ArrayList<>();
 
@@ -122,7 +128,7 @@ public class PlaneContactWrenchProcessor
 
             tempCoP3d.setIncludingFrame(cop, 0.0);
             centersOfPressureWorld.get(contactablePlaneBody).setMatchingFrame(tempCoP3d);
-            groundReactionForceMagnitudes.get(contactablePlaneBody).set(tempForce.length());
+            groundReactionForceMagnitudes.get(contactablePlaneBody).set(tempForce.norm());
             normalTorques.get(contactablePlaneBody).set(normalTorque);
          }
          else
@@ -161,5 +167,18 @@ public class PlaneContactWrenchProcessor
    public DesiredExternalWrenchHolder getDesiredExternalWrenchHolder()
    {
       return desiredExternalWrenchHolder;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      for (int i = 0; i < contactablePlaneBodies.size(); i++)
+      {
+         YoFramePoint3D cop = centersOfPressureWorld.get(contactablePlaneBodies.get(i));
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(cop.getNamePrefix(), cop, 0.010, ColorDefinitions.Navy(), DefaultPoint2DGraphic.CIRCLE));
+      }
+      group.setVisible(VISUALIZE);
+      return group;
    }
 }

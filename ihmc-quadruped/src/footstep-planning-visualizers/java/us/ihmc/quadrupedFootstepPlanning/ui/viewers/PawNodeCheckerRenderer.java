@@ -69,8 +69,8 @@ public class PawNodeCheckerRenderer extends AnimationTimer
       SnapBasedPawNodeTransitionChecker snapBasedNodeChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
       nodeChecker = new PawNodeTransitionCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));
 
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.PlannerParametersTopic, parameters::set);
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);
+      messager.addTopicListener(PawStepPlannerMessagerAPI.PlannerParametersTopic, parameters::set);
+      messager.addTopicListener(PawStepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);
    }
 
    @Override

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.ejml.data.DMatrixRMaj;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
@@ -33,12 +34,14 @@ import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class InverseKinematicsOptimizationControlModule
+public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphicHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final InverseKinematicsQPSolver qpSolver;
@@ -56,6 +59,7 @@ public class InverseKinematicsOptimizationControlModule
    private final Map<OneDoFJointBasics, YoDouble> jointMinimumVelocities = new HashMap<>();
    private final DMatrixRMaj qDotMinMatrix, qDotMaxMatrix;
    private final JointIndexHandler jointIndexHandler;
+   private final TIntArrayList inactiveJointIndices = new TIntArrayList();
 
    private final YoBoolean computeJointTorques = new YoBoolean("computeJointTorques", registry);
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
@@ -72,6 +76,9 @@ public class InverseKinematicsOptimizationControlModule
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       kinematicLoopFunctions = toolbox.getKinematicLoopFunctions();
       inverseKinematicsSolution = new InverseKinematicsSolution(jointsToOptimizeFor);
+
+      for (OneDoFJointBasics inactiveJoint : toolbox.getInactiveOneDoFJoints())
+         inactiveJointIndices.add(jointIndexHandler.getOneDoFJointIndex(inactiveJoint));
 
       numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       qpInput = new QPInputTypeA(numberOfDoFs);
@@ -129,6 +136,11 @@ public class InverseKinematicsOptimizationControlModule
       computeJointVelocityLimits();
       qpSolver.setMaxJointVelocities(qDotMaxMatrix);
       qpSolver.setMinJointVelocities(qDotMinMatrix);
+
+      for (int i = 0; i < inactiveJointIndices.size(); i++)
+      {
+         qpSolver.setActiveDoF(inactiveJointIndices.get(i), false);
+      }
 
       for (int i = 0; i < kinematicLoopFunctions.size(); i++)
       {
@@ -261,5 +273,25 @@ public class InverseKinematicsOptimizationControlModule
          boundCalculator.considerJointVelocityLimits(command.getJointVelocityLimitMode() == ActivationState.ENABLED);
       if (command.hasComputeJointTorques())
          computeJointTorques.set(command.getComputeJointTorques() == ActivationState.ENABLED);
+      for (int i = 0; i < command.getJointsToActivate().size(); i++)
+      {
+         OneDoFJointBasics joint = command.getJointsToActivate().get(i);
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+         inactiveJointIndices.remove(jointIndex);
+      }
+      for (int i = 0; i < command.getJointsToDeactivate().size(); i++)
+      {
+         OneDoFJointBasics joint = command.getJointsToDeactivate().get(i);
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+         // Prevent duplicates in the list.
+         if (!inactiveJointIndices.contains(jointIndex))
+            inactiveJointIndices.add(jointIndex);
+      }
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return null;
    }
 }

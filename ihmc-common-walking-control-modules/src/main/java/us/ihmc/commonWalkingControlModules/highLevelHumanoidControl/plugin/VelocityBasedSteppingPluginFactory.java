@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
-import controller_msgs.msg.dds.DirectionalControlInputMessage;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
@@ -115,6 +112,7 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
       fastWalkingJoystickPlugin.setDirectionalControlMessenger(new DirectionalControlMessenger()
       {
          private final DirectionalControlInputMessage message = new DirectionalControlInputMessage();
+         private final FastWalkingGaitParametersMessage gaitParameters = new FastWalkingGaitParametersMessage();
 
          @Override
          public void submitDirectionalControlRequest(double desiredXVelocity, double desiredYVelocity, double desiredTurningSpeed)
@@ -124,6 +122,16 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
             message.setClockwise(-desiredTurningSpeed);
 
             walkingCommandInputManager.submitMessage(message);
+         }
+
+         @Override
+         public void submitGaitParameters(double swingHeight, double swingDuration, double doubleSupportFraction)
+         {
+            gaitParameters.setSwingHeight(swingHeight);
+            gaitParameters.setSwingDuration(swingDuration);
+            gaitParameters.setDoubleSupportFraction(doubleSupportFraction);
+
+            walkingCommandInputManager.submitMessage(gaitParameters);
          }
       });
       if (csgCommandInputManagerField.hasValue())
@@ -146,9 +154,11 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
          @Override
          public void submitStopWalkingRequest()
          {
+            message.setClearRemainingFootstepQueue(true);
             walkingCommandInputManager.submitMessage(message);
          }
       });
+
       fastWalkingJoystickPlugin.setStartWalkingMessenger(new StartWalkingMessenger()
       {
          private final PauseWalkingMessage message = HumanoidMessageTools.createPauseWalkingMessage(false);

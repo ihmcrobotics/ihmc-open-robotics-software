@@ -24,7 +24,7 @@ public class AtlasProvidedMassMatrixToolRigidBodyTest extends ProvidedMassMatrix
    @Override
    public FullHumanoidRobotModel getFullRobotModel()
    {
-      FullHumanoidRobotModel fullRobotModel = atlasRobotModel.createFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = atlasRobotModel.createFullRobotModel(false);
 
       Random random = new Random(945298L);
       OneDoFJointBasics[] armJoints = MultiBodySystemTools.createOneDoFJointPath(fullRobotModel.getChest(), fullRobotModel.getHand(side));

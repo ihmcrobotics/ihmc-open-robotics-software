@@ -1,6 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class InverseKinematicsOptimizationSettingsCommand implements InverseKinematicsCommand<InverseKinematicsOptimizationSettingsCommand>
 {
@@ -15,6 +19,8 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
    private double jointTorqueWeight = Double.NaN;
    private ActivationState jointVelocityLimitMode = null;
    private ActivationState computeJointTorques = null;
+   private final List<OneDoFJointBasics> jointsToDeactivate = new ArrayList<>();
+   private final List<OneDoFJointBasics> jointsToActivate = new ArrayList<>();
 
    /**
     * Sets the weight specifying how much high joint velocity values should be penalized in the
@@ -81,6 +87,34 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
    public void setComputeJointTorques(ActivationState computeJointTorques)
    {
       this.computeJointTorques = computeJointTorques;
+   }
+
+   /**
+    * Activates a joint such that it is assumed to be controllable and its acceleration should be
+    * solved by the QP solver.
+    * <p>
+    * If the joint was already active, nothing happens.
+    * </p>
+    *
+    * @param jointToActivate the joint to activate and optimize acceleration for.
+    */
+   public void activateJoint(OneDoFJointBasics jointToActivate)
+   {
+      jointsToActivate.add(jointToActivate);
+   }
+
+   /**
+    * Deactivates a joint such that it is assumed to be uncontrollable. However, its position and
+    * velocity are still considered when optimizing for the other active joints.
+    * <p>
+    * If the joint was already deactivated, nothing happens.
+    * </p>
+    * 
+    * @param jointToDeactivate the joint to deactivate.
+    */
+   public void deactivateJoint(OneDoFJointBasics jointToDeactivate)
+   {
+      jointsToDeactivate.add(jointToDeactivate);
    }
 
    /**
@@ -193,6 +227,26 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
       return computeJointTorques;
    }
 
+   /**
+    * Gets the list of joints to activate in the optimization problem.
+    * 
+    * @return the joints to activate.
+    */
+   public List<OneDoFJointBasics> getJointsToActivate()
+   {
+      return jointsToActivate;
+   }
+
+   /**
+    * Gets the list of joints to deactivate in the optimization problem.
+    * 
+    * @return the joints to deactivate.
+    */
+   public List<OneDoFJointBasics> getJointsToDeactivate()
+   {
+      return jointsToDeactivate;
+   }
+
    @Override
    public void set(InverseKinematicsOptimizationSettingsCommand other)
    {
@@ -202,6 +256,12 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
       jointTorqueWeight = other.jointTorqueWeight;
       jointVelocityLimitMode = other.jointVelocityLimitMode;
       computeJointTorques = other.computeJointTorques;
+      jointsToActivate.clear();
+      for (int i = 0; i < other.jointsToActivate.size(); i++)
+         jointsToActivate.add(other.jointsToActivate.get(i));
+      jointsToDeactivate.clear();
+      for (int i = 0; i < other.jointsToDeactivate.size(); i++)
+         jointsToDeactivate.add(other.jointsToDeactivate.get(i));
    }
 
    @Override
@@ -244,6 +304,10 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
          if (jointVelocityLimitMode != other.jointVelocityLimitMode)
             return false;
          if (computeJointTorques != other.computeJointTorques)
+            return false;
+         if (!jointsToActivate.equals(other.jointsToActivate))
+            return false;
+         if (!jointsToDeactivate.equals(other.jointsToDeactivate))
             return false;
 
          return true;

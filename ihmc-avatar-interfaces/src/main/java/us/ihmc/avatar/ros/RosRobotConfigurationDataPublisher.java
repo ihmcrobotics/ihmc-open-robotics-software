@@ -2,6 +2,7 @@ package us.ihmc.avatar.ros;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -73,7 +74,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final SideDependentList<float[]> footForceSensorWrenches = new SideDependentList<float[]>();
    private final SideDependentList<float[]> wristForceSensorWrenches = new SideDependentList<float[]>();
 
-   private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTransforms;
+   private final List<ImmutableTriple<String, String, RigidBodyTransform>> staticTransforms;
 
    private volatile boolean running = true;
 

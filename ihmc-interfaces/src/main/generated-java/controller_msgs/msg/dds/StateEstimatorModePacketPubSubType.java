@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.StateEstimatorModePacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::StateEstimatorModePacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "6d07cdee0553c23b74e3d9614a6ed76ebd4f2de15146adf9870dff3bea7245d3";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

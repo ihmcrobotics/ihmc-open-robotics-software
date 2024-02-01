@@ -105,12 +105,6 @@ public class AtlasToeOffTest extends AvatarToeOffTest
                             {
                                 return true;
                             }
-
-                            @Override
-                            public double getICPProximityForToeOff()
-                            {
-                                return 0.0;
-                            }
                         };
                     }
                 };

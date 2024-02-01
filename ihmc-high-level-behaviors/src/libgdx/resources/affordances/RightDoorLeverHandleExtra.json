@@ -1,0 +1,146 @@
+{
+  "name" : "RightDoorLeverHandle",
+  "object" : "RightDoorLeverHandle",
+  "x" : 0.0,
+  "y" : 0.0,
+  "z" : 0.0,
+  "rollInDegrees" : 0.0,
+  "pitchInDegrees" : 0.0,
+  "yawInDegrees" : 180.0,
+  "frames" : [ {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 180.0,
+    "configuration": [ {
+      "side" : "right",
+      "type": "OPEN"
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 180.0,
+    "configuration": [ {
+      "side" : "right",
+      "type": ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 180.0,
+    "configuration": [ {
+      "side" : "right",
+      "type": "GRIP_HARD"
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 12.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 180.0,
+    "configuration": [ {
+      "side" : "right",
+      "type": ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 24.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 180.0,
+    "configuration": [ {
+      "side" : "right",
+      "type": ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 36.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 180.0,
+    "configuration": [ {
+      "side" : "right",
+      "type": ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 48.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 180.0,
+    "configuration": [ {
+      "side" : "right",
+      "type": ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 60.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 180.0,
+    "configuration": [ {
+      "side" : "right",
+      "type": ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 72.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 180.0,
+    "configuration": [ {
+      "side" : "right",
+      "type": ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 84.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 180.0,
+    "configuration": [ {
+      "side" : "right",
+      "type": ""
+    } ]
+  }, {
+    "x" : 0.172,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 84.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 180.0,
+    "configuration": [ {
+      "side" : "right",
+      "type": "CLOSE"
+    } ]
+  }, {
+    "x" : 0.172,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 84.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 180.0,
+    "configuration": [ {
+      "side" : "right",
+      "type": ""
+    } ]
+  } ],
+  "activeSides" : 1,
+  "numberPreGraspFrames" : 2,
+  "numberPostGraspFrames" : 9
+}

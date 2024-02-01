@@ -10,8 +10,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 
 public class WalkerCollisionsViewer extends AnimationTimer
@@ -23,7 +23,7 @@ public class WalkerCollisionsViewer extends AnimationTimer
 
    public WalkerCollisionsViewer(JavaFXMessager messager)
    {
-      messager.registerTopicListener(UIVisibilityGraphsTopics.WalkerCollisionLocations, this::processCollisions);
+      messager.addTopicListener(UIVisibilityGraphsTopics.WalkerCollisionLocations, this::processCollisions);
       reset = messager.createInput(UIVisibilityGraphsTopics.GlobalReset, false);
    }
 

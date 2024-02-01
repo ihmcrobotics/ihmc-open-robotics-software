@@ -4,10 +4,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
-import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SoleTrajectoryMessage;
+import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -21,12 +20,13 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.manual.ManualPawPlanGenerator;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -91,7 +91,7 @@ public class ManualStepTabController extends Group
    {
       this.messager = messager;
       xGaitSettingsReference = messager.createInput(QuadrupedUIMessagerAPI.XGaitSettingsTopic);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic, this::handleRobotConfigurationData);
+      messager.addTopicListener(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic, this::handleRobotConfigurationData);
 
       xGaitSettingsReference.set(defaultXGaitSettings);
    }

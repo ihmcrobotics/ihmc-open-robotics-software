@@ -132,6 +132,7 @@ public class ICPControllerQPSolver
    /** Whether or not to use angular momentum during feedback. This means the CMP will be constrained to being in the support polygon. */
    private final YoBoolean useAngularMomentum;
 
+   private final DMatrixRMaj maxFeedbackTransform = new DMatrixRMaj(2, 2);
    private double maxFeedbackXMagnitude = Double.POSITIVE_INFINITY;
    private double maxFeedbackYMagnitude = Double.POSITIVE_INFINITY;
    private double maximumFeedbackRate = Double.POSITIVE_INFINITY;
@@ -277,11 +278,11 @@ public class ICPControllerQPSolver
    /**
     * Sets the maximum allowable feedback magnitude in X and Y. This defines an inequality constraint on the sum of the feedback terms in the QP.
     */
-   public void setMaximumFeedbackMagnitude(FrameVector2DReadOnly maximumFeedbackMagnitude)
+   public void setMaximumFeedbackMagnitude(DMatrixRMaj maxFeedbackTransform, double maximumFeedbackX, double maximumFeedbackY)
    {
-      maximumFeedbackMagnitude.checkReferenceFrameMatch(worldFrame);
-      this.maxFeedbackXMagnitude = Math.abs(maximumFeedbackMagnitude.getX());
-      this.maxFeedbackYMagnitude = Math.abs(maximumFeedbackMagnitude.getY());
+      this.maxFeedbackTransform.set(maxFeedbackTransform);
+      this.maxFeedbackXMagnitude = Math.abs(maximumFeedbackX);
+      this.maxFeedbackYMagnitude = Math.abs(maximumFeedbackY);
    }
 
    /**
@@ -346,9 +347,9 @@ public class ICPControllerQPSolver
       cmpFeedbackMinimizationTask.reshape(2);
       feedbackRateMinimizationTask.reshape(problemSize);
 
+      // It's 4 becuase it's max and min.
       numberOfInequalityConstraints += (Double.isFinite(maximumFeedbackRate) && Double.isFinite(controlDT)) ? 4 : 0;
-      numberOfInequalityConstraints += Double.isFinite(maxFeedbackXMagnitude) ? 2 : 0;
-      numberOfInequalityConstraints += Double.isFinite(maxFeedbackYMagnitude) ? 2 : 0;
+      numberOfInequalityConstraints += Double.isFinite(maxFeedbackXMagnitude) || Double.isFinite(maxFeedbackYMagnitude) ? 4 : 0;
 
       solverInput_Aineq.reshape(numberOfInequalityConstraints, problemSize);
       solverInput_bineq.reshape(numberOfInequalityConstraints, 1);
@@ -548,7 +549,7 @@ public class ICPControllerQPSolver
       if (useAngularMomentum.getBooleanValue() && cmpLocationConstraint.getInequalityConstraintSize() > 0)
          addCMPLocationConstraint();
 
-      if (!previousTickFailed)
+//      if (!previousTickFailed)
       { // this can occasionally over-constrain the problem, so remove it if the previous tick failed.
          addMaximumFeedbackMagnitudeConstraint();
          addMaximumFeedbackRateConstraint();
@@ -758,6 +759,7 @@ public class ICPControllerQPSolver
          return;
 
       ICPControllerQPConstraintCalculator.calculateMaxFeedbackMagnitudeConstraint(feedbackLimitConstraint,
+                                                                                  maxFeedbackTransform,
                                                                                   maxFeedbackXMagnitude,
                                                                                   maxFeedbackYMagnitude,
                                                                                   useAngularMomentum.getBooleanValue());
@@ -793,7 +795,7 @@ public class ICPControllerQPSolver
    private void addMaximumFeedbackRateConstraint()
    {
       //FIXME: Need better conditions. Ask Sylvain about this...
-      if (!Double.isFinite(maxFeedbackXMagnitude) && !Double.isFinite(maxFeedbackYMagnitude))
+      if (!Double.isFinite(maximumFeedbackRate))
          return;
 
       ICPControllerQPConstraintCalculator.calculateMaxFeedbackRateConstraint(feedbackRateLimitConstraint,
@@ -803,7 +805,7 @@ public class ICPControllerQPSolver
                                                                              useAngularMomentum.getBooleanValue());
 
       int feedbackRateConstraintSize = feedbackRateLimitConstraint.getNumberOfConstraints();
-      int numberOfVariables = feedbackLimitConstraint.getNumberOfVariables();
+      int numberOfVariables = feedbackRateLimitConstraint.getNumberOfVariables();
 
       MatrixTools.setMatrixBlock(solverInput_Aineq,
                                  currentInequalityConstraintIndex,

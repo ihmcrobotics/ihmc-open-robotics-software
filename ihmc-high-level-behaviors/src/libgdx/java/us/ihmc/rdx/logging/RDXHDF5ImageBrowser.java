@@ -2,6 +2,7 @@ package us.ihmc.rdx.logging;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiDataType;
+import imgui.type.ImInt;
 import imgui.type.ImLong;
 import org.bytedeco.hdf5.*;
 import org.bytedeco.hdf5.global.hdf5;
@@ -12,10 +13,12 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.nio.BasicPathVisitor;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.log.LogTools;
+import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.perception.RDXCVImagePanel;
-import us.ihmc.rdx.ui.tools.ImGuiDirectory;
+import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
+import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.nio.file.Paths;
@@ -27,8 +30,8 @@ public class RDXHDF5ImageBrowser
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiDirectory logDirectory;
-   private final ImGuiPanel panel = new ImGuiPanel("HDF5 Browsing", this::renderImGuiWidgets);
-   private final RDXCVImagePanel imagePanel;
+   private final RDXPanel panel = new RDXPanel("HDF5 Browsing", this::renderImGuiWidgets);
+   private final RDXBytedecoImagePanel imagePanel;
    private H5File h5File = null;
    private String selectedFileName = "";
    private String openFile = "";
@@ -42,10 +45,11 @@ public class RDXHDF5ImageBrowser
    private final Mat decompressionOutputMat;
    private boolean isPNG;
    private String encoding;
+   private final ImInt imageIndexToDelete = new ImInt();
 
    public RDXHDF5ImageBrowser()
    {
-      imagePanel = new RDXCVImagePanel("HDF5 Image Browser", 100, 100);
+      imagePanel = new RDXBytedecoImagePanel("HDF5 Image Browser", 100, 100);
 
       logDirectory = new ImGuiDirectory(IHMCCommonPaths.LOGS_DIRECTORY.toString(),
                                         fileName -> h5File != null && selectedFileName.equals(fileName),
@@ -92,6 +96,13 @@ public class RDXHDF5ImageBrowser
                {
                   loadDatasetImage();
                }
+               ImGuiTools.volatileInputInt(labels.get("Index to delete"), imageIndexToDelete, 1);
+               ImGui.sameLine();
+               if (ImGui.button(labels.get("Delete")))
+               {
+                  // TODO: How to delete?
+                  LogTools.error("Not implemented!");
+               }
             }
          }
       }
@@ -101,9 +112,9 @@ public class RDXHDF5ImageBrowser
 
    private void closeHDF5File()
    {
-      imageGroup.close();
+      imageGroup._close();
       imageGroup = null;
-      h5File.close();
+      h5File._close();
       h5File = null;
       selectedFileName = "";
       openFile = "";
@@ -177,12 +188,12 @@ public class RDXHDF5ImageBrowser
          closeHDF5File();
    }
 
-   public RDXCVImagePanel getImagePanel()
+   public RDXBytedecoImagePanel getImagePanel()
    {
       return imagePanel;
    }
 
-   public ImGuiPanel getControlPanel()
+   public RDXPanel getControlPanel()
    {
       return panel;
    }

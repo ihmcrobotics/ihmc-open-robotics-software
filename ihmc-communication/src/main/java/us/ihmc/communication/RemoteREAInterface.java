@@ -19,8 +19,8 @@ public class RemoteREAInterface
 
    public RemoteREAInterface(ROS2NodeInterface ros2Node)
    {
-      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.withInput());
-      planarRegionsListInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.LIDAR_REA_REGIONS);
+      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, PerceptionAPI.REA.withInput());
+      planarRegionsListInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, PerceptionAPI.LIDAR_REA_REGIONS);
 
       planarRegionsListInput.addCallback(planarRegionsListMessage -> stopwatch.start());
    }

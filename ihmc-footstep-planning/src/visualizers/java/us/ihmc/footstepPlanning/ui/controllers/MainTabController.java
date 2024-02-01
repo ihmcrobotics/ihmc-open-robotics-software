@@ -1,10 +1,55 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ApproveStep;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.BindStartToRobot;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePath;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.DataSetSelected;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GenerateLogStatus;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalDistanceProximity;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalMidFootOrientation;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalMidFootPosition;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalYawProximity;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.HaltPlanning;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.HeightMapDataSetSelected;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.IgnorePartialFootholds;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LeftFootPose;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LoadLogStatus;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ManualSwingHeight;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ManualSwingTime;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ManualTransferTime;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.OverrideStepTimings;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.OverrideSwingHeight;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PerformAStarSearch;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanBodyPath;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanSingleStep;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ReconnectRos1Node;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ReplanStep;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ReplanSwing;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.RequestLoadLog;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.RequestedSwingPlannerType;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ResendLastStep;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.RightFootPose;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.SnapGoalSteps;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartHeightMapNavigation;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StopHeightMapNavigation;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.WriteHeightMapLog;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.TextField;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -13,9 +58,9 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadRequestType;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.javafx.JavaFXMessager;
+import us.ihmc.messager.javafx.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.HeightMapDataSetName;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
@@ -24,13 +69,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public class MainTabController
 {
@@ -265,8 +303,8 @@ public class MainTabController
       messager.bindBidirectional(PerformAStarSearch, performAStarSearch.selectedProperty(), true);
       messager.bindBidirectional(RequestedSwingPlannerType, swingPlannerType.valueProperty(), true);
 
-      messager.registerTopicListener(GenerateLogStatus, logGenerationStatus::setText);
-      messager.registerTopicListener(LoadLogStatus, logLoadStatus::setText);
+      messager.addTopicListener(GenerateLogStatus, logGenerationStatus::setText);
+      messager.addTopicListener(LoadLogStatus, logLoadStatus::setText);
    }
 
    @FXML

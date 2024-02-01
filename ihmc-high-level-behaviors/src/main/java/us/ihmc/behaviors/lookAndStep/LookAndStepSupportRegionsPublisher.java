@@ -2,6 +2,7 @@ package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.tools.Timer;
@@ -188,7 +189,7 @@ public class LookAndStepSupportRegionsPublisher
          planarRegions.addPlanarRegion(supportRegion);
 
          PlanarRegionsListMessage message = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(supportRegion);
-         ros2Publisher.publishROS2(ROS2Tools.REA_SUPPORT_REGIONS_INPUT, message);
+         ros2Publisher.publishROS2(PerceptionAPI.REA_SUPPORT_REGIONS_INPUT, message);
          statusLogger.info("Published region with {} vertices", supportRegion.getConvexPolygon(0).getNumberOfVertices());
       }
       else

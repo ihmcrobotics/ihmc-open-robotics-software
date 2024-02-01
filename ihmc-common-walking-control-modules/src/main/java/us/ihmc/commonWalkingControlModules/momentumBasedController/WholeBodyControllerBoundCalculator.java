@@ -193,9 +193,12 @@ public class WholeBodyControllerBoundCalculator
       double jointLimitLower = jointLowerLimits.get(index, 0);
       double jointLimitUpper = jointUpperLimits.get(index, 0);
 
-      double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
-      jointLimitUpper -= limitMargin;
-      jointLimitLower += limitMargin;
+      if (!Double.isInfinite(jointLimitUpper) && !Double.isInfinite(jointLimitLower))
+      {
+         double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
+         jointLimitUpper -= limitMargin;
+         jointLimitLower += limitMargin;
+      }
 
       double velocityLimitLower;
       double velocityLimitUpper;
@@ -262,9 +265,12 @@ public class WholeBodyControllerBoundCalculator
       double jointLimitLower = jointLowerLimits.get(index, 0);
       double jointLimitUpper = jointUpperLimits.get(index, 0);
 
-      double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
-      jointLimitUpper -= limitMargin;
-      jointLimitLower += limitMargin;
+      if (!Double.isInfinite(jointLimitUpper) && !Double.isInfinite(jointLimitLower))
+      {
+         double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
+         jointLimitUpper -= limitMargin;
+         jointLimitLower += limitMargin;
+      }
 
       double qDDotMin = Double.NEGATIVE_INFINITY;
       double qDDotMax = Double.POSITIVE_INFINITY;
@@ -312,12 +318,17 @@ public class WholeBodyControllerBoundCalculator
                                                     DMatrixRMaj qDDotMaxToPack)
    {
       int index = jointIndexHandler.getOneDoFJointIndex(joint);
+
+      JointLimitParameters params = jointLimitParameters[index];
+
       double jointLimitLower = jointLowerLimits.get(index, 0);
       double jointLimitUpper = jointUpperLimits.get(index, 0);
-
-      double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
-      jointLimitUpper -= limitMargin;
-      jointLimitLower += limitMargin;
+      if (!Double.isInfinite(jointLimitUpper) && !Double.isInfinite(jointLimitLower))
+      {
+         double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
+         jointLimitUpper -= limitMargin;
+         jointLimitLower += limitMargin;
+      }
 
       double velocityLimitLower;
       double velocityLimitUpper;
@@ -336,7 +347,6 @@ public class WholeBodyControllerBoundCalculator
       double qDDotMin = -absoluteMaximumJointAcceleration;
       double qDDotMax = absoluteMaximumJointAcceleration;
 
-      JointLimitParameters params = jointLimitParameters[index];
       double brakeVelocity = DeadbandTools.applyDeadband(velocityDeadbandSizes[index].getDoubleValue(), joint.getQd());
       double slope = params.getMaxAbsJointVelocity() / Math.pow(params.getJointLimitDistanceForMaxVelocity(), 2.0);
 

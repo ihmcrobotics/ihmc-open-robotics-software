@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.StampedPosePacket>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::StampedPosePacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "046998c0678764138cf2292a89f7e9db0645e555bef6f56500deb8d5f42c6c59";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

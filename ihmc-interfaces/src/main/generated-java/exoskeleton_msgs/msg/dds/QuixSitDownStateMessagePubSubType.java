@@ -11,6 +11,18 @@ package exoskeleton_msgs.msg.dds;
 public class QuixSitDownStateMessagePubSubType implements us.ihmc.pubsub.TopicDataType<exoskeleton_msgs.msg.dds.QuixSitDownStateMessage>
 {
    public static final java.lang.String name = "exoskeleton_msgs::msg::dds_::QuixSitDownStateMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "2ae0ff8f30f1f466fbcbd533c46e728186d16b1c3c8921eeef9b2c7bff517207";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

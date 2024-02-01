@@ -4,20 +4,16 @@ import imgui.ImGui;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
 import imgui.flag.ImGuiDataType;
 import imgui.type.ImLong;
-import org.bytedeco.ffmpeg.ffmpeg;
-import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.perception.RDXCVImagePanel;
-import us.ihmc.perception.BytedecoTools;
+import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.IHMCCommonPaths;
-import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
-import us.ihmc.tools.thread.Activator;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -30,18 +26,14 @@ import java.nio.ByteOrder;
  */
 public class RDXFFMPEGPlaybackDemo
 {
-   private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
    private final String logDirectory = IHMCCommonPaths.LOGS_DIRECTORY + File.separator;
 
    // example.webm contains licensing information at attribution.txt in same directory.
    // Used with permission from https://en.wikipedia.org/wiki/File:Schlossbergbahn.webm
-   private final WorkspaceFile exampleVideo = new WorkspaceFile(new WorkspaceDirectory("ihmc-open-robotics-software",
-                                                                                       "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                                                       RDXFFMPEGPlaybackDemo.class),
-                                                                "example.webm");
+   private final WorkspaceResourceFile exampleVideo = new WorkspaceResourceFile(new WorkspaceResourceDirectory(getClass()), "example.webm");
 
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
-   private RDXCVImagePanel imagePanel;
+   private final RDXBaseUI baseUI = new RDXBaseUI();
+   private RDXBytedecoImagePanel imagePanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private FFMPEGVideoPlaybackManager video;
    private boolean videoReload;
@@ -78,19 +70,15 @@ public class RDXFFMPEGPlaybackDemo
 
             baseUI.create();
 
-            ImGuiPanel panel = new ImGuiPanel("Image", this::renderImGuiWidgets);
+            RDXPanel panel = new RDXPanel("Image", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
+
+            loadVideo(exampleVideo.getFilesystemFile().toString());
          }
 
          @Override
          public void render()
          {
-            if (nativesLoadedActivator.poll())
-            {
-               if (nativesLoadedActivator.isNewlyActivated())
-                  loadVideo(exampleVideo.getFilePath().toString());
-            }
-
             if (imagePanel != null && !seeking)
                imagePanel.draw();
 
@@ -120,7 +108,7 @@ public class RDXFFMPEGPlaybackDemo
             if (videoReload)
             {
                videoReload = false;
-               baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
+               baseUI.getImGuiPanelManager().addPanel(imagePanel.getImagePanel());
                baseUI.getLayoutManager().reloadLayout();
             }
          }
@@ -134,7 +122,7 @@ public class RDXFFMPEGPlaybackDemo
 
             video = new FFMPEGVideoPlaybackManager(file);
             if (imagePanel == null)
-               imagePanel = new RDXCVImagePanel("Playback Video", video.getImage());
+               imagePanel = new RDXBytedecoImagePanel("Playback Video", video.getImage());
             else
                imagePanel.resize(video.getImage());
             video.seek(0);
@@ -189,7 +177,10 @@ public class RDXFFMPEGPlaybackDemo
                                         numberOfFramesDouble));
 
                ImGui.text(String.format("ffmpeg: Time base: %.6f s, Start time: %d, Average frame rate: %.3f, Number of frames (if known): %d",
-                                        timeBase, startTime, frameRate, numberOfFramesAVStream));
+                                        timeBase,
+                                        startTime,
+                                        frameRate,
+                                        numberOfFramesAVStream));
 
                ImGui.text(String.format("Current frame: %.3f / %.3f", currentFrameDouble, numberOfFramesDouble));
                ImGui.text(String.format("Current timestamp: %.6f s / %.6f s", currentTimestamp, videoDuration));

@@ -2,7 +2,7 @@ package us.ihmc.avatar.networkProcessor.time;
 
 
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
-import us.ihmc.ihmcPerception.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
+import us.ihmc.perception.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosNodeInterface;
 
 public class DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider extends AlwaysZeroOffsetPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffsetProvider

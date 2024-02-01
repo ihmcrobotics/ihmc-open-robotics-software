@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.flatGroundPlanning;
 
+import org.bytedeco.javacpp.Loader;
+import org.bytedeco.opencl.global.OpenCL;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -19,6 +21,13 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public class FootstepPlanningModuleOnFlatTest
 {
+   static
+   {
+      // This is required to load the javacpp shared library immediately.
+      // We allocate native memory very early (inline in fields) before OpenCLManager is initialized, so this is required.
+      Loader.load(OpenCL.class);
+   }
+
    private final Random random = new Random(727434726273L);
    private static final double stepWidth = 0.3;
    private final double idealStanceWidth = new DefaultFootstepPlannerParameters().getIdealFootstepWidth();

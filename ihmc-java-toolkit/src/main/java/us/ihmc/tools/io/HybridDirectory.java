@@ -1,68 +1,43 @@
 package us.ihmc.tools.io;
 
-import us.ihmc.commons.nio.BasicPathVisitor;
-
 import java.nio.file.Path;
-import java.util.function.BiConsumer;
 
 /**
+ * A class used for managing a resources that you're either using from source
+ * version control or using a version somewhere else local to your machine.
+ *
+ * This class provides an easily switchable "mode" between accessing the workspace
+ * or external version of this directory.
+ *
  * A hybrid directory defines:
  * - Workspace directory: A directory in your source code workspace checkout in a resources source set
  * - External directory: A directory somewhere on your file system not in your workspace
+ *
+ * Example:
+ * Workspace: ihmc-open-robotics-software/ihmc-java-toolkit/stuff
+ * External: ~/.ihmc/stuff
  */
 public class HybridDirectory
 {
-   private final WorkspaceDirectory workspaceDirectory;
-   private final Path externalDirectory;
-   private HybridResourceMode mode = HybridResourceMode.WORKSPACE;
+   protected Path externalDirectory;
+   protected WorkspaceDirectory workspaceDirectory;
+   protected HybridResourceMode mode = HybridResourceMode.WORKSPACE;
 
-   public HybridDirectory(Path externalDirectory,
-                          String directoryNameToAssumePresent,
-                          String subsequentPathToResourceFolder,
-                          Class<?> classForResourceDirectory)
+   protected HybridDirectory()
    {
-      this(externalDirectory,
-           directoryNameToAssumePresent,
-           subsequentPathToResourceFolder,
-           classForResourceDirectory,
-           "");
+
    }
 
-   /**
-    * @deprecated This is broken for some reason.
-    */
-   public HybridDirectory(Path externalDirectory,
-                          String directoryNameToAssumePresent,
-                          String subsequentPathToResourceFolder,
-                          String absoluteResourceDirectory)
+   public HybridDirectory(Path externalDirectory, Path workspaceDirectory)
    {
-      this(externalDirectory,
-           directoryNameToAssumePresent,
-           subsequentPathToResourceFolder,
-           null,
-           absoluteResourceDirectory);
+      this.externalDirectory = externalDirectory;
+      this.workspaceDirectory = new WorkspaceDirectory(workspaceDirectory);
    }
 
-   public HybridDirectory(Path externalDirectory,
-                          String directoryNameToAssumePresent,
-                          String subsequentPathToResourceFolder,
-                          Class<?> classForResourceDirectory,
-                          String subsequentOrAbsoluteResourcePackagePath)
+   public HybridDirectory(Path externalDirectory, WorkspaceDirectory workspaceDirectory)
    {
-      this.workspaceDirectory = new WorkspaceDirectory(directoryNameToAssumePresent,
-                                                       subsequentPathToResourceFolder,
-                                                       classForResourceDirectory,
-                                                       subsequentOrAbsoluteResourcePackagePath);
-
-      String subsequentExternalPath = subsequentOrAbsoluteResourcePackagePath;
-      if (subsequentExternalPath.startsWith("/"))
-         subsequentExternalPath = subsequentExternalPath.replaceFirst("/", "");
-      this.externalDirectory = externalDirectory.resolve(subsequentExternalPath).toAbsolutePath().normalize();
-   }
-
-   public void walkResourcesFlat(BiConsumer<String, BasicPathVisitor.PathType> pathVisitor)
-   {
-      workspaceDirectory.walkResourcesFlat(pathVisitor);
+      this.externalDirectory = externalDirectory;
+      this.workspaceDirectory = workspaceDirectory;
    }
 
    /** If the directory is available for reading/writing using files.
@@ -85,12 +60,12 @@ public class HybridDirectory
 
    public Path getDirectoryForWriting()
    {
-      return mode == HybridResourceMode.WORKSPACE ? workspaceDirectory.getDirectoryPath() : externalDirectory;
+      return mode == HybridResourceMode.WORKSPACE ? workspaceDirectory.getFilesystemDirectory() : externalDirectory;
    }
 
    public Path getWorkspaceDirectory()
    {
-      return workspaceDirectory.getDirectoryPath();
+      return workspaceDirectory.getFilesystemDirectory();
    }
 
    public Path getExternalDirectory()
@@ -98,22 +73,13 @@ public class HybridDirectory
       return externalDirectory;
    }
 
-   public Class<?> getClassForLoading()
+   public HybridDirectory resolve(String subsequentPathInBothExternalAndWorkspace)
    {
-      return workspaceDirectory.getClassForLoading();
+      return new HybridDirectory(externalDirectory.resolve(subsequentPathInBothExternalAndWorkspace),
+                                 workspaceDirectory.resolve(subsequentPathInBothExternalAndWorkspace));
    }
 
-   public String getPathNecessaryForClasspathLoading()
-   {
-      return workspaceDirectory.getPathNecessaryForClasspathLoading();
-   }
-
-   public String getPathNecessaryForResourceExploring()
-   {
-      return workspaceDirectory.getPathNecessaryForResourceExploring();
-   }
-
-   WorkspaceDirectory getInternalWorkspaceDirectory()
+   /* package private */ WorkspaceDirectory getWorkspaceDirectoryInternal()
    {
       return workspaceDirectory;
    }

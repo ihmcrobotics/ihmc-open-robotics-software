@@ -138,11 +138,11 @@ public class LIDARBasedREAModule implements PerceptionModule
 
       loadConfigurationFile(filePropertyHelper);
 
-      reaMessager.registerTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> lidarBufferUpdater.saveConfiguration(filePropertyHelper));
-      reaMessager.registerTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> stereoVisionBufferUpdater.saveConfiguration(filePropertyHelper));
-      reaMessager.registerTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> depthCloudBufferUpdater.saveConfiguration(filePropertyHelper));
-      reaMessager.registerTopicListener(REAModuleAPI.SaveMainUpdaterConfiguration, (content) -> mainUpdater.saveConfiguration(filePropertyHelper));
-      reaMessager.registerTopicListener(REAModuleAPI.SaveRegionUpdaterConfiguration,
+      reaMessager.addTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> lidarBufferUpdater.saveConfiguration(filePropertyHelper));
+      reaMessager.addTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> stereoVisionBufferUpdater.saveConfiguration(filePropertyHelper));
+      reaMessager.addTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> depthCloudBufferUpdater.saveConfiguration(filePropertyHelper));
+      reaMessager.addTopicListener(REAModuleAPI.SaveMainUpdaterConfiguration, (content) -> mainUpdater.saveConfiguration(filePropertyHelper));
+      reaMessager.addTopicListener(REAModuleAPI.SaveRegionUpdaterConfiguration,
                                         (content) -> planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper));
 
       clearOcTree = reaMessager.createInput(REAModuleAPI.OcTreeClear, false);

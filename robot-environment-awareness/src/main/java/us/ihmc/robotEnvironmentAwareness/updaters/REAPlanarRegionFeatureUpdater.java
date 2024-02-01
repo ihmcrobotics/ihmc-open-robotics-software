@@ -94,7 +94,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    {
       this.reaMessager = reaMessager;
 
-      reaMessager.registerTopicListener(requestEntireModuleStateTopic, (messageContent) -> sendCurrentState());
+      reaMessager.addTopicListener(requestEntireModuleStateTopic, (messageContent) -> sendCurrentState());
    }
 
    public void bindControls()
@@ -110,8 +110,8 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
       planarRegionSegmentationParameters = reaMessager.createInput(planarRegionsSegmentationParametersTopic, new PlanarRegionSegmentationParameters());
       customRegionMergingParameters = reaMessager.createInput(customRegionMergeParametersTopic, new CustomRegionMergeParameters());
-      reaMessager.registerTopicListener(planarRegionsConcaveHullParametersTopic, message -> concaveHullFactoryParameters.set(REAParametersMessageHelper.convertFromMessage(message)));
-      reaMessager.registerTopicListener(planarRegionsPolygonizerParametersTopic, message -> polygonizerParameters.set(REAParametersMessageHelper.convertFromMessage(message)));
+      reaMessager.addTopicListener(planarRegionsConcaveHullParametersTopic, message -> concaveHullFactoryParameters.set(REAParametersMessageHelper.convertFromMessage(message)));
+      reaMessager.addTopicListener(planarRegionsPolygonizerParametersTopic, message -> polygonizerParameters.set(REAParametersMessageHelper.convertFromMessage(message)));
       intersectionEstimationParameters = reaMessager.createInput(planarRegionsIntersectionParametersTopic, new IntersectionEstimationParameters());
       surfaceNormalFilterParameters = reaMessager.createInput(surfaceNormalFilterParametersTopic, new SurfaceNormalFilterParameters());
 

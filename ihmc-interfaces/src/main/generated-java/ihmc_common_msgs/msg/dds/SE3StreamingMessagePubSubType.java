@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class SE3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.SE3StreamingMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::SE3StreamingMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "54724d21104c5a61645ec007b37763386e7afcab35c59f7b72a1051f36ad5541";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

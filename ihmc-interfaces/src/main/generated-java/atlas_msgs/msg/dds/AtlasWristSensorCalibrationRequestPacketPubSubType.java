@@ -11,6 +11,18 @@ package atlas_msgs.msg.dds;
 public class AtlasWristSensorCalibrationRequestPacketPubSubType implements us.ihmc.pubsub.TopicDataType<atlas_msgs.msg.dds.AtlasWristSensorCalibrationRequestPacket>
 {
    public static final java.lang.String name = "atlas_msgs::msg::dds_::AtlasWristSensorCalibrationRequestPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "d5d1f7cce3757fc425c51ff5bf407af4ce6b4345053ab61815f9df33f0cdb2ad";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

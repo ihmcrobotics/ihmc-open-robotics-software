@@ -56,7 +56,7 @@ public class HeightMapManagerTest
       Point2D newGridCenter = new Point2D(gridCenter);
       newGridCenter.add(4 * discretizationXY, -4 * discretizationXY);
 
-      heightMapManager.translateToNewGridCenter(newGridCenter);
+      heightMapManager.translateToNewGridCenter(newGridCenter, parameters.getVarianceAddedWhenTranslating());
 
 
       // Check that the ptranslated points are at the right height

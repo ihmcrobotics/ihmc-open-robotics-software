@@ -42,7 +42,7 @@ public class PlanarRegionIDRandomizer
    {
       this.dataTopic = dataTopic;
       planarRegionsReference = messager.createInput(dataTopic, null);
-      messager.registerTopicListener(requestTopic, this::randomizeIDsOnThread);
+      messager.addTopicListener(requestTopic, this::randomizeIDsOnThread);
    }
 
    private void randomizeIDsOnThread(boolean dummyArg)

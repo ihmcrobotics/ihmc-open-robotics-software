@@ -387,6 +387,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
       sensorProcessingConfiguration.configureSensorProcessing(this);
 
+      bindSensorOutputMap();
+
+      parentRegistry.addChild(registry);
+   }
+
+   public void bindSensorOutputMap() {
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
       {
          OneDoFJointBasics oneDoFJoint = jointSensorDefinitions.get(i);
@@ -401,8 +407,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          outputJointSensorList.add(processedSensorOutput);
          outputJointSensorMap.put(oneDoFJoint, processedSensorOutput);
       }
-
-      parentRegistry.addChild(registry);
    }
 
    public void initialize()
@@ -440,15 +444,14 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       {
          ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
 
-         inputForceSensors.getForceSensorValue(forceSensorDefinition, tempWrench);
          inputForces.get(forceSensorDefinition).setToZero();
          inputTorques.get(forceSensorDefinition).setToZero();
 
          resetProcessors(processedForces.get(forceSensorDefinition));
          resetProcessors(processedTorques.get(forceSensorDefinition));
 
-         tempWrench.setToZero();
-         outputForceSensors.setForceSensorValue(forceSensorDefinition, tempWrench);
+         tempWrench.setToZero(forceSensorDefinition.getSensorFrame(), forceSensorDefinition.getSensorFrame());
+         outputForceSensors.getData(forceSensorDefinition).setWrench(tempWrench);
       }
    }
 
@@ -457,7 +460,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * <p>
     * During a control tick, every sensor processor is updated once and the timestamps are updated.
     * </p>
-    * 
+    *
     * @param wallTime      Time in nanoseconds of the clock hanging on the wall. Takes into account
     *                      leap seconds/years and is updated by the NTP server (thus can jump
     *                      backwards). The wall time is usually used in ROS1 for synchronizing
@@ -511,7 +514,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       {
          ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
 
-         inputForceSensors.getForceSensorValue(forceSensorDefinition, tempWrench);
+         tempWrench.setIncludingFrame(inputForceSensors.getData(forceSensorDefinition).getWrench());
          tempForce.setIncludingFrame(tempWrench.getLinearPart());
          tempTorque.setIncludingFrame(tempWrench.getAngularPart());
          inputForces.get(forceSensorDefinition).set(tempForce);
@@ -523,7 +526,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          tempForce.setIncludingFrame(intermediateForces.get(forceSensorDefinition));
          tempTorque.setIncludingFrame(intermediateTorques.get(forceSensorDefinition));
          tempWrench.set(tempTorque, tempForce);
-         outputForceSensors.setForceSensorValue(forceSensorDefinition, tempWrench);
+         outputForceSensors.getData(forceSensorDefinition).setWrench(tempWrench);
       }
 
       for (int i = 0; i < diagnosticModules.size(); i++)
@@ -549,7 +552,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    /**
     * Add a low-pass filter stage for the given sensor signal. This is cumulative, by calling this
     * method twice for instance, you will obtain a two pole low-pass filter.
-    * 
+    *
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly  if set to true, the result will not be used as the input of the next
     *                    processing stage, nor as the output of the sensor processing.
@@ -562,7 +565,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    /**
     * Add a low-pass filter stage for the given sensor signal. This is cumulative, by calling this
     * method twice for instance, you will obtain a two pole low-pass filter.
-    * 
+    *
     * @param alphaFilter          low-pass filter parameter.
     * @param forVizOnly           if set to true, the result will not be used as the input of the next
     *                             processing stage, nor as the output of the sensor processing.
@@ -579,7 +582,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    /**
     * Add a low-pass filter stage for the given sensor signal. This is cumulative, by calling this
     * method twice for instance, you will obtain a two pole low-pass filter.
-    * 
+    *
     * @param alphaFilter     low-pass filter parameter.
     * @param forVizOnly      if set to true, the result will not be used as the input of the next
     *                        processing stage, nor as the output of the sensor processing.
@@ -750,7 +753,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    /**
     * Apply a constant position and velocity override on the joints. This can be useful when dealing
     * with a broken robot with sensors going crazy.
-    * 
+    *
     * @param constantPosition the position value that will be used as the output of the sensor
     *                         processing.
     * @param constantVelocity the velocity value that will be used as the output of the sensor
@@ -766,7 +769,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    /**
     * Apply a constant position and velocity override on the joints. This can be useful when dealing
     * with a broken robot with sensors going crazy.
-    * 
+    *
     * @param constantPosition    the position value that will be used as the output of the sensor
     *                            processing.
     * @param constantVelocity    the velocity value that will be used as the output of the sensor
@@ -789,7 +792,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    /**
     * Apply a constant position and velocity override on the joints. This can be useful when dealing
     * with a broken robot with sensors going crazy.
-    * 
+    *
     * @param constantPosition the position value that will be used as the output of the sensor
     *                         processing.
     * @param constantVelocity the velocity value that will be used as the output of the sensor
@@ -847,7 +850,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * with a constant gear ratio plus an offset. Implemented as a cumulative processor but should
     * probably be called only once.
     * </p>
-    * 
+    *
     * @param scale      the scale factor to apply to the joint position measurement. Can be
     *                   {@code null}.
     * @param bias       the offset to add to the joint position measurement. Can be {@code null}.
@@ -870,7 +873,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * with a constant gear ratio plus an offset. Implemented as a cumulative processor but should
     * probably be called only once.
     * </p>
-    * 
+    *
     * @param scale               the scale factor to apply to the joint position measurement. Can be
     *                            {@code null}.
     * @param bias                the offset to add to the joint position measurement. Can be
@@ -898,7 +901,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * with a constant gear ratio plus an offset. Implemented as a cumulative processor but should
     * probably be called only once.
     * </p>
-    * 
+    *
     * @param scale          the scale factor to apply to the joint position measurement. Can be
     *                       {@code null}.
     * @param bias           the offset to add to the joint position measurement. Can be {@code null}.
@@ -947,7 +950,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * Apply a polynomial function to (see {@link PolynomialProcessorYoVariable}) to the joint position.
     * Useful when the joint encoders are off and the error can be approximated by a polynomial.
     * Implemented as a cumulative processor but should probably be called only once.
-    * 
+    *
     * @param polynomialToApply the polynomial to apply on the joint position signals.
     * @param forVizOnly        if set to true, the result will not be used as the input of the next
     *                          processing stage, nor as the output of the sensor processing.
@@ -961,7 +964,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * Apply a polynomial function to (see {@link PolynomialProcessorYoVariable}) to the joint position.
     * Useful when the joint encoders are off and the error can be approximated by a polynomial.
     * Implemented as a cumulative processor but should probably be called only once.
-    * 
+    *
     * @param polynomialToApply   the polynomial to apply on the joint position signals.
     * @param forVizOnly          if set to true, the result will not be used as the input of the next
     *                            processing stage, nor as the output of the sensor processing.
@@ -978,7 +981,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * Apply a polynomial function to (see {@link PolynomialProcessorYoVariable}) to the joint position.
     * Useful when the joint encoders are off and the error can be approximated by a polynomial.
     * Implemented as a cumulative processor but should probably be called only once.
-    * 
+    *
     * @param polynomialToApply the polynomial to apply on the joint position signals.
     * @param forVizOnly        if set to true, the result will not be used as the input of the next
     *                          processing stage, nor as the output of the sensor processing.
@@ -1032,7 +1035,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * Apply an elasticity compensator to correct the joint positions according their torque and a given
     * stiffness. Useful when the robot has a non negligible elasticity in the links or joints.
     * Implemented as a cumulative processor but should probably be called only once.
-    * 
+    *
     * @param stiffnesses estimated stiffness for each joint.
     * @param forVizOnly  if set to true, the result will not be used as the input of the next
     *                    processing stage, nor as the output of the sensor processing.
@@ -1090,8 +1093,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          List<ProcessingYoVariable> processors = processedJointPositions.get(oneDoFJoint);
          String prefix = JOINT_POSITION.getProcessorNamePrefix(ELASTICITY_COMPENSATOR);
          String suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, processors.size());
-         ElasticityCompensatorYoVariable filteredJointPosition = new ElasticityCompensatorYoVariable(prefix
-               + suffix, stiffness, maximumDeflection, intermediateJointPosition, intermediateJointTau, registry);
+         ElasticityCompensatorYoVariable filteredJointPosition = new ElasticityCompensatorYoVariable(prefix + suffix,
+                                                                                                     stiffness,
+                                                                                                     maximumDeflection,
+                                                                                                     intermediateJointPosition,
+                                                                                                     intermediateJointTau,
+                                                                                                     registry);
          processors.add(filteredJointPosition);
 
          if (!forVizOnly)
@@ -1104,7 +1111,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * <p>
     * <code> q_slave = couplingRatio * q_master + couplingBias </code>
     * </p>
-    * 
+    *
     * @param nameOfJointMaster the name of the joint from which the position of the slave is to be
     *                          computed.
     * @param nameOfJointSlave  the name of the joint to compute the position of.
@@ -1132,7 +1139,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * <p>
     * <code> q_slave = couplingRatio * q_master + couplingBias </code>
     * </p>
-    * 
+    *
     * @param jointMasterPositionProvider the provider of the master joint position that is to be used
     *                                    to compute the slave position.
     * @param nameOfJointSlave            the name of the joint to compute the position of.
@@ -1202,7 +1209,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       String suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, newProcessorID);
       YoDouble filteredJointPosition = new YoDouble(prefix + suffix, registry);
       ProcessingYoVariable jointProcessor = () -> filteredJointPosition.set(backupProcessorTrigger.test(defaultInput) ? backupInput.getValue()
-            : defaultInput.getValue());
+                                                                                                                      : defaultInput.getValue());
 
       jointProcessors.add(jointProcessor);
 
@@ -1229,7 +1236,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * Apply an elasticity compensator to correct the joint positions according their torque and a given
     * stiffness. Useful when the robot has a non negligible elasticity in the links or joints.
     * Implemented as a cumulative processor but should probably be called only once.
-    * 
+    *
     * @param stiffnesses estimated stiffness for each joint.
     * @param forVizOnly  if set to true, the result will not be used as the input of the next
     *                    processing stage, nor as the output of the sensor processing.
@@ -1274,8 +1281,13 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(ELASTICITY_COMPENSATOR);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
-         VelocityElasticityCompensatorYoVariable filteredJointVelocity = new VelocityElasticityCompensatorYoVariable(prefix
-               + suffix, stiffness, maximumDeflection, intermediateJointVelocity, intermediateJointTau, updateDT, registry);
+         VelocityElasticityCompensatorYoVariable filteredJointVelocity = new VelocityElasticityCompensatorYoVariable(prefix + suffix,
+                                                                                                                     stiffness,
+                                                                                                                     maximumDeflection,
+                                                                                                                     intermediateJointVelocity,
+                                                                                                                     intermediateJointTau,
+                                                                                                                     updateDT,
+                                                                                                                     registry);
          processors.add(filteredJointVelocity);
 
          if (!forVizOnly)
@@ -1287,7 +1299,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * Compute the joint velocities by calculating finite-difference on joint positions using
     * {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered. This is not
     * cumulative and has the effect of ignoring the velocity signal provided by the robot.
-    * 
+    *
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly  if set to true, the result will not be used as the input of the next
     *                    processing stage, nor as the output of the sensor processing.
@@ -1302,7 +1314,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * on joint positions using {@link FilteredVelocityYoVariable}. It is then automatically low-pass
     * filtered. This is not cumulative and has the effect of ignoring the velocity signal provided by
     * the robot.
-    * 
+    *
     * @param alphaFilter         low-pass filter parameter.
     * @param forVizOnly          if set to true, the result will not be used as the input of the next
     *                            processing stage, nor as the output of the sensor processing.
@@ -1318,7 +1330,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * on joint positions using {@link FilteredVelocityYoVariable}. It is then automatically low-pass
     * filtered. This is not cumulative and has the effect of ignoring the velocity signal provided by
     * the robot.
-    * 
+    *
     * @param alphaFilter    low-pass filter parameter.
     * @param forVizOnly     if set to true, the result will not be used as the input of the next
     *                       processing stage, nor as the output of the sensor processing.
@@ -1342,8 +1354,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(FINITE_DIFFERENCE);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
-         FilteredVelocityYoVariable jointVelocity = new FilteredVelocityYoVariable(prefix
-               + suffix, "", alphaFilter, intermediateJointPosition, updateDT, registry);
+         FilteredVelocityYoVariable jointVelocity = new FilteredVelocityYoVariable(prefix + suffix,
+                                                                                   "",
+                                                                                   alphaFilter,
+                                                                                   intermediateJointPosition,
+                                                                                   updateDT,
+                                                                                   registry);
          processors.add(jointVelocity);
 
          if (!forVizOnly)
@@ -1356,7 +1372,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * backlash compensator (see {@link RevisedBacklashCompensatingVelocityYoVariable}). It is then
     * automatically low-pass filtered. This is not cumulative and has the effect of ignoring the
     * velocity signal provided by the robot.
-    * 
+    *
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly  if set to true, the result will not be used as the input of the next
     *                    processing stage, nor as the output of the sensor processing.
@@ -1372,7 +1388,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * {@link RevisedBacklashCompensatingVelocityYoVariable}). It is then automatically low-pass
     * filtered. This is not cumulative and has the effect of ignoring the velocity signal provided by
     * the robot.
-    * 
+    *
     * @param alphaFilter         low-pass filter parameter.
     * @param forVizOnly          if set to true, the result will not be used as the input of the next
     *                            processing stage, nor as the output of the sensor processing.
@@ -1395,7 +1411,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * {@link RevisedBacklashCompensatingVelocityYoVariable}). It is then automatically low-pass
     * filtered. This is not cumulative and has the effect of ignoring the velocity signal provided by
     * the robot.
-    * 
+    *
     * @param alphaFilter    low-pass filter parameter.
     * @param forVizOnly     if set to true, the result will not be used as the input of the next
     *                       processing stage, nor as the output of the sensor processing.
@@ -1423,8 +1439,13 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(BACKLASH);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
-         RevisedBacklashCompensatingVelocityYoVariable jointVelocity = new RevisedBacklashCompensatingVelocityYoVariable(prefix
-               + suffix, "", alphaFilter, intermediateJointPosition, updateDT, slopTime, registry);
+         RevisedBacklashCompensatingVelocityYoVariable jointVelocity = new RevisedBacklashCompensatingVelocityYoVariable(prefix + suffix,
+                                                                                                                         "",
+                                                                                                                         alphaFilter,
+                                                                                                                         intermediateJointPosition,
+                                                                                                                         updateDT,
+                                                                                                                         slopTime,
+                                                                                                                         registry);
          processors.add(jointVelocity);
 
          if (!forVizOnly)
@@ -1437,7 +1458,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to the joint velocity.
     * Useful when the robot has backlash in its joints or simply to calm down small shakies when the
     * robot is at rest. Implemented as a cumulative processor but should probably be called only once.
-    * 
+    *
     * @param slopTime   every time the velocity changes sign, a slop is engaged during which a
     *                   confidence factor is ramped up from 0 to 1.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing
@@ -1452,7 +1473,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to the joint velocity.
     * Useful when the robot has backlash in its joints or simply to calm down small shakies when the
     * robot is at rest. Implemented as a cumulative processor but should probably be called only once.
-    * 
+    *
     * @param slopTime            every time the velocity changes sign, a slop is engaged during which a
     *                            confidence factor is ramped up from 0 to 1.
     * @param forVizOnly          if set to true, the result will not be used as the input of the next
@@ -1468,7 +1489,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to the joint velocity.
     * Useful when the robot has backlash in its joints or simply to calm down small shakies when the
     * robot is at rest. Implemented as a cumulative processor but should probably be called only once.
-    * 
+    *
     * @param slopTime       every time the velocity changes sign, a slop is engaged during which a
     *                       confidence factor is ramped up from 0 to 1.
     * @param forVizOnly     if set to true, the result will not be used as the input of the next
@@ -1493,8 +1514,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(BACKLASH);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
-         BacklashProcessingYoVariable filteredJointVelocity = new BacklashProcessingYoVariable(prefix
-               + suffix, "", intermediateJointVelocity, updateDT, slopTime, registry);
+         BacklashProcessingYoVariable filteredJointVelocity = new BacklashProcessingYoVariable(prefix + suffix,
+                                                                                               "",
+                                                                                               intermediateJointVelocity,
+                                                                                               updateDT,
+                                                                                               slopTime,
+                                                                                               registry);
          processors.add(filteredJointVelocity);
 
          if (!forVizOnly)
@@ -1505,7 +1530,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    /**
     * Compute the joint accelerations by calculating finite-difference on joint velocities using
     * {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered.
-    * 
+    *
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly  if set to true, the result will not be used as the input of the next
     *                    processing stage, nor as the output of the sensor processing.
@@ -1519,7 +1544,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * Compute the joint accelerations (for a specific subset of joints) by calculating
     * finite-difference on joint velocities using {@link FilteredVelocityYoVariable}. It is then
     * automatically low-pass filtered.
-    * 
+    *
     * @param alphaFilter    low-pass filter parameter.
     * @param forVizOnly     if set to true, the result will not be used as the input of the next
     *                       processing stage, nor as the output of the sensor processing.
@@ -1543,8 +1568,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          List<ProcessingYoVariable> processors = processedJointAccelerations.get(oneDoFJoint);
          String prefix = JOINT_ACCELERATION.getProcessorNamePrefix(FINITE_DIFFERENCE);
          String suffix = JOINT_ACCELERATION.getProcessorNameSuffix(jointName, processors.size());
-         FilteredVelocityYoVariable jointAcceleration = new FilteredVelocityYoVariable(prefix
-               + suffix, "", alphaFilter, intermediateJointVelocity, updateDT, registry);
+         FilteredVelocityYoVariable jointAcceleration = new FilteredVelocityYoVariable(prefix + suffix,
+                                                                                       "",
+                                                                                       alphaFilter,
+                                                                                       intermediateJointVelocity,
+                                                                                       updateDT,
+                                                                                       registry);
          processors.add(jointAcceleration);
 
          if (!forVizOnly)
@@ -1555,7 +1584,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    /**
     * Add a low-pass filter stage on the orientations provided by the IMU sensors. This is cumulative,
     * by calling this method twice for instance, you will obtain a two pole low-pass filter.
-    * 
+    *
     * @param alphaFilter     low-pass filter parameter.
     * @param forVizOnly      if set to true, the result will not be used as the input of the next
     *                        processing stage, nor as the output of the sensor processing.
@@ -1599,7 +1628,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * <p>
     * This estimator only uses gyro and accelerometer data to estimate the orientation.
     * </p>
-    * 
+    *
     * @param proportionalGain      gain used to correct the orientation resulting from integrating
     *                              angular velocity using the accelerometer.
     * @param integralGain          gain used to update the angular velocity bias.
@@ -1624,7 +1653,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * <p>
     * This estimator only uses gyro and accelerometer data to estimate the orientation.
     * </p>
-    * 
+    *
     * @param proportionalGain      gain used to correct the orientation resulting from integrating
     *                              angular velocity using the accelerometer.
     * @param integralGain          gain used to update the angular velocity bias.
@@ -1658,7 +1687,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * <p>
     * This estimator only uses gyro and accelerometer data to estimate the orientation.
     * </p>
-    * 
+    *
     * @param proportionalGain      gain used to correct the orientation resulting from integrating
     *                              angular velocity using the accelerometer.
     * @param integralGain          gain used to update the angular velocity bias.
@@ -1778,7 +1807,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * IMU angular velocity. Useful when the robot has backlash in its joints or simply to calm down
     * small shakies when the robot is at rest. Implemented as a cumulative processor but should
     * probably be called only once.
-    * 
+    *
     * @param slopTime   every time the velocity changes sign, a slop is engaged during which a
     *                   confidence factor is ramped up from 0 to 1.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing
@@ -1794,7 +1823,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * IMU angular velocity. Useful when the robot has backlash in its joints or simply to calm down
     * small shakies when the robot is at rest. Implemented as a cumulative processor but should
     * probably be called only once.
-    * 
+    *
     * @param slopTime             every time the velocity changes sign, a slop is engaged during which
     *                             a confidence factor is ramped up from 0 to 1.
     * @param forVizOnly           if set to true, the result will not be used as the input of the next
@@ -1813,7 +1842,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * IMU angular velocity. Useful when the robot has backlash in its joints or simply to calm down
     * small shakies when the robot is at rest. Implemented as a cumulative processor but should
     * probably be called only once.
-    * 
+    *
     * @param slopTime        every time the velocity changes sign, a slop is engaged during which a
     *                        confidence factor is ramped up from 0 to 1.
     * @param forVizOnly      if set to true, the result will not be used as the input of the next
@@ -1860,7 +1889,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    /**
     * Call this method to setup validity checkers on all the joint sensors. Each validity checker will
     * check if the sensor measurement signal is NaN, infinite, dead, etc. Use only for diagnostics.
-    * 
+    *
     * @return The map with all the validity checkers.
     */
    public Map<OneDoFJointBasics, OneDoFJointSensorValidityChecker> addJointSensorValidityCheckers(boolean enableLogging,
@@ -2037,7 +2066,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    /**
     * Create an alpha filter given a name and a break frequency (in Hertz) that will be registered in
     * the {@code SensorProcessing}'s {@code YoRegistry}.
-    * 
+    *
     * @param name           name of the variable.
     * @param breakFrequency break frequency in Hertz
     * @return a {@code YoDouble} to be used when adding a low-pass filter stage using the methods in
@@ -2053,7 +2082,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    /**
     * Helper to create easily a {@code Map<OneDoFJoint, YoDouble>} referring to the stiffness for each
     * joint.
-    * 
+    *
     * @param nameSuffix             suffix to be used in the variables' name.
     * @param defaultStiffness       default value of stiffness to use when not referred in the
     *                               jointSpecificStiffness.
@@ -2113,7 +2142,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    /**
     * Helper to convert easily a map from joint name to @{@code YoDouble}
     * ({@code Map<String, YoDouble>}) to a {@code Map<OneDoFJoint, YoDouble>}.
-    * 
+    *
     * @param mapToConvert {@code Map<String, YoDouble>} the map to be converted, not modified.
     * @return {@code Map<OneDoFJoint, YoDouble>} the converted map.
     */
@@ -2320,7 +2349,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       if (value.getNumRows() != Wrench.SIZE || value.getNumCols() != 1)
          throw new RuntimeException("Unexpected size");
 
-      inputForceSensors.setForceSensorValue(forceSensorDefinition, value);
+      inputForceSensors.getData(forceSensorDefinition).setWrench(value);
    }
 
    public SensorOutputMapReadOnly getRawSensorOutputMap()

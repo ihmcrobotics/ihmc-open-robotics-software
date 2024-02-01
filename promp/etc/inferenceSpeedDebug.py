@@ -16,7 +16,7 @@ import os
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-n_demos=30
+n_demos=20
 colorX ='red'
 colorY ='yellowgreen'
 colorZ ='cornflowerblue'
@@ -113,7 +113,7 @@ stdModulatedY = numpy.array([row[5] for row in stdDeviationModulated])
 meanModulatedZ = numpy.array([row[6] for row in meanModulated])
 stdModulatedZ = numpy.array([row[6] for row in stdDeviationModulated])
 
-test = numpy.genfromtxt('test/PushDoorTest/test.csv',delimiter=',', dtype = float)
+test = numpy.genfromtxt('test/DoorTest/test.csv',delimiter=',', dtype = float)
 
 fig = plotter.figure()
 fig.suptitle('ProMP before and after modulation with observed demo', fontsize=16)

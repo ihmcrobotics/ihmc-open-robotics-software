@@ -6,9 +6,6 @@ import us.ihmc.tools.property.StoredPropertySet;
 
 public class SimpleGPUHeightMapParameters extends StoredPropertySet implements SimpleGPUHeightMapParametersBasics
 {
-   public static final String PROJECT_NAME = "ihmc-open-robotics-software";
-   public static final String TO_RESOURCE_FOLDER = "ihmc-perception/src/main/resources";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    // resolution in m
@@ -29,13 +26,13 @@ public class SimpleGPUHeightMapParameters extends StoredPropertySet implements S
 
    public SimpleGPUHeightMapParameters()
    {
-      super(keys, SimpleGPUHeightMapParameters.class, PROJECT_NAME, TO_RESOURCE_FOLDER);
+      super(keys, SimpleGPUHeightMapParameters.class);
       load();
    }
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys, SimpleGPUHeightMapParameters.class, PROJECT_NAME, TO_RESOURCE_FOLDER);
+      StoredPropertySet parameters = new StoredPropertySet(keys, SimpleGPUHeightMapParameters.class);
       parameters.loadUnsafe();
       parameters.save();
    }

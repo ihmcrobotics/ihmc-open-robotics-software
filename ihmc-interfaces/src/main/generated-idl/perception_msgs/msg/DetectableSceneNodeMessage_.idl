@@ -1,0 +1,32 @@
+#ifndef __perception_msgs__msg__DetectableSceneNodeMessage__idl__
+#define __perception_msgs__msg__DetectableSceneNodeMessage__idl__
+
+#include "perception_msgs/msg/./SceneNodeMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * A detectable perception scene node
+       * The topic name identifies the node.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::DetectableSceneNodeMessage_")
+      struct DetectableSceneNodeMessage
+      {
+        /**
+         * The base scene node information
+         */
+        perception_msgs::msg::dds::SceneNodeMessage scene_node;
+        /**
+         * Whether or not the node is currently detected
+         */
+        boolean currently_detected;
+      };
+    };
+  };
+};
+
+#endif

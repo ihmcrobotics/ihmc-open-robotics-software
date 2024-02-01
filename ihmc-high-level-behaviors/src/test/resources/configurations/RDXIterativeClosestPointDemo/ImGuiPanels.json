@@ -1,0 +1,15 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "3D View 2" : false,
+    "Environment###java.lang.Class:Environment" : true,
+    "Iterative Closest Point" : true,
+    "Main view depth" : false,
+    "Stepping L515 Simulator###java.lang.Integer:Stepping L515 Simulator" : false,
+    "Stepping L515 Color###GlobalWidgetIndex:1:Stepping L515 Color" : true,
+    "Stepping L515 Depth###GlobalWidgetIndex:0:Stepping L515 Depth" : true,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}

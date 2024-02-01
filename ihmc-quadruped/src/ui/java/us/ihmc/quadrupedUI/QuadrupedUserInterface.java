@@ -22,10 +22,10 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.JavaFXQuadrupedVisualizer;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
@@ -33,8 +33,8 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawS
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawStepPlannerMenuUIController;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawStepPlannerParametersUIController;
-import us.ihmc.quadrupedFootstepPlanning.ui.controllers.QuadrupedMainTabController;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PlannerReachParametersUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.QuadrupedMainTabController;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.VisibilityGraphsParametersUIController;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.BodyPawPathMeshViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.PawPathMeshViewer;
@@ -196,7 +196,7 @@ public class QuadrupedUserInterface
 
       robotVisualizer = new JavaFXQuadrupedVisualizer(modelFactory, graphicsMutator);
       robotVisualizer.attachMessager(messager, QuadrupedUIMessagerAPI.RobotModelTopic);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic, this::submitNewConfiguration);
+      messager.addTopicListener(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic, this::submitNewConfiguration);
 
       plannerTabController.setFullRobotModel(robotVisualizer.getFullRobotModel());
 

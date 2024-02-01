@@ -77,7 +77,6 @@ public class FootstepPlanningModuleLauncher
    {
       String moduleName = robotModel.getSimpleRobotName();
 
-      VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
@@ -86,7 +85,6 @@ public class FootstepPlanningModuleLauncher
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);
 
       return new FootstepPlanningModule(moduleName,
-                                        visibilityGraphsParameters,
                                         robotModel.getAStarBodyPathPlannerParameters(),
                                         footstepPlannerParameters,
                                         swingPlannerParameters,
@@ -143,11 +141,6 @@ public class FootstepPlanningModuleLauncher
       {
          if (!footstepPlanningModule.isPlanning())
             footstepPlanningModule.getFootstepPlannerParameters().set(s.readNextData());
-      });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, VisibilityGraphsParametersPacket.class, inputTopic, s ->
-      {
-         if (!footstepPlanningModule.isPlanning())
-            footstepPlanningModule.getVisibilityGraphParameters().set(s.takeNextData());
       });
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, SwingPlannerParametersPacket.class, inputTopic, s ->
       {

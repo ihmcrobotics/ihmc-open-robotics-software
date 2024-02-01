@@ -1,6 +1,8 @@
 package us.ihmc.perception.memory;
 
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.Loader;
+import org.bytedeco.opencl._cl_mem;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
@@ -10,6 +12,14 @@ import java.nio.ByteBuffer;
 
 public class NativeMemoryToolsTest
 {
+   static
+   {
+      // Because we're only using javacpp itself, we need to load it manually.
+      // We can do that by calling the loader on any javacpp preset. Perhaps there's
+      // a better way to just load jnijavacpp itself.
+      Loader.load(_cl_mem.class);
+   }
+
    @Test
    public void testNativeCopy()
    {

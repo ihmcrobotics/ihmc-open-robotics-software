@@ -1,13 +1,12 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.controllers;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlan;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public class VisualizationController
 {

@@ -1,7 +1,11 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -11,8 +15,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -21,8 +27,14 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -42,11 +54,14 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final YoDouble stepTime;
    private final YoDouble timeIntoStep;
    private final YoBoolean isDone;
+   private final YoBoolean isSteppingDown;
    private final YoDouble swingHeight;
    private final YoDouble minSwingHeight;
    private final YoDouble maxSwingHeight;
    private final YoDouble defaultSwingHeight;
    private final YoDouble customWaypointAngleThreshold;
+   private final YoDouble stepUpFirstWaypointHeightFactor;
+   private final YoDouble stepDownSecondWaypointHeightFactor;
 
    private final double[] waypointProportions = new double[2];
 
@@ -88,6 +103,18 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
 
    private final int maxNumberOfSwingWaypoints;
    private boolean visualize = true;
+   private final String namePrefix;
+
+   /**
+    * Provider used to obtain the ground height for the initial foot position. Called in
+    * {@link #initialize()}.
+    */
+   private DoubleProvider initialGroundHeightProvider = null;
+   /**
+    * Provider used to obtain the ground height for the final foot position. Called in
+    * {@link #initialize()}.
+    */
+   private DoubleProvider finalGroundHeightProvider = null;
 
    public TwoWaypointSwingGenerator(String namePrefix,
                                     double minSwingHeight,
@@ -109,7 +136,15 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
                                     YoRegistry parentRegistry,
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, customWaypointAngleThreshold, maxNumberOfSwingWaypoints, worldFrame, parentRegistry, yoGraphicsListRegistry);
+      this(namePrefix,
+           minSwingHeight,
+           maxSwingHeight,
+           defaultSwingHeight,
+           customWaypointAngleThreshold,
+           maxNumberOfSwingWaypoints,
+           worldFrame,
+           parentRegistry,
+           yoGraphicsListRegistry);
    }
 
    public TwoWaypointSwingGenerator(String namePrefix,
@@ -142,6 +177,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
                                     YoRegistry parentRegistry,
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.namePrefix = namePrefix;
       this.maxNumberOfSwingWaypoints = maxNumberOfSwingWaypoints;
 
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
@@ -154,6 +190,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       stepTime = new YoDouble(namePrefix + "StepTime", registry);
       timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
       isDone = new YoBoolean(namePrefix + "IsDone", registry);
+      isSteppingDown = new YoBoolean(namePrefix + "IsSteppingDown", registry);
       swingHeight = new YoDouble(namePrefix + "SwingHeight", registry);
       swingHeight.set(minSwingHeight);
 
@@ -169,8 +206,13 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       this.minDistanceToStance = new YoDouble(namePrefix + "MinDistanceToStance", registry);
       this.minDistanceToStance.set(Double.NEGATIVE_INFINITY);
 
-      this.customWaypointAngleThreshold = new YoDouble(namePrefix + "customWaypointAngleThreshold", registry);
+      this.customWaypointAngleThreshold = new YoDouble(namePrefix + "CustomWaypointAngleThreshold", registry);
       this.customWaypointAngleThreshold.set(customWaypointAngleThreshold);
+
+      stepUpFirstWaypointHeightFactor = new YoDouble(namePrefix + "StepUpFirstWaypointHeightFactor", registry);
+      stepUpFirstWaypointHeightFactor.set(1.0);
+      stepDownSecondWaypointHeightFactor = new YoDouble(namePrefix + "StepDownSecondWaypointHeightFactor", registry);
+      stepDownSecondWaypointHeightFactor.set(1.0);
 
       for (int i = 0; i < defaultNumberOfWaypoints; i++)
          this.waypointProportions[i] = defaultWaypointProportions[i];
@@ -305,12 +347,15 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    @Override
    public void setSwingHeight(double swingHeight)
    {
-      boolean useDefaultSwing = Double.isNaN(swingHeight) || swingHeight <= 0.0;
-
-      if (useDefaultSwing)
+      if (!isSwingHeightValid(swingHeight))
          this.swingHeight.set(defaultSwingHeight.getDoubleValue());
       else
          this.swingHeight.set(MathTools.clamp(swingHeight, minSwingHeight.getDoubleValue(), maxSwingHeight.getDoubleValue()));
+   }
+
+   public boolean isSwingHeightValid(double swingHeight)
+   {
+      return Double.isFinite(swingHeight) && swingHeight > 0.0;
    }
 
    @Override
@@ -336,6 +381,22 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       this.waypointProportions[1] = waypointProportions1;
    }
 
+   public void setObstacleClearanceWaypointHeightFactors(double stepUpFirstWaypointHeightFactor, double stepDownSecondWaypointHeightFactor)
+   {
+      this.stepUpFirstWaypointHeightFactor.set(stepUpFirstWaypointHeightFactor);
+      this.stepDownSecondWaypointHeightFactor.set(stepDownSecondWaypointHeightFactor);
+   }
+
+   public void setInitialGroundHeightProvider(DoubleProvider initialGroundHeightProvider)
+   {
+      this.initialGroundHeightProvider = initialGroundHeightProvider;
+   }
+
+   public void setFinalGroundHeightProvider(DoubleProvider finalGroundHeightProvider)
+   {
+      this.finalGroundHeightProvider = finalGroundHeightProvider;
+   }
+
    @Override
    public void initialize()
    {
@@ -348,51 +409,104 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
 
       needToAdjustedSwingForSelfCollision.set(computeSwingAdjustment(initialPosition, finalPosition, stanceFootPosition, swingOffset));
 
-      double maxStepZ = Math.max(initialPosition.getZ(), finalPosition.getZ());
+      double initialGroundZ;
+      if (initialGroundHeightProvider != null)
+         initialGroundZ = initialGroundHeightProvider.getValue();
+      else
+         initialGroundZ = initialPosition.getZ();
+
+      double finalGroundZ;
+      if (finalGroundHeightProvider != null)
+         finalGroundZ = finalGroundHeightProvider.getValue();
+      else
+         finalGroundZ = finalPosition.getZ();
+
+      isSteppingDown.set(false);
       switch (trajectoryType)
       {
          case OBSTACLE_CLEARANCE:
+         {
             waypointPositions.clear();
+
             for (int i = 0; i < defaultNumberOfWaypoints; i++)
             {
                waypointPositions.add();
                waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
-               waypointPositions.get(i).setZ(maxStepZ + swingHeight.getDoubleValue());
 
                if (needToAdjustedSwingForSelfCollision.getBooleanValue())
                {
                   waypointPositions.get(i).add(swingOffset.getX(), swingOffset.getY(), 0.0);
                }
             }
+
+            if (initialGroundZ < finalGroundZ)
+            { // Stepping up
+               double alpha = stepUpFirstWaypointHeightFactor.getValue();
+               waypointPositions.get(0).setZ(swingHeight.getValue() + EuclidCoreTools.interpolate(initialGroundZ, finalGroundZ, alpha));
+               waypointPositions.get(1).setZ(swingHeight.getValue() + finalGroundZ);
+            }
+            else
+            { // Stepping down
+               waypointPositions.get(0).setZ(swingHeight.getValue() + initialGroundZ);
+               double alpha = stepDownSecondWaypointHeightFactor.getValue();
+               waypointPositions.get(1).setZ(swingHeight.getValue() + EuclidCoreTools.interpolate(finalGroundZ, initialGroundZ, alpha));
+               isSteppingDown.set(true);
+            }
+
             break;
+         }
          case DEFAULT:
+         {
             waypointPositions.clear();
             for (int i = 0; i < defaultNumberOfWaypoints; i++)
             {
                waypointPositions.add();
                waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
-               waypointPositions.get(i).addZ(swingHeight.getDoubleValue());
+
                if (needToAdjustedSwingForSelfCollision.getBooleanValue())
                {
                   waypointPositions.get(i).add(swingOffset.getX(), swingOffset.getY(), 0.0);
                }
             }
+
+            waypointPositions.get(0).setZ(initialGroundZ + swingHeight.getValue());
+            waypointPositions.get(1).setZ(finalGroundZ + swingHeight.getValue());
+
             break;
+         }
          case CUSTOM:
             break;
          default:
             throw new RuntimeException("Trajectory type not implemented");
       }
 
-      double maxWaypointZ;
-      if (stanceFootPosition.containsNaN())
-         maxWaypointZ = maxStepZ + maxSwingHeight.getDoubleValue();
-      else
-         maxWaypointZ = Math.max(stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue(), maxStepZ + minSwingHeight.getDoubleValue());
-
-      for (int i = 0; i < waypointPositions.size(); i++)
+      if (trajectoryType != TrajectoryType.OBSTACLE_CLEARANCE)
       {
-         waypointPositions.get(i).setZ(Math.min(waypointPositions.get(i).getZ(), maxWaypointZ));
+         double maxStepZ = Math.max(initialGroundZ, finalGroundZ);
+         double maxWaypointZ;
+
+         if (stanceFootPosition.containsNaN())
+            maxWaypointZ = maxStepZ + maxSwingHeight.getDoubleValue();
+         else
+            maxWaypointZ = Math.max(stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue(), maxStepZ + minSwingHeight.getDoubleValue());
+
+         for (int i = 0; i < waypointPositions.size(); i++)
+         {
+            waypointPositions.get(i).setZ(Math.min(waypointPositions.get(i).getZ(), maxWaypointZ));
+         }
+      }
+
+      if (trajectoryType == TrajectoryType.OBSTACLE_CLEARANCE || trajectoryType == TrajectoryType.DEFAULT)
+      {
+         if (initialGroundHeightProvider != null)
+         {
+            waypointPositions.get(0).setZ(Math.max(waypointPositions.get(0).getZ(), initialPosition.getZ() + minSwingHeight.getValue()));
+         }
+
+         if (finalGroundHeightProvider != null)
+         {
+            waypointPositions.get(1).setZ(Math.max(waypointPositions.get(1).getZ(), finalPosition.getZ() + minSwingHeight.getValue()));
+         }
       }
 
       initialVelocityNoTimeDimension.setIncludingFrame(initialVelocity);
@@ -424,15 +538,17 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final Point2D pointB2D = new Point2D();
    private final FramePoint2D pointAInStance = new FramePoint2D();
    private final FramePoint2D pointBInStance = new FramePoint2D();
-   private final Point2D tempPoint = new Point2D();
+   private final Point2D stanceProjection2D = new Point2D();
+   private final Point2D swingIntersectionWithStanceY2D = new Point2D();
 
    /**
-    * Given the start and end point of the swing as well as the position of the stance foot this method will compute
-    * whether the nominal swing trajectory will be close to the stance foot. This is an indication that self collision
-    * between swing and stance leg will occur. In that case a offset vector is computed and packed that will contain
-    * a swing trajectory adjustment that will avoid this.
+    * Given the start and end point of the swing as well as the position of the stance foot this method
+    * will compute whether the nominal swing trajectory will be close to the stance foot. This is an
+    * indication that self collision between swing and stance leg will occur. In that case a offset
+    * vector is computed and packed that will contain a swing trajectory adjustment that will avoid
+    * this.
     */
-   private boolean computeSwingAdjustment(FramePoint3D pointA, FramePoint3D pointB, FramePoint3D stance, Vector2D offsetToPack)
+   private boolean computeSwingAdjustment(FramePoint3DReadOnly pointA, FramePoint3DReadOnly pointB, FramePoint3DReadOnly stance, Vector2DBasics offsetToPack)
    {
       if (swingSide == null || stanceZUpFrame == null)
       {
@@ -443,11 +559,11 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       pointA2D.set(pointA);
       pointB2D.set(pointB);
       stance2D.set(stance);
-      EuclidGeometryTools.orthogonalProjectionOnLine2D(stance2D, pointA2D, pointB2D, tempPoint);
-      boolean smallAngleChange = !EuclidGeometryTools.isPoint2DOnLineSegment2D(tempPoint, pointA2D, pointB2D);
+      EuclidGeometryTools.orthogonalProjectionOnLine2D(stance2D, pointA2D, pointB2D, stanceProjection2D);
+      boolean smallAngleChange = !EuclidGeometryTools.isPoint2DOnLineSegment2D(stanceProjection2D, pointA2D, pointB2D);
 
       xyDistanceToStance.setToZero(trajectoryFrame);
-      xyDistanceToStance.sub(tempPoint, stance2D);
+      xyDistanceToStance.sub(stanceProjection2D, stance2D);
       xyDistanceToStance.changeFrame(stanceZUpFrame);
 
       // If the nominal trajectory intersects the negative Y axis of the sole frame for a swing with the left side the step is a cross over step.
@@ -463,9 +579,10 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
                                                                                                     pointAInStance.getY(),
                                                                                                     pointBInStance.getX(),
                                                                                                     pointBInStance.getY(),
-                                                                                                    tempPoint);
+                                                                                                    swingIntersectionWithStanceY2D);
 
-      boolean crossOver = trajectoryIntersectsY && swingSide.negateIfRightSide(tempPoint.getY()) < 0.0;
+      double intersectionYTowardsSwingSide = swingSide.negateIfRightSide(swingIntersectionWithStanceY2D.getY());
+      boolean crossOver = trajectoryIntersectsY && intersectionYTowardsSwingSide < 0.0;
       crossOverStep.set(crossOver);
 
       // Prevent adjusting on side steps or steps that do not change the angle between the feet much.
@@ -500,13 +617,15 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    }
 
    /**
-    * Calling this method will enable a simple collision avoidance heuristic in the swing generator: if a straight line in the xy plane
-    * from the start to the end of the swing is too close to the stance position the trajectory waypoints will be adjusted. To activate
-    * this, additional information has to be provided as arguments to this method.
+    * Calling this method will enable a simple collision avoidance heuristic in the swing generator: if
+    * a straight line in the xy plane from the start to the end of the swing is too close to the stance
+    * position the trajectory waypoints will be adjusted. To activate this, additional information has
+    * to be provided as arguments to this method.
     *
     * @param swingSide           the side of the robot that this swing trajectory will be executed on
     * @param stanceZUpFrame      the zup frame located at the stance foot sole
-    * @param minDistanceToStance the minimum clearance that the swing should have from the stance foot sole point in the xy plane
+    * @param minDistanceToStance the minimum clearance that the swing should have from the stance foot
+    *                            sole point in the xy plane
     */
    public void enableStanceCollisionAvoidance(RobotSide swingSide, ReferenceFrame stanceZUpFrame, double minDistanceToStance)
    {
@@ -701,5 +820,27 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private FramePoint3D createNewWaypoint()
    {
       return new FramePoint3D(trajectoryFrame);
+   }
+
+   public EnumMap<Axis3D, ArrayList<YoPolynomial>> getSwingTrajectory()
+   {
+      return trajectory.getTrajectories();
+   }
+
+   public boolean isSteppingDown()
+   {
+      return isSteppingDown.getBooleanValue();
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(trajectory.getSCS2YoGraphics());
+      if (waypointViz != null)
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D(namePrefix + "Waypoint",
+                                                                            waypointViz.getPositions(),
+                                                                            0.02,
+                                                                            ColorDefinitions.White()));
+      return group;
    }
 }

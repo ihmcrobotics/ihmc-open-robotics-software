@@ -13,6 +13,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -20,10 +26,10 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
- * Class provides a CenterOfPressureCommand for the QP that is used to explore the foothold by shifting the
- * desired CoP to the corners of the foothold.
+ * Class provides a CenterOfPressureCommand for the QP that is used to explore the foothold by
+ * shifting the desired CoP to the corners of the foothold.
  */
-public class ExplorationHelper
+public class ExplorationHelper implements SCS2YoGraphicHolder
 {
    private final YoBoolean footholdExplorationActive;
    private final ExplorationParameters explorationParameters;
@@ -184,4 +190,17 @@ public class ExplorationHelper
       return null;
    }
 
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      if (yoDesiredCop == null)
+         return null;
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("Desired Center of Pressure for Exploration",
+                                                                    yoDesiredCop,
+                                                                    0.006,
+                                                                    ColorDefinitions.Blue(),
+                                                                    DefaultPoint2DGraphic.CIRCLE));
+      return group;
+   }
 }

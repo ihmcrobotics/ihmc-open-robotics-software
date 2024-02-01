@@ -4,8 +4,11 @@ import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityDa
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepPlannerBodyCollisionDetector;
+import us.ihmc.footstepPlanning.graphSearch.collision.PlanarRegionFootstepPlannerBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -21,23 +24,28 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason.HEIGHT_MAP_NONTRAVERSABLE;
+
 public class FootstepChecker implements FootstepCheckerInterface
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    public static final String rejectionReasonVariable = "rejectionReason";
 
+   private static final double traversabilityThresholdCenter = 0.08;
+   private static final double traversabilityThresholdPerimeter = 0.02;
+
    private final FootstepPlannerParametersReadOnly parameters;
-   private final FootstepSnapAndWiggler snapper;
+   private final FootstepSnapperReadOnly snapper;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
+   private final ConvexPolygon2D tmpFootPolygon = new ConvexPolygon2D();
 
    private final PlanarRegionCliffAvoider cliffAvoider;
-   private final ObstacleBetweenStepsChecker obstacleBetweenStepsChecker;
-   private final FootstepPlannerBodyCollisionDetector collisionDetector;
+   private final PlanarRegionObstacleBetweenStepsChecker obstacleBetweenStepsChecker;
+   private final PlanarRegionFootstepPlannerBodyCollisionDetector collisionDetector;
    private final FootstepPoseHeuristicChecker heuristicPoseChecker;
    private final FootstepPoseReachabilityChecker reachabilityChecker;
 
    private PlanarRegionsList regionsForCollisionChecking = null;
-   private HeightMapData heightMapData = null;
 
    private boolean assumeFlatGround = false;
 
@@ -52,7 +60,7 @@ public class FootstepChecker implements FootstepCheckerInterface
 
    public FootstepChecker(FootstepPlannerParametersReadOnly parameters,
                           SideDependentList<ConvexPolygon2D> footPolygons,
-                          FootstepSnapAndWiggler snapper,
+                          FootstepSnapperReadOnly snapper,
                           StepReachabilityData stepReachabilityData,
                           YoRegistry parentRegistry)
    {
@@ -60,8 +68,8 @@ public class FootstepChecker implements FootstepCheckerInterface
       this.snapper = snapper;
       this.footPolygons = footPolygons;
       this.cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
-      this.obstacleBetweenStepsChecker = new ObstacleBetweenStepsChecker(parameters, snapper);
-      this.collisionDetector = new FootstepPlannerBodyCollisionDetector(parameters);
+      this.obstacleBetweenStepsChecker = new PlanarRegionObstacleBetweenStepsChecker(parameters, snapper);
+      this.collisionDetector = new PlanarRegionFootstepPlannerBodyCollisionDetector(parameters);
       this.heuristicPoseChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
       this.reachabilityChecker = new FootstepPoseReachabilityChecker(parameters, snapper, stepReachabilityData, registry);
       parentRegistry.addChild(registry);
@@ -84,66 +92,38 @@ public class FootstepChecker implements FootstepCheckerInterface
       return rejectionReason.getValue() == null;
    }
 
-   // TODO compute step index
-
    private void doValidityCheck(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep, DiscreteFootstep startOfSwing)
    {
-      FootstepSnapData snapData = snapper.snapFootstep(candidateStep, stanceStep, parameters.getWiggleWhilePlanning());
+      // Do pre-snap validity checks here -- any validity checks before snapping will have big speedups
+
+      double centerOfFootX = candidateStep.getX();
+      double centerOfFootY = candidateStep.getY();
+      if (queryHeightMapTraversabilityDistanceMargin(centerOfFootX, centerOfFootY) < traversabilityThresholdCenter)
+      {
+         rejectionReason.set(HEIGHT_MAP_NONTRAVERSABLE);
+         return;
+      }
+
+      double averageSignedDistanceFunction = 0.0;
+      DiscreteFootstepTools.getFootPolygon(candidateStep, footPolygons.get(candidateStep.getRobotSide()), tmpFootPolygon);
+      for (int i = 0; i < tmpFootPolygon.getNumberOfVertices(); i++)
+      {
+         averageSignedDistanceFunction += queryHeightMapTraversabilityDistanceMargin(tmpFootPolygon.getVertex(i).getX(), tmpFootPolygon.getVertex(i).getY());
+      }
+
+      averageSignedDistanceFunction /= tmpFootPolygon.getNumberOfVertices();
+
+      if (averageSignedDistanceFunction < traversabilityThresholdPerimeter)
+      {
+         rejectionReason.set(HEIGHT_MAP_NONTRAVERSABLE);
+         return;
+      }
+
+      // Snap footstep to height map/planar regions
+      FootstepSnapDataReadOnly snapData = snapper.snapFootstep(candidateStep, stanceStep, parameters.getWiggleWhilePlanning());
       candidateStepSnapData.set(snapData);
       heuristicPoseChecker.setApproximateStepDimensions(candidateStep, stanceStep);
       achievedDeltaInside.set(snapData.getAchievedInsideDelta());
-
-      if (heightMapData != null)
-      {
-         if (candidateStepSnapData.getSnapTransform().containsNaN())
-         {
-            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
-            return;
-         }
-
-         // Area
-         double fullFootArea = footPolygons.get(candidateStep.getRobotSide()).getArea();
-         footAreaPercentage.set(candidateStepSnapData.getHeightMapArea() / fullFootArea);
-
-         double epsilonAreaPercentage = 1e-4;
-         if (footAreaPercentage.getValue() < (parameters.getMinimumFootholdPercent() - epsilonAreaPercentage))
-         {
-            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
-            return;
-         }
-
-         // Check incline
-         RigidBodyTransform snappedSoleTransform = candidateStepSnapData.getSnappedStepTransform(candidateStep);
-         double minimumSurfaceNormalZ = Math.cos(parameters.getMinimumSurfaceInclineRadians());
-         if (snappedSoleTransform.getM22() < minimumSurfaceNormalZ)
-         {
-            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
-            return;
-         }
-
-         // Root-mean-squared error
-         rmsError.set(candidateStepSnapData.getRMSErrorHeightMap());
-         if (candidateStepSnapData.getRMSErrorHeightMap() > parameters.getRMSErrorThreshold())
-         {
-            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.RMS_ERROR_TOO_HIGH);
-            return;
-         }
-
-         if (stanceStep == null)
-         {
-            return;
-         }
-
-         // Check snapped footstep placement
-         BipedalFootstepPlannerNodeRejectionReason poseRejectionReason = heuristicPoseChecker.snapAndCheckValidity(candidateStep, stanceStep, startOfSwing);
-         rejectionReason.set(poseRejectionReason);
-
-         return;
-      }
-      else if (regionsForCollisionChecking == null || regionsForCollisionChecking.isEmpty())
-      {
-         return;
-      }
 
       // Check step placement
       if (!assumeFlatGround && !isStepPlacementValid(candidateStep, snapData))
@@ -151,9 +131,19 @@ public class FootstepChecker implements FootstepCheckerInterface
          return;
       }
 
-      // Check collisions
-      if (!isCollisionFree(candidateStep, stanceStep, startOfSwing))
+      // Check snapped footstep placement
+      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason;
+      if (parameters.getUseStepReachabilityMap())
       {
+         poseRejectionReason = reachabilityChecker.checkStepValidity(candidateStep, stanceStep);
+      }
+      else
+      {
+         poseRejectionReason = heuristicPoseChecker.snapAndCheckValidity(candidateStep, stanceStep, startOfSwing);
+      }
+      if (poseRejectionReason != null)
+      {
+         rejectionReason.set(poseRejectionReason);
          return;
       }
 
@@ -166,9 +156,18 @@ public class FootstepChecker implements FootstepCheckerInterface
             return;
          }
       }
+
+
+      if (regionsForCollisionChecking == null || regionsForCollisionChecking.isEmpty())
+      {
+         return;
+      }
+
+      // Check collisions
+      isCollisionFree(candidateStep, stanceStep, startOfSwing);
    }
 
-   private boolean isStepPlacementValid(DiscreteFootstep candidateStep, FootstepSnapData snapData)
+   private boolean isStepPlacementValid(DiscreteFootstep candidateStep, FootstepSnapDataReadOnly snapData)
    {
       // Check valid snap
       if (candidateStepSnapData.getSnapTransform().containsNaN())
@@ -227,23 +226,6 @@ public class FootstepChecker implements FootstepCheckerInterface
          return true;
       }
 
-      // Check snapped footstep placement
-      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason;
-      if (parameters.getUseStepReachabilityMap())
-      {
-         poseRejectionReason = reachabilityChecker.checkStepValidity(candidateStep, stanceStep);
-      }
-      else
-      {
-         poseRejectionReason = heuristicPoseChecker.snapAndCheckValidity(candidateStep, stanceStep, startOfSwing);
-      }
-      if (poseRejectionReason != null)
-      {
-         rejectionReason.set(poseRejectionReason);
-         return false;
-      }
-
-
       // Check for obstacle collisions (vertically extruded line between steps)
       if (parameters.checkForPathCollisions())
       {
@@ -274,9 +256,15 @@ public class FootstepChecker implements FootstepCheckerInterface
       return true;
    }
 
+   private double queryHeightMapTraversabilityDistanceMargin(double x, double y)
+   {
+      // TODO
+      return Double.POSITIVE_INFINITY;
+   }
+
    private boolean boundingBoxCollisionDetected(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep)
    {
-      FootstepSnapData stanceStepSnapData = snapper.snapFootstep(stanceStep, null, parameters.getWiggleWhilePlanning());
+      FootstepSnapDataReadOnly stanceStepSnapData = snapper.snapFootstep(stanceStep, null, parameters.getWiggleWhilePlanning());
       if (stanceStepSnapData == null)
       {
          return false;
@@ -314,11 +302,6 @@ public class FootstepChecker implements FootstepCheckerInterface
    public void setAssumeFlatGround(boolean assumeFlatGround)
    {
       this.assumeFlatGround = assumeFlatGround;
-   }
-
-   public void setHeightMapData(HeightMapData heightMapData)
-   {
-      this.heightMapData = heightMapData;
    }
 
    private static void checkWiggleParameters(FootstepPlannerParametersReadOnly parameters)

@@ -35,7 +35,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -134,7 +133,7 @@ public class LogDataProcessorHelper
 
       double omega0 = walkingControllerParameters.getOmega0();
       double gravityZ = 9.81;
-      String controllerTimeNamespace = DRCControllerThread.class.getSimpleName();
+      String controllerTimeNamespace = null; // FIXME DRCControllerThread.class.getSimpleName();
       yoTime = (YoDouble) scs.findVariable(controllerTimeNamespace, "controllerTime");
 
       controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs,

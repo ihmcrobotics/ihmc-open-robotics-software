@@ -14,16 +14,14 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
-import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
-import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
-import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
-import us.ihmc.tools.thread.Activator;
+import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVGuidedSwapVideoPanel;
+import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
+import us.ihmc.rdx.imgui.ImPlotIntegerPlot;
+import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
 import us.ihmc.tools.thread.Throttler;
 
 import java.io.File;
@@ -34,9 +32,8 @@ import java.util.function.Consumer;
  */
 public class RDXCameraCalibrationDemo
 {
-   private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources");
-   private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
+   private final RDXBaseUI baseUI = new RDXBaseUI();
+   private final RDXPanel diagnosticPanel = new RDXPanel("Diagnostics", this::renderImGuiWidgets);
    private VideoCapture videoCapture;
    private int imageHeight = 1080;
    private int imageWidth = 1920;
@@ -46,8 +43,8 @@ public class RDXCameraCalibrationDemo
    private Mat bgrImage;
    private BytePointer jpegImageBytePointer;
    private Mat yuv420Image;
-   private RDXOpenCVSwapVideoPanel swapCVPanel;
-   private final Consumer<RDXOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::generateNewCameraMatrixOnUIThread;
+   private RDXOpenCVGuidedSwapVideoPanel swapCVPanel;
+   private final Consumer<RDXImagePanelTexture> accessOnHighPriorityThread = this::generateNewCameraMatrixOnUIThread;
    private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read Duration");
    private final ImPlotStopwatchPlot encodeDurationPlot = new ImPlotStopwatchPlot("Encode Duration");
    private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read Frequency");
@@ -74,7 +71,8 @@ public class RDXCameraCalibrationDemo
    private final Size boardSize = new Size(8, 11);
    private final int squareSize = 13;
 
-   private enum CalibrationPattern { NOT_EXISTING, CHESSBOARD, CIRCLES_GRID, ASYMMETRIC_CIRCLES_GRID }
+   private enum CalibrationPattern
+   {NOT_EXISTING, CHESSBOARD, CIRCLES_GRID, ASYMMETRIC_CIRCLES_GRID}
 
    private final CalibrationPattern calibrationPattern = CalibrationPattern.CIRCLES_GRID;
    private Point3fVectorVector objectPoints;
@@ -83,13 +81,12 @@ public class RDXCameraCalibrationDemo
    private final Mat matOfCorners = new Mat();
    private final Point2fVector tempPoint2fVector = new Point2fVector();
    private final Mat tempMat = new Mat();
-   private RDXCVImagePanel undistortedVideoPanel;
-   private RDXCVImagePanel testImagePanel;
+   private RDXBytedecoImagePanel undistortedVideoPanel;
+   private RDXBytedecoImagePanel testImagePanel;
    private Mat imageAtIndex = null;
    private final MatVector images = new MatVector();
    private Mat newCameraMatrix = new Mat();
-   private final String calibrationPhotoDirectory
-         = "ihmc-open-robotics-software/ihmc-high-level-behaviors/src/libgdx/resources/configurations/cameraCalibrationPhotos/";
+   private final String calibrationPhotoDirectory = "ihmc-open-robotics-software/ihmc-high-level-behaviors/src/libgdx/resources/configurations/cameraCalibrationPhotos/";
    private File dir;
    private int currentNumberOfImagesInDirectory = 0;
    private final ImBoolean takingPhotosIsActive = new ImBoolean(false);
@@ -108,6 +105,104 @@ public class RDXCameraCalibrationDemo
          public void create()
          {
             baseUI.create();
+
+            videoCapture = new VideoCapture(0);
+
+            int reportedImageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
+            int reportedImageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
+            reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
+
+            LogTools.info("Default resolution: {} x {}", reportedImageWidth, reportedImageHeight);
+            LogTools.info("Default fps: {}", reportedFPS);
+
+            backendName = videoCapture.getBackendName().getString();
+
+            videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, imageWidth);
+            videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, imageHeight);
+            videoCapture.set(opencv_videoio.CAP_PROP_FOURCC, VideoWriter.fourcc((byte) 'M', (byte) 'J', (byte) 'P', (byte) 'G'));
+            videoCapture.set(opencv_videoio.CAP_PROP_FPS, requestedFPS);
+
+            imageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
+            imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
+            reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
+            LogTools.info("Format: {}", videoCapture.get(opencv_videoio.CAP_PROP_FORMAT));
+
+            bgrImage = new Mat();
+            yuv420Image = new Mat();
+            jpegImageBytePointer = new BytePointer();
+
+            swapCVPanel = new RDXOpenCVGuidedSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread, this::videoUpdateOnUIThread);
+            undistortedVideoPanel = new RDXBytedecoImagePanel("Undistorted Video", imageWidth, imageHeight);
+            testImagePanel = new RDXBytedecoImagePanel("Test Image 1", imageWidth, imageHeight);
+            baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getImagePanel());
+            baseUI.getImGuiPanelManager().addPanel(undistortedVideoPanel.getImagePanel());
+            baseUI.getImGuiPanelManager().addPanel(testImagePanel.getImagePanel());
+
+            compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
+
+            ThreadTools.startAsDaemon(() ->
+            {
+               while (true)
+               {
+                  // If encoding is running slower than reading, we want to wait a little so the read
+                  // is freshest going into the encode and publish. We do this because we don't want
+                  // to there to be more than one publish thread going
+                  boolean shouldSleep;
+                  double sleepTime;
+                  synchronized (measurementSyncObject)
+                  {
+                     double averageThreadTwoDuration = threadTwoDuration.averageLap();
+                     double averageThreadOneDuration = threadOneDuration.averageLap();
+                     shouldSleep = !Double.isNaN(averageThreadTwoDuration) && !Double.isNaN(averageThreadOneDuration)
+                                   && averageThreadTwoDuration > averageThreadOneDuration;
+                     sleepTime = averageThreadTwoDuration - averageThreadOneDuration;
+
+                     if (Double.isNaN(threadOneDuration.lap()))
+                        threadOneDuration.reset();
+                  }
+
+                  if (shouldSleep)
+                     ThreadTools.sleepSeconds(sleepTime);
+
+                  readDurationPlot.start();
+                  boolean imageWasRead = videoCapture.read(bgrImage);
+                  readDurationPlot.stop();
+                  readFrequencyPlot.ping();
+
+                  if (!imageWasRead)
+                  {
+                     LogTools.error("Image was not read!");
+                  }
+
+                  // Convert colors are pretty fast. Encoding is slow, so let's do it in parallel.
+
+                  swapCVPanel.updateOnAsynchronousThread();
+
+                  opencv_imgproc.cvtColor(bgrImage, yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
+
+                  synchronized (measurementSyncObject)
+                  {
+                     threadOneDuration.suspend();
+                  }
+               }
+            }, "CameraRead");
+
+            dir = new File(calibrationPhotoDirectory);
+            File[] directoryListing = dir.listFiles();
+            if (directoryListing != null)
+            {
+               for (File child : directoryListing)
+               {
+                  images.push_back(new Mat(opencv_imgcodecs.imread(child.getAbsolutePath())));
+                  //LogTools.info("{}", child.getAbsolutePath());
+               }
+            }
+            else
+            {
+               LogTools.info("Not a directory");
+            }
+            LogTools.info("There are {} many photos", images.size());
+            currentNumberOfImagesInDirectory = (int) images.size();
          }
 
          @Override
@@ -120,137 +215,31 @@ public class RDXCameraCalibrationDemo
          @Override
          public void render()
          {
-            if (nativesLoadedActivator.poll())
-            {
-               if (nativesLoadedActivator.isNewlyActivated())
-               {
-                  videoCapture = new VideoCapture(0);
-
-                  int reportedImageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
-                  int reportedImageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
-                  reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
-
-                  LogTools.info("Default resolution: {} x {}", reportedImageWidth, reportedImageHeight);
-                  LogTools.info("Default fps: {}", reportedFPS);
-
-                  backendName = BytedecoTools.stringFromByteBuffer(videoCapture.getBackendName());
-
-                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, imageWidth);
-                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, imageHeight);
-                  videoCapture.set(opencv_videoio.CAP_PROP_FOURCC, VideoWriter.fourcc((byte) 'M', (byte) 'J', (byte) 'P', (byte) 'G'));
-                  videoCapture.set(opencv_videoio.CAP_PROP_FPS, requestedFPS);
-
-                  imageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
-                  imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
-                  reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
-                  LogTools.info("Format: {}", videoCapture.get(opencv_videoio.CAP_PROP_FORMAT));
-
-                  bgrImage = new Mat();
-                  yuv420Image = new Mat();
-                  jpegImageBytePointer = new BytePointer();
-
-                  swapCVPanel = new RDXOpenCVSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread, this::videoUpdateOnUIThread);
-                  undistortedVideoPanel = new RDXCVImagePanel("Undistorted Video", imageWidth, imageHeight);
-                  testImagePanel = new RDXCVImagePanel("Test Image 1", imageWidth, imageHeight);
-                  baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
-                  baseUI.getImGuiPanelManager().addPanel(undistortedVideoPanel.getVideoPanel());
-                  baseUI.getImGuiPanelManager().addPanel(testImagePanel.getVideoPanel());
-                  baseUI.getLayoutManager().reloadLayout();
-
-                  compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
-
-                  ThreadTools.startAsDaemon(() ->
-                  {
-                     while (true)
-                     {
-                        // If encoding is running slower than reading, we want to wait a little so the read
-                        // is freshest going into the encode and publish. We do this because we don't want
-                        // to there to be more than one publish thread going
-                        boolean shouldSleep;
-                        double sleepTime;
-                        synchronized (measurementSyncObject)
-                        {
-                           double averageThreadTwoDuration = threadTwoDuration.averageLap();
-                           double averageThreadOneDuration = threadOneDuration.averageLap();
-                           shouldSleep = !Double.isNaN(averageThreadTwoDuration) && !Double.isNaN(averageThreadOneDuration)
-                                         && averageThreadTwoDuration > averageThreadOneDuration;
-                           sleepTime = averageThreadTwoDuration - averageThreadOneDuration;
-
-                           if (Double.isNaN(threadOneDuration.lap()))
-                              threadOneDuration.reset();
-                        }
-
-                        if (shouldSleep)
-                           ThreadTools.sleepSeconds(sleepTime);
-
-                        readDurationPlot.start();
-                        boolean imageWasRead = videoCapture.read(bgrImage);
-                        readDurationPlot.stop();
-                        readFrequencyPlot.ping();
-
-                        if (!imageWasRead)
-                        {
-                           LogTools.error("Image was not read!");
-                        }
-
-                        // Convert colors are pretty fast. Encoding is slow, so let's do it in parallel.
-
-                        swapCVPanel.updateOnAsynchronousThread();
-
-                        opencv_imgproc.cvtColor(bgrImage, yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
-
-                        synchronized (measurementSyncObject)
-                        {
-                           threadOneDuration.suspend();
-                        }
-                     }
-                  }, "CameraRead");
-
-                  dir = new File(calibrationPhotoDirectory);
-                  File[] directoryListing = dir.listFiles();
-                  if (directoryListing != null)
-                  {
-                     for (File child : directoryListing)
-                     {
-                        images.push_back(new Mat(opencv_imgcodecs.imread(child.getAbsolutePath())));
-                        //LogTools.info("{}", child.getAbsolutePath());
-                     }
-                  }
-                  else
-                  {
-                     LogTools.info("Not a directory");
-                  }
-                  LogTools.info("There are {} many photos", images.size());
-                  currentNumberOfImagesInDirectory = (int) images.size();
-               }
-
-               swapCVPanel.updateOnUIThread();
-            }
-
+            swapCVPanel.updateOnUIThread();
             testImagePanel.draw();
             undistortedVideoPanel.draw();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
 
-         private void videoUpdateOnAsynchronousThread(RDXOpenCVSwapVideoPanelData data)
+         private void videoUpdateOnAsynchronousThread(RDXImagePanelTexture texture)
          {
-            data.ensureTextureDimensions(imageWidth, imageHeight);
-            opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+            texture.ensureTextureDimensions(imageWidth, imageHeight);
+            opencv_imgproc.cvtColor(bgrImage, texture.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
          }
 
-         private void videoUpdateOnUIThread(RDXOpenCVSwapVideoPanelData data)
+         private void videoUpdateOnUIThread(RDXImagePanelTexture texture)
          {
             if (generateCameraMatrixNotification.poll())
             {
-               generateNewCameraMatrixOnUIThread(data);
+               generateNewCameraMatrixOnUIThread(texture);
             }
 
             if (cameraMatrix != null)
             {
                newCameraMatrix = opencv_calib3d.getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 1.0);
 
-               data.getRGBA8Image().getBytedecoOpenCVMat().copyTo(tempMat);
+               texture.getRGBA8Image().getBytedecoOpenCVMat().copyTo(tempMat);
                opencv_calib3d.undistort(tempMat,
                                         undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat(),
                                         cameraMatrix,
@@ -261,31 +250,27 @@ public class RDXCameraCalibrationDemo
             if (takingPhotosIsActive.get() && throttler.run(0.5))
             {
 
-               opencv_imgproc.cvtColor(data.getRGBA8Image().getBytedecoOpenCVMat(), tempMat, opencv_imgproc.COLOR_BGR2RGB);
-               opencv_imgcodecs.imwrite(calibrationPhotoDirectory + "CameraCalibrationPhoto" + (currentNumberOfImagesInDirectory /*+1*/) + ".jpg",
-                                        tempMat);
+               opencv_imgproc.cvtColor(texture.getRGBA8Image().getBytedecoOpenCVMat(), tempMat, opencv_imgproc.COLOR_BGR2RGB);
+               opencv_imgcodecs.imwrite(calibrationPhotoDirectory + "CameraCalibrationPhoto" + (currentNumberOfImagesInDirectory /*+1*/) + ".jpg", tempMat);
                currentNumberOfImagesInDirectory++;
             }
 
-            data.updateOnUIThread(swapCVPanel.getVideoPanel());
+            texture.updateTextureAndDraw(swapCVPanel.getImagePanel());
          }
       });
    }
 
    private void renderImGuiWidgets()
    {
-      if (nativesLoadedActivator.peek())
-      {
-         ImGui.text("Is open: " + videoCapture.isOpened());
-         ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
-         ImGui.text("Reported fps: " + reportedFPS);
-         ImGui.text("Backend name: " + backendName);
-         readFrequencyPlot.renderImGuiWidgets();
-         encodeFrequencyPlot.renderImGuiWidgets();
-         readDurationPlot.renderImGuiWidgets();
-         encodeDurationPlot.renderImGuiWidgets();
-         compressedBytesPlot.renderImGuiWidgets();
-      }
+      ImGui.text("Is open: " + videoCapture.isOpened());
+      ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
+      ImGui.text("Reported fps: " + reportedFPS);
+      ImGui.text("Backend name: " + backendName);
+      readFrequencyPlot.renderImGuiWidgets();
+      encodeFrequencyPlot.renderImGuiWidgets();
+      readDurationPlot.renderImGuiWidgets();
+      encodeDurationPlot.renderImGuiWidgets();
+      compressedBytesPlot.renderImGuiWidgets();
       ImGui.text(("There are currently {} photos" + currentNumberOfImagesInDirectory));
       if (ImGui.checkbox("Record photos for calibration", takingPhotosIsActive))
       {
@@ -297,7 +282,7 @@ public class RDXCameraCalibrationDemo
       }
    }
 
-   private void generateNewCameraMatrixOnUIThread(RDXOpenCVSwapVideoPanelData data)
+   private void generateNewCameraMatrixOnUIThread(RDXImagePanelTexture texture)
    {
       LogTools.info("PATH {}", dir.getAbsolutePath());
       File[] directoryListing = dir.listFiles();
@@ -317,9 +302,9 @@ public class RDXCameraCalibrationDemo
       LogTools.info("There are {} many photos", images.size());
       //numOfImagesInDirectory = (int) images.size();
 
-      if (data != null && data.getRGBA8Image() != null && data.getRGBA8Image().getBytedecoOpenCVMat() != null)
+      if (texture != null && texture.getRGBA8Image() != null && texture.getRGBA8Image().getBytedecoOpenCVMat() != null)
       {
-         data.getRGBA8Image().getBytedecoOpenCVMat().copyTo(undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat());
+         texture.getRGBA8Image().getBytedecoOpenCVMat().copyTo(undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat());
          undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat().copyTo(tempMat);
          gridWidth = (float) squareSize * (boardSize.width() - 1);
 

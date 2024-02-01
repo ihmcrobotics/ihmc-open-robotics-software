@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.DetectedFiducialPacket>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::DetectedFiducialPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "42779ff520895c59f998e40723bb70a3324807f8d128b9e2399d26eab184eafd";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

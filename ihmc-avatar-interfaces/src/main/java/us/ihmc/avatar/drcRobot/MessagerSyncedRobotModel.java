@@ -28,7 +28,7 @@ public class MessagerSyncedRobotModel extends CommunicationsSyncedRobotModel
    {
       super(robotModel, fullRobotModel, null, sensorInformation);
 
-      messager.registerTopicListener(topic, robotConfigurationData ->
+      messager.addTopicListener(topic, robotConfigurationData ->
       {
          FullRobotModelUtils.checkJointNameHash(jointNameHash, robotConfigurationData.getJointNameHash());
          latestRobotConfigurationData = robotConfigurationData;

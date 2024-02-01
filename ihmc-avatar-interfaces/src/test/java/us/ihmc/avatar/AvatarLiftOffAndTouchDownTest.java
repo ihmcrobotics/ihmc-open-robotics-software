@@ -38,7 +38,7 @@ public class AvatarLiftOffAndTouchDownTest
          throws SimulationExceededMaximumTimeException
    {
       double swingDuration = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
-      double swingHeight = Math.max(0.05, robotModel.getWalkingControllerParameters().getSteppingParameters().getDefaultSwingHeightFromStanceFoot());
+      double swingHeight = Math.max(0.05, robotModel.getWalkingControllerParameters().getSwingTrajectoryParameters().getDefaultSwingHeight());
       double touchdownVelocity = robotModel.getWalkingControllerParameters().getSwingTrajectoryParameters().getDesiredTouchdownVelocity();
       RobotSide side = RobotSide.LEFT;
 

@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class SoleTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.SoleTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::SoleTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "1044ae908762ccfce0965ab94993575a99c7d34c39572fbdcf2fe99a4d5f5d00";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

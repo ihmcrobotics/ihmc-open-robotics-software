@@ -1,13 +1,11 @@
 package us.ihmc.footstepPlanning;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
-import us.ihmc.footstepPlanning.messager.FootstepPlannerAStarDataSetTest;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
@@ -18,6 +16,8 @@ import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +33,15 @@ public class AStarFootstepPlannerHeightMapTest
    private final FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule");
    private final FootstepPlannerLogger logger = new FootstepPlannerLogger(planningModule);
 
+   private static final List<DataSetName> dataSetsToIgnore = new ArrayList<>();
+   {
+      dataSetsToIgnore.add(DataSetName._20190219_182005_Random);
+      dataSetsToIgnore.add(DataSetName._20190219_182005_OverCinderBlockField);
+      dataSetsToIgnore.add(DataSetName._20171215_214730_CinderBlockField);
+      dataSetsToIgnore.add(DataSetName._20171215_201810_RampSteppingStones_Sim);
+      dataSetsToIgnore.add(DataSetName._20171026_131304_PlanarRegion_Ramp_2Story_UnitTest);
+   }
+
    private String getTestNamePrefix()
    {
       return "a_star";
@@ -41,6 +50,11 @@ public class AStarFootstepPlannerHeightMapTest
    private Predicate<PlannerInput> getTestableFilter()
    {
       return plannerInput -> plannerInput.getStepPlannerIsTestable() && plannerInput.containsIterationLimitFlag(getTestNamePrefix().toLowerCase());
+   }
+
+   private static boolean isIncluded(DataSet input)
+   {
+      return dataSetsToIgnore.stream().noneMatch(dataSet -> dataSet.name().substring(1).equals(input.getName()));
    }
 
    @BeforeEach
@@ -58,7 +72,7 @@ public class AStarFootstepPlannerHeightMapTest
 
    static Predicate<DataSet> buildFilter(Predicate<PlannerInput> testSpecificFilter)
    {
-      return dataSet -> dataSet.hasPlannerInput() && testSpecificFilter.test(dataSet.getPlannerInput());
+      return dataSet -> dataSet.hasPlannerInput() && testSpecificFilter.test(dataSet.getPlannerInput()) && isIncluded(dataSet);
    }
 
    private void testDataSets(List<DataSet> allDatasets)
@@ -149,13 +163,14 @@ public class AStarFootstepPlannerHeightMapTest
 
       double heightMapResolution = 0.03;
       HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(dataset.getPlanarRegionsList(), heightMapResolution);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
 
       request.setStartFootPoses(startSteps.get(RobotSide.LEFT), startSteps.get(RobotSide.RIGHT));
       request.setGoalFootPoses(goalSteps.get(RobotSide.LEFT), goalSteps.get(RobotSide.RIGHT));
       request.setPlanBodyPath(false);
       request.setPerformAStarSearch(true);
-      request.setHeightMapMessage(heightMapMessage);
-      request.setMaximumIterations(300);
+      request.setHeightMapData(heightMapData);
+      request.setMaximumIterations(1000);
       request.setTimeout(Double.MAX_VALUE);
       request.setHorizonLength(Double.MAX_VALUE);
       return request;

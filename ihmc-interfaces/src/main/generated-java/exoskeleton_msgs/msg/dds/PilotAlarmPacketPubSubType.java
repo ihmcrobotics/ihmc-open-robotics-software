@@ -11,6 +11,18 @@ package exoskeleton_msgs.msg.dds;
 public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<exoskeleton_msgs.msg.dds.PilotAlarmPacket>
 {
    public static final java.lang.String name = "exoskeleton_msgs::msg::dds_::PilotAlarmPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "23b435888f94e54f7ebaca4bcf7938725797b9a2a007e149cd3e79ba01784863";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

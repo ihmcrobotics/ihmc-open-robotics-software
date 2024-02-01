@@ -14,6 +14,8 @@ import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 
 import java.util.List;
 import java.util.TreeSet;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class RDXRigidBody implements RigidBodyBasics
@@ -22,6 +24,17 @@ public class RDXRigidBody implements RigidBodyBasics
    private RDXFrameGraphicsNode visualGraphicsNode;
    private RDXFrameGraphicsNode collisionGraphicsNode;
    private TreeSet<String> rigidBodiesToHide = new TreeSet<>();
+
+   // Store method references to avoid allocation in performance critical code
+   // This is done to avoid large duplicated chunks and error-prone sections of code
+   private final Function<RDXRigidBody, RDXFrameGraphicsNode> visualGraphicsNodeSelector = RDXRigidBody::getVisualGraphicsNode;
+   private final Function<RDXRigidBody, RDXFrameGraphicsNode> collisionGraphicsNodeSelector = RDXRigidBody::getCollisionGraphicsNode;
+   private final Consumer<RDXRigidBody> rigidBodyRenderableProvider = this::getRigidBodyRenderables;
+   private final Consumer<RDXRigidBody> referenceFrameRenderableProvider = this::getReferenceFrameRenderables;
+   // Temporary variables for the above
+   private Function<RDXRigidBody, RDXFrameGraphicsNode> nodeSelector;
+   private Array<Renderable> renderables;
+   private Pool<Renderable> pool;
 
    public RDXRigidBody(RigidBodyBasics rigidBody)
    {
@@ -39,9 +52,9 @@ public class RDXRigidBody implements RigidBodyBasics
    public void updateGraphics()
    {
       if (visualGraphicsNode != null)
-         visualGraphicsNode.updatePose();
+         visualGraphicsNode.update();
       if (collisionGraphicsNode != null)
-         collisionGraphicsNode.updatePose();
+         collisionGraphicsNode.update();
 
       for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
       {
@@ -79,75 +92,57 @@ public class RDXRigidBody implements RigidBodyBasics
 
    public void getVisualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RDXRigidBody rigidBody : subtreeIterable())
-      {
-         if (rigidBodiesToHide != null  && (rigidBodiesToHide.isEmpty() || !rigidBodiesToHide.contains(rigidBody.getName())))
-         {
-            if (rigidBody.getVisualGraphicsNode() != null)
-            {
-               rigidBody.getVisualGraphicsNode().getRenderables(renderables, pool);
-            }
-            for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
-            {
-               if (childrenJoint instanceof CrossFourBarJointReadOnly)
-               {
-                  CrossFourBarJoint fourBarJoint = (CrossFourBarJoint) childrenJoint;
-                  RDXRigidBody bodyDA = (RDXRigidBody) fourBarJoint.getJointA().getSuccessor();
-                  if (bodyDA.getVisualGraphicsNode() != null)
-                  {
-                     bodyDA.getVisualGraphicsNode().getRenderables(renderables, pool);
-                  }
-                  RDXRigidBody bodyBC = (RDXRigidBody) fourBarJoint.getJointB().getSuccessor();
-                  if (bodyBC.getVisualGraphicsNode() != null)
-                  {
-                     bodyBC.getVisualGraphicsNode().getRenderables(renderables, pool);
-                  }
-               }
-            }
-         }
-      }
+      getRenderables(visualGraphicsNodeSelector, renderables, pool, rigidBodyRenderableProvider);
+   }
+
+   public void getVisualReferenceFrameRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      getRenderables(visualGraphicsNodeSelector, renderables, pool, referenceFrameRenderableProvider);
    }
 
    public void getCollisionMeshRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      getRenderables(collisionGraphicsNodeSelector, renderables, pool, rigidBodyRenderableProvider);
+   }
+
+   public void getCollisionMeshReferenceFrameRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      getRenderables(collisionGraphicsNodeSelector, renderables, pool, referenceFrameRenderableProvider);
+   }
+
+   private void getRenderables(Function<RDXRigidBody, RDXFrameGraphicsNode> nodeSelector,
+                               Array<Renderable> renderables,
+                               Pool<Renderable> pool,
+                               Consumer<RDXRigidBody> renderableProvider)
+   {
+      this.nodeSelector = nodeSelector;
+      this.renderables = renderables;
+      this.pool = pool;
+
       for (RDXRigidBody rigidBody : subtreeIterable())
       {
-         if (rigidBody.getCollisionGraphicsNode() != null)
+         if (rigidBodiesToHide != null  && (rigidBodiesToHide.isEmpty() || !rigidBodiesToHide.contains(rigidBody.getName())))
          {
-            rigidBody.getCollisionGraphicsNode().getRenderables(renderables, pool);
-         }
-         for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
-         {
-            if (childrenJoint instanceof CrossFourBarJointReadOnly)
-            {
-               CrossFourBarJoint fourBarJoint = (CrossFourBarJoint) childrenJoint;
-               RDXRigidBody bodyDA = (RDXRigidBody) fourBarJoint.getJointA().getSuccessor();
-               if (bodyDA.getCollisionGraphicsNode() != null)
-               {
-                  bodyDA.getCollisionGraphicsNode().getRenderables(renderables, pool);
-               }
-               RDXRigidBody bodyBC = (RDXRigidBody) fourBarJoint.getJointB().getSuccessor();
-               if (bodyBC.getCollisionGraphicsNode() != null)
-               {
-                  bodyBC.getCollisionGraphicsNode().getRenderables(renderables, pool);
-               }
-            }
+            RDXVisualTools.collectRDXRigidBodiesIncludingPossibleFourBars(rigidBody, renderableProvider);
          }
       }
    }
 
-   public void destroy()
+   private void getRigidBodyRenderables(RDXRigidBody rigidBody)
    {
-      for (RDXRigidBody rigidBody : subtreeIterable())
+      RDXFrameGraphicsNode frameGraphicsNode = nodeSelector.apply(rigidBody);
+      if (frameGraphicsNode != null)
       {
-         if (rigidBody.getVisualGraphicsNode() != null)
-         {
-            rigidBody.getVisualGraphicsNode().dispose();
-         }
-         if (rigidBody.getCollisionGraphicsNode() != null)
-         {
-            rigidBody.getCollisionGraphicsNode().dispose();
-         }
+         frameGraphicsNode.getRenderables(renderables, pool);
+      }
+   }
+
+   private void getReferenceFrameRenderables(RDXRigidBody rigidBody)
+   {
+      RDXFrameGraphicsNode frameGraphicsNode = nodeSelector.apply(rigidBody);
+      if (frameGraphicsNode != null)
+      {
+         frameGraphicsNode.getReferenceFrameRenderables(renderables, pool);
       }
    }
 
@@ -207,21 +202,13 @@ public class RDXRigidBody implements RigidBodyBasics
    @Override
    public Iterable<? extends RDXRigidBody> subtreeIterable()
    {
-      return new RigidBodyIterable<>(RDXRigidBody.class, null, this);
+      return new RigidBodyIterable<>(RDXRigidBody.class, null, null, this);
    }
 
    @Override
    public Stream<? extends RDXRigidBody> subtreeStream()
    {
       return SubtreeStreams.from(RDXRigidBody.class, this);
-   }
-
-   public void scale(float x, float y, float z)
-   {
-      if (visualGraphicsNode != null)
-         visualGraphicsNode.scale(x, y, z);
-      if (collisionGraphicsNode != null)
-         collisionGraphicsNode.scale(x, y, z);
    }
 
    public TreeSet<String> getRigidBodiesToHide()

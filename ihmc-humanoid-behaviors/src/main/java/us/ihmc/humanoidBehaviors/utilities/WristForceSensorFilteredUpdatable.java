@@ -5,7 +5,6 @@ import java.util.List;
 import controller_msgs.msg.dds.HandCollisionDetectedPacket;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -14,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.filters.FirstOrderBandPassFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable;
@@ -42,7 +41,6 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    private final double forceSensorMaxPassThroughFreq_Hz = 50.0;
 
    private final ForceSensorData forceSensorData;
-   private final Wrench wristSensorWrench;
 
    private final YoDouble yoWristSensorForceMagnitude;
    private final FirstOrderFilteredYoVariable yoWristSensorForceMagnitudeBias;
@@ -65,8 +63,14 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    private final IHMCROS2Publisher<HandCollisionDetectedPacket> publisher;
 
-   public WristForceSensorFilteredUpdatable(String robotName, RobotSide robotSide, FullRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInfo,
-                                            ForceSensorDataHolder forceSensorDataHolder, double DT, ROS2Node ros2Node, YoRegistry registry)
+   public WristForceSensorFilteredUpdatable(String robotName,
+                                            RobotSide robotSide,
+                                            FullRobotModel fullRobotModel,
+                                            HumanoidRobotSensorInformation sensorInfo,
+                                            ForceSensorDataHolder forceSensorDataHolder,
+                                            double DT,
+                                            ROS2Node ros2Node,
+                                            YoRegistry registry)
    {
       this.DT = DT;
       this.robotSide = robotSide;
@@ -87,19 +91,23 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       {
          throw new RuntimeException("No Wrist Sensor Definition Found!  Make sure that forceSensorName is properly set.");
       }
-      this.forceSensorData = forceSensorDataHolder.getByName(forceSensorName);
-
-      wristSensorWrench = new Wrench();
-      forceSensorData.getWrench(wristSensorWrench);
+      this.forceSensorData = forceSensorDataHolder.getData(forceSensorName);
 
       this.sensorMassCompensator = new ForceSensorDistalMassCompensator(wristSensorDefinition, DT, registry);
 
       yoWristSensorForceMagnitude = new YoDouble(forceSensorName + "ForceMag", registry);
-      yoWristSensorForceMagnitudeBias = new FirstOrderFilteredYoVariable(forceSensorName + "ForceBias", "", 0.0001, DT, FirstOrderFilterType.LOW_PASS,
+      yoWristSensorForceMagnitudeBias = new FirstOrderFilteredYoVariable(forceSensorName + "ForceBias",
+                                                                         "",
+                                                                         0.0001,
+                                                                         DT,
+                                                                         FirstOrderFilterType.LOW_PASS,
                                                                          registry);
-      yoWristSensorForceMagnitudeBandPassFiltered = new FirstOrderBandPassFilteredYoVariable(forceSensorName + "ForceMagFiltered", "",
-                                                                                             forceSensorMinPassThroughFreq_Hz, forceSensorMaxPassThroughFreq_Hz,
-                                                                                             DT, registry);
+      yoWristSensorForceMagnitudeBandPassFiltered = new FirstOrderBandPassFilteredYoVariable(forceSensorName + "ForceMagFiltered",
+                                                                                             "",
+                                                                                             forceSensorMinPassThroughFreq_Hz,
+                                                                                             forceSensorMaxPassThroughFreq_Hz,
+                                                                                             DT,
+                                                                                             registry);
 
       taskspaceStiffnessCalc = new TaskSpaceStiffnessCalculator(sidePrefix, DT, registry);
 
@@ -203,10 +211,9 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    private void updateSensorValuesFromRobot()
    {
-      forceSensorData.getWrench(wristSensorWrench);
-      sensorMassCompensator.update(forceSensorData);
+      sensorMassCompensator.update(forceSensorData.getWrench());
 
-      yoWristSensorForceMagnitude.set(sensorMassCompensator.getSensorForceRaw().length());
+      yoWristSensorForceMagnitude.set(sensorMassCompensator.getSensorForceRaw().norm());
    }
 
    private double maxFilteredForce;
@@ -235,7 +242,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
             publisher.publish(HumanoidMessageTools.createHandCollisionDetectedPacket(robotSide, yoCollisionSeverityLevelOneToThree.getIntegerValue()));
             if (DEBUG)
-               PrintTools.debug(this, "Sending Collision Detected Packet.  FilteredForce = " + yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue());
+               LogTools.debug("Sending Collision Detected Packet.  FilteredForce = " + yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue());
 
          }
       }
@@ -244,7 +251,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       {
          maxFilteredForce = Math.abs(yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue());
          if (DEBUG)
-            PrintTools.debug(this, "maxFilteredForce = " + maxFilteredForce);
+            LogTools.debug("maxFilteredForce = " + maxFilteredForce);
       }
    }
 

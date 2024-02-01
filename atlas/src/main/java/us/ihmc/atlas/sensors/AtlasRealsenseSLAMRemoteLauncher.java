@@ -8,6 +8,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.log.LogTools;
@@ -47,7 +48,7 @@ public class AtlasRealsenseSLAMRemoteLauncher
    {
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT, false);
 
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, PerceptionAPI.REA_NODE_NAME);
 
 //      slamMessager = KryoMessager.createServer(SLAMModuleAPI.API, NetworkPorts.SLAM_MODULE_UI_PORT.getPort(), "SLAMModule", 5);
 //      ThreadTools.startAThread(() -> ExceptionTools.handle(slamMessager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION), "KryoStarter");

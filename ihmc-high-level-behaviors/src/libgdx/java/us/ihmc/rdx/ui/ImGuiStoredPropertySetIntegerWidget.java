@@ -21,7 +21,6 @@ public class ImGuiStoredPropertySetIntegerWidget implements ImGuiStoredPropertyS
    private final int max;
    private final Runnable onParametersUpdatedCallback;
    private final ImIntegerWrapper imIntegerWrapper;
-   private final Consumer<ImInt> accessImInt;
    private int step;
    private String fancyPrefixLabel;
    private float fancyPrefixWidth;
@@ -36,9 +35,8 @@ public class ImGuiStoredPropertySetIntegerWidget implements ImGuiStoredPropertyS
       this.min = min;
       this.max = max;
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
-      imIntegerWrapper = new ImIntegerWrapper(storedPropertySet, key);
+      imIntegerWrapper = new ImIntegerWrapper(storedPropertySet, key, this::renderSliderWithMinMax);
       label = labels.get(key.getTitleCasedName());
-      accessImInt = this::renderSliderWithMinMax;
    }
 
    public ImGuiStoredPropertySetIntegerWidget(StoredPropertySetBasics storedPropertySet,
@@ -47,29 +45,31 @@ public class ImGuiStoredPropertySetIntegerWidget implements ImGuiStoredPropertyS
                                               Runnable onParametersUpdatedCallback)
    {
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
-      imIntegerWrapper = new ImIntegerWrapper(storedPropertySet, key);
       label = labels.getHidden(key.getTitleCasedName());
       fancyPrefixLabel = key.getTitleCasedName() + ":";
 
+      Consumer<ImInt> widgetRenderer;
       if (key.hasLowerBound() && key.hasUpperBound())
       {
          this.min = key.getLowerBound();
          this.max = key.getUpperBound();
-         accessImInt = this::renderSliderWithMinMax;
+         widgetRenderer = this::renderSliderWithMinMax;
       }
       else
       {
          this.step = step;
          min = Integer.MIN_VALUE;
          max = Integer.MAX_VALUE;
-         accessImInt = this::renderInputWithStep;
+         widgetRenderer = this::renderInputWithStep;
       }
+
+      imIntegerWrapper = new ImIntegerWrapper(storedPropertySet, key, widgetRenderer);
    }
 
    @Override
-   public void render()
+   public void renderImGuiWidget()
    {
-      imIntegerWrapper.accessImInt(accessImInt);
+      imIntegerWrapper.renderImGuiWidget();
    }
 
    @Override

@@ -1,8 +1,8 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.spatial.Twist;
@@ -46,14 +46,14 @@ public class ConstantPelvisRotationalStateUpdater implements PelvisRotationalSta
    }
 
    @Override
-   public void getEstimatedOrientation(FrameQuaternion estimatedOrientation)
+   public FrameOrientation3DReadOnly getEstimatedOrientation()
    {
-      estimatedOrientation.setIncludingFrame(yoRootJointFrameOrientation);
+      return yoRootJointFrameOrientation;
    }
 
    @Override
-   public void getEstimatedAngularVelocity(FrameVector3D estimatedAngularVelocityToPack)
+   public FrameVector3DReadOnly getEstimatedAngularVelocity()
    {
-      estimatedAngularVelocityToPack.setToZero();
+      return twistRootBodyRelativeToWorld.getAngularPart();
    }
 }

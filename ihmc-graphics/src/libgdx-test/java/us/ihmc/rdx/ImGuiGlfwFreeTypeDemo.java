@@ -30,7 +30,7 @@ public class ImGuiGlfwFreeTypeDemo
 
    public ImGuiGlfwFreeTypeDemo()
    {
-      imGuiGlfwWindow = new ImGuiGlfwWindow(getClass(), "ihmc-open-robotics-software", "ihmc-graphics/src/libgdx-test/resources");
+      imGuiGlfwWindow = new ImGuiGlfwWindow(getClass());
       imGuiGlfwWindow.getPanelManager().addSelfManagedPanel("Window");
       imGuiGlfwWindow.run(null, this::configure, this::render, this::dispose);
 

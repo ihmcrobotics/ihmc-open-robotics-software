@@ -1,7 +1,7 @@
 {
   "title" : "Rapid region extractor parameters",
   "Normal pack range" : {
-    "value" : 1,
+    "value" : 10,
     "lowerBound" : 1,
     "upperBound" : 10
   },
@@ -16,7 +16,7 @@
     "upperBound" : 10
   },
   "Merge orthogonal threshold" : {
-    "value" : 0.015464,
+    "value" : 0.201031,
     "lowerBound" : 0.0,
     "upperBound" : 1.5
   },
@@ -26,12 +26,12 @@
     "upperBound" : 1.0
   },
   "Merge angular threshold" : {
-    "value" : 0.935275,
+    "value" : 0.970874,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Connection threshold" : {
-    "value" : 4,
+    "value" : 6,
     "lowerBound" : 0,
     "upperBound" : 8
   },
@@ -46,17 +46,17 @@
     "upperBound" : 20
   },
   "Focal length X pixels" : {
-    "value" : 736.4765625,
+    "value" : 654.29,
     "lowerBound" : -1000.0,
     "upperBound" : 1000.0
   },
   "Focal length Y pixels" : {
-    "value" : 737.09375,
+    "value" : 654.29,
     "lowerBound" : -1000.0,
     "upperBound" : 1000.0
   },
-  "Principal offset X pixels" : 538.984375,
-  "Principal offset Y pixels" : 391.03125,
+  "Principal offset X pixels" : 651.14,
+  "Principal offset Y pixels" : 361.89,
   "Use filtered image" : true,
   "Use SVD normals" : true,
   "SVD reduction factor" : {

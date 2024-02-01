@@ -96,7 +96,7 @@ public class BodyPathMeshViewer extends AnimationTimer
 
       resetRequested = messager.createInput(UIVisibilityGraphsTopics.GlobalReset, false);
       show = messager.createInput(UIVisibilityGraphsTopics.ShowBodyPath, true);
-      messager.registerTopicListener(UIVisibilityGraphsTopics.BodyPathData, this::processBodyPathOnThread);
+      messager.addTopicListener(UIVisibilityGraphsTopics.BodyPathData, this::processBodyPathOnThread);
 
       walkerPosition = messager.createInput(UIVisibilityGraphsTopics.WalkerPosition, null);
       walkerOrientation = messager.createInput(UIVisibilityGraphsTopics.WalkerOrientation, null);

@@ -1,11 +1,5 @@
 package us.ihmc.sensorProcessing.frames;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,8 +12,14 @@ import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.euclid.referenceFrame.interfaces.FrameIndexMap;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
- * This class represents a map to retrieve reference frame from their hash-code.
+ * This class represents a map to retrieve reference frame from their frame name hash.
  * <p>
  * Utilities are provided to extract reference frames from {@code FullRobotModel} and
  * {@code ReferenceFrames}.
@@ -87,16 +87,15 @@ public class ReferenceFrameHashCodeResolver implements FrameIndexMap
     * </p>
     * 
     * @param referenceFrame the reference frame to register.
-    * @throws IllegalArgumentException if a distinct reference frame was already registered under the
-    *            same hash-code as {@code referenceFrame.hashCode()}. This usually occurs if: 1- the
-    *            two reference frames are two distinct instances with the same name, 2- (very unlikely)
-    *            bad luck and the hash-code algorithm generated the same hash-code for the two
-    *            reference frames.
+    * @throws IllegalArgumentException if a frame was already registered under the
+    *            same hash-code as {@code referenceFrame.getFrameNameHashCode()}. This occurs if:
+    *            1- The two reference frames have the same {@link ReferenceFrame#getName()}}
+    *            2- (very unlikely) bad luck and the hash-code algorithm generated the same hash-code for the two reference frames.
     */
    @Override
    public void put(ReferenceFrame referenceFrame)
    {
-      put(referenceFrame, referenceFrame.hashCode());
+      put(referenceFrame, referenceFrame.getFrameNameHashCode());
    }
 
    /**
@@ -109,7 +108,7 @@ public class ReferenceFrameHashCodeResolver implements FrameIndexMap
     * @param referenceFrame the reference frame to register.
     * @param frameHashCode the custom hash-code to associate with the given frame.
     * @throws IllegalArgumentException if a distinct reference frame was already registered under the
-    *            same hash-code as {@code referenceFrame.hashCode()}.
+    *            same hash-code as {@code referenceFrame.getFrameNameHashCode()}.
     */
    public void put(ReferenceFrame referenceFrame, long frameHashCode)
    {
@@ -275,7 +274,7 @@ public class ReferenceFrameHashCodeResolver implements FrameIndexMap
     * Gets the reference frame associated to the given {@code frameHashCode}.
     * 
     * @param frameHashCode the hash-code used to retrieve the reference frame, it is usually generated
-    *           from {@code referenceFrame.hashCode()}.
+    *           from {@code referenceFrame.getFrameNameHashCode()}.
     * @return the corresponding reference frame.
     * @throws RuntimeException if no reference frame is associated to the given hash-code.
     */
@@ -301,7 +300,7 @@ public class ReferenceFrameHashCodeResolver implements FrameIndexMap
    @Override
    public long getFrameIndex(ReferenceFrame referenceFrame)
    {
-      long hashCode = referenceFrame.hashCode();
+      long hashCode = referenceFrame.getFrameNameHashCode();
 
       if (!hashCodeToReferenceFrameMap.contains(hashCode))
          throw new RuntimeException("Unknown reference frame.");

@@ -4,6 +4,9 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.simulationConstructionSetTools.tools.TerrainObjectDefinitionTools;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationConstructionSetTools.util.ground.PlanarRegionTerrainObject;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -17,6 +20,7 @@ import java.util.List;
  */
 public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironmentInterface
 {
+   private final TerrainObjectDefinition terrainObjectDefinition ;
    private final CombinedTerrainObject3D combinedTerrainObject;
    private final String environmentName;
    private final PlanarRegionsList[] planarRegionsLists;
@@ -69,11 +73,18 @@ public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironm
       {
          combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
       }
+
+      terrainObjectDefinition = TerrainObjectDefinitionTools.toTerrainObjectDefinition(this);
    }
 
    public CombinedTerrainObject3D getCombinedTerrainObject3D()
    {
       return combinedTerrainObject;
+   }
+
+   public TerrainObjectDefinition getTerrainObjectDefinition()
+   {
+      return terrainObjectDefinition;
    }
    
    @Override

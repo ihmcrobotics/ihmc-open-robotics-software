@@ -1,6 +1,5 @@
 package us.ihmc.rdx.simulation.environment;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -13,7 +12,6 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor;
-import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -21,7 +19,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -33,54 +31,57 @@ import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectLibrary;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXDirectionalLightObject;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXPointLightObject;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.io.WorkspacePathTools;
+import us.ihmc.tools.io.JSONTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 
-import java.nio.file.FileVisitResult;
-import java.nio.file.Path;
 import java.util.*;
 
-public class RDXEnvironmentBuilder extends ImGuiPanel
+public class RDXEnvironmentBuilder extends RDXPanel
 {
-   private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(RDXEnvironmentBuilder.class, "Environment");
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final WorkspaceResourceDirectory environmentFilesDirectory = new WorkspaceResourceDirectory(getClass(), "/environments");
    private final ArrayList<RDXEnvironmentObject> allObjects = new ArrayList<>();
    private final ArrayList<RDXEnvironmentObject> lightObjects = new ArrayList<>();
-   private boolean loadedFilesOnce = false;
-   private Path selectedEnvironmentFile = null;
-   private final TreeSet<Path> environmentFiles = new TreeSet<>(Comparator.comparing(path -> path.getFileName().toString()));
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImString saveString = new ImString(256);
+   private final RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo();
+   private final RDX3DPanel panel3D;
+   private final RDXPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
+   private final RDXBulletPhysicsManager bulletPhysicsManager = new RDXBulletPhysicsManager();
+
+   private final TreeSet<String> environmentFileNames = new TreeSet<>();
+   private final Point3D tempIntersection = new Point3D();
    private final Point3D tempTranslation = new Point3D();
    private final Quaternion tempOrientation = new Quaternion();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ImFloat ambientLightAmount = new ImFloat(0.4f);
-   private final RDX3DPanel panel3D;
+   private final ImBoolean inputsEnabled = new ImBoolean(false);
+   private final ImString saveString = new ImString(256);
+
+   private boolean loadedFilesOnce = false;
    private boolean isPlacing = false;
+   private String selectedEnvironmentFile = null;
    private RDXEnvironmentObject selectedObject;
    private RDXEnvironmentObject intersectedObject;
-   private final RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo();
-   private final ImGuiPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
-   private final Point3D tempIntersection = new Point3D();
-   private final RDXBulletPhysicsManager bulletPhysicsManager = new RDXBulletPhysicsManager();
-   private final ImBoolean inputsEnabled = new ImBoolean(true);
 
    public RDXEnvironmentBuilder(RDX3DPanel panel3D)
    {
-      super(WINDOW_NAME);
+      super("Environment");
       this.panel3D = panel3D;
       setRenderMethod(this::renderImGuiWidgets);
       addChild(poseGizmoTunerPanel);
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete selected object", "Delete");
    }
 
    public void create()
    {
       bulletPhysicsManager.create();
 
-      panel3D.getScene().addRenderableProvider(this::getRenderables);
-
       pose3DGizmo.create(panel3D);
+      panel3D.getScene().addRenderableProvider(this::getRenderables);
       panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
       panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
@@ -183,25 +184,17 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
 
    public void update()
    {
-      bulletPhysicsManager.simulate(Gdx.graphics.getDeltaTime());
       for (RDXEnvironmentObject allObject : allObjects)
       {
-         if (bulletPhysicsManager.getSimulate().get())
-         {
-            allObject.copyBulletTransformToThisMultiBody();
-            allObject.afterSimulate(bulletPhysicsManager);
-         }
          allObject.update(bulletPhysicsManager);
       }
    }
 
    public void renderImGuiWidgets()
    {
-      bulletPhysicsManager.renderImGuiWidgets();
-
       ImGui.separator();
 
-      ImGui.checkbox(labels.get("Inputs enabled"), inputsEnabled);
+      ImGui.checkbox(labels.get("Enable Environment Building"), inputsEnabled);
 
       if (ImGui.sliderFloat("Ambient light", ambientLightAmount.getData(), 0.0f, 1.0f))
       {
@@ -209,16 +202,28 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
       }
 
       ImGui.separator();
-      ImGui.text("Selected: " + (selectedObject == null ? "" : (selectedObject.getTitleCasedName() + " " + selectedObject.getObjectIndex())));
-      ImGui.text("Intersected: " + (intersectedObject == null ? "" : (intersectedObject.getTitleCasedName() + " " + intersectedObject.getObjectIndex())));
+      ImGui.text("Selected Object: " + (selectedObject == null ? "" : (selectedObject.getTitleCasedName() + " " + selectedObject.getObjectIndex())));
+      ImGui.text("Highlighted Object: " + (intersectedObject == null ? "" : (intersectedObject.getTitleCasedName() + " " + intersectedObject.getObjectIndex())));
 
-      // TODO: Place robots
-      if (!isPlacing)
+      if (ImGui.button("Delete selected object") && selectedObject != null || ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
+      {
+         removeObject(selectedObject);
+         resetSelection();
+      }
+
+      ImGui.separator();
+
+      if (inputsEnabled.get())
       {
          for (RDXEnvironmentObjectFactory objectFactory : RDXEnvironmentObjectLibrary.getObjectFactories())
          {
             if (ImGui.button(labels.get("Place " + objectFactory.getName())))
             {
+               if (isPlacing)
+               {
+                  removeObject(selectedObject);
+               }
+
                RDXEnvironmentObject objectToPlace = objectFactory.getSupplier().get();
                addObject(objectToPlace);
                updateObjectSelected(selectedObject, objectToPlace);
@@ -228,39 +233,36 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
 
          ImGui.separator();
       }
-      if (selectedObject != null && (ImGui.button("Delete selected") || ImGui.isKeyReleased(ImGuiTools.getDeleteKey())))
-      {
-         removeObject(selectedObject);
-         resetSelection();
-      }
 
       ImGui.text("Environments:");
       if (!loadedFilesOnce && selectedEnvironmentFile != null)
       {
-         loadEnvironment(selectedEnvironmentFile);
+         loadEnvironmentInternal(selectedEnvironmentFile);
       }
-      boolean reindexClicked = ImGui.button(ImGuiTools.uniqueLabel(this, "Reindex scripts"));
+      boolean reindexClicked = ImGui.button(labels.get("Reindex scripts"));
       if (!loadedFilesOnce || reindexClicked)
       {
          loadedFilesOnce = true;
          reindexScripts();
       }
       String fileNameToSave = null;
-      for (Path environmentFile : environmentFiles)
+      for (String environmentFileName : environmentFileNames)
       {
-         if (ImGui.radioButton(environmentFile.getFileName().toString(), selectedEnvironmentFile != null && selectedEnvironmentFile.equals(environmentFile)))
+         if (ImGui.radioButton(environmentFileName, selectedEnvironmentFile != null && selectedEnvironmentFile.equals(environmentFileName)))
          {
-            loadEnvironment(environmentFile);
+            loadEnvironmentInternal(environmentFileName);
          }
-         if (selectedEnvironmentFile != null && selectedEnvironmentFile.equals(environmentFile))
+         if (selectedEnvironmentFile != null && selectedEnvironmentFile.equals(environmentFileName))
          {
             ImGui.sameLine();
             if (ImGui.button("Save"))
             {
-               fileNameToSave = environmentFile.getFileName().toString();
+               fileNameToSave = environmentFileName;
             }
          }
       }
+
+      ImGui.separator();
       ImGuiTools.inputText("###saveText", saveString);
       ImGui.sameLine();
       if (ImGui.button("Save as"))
@@ -298,11 +300,10 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
       ImGui.checkbox("Show 3D Widget Tuner", poseGizmoTunerPanel.getIsShowing());
    }
 
-   private void loadEnvironment(Path environmentFile)
+   private void loadEnvironmentInternal(String environmentFileName)
    {
       loadedFilesOnce = true;
-      selectedEnvironmentFile = environmentFile;
-      bulletPhysicsManager.getSimulate().set(false);
+      selectedEnvironmentFile = environmentFileName;
       for (RDXEnvironmentObject object : allObjects.toArray(new RDXEnvironmentObject[0]))
       {
          removeObject(object);
@@ -310,9 +311,7 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
 
       resetSelection();
 
-      JSONFileTools.loadFromWorkspace("ihmc-open-robotics-software",
-                                      "ihmc-high-level-behaviors/src/libgdx/resources",
-                                      "environments/" + environmentFile.getFileName().toString(),
+      JSONFileTools.load(new WorkspaceResourceFile(environmentFilesDirectory, selectedEnvironmentFile),
       node ->
       {
          JsonNode ambientLightNode = node.get("ambientLight");
@@ -322,9 +321,8 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
             ambientLightAmount.set(ambientValue);
             panel3D.getScene().setAmbientLight(ambientLightAmount.get());
          }
-         for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
+         JSONTools.forEachArrayElement(node, "objects", objectNode ->
          {
-            JsonNode objectNode = it.next();
             String objectTypeName = objectNode.get("type").asText();
             RDXEnvironmentObject object = RDXEnvironmentObjectLibrary.loadBySimpleClassName(objectTypeName);
 
@@ -346,17 +344,18 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
             {
                LogTools.warn("Skipping loading object: {}", objectTypeName);
             }
-         }
+         });
       });
    }
 
    public void loadEnvironment(String environmentFileName)
    {
+      LogTools.info("Loading environment: {}", environmentFileName);
       reindexScripts();
-      Optional<Path> match = environmentFiles.stream().filter(path -> path.getFileName().toString().equals(environmentFileName)).findFirst();
+      Optional<String> match = environmentFileNames.stream().filter(fileName -> fileName.equals(environmentFileName)).findFirst();
       if (match.isPresent())
       {
-         loadEnvironment(match.get());
+         loadEnvironmentInternal(match.get());
       }
       else
       {
@@ -383,15 +382,13 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
       allObjects.add(environmentObject);
       environmentObject.addToBullet(bulletPhysicsManager);
 
-      if (environmentObject instanceof RDXPointLightObject)
+      if (environmentObject instanceof RDXPointLightObject pointLightObject)
       {
-         RDXPointLightObject pointLightObject = (RDXPointLightObject) environmentObject;
          panel3D.getScene().addPointLight(pointLightObject.getLight());
          lightObjects.add(pointLightObject);
       }
-      else if (environmentObject instanceof RDXDirectionalLightObject)
+      else if (environmentObject instanceof RDXDirectionalLightObject directionalLightObject)
       {
-         RDXDirectionalLightObject directionalLightObject = (RDXDirectionalLightObject) environmentObject;
          panel3D.getScene().addDirectionalLight(directionalLightObject.getLight());
          lightObjects.add(directionalLightObject);
       }
@@ -400,17 +397,14 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
    public void removeObject(RDXEnvironmentObject environmentObject)
    {
       allObjects.remove(environmentObject);
-      environmentObject.removeFromBullet();
 
-      if (environmentObject instanceof RDXPointLightObject)
+      if (environmentObject instanceof RDXPointLightObject lightObject)
       {
-         RDXPointLightObject lightObject = (RDXPointLightObject) environmentObject;
          panel3D.getScene().removePointLight(lightObject.getLight());
          lightObjects.remove(environmentObject);
       }
-      else if (environmentObject instanceof RDXDirectionalLightObject)
+      else if (environmentObject instanceof RDXDirectionalLightObject lightObject)
       {
-         RDXDirectionalLightObject lightObject = (RDXDirectionalLightObject) environmentObject;
          panel3D.getScene().removeDirectionalLight(lightObject.getLight());
          lightObjects.remove(environmentObject);
       }
@@ -418,17 +412,13 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
 
    private void reindexScripts()
    {
-      Path scriptsPath = WorkspacePathTools.findPathToResource("ihmc-open-robotics-software",
-                                                               "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                               "environments");
-      environmentFiles.clear();
-      PathTools.walkFlat(scriptsPath, (path, pathType) ->
+      environmentFileNames.clear();
+      environmentFilesDirectory.walkResourcesFlat((path, pathType) ->
       {
          if (pathType == BasicPathVisitor.PathType.FILE)
          {
-            environmentFiles.add(path);
+            environmentFileNames.add(path);
          }
-         return FileVisitResult.CONTINUE;
       });
    }
 
@@ -466,11 +456,6 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
       bulletPhysicsManager.destroy();
    }
 
-   public String getWindowName()
-   {
-      return WINDOW_NAME;
-   }
-
    public RDXBulletPhysicsManager getBulletPhysicsManager()
    {
       return bulletPhysicsManager;
@@ -479,10 +464,5 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
    public ArrayList<RDXEnvironmentObject> getAllObjects()
    {
       return allObjects;
-   }
-
-   public ImBoolean getInputsEnabled()
-   {
-      return inputsEnabled;
    }
 }

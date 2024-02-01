@@ -1,6 +1,7 @@
 package us.ihmc.avatar.sensors.realsense;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
@@ -27,18 +28,18 @@ public class RealsenseROS1Bridge
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "imagePublisherNode");
 
-      d435VideoBridge = new RealsenseVideoROS1Bridge(ros1Node, ros2Node, RosTools.D435_VIDEO, ROS2Tools.D435_VIDEO, 25.0);
-      l515VideoBridge = new RealsenseVideoROS1Bridge(ros1Node, ros2Node, RosTools.L515_VIDEO, ROS2Tools.L515_VIDEO, 25.0);
+      d435VideoBridge = new RealsenseVideoROS1Bridge(ros1Node, ros2Node, RosTools.D435_VIDEO, PerceptionAPI.D435_VIDEO, 25.0);
+      l515VideoBridge = new RealsenseVideoROS1Bridge(ros1Node, ros2Node, RosTools.L515_VIDEO, PerceptionAPI.L515_VIDEO, 25.0);
       d435PointCloudBridge = new RealsensePointCloudROS1Bridge(robotModel,
                                                                ros1Node,
                                                                ros2Node,
                                                                RosTools.D435_POINT_CLOUD,
-                                                               ROS2Tools.D435_POINT_CLOUD);
+                                                               PerceptionAPI.D435_POINT_CLOUD);
       l515PointCloudBridge = new RealsensePointCloudROS1Bridge(robotModel,
                                                                ros1Node,
                                                                ros2Node,
                                                                RosTools.L515_POINT_CLOUD,
-                                                               ROS2Tools.L515_POINT_CLOUD);
+                                                               PerceptionAPI.L515_POINT_CLOUD);
       l515PlanarRegionBridge = new MapSensePlanarRegionROS1Bridge(robotModel,
                                                                   ros1Node,
                                                                   ros2Node);

@@ -7,6 +7,9 @@ import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 
+/**
+ * Used to compute the value and 1st and 2nd order derivatives of a polynomial.
+ */
 public class Polynomial implements PolynomialBasics
 {
    private final int maximumNumberOfCoefficients;
@@ -91,6 +94,27 @@ public class Polynomial implements PolynomialBasics
          else
             setCoefficient(i, coefficients[coefficients.length - 1 - i]);
       }
+   }
+
+   /** Deep copy constructor */
+   public Polynomial(Polynomial other)
+   {
+      maximumNumberOfCoefficients = other.maximumNumberOfCoefficients;
+      coefficients = other.coefficients.clone();
+      coefficientsCopy = other.coefficientsCopy.clone();
+      constraintMatrix = new DMatrixRMaj(other.constraintMatrix);
+      constraintVector = new DMatrixRMaj(other.constraintVector);
+      coefficientVector = new DMatrixRMaj(other.coefficientVector);
+      solver = LinearSolverFactory_DDRM.general(other.maximumNumberOfCoefficients, other.maximumNumberOfCoefficients);
+      timeInterval.setInterval(other.timeInterval.getStartTime(), other.timeInterval.getEndTime());
+      currentTime = other.currentTime;
+      numberOfCoefficients = other.numberOfCoefficients;
+      f = other.f;
+      df = other.df;
+      ddf = other.ddf;
+      xPowers = other.xPowers.clone();
+      xPowersDerivativeVector = new DMatrixRMaj(other.xPowersDerivativeVector);
+      isConstraintMatrixUpToDate = other.isConstraintMatrixUpToDate;
    }
 
    @Override

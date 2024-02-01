@@ -7,11 +7,16 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationsCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * A rigid body mode that takes a user's {@link DesiredAccelerationsCommand} and directly
+ * feeds that into the whole body controller core as a {@link JointspaceAccelerationCommand}.
+ */
 public class RigidBodyUserControlState extends RigidBodyControlState
 {
    public static final double TIME_WITH_NO_MESSAGE_BEFORE_ABORT = 0.25;
@@ -146,5 +151,11 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    {
       // this control mode does not support command queuing
       return 0.0;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return null;
    }
 }

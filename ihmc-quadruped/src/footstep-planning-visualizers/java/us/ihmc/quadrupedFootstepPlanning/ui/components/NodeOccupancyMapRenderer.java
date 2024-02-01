@@ -54,7 +54,7 @@ public class NodeOccupancyMapRenderer extends AnimationTimer
       else
          this.executorService = executorService;
 
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
+      messager.addTopicListener(PawStepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
       planarRegionsList = messager.createInput(PawStepPlannerMessagerAPI.PlanarRegionDataTopic);
 
       cellPolygon.addVertex(cellWidth, 0.0);

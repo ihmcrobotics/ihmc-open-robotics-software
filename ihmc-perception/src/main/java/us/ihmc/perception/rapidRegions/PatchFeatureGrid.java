@@ -5,7 +5,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLManager;
 
 public class PatchFeatureGrid
 {

@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.teleoperation;
 
 import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -20,7 +21,7 @@ public class RDXRobotLowLevelMessenger
    {
       this.communicationHelper = communicationHelper;
       this.teleoperationParameters = teleoperationParameters;
-      robotLowLevelMessenger = communicationHelper.newRobotLowLevelMessenger();
+      robotLowLevelMessenger = communicationHelper.getOrCreateRobotLowLevelMessenger();
 
       if (robotLowLevelMessenger == null)
       {
@@ -31,9 +32,21 @@ public class RDXRobotLowLevelMessenger
 
    public void renderImGuiWidgets()
    {
+      if (ImGui.button(labels.get("Freeze")))
+      {
+         sendFreezeRequest();
+      }
+
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Stand prep")))
+      {
+         sendStandRequest();
+      }
+
+      ImGui.sameLine();
       if (ImGui.button(labels.get("Home Pose")))
       {
-         double trajectoryTime = 3.5;
+         double trajectoryTime = 3.0;
 
          GoHomeMessage homeLeftArm = new GoHomeMessage();
          homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
@@ -57,34 +70,12 @@ public class RDXRobotLowLevelMessenger
          homeChest.setTrajectoryTime(trajectoryTime);
          communicationHelper.publishToController(homeChest);
       }
+
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Stand prep")))
+      if (ImGui.button(labels.get("Stop All Trajectories")))
       {
-         sendStandRequest();
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Abort")))
-      {
-         robotLowLevelMessenger.sendAbortWalkingRequest();
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Pause")))
-      {
-         robotLowLevelMessenger.sendPauseWalkingRequest();
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Continue")))
-      {
-         robotLowLevelMessenger.sendContinueWalkingRequest();
-      }
-      if (ImGui.button(labels.get("Freeze")))
-      {
-         robotLowLevelMessenger.sendFreezeRequest();
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Shutdown")))
-      {
-         robotLowLevelMessenger.sendShutdownRequest();
+         StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
+         communicationHelper.publishToController(stopAllTrajectoryMessage);
       }
 
       if (teleoperationParameters.getPSIAdjustable())
@@ -104,6 +95,11 @@ public class RDXRobotLowLevelMessenger
    public void sendStandRequest()
    {
       robotLowLevelMessenger.sendStandRequest();
+   }
+
+   public void sendFreezeRequest()
+   {
+      robotLowLevelMessenger.sendFreezeRequest();
    }
 
    private void sendPSIRequest()

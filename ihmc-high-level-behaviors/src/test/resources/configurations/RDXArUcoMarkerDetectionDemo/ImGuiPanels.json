@@ -1,0 +1,16 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "ArUco Marker Detection from Sensor" : true,
+    "ArUco Marker Detection Image from Sensor" : true,
+    "Blackfly Fisheye Simulator###java.lang.Integer:Blackfly Fisheye Simulator" : true,
+    "Blackfly Fisheye Color###GlobalWidgetIndex:1:Blackfly Fisheye Color" : false,
+    "Blackfly Fisheye Depth###GlobalWidgetIndex:0:Blackfly Fisheye Depth" : false,
+    "Environment###java.lang.Class:Environment" : true,
+    "Test image detection" : true,
+    "ArUco Marker Detection Image Test" : true,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}

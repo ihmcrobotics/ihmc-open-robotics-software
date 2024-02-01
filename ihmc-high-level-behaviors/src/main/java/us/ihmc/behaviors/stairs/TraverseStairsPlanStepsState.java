@@ -8,6 +8,7 @@ import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -21,9 +22,11 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.TimerSnapshot;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -64,10 +67,13 @@ public class TraverseStairsPlanStepsState extends TraverseStairsState
          statusLogger.info("Received goal input: " + goalPose);
          goalInput.set(goalPose);
       });
-      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, newValue ->
+      helper.subscribeViaCallback(PerceptionAPI.LIDAR_REA_REGIONS, newValue ->
       {
          planarRegions.set(newValue);
-         executor.submit(() -> helper.publish(PlanarRegionsForUI, PlanarRegionMessageConverter.convertToPlanarRegionsList(newValue)));
+         executor.submit(() ->
+         {
+//            helper.publish(PlanarRegionsForUI, PlanarRegionMessageConverter.convertToPlanarRegionsList(newValue));
+         });
       });
 
       syncedRobot = helper.getOrCreateRobotInterface().newSyncedRobot();
@@ -76,16 +82,16 @@ public class TraverseStairsPlanStepsState extends TraverseStairsState
       planningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       SwingPlannerParametersBasics swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters("_Stairs");
       planningModule.getSwingPlannerParameters().set(swingPlannerParameters);
-      helper.subscribeViaCallback(FootstepPlannerParameters, parametersAsStrings ->
-      {
-         statusLogger.info("Accepting new footstep planner parameters");
-         planningModule.getFootstepPlannerParameters().setAllFromStrings(parametersAsStrings);
-      });
-      helper.subscribeViaCallback(SwingPlannerParameters, parametersAsStrings ->
-      {
-         statusLogger.info("Accepting new swing planner parameters");
-         planningModule.getSwingPlannerParameters().setAllFromStrings(parametersAsStrings);
-      });
+//      helper.subscribeViaCallback(FootstepPlannerParameters, parametersAsStrings ->
+//      {
+//         statusLogger.info("Accepting new footstep planner parameters");
+//         planningModule.getFootstepPlannerParameters().setAllFromStrings(parametersAsStrings);
+//      });
+//      helper.subscribeViaCallback(SwingPlannerParameters, parametersAsStrings ->
+//      {
+//         statusLogger.info("Accepting new swing planner parameters");
+//         planningModule.getSwingPlannerParameters().setAllFromStrings(parametersAsStrings);
+//      });
 
       footstepListPublisher = new IHMCROS2Publisher<>(helper.getROS2Node(), TraverseStairsBehaviorAPI.PLANNED_STEPS);
       new IHMCROS2Callback<>(helper.getROS2Node(), TraverseStairsBehaviorAPI.EXECUTE_STEPS, r -> executeStepsSignaled.set(true));
@@ -155,7 +161,7 @@ public class TraverseStairsPlanStepsState extends TraverseStairsState
       }
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
-      request.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegions.get()));
+      request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegions.get()))));
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalInput.get());
       request.setPlanBodyPath(false);
 
