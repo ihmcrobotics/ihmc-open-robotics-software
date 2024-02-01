@@ -7,7 +7,6 @@ import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.*;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.interfaces.EuclidGeometry;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.shape.collision.interfaces.SupportingVertexHolder;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -29,7 +28,6 @@ import us.ihmc.robotics.random.RandomGeometry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterface<PlanarRegion>
 {
@@ -47,6 +45,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     */
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
+
    private final RecyclingArrayList<Point2D> concaveHullsVertices = new RecyclingArrayList<>(Point2D::new);
    /**
     * List of the convex polygons representing this planar region. They are in the local frame of
@@ -882,7 +881,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       return containsNaN;
    }
 
-   public List<? extends Point2DReadOnly> getConcaveHull()
+   public List<Point2D> getConcaveHull()
    {
       return concaveHullsVertices;
    }
@@ -1182,7 +1181,9 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       updateBoundingBox();
       convexHull.set(other.convexHull);
 
-      updateArea();
+      this.area = other.area;
+      this.numberOfTimesMatched = other.numberOfTimesMatched;
+      this.tickOfLastMeasurement = other.tickOfLastMeasurement;
    }
 
    public void setTransformOnly(PlanarRegion other)
@@ -1689,7 +1690,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       return buffer.toString();
    }
 
-   public String getTooltipString()
+   public String getDebugString()
    {
       return String.format("Regions ID: %d\nArea: %.2f\nConcave Hull Size: %d\nMatched: %d\nOrigin: %s\nNormal: %s\nTime: %d",
                     regionId,
@@ -1699,6 +1700,14 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
                     String.format("%.2f, %.2f, %.2f", origin.getX(), origin.getY(), origin.getZ()),
                     String.format("%.2f, %.2f, %.2f", normal.getX(), normal.getY(), normal.getZ()),
                     getTickOfLastMeasurement());
+   }
+
+   public Point3D getConcaveHullPoint3DInWorld(int index)
+   {
+      Point2D pointInPlane = concaveHullsVertices.get(index);
+      Point3D pointInWorld = new Point3D(pointInPlane.getX(), pointInPlane.getY(), 0.0);
+      pointInWorld.applyTransform(fromLocalToWorldTransform);
+      return pointInWorld;
    }
 
    public int getNumberOfTimesMatched()

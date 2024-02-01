@@ -6,5 +6,10 @@ public interface FullRobotModelFactory
 {
    RobotDefinition getRobotDefinition();
 
-   FullRobotModel createFullRobotModel();
+   default FullRobotModel createFullRobotModel()
+   {
+      return createFullRobotModel(true);
+   }
+
+   FullRobotModel createFullRobotModel(boolean enforceUniqueReferenceFrames);
 }

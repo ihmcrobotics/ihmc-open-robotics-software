@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.log.LogTools;
@@ -60,15 +61,10 @@ public class LiveMapModule implements PerceptionModule
 
    private LiveMapModule(ROS2Node ros2Node, Messager messager)
    {
-      this(ros2Node, messager, null);
-   }
-
-   private LiveMapModule(ROS2Node ros2Node, Messager messager, String configurationFileProject)
-   {
       this.ros2Node = ros2Node;
       this.messager = messager;
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_REGIONS, this::dispatchLocalizedMap);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, PerceptionAPI.REALSENSE_SLAM_REGIONS, this::dispatchLocalizedMap);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, lidarOutputTopic, this::dispatchLidarMap);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, stereoOutputTopic, this::dispatchRegionsAtFeet);
 
@@ -76,20 +72,17 @@ public class LiveMapModule implements PerceptionModule
       mostRecentRegionsAtFeet = messager.createInput(LiveMapModuleAPI.RegionsAtFeet, null);
       mostRecentLidarMap = messager.createInput(LiveMapModuleAPI.LidarMap, null);
 
-      if (configurationFileProject != null)
-         slamParameters = new PlanarRegionSLAMParameters("ForLiveMap", configurationFileProject);
-      else
-         slamParameters = new PlanarRegionSLAMParameters("ForLiveMap");
+      slamParameters = new PlanarRegionSLAMParameters("ForLiveMap");
 
-      messager.registerTopicListener(LiveMapModuleAPI.PlanarRegionsSLAMParameters, parameters ->
+      messager.addTopicListener(LiveMapModuleAPI.PlanarRegionsSLAMParameters, parameters ->
       {
          slamParameters.setAllFromStrings(parameters);
          hasNewParameters.set(true);
       });
 
-      messager.registerTopicListener(LiveMapModuleAPI.LocalizedMap, (message) -> hasNewLocalizedMap.set(true));
-      messager.registerTopicListener(LiveMapModuleAPI.RegionsAtFeet, (message) -> hasNewRegionsAtFeet.set(true));
-      messager.registerTopicListener(LiveMapModuleAPI.LidarMap, (message) -> hasNewLidarMap.set(true));
+      messager.addTopicListener(LiveMapModuleAPI.LocalizedMap, (message) -> hasNewLocalizedMap.set(true));
+      messager.addTopicListener(LiveMapModuleAPI.RegionsAtFeet, (message) -> hasNewRegionsAtFeet.set(true));
+      messager.addTopicListener(LiveMapModuleAPI.LidarMap, (message) -> hasNewLidarMap.set(true));
 
       viewingEnabled = messager.createInput(LiveMapModuleAPI.ViewingEnable, true);
       combinedLiveMap = messager.createInput(LiveMapModuleAPI.CombinedLiveMap);
@@ -102,11 +95,11 @@ public class LiveMapModule implements PerceptionModule
       clearLidar = messager.createInput(LiveMapModuleAPI.ClearLidar, false);
       clearLocalizedMap = messager.createInput(LiveMapModuleAPI.ClearLocalizedMap, false);
 
-      messager.registerTopicListener(LiveMapModuleAPI.RequestEntireModuleState, request -> sendCurrentState());
+      messager.addTopicListener(LiveMapModuleAPI.RequestEntireModuleState, request -> sendCurrentState());
 
       sendCurrentState();
 
-      combinedMapPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.MAP_REGIONS);
+      combinedMapPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, PerceptionAPI.MAP_REGIONS);
    }
 
    private void sendCurrentState()
@@ -256,6 +249,6 @@ public class LiveMapModule implements PerceptionModule
 
    public static LiveMapModule createIntraprocess(ROS2Node ros2Node, Messager messager, String configurationFileProject)
    {
-      return new LiveMapModule(ros2Node, messager, configurationFileProject);
+      return new LiveMapModule(ros2Node, messager);
    }
 }

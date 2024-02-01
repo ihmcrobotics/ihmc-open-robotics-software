@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class MomentumTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.MomentumTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::MomentumTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "ea80a12c0a03a434c6cc6075ac6655284bad57ce5d6b0e763615a414e4f1a2f3";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

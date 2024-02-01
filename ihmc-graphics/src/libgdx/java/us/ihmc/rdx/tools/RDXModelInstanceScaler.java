@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
 import java.util.ArrayList;
 
@@ -47,15 +47,15 @@ public class RDXModelInstanceScaler
    private ModelInstance modelInstance;
    private final FramePoint3D scaledVertex = new FramePoint3D();
    private final Vector3D32 centroidToVertex = new Vector3D32();
-   private final ModifiableReferenceFrame centroidFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private final MutableReferenceFrame centroidFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
    private final Stopwatch stopwatch = new Stopwatch();
 
-   public RDXModelInstanceScaler(String modelFileName, double startingScaleFactor)
+   public RDXModelInstanceScaler(String modelFileName)
    {
-      this(RDXModelLoader.loadModelData(modelFileName), startingScaleFactor);
+      this(RDXModelLoader.loadModelData(modelFileName));
    }
 
-   public RDXModelInstanceScaler(ModelData modelData, double startingScaleFactor)
+   public RDXModelInstanceScaler(ModelData modelData)
    {
       this.modelData = modelData;
 
@@ -66,39 +66,42 @@ public class RDXModelInstanceScaler
       {
          ModelNode node = modelData.nodes.get(nodeIndex);
 
-         for (ModelNodePart part : node.parts)
+         if (node.parts != null)
          {
-            String meshPartId = part.meshPartId;
-            ModelMeshPart modelMeshPart = LibGDXTools.findModelMeshPart(modelData, meshPartId);
-            ModelMesh modelMesh = LibGDXTools.findMeshContainingPart(modelData, meshPartId);
-
-            // Each vertex is usually something like 8 floats: x,y,z,nx,ny,nz,u,v
-            int floatsPerVertex = LibGDXTools.calculateFloatsPerVertex(modelMesh);
-            int numberOfVertices = modelMeshPart.indices.length;
-            totalNumberOfVertices += numberOfVertices;
-
-            RigidBodyTransform transform = new RigidBodyTransform();
-            Quaternion quaternion = new Quaternion();
-            if (node.translation != null)
-               LibGDXTools.toEuclid(node.translation, transform.getTranslation());
-            if (node.rotation != null)
-               LibGDXTools.toEuclid(node.rotation, quaternion);
-            transform.getRotation().set(quaternion);
-
-            ArrayList<OriginalVertexRecord> originalPartVertices = new ArrayList<>();
-
-            for (short index : modelMeshPart.indices)
+            for (ModelNodePart part : node.parts)
             {
-               Point3D32 originalVertex = new Point3D32(modelMesh.vertices[floatsPerVertex * index],
-                                                        modelMesh.vertices[floatsPerVertex * index + 1],
-                                                        modelMesh.vertices[floatsPerVertex * index + 2]);
-               transform.transform(originalVertex);
+               String meshPartId = part.meshPartId;
+               ModelMeshPart modelMeshPart = LibGDXTools.findModelMeshPart(modelData, meshPartId);
+               ModelMesh modelMesh = LibGDXTools.findMeshContainingPart(modelData, meshPartId);
 
-               originalPartVertices.add(new OriginalVertexRecord(originalVertex, index));
-               wholeModelCentroid.add(originalVertex);
+               // Each vertex is usually something like 8 floats: x,y,z,nx,ny,nz,u,v
+               int floatsPerVertex = LibGDXTools.calculateFloatsPerVertex(modelMesh);
+               int numberOfVertices = modelMeshPart.indices.length;
+               totalNumberOfVertices += numberOfVertices;
+
+               RigidBodyTransform transform = new RigidBodyTransform();
+               Quaternion quaternion = new Quaternion();
+               if (node.translation != null)
+                  LibGDXTools.toEuclid(node.translation, transform.getTranslation());
+               if (node.rotation != null)
+                  LibGDXTools.toEuclid(node.rotation, quaternion);
+               transform.getRotation().set(quaternion);
+
+               ArrayList<OriginalVertexRecord> originalPartVertices = new ArrayList<>();
+
+               for (short index : modelMeshPart.indices)
+               {
+                  Point3D32 originalVertex = new Point3D32(modelMesh.vertices[floatsPerVertex * index],
+                                                           modelMesh.vertices[floatsPerVertex * index + 1],
+                                                           modelMesh.vertices[floatsPerVertex * index + 2]);
+                  transform.transform(originalVertex);
+
+                  originalPartVertices.add(new OriginalVertexRecord(originalVertex, index));
+                  wholeModelCentroid.add(originalVertex);
+               }
+
+               partRecords.add(new PartRecord(modelMeshPart, modelMesh, transform, floatsPerVertex, numberOfVertices, originalPartVertices));
             }
-
-            partRecords.add(new PartRecord(modelMeshPart, modelMesh, transform, floatsPerVertex, numberOfVertices, originalPartVertices));
          }
       }
       if (stopwatch.totalElapsed() > 0.5)
@@ -106,11 +109,15 @@ public class RDXModelInstanceScaler
 
       wholeModelCentroid.scale(1.0 / totalNumberOfVertices);
       centroidFrame.update(transformToParent -> transformToParent.getTranslation().set(wholeModelCentroid));
-
-      scale(startingScaleFactor);
    }
 
    public void scale(double scaleFactor)
+   {
+      Model model = scaleForModel(scaleFactor);
+      modelInstance = new ModelInstance(model);
+   }
+
+   public Model scaleForModel(double scaleFactor)
    {
       stopwatch.start();
       float scaleFactorFloat = (float) scaleFactor;
@@ -135,10 +142,11 @@ public class RDXModelInstanceScaler
       }
 
       Model model = new Model(modelData);
-      modelInstance = new ModelInstance(model);
 
       if (stopwatch.totalElapsed() > 0.1)
-         LogTools.warn("Took {} s to scale, whcih is a little long.", stopwatch.lapElapsed());
+         LogTools.warn("Took {} s to scale, which is a little long.", stopwatch.lapElapsed());
+
+      return model;
    }
 
    public Point3D32 getWholeModelCentroid()

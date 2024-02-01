@@ -54,8 +54,8 @@ public class PolygonizerManager
 
       lastSegmentationDataReceived = messager.createInput(PlanarRegionSemgentationData);
       intersectionParameters = messager.createInput(IntersectionParameters, new IntersectionEstimationParameters());
-      messager.registerTopicListener(PlanarRegionSemgentationData, this::handleSegmentationData);
-      messager.registerTopicListener(PlanarRegionSemgentationReload, this::handleReload);
+      messager.addTopicListener(PlanarRegionSemgentationData, this::handleSegmentationData);
+      messager.addTopicListener(PlanarRegionSemgentationReload, this::handleReload);
    }
 
    private void handleSegmentationData(List<PlanarRegionSegmentationRawData> segmentationData)

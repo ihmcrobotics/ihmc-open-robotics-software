@@ -30,7 +30,7 @@
   "Extra size z high" : 0.06,
   "Percentage max displacement low" : 0.05,
   "Percentage max displacement high" : 0.3,
-  "Max displacement low" : 0.007,
+  "Max displacement low" : 0.05,
   "Max displacement high" : 0.1,
   "Motion correlation alpha" : 0.65,
   "Allow lateral motion" : true,

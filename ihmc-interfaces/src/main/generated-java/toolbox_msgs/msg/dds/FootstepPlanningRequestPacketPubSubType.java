@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.FootstepPlanningRequestPacket>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::FootstepPlanningRequestPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "2f63b2077372c7759da4c39508b70f1b32eec4fa60be3f041b68c82cdeb48b63";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -77,8 +89,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
       current_alignment += perception_msgs.msg.dds.HeightMapMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -88,6 +98,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += controller_msgs.msg.dds.FootstepDataListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -156,8 +168,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getPlanarRegionsListMessage(), current_alignment);
-
       current_alignment += perception_msgs.msg.dds.HeightMapMessagePubSubType.getCdrSerializedSize(data.getHeightMapMessage(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -171,6 +181,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
+      current_alignment += controller_msgs.msg.dds.FootstepDataListMessagePubSubType.getCdrSerializedSize(data.getReferencePlan(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -215,7 +227,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_6(data.getHorizonLength());
 
-      perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegionsListMessage(), cdr);
       perception_msgs.msg.dds.HeightMapMessagePubSubType.write(data.getHeightMapMessage(), cdr);
       cdr.write_type_7(data.getAssumeFlatGround());
 
@@ -225,6 +236,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_9(data.getRequestedSwingPlanner());
 
+      controller_msgs.msg.dds.FootstepDataListMessagePubSubType.write(data.getReferencePlan(), cdr);
       cdr.write_type_7(data.getGenerateLog());
 
    }
@@ -262,7 +274,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       	
       data.setHorizonLength(cdr.read_type_6());
       	
-      perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getPlanarRegionsListMessage(), cdr);	
       perception_msgs.msg.dds.HeightMapMessagePubSubType.read(data.getHeightMapMessage(), cdr);	
       data.setAssumeFlatGround(cdr.read_type_7());
       	
@@ -272,6 +283,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       	
       data.setRequestedSwingPlanner(cdr.read_type_9());
       	
+      controller_msgs.msg.dds.FootstepDataListMessagePubSubType.read(data.getReferencePlan(), cdr);	
       data.setGenerateLog(cdr.read_type_7());
       	
 
@@ -302,14 +314,14 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       ser.write_type_6("timeout", data.getTimeout());
       ser.write_type_2("max_iterations", data.getMaxIterations());
       ser.write_type_6("horizon_length", data.getHorizonLength());
-      ser.write_type_a("planar_regions_list_message", new perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
-
       ser.write_type_a("height_map_message", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getHeightMapMessage());
 
       ser.write_type_7("assume_flat_ground", data.getAssumeFlatGround());
       ser.write_type_2("planner_request_id", data.getPlannerRequestId());
       ser.write_type_6("status_publish_period", data.getStatusPublishPeriod());
       ser.write_type_9("requested_swing_planner", data.getRequestedSwingPlanner());
+      ser.write_type_a("reference_plan", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getReferencePlan());
+
       ser.write_type_7("generate_log", data.getGenerateLog());
    }
 
@@ -338,14 +350,14 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setTimeout(ser.read_type_6("timeout"));
       data.setMaxIterations(ser.read_type_2("max_iterations"));
       data.setHorizonLength(ser.read_type_6("horizon_length"));
-      ser.read_type_a("planar_regions_list_message", new perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
-
       ser.read_type_a("height_map_message", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getHeightMapMessage());
 
       data.setAssumeFlatGround(ser.read_type_7("assume_flat_ground"));
       data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
       data.setStatusPublishPeriod(ser.read_type_6("status_publish_period"));
       data.setRequestedSwingPlanner(ser.read_type_9("requested_swing_planner"));
+      ser.read_type_a("reference_plan", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getReferencePlan());
+
       data.setGenerateLog(ser.read_type_7("generate_log"));
    }
 

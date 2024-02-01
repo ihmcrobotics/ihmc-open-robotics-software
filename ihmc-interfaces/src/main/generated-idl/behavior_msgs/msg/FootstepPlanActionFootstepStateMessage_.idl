@@ -1,0 +1,20 @@
+#ifndef __behavior_msgs__msg__FootstepPlanActionFootstepStateMessage__idl__
+#define __behavior_msgs__msg__FootstepPlanActionFootstepStateMessage__idl__
+
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::FootstepPlanActionFootstepStateMessage_")
+      struct FootstepPlanActionFootstepStateMessage
+      {
+        boolean unused_placeholder_field;
+      };
+    };
+  };
+};
+
+#endif

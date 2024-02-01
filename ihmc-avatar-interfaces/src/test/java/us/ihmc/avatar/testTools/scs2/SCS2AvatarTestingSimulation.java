@@ -31,6 +31,7 @@ import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
@@ -44,7 +45,6 @@ import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
-import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerIOTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.tools.JavaFXMissingTools;
 import us.ihmc.scs2.simulation.SimulationTerminalCondition;
@@ -107,7 +107,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       if (fullRobotModel != null)
          avatarSimulation.setFullHumanoidRobotModel(fullRobotModel);
       if (yoGraphicsListRegistry != null)
-         simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
 
       if (parameters != null)
       {
@@ -161,7 +161,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
          setCameraDefaultRobotView();
          if (cameraTracksPelvis)
-            requestCameraRigidBodyTracking(getRobotModel().getSimpleRobotName(), getRobot().getFloatingRootJoint().getSuccessor().getName());
+            requestCameraRigidBodyTracking(getRobot().getFloatingRootJoint().getSuccessor().getName());
       }
 
       // We park the simulation thread assuming that the calling test will need to run the simulation in their own thread to keep things synchronous.
@@ -196,7 +196,8 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * Adds a terminal condition that will be used in the subsequent simulations to determine when to
     * stop the simulation.
     * <p>
-    * The condition can be removed with {@link #removeSimulationTerminalCondition(SimulationTerminalCondition)}.
+    * The condition can be removed with
+    * {@link #removeSimulationTerminalCondition(SimulationTerminalCondition)}.
     * </p>
     * 
     * @param terminalCondition the new condition used to terminate future simulation.
@@ -413,6 +414,9 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * <p>
     * The camera is rotated during this operation, its position remains unchanged.
     * </p>
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
+    * </p>
     * 
     * @param focus the new focus position.
     */
@@ -425,6 +429,9 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * Sets the new focus point the camera is looking at.
     * <p>
     * The camera is rotated during this operation, its position remains unchanged.
+    * </p>
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
     * </p>
     *
     * @param x the x-coordinate of the new focus location.
@@ -466,13 +473,21 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    /**
     * Sets the camera configuration.
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
+    * </p>
     * 
     * @param cameraFocus    the new focus position (where the camera is looking at).
-    * @param cameraPosition the new camerate position.
+    * @param cameraPosition the new camera position.
     */
    public void setCamera(Point3DReadOnly cameraFocus, Point3DReadOnly cameraPosition)
    {
       getAvatarSimulation().setCamera(cameraFocus, cameraPosition);
+   }
+
+   public void requestCameraRigidBodyTracking(String rigidBodyName)
+   {
+      getAvatarSimulation().requestCameraRigidBodyTracking(rigidBodyName);
    }
 
    public void requestCameraRigidBodyTracking(String robotName, String rigidBodyName)
@@ -501,13 +516,13 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    public void addYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       checkSimulationSessionAlive();
-      SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry).forEach(this::addYoGraphicDefinition);
+      YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry).forEach(this::addYoGraphicDefinition);
    }
 
    public void addYoGraphic(YoGraphic yoGraphic)
    {
       checkSimulationSessionAlive();
-      addYoGraphicDefinition(SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphic));
+      addYoGraphicDefinition(YoGraphicConversionTools.toYoGraphicDefinition(yoGraphic));
    }
 
    // Misc.

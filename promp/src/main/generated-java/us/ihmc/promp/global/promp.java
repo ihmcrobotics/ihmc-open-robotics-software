@@ -11,13 +11,13 @@ import org.bytedeco.javacpp.annotation.*;
 public class promp extends us.ihmc.promp.presets.ProMPInfoMapper {
     static { Loader.load(); }
 
+// Targeting ../TrajectoryVector.java
+
+
 // Targeting ../StringVector.java
 
 
 // Targeting ../SizeTVector.java
-
-
-// Targeting ../TrajectoryVector.java
 
 
 // Targeting ../VectorVectorPair.java

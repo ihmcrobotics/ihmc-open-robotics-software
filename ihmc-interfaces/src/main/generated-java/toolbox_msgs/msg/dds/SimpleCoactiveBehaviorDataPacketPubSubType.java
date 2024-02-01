@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class SimpleCoactiveBehaviorDataPacketPubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::SimpleCoactiveBehaviorDataPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "45212f140cbd4641b0ffe5ced31cbaed79c8a72aa6fde2badc2cf26648bf11b9";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -9,10 +9,9 @@ import geometry_msgs.PoseStamped;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.targetFollowing.TargetFollowingBehavior;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.targetFollowing.TargetFollowingBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,9 +21,8 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
-import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.utilities.ros.RosTools;
@@ -33,19 +31,15 @@ import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.targetFollowing.TargetFollowingBehaviorAPI.*;
-
 public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
 {
-   public static final RDXBehaviorUIDefinition DEFINITION = new RDXBehaviorUIDefinition(TargetFollowingBehavior.DEFINITION,
-                                                                                        RDXTargetFollowingBehaviorUI::new);
    private final BehaviorHelper helper;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean publishTestLoop = new ImBoolean(false);
    private final TargetFollowingBehaviorParameters targetFollowingParameters = new TargetFollowingBehaviorParameters();
-   private final ImGuiStoredPropertySetTuner targetFollowingParameterTuner = new ImGuiStoredPropertySetTuner("Target Following Parameters");
+   private final RDXStoredPropertySetTuner targetFollowingParameterTuner = new RDXStoredPropertySetTuner("Target Following Parameters");
    private final RDXBallAndArrowPosePlacement manualTargetAffordance = new RDXBallAndArrowPosePlacement();
-   private final RosTopicPublisher<PoseStamped> manualTargetPublisher;
+   private final RosTopicPublisher<PoseStamped> manualTargetPublisher = null;
    private int pointNumber;
    private final FramePose3D testLoopTargetPose = new FramePose3D();
    private final FramePose3D manualTargetPose = new FramePose3D();
@@ -64,8 +58,8 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
       lookAndStepUI = new RDXLookAndStepBehaviorUI(helper);
       addChild(lookAndStepUI);
 
-      manualTargetPublisher = helper.getROS1Helper().publishPose(RosTools.SEMANTIC_TARGET_POSE);
-      helper.subscribeViaCallback(TargetPose, latestTargetPoseFromBehaviorReference::set);
+//      manualTargetPublisher = helper.getROS1Helper().publishPose(RosTools.SEMANTIC_TARGET_POSE);
+//      helper.subscribeViaCallback(TargetPose, latestTargetPoseFromBehaviorReference::set);
 
       pointNumber = 0;
       int numberOfPoints = 20;
@@ -95,9 +89,12 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    public void create(RDXBaseUI baseUI)
    {
       targetFollowingParameterTuner.create(targetFollowingParameters,
-                                           () -> helper.publish(TargetFollowingParameters, targetFollowingParameters.getAllAsStrings()));
+                                           () ->
+                                           {
+//                                              helper.publish(TargetFollowingParameters, targetFollowingParameters.getAllAsStrings());
+                                           });
       targetApproachPoseGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.1);
-      targetApproachPoseReference = helper.subscribeViaReference(TargetApproachPose, BehaviorTools.createNaNPose());
+//      targetApproachPoseReference = helper.subscribeViaReference(TargetApproachPose, BehaviorTools.createNaNPose());
       manualTargetAffordance.create(placedTargetPose ->
       {
          syncedRobot.update();
@@ -117,7 +114,7 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    public void update()
    {
       if (publishTestLoop.get())
-         periodicThread.setRunning(wasTickedRecently(0.5));
+         periodicThread.setRunning(getState().getIsActive());
       else
          periodicThread.setRunning(false);
 
@@ -134,6 +131,8 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public void renderTreeNodeImGuiWidgets()
    {
+      ImGui.text("Goal Planning");
+      ImGui.sameLine();
       manualTargetAffordance.renderPlaceGoalButton();
       ImGui.sameLine();
       ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
@@ -157,7 +156,7 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      return wasTickedRecently(0.5);
+      return getState().getIsActive();
    }
 
    @Override
@@ -167,9 +166,8 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
       periodicThread.destroy();
    }
 
-   @Override
    public String getName()
    {
-      return DEFINITION.getName();
+      return "Target Following";
    }
 }

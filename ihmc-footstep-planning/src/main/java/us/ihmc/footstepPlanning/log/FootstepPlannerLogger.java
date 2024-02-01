@@ -273,6 +273,7 @@ public class FootstepPlannerLogger
             fileWriter.write("Iteration " + i + newLine);
             writeNode(1, "parentNode", iterationData.getParentNode());
             writeNode(1, "idealStep", iterationData.getIdealChildNode());
+            writeNode(1, "nominalIdealStep", iterationData.getNominalIdealChildNode());
             writeLine(1, "edges:" + iterationData.getChildNodes().size());
             writeSnapData(1, iterationData.getParentStartSnapData());
             writeSnapData(1, iterationData.getParentEndSnapData());
@@ -280,21 +281,23 @@ public class FootstepPlannerLogger
             for (int j = 0; j < iterationData.getChildNodes().size(); j++)
             {
                FootstepPlannerEdgeData edgeData = planner.getEdgeDataMap().get(new GraphEdge<>(iterationData.getParentNode(), iterationData.getChildNodes().get(j)));
-
-               // indicate start of data
-               writeLine(1, "Edge:");
-               writeNode(2, "candidateNode", edgeData.getChildNode());
-               writeLine(2, "solutionEdge:" + edgeData.isSolutionEdge());
-               writeSnapData(2, edgeData.getEndStepSnapData());
-
-               // write additional data as doubles
-               fileWriter.write(tab + tab + "data:");
-               long[] dataBuffer = edgeData.getDataBuffer();
-               for (int k = 0; k < dataBuffer.length; k++)
+               if (edgeData != null) // Sometimes it's not there. Not sure if that's expected. TODO: Verify. @dcalvert
                {
-                  fileWriter.write(dataBuffer[k] + (k == dataBuffer.length - 1 ? "" : ","));
+                  // indicate start of data
+                  writeLine(1, "Edge:");
+                  writeNode(2, "candidateNode", edgeData.getChildNode());
+                  writeLine(2, "solutionEdge:" + edgeData.isSolutionEdge());
+                  writeSnapData(2, edgeData.getEndStepSnapData());
+
+                  // write additional data as doubles
+                  fileWriter.write(tab + tab + "data:");
+                  long[] dataBuffer = edgeData.getDataBuffer();
+                  for (int k = 0; k < dataBuffer.length; k++)
+                  {
+                     fileWriter.write(dataBuffer[k] + (k == dataBuffer.length - 1 ? "" : ","));
+                  }
+                  fileWriter.write(newLine);
                }
-               fileWriter.write(newLine);
             }
          }
 

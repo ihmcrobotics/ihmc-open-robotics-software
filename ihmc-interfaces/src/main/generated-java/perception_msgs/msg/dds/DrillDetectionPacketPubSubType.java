@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class DrillDetectionPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.DrillDetectionPacket>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::DrillDetectionPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "989bf816fca52ac22ff98f5d1e2fe99d0efc7db1efbcdfbc7410b0ae98526415";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

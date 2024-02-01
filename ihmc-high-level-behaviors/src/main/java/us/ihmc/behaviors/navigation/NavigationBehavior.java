@@ -2,14 +2,12 @@ package us.ihmc.behaviors.navigation;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -28,19 +26,10 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.behaviors.BehaviorDefinition;
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.tools.behaviorTree.AlwaysSuccessfulAction;
-import us.ihmc.behaviors.tools.behaviorTree.LoopSequenceNode;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.messager.MessagerAPIFactory.Category;
-import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
-import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -51,6 +40,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -58,13 +48,14 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.behaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.*;
 import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_SIZE;
 
-public class NavigationBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
+/**
+ * Used visibility graphs to walk through a maze.
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
+public class NavigationBehavior extends LocalOnlyBehaviorTreeNodeExecutor implements Destroyable
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Navigation", NavigationBehavior::new, NavigationBehaviorAPI.create());
-
    private static final Point3D goal = new Point3D(MAZE_CORRIDOR_SQUARE_SIZE * 4.0, MAZE_CORRIDOR_SQUARE_SIZE, 0.0);
 
    private final BehaviorHelper helper;
@@ -77,7 +68,7 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
 
    private final FramePose3D robotPose = new FramePose3D();
    private final LoopSequenceNode sequence;
-   private final Notification stepThroughAlgorithm;
+   private final Notification stepThroughAlgorithm = null;
    private final PausablePeriodicThread mainThread;
 
    private long latestMapSequenceId = 0;
@@ -92,7 +83,7 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
       this.helper = helper;
 
       // create map subscriber
-      mapRegionsInput = new ROS2Input<>(helper.getROS2Node(), PlanarRegionsListMessage.class, ROS2Tools.MAPPING_MODULE.withOutput());
+      mapRegionsInput = new ROS2Input<>(helper.getROS2Node(), PlanarRegionsListMessage.class, PerceptionAPI.MAPPING_MODULE.withOutput());
 
       robotInterface = helper.getOrCreateRobotInterface();
       syncedRobot = robotInterface.newSyncedRobot();
@@ -106,23 +97,23 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
          footPolygons.set(side, scaledFoot);
       }
 
-      stepThroughAlgorithm = helper.subscribeTypelessViaNotification(StepThroughAlgorithm);
+//      stepThroughAlgorithm = helper.subscribeTypelessViaNotification(StepThroughAlgorithm);
 
       sequence = new LoopSequenceNode();
-      sequence.addChild(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("aquire map")));
-      sequence.addChild(new AlwaysSuccessfulAction(this::aquireMap));
-      sequence.addChild(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("plan body path")));
-      sequence.addChild(new AlwaysSuccessfulAction(this::planBodyPath));
-      sequence.addChild(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("plan body orientation trajectory and footsteps")));
-      sequence.addChild(new AlwaysSuccessfulAction(this::planBodyOrientationTrajectoryAndFootsteps));
-      sequence.addChild(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("shorten footstep plan and walk it")));
-      sequence.addChild(new AlwaysSuccessfulAction(this::shortenFootstepPlanAndWalkIt));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("aquire map")));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(this::aquireMap));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("plan body path")));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(this::planBodyPath));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("plan body orientation trajectory and footsteps")));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(this::planBodyOrientationTrajectoryAndFootsteps));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("shorten footstep plan and walk it")));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(this::shortenFootstepPlanAndWalkIt));
 
       mainThread = helper.createPausablePeriodicThread(getClass(), UnitConversions.hertzToSeconds(250), 5, sequence::tick);
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       return BehaviorTreeNodeStatus.SUCCESS;
    }
@@ -132,7 +123,6 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
       LogTools.info("Navigation behavior selected = {}", enabled);
 
       mainThread.setRunning(enabled);
-      helper.setCommunicationCallbacksEnabled(enabled);
    }
 
    private void stepThroughAlgorithm(String message)
@@ -152,7 +142,7 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
       latestMapSequenceId = mapRegionsInput.getLatest().getSequenceId();
       //      ThreadTools.sleep(100); // try to get a little more perception data TODO wait for a SLAM update
 
-      helper.publish(MapRegionsForUI, PlanarRegionMessageConverter.convertToPlanarRegionsList(mapRegionsInput.getLatest()));
+//      helper.publish(MapRegionsForUI, PlanarRegionMessageConverter.convertToPlanarRegionsList(mapRegionsInput.getLatest()));
    }
 
    private void planBodyPath()
@@ -194,7 +184,7 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
          pathPoses.add(new Pose3D(pathPoint, new Quaternion()));
       }
 
-      helper.getMessager().submitMessage(BodyPathPlanForUI, pathPoses);
+//      helper.getMessager().submitMessage(BodyPathPlanForUI, pathPoses);
    }
 
    private void planBodyOrientationTrajectoryAndFootsteps()
@@ -345,23 +335,6 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
 
    public static class NavigationBehaviorAPI
    {
-      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final Category RootCategory = apiFactory.createRootCategory("NavigationBehavior");
-      private static final CategoryTheme NavigationTheme = apiFactory.createCategoryTheme("Navigation");
 
-      public static final Topic<Object> StepThroughAlgorithm = topic("StepThroughAlgorithm");
-      public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
-      public static final Topic<ArrayList<Pose3DReadOnly>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
-      public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
-
-      private static final <T> Topic<T> topic(String name)
-      {
-         return RootCategory.child(NavigationTheme).topic(apiFactory.createTypedTopicTheme(name));
-      }
-
-      public static final MessagerAPI create()
-      {
-         return apiFactory.getAPIAndCloseFactory();
-      }
    }
 }

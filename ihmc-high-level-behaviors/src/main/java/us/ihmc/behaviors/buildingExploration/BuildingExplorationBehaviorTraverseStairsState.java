@@ -1,7 +1,5 @@
 package us.ihmc.behaviors.buildingExploration;
 
-import us.ihmc.behaviors.BehaviorModule;
-import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.thread.ThreadTools;
@@ -33,10 +31,6 @@ class BuildingExplorationBehaviorTraverseStairsState implements State
 
       isDone.set(false);
 
-      String behaviorName = TraverseStairsBehavior.DEFINITION.getName();
-      helper.publish(BehaviorModule.API.BehaviorSelection, behaviorName);
-      ThreadTools.sleep(100);
-
       helper.publish(TraverseStairsBehaviorAPI.GOAL_INPUT, new Pose3D(bombPose));
       ThreadTools.sleep(100);
 
@@ -52,7 +46,6 @@ class BuildingExplorationBehaviorTraverseStairsState implements State
    public void onExit(double timeInState)
    {
       LogTools.info("Exiting " + getClass().getSimpleName());
-      helper.publish(BehaviorModule.API.BehaviorSelection, "null");
    }
 
    @Override

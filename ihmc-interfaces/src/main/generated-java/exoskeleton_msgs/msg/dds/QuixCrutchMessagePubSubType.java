@@ -11,6 +11,18 @@ package exoskeleton_msgs.msg.dds;
 public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType<exoskeleton_msgs.msg.dds.QuixCrutchMessage>
 {
    public static final java.lang.String name = "exoskeleton_msgs::msg::dds_::QuixCrutchMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "a6b5bfc05c64ca27f2039e2d378daf883960dcaa0f987a6d8341d9fba8632e28";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

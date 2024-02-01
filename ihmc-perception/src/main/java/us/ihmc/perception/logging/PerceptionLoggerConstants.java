@@ -2,6 +2,18 @@ package us.ihmc.perception.logging;
 
 public class PerceptionLoggerConstants
 {
+   public static final String HDF5_FILE_EXTENSION = ".hdf5";
+
+   public static final int COMPRESSED_IMAGE_BUFFER_SIZE = 1000000;
+   public static final int BYTE_BUFFER_SIZE = 1000000;
+   public static final int INT_BUFFER_SIZE = 100000;
+   public static final int FLOAT_BUFFER_SIZE = 10000;
+   public static final int LONG_BUFFER_SIZE = 10000;
+   public static final int DOUBLE_BUFFER_SIZE = 10000;
+
+   public static final int DEFAULT_BLOCK_SIZE = 100;
+   public static final int LEGACY_BLOCK_SIZE = 10;
+
    public static final String ROBOT_CONFIGURATION_DATA_NAME = "/robot/root/position/";
    public static final String ROBOT_CONFIGURATION_DATA_MONOTONIC_TIME = "/robot/configuration/timestamps/";
 
@@ -28,6 +40,8 @@ public class PerceptionLoggerConstants
 
    public static final String ZED2_SENSOR_TIME = "/zed2/sensor/time";
    public static final String ZED2_COLOR_NAME = "/zed2/color/";
+   public static final String ZED2_DEPTH_NAME = "/zed2/depth/";
+   public static final String ZED2_TIME_NAME = "/zed2/time/";
 
    public static final String L515_SENSOR_TIME = "/l515/sensor/time";
    public static final String L515_DEPTH_NAME = "/l515/depth/";
@@ -35,8 +49,19 @@ public class PerceptionLoggerConstants
    public static final String L515_SENSOR_POSITION = "/l515/sensor/position/";
    public static final String L515_SENSOR_ORIENTATION = "/l515/sensor/orientation/";
 
-
    public static final String MOCAP_RIGID_BODY_TIME = "/mocap/rigid_body/position";
    public static final String MOCAP_RIGID_BODY_POSITION = "/mocap/rigid_body/position";
    public static final String MOCAP_RIGID_BODY_ORIENTATION = "/mocap/rigid_body/orientation";
+
+   public static final String INTERNAL_HEIGHT_MAP_NAME = "/internal/height/";
+   public static final String CROPPED_HEIGHT_MAP_NAME = "/cropped/height/";
+   public static final String SENSOR_CROPPED_HEIGHT_MAP_NAME = "/sensor/cropped/height/";
+   public static final String FOOTSTEP_SIDE = "/plan/footstep/side/";
+   public static final String FOOTSTEP_POSITION = "/plan/footstep/position/";
+   public static final String FOOTSTEP_ORIENTATION = "/plan/footstep/orientation/";
+   public static final String START_FOOTSTEP_POSITION = "/start/footstep/position/";
+   public static final String START_FOOTSTEP_ORIENTATION = "/start/footstep/orientation/";
+   public static final String GOAL_FOOTSTEP_POSITION = "/goal/footstep/position/";
+   public static final String GOAL_FOOTSTEP_ORIENTATION = "/goal/footstep/orientation/";
+   public static final String INITIAL_FOOTSTEP_SIDE = "/initial/side/";
 }

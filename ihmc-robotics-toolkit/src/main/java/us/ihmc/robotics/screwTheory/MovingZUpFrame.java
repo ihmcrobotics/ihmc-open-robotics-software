@@ -24,6 +24,14 @@ public class MovingZUpFrame extends MovingReferenceFrame
       this.nonZUpFrame = nonZUpFrame;
    }
 
+   public MovingZUpFrame(MovingReferenceFrame nonZUpFrame, ReferenceFrame parentFrame, String name)
+   {
+      super(name, parentFrame, true);
+
+      this.rootFrame = parentFrame;
+      this.nonZUpFrame = nonZUpFrame;
+   }
+
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {

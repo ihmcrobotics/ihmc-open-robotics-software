@@ -332,6 +332,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.footholdAreaWeight, footholdAreaWeight);
    }
 
+   default void setReferencePlanAlpha(double referencePlanAlpha)
+   {
+      set(FootstepPlannerParameterKeys.referencePlanAlpha, referencePlanAlpha);
+   }
+
    default void setDistanceFromPathTolerance(double tolerance)
    {
       set(distanceFromPathTolerance, tolerance);
@@ -383,6 +388,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
       setCheckForPathCollisions(parametersPacket.getCheckForPathCollisions());
       setIntermediateBodyBoxChecks((int) parametersPacket.getIntermediateBodyBoxChecks());
+      if (parametersPacket.getReferencePlanAlpha() != noValue)
+         setReferencePlanAlpha(parametersPacket.getReferencePlanAlpha());
       if (parametersPacket.getIdealFootstepWidth() != noValue)
          setIdealFootstepWidth(parametersPacket.getIdealFootstepWidth());
       if (parametersPacket.getIdealFootstepLength() != noValue)

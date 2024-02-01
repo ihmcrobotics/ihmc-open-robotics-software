@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.*;
+import us.ihmc.perception.opencl.*;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
@@ -465,8 +465,6 @@ public class GPUAStarBodyPathSmoother
       openCLManager.setKernelArgument(computeCollisionGradientMapKernel, 6, maxCollisionsMapBuffer.getOpenCLBufferObject());
 
       openCLManager.execute3D(computeCollisionGradientMapKernel, cellsPerSide, cellsPerSide, yawDiscretizations);
-
-      openCLManager.finish();
    }
 
    private void populateTraversibilityOffsetsForNominalBuffer(HeightMapData heightMapData)
@@ -519,8 +517,6 @@ public class GPUAStarBodyPathSmoother
       openCLManager.setKernelArgument(computeCurrentTraversibilityMapKernel, 8, rightTraversibilitiesMapBuffer.getOpenCLBufferObject());
 
       openCLManager.execute3D(computeCurrentTraversibilityMapKernel, cellsPerSide, cellsPerSide, yawDiscretizations);
-
-      openCLManager.finish();
    }
 
    private void populateTraversibilityOffsetsForGradientBuffer(HeightMapData heightMapData)
@@ -575,8 +571,6 @@ public class GPUAStarBodyPathSmoother
       openCLManager.setKernelArgument(computeTraversibilityForGradientMapKernel, 8, rightTraversibilitiesForGradientMapBuffer.getOpenCLBufferObject());
 
       openCLManager.execute3D(computeTraversibilityForGradientMapKernel, cellsPerSide, cellsPerSide, yawDiscretizations);
-
-      openCLManager.finish();
    }
 
    private void populateGroundPlaneOffsetsGradientBuffer()
@@ -620,8 +614,6 @@ public class GPUAStarBodyPathSmoother
       openCLManager.setKernelArgument(computeGroundPlaneGradientKernel, 7, groundPlaneGradientMapBuffer.getOpenCLBufferObject());
 
       openCLManager.execute3D(computeGroundPlaneGradientKernel, cellsPerSide, cellsPerSide, yawDiscretizations);
-
-      openCLManager.finish();
    }
 
    private void populateWaypointStateBuffers()
@@ -649,8 +641,6 @@ public class GPUAStarBodyPathSmoother
       openCLManager.execute1D(computeWaypointSmoothessGradientKernel, pathSize);
 
       waypointSmoothnessGradients.readOpenCLBufferObject(openCLManager);
-
-      openCLManager.finish();
    }
 
    private void getCurrentTraversibilityValues(OpenCLFloatBuffer heightMapParamsBuffer)
@@ -665,8 +655,6 @@ public class GPUAStarBodyPathSmoother
       openCLManager.execute1D(getWaypointCurrentTraversibilityKernel, pathSize);
 
       waypointTravesibilityValues.readOpenCLBufferObject(openCLManager);
-
-      openCLManager.finish();
    }
 
 
@@ -699,8 +687,6 @@ public class GPUAStarBodyPathSmoother
       waypointTraversibilityGradients.readOpenCLBufferObject(openCLManager);
       waypointGroundPlaneCells.readOpenCLBufferObject(openCLManager);
       waypointGroundPlaneGradients.readOpenCLBufferObject(openCLManager);
-
-      openCLManager.finish();
    }
 
    private void computeSmoothenessGradientFromGPU(int waypointIndex, Vector2DBasics gradientToSet)

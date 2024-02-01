@@ -40,6 +40,7 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
    private Group durationGroup;
    private Group posGroup;
    private final String tempFileName;
+   private final HDF5Tools hdf5Tools = new HDF5Tools();
 
    @Override
    public void stop()
@@ -47,10 +48,10 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
       super.stop();
 
       try {
-         Group headerGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/header");
+         Group headerGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/header");
 
          byte[] headerData = FileUtils.readFileToByteArray(new File(tempFileName));
-         HDF5Tools.storeByteArray(headerGroup, 0, headerData, headerData.length);
+         hdf5Tools.storeByteArray(headerGroup, 0, headerData, headerData.length);
 
          headerGroup.close();
       }
@@ -75,13 +76,13 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
    {
       isInitialized = true;
 
-      ptsGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/pts");
-      dtsGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/dts");
-      dataGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/data");
-      flagsGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/flags");
-      sideDataGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/side_data");
-      durationGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/duration");
-      posGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/pos");
+      ptsGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/pts");
+      dtsGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/dts");
+      dataGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/data");
+      flagsGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/flags");
+      sideDataGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/side_data");
+      durationGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/duration");
+      posGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/pos");
 
       int returnCode = avcodec.avcodec_open2(avEncoderContext, avEncoderContext.codec(), streamFlags);
       FFMPEGTools.checkNonZeroError(returnCode, "Initializing codec context to use the codec");
@@ -178,27 +179,27 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
       avPacket.stream_index(avStream.index());
 
       // Write packet data to HDF groups instead of calling av_interleave_frame()
-      HDF5Tools.storeByteArray(ptsGroup, presentationTimestamp++, Longs.toByteArray(avPacket.pts()), Long.BYTES);
-      HDF5Tools.storeByteArray(dtsGroup, presentationTimestamp++, Longs.toByteArray(avPacket.dts()), Long.BYTES);
+      hdf5Tools.storeByteArray(ptsGroup, presentationTimestamp++, Longs.toByteArray(avPacket.pts()), Long.BYTES);
+      hdf5Tools.storeByteArray(dtsGroup, presentationTimestamp++, Longs.toByteArray(avPacket.dts()), Long.BYTES);
 
       // TODO this copy operation is necessary for data to be properly logged but there might be a faster way to do this.
       //  There doesn't seem to be a major speed impact though
       try (BytePointer data = new BytePointer(avPacket.size())) {
          BytePointer.memcpy(data, avPacket.data(), avPacket.size());
-         HDF5Tools.storeBytesFromPointer(dataGroup, presentationTimestamp++, data, avPacket.size());
+         hdf5Tools.storeBytes(dataGroup, presentationTimestamp++, data);
       }
 
-      HDF5Tools.storeByteArray(flagsGroup, presentationTimestamp++, Longs.toByteArray(avPacket.flags()), Integer.BYTES); // Not a long but that's okay
+      hdf5Tools.storeByteArray(flagsGroup, presentationTimestamp++, Longs.toByteArray(avPacket.flags()), Integer.BYTES); // Not a long but that's okay
 
       if (avPacket.side_data() != null) {
          try (BytePointer data = new BytePointer(avPacket.side_data().size())) {
             BytePointer.memcpy(data, avPacket.side_data().data(), avPacket.side_data().size());
-            HDF5Tools.storeBytesFromPointer(dataGroup, presentationTimestamp++, data, avPacket.side_data().size());
+            hdf5Tools.storeBytes(dataGroup, presentationTimestamp++, data);
          }
       }
 
-      HDF5Tools.storeByteArray(durationGroup, presentationTimestamp++, Longs.toByteArray(avPacket.duration()), Long.BYTES);
-      HDF5Tools.storeByteArray(posGroup, presentationTimestamp++, Longs.toByteArray(avPacket.pos()), Long.BYTES);
+      hdf5Tools.storeByteArray(durationGroup, presentationTimestamp++, Longs.toByteArray(avPacket.duration()), Long.BYTES);
+      hdf5Tools.storeByteArray(posGroup, presentationTimestamp++, Longs.toByteArray(avPacket.pos()), Long.BYTES);
 
       return returnCode == 0;
    }

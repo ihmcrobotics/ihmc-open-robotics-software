@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Triple;
 
-import perception_msgs.msg.dds.REAStateRequestMessage;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasUIAuxiliaryData;
@@ -22,8 +22,8 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -64,7 +64,6 @@ public class AtlasFootstepPlannerUI extends ApplicationNoModule
 
       ui = FootstepPlannerUI.createUI(primaryStage,
                                       messager,
-                                      drcRobotModel.getVisibilityGraphsParameters(),
                                       drcRobotModel.getAStarBodyPathPlannerParameters(),
                                       drcRobotModel.getFootstepPlannerParameters("ForLookAndStep"),
                                       drcRobotModel.getSwingPlannerParameters(),
@@ -75,8 +74,6 @@ public class AtlasFootstepPlannerUI extends ApplicationNoModule
                                       drcRobotModel.getWalkingControllerParameters(),
                                       new AtlasUIAuxiliaryData(),
                                       drcRobotModel.getCollisionBoxProvider());
-      ui.setRobotLowLevelMessenger(robotLowLevelMessenger);
-      ui.setREAStateRequestPublisher(reaStateRequestPublisher);
       ui.show();
 
       if (launchPlannerToolbox)
@@ -86,8 +83,8 @@ public class AtlasFootstepPlannerUI extends ApplicationNoModule
          // Create logger and connect to messager
          FootstepPlannerLogger logger = new FootstepPlannerLogger(plannerModule);
          Runnable loggerRunnable = () -> logger.logSessionAndReportToMessager(messager);
-         messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestGenerateLog, b -> new Thread(loggerRunnable).start());
-         messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanSingleStep, planSingleStep ->
+         messager.addTopicListener(FootstepPlannerMessagerAPI.RequestGenerateLog, b -> new Thread(loggerRunnable).start());
+         messager.addTopicListener(FootstepPlannerMessagerAPI.PlanSingleStep, planSingleStep ->
          {
             if (planSingleStep)
             {

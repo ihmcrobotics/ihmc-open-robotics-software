@@ -13,16 +13,14 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.visualizers.RDXFrustumVisualizer;
+import us.ihmc.rdx.visualizers.RDXFrustumGraphic;
 import us.ihmc.perception.BytedecoImage;
 
 import java.nio.ByteBuffer;
 
 public class RDXHighLevelDepthSensorDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
 
    private RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
@@ -30,8 +28,8 @@ public class RDXHighLevelDepthSensorDemo
    private ModelInstance mousePickSphere;
    private int mousePosX;
    private int mousePosY;
-   private RDXFrustumVisualizer frustumVisualizer;
-   private RDXCVImagePanel mainViewDepthPanel;
+   private RDXFrustumGraphic frustumVisualizer;
+   private RDXBytedecoImagePanel mainViewDepthPanel;
    private BytedecoImage image;
 
    public RDXHighLevelDepthSensorDemo()
@@ -108,7 +106,7 @@ public class RDXHighLevelDepthSensorDemo
             RDX3DPanel panel3D = new RDX3DPanel("3D View 2", true);
             baseUI.add3DPanel(panel3D);
 
-            frustumVisualizer = new RDXFrustumVisualizer();
+            frustumVisualizer = new RDXFrustumGraphic();
             baseUI.getPrimaryScene().addRenderableProvider(frustumVisualizer::getRenderables, RDXSceneLevel.VIRTUAL);
          }
 
@@ -130,10 +128,10 @@ public class RDXHighLevelDepthSensorDemo
                                             (int) baseUI.getPrimary3DPanel().getRenderSizeY(),
                                             opencv_core.CV_32FC1,
                                             depthBuffer);
-                  mainViewDepthPanel = new RDXCVImagePanel("Main view depth", (int) baseUI.getPrimary3DPanel().getRenderSizeX(),
-                                                           (int) baseUI.getPrimary3DPanel().getRenderSizeY(),
-                                                           true);
-                  baseUI.getImGuiPanelManager().addPanel(mainViewDepthPanel.getVideoPanel());
+                  mainViewDepthPanel = new RDXBytedecoImagePanel("Main view depth", (int) baseUI.getPrimary3DPanel().getRenderSizeX(),
+                                                                 (int) baseUI.getPrimary3DPanel().getRenderSizeY(),
+                                                                 true);
+                  baseUI.getImGuiPanelManager().addPanel(mainViewDepthPanel.getImagePanel());
 
                   baseUI.getLayoutManager().reloadLayout();
                }

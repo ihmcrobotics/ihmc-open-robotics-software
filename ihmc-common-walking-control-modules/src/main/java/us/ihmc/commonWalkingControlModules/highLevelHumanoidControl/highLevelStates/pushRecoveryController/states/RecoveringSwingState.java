@@ -115,7 +115,7 @@ public class RecoveringSwingState extends PushRecoveryState
    {
       balanceManager.computeICPPlan();
 
-      walkingMessageHandler.clearFootTrajectory();
+      walkingMessageHandler.clearFlamingoCommands();
    }
 
    @Override

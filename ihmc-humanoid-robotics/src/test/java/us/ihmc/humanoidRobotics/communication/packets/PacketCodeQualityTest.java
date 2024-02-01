@@ -60,8 +60,8 @@ public class PacketCodeQualityTest
    {
       FrameInformation frameInformation = new FrameInformation();
       assertEquals(EuclidHashCodeTools.DEFAULT_HASHCODE, frameInformation.getDataReferenceFrameId());
-      assertEquals(ReferenceFrame.getWorldFrame().hashCode(), frameInformation.getTrajectoryReferenceFrameId());
-      assertEquals(ReferenceFrame.getWorldFrame().hashCode(), FrameInformation.WORLD_FRAME);
+      assertEquals(ReferenceFrame.getWorldFrame().getFrameNameHashCode(), frameInformation.getTrajectoryReferenceFrameId());
+      assertEquals(ReferenceFrame.getWorldFrame().getFrameNameHashCode(), FrameInformation.WORLD_FRAME);
    }
 
    @SuppressWarnings("rawtypes")

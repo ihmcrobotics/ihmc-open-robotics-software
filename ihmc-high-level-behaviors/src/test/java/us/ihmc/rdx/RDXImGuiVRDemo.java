@@ -18,7 +18,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXImGuiVRDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources", "VR Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI("VR Demo");
    private RDXReferenceFrameGraphic headsetZUpFrameGraphic;
    private RDXReferenceFrameGraphic headsetZBackFrameGraphic;
    private RDXReferenceFrameGraphic leftControllerZUpFrameGraphic;

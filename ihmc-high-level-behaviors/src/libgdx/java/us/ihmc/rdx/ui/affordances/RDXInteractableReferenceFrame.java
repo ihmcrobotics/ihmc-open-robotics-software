@@ -11,7 +11,9 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.collidables.RDXCoordinateFrameIntersection;
+import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
@@ -45,6 +47,14 @@ public class RDXInteractableReferenceFrame
       LibGDXTools.setOpacity(highlightReferenceFrameGraphic, 0.5f);
       selectablePose3DGizmo = new RDXSelectablePose3DGizmo(representativeReferenceFrame, transformToParent);
       selectablePose3DGizmo.create(panel3D);
+   }
+
+   public void createAndSetupDefault(RDXBaseUI baseUI, ReferenceFrame parentFrame, double length)
+   {
+      create(parentFrame, length, baseUI.getPrimary3DPanel());
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
+      baseUI.getPrimaryScene().addRenderableProvider(this::getVirtualRenderables);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)

@@ -133,9 +133,10 @@ public class RigidBodyControlManagerTest
       Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
-      message.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
-      message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
-      message.getTaskspaceTrajectoryPoints().add()
+      message.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
+      message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
+      message.getTaskspaceTrajectoryPoints()
+             .add()
              .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, position, orientation, linearVelocity, angularVelocity));
 
       SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
@@ -273,8 +274,9 @@ public class RigidBodyControlManagerTest
          Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
          SE3TrajectoryMessage message = new SE3TrajectoryMessage();
-         message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
-         message.getTaskspaceTrajectoryPoints().add()
+         message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
+         message.getTaskspaceTrajectoryPoints()
+                .add()
                 .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, position, orientation, linearVelocity, angularVelocity));
 
          SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
@@ -384,12 +386,13 @@ public class RigidBodyControlManagerTest
       Quaternion controlFrameOrientation = new Quaternion();
 
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
-      message.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
-      message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+      message.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
+      message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
       message.getControlFramePose().getPosition().set(controlFramePosition);
       message.getControlFramePose().getOrientation().set(controlFrameOrientation);
       message.setUseCustomControlFrame(true);
-      message.getTaskspaceTrajectoryPoints().add()
+      message.getTaskspaceTrajectoryPoints()
+             .add()
              .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, position, orientation, linearVelocity, angularVelocity));
 
       SE3TrajectoryControllerCommand command = new SE3TrajectoryControllerCommand();
@@ -502,10 +505,25 @@ public class RigidBodyControlManagerTest
       Vector3D taskspaceAngularWeight = new Vector3D(1.0, 1.0, 1.0);
       Vector3D taskspaceLinearWeight = new Vector3D(1.0, 1.0, 1.0);
 
-      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, null, controlFrame, baseFrame,
-                                                                    taskspaceAngularWeight, taskspaceLinearWeight, taskspaceOrientationGains,
-                                                                    taskspacePositionGains, contactableBody, null, yoTime, null, testRegistry);
-      manager.setGains(jointspaceGains, null);
+      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
+                                                                    baseBody,
+                                                                    elevator,
+                                                                    homeConfiguration,
+                                                                    null,
+                                                                    controlFrame,
+                                                                    baseFrame,
+                                                                    taskspaceAngularWeight,
+                                                                    taskspaceLinearWeight,
+                                                                    taskspaceOrientationGains,
+                                                                    taskspacePositionGains,
+                                                                    contactableBody,
+                                                                    null,
+                                                                    false,
+                                                                    yoTime,
+                                                                    0.0,
+                                                                    null,
+                                                                    testRegistry);
+      manager.setGains(jointspaceGains);
       manager.setWeights(jointspaceWeights, userModeWeights);
 
       new DefaultParameterReader().readParametersInRegistry(testRegistry);

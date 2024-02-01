@@ -15,6 +15,9 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class WalkingPreviewContactStateHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -28,33 +31,40 @@ public class WalkingPreviewContactStateHolder
    private final double kd = GainCalculator.computeDerivativeGain(kp, zeta);
    private final double weight = 50.0;
 
+   private final String namePrefix;
    private final InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
+   private final List<ReferenceFrame> framesToClear = new ArrayList<>();
 
-   public static WalkingPreviewContactStateHolder holdAtCurrent(PlaneContactState contactStateToHold)
+   public static WalkingPreviewContactStateHolder holdAtCurrent(String namePrefix, PlaneContactState contactStateToHold)
    {
       FramePose3D desiredPose = new FramePose3D(contactStateToHold.getPlaneFrame());
       desiredPose.changeFrame(worldFrame);
-      return new WalkingPreviewContactStateHolder(contactStateToHold, desiredPose);
+      return new WalkingPreviewContactStateHolder(namePrefix, contactStateToHold, desiredPose);
    }
 
-   public WalkingPreviewContactStateHolder(PlaneContactState contactStateToHold, FramePose3DReadOnly desiredPlaneFramePose)
+   public WalkingPreviewContactStateHolder(String namePrefix, PlaneContactState contactStateToHold, FramePose3DReadOnly desiredPlaneFramePose)
    {
       this.contactStateToHold = contactStateToHold;
+      this.namePrefix = namePrefix;
       currentPlaneFrame = (MovingReferenceFrame) contactStateToHold.getPlaneFrame();
 
       desiredPlaneFramePose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      desiredPlaneFrame = new PoseReferenceFrame("desiredPlaneFrame", desiredPlaneFramePose);
+      desiredPlaneFrame = new PoseReferenceFrame(namePrefix + "desiredPlaneFrame", desiredPlaneFramePose);
    }
+
+   private long doControlCounter = 0;
 
    public void doControl()
    {
       commandList.clear();
 
-      for (FramePoint3D currentContactPoint : contactStateToHold.getContactFramePointsInContactCopy())
+      List<FramePoint3D> contactFramePointsInContactCopy = contactStateToHold.getContactFramePointsInContactCopy();
+      for (int i = 0; i < contactFramePointsInContactCopy.size(); i++)
       {
+         FramePoint3D currentContactPoint = contactFramePointsInContactCopy.get(i);
          currentContactPoint.changeFrame(currentPlaneFrame);
          FramePoint3D desiredContactPoint = new FramePoint3D(desiredPlaneFrame, currentContactPoint);
-         PoseReferenceFrame controlFrame = new PoseReferenceFrame("atContactPoint", currentPlaneFrame);
+         PoseReferenceFrame controlFrame = new PoseReferenceFrame(namePrefix + "_atContactPoint_" + i + "_" + doControlCounter, currentPlaneFrame);
          controlFrame.setPositionAndUpdate(currentContactPoint);
 
          FrameVector3D currentLinearVelocity = new FrameVector3D();
@@ -77,11 +87,21 @@ public class WalkingPreviewContactStateHolder
          command.setWeight(0.0, weight);
          command.setSelectionMatrixForLinearControl();
          commandList.addCommand(command);
+
+         framesToClear.add(controlFrame);
       }
+
+      doControlCounter++;
    }
 
    public InverseDynamicsCommand<?> getOutput()
    {
       return commandList;
+   }
+
+   public void clearFrames()
+   {
+      framesToClear.forEach(ReferenceFrame::remove);
+      framesToClear.clear();
    }
 }

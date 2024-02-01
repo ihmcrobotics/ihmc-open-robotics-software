@@ -91,6 +91,14 @@ namespace promp {
          */
         const std::vector<Trajectory>& trajectories() const { return _trajs; }
 
+        /**
+         * @\brief	return the mean end value of the trajectory
+         * @param dof of the trajectory of interest
+         */
+        double get_mean_end_value(int dof);
+
+        double get_mean_start_value(int dof);
+
     private:
 
         //! vector of loaded trajectories

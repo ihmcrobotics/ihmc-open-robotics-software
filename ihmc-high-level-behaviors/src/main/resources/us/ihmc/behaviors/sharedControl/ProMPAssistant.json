@@ -1,16 +1,19 @@
 {
-  "testNumberUseOnlyForTesting": 2,
-  "logging" : true,
+  "testNumberUseOnlyForTesting": 1,
+  "logging" : false,
   "numberBasisFunctions": 20,
-  "numberObservations": 50,
+  "numberObservations": 10,
   "conditionOnlyLastObservation": true,
+  "numberOfInferredSpeeds": 0,
   "allowedIncreaseDecreaseSpeedFactor": 2,
-  "numberOfInferredSpeeds": 30,
   "tasks":[
     {
-      "name":"PushDoor",
-      "bodyPartForRecognition": "rightHand",
+      "context": "Door",
+      "name": "ReachHandle",
+      "bodyPartForInference": "rightHand",
       "bodyPartWithObservableGoal": "rightHand",
+      "translationGoalToEE": [0.135, -0.027,  0.174],
+      "rotationGoalToEE": [-0.158, -0.691,  0.681, -0.185],
       "bodyParts":[
         { "name":"leftHand", "geometry":"Pose" },
         { "name":"rightHand", "geometry":"Pose" }

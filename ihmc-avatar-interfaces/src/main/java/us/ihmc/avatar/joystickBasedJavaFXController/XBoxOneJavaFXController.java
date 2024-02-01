@@ -86,7 +86,7 @@ public class XBoxOneJavaFXController
    {
       this.messager = messager;
 
-      messager.registerTopicListener(XBoxControllerReconnect, value -> reconnectJoystick());
+      messager.addTopicListener(XBoxControllerReconnect, value -> reconnectJoystick());
 
       scheduleReconnectJoystick();
    }

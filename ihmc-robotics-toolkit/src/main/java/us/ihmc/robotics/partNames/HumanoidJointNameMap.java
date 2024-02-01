@@ -14,21 +14,21 @@ public interface HumanoidJointNameMap extends LeggedJointNameMap<RobotSide>
 {
    ImmutablePair<RobotSide, ArmJointName> getArmJointName(String jointName);
 
-   String getJointBeforeHandName(RobotSide robotSide);
+   default String getJointBeforeHandName(RobotSide robotSide)
+   {
+      if (getNameOfJointBeforeHands() == null)
+         return null;
+      else
+         return getNameOfJointBeforeHands().get(robotSide);
+   }
+
+   SideDependentList<String> getNameOfJointBeforeHands();
 
    RigidBodyTransform getHandControlFrameToWristTransform(RobotSide robotSide);
-
-   default RigidBodyTransform getSoleToParentFrameTransform(RobotSide robotSide)
-   {
-      return getSoleToAnkleFrameTransform(robotSide);
-   }
 
    String getPelvisName();
 
    String getChestName();
-
-   @Deprecated
-   RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide);
 
    @Override
    default RobotSide[] getRobotSegments()
@@ -44,10 +44,6 @@ public interface HumanoidJointNameMap extends LeggedJointNameMap<RobotSide>
 
    String getNameOfJointBeforeChest();
 
-   SideDependentList<String> getNameOfJointBeforeThighs();
-
-   SideDependentList<String> getNameOfJointBeforeHands();
-
    String[] getOrderedJointNames();
 
    String getLegJointName(RobotSide robotSide, LegJointName legJointName);
@@ -60,9 +56,14 @@ public interface HumanoidJointNameMap extends LeggedJointNameMap<RobotSide>
 
    String[] getPositionControlledJointsForSimulation();
 
-   List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoRegistry registry);
+   default List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoRegistry registry)
+   {
+      return null;
+   }
 
    String getHandName(RobotSide robotSide);
+
+   String getForearmName(RobotSide robotSide);
 
    String getFootName(RobotSide robotSide);
 
@@ -99,11 +100,28 @@ public interface HumanoidJointNameMap extends LeggedJointNameMap<RobotSide>
    default List<String> getArmJointNamesAsStrings(RobotSide robotSide)
    {
       List<String> armJointNames = new ArrayList<>();
+
+      // Must iterate in kinematic joint order
+      // Iterating over Set<Enum>#values will reorder the entries
       for (ArmJointName jointName : getArmJointNames())
       {
-         armJointNames.add(getArmJointName(robotSide, jointName));
+         String armJointName = getArmJointName(robotSide, jointName);
+         if (armJointName != null) // Account for asymetrical arms
+         {
+            armJointNames.add(armJointName);
+         }
       }
       return armJointNames;
+   }
+
+   default ArmJointName[] getArmJointNames(RobotSide robotSide)
+   {
+      ArrayList<ArmJointName> armJointNames = new ArrayList<>();
+      for (String armJointNamesAsString : getArmJointNamesAsStrings(robotSide))
+      {
+         armJointNames.add(getArmJointName(armJointNamesAsString).getValue());
+      }
+      return armJointNames.toArray(new ArmJointName[armJointNames.size()]);
    }
 
    default List<String> getLegJointNamesAsStrings()

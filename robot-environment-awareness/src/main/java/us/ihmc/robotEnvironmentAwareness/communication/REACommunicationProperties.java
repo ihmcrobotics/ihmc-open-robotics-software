@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import controller_msgs.msg.dds.ConcaveHullFactoryParametersMessage;
 import controller_msgs.msg.dds.ConcaveHullFactoryParametersStringMessage;
 import ihmc_common_msgs.msg.dds.BoundingBox3DMessagePubSubType;
+import ihmc_common_msgs.msg.dds.InstantMessage;
 import perception_msgs.msg.dds.*;
 import controller_msgs.msg.dds.Polygon2DMessage;
 import controller_msgs.msg.dds.Polygon2DMessagePubSubType;
@@ -12,6 +13,7 @@ import geometry_msgs.msg.dds.PointPubSubType;
 import geometry_msgs.msg.dds.QuaternionPubSubType;
 import geometry_msgs.msg.dds.Vector3PubSubType;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.*;
@@ -43,14 +45,14 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
  */
 public class REACommunicationProperties
 {
-   public static final ROS2Topic outputTopic = ROS2Tools.REA.withRobot(null).withOutput();
-   public static final ROS2Topic lidarOutputTopic = ROS2Tools.REA.withPrefix("lidar").withRobot(null).withOutput();
-   public static final ROS2Topic stereoOutputTopic = ROS2Tools.REALSENSE_REA;
-   public static final ROS2Topic depthOutputTopic = ROS2Tools.REA.withPrefix("depth").withRobot(null).withOutput();
-   public static final ROS2Topic inputTopic = ROS2Tools.REA.withRobot(null).withInput();
-   public static final ROS2Topic stereoInputTopic = ROS2Tools.REA.withPrefix("depth").withRobot(null).withInput();
-   public static final ROS2Topic subscriberCustomRegionsTopicName = ROS2Tools.REA.withRobot(null)
-                                                                                 .withSuffix(ROS2Tools.REA_CUSTOM_REGION_NAME)
+   public static final ROS2Topic outputTopic = PerceptionAPI.REA.withRobot(null).withOutput();
+   public static final ROS2Topic lidarOutputTopic = PerceptionAPI.REA.withPrefix("lidar").withRobot(null).withOutput();
+   public static final ROS2Topic stereoOutputTopic = PerceptionAPI.REALSENSE_REA;
+   public static final ROS2Topic depthOutputTopic = PerceptionAPI.REA.withPrefix("depth").withRobot(null).withOutput();
+   public static final ROS2Topic inputTopic = PerceptionAPI.REA.withRobot(null).withInput();
+   public static final ROS2Topic stereoInputTopic = PerceptionAPI.REA.withPrefix("depth").withRobot(null).withInput();
+   public static final ROS2Topic subscriberCustomRegionsTopicName = PerceptionAPI.REA.withRobot(null)
+                                                                                 .withSuffix(PerceptionAPI.REA_CUSTOM_REGION_NAME)
                                                                                  .withInput();
 
    private static final NetClassList privateNetClassList = new NetClassList();
@@ -97,6 +99,7 @@ public class REACommunicationProperties
       privateNetClassList.registerPacketField(PlanarRegionsListMessage.class);
       privateNetClassList.registerPacketField(Polygon2DMessage.class);
       privateNetClassList.registerPacketField(PlanarRegionMessage.class);
+      privateNetClassList.registerPacketField(InstantMessage.class);
 
       privateNetClassList.registerPacketClass(ConcaveHullFactoryParametersMessage.class);
       privateNetClassList.registerPacketField(ConcaveHullFactoryParametersMessage.class);

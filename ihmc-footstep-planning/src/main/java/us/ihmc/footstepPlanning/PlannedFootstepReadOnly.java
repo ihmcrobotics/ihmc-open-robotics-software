@@ -8,10 +8,15 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintListConverter;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
+import java.util.Arrays;
 import java.util.List;
 
 public interface PlannedFootstepReadOnly
@@ -39,6 +44,8 @@ public interface PlannedFootstepReadOnly
    double getTransferDuration();
 
    List<FrameSE3TrajectoryPoint> getSwingTrajectory();
+
+   PlanarRegion getRegionSnappedTo();
 
    long getSequenceId();
 
@@ -83,6 +90,11 @@ public interface PlannedFootstepReadOnly
 
       footstepDataMessage.setSwingDuration(getSwingDuration());
       footstepDataMessage.setTransferDuration(getTransferDuration());
+
+      if (getRegionSnappedTo() != null)
+      {
+         footstepDataMessage.getStepConstraints().set(StepConstraintMessageConverter.convertToStepConstraintsListMessageFromPlanarRegions(Arrays.asList(getRegionSnappedTo())));
+      }
 
       return footstepDataMessage;
    }

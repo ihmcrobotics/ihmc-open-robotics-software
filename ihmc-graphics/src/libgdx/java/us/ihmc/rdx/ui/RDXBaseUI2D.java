@@ -14,8 +14,8 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
-import us.ihmc.rdx.imgui.ImGuiPanelManager;
-import us.ihmc.rdx.imgui.ImGuiPanelSizeHandler;
+import us.ihmc.rdx.imgui.RDXPanelManager;
+import us.ihmc.rdx.imgui.RDXPanelSizeHandler;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.RDXInputMode;
 import us.ihmc.rdx.input.ImGui2DViewInput;
@@ -23,9 +23,7 @@ import us.ihmc.rdx.sceneManager.RDX2DSceneManager;
 import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.HybridDirectory;
-import us.ihmc.tools.io.HybridFile;
-import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,10 +43,10 @@ public class RDXBaseUI2D
    private final String windowTitle;
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
    private String configurationExtraPath;
-   private final HybridDirectory configurationBaseDirectory;
-   private HybridFile libGDXSettingsFile;
+   private final HybridResourceDirectory configurationBaseDirectory;
+   private HybridResourceFile libGDXSettingsFile;
    private final Stopwatch runTime = new Stopwatch().start();
-   private final ImGuiPanelSizeHandler view2DPanelSizeHandler = new ImGuiPanelSizeHandler();
+   private final RDXPanelSizeHandler view2DPanelSizeHandler = new RDXPanelSizeHandler();
    private ImGui2DViewInput inputCalculator;
    private final ArrayList<Consumer<ImGui2DViewInput>> imgui2DViewInputProcessors = new ArrayList<>();
    private GLFrameBuffer frameBuffer;
@@ -59,40 +57,32 @@ public class RDXBaseUI2D
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
    private final RDXImGuiLayoutManager layoutManager;
 
-   public RDXBaseUI2D(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public RDXBaseUI2D(Class<?> classForLoading)
    {
-      this(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading.getSimpleName());
+      this(classForLoading, classForLoading.getSimpleName());
    }
 
-   public RDXBaseUI2D(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
+   public RDXBaseUI2D(Class<?> classForLoading, String windowTitle)
    {
       this.windowTitle = windowTitle;
 
-      configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
-      configurationBaseDirectory = new HybridDirectory(dotIHMCDirectory,
-                                                       directoryNameToAssumePresent,
-                                                       subsequentPathToResourceFolder,
-                                                       classForLoading,
-                                                       configurationExtraPath);
+      configurationExtraPath = "configurations/" + windowTitle.replaceAll(" ", "");
+      configurationBaseDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading).resolve(configurationExtraPath);
 
-      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem();
-      layoutManager = new RDXImGuiLayoutManager(classForLoading,
-                                                directoryNameToAssumePresent,
-                                                subsequentPathToResourceFolder,
-                                                configurationExtraPath,
-                                                configurationBaseDirectory);
+      layoutManager = new RDXImGuiLayoutManager(classForLoading, configurationExtraPath, configurationBaseDirectory);
+      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem(layoutManager);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(updatedLayoutDirectory ->
       {
-         libGDXSettingsFile = new HybridFile(updatedLayoutDirectory, "GDXSettings.json");
+         libGDXSettingsFile = new HybridResourceFile(updatedLayoutDirectory, "GDXSettings.json");
       });
       layoutManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
          Gdx.graphics.setWindowedMode(imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth(),
                                       imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight());
-         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(imGuiWindowAndDockSystem.getPrimaryWindowPosition().getX(),
-                                                                 imGuiWindowAndDockSystem.getPrimaryWindowPosition().getY());
+         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getX(),
+                                                                 imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getY());
          return true;
       });
       layoutManager.getSaveListeners().add(this::saveApplicationSettings);
@@ -128,7 +118,7 @@ public class RDXBaseUI2D
 
 
 
-      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle(), layoutManager);
+      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
    }
@@ -287,7 +277,7 @@ public class RDXBaseUI2D
       Gdx.graphics.setForegroundFPS(foregroundFPS);
    }
 
-   public ImGuiPanelManager getImGuiPanelManager()
+   public RDXPanelManager getImGuiPanelManager()
    {
       return imGuiWindowAndDockSystem.getPanelManager();
    }

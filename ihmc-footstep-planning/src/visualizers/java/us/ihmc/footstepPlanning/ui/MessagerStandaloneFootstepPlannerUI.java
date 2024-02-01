@@ -3,8 +3,8 @@ package us.ihmc.footstepPlanning.ui;
 import javafx.stage.Stage;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 
 /**
  * This class provides a fully remote footstep planner. It includes the UI and the footstep planning modules, which are

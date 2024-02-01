@@ -16,12 +16,32 @@ import us.ihmc.tools.property.*;
  */
 public class HeightMapParameters extends StoredPropertySet implements HeightMapParametersBasics
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-sensor-processing/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-sensor-processing/src/main/generated-java";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
+   public static final BooleanStoredPropertyKey resetHeightMap = keys.addBooleanKey("Reset Height Map");
+   public static final IntegerStoredPropertyKey searchWindowHeight = keys.addIntegerKey("Search window height");
+   public static final IntegerStoredPropertyKey searchWindowWidth = keys.addIntegerKey("Search window width");
+   public static final DoubleStoredPropertyKey minHeightRegistration = keys.addDoubleKey("Min height registration");
+   public static final DoubleStoredPropertyKey maxHeightRegistration = keys.addDoubleKey("Max height registration");
+   public static final DoubleStoredPropertyKey minHeightDifference = keys.addDoubleKey("Min height difference");
+   public static final DoubleStoredPropertyKey maxHeightDifference = keys.addDoubleKey("Max height difference");
+   public static final DoubleStoredPropertyKey heightFilterAlpha = keys.addDoubleKey("Height filter alpha");
+   public static final DoubleStoredPropertyKey spatialAlpha = keys.addDoubleKey("Spatial alpha");
+   public static final DoubleStoredPropertyKey heightOffset = keys.addDoubleKey("Height offset");
+   public static final DoubleStoredPropertyKey minClampHeight = keys.addDoubleKey("Min Clamp Height");
+   public static final DoubleStoredPropertyKey maxClampHeight = keys.addDoubleKey("Max Clamp Height");
+   public static final DoubleStoredPropertyKey localWidthInMeters = keys.addDoubleKey("Local width in meters");
+   public static final DoubleStoredPropertyKey localCellSizeInMeters = keys.addDoubleKey("Local cell size in meters");
+   public static final DoubleStoredPropertyKey globalWidthInMeters = keys.addDoubleKey("Global width in meters");
+   public static final DoubleStoredPropertyKey globalCellSizeInMeters = keys.addDoubleKey("Global cell size in meters");
+   public static final DoubleStoredPropertyKey robotCollisionCylinderRadius = keys.addDoubleKey("Robot collision cylinder radius");
+   public static final DoubleStoredPropertyKey internalGlobalWidthInMeters = keys.addDoubleKey("Internal global width in meters");
+   public static final DoubleStoredPropertyKey internalGlobalCellSizeInMeters = keys.addDoubleKey("Internal global cell size in meters");
+   public static final DoubleStoredPropertyKey heightScaleFactor = keys.addDoubleKey("Height scale factor");
+   public static final IntegerStoredPropertyKey cropWindowSize = keys.addIntegerKey("Crop window size");
+   public static final IntegerStoredPropertyKey steppingContactThreshold = keys.addIntegerKey("Stepping contact threshold");
+   public static final IntegerStoredPropertyKey contactWindowSize = keys.addIntegerKey("Contact window size");
+   public static final DoubleStoredPropertyKey steppingCosineThreshold = keys.addDoubleKey("Stepping cosine threshold");
    /**
     * Resolution of the height map grid
     */
@@ -46,6 +66,19 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
     * is getNominalStandardDeviation() and m is this value.
     */
    public static final DoubleStoredPropertyKey mahalanobisScale = keys.addDoubleKey("Mahalanobis scale");
+   /**
+    * This is the variance added to all past measurements when a cell is translated
+    */
+   public static final DoubleStoredPropertyKey varianceAddedWhenTranslating = keys.addDoubleKey("Variance added when translating");
+   /**
+    * This is the measurement variance when the robot is standing
+    */
+   public static final DoubleStoredPropertyKey sensorVarianceWhenStanding = keys.addDoubleKey("Sensor variance when standing");
+   /**
+    * This is the measurement variance when the robot is moving
+    */
+   public static final DoubleStoredPropertyKey sensorVarianceWhenMoving = keys.addDoubleKey("Sensor variance when moving");
+   public static final BooleanStoredPropertyKey estimateHeightWithKalmanFilter = keys.addBooleanKey("Estimate height with kalman filter");
 
    /**
     * Loads this property set.
@@ -58,32 +91,29 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    /**
     * Loads an alternate version of this property set in the same folder.
     */
-   public HeightMapParameters(String versionSpecifier)
+   public HeightMapParameters(String versionSuffix)
    {
-      this(HeightMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(HeightMapParameters.class, versionSuffix);
    }
 
    /**
     * Loads an alternate version of this property set in other folders.
     */
-   public HeightMapParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
+   public HeightMapParameters(Class<?> classForLoading, String versionSuffix)
    {
-      super(keys, classForLoading, HeightMapParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+      super(keys, classForLoading, HeightMapParameters.class, versionSuffix);
       load();
    }
 
    public HeightMapParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, HeightMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, HeightMapParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           HeightMapParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+      StoredPropertySet parameters = new StoredPropertySet(keys, HeightMapParameters.class);
+      parameters.generateJavaFiles();
    }
 }

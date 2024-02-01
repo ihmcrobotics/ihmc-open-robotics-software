@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::TrajectoryPoint1DMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "6581462b3cc4a8092bac9c9a4f04b20aea254465914055999ba442e4a6f8c557";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

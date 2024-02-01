@@ -1,16 +1,16 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.controllers;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.PawStepPlannerNodeRejectionReason;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class PawStepPlannerVisualizationController
 {
@@ -66,8 +66,8 @@ public class PawStepPlannerVisualizationController
 
       messager.bindBidirectional(PawStepPlannerMessagerAPI.PlannerThoughtPlaybackFractionTopic, plannerPlaybackSlider.valueProperty(), false);
 
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.NodesThisTickTopic,
+      messager.addTopicListener(PawStepPlannerMessagerAPI.NodesThisTickTopic,
                                      nodes -> plannerPlaybackSlider.setBlockIncrement(1.0 / bufferSize.incrementAndGet()));
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.ComputePathTopic, data -> bufferSize.set(0));
+      messager.addTopicListener(PawStepPlannerMessagerAPI.ComputePathTopic, data -> bufferSize.set(0));
    }
 }

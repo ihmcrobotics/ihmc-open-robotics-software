@@ -2,21 +2,14 @@ package us.ihmc.commonWalkingControlModules.contact.kinematics;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.polytope.FrameConvexPolytope3D;
+import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameConvexPolytope3DReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
-import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
-import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
@@ -36,8 +29,8 @@ public class ContactableShape
 
    private final ExpandingPolytopeAlgorithm collisionDetector = new ExpandingPolytopeAlgorithm();
    private final EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
-   private final RigidBodyTransform shapeToWorldFrameTransform = new RigidBodyTransform();
-   private final RigidBodyTransform worldToShapeFrameTransform = new RigidBodyTransform();
+   private final RigidBodyTransform thisToOtherTransform = new RigidBodyTransform();
+   private final RigidBodyTransform otherToThisTransform = new RigidBodyTransform();
 
    private final Box3D polytopeInShapeFrame = new Box3D();
    private final BoundingBox3D shapeBoundingBoxInWorld = new BoundingBox3D();
@@ -47,6 +40,8 @@ public class ContactableShape
    private final List<FramePoint3D> boxCorners = new ArrayList<>();
    private final FramePose3D boxPose;
    private final PoseReferenceFrame boxFrame;
+   private final FrameSphere3D tempSphere = new FrameSphere3D(ReferenceFrame.getWorldFrame(), 0.0001);
+   private final FramePoint3D tempPoint = new FramePoint3D();
 
    public ContactableShape(String namePrefix, Collidable collidable)
    {
@@ -140,38 +135,86 @@ public class ContactableShape
       }
    }
 
-   public boolean detectEnvironmentContact(List<FramePoint3DReadOnly> contactPoints, double distanceThreshold, FrameBox3DReadOnly contactablePolytope, Vector3D contactNormalToSet)
+   public boolean detectEnvironmentContact(List<FramePoint3DReadOnly> contactPoints, List<FrameVector3DReadOnly> contactNormals, double distanceThreshold, FrameShape3DBasics otherShape)
    {
-      // Collision check in shape frame
-      FrameShape3DReadOnly collisionShape = collidable.getShape();
-      ReferenceFrame collisionShapeFrame = collisionShape.getReferenceFrame();
-      collisionShapeFrame.getTransformToDesiredFrame(shapeToWorldFrameTransform, ReferenceFrame.getWorldFrame());
-      worldToShapeFrameTransform.setAndInvert(shapeToWorldFrameTransform);
+//      if (isABox)
+//      {
+//         boolean contactDetected = false;
+//
+//         for (int i = 0; i < boxCorners.size(); i++)
+//         {
+//            FramePoint3D boxCorner = boxCorners.get(i);
+//            tempSphere.getPosition().set(boxCorner);
+//            contactDetected |= doCollisionCheck(contactPoints, contactNormals, distanceThreshold, tempSphere);
+//         }
+//
+//         return contactDetected;
+//      }
+//      else
+//      {
+         return doCollisionCheck(contactPoints, contactNormals, distanceThreshold, otherShape);
+//      }
+   }
 
-      polytopeInShapeFrame.set(contactablePolytope);
-      polytopeInShapeFrame.applyTransform(worldToShapeFrameTransform);
+   private boolean doCollisionCheck(List<FramePoint3DReadOnly> contactPoints,
+                                    List<FrameVector3DReadOnly> contactNormals,
+                                    double distanceThreshold,
+                                    FrameShape3DBasics otherShape)
+   {
+      FrameShape3DReadOnly thisShape = collidable.getShape();
+      ReferenceFrame thisShapeFrame = thisShape.getReferenceFrame();
+      thisShapeFrame.getTransformToDesiredFrame(thisToOtherTransform, otherShape.getReferenceFrame());
+      otherToThisTransform.setAndInvert(thisToOtherTransform);
 
-      collisionDetector.evaluateCollision(polytopeInShapeFrame, collisionShape, collisionResult);
+      otherShape.applyTransform(otherToThisTransform);
+      collisionDetector.evaluateCollision(otherShape, thisShape, collisionResult);
 
       boolean contactDetected = collisionResult.getSignedDistance() < distanceThreshold;
       if (contactDetected)
       {
-         FramePoint3D contactPoint = new FramePoint3D(collisionShapeFrame, collisionResult.getPointOnA());
+         FramePoint3D contactPoint = new FramePoint3D(thisShapeFrame, collisionResult.getPointOnB());
+         FrameVector3D surfaceNormal = new FrameVector3D();
+
+         contactPoint.setReferenceFrame(otherShape.getReferenceFrame());
+         otherShape.evaluatePoint3DCollision(contactPoint, tempPoint, surfaceNormal);
+         contactPoint.setReferenceFrame(thisShapeFrame);
+         surfaceNormal.setReferenceFrame(thisShapeFrame);
+
          contactPoint.changeFrame(ReferenceFrame.getWorldFrame());
          contactPoints.add(contactPoint);
 
-         FrameVector3D contactNormal = new FrameVector3D(collisionShapeFrame);
-         contactNormal.sub(collisionResult.getPointOnB(), collisionResult.getPointOnA());
-
-         if (collisionResult.areShapesColliding())
-            contactNormal.negate();
-
-         contactNormal.normalize();
-         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
-         contactNormalToSet.set(contactNormal);
+         surfaceNormal.changeFrame(ReferenceFrame.getWorldFrame());
+         contactNormals.add(surfaceNormal);
       }
 
+      otherShape.applyTransform(thisToOtherTransform);
       return contactDetected;
+   }
+
+   public void update()
+   {
+      if (isABox)
+      {
+         FrameBox3DReadOnly boxShape = (FrameBox3DReadOnly) collidable.getShape();
+         boxPose.setIncludingFrame(boxShape.getReferenceFrame(), boxShape.getPosition(), boxShape.getOrientation());
+         boxPose.changeFrame(ReferenceFrame.getWorldFrame());
+         boxFrame.setPoseAndUpdate(boxPose);
+
+         double halfX = 0.5 * boxShape.getSize().getX();
+         double halfY = 0.5 * boxShape.getSize().getY();
+         double halfZ = 0.5 * boxShape.getSize().getZ();
+
+         boxCorners.get(0).setIncludingFrame(boxFrame, halfX, halfY, halfZ);
+         boxCorners.get(1).setIncludingFrame(boxFrame, halfX, halfY, -halfZ);
+         boxCorners.get(2).setIncludingFrame(boxFrame, halfX, -halfY, halfZ);
+         boxCorners.get(3).setIncludingFrame(boxFrame, halfX, -halfY, -halfZ);
+         boxCorners.get(4).setIncludingFrame(boxFrame, -halfX, halfY, halfZ);
+         boxCorners.get(5).setIncludingFrame(boxFrame, -halfX, halfY, -halfZ);
+         boxCorners.get(6).setIncludingFrame(boxFrame, -halfX, -halfY, halfZ);
+         boxCorners.get(7).setIncludingFrame(boxFrame, -halfX, -halfY, -halfZ);
+
+         boxCorners.forEach(corner -> corner.changeFrame(ReferenceFrame.getWorldFrame()));
+      }
    }
 
    public BoundingBox3DReadOnly getShapeBoundingBox()
@@ -179,13 +222,5 @@ public class ContactableShape
       collidable.getShape().getReferenceFrame().update();
       collidable.getShape().getBoundingBox(ReferenceFrame.getWorldFrame(), shapeBoundingBoxInWorld);
       return shapeBoundingBoxInWorld;
-   }
-
-   public static int getMaximumNumberOfContactPoints(Collidable collidable)
-   {
-      if (collidable.getShape() instanceof FrameBox3DReadOnly)
-         return 4;
-      else
-         return 1;
    }
 }

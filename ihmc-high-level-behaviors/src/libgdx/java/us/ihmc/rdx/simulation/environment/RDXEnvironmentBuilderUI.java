@@ -6,16 +6,13 @@ import us.ihmc.rdx.ui.ImGui3DViewInputDebugger;
 
 public class RDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                  "Environment Builder");
+   private final RDXBaseUI baseUI = new RDXBaseUI("Environment Builder");
    private final RDXEnvironmentBuilder environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
    private final ImGui3DViewInputDebugger inputDebugger = new ImGui3DViewInputDebugger();
 
    public RDXEnvironmentBuilderUI()
    {
-      baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getWindowName(), environmentBuilder::renderImGuiWidgets);
+      baseUI.getImGuiPanelManager().addPanel(environmentBuilder);
       baseUI.launchRDXApplication(this);
    }
 

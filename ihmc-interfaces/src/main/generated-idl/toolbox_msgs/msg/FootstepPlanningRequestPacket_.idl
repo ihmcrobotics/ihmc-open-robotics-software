@@ -1,9 +1,9 @@
 #ifndef __toolbox_msgs__msg__FootstepPlanningRequestPacket__idl__
 #define __toolbox_msgs__msg__FootstepPlanningRequestPacket__idl__
 
+#include "controller_msgs/msg/./FootstepDataListMessage_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 #include "perception_msgs/msg/./HeightMapMessage_.idl"
-#include "perception_msgs/msg/./PlanarRegionsListMessage_.idl"
 module toolbox_msgs
 {
   module msg
@@ -19,14 +19,11 @@ module toolbox_msgs
       const octet SWING_PLANNER_TYPE_NONE =
       0;
 
-      const octet SWING_PLANNER_TYPE_TWO_WAYPOINT_POSITION =
+      const octet SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION =
       1;
 
-      const octet SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION =
-      2;
-
       const octet SWING_PLANNER_TYPE_PROPORTION =
-      3;
+      2;
 
       const long NO_PLAN_ID =
       -1;
@@ -120,11 +117,7 @@ module toolbox_msgs
          */
         double horizon_length;
         /**
-         * Planar regions to use, if you don't want to assume flat ground
-         */
-        perception_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list_message;
-        /**
-         * Height map data, optional
+         * Height map data, if you don'ot want to assume flat ground.
          */
         perception_msgs::msg::dds::HeightMapMessage height_map_message;
         /**
@@ -146,6 +139,10 @@ module toolbox_msgs
          * Specifies swing planner to use. See the above enumeration
          */
         octet requested_swing_planner;
+        /**
+         * Reference plan to be used in ReferenceBasedIdealStepCalculator.
+         */
+        controller_msgs::msg::dds::FootstepDataListMessage reference_plan;
         /**
          * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
          * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/

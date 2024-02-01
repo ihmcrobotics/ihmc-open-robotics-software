@@ -1,9 +1,10 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 
-class PlanarRegionNormal implements UnitVector3DReadOnly
+public class PlanarRegionNormal implements UnitVector3DReadOnly
 {
    private final RigidBodyTransform fromLocalToWorldTransform;
 
@@ -13,7 +14,7 @@ class PlanarRegionNormal implements UnitVector3DReadOnly
       this.fromLocalToWorldTransform = null;
    }
 
-   PlanarRegionNormal(RigidBodyTransform fromLocalToWorldTransform)
+   public PlanarRegionNormal(RigidBodyTransform fromLocalToWorldTransform)
    {
       this.fromLocalToWorldTransform = fromLocalToWorldTransform;
    }
@@ -58,5 +59,11 @@ class PlanarRegionNormal implements UnitVector3DReadOnly
    public boolean isDirty()
    {
       return false;
+   }
+
+   @Override
+   public String toString(String format)
+   {
+      return EuclidCoreIOTools.getTuple3DString(format, this);
    }
 }

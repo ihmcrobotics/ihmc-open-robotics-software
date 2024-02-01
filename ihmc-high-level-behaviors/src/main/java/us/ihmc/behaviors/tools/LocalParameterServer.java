@@ -12,6 +12,10 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * This is useful in dealing with the {@link us.ihmc.wholeBodyController.parameters} stuff,
+ * which we don't use much, but handy to have around.
+ */
 public class LocalParameterServer
 {
    private static final long PERIOD_MS = 17; // 60Hz should be plenty

@@ -192,7 +192,7 @@ public class UpDownFlatAreaFinder
 
          LogTools.trace("Polygon center point {}", polygonPoints.getCenterPoint());
 
-         messager.submitMessage(PatrolBehaviorAPI.UpDownGoalPoses, upDownResultForVisualization);
+//         messager.submitMessage(PatrolBehaviorAPI.UpDownGoalPoses, upDownResultForVisualization);
          ThreadTools.sleepSeconds(0.02);
 
       }

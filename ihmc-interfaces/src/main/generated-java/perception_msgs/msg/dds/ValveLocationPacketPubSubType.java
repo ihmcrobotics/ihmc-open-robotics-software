@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.ValveLocationPacket>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::ValveLocationPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "d1dd82a283bf7b28135506e69d962d66e8ac8aa809af99f535557af3922e75ac";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

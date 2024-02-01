@@ -21,14 +21,13 @@ import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -47,7 +46,7 @@ public class KinematicsBasedStateEstimatorFactory
    private RequiredFactoryField<StateEstimatorParameters> stateEstimatorParametersField = new RequiredFactoryField<>("stateEstimatorParametersField");
 
    private RequiredFactoryField<ContactableBodiesFactory<RobotSide>> contactableBodiesFactoryField = new RequiredFactoryField<>("contactableBodiesFactoryField");
-   private RequiredFactoryField<ForceSensorDataHolderReadOnly> estimatorForceSensorDataHolderField = new RequiredFactoryField<>("estimatorForceSensorDataHolderField");
+   private RequiredFactoryField<ForceSensorDataHolder> estimatorForceSensorDataHolderField = new RequiredFactoryField<>("estimatorForceSensorDataHolderField");
 
    private OptionalFactoryField<CenterOfMassDataHolder> estimatorCenterOfMassDataHolderToUpdateField = new OptionalFactoryField<>("estimatorCenterOfMassDataHolderToUpdateField");
 
@@ -92,7 +91,7 @@ public class KinematicsBasedStateEstimatorFactory
       return this;
    }
 
-   public KinematicsBasedStateEstimatorFactory setEstimatorForceSensorDataHolder(ForceSensorDataHolderReadOnly estimatorForceSensorDataHolder)
+   public KinematicsBasedStateEstimatorFactory setEstimatorForceSensorDataHolder(ForceSensorDataHolder estimatorForceSensorDataHolder)
    {
       this.estimatorForceSensorDataHolderField.set(estimatorForceSensorDataHolder);
       return this;
@@ -122,7 +121,7 @@ public class KinematicsBasedStateEstimatorFactory
       return this;
    }
 
-   public StateEstimatorController createStateEstimator(YoRegistry stateEstimatorRegistry, YoGraphicsListRegistry stateEstimatorYoGraphicsListRegistry)
+   public DRCKinematicsBasedStateEstimator createStateEstimator(YoRegistry stateEstimatorRegistry, YoGraphicsListRegistry stateEstimatorYoGraphicsListRegistry)
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -144,23 +143,26 @@ public class KinematicsBasedStateEstimatorFactory
       Map<RigidBodyBasics, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBodyBasics, ContactablePlaneBody>();
 
       HumanoidRobotSensorInformation sensorInformation = sensorInformationField.get();
-      ForceSensorDataHolderReadOnly estimatorForceSensorDataHolder = estimatorForceSensorDataHolderField.get();
+      ForceSensorDataHolder estimatorForceSensorDataHolder = estimatorForceSensorDataHolderField.get();
       StateEstimatorParameters stateEstimatorParameters = stateEstimatorParametersField.get();
-      FootSwitchFactory footSwitchFactory = stateEstimatorParameters.getFootSwitchFactory();
+      SideDependentList<FootSwitchFactory> footSwitchFactories = stateEstimatorParameters.getFootSwitchFactories();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
-         ForceSensorDataReadOnly footForceSensorForEstimator = estimatorForceSensorDataHolder.getByName(footForceSensorName);
+         ForceSensorDataReadOnly footForceSensorForEstimator = estimatorForceSensorDataHolder.getData(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
          RigidBodyBasics foot = bipedFeet.get(robotSide).getRigidBody();
          bipedFeetMap.put(foot, bipedFeet.get(robotSide));
 
+         FootSwitchFactory footSwitchFactory = footSwitchFactories.get(robotSide);
+
          Set<ContactableFoot> otherFoot = Collections.singleton(bipedFeet.get(robotSide.getOppositeSide()));
          FootSwitchInterface footSwitch = footSwitchFactory.newFootSwitch(namePrefix,
                                                                           bipedFeet.get(robotSide),
                                                                           otherFoot,
+                                                                          fullRobotModel.getRootBody(),
                                                                           footForceSensorForEstimator,
                                                                           totalRobotWeight,
                                                                           null,
@@ -171,9 +173,8 @@ public class KinematicsBasedStateEstimatorFactory
       String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
 
       // Create the sensor readers and state estimator here:
-      CenterOfMassDataHolder estimatorCenterOfMassDataHolder = estimatorCenterOfMassDataHolderToUpdateField.hasValue()
-            ? estimatorCenterOfMassDataHolderToUpdateField.get()
-            : null;
+      CenterOfMassDataHolder estimatorCenterOfMassDataHolder = estimatorCenterOfMassDataHolderToUpdateField.hasValue() ? estimatorCenterOfMassDataHolderToUpdateField.get()
+                                                                                                                       : null;
       DRCKinematicsBasedStateEstimator estimator = new DRCKinematicsBasedStateEstimator(fullInverseDynamicsStructure,
                                                                                         stateEstimatorParameters,
                                                                                         sensorOutputMapReadOnlyField.get(),
@@ -184,6 +185,7 @@ public class KinematicsBasedStateEstimatorFactory
                                                                                         centerOfPressureDataHolderFromControllerField.get(),
                                                                                         robotMotionStatusFromControllerField.get(),
                                                                                         bipedFeetMap,
+                                                                                        estimatorForceSensorDataHolder,
                                                                                         stateEstimatorYoGraphicsListRegistry);
 
       if (externalPelvisPoseSubscriberField.hasValue())
@@ -194,7 +196,7 @@ public class KinematicsBasedStateEstimatorFactory
       return estimator;
    }
 
-   private FullInverseDynamicsStructure createFullInverseDynamicsStructure(FullHumanoidRobotModel fullRobotModel)
+   public static FullInverseDynamicsStructure createFullInverseDynamicsStructure(FullHumanoidRobotModel fullRobotModel)
    {
       RigidBodyBasics elevator = fullRobotModel.getElevator();
       FloatingJointBasics rootInverseDynamicsJoint = fullRobotModel.getRootJoint();

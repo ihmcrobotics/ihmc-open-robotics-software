@@ -1,7 +1,6 @@
 package us.ihmc.tools.thread;
 
 import us.ihmc.commons.exception.ExceptionHandler;
-import us.ihmc.log.LogTools;
 
 import java.util.HashMap;
 import java.util.List;
@@ -97,24 +96,13 @@ public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
    @Override
    protected void afterExecute(Runnable runnableFuture, Throwable throwable)
    {
-      super.afterExecute(runnableFuture, throwable); // fluff pretty much, super has no implementation
+      // super is probably a no-op
+      super.afterExecute(runnableFuture, throwable);
 
-      try
+      ExceptionHandler handler = afterExecuteHandlers.remove(runnableFuture);
+      if (throwable != null) // Throwable is null if execution completed normally
       {
-         ExceptionHandler handler = afterExecuteHandlers.remove(runnableFuture);
-         if (handler != null)
-         {
-            handler.handleException(throwable);
-         }
-         else
-         {
-            LogTools.warn("There were no afterExecute handlers to run.");
-         }
-      }
-      catch (NullPointerException nullPointerException)
-      {
-         LogTools.error(nullPointerException.getMessage());
-         nullPointerException.printStackTrace();
+         handler.handleException(throwable);
       }
    }
 }

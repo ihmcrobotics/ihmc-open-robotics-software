@@ -44,28 +44,36 @@
 		}
 	], 
 	"materials": [
-		{"id": "Material", 
-			"ambient": [ 0.050876,  0.050876,  0.050876], 
-			"diffuse": [ 0.588235,  0.588235,  0.588235],
-			"emissive": [ 0.000000,  0.000000,  0.000000], 
-			"opacity":  1.000000, 
-			"specular": [ 0.588235,  0.588235,  0.588235],
-			"shininess":  2.000000,
+		{
+			"id": "Material", 
+			"ambient": [ 1.0,  1.0,  1.0],
+			"diffuse": [ 1.000000,  1.000000,  1.000000],
+			"emissive": [ 0.000000,  0.000000,  0.000000],
+			"opacity":  1.000000,
+			"specular": [ 0.1, 0.1, 0.1],
+			"shininess":  0.000001,
 			"textures": [
-				{"id": "base_color_texture", 
+				{
+					"id": "base_color_texture", 
 					"filename": "boxTexture.jpg", 
-					"type": "DIFFUSE"}
-			]}
+					"type": "DIFFUSE"
+				}
+			]
+		}
 	], 
 	"nodes": [
-		{"id": "Cube", 
+		{
+			"id": "Cube", 
 			"scale": [ 0.175000,  0.175000,  0.175000], 
 			"translation": [ 0.175000,  0.175000,  0.175000], 
 			"parts": [
-				{"meshpartid": "Cube_part1", 
+				{
+					"meshpartid": "Cube_part1", 
 					"materialid": "Material", 
-					"uvMapping": [[]]}
-			]}
+					"uvMapping": [[]]
+				}
+			]
+		}
 	], 
 	"animations": []
 }

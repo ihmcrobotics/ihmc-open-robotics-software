@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.ImageMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::ImageMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "861742e3ba65a4001a48beb5dfe643935ac3c8bc1b1014cd07c2e7a9b324d057";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -48,15 +60,29 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (25000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (128 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (128 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       return current_alignment - initial_alignment;
@@ -83,17 +109,41 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getData().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPosition(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
 
-      current_alignment += perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType.getCdrSerializedSize(data.getIntrinsicParameters(), current_alignment);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getOusterBeamAltitudeAngles().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getOusterBeamAzimuthAngles().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       return current_alignment - initial_alignment;
@@ -108,15 +158,34 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       cdr.write_type_3(data.getImageHeight());
 
+      cdr.write_type_5(data.getDepthDiscretization());
+
       if(data.getData().size() <= 25000000)
       cdr.write_type_e(data.getData());else
           throw new RuntimeException("data field exceeds the maximum length");
 
-      cdr.write_type_3(data.getFormat());
+      cdr.write_type_9(data.getFormat());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
-      perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType.write(data.getIntrinsicParameters(), cdr);
+      cdr.write_type_9(data.getCameraModel());
+
+      cdr.write_type_5(data.getFocalLengthXPixels());
+
+      cdr.write_type_5(data.getFocalLengthYPixels());
+
+      cdr.write_type_5(data.getPrincipalPointXPixels());
+
+      cdr.write_type_5(data.getPrincipalPointYPixels());
+
+      if(data.getOusterBeamAltitudeAngles().size() <= 128)
+      cdr.write_type_e(data.getOusterBeamAltitudeAngles());else
+          throw new RuntimeException("ouster_beam_altitude_angles field exceeds the maximum length");
+
+      if(data.getOusterBeamAzimuthAngles().size() <= 128)
+      cdr.write_type_e(data.getOusterBeamAzimuthAngles());else
+          throw new RuntimeException("ouster_beam_azimuth_angles field exceeds the maximum length");
+
    }
 
    public static void read(perception_msgs.msg.dds.ImageMessage data, us.ihmc.idl.CDR cdr)
@@ -128,12 +197,25 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       	
       data.setImageHeight(cdr.read_type_3());
       	
+      data.setDepthDiscretization(cdr.read_type_5());
+      	
       cdr.read_type_e(data.getData());	
-      data.setFormat(cdr.read_type_3());
+      data.setFormat(cdr.read_type_9());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
-      perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType.read(data.getIntrinsicParameters(), cdr);	
+      data.setCameraModel(cdr.read_type_9());
+      	
+      data.setFocalLengthXPixels(cdr.read_type_5());
+      	
+      data.setFocalLengthYPixels(cdr.read_type_5());
+      	
+      data.setPrincipalPointXPixels(cdr.read_type_5());
+      	
+      data.setPrincipalPointYPixels(cdr.read_type_5());
+      	
+      cdr.read_type_e(data.getOusterBeamAltitudeAngles());	
+      cdr.read_type_e(data.getOusterBeamAzimuthAngles());	
 
    }
 
@@ -145,14 +227,20 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       ser.write_type_3("image_width", data.getImageWidth());
       ser.write_type_3("image_height", data.getImageHeight());
+      ser.write_type_5("depth_discretization", data.getDepthDiscretization());
       ser.write_type_e("data", data.getData());
-      ser.write_type_3("format", data.getFormat());
+      ser.write_type_9("format", data.getFormat());
       ser.write_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
-      ser.write_type_a("intrinsic_parameters", new perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType(), data.getIntrinsicParameters());
-
+      ser.write_type_9("camera_model", data.getCameraModel());
+      ser.write_type_5("focal_length_x_pixels", data.getFocalLengthXPixels());
+      ser.write_type_5("focal_length_y_pixels", data.getFocalLengthYPixels());
+      ser.write_type_5("principal_point_x_pixels", data.getPrincipalPointXPixels());
+      ser.write_type_5("principal_point_y_pixels", data.getPrincipalPointYPixels());
+      ser.write_type_e("ouster_beam_altitude_angles", data.getOusterBeamAltitudeAngles());
+      ser.write_type_e("ouster_beam_azimuth_angles", data.getOusterBeamAzimuthAngles());
    }
 
    @Override
@@ -163,14 +251,20 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       data.setImageWidth(ser.read_type_3("image_width"));
       data.setImageHeight(ser.read_type_3("image_height"));
+      data.setDepthDiscretization(ser.read_type_5("depth_discretization"));
       ser.read_type_e("data", data.getData());
-      data.setFormat(ser.read_type_3("format"));
+      data.setFormat(ser.read_type_9("format"));
       ser.read_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
-      ser.read_type_a("intrinsic_parameters", new perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType(), data.getIntrinsicParameters());
-
+      data.setCameraModel(ser.read_type_9("camera_model"));
+      data.setFocalLengthXPixels(ser.read_type_5("focal_length_x_pixels"));
+      data.setFocalLengthYPixels(ser.read_type_5("focal_length_y_pixels"));
+      data.setPrincipalPointXPixels(ser.read_type_5("principal_point_x_pixels"));
+      data.setPrincipalPointYPixels(ser.read_type_5("principal_point_y_pixels"));
+      ser.read_type_e("ouster_beam_altitude_angles", data.getOusterBeamAltitudeAngles());
+      ser.read_type_e("ouster_beam_azimuth_angles", data.getOusterBeamAzimuthAngles());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.ImageMessage src, perception_msgs.msg.dds.ImageMessage dest)

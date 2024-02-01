@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.TimeIntervalMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::TimeIntervalMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "a0653a5a82a206833f2d98e8452fcf1d28a94dfde1c0bbe446ce5dfbfa60a443";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

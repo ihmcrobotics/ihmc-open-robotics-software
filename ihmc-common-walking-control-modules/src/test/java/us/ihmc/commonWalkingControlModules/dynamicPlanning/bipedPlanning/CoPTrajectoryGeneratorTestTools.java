@@ -129,7 +129,7 @@ public class CoPTrajectoryGeneratorTestTools
       return soleFrames;
    }
 
-   public static ConvexPolygon2D createDefaultSupportPolygon()
+   public static SideDependentList<ConvexPolygon2D> createDefaultSupportPolygon()
    {
       ConvexPolygon2D defaultSupportPolygon = new ConvexPolygon2D();
       defaultSupportPolygon.addVertex(0.1, 0.05);
@@ -137,6 +137,6 @@ public class CoPTrajectoryGeneratorTestTools
       defaultSupportPolygon.addVertex(-0.1, 0.05);
       defaultSupportPolygon.addVertex(-0.1, -0.05);
       defaultSupportPolygon.update();
-      return defaultSupportPolygon;
+      return new SideDependentList<>(defaultSupportPolygon, defaultSupportPolygon);
    }
 }

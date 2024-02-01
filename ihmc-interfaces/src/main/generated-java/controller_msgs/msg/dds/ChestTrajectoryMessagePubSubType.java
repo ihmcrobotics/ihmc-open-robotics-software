@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ChestTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ChestTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ChestTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "db4649d00d1b5ed84428b24465afc5fe97d1cdd5d99990b06301789fd04d588f";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

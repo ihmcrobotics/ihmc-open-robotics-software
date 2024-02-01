@@ -9,14 +9,15 @@ import perception_msgs.msg.dds.DoorLocationPacket;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 
 public class ObjectDetectorToolboxModule extends ToolboxModule
 {
@@ -38,10 +39,10 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
 
    //TODO check this
    @Override
-   public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
+   public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     DetectedFiducialPacket.class,
                                                     FiducialDetectorToolboxModule.getOutputTopic(robotName),
                                                     s ->
@@ -79,7 +80,7 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ROS2Tools.OBJECT_DETECTOR_TOOLBOX_OUTPUT.withRobot(robotName);
+      return PerceptionAPI.OBJECT_DETECTOR_TOOLBOX_OUTPUT.withRobot(robotName);
    }
 
    @Override
@@ -90,6 +91,6 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ROS2Tools.OBJECT_DETECTOR_TOOLBOX_INPUT.withRobot(robotName);
+      return PerceptionAPI.OBJECT_DETECTOR_TOOLBOX_INPUT.withRobot(robotName);
    }
 }

@@ -8,6 +8,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.matrixlib.NativeMatrix;
+import us.ihmc.matrixlib.NativeMatrixTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -91,7 +92,7 @@ public class JointIndexHandler
          
          if (indicesIntoFullBlock == null) // don't do anything for joints that are not in the list
             return false;
-         
+
          for (int i = 0; i < indicesIntoCompactBlock.size(); i++)
          {
             int compactBlockIndex = indicesIntoCompactBlock.get(i);
@@ -150,6 +151,27 @@ public class JointIndexHandler
             int fullBlockIndex = indicesIntoFullBlock[i];
             CommonOps_DDRM.extract(compactMatrix, 0, compactMatrix.getNumRows(), compactBlockIndex, compactBlockIndex + 1, fullMatrix, 0, fullBlockIndex);
          }
+      }
+   }
+
+   public void compactBlockToFullBlockIgnoreUnindexedJoints(List<? extends JointReadOnly> joints, NativeMatrix compactMatrix, NativeMatrix fullMatrix)
+   {
+      fullMatrix.reshape(compactMatrix.getNumRows(), fullMatrix.getNumCols());
+      fullMatrix.zero();
+
+      int rows = compactMatrix.getNumRows();
+
+      for (int index = 0; index < joints.size(); index++)
+      {
+         JointReadOnly joint = joints.get(index);
+         indicesIntoCompactBlock.reset();
+         ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
+         int[] indicesIntoFullBlock = columnsForJoints.get(joint);
+
+         if (indicesIntoFullBlock == null) // don't do anything for joints that are not in the list
+            continue;
+
+         NativeMatrixTools.extractColumns(compactMatrix, indicesIntoCompactBlock, fullMatrix, indicesIntoFullBlock);
       }
    }
 

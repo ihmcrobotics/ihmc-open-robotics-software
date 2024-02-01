@@ -12,12 +12,11 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.partNames.LeggedJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.simulationconstructionset.util.BidirectionGroundContactModel;
-import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 
 public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegment<E>> implements ContactPointDefinitionHolder
 {
@@ -36,6 +35,8 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
    protected final ArrayList<String> additionalContactRigidBodyNames = new ArrayList<>();
    protected final ArrayList<String> additionalContactNames = new ArrayList<>();
    protected final ArrayList<RigidBodyTransform> additionalContactTransforms = new ArrayList<>();
+
+   protected GroundContactModelParameters groundContactModelParameters = null;
 
    protected boolean useSoftGroundContactParameters;
 
@@ -190,12 +191,20 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
       return additionalContactNames;
    }
 
-   public GroundContactModelParameters getContactModelParameters()
+   public void setGroundContactModelParameters(GroundContactModelParameters groundContactModelParameters)
    {
-      return getContactModelParameters(0.0001);
+      if (this.groundContactModelParameters == null)
+         this.groundContactModelParameters = groundContactModelParameters;
+      else
+         LogTools.warn("Cannot set ground contact parameters, they have already been set elsewhere");
    }
 
-   public GroundContactModelParameters getContactModelParameters(double simDT)
+   public void createGroundContactModelParameters()
+   {
+      createGroundContactModelParameters(0.0001);
+   }
+
+   public void createGroundContactModelParameters(double simDT)
    {
       double zStiffness;
       double zDamping;
@@ -223,30 +232,21 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
          xyStiffness = (50000.0 * scale);
          xyDamping = (2000.0 * scale);
       }
-      return new GroundContactModelParameters(zStiffness, zDamping, xyStiffness, xyDamping);
+
+      setGroundContactModelParameters(new GroundContactModelParameters(zStiffness, zDamping, xyStiffness, xyDamping));
    }
 
-   public void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel)
+   public GroundContactModelParameters getGroundContactModelParameters()
    {
-      setupGroundContactModelParameters(linearGroundContactModel, 0.0001);
+      return getGroundContactModelParameters(0.0001);
    }
 
-   public void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel, double simDT)
+   public GroundContactModelParameters getGroundContactModelParameters(double simDT)
    {
-      GroundContactModelParameters contactModelParameters = getContactModelParameters(simDT);
-      linearGroundContactModel.setZStiffness(contactModelParameters.getZStiffness());
-      linearGroundContactModel.setZDamping(contactModelParameters.getZDamping());
-      linearGroundContactModel.setXYStiffness(contactModelParameters.getXYStiffness());
-      linearGroundContactModel.setXYDamping(contactModelParameters.getXYDamping());
-   }
+      if (groundContactModelParameters == null)
+         createGroundContactModelParameters(simDT);
 
-   public void setupGroundContactModelParameters(BidirectionGroundContactModel bidirectionGroundContactModel)
-   {
-      GroundContactModelParameters contactModelParameters = getContactModelParameters();
-      bidirectionGroundContactModel.setZStiffness(contactModelParameters.getZStiffness());
-      bidirectionGroundContactModel.setZDamping(contactModelParameters.getZDamping());
-      bidirectionGroundContactModel.setXYStiffness(contactModelParameters.getXYStiffness());
-      bidirectionGroundContactModel.setXYDamping(contactModelParameters.getXYDamping());
+      return groundContactModelParameters;
    }
 
    public static class GroundContactModelParameters

@@ -1,13 +1,14 @@
 package us.ihmc.robotEnvironmentAwareness.polygonizer;
 
-import static us.ihmc.robotEnvironmentAwareness.ui.controller.PolygonizerAnchorPaneController.*;
+import static us.ihmc.robotEnvironmentAwareness.ui.controller.PolygonizerAnchorPaneController.createAngleValueFactory;
+import static us.ihmc.robotEnvironmentAwareness.ui.controller.PolygonizerAnchorPaneController.createLengthValueFactory;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.javaFXToolkit.StringConverterTools;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.ConcaveHullFactoryParametersProperty;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.IntersectionEstimationParametersProperty;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.PolygonizerParametersProperty;

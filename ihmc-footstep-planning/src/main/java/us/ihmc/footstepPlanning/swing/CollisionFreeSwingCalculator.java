@@ -1,11 +1,18 @@
 package us.ihmc.footstepPlanning.swing;
 
-import gnu.trove.list.array.TDoubleArrayList;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.mutable.MutableInt;
+
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.AdaptiveSwingTimingTools;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -28,31 +35,35 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.math.trajectories.core.Polynomial;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class CollisionFreeSwingCalculator
 {
    private static final FrameVector3D zeroVector = new FrameVector3D();
    private static final Vector3D infiniteWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
    private static final double collisionGradientScale = 0.5;
+   private static final double minCollisionAdjustment = 0.01;
    private static final double collisionDistanceEpsilon = 1e-4;
    private static final int numberOfKnotPoints = 12;
    private static final double downSamplePercentage = 0.3;
@@ -66,7 +77,7 @@ public class CollisionFreeSwingCalculator
    private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final TickAndUpdatable tickAndUpdatable;
+   private final List<TickAndUpdatable> tickAndUpdatables = new ArrayList<>();
 
    private final FramePose3D startOfSwingPose = new FramePose3D();
    private final FramePose3D endOfSwingPose = new FramePose3D();
@@ -79,6 +90,10 @@ public class CollisionFreeSwingCalculator
    private final List<Vector3D> convolvedGradients = new ArrayList<>();
    private final TDoubleArrayList convolutionWeights = new TDoubleArrayList();
    private final List<SwingKnotPoint> swingKnotPoints = new ArrayList<>();
+
+   private final List<YoFramePoint3D> collisionLocationsViz = new ArrayList<>();
+   private final List<YoFramePoint3D> collisionPointsViz = new ArrayList<>();
+   private final List<YoFrameVector3D> collisionGradientsViz = new ArrayList<>();
 
    private PlanarRegionsList planarRegionsList;
    private HeightMapData heightMapData;
@@ -95,12 +110,11 @@ public class CollisionFreeSwingCalculator
    private final YoEnum<PlanPhase> planPhase = new YoEnum<>("planPhase", registry, PlanPhase.class, true);
    private final BagOfBalls downSampledWaypoints;
 
+   private final List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = new ArrayList<>();
+
    private enum PlanPhase
    {
-      PLAN_NOMINAL_TRAJECTORY,
-      PERFORM_COLLISION_CHECK,
-      RECOMPUTE_FULL_TRAJECTORY,
-      COMPUTE_DOWN_SAMPLED_TRAJECTORY
+      PLAN_NOMINAL_TRAJECTORY, PERFORM_COLLISION_CHECK, RECOMPUTE_FULL_TRAJECTORY, COMPUTE_DOWN_SAMPLED_TRAJECTORY
    }
 
    public CollisionFreeSwingCalculator(FootstepPlannerParametersReadOnly footstepPlannerParameters,
@@ -122,9 +136,10 @@ public class CollisionFreeSwingCalculator
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.swingPlannerParameters = swingPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
-      this.tickAndUpdatable = tickAndUpdatable;
+      if (tickAndUpdatable != null)
+         this.tickAndUpdatables.add(tickAndUpdatable);
       this.graphicsListRegistry = graphicsListRegistry;
-      this.positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator("", registry, graphicsListRegistry, 30, numberOfKnotPoints, ReferenceFrame.getWorldFrame());
+      this.positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator("", registry, graphicsListRegistry, 100, numberOfKnotPoints, ReferenceFrame.getWorldFrame());
 
       for (int i = 0; i < numberOfKnotPoints; i++)
       {
@@ -150,12 +165,34 @@ public class CollisionFreeSwingCalculator
          }
 
          soleFrameGraphicPose = new YoFramePoseUsingYawPitchRoll("soleGraphicPose", ReferenceFrame.getWorldFrame(), registry);
-         YoFrameConvexPolygon2D yoFootPolygon = new YoFrameConvexPolygon2D("footPolygon", "", ReferenceFrame.getWorldFrame(), footPolygons.get(RobotSide.LEFT).getNumberOfVertices(), registry);
+         YoFrameConvexPolygon2D yoFootPolygon = new YoFrameConvexPolygon2D("footPolygon",
+                                                                           "",
+                                                                           ReferenceFrame.getWorldFrame(),
+                                                                           footPolygons.get(RobotSide.LEFT).getNumberOfVertices(),
+                                                                           registry);
          yoFootPolygon.set(footPolygons.get(RobotSide.LEFT));
          footPolygonGraphic = new YoGraphicPolygon("soleGraphicPolygon", yoFootPolygon, soleFrameGraphicPose, 1.0, YoAppearance.RGBColorFromHex(0x386166));
          graphicsList.add(footPolygonGraphic);
 
          downSampledWaypoints = new BagOfBalls(3, 0.015, YoAppearance.White(), registry, graphicsListRegistry);
+
+         for (int i = 0; i < numberOfKnotPoints; i++)
+         {
+            YoFramePoint3D collisionPointViz = new YoFramePoint3D("collisionPointViz" + i, ReferenceFrame.getWorldFrame(), registry);
+            YoFramePoint3D collisionLocationViz = new YoFramePoint3D("collisionLocationViz" + i, ReferenceFrame.getWorldFrame(), registry);
+            YoFrameVector3D collisionGradientViz = new YoFrameVector3D("collisionGradientViz" + i, ReferenceFrame.getWorldFrame(), registry);
+
+            YoGraphicVector collisionGraphic = new YoGraphicVector("collisionDirection" + i, collisionLocationViz, collisionGradientViz, 2.0, YoAppearance.Red());
+            YoGraphicPosition collisionLocation = new YoGraphicPosition("collisionLocation" + i, collisionLocationViz, 0.03, YoAppearance.Red());
+            YoGraphicPosition collisionPoint = new YoGraphicPosition("collision" + i, collisionPointViz, 0.02, YoAppearance.Yellow());
+            graphicsList.add(collisionGraphic);
+            graphicsList.add(collisionLocation);
+            graphicsList.add(collisionPoint);
+
+            collisionPointsViz.add(collisionPointViz);
+            collisionLocationsViz.add(collisionLocationViz);
+            collisionGradientsViz.add(collisionGradientViz);
+         }
 
          graphicsListRegistry.registerYoGraphicsList(graphicsList);
          parentRegistry.addChild(registry);
@@ -166,6 +203,11 @@ public class CollisionFreeSwingCalculator
          footPolygonGraphic = null;
          downSampledWaypoints = null;
       }
+   }
+
+   public void addTickAndUpdatable(TickAndUpdatable tickAndUpdatable)
+   {
+      this.tickAndUpdatables.add(tickAndUpdatable);
    }
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
@@ -180,7 +222,8 @@ public class CollisionFreeSwingCalculator
 
    public void computeSwingTrajectories(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
    {
-      if ((planarRegionsList == null || planarRegionsList.isEmpty()) && (heightMapData == null))
+      swingTrajectories.clear();
+      if ((planarRegionsList == null || planarRegionsList.isEmpty()) && (heightMapData == null || heightMapData.isEmpty()))
       {
          return;
       }
@@ -189,7 +232,7 @@ public class CollisionFreeSwingCalculator
       for (int i = 0; i < swingKnotPoints.size(); i++)
       {
          swingKnotPoints.get(i).initializeBoxParameters();
-         convolutionWeights.add(exp(swingPlannerParameters.getMotionCorrelationAlpha(), i));
+         convolutionWeights.add(MathTools.pow(swingPlannerParameters.getMotionCorrelationAlpha(), i));
       }
 
       initializeGraphics(initialStanceFootPoses, footstepPlan);
@@ -212,6 +255,7 @@ public class CollisionFreeSwingCalculator
          double minXYTranslationToPlanSwing = swingPlannerParameters.getMinXYTranslationToPlanSwing();
          if (swingReach < minXYTranslationToPlanSwing)
          {
+            swingTrajectories.add(null);
             continue;
          }
 
@@ -220,15 +264,17 @@ public class CollisionFreeSwingCalculator
          footstep.setSwingDuration(swingDuration);
 
          initializeKnotPoints();
-         optimizeKnotPoints();
+         // FIXME figure out how to avoid using the height map data when possible.
+         optimizeKnotPoints(planarRegionsList, heightMapData);
 
          if (!collisionFound.getValue())
          {
+            swingTrajectories.add(null);
             continue;
          }
 
          footstep.setTrajectoryType(TrajectoryType.CUSTOM);
-         recomputeTrajectory(footstep);
+         swingTrajectories.add(recomputeTrajectory(footstep));
       }
    }
 
@@ -238,7 +284,7 @@ public class CollisionFreeSwingCalculator
 
       // see TwoWaypointSwingGenerator.initialize() for trajectoryTypes DEFAULT and OBSTACLE_CLEARANCE
       double[] defaultWaypointProportions = new double[] {0.15, 0.85};
-      double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
+      double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeight();
 
       for (int i = 0; i < 2; i++)
       {
@@ -300,12 +346,14 @@ public class CollisionFreeSwingCalculator
          {
             swingKnotPoints.forEach(kp -> kp.updateGraphics(false));
             swingKnotPoints.get(boxToShow).updateGraphics(true);
-            tickAndUpdatable.tickAndUpdate();
+            for (TickAndUpdatable tickAndUpdatable : tickAndUpdatables)
+               tickAndUpdatable.tickAndUpdate();
          }
       }
+
    }
 
-   private void optimizeKnotPoints()
+   private void optimizeKnotPoints(PlanarRegionsList planarRegionsList, HeightMapData heightMapData)
    {
       collisionFound.set(false);
       planPhase.set(PlanPhase.PERFORM_COLLISION_CHECK);
@@ -328,13 +376,31 @@ public class CollisionFreeSwingCalculator
                EuclidShape3DCollisionResult collisionResult = knotPoint.getCollisionResult();
                collisionGradients.get(j).sub(collisionResult.getPointOnB(), collisionResult.getPointOnA());
                collisionGradients.get(j).scale(collisionGradientScale);
+               double length = collisionGradients.get(j).norm();
+               if (length < minCollisionAdjustment)
+               {
+                  collisionGradients.get(j).scale(minCollisionAdjustment / length);
+               }
                swingKnotPoints.get(j).project(collisionGradients.get(j));
                maxCollisionDistance.set(Math.max(maxCollisionDistance.getDoubleValue(), collisionResult.getDistance()));
                intersectionFound = true;
+
+               if (visualize)
+               {
+                  collisionPointsViz.get(j).set(collisionResult.getPointOnB());
+                  collisionLocationsViz.get(j).set(collisionResult.getPointOnA());
+                  collisionGradientsViz.get(j).set(collisionGradients.get(j));
+               }
             }
             else
             {
                collisionGradients.get(j).setToZero();
+               if (visualize)
+               {
+                  collisionPointsViz.get(j).setToNaN();
+                  collisionLocationsViz.get(j).setToNaN();
+                  collisionGradientsViz.get(j).setToNaN();
+               }
                continue;
             }
 
@@ -366,7 +432,8 @@ public class CollisionFreeSwingCalculator
 
          if (visualize)
          {
-            tickAndUpdatable.tickAndUpdate();
+            for (TickAndUpdatable tickAndUpdatable : tickAndUpdatables)
+               tickAndUpdatable.tickAndUpdate();
          }
 
          if (!intersectionFound || maxCollisionDistance.getDoubleValue() < collisionDistanceEpsilon)
@@ -376,30 +443,13 @@ public class CollisionFreeSwingCalculator
       }
    }
 
-   /* exponent function assuming non-negative positive exponent */
-   static double exp(double base, int exponent)
-   {
-      double value = 1.0;
-      int i = 0;
-
-      while (i < exponent)
-      {
-         value *= base;
-         i++;
-      }
-
-      return value;
-   }
-
    /*
     * Different from the Vector3DBasics.scaleAdd, which scales the mutated vector
     * a = a + alpha * b
     */
    static void scaleAdd(Vector3DBasics vectorA, double alpha, Vector3DReadOnly vectorB)
    {
-      vectorA.addX(alpha * vectorB.getX());
-      vectorA.addY(alpha * vectorB.getY());
-      vectorA.addZ(alpha * vectorB.getZ());
+      vectorA.scaleAdd(alpha, vectorB, vectorA);
    }
 
    /*
@@ -413,7 +463,7 @@ public class CollisionFreeSwingCalculator
       return EuclidCoreTools.interpolate(valueLow, valueHigh, alpha);
    }
 
-   private void recomputeTrajectory(PlannedFootstep footstep)
+   private EnumMap<Axis3D, List<PolynomialReadOnly>> recomputeTrajectory(PlannedFootstep footstep)
    {
       planPhase.set(PlanPhase.RECOMPUTE_FULL_TRAJECTORY);
       modifiedWaypoints.clear();
@@ -446,7 +496,8 @@ public class CollisionFreeSwingCalculator
 
          soleFrameGraphicPose.setToNaN();
          footPolygonGraphic.update();
-         tickAndUpdatable.tickAndUpdate();
+         for (TickAndUpdatable tickAndUpdatable : tickAndUpdatables)
+            tickAndUpdatable.tickAndUpdate();
       }
 
       /* Down sample to 3 waypoints */
@@ -486,8 +537,11 @@ public class CollisionFreeSwingCalculator
          soleFrameGraphicPose.setToNaN();
          footPolygonGraphic.update();
          footstep.getCustomWaypointPositions().forEach(downSampledWaypoints::setBall);
-         tickAndUpdatable.tickAndUpdate();
+         for (TickAndUpdatable tickAndUpdatable : tickAndUpdatables)
+            tickAndUpdatable.tickAndUpdate();
       }
+
+      return copySwingTrajectories(positionTrajectoryGenerator.getTrajectories(), footstep.getCustomWaypointPositions().size() + 1);
    }
 
    private void initializeGraphics(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
@@ -523,7 +577,8 @@ public class CollisionFreeSwingCalculator
          footstepVisualizer.visualizeFootstep(footstep.getFootstepPose());
       }
 
-      tickAndUpdatable.tickAndUpdate();
+      for (TickAndUpdatable tickAndUpdatable : tickAndUpdatables)
+         tickAndUpdatable.tickAndUpdate();
    }
 
    private double calculateSwingTime(Point3DReadOnly startPosition, Point3DReadOnly endPosition)
@@ -551,6 +606,11 @@ public class CollisionFreeSwingCalculator
       }
 
       return footstepVisualizer[indexToGet];
+   }
+
+   public List<EnumMap<Axis3D, List<PolynomialReadOnly>>> getSwingTrajectories()
+   {
+      return swingTrajectories;
    }
 
    private static final SideDependentList<AppearanceDefinition> footPolygonAppearances = new SideDependentList<>(YoAppearance.Purple(), YoAppearance.Green());
@@ -582,5 +642,33 @@ public class CollisionFreeSwingCalculator
          soleFramePose.setToNaN();
          footPolygonViz.update();
       }
+   }
+
+   public static EnumMap<Axis3D, List<PolynomialReadOnly>> copySwingTrajectories(EnumMap<Axis3D, ArrayList<YoPolynomial>> trajectories)
+   {
+      return copySwingTrajectories(trajectories, trajectories.get(Axis3D.X).size());
+
+   }
+   public static EnumMap<Axis3D, List<PolynomialReadOnly>> copySwingTrajectories(EnumMap<Axis3D, ArrayList<YoPolynomial>> trajectories, int trajectoriesToCopy)
+   {
+      EnumMap<Axis3D, List<PolynomialReadOnly>> copy = new EnumMap<>(Axis3D.class);
+         trajectories.keySet().forEach(axis ->
+                                       {
+                                          List<PolynomialReadOnly> listCopy = new ArrayList<>();
+                                          for (int i = 0; i < trajectoriesToCopy; i++)
+                                          {
+                                             PolynomialReadOnly polynomialReadOnly = trajectories.get(axis).get(i);
+                                             double duration = polynomialReadOnly.getTimeInterval().getDuration();
+                                             if (Double.isNaN(duration) || duration < 1e-4)
+                                                continue;
+
+                                             Polynomial polynomialCopy = new Polynomial(polynomialReadOnly.getNumberOfCoefficients());
+                                             polynomialCopy.set(polynomialReadOnly);
+                                             listCopy.add(polynomialCopy);
+                                          }
+                                          copy.put(axis, listCopy);
+                                       });
+
+      return copy;
    }
 }

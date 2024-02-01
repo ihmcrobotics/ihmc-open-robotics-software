@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    private boolean isOpen = false;
    private boolean walk = false;
    private boolean isUnitVelocities = false;
+   private double swingHeight = 0.1;
    private final Vector2D desiredVelocity = new Vector2D();
    private double turningVelocity = 0.0;
    private int ticksToUpdateTheEnvironment = Integer.MAX_VALUE;
@@ -135,11 +137,12 @@ public class StepGeneratorCommandInputManager implements Updatable
          ContinuousStepGeneratorParameters parameters = command.getParameters();
 
          ticksToUpdateTheEnvironment = parameters.getTicksToUpdateTheEnvironment();
+         swingHeight = parameters.getSwingHeight();
 
          if (continuousStepGenerator != null)
          {
             continuousStepGenerator.setFootstepTiming(parameters.getSwingDuration(), parameters.getTransferDuration());
-            continuousStepGenerator.setSwingHeight(parameters.getSwingHeight());
+            continuousStepGenerator.setSwingHeight(swingHeight);
             continuousStepGenerator.setFootstepsAreAdjustable(parameters.getStepsAreAdjustable());
             continuousStepGenerator.setStepWidths(parameters.getDefaultStepWidth(), parameters.getMinStepWidth(), parameters.getMaxStepWidth());
          }
@@ -232,5 +235,10 @@ public class StepGeneratorCommandInputManager implements Updatable
    public BooleanProvider createWalkInputProvider()
    {
       return () -> walk;
+   }
+
+   public DoubleProvider createSwingHeightProvider()
+   {
+      return () -> swingHeight;
    }
 }

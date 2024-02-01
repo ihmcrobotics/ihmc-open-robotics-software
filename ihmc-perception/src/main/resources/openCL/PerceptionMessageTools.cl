@@ -1,4 +1,3 @@
-
 float4 createRGB(double input)
 {
    // Using interpolation between keu color points
@@ -48,9 +47,7 @@ float4 createRGB(double input)
    return (float4) (r, g, b, 1.0);
 }
 
-kernel void imageToPointCloud(global float* parameters,
-                              read_only image2d_t discretizedDepthImage,
-                              global float* pointCloudVertexBuffer)
+kernel void imageToPointCloud(global float* parameters, read_only image2d_t discretizedDepthImage, global float* pointCloudVertexBuffer)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);
@@ -90,49 +87,25 @@ kernel void imageToPointCloud(global float* parameters,
    float beamFramePointY = 0.0;
    float beamFramePointZ = 0.0;
 
-   float4 sensorFramePoint = transform(beamFramePointX,
-                                       beamFramePointY,
-                                       beamFramePointZ,
-                                       0.0,
-                                       0.0,
-                                       0.0,
-                                       angledRotationMatrix.s0,
-                                       angledRotationMatrix.s1,
-                                       angledRotationMatrix.s2,
-                                       angledRotationMatrix.s3,
-                                       angledRotationMatrix.s4,
-                                       angledRotationMatrix.s5,
-                                       angledRotationMatrix.s6,
-                                       angledRotationMatrix.s7,
-                                       angledRotationMatrix.s8);
+   float4 sensorFramePoint = transform(beamFramePointX, beamFramePointY, beamFramePointZ, 0.0, 0.0, 0.0, angledRotationMatrix.s0, angledRotationMatrix.s1,
+                                       angledRotationMatrix.s2, angledRotationMatrix.s3, angledRotationMatrix.s4, angledRotationMatrix.s5,
+                                       angledRotationMatrix.s6, angledRotationMatrix.s7, angledRotationMatrix.s8);
 
-   float4 worldFramePoint = transform(sensorFramePoint.x,
-                                      sensorFramePoint.y,
-                                      sensorFramePoint.z,
-                                      translationX,
-                                      translationY,
-                                      translationZ,
-                                      rotationMatrixM00,
-                                      rotationMatrixM01,
-                                      rotationMatrixM02,
-                                      rotationMatrixM10,
-                                      rotationMatrixM11,
-                                      rotationMatrixM12,
-                                      rotationMatrixM20,
-                                      rotationMatrixM21,
-                                      rotationMatrixM22);
+   float4 worldFramePoint =
+       transform(sensorFramePoint.x, sensorFramePoint.y, sensorFramePoint.z, translationX, translationY, translationZ, rotationMatrixM00, rotationMatrixM01,
+                 rotationMatrixM02, rotationMatrixM10, rotationMatrixM11, rotationMatrixM12, rotationMatrixM20, rotationMatrixM21, rotationMatrixM22);
 
    int pointStartIndex = (depthImageWidth * y + x) * 3;
 
    if (eyeDepthInMeters == 0.0f)
    {
-      pointCloudVertexBuffer[pointStartIndex]     = nan((uint) 0);
+      pointCloudVertexBuffer[pointStartIndex] = nan((uint) 0);
       pointCloudVertexBuffer[pointStartIndex + 1] = nan((uint) 0);
       pointCloudVertexBuffer[pointStartIndex + 2] = nan((uint) 0);
    }
    else
    {
-      pointCloudVertexBuffer[pointStartIndex]     = worldFramePoint.x;
+      pointCloudVertexBuffer[pointStartIndex] = worldFramePoint.x;
       pointCloudVertexBuffer[pointStartIndex + 1] = worldFramePoint.y;
       pointCloudVertexBuffer[pointStartIndex + 2] = worldFramePoint.z;
    }

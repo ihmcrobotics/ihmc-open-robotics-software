@@ -11,6 +11,18 @@ package atlas_msgs.msg.dds;
 public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDataType<atlas_msgs.msg.dds.AtlasAuxiliaryRobotData>
 {
    public static final java.lang.String name = "atlas_msgs::msg::dds_::AtlasAuxiliaryRobotData_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "8719501297b00475a730fa537bd42296a33585ea381937b74fbc388baabe1e69";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

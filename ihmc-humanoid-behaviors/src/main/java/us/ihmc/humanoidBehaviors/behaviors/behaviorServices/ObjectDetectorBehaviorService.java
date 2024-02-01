@@ -12,7 +12,6 @@ import javax.imageio.ImageIO;
 
 import controller_msgs.msg.dds.BoundingBoxesPacket;
 import perception_msgs.msg.dds.HeatMapPacket;
-import perception_msgs.msg.dds.ObjectDetectorResultPacket;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.PrintTools;
@@ -25,7 +24,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.ihmcPerception.objectDetector.ObjectDetectorFromCameraImages;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -38,7 +36,7 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
    private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<VideoPacket>(20);
 
    private final Object detectorFromCameraImagesConch = new Object();
-   private final ObjectDetectorFromCameraImages objectDetectorFromCameraImages;
+//   private final ObjectDetectorFromCameraImages objectDetectorFromCameraImages;
    private RigidBodyTransform transformFromReportedToFiducialFrame;
 
    private final YoBoolean locationEnabled;
@@ -53,14 +51,14 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 
       createSubscriber(VideoPacket.class, ROS2Tools.IHMC_ROOT, videoPacketQueue::put);
 
-      transformFromReportedToFiducialFrame = new RigidBodyTransform();
-      objectDetectorFromCameraImages = new ObjectDetectorFromCameraImages(transformFromReportedToFiducialFrame, getYoVariableRegistry(),
-                                                                          yoGraphicsListRegistry);
-
-      objectDetectorFromCameraImages.setFieldOfView(DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS, DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS);
-      objectDetectorFromCameraImages.setExpectedObjectSize(DEFAULT_OBJECT_SIZE);
-
-      createSubscriber(ObjectDetectorResultPacket.class, ROS2Tools.IHMC_ROOT, objectDetectorFromCameraImages);
+//      transformFromReportedToFiducialFrame = new RigidBodyTransform();
+//      objectDetectorFromCameraImages = new ObjectDetectorFromCameraImages(transformFromReportedToFiducialFrame, getYoVariableRegistry(),
+//                                                                          yoGraphicsListRegistry);
+//
+//      objectDetectorFromCameraImages.setFieldOfView(DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS, DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS);
+//      objectDetectorFromCameraImages.setExpectedObjectSize(DEFAULT_OBJECT_SIZE);
+//
+//      createSubscriber(ObjectDetectorResultPacket.class, ROS2Tools.IHMC_ROOT, objectDetectorFromCameraImages);
 
       String prefix = "fiducial";
       locationEnabled = new YoBoolean(prefix + "LocationEnabled", getYoVariableRegistry());
@@ -73,10 +71,10 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
       IHMCROS2Publisher<BoundingBoxesPacket> boundingBoxesPublisher = createBehaviorOutputPublisher(BoundingBoxesPacket.class, "/bounding_boxes");
       IHMCROS2Publisher<HeatMapPacket> heatMapPublisher = createBehaviorOutputPublisher(HeatMapPacket.class, "/heat_map");
 
-      objectDetectorFromCameraImages.addDetectionResultListener(detectionVisualizationPackets -> {
-         boundingBoxesPublisher.publish(detectionVisualizationPackets.getBoundingBoxesPacket());
-         heatMapPublisher.publish(detectionVisualizationPackets.getHeatMapPacket());
-      });
+//      objectDetectorFromCameraImages.addDetectionResultListener(detectionVisualizationPackets -> {
+//         boundingBoxesPublisher.publish(detectionVisualizationPackets.getBoundingBoxesPacket());
+//         heatMapPublisher.publish(detectionVisualizationPackets.getHeatMapPacket());
+//      });
    }
 
    @Override
@@ -93,7 +91,7 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 
          synchronized (detectorFromCameraImagesConch)
          {
-            objectDetectorFromCameraImages.detectFromVideoPacket(videoPacket);
+//            objectDetectorFromCameraImages.detectFromVideoPacket(videoPacket);
          }
       }
       else
@@ -106,7 +104,7 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
    {
       synchronized (detectorFromCameraImagesConch)
       {
-         objectDetectorFromCameraImages.setExpectedObjectSize(expectedFiducialSize);
+//         objectDetectorFromCameraImages.setExpectedObjectSize(expectedFiducialSize);
       }
    }
 
@@ -115,8 +113,9 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
    {
       synchronized (detectorFromCameraImagesConch)
       {
-         return objectDetectorFromCameraImages.getTargetIDHasBeenLocated();
+//         return objectDetectorFromCameraImages.getTargetIDHasBeenLocated();
       }
+      return false;
    }
 
    @Override
@@ -124,7 +123,7 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
    {
       synchronized (detectorFromCameraImagesConch)
       {
-         objectDetectorFromCameraImages.getReportedFiducialPoseWorldFrame(framePoseToPack);
+//         objectDetectorFromCameraImages.getReportedFiducialPoseWorldFrame(framePoseToPack);
       }
    }
 
@@ -152,7 +151,7 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
    @Override
    public void initialize()
    {
-      objectDetectorFromCameraImages.reset();
+//      objectDetectorFromCameraImages.reset();
    }
 
    private class VideoPacketToImageFilesRecorder implements Runnable

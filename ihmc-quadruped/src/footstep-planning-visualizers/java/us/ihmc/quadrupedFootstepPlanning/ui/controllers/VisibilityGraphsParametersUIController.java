@@ -4,12 +4,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphParametersKeys;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
-import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 
 public class VisibilityGraphsParametersUIController
 {
@@ -83,7 +83,7 @@ public class VisibilityGraphsParametersUIController
       javaFXStoredPropertyMap.put(searchHostRegionEpsilon, VisibilityGraphParametersKeys.searchHostRegionEpsilon);
 
       // set messager updates to update all stored properties and select JavaFX properties
-      messager.registerTopicListener(visibilityGraphsParametersTopic, parameters ->
+      messager.addTopicListener(visibilityGraphsParametersTopic, parameters ->
       {
          this.parameters.set(parameters);
 

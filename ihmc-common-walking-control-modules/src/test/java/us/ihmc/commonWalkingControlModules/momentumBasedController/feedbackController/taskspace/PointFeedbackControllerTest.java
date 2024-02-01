@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
@@ -34,6 +35,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -97,7 +99,7 @@ public final class PointFeedbackControllerTest
       pointFeedbackController.setEnabled(true);
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
-      QPInputTypeA motionQPInput = new QPInputTypeA(MultiBodySystemTools.computeDegreesOfFreedom(joints));
+      NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(MultiBodySystemTools.computeDegreesOfFreedom(joints));
       DMatrixRMaj jointAccelerations = new DMatrixRMaj(0, 0);
       double damping = 0.001;
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT / integrationSteps);
@@ -107,7 +109,7 @@ public final class PointFeedbackControllerTest
          pointFeedbackController.computeInverseDynamics();
          SpatialAccelerationCommand spatialAccelerationCommand = pointFeedbackController.getInverseDynamicsOutput();
          Assert.assertTrue(motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput));
-         NativeCommonOps.solveDamped(motionQPInput.getTaskJacobian(), motionQPInput.getTaskObjective(), damping, jointAccelerations);
+         NativeCommonOps.solveDamped(new DMatrixRMaj(motionQPInput.getTaskJacobian()), new DMatrixRMaj(motionQPInput.getTaskObjective()), damping, jointAccelerations);
 
          // Need to do a fine grain integration since the point we care about will be the center of rotation of the body and we need
          // to maintain that situation.
@@ -176,7 +178,7 @@ public final class PointFeedbackControllerTest
       pointFeedbackController.setEnabled(true);
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      QPInputTypeA motionQPInput = new QPInputTypeA(numberOfDoFs);
+      NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
       LinearSolverDense<DMatrixRMaj> pseudoInverseSolver = LinearSolverFactory_DDRM.pseudoInverse(true);
       DMatrixRMaj jInverse = new DMatrixRMaj(numberOfDoFs, 6);
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -195,9 +197,9 @@ public final class PointFeedbackControllerTest
          SpatialAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
 
          motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
-         pseudoInverseSolver.setA(motionQPInput.taskJacobian);
+         pseudoInverseSolver.setA(new DMatrixRMaj(motionQPInput.taskJacobian));
          pseudoInverseSolver.invert(jInverse);
-         CommonOps_DDRM.mult(jInverse, motionQPInput.taskObjective, jointAccelerations);
+         CommonOps_DDRM.mult(jInverse, new DMatrixRMaj(motionQPInput.taskObjective), jointAccelerations);
 
          integrator.integrateJointAccelerations(jointsToOptimizeFor, jointAccelerations);
          integrator.integrateJointVelocities(jointsToOptimizeFor, integrator.getJointVelocities());
@@ -264,7 +266,7 @@ public final class PointFeedbackControllerTest
       pointFeedbackController.setEnabled(true);
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      QPInputTypeA motionQPInput = new QPInputTypeA(numberOfDoFs);
+      NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
       LinearSolverDense<DMatrixRMaj> pseudoInverseSolver = LinearSolverFactory_DDRM.pseudoInverse(true);
       DMatrixRMaj jInverse = new DMatrixRMaj(numberOfDoFs, 6);
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -301,9 +303,9 @@ public final class PointFeedbackControllerTest
          SpatialAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
          motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
 
-         MatrixTools.scaleTranspose(1.0, motionQPInput.taskJacobian, tempJtW); // J^T W
-         CommonOps_DDRM.mult(tempJtW, motionQPInput.taskJacobian, solverInput_H); // H = J^T W J
-         CommonOps_DDRM.mult(tempJtW, motionQPInput.taskObjective, solverInput_f); // f = - J^T W xDDot
+         MatrixTools.scaleTranspose(1.0, new DMatrixRMaj(motionQPInput.taskJacobian), tempJtW); // J^T W
+         CommonOps_DDRM.mult(tempJtW, new DMatrixRMaj(motionQPInput.taskJacobian), solverInput_H); // H = J^T W J
+         CommonOps_DDRM.mult(tempJtW, new DMatrixRMaj(motionQPInput.taskObjective), solverInput_f); // f = - J^T W xDDot
          CommonOps_DDRM.scale(-1.0, solverInput_f);
 
          for (int diag = 0; diag < numberOfDoFs; diag++)
@@ -315,9 +317,9 @@ public final class PointFeedbackControllerTest
          oasesQPSolver.solve(solverInput_H, solverInput_f, solverInput_Aeq, solverInput_beq, solverInput_Ain, solverInput_bin, solverInput_lb, solverInput_ub,
                              jointAccelerationsFromQPOASES, true);
 
-         pseudoInverseSolver.setA(motionQPInput.taskJacobian);
+         pseudoInverseSolver.setA(new DMatrixRMaj(motionQPInput.taskJacobian));
          pseudoInverseSolver.invert(jInverse);
-         CommonOps_DDRM.mult(jInverse, motionQPInput.taskObjective, jointAccelerations);
+         CommonOps_DDRM.mult(jInverse, new DMatrixRMaj(motionQPInput.taskObjective), jointAccelerations);
 
          integrator.integrateJointAccelerations(jointsToOptimizeFor, jointAccelerationsFromJerryQP);
          integrator.integrateJointVelocities(jointsToOptimizeFor, integrator.getJointVelocities());
@@ -372,8 +374,8 @@ public final class PointFeedbackControllerTest
       spatialFeedbackControlCommand.getSpatialAccelerationCommand().setSelectionMatrixForLinearControl();
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
-      QPInputTypeA pointMotionQPInput = new QPInputTypeA(toolbox.getJointIndexHandler().getNumberOfDoFs());
-      QPInputTypeA spatialMotionQPInput = new QPInputTypeA(toolbox.getJointIndexHandler().getNumberOfDoFs());
+      NativeQPInputTypeA pointMotionQPInput = new NativeQPInputTypeA(toolbox.getJointIndexHandler().getNumberOfDoFs());
+      NativeQPInputTypeA spatialMotionQPInput = new NativeQPInputTypeA(toolbox.getJointIndexHandler().getNumberOfDoFs());
 
       SpatialAccelerationCommand pointControllerOutput = pointFeedbackController.getInverseDynamicsOutput();
       SpatialAccelerationCommand spatialControllerOutput = spatialFeedbackController.getInverseDynamicsOutput();
@@ -427,6 +429,11 @@ public final class PointFeedbackControllerTest
          assertEquals(spatialMotionQPInput.taskObjective, pointMotionQPInput.taskObjective, 1.0e-12);
          assertEquals(spatialMotionQPInput.taskWeightMatrix, pointMotionQPInput.taskWeightMatrix, 1.0e-12);
       }
+   }
+
+   private static void assertEquals(NativeMatrix expected, NativeMatrix actual, double epsilon)
+   {
+      assertEquals(new DMatrixRMaj(expected), new DMatrixRMaj(actual), epsilon);
    }
 
    private static void assertEquals(DMatrixRMaj expected, DMatrixRMaj actual, double epsilon)

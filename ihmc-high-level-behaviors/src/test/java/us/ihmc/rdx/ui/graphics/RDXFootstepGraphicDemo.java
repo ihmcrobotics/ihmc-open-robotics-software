@@ -7,17 +7,14 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 
 public class RDXFootstepGraphicDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources",
-                                                  "Footstep Graphic Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI("Footstep Graphic Demo");
    private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic();
 
    public RDXFootstepGraphicDemo()

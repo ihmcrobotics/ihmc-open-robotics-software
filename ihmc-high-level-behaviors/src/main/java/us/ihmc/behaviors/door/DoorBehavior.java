@@ -1,16 +1,13 @@
 package us.ihmc.behaviors.door;
 
 import perception_msgs.msg.dds.DetectedFiducialPacket;
-import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
-import us.ihmc.behaviors.BehaviorDefinition;
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
-import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.ResettingNode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.Axis3D;
@@ -22,15 +19,17 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorS
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.Timer;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.door.DoorBehaviorAPI.*;
-
-public class DoorBehavior extends ResettingNode implements BehaviorInterface
+/**
+ * A behavior tree layer on top of the door behavior that John wrote for Atlas.
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
+public class DoorBehavior extends ResettingNode implements Destroyable
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Door", DoorBehavior::new, DoorBehaviorAPI.create());
    private BehaviorHelper helper;
    private ROS2SyncedRobotModel syncedRobot;
    private AtomicReference<Boolean> reviewEnabled;
@@ -59,12 +58,13 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
    {
       this.helper = helper;
       helper.subscribeToBehaviorStatusViaCallback(status::set);
-      reviewEnabled = helper.subscribeViaReference(ReviewEnabled, true);
+      // FIXME: subscribe review enabled
+      reviewEnabled = null;
       helper.subscribeToDoorLocationViaCallback(doorLocationPacket ->
       {
          doorDetectedTimer.reset();
          doorPose.set(doorLocationPacket.getDoorTransformToWorld());
-         helper.publish(DetectedDoorPose, MutablePair.of(DoorType.fromByte(doorLocationPacket.getDetectedDoorType()), new Pose3D(doorPose)));
+         // publish detected door
       });
       helper.subscribeViaCallback(ROS2Tools::getBehaviorStatusTopic, status ->
       {
@@ -93,7 +93,7 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
    {
       FramePose3DReadOnly robotPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
       distanceToDoor = doorPose.getPosition().distance(robotPose.getPosition());
-      helper.publish(DistanceToDoor, distanceToDoor);
+      // FIXME: publish distance to door
       helper.publishToolboxState(FiducialDetectorToolboxModule::getInputTopic, ToolboxState.WAKE_UP);
       helper.publishToolboxState(ObjectDetectorToolboxModule::getInputTopic, ToolboxState.WAKE_UP);
 
@@ -106,7 +106,7 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       if (firstTick)
       {
@@ -166,9 +166,8 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
       return distanceToDoor;
    }
 
-   @Override
    public String getName()
    {
-      return DEFINITION.getName();
+      return "Door";
    }
 }

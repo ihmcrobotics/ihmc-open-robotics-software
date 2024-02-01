@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
@@ -18,20 +19,21 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.HeightMapFootstepChecker;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculator;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ParameterBasedStepExpansion;
+import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedIdealStepCalculator;
+import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedStepExpansion;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -48,12 +50,16 @@ public class AStarFootstepPlanner
 
    private final AStarFootstepPlannerIterationConductor iterationConductor;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final FootstepPlannerEnvironmentHandler plannerEnvironmentHandler;
    private final FootstepSnapAndWiggler snapper;
-   private final ParameterBasedStepExpansion expansion;
-   private final FootstepChecker checker;
+   private final ParameterBasedStepExpansion nominalExpansion;
+   private final ReferenceBasedStepExpansion referenceBasedExpansion;
+   private final HeightMapFootstepChecker checker;
    private final FootstepPlannerHeuristicCalculator distanceAndYawHeuristics;
    private final IdealStepCalculator idealStepCalculator;
+   private final ReferenceBasedIdealStepCalculator referenceBasedIdealStepCalculator;
    private final FootstepPlannerCompletionChecker completionChecker;
+   private final FootstepCostCalculator stepCostCalculator;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
 
    private final FootstepPlannerEdgeData edgeData;
@@ -89,19 +95,25 @@ public class AStarFootstepPlanner
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
       this.footPolygons = footPolygons;
-      this.snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters);
+      this.plannerEnvironmentHandler = new FootstepPlannerEnvironmentHandler();
+      this.snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters, plannerEnvironmentHandler);
       this.stopwatch = stopwatch;
       this.statusCallbacks = statusCallbacks;
 
-      this.checker = new FootstepChecker(footstepPlannerParameters, footPolygons, snapper, stepReachabilityData, registry);
-      this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, registry);
-      this.expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, idealStepCalculator, footPolygons);
+      this.checker = new HeightMapFootstepChecker(footstepPlannerParameters, footPolygons, snapper, stepReachabilityData, registry);
+      this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, plannerEnvironmentHandler, registry);
+      this.referenceBasedIdealStepCalculator = new ReferenceBasedIdealStepCalculator(footstepPlannerParameters, idealStepCalculator, registry);
+
+      this.nominalExpansion = new ParameterBasedStepExpansion(footstepPlannerParameters, referenceBasedIdealStepCalculator, footPolygons);
+      this.referenceBasedExpansion = new ReferenceBasedStepExpansion(referenceBasedIdealStepCalculator, nominalExpansion);
 
       this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(footstepPlannerParameters, bodyPathPlanHolder, registry);
-      FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, distanceAndYawHeuristics::compute, footPolygons, registry);
+      stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, referenceBasedIdealStepCalculator, distanceAndYawHeuristics::compute, footPolygons, registry);
 
-      this.iterationConductor = new AStarFootstepPlannerIterationConductor(expansion, checker, stepCostCalculator, distanceAndYawHeuristics::compute);
+      this.iterationConductor = new AStarFootstepPlannerIterationConductor(referenceBasedExpansion, checker, stepCostCalculator, distanceAndYawHeuristics::compute);
       this.completionChecker = new FootstepPlannerCompletionChecker(footstepPlannerParameters, iterationConductor, distanceAndYawHeuristics, snapper);
+
+      referenceBasedIdealStepCalculator.setFootstepGraph(iterationConductor.getGraph());
 
       List<YoVariable> allVariables = registry.collectSubtreeVariables();
       this.edgeData = new FootstepPlannerEdgeData(allVariables.size());
@@ -140,10 +152,11 @@ public class AStarFootstepPlanner
       haltRequested.set(false);
       result = FootstepPlanningResult.PLANNING;
 
-      // Update planar regions
-      boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
-      PlanarRegionsList planarRegionsListForStepping = flatGroundMode ? null : request.getPlanarRegionsList();
-      PlanarRegionsList planarRegionsListForCollisionChecking = request.getPlanarRegionsList();
+      // Update what we should use for planning
+      boolean hasHeightMap = request.getHeightMapData() != null && !request.getHeightMapData().isEmpty();
+      boolean flatGroundMode = request.getAssumeFlatGround() || !hasHeightMap;
+
+      HeightMapData heightMapData = flatGroundMode ? null : request.getHeightMapData();
 
       if (flatGroundMode)
       {
@@ -151,9 +164,11 @@ public class AStarFootstepPlanner
          snapper.setFlatGroundHeight(flatGroundHeight);
       }
 
-      snapper.setPlanarRegions(planarRegionsListForStepping);
-      idealStepCalculator.setPlanarRegionsList(planarRegionsListForStepping);
-      checker.setPlanarRegions(planarRegionsListForCollisionChecking);
+      snapper.clearSnapData();
+      plannerEnvironmentHandler.setHeightMap(heightMapData);
+
+      checker.setHeightMapData(heightMapData);
+      stepCostCalculator.setHeightMapData(heightMapData);
 
       double pathLength = bodyPathPlanHolder.computePathLength(0.0);
       boolean imposeHorizonLength = request.getPlanBodyPath() && request.getHorizonLength() > 0.0 && !MathTools.intervalContains(pathLength, 0.0, request.getHorizonLength());
@@ -177,7 +192,7 @@ public class AStarFootstepPlanner
       distanceAndYawHeuristics.initialize(goalMidFootPose);
       idealStepCalculator.initialize(goalSteps);
       completionChecker.initialize(startNode, goalSteps, request.getGoalDistanceProximity(), request.getGoalYawProximity());
-      expansion.initialize();
+      nominalExpansion.initialize();
       snapper.initialize();
 
       // Check valid goal
@@ -189,6 +204,15 @@ public class AStarFootstepPlanner
       }
 
       // Start planning loop
+      if (request.getReferencePlan() == null)
+      {
+         referenceBasedIdealStepCalculator.clearReferencePlan();
+      }
+      else
+      {
+         referenceBasedIdealStepCalculator.setReferenceFootstepPlan(request.getReferencePlan());
+      }
+
       while (true)
       {
          iterations++;
@@ -217,7 +241,8 @@ public class AStarFootstepPlanner
             break;
          }
 
-         AStarIterationData<FootstepGraphNode> iterationData = iterationConductor.doPlanningIteration(nodeToExpand, true);
+         boolean performIterativeExpansion = false;
+         AStarIterationData<FootstepGraphNode> iterationData = iterationConductor.doPlanningIteration(nodeToExpand, performIterativeExpansion);
          recordIterationData(iterationData);
          iterationCallbacks.forEach(callback -> callback.accept(iterationData));
 
@@ -279,14 +304,12 @@ public class AStarFootstepPlanner
             edgeDataMap.get(new GraphEdge<>(path.get(i - 1), path.get(i))).getEndStepSnapData().set(snapData);
          }
 
-         footstep.getFoothold().set(snapData.getCroppedFoothold());
          outputToPack.getFootstepPlan().addFootstep(footstep);
       }
 
       if (!request.getAssumeFlatGround())
       {
-         swingPlanningModule.computeSwingWaypoints(request.getPlanarRegionsList(),
-                                                   HeightMapMessageTools.unpackMessage(request.getHeightMapMessage()),
+         swingPlanningModule.computeSwingWaypoints(request.getHeightMapData(),
                                                    outputToPack.getFootstepPlan(),
                                                    request.getStartFootPoses(),
                                                    request.getSwingPlannerType());
@@ -336,9 +359,12 @@ public class AStarFootstepPlanner
       {
          loggedData = new FootstepPlannerIterationData();
          loggedData.setParentNode(iterationData.getParentNode());
-         DiscreteFootstep idealFootstep = idealStepCalculator.computeIdealStep(iterationData.getParentNode().getSecondStep(),
-                                                                                  iterationData.getParentNode().getFirstStep());
+         referenceBasedIdealStepCalculator.setFootstepGraph(iterationConductor.getGraph());
+         DiscreteFootstep idealFootstep = referenceBasedIdealStepCalculator.computeIdealStep(iterationData.getParentNode().getSecondStep(),
+                                                                                             iterationData.getParentNode().getFirstStep());
+         DiscreteFootstep nominalIdealStep = referenceBasedIdealStepCalculator.getNominalIdealStep();
          loggedData.setIdealChildNode(new FootstepGraphNode(iterationData.getParentNode().getSecondStep(), idealFootstep));
+         loggedData.setNominalIdealChildNode(new FootstepGraphNode(iterationData.getParentNode().getSecondStep(), nominalIdealStep));
          loggedData.setParentEndSnapData(snapper.snapFootstep(iterationData.getParentNode().getSecondStep()));
          loggedData.setParentStartSnapData(snapper.snapFootstep(iterationData.getParentNode().getFirstStep()));
          this.iterationData.add(loggedData);
@@ -471,7 +497,7 @@ public class AStarFootstepPlanner
       return snapper;
    }
 
-   public FootstepChecker getChecker()
+   public HeightMapFootstepChecker getChecker()
    {
       return checker;
    }
@@ -506,9 +532,8 @@ public class AStarFootstepPlanner
       return swingPlanningModule;
    }
 
-   public void setHeightMapData(HeightMapData heightMapData)
+   public ReferenceBasedIdealStepCalculator getReferenceBasedIdealStepCalculator()
    {
-      snapper.setHeightMapData(heightMapData);
-      checker.setHeightMapData(heightMapData);
+      return referenceBasedIdealStepCalculator;
    }
 }

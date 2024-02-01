@@ -21,10 +21,16 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.math.trajectories.LinearSpatialVectorTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.LinearSpatialVectorTrajectoryGenerator.SpatialWaypoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * Manages an external wrench trajectory through waypoints submitted by the user
+ * and provided as external wrench commands to be submitted to the whole body controller core.
+ * This class is to be used in combination with one of the primary {@link RigidBodyControlMode rigid body control modes}.
+ */
 public class RigidBodyExternalWrenchManager extends RigidBodyControlState
 {
    private final ExternalWrenchCommand externalWrenchCommand = new ExternalWrenchCommand();
@@ -37,7 +43,8 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
    private final Wrench desiredWrench = new Wrench();
 
    private final SpatialWaypoint lastPointAdded = new SpatialWaypoint();
-   private final RecyclingArrayDeque<SpatialWaypoint> pointQueue = new RecyclingArrayDeque<>(RigidBodyTaskspaceControlState.maxPoints, SpatialWaypoint.class,
+   private final RecyclingArrayDeque<SpatialWaypoint> pointQueue = new RecyclingArrayDeque<>(RigidBodyTaskspaceControlState.maxPoints,
+                                                                                             SpatialWaypoint.class,
                                                                                              SpatialWaypoint::set);
    private final LinearSpatialVectorTrajectoryGenerator trajectoryGenerator;
 
@@ -49,26 +56,31 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
    private final FramePose3DReadOnly defaultControlFramePose;
    private final PoseReferenceFrame activeControlFrame;
 
-   public RigidBodyExternalWrenchManager(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, ReferenceFrame controlFrame, YoDouble yoTime,
-                                         YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
+   public RigidBodyExternalWrenchManager(RigidBodyBasics bodyToControl,
+                                         RigidBodyBasics baseBody,
+                                         ReferenceFrame controlFrame,
+                                         YoDouble yoTime,
+                                         YoGraphicsListRegistry graphicsListRegistry,
+                                         YoRegistry parentRegistry)
    {
       super(null, bodyToControl.getName() + "Wrench", yoTime, parentRegistry);
 
       this.bodyToControl = bodyToControl;
+      String prefix = bodyToControl.getName() + "Wrench";
 
       bodyFrame = bodyToControl.getBodyFixedFrame();
       baseFrame = baseBody.getBodyFixedFrame();
       defaultControlFramePose = new FramePose3D(bodyFrame, controlFrame.getTransformToDesiredFrame(bodyFrame));
-      activeControlFrame = new PoseReferenceFrame("activeControlFrame", bodyToControl.getBodyFixedFrame());
-
-      String prefix = bodyToControl.getName() + "Wrench";
+      activeControlFrame = new PoseReferenceFrame(prefix + "activeControlFrame", bodyToControl.getBodyFixedFrame());
 
       numberOfPointsInQueue = new YoInteger(prefix + "NumberOfPointsInQueue", registry);
       numberOfPointsInGenerator = new YoInteger(prefix + "NumberOfPointsInGenerator", registry);
       numberOfPoints = new YoInteger(prefix + "NumberOfPoints", registry);
 
-      trajectoryGenerator = new LinearSpatialVectorTrajectoryGenerator(prefix, RigidBodyTaskspaceControlState.maxPointsInGenerator,
-                                                                       ReferenceFrame.getWorldFrame(), registry);
+      trajectoryGenerator = new LinearSpatialVectorTrajectoryGenerator(prefix,
+                                                                       RigidBodyTaskspaceControlState.maxPointsInGenerator,
+                                                                       ReferenceFrame.getWorldFrame(),
+                                                                       registry);
       trajectoryGenerator.clear(baseFrame);
    }
 
@@ -300,5 +312,11 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
          return null;
       else
          return externalWrenchCommand;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return null;
    }
 }

@@ -8,8 +8,6 @@ public interface LeggedJointNameMap<E extends Enum<E> & RobotSegment<E>> extends
 {
    ImmutablePair<E, LegJointName> getLegJointName(String jointName);
 
-   ImmutablePair<E, LimbName> getLimbName(String limbName);
-
    String getJointBeforeFootName(E robotSegment);
 
    RigidBodyTransform getSoleToParentFrameTransform(E robotSegment);

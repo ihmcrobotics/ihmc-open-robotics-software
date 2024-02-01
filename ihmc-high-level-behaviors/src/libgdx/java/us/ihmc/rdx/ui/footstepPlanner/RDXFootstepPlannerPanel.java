@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,8 +17,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
@@ -28,7 +27,7 @@ import us.ihmc.robotics.robotSide.SegmentDependentList;
 
 import java.util.ArrayList;
 
-public class RDXFootstepPlannerPanel extends ImGuiPanel implements RenderableProvider
+public class RDXFootstepPlannerPanel extends RDXPanel implements RenderableProvider
 {
    private final RDXPathControlRingGizmo goalGizmo = new RDXPathControlRingGizmo();
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -66,10 +65,7 @@ public class RDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
 
    public void create(RDXBaseUI baseUI)
    {
-      goalGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
-      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(goalGizmo::calculate3DViewPick);
-      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(goalGizmo::process3DViewInput);
-      baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this, RDXSceneLevel.VIRTUAL);
+      goalGizmo.createAndSetupDefault(baseUI);
       leftStanceFootstepGraphic.create();
       rightStanceFootstepGraphic.create();
       leftGoalFootstepGraphic.create();

@@ -34,5 +34,5 @@
   "Robot configuration data expiration" : 0.5,
   "Acceptable incomplete footsteps" : 1,
   "Horizon from debris to stop" : 1.8,
-  "Stop for impassibilities" : true
+  "Stop for impassibilities" : true,
 }

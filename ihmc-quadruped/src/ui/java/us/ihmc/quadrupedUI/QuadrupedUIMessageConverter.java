@@ -210,37 +210,37 @@ public class QuadrupedUIMessageConverter
 
       reaStateRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.inputTopic);
 
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredControllerNameTopic, this::publishDesiredHighLevelControllerState);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredSteppingStateNameTopic, this::publishDesiredQuadrupedSteppigState);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, this::publishDesiredBodyHeight);
+      messager.addTopicListener(QuadrupedUIMessagerAPI.DesiredControllerNameTopic, this::publishDesiredHighLevelControllerState);
+      messager.addTopicListener(QuadrupedUIMessagerAPI.DesiredSteppingStateNameTopic, this::publishDesiredQuadrupedSteppigState);
+      messager.addTopicListener(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, this::publishDesiredBodyHeight);
 
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, this::publishEnableStepTeleop);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.XGaitSettingsTopic, this::publishQuadrupedXGaitSettings);
+      messager.addTopicListener(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, this::publishEnableStepTeleop);
+      messager.addTopicListener(QuadrupedUIMessagerAPI.XGaitSettingsTopic, this::publishQuadrupedXGaitSettings);
 
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.ManualStepsListMessageTopic, this::publishStepListMessage);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.SoleTrajectoryMessageTopic, this::publishSoleTrajectoryMessage);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.FootstepPlannerTimedStepsTopic, this::publishStepListMessage);
+      messager.addTopicListener(QuadrupedUIMessagerAPI.ManualStepsListMessageTopic, this::publishStepListMessage);
+      messager.addTopicListener(QuadrupedUIMessagerAPI.SoleTrajectoryMessageTopic, this::publishSoleTrajectoryMessage);
+      messager.addTopicListener(QuadrupedUIMessagerAPI.FootstepPlannerTimedStepsTopic, this::publishStepListMessage);
 
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.ComputePathTopic, request -> requestNewPlan());
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.AbortPlanningTopic, request -> requestAbortPlanning());
+      messager.addTopicListener(QuadrupedUIMessagerAPI.ComputePathTopic, request -> requestNewPlan());
+      messager.addTopicListener(QuadrupedUIMessagerAPI.AbortPlanningTopic, request -> requestAbortPlanning());
 
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredTeleopVelocity, this::publishDesiredVelocity);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredBodyTrajectoryTopic, desiredBodyPosePublisher::publish);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.AbortWalkingTopic, m -> abortWalkingPublisher.publish(new AbortWalkingMessage()));
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.PauseWalkingTopic, request ->
+      messager.addTopicListener(QuadrupedUIMessagerAPI.DesiredTeleopVelocity, this::publishDesiredVelocity);
+      messager.addTopicListener(QuadrupedUIMessagerAPI.DesiredBodyTrajectoryTopic, desiredBodyPosePublisher::publish);
+      messager.addTopicListener(QuadrupedUIMessagerAPI.AbortWalkingTopic, m -> abortWalkingPublisher.publish(new AbortWalkingMessage()));
+      messager.addTopicListener(QuadrupedUIMessagerAPI.PauseWalkingTopic, request ->
       {
          PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
          pauseWalkingMessage.setPause(request);
          pauseWalkingPublisher.publish(pauseWalkingMessage);
       });
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.LoadBearingRequestTopic, quadrant ->
+      messager.addTopicListener(QuadrupedUIMessagerAPI.LoadBearingRequestTopic, quadrant ->
       {
          QuadrupedFootLoadBearingMessage loadBearingMessage = new QuadrupedFootLoadBearingMessage();
          loadBearingMessage.setRobotQuadrant(quadrant.toByte());
          loadBearingRequestPublisher.publish(loadBearingMessage);
       });
 
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.PlanarRegionDataClearTopic, m ->
+      messager.addTopicListener(QuadrupedUIMessagerAPI.PlanarRegionDataClearTopic, m ->
       {
          REAStateRequestMessage clearRequest = new REAStateRequestMessage();
          clearRequest.setRequestClear(true);

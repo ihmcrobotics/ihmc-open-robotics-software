@@ -74,12 +74,20 @@ public class WrapperForMultipleToeOffCalculatorsTest
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
          List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
-         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, parentRegistry);
+         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot",
+                                                                           foot,
+                                                                           soleFrame,
+                                                                           contactFramePoints,
+                                                                           coefficientOfFriction,
+                                                                           parentRegistry);
          yoPlaneContactState.setFullyConstrained();
          contactStates.put(robotSide, yoPlaneContactState);
       }
 
-      ToeOffCalculator toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getWalkingControllerParameters().getToeOffParameters(), parentRegistry);
+      ToeOffCalculator toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates,
+                                                                                 contactableFeet,
+                                                                                 getWalkingControllerParameters().getToeOffParameters(),
+                                                                                 parentRegistry);
       toeOffCalculators.put(toeOffCalculator.getEnum(), toeOffCalculator);
    }
 
@@ -89,14 +97,11 @@ public class WrapperForMultipleToeOffCalculatorsTest
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-
-
-	@Test
+   @Test
    public void testConstructor()
    {
       generator = new WrapperForMultipleToeOffCalculators(toeOffCalculators, parentRegistry);
    }
-
 
    @Test
    public void testClear()
@@ -116,7 +121,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
       generator = new WrapperForMultipleToeOffCalculators(toeOffCalculators, parentRegistry);
       generator.setExitCMP(exitCMP, trailingSide);
    }
-
 
    @Test
    public void testComputeToeOffContactPoint()
@@ -189,12 +193,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
 
          @Override
          public double maximumHeightAboveAnkle()
-         {
-            return 0;
-         }
-
-         @Override
-         public double defaultOffsetHeightAboveAnkle()
          {
             return 0;
          }
@@ -331,12 +329,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
                }
 
                @Override
-               public boolean checkECMPLocationToTriggerToeOff()
-               {
-                  return false;
-               }
-
-               @Override
                public double getMinStepLengthForToeOff()
                {
                   return 0;
@@ -355,6 +347,12 @@ public class WrapperForMultipleToeOffCalculatorsTest
          {
             return new SwingTrajectoryParameters()
             {
+               @Override
+               public double getMaxSwingHeight()
+               {
+                  return 0;
+               }
+
                @Override
                public double getDesiredTouchdownHeightOffset()
                {

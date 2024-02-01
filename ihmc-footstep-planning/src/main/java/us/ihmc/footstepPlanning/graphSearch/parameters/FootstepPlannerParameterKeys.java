@@ -64,6 +64,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  rollWeight                                   = keys.addDoubleKey ("Roll weight", 0.2);
    public static final DoubleStoredPropertyKey  pitchWeight                                  = keys.addDoubleKey ("Pitch weight", 0.2);
    public static final DoubleStoredPropertyKey  footholdAreaWeight                           = keys.addDoubleKey ("Foothold area weight", 0.0);
+   public static final DoubleStoredPropertyKey  referencePlanAlpha                           = keys.addDoubleKey("Reference plan alpha", 0.7);
 
    // Footstep snapping and wiggling
    public static final DoubleStoredPropertyKey  wiggleInsideDeltaTarget                      = keys.addDoubleKey ("Wiggle inside delta target", 0.01);

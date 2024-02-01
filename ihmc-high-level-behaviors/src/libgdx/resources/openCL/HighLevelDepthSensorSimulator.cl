@@ -1,6 +1,4 @@
-kernel void discretizePoints(global float* pointCloudBuffer,
-                             global int* discretizedIntBuffer,
-                             global float* parameters)
+kernel void discretizePoints(global float* pointCloudBuffer, global int* discretizedIntBuffer, global float* parameters)
 {
    int n = get_global_id(0);
 

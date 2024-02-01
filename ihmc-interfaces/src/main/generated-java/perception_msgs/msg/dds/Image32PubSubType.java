@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.Image32>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::Image32_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "5894a3eddd157a9b707b958e4c422541039dd6284d5da1f0a10d05e1df409fb8";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

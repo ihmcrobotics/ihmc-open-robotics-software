@@ -77,7 +77,7 @@ void FactorGraphExternal::setPoseInitialValue(int index, double* value)
 
 void FactorGraphExternal::setPoseInitialValueSE3(int index, double* value)
 {
-   printf("setPoseInitialValueSE3(%d)\n", index); fflush(stdout);
+   // printf("setPoseInitialValueSE3(%d)\n", index); fflush(stdout);
    using namespace gtsam;
    Eigen::Matrix4d eigenMatrixSE3 = Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor> >(value);
 

@@ -1,0 +1,41 @@
+#ifndef __perception_msgs__msg__PrimitiveRigidBodySceneNodeMessage__idl__
+#define __perception_msgs__msg__PrimitiveRigidBodySceneNodeMessage__idl__
+
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+#include "perception_msgs/msg/./SceneNodeMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * A primitive rigid body scene node
+       * The topic name identifies the node.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::PrimitiveRigidBodySceneNodeMessage_")
+      struct PrimitiveRigidBodySceneNodeMessage
+      {
+        /**
+         * The base scene node information
+         */
+        perception_msgs::msg::dds::SceneNodeMessage scene_node;
+        /**
+         * Initial parent ID
+         */
+        unsigned long initial_parent_id;
+        /**
+         * Initial transform to initial parent
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage initial_transform_to_parent;
+        /**
+         * Type of primitive shape
+         */
+        string shape;
+      };
+    };
+  };
+};
+
+#endif

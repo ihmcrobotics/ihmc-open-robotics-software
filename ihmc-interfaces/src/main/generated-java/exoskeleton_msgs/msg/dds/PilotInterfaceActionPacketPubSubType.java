@@ -11,6 +11,18 @@ package exoskeleton_msgs.msg.dds;
 public class PilotInterfaceActionPacketPubSubType implements us.ihmc.pubsub.TopicDataType<exoskeleton_msgs.msg.dds.PilotInterfaceActionPacket>
 {
    public static final java.lang.String name = "exoskeleton_msgs::msg::dds_::PilotInterfaceActionPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "dedd6acc556bffea1f5fb3e2a343652577ca81fb9d914e30ec56c43f1cc3b0a0";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

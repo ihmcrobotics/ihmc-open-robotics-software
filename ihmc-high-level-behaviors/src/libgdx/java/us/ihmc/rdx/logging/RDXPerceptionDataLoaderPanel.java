@@ -3,15 +3,16 @@ package us.ihmc.rdx.logging;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import imgui.type.ImString;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLogChannel;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
@@ -20,10 +21,11 @@ import java.util.HashMap;
 
 import static org.bytedeco.opencv.global.opencv_highgui.destroyAllWindows;
 
-public class RDXPerceptionDataLoaderPanel extends ImGuiPanel
+public class RDXPerceptionDataLoaderPanel extends RDXPanel
 {
    private PerceptionDataLoader loader;
    private Mat cvImage;
+   private final BytePointer imageBytePointer = new BytePointer(1000000);
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString perceptionLogPath = new ImString(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY + "/");
@@ -132,14 +134,14 @@ public class RDXPerceptionDataLoaderPanel extends ImGuiPanel
                if (channel.getName().contains("depth"))
                {
                   cvImage = new Mat();
-                  loader.loadCompressedDepth(channel.getName(), channel.getIndex(), cvImage);
-                  BytedecoOpenCVTools.displayDepth(channel.getName(), cvImage, 1);
+                  loader.loadCompressedDepth(channel.getName(), channel.getIndex(), imageBytePointer, cvImage);
+                  PerceptionDebugTools.displayDepth(channel.getName(), cvImage, 1);
                }
                if (channel.getName().contains("color"))
                {
                   cvImage = new Mat();
-                  loader.loadCompressedImage(channel.getName(), channel.getIndex(), cvImage);
-                  BytedecoOpenCVTools.displayDepth(channel.getName(), cvImage, 1);
+                  loader.loadCompressedColor(channel.getName(), channel.getIndex(), cvImage);
+                  PerceptionDebugTools.displayDepth(channel.getName(), cvImage, 1);
                }
 
                // TODO: Maybe replace these with trajectory graphics buffer replay

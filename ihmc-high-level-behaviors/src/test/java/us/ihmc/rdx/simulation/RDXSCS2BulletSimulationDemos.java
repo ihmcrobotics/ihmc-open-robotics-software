@@ -4,15 +4,15 @@ import imgui.ImGui;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.simulation.scs2.RDXSCS2BulletSimulationSession;
+import us.ihmc.rdx.simulation.scs2.RDXSCS2SimulationSession;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.scs2.examples.simulations.bullet.*;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletFlyingBallSimulationTest;
 
 public class RDXSCS2BulletSimulationDemos
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
-   private RDXSCS2BulletSimulationSession scs2SimulationSession;
+   private final RDXBaseUI baseUI = new RDXBaseUI();
+   private RDXSCS2SimulationSession scs2SimulationSession;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    public RDXSCS2BulletSimulationDemos()
@@ -27,10 +27,8 @@ public class RDXSCS2BulletSimulationDemos
 
             baseUI.getImGuiPanelManager().addPanel("Session Selection", this::renderSessionSelectionPanelImGuiWidgets);
 
-            scs2SimulationSession = new RDXSCS2BulletSimulationSession();
-            scs2SimulationSession.create(baseUI);
+            scs2SimulationSession = new RDXSCS2SimulationSession(baseUI);
             scs2SimulationSession.startSession(FallingBoxBulletSimulation.createSession());
-            baseUI.getImGuiPanelManager().addPanel(scs2SimulationSession.getControlPanel());
          }
 
          @Override

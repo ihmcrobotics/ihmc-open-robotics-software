@@ -16,10 +16,6 @@ import us.ihmc.tools.property.*;
  */
 public class AStarBodyPathPlannerParameters extends StoredPropertySet implements AStarBodyPathPlannerParametersBasics
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-footstep-planning/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-footstep-planning/src/main/generated-java";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    /**
@@ -229,32 +225,29 @@ public class AStarBodyPathPlannerParameters extends StoredPropertySet implements
    /**
     * Loads an alternate version of this property set in the same folder.
     */
-   public AStarBodyPathPlannerParameters(String versionSpecifier)
+   public AStarBodyPathPlannerParameters(String versionSuffix)
    {
-      this(AStarBodyPathPlannerParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(AStarBodyPathPlannerParameters.class, versionSuffix);
    }
 
    /**
     * Loads an alternate version of this property set in other folders.
     */
-   public AStarBodyPathPlannerParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
+   public AStarBodyPathPlannerParameters(Class<?> classForLoading, String versionSuffix)
    {
-      super(keys, classForLoading, AStarBodyPathPlannerParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+      super(keys, classForLoading, AStarBodyPathPlannerParameters.class, versionSuffix);
       load();
    }
 
    public AStarBodyPathPlannerParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, AStarBodyPathPlannerParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, AStarBodyPathPlannerParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           AStarBodyPathPlannerParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+      StoredPropertySet parameters = new StoredPropertySet(keys, AStarBodyPathPlannerParameters.class);
+      parameters.generateJavaFiles();
    }
 }

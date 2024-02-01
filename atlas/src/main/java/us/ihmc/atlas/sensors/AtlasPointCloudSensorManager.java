@@ -7,12 +7,12 @@ import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPoi
 import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraBridge;
 import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraBridge.SensorFrameInitializationTransformer;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
@@ -35,7 +35,7 @@ public class AtlasPointCloudSensorManager
                                        boolean useTrackingData)
    {
       LogTools.info("Creating sensor bridges...");
-      realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, ROS2Tools.D435_POINT_CLOUD);
+      realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, PerceptionAPI.D435_POINT_CLOUD);
       LogTools.info("Using ROS clock calculator {}", rosClockCalculator.getClass());
       realsenseDepthPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
 
@@ -66,7 +66,7 @@ public class AtlasPointCloudSensorManager
       realsenseDepthPointCloudPublisher.shutdown();
       trackingCameraPublisher.shutdown();
    }
-   
+
    public void setCollisionBoxProvider(CollisionBoxProvider collisionBoxProvider)
    {
       realsenseDepthPointCloudPublisher.setSelfCollisionFilter(collisionBoxProvider);

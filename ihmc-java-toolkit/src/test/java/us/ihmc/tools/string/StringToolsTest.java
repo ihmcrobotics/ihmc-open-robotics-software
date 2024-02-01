@@ -4,8 +4,6 @@ import static us.ihmc.robotics.Assert.*;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 public class StringToolsTest
 {
    @Test
@@ -48,5 +46,14 @@ public class StringToolsTest
       assertEquals("meepMan", StringTools.titleToCamelCase("meep man"));
       assertEquals("camelCase", StringTools.titleToCamelCase("Camel case"));
       assertEquals("gpuPlanarRegions", StringTools.titleToCamelCase("GPU planar regions"));
+   }
+
+   @Test
+   public void testPascalCaseToSentenceCase()
+   {
+      assertEquals("Test pascal to sentence case", StringTools.pascalCaseToSentenceCase("TestPascalToSentenceCase"));
+      assertEquals("Test pascal to sentence case but there is an acronym such as UI", StringTools.pascalCaseToSentenceCase("TestPascalToSentenceCaseButThereIsAnAcronymSuchAsUI"));
+      assertEquals("It should handle stuff like 3D as well", StringTools.pascalCaseToSentenceCase("ItShouldHandleStuffLike3DAsWell"));
+      assertNotEquals("It cannot handle all cases and struggles with some acronyms like UI and 3D in certain order", StringTools.pascalCaseToSentenceCase("ItCannotHandleAssCasesAndStrugglesWithSomeAcronymsLikeUIAnd3DInCertainOrder"));
    }
 }

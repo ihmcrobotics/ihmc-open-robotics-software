@@ -3,7 +3,7 @@ package us.ihmc.rdx.simulation;
 import us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageRobotDefinition;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.simulation.scs2.RDXSCS2BulletSimulationSession;
+import us.ihmc.rdx.simulation.scs2.RDXSCS2SimulationSession;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
@@ -16,8 +16,8 @@ import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
  */
 public class RDXSCS2FourBarLinkageTest
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
-   private RDXSCS2BulletSimulationSession scs2SimulationSession;
+   private final RDXBaseUI baseUI = new RDXBaseUI();
+   private RDXSCS2SimulationSession scs2SimulationSession;
 
    public RDXSCS2FourBarLinkageTest()
    {
@@ -29,8 +29,7 @@ public class RDXSCS2FourBarLinkageTest
             baseUI.create();
             baseUI.getPrimaryScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
 
-            scs2SimulationSession = new RDXSCS2BulletSimulationSession();
-            scs2SimulationSession.create(baseUI);
+            scs2SimulationSession = new RDXSCS2SimulationSession(baseUI);
 
             SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
             CrossFourBarLinkageRobotDefinition robotDefinition = new CrossFourBarLinkageRobotDefinition();
@@ -38,7 +37,6 @@ public class RDXSCS2FourBarLinkageTest
 
             scs2SimulationSession.startSession(simulationSession);
             scs2SimulationSession.changeBufferDuration(20.0);
-            baseUI.getImGuiPanelManager().addPanel(scs2SimulationSession.getControlPanel());
          }
 
          @Override

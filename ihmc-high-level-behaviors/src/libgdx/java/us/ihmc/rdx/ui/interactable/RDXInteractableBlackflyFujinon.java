@@ -21,8 +21,8 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
-import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
-import us.ihmc.rdx.visualizers.RDXFrustumVisualizer;
+import us.ihmc.robotics.interaction.CylinderRayIntersection;
+import us.ihmc.rdx.visualizers.RDXFrustumGraphic;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class RDXInteractableBlackflyFujinon
@@ -34,10 +34,11 @@ public class RDXInteractableBlackflyFujinon
    private final ImBoolean renderARImage = new ImBoolean(false);
    private final double frustimNear = 0.05;
    private final ImFloat frustumFar = new ImFloat(5.0f);
-   private RDXFrustumVisualizer frustumVisualizer;
+   private RDXFrustumGraphic frustumVisualizer;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Matrix4 tempMatrix4 = new Matrix4();
    private PerspectiveCamera camera;
+   private final Point3D offset = new Point3D();
 
    public RDXInteractableBlackflyFujinon(RDX3DPanel panel3D)
    {
@@ -67,7 +68,7 @@ public class RDXInteractableBlackflyFujinon
       camera.position.setZero();
       camera.up.set(0.0f, 0.0f, 1.0f);
       camera.direction.set(1.0f, 0.0f, 0.0f);
-      frustumVisualizer = new RDXFrustumVisualizer();
+      frustumVisualizer = new RDXFrustumGraphic();
 
       panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
    }
@@ -109,7 +110,10 @@ public class RDXInteractableBlackflyFujinon
 
    private double calculateClosestCollision(Line3DReadOnly mousePickRay)
    {
-      cylinderIntersection.update(0.08, 0.03, new Point3D(-0.03, 0.0, 0.0), Axis3D.X, interactableFrameModel.getReferenceFrame());
+      double length = 0.12;
+      double radius = 0.03;
+      offset.set(0.0, 0.0, 0.0);
+      cylinderIntersection.update(length, radius, offset, Axis3D.X, interactableFrameModel.getReferenceFrame());
       return cylinderIntersection.intersect(mousePickRay);
    }
 

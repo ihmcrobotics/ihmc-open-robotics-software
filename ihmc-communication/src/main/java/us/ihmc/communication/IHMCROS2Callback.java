@@ -55,7 +55,11 @@ public class IHMCROS2Callback<T>
       }, DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 
-   private static <T> TopicDataType<T> newMessageTopicDataTypeInstance(Class<T> messageType)
+   /**
+    * This is an improved version of  {@link ROS2TopicNameTools#newMessageTopicDataTypeInstance}
+    * and should be merged upstream.
+    */
+   public static <T> TopicDataType<T> newMessageTopicDataTypeInstance(Class<T> messageType)
    {
       if (messageType.equals(Pose3D.class))
       {

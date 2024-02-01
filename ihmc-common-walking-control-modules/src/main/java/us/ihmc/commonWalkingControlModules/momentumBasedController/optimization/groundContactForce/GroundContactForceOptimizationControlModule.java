@@ -192,7 +192,7 @@ public class GroundContactForceOptimizationControlModule
 
    public void processMomentumRateCommand(DMatrixRMaj additionalWrench)
    {
-      wrenchMatrixCalculator.computeMatrices();
+      wrenchMatrixCalculator.computeMatrices(null);
 
       int taskSize = momentumSelectionMatrix.getNumRows();
       momentumObjective.reshape(taskSize, 1);

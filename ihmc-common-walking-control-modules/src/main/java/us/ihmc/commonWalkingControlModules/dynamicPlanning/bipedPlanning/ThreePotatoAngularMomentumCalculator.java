@@ -19,6 +19,7 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -29,6 +30,10 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.robotics.time.TimeIntervalProvider;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -41,7 +46,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class ThreePotatoAngularMomentumCalculator
+public class ThreePotatoAngularMomentumCalculator implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -198,7 +203,6 @@ public class ThreePotatoAngularMomentumCalculator
          actualModelAngularMomentum.set(totalAngularMomentum);
       }
 
-
       MultipleWaypointsPositionTrajectoryGenerator predictedLeftFootTrajectory = footTrajectoryPredictor.getPredictedLeftFootTrajectories();
       MultipleWaypointsPositionTrajectoryGenerator predictedRightFootTrajectory = footTrajectoryPredictor.getPredictedRightFootTrajectories();
 
@@ -247,7 +251,6 @@ public class ThreePotatoAngularMomentumCalculator
 
    private final FramePoint3D potatoPosition = new FramePoint3D();
    private final FrameVector3D potatoVelocity = new FrameVector3D();
-
 
    public void computeAngularMomentumTrajectories(List<? extends TimeIntervalProvider> timeIntervals,
                                                   MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories)
@@ -311,11 +314,11 @@ public class ThreePotatoAngularMomentumCalculator
 
             if (debug && totalAngularMomentum.containsNaN() || Double.isInfinite(totalAngularMomentum.length()))
                throw new RuntimeException("Error.");
-            if (useHeightScaledAngularMomentum.getValue() && !MathTools.isLessThanOrEqualToWithPrecision(comTrajectories.getAcceleration().getZ(), gravityZ, 1e-3))
+            if (useHeightScaledAngularMomentum.getValue()
+                && !MathTools.isLessThanOrEqualToWithPrecision(comTrajectories.getAcceleration().getZ(), gravityZ, 1e-3))
                totalAngularMomentum.scale(gravityZ / (gravityZ + comTrajectories.getAcceleration().getZ()));
 
             angularMomentumEstimator.addObjectivePosition(timeInInterval, totalAngularMomentum);
-
 
             if (debug && totalAngularMomentum.containsNaN() || Double.isInfinite(totalAngularMomentum.length()))
                throw new RuntimeException("Error.");
@@ -340,7 +343,10 @@ public class ThreePotatoAngularMomentumCalculator
       if (!visualize)
          return;
 
-      double duration = EuclidCoreTools.min(comTrajectories.getEndTime(), secondPotatoTrajectories.getLastWaypointTime(), thirdPotatoTrajectories.getLastWaypointTime(), sufficientlyLongTime);
+      double duration = EuclidCoreTools.min(comTrajectories.getEndTime(),
+                                            secondPotatoTrajectories.getLastWaypointTime(),
+                                            thirdPotatoTrajectories.getLastWaypointTime(),
+                                            sufficientlyLongTime);
 
       comTrajectoryVis.reset();
       secondPotatoVis.reset();
@@ -416,5 +422,18 @@ public class ThreePotatoAngularMomentumCalculator
 
       angularMomentumToPack.cross(relativePotatoPosition, relativePotatoVelocity);
       angularMomentumToPack.scale(potatoMass);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      if (!visualize)
+         return null;
+
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("comTrajectoryViz", comTrajectoryVis.getPositions(), 0.01, ColorDefinitions.Black()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("secondPotatoVis", secondPotatoVis.getPositions(), 0.01, ColorDefinitions.Blue()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("thirdPotatoVis", thirdPotatoVis.getPositions(), 0.01, ColorDefinitions.Red()));
+      return group;
    }
 }

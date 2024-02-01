@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class BoundingBox3DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.BoundingBox3DMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::BoundingBox3DMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "bd5c9c8219a60de02a424f37f96d3ae31f033bec2a9d6918efff878fd541dec6";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

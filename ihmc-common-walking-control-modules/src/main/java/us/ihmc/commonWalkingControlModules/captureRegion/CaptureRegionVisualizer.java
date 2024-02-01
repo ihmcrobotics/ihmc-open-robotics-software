@@ -10,10 +10,15 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class CaptureRegionVisualizer
+public class CaptureRegionVisualizer implements SCS2YoGraphicHolder
 {
    private static final String caption = "CaptureRegion";
    private static final Color color = Color.GREEN;
@@ -26,14 +31,17 @@ public class CaptureRegionVisualizer
    private final FrameConvexPolygon2D captureRegionPolygon = new FrameConvexPolygon2D();
    private final Supplier<FrameConvexPolygon2DReadOnly> captureRegionProvider;
 
-   public CaptureRegionVisualizer(Supplier<FrameConvexPolygon2DReadOnly> captureRegionProvider, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public CaptureRegionVisualizer(Supplier<FrameConvexPolygon2DReadOnly> captureRegionProvider,
+                                  YoGraphicsListRegistry yoGraphicsListRegistry,
                                   YoRegistry parentRegistry)
    {
       this(captureRegionProvider, "", yoGraphicsListRegistry, parentRegistry);
    }
 
-   public CaptureRegionVisualizer(Supplier<FrameConvexPolygon2DReadOnly> captureRegionProvider, String suffix, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoRegistry parentRegistry)
+   public CaptureRegionVisualizer(Supplier<FrameConvexPolygon2DReadOnly> captureRegionProvider,
+                                  String suffix,
+                                  YoGraphicsListRegistry yoGraphicsListRegistry,
+                                  YoRegistry parentRegistry)
    {
       this.captureRegionProvider = captureRegionProvider;
 
@@ -66,5 +74,13 @@ public class CaptureRegionVisualizer
             System.out.println(e);
          }
       }
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D(caption, yoCaptureRegionPolygon, ColorDefinitions.argb(color.getRGB())));
+      return group;
    }
 }

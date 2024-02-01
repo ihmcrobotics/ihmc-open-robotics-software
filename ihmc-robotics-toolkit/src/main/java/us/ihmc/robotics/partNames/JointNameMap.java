@@ -63,7 +63,10 @@ public interface JointNameMap<E extends Enum<E> & RobotSegment<E>> extends Robot
 
    String getHeadName();
 
-   boolean isTorqueVelocityLimitsEnabled();
+   default boolean isTorqueVelocityLimitsEnabled()
+   {
+      return false;
+   }
 
    Set<String> getLastSimulatedJoints();
    
@@ -77,6 +80,4 @@ public interface JointNameMap<E extends Enum<E> & RobotSegment<E>> extends Robot
    E[] getRobotSegments();
 
    E getEndEffectorsRobotSegment(String jointNameBeforeEndEffector);
-
-
 }

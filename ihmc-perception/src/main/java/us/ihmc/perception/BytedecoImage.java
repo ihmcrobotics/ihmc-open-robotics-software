@@ -5,6 +5,8 @@ import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
 
 import java.nio.ByteBuffer;
@@ -38,8 +40,8 @@ public class BytedecoImage
 
    public BytedecoImage(Mat suppliedMat)
    {
-      this(BytedecoOpenCVTools.getImageWidth(suppliedMat),
-           BytedecoOpenCVTools.getImageHeight(suppliedMat),
+      this(OpenCVTools.getImageWidth(suppliedMat),
+           OpenCVTools.getImageHeight(suppliedMat),
            suppliedMat.type(),
            suppliedMat.data().asByteBuffer(),
            suppliedMat);
@@ -132,6 +134,7 @@ public class BytedecoImage
 
    public void changeAddress(long address)
    {
+      bytedecoByteBufferPointer.deallocate();
       bytedecoByteBufferPointer.setAddress(address);
       backingDirectByteBuffer = bytedecoByteBufferPointer.asByteBuffer(); // Allocates, but on the native side?
       bytedecoOpenCVMat.data(bytedecoByteBufferPointer);
@@ -140,6 +143,11 @@ public class BytedecoImage
 
    public void createOpenCLImage(OpenCLManager openCLManager, int flags)
    {
+      if (openCLChannelOrder == OpenCL.CL_RGB)
+      {
+         throw new RuntimeException("OpenCL will throw CL_OUT_OF_RESOURCES unless you use RGBA and CV_8UC4."
+                                    + "It's probably something about memory alignment on hardware. Just include the alpha channel.");
+      }
       openCLImageObjectFlags = flags;
       openCLImageObject = openCLManager.createImage(flags, openCLChannelOrder, openCLChannelDataType, imageWidth, imageHeight, bytedecoByteBufferPointer);
    }
@@ -152,6 +160,12 @@ public class BytedecoImage
    public void readOpenCLImage(OpenCLManager openCLManager)
    {
       openCLManager.enqueueReadImage(openCLImageObject, imageWidth, imageHeight, bytedecoByteBufferPointer);
+   }
+
+   public void fill(OpenCLManager openCLManager, byte value)
+   {
+      bytedecoByteBufferPointer.fill(value);
+      openCLManager.enqueueFillBuffer(openCLImageObject, 1, value);
    }
 
    public void resize(int imageWidth, int imageHeight, OpenCLManager openCLManager, ByteBuffer externalByteBuffer)
@@ -168,6 +182,11 @@ public class BytedecoImage
       if (isBackedByExternalByteBuffer)
       {
          backingDirectByteBuffer = externalByteBuffer;
+         if (backingDirectByteBuffer.capacity() < imageWidth * imageHeight * bytesPerPixel)
+         {
+            throw new RuntimeException("Externally managed byte buffer large enough."
+                                       + "Resize it before calling this resize method.");
+         }
       }
       else
       {
@@ -182,6 +201,30 @@ public class BytedecoImage
       if (openCLObjectCreated)
       {
          createOpenCLImage(openCLManager, openCLImageObjectFlags);
+      }
+   }
+
+   /**
+    * Resizes this image to match the dimensions of other if necessary.
+    *
+    * Warning: Assumes we are not using OpenCL on this image and this BytedecoImage is not
+    *   backed by an external buffer.
+    */
+   public void ensureDimensionsMatch(BytedecoImage other)
+   {
+      ensureDimensionsMatch(other, null);
+   }
+
+   /**
+    * Resizes this image to match the dimensions of other if necessary.
+    *
+    * // FIXME: Broken for external byte buffers
+    */
+   public void ensureDimensionsMatch(BytedecoImage other, OpenCLManager openCLManager)
+   {
+      if (!OpenCVTools.dimensionsMatch(this, other))
+      {
+         resize(other.getImageWidth(), other.getImageHeight(), openCLManager, backingDirectByteBuffer);
       }
    }
 
@@ -232,6 +275,16 @@ public class BytedecoImage
    }
 
    /**
+    * Retrieve an int from the image.
+    *
+    * This uses a precalulated pointer to allow for faster access.
+    */
+   public int getInt(int row, int column)
+   {
+      return pointerForAccessSpeed.getInt((getLinearizedIndex(row, column)) * Float.BYTES);
+   }
+
+   /**
     * Set a float in the image.
     *
     * This uses a precalulated pointer to allow for faster access.
@@ -267,5 +320,10 @@ public class BytedecoImage
    private long getLinearizedIndex(int row, int column)
    {
       return (long) row * imageWidth + column;
+   }
+
+   public BytePointer getPointerForAccessSpeed()
+   {
+      return pointerForAccessSpeed;
    }
 }

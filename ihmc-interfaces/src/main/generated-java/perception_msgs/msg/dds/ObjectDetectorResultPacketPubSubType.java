@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class ObjectDetectorResultPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.ObjectDetectorResultPacket>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::ObjectDetectorResultPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "d2a69bf3012907d2df4e409d54800f020bbcd34fd1af913048aafc6afd07ec6e";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

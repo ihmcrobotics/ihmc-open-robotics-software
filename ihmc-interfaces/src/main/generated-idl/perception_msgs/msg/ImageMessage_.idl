@@ -4,7 +4,6 @@
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
 #include "ihmc_common_msgs/msg/./InstantMessage_.idl"
-#include "perception_msgs/msg/./IntrinsicParametersMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -36,25 +35,57 @@ module perception_msgs
          */
         unsigned short image_height;
         /**
+         * Depth discretization unit length.
+         * This is used when this image is a depth image. The image will be represented
+         * in data as unsigned integers where the units are this distance.
+         * For instance a depth pixel value of 2 and discretization value of 0.1 would
+         * indicate a depth of 0.2 meters.
+         */
+        float depth_discretization;
+        /**
          * The raw data for the image
          */
         sequence<octet, 25000000> data;
         /**
          * The image format. Ordinal of OpenCVImageFormat
          */
-        unsigned short format;
+        octet format;
         /**
-         * Position of the focal point at sensor data aquisition
+         * Position of the focal point at sensor data acquisition
          */
         geometry_msgs::msg::dds::Point position;
         /**
-         * Orientation of the focal point at sensor data aquisition
+         * Orientation of the focal point at sensor data acquisition
          */
         geometry_msgs::msg::dds::Quaternion orientation;
         /**
-         * Intrinsic parameters for frustum camera models
+         * Camera model of the sensor. Ordinal of us.ihmc.perception.CameraModel
          */
-        perception_msgs::msg::dds::IntrinsicParametersMessage intrinsic_parameters;
+        octet camera_model;
+        /**
+         * Horizontal focal length in units of pixels (Fx)
+         */
+        float focal_length_x_pixels;
+        /**
+         * Vertical focal length in units of pixels (Fx)
+         */
+        float focal_length_y_pixels;
+        /**
+         * Principal point X in units of pixels (Cx)
+         */
+        float principal_point_x_pixels;
+        /**
+         * Principal point Y in units of pixels (Cy)
+         */
+        float principal_point_y_pixels;
+        /**
+         * If Ouster camera model, the calibrated beam altitude angles used to get 3D points.
+         */
+        sequence<float, 128> ouster_beam_altitude_angles;
+        /**
+         * If Ouster camera model, the calibrated beam azimuth angles used to get 3D points.
+         */
+        sequence<float, 128> ouster_beam_azimuth_angles;
       };
     };
   };

@@ -44,20 +44,20 @@ void FactorGraphHandler::createOrientedPlaneNoiseModel(gtsam::Vector3 lmVariance
 
 void FactorGraphHandler::addPriorPoseFactor(int index, gtsam::Pose3 mean)
 {
-   printf("Prior Pose Factor: x%d\n", index); fflush(stdout);
+   // printf("Prior Pose Factor: x%d\n", index); fflush(stdout);
    graph.add(gtsam::PriorFactor<gtsam::Pose3>(gtsam::Symbol('x', index), mean, priorNoise));
 }
 
 void FactorGraphHandler::addOdometryFactor(gtsam::Pose3 odometry, int poseId)
 {
-   printf("Odometry Factor: x%d -> x%d\n", poseId - 1, poseId); fflush(stdout);
+   // printf("Odometry Factor: x%d -> x%d\n", poseId - 1, poseId); fflush(stdout);
    graph.add(gtsam::BetweenFactor<gtsam::Pose3>(gtsam::Symbol('x', poseId - 1), gtsam::Symbol('x', poseId), odometry, odometryNoise));
    poseId++;
 }
 
 void FactorGraphHandler::addOrientedPlaneFactor(gtsam::Vector4 lmMean, int lmId, int poseIndex)
 {
-   printf("Plane Factor: x%d -> l%d\n", poseIndex, lmId); fflush(stdout);
+   // printf("Plane Factor: x%d -> l%d\n", poseIndex, lmId); fflush(stdout);
    graph.add(gtsam::OrientedPlane3Factor(lmMean, orientedPlaneNoise, gtsam::Symbol('x', poseIndex), gtsam::Symbol('l', lmId)));
 }
 
@@ -69,7 +69,7 @@ void FactorGraphHandler::addGenericProjectionFactor(gtsam::Point2 point, int lmI
 
 void FactorGraphHandler::setPoseInitialValue(int index, gtsam::Pose3 value)
 {
-   printf("Pose Initial Value: x%d\n", index); fflush(stdout);
+   // printf("Pose Initial Value: x%d\n", index); fflush(stdout);
    if (structure.find('x' + std::to_string(index)) == structure.end())
    {
       structure.insert('x' + std::to_string(index));
@@ -89,7 +89,7 @@ void FactorGraphHandler::setPointLandmarkInitialValue(int landmarkId, gtsam::Poi
 
 void FactorGraphHandler::setOrientedPlaneInitialValue(int landmarkId, gtsam::OrientedPlane3 value)
 {
-   printf("Plane Initial Value: l%d\n", landmarkId); fflush(stdout);
+   // printf("Plane Initial Value: l%d\n", landmarkId); fflush(stdout);
    if (!initial.exists(gtsam::Symbol('l', landmarkId)) && structure.find('l' + std::to_string(landmarkId)) == structure.end())
    {
       structure.insert('l' + std::to_string(landmarkId));

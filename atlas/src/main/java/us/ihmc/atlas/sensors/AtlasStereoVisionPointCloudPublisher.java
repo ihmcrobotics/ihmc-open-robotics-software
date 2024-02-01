@@ -9,6 +9,7 @@ import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPoi
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
@@ -32,7 +33,7 @@ public class AtlasStereoVisionPointCloudPublisher
       DRCROSPPSTimestampOffsetProvider timestampOffsetProvider = AtlasPPSTimestampOffsetProvider.getInstance(sensorInformation);
       RobotROSClockCalculatorFromPPSOffset rosClockCalculator = new RobotROSClockCalculatorFromPPSOffset(timestampOffsetProvider);
 
-      multisenseStereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(robotModel, ros2Node, ROS2Tools.MULTISENSE_STEREO_POINT_CLOUD);
+      multisenseStereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(robotModel, ros2Node, PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD);
       multisenseStereoVisionPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
       AvatarRobotPointCloudParameters multisenseStereoParameters
             = sensorInformation.getPointCloudParameters(AtlasSensorInformation.MULTISENSE_STEREO_ID);

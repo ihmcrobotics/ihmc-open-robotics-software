@@ -7,6 +7,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.logging.HDF5Tools;
+import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.tools.thread.Throttler;
 
 public class FFMPEGVideoPlaybackManager
@@ -23,7 +24,7 @@ public class FFMPEGVideoPlaybackManager
 
    public FFMPEGVideoPlaybackManager(String file)
    {
-      if (file.endsWith(HDF5Tools.HDF5_FILE_EXTENSION))
+      if (file.endsWith(PerceptionLoggerConstants.HDF5_FILE_EXTENSION))
          this.file = new FFMPEGHDF5FileReader(file);
       else
          this.file = new FFMPEGFileReader(file);

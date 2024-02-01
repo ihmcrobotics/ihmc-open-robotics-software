@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 
@@ -135,10 +136,17 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       behaviorTestHelper.dispatchBehavior(ik);
 
+      double totalSimDuration = 0.0;
       while (!ik.isDone())
       {
-         success = behaviorTestHelper.simulateNow(0.1);
+         double simDuration = 0.1;
+         success = behaviorTestHelper.simulateNow(simDuration);
          assertTrue(success);
+
+         totalSimDuration += simDuration;
+
+         if (totalSimDuration >= 10)
+            fail("IK is not converging");
       }
 
       assertFalse(ik.hasSolverFailed(), "Bad solution: " + ik.getSolutionQuality());
@@ -211,10 +219,17 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       behaviorTestHelper.dispatchBehavior(ik);
 
+      double totalSimDuration = 0.0;
       while (!ik.isDone())
       {
-         success = behaviorTestHelper.simulateNow(0.1);
+         double simDuration = 0.1;
+         success = behaviorTestHelper.simulateNow(simDuration);
          assertTrue(success);
+
+         totalSimDuration += simDuration;
+
+         if (totalSimDuration >= 10)
+            fail("IK is not converging");
       }
 
       assertFalse(ik.hasSolverFailed(), "Bad solution: " + ik.getSolutionQuality());
@@ -295,10 +310,17 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       behaviorTestHelper.dispatchBehavior(ik);
 
+      double totalSimDuration = 0.0;
       while (!ik.isDone())
       {
-         success = behaviorTestHelper.simulateNow(0.1);
+         double simDuration = 0.1;
+         success = behaviorTestHelper.simulateNow(simDuration);
          assertTrue(success);
+
+         totalSimDuration += simDuration;
+
+         if (totalSimDuration >= 10)
+            fail("IK is not converging");
       }
 
       assertFalse(ik.hasSolverFailed(), "Bad solution: " + ik.getSolutionQuality());
@@ -391,10 +413,17 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       behaviorTestHelper.dispatchBehavior(ik);
 
+      double totalSimDuration = 0.0;
       while (!ik.isDone())
       {
-         success = behaviorTestHelper.simulateNow(0.1);
+         double simDuration = 0.1;
+         success = behaviorTestHelper.simulateNow(simDuration);
          assertTrue(success);
+
+         totalSimDuration += simDuration;
+
+         if (totalSimDuration >= 10)
+            fail("IK is not converging");
       }
 
       assertFalse(ik.hasSolverFailed(), "Bad solution: " + ik.getSolutionQuality());
@@ -477,10 +506,17 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       behaviorTestHelper.dispatchBehavior(ik);
 
+      double totalSimDuration = 0.0;
       while (!ik.isDone())
       {
-         success = behaviorTestHelper.simulateNow(0.1);
+         double simDuration = 0.1;
+         success = behaviorTestHelper.simulateNow(simDuration);
          assertTrue(success);
+
+         totalSimDuration += simDuration;
+
+         if (totalSimDuration >= 10)
+            fail("IK is not converging");
       }
 
       assertFalse(ik.hasSolverFailed(), "Bad solution: " + ik.getSolutionQuality());
@@ -539,10 +575,17 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       behaviorTestHelper.dispatchBehavior(ik);
 
+      double totalSimDuration = 0.0;
       while (!ik.isDone())
       {
-         success = behaviorTestHelper.simulateNow(0.1);
+         double simDuration = 0.1;
+         success = behaviorTestHelper.simulateNow(simDuration);
          assertTrue(success);
+
+         totalSimDuration += simDuration;
+
+         if (totalSimDuration >= 10)
+            fail("IK is not converging");
       }
 
       assertFalse(ik.hasSolverFailed(), "Bad solution: " + ik.getSolutionQuality());
@@ -598,10 +641,17 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       behaviorTestHelper.dispatchBehavior(ik);
 
+      double totalSimDuration = 0.0;
       while (!ik.isDone())
       {
-         success = behaviorTestHelper.simulateNow(0.1);
+         double simDuration = 0.1;
+         success = behaviorTestHelper.simulateNow(simDuration);
          assertTrue(success);
+
+         totalSimDuration += simDuration;
+
+         if (totalSimDuration >= 10)
+            fail("IK is not converging");
       }
 
       assertFalse(ik.hasSolverFailed(), "Bad solution: " + ik.getSolutionQuality());

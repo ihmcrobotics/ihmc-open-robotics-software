@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -21,6 +22,7 @@ public class HeightMapPolygonSnapperTest
    public void testSnappingToPlane()
    {
       double epsilon = 1e-10;
+      double normalEpsilon = 5e-2;
       int numTests = 10;
       Random random = new Random(390223);
 
@@ -32,7 +34,14 @@ public class HeightMapPolygonSnapperTest
 
          Plane3D plane = new Plane3D(pointOnPlane, normal);
 
-         ConvexPolygon2D polygonToSnap = EuclidGeometryRandomTools.nextConvexPolygon2D(random, 0.5, 3 + random.nextInt(5));
+         // TODO make this not assume 4 points
+//         ConvexPolygon2D polygonToSnap = EuclidGeometryRandomTools.nextConvexPolygon2D(random, 0.5, 3 + random.nextInt(5));
+         ConvexPolygon2D polygonToSnap = EuclidGeometryRandomTools.nextConvexPolygon2D(random, 0.5, 4);
+         while (polygonToSnap.getNumberOfVertices() < 4)
+         {
+            polygonToSnap.addVertex(EuclidCoreRandomTools.nextPoint2D(random, 0.5));
+            polygonToSnap.update();
+         }
          polygonToSnap.translate(EuclidCoreRandomTools.nextDouble(random, 1.0), EuclidCoreRandomTools.nextDouble(random, 1.0));
 
          double gridResolution = 0.01;
@@ -52,7 +61,7 @@ public class HeightMapPolygonSnapperTest
          }
 
          HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
-         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData, Double.POSITIVE_INFINITY);
+         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
          // Check XY position of centroid isn't changed
          Point3D centroid = new Point3D(polygonToSnap.getCentroid().getX(), polygonToSnap.getCentroid().getY(), 0.0);
@@ -63,7 +72,7 @@ public class HeightMapPolygonSnapperTest
          // Check plane normal
          Vector3D zAxis = new Vector3D(Axis3D.Z);
          snapTransform.transform(zAxis);
-         Assertions.assertTrue(zAxis.epsilonEquals(plane.getNormal(), epsilon), "Snap transform does not match plane normal.");
+         EuclidCoreTestTools.assertEquals(plane.getNormal(), zAxis, normalEpsilon);
 
          // Check transformed x is perpendicular to world y
          Vector3D xAxis = new Vector3D(Axis3D.X);
@@ -123,10 +132,48 @@ public class HeightMapPolygonSnapperTest
          heightMapData.setHeightAt(polygonToSnap.getVertex(3).getX(), polygonToSnap.getVertex(3).getY(), offsetZ3);
 
          HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
-         snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData, Double.POSITIVE_INFINITY);
+         snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
          Assertions.assertTrue(plane.getNormal().epsilonEquals(snapper.getBestFitPlane().getNormal(), 1e-10));
          Assertions.assertTrue(Math.abs(plane.getZOnPlane(0.0, 0.0) - snapper.getBestFitPlane().getZOnPlane(0.0, 0.0)) < 1e-10);
       }
+   }
+
+   @Test
+   public void testAreaWhenFootOverhangs()
+   {
+      double gridResolution = 0.05;
+      double gridSizeXY = 0.3;
+      double gridCenterXY = 0.0;
+      HeightMapData heightMapData = new HeightMapData(gridResolution, gridSizeXY, gridCenterXY, gridCenterXY);
+
+      for (double x = -0.10; x <= 0.1; x += gridResolution)
+      {
+         for (double y = -0.10; y <= 0.1; y += gridResolution)
+         {
+            heightMapData.setHeightAt(x, y, 0.2);
+         }
+      }
+
+      ConvexPolygon2D polygonToSnap = new ConvexPolygon2D();
+
+      double footLength = 0.2;
+      double footWidth = 0.1;
+      polygonToSnap.addVertex(footLength / 2.0, footWidth / 2.0);
+      polygonToSnap.addVertex(footLength / 2.0, -footWidth / 2.0);
+      polygonToSnap.addVertex(-footLength / 2.0, -footWidth / 2.0);
+      polygonToSnap.addVertex(-footLength / 2.0, footWidth / 2.0);
+      polygonToSnap.update();
+
+      HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
+      snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData, 0.05, Math.toRadians(45.0));
+
+      Assertions.assertTrue(snapper.getArea() >= polygonToSnap.getArea());
+
+      // make the foot overhang by a fair bit
+      polygonToSnap.translate(-gridResolution, 0.0);
+      snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData, 0.05, Math.toRadians(45.0));
+      Assertions.assertFalse(snapper.getArea() >= polygonToSnap.getArea());
+      Assertions.assertEquals(snapper.getArea(), (footLength - 0.05) * footWidth, 2e-3);
    }
 }

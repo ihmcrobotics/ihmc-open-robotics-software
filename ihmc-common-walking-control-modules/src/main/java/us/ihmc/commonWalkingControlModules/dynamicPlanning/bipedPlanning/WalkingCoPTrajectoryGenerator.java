@@ -1,7 +1,13 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.*;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
+import java.util.List;
+import java.util.function.Supplier;
+
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionFromAreaCalculator;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionFromPositionCalculator;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.YoSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
@@ -12,21 +18,28 @@ import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.List;
-import java.util.function.Supplier;
-
-public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
+public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator implements SCS2YoGraphicHolder
 {
    private final CoPTrajectoryParameters parameters;
 
@@ -34,7 +47,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
    private final YoRegistry registry;
 
-   private final ConvexPolygon2D defaultSupportPolygon = new ConvexPolygon2D();
+   private final SideDependentList<ConvexPolygon2D> defaultSupportPolygons = new SideDependentList<>();
    private final SideDependentList<FrameConvexPolygon2D> movingPolygonsInSole = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
 
    private final SideDependentList<RecyclingArrayList<PoseReferenceFrame>> stepFrames = new SideDependentList<>();
@@ -70,21 +83,21 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
    private CoPPointViewer viewer = null;
 
    public WalkingCoPTrajectoryGenerator(CoPTrajectoryParameters parameters,
-                                        ConvexPolygon2DReadOnly defaultSupportPolygon,
+                                        SideDependentList<? extends ConvexPolygon2DReadOnly> defaultSupportPolygons,
                                         YoRegistry parentRegistry)
    {
-      this(parameters, new DefaultSplitFractionCalculatorParameters(), defaultSupportPolygon, parentRegistry);
+      this(parameters, new DefaultSplitFractionCalculatorParameters(), defaultSupportPolygons, parentRegistry);
    }
 
    public WalkingCoPTrajectoryGenerator(CoPTrajectoryParameters parameters,
                                         SplitFractionCalculatorParametersReadOnly defaultSplitFractionParameters,
-                                        ConvexPolygon2DReadOnly defaultSupportPolygon,
+                                        SideDependentList<? extends ConvexPolygon2DReadOnly> defaultSupportPolygons,
                                         YoRegistry parentRegistry)
    {
       super(WalkingCoPTrajectoryGenerator.class, parentRegistry);
 
       this.parameters = parameters;
-      this.defaultSupportPolygon.set(defaultSupportPolygon);
+      this.defaultSupportPolygons.set(side -> new ConvexPolygon2D(defaultSupportPolygons.get(side)));
 
       registry = new YoRegistry(getClass().getSimpleName());
       splitFractionParameters = new YoSplitFractionCalculatorParameters(defaultSplitFractionParameters, registry);
@@ -110,8 +123,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
       positionSplitFractionCalculator = new SplitFractionFromPositionCalculator(splitFractionParameters);
 
-      SideDependentList<ConvexPolygon2DReadOnly> defaultFootPolygons = new SideDependentList<>(defaultSupportPolygon, defaultSupportPolygon);
-      areaSplitFractionCalculator = new SplitFractionFromAreaCalculator(splitFractionParameters, defaultFootPolygons);
+      areaSplitFractionCalculator = new SplitFractionFromAreaCalculator(splitFractionParameters, defaultSupportPolygons);
 
       parentRegistry.addChild(registry);
       clear();
@@ -141,12 +153,12 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       positionSplitFractionCalculator.setFirstSupportPoseProvider(() ->
                                                                   {
                                                                      RobotSide stanceSide = state.getFootstep(0).getRobotSide().getOppositeSide();
-                                                                     return state.getFootPose(stanceSide);
+                                                                     return state.getCurrentFootPose(stanceSide);
                                                                   });
       positionSplitFractionCalculator.setFirstSwingPoseProvider(() ->
                                                                 {
                                                                    RobotSide stanceSide = state.getFootstep(0).getRobotSide();
-                                                                   return state.getFootPose(stanceSide);
+                                                                   return state.getCurrentFootPose(stanceSide);
                                                                 });
       positionSplitFractionCalculator.setStepPoseGetter((i) -> state.getFootstep(i).getFootstepPose());
 
@@ -236,7 +248,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       {
          // Record the initial step frames. In case there is a step touching down this frame will be updated.
          PoseReferenceFrame stepFrame = stepFrames.get(robotSide).add();
-         tempPose.setIncludingFrame(state.getFootPose(robotSide));
+         tempPose.setIncludingFrame(state.getCurrentFootPose(robotSide));
          tempPose.changeFrame(stepFrame.getParent());
          stepFrame.setPoseAndUpdate(tempPose);
 
@@ -279,7 +291,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
             FrameConvexPolygon2DReadOnly currentPolygon = movingPolygonsInSole.get(swingSide.getOppositeSide());
 
             ReferenceFrame stepFrame = extractStepFrame(footstep);
-            extractSupportPolygon(footstep, stepFrame, nextPolygon, defaultSupportPolygon);
+            extractSupportPolygon(footstep, stepFrame, nextPolygon, defaultSupportPolygons.get(footstep.getRobotSide()));
 
             computeCoPPointsForFootstepTransfer(timings.getTransferTime(),
                                                 transferSplitFractions.get(footstepIndex).getDoubleValue(),
@@ -656,5 +668,11 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       copPointToConstrain.changeFrame(constraintPolygon.getReferenceFrame());
       if (!tempPolygon.isPointInside(copPointToConstrain))
          tempPolygon.orthogonalProjection(copPointToConstrain);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return viewer == null ? null : viewer.getSCS2YoGraphics();
    }
 }

@@ -18,30 +18,30 @@ public class RDXFrameNodePart
 {
    private static final AtomicInteger INDEX = new AtomicInteger();
 
-   private RDXVisualModelInstance modelInstance;
-   private final String name;
-   private ReferenceFrame modelFrame;
+   private final RDXVisualModelInstance modelInstance;
+   // The name part is just for optional debugging
+   private String name;
+   private final ReferenceFrame partFrame;
 
-   public RDXFrameNodePart(ReferenceFrame referenceFrame, RDXVisualModelInstance modelInstance, String name, float x, float y, float z)
+   public RDXFrameNodePart(ReferenceFrame referenceFrame, RDXVisualModelInstance modelInstance)
    {
-      this(referenceFrame, modelInstance, name);
-      scale(x, y, z);
+      this(referenceFrame, modelInstance, "");
    }
 
    public RDXFrameNodePart(ReferenceFrame referenceFrame, RDXVisualModelInstance modelInstance, String name)
    {
       this.modelInstance = modelInstance;
       this.name = name;
-      modelFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("modelFrame" + INDEX.getAndIncrement(),
-                                                                                     referenceFrame,
-                                                                                     modelInstance.getLocalTransform());
+      partFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("partFrame" + INDEX.getAndIncrement(),
+                                                                                    referenceFrame,
+                                                                                    modelInstance.getLocalTransform());
    }
 
    public void update()
    {
       try
       {
-         RigidBodyTransform transformToRoot = modelFrame.getTransformToRoot();
+         RigidBodyTransform transformToRoot = partFrame.getTransformToRoot();
          LibGDXTools.toLibGDX(transformToRoot, modelInstance.transform);
       }
       catch (NotARotationMatrixException e) // TODO: Why do we get this sometimes?
@@ -50,22 +50,12 @@ public class RDXFrameNodePart
       }
    }
 
-   public void scale(float x, float y, float z)
-   {
-      modelInstance.transform.scale(x, y, z);
-   }
-
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       modelInstance.getRenderables(renderables, pool);
    }
 
-   public void dispose()
-   {
-
-   }
-
-   public ModelInstance getModelInstance()
+   public RDXVisualModelInstance getModelInstance()
    {
       return modelInstance;
    }

@@ -53,7 +53,6 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
       xyExpansionMask.add(1);
       xyExpansionMask.add(3);
       xyExpansionMask.add(6);
-      xyExpansionMask.add(13);
 
       yawExpansionMask.add(0);
       yawExpansionMask.add(1);
@@ -149,11 +148,13 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
          applyMask(fullExpansionToPack, nodeToExpand);
       }
 
-      if (idealStepCalculator != null)
-      {
-         idealStepProximityComparator.update(nodeToExpand, idealStepCalculator);
-         fullExpansionToPack.sort(idealStepProximityComparator);
-      }
+      // sorting is primarily a debug tool for checking proximity to ideal step - skip by default
+
+//      if (idealStepCalculator != null)
+//      {
+//         idealStepProximityComparator.update(nodeToExpand, idealStepCalculator);
+//         fullExpansionToPack.sort(idealStepProximityComparator);
+//      }
    }
 
    private void applyMask(List<FootstepGraphNode> listToFilter, FootstepGraphNode stanceNode)

@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
@@ -357,7 +358,7 @@ public class ContinuousStepController
                                                  yoGraphicsListRegistry);
    }
 
-   private boolean adjustFootstep(FramePose3DReadOnly stanceFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
+   private boolean adjustFootstep(FramePose3DReadOnly stanceFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FootstepDataMessage adjustedFootstep)
    {
       FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
       adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
@@ -373,7 +374,8 @@ public class ContinuousStepController
             snapAndWiggleSingleStep.snapAndWiggle(wiggledPose, footPolygonToWiggle, forwardVelocity.getValue() > 0.0);
             if (wiggledPose.containsNaN())
             {
-               adjustedFootstep.set(adjustedBasedOnStanceFoot);
+               adjustedFootstep.getLocation().set(adjustedBasedOnStanceFoot.getPosition());
+               adjustedFootstep.getOrientation().set(adjustedBasedOnStanceFoot.getOrientation());
                return true;
             }
          }
@@ -384,12 +386,14 @@ public class ContinuousStepController
              * Let's just keep the adjusted footstep based on the pose of the current stance foot.
              */
          }
-         adjustedFootstep.set(wiggledPose);
+         adjustedFootstep.getLocation().set(wiggledPose.getPosition());
+         adjustedFootstep.getOrientation().set(wiggledPose.getOrientation());
          return true;
       }
       else
       {
-         adjustedFootstep.set(adjustedBasedOnStanceFoot);
+         adjustedFootstep.getLocation().set(adjustedBasedOnStanceFoot.getPosition());
+         adjustedFootstep.getOrientation().set(adjustedBasedOnStanceFoot.getOrientation());
          return true;
       }
    }

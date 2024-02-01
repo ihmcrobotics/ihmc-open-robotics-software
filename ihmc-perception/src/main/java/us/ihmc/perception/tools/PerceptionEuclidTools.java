@@ -27,4 +27,11 @@ public class PerceptionEuclidTools
       transform.get(transformArray);
       return transformArray;
    }
+
+   public static float[] toFloatArray(RigidBodyTransform transform)
+   {
+      float[] transformArray = new float[16];
+      transform.get(transformArray);
+      return transformArray;
+   }
 }

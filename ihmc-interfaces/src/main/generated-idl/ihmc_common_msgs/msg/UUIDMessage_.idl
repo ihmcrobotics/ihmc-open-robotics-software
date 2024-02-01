@@ -1,0 +1,24 @@
+#ifndef __ihmc_common_msgs__msg__UUIDMessage__idl__
+#define __ihmc_common_msgs__msg__UUIDMessage__idl__
+
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Holds a UUID
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::UUIDMessage_")
+      struct UUIDMessage
+      {
+        long long least_significant_bits;
+        long long most_significant_bits;
+      };
+    };
+  };
+};
+
+#endif

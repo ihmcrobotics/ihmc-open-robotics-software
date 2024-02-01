@@ -6,8 +6,10 @@ import java.util.List;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
@@ -33,6 +35,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -42,6 +45,9 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicListDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -52,7 +58,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class HumanoidHighLevelControllerManager implements RobotController
+public class HumanoidHighLevelControllerManager implements RobotController, SCS2YoGraphicHolder
 {
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -297,6 +303,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
             highLevelStateChangeStatusMessage.setInitialHighLevelControllerName(fromByte);
             highLevelStateChangeStatusMessage.setEndHighLevelControllerName(toByte);
             statusMessageOutputManager.reportStatusMessage(highLevelStateChangeStatusMessage);
+            controllerToolbox.reportControllerStateChangeToListeners(from, to);
          }
       });
 
@@ -370,5 +377,37 @@ public class HumanoidHighLevelControllerManager implements RobotController
    public void addHighLevelStateChangedListener(StateChangedListener<HighLevelControllerName> stateChangedListener)
    {
       stateMachine.addStateChangedListener(stateChangedListener);
+   }
+
+   private final YoGraphicListDefinition scs2AdditionalYoGraphics = new YoGraphicListDefinition();
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(scs2AdditionalYoGraphics);
+      WholeBodyControllerCoreFactory wholeBodyControllerCoreFactory = controllerFactoryHelper.getWholeBodyControllerCoreFactory();
+      WholeBodyControllerCore wholeBodyControllerCore = wholeBodyControllerCoreFactory.getWholeBodyControllerCore();
+      if (wholeBodyControllerCore != null)
+         group.addChild(wholeBodyControllerCore.getSCS2YoGraphics());
+      LinearMomentumRateControlModule linearMomentumRateControlModule = wholeBodyControllerCoreFactory.getLinearMomentumRateControlModule();
+      if (linearMomentumRateControlModule != null)
+         group.addChild(linearMomentumRateControlModule.getSCS2YoGraphics());
+      group.addChild(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getSCS2YoGraphics());
+      group.addChild(controllerFactoryHelper.getManagerFactory().getSCS2YoGraphics());
+      for (HighLevelControllerState controllerState : highLevelControllerStates.values())
+      {
+         group.addChild(controllerState.getSCS2YoGraphics());
+      }
+      for (HighLevelHumanoidControllerPlugin controllerPlugin : controllerPlugins)
+      {
+         group.addChild(controllerPlugin.getSCS2YoGraphics());
+      }
+      return group;
+   }
+
+   public void addYoGraphic(YoGraphicDefinition scs2AdditionalYoGraphic)
+   {
+      scs2AdditionalYoGraphics.addYoGraphic(scs2AdditionalYoGraphic);
    }
 }

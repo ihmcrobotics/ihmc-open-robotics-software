@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class FusedSensorHeadPointCloudMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::FusedSensorHeadPointCloudMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "df440dcd0c75ea10f504e3bd1df6029c069b28b3563709f5815d3e99c6064722";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

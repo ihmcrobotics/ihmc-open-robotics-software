@@ -2,13 +2,14 @@ package us.ihmc.avatar.sensors.multisense;
 
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.communication.producers.VideoControlSettings;
-import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
-import us.ihmc.ihmcPerception.camera.CameraLogger;
-import us.ihmc.ihmcPerception.camera.RosCameraCompressedImageReceiver;
-import us.ihmc.ihmcPerception.camera.VideoPacketHandler;
+import us.ihmc.perception.ros1.camera.CameraDataReceiver;
+import us.ihmc.perception.ros1.camera.CameraLogger;
+import us.ihmc.perception.ros1.camera.RosCameraCompressedImageReceiver;
+import us.ihmc.perception.ros1.camera.VideoPacketHandler;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
@@ -30,10 +31,38 @@ public class MultiSenseSensorManager
    private RosCameraCompressedImageReceiver cameraImageReceiver;
    private VideoPacketHandler compressedVideoHandler;
 
-   public MultiSenseSensorManager(FullRobotModelFactory fullRobotModelFactory, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
-                                  RosMainNode rosMainNode, ROS2NodeInterface ros2Node, RobotROSClockCalculator rosClockCalculator,
-                                  AvatarRobotCameraParameters cameraParameters, AvatarRobotLidarParameters lidarParameters,
-                                  AvatarRobotPointCloudParameters stereoParameters, boolean setROSParameters)
+   public MultiSenseSensorManager(FullRobotModelFactory fullRobotModelFactory,
+                                  RobotConfigurationDataBuffer robotConfigurationDataBuffer,
+                                  RosMainNode rosMainNode,
+                                  ROS2NodeInterface ros2Node,
+                                  RobotROSClockCalculator rosClockCalculator,
+                                  AvatarRobotCameraParameters cameraParameters,
+                                  AvatarRobotLidarParameters lidarParameters,
+                                  AvatarRobotPointCloudParameters stereoParameters,
+                                  boolean setROSParameters)
+   {
+      this(fullRobotModelFactory,
+           robotConfigurationDataBuffer,
+           rosMainNode,
+           ros2Node,
+           ROS2QosProfile.DEFAULT(),
+           rosClockCalculator,
+           cameraParameters,
+           lidarParameters,
+           stereoParameters,
+           setROSParameters);
+   }
+
+   public MultiSenseSensorManager(FullRobotModelFactory fullRobotModelFactory,
+                                  RobotConfigurationDataBuffer robotConfigurationDataBuffer,
+                                  RosMainNode rosMainNode,
+                                  ROS2NodeInterface ros2Node,
+                                  ROS2QosProfile qosProfile,
+                                  RobotROSClockCalculator rosClockCalculator,
+                                  AvatarRobotCameraParameters cameraParameters,
+                                  AvatarRobotLidarParameters lidarParameters,
+                                  AvatarRobotPointCloudParameters stereoParameters,
+                                  boolean setROSParameters)
    {
       this.ros2Node = ros2Node;
       this.cameraParameters = cameraParameters;
@@ -41,7 +70,7 @@ public class MultiSenseSensorManager
       this.lidarParameters = lidarParameters;
       this.setROSParameters = setROSParameters;
 
-      compressedVideoHandler = new VideoPacketHandler(ros2Node);
+      compressedVideoHandler = new VideoPacketHandler(ros2Node, qosProfile);
       cameraReceiver = new CameraDataReceiver(fullRobotModelFactory,
                                               cameraParameters.getPoseFrameForSdf(),
                                               robotConfigurationDataBuffer,

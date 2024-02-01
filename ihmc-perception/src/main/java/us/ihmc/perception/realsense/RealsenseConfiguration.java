@@ -1,47 +1,40 @@
 package us.ihmc.perception.realsense;
 
-public class RealsenseConfiguration
+/**
+ * Only certain combinations of settings are valid and it's cumbersome to pass them around
+ * separately, so let's just make some enums.
+ *
+ * L515 serial numbers:
+ * - F0245563
+ *
+ * D435 serial numbers:
+ * - 752112070330
+ */
+public enum RealsenseConfiguration
 {
-   private String serialNumber;
+   L515_COLOR_720P_DEPTH_768P_30HZ(1024, 768, 30, 1280, 720, 30),
+   L515_COLOR_480P_DEPTH_480P_30HZ(640, 480, 30, 640, 640, 30),
+   L515_COLOR_720P_DEPTH_768P_15HZ(1024, 768, 15, 1280, 720, 15),
+   D435_COLOR_480P_DEPTH_480P_30HZ(640, 480, 30, 640, 480, 30),
+   D435_COLOR_720P_DEPTH_720P_30HZ(1280, 720, 30, 1280, 720, 30),
+   D455_COLOR_720P_DEPTH_720P_30HZ(1280, 720, 30, 1280, 720, 30),
+   ;
 
-   private int depthHeight;
-   private int depthWidth;
-   private int depthFPS;
-   private boolean useColor;
-   private int colorHeight;
-   private int colorWidth;
-   private int colorFPS;
+   private final int depthWidth;
+   private final int depthHeight;
+   private final int depthFPS;
+   private final int colorWidth;
+   private final int colorHeight;
+   private final int colorFPS;
 
-   public RealsenseConfiguration(String serialNumber, int depthHeight, int depthWidth, int depthFPS, boolean useColor, int colorHeight, int colorWidth, int colorFPS)
+   RealsenseConfiguration(int depthWidth, int depthHeight, int depthFPS, int colorWidth, int colorHeight, int colorFPS)
    {
-      this.serialNumber = serialNumber;
-      this.depthHeight = depthHeight;
       this.depthWidth = depthWidth;
-      this.depthFPS = depthFPS;
-      this.useColor = useColor;
-      this.colorHeight = colorHeight;
-      this.colorWidth = colorWidth;
-      this.colorFPS = colorFPS;
-   }
-
-   public String getSerialNumber()
-   {
-      return serialNumber;
-   }
-
-   public void setSerialNumber(String serialNumber)
-   {
-      this.serialNumber = serialNumber;
-   }
-
-   public int getDepthHeight()
-   {
-      return depthHeight;
-   }
-
-   public void setDepthHeight(int depthHeight)
-   {
       this.depthHeight = depthHeight;
+      this.depthFPS = depthFPS;
+      this.colorWidth = colorWidth;
+      this.colorHeight = colorHeight;
+      this.colorFPS = colorFPS;
    }
 
    public int getDepthWidth()
@@ -49,29 +42,14 @@ public class RealsenseConfiguration
       return depthWidth;
    }
 
-   public void setDepthWidth(int depthWidth)
+   public int getDepthHeight()
    {
-      this.depthWidth = depthWidth;
+      return depthHeight;
    }
 
-   public boolean isUseColor()
+   public int getDepthFPS()
    {
-      return useColor;
-   }
-
-   public void setUseColor(boolean useColor)
-   {
-      this.useColor = useColor;
-   }
-
-   public int getColorHeight()
-   {
-      return colorHeight;
-   }
-
-   public void setColorHeight(int colorHeight)
-   {
-      this.colorHeight = colorHeight;
+      return depthFPS;
    }
 
    public int getColorWidth()
@@ -79,28 +57,13 @@ public class RealsenseConfiguration
       return colorWidth;
    }
 
-   public void setColorWidth(int colorWidth)
+   public int getColorHeight()
    {
-      this.colorWidth = colorWidth;
+      return colorHeight;
    }
 
    public int getColorFPS()
    {
       return colorFPS;
-   }
-
-   public void setColorFPS(int colorFPS)
-   {
-      this.colorFPS = colorFPS;
-   }
-
-   public void setDepthFPS(int depthFPS)
-   {
-      this.depthFPS = depthFPS;
-   }
-
-   public int getDepthFPS()
-   {
-      return depthFPS;
    }
 }

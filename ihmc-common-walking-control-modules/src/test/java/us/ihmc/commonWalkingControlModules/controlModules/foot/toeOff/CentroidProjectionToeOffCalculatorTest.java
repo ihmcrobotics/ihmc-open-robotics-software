@@ -196,12 +196,6 @@ public class CentroidProjectionToeOffCalculatorTest
          }
 
          @Override
-         public double defaultOffsetHeightAboveAnkle()
-         {
-            return 0;
-         }
-
-         @Override
          public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
          {
             return false;
@@ -327,12 +321,6 @@ public class CentroidProjectionToeOffCalculatorTest
                }
 
                @Override
-               public boolean checkECMPLocationToTriggerToeOff()
-               {
-                  return false;
-               }
-
-               @Override
                public double getMinStepLengthForToeOff()
                {
                   return 0;
@@ -351,6 +339,12 @@ public class CentroidProjectionToeOffCalculatorTest
          {
             return new SwingTrajectoryParameters()
             {
+               @Override
+               public double getMaxSwingHeight()
+               {
+                  return 0;
+               }
+
                @Override
                public double getDesiredTouchdownHeightOffset()
                {
@@ -397,12 +391,6 @@ public class CentroidProjectionToeOffCalculatorTest
 
          @Override
          public boolean doToeOffIfPossibleInSingleSupport()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean checkECMPLocationToTriggerToeOff()
          {
             return false;
          }

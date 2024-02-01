@@ -104,6 +104,17 @@ public class JointspacePositionControllerState extends HighLevelControllerState
       }
    }
 
+   public boolean isExecutingTrajectory()
+   {
+      for (int i = 0; i < jointManagers.length; i++)
+      {
+         if (!jointManagers[i].trajectoryDone.getValue())
+            return true;
+      }
+
+      return false;
+   }
+
    @Override
    public void onEntry()
    {
@@ -400,7 +411,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
          if (!isEmpty() && wantToQueue && !previousIdMatch)
          {
             LogTools.warn(warningPrefix + "Unexpected command ID. Msg previous id: " + queueingProperties.getPreviousCommandId() + " but was "
-                  + lastCommandId.getLongValue());
+                          + lastCommandId.getLongValue());
             return false;
          }
 

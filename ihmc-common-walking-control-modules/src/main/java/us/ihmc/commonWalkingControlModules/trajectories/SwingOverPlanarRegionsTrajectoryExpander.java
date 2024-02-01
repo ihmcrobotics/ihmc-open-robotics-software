@@ -1,20 +1,28 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Box3D;
@@ -29,6 +37,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.YoCounter;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -134,16 +143,19 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    {
       String namePrefix = "trajectoryExpander";
       this.graphicsListRegistry = graphicsListRegistry;
+
+      SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      
       twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix,
-                                                                steppingParameters.getMinSwingHeightFromStanceFoot(),
-                                                                steppingParameters.getMaxSwingHeightFromStanceFoot(),
-                                                                steppingParameters.getDefaultSwingHeightFromStanceFoot(),
-                                                                steppingParameters.getCustomWaypointAngleThreshold(),
+                                                                swingTrajectoryParameters.getMinSwingHeight(),
+                                                                swingTrajectoryParameters.getMaxSwingHeight(),
+                                                                swingTrajectoryParameters.getDefaultSwingHeight(),
+                                                                swingTrajectoryParameters.getCustomWaypointAngleThreshold(),
                                                                 this.registry,
                                                                 graphicsListRegistry);
-      minimumSwingHeight = steppingParameters.getMinSwingHeightFromStanceFoot();
-      maximumSwingHeight = steppingParameters.getMaxSwingHeightFromStanceFoot();
+      minimumSwingHeight = swingTrajectoryParameters.getMinSwingHeight();
+      maximumSwingHeight = swingTrajectoryParameters.getMaxSwingHeight();
       toeLength = steppingParameters.getFootForwardOffset();
       heelLength = steppingParameters.getFootBackwardOffset();
       footLengthOffset = 0.5 * (heelLength - toeLength);
@@ -155,7 +167,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       footHeight = 0.05;
       collisionBox = new Box3D();
 
-      swingWaypointProportions = walkingControllerParameters.getSwingTrajectoryParameters().getSwingWaypointProportions();
+      swingWaypointProportions = swingTrajectoryParameters.getSwingWaypointProportions();
 
       footPolygonShape = new ConvexPolygon2D();
       footPolygonShape.addVertex(steppingParameters.getFootForwardOffset(), 0.5 * steppingParameters.getToeWidth());
@@ -207,7 +219,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       initialVelocity = new FrameVector3D();
       touchdownVelocity = new FrameVector3D();
-      touchdownVelocity.setZ(walkingControllerParameters.getSwingTrajectoryParameters().getDesiredTouchdownVelocity());
+      touchdownVelocity.setZ(swingTrajectoryParameters.getDesiredTouchdownVelocity());
       swingStartPosition = new FramePoint3D();
       swingEndPosition = new FramePoint3D();
       stanceFootPosition = new FramePoint3D();
@@ -809,6 +821,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       }
 
       trajectoryLengthToSet.set(distance);
+   }
+
+   public EnumMap<Axis3D, ArrayList<YoPolynomial>> getSwingTrajectory()
+   {
+      return twoWaypointSwingGenerator.getSwingTrajectory();
    }
 
    /**

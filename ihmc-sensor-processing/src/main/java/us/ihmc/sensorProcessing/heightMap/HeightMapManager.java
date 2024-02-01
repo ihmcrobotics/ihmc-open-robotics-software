@@ -8,10 +8,13 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class HeightMapManager
 {
+   public static final double defaultVariance = 0.1;
    private static final boolean debug = false;
 
    /*  From HeightMapMessage.msg  */
@@ -87,15 +90,15 @@ public class HeightMapManager
    /**
     * Translates the existing height map to a new center location. It keeps all the cells that are still in range and translates them to new locations.
     */
-   public void translateToNewGridCenter(Point2DReadOnly gridCenter)
+   public void translateToNewGridCenter(Point2DReadOnly gridCenter, double varianceToAdd)
    {
-      translateToNewGridCenter(gridCenter.getX(), gridCenter.getY());
+      translateToNewGridCenter(gridCenter.getX(), gridCenter.getY(), varianceToAdd);
    }
 
    /**
     * Translates the existing height map to a new center location. It keeps all the cells that are still in range and translates them to new locations.
     */
-   public void translateToNewGridCenter(double xCenter, double yCenter)
+   public void translateToNewGridCenter(double xCenter, double yCenter, double varianceToAdd)
    {
 //      int xIndexShift = HeightMapTools.coordinateToIndex(xCenter - this.gridCenterXY.getX(), 0.0, gridResolutionXY, centerIndex);
 //      int yIndexShift = HeightMapTools.coordinateToIndex(yCenter - this.gridCenterXY.getY(), 0.0, gridResolutionXY, centerIndex);
@@ -138,6 +141,8 @@ public class HeightMapManager
 
          int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
          heightMapCells[key] = oldCellArray[oldKey];
+         if (key != oldKey)
+            heightMapCells[key].addVariance(varianceToAdd);
          occupiedCells.add(key);
       }
 
@@ -153,7 +158,19 @@ public class HeightMapManager
       occupiedCells.clear();
    }
 
+   /**
+    * This method consums the {@param pointCloud} add adds it to the existing height map. It then updates the height map estimates in each of the cells.
+    */
    public void update(Point3D[] pointCloud)
+   {
+      update(pointCloud, 1.0);
+   }
+
+   /**
+    * This method consums the {@param pointCloud} add adds it to the existing height map. It then updates the height map estimates in each of the cells.
+    * It does this using a constant variance for all points, defined by {@param verticalMeasurementVariance}.
+    */
+   public void update(Point3D[] pointCloud, double verticalMeasurementVariance)
    {
 //      List<Point3D> pointList = new ArrayList<>();
 //
@@ -240,9 +257,12 @@ public class HeightMapManager
                occupiedCells.add(key);
             }
 
-            heightMapCells[key].addPoint(point.getZ());
+            heightMapCells[key].addPoint(point.getZ(), verticalMeasurementVariance);
          }
       }
+
+      for (int i = 0; i < occupiedCells.size(); i++)
+         heightMapCells[occupiedCells.get(i)].updateHeightEstimate();
 
       if (debug)
          LogTools.info(occupiedCells.size() + " cells");
@@ -306,12 +326,12 @@ public class HeightMapManager
       heightMapCells[occupiedCells.get(i)].setHasSufficientNeighbors(hasSufficientNeighbors);
    }
 
-   public void resetAtHeight(int i, double height)
+   public void resetAtHeight(int i, double height, double variance)
    {
-      heightMapCells[occupiedCells.get(i)].resetAtHeight(height);
+      heightMapCells[occupiedCells.get(i)].resetAtHeight(height, variance);
    }
 
-   public void resetAtHeightByKey(int key, double height)
+   public void resetAtHeightByKey(int key, double height, double variance)
    {
       if (heightMapCells[key] == null)
       {
@@ -323,7 +343,7 @@ public class HeightMapManager
          throw new RuntimeException("Should not get here");
       }
 
-      heightMapCells[key].resetAtHeight(height);
+      heightMapCells[key].resetAtHeight(height, variance);
    }
 
    public boolean cellHasData(int key)

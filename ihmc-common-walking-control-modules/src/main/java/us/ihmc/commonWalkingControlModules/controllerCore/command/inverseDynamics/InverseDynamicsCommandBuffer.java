@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotComm
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 
 /**
@@ -35,6 +36,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
    private final RecyclingArrayList<PrivilegedJointSpaceCommand> privilegedJointSpaceCommandBuffer = new RecyclingArrayList<>(PrivilegedJointSpaceCommand.class);
    private final RecyclingArrayList<PrivilegedConfigurationCommand> privilegedConfigurationCommandBuffer = new RecyclingArrayList<>(PrivilegedConfigurationCommand.class);
    private final RecyclingArrayList<QPObjectiveCommand> qPObjectiveCommandBuffer = new RecyclingArrayList<>(QPObjectiveCommand.class);
+   private final RecyclingArrayList<JointTorqueCommand> jointTorqueCommandBuffer = new RecyclingArrayList<>(JointTorqueCommand.class);
 
    public InverseDynamicsCommandBuffer()
    {
@@ -63,6 +65,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       privilegedJointSpaceCommandBuffer.clear();
       privilegedConfigurationCommandBuffer.clear();
       qPObjectiveCommandBuffer.clear();
+      jointTorqueCommandBuffer.clear();
    }
 
    /**
@@ -278,6 +281,18 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
    public QPObjectiveCommand addQPObjectiveCommand()
    {
       QPObjectiveCommand command = qPObjectiveCommandBuffer.add();
+      super.addCommand(command);
+      return command;
+   }
+
+   /**
+    * Gets an available {@link QPObjectiveCommand} and registers it to this list.
+    *
+    * @return the available command ready to be set.
+    */
+   public JointTorqueCommand addJointTorqueCommand()
+   {
+      JointTorqueCommand command = jointTorqueCommandBuffer.add();
       super.addCommand(command);
       return command;
    }

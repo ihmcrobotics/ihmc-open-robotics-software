@@ -1,5 +1,19 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Stack;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
@@ -7,15 +21,24 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TablePosition;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
-import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
+import perception_msgs.msg.dds.HeightMapMessage;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.EnvironmentConstraintHandler;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -23,10 +46,14 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionFootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
@@ -37,23 +64,17 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadRequestType;
-import us.ihmc.footstepPlanning.log.*;
+import us.ihmc.footstepPlanning.log.VariableDescriptor;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphHolder;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.text.DecimalFormat;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 public class FootstepPlannerLogVisualizerController
 {
@@ -69,7 +90,8 @@ public class FootstepPlannerLogVisualizerController
    private List<FootstepPlannerIterationData> iterationDataList;
    private Map<GraphEdge<FootstepGraphNode>, FootstepPlannerEdgeData> edgeDataMap;
    private List<VariableDescriptor> variableDescriptors;
-   private FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters()); // TODO
+   private final FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+   private FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters(), environmentHandler); // TODO
 
    private final AtomicBoolean loadingLog = new AtomicBoolean();
    private final List<VariableDescriptor> variablesToChart = new ArrayList<>();
@@ -114,6 +136,8 @@ public class FootstepPlannerLogVisualizerController
    @FXML
    private CheckBox showIdealStep;
    @FXML
+   private CheckBox showNominalIdealStep;
+   @FXML
    private CheckBox showBodyBox;
 
    @FXML
@@ -128,11 +152,11 @@ public class FootstepPlannerLogVisualizerController
 
    public void bindControls()
    {
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestLoadLog, type -> loadLog(type));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.RequestLoadLog, type -> loadLog(type));
 
-      AtomicReference<PlanarRegionsList> planarRegionData = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.GraphData,
-                                     graphData -> Platform.runLater(() -> updateGraphData(planarRegionData.get(),
+      AtomicReference<HeightMapMessage> heightMapMessage = messager.createInput(FootstepPlannerMessagerAPI.HeightMapData);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.GraphData,
+                                     graphData -> Platform.runLater(() -> updateGraphData(HeightMapMessageTools.unpackMessage(heightMapMessage.get()),
                                                                                           graphData.getLeft(),
                                                                                           graphData.getMiddle(),
                                                                                           graphData.getRight())));
@@ -143,9 +167,10 @@ public class FootstepPlannerLogVisualizerController
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedSnappedCandidateStep, showSnappedStep.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedWiggledCandidateStep, showSnapAndWiggledStep.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedIdealStep, showIdealStep.selectedProperty(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedNominalIdealStep, showNominalIdealStep.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowBodyBox, showBodyBox.selectedProperty(), true);
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLogGraphics, show ->
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ShowLogGraphics, show ->
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.ShowLoggedStartOfSwingStep, show);
          messager.submitMessage(FootstepPlannerMessagerAPI.ShowLoggedStanceStep, show);
@@ -261,7 +286,7 @@ public class FootstepPlannerLogVisualizerController
                                                                                    List<Point2D> footPoints = defaultContactPoints.get(side);
                                                                                    return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
                                                                                 });
-      snapper = new FootstepSnapAndWiggler(footPolygons, new DefaultFootstepPlannerParameters());
+      snapper = new FootstepSnapAndWiggler(footPolygons, new DefaultFootstepPlannerParameters(), environmentHandler);
    }
 
    public void loadLog(LoadRequestType loadRequestType)
@@ -318,10 +343,9 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.AssumeFlatGround, footstepPlannerLog.getRequestPacket().getAssumeFlatGround());
       messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, footstepPlannerLog.getRequestPacket().getSnapGoalSteps());
 
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(footstepPlannerLog.getRequestPacket().getPlanarRegionsListMessage());
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(footstepPlannerLog.getRequestPacket().getHeightMapMessage());
 
-      if (!footstepPlannerLog.getRequestPacket().getHeightMapMessage().getHeights().isEmpty())
+      if (!heightMapData.isEmpty())
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, footstepPlannerLog.getRequestPacket().getHeightMapMessage());
       }
@@ -348,21 +372,34 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterRawPoints, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowStartVisibilityMap, false);
-      messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlan, false); // hide plan by default
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlan, true); // hide plan by default
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowBodyPathLogGraphics, true);
 
       // set footstep graph data
-      updateGraphData(planarRegionsList, footstepPlannerLog.getEdgeDataMap(), footstepPlannerLog.getIterationData(), footstepPlannerLog.getVariableDescriptors());
+      updateGraphData(heightMapData, footstepPlannerLog.getEdgeDataMap(), footstepPlannerLog.getIterationData(), footstepPlannerLog.getVariableDescriptors());
 
       // set body path graph data
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathGraphData,
                              Triple.of(footstepPlannerLog.getBodyPathEdgeDataMap(),
                                        footstepPlannerLog.getBodyPathIterationData(),
                                        footstepPlannerLog.getBodyPathVariableDescriptors()));
+
+      // Update swing planner type
+      messager.submitMessage(FootstepPlannerMessagerAPI.RequestedSwingPlannerType, SwingPlannerType.fromByte(footstepPlannerLog.getRequestPacket().getRequestedSwingPlanner()));
+
+      FootstepDataListMessage referencePlan = footstepPlannerLog.getRequestPacket().getReferencePlan();
+      if (!referencePlan.getFootstepDataList().isEmpty())
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.ReferencePlan, new FootstepPlan());
+      }
+      else
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.ReferencePlan, FootstepDataMessageConverter.convertToFootstepPlan(referencePlan));
+      }
    }
 
-   private void updateGraphData(PlanarRegionsList planarRegionsList,
+   private void updateGraphData(HeightMapData heightMapData,
                                 Map<GraphEdge<FootstepGraphNode>, FootstepPlannerEdgeData> edgeDataMap,
                                 List<FootstepPlannerIterationData> iterationData,
                                 List<VariableDescriptor> variableDescriptors)
@@ -370,7 +407,7 @@ public class FootstepPlannerLogVisualizerController
       this.iterationDataList = iterationData;
       this.edgeDataMap = edgeDataMap;
       this.variableDescriptors = variableDescriptors;
-      this.snapper.setPlanarRegions(planarRegionsList);
+      environmentHandler.setHeightMap(heightMapData);
 
       parentNodeStack.clear();
       selectedRow.set(null);
@@ -463,6 +500,7 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.StartOfSwingStepToVisualize, Pair.of(stepProperty.parentNode.getFirstStep(), stepProperty.startStepSnapData));
       messager.submitMessage(FootstepPlannerMessagerAPI.StanceStepToVisualize, Pair.of(stepProperty.parentNode.getSecondStep(), stepProperty.endStepSnapData));
       messager.submitMessage(FootstepPlannerMessagerAPI.LoggedIdealStep, stepProperty.idealStepTransform);
+      messager.submitMessage(FootstepPlannerMessagerAPI.LoggedNominalIdealStep, stepProperty.nominalIdealStepTransform);
 
       childTable.getSelectionModel().selectedItemProperty().addListener(onStepSelected());
       childTable.getSelectionModel().select(0);
@@ -628,6 +666,7 @@ public class FootstepPlannerLogVisualizerController
       private final RigidBodyTransform endStepTransform = new RigidBodyTransform();
       private final RigidBodyTransform startStepTransform = new RigidBodyTransform();
       private final RigidBodyTransform idealStepTransform = new RigidBodyTransform();
+      private final RigidBodyTransform nominalIdealStepTransform = new RigidBodyTransform();
 
       public ParentStepProperty(FootstepPlannerIterationData iterationData)
       {
@@ -638,7 +677,11 @@ public class FootstepPlannerLogVisualizerController
          startStepTransform.set(startStepSnapData.getSnappedStepTransform(parentNode.getFirstStep()));
 
          DiscreteFootstep idealStep = iterationData.getIdealChildNode().getSecondStep();
+         DiscreteFootstep nominalIdealStep = iterationData.getNominalIdealChildNode().getSecondStep();
+
          FootstepSnapData idealStepSnapData = snapper.snapFootstep(idealStep);
+         FootstepSnapData nominalIdealStepSnapData = snapper.snapFootstep(nominalIdealStep);
+
          if(idealStepSnapData == null || idealStepSnapData.getSnapTransform().containsNaN())
          {
             DiscreteFootstepTools.getStepTransform(idealStep, idealStepTransform);
@@ -647,6 +690,16 @@ public class FootstepPlannerLogVisualizerController
          else
          {
             DiscreteFootstepTools.getSnappedStepTransform(idealStep, idealStepSnapData.getSnapTransform(), idealStepTransform);
+         }
+
+         if(nominalIdealStepSnapData == null || nominalIdealStepSnapData.getSnapTransform().containsNaN())
+         {
+            DiscreteFootstepTools.getStepTransform(nominalIdealStep, nominalIdealStepTransform);
+            nominalIdealStepTransform.getTranslation().setZ(nominalIdealStepTransform.getTranslationZ());
+         }
+         else
+         {
+            DiscreteFootstepTools.getSnappedStepTransform(nominalIdealStep, nominalIdealStepSnapData.getSnapTransform(), nominalIdealStepTransform);
          }
       }
 

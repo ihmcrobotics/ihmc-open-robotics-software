@@ -6,21 +6,23 @@ import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.ihmcPerception.depthData.PointCloudData;
+import us.ihmc.commons.MathTools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.perception.depthData.PointCloudData;
+import us.ihmc.perception.heightMap.HeightMapInputData;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.ApplicationNoModule;
-import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.messager.javafx.JavaFXMessager;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
+import us.ihmc.perception.gpuHeightMap.HeightMapKernel;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
@@ -39,7 +41,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
    private ROS2SyncedRobotModel syncedRobot;
    private RealtimeROS2Node ros2Node;
    private BorderPane mainPane;
-   private final PerceptionMessageTools perceptionMessageTools;
+   private final HeightMapKernel heightMapKernel;
 
    @FXML
    private HeightMapParametersUIController heightMapParametersUIController;
@@ -49,7 +51,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
 
    public HeightMapUI()
    {
-      this.perceptionMessageTools = new PerceptionMessageTools();
+      heightMapKernel = new HeightMapKernel();
    }
 
    public abstract DRCRobotModel getRobotModel();
@@ -74,7 +76,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
       DRCRobotModel robotModel = getRobotModel();
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.OUSTER_LIDAR_SCAN, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<LidarScanMessage>()
+      ROS2Tools.createCallbackSubscription(ros2Node, PerceptionAPI.OUSTER_LIDAR_SCAN, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<LidarScanMessage>()
       {
          @Override
          public void onNewDataMessage(Subscriber<LidarScanMessage> subscriber)
@@ -88,12 +90,17 @@ public abstract class HeightMapUI extends ApplicationNoModule
             PointCloudData pointCloudData = new PointCloudData(data);
             Point3D gridCenter = new Point3D(data.getLidarPosition().getX(), data.getLidarPosition().getY(), groundHeight);
             FramePose3D sensorPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
+            HeightMapInputData inputData = new HeightMapInputData();
+            inputData.pointCloud = pointCloudData;
+            inputData.sensorPose = sensorPose;
+            inputData.gridCenter = gridCenter;
+            inputData.verticalMeasurementVariance = MathTools.square(parameters.getNominalStandardDeviation());
 
-            messager.submitMessage(HeightMapMessagerAPI.PointCloudData, Triple.of(pointCloudData, sensorPose, gridCenter));
+            messager.submitMessage(HeightMapMessagerAPI.PointCloudData, inputData);
          }
       } );
       /*
-      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<ImageMessage>()
+      ROS2Tools.createCallbackSubscription(ros2Node, PerceptionAPI.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<ImageMessage>()
       {
          @Override
          public void onNewDataMessage(Subscriber<ImageMessage> subscriber)
@@ -123,11 +130,11 @@ public abstract class HeightMapUI extends ApplicationNoModule
       if (SHOW_HEIGHT_MAP)
       {
          heightMapVisualizer = new HeightMapVisualizer();
-         messager.registerTopicListener(HeightMapMessagerAPI.HeightMapData, heightMapVisualizer::update);
-         messager.registerTopicListener(HeightMapMessagerAPI.MaxHeight, heightMapVisualizer::setMaxHeight);
-         messager.registerTopicListener(HeightMapMessagerAPI.xPosition, v -> heightMapVisualizer.setDebugPosition(0, v));
-         messager.registerTopicListener(HeightMapMessagerAPI.yPosition, v -> heightMapVisualizer.setDebugPosition(1, v));
-         messager.registerTopicListener(HeightMapMessagerAPI.zPosition, v -> heightMapVisualizer.setDebugPosition(2, v));
+         messager.addTopicListener(HeightMapMessagerAPI.HeightMapData, heightMapVisualizer::update);
+         messager.addTopicListener(HeightMapMessagerAPI.MaxHeight, heightMapVisualizer::setMaxHeight);
+         messager.addTopicListener(HeightMapMessagerAPI.xPosition, v -> heightMapVisualizer.setDebugPosition(0, v));
+         messager.addTopicListener(HeightMapMessagerAPI.yPosition, v -> heightMapVisualizer.setDebugPosition(1, v));
+         messager.addTopicListener(HeightMapMessagerAPI.zPosition, v -> heightMapVisualizer.setDebugPosition(2, v));
          view3dFactory.addNodeToView(heightMapVisualizer.getRoot());
          heightMapVisualizer.start();
       }
@@ -173,7 +180,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
 
    public void stop()
    {
-      perceptionMessageTools.destroy();
+      heightMapKernel.destroy();
       ros2Node.destroy();
       if (SHOW_HEIGHT_MAP)
          heightMapVisualizer.stop();

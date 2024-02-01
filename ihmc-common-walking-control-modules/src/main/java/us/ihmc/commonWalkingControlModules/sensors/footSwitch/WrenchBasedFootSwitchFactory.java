@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 import java.util.Collection;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -62,8 +63,13 @@ public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
    }
 
    @Override
-   public FootSwitchInterface newFootSwitch(String namePrefix, ContactablePlaneBody foot, Collection<? extends ContactablePlaneBody> otherFeet,
-                                            ForceSensorDataReadOnly footForceSensor, double totalRobotWeight, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public FootSwitchInterface newFootSwitch(String namePrefix,
+                                            ContactablePlaneBody foot,
+                                            Collection<? extends ContactablePlaneBody> otherFeet,
+                                            RigidBodyBasics rootBody,
+                                            ForceSensorDataReadOnly footForceSensor,
+                                            double totalRobotWeight,
+                                            YoGraphicsListRegistry yoGraphicsListRegistry,
                                             YoRegistry registry)
    {
       if (contactThresholdForceParameter == null)
@@ -73,7 +79,14 @@ public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
          secondContactThresholdForceParameter = new DoubleParameter("SecondContactThresholdForce", registry, defaultSecondContactThresholdForceIgnoringCoP);
       }
 
-      return new WrenchBasedFootSwitch(namePrefix, footForceSensor, totalRobotWeight, foot, contactThresholdForceParameter,
-                                       secondContactThresholdForceParameter, copThresholdFractionParameter, yoGraphicsListRegistry, registry);
+      return new WrenchBasedFootSwitch(namePrefix,
+                                       footForceSensor,
+                                       totalRobotWeight,
+                                       foot,
+                                       contactThresholdForceParameter,
+                                       secondContactThresholdForceParameter,
+                                       copThresholdFractionParameter,
+                                       yoGraphicsListRegistry,
+                                       registry);
    }
 }

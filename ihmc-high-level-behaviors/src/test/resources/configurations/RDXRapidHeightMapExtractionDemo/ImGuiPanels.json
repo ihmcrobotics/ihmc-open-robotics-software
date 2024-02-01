@@ -1,0 +1,13 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "Dataset Navigation Panel" : true,
+    "Cropped Height Map" : true,
+    "Depth Image" : true,
+    "Local Height Map" : true,
+    "Perception Panel" : true,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}

@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -30,8 +31,18 @@ public class DiscreteFootstepTools
     */
    public static void getStepTransform(DiscreteFootstep step, RigidBodyTransform stepToWorldTransformToPack)
    {
-      stepToWorldTransformToPack.setRotationYawAndZeroTranslation(step.getYaw());
-      stepToWorldTransformToPack.getTranslation().set(step.getX(), step.getY(), 0.0);
+      getStepTransform(step.getX(), step.getY(), step.getYaw(), stepToWorldTransformToPack);
+   }
+
+   /**
+    * Computes a step-to-world RigidBodyTransform from the step's x, y and yaw. This transform
+    * will always have no z translation, pitch and roll.
+    * @param stepToWorldTransformToPack
+    */
+   public static void getStepTransform(double x, double y, double yaw, RigidBodyTransform stepToWorldTransformToPack)
+   {
+      stepToWorldTransformToPack.setRotationYawAndZeroTranslation(yaw);
+      stepToWorldTransformToPack.getTranslation().set(x, y, 0.0);
    }
 
    /**
@@ -76,26 +87,40 @@ public class DiscreteFootstepTools
       getSnappedStepTransform(step, snapTransform, snappedTransform);
       stepPoseToSet.set(snappedTransform);
    }
+
    /**
     * Computes the foot polygon in world frame that corresponds to the give footstep step
-    *
+    *snappedFootstepTransform
     * @param step
     * @param footPolygonInSoleFrame
     * @param footPolygonToPack
     */
    public static void getFootPolygon(DiscreteFootstep step, ConvexPolygon2DReadOnly footPolygonInSoleFrame, ConvexPolygon2D footPolygonToPack)
    {
+      getFootPolygon(step.getX(), step.getY(), step.getYaw(), footPolygonInSoleFrame, footPolygonToPack);
+   }
+
+   /**
+    * Computes the foot polygon in world frame that corresponds to the give footstep step
+    *
+    * @param footPolygonInSoleFrame
+    * @param footPolygonToPack
+    */
+   public static void getFootPolygon(double stepX, double stepY, double stepYaw, ConvexPolygon2DReadOnly footPolygonInSoleFrame, ConvexPolygon2D footPolygonToPack)
+   {
       footPolygonToPack.set(footPolygonInSoleFrame);
 
       RigidBodyTransform footstepTransform = new RigidBodyTransform();
-      DiscreteFootstepTools.getStepTransform(step, footstepTransform);
+      DiscreteFootstepTools.getStepTransform(stepX, stepY, stepYaw, footstepTransform);
 
       footPolygonToPack.applyTransform(footstepTransform);
    }
 
-   public static double getSnappedStepHeight(DiscreteFootstep step, RigidBodyTransform snapTransform)
+   public static double getSnappedStepHeight(DiscreteFootstep step, RigidBodyTransformReadOnly snapTransform)
    {
-      return snapTransform.getRotation().getM20() * step.getX() + snapTransform.getRotation().getM21() * step.getY() + snapTransform.getTranslationZ();
+      // FIXME there may be a faster way that doesn't require the additional object creation.
+      RotationMatrix rotationMatrix = new RotationMatrix(snapTransform.getRotation());
+      return rotationMatrix.getM20() * step.getX() + rotationMatrix.getM21() * step.getY() + snapTransform.getTranslationZ();
    }
 
    public static LatticePoint interpolate(LatticePoint pointA, LatticePoint pointB, double alpha)

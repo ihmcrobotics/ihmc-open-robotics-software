@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class SwingPlanningRequestPacketPubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.SwingPlanningRequestPacket>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::SwingPlanningRequestPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "ac6f8510725a3f8c0e50772c9d3e56e6d576a60aed233b4b793232b44101bb14";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

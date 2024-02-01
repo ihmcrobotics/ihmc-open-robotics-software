@@ -5,14 +5,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding;
-import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.messager.Message;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.MessagerStateListener;
 import us.ihmc.messager.TopicListener;
+import us.ihmc.messager.javafx.MessageBidirectionalBinding;
+import us.ihmc.messager.javafx.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 
 // FIXME This implementation completely ignores that messages can be sent/received across several threads.
 // TODO Review if the use of 2 messagers for REA is actually necessary.
@@ -35,7 +35,7 @@ public class REAUIMessager
    public <T> AtomicReference<T> createInput(Topic<T> topic, T defaultValue)
    {
       AtomicReference<T> input = internalMessager.createInput(topic, defaultValue);
-      reaMessagerToModule.registerTopicListener(topic, input::set);
+      reaMessagerToModule.addTopicListener(topic, input::set);
       return input;
    }
 
@@ -90,8 +90,8 @@ public class REAUIMessager
 
    public <T> void registerTopicListener(Topic<T> topic, TopicListener<T> listener)
    {
-      internalMessager.registerTopicListener(topic, listener);
-      reaMessagerToModule.registerTopicListener(topic, listener);
+      internalMessager.addTopicListener(topic, listener);
+      reaMessagerToModule.addTopicListener(topic, listener);
    }
 
    public <M, P> void bindBidirectionalInternal(Topic<M> topic, Property<P> property, PropertyToMessageTypeConverter<M, P> converterToMessageType,
@@ -100,7 +100,7 @@ public class REAUIMessager
       MessageBidirectionalBinding<M, P> bind = new MessageBidirectionalBinding<>(messageContent -> submitMessageInternal(topic, messageContent), property,
                                                                                  converterToMessageType);
       property.addListener(bind);
-      internalMessager.registerTopicListener(topic, bind);
+      internalMessager.addTopicListener(topic, bind);
       if (pushValue)
          internalMessager.submitMessage(topic, converterToMessageType.convert(property.getValue()));
    }
@@ -111,7 +111,7 @@ public class REAUIMessager
                                                                                                                                             messageContent),
                                                                                                     property);
       property.addListener(bind);
-      internalMessager.registerTopicListener(topic, bind);
+      internalMessager.addTopicListener(topic, bind);
       if (pushValue)
          internalMessager.submitMessage(topic, property.getValue());
    }
@@ -122,7 +122,7 @@ public class REAUIMessager
                                                                                                                                             messageContent),
                                                                                                     property);
       property.addListener(bind);
-      reaMessagerToModule.registerTopicListener(topic, bind);
+      reaMessagerToModule.addTopicListener(topic, bind);
    }
 
    public <M, P> void bindBidirectionalGlobal(Topic<M> topic, Property<P> property, PropertyToMessageTypeConverter<M, P> converterToMessageType)
@@ -131,8 +131,8 @@ public class REAUIMessager
                                                                                  converterToMessageType);
       property.addListener(bind);
       // TODO Workaround to prevent modification of the topic from another thread. Needs to be better implemented and propagated to the rest of this class.
-      internalMessager.registerJavaFXSyncedTopicListener(topic, bind);
-      reaMessagerToModule.registerTopicListener(topic, message -> internalMessager.submitMessage(topic, message));
+      internalMessager.addFXTopicListener(topic, bind);
+      reaMessagerToModule.addTopicListener(topic, message -> internalMessager.submitMessage(topic, message));
    }
 
    public <T> void bindBidirectionalGlobal(Topic<T> topic, Property<T> property)
@@ -141,14 +141,14 @@ public class REAUIMessager
                                                                                                     property);
       property.addListener(bind);
       // TODO Workaround to prevent modification of the topic from another thread. Needs to be better implemented and propagated to the rest of this class.
-      internalMessager.registerJavaFXSyncedTopicListener(topic, bind);
-      reaMessagerToModule.registerTopicListener(topic, message -> internalMessager.submitMessage(topic, message));
+      internalMessager.addFXTopicListener(topic, bind);
+      reaMessagerToModule.addTopicListener(topic, message -> internalMessager.submitMessage(topic, message));
    }
 
    public <T> void bindPropertyToTopic(Topic<T> topic, Property<T> propertyToBind)
    {
-      reaMessagerToModule.registerTopicListener(topic, propertyToBind::setValue);
-      internalMessager.registerTopicListener(topic, propertyToBind::setValue);
+      reaMessagerToModule.addTopicListener(topic, propertyToBind::setValue);
+      internalMessager.addTopicListener(topic, propertyToBind::setValue);
    }
 
    public <T> void bindInternalTopic(Topic<T> topic, ObservableValue<T> observableValue)
@@ -190,7 +190,7 @@ public class REAUIMessager
 
    public void registerModuleMessagerStateListener(MessagerStateListener listener)
    {
-      reaMessagerToModule.registerMessagerStateListener(listener);
+      reaMessagerToModule.addMessagerStateListener(listener);
    }
 
    public void notifyModuleMessagerStateListeners()

@@ -846,6 +846,19 @@ public class CrossRobotCommandRandomTools
       next.setJointTorqueWeight(random.nextDouble());
       next.setJointVelocityLimitMode(nextElementIn(random, ActivationState.values()));
       next.setComputeJointTorques(nextElementIn(random, ActivationState.values()));
+
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      int numberOfJointsToDeactivate = Math.max(random.nextInt(allJoints.size()), 1);
+
+      for (int jointIndex = 0; jointIndex < numberOfJointsToDeactivate; jointIndex++)
+         next.deactivateJoint(allJoints.remove(random.nextInt(allJoints.size())));
+
+      allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      int numberOfJointsToActivate = Math.max(random.nextInt(allJoints.size()), 1);
+
+      for (int jointIndex = 0; jointIndex < numberOfJointsToActivate; jointIndex++)
+         next.activateJoint(allJoints.remove(random.nextInt(allJoints.size())));
+
       return next;
    }
 
@@ -1081,8 +1094,10 @@ public class CrossRobotCommandRandomTools
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          JointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
-         next.addJoint(joint, RandomMatrices_DDRM.rectangle(joint.getDegreesOfFreedom(), 1, random));
+         next.addJoint(joint, RandomMatrices_DDRM.rectangle(joint.getDegreesOfFreedom(), 1, random), random.nextDouble());
       }
+
+      next.setConstraintType(nextElementIn(random, ConstraintType.values()));
 
       return next;
    }
@@ -1218,7 +1233,7 @@ public class CrossRobotCommandRandomTools
       OrientationFeedbackControlCommand next = new OrientationFeedbackControlCommand();
       next.setCommandId(random.nextInt());
       next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
-      next.getBodyFixedOrientationToControl().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
+      next.getControlFrameOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
       next.getReferenceOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
       next.getReferenceAngularVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getReferenceAngularAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));

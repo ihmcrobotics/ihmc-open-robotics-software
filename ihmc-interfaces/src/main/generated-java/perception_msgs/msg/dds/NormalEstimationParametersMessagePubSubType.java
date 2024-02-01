@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class NormalEstimationParametersMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.NormalEstimationParametersMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::NormalEstimationParametersMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "ea1f75a814e7b67b545de9f643f6574f33cbcb518348389d75c0ba01cb99ffc3";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

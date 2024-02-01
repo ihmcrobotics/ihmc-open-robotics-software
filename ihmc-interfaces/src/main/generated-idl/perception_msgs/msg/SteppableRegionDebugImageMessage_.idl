@@ -1,0 +1,35 @@
+#ifndef __perception_msgs__msg__SteppableRegionDebugImageMessage__idl__
+#define __perception_msgs__msg__SteppableRegionDebugImageMessage__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::SteppableRegionDebugImageMessage_")
+      struct SteppableRegionDebugImageMessage
+      {
+        /**
+         * Image width in pixels
+         */
+        unsigned short image_width;
+        /**
+         * Image height in pixels
+         */
+        unsigned short image_height;
+        /**
+         * The raw data for the image
+         */
+        sequence<octet, 250000> data;
+        /**
+         * The image format. Ordinal of OpenCVImageFormat
+         */
+        unsigned short format;
+      };
+    };
+  };
+};
+
+#endif

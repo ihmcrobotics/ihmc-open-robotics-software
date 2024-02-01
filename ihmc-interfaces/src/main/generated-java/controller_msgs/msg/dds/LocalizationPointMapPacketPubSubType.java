@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.LocalizationPointMapPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::LocalizationPointMapPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "9a578ef99b4ca95858e1b158a5c5668f49282569f40f3b4cc54b74ac008b00ce";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

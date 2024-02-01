@@ -7,8 +7,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import quadruped_msgs.msg.dds.QuadrupedTimedStepMessage;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,6 +18,8 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.TextField;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -29,12 +29,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
+import us.ihmc.messager.javafx.JavaFXMessager;
+import us.ihmc.messager.javafx.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
@@ -438,11 +438,11 @@ public class QuadrupedMainTabController
 
       // control
       messager.bindBidirectional(plannerTypeTopic, plannerType.valueProperty(), true);
-      messager.registerJavaFXSyncedTopicListener(plannerRequestIdTopic, new TextViewerListener<>(sentRequestId));
-      messager.registerJavaFXSyncedTopicListener(receivedPlanIdTopic, new TextViewerListener<>(receivedRequestId));
-      messager.registerJavaFXSyncedTopicListener(plannerTimeTakenTopic, new TextViewerListener<>(timeTaken));
-      messager.registerJavaFXSyncedTopicListener(planningResultTopic, new TextViewerListener<>(planningResult));
-      messager.registerJavaFXSyncedTopicListener(plannerStatusTopic, new TextViewerListener<>(plannerStatus));
+      messager.addFXTopicListener(plannerRequestIdTopic, new TextViewerListener<>(sentRequestId));
+      messager.addFXTopicListener(receivedPlanIdTopic, new TextViewerListener<>(receivedRequestId));
+      messager.addFXTopicListener(plannerTimeTakenTopic, new TextViewerListener<>(timeTaken));
+      messager.addFXTopicListener(planningResultTopic, new TextViewerListener<>(planningResult));
+      messager.addFXTopicListener(plannerStatusTopic, new TextViewerListener<>(plannerStatus));
 
       messager.bindBidirectional(acceptNewPlanarRegionsTopic, acceptNewRegions.selectedProperty(), true);
 
@@ -477,7 +477,7 @@ public class QuadrupedMainTabController
       goalRotationProperty.bindBidirectionalYaw(goalYaw.getValueFactory().valueProperty());
       messager.bindBidirectional(goalOrientationTopic, goalRotationProperty, false);
 
-      messager.registerTopicListener(globalResetTopic, reset -> clearStartGoalTextFields());
+      messager.addTopicListener(globalResetTopic, reset -> clearStartGoalTextFields());
 
       messager.bindBidirectional(plannerPlaybackFractionTopic, previewSlider.valueProperty(), false);
 
@@ -486,12 +486,12 @@ public class QuadrupedMainTabController
       previewSlider.valueProperty()
                    .addListener((observable, oldValue, newValue) -> footstepPlanPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
 
-      messager.registerTopicListener(footstepPlanTopic, plan -> sendPlanButton.setDisable(plan == null || !isValidPlan(plan)));
+      messager.addTopicListener(footstepPlanTopic, plan -> sendPlanButton.setDisable(plan == null || !isValidPlan(plan)));
       if (abortWalkingTopic != null)
-         messager.registerJavaFXSyncedTopicListener(abortWalkingTopic, m -> clearFootstepPlan());
+         messager.addFXTopicListener(abortWalkingTopic, m -> clearFootstepPlan());
       if (currentSteppingStateNameTopic != null)
       {
-         messager.registerJavaFXSyncedTopicListener(currentSteppingStateNameTopic, m -> {
+         messager.addFXTopicListener(currentSteppingStateNameTopic, m -> {
             if (m != null && m == QuadrupedSteppingStateEnum.STAND)
                clearFootstepPlan();
          });
@@ -744,7 +744,7 @@ public class QuadrupedMainTabController
       {
          xGaitSettingsReference = messager.createInput(xGaitSettingsTopic);
 
-         messager.registerTopicListener(footstepPlanTopic, footstepPlan -> executorService.submit(() -> {
+         messager.addTopicListener(footstepPlanTopic, footstepPlan -> executorService.submit(() -> {
            calculateFrames(footstepPlan);
          }));
       }

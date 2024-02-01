@@ -17,7 +17,6 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.AStarBodyPathEdgeData;
 import us.ihmc.footstepPlanning.log.AStarBodyPathIterationData;
-import us.ihmc.footstepPlanning.tools.LinkedPriorityQueue;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
@@ -38,7 +37,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-public class AStarBodyPathPlanner
+public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
 {
    private static final boolean debug = false;
    private static final boolean useRANSACTraversibility = true;
@@ -230,6 +229,7 @@ public class AStarBodyPathPlanner
       NON_TRAVERSIBLE
    }
 
+   @Override
    public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
       haltRequested.set(false);
@@ -243,6 +243,7 @@ public class AStarBodyPathPlanner
       iterationData.clear();
       edgeDataMap.clear();
       gridHeightMap.clear();
+      setHeightMapData(request.getHeightMapData());
 
       packRadialOffsets(heightMapData, plannerParameters.getSnapRadius(), xSnapOffsets, ySnapOffsets);
 
@@ -548,6 +549,7 @@ public class AStarBodyPathPlanner
       statusCallbacks.forEach(callback -> callback.accept(outputToPack));
    }
 
+   @Override
    public void clearLoggedData()
    {
       edgeDataMap.clear();
@@ -575,6 +577,7 @@ public class AStarBodyPathPlanner
       }
    }
 
+   @Override
    public BodyPathLatticePoint getNextNode()
    {
       while (!stack.isEmpty())
@@ -679,21 +682,25 @@ public class AStarBodyPathPlanner
       return xyDistance(node, goalNode);
    }
 
+   @Override
    public void halt()
    {
       haltRequested.set(true);
    }
 
+   @Override
    public List<AStarBodyPathIterationData> getIterationData()
    {
       return iterationData;
    }
 
+   @Override
    public HashMap<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> getEdgeDataMap()
    {
       return edgeDataMap;
    }
 
+   @Override
    public YoRegistry getRegistry()
    {
       return registry;

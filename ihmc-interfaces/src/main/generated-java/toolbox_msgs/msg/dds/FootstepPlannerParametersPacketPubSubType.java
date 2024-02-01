@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.FootstepPlannerParametersPacket>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::FootstepPlannerParametersPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "ae6b7bcf21d60dacbd381bc626a75d196be04e527bcc77ac06b0cf756df4c880";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -107,6 +119,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -391,6 +405,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -559,6 +576,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getFootholdAreaWeight());
 
+      cdr.write_type_6(data.getReferencePlanAlpha());
+
       cdr.write_type_6(data.getCostPerStep());
 
       cdr.write_type_6(data.getAStarHeuristicsWeight());
@@ -715,6 +734,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setFootholdAreaWeight(cdr.read_type_6());
       	
+      data.setReferencePlanAlpha(cdr.read_type_6());
+      	
       data.setCostPerStep(cdr.read_type_6());
       	
       data.setAStarHeuristicsWeight(cdr.read_type_6());
@@ -813,6 +834,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("step_down_weight", data.getStepDownWeight());
       ser.write_type_6("long_step_weight", data.getLongStepWeight());
       ser.write_type_6("foothold_area_weight", data.getFootholdAreaWeight());
+      ser.write_type_6("reference_plan_alpha", data.getReferencePlanAlpha());
       ser.write_type_6("cost_per_step", data.getCostPerStep());
       ser.write_type_6("a_star_heuristics_weight", data.getAStarHeuristicsWeight());
       ser.write_type_4("intermediate_body_box_checks", data.getIntermediateBodyBoxChecks());
@@ -894,6 +916,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setStepDownWeight(ser.read_type_6("step_down_weight"));
       data.setLongStepWeight(ser.read_type_6("long_step_weight"));
       data.setFootholdAreaWeight(ser.read_type_6("foothold_area_weight"));
+      data.setReferencePlanAlpha(ser.read_type_6("reference_plan_alpha"));
       data.setCostPerStep(ser.read_type_6("cost_per_step"));
       data.setAStarHeuristicsWeight(ser.read_type_6("a_star_heuristics_weight"));
       data.setIntermediateBodyBoxChecks(ser.read_type_4("intermediate_body_box_checks"));

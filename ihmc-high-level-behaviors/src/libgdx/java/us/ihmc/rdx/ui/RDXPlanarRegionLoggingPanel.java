@@ -10,7 +10,7 @@ import imgui.type.ImFloat;
 import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.avatar.logging.PlanarRegionsListLogger;
 import us.ihmc.commons.Conversions;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
 
-public class RDXPlanarRegionLoggingPanel extends ImGuiPanel implements RenderableProvider
+public class RDXPlanarRegionLoggingPanel extends RDXPanel implements RenderableProvider
 {
    private static final int REALTIME_BUFFER_LEN = 3000;
 

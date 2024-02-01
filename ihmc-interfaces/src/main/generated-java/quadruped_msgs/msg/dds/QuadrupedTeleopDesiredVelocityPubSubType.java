@@ -11,6 +11,18 @@ package quadruped_msgs.msg.dds;
 public class QuadrupedTeleopDesiredVelocityPubSubType implements us.ihmc.pubsub.TopicDataType<quadruped_msgs.msg.dds.QuadrupedTeleopDesiredVelocity>
 {
    public static final java.lang.String name = "quadruped_msgs::msg::dds_::QuadrupedTeleopDesiredVelocity_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "82816c03a2478435afa786557fdc5ef23443ce7da75c82d6af44d29aeff89670";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

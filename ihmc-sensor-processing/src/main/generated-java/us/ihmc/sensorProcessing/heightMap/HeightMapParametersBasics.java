@@ -8,6 +8,126 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, StoredPropertySetBasics
 {
+   default void setResetHeightMap(boolean resetHeightMap)
+   {
+      set(HeightMapParameters.resetHeightMap, resetHeightMap);
+   }
+
+   default void setSearchWindowHeight(int searchWindowHeight)
+   {
+      set(HeightMapParameters.searchWindowHeight, searchWindowHeight);
+   }
+
+   default void setSearchWindowWidth(int searchWindowWidth)
+   {
+      set(HeightMapParameters.searchWindowWidth, searchWindowWidth);
+   }
+
+   default void setMinHeightRegistration(double minHeightRegistration)
+   {
+      set(HeightMapParameters.minHeightRegistration, minHeightRegistration);
+   }
+
+   default void setMaxHeightRegistration(double maxHeightRegistration)
+   {
+      set(HeightMapParameters.maxHeightRegistration, maxHeightRegistration);
+   }
+
+   default void setMinHeightDifference(double minHeightDifference)
+   {
+      set(HeightMapParameters.minHeightDifference, minHeightDifference);
+   }
+
+   default void setMaxHeightDifference(double maxHeightDifference)
+   {
+      set(HeightMapParameters.maxHeightDifference, maxHeightDifference);
+   }
+
+   default void setHeightFilterAlpha(double heightFilterAlpha)
+   {
+      set(HeightMapParameters.heightFilterAlpha, heightFilterAlpha);
+   }
+
+   default void setSpatialAlpha(double spatialAlpha)
+   {
+      set(HeightMapParameters.spatialAlpha, spatialAlpha);
+   }
+
+   default void setHeightOffset(double heightOffset)
+   {
+      set(HeightMapParameters.heightOffset, heightOffset);
+   }
+
+   default void setMinClampHeight(double minClampHeight)
+   {
+      set(HeightMapParameters.minClampHeight, minClampHeight);
+   }
+
+   default void setMaxClampHeight(double maxClampHeight)
+   {
+      set(HeightMapParameters.maxClampHeight, maxClampHeight);
+   }
+
+   default void setLocalWidthInMeters(double localWidthInMeters)
+   {
+      set(HeightMapParameters.localWidthInMeters, localWidthInMeters);
+   }
+
+   default void setLocalCellSizeInMeters(double localCellSizeInMeters)
+   {
+      set(HeightMapParameters.localCellSizeInMeters, localCellSizeInMeters);
+   }
+
+   default void setGlobalWidthInMeters(double globalWidthInMeters)
+   {
+      set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
+   }
+
+   default void setGlobalCellSizeInMeters(double globalCellSizeInMeters)
+   {
+      set(HeightMapParameters.globalCellSizeInMeters, globalCellSizeInMeters);
+   }
+
+   default void setRobotCollisionCylinderRadius(double robotCollisionCylinderRadius)
+   {
+      set(HeightMapParameters.robotCollisionCylinderRadius, robotCollisionCylinderRadius);
+   }
+
+   default void setInternalGlobalWidthInMeters(double internalGlobalWidthInMeters)
+   {
+      set(HeightMapParameters.internalGlobalWidthInMeters, internalGlobalWidthInMeters);
+   }
+
+   default void setInternalGlobalCellSizeInMeters(double internalGlobalCellSizeInMeters)
+   {
+      set(HeightMapParameters.internalGlobalCellSizeInMeters, internalGlobalCellSizeInMeters);
+   }
+
+   default void setHeightScaleFactor(double heightScaleFactor)
+   {
+      set(HeightMapParameters.heightScaleFactor, heightScaleFactor);
+   }
+
+   default void setCropWindowSize(int cropWindowSize)
+   {
+      set(HeightMapParameters.cropWindowSize, cropWindowSize);
+   }
+
+   default void setSteppingContactThreshold(int steppingContactThreshold)
+   {
+      set(HeightMapParameters.steppingContactThreshold, steppingContactThreshold);
+   }
+
+   default void setContactWindowSize(int contactWindowSize)
+   {
+      set(HeightMapParameters.contactWindowSize, contactWindowSize);
+   }
+
+   default void setSteppingCosineThreshold(double steppingCosineThreshold)
+   {
+      set(HeightMapParameters.steppingCosineThreshold, steppingCosineThreshold);
+   }
+
    /**
     * Resolution of the height map grid
     */
@@ -54,5 +174,34 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setMahalanobisScale(double mahalanobisScale)
    {
       set(HeightMapParameters.mahalanobisScale, mahalanobisScale);
+   }
+
+   /**
+    * This is the variance added to all past measurements when a cell is translated
+    */
+   default void setVarianceAddedWhenTranslating(double varianceAddedWhenTranslating)
+   {
+      set(HeightMapParameters.varianceAddedWhenTranslating, varianceAddedWhenTranslating);
+   }
+
+   /**
+    * This is the measurement variance when the robot is standing
+    */
+   default void setSensorVarianceWhenStanding(double sensorVarianceWhenStanding)
+   {
+      set(HeightMapParameters.sensorVarianceWhenStanding, sensorVarianceWhenStanding);
+   }
+
+   /**
+    * This is the measurement variance when the robot is moving
+    */
+   default void setSensorVarianceWhenMoving(double sensorVarianceWhenMoving)
+   {
+      set(HeightMapParameters.sensorVarianceWhenMoving, sensorVarianceWhenMoving);
+   }
+
+   default void setEstimateHeightWithKalmanFilter(boolean estimateHeightWithKalmanFilter)
+   {
+      set(HeightMapParameters.estimateHeightWithKalmanFilter, estimateHeightWithKalmanFilter);
    }
 }

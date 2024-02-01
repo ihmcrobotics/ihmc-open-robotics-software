@@ -21,4 +21,4 @@ int32[<=100] number_of_holes_in_region
 int32[<=100] hole_polygons_size
 
 # Single buffer used to store for each constraint the vertices of the concave hull and the convex polygons.
-geometry_msgs/Point[<=500] vertex_buffer
+geometry_msgs/Point[<=50000] vertex_buffer

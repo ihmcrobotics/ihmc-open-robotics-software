@@ -50,6 +50,7 @@ public class FootstepPlannerMessageTools
          return;
       }
 
+      packet.setReferencePlanAlpha(parameters.getReferencePlanAlpha());
       packet.setCheckForBodyBoxCollisions(parameters.checkForBodyBoxCollisions());
       packet.setCheckForPathCollisions(parameters.checkForPathCollisions());
       packet.setIdealFootstepWidth(parameters.getIdealFootstepWidth());

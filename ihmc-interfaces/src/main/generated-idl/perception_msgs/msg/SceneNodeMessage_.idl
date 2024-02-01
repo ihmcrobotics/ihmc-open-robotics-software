@@ -1,0 +1,40 @@
+#ifndef __perception_msgs__msg__SceneNodeMessage__idl__
+#define __perception_msgs__msg__SceneNodeMessage__idl__
+
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * The base scene node information
+       * The topic name identifies the node.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::SceneNodeMessage_")
+      struct SceneNodeMessage
+      {
+        /**
+         * The ID of the node
+         */
+        unsigned long id;
+        /**
+         * The name of the scene node
+         */
+        string name;
+        /**
+         * Transform of the node's frame to world frame
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_world;
+        /**
+         * Number of child nodes; used for serialization
+         */
+        unsigned short number_of_children;
+      };
+    };
+  };
+};
+
+#endif

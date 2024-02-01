@@ -5,13 +5,12 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.HybridDirectory;
-import us.ihmc.tools.io.HybridFile;
+import us.ihmc.tools.io.HybridResourceDirectory;
+import us.ihmc.tools.io.HybridResourceFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
@@ -23,8 +22,8 @@ public class ImGuiGlfwWindow
 {
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
    private final String configurationExtraPath;
-   private final HybridDirectory configurationBaseDirectory;
-   private HybridFile windowSettingsFile;
+   private final HybridResourceDirectory configurationBaseDirectory;
+   private HybridResourceFile windowSettingsFile;
    private final FrequencyCalculator fpsCalculator = new FrequencyCalculator();
    private final Stopwatch runTime = new Stopwatch().start();
    private String[] iconPaths = null;
@@ -34,31 +33,23 @@ public class ImGuiGlfwWindow
    private final ImBoolean vsync = new ImBoolean(true);
    private final ImInt maxFrameRate = new ImInt(240);
 
-   public ImGuiGlfwWindow(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public ImGuiGlfwWindow(Class<?> classForLoading)
    {
-      this(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading.getSimpleName());
+      this(classForLoading, classForLoading.getSimpleName());
    }
 
-   public ImGuiGlfwWindow(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
+   public ImGuiGlfwWindow(Class<?> classForLoading, String windowTitle)
    {
-      configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
-      configurationBaseDirectory = new HybridDirectory(dotIHMCDirectory,
-                                                       directoryNameToAssumePresent,
-                                                       subsequentPathToResourceFolder,
-                                                       classForLoading,
-                                                       configurationExtraPath);
+      configurationExtraPath = "configurations/" + windowTitle.replaceAll(" ", "");
+      configurationBaseDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading).resolve(configurationExtraPath);
 
-      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem();
       glfwWindowForImGui = new GlfwWindowForImGui(windowTitle);
-      layoutManager = new RDXImGuiLayoutManager(classForLoading,
-                                                directoryNameToAssumePresent,
-                                                subsequentPathToResourceFolder,
-                                                configurationExtraPath,
-                                                configurationBaseDirectory);
+      layoutManager = new RDXImGuiLayoutManager(classForLoading, configurationExtraPath, configurationBaseDirectory);
+      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem(layoutManager);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(updatedLayoutDirectory ->
       {
-         windowSettingsFile = new HybridFile(updatedLayoutDirectory, "WindowSettings.json");
+         windowSettingsFile = new HybridResourceFile(updatedLayoutDirectory, "WindowSettings.json");
       });
       layoutManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
@@ -96,7 +87,7 @@ public class ImGuiGlfwWindow
 
       long windowHandle = glfwWindowForImGui.getWindowHandle();
 
-      imGuiWindowAndDockSystem.create(windowHandle, layoutManager);
+      imGuiWindowAndDockSystem.create(windowHandle);
 
       if (create != null)
          create.run();
@@ -178,12 +169,18 @@ public class ImGuiGlfwWindow
       }
    }
 
+   /**
+    * Launches an ImGui window with a single parent panel.
+    * Will block until a shutdown is requested.
+    *
+    * @param renderImGuiWidgets the render method for ImGui widgets
+    */
    public void runWithSinglePanel(Runnable renderImGuiWidgets)
    {
-      ImGuiPanel mainPanel = new ImGuiPanel("Main Panel", renderImGuiWidgets);
+      RDXPanel mainPanel = new RDXPanel("Main Panel", renderImGuiWidgets);
       mainPanel.getIsShowing().set(true);
       imGuiWindowAndDockSystem.getPanelManager().addPanel(mainPanel);
-      ThreadTools.startAThread(() -> run(null, () -> { }, () -> System.exit(0)), glfwWindowForImGui.getWindowTitle());
+      run(null, () -> {}, () -> System.exit(0));
    }
 
    public void setIcons(String... iconPaths)
@@ -197,7 +194,7 @@ public class ImGuiGlfwWindow
       glfwWindowForImGui.setVSyncEnabled(enableVsync);
    }
 
-   public ImGuiPanelManager getPanelManager()
+   public RDXPanelManager getPanelManager()
    {
       return imGuiWindowAndDockSystem.getPanelManager();
    }

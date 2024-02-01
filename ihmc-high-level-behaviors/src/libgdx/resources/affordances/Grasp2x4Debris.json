@@ -1,0 +1,53 @@
+{
+  "name" : "Grasp2x4Debris",
+  "children" : [ {
+    "type" : "HandPoseActionDefinition",
+    "parentFrame" : "2x4Debris",
+    "side" : "right",
+    "trajectoryDuration" : 1.0,
+    "x" : -0.1965,
+    "y" : -0.0105,
+    "z" : 0.0,
+    "rollInDegrees" : -90.0,
+    "pitchInDegrees" : -2.14,
+    "yawInDegrees" : 90.0
+  }, {
+    "type" : "SakeHandCommandActionDefinition",
+    "description" : "Open (half close)",
+    "side" : "right",
+    "configuration" : "OPEN",
+    "position" : 0.4999999976514124,
+    "torque" : 0.30000001192092896,
+    "executeWithNextAction" : false
+  }, {
+    "type" : "HandPoseActionDefinition",
+    "parentFrame" : "2x4Debris",
+    "side" : "right",
+    "trajectoryDuration" : 1.0461659323913874,
+    "x" : -0.0915,
+    "y" : -0.0105,
+    "z" : 0.0,
+    "rollInDegrees" : -90.0,
+    "pitchInDegrees" : -2.14,
+    "yawInDegrees" : 90.0
+  }, {
+    "type" : "HandPoseActionDefinition",
+    "parentFrame" : "2x4Debris",
+    "side" : "right",
+    "trajectoryDuration" : 1.9229626863835646E-16,
+    "x" : -0.0915,
+    "y" : -0.0105,
+    "z" : 0.0,
+    "rollInDegrees" : -90.0,
+    "pitchInDegrees" : -2.14,
+    "yawInDegrees" : 90.0
+  }, {
+    "type" : "SakeHandCommandActionDefinition",
+    "description" : "Crush",
+    "side" : "right",
+    "configuration" : "GRIP_HARD",
+    "position" : 0.0,
+    "torque" : 1.0,
+    "executeWithNextAction" : false
+  } ]
+}

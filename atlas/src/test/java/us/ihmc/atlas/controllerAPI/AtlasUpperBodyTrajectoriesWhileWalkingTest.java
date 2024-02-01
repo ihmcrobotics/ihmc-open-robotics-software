@@ -43,6 +43,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -74,7 +75,8 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       fullRobotModel.updateFrames();
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
+      referenceFrames.updateFrames();
 
       double timeToCompleteWalking = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames);
       sendArmTrajectoryMessageWithRandomPoints(random, robotModel, fullRobotModel);
@@ -96,7 +98,8 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       fullRobotModel.updateFrames();
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      HumanoidReferenceFrames referenceFrames = (HumanoidReferenceFrames) simulationTestHelper.getControllerReferenceFrames();
+      referenceFrames.updateFrames();
 
       double timeToCompleteWalking = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames);
 
@@ -195,7 +198,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       }
    }
 
-   private double sendWalkingPacket(DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
+   private double sendWalkingPacket(DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
    {
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       double swingTime = walkingControllerParameters.getDefaultSwingTime();

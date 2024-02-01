@@ -6,10 +6,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.stateMachine.core.State;
 
-public interface PelvisAndCenterOfMassHeightControlState extends State
+public interface PelvisAndCenterOfMassHeightControlState extends State, SCS2YoGraphicHolder
 {
    @Override
    default boolean isDone(double timeInState)

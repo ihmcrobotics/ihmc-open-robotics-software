@@ -1,0 +1,60 @@
+#ifndef __controller_msgs__msg__QueuedFootstepStatusMessage__idl__
+#define __controller_msgs__msg__QueuedFootstepStatusMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message specifies the position, orientation and side (left or right) of a footstep in the queue in world frame.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::QueuedFootstepStatusMessage_")
+      struct QueuedFootstepStatusMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Specifies which foot will swing to reach the footstep.
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
+         * Specifies the position of the footstep (sole frame) in world frame.
+         */
+        geometry_msgs::msg::dds::Point location;
+        /**
+         * Specifies the orientation of the footstep (sole frame) in world frame.
+         */
+        geometry_msgs::msg::dds::Quaternion orientation;
+        /**
+         * The swingDuration is the time a foot is not in ground contact during a step.
+         * If the value of this field is invalid (not positive) it will be replaced by a default swing_duration.
+         */
+        @defaultValue(value=-1.0)
+        double swing_duration;
+        /**
+         * The transferDuration is the time spent with the feet in ground contact before a step.
+         * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
+         */
+        @defaultValue(value=-1.0)
+        double transfer_duration;
+      };
+    };
+  };
+};
+
+#endif

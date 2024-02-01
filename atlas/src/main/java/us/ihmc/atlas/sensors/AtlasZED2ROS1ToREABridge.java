@@ -6,7 +6,8 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.ihmcPerception.depthData.PointCloudData;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -59,7 +60,7 @@ public class AtlasZED2ROS1ToREABridge
                      lidarScanMessage.getLidarPosition().set(ousterPose.getPosition());
                      lidarScanMessage.getLidarOrientation().set(ousterPose.getOrientation());
                      lidarScanMessage.setSensorPoseConfidence(1.0);
-                     ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
+                     ros2Helper.publish(PerceptionAPI.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
                   }
                });
             }

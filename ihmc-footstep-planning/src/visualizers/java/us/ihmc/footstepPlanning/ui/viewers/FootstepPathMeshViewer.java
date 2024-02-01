@@ -52,25 +52,25 @@ public class FootstepPathMeshViewer extends AnimationTimer
    public FootstepPathMeshViewer(Messager messager)
    {
       // call these on separate thread since they update all meshes
-      messager.registerTopicListener(FootstepPlanResponse, footstepPlan ->
+      messager.addTopicListener(FootstepPlanResponse, footstepPlan ->
       {
          footstepPlanResponse.set(footstepPlan);
          updateAllMeshes.set(true);
       });
 
-      messager.registerTopicListener(IgnorePartialFootholds, ignore ->
+      messager.addTopicListener(IgnorePartialFootholds, ignore ->
       {
          ignorePartialFootholds.set(ignore);
          updateAllMeshes.set(true);
       });
 
       // call this on animation timer update thread since it updates a single step and might come in at higher frequency
-      messager.registerTopicListener(FootstepToUpdateViz, updateStep::set);
+      messager.addTopicListener(FootstepToUpdateViz, updateStep::set);
       selectedStep = messager.createInput(SelectedFootstep, Pair.of(-1, null));
 
       // handle reset on animation timer thread
-      messager.registerTopicListener(ComputePath, data -> reset.set(true));
-      messager.registerTopicListener(GlobalReset, data -> reset.set(true));
+      messager.addTopicListener(ComputePath, data -> reset.set(true));
+      messager.addTopicListener(GlobalReset, data -> reset.set(true));
 
       for (int i = 0; i < 200; i++)
       {
@@ -83,7 +83,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
          footstepMeshes.add(meshManager);
       }
 
-      messager.registerTopicListener(ShowFootstepPlan, show -> footstepMeshes.forEach(mesh -> mesh.getMeshHolder().getMeshView().setVisible(show)));
+      messager.addTopicListener(ShowFootstepPlan, show -> footstepMeshes.forEach(mesh -> mesh.getMeshHolder().getMeshView().setVisible(show)));
    }
 
    private void computeAllMeshes(FootstepDataListMessage footstepPlanResponse)

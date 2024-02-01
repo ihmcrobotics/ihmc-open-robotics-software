@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.FootstepStatusMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::FootstepStatusMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "15eaba202ed9261a5fdf5e1e01a6a248719bca36a9ef63bab17cd7e69748df79";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

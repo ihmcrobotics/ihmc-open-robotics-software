@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
 import perception_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -18,6 +19,7 @@ import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.RegionFeaturesProvider;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
@@ -31,23 +33,17 @@ public class LidarREANetworkProvider implements REANetworkProvider
 
    private REACurrentStateProvider currentStateProvider = null;
 
-
    private final ROS2Node ros2Node;
 
    private final ROS2Topic<PlanarRegionsListMessage> outputTopic;
    private PlanarRegionsListMessage lastPlanarRegionsListMessage;
 
-   public LidarREANetworkProvider(ROS2Topic outputTopic,
-                                  ROS2Topic lidarOutputTopic)
+   public LidarREANetworkProvider(ROS2Topic outputTopic, ROS2Topic lidarOutputTopic)
    {
-      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
-           outputTopic,
-           lidarOutputTopic);
+      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, PerceptionAPI.REA_NODE_NAME), outputTopic, lidarOutputTopic);
    }
 
-   public LidarREANetworkProvider(ROS2Node ros2Node,
-                                  ROS2Topic outputTopic,
-                                  ROS2Topic lidarOutputTopic)
+   public LidarREANetworkProvider(ROS2Node ros2Node, ROS2Topic outputTopic, ROS2Topic lidarOutputTopic)
    {
       this.ros2Node = ros2Node;
       this.outputTopic = outputTopic;
@@ -64,11 +60,13 @@ public class LidarREANetworkProvider implements REANetworkProvider
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     NormalEstimationParametersMessage.class,
                                                     inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.NormalEstimationParameters, REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+                                                    s -> messager.submitMessage(REAModuleAPI.NormalEstimationParameters,
+                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PlanarRegionSegmentationParametersMessage.class,
                                                     inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters, REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters,
+                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PolygonizerParametersMessage.class,
                                                     inputTopic,
@@ -107,11 +105,10 @@ public class LidarREANetworkProvider implements REANetworkProvider
       ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, REASourceType.LIDAR_SCAN.getTopicName(), lidarScanHandler);
    }
 
-
    @Override
    public void registerLidarScanHandler(Messager messager, NewMessageListener<LidarScanMessage> lidarScanHandler)
    {
-      new REAModuleROS2Subscription<>(ros2Node, messager, REASourceType.LIDAR_SCAN, LidarScanMessage.class, lidarScanHandler);
+      new REAModuleROS2Subscription<>(ros2Node, messager, REASourceType.LIDAR_SCAN, LidarScanMessage.class, lidarScanHandler, ROS2QosProfile.BEST_EFFORT());
    }
 
    @Override

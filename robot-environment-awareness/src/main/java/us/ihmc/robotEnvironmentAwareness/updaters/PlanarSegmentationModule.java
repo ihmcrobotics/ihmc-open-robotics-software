@@ -12,6 +12,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -79,10 +80,10 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
    private PlanarSegmentationModule(Messager reaMessager, File configurationFile) throws Exception
    {
-      this(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
+      this(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, PerceptionAPI.REA_NODE_NAME),
            REACommunicationProperties.inputTopic,
            REACommunicationProperties.subscriberCustomRegionsTopicName,
-           ROS2Tools.REALSENSE_SLAM_MODULE,
+           PerceptionAPI.REALSENSE_SLAM_MODULE,
            reaMessager,
            configurationFile,
            true,
@@ -94,7 +95,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       this(ros2Node,
            REACommunicationProperties.inputTopic,
            REACommunicationProperties.subscriberCustomRegionsTopicName,
-           ROS2Tools.REALSENSE_SLAM_REGIONS,
+           PerceptionAPI.REALSENSE_SLAM_REGIONS,
            reaMessager,
            configurationFile,
            false,
@@ -106,7 +107,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       this(ros2Node,
            REACommunicationProperties.inputTopic,
            REACommunicationProperties.subscriberCustomRegionsTopicName,
-           ROS2Tools.REALSENSE_SLAM_MODULE,
+           PerceptionAPI.REALSENSE_SLAM_MODULE,
            reaMessager,
            configurationFile,
            false,
@@ -120,7 +121,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
                                     Messager reaMessager,
                                     File configurationFile) throws Exception
    {
-      this(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
+      this(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, PerceptionAPI.REA_NODE_NAME),
            inputTopic,
            customRegionTopic,
            outputTopic,
@@ -178,7 +179,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       planarRegionFeatureUpdater.setSurfaceNormalFilterParametersTopic(SegmentationModuleAPI.SurfaceNormalFilterParameters);
       planarRegionFeatureUpdater.bindControls();
 
-      reaMessager.registerTopicListener(SegmentationModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
+      reaMessager.addTopicListener(SegmentationModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
 
       isOcTreeBoundingBoxRequested = reaMessager.createInput(SegmentationModuleAPI.RequestBoundingBox, false);
 
@@ -225,7 +226,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
          FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
          loadConfigurationFile(filePropertyHelper);
 
-         reaMessager.registerTopicListener(SegmentationModuleAPI.SaveUpdaterConfiguration, (content) -> saveConfigurationFIle(filePropertyHelper));
+         reaMessager.addTopicListener(SegmentationModuleAPI.SaveUpdaterConfiguration, (content) -> saveConfigurationFIle(filePropertyHelper));
       }
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.

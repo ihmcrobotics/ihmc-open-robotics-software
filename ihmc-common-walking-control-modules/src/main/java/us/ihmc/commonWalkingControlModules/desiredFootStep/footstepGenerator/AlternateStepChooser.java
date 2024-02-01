@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -22,5 +23,5 @@ public interface AlternateStepChooser
     * @param swingSide swing side of the step to be calculated
     * @param touchdownPoseToPack the pose used to store the new calculated step. Modified.
     */
-   void computeStep(FramePose2DReadOnly stanceFootPose, FramePose2DReadOnly defaultTouchdownPose, RobotSide swingSide, FramePose3D touchdownPoseToPack);
+   void computeStep(FramePose2DReadOnly stanceFootPose, FramePose2DReadOnly defaultTouchdownPose, RobotSide swingSide, FootstepDataMessage touchdownPoseToPack);
 }

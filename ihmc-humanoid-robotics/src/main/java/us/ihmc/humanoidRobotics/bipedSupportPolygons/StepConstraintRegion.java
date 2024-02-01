@@ -1,5 +1,6 @@
 package us.ihmc.humanoidRobotics.bipedSupportPolygons;
 
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
@@ -30,7 +31,7 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
 
-   private final List<ConcavePolygon2DReadOnly> holesInRegion = new ArrayList<>();
+   private final RecyclingArrayList<ConcavePolygon2D> holesInRegion = new RecyclingArrayList<>(ConcavePolygon2D::new);
 
    private final BoundingBox3D boundingBox3dInWorld = new BoundingBox3D(new Point3D(Double.NaN, Double.NaN, Double.NaN),
                                                                         new Point3D(Double.NaN, Double.NaN, Double.NaN));
@@ -142,19 +143,42 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       updateConvexHull();
       updateBoundingBox();
 
-      this.holesInRegion.addAll(holesInRegion);
+      for (ConcavePolygon2DReadOnly hole : holesInRegion)
+         this.holesInRegion.add().set(hole);
+   }
+
+   public void clear()
+   {
+      fromLocalToWorldTransform.setToNaN();
+      fromWorldToLocalTransform.setToNaN();
+      for (int i = 0; i < holesInRegion.size(); i++)
+         holesInRegion.get(i).clear();
+      holesInRegion.clear();
+
+      concaveHull.clear();
+      convexHull.clear();
+      boundingBox3dInWorld.setToNaN();
    }
 
    public void set(StepConstraintRegion other)
    {
+      clear();
+
       fromLocalToWorldTransform.set(other.fromLocalToWorldTransform);
       fromWorldToLocalTransform.set(other.fromWorldToLocalTransform);
-      holesInRegion.clear();
       for (int i = 0; i < other.getNumberOfHolesInRegion(); i++)
-         holesInRegion.add(new ConcavePolygon2D(other.holesInRegion.get(i)));
+         holesInRegion.add().set(other.holesInRegion.get(i));
 
       concaveHull.set(other.concaveHull);
       convexHull.set(other.convexHull);
+      updateBoundingBox();
+   }
+
+   public void addOffset(Vector3DReadOnly offset)
+   {
+      fromLocalToWorldTransform.prependTranslation(offset);
+      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
+
       updateBoundingBox();
    }
 
@@ -182,8 +206,15 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       convexHull.set(concaveHull);
    }
 
-   public void set(RigidBodyTransform transformToWorld, List<? extends Point2DReadOnly> concaveHullsVertices, List<ConcavePolygon2D> holesInRegion)
+   public void set(RigidBodyTransformReadOnly transformToWorld, List<? extends Point2DReadOnly> concaveHullsVertices)
    {
+      set(transformToWorld, concaveHullsVertices, null);
+   }
+
+   public void set(RigidBodyTransformReadOnly transformToWorld, List<? extends Point2DReadOnly> concaveHullsVertices, List<ConcavePolygon2D> holesInRegion)
+   {
+      clear();
+
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
 
@@ -195,9 +226,11 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       updateConvexHull();
       updateBoundingBox();
 
-      this.holesInRegion.clear();
-      for (int i = 0; i < holesInRegion.size(); i++)
-         this.holesInRegion.add(holesInRegion.get(i));
+      if (holesInRegion != null)
+      {
+         for (int i = 0; i < holesInRegion.size(); i++)
+            this.holesInRegion.add().set(holesInRegion.get(i));
+      }
    }
 
    /**
@@ -253,7 +286,7 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       return convexHull;
    }
 
-   public List<ConcavePolygon2DReadOnly> getHolesInConstraintRegion()
+   public List<? extends ConcavePolygon2DReadOnly> getHolesInConstraintRegion()
    {
       return holesInRegion;
    }

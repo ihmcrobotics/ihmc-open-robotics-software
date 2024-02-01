@@ -441,7 +441,7 @@ public class DirectionalControlController extends ToolboxController
     * @param footSide     -- left or right
     * @return 3D pose for the input step
     */
-   private boolean adjustFootstep(FramePose3DReadOnly stancePose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
+   private boolean adjustFootstep(FramePose3DReadOnly stancePose, FramePose2DReadOnly footstepPose, RobotSide footSide, FootstepDataMessage adjustedFootstep)
    {
       FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
       adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
@@ -460,7 +460,8 @@ public class DirectionalControlController extends ToolboxController
             snapAndWiggleSingleStep.snapAndWiggle(wiggledPose, footPolygonToWiggle, forwardVelocityProperty.get() > 0.0);
             if (wiggledPose.containsNaN())
             {
-               adjustedFootstep.set(adjustedBasedOnStanceFoot);
+               adjustedFootstep.getLocation().set(adjustedBasedOnStanceFoot.getPosition());
+               adjustedFootstep.getOrientation().set(adjustedBasedOnStanceFoot.getOrientation());
                return true;
             }
          }
@@ -471,12 +472,14 @@ public class DirectionalControlController extends ToolboxController
              * Let's just keep the adjusted footstep based on the pose of the current stance foot.
              */
          }
-         adjustedFootstep.set(wiggledPose);
+         adjustedFootstep.getLocation().set(wiggledPose.getPosition());
+         adjustedFootstep.getOrientation().set(wiggledPose.getOrientation());
          return true;
       }
       else
       {
-         adjustedFootstep.set(adjustedBasedOnStanceFoot);
+         adjustedFootstep.getLocation().set(adjustedBasedOnStanceFoot.getPosition());
+         adjustedFootstep.getOrientation().set(adjustedBasedOnStanceFoot.getOrientation());
          return true;
       }
    }

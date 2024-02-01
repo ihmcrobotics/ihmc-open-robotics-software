@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -15,11 +16,14 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.EnumParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -30,7 +34,18 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.Map;
 
-public class RigidBodyControlManager
+/**
+ * Manages a rigid body as part of a high level controller.
+ * <p>
+ * This class triages user commands and computes inverse dynamics, feedback control commands,
+ * and joint desired output data that are provided to the whole body controller core.
+ * </p>
+ * <p>
+ * As part of this class, a rigid body can be in one of the four {@link RigidBodyControlMode
+ * rigid body control modes}.
+ * </p>
+ */
+public class RigidBodyControlManager implements SCS2YoGraphicHolder
 {
    public static final double INITIAL_GO_HOME_TIME = 2.0;
 
@@ -68,7 +83,9 @@ public class RigidBodyControlManager
                                   PID3DGainsReadOnly taskspacePositionGains,
                                   ContactablePlaneBody contactableBody,
                                   RigidBodyControlMode defaultControlMode,
+                                  boolean enableFunctionGenerators,
                                   YoDouble yoTime,
+                                  double controlDT,
                                   YoGraphicsListRegistry graphicsListRegistry,
                                   YoRegistry parentRegistry)
    {
@@ -85,7 +102,7 @@ public class RigidBodyControlManager
 
       initialJointPositions = new double[jointsToControl.length];
 
-      RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, yoTime, parentRegistry);
+      RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, yoTime, controlDT, enableFunctionGenerators, parentRegistry);
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, jointControlHelper, registry);
 
@@ -97,6 +114,7 @@ public class RigidBodyControlManager
                                                                                                    baseFrame,
                                                                                                    yoTime,
                                                                                                    jointControlHelper,
+                                                                                                   enableFunctionGenerators,
                                                                                                    parentRegistry);
          if (taskspaceOrientationGains == null)
          {
@@ -115,6 +133,7 @@ public class RigidBodyControlManager
                                                                                              controlFrame,
                                                                                              baseFrame,
                                                                                              yoTime,
+                                                                                             enableFunctionGenerators,
                                                                                              parentRegistry,
                                                                                              graphicsListRegistry);
          if (taskspacePositionGains == null)
@@ -135,6 +154,7 @@ public class RigidBodyControlManager
                                                                                      baseFrame,
                                                                                      yoTime,
                                                                                      jointControlHelper,
+                                                                                     enableFunctionGenerators,
                                                                                      graphicsListRegistry,
                                                                                      registry);
          if (taskspaceOrientationGains == null || taskspacePositionGains == null)
@@ -218,9 +238,9 @@ public class RigidBodyControlManager
       userControlState.setWeights(userModeWeights);
    }
 
-   public void setGains(Map<String, PIDGainsReadOnly> jointspaceHighLevelGains, Map<String, PIDGainsReadOnly> jointspaceLowLevelGains)
+   public void setGains(Map<String, PIDGainsReadOnly> jointspaceGains)
    {
-      jointspaceControlState.setGains(jointspaceHighLevelGains, jointspaceLowLevelGains);
+      jointspaceControlState.setGains(jointspaceGains);
    }
 
    /**
@@ -574,11 +594,6 @@ public class RigidBodyControlManager
       return stateMachine.getCurrentState().getJointDesiredData();
    }
 
-   public void setEnableDirectJointPositionControl(boolean enable)
-   {
-      jointspaceControlState.setEnableDirectJointPositionControl(enable);
-   }
-
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return stateMachine.getCurrentState().getFeedbackControlCommand();
@@ -604,5 +619,27 @@ public class RigidBodyControlManager
    public Object pollStatusToReport()
    {
       return stateMachine.getCurrentState().pollStatusToReport();
+   }
+
+   public RigidBodyTaskspaceControlState getTaskspaceControlState()
+   {
+      return taskspaceControlState;
+   }
+
+   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
+   {
+      if (loadBearingControlState != null)
+         loadBearingControlState.setControllerCoreOutput(controllerCoreOutput);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(bodyName + "-" + getClass().getSimpleName());
+      group.addChild(taskspaceControlState.getSCS2YoGraphics());
+      if (loadBearingControlState != null)
+         group.addChild(loadBearingControlState.getSCS2YoGraphics());
+      group.addChild(externalWrenchManager.getSCS2YoGraphics());
+      return group.isEmpty() ? null : group;
    }
 }

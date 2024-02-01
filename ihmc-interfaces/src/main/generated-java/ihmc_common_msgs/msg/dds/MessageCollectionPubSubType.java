@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.MessageCollection>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::MessageCollection_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "539ba3bd7996534a788a9a164e3b2bc1cfa847c4fae7ffcef5184551f8c71dec";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

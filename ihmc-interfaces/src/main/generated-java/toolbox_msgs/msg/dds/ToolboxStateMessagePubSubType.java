@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class ToolboxStateMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.ToolboxStateMessage>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::ToolboxStateMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "53fdde5b39d13d9984937a383e810a44bc8212d5d5014cf6c641f10988c67069";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

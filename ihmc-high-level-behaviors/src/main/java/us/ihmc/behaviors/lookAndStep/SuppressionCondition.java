@@ -5,6 +5,10 @@ import java.util.function.Supplier;
 
 import static us.ihmc.behaviors.lookAndStep.BehaviorTaskSuppressor.NOOP;
 
+/**
+ * A suppression condition for input to a module in the subsumption style
+ * architecture.
+ */
 public class SuppressionCondition
 {
    private final Supplier<String> onSuppressMessageSupplier;

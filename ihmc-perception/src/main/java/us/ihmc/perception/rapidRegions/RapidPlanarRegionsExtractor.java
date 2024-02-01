@@ -1,5 +1,6 @@
 package us.ihmc.perception.rapidRegions;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl._cl_program;
@@ -15,10 +16,16 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.filters.CollidingScanRegionFilter;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
+import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.tools.PerceptionFilterTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 
 import java.util.Comparator;
 import java.util.Stack;
@@ -26,6 +33,7 @@ import java.util.Stack;
 public class RapidPlanarRegionsExtractor
 {
    private final int TOTAL_NUM_PARAMS = 21;
+   private CollidingScanRegionFilter collidingScanRegionFilter;
 
    public enum SensorModel
    {
@@ -51,6 +59,7 @@ public class RapidPlanarRegionsExtractor
    private BMatrixRMaj boundaryMatrix;
    private DMatrixRMaj regionMatrix;
 
+   private boolean enabled = true;
    private boolean patchSizeChanged = true;
    private boolean modified = true;
    private boolean processing = false;
@@ -73,7 +82,7 @@ public class RapidPlanarRegionsExtractor
    private int filterPatchImageHeight;
    private int filterPatchImageWidth;
 
-   private final RapidRegionsDebutOutputGenerator debugger = new RapidRegionsDebutOutputGenerator();
+   private final RapidPatchesDebugOutputGenerator debugger = new RapidPatchesDebugOutputGenerator();
    private final Stack<PatchGraphRecursionBlock> depthFirstSearchStack = new Stack<>();
    private final RecyclingArrayList<RapidPlanarRegion> rapidPlanarRegions = new RecyclingArrayList<>(RapidPlanarRegion::new);
    private final Comparator<RapidRegionRing> boundaryLengthComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
@@ -93,7 +102,42 @@ public class RapidPlanarRegionsExtractor
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private final FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
    private final RapidPlanarRegionIsland tempIsland = new RapidPlanarRegionIsland();
+
+   private FullHumanoidRobotModel fullRobotModel;
+   private CollisionBoxProvider collisionBoxProvider;
+   private RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
+
    private boolean firstRun = true;
+   boolean waitIfNecessary = false; // dangerous if true! need a timeout
+
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager, CameraIntrinsics cameraIntrinsics)
+   {
+      this(openCLManager,
+           openCLManager.loadProgram("RapidRegionsExtractor"),
+           cameraIntrinsics.getHeight(),
+           cameraIntrinsics.getWidth(),
+           cameraIntrinsics.getFx(),
+           cameraIntrinsics.getFy(),
+           cameraIntrinsics.getCx(),
+           cameraIntrinsics.getCy());
+   }
+
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager, int imageHeight, int imageWidth, double fx, double fy, double cx, double cy)
+   {
+      this(openCLManager, openCLManager.loadProgram("RapidRegionsExtractor"), imageHeight, imageWidth, fx, fy, cx, cy);
+   }
+
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager,
+                                      _cl_program program,
+                                      int imageHeight,
+                                      int imageWidth,
+                                      double fx,
+                                      double fy,
+                                      double cx,
+                                      double cy)
+   {
+      this(openCLManager, program, imageHeight, imageWidth, fx, fy, cx, cy, "");
+   }
 
    /**
     * Creates buffers and kernels for the OpenCL program.
@@ -101,7 +145,15 @@ public class RapidPlanarRegionsExtractor
     * @param imageWidth  width of the input depth image
     * @param imageHeight height of the input depth image
     */
-   public void create(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth, double fx, double fy, double cx, double cy)
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager,
+                                      _cl_program program,
+                                      int imageHeight,
+                                      int imageWidth,
+                                      double fx,
+                                      double fy,
+                                      double cx,
+                                      double cy,
+                                      String version)
    {
       this.sensorModel = SensorModel.PERSPECTIVE;
       this.openCLManager = openCLManager;
@@ -109,7 +161,7 @@ public class RapidPlanarRegionsExtractor
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
 
-      this.parameters = new RapidRegionsExtractorParameters();
+      this.parameters = new RapidRegionsExtractorParameters(version);
       this.parameters.set(RapidRegionsExtractorParameters.focalLengthXPixels, fx);
       this.parameters.set(RapidRegionsExtractorParameters.focalLengthYPixels, fy);
       this.parameters.set(RapidRegionsExtractorParameters.principalOffsetXPixels, cx);
@@ -120,7 +172,7 @@ public class RapidPlanarRegionsExtractor
       this.create();
    }
 
-   public void create(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth)
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth)
    {
       this.sensorModel = SensorModel.SPHERICAL;
       this.openCLManager = openCLManager;
@@ -132,10 +184,11 @@ public class RapidPlanarRegionsExtractor
 
       rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer("ForSphericalRapidRegions");
       sphericalBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "sphericalBackProjectionKernel");
-      this.create();
+
+      create();
    }
 
-   public void create()
+   private void create()
    {
       calculateDerivativeParameters();
 
@@ -161,9 +214,54 @@ public class RapidPlanarRegionsExtractor
       LogTools.info("Finished creating buffers and kernels for OpenCL program.");
    }
 
+   public void initializeBodyCollisionFilter(FullHumanoidRobotModel robotModel, CollisionBoxProvider collisionBoxProvider)
+   {
+      if (robotModel == null)
+      {
+         LogTools.warn("Cannot initialize body collision filter. Robot model is null.");
+         return;
+      }
+
+      if (collisionBoxProvider == null)
+      {
+         LogTools.warn("Cannot initialize body collision filter. Robot collision box provider is null.");
+         return;
+      }
+
+      this.fullRobotModel = robotModel;
+      this.collisionBoxProvider = collisionBoxProvider;
+
+
+      this.collidingScanRegionFilter = PerceptionFilterTools.createHumanoidShinCollisionFilter(fullRobotModel, this.collisionBoxProvider);
+   }
+
+   public void filterFramePlanarRegionsList(FramePlanarRegionsList frameRegionsToFilter)
+   {
+      if (fullRobotModel == null || collidingScanRegionFilter == null)
+         return;
+
+      this.fullRobotModel.updateFrames();
+      this.collidingScanRegionFilter.update();
+
+      synchronized (frameRegionsToFilter)
+      {
+         PerceptionFilterTools.filterCollidingPlanarRegions(frameRegionsToFilter, this.collidingScanRegionFilter);
+      }
+   }
+
+   public void updateRobotConfigurationData(RobotConfigurationData robotConfigurationData)
+   {
+      if (robotConfigurationData != null && robotConfigurationData.getJointNameHash() != 0)
+      {
+         robotConfigurationDataBuffer.update(robotConfigurationData);
+         long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
+         long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary, newestTimestamp, this.fullRobotModel, null);
+      }
+   }
+
    public void update(BytedecoImage input16UC1DepthImage, ReferenceFrame cameraFrame, FramePlanarRegionsList frameRegions)
    {
-      if (!processing)
+      if (!processing && enabled)
       {
          processing = true;
          debugger.clearDebugImage();
@@ -180,6 +278,8 @@ public class RapidPlanarRegionsExtractor
          depthFirstSearchDurationStopwatch.suspend();
 
          rapidPlanarRegionsCustomizer.createCustomPlanarRegionsList(rapidPlanarRegions, cameraFrame, frameRegions);
+
+         filterFramePlanarRegionsList(frameRegions);
 
          wholeAlgorithmDurationStopwatch.suspend();
 
@@ -302,8 +402,6 @@ public class RapidPlanarRegionsExtractor
          openCLManager.execute2D(perspectiveBackProjectionKernel, imageWidth, imageHeight);
          cloudBuffer.readOpenCLBufferObject(openCLManager);
       }
-
-      openCLManager.finish();
    }
 
    public void copyFeatureGridMapUsingOpenCL()
@@ -322,7 +420,6 @@ public class RapidPlanarRegionsExtractor
       openCLManager.setKernelArgument(copyKernel, 11, previousFeatureGrid.getCzImage().getOpenCLImageObject());
       openCLManager.setKernelArgument(copyKernel, 12, parametersBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(copyKernel, patchImageWidth, patchImageHeight);
-      openCLManager.finish();
    }
 
    /**
@@ -507,13 +604,6 @@ public class RapidPlanarRegionsExtractor
 
    private void calculateDerivativeParameters()
    {
-      int previousPatchHeight = patchHeight;
-      int previousPatchWidth = patchWidth;
-      int previousPatchImageHeight = patchImageHeight;
-      int previousPatchImageWidth = patchImageWidth;
-      int previousFilterPatchImageHeight = filterPatchImageHeight;
-      int previousFilterPatchImageWidth = filterPatchImageWidth;
-
       patchHeight = parameters.getPatchSize();
       patchWidth = parameters.getPatchSize();
       patchImageHeight = imageHeight / patchHeight;
@@ -521,29 +611,15 @@ public class RapidPlanarRegionsExtractor
       filterPatchImageHeight = imageHeight / parameters.getDeadPixelFilterPatchSize();
       filterPatchImageWidth = imageWidth / parameters.getDeadPixelFilterPatchSize();
 
-      int newPatchHeight = patchHeight;
-      int newPatchWidth = patchWidth;
-      int newPatchImageHeight = patchImageHeight;
-      int newPatchImageWidth = patchImageWidth;
-      int newFilterPatchImageHeight = filterPatchImageHeight;
-      int newFilterPatchImageWidth = filterPatchImageWidth;
-
-      boolean changed = previousPatchHeight != newPatchHeight;
-      changed |= previousPatchWidth != newPatchWidth;
-      changed |= previousPatchImageHeight != newPatchImageHeight;
-      changed |= previousPatchImageWidth != newPatchImageWidth;
-      changed |= previousFilterPatchImageHeight != newFilterPatchImageHeight;
-      changed |= previousFilterPatchImageWidth != newFilterPatchImageWidth;
-
-      if (changed)
+      if (debugger.isEnabled())
       {
-         LogTools.info("Updated patch sizes:");
-         LogTools.info("newPatchHeight: {} -> {}", previousPatchHeight, newPatchHeight);
-         LogTools.info("newPatchWidth: {} -> {}", previousPatchWidth, newPatchWidth);
-         LogTools.info("newPatchImageHeight: {} -> {}", previousPatchImageHeight, newPatchImageHeight);
-         LogTools.info("newPatchImageWidth: {} -> {}", previousPatchImageWidth, newPatchImageWidth);
-         LogTools.info("newFilterPatchImageHeight: {} -> {}", previousFilterPatchImageHeight, newFilterPatchImageHeight);
-         LogTools.info("newFilterPatchImageWidth: {} -> {}", previousFilterPatchImageWidth, newFilterPatchImageWidth);
+         LogTools.info(String.format("Patch Height: %d, Patch Width: %d, Patch Image Height: %d, Patch Image Width: %d, Filter Patch Image Height: %d, Filter Patch Image Width: %d",
+                                     patchHeight,
+                                     patchWidth,
+                                     patchImageHeight,
+                                     patchImageWidth,
+                                     filterPatchImageHeight,
+                                     filterPatchImageWidth));
       }
    }
 
@@ -657,7 +733,7 @@ public class RapidPlanarRegionsExtractor
       return planarRegionsList;
    }
 
-   public RapidRegionsDebutOutputGenerator getDebugger()
+   public RapidPatchesDebugOutputGenerator getDebugger()
    {
       return debugger;
    }
@@ -776,5 +852,15 @@ public class RapidPlanarRegionsExtractor
    {
       this.processing = processing;
    }
+
+   public boolean getEnabled()
+   {
+      return enabled;
+   }
+
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
 }
 

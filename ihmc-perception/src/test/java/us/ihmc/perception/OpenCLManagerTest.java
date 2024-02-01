@@ -10,6 +10,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import us.ihmc.perception.opencl.OpenCLManager;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -18,21 +19,19 @@ import static org.bytedeco.opencl.global.OpenCL.*;
 
 public class OpenCLManagerTest
 {
-   @Tag("gui")
+   @Tag("opencl")
    @Test
    public void testLoadingAndPrintingParameters()
    {
       OpenCLManager openCLManager = new OpenCLManager();
-      openCLManager.create();
       openCLManager.destroy();
    }
 
-   @Tag("gui")
+   @Tag("opencl")
    @Test
    public void testOpenCLContext()
    {
       OpenCLManager openCLManager = new OpenCLManager();
-      openCLManager.create();
       _cl_kernel kernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("VectorAddition");
       long numberOfFloats = 128;
       long sizeInBytes = numberOfFloats * Float.BYTES;
@@ -46,7 +45,6 @@ public class OpenCLManagerTest
       openCLManager.setKernelArgument(kernel, 0, bufferObject);
       openCLManager.execute1D(kernel, numberOfFloats);
       openCLManager.enqueueReadBuffer(bufferObject, sizeInBytes, hostMemoryPointer);
-      openCLManager.finish();
 
       /* Display result */
       for (int i = 0; i < numberOfFloats; i++)
@@ -56,12 +54,11 @@ public class OpenCLManagerTest
       openCLManager.destroy();
    }
 
-   @Tag("gui")
+   @Tag("opencl")
    @Test
    public void testOpenCLImageManipulation()
    {
       OpenCLManager openCLManager = new OpenCLManager();
-      openCLManager.create();
       _cl_kernel kernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("ManipulateImage");
       int imageWidth = 6;
       int imageHeight = 4;
@@ -87,9 +84,7 @@ public class OpenCLManagerTest
 //      openCLManager.enqueueWriteImage(image, imageWidth, imageHeight, hostMemoryPointer); // Not actually required
       openCLManager.setKernelArgument(kernel, 0, image);
       openCLManager.execute2D(kernel, imageWidth, imageHeight);
-      openCLManager.flush();
       openCLManager.enqueueReadImage(image, imageWidth, imageHeight, hostMemoryPointer);
-      openCLManager.finish();
 
       /* Display result */
       for (int x = 0; x < imageWidth; x++)
@@ -102,19 +97,19 @@ public class OpenCLManagerTest
       openCLManager.destroy();
    }
 
-   @Tag("gui")
+   @Tag("opencl")
    @Test
    public void testOpenCLImageManipulation2()
    {
-      final int maxNumberOfEntries = 2; // More than 2 results in native crash TODO: Why?
       _cl_platform_id platforms = new _cl_platform_id();
       _cl_device_id devices = new _cl_device_id();
       _cl_context context;
       IntPointer numberOfDevices = new IntPointer(1);
       IntPointer numberOfPlatforms = new IntPointer(3);
       IntPointer returnCode = new IntPointer(1);
-      clGetPlatformIDs(maxNumberOfEntries, platforms, numberOfPlatforms);
-      clGetDeviceIDs(platforms, CL_DEVICE_TYPE_ALL, maxNumberOfEntries, devices, numberOfDevices);
+      final int platformCount = 1; // We're just interested in the primary platform (most likely "NVIDIA CUDA")
+      clGetPlatformIDs(platformCount, platforms, numberOfPlatforms);
+      clGetDeviceIDs(platforms, CL_DEVICE_TYPE_ALL, platformCount, devices, numberOfDevices);
       context = clCreateContext(null, 1, devices, null, null, returnCode);
       int imageWidth = 6;
       int imageHeight = 4;

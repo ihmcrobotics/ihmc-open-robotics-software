@@ -18,6 +18,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -25,14 +28,23 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.PlanarRegionEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.tools.TerrainObjectDefinitionTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
+import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.List;
@@ -55,14 +67,14 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       return 0.3;
    }
 
-   public void setupTest()
+   public void setupTest(double platformWidth)
    {
       double platform1Length = 0.7;
       double platform2Length = 1.0;
       double gapWidth = 0.10;
       double sideGapWidth = 0.04;
 
-      GapPlanarRegionEnvironment environment = new GapPlanarRegionEnvironment(platform1Length, platform2Length, 0.55, gapWidth, sideGapWidth);
+      GapPlanarRegionEnvironment environment = new GapPlanarRegionEnvironment(platform1Length, platform2Length, platformWidth, gapWidth, sideGapWidth);
 
       DRCRobotModel robotModel = getRobotModel();
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
@@ -71,6 +83,8 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(true);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
+
+      ((YoBoolean) simulationTestHelper.findVariable("switchPlanarRegionConstraintsAutomatically")).set(true);
 
       SteppableRegionsCalculator stepConstraintCalculator = new SteppableRegionsCalculator(4.0, simulationTestHelper.getControllerRegistry());
 
@@ -122,7 +136,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    @Test
    public void testNoPush()
    {
-      setupTest();
+      setupTest(0.5);
 
       double simulationTime = (swingTime + transferTime) * 4 + 1.0;
       assertTrue(simulationTestHelper.simulateNow(simulationTime));
@@ -136,8 +150,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    @Test
    public void testForwardPush()
    {
-      setupTest();
-      simulationTestHelper.setKeepSCSUp(true);
+      setupTest(0.75);
 
       simulationTestHelper.simulateNow(1.0);
       double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
@@ -149,19 +162,21 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
 
-      double simulationTime = (swingTime + transferTime) * 4 + 4.0;
-      simulationTestHelper.simulateNow(simulationTime);
+      double simulationTime = (swingTime + transferTime) * 4 + 10.0;
+      boolean success = simulationTestHelper.simulateNow(simulationTime);
 
       Point3D center = new Point3D(1.05, 0.0, 1.0893768421917251);
       Vector3D plusMinusVector = new Vector3D(0.4, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      assertTrue(success);
    }
 
    @Test
    public void testSidePush()
    {
-      setupTest();
+      setupTest(0.5);
 
       double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
@@ -224,23 +239,75 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private class GapPlanarRegionEnvironment extends PlanarRegionEnvironmentInterface
+
+   private static class GapPlanarRegionEnvironment implements CommonAvatarEnvironmentInterface
    {
+      private final RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
+      private final TerrainObjectDefinition terrainObjectDefinition ;
+      private final CombinedTerrainObject3D combinedTerrainObject;
+      private final PlanarRegionsList planarRegionsList;
+      private int id = 0;
+
       public GapPlanarRegionEnvironment(double platform1Length, double platform2Length, double platformWidth, double forwardGapSize, double sideGapSize)
       {
-         generator.translate(0.0, 0.0, -0.01);
-         generator.addCubeReferencedAtBottomMiddle(platform1Length, platformWidth, 0.01); // ground
+         double platformHeight = 0.2;
+         transformGenerator.translate(0.0, 0.0, 0.01);
+         combinedTerrainObject = new CombinedTerrainObject3D("gapEnvironment");
+         planarRegionsList = new PlanarRegionsList();
+
+         addBox(platform1Length, platformWidth, platformHeight);
 
          double platform2Center = 0.5 * (platform1Length + platform2Length) + forwardGapSize;
-         generator.translate(0.5 * (platform1Length + platform2Length) + forwardGapSize, 0.0, 0.0);
-         generator.addCubeReferencedAtBottomMiddle(platform2Length, platformWidth, 0.01); // ground
+         transformGenerator.translate(0.5 * (platform1Length + platform2Length) + forwardGapSize, 0.0, 0.0);
+         addBox(platform2Length, platformWidth, platformHeight);
 
          double sideWidth = 0.18;
          double sideLength = platform1Length + platform2Length + forwardGapSize;
          double distanceToCenter = 0.5 * sideLength - 0.5 * platform1Length;
-         generator.translate(-platform2Center + distanceToCenter, 0.5 * platformWidth + sideGapSize + 0.5 * sideWidth, 0.0);
-         generator.addCubeReferencedAtBottomMiddle(sideLength, sideWidth, 0.01); // ground
-         addPlanarRegionsToTerrain(YoAppearance.Grey());
+         transformGenerator.translate(-platform2Center + distanceToCenter, 0.5 * platformWidth + sideGapSize + 0.5 * sideWidth, 0.0);
+         addBox(sideLength, sideWidth, platformHeight);
+
+         terrainObjectDefinition = TerrainObjectDefinitionTools.toTerrainObjectDefinition(this);
+      }
+
+      void addBox(double length, double width, double height)
+      {
+         RigidBodyTransform boxCenter = transformGenerator.getRigidBodyTransformCopy();
+         boxCenter.appendTranslation(0.0, 0.0, -0.5 * height);
+
+         RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(boxCenter, length, width, height), YoAppearance.DarkGray());
+         combinedTerrainObject.addTerrainObject(newBox);
+
+         addPolygon(createRectanglePolygon(length, width));
+      }
+
+      private static ConvexPolygon2D createRectanglePolygon(double lengthX, double widthY)
+      {
+         ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+         convexPolygon.addVertex(lengthX / 2.0, widthY / 2.0);
+         convexPolygon.addVertex(-lengthX / 2.0, widthY / 2.0);
+         convexPolygon.addVertex(-lengthX / 2.0, -widthY / 2.0);
+         convexPolygon.addVertex(lengthX / 2.0, -widthY / 2.0);
+         convexPolygon.update();
+         return convexPolygon;
+      }
+
+      private void addPolygon(ConvexPolygon2D polygon)
+      {
+         PlanarRegion planarRegion = new PlanarRegion(transformGenerator.getRigidBodyTransformCopy(), polygon);
+         planarRegion.setRegionId(id++);
+         planarRegionsList.addPlanarRegion(planarRegion);
+      }
+
+      @Override
+      public TerrainObject3D getTerrainObject3D()
+      {
+         return combinedTerrainObject;
+      }
+
+      public PlanarRegionsList getPlanarRegionsList()
+      {
+         return planarRegionsList;
       }
    }
 

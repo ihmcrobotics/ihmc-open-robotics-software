@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class WholeBodyJointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::WholeBodyJointspaceTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "7d7892e85f314072e6cd368418a16a57e02f66ad142afbd17e2753010afef144";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

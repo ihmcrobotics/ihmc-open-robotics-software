@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
@@ -160,6 +157,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
          @Override
          public void submitStopWalkingRequest()
          {
+            message.setClearRemainingFootstepQueue(true);
             walkingCommandInputManager.submitMessage(message);
          }
       });
@@ -181,13 +179,9 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
 
       if (useHeadingAndVelocityScriptField.get())
       {
-         HeadingAndVelocityEvaluationScriptParameters parameters = headingAndVelocityEvaluationScriptParametersField.hasValue() ?
-               headingAndVelocityEvaluationScriptParametersField.get() :
-               null;
-         HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(updateDT,
-                                                                                            timeProvider,
-                                                                                            parameters,
-                                                                                            registryField.get());
+         HeadingAndVelocityEvaluationScriptParameters parameters = headingAndVelocityEvaluationScriptParametersField.hasValue() ? headingAndVelocityEvaluationScriptParametersField.get()
+                                                                                                                                : null;
+         HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(updateDT, timeProvider, parameters, registryField.get());
          continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
          continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
          updatables.add(script);
@@ -203,8 +197,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
          continuousStepGenerator.setWalkInputProvider(commandInputManager.createWalkInputProvider());
          walkingStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
                                                                        commandInputManager::setHighLevelStateChangeStatusMessage);
-         walkingStatusMessageOutputManager.attachStatusMessageListener(WalkingStatusMessage.class,
-                                                                       commandInputManager::setWalkingStatus);
+         walkingStatusMessageOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, commandInputManager::setWalkingStatus);
          walkingStatusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, commandInputManager::consumeFootstepStatus);
          commandInputManager.setFootstepStatusListener(walkingStatusMessageOutputManager);
 

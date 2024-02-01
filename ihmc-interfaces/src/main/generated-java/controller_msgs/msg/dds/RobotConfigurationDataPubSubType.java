@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.RobotConfigurationData>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::RobotConfigurationData_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "06d7040905e6dccb1fbc39f344d9b71096e35cc8faa6f66edce02b780c376aaa";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

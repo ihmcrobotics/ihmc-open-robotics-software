@@ -7,10 +7,9 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.io.*;
 import us.ihmc.tools.string.StringTools;
 
 import java.io.InputStream;
@@ -34,11 +33,8 @@ import java.util.*;
  * <pre>
  * public static void main(String[] args)
  * {
- *    StoredPropertySet parameters = new StoredPropertySet(keys,
- *                                                         YourStoredPropertySet.class,
- *                                                         DIRECTORY_NAME_TO_ASSUME_PRESENT,
- *                                                         SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
- *    parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+ *    StoredPropertySet parameters = new StoredPropertySet(keys, YourStoredPropertySet.class);
+ *    parameters.generateJavaFiles();
  * }
  * </pre>
  *
@@ -85,41 +81,28 @@ public class StoredPropertySet implements StoredPropertySetBasics
    private String legacyFileNameINI;
    private String saveFileNameJSON;
    private String currentVersionSuffix;
-   private Class<?> classForLoading;
-   private Class<?> basePropertySetClass;
-   private String directoryNameToAssumePresent;
-   private String subsequentPathToResourceFolder;
-   private final WorkspaceDirectory workspaceDirectory;
+   private final Class<?> classForLoading;
+   private final Class<?> basePropertySetClass;
+   private final WorkspaceResourceDirectory workspaceDirectory;
    private final String uncapitalizedClassName;
    private final String capitalizedClassName;
-   private WorkspaceFile workspaceLegacyINIFile;
-   private WorkspaceFile workspaceJSONFile;
+   private WorkspaceResourceFile workspaceLegacyINIFile;
+   private WorkspaceResourceFile workspaceJSONFile;
 
    private final Map<StoredPropertyKey, List<Runnable>> propertyChangedListeners = new HashMap<>();
+   private final List<Notification> anyPropertyChangedListeners = new ArrayList<>();
 
-   public StoredPropertySet(StoredPropertyKeyList keys,
-                            Class<?> classForLoading,
-                            String directoryNameToAssumePresent,
-                            String subsequentPathToResourceFolder)
+   public StoredPropertySet(StoredPropertyKeyList keys, Class<?> classForLoading)
    {
-      this(keys, classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, "");
+      this(keys, classForLoading, "");
    }
 
-   public StoredPropertySet(StoredPropertyKeyList keys,
-                            Class<?> classForLoading,
-                            String directoryNameToAssumePresent,
-                            String subsequentPathToResourceFolder,
-                            String versionSuffix)
+   public StoredPropertySet(StoredPropertyKeyList keys, Class<?> classForLoading, String versionSuffix)
    {
-      this(keys, classForLoading, classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+      this(keys, classForLoading, classForLoading, versionSuffix);
    }
 
-   public StoredPropertySet(StoredPropertyKeyList keys,
-                            Class<?> classForLoading,
-                            Class<?> basePropertySetClass,
-                            String directoryNameToAssumePresent,
-                            String subsequentPathToResourceFolder,
-                            String versionSuffix)
+   public StoredPropertySet(StoredPropertyKeyList keys, Class<?> classForLoading, Class<?> basePropertySetClass, String versionSuffix)
    {
       this.keys = keys;
       this.uncapitalizedClassName = StringUtils.uncapitalize(basePropertySetClass.getSimpleName());
@@ -127,9 +110,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
       this.classForLoading = classForLoading;
       title = classForLoading.getSimpleName();
       this.basePropertySetClass = basePropertySetClass;
-      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
-      this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
-      workspaceDirectory = new WorkspaceDirectory(directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading);
+      workspaceDirectory = new WorkspaceResourceDirectory(classForLoading);
 
       updateBackingSaveFile(versionSuffix);
       values = new Object[keys.keys().size()];
@@ -143,12 +124,11 @@ public class StoredPropertySet implements StoredPropertySetBasics
       }
    }
 
-   public void generateJavaFiles(String subsequentPathToJavaFolder)
+   public void generateJavaFiles()
    {
       StoredPropertySetJavaGenerator generator = new StoredPropertySetJavaGenerator(basePropertySetClass,
-                                                                                    directoryNameToAssumePresent,
-                                                                                    subsequentPathToResourceFolder,
-                                                                                    subsequentPathToJavaFolder);
+                                                                                    classForLoading,
+                                                                                    WorkspacePathTools.removePathPartsBeforeProjectFolder(findFileForSaving()));
       if (jsonResourceExists())
       {
          generator.loadFromJSON();
@@ -317,6 +297,10 @@ public class StoredPropertySet implements StoredPropertySetBasics
                propertyChangedListener.run();
             }
          }
+         for (Notification anyPropertyChangedListener : anyPropertyChangedListeners)
+         {
+            anyPropertyChangedListener.set();
+         }
       }
    }
 
@@ -340,19 +324,46 @@ public class StoredPropertySet implements StoredPropertySetBasics
       }
    }
 
+   @Override
+   public void addAnyPropertyChangedListener(Notification anyPropertyChangedNotification)
+   {
+      anyPropertyChangedListeners.add(anyPropertyChangedNotification);
+   }
+
+   @Override
+   public void removeAnyPropertyChangedListener(Notification anyPropertyChangedNotification)
+   {
+      anyPropertyChangedListeners.remove(anyPropertyChangedNotification);
+   }
+
    public void updateBackingSaveFile(String versionSuffix)
+   {
+      updateBackingSaveFileSilently(versionSuffix);
+      LogTools.info("Updated backing save file: {}", saveFileNameJSON);
+   }
+
+   private void updateBackingSaveFileSilently(String versionSuffix)
    {
       currentVersionSuffix = versionSuffix;
       legacyFileNameINI = uncapitalizedClassName + currentVersionSuffix + ".ini";
-      workspaceLegacyINIFile = new WorkspaceFile(workspaceDirectory, legacyFileNameINI);
+      workspaceLegacyINIFile = new WorkspaceResourceFile(workspaceDirectory, legacyFileNameINI);
       saveFileNameJSON = basePropertySetClass.getSimpleName() + currentVersionSuffix + ".json";
-      LogTools.info("Updated backing save file: {}", saveFileNameJSON);
-      workspaceJSONFile = new WorkspaceFile(workspaceDirectory, saveFileNameJSON);
+      workspaceJSONFile = new WorkspaceResourceFile(workspaceDirectory, saveFileNameJSON);
    }
 
    @Override
    public void load()
    {
+      // Load common properties from non-suffixed version, like bounds, description, etc.
+      if (!currentVersionSuffix.isEmpty())
+      {
+         String backupVersionSuffix = currentVersionSuffix;
+         updateBackingSaveFileSilently("");
+         if (jsonResourceExists())
+            load(true);
+         updateBackingSaveFileSilently(backupVersionSuffix);
+      }
+
       load(true);
    }
 
@@ -382,7 +393,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    {
       if (jsonResourceExists())
       {
-         LogTools.info("Loading parameters from resource: {}/{}", classForLoading.getPackageName().replaceAll("\\.", "/"), saveFileNameJSON);
+         LogTools.info("Loading parameters from resource: {}", workspaceJSONFile.getPathForResourceLoadingPathFiltered());
          JSONFileTools.loadFromClasspath(classForLoading, workspaceJSONFile.getPathForResourceLoadingPathFiltered(), node ->
          {
             if (node instanceof ObjectNode objectNode)
@@ -429,7 +440,9 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
                      if (key instanceof DoubleStoredPropertyKey doubleKey)
                      {
-                        setInternal(key, valueNode.doubleValue());
+                        // Values are not present for common files that just provide bounds, description, etc.
+                        if (valueNode != null)
+                           setInternal(key, valueNode.doubleValue());
                         JsonNode lowerBound = keyObjectNode.get("lowerBound");
                         if (lowerBound != null)
                            doubleKey.setLowerBound(lowerBound.doubleValue());
@@ -440,7 +453,8 @@ public class StoredPropertySet implements StoredPropertySetBasics
                      }
                      else if (key instanceof IntegerStoredPropertyKey integerKey)
                      {
-                        setInternal(key, valueNode.intValue());
+                        if (valueNode != null)
+                           setInternal(key, valueNode.intValue());
                         JsonNode lowerBound = keyObjectNode.get("lowerBound");
                         if (lowerBound != null)
                            integerKey.setLowerBound(lowerBound.intValue());
@@ -460,7 +474,8 @@ public class StoredPropertySet implements StoredPropertySetBasics
                      }
                      else if (key instanceof BooleanStoredPropertyKey booleanKey)
                      {
-                        setInternal(key, valueNode.booleanValue());
+                        if (valueNode != null)
+                           setInternal(key, valueNode.booleanValue());
                      }
                   }
                   else
@@ -536,12 +551,8 @@ public class StoredPropertySet implements StoredPropertySetBasics
       Path fileForSaving = findFileForSaving();
       if (workspaceDirectory.isFileAccessAvailable())
       {
-         LogTools.info(StringTools.format("Saving parameters to workspace: {}/{}/{}/{}",
-                                          directoryNameToAssumePresent,
-                                          subsequentPathToResourceFolder,
-                                          classForLoading.getPackageName().replaceAll("\\.", "/"),
-                                          saveFileNameJSON));
-         FileTools.ensureDirectoryExists(workspaceDirectory.getDirectoryPath(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         LogTools.info(StringTools.format("Saving parameters to workspace: {}", WorkspacePathTools.removePathPartsBeforeProjectFolder(fileForSaving)));
+         FileTools.ensureDirectoryExists(workspaceDirectory.getFilesystemDirectory(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       }
       else
       {
@@ -647,7 +658,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
       // Automatically upgrade the stored file to JSON
       if (iniResourceExists() && workspaceLegacyINIFile.isFileAccessAvailable())
       {
-         FileTools.deleteQuietly(workspaceLegacyINIFile.getFilePath());
+         FileTools.deleteQuietly(workspaceLegacyINIFile.getFilesystemFile());
       }
    }
 
@@ -726,7 +737,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    {
       if (workspaceDirectory.isFileAccessAvailable())
       {
-         return workspaceDirectory.getDirectoryPath();
+         return workspaceDirectory.getFilesystemDirectory();
       }
       else
       {

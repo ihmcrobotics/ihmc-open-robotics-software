@@ -82,17 +82,17 @@ public class PawStepPlannerProcessViewer extends AnimationTimer
          rejectedNodesByReasonRenderers.put(rejectionReason, renderer);
       }
 
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.ComputePathTopic, data -> reset());
+      messager.addTopicListener(PawStepPlannerMessagerAPI.ComputePathTopic, data -> reset());
 
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.ShowAllValidNodesTopic, allValidNodesRenderer::show);
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.ShowAllInvalidNodesTopic, allInvalidNodesRenderer::show);
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.ShowNodesThisTickTopic, nodeExpansionPlaybackRenderer::show);
+      messager.addTopicListener(PawStepPlannerMessagerAPI.ShowAllValidNodesTopic, allValidNodesRenderer::show);
+      messager.addTopicListener(PawStepPlannerMessagerAPI.ShowAllInvalidNodesTopic, allInvalidNodesRenderer::show);
+      messager.addTopicListener(PawStepPlannerMessagerAPI.ShowNodesThisTickTopic, nodeExpansionPlaybackRenderer::show);
 
 
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.NodesThisTickTopic, this::handleNodesThisTick);
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.NodesRejectedThisTickTopic, this::handleNodesRejectedThisTick);
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.PlannerThoughtPlaybackFractionTopic, this::handlePlaybackFraction);
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);
+      messager.addTopicListener(PawStepPlannerMessagerAPI.NodesThisTickTopic, this::handleNodesThisTick);
+      messager.addTopicListener(PawStepPlannerMessagerAPI.NodesRejectedThisTickTopic, this::handleNodesRejectedThisTick);
+      messager.addTopicListener(PawStepPlannerMessagerAPI.PlannerThoughtPlaybackFractionTopic, this::handlePlaybackFraction);
+      messager.addTopicListener(PawStepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);
 
       rejectionReasonToShow = messager.createInput(PawStepPlannerMessagerAPI.RejectionReasonToShowTopic, PawStepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_STEP);
       showNodesByRejectionReason = messager.createInput(PawStepPlannerMessagerAPI.ShowNodesRejectedByReasonTopic, false);

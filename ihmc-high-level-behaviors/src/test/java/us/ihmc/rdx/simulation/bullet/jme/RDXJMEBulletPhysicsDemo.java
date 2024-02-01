@@ -19,7 +19,7 @@ public class RDXJMEBulletPhysicsDemo
 {
    String directoryNameToAssumePresent = "ihmc-open-robotics-software";
    String subsequentPathToResourceFolder = "ihmc-high-level-behaviors/src/test/resources";
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), directoryNameToAssumePresent, subsequentPathToResourceFolder);
+   private final RDXBaseUI baseUI = new RDXBaseUI();
 
    public RDXJMEBulletPhysicsDemo()
    {

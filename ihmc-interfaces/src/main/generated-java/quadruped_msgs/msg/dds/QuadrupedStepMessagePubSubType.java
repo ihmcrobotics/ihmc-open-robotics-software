@@ -11,6 +11,18 @@ package quadruped_msgs.msg.dds;
 public class QuadrupedStepMessagePubSubType implements us.ihmc.pubsub.TopicDataType<quadruped_msgs.msg.dds.QuadrupedStepMessage>
 {
    public static final java.lang.String name = "quadruped_msgs::msg::dds_::QuadrupedStepMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "0b62d6b1db3b046cc6be4b772e4857654792e75c6bed0c2cc78d8b96e3d766fb";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -74,6 +74,8 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType.JOINTSPACE;
+
 /**
  * The objective of this class is to help the passing commands between two instances of the same
  * robot.
@@ -161,10 +163,10 @@ public class CrossRobotCommandResolver
       for (int i = 0; i < in.getNumberOfForceSensors(); i++)
       {
          ForceSensorDefinition inDefinition = in.getForceSensorDefinitions().get(i);
-         ForceSensorData inData = in.get(inDefinition);
+         ForceSensorData inData = in.getData(inDefinition);
          out.registerForceSensor(inDefinition);
          ForceSensorDefinition outDefinition = out.getForceSensorDefinitions().get(i);
-         ForceSensorData outData = out.get(outDefinition);
+         ForceSensorData outData = out.getData(outDefinition);
 
          resolveForceSensorDefinition(inDefinition, outDefinition);
          resolveForceSensorData(inData, outData);
@@ -329,7 +331,12 @@ public class CrossRobotCommandResolver
                resolveJointLimitEnforcementMethodCommand((JointLimitEnforcementMethodCommand) commandToResolve, out.addJointLimitEnforcementMethodCommand());
                break;
             case JOINTSPACE:
-               resolveJointspaceAccelerationCommand((JointspaceAccelerationCommand) commandToResolve, out.addJointspaceAccelerationCommand());
+               if (commandToResolve instanceof JointspaceAccelerationCommand jointspaceAccelerationCommand)
+                  resolveJointspaceAccelerationCommand(jointspaceAccelerationCommand, out.addJointspaceAccelerationCommand());
+               else if (commandToResolve instanceof JointTorqueCommand jointTorqueCommand)
+                  resolveJointTorqueCommand(jointTorqueCommand, out.addJointTorqueCommand());
+               else
+                  throw new RuntimeException("Unknown " + JOINTSPACE +  " command " + commandToResolve.getClass().getSimpleName());
                break;
             case MOMENTUM:
                resolveMomentumRateCommand((MomentumRateCommand) commandToResolve, out.addMomentumRateCommand());
@@ -551,7 +558,6 @@ public class CrossRobotCommandResolver
       out.setJointJerkWeight(in.getJointJerkWeight());
       out.setJointTorqueWeight(in.getJointTorqueWeight());
       out.getJointsToActivate().clear();
-      out.getJointsToActivate().clear();
       for (int i = 0; i < in.getJointsToActivate().size(); i++)
          out.getJointsToActivate().add(resolveJoint(in.getJointsToActivate().get(i)));
       out.getJointsToDeactivate().clear();
@@ -666,8 +672,18 @@ public class CrossRobotCommandResolver
    public void resolveInverseKinematicsOptimizationSettingsCommand(InverseKinematicsOptimizationSettingsCommand in,
                                                                    InverseKinematicsOptimizationSettingsCommand out)
    {
-      // There is no robot sensitive information in this command, so the output can directly be set to the input.
-      out.set(in);
+      out.setCommandId(in.getCommandId());
+      out.setJointVelocityWeight(in.getJointVelocityWeight());
+      out.setJointAccelerationWeight(in.getJointAccelerationWeight());
+      out.setJointTorqueWeight(in.getJointTorqueWeight());
+      out.setJointVelocityLimitMode(in.getJointVelocityLimitMode());
+      out.setComputeJointTorques(in.getComputeJointTorques());
+      out.getJointsToActivate().clear();
+      for (int i = 0; i < in.getJointsToActivate().size(); i++)
+         out.getJointsToActivate().add(resolveJoint(in.getJointsToActivate().get(i)));
+      out.getJointsToDeactivate().clear();
+      for (int i = 0; i < in.getJointsToDeactivate().size(); i++)
+         out.getJointsToDeactivate().add(resolveJoint(in.getJointsToDeactivate().get(i)));
    }
 
    public void resolveJointLimitReductionCommand(JointLimitReductionCommand in, JointLimitReductionCommand out)
@@ -771,8 +787,10 @@ public class CrossRobotCommandResolver
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
-         out.addJoint(resolveJoint(in.getJoint(jointIndex)), in.getDesiredTorque(jointIndex));
+         out.addJoint(resolveJoint(in.getJoint(jointIndex)), in.getDesiredTorque(jointIndex), in.getWeight(jointIndex));
       }
+
+      out.setConstraintType(in.getConstraintType());
    }
 
    public void resolveVirtualForceCommand(VirtualForceCommand in, VirtualForceCommand out)
@@ -842,7 +860,7 @@ public class CrossRobotCommandResolver
    {
       resolveSpatialAccelerationCommand(in.getSpatialAccelerationCommand(), out.getSpatialAccelerationCommand());
       out.setControlMode(in.getControlMode());
-      resolveFrameQuaternion(in.getBodyFixedOrientationToControl(), out.getBodyFixedOrientationToControl());
+      resolveFrameQuaternion(in.getControlFrameOrientation(), out.getControlFrameOrientation());
       resolveFrameQuaternion(in.getReferenceOrientation(), out.getReferenceOrientation());
       resolveFrameTuple3D(in.getReferenceAngularVelocity(), out.getReferenceAngularVelocity());
       resolveFrameTuple3D(in.getReferenceAngularAcceleration(), out.getReferenceAngularAcceleration());
@@ -984,7 +1002,7 @@ public class CrossRobotCommandResolver
       if (in == null)
          return null;
       else
-         return referenceFrameHashCodeResolver.getReferenceFrame(in.hashCode());
+         return referenceFrameHashCodeResolver.getReferenceFrame(in.getFrameNameHashCode());
    }
 
    private <B extends RigidBodyReadOnly> B resolveRigidBody(B in)

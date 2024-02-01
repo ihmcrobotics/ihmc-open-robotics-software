@@ -22,6 +22,7 @@ import org.bytedeco.javacpp.PointerPointer;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.logging.HDF5Manager;
 import us.ihmc.perception.logging.HDF5Tools;
+import us.ihmc.perception.logging.PerceptionLoggerConstants;
 
 import java.nio.ByteBuffer;
 
@@ -46,7 +47,10 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
    private final long startTime;
 
    private HDF5Manager hdf5Manager;
+   private final HDF5Tools hdf5Tools = new HDF5Tools();
    private Group framesGroup;
+
+   BytePointer packetData = new BytePointer(0);
 
    /**
     * Due to the current intermediate design of the FFMPEGHDF5Logger, there are two files which
@@ -56,7 +60,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
    {
       avutil.av_log_set_level(avutil.AV_LOG_WARNING);
 
-      String file = hdf5File.replaceFirst(HDF5Tools.HDF5_FILE_EXTENSION, ""); // BAD
+      String file = hdf5File.replaceFirst(PerceptionLoggerConstants.HDF5_FILE_EXTENSION, ""); // BAD
 
       LogTools.info("Initializing ffmpeg contexts for playback from {}", file);
       avFormatContext = avformat.avformat_alloc_context();
@@ -118,7 +122,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
       hdf5Manager = new HDF5Manager(hdf5File, hdf5.H5F_ACC_RDONLY);
       hdf5Manager.getFile().openFile(hdf5File, hdf5.H5F_ACC_RDONLY);
 
-      framesGroup = hdf5Manager.getGroup(FFMPEGHDF5Logger.NAMESPACE_ROOT);
+      framesGroup = hdf5Manager.createOrGetGroup(FFMPEGHDF5Logger.NAMESPACE_ROOT);
    }
 
    // Adapted from demuxing_decoding.c. Currently assumes video stream, but could be adapted for audio use, too
@@ -152,9 +156,9 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
 
          avformat.av_read_frame(avFormatContext, packet);
          // get packet from HDF5
-         byte[] rawData = HDF5Tools.loadRawByteArray(framesGroup, streamIndex);
-         BytePointer packetData = new BytePointer(ByteBuffer.wrap(rawData));
-         BytePointer.memcpy(packet.data(), packetData, rawData.length);
+
+         hdf5Tools.loadBytes(framesGroup, streamIndex, packetData);
+         BytePointer.memcpy(packet.data(), packetData, packetData.capacity());
       }
       while (packet.stream_index() != streamIndex);
 

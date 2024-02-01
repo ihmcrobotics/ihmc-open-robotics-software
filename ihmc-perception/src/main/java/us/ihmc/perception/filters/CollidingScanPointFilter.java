@@ -2,7 +2,7 @@ package us.ihmc.perception.filters;
 
 import us.ihmc.communication.packets.ScanPointFilter;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
+import us.ihmc.perception.depthData.CollisionShapeTester;
 
 public class CollidingScanPointFilter implements ScanPointFilter
 {

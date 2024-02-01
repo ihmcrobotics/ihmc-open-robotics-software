@@ -4,10 +4,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.sceneManager.RDX3DBareBonesScene;
-import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 
 import java.util.Random;
 
@@ -18,19 +15,19 @@ public class RDXPointCloudRendererDemo
 
    public RDXPointCloudRendererDemo()
    {
-      RDX3DBareBonesScene sceneManager = new RDX3DBareBonesScene();
+      RDXBaseUI baseUI = new RDXBaseUI();
       RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
-      LibGDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
-            sceneManager.create();
+            baseUI.create();
 
-            sceneManager.addCoordinateFrame(0.3);
+            baseUI.getPrimaryScene().addCoordinateFrame(0.3);
 
             pointCloudRenderer.create(5000);
-            sceneManager.addRenderableProvider(pointCloudRenderer, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer, RDXSceneLevel.VIRTUAL);
          }
 
          @Override
@@ -45,12 +42,18 @@ public class RDXPointCloudRendererDemo
 
             pointCloudRenderer.setPointsToRender(points);
 
-            RDX3DSceneTools.glClearGray();
             pointCloudRenderer.updateMesh();
-            sceneManager.setViewportBoundsToWindow();
-            sceneManager.render();
+
+            baseUI.renderBeforeOnScreenUI();
+            baseUI.renderEnd();
          }
-      }, "RDX3DDemo", 1100, 800);
+
+         @Override
+         public void dispose()
+         {
+            baseUI.dispose();
+         }
+      });
    }
 
    public static void main(String[] args)

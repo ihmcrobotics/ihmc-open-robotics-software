@@ -26,6 +26,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.robot.SixDoFJointDefinition;
 import us.ihmc.scs2.definition.state.OneDoFJointState;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -201,7 +202,7 @@ public class HumanoidRobotInitialSetup implements RobotInitialSetup<HumanoidFloa
    @Override
    public void initializeRobotDefinition(RobotDefinition robotDefinition)
    {
-      JointDefinition rootJoint = robotDefinition.getJointDefinition(jointMap.getRootBodyName());
+      SixDoFJointDefinition rootJoint = robotDefinition.getFloatingRootJointDefinition();
       if (rootJoint != null)
       {
          Point3D position = new Point3D(rootJointPosition);

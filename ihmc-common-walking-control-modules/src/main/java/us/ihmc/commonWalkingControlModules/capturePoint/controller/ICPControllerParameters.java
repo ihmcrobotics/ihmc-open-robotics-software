@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
@@ -141,7 +143,6 @@ public abstract class ICPControllerParameters
       return 0.06;
    }
 
-
    public void createFeedForwardAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
    }
@@ -169,7 +170,7 @@ public abstract class ICPControllerParameters
       return null;
    }
 
-   public interface FeedForwardAlphaCalculator
+   public interface FeedForwardAlphaCalculator extends SCS2YoGraphicHolder
    {
       double computeAlpha(FramePoint2DReadOnly currentICP,
                           FramePoint2DReadOnly referenceICP,
@@ -177,6 +178,12 @@ public abstract class ICPControllerParameters
                           FramePoint2DReadOnly referenceCMP,
                           FramePoint2DReadOnly unconstrainedFeedbackCMP,
                           FrameConvexPolygon2DReadOnly supportPolygon);
+
+      @Override
+      default YoGraphicDefinition getSCS2YoGraphics()
+      {
+         return null;
+      }
    }
 
    public interface FeedbackAlphaCalculator
@@ -184,7 +191,7 @@ public abstract class ICPControllerParameters
       double computeAlpha(FramePoint2DReadOnly currentICP, FrameConvexPolygon2DReadOnly supportPolygon);
    }
 
-   public interface FeedbackProjectionOperator
+   public interface FeedbackProjectionOperator extends SCS2YoGraphicHolder
    {
       void projectFeedback(FramePoint2DReadOnly currentICP,
                            FramePoint2DReadOnly unconstrainedFeedbackCMP,
@@ -192,5 +199,11 @@ public abstract class ICPControllerParameters
                            FrameConvexPolygon2DReadOnly supportPolygonInWorld,
                            FixedFramePoint2DBasics feedbackCoPToPack,
                            FixedFramePoint2DBasics feedbackCMPToPack);
+
+      @Override
+      default YoGraphicDefinition getSCS2YoGraphics()
+      {
+         return null;
+      }
    }
 }
