@@ -46,8 +46,20 @@ module behavior_msgs
          * The max angular velocity
          */
         double max_angular_velocity;
+        /**
+         * The max force
+         */
+        double max_force;
+        /**
+         * The max torque
+         */
+        double max_torque;
         double linear_position_weight;
         double angular_position_weight;
+        /**
+         * The pose of the wrench contact in hand control frame
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage wrench_contact_pose;
       };
     };
   };
