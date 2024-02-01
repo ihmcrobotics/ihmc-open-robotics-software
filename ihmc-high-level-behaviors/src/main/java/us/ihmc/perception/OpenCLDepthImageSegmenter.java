@@ -66,7 +66,6 @@ public class OpenCLDepthImageSegmenter
                                                                 new Size(2 * dilationSize + 1, 2 * dilationSize + 1),
                                                                 new Point(dilationSize, dilationSize)));
 
-      PerceptionDebugTools.display("erodedmat", erodedMat, 1);
       if (bytedecoDepthImage != null)
          bytedecoDepthImage.destroy(openCLManager);
       bytedecoDepthImage = new BytedecoImage(depthImage.getCpuImageMat());
@@ -93,8 +92,6 @@ public class OpenCLDepthImageSegmenter
       openCLManager.execute2D(kernel, depthImage.getImageWidth(), depthImage.getImageHeight());
 
       bytedecoSegmentedDepth.readOpenCLImage(openCLManager);
-
-      PerceptionDebugTools.display("segmented depth", bytedecoSegmentedDepth.getBytedecoOpenCVMat(), 1);
 
       erodedMat.release();
       depthImage.release();
