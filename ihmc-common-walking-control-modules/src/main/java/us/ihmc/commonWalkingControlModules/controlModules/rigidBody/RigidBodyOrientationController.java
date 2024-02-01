@@ -201,12 +201,6 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      // TODO: this can be removed once the controller core can handle control frame orientations with orientation commands.
-      if (Math.abs(orientationHelper.getFeedbackControlCommand().getBodyFixedOrientationToControl().getS()) < 1.0 - 1.0e-5)
-      {
-         throw new RuntimeException("Control frame orientations for orientation control only are not supported!");
-      }
-
       if (hybridModeActive.getBooleanValue())
       {
          feedbackControlCommandList.clear();

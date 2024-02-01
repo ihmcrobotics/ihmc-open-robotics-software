@@ -8,7 +8,6 @@ import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -24,7 +23,6 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    private final ROS2BehaviorTreeState ros2BehaviorTreeState;
    /** Reduce the communication update rate. */
    private final Throttler communicationThrottler = new Throttler().setFrequency(ROS2BehaviorTreeState.SYNC_FREQUENCY);
-   private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
    private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
 
    public RDXROS2BehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
@@ -51,13 +49,6 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       ros2BehaviorTreeState.getBehaviorTreeSubscription().registerMessageReceivedCallback(subscriptionFrequencyText::ping);
    }
 
-   public void createAndSetupDefault(RDXBaseUI baseUI)
-   {
-      baseUI.getImGuiPanelManager().addPanel(panel);
-      super.createAndSetupDefault(baseUI);
-
-   }
-
    public void update()
    {
       boolean updateComms = communicationThrottler.run();
@@ -70,6 +61,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
          ros2BehaviorTreeState.updatePublication();
    }
 
+   @Override
    public void renderImGuiWidgets()
    {
       super.renderImGuiWidgetsPre();

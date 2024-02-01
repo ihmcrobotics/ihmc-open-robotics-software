@@ -24,6 +24,11 @@ public class RDXBehaviorTreeTools
       }
    }
 
+   public static void runForEntireTree(RDXBehaviorTreeNode<?, ?> anyNode, Consumer<RDXBehaviorTreeNode<?, ?>> operation)
+   {
+      runForSubtreeNodes(findRootNode(anyNode), operation);
+   }
+
    public static RDXActionSequence findActionSequenceAncestor(RDXBehaviorTreeNode<?, ?> node)
    {
       if (node.getParent() == null)

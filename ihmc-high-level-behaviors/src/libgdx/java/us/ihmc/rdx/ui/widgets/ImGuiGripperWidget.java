@@ -49,7 +49,7 @@ public class ImGuiGripperWidget
       }
    }
 
-   public void render(RobotSide side)
+   public void render(RobotSide side, float lineHeight)
    {
       float fontSize = ImGui.getFontSize();
 
@@ -64,6 +64,9 @@ public class ImGuiGripperWidget
 
       center.set(0.4f * fontSize, 0.5f * fontSize);
 
+      if (lineHeight == ImGui.getFrameHeight())
+         center.addY(ImGui.getStyle().getFramePaddingY());
+
       float xMin = Float.MAX_VALUE;
       float xMax = Float.MIN_VALUE;
       for (int i = 0; i < vertices.size(); i++)
@@ -75,7 +78,7 @@ public class ImGuiGripperWidget
       }
 
       float itemWidth = xMax - xMin;
-      boolean isHovered = ImGuiTools.isItemHovered(itemWidth);
+      boolean isHovered = ImGuiTools.isItemHovered(itemWidth, lineHeight);
 
       float cursorScreenPosX = ImGui.getCursorScreenPosX();
       float cursorScreenPosY = ImGui.getCursorScreenPosY();

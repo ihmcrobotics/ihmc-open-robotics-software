@@ -48,6 +48,7 @@ public class ImGuiTools
    private static int deleteKey;
    private static int escapeKey;
    private static int enterKey;
+   private static int keyPadEnterKey;
    private static int upArrowKey;
    private static int downArrowKey;
    private static int leftArrowKey;
@@ -264,7 +265,7 @@ public class ImGuiTools
    public static boolean inputText(String label, ImString text)
    {
       ImGui.inputText(label, text);
-      return ImGui.isItemFocused() && ImGui.isKeyReleased(ImGuiTools.getEnterKey());
+      return ImGui.isItemFocused() && (ImGui.isKeyReleased(ImGuiTools.getEnterKey()) || ImGui.isKeyReleased(ImGuiTools.getKeyPadEnterKey()));
    }
 
    public static void textColored(Color color, String text)
@@ -309,9 +310,12 @@ public class ImGuiTools
 
    /**
     * Useful for custom widgets.
+    * @param itemWidth the width of the applicable area after the cursor
+    * @param lineHeight Needs to get passed in because it could be either
+    *                  {@link ImGui#getTextLineHeight} or {@link ImGui#getFrameHeight}
     * @return Whether the area of the current custom item is hovered.
     */
-   public static boolean isItemHovered(float itemWidth)
+   public static boolean isItemHovered(float itemWidth, float lineHeight)
    {
       float mousePosXInDesktopFrame = ImGui.getMousePosX();
       float mousePosYInDesktopFrame = ImGui.getMousePosY();
@@ -323,7 +327,7 @@ public class ImGuiTools
       boolean isHovered = mousePosXInWidgetFrame >= ImGui.getCursorPosX();
       isHovered &= mousePosXInWidgetFrame <= ImGui.getCursorPosX() + itemWidth + ImGui.getStyle().getFramePaddingX();
       isHovered &= mousePosYInWidgetFrame >= ImGui.getCursorPosY();
-      isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + ImGui.getFontSize() + ImGui.getStyle().getFramePaddingY();
+      isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + lineHeight;
       isHovered &= ImGui.isWindowHovered();
 
       return isHovered;
@@ -355,10 +359,46 @@ public class ImGuiTools
       return isHovered;
    }
 
+   /**
+    * A separator with a label in it.
+    * This is in the newer versions of ImGui.
+    */
+   public static void separatorText(String text)
+   {
+      float cursorScreenPosX = ImGui.getCursorScreenPosX();
+      float cursorScreenPosY = ImGui.getCursorScreenPosY();
+      int fontSize = ImGui.getFontSize();
+      float itemSpacingX = ImGui.getStyle().getItemSpacingX();
+      float lineThickness = fontSize * 0.2f;
+      float lineY = ImGui.getTextLineHeight() / 2.0f;
+      float initialLineWidth = fontSize * 1.5f;
+      int separatorColor = ImGui.getColorU32(ImGuiCol.Separator);
+      ImGui.getWindowDrawList().addLine(cursorScreenPosX, cursorScreenPosY + lineY,
+                                        cursorScreenPosX + initialLineWidth, cursorScreenPosY + lineY,
+                                        separatorColor, lineThickness);
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + initialLineWidth + itemSpacingX);
+      ImGui.text(text);
+      ImGui.sameLine();
+      float startX = ImGui.getCursorPosX() - itemSpacingX;
+      float endX = ImGui.getContentRegionMaxX();
+      float secondLineWidth = endX - startX;
+      ImGui.getWindowDrawList().addLine(cursorScreenPosX + startX, cursorScreenPosY + lineY,
+                                        cursorScreenPosX + endX, cursorScreenPosY + lineY,
+                                        separatorColor, lineThickness);
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + secondLineWidth);
+      ImGui.newLine();
+   }
+
    public static float calcTextSizeX(String text)
    {
       ImGui.calcTextSize(calcTextSize, text);
       return calcTextSize.x;
+   }
+
+   public static float calcTextSizeY(String text)
+   {
+      ImGui.calcTextSize(calcTextSize, text);
+      return calcTextSize.y;
    }
 
    public static float calcButtonWidth(String buttonText)
@@ -593,6 +633,7 @@ public class ImGuiTools
       deleteKey = ImGui.getKeyIndex(ImGuiKey.Delete);
       escapeKey = ImGui.getKeyIndex(ImGuiKey.Escape);
       enterKey = ImGui.getKeyIndex(ImGuiKey.Enter);
+      keyPadEnterKey = ImGui.getKeyIndex(ImGuiKey.KeyPadEnter);
       upArrowKey = ImGui.getKeyIndex(ImGuiKey.UpArrow);
       downArrowKey = ImGui.getKeyIndex(ImGuiKey.DownArrow);
       leftArrowKey = ImGui.getKeyIndex(ImGuiKey.LeftArrow);
@@ -625,6 +666,13 @@ public class ImGuiTools
       if (!userKeysHaveBeenMapped)
          initializeUserMappedKeys();
       return enterKey;
+   }
+
+   public static int getKeyPadEnterKey()
+   {
+      if (!userKeysHaveBeenMapped)
+         initializeUserMappedKeys();
+      return keyPadEnterKey;
    }
 
    public static int getUpArrowKey()

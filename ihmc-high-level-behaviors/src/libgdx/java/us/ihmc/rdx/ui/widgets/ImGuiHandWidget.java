@@ -51,6 +51,7 @@ public class ImGuiHandWidget
    private final ImVec2[] polygon = new ImVec2[vertices.size()];
    private int lineColor;
    private int backgroundColor;
+   private boolean isHovered;
 
    public ImGuiHandWidget()
    {
@@ -60,7 +61,7 @@ public class ImGuiHandWidget
       }
    }
 
-   public void render(RobotSide side)
+   public void render(RobotSide side, float lineHeight)
    {
       float fontSize = ImGui.getFontSize();
 
@@ -75,6 +76,9 @@ public class ImGuiHandWidget
 
       center.set(0.3f * fontSize, 0.5f * fontSize);
 
+      if (lineHeight == ImGui.getFrameHeight())
+         center.addY(ImGui.getStyle().getFramePaddingY());
+
       float xMin = Float.MAX_VALUE;
       float xMax = Float.MIN_VALUE;
       for (int i = 0; i < vertices.size(); i++)
@@ -86,7 +90,7 @@ public class ImGuiHandWidget
       }
 
       float itemWidth = xMax - xMin;
-      boolean isHovered = ImGuiTools.isItemHovered(itemWidth);
+      isHovered = ImGuiTools.isItemHovered(itemWidth, lineHeight);
 
       float cursorScreenPosX = ImGui.getCursorScreenPosX();
       float cursorScreenPosY = ImGui.getCursorScreenPosY();
@@ -119,5 +123,10 @@ public class ImGuiHandWidget
    private void drawLine(float x0, float y0, float x1, float y1)
    {
       ImGui.getWindowDrawList().addLine(x0, y0, x1, y1, lineColor);
+   }
+
+   public boolean getIsHovered()
+   {
+      return isHovered;
    }
 }
