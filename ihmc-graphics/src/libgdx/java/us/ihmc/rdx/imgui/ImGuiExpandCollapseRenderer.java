@@ -35,7 +35,7 @@ public class ImGuiExpandCollapseRenderer
       return render(expanded, expandCollapseAll, ImGui.getFontSize());
    }
 
-   public boolean render(boolean expanded, boolean expandCollapseAll, float rowHeight)
+   public boolean render(boolean expanded, boolean expandCollapseAll, float lineHeight)
    {
       float itemSize = ImGui.getFontSize() * 0.8f;
 
@@ -62,11 +62,11 @@ public class ImGuiExpandCollapseRenderer
       plusTop.set(pixelsToCenter, pixelsToMinus);
       plusBottom.set(pixelsToCenter + 1.0f, pixelsToMinus + minusWidthPixels);
 
-      float centering = (float) Math.floor((rowHeight - itemSize) / 2.0f);
+      float centering = (float) Math.floor((lineHeight - itemSize) / 2.0f);
       shiftAll(centering, centering);
 
       float itemWidth = boxTopRight.getX32() - boxTopLeft.getX32();
-      isHovered = ImGuiTools.isItemHovered(itemWidth, rowHeight);
+      isHovered = ImGuiTools.isItemHovered(itemWidth, lineHeight);
 
       backgroundColor = isHovered ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Button);
 

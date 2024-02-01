@@ -311,11 +311,11 @@ public class ImGuiTools
    /**
     * Useful for custom widgets.
     * @param itemWidth the width of the applicable area after the cursor
-    * @param rowHeight Needs to get passed in because it could be either
+    * @param lineHeight Needs to get passed in because it could be either
     *                  {@link ImGui#getTextLineHeight} or {@link ImGui#getFrameHeight}
     * @return Whether the area of the current custom item is hovered.
     */
-   public static boolean isItemHovered(float itemWidth, float rowHeight)
+   public static boolean isItemHovered(float itemWidth, float lineHeight)
    {
       float mousePosXInDesktopFrame = ImGui.getMousePosX();
       float mousePosYInDesktopFrame = ImGui.getMousePosY();
@@ -327,7 +327,7 @@ public class ImGuiTools
       boolean isHovered = mousePosXInWidgetFrame >= ImGui.getCursorPosX();
       isHovered &= mousePosXInWidgetFrame <= ImGui.getCursorPosX() + itemWidth + ImGui.getStyle().getFramePaddingX();
       isHovered &= mousePosYInWidgetFrame >= ImGui.getCursorPosY();
-      isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + rowHeight;
+      isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + lineHeight;
       isHovered &= ImGui.isWindowHovered();
 
       return isHovered;

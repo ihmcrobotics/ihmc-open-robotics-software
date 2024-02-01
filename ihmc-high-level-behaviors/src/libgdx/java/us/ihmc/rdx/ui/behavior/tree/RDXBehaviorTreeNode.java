@@ -36,12 +36,12 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean selected = new ImBoolean();
-   private transient final ImVec2 rowMin = new ImVec2();
-   private transient final ImVec2 rowMax = new ImVec2();
+   private transient final ImVec2 lineMin = new ImVec2();
+   private transient final ImVec2 lineMax = new ImVec2();
    private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
    private ImStringWrapper descriptionWrapper;
-   private boolean mouseHoveringNodeRow;
-   private boolean anySpecificWidgetOnRowClicked = false;
+   private boolean mouseHoveringNodeLine;
+   private boolean anySpecificWidgetOnLineClicked = false;
    private boolean treeWidgetExpanded = false;
    private boolean isDescriptionBeingEdited = false;
    private transient final ImString imDescriptionText = new ImString();
@@ -103,27 +103,27 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    public void renderGeneralRowBeginWidgets()
    {
-      anySpecificWidgetOnRowClicked = false;
+      anySpecificWidgetOnLineClicked = false;
 
-      ImGui.dummy(0.0f, ImGui.getFrameHeight()); // Make the rows as tall as when they have and input box
+      ImGui.dummy(0.0f, ImGui.getFrameHeight()); // Make the lines as tall as when they have and input box
       ImGui.sameLine(0.0f, 0.0f);
 
       ImGui.alignTextToFramePadding(); // Centers the node descriptions vertically in the frame height area
 
-      ImGui.getCursorScreenPos(rowMin);
-      rowMax.set(rowMin.x + ImGui.getContentRegionAvailX(), rowMin.y + ImGui.getFrameHeightWithSpacing());
+      ImGui.getCursorScreenPos(lineMin);
+      lineMax.set(lineMin.x + ImGui.getContentRegionAvailX(), lineMin.y + ImGui.getFrameHeightWithSpacing());
 
-      mouseHoveringNodeRow = ImGuiTools.isItemHovered(ImGui.getContentRegionAvailX(), ImGui.getFrameHeight());
-      if (mouseHoveringNodeRow)
+      mouseHoveringNodeLine = ImGuiTools.isItemHovered(ImGui.getContentRegionAvailX(), ImGui.getFrameHeight());
+      if (mouseHoveringNodeLine)
       {
-         ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.MenuBarBg));
+         ImGui.getWindowDrawList().addRectFilled(lineMin.x, lineMin.y, lineMax.x, lineMax.y, ImGui.getColorU32(ImGuiCol.MenuBarBg));
       }
 
       if (!getChildren().isEmpty())
       {
          if (expandCollapseRenderer.render(treeWidgetExpanded, false, ImGui.getFrameHeight()))
          {
-            anySpecificWidgetOnRowClicked = true;
+            anySpecificWidgetOnLineClicked = true;
             treeWidgetExpanded = !treeWidgetExpanded;
          }
          ImGui.sameLine();
@@ -146,7 +146,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
       if (selected.get())
       {
-         ImGui.getWindowDrawList().addRectFilled(rowMin.x, rowMin.y, rowMax.x, rowMax.y, ImGui.getColorU32(ImGuiCol.Header));
+         ImGui.getWindowDrawList().addRectFilled(lineMin.x, lineMin.y, lineMax.x, lineMax.y, ImGui.getColorU32(ImGuiCol.Header));
       }
 
       if (textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
@@ -172,7 +172,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
          nodeContextMenuShowing = false;
       }
 
-      if (mouseHoveringNodeRow && !isDescriptionBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
+      if (mouseHoveringNodeLine && !isDescriptionBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
       {
          RDXBehaviorTreeTools.runForEntireTree(this, RDXBehaviorTreeNode::clearSelections);
          selected.set(true);
@@ -181,7 +181,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
       // We try to make anywhere on the row clickable to select the node,
       // execpt for specific interactions
-      if (!anySpecificWidgetOnRowClicked && mouseHoveringNodeRow && ImGui.isMouseClicked(ImGuiMouseButton.Left) && !isDescriptionBeingEdited)
+      if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine && ImGui.isMouseClicked(ImGuiMouseButton.Left) && !isDescriptionBeingEdited)
       {
          boolean desiredValue = !selected.get();
          RDXBehaviorTreeTools.runForEntireTree(this, RDXBehaviorTreeNode::clearSelections);
@@ -267,7 +267,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    protected void setSpecificWidgetOnRowClicked()
    {
-      anySpecificWidgetOnRowClicked = true;
+      anySpecificWidgetOnLineClicked = true;
    }
 
    public ImStringWrapper getDescriptionWrapper()

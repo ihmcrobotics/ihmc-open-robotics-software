@@ -41,7 +41,7 @@ public class ImGuiFootstepsWidget
       render(RobotSide.RIGHT, rowHeight);
    }
 
-   public void render(RobotSide side, float rowHeight)
+   public void render(RobotSide side, float lineHeight)
    {
       float fontSize = ImGui.getFontSize();
 
@@ -50,7 +50,7 @@ public class ImGuiFootstepsWidget
 
       center.set(0.3f * fontSize, 0.5f * fontSize);
 
-      if (rowHeight == ImGui.getFrameHeight())
+      if (lineHeight == ImGui.getFrameHeight())
          center.addY(ImGui.getStyle().getFramePaddingY());
 
       float halfWidth = 0.34f;
@@ -79,7 +79,7 @@ public class ImGuiFootstepsWidget
       heelRight.scaleAdd(scale, center);
 
       float itemWidth = bottomRight.getX32() - bottomLeft.getX32();
-      isHovered.set(side, ImGuiTools.isItemHovered(itemWidth, rowHeight));
+      isHovered.set(side, ImGuiTools.isItemHovered(itemWidth, lineHeight));
 
       float cursorScreenPosX = ImGui.getCursorScreenPosX();
       float cursorScreenPosY = ImGui.getCursorScreenPosY();

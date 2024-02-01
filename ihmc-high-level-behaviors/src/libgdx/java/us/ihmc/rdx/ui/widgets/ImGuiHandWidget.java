@@ -61,7 +61,7 @@ public class ImGuiHandWidget
       }
    }
 
-   public void render(RobotSide side, float rowHeight)
+   public void render(RobotSide side, float lineHeight)
    {
       float fontSize = ImGui.getFontSize();
 
@@ -76,7 +76,7 @@ public class ImGuiHandWidget
 
       center.set(0.3f * fontSize, 0.5f * fontSize);
 
-      if (rowHeight == ImGui.getFrameHeight())
+      if (lineHeight == ImGui.getFrameHeight())
          center.addY(ImGui.getStyle().getFramePaddingY());
 
       float xMin = Float.MAX_VALUE;
@@ -90,7 +90,7 @@ public class ImGuiHandWidget
       }
 
       float itemWidth = xMax - xMin;
-      isHovered = ImGuiTools.isItemHovered(itemWidth, rowHeight);
+      isHovered = ImGuiTools.isItemHovered(itemWidth, lineHeight);
 
       float cursorScreenPosX = ImGui.getCursorScreenPosX();
       float cursorScreenPosY = ImGui.getCursorScreenPosY();

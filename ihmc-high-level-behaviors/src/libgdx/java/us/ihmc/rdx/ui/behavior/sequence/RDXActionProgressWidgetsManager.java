@@ -20,12 +20,12 @@ public class RDXActionProgressWidgetsManager
    private final ArrayList<RDXActionNode<?, ?>> actionNodesToRender = new ArrayList<>();
    private boolean renderAsPlots = true;
    private int emptyPlotIndex;
-   private int numberOfRows;
+   private int numberOfLines;
 
    public void render()
    {
       emptyPlotIndex = 0;
-      numberOfRows = 0;
+      numberOfLines = 0;
 
       actionNodesToRender.clear();
       actionNodesToRender.addAll(sortedActionNodesToRender);
@@ -50,7 +50,7 @@ public class RDXActionProgressWidgetsManager
          actionNodesToRender.get(i).getProgressWidgets().renderElapsedTimeBar(dividedBarWidth);
          sameLineExceptLast(i);
       }
-      ++numberOfRows;
+      ++numberOfLines;
       ImGui.spacing();
 
       if (containsFootsteps)
@@ -62,7 +62,7 @@ public class RDXActionProgressWidgetsManager
             actionNodesToRender.get(i).getProgressWidgets().renderFootstepCompletion(dividedBarWidth, renderAsPlots);
             sameLineExceptLast(i);
          }
-         ++numberOfRows;
+         ++numberOfLines;
          ImGui.spacing();
       }
 
@@ -76,7 +76,7 @@ public class RDXActionProgressWidgetsManager
             actionNodesToRender.get(i).getProgressWidgets().renderPositionError(dividedBarWidth, renderAsPlots);
          sameLineExceptLast(i);
       }
-      ++numberOfRows;
+      ++numberOfLines;
       ImGui.spacing();
 
       widgetAligner.text("Orientation error (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
@@ -89,7 +89,7 @@ public class RDXActionProgressWidgetsManager
             actionNodesToRender.get(i).getProgressWidgets().renderOrientationError(dividedBarWidth, renderAsPlots);
          sameLineExceptLast(i);
       }
-      ++numberOfRows;
+      ++numberOfLines;
       ImGui.spacing();
 
       if (containsHandMovements)
@@ -101,7 +101,7 @@ public class RDXActionProgressWidgetsManager
             actionNodesToRender.get(i).getProgressWidgets().renderHandForce(dividedBarWidth, renderAsPlots);
             sameLineExceptLast(i);
          }
-         ++numberOfRows;
+         ++numberOfLines;
          ImGui.spacing();
 
          widgetAligner.text("Hand torque (Nm):");
@@ -111,15 +111,15 @@ public class RDXActionProgressWidgetsManager
             actionNodesToRender.get(i).getProgressWidgets().renderHandTorque(dividedBarWidth, renderAsPlots);
             sameLineExceptLast(i);
          }
-         ++numberOfRows;
+         ++numberOfLines;
          ImGui.spacing();
       }
 
-      while (numberOfRows < 5)
+      while (numberOfLines < 5)
       {
          widgetAligner.text("");
          renderBlankBar(true);
-         ++numberOfRows;
+         ++numberOfLines;
          ImGui.spacing();
       }
    }

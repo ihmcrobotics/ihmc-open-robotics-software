@@ -190,8 +190,12 @@ public class RDXBehaviorTree
          float menuBarHeight = ImGui.getFrameHeightWithSpacing();
          float windowHeight = ImGui.getWindowHeight();
          float availableHeight = windowHeight - titleHeight - menuBarHeight - cursorYAfterControlWidgets;
+         // There are ~9 rows of stuff in the screw primitive action settings,
+         // which is the tallest one currently. We could think of ways to improve on this.
          float tallestNodeSettings = 9 * ImGui.getFrameHeightWithSpacing();
 
+         // 60% seems to be the desirable ratio for the visible area
+         // of the tree view vs the settings area
          float treeExplorerPercentage = 0.6f;
          float treeExplorerHeight = availableHeight * treeExplorerPercentage;
          float nodeSettingsHeight = availableHeight * (1.0f - treeExplorerPercentage);
