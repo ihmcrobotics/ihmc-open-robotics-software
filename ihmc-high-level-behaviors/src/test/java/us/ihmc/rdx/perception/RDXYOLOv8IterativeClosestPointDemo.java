@@ -12,8 +12,10 @@ import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.OpenCLPointCloudExtractor;
@@ -21,7 +23,6 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectableObject;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionResults;
 import us.ihmc.perception.YOLOv8.YOLOv8ObjectDetector;
-import us.ihmc.perception.iterativeClosestPoint.IterativeClosestPointTools;
 import us.ihmc.perception.iterativeClosestPoint.IterativeClosestPointWorker;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
@@ -37,10 +38,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -48,7 +50,7 @@ import java.util.stream.Stream;
 
 public class RDXYOLOv8IterativeClosestPointDemo
 {
-   private static final String CSV_FILE_PATH = "/home/tbialek/.ihmc/icpPointCloudFiles/mug_modified_accurate.csv";
+   private static final String CSV_FILE_NAME = "ihmc_mug_points.csv";
    private static final boolean USE_CUSTOM_OBJECT = true;
    private static final YOLOv8DetectableObject OBJECT_TYPE = YOLOv8DetectableObject.CUP;
    private static final Random random = new Random();
@@ -85,6 +87,7 @@ public class RDXYOLOv8IterativeClosestPointDemo
    private final ImFloat confidenceThreshold = new ImFloat(0.5f);
    private final ImFloat nmsThreshold = new ImFloat(0.1f);
    private final ImFloat maskThreshold = new ImFloat(0.0f);
+   private final ImFloat outlierRejectionThreshold = new ImFloat(10.0f);
 
    public RDXYOLOv8IterativeClosestPointDemo()
    {
@@ -99,7 +102,10 @@ public class RDXYOLOv8IterativeClosestPointDemo
       icpWorker.setSegmentSphereRadius(Double.MAX_VALUE);
       if (USE_CUSTOM_OBJECT)
       {
-         icpWorker.setDetectionShape(PrimitiveRigidBodyShape.CUSTOM, CSV_FILE_PATH);
+         WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(YOLOv8DetectableObject.class, "/yoloICPPointClouds/");
+         WorkspaceResourceFile file = new WorkspaceResourceFile(directory, CSV_FILE_NAME);
+
+         icpWorker.setDetectionShape(PrimitiveRigidBodyShape.CUSTOM, file.getFilesystemFile().toFile());
       }
 
       zedImageRetriever.start();
@@ -122,12 +128,16 @@ public class RDXYOLOv8IterativeClosestPointDemo
 
             List<Point3DReadOnly> ptcld = extractor.extractPointCloud(segmentedDepth);
 
-            Collections.shuffle(ptcld, random);
-            Point3DReadOnly centroid = IterativeClosestPointTools.computeCentroidOfPointCloud(ptcld, 500);
-            centroidGraphic.setPositionInWorldFrame(centroid);
-            Stream<Point3DReadOnly> pointCloudStream = ptcld.parallelStream();
-            ptcld = pointCloudStream.sorted(Comparator.comparingDouble(point -> point.distanceSquared(centroid))).limit((int) (0.75 * ptcld.size())).collect(Collectors.toList());
+            Point3D centroid = new Point3D();
+            double stdDev = doMath(ptcld, 500, true, centroid);
 
+            ptcld = ptcld.parallelStream().filter(point ->
+            {
+               Vector3D zVector = new Vector3D(point);
+               zVector.sub(centroid);
+               zVector.scale(1.0 / stdDev);
+               return zVector.normSquared() < outlierRejectionThreshold.get();
+            }).collect(Collectors.toList());
 
             if (segmentedPointCloud != null)
                segmentedPointCloud.clear();
@@ -218,6 +228,7 @@ public class RDXYOLOv8IterativeClosestPointDemo
             ImGui.sliderFloat("confidenceThreshold", confidenceThreshold.getData(), 0.0f, 1.0f);
             ImGui.sliderFloat("nmsThreshold", nmsThreshold.getData(), 0.0f, 1.0f);
             ImGui.sliderFloat("maskThreshold", maskThreshold.getData(), -1.0f, 1.0f);
+            ImGui.sliderFloat("outlierRejectionThreshold", outlierRejectionThreshold.getData(), 0.0f, 50.0f);
          }
 
          @Override
@@ -229,6 +240,47 @@ public class RDXYOLOv8IterativeClosestPointDemo
             baseUI.dispose();
          }
       });
+   }
+
+   private double doMath(List<? extends Point3DReadOnly> pointCloud, Point3DBasics centroidToPack)
+   {
+      return doMath(pointCloud, pointCloud.size(), false, centroidToPack);
+   }
+
+   /**
+    * Given a point cloud, computes the centroid and variance of the points
+    * @param pointCloud       The list of points used for calculations
+    * @param maxComputations  Maximum number of points to use for the computation. First N points in the list will be used.
+    * @param shuffle          Whether to shuffle the point cloud before computations. Can be used to find approximate values with N points
+    * @param centroidToPack   Point object into which the centroid will be packed
+    * @return The variance of the points
+    */
+   private double doMath(List<? extends Point3DReadOnly> pointCloud, int maxComputations, boolean shuffle, Point3DBasics centroidToPack)
+   {
+      if (shuffle)
+         Collections.shuffle(pointCloud);
+
+      Vector3D sumVector = new Vector3D(0.0, 0.0, 0.0);
+      Vector3D squaredSumVector = new Vector3D(0.0, 0.0, 0.0);
+      int numberOfComputations = Math.min(pointCloud.size(), maxComputations);
+
+      pointCloud.parallelStream().limit(numberOfComputations).forEach(point ->
+      {
+         sumVector.add(point);
+         squaredSumVector.add((point.getX() * point.getX()), (point.getY() * point.getY()), (point.getZ() * point.getZ()));
+      });
+
+      centroidToPack.set(sumVector);
+      centroidToPack.scale(1.0 / numberOfComputations);
+
+      Vector3D meanSquaredVector = new Vector3D(centroidToPack);
+      meanSquaredVector.scale(meanSquaredVector.getX(), meanSquaredVector.getY(), meanSquaredVector.getZ());
+
+      Vector3D stdDevVector = new Vector3D(squaredSumVector);
+      stdDevVector.scale(1.0 / numberOfComputations);
+      stdDevVector.sub(meanSquaredVector);
+
+      return stdDevVector.getX() + stdDevVector.getY() + stdDevVector.getZ();
    }
 
    public static void main(String[] args)
