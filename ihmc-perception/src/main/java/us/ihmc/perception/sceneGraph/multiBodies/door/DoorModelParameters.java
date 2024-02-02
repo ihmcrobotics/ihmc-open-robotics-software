@@ -43,6 +43,8 @@ public class DoorModelParameters
    public static final double DOOR_FRAME_PILLAR_SIZE_X = 0.0889;
    /** Frame post Z size. */
    public static final double DOOR_FRAME_PILLAR_SIZE_Z = 2.159;
+   /** The angle of the lever in which the bolt is fully drawn i.e. the end stop */
+   public static final double DOOR_LEVER_MAX_TURN_ANGLE = 0.4 * Math.PI / 2.0;
    public static final double DOOR_BOLT_HEIGHT = 0.015;
    public static final double DOOR_BOLT_HOLE_HEIGHT = DOOR_BOLT_HEIGHT + 0.01;
    public static final double DOOR_BOLT_TRAVEL = 0.015;

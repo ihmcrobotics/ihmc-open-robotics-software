@@ -112,29 +112,33 @@ public class DoorDefinition extends RobotDefinition
 
       simulationSession.addBeforePhysicsCallback(time ->
       {
-         double p = 2.0;
-         double d = 1.0;
+         double leverSpring = 2.0;
+         double leverDamping = 1.0;
 
          double errorQ = doorLeverJoint.getQ();
          double errorQd = doorLeverJoint.getQd();
 
-         doorLeverJoint.setTau(-p * errorQ - d * errorQd);
+         doorLeverJoint.setTau(-leverSpring * errorQ - leverDamping * errorQd);
 
-         double angleOfFullPull = 0.4 * Math.PI / 2.0;
-         double pullAmountQ = -Math.abs(doorLeverJoint.getQ()) * DOOR_BOLT_TRAVEL / angleOfFullPull;
+         // Compute the bolt desired position as a proportion of the max bolt travel, the lever end stop,
+         // and current lever position
+         double boltDesiredQ = -Math.abs(doorLeverJoint.getQ()) * DOOR_BOLT_TRAVEL / DOOR_LEVER_MAX_TURN_ANGLE;
 
-         double boltFromPullAmountQ = doorBoltJoint.getQ() - pullAmountQ;
-         if (boltFromPullAmountQ < 0.0)
-            boltFromPullAmountQ = 0.0;
+         // Compute the error for the hard mechanism, which we simulated as a spring damper,
+         // but in real life it's a physical constraint. We remove any negative error, as this
+         // strong component should only ever serve to pull the latch in the opening direction.
+         double boltMechanismErrorQ = doorBoltJoint.getQ() - boltDesiredQ;
+         if (boltMechanismErrorQ < 0.0)
+            boltMechanismErrorQ = 0.0;
 
-         d = 5.0;
+         //
+         double boltSpringK = 8.0; // Light spring that tried to restore the bolt to zero position (fully extended)
+         double mechanismK = 1000.0; // Strong spring that simulates a hard mechanism
+         double boltKTerm = boltSpringK * doorBoltJoint.getQ() + mechanismK * boltMechanismErrorQ;
+         double boltDamping = 5.0;
+         double boltErrorQd = doorBoltJoint.getQd();
 
-         double springK = 8.0;
-         double mechanismK = 50.0;
-         errorQ = springK * doorBoltJoint.getQ() + mechanismK * boltFromPullAmountQ;
-         errorQd = doorBoltJoint.getQd();
-
-         doorBoltJoint.setTau(-errorQ - d * errorQd);
+         doorBoltJoint.setTau(-boltKTerm - boltDamping * boltErrorQd);
       });
 
       if (simulationSession.getPhysicsEngine() instanceof BulletPhysicsEngine bulletPhysicsEngine)

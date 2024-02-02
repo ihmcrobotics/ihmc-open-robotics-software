@@ -45,6 +45,7 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
          doorWidgets.zeroTorques();
          rdxSimulationSession.getBulletPhysicsDebugger().setUpdateDebugDrawings(true);
          rdxSimulationSession.getSession().runTick();
+         rdxSimulationSession.setPauseAtEndOfBuffer(false);
       });
 
       rdxSimulationSession.buildSimulation();
