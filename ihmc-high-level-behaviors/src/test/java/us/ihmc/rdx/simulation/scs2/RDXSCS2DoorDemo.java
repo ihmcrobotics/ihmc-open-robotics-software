@@ -84,8 +84,7 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
       doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(Math.PI, 0.0, 0.0), new Point3D(1.3, 0.5, 0.01));
 
       Robot doorRobot = simulationSession.addRobot(doorDefinition);
-      DoorDefinition.applyPDController(doorRobot);
-      DoorDefinition.setupFrictionCoefficients(simulationSession);
+      DoorDefinition.setupPhysics(doorRobot, simulationSession);
       doorWidgets.initialize(doorRobot);
 
       simulationSession.addTerrainObject(new FlatGroundDefinition());

@@ -105,13 +105,12 @@ public class DoorDefinition extends RobotDefinition
       setRootBodyDefinition(rootBodyDefinition);
    }
 
-   public static void applyPDController(Robot robot)
+   public static void setupPhysics(Robot robot, SimulationSession simulationSession)
    {
       SimRevoluteJoint doorLeverJoint = (SimRevoluteJoint) robot.getJoint("doorLeverJoint");
       SimPrismaticJoint doorBoltJoint = (SimPrismaticJoint) robot.getJoint("doorBoltJoint");
 
-      // TODO: Make this happen at simulation rate instead of control rate
-      robot.getControllerManager().addController(() ->
+      simulationSession.addBeforePhysicsCallback(time ->
       {
          double p = 2.0;
          double d = 1.0;
@@ -137,15 +136,12 @@ public class DoorDefinition extends RobotDefinition
 
          doorBoltJoint.setTau(-errorQ - d * errorQd);
       });
-   }
 
-   public static void setupFrictionCoefficients(SimulationSession simulationSession)
-   {
       if (simulationSession.getPhysicsEngine() instanceof BulletPhysicsEngine bulletPhysicsEngine)
       {
          for (BulletRobot bulletRobot : bulletPhysicsEngine.getBulletRobots())
          {
-            if (bulletRobot.getName().equals(DOOR_ROBOT_NAME))
+            if (bulletRobot.getName().equals(robot.getName()))
             {
                // The bolt should be slippery
                BulletMultiBodyLinkCollider boltLinkCollider = bulletRobot.getBulletMultiBodyRobot().getBulletMultiBodyLinkCollider(3);

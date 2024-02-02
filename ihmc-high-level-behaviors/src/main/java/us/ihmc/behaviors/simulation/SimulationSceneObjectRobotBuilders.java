@@ -37,7 +37,6 @@ public class SimulationSceneObjectRobotBuilders
          // Rotate the door so the push side is facing
          doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(Math.PI, 0.0, 0.0), new Point3D(1.3, 0.5, 0.01));
          Robot robot = new Robot(doorDefinition, inertialFrame);
-         DoorDefinition.applyPDController(robot);
          return robot;
       };
    }
@@ -49,7 +48,6 @@ public class SimulationSceneObjectRobotBuilders
          DoorDefinition doorDefinition = getDoorWithArUcoMarkersDefinition();
          doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(1.0, -0.5, 0.01));
          Robot robot = new Robot(doorDefinition, inertialFrame);
-         DoorDefinition.applyPDController(robot);
          return robot;
       };
    }
