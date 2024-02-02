@@ -37,10 +37,8 @@ public class VisualSLAMModule
 
    public VisualSLAMModule()
    {
-      BytedecoTools.loadMapsenseNative();
       visualOdometryExternal = new VisualOdometry.VisualOdometryExternal(NUMBER_OF_FEATURES, MIN_NUM_FEATURES);
 
-      BytedecoTools.loadSlamWrapper();
       factorGraphExternal = new SlamWrapper.FactorGraphExternal();
 
       double[] poseInitial = new double[] {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
@@ -52,18 +50,24 @@ public class VisualSLAMModule
    }
 
    /*
-   *  - Calls the updateStereo() on VisualOdometryExternal to generate visual keypoint measurements and odometry estimate.
-   *  - Inserts the landmark measurements and odometry as constraints in the factor graph.
-   *  - Performs factor graph optimization and extracts results from the GTSAM wrapper FactorGraphExternal.
-   * */
+    *  - Calls the updateStereo() on VisualOdometryExternal to generate visual keypoint measurements and odometry estimate.
+    *  - Inserts the landmark measurements and odometry as constraints in the factor graph.
+    *  - Performs factor graph optimization and extracts results from the GTSAM wrapper FactorGraphExternal.
+    * */
    public boolean update(ImageMat leftImage, ImageMat rightImage)
    {
       /*
        *  Compute both relative pose in last key-frame, and 2D-3D keypoint landmark measurements in current camera frame.
-      */
+       */
       LogTools.info("Update Stereo(Dims: {}, {})", leftImage.getRows(), leftImage.getCols());
-      boolean initialized = visualOdometryExternal.updateStereo(leftImage.getData(), rightImage.getData(), leftImage.getRows(), leftImage.getCols(),
-                                                                latestSensorPose, idInts, landmarkPoints, idInts.length);
+      boolean initialized = visualOdometryExternal.updateStereo(leftImage.getData(),
+                                                                rightImage.getData(),
+                                                                leftImage.getRows(),
+                                                                leftImage.getCols(),
+                                                                latestSensorPose,
+                                                                idInts,
+                                                                landmarkPoints,
+                                                                idInts.length);
 
       LogTools.info("Extracting Keyframe External");
       double[] relativePoseTransformAsArray = new double[16];
@@ -121,7 +125,10 @@ public class VisualSLAMModule
             keyframes.get(keyframeID[0]).addLandmark(landmarkIDs[i]);
             landmarks.get(landmarkIDs[i]).addKeyframe(keyframeID[0]);
 
-            LogTools.info("Keyframe: {}, Landmark: {}, LandmarkMeasurements: {}", keyframeID[0], landmarkIDs[i], landmarks.get(landmarkIDs[i]).getKeyframeCount());
+            LogTools.info("Keyframe: {}, Landmark: {}, LandmarkMeasurements: {}",
+                          keyframeID[0],
+                          landmarkIDs[i],
+                          landmarks.get(landmarkIDs[i]).getKeyframeCount());
             //LogTools.info("Inserting Landmark: {}, Count: {}", landmarkIDs[i], landmarks.get(landmarkIDs[i]).getKeyframeCount());
 
             /* Insert generic projection factor for each landmark measurement on left camera. */
@@ -144,12 +151,12 @@ public class VisualSLAMModule
       // TODO: Try Incremental SAM instead of batch optimizer.
       if (initialized)
       {
-            factorGraphExternal.optimize();
+         factorGraphExternal.optimize();
 
-            factorGraphExternal.getPoseById(keyframeID[0], latestSensorPose);
-            getLandmarkPoints(landmarks.keySet());
+         factorGraphExternal.getPoseById(keyframeID[0], latestSensorPose);
+         getLandmarkPoints(landmarks.keySet());
 
-            //factorGraphExternal.optimizeISAM2((byte) 4);
+         //factorGraphExternal.optimizeISAM2((byte) 4);
          //factorGraphExternal.optimize();
       }
 
