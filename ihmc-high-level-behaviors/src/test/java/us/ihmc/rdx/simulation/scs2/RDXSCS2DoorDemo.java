@@ -8,6 +8,7 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.scs2.robots.RDXDoorWidgets;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.robot.Robot;
@@ -46,6 +47,7 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
          rdxSimulationSession.getBulletPhysicsDebugger().setUpdateDebugDrawings(true);
          rdxSimulationSession.getSession().runTick();
          rdxSimulationSession.setPauseAtEndOfBuffer(false);
+         rdxSimulationSession.getSession().setSessionMode(SessionMode.RUNNING);
       });
 
       rdxSimulationSession.buildSimulation();

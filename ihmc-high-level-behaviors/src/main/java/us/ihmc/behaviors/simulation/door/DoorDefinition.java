@@ -112,13 +112,13 @@ public class DoorDefinition extends RobotDefinition
 
       simulationSession.addBeforePhysicsCallback(time ->
       {
-         double leverSpring = 2.0;
+         double leverSpringK = DOOR_LEVER_MAX_TORQUE / DOOR_LEVER_MAX_TURN_ANGLE;
          double leverDamping = 1.0;
 
-         double errorQ = doorLeverJoint.getQ();
-         double errorQd = doorLeverJoint.getQd();
+         double leverErrorQ = doorLeverJoint.getQ();
+         double leverErrorQd = doorLeverJoint.getQd();
 
-         doorLeverJoint.setTau(-leverSpring * errorQ - leverDamping * errorQd);
+         doorLeverJoint.setTau(-leverSpringK * leverErrorQ - leverDamping * leverErrorQd);
 
          // Compute the bolt desired position as a proportion of the max bolt travel, the lever end stop,
          // and current lever position
