@@ -1,5 +1,7 @@
 package us.ihmc.exampleSimulations.planarWalker;
 
+import javafx.geometry.Side;
+import org.opencv.features2d.SIFT;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -24,13 +26,14 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
    public static final String leftShinName = "l_shin";
    public static final String rightShinName = "r_shin";
 
+
    private static final double torsoHeight = 0.5;
-   private static final double thighLength = 0.5;
-   private static final double shinLength = 0.5;
+   public static final double thighLength = 0.5;
+   public static final double shinLength = 0.5;
 
    private final SideDependentList<String> hipPitchNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
    private final SideDependentList<String> thighNames = new SideDependentList<>(leftThighName, rightThighName);
-   private final SideDependentList<String> kneeNames = new SideDependentList<>(leftKneeName, rightKneeName);
+   public static final SideDependentList<String> kneeNames = new SideDependentList<>(leftKneeName, rightKneeName);
    private final SideDependentList<String> shinNames = new SideDependentList<>(leftShinName, rightShinName);
 
    private final SideDependentList<RevoluteJointDefinition> hipPitchJointDefinitions = new SideDependentList<>();
@@ -60,20 +63,24 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
          torsoBodyDefinition.addChildJoint(hipPitchJointDefinition);
          hipPitchJointDefinitions.put(robotSide, hipPitchJointDefinition);
 
-         // Create the upper leg links and add them to the tree
+         // create the upper leg links and add them to the tree
          // FIXME we probably need to add an offset from the joint attachment to the origin of the link.
          RigidBodyDefinition thighLink = createThigh(thighNames.get(robotSide));
          hipPitchJointDefinition.setSuccessor(thighLink);
 
-         // Create the knee joints and add them to the tree
+         // create the knee joints and add them to the tree
          Vector3D leftKneeOffsetInThigh = new Vector3D(0.0, 0.0, -thighLength / 2.0);
          PrismaticJointDefinition kneeJointDefinition = new PrismaticJointDefinition(kneeNames.get(robotSide), leftKneeOffsetInThigh, Axis3D.Z);
          thighLink.addChildJoint(kneeJointDefinition);
 
-         // Create the shin links and add them to the tree
+         // create the shin links and add them to the tree
          // FIXME we probably need to add an offset from the joint attachment to the origin of the link.
          RigidBodyDefinition lowerLeg = createShin(shinNames.get(robotSide));
          kneeJointDefinition.setSuccessor(lowerLeg);
+
+         // create the contact points for the feet.
+         GroundContactPointDefinition footContactPoint = new GroundContactPointDefinition(robotSide.getLowerCaseName() + "_gc_point", new Vector3D(0.0, 0.0, -shinLength / 2.0));
+         kneeJointDefinition.addGroundContactPointDefinition(footContactPoint);
       }
 
       // TODO add some kind of collisions. Could be a collision shape. Could be a contact point.
