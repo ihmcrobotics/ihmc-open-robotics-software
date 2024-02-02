@@ -49,8 +49,8 @@ public class RDXVisualSLAMDemo
    private static final int FRAME_SKIP = 1;
    private static final String LEFT_CAMERA_NAME = "image_0/";
    private static final String RIGHT_CAMERA_NAME = "image_1/";
-   private static final String DATASET_PATH = System.getProperty("user.home") + "/Workspace/Data/Datasets/sequences/00/";
-   private static final String GROUND_TRUTH_PATH = System.getProperty("user.home") + "/Workspace/Data/Datasets/poses/";
+   private static final String DATASET_PATH = System.getProperty("user.home") + "/Downloads/00/";
+   private static final String GROUND_TRUTH_PATH = System.getProperty("user.home") + "/Downloads/dataset/poses/";
 
    private boolean active = false;
    private int updateCount = 0;
