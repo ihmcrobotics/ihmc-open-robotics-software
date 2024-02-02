@@ -13,6 +13,7 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDB
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
 
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
+import us.ihmc.commonWalkingControlModules.controlModules.YoTranslationFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -100,7 +101,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private final YoPID3DGains gains;
    private final Matrix3D tempGainMatrix = new Matrix3D();
-   private final YoSE3OffsetFrame controlFrame;
+   private final YoTranslationFrame controlFrame;
 
    private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
@@ -158,7 +159,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       gains = fbToolbox.getOrCreatePositionGains(endEffector, controllerIndex, computeIntegralTerm, true);
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
-      controlFrame = fbToolbox.getOrCreateControlFrame(endEffector, controllerIndex, true);
+      controlFrame = fbToolbox.getOrCreatePointFeedbackControlFrame(endEffector, controllerIndex, true);
 
       isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isPointFBControllerEnabled", fbToolbox.getRegistry());
       isEnabled.set(false);
@@ -306,7 +307,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       linearGainsFrame = command.getLinearGainsFrame();
 
       command.getBodyFixedPointIncludingFrame(desiredPosition);
-      controlFrame.setOffsetToParentToTranslationOnly(desiredPosition);
+      controlFrame.setTranslationToParent(desiredPosition);
 
       yoDesiredPosition.setIncludingFrame(command.getReferencePosition());
       yoDesiredPosition.setCommandId(currentCommandId);

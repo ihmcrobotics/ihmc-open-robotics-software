@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
@@ -14,32 +15,49 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.ui.gizmo.RDXSelectablePathControlRingGizmo;
+import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
+import us.ihmc.rdx.ui.widgets.ImGuiFootstepsWidget;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState, FootstepPlanActionDefinition>
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final FootstepPlanActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
+   private final ImBoolean showAdjustmentInteractables = new ImBoolean();
+   private final ImBooleanWrapper executeWithNextActionWrapper;
+   private final ImBooleanWrapper manuallyPlaceStepsWrapper;
    private final ImDoubleWrapper swingDurationWidget;
    private final ImDoubleWrapper transferDurationWidget;
    private int numberOfAllocatedFootsteps = 0;
-   private final RecyclingArrayList<RDXFootstepPlanActionFootstep> footsteps;
+   private final RecyclingArrayList<RDXFootstepPlanActionFootstep> manuallyPlacedFootsteps;
    private final TypedNotification<RobotSide> userAddedFootstep = new TypedNotification<>();
    private final Notification userRemovedFootstep = new Notification();
-   private boolean frameIsChildOfWorld = false;
+   private final SideDependentList<RDXFootstepGraphic> goalFeetGraphics = new SideDependentList<>();
+   private final RDXSelectablePathControlRingGizmo footstepPlannerGoalGizmo;
+   private final SideDependentList<ImBoolean> goalFeetPosesSelected = new SideDependentList<>();
+   private final SideDependentList<RDXPose3DGizmo> goalFeetGizmos = new SideDependentList<>();
+   private final RDX3DPanelTooltip tooltip;
+   private final ImGuiFootstepsWidget footstepsWidget = new ImGuiFootstepsWidget();
 
    public RDXFootstepPlanAction(long id,
                                 CRDTInfo crdtInfo,
@@ -47,7 +65,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                                 RDXBaseUI baseUI,
                                 DRCRobotModel robotModel,
                                 ROS2SyncedRobotModel syncedRobot,
-                                ReferenceFrameLibrary referenceFrameLibrary)
+                                ReferenceFrameLibrary referenceFrameLibrary,
+                                FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
@@ -55,26 +74,59 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
-      this.referenceFrameLibrary = referenceFrameLibrary;
 
       getDefinition().setDescription("Footstep plan");
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                getDefinition().getBasics()::getParentFrameName,
+                                                                getDefinition()::getParentFrameName,
                                                                 this::changeParentFrame);
-      swingDurationWidget = new ImDoubleWrapper(getDefinition().getBasics()::getSwingDuration,
-                                                getDefinition().getBasics()::setSwingDuration,
+      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
+                                                          getDefinition()::setExecuteWithNextAction,
+                                                          imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
+      manuallyPlaceStepsWrapper = new ImBooleanWrapper(getDefinition()::getIsManuallyPlaced,
+                                                       getDefinition()::setIsManuallyPlaced,
+                                                       imBoolean -> ImGui.checkbox(labels.get("Manually place steps"), imBoolean));
+      swingDurationWidget = new ImDoubleWrapper(getDefinition()::getSwingDuration,
+                                                getDefinition()::setSwingDuration,
                                                 imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
-      transferDurationWidget = new ImDoubleWrapper(getDefinition().getBasics()::getTransferDuration,
-                                                   getDefinition().getBasics()::setTransferDuration,
+      transferDurationWidget = new ImDoubleWrapper(getDefinition()::getTransferDuration,
+                                                   getDefinition()::setTransferDuration,
                                                    imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
 
-      footsteps = new RecyclingArrayList<>(() ->
+      manuallyPlacedFootsteps = new RecyclingArrayList<>(() ->
          new RDXFootstepPlanActionFootstep(baseUI,
                                            robotModel,
                                            this,
                                            RecyclingArrayListTools.getUnsafe(state.getFootsteps(), numberOfAllocatedFootsteps++)));
+
+      for (RobotSide side : RobotSide.values)
+      {
+         getDefinition().getGoalFootstepToGoalTransform(side).getValue()
+                        .getTranslation().addY(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
+      }
+
+      footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(ReferenceFrame.getWorldFrame(),
+                                                                       getDefinition().getGoalToParentTransform().getValue(),
+                                                                       showAdjustmentInteractables);
+      footstepPlannerGoalGizmo.create(baseUI.getPrimary3DPanel());
+
+      for (RobotSide side : RobotSide.values)
+      {
+         goalFeetPosesSelected.put(side, new ImBoolean(false));
+
+         RDXPose3DGizmo footGizmo = new RDXPose3DGizmo(ReferenceFrame.getWorldFrame(),
+                                                       getDefinition().getGoalFootstepToGoalTransform(side).getValue());
+         footGizmo.create(baseUI.getPrimary3DPanel());
+         goalFeetGizmos.put(side, footGizmo);
+
+         RDXFootstepGraphic goalFootGraphic = new RDXFootstepGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints(), side);
+         goalFootGraphic.create();
+         goalFeetGraphics.put(side, goalFootGraphic);
+      }
+
+      tooltip = new RDX3DPanelTooltip(baseUI.getPrimary3DPanel());
+      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
    }
 
    @Override
@@ -82,23 +134,22 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    {
       super.update();
 
-      RecyclingArrayListTools.synchronizeSize(footsteps, state.getFootsteps());
+      RecyclingArrayListTools.synchronizeSize(manuallyPlacedFootsteps, state.getFootsteps());
 
-      frameIsChildOfWorld = referenceFrameLibrary.containsFrame(getDefinition().getBasics().getParentFrameName());
-      if (frameIsChildOfWorld)
+      if (state.areFramesInWorld())
       {
          // Add a footstep to the action data only
          if (userAddedFootstep.poll())
          {
             RobotSide newSide = userAddedFootstep.read();
             RecyclingArrayListTools.addToAll(getDefinition().getFootsteps().getValue(), state.getFootsteps());
-            RDXFootstepPlanActionFootstep addedFootstep = footsteps.add();
+            RDXFootstepPlanActionFootstep addedFootstep = manuallyPlacedFootsteps.add();
             addedFootstep.getDefinition().setSide(newSide);
             addedFootstep.getState().update();
             FramePose3D newFootstepPose = new FramePose3D();
-            if (footsteps.size() > 1)
+            if (manuallyPlacedFootsteps.size() > 1)
             {
-               RDXFootstepPlanActionFootstep previousFootstep = footsteps.get(footsteps.size() - 2);
+               RDXFootstepPlanActionFootstep previousFootstep = manuallyPlacedFootsteps.get(manuallyPlacedFootsteps.size() - 2);
                newFootstepPose.setToZero(previousFootstep.getState().getSoleFrame().getReferenceFrame());
 
                if (previousFootstep.getDefinition().getSide() != newSide)
@@ -121,14 +172,70 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
          if (userRemovedFootstep.poll())
          {
-            RecyclingArrayListTools.removeLast(footsteps);
+            RecyclingArrayListTools.removeLast(manuallyPlacedFootsteps);
             RecyclingArrayListTools.removeLast(state.getFootsteps());
             RecyclingArrayListTools.removeLast(getDefinition().getFootsteps().getValue());
          }
 
-         for (RDXFootstepPlanActionFootstep footstep : footsteps)
+         for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
          {
             footstep.update();
+         }
+
+         if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoFrame() != state.getGoalFrame().getReferenceFrame())
+         {
+            footstepPlannerGoalGizmo.getPathControlRingGizmo().setGizmoFrame(state.getGoalFrame().getReferenceFrame());
+         }
+
+         for (RobotSide side : RobotSide.values)
+         {
+            if (goalFeetGizmos.get(side).getGizmoFrame().getParent() != state.getGoalFrame().getReferenceFrame())
+            {
+               goalFeetGizmos.get(side).setParentFrame(state.getGoalFrame().getReferenceFrame());
+            }
+         }
+
+         if (!showAdjustmentInteractables.get())
+            goalFeetPosesSelected.forEach(imBoolean -> imBoolean.set(false));
+
+         footstepPlannerGoalGizmo.getPathControlRingGizmo().update();
+         for (RobotSide side : RobotSide.values)
+         {
+            goalFeetGizmos.get(side).update();
+            goalFeetGraphics.get(side).setPose(goalFeetGizmos.get(side).getPose());
+         }
+      }
+   }
+
+   @Override
+   public void renderTreeViewIconArea()
+   {
+      super.renderTreeViewIconArea();
+
+      footstepsWidget.render(ImGui.getFrameHeight());
+      ImGui.sameLine();
+   }
+
+   @Override
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      if (state.getGoalFrame().isChildOfWorld())
+      {
+         if (!getDefinition().getIsManuallyPlaced())
+         {
+            footstepPlannerGoalGizmo.calculateVRPick(vrContext);
+         }
+      }
+   }
+
+   @Override
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      if (state.getGoalFrame().isChildOfWorld())
+      {
+         if (!getDefinition().getIsManuallyPlaced())
+         {
+            footstepPlannerGoalGizmo.processVRInput(vrContext);
          }
       }
    }
@@ -136,11 +243,28 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (frameIsChildOfWorld)
+      if (state.areFramesInWorld())
       {
-         for (RDXFootstepPlanActionFootstep footstep : footsteps)
+         if (getDefinition().getIsManuallyPlaced())
          {
-            footstep.calculate3DViewPick(input);
+            for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
+            {
+               footstep.calculate3DViewPick(input);
+            }
+         }
+         else
+         {
+            footstepPlannerGoalGizmo.calculate3DViewPick(input);
+            if (showAdjustmentInteractables.get())
+            {
+               for (RobotSide side : RobotSide.values)
+               {
+                  if (goalFeetPosesSelected.get(side).get())
+                  {
+                     goalFeetGizmos.get(side).calculate3DViewPick(input);
+                  }
+               }
+            }
          }
       }
    }
@@ -148,11 +272,29 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (frameIsChildOfWorld)
+      if (state.areFramesInWorld())
       {
-         for (RDXFootstepPlanActionFootstep footstep : footsteps)
+         if (getDefinition().getIsManuallyPlaced())
          {
-            footstep.process3DViewInput(input);
+            for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
+            {
+               footstep.process3DViewInput(input);
+            }
+         }
+         else
+         {
+            footstepPlannerGoalGizmo.process3DViewInput(input);
+            tooltip.setInput(input);
+            if (showAdjustmentInteractables.get())
+            {
+               for (RobotSide side : RobotSide.values)
+               {
+                  if (goalFeetPosesSelected.get(side).get())
+                  {
+                     goalFeetGizmos.get(side).process3DViewInput(input);
+                  }
+               }
+            }
          }
       }
    }
@@ -160,6 +302,9 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    protected void renderImGuiWidgetsInternal()
    {
+      ImGui.checkbox(labels.get("Show Adjustment Interactables"), showAdjustmentInteractables);
+      ImGui.sameLine();
+      executeWithNextActionWrapper.renderImGuiWidget();
       parentFrameComboBox.render();
 
       ImGui.pushItemWidth(80.0f);
@@ -167,26 +312,50 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       transferDurationWidget.renderImGuiWidget();
       ImGui.popItemWidth();
 
-      ImGui.text("Number of footsteps: %d".formatted(footsteps.size()));
+      manuallyPlaceStepsWrapper.renderImGuiWidget();
 
-      if (frameIsChildOfWorld) // Not allowing modification if not renderable
+      if (state.areFramesInWorld()) // Not allowing modification if not renderable
       {
-         ImGui.text("Add:");
-         for (RobotSide side : RobotSide.values)
+         if (getDefinition().getIsManuallyPlaced())
          {
-            ImGui.sameLine();
-            if (ImGui.button(labels.get(side.getPascalCaseName())))
-               userAddedFootstep.set(side);
-         }
-         if (!getState().getFootsteps().isEmpty())
-         {
-            ImGui.sameLine();
-            ImGui.text("Remove:");
-            ImGui.sameLine();
-            if (ImGui.button(labels.get("Last")))
+            ImGui.text("Number of footsteps: %d".formatted(manuallyPlacedFootsteps.size()));
+            ImGui.text("Add:");
+            for (RobotSide side : RobotSide.values)
             {
-               userRemovedFootstep.set();
+               ImGui.sameLine();
+               if (ImGui.button(labels.get(side.getPascalCaseName())))
+                  userAddedFootstep.set(side);
             }
+            if (!getState().getFootsteps().isEmpty())
+            {
+               ImGui.sameLine();
+               ImGui.text("Remove:");
+               ImGui.sameLine();
+               if (ImGui.button(labels.get("Last")))
+               {
+                  userRemovedFootstep.set();
+               }
+            }
+         }
+         else
+         {
+            for (RobotSide side : RobotSide.values)
+            {
+               ImGui.checkbox(labels.get("Edit Goal " + side.getPascalCaseName()), goalFeetPosesSelected.get(side));
+               if (side == RobotSide.LEFT)
+                  ImGui.sameLine();
+            }
+         }
+      }
+   }
+
+   public void render3DPanelImGuiOverlays()
+   {
+      if (!getDefinition().getIsManuallyPlaced())
+      {
+         if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getRingHovered())
+         {
+            tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(), state.getActionIndex(), getDefinition().getDescription()));
          }
       }
    }
@@ -194,11 +363,33 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (frameIsChildOfWorld)
+      if (state.areFramesInWorld())
       {
-         for (RDXFootstepPlanActionFootstep footstep : footsteps)
+         if (getDefinition().getIsManuallyPlaced())
          {
-            footstep.getVirtualRenderables(renderables, pool);
+            for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
+            {
+               footstep.getVirtualRenderables(renderables, pool);
+            }
+         }
+         else
+         {
+            footstepPlannerGoalGizmo.getVirtualRenderables(renderables, pool);
+            if (showAdjustmentInteractables.get())
+            {
+               for (RobotSide side : RobotSide.values)
+               {
+                  if (goalFeetPosesSelected.get(side).get())
+                  {
+                     goalFeetGizmos.get(side).getRenderables(renderables, pool);
+                  }
+               }
+            }
+            for (RobotSide side : RobotSide.values)
+            {
+               goalFeetGraphics.get(side).setHighlighted(footstepsWidget.getIsHovered().get(side));
+               goalFeetGraphics.get(side).getRenderables(renderables, pool);
+            }
          }
       }
    }
@@ -211,10 +402,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
    public void changeParentFrame(String newParentFrameName)
    {
-      getDefinition().getBasics().setParentFrameName(newParentFrameName);
+      getDefinition().setParentFrameName(newParentFrameName);
       for (FootstepPlanActionFootstepState footstepState : getState().getFootsteps())
       {
          footstepState.getSoleFrame().changeFrame(newParentFrameName);
       }
+   }
+
+   public ImBoolean getShowAdjustmentInteractables()
+   {
+      return showAdjustmentInteractables;
    }
 }

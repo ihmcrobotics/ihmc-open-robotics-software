@@ -122,21 +122,25 @@ public class RDXPose3DGizmo implements RenderableProvider
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
 
+   /** Maintains it's own frame in World. */
    public RDXPose3DGizmo()
    {
       this(ReferenceFrame.getWorldFrame());
    }
 
+   /** Maintains it's own frame in World with the given name. */
    public RDXPose3DGizmo(String gizmoFrameName)
    {
       this(gizmoFrameName, ReferenceFrame.getWorldFrame());
    }
 
+   /** Maintains it's own frame in the given parent frame. */
    public RDXPose3DGizmo(ReferenceFrame parentReferenceFrame)
    {
       this(ReferenceFrameMissingTools.computeFrameName(), parentReferenceFrame);
    }
 
+   /** Maintains it's own frame with the given name in the given parent frame. */
    public RDXPose3DGizmo(String gizmoFrameName, ReferenceFrame parentReferenceFrame)
    {
       RigidBodyTransform transformToParent = new RigidBodyTransform();
@@ -146,16 +150,19 @@ public class RDXPose3DGizmo implements RenderableProvider
       initialize(gizmoFrame, transformToParent);
    }
 
+   /** Wraps the given frame and updates it by modifying the given transform. */
    public RDXPose3DGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
    {
       initialize(gizmoFrame, gizmoTransformToParentFrameToModify);
    }
 
+   /** Maintains it's own frame in the given parent frame and updates it by modifying the given transform. */
    public RDXPose3DGizmo(RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame)
    {
       this(ReferenceFrameMissingTools.computeFrameName(), gizmoTransformToParentFrameToModify, parentReferenceFrame);
    }
 
+   /** Maintains it's own frame with the given name in the given parent frame and updates it by modifying the given transform. */
    public RDXPose3DGizmo(String gizmoFrameName, RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame)
    {
       ReferenceFrame gizmoFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(gizmoFrameName,

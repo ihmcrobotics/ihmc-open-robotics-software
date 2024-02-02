@@ -128,12 +128,6 @@ public class RDXLocomotionManager
       interactableFootstepPlan = new RDXInteractableFootstepPlan(controllerStatusTracker);
 
       // TODO remove ros from this module, and have it call from the higher level.
-      ros2Helper.subscribeViaCallback(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, regions ->
-      {
-         PlanarRegionsList planarRegionsList = getPlanarRegionListInWorld(regions);
-         footstepPlanning.setPlanarRegionsList(planarRegionsList);
-         interactableFootstepPlan.setPlanarRegionsList(planarRegionsList);
-      });
       ros2Helper.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, heightMap ->
       {
          footstepPlanning.setHeightMapData(heightMap);
@@ -141,15 +135,6 @@ public class RDXLocomotionManager
       });
 
       controllerFootstepQueueGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
-   }
-
-   private PlanarRegionsList getPlanarRegionListInWorld(FramePlanarRegionsListMessage message)
-   {
-      FramePlanarRegionsList framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(message);
-      PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList().copy();
-      planarRegionsList.applyTransform(framePlanarRegionsList.getSensorToWorldFrameTransform());
-
-      return planarRegionsList;
    }
 
    public void create(RDXBaseUI baseUI)

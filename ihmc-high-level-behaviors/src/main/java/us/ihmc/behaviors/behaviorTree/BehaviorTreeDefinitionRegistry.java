@@ -18,10 +18,10 @@ public class BehaviorTreeDefinitionRegistry
       new RegistryRecord(FootstepPlanActionDefinition.class, BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION),
       new RegistryRecord(HandPoseActionDefinition.class, BehaviorTreeStateMessage.HAND_POSE_ACTION),
       new RegistryRecord(HandWrenchActionDefinition.class, BehaviorTreeStateMessage.HAND_WRENCH_ACTION),
+      new RegistryRecord(ScrewPrimitiveActionDefinition.class, BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION),
       new RegistryRecord(PelvisHeightPitchActionDefinition.class, BehaviorTreeStateMessage.PELVIS_HEIGHT_PITCH_ACTION),
       new RegistryRecord(SakeHandCommandActionDefinition.class, BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION),
       new RegistryRecord(WaitDurationActionDefinition.class, BehaviorTreeStateMessage.WAIT_DURATION_ACTION),
-      new RegistryRecord(WalkActionDefinition.class, BehaviorTreeStateMessage.WALK_ACTION),
    };
 
    public static Class<?> getClassFromTypeName(String typeName)

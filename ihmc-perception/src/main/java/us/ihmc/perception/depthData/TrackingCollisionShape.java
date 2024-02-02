@@ -1,11 +1,7 @@
 package us.ihmc.perception.depthData;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
@@ -15,6 +11,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.depthData.collisionShapes.CollisionShape;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TrackingCollisionShape
 {
@@ -73,7 +72,7 @@ public class TrackingCollisionShape
 
       private TrackingCollisionShapeImpl(ReferenceFrame frame, CollisionShape shape)
       {
-         this.frame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("CollisionFrame", frame, shape.getPose());
+         this.frame = frame;
          this.shape = shape;
          this.shape3D = shape.getOrCreateShape3D();
          boundingBox = shape3D.getBoundingBox();
@@ -84,7 +83,8 @@ public class TrackingCollisionShape
 
       private void update()
       {
-         frame.getTransformToDesiredFrame(transform, ReferenceFrame.getWorldFrame());
+         transform.set(frame.getTransformToRoot());
+         transform.multiply(shape.getPose());
          transform.invert();
       }
 

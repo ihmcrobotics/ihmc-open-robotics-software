@@ -61,22 +61,7 @@ public interface FootstepSnapDataReadOnly
    /**
     * When using a height map, this is the root-mean-square error of the best-fit plane.
     */
-   double getRMSErrorHeightMap();
-
-   /**
-    * When using a height map, this returns the foothold area. If using planar regions, use the area of the polygon given by {@link #getCroppedFoothold()}
-    */
-   double getHeightMapArea();
-
-   /**
-    * Returns whether the footstep was snapped to the planar regions.
-    */
-   boolean getSnappedToPlanarRegions();
-
-   /**
-    * Returns whether the footstep was snapped to the height map.
-    */
-   boolean getSnappedToHeightMap();
+   double getSnapRMSError();
 
    default void packSnapAndWiggleTransform(RigidBodyTransform transformToPack)
    {

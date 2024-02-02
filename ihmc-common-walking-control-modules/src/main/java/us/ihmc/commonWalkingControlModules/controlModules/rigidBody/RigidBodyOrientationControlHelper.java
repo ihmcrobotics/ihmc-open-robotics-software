@@ -20,6 +20,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3Trajector
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
@@ -145,7 +146,7 @@ public class RigidBodyOrientationControlHelper
       if (enableFunctionGenerators)
       {
          functionGenerator = new YoFunctionGeneratorNew(prefix + "_FG", time, registry);
-         functionGeneratorAxis = new YoEnum<>(prefix + "_FGAxis", registry, Axis3D.class);
+         functionGeneratorAxis = new YoEnum<>(prefix + "_FGAxis", registry, Axis3D.class, true);
       }
       else
       {
@@ -177,13 +178,13 @@ public class RigidBodyOrientationControlHelper
    private void setDefaultControlFrame()
    {
       controlFrameOrientation.setFromReferenceFrame(defaultControlFrame);
-      feedbackControlCommand.setBodyFixedOrientationToControl(controlFrameOrientation);
+      feedbackControlCommand.setControlFrameFixedInEndEffector(controlFrameOrientation);
    }
 
    private void setControlFrameOrientation(Orientation3DReadOnly controlFrameOrientationInBodyFrame)
    {
       controlFrameOrientation.set(controlFrameOrientationInBodyFrame);
-      feedbackControlCommand.setBodyFixedOrientationToControl(controlFrameOrientation);
+      feedbackControlCommand.setControlFrameFixedInEndEffector(controlFrameOrientation);
    }
 
    public static void modifyControlFrame(FrameQuaternionBasics desiredOrientationToModify, QuaternionReadOnly previousControlFrameOrientation,
@@ -196,7 +197,7 @@ public class RigidBodyOrientationControlHelper
    public void holdCurrent()
    {
       clear();
-      desiredOrientation.setIncludingFrame(controlFrameOrientation);
+      desiredOrientation.setIncludingFrame(bodyFrame, controlFrameOrientation);
       queueInitialPoint(desiredOrientation);
    }
 
@@ -493,7 +494,7 @@ public class RigidBodyOrientationControlHelper
          desiredVelocity.addY(functionGenerator.getValueDot());
          feedForwardAcceleration.addY(functionGenerator.getValueDDot());
       }
-      else
+      else if (functionGeneratorAxis.getValue() == Axis3D.Z)
       {
          desiredOrientation.appendYawRotation(functionGenerator.getValue());
          desiredVelocity.addZ(functionGenerator.getValueDot());
@@ -573,6 +574,16 @@ public class RigidBodyOrientationControlHelper
          return false;
       }
       return trajectoryGenerator.isDone();
+   }
+
+   public void resetFunctionGenerator()
+   {
+      if (functionGenerator != null)
+      {
+         functionGenerator.setMode(YoFunctionGeneratorMode.OFF);
+         functionGenerator.reset();
+         functionGeneratorAxis.set(null);
+      }
    }
 
    public double getLastTrajectoryPointTime()

@@ -22,8 +22,10 @@ wget -nc --no-check-certificate 'https://docs.google.com/uc?export=download&id=1
 # cup
 wget -nc --no-check-certificate 'https://docs.google.com/uc?export=download&id=1ClRdu_69-Dw-3MSO_iAs1ewzFbIr4rvK' -O models/cup_cup_v1_sym_12_140.pth
 # mug
-wget -nc --no-check-certificate 'https://docs.google.com/uc?export=download&id=17ER2sw7rzTcpRNy3FsjKGRfI-gEX2I_R' -O models/cup_mug_v1_140.pth
+wget -nc --no-check-certificate 'http://10.100.3.250/cup_140.pth' -O models/cup_mug_v1_140.pth
 # laptop
 wget -nc --no-check-certificate 'https://docs.google.com/uc?export=download&id=1IFFuEevJnB4TdOJW-wgKADDlbZ_4bbpf' -O models/laptop_v1_140.pth
 # shoe
 wget -nc --no-check-certificate 'https://docs.google.com/uc?export=download&id=16ybW3O1-86LzGxWzP6vS_0Dv6BNTA1p3' -O models/shoe_v1_140.pth
+# drill
+wget -nc --no-check-certificate 'http://10.100.3.250/drill_85.pth' -O models/drill_85.pth
