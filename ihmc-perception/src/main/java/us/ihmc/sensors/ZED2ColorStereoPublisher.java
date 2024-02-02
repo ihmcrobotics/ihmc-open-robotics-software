@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.zedDriver.ZEDOpenDriver;
 import us.ihmc.perception.zedDriver.ZedDriverNativeLibrary;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
