@@ -11,7 +11,7 @@ public class BWCPlanarWalkingController implements Controller
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private BWCPlanarWalkingRobot controllerRobot;
+   private final BWCPlanarWalkingRobot controllerRobot;
 
    private final SideDependentList<PDController> kneeLengthControllers = new SideDependentList<>();
    private final SideDependentList<YoDouble> desiredKneeForces = new SideDependentList<>();
@@ -66,7 +66,7 @@ public class BWCPlanarWalkingController implements Controller
          desiredKneeForces.get(robotSide).set(desiredKneeForce);
 
          // set the desired force to the knee joint to hold the leg at the desired length
-         controllerRobot.getKneeJoint(robotSide).setTau(desiredKneeForce);
+         controllerRobot.getKneeJoint(robotSide).setTau(-desiredKneeForce);
       }
    }
 }
