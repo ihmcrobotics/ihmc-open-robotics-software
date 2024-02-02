@@ -31,7 +31,7 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
    private final DomainFactory.PubSubImplementation pubSubImplementation;
    private final ROS2Topic<FootstepDataListMessage> topic;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean subscribed = new ImBoolean(false);
+   private boolean subscribed = false;
    private ROS2Node ros2Node;
    private final Object syncObject = new Object();
    private AtomicReference<FootstepDataListMessage> footstepDataListMessage = new AtomicReference<>(null);
@@ -43,7 +43,7 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
 
-      super.setActivenessChangeCallback(isActive ->
+      setActivenessChangeCallback(isActive ->
       {
          if (isActive && ros2Node == null)
          {
@@ -58,7 +58,7 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
 
    private void subscribe()
    {
-      subscribed.set(true);
+      subscribed = true;
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, StringTools.titleToSnakeCase(titleBeforeAdditions));
       ROS2Tools.createCallbackSubscription(ros2Node, this.topic, this::queueFootstepDataListMessage);
    }
@@ -108,7 +108,7 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
 
    private void unsubscribe()
    {
-      subscribed.set(false);
+      subscribed = false;
       if (ros2Node != null)
       {
          ros2Node.destroy();
@@ -118,6 +118,6 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
 
    public boolean isSubscribed()
    {
-      return subscribed.get();
+      return subscribed;
    }
 }

@@ -16,7 +16,6 @@ import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
@@ -41,12 +40,12 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
 {
    private final String titleBeforeAdditions;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean subscribed = new ImBoolean(false);
    private final ImBoolean useSensorColor = new ImBoolean(true);
    private RDXColorGradientMode gradientMode = RDXColorGradientMode.WORLD_Z;
    private final ImBoolean useSinusoidalGradientPattern = new ImBoolean(true);
    private final ImFloat pointSizeScale = new ImFloat(1.0f);
    private final ImInt levelOfColorDetail = new ImInt(0);
+   private boolean subscribed = false;
 
    private final RDXROS2ColoredPointCloudVisualizerDepthChannel depthChannel;
    private final RDXROS2ColoredPointCloudVisualizerColorChannel colorChannel;
@@ -78,7 +77,8 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
       this.pubSubImplementation = pubSubImplementation;
       depthChannel = new RDXROS2ColoredPointCloudVisualizerDepthChannel(depthTopic);
       colorChannel = new RDXROS2ColoredPointCloudVisualizerColorChannel(colorTopic);
-      super.setActivenessChangeCallback(isActive ->
+
+      setActivenessChangeCallback(isActive ->
       {
          if (isActive && realtimeROS2Node == null)
             subscribe();
@@ -89,7 +89,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
 
    private void subscribe()
    {
-      subscribed.set(true);
+      subscribed = true;
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
       depthChannel.subscribe(realtimeROS2Node, imageMessagesSyncObject);
       colorChannel.subscribe(realtimeROS2Node, imageMessagesSyncObject);
@@ -111,7 +111,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    {
       super.update();
 
-      if (subscribed.get() && isActive())
+      if (subscribed && isActive())
       {
          synchronized (imageMessagesSyncObject)
          {
@@ -277,7 +277,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
 
    private void unsubscribe()
    {
-      subscribed.set(false);
+      subscribed = false;
       if (realtimeROS2Node != null)
       {
          realtimeROS2Node.destroy();
@@ -287,7 +287,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
 
    public boolean isSubscribed()
    {
-      return subscribed.get();
+      return subscribed;
    }
 
    public void setPointSizeScale(float pointSizeScale)

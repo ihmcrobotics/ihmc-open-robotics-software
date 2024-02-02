@@ -48,7 +48,7 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
 
-      super.setActivenessChangeCallback(isAlive ->
+      setActivenessChangeCallback(isAlive ->
       {
          if (isAlive && realtimeROS2Node == null)
          {

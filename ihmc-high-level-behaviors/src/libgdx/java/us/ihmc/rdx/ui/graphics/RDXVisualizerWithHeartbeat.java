@@ -11,8 +11,6 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 public class RDXVisualizerWithHeartbeat
@@ -21,7 +19,7 @@ public class RDXVisualizerWithHeartbeat
    @Nullable
    private ROS2Heartbeat heartbeat = null;
    // List of heartbeats that should be set alive when this class's heartbeat is alive
-   private final List<RDXVisualizerWithHeartbeat> dependentVisualizers;
+   private final RDXVisualizerWithHeartbeat[] dependentVisualizers;
 
    public RDXVisualizerWithHeartbeat(@Nullable ROS2Node node,
                                      @Nullable ROS2Topic<Empty> heartbeatTopic,
@@ -29,7 +27,7 @@ public class RDXVisualizerWithHeartbeat
                                      RDXVisualizerWithHeartbeat... dependentVisualizers)
    {
       this.visualizer = visualizer;
-      this.dependentVisualizers = Arrays.asList(dependentVisualizers);
+      this.dependentVisualizers = dependentVisualizers;
       if (heartbeatTopic != null)
       {
          heartbeat = new ROS2Heartbeat(node, heartbeatTopic);

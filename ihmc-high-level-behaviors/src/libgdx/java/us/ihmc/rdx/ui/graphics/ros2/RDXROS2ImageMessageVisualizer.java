@@ -37,7 +37,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
    private final ROS2Topic<ImageMessage> topic;
    private RealtimeROS2Node realtimeROS2Node;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean subscribed = new ImBoolean(false);
+   private boolean subscribed = false;
    private final ImageMessage imageMessage = new ImageMessage();
    private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
@@ -61,7 +61,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
 
-      super.setActivenessChangeCallback(isActive ->
+      setActivenessChangeCallback(isActive ->
       {
          if (isActive && realtimeROS2Node == null)
             subscribe();
@@ -72,7 +72,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
 
    private void subscribe()
    {
-      subscribed.set(true);
+      subscribed = true;
       this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
       ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, ROS2QosProfile.BEST_EFFORT(), this::queueRenderImage);
       realtimeROS2Node.spin();
@@ -179,7 +179,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
    public void renderImGuiWidgets()
    {
       super.renderImGuiWidgets();
-      if (super.isActive())
+
       ImGui.text(topic.getName());
       if (getHasReceivedOne())
       {
@@ -189,14 +189,14 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
 
    private void unsubscribe()
    {
-      subscribed.set(false);
+      subscribed = false;
       realtimeROS2Node.destroy();
       realtimeROS2Node = null;
    }
 
    public boolean isSubscribed()
    {
-      return subscribed.get();
+      return subscribed;
    }
 
    @Override
