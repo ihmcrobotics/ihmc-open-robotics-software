@@ -223,23 +223,27 @@ def analyzer_main():
 def kitti_main():
     home = os.path.expanduser('~')
     path = home + '/.ihmc/logs/perception/'
+    path_quantum = '/home/quantum/Workspace/Storage/Other/Temp/dataset/'
+    path_downloads = '/home/bmishra/Downloads/'
 
-    timestamps_path = '/home/quantum/Workspace/Storage/Other/Temp/dataset/sequences/00/times.txt'
-    poses_path = '/home/quantum/Workspace/Storage/Other/Temp/dataset/data_odometry_poses/poses/00.txt'
+    timestamps_path = path_downloads + '00/times.txt'
+    poses_path = path_downloads + 'dataset/poses/00.txt'
+    left_path = path_downloads + '00/image_0/'
+    right_path = path_downloads + '00/image_1/'
 
-    dataset_paths = ['/home/quantum/Workspace/Storage/Other/Temp/dataset/sequences/00/image_0/']
-    group_names = ['/kitti/left/']
+    dataset_paths = [left_path, right_path]
+    group_names = ['/kitti/left/', '/kitti/right/']
 
-    # data = h5py.File(path + 'KITTI_Dataset_00.hdf5', 'w')
+    data = h5py.File(path + 'KITTI_Dataset_00.hdf5', 'w')
 
-    # data = insert_image_datasets(data, dataset_paths, group_names)
-    # data = insert_timestamps(data, timestamps_path, '/kitti/ground_truth/')
-    # data = insert_poses(data, poses_path, '/kitti/time/')
+    data = insert_image_datasets(data, dataset_paths, group_names)
+    data = insert_timestamps(data, timestamps_path, '/kitti/ground_truth/')
+    data = insert_poses(data, poses_path, '/kitti/time/')
 
-    # data.close()
+    data.close()
 
-    data = h5py.File(path + 'KITTI_Dataset_00.hdf5', 'r')
-    print_file_info(data, 'KITTI_Dataset_00.hdf5')
+    # data = h5py.File(path + 'KITTI_Dataset_00.hdf5', 'r')
+    # print_file_info(data, 'KITTI_Dataset_00.hdf5')
 
 if __name__ == '__main__':
 
@@ -255,6 +259,7 @@ if __name__ == '__main__':
     parser.add_argument("--dst", help="destination file name", type=str)
     parser.add_argument("--rename", help="rename file to include sensors used", type=str)
     parser.add_argument("--renameAll", help="renames ALL files in the logs/perception directory", action="store_true")
+    parser.add_argument("--kitti", help="generate KITTI dataset", action="store_true")
 
     args = parser.parse_args()
     home = os.path.expanduser('~')
@@ -290,3 +295,6 @@ if __name__ == '__main__':
     if args.renameAll:
         files = sorted(os.listdir(path))
         rename_all_files(path, files)
+
+    if args.kitti:
+        kitti_main()
