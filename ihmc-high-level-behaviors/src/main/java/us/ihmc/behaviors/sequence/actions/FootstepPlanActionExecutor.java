@@ -40,8 +40,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
-   /** Sometimes the controller can take a while to report that it's completed walking. */
-   public static final double EXTRA_TIME_ALLOWED = 5.0;
 
    private final FootstepPlanActionState state;
    private final FootstepPlanActionDefinition definition;
@@ -339,7 +337,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
       for (RobotSide side : RobotSide.values)
       {
-         trackingCalculators.get(side).computeExecutionTimings(nominalExecutionDuration, nominalExecutionDuration + EXTRA_TIME_ALLOWED);
+         trackingCalculators.get(side).computeExecutionTimings(nominalExecutionDuration);
          trackingCalculators.get(side).computePoseTrackingData(commandedGoalFeetPoses.get(side), syncedFeetPoses.get(side));
          trackingCalculators.get(side).factorInR3Errors(POSITION_TOLERANCE);
          trackingCalculators.get(side).factoryInSO3Errors(ORIENTATION_TOLERANCE);
