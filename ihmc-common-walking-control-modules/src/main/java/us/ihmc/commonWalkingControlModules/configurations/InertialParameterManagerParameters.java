@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 import java.util.Set;
 
@@ -12,5 +11,6 @@ public interface InertialParameterManagerParameters
 
    public abstract DMatrixRMaj getURDFParameters(Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets);
 
-   public abstract double getBreakFrequencyForFiltering();
+   public abstract double getBreakFrequencyForTorqueFiltering();
+   public abstract double getBreakFrequencyForEstimateFiltering();
 }
