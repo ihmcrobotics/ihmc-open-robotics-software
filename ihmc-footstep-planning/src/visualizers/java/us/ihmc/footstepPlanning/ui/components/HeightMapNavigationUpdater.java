@@ -23,6 +23,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.depthData.CollisionShapeTester;
@@ -139,7 +140,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
                                              });
 
       footstepPlannerParameters.setIdealFootstepLength(0.28);
-      planningModule = new FootstepPlanningModule("HeightMap", new DefaultVisibilityGraphParameters(), new AStarBodyPathPlannerParameters(), footstepPlannerParameters, new DefaultSwingPlannerParameters(), walkingControllerParameters, footPolygons, null);
+      planningModule = new FootstepPlanningModule("HeightMap", new AStarBodyPathPlannerParameters(), footstepPlannerParameters, new DefaultSwingPlannerParameters(), walkingControllerParameters, footPolygons, null);
       logger = new FootstepPlannerLogger(planningModule);
       planningModule.addCustomTerminationCondition((plannerTime, iterations, bestFinalStep, bestSecondToLastStep, bestPathSize) -> iterations > 1);
 
@@ -289,8 +290,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
          request.setPlanBodyPath(false);
          request.setPerformAStarSearch(true);
-         request.setHeightMapData(null);
-         request.setPlanarRegionsList(planarRegions.get());
+         request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegions.get())));
          request.setRequestedInitialStanceSide(lastStepSide);
 
          LogTools.info("Planning step");

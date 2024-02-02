@@ -1,11 +1,11 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
-import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
-import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
+import us.ihmc.behaviors.sequence.TrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
@@ -16,7 +16,6 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.tools.NonWallTimer;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrientationActionState, ChestOrientationActionDefinition>
@@ -26,10 +25,10 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    private final ChestOrientationActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final NonWallTimer executionTimer = new NonWallTimer();
    private final FramePose3D desiredChestPose = new FramePose3D();
    private final FramePose3D syncedChestPose = new FramePose3D();
-   private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
+   private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
+   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
    public ChestOrientationActionExecutor(long id,
                                          CRDTInfo crdtInfo,
@@ -51,7 +50,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    {
       super.update();
 
-      executionTimer.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
+      trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
       state.setCanExecute(state.getChestFrame().isChildOfWorld());
    }
@@ -76,7 +75,10 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
          message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
 
          ros2ControllerHelper.publishToController(message);
-         executionTimer.reset();
+
+         trackingCalculator.reset();
+
+         state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
 
          desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
          syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
@@ -91,30 +93,42 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    @Override
    public void updateCurrentlyExecuting()
    {
+      trackingCalculator.computeExecutionTimings(state.getNominalExecutionDuration());
+      state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
+
+      if (trackingCalculator.getHitTimeLimit())
+      {
+         state.setIsExecuting(false);
+         state.setFailed(true);
+         LogTools.error("Task execution timed out. Publishing stop all trajectories message.");
+         ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+         return;
+      }
+
       if (state.getChestFrame().isChildOfWorld())
       {
          desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
          syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
 
-         boolean wasExecuting = state.getIsExecuting();
-         state.setIsExecuting(!completionCalculator.isComplete(desiredChestPose,
-                                                               syncedChestPose,
-                                                               Double.NaN,
-                                                               ORIENTATION_TOLERANCE,
-                                                               getDefinition().getTrajectoryDuration(),
-                                                               executionTimer,
-                                                               getState(),
-                                                               BehaviorActionCompletionComponent.ORIENTATION));
+         trackingCalculator.computePoseTrackingData(desiredChestPose, syncedChestPose);
+         trackingCalculator.factoryInSO3Errors(ORIENTATION_TOLERANCE);
 
-         state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
-         state.setElapsedExecutionTime(executionTimer.getElapsedTime());
+         boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
+         meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
          state.getCurrentPose().getValue().set(syncedChestPose);
          state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
 
-         if (!state.getIsExecuting() && wasExecuting && !getDefinition().getHoldPoseInWorldLater())
+         if (meetsDesiredCompletionCriteria)
          {
-            disengageHoldPoseInWorld();
+            state.setIsExecuting(false);
+
+            if (!getDefinition().getHoldPoseInWorldLater())
+            {
+               disengageHoldPoseInWorld();
+            }
          }
+
+         state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
       }
    }
 
@@ -131,7 +145,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
                                                                   syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame()));
       long frameId = MessageTools.toFrameId(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
-
+      LogTools.info("Publishing chest trajectory message to disengage holding hand in taskspace");
       ros2ControllerHelper.publishToController(message);
    }
 }
