@@ -257,7 +257,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          {
             for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
             {
-               if (i == 0 || i == footstepPlan.getNumberOfSteps() - 1)
+               if (i == 0)
                   footstepPlan.getFootstep(i).setTransferDuration(getDefinition().getTransferDuration() / 2.0);
                else
                   footstepPlan.getFootstep(i).setTransferDuration(getDefinition().getTransferDuration());
@@ -278,6 +278,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlanToExecute,
                                                                                                                     definition.getSwingDuration(),
                                                                                                                     definition.getTransferDuration());
+      double finalTransferDuration = 0.01; // We don't want any unecessary pauses at the end; but it can't be 0
+      footstepDataListMessage.setFinalTransferDuration(finalTransferDuration);
       footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       LogTools.info("Commanding {} footsteps", footstepDataListMessage.getFootstepDataList().size());
@@ -291,7 +293,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                                                                          definition.getSwingDuration(),
                                                                                          walkingControllerParameters.getDefaultInitialTransferTime(),
                                                                                          definition.getTransferDuration(),
-                                                                                         walkingControllerParameters.getDefaultFinalTransferTime());
+                                                                                         finalTransferDuration);
       for (RobotSide side : RobotSide.values)
       {
          indexOfLastFoot.put(side, -1);
