@@ -11,8 +11,8 @@ class PointLandmark
 
       PointLandmark(Eigen::Vector3f point3D, Eigen::Vector2f measurement2D, int id) : _point3D(point3D), _measurement2D(measurement2D), _id(id){};
 
-      PointLandmark(Eigen::Vector3f point3D, Eigen::Vector2f measurement2D, cv::Mat descriptor, int id) 
-         : _point3D(point3D), _measurement2D(measurement2D), _descriptor(descriptor), _id(id){};
+      PointLandmark(Eigen::Vector3f point3D, Eigen::Vector2f measurement2D, cv::Mat descriptor, int id)
+         : _descriptor(descriptor), _point3D(point3D), _measurement2D(measurement2D), _id(id){};
 
       const Eigen::Vector3f& GetPoint3D() const {return _point3D;}
 
@@ -30,7 +30,7 @@ class PointLandmark
       cv::Mat _descriptor;
       Eigen::Vector3f _point3D;
       Eigen::Vector2f _measurement2D;
-      
+
       int _id = -1;
 
 };

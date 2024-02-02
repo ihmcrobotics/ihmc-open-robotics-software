@@ -65,18 +65,18 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
       // Keyframe Insertion Check. Triangulate if Keypoint
       if (trackedPose.block<3, 1>(0, 3).norm() > 1)
       {
-         InsertKeyframe();
+//         InsertKeyframe();
 
-         TriangulateLandmarks(_keyframes, _landmarks);
+//         TriangulateLandmarks(_keyframes, _landmarks);
       }
       
       PrintKeyframeIDs();
 
       // Visualization and Logging Only --------------------------------------------
-      std::cout << "Camera Pose: " << std::endl << pose << std::endl;
-      cv::Mat outImage;
-      OpenCVTools::DrawMatchesDouble(_lastKeyframeImage, kpPrev, leftImage, _kpCurLeft, matches, outImage);
-      OpenCVTools::DisplayImage("TestMatchKeypointsMonocular", outImage, 1);
+//      std::cout << "Camera Pose: " << std::endl << pose << std::endl;
+//      cv::Mat outImage;
+//      OpenCVTools::DrawMatchesDouble(_lastKeyframeImage, kpPrev, leftImage, _kpCurLeft, matches, outImage);
+//      OpenCVTools::DisplayImage("TestMatchKeypointsMonocular", outImage, 1);
    }
    printf("Total Keyframes: %ld\n", _keyframes.size());fflush(stdout);
 
@@ -228,8 +228,8 @@ void VisualOdometry::TriangulateLandmarks(const Keyframe& kfPrev, const Keyframe
    TriangulateLandmarksStereoNormal(_kpCurLeft, _kpCurRight, _descCurLeft, _curMatchesStereo, keypointIDs, _curPoints3D);
    printf("Total Landmarks Triangulated: %ld\n", _curPoints3D.size());fflush(stdout);
 
-   _lastKeyframeImage = leftImage.clone();
-   InsertKeyframe(eigenPose, _descCurLeft, _kpCurLeft, keypointIDs);
+   _lastKeyframeImage = kfPrev.leftImage.clone();
+   // InsertKeyframe(eigenPose, _descCurLeft, _kpCurLeft, keypointIDs);
    
    AppendLandmarks(_curPoints3D);
 }
@@ -460,7 +460,7 @@ cv::Mat VisualOdometry::Initialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRig
       std::cout << "Pose:" << std::endl << eigPose << std::endl;
       std::cout << "Determinant: " << eigPose.determinant() << std::endl;
       
-      InsertKeyframe(eigPose, _descCurLeft, _kpCurLeft, keypointIDs);      
+      InsertKeyframe(initialRelativePose, _descCurLeft, _kpCurLeft, keypointIDs);      
       AppendLandmarks(_curPoints3D);
 
       return pose;
@@ -513,7 +513,7 @@ Eigen::Matrix4f VisualOdometry::TrackCameraPose(const KeyPointVec& kp, cv::Mat& 
       
       if(hasValidZ) 
       {
-         candidateMapPoints.emplace_back(landmark);
+         candidateMapPoints.emplace_back(std::move(landmark.second));
          candidateDescMat.push_back(landmark.second._descriptor);
       }
    }
@@ -529,7 +529,6 @@ Eigen::Matrix4f VisualOdometry::TrackCameraPose(const KeyPointVec& kp, cv::Mat& 
    Point3fVec points3d;
    for (auto match: matchesToMap)
    {
-      cv::Point2f point = kp[match.trainIdx].pt;
       PointLandmark landmark = candidateMapPoints[match.queryIdx];
 
       points2d.emplace_back(cv::Point2f(kp[match.trainIdx].pt));
@@ -539,7 +538,6 @@ Eigen::Matrix4f VisualOdometry::TrackCameraPose(const KeyPointVec& kp, cv::Mat& 
    // Estimate world-frame camera pose using PnP
    cv::Mat mask;
    cv::Mat cameraWorldPose = EstimateMotionPnP(points2d, points3d, mask, _leftCamera);
-   cv::Mat cameraWorldPose;
 
    Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPose(reinterpret_cast<float *>(cameraWorldPose.data));
    eigenPose.transposeInPlace();
@@ -589,6 +587,6 @@ void VisualOdometry::AppendLandmarks(const PointLandmarkVec& landmarks)
 {
    for(auto landmark : landmarks)
    {
-      _landmarks[landmark.GetLandmarkID()] = std::move(landmark);
+      _landmarks.emplace(landmark.GetLandmarkID(), std::move(landmark));
    }
 }

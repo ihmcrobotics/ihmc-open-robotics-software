@@ -20,14 +20,13 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-//import us.ihmc.log.LogTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.ImageMat;
 import us.ihmc.perception.ImageTools;
 import us.ihmc.perception.VisualSLAMModule;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -63,8 +62,8 @@ public class RDXVisualSLAMDemo
 
    private ScheduledFuture<?> scheduledFuture = null;
 
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
-   private final ImGuiPanel panel = new ImGuiPanel("Visual SLAM");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
+   private final RDXPanel panel = new RDXPanel("Visual SLAM");
    private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
    private final ArrayList<ModelInstance> groundTruthPoseModels = new ArrayList<>();
    private ModelInstance modelInstance;
