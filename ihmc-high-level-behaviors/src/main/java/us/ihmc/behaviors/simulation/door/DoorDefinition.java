@@ -1,6 +1,5 @@
-package us.ihmc.perception.sceneGraph.multiBodies.door;
+package us.ihmc.behaviors.simulation.door;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -8,6 +7,10 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.scs2.definition.robot.*;
 import us.ihmc.scs2.definition.state.OneDoFJointState;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletMultiBodyLinkCollider;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletRobot;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimPrismaticJoint;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
@@ -27,6 +30,8 @@ import static us.ihmc.perception.sceneGraph.multiBodies.door.DoorModelParameters
  */
 public class DoorDefinition extends RobotDefinition
 {
+   public static final String DOOR_ROBOT_NAME = "door";
+
    private SixDoFJointState initialSixDoFState;
    private OneDoFJointState initialHingeState;
    private OneDoFJointState initialLeverState;
@@ -36,7 +41,7 @@ public class DoorDefinition extends RobotDefinition
 
    public DoorDefinition()
    {
-      super("door");
+      super(DOOR_ROBOT_NAME);
    }
 
    public DoorPanelDefinition getDoorPanelDefinition()
@@ -132,6 +137,22 @@ public class DoorDefinition extends RobotDefinition
 
          doorBoltJoint.setTau(-errorQ - d * errorQd);
       });
+   }
+
+   public static void setupFrictionCoefficients(SimulationSession simulationSession)
+   {
+      if (simulationSession.getPhysicsEngine() instanceof BulletPhysicsEngine bulletPhysicsEngine)
+      {
+         for (BulletRobot bulletRobot : bulletPhysicsEngine.getBulletRobots())
+         {
+            if (bulletRobot.getName().equals(DOOR_ROBOT_NAME))
+            {
+               // The bolt should be slippery
+               BulletMultiBodyLinkCollider boltLinkCollider = bulletRobot.getBulletMultiBodyRobot().getBulletMultiBodyLinkCollider(3);
+               boltLinkCollider.setFriction(0.001);
+            }
+         }
+      }
    }
 
    public SixDoFJointState getInitialSixDoFState()

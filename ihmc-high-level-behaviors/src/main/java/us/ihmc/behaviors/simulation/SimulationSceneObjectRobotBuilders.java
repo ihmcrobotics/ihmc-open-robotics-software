@@ -3,7 +3,7 @@ package us.ihmc.behaviors.simulation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.perception.sceneGraph.multiBodies.door.DoorDefinition;
+import us.ihmc.behaviors.simulation.door.DoorDefinition;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.TableModelParameters;
 import us.ihmc.scs2.simulation.robot.Robot;

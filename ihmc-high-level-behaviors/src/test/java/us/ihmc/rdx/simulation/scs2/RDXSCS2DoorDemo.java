@@ -1,21 +1,16 @@
 package us.ihmc.rdx.simulation.scs2;
 
-import imgui.type.ImDouble;
 import us.ihmc.behaviors.simulation.FlatGroundDefinition;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.perception.sceneGraph.multiBodies.door.DoorDefinition;
+import us.ihmc.behaviors.simulation.door.DoorDefinition;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.simulation.scs2.robots.RDXDoorWidgets;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.scs2.simulation.SimulationSession;
-import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletMultiBodyLinkCollider;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
-import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletRobot;
 import us.ihmc.scs2.simulation.robot.Robot;
-import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
 
 /**
  * An SCS 2 simulation of a door hinged on a frame with a lever handle.
@@ -23,13 +18,8 @@ import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
 public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDouble hingeTorque = new ImDouble();
-   private final ImDouble leverTorque = new ImDouble();
    private RDXSCS2RestartableSimulationSession rdxSimulationSession;
-   private SimRevoluteJoint doorHingeJoint;
-   private SimRevoluteJoint doorLeverJoint;
-   private BulletRobot bulletRobot;
+   private final RDXDoorWidgets doorWidgets = new RDXDoorWidgets();
 
    public RDXSCS2DoorDemo()
    {
@@ -48,13 +38,11 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
       rdxSimulationSession.setSessionBuilder(this::buildSession);
       rdxSimulationSession.getAdditionalImGuiWidgets().add(() ->
       {
-         ImGuiTools.sliderDouble(labels.get("Hinge torque"), hingeTorque, -100.0, 100.0);
-         ImGuiTools.sliderDouble(labels.get("Lever torque"), leverTorque, -2.0, 2.0);
+         doorWidgets.renderImGuiWidgets();
       });
       rdxSimulationSession.getOnSessionStartedRunnables().add(() ->
       {
-         hingeTorque.set(0.0);
-         leverTorque.set(0.0);
+         doorWidgets.zeroTorques();
          rdxSimulationSession.getBulletPhysicsDebugger().setUpdateDebugDrawings(true);
          rdxSimulationSession.getSession().runTick();
       });
@@ -90,30 +78,15 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
       doorDefinition.build();
 
       // Pull door
-      //            doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(1.0, -0.5, 0.01));
+      //  doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(1.0, -0.5, 0.01));
 
       // Push door
       doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(Math.PI, 0.0, 0.0), new Point3D(1.3, 0.5, 0.01));
 
       Robot doorRobot = simulationSession.addRobot(doorDefinition);
-      doorDefinition.applyPDController(doorRobot);
-
-      bulletPhysicsEngine.getGlobalBulletMultiBodyJointParameters().setJointDisableParentCollision(true);
-
-      bulletRobot = bulletPhysicsEngine.getBulletRobots().get(0);
-
-      // The bolt should be slippery
-      BulletMultiBodyLinkCollider boltLinkCollider = bulletRobot.getBulletMultiBodyRobot().getBulletMultiBodyLinkCollider(3);
-      boltLinkCollider.setFriction(0.001);
-
-      doorHingeJoint = (SimRevoluteJoint) doorRobot.getJoint("doorHingeJoint");
-      doorLeverJoint = (SimRevoluteJoint) doorRobot.getJoint("doorLeverJoint");
-
-      doorRobot.addController(() ->
-      {
-         doorHingeJoint.setTau(hingeTorque.get());
-         doorLeverJoint.setTau(doorLeverJoint.getTau() + leverTorque.get());
-      });
+      DoorDefinition.applyPDController(doorRobot);
+      DoorDefinition.setupFrictionCoefficients(simulationSession);
+      doorWidgets.initialize(doorRobot);
 
       simulationSession.addTerrainObject(new FlatGroundDefinition());
 
