@@ -370,7 +370,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          rootJointVelocity.set(i, doubleFilteredRootJointAccelerations[i].getValue());
       }
       // TODO: for some reason, doing this tanks performance of the filter. Why?
-//      regressorModelJoints.get(0).setJointAcceleration(0, rootJointVelocity);
+      regressorModelJoints.get(0).setJointAcceleration(0, rootJointVelocity);
 
       regressorRobotModel.getRootJoint().updateFramesRecursively();
    }
