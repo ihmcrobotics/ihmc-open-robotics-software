@@ -2,24 +2,33 @@ package us.ihmc.perception.YOLOv8;
 
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
+import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 
 import java.util.EnumMap;
 import java.util.List;
 
-
-// FIXME: Getting core dump somewhere here
 public class YOLOv8DetectionResults
 {
+   private final static Stopwatch totalWatch = new Stopwatch();
+   private final static Stopwatch floatWatch = new Stopwatch();
+   private double floatTime = 0.0;
+   private final static Stopwatch booleanWatch = new Stopwatch();
+   private double booleanTime = 0.0;
+
    private final List<YOLOv8Detection> detections;
    private final MatVector outputBlobs;
    private final RawImage detectionImage;
    private final FloatIndexer outputMasksIndexer;
    private final EnumMap<YOLOv8DetectableObject, Mat> objectMasks = new EnumMap<>(YOLOv8DetectableObject.class);
 
+   private final int maskOpenCVType;
    private final int numberOfMasks;
    private final int maskWidth;
    private final int maskHeight;
@@ -35,6 +44,7 @@ public class YOLOv8DetectionResults
       this.detectionImage = detectionImage.get();
       this.outputMasksIndexer = outputBlobs.get(1).createIndexer();
 
+      maskOpenCVType = outputBlobs.get(1).col(0).type();
       numberOfMasks = (int) outputMasksIndexer.size(1);
       maskHeight = (int) outputMasksIndexer.size(2);
       maskWidth = (int) outputMasksIndexer.size(3);
@@ -68,11 +78,8 @@ public class YOLOv8DetectionResults
                              detectionImage.getOrientation());
       }
 
-      boolean foundObject = false;
-      int rowSize = (int) outputMasksIndexer.size(2);
-      int columnSize = (int) outputMasksIndexer.size(3);
-      Mat maskBooleanMat = new Mat(rowSize, columnSize, opencv_core.CV_8UC1, new Scalar(0.0));
-
+      totalWatch.start();
+      Mat maskBooleanMat = null;
       if (!detections.isEmpty())
       {
          for (YOLOv8Detection detection : detections)
@@ -80,15 +87,16 @@ public class YOLOv8DetectionResults
             // Find the detection that matches the query object type
             if (detection.objectClass() == objectType)
             {
-               float[][] maskFloatMatrix = getFloatMaskMatrix(detection, numberOfMasks, rowSize, columnSize);
-
-               // TODO: Use CV threshold here instead
-               foundObject = getBooleanMaskMat(maskBooleanMat, detection, maskFloatMatrix, maskThreshold);
+               Mat floatMaskMat = getFloatMaskMatrix(detection);
+               maskBooleanMat = getBooleanMaskMat(detection, floatMaskMat, maskThreshold);
+               floatMaskMat.close();
             }
          }
       }
+      double totalElapsed = totalWatch.totalElapsed();
+      LogTools.info("Total ellapsed: " + totalElapsed + " | float time: " + floatTime + " | bool time: " + booleanTime);
 
-      if (foundObject)
+      if (maskBooleanMat != null)
       {
          objectMasks.put(objectType, maskBooleanMat);
          return new RawImage(detectionImage.getSequenceNumber(),
@@ -108,47 +116,49 @@ public class YOLOv8DetectionResults
       }
 
       // Did not find object we're looking for
-      objectMasks.put(objectType, null);
-      maskBooleanMat.release();
+      Mat previousValue = objectMasks.putIfAbsent(objectType, null);
+      if (previousValue != null)
+         previousValue.close();
+
       return null;
    }
 
-   public float[][] getFloatMaskMatrix(YOLOv8Detection detection, int numberOfMasks, int rowSize, int columnSize)
+   private Mat getFloatMaskMatrix(YOLOv8Detection detection)
    {
-      float[][] maskFloatMatrix = new float[rowSize][columnSize];
-
-      for (int i = 0; i < numberOfMasks; i++)
-         for (int j = 0; j < rowSize; j++)
-            for (int k = 0; k < columnSize; k++)
-               maskFloatMatrix[j][k] += detection.maskWeights()[i] * outputMasksIndexer.get(0, i, j, k);
-
-      return maskFloatMatrix;
-   }
-
-   private boolean getBooleanMaskMat(Mat booleanMaskToPack, YOLOv8Detection detection, float[][] maskFloatMatrix, float maskThreshold)
-   {
-      int rowSize = booleanMaskToPack.rows();
-      int columnSize = booleanMaskToPack.cols();
-
-      boolean foundObject = false;
-      // TODO: Use CV threshold here instead
-      for (int j = 0; j < rowSize; j++)
+      floatWatch.start();
+      Mat floatMaskMat = new Mat(maskHeight, maskWidth, maskOpenCVType, new Scalar(0.0));
+      Mat multipliedMask = new Mat(maskHeight, maskWidth, maskOpenCVType);
+      for (int i = 0; i < numberOfMasks; ++i)
       {
-         for (int k = 0; k < columnSize; k++)
-         {
-            if (maskFloatMatrix[j][k] >= maskThreshold
-                && j >= detection.y() / 4 && j <= (detection.y() + detection.height()) / 4
-                && k >= detection.x() / 4 && k <= (detection.x() + detection.width()) / 4)
-            {
-               booleanMaskToPack.data().put((long) j * columnSize + k, (byte) 255);
-               foundObject = true;
-            }
-            else
-               booleanMaskToPack.data().put((long) j * columnSize + k, (byte) 0);
-         }
+         Mat mask = outputBlobs.get(1).col(i).reshape(1, maskHeight);
+         mask.convertTo(multipliedMask, maskOpenCVType, detection.maskWeights()[i], 0.0);
+         opencv_core.add(floatMaskMat, multipliedMask, floatMaskMat);
+         mask.close();
       }
 
-      return foundObject;
+      multipliedMask.close();
+
+      floatTime = floatWatch.totalElapsed();
+      return floatMaskMat;
+   }
+
+   private Mat getBooleanMaskMat(YOLOv8Detection detection, Mat maskFloatMat, double maskThreshold)
+   {
+      booleanWatch.start();
+      // Use the float mat to threshold
+      Mat booleanMask = new Mat(maskHeight, maskWidth, opencv_core.CV_32FC1);
+      opencv_imgproc.threshold(maskFloatMat, booleanMask, maskThreshold, 1.0, opencv_imgproc.CV_THRESH_BINARY);
+
+      Mat boundingBoxMask = new Mat(maskHeight, maskWidth, opencv_core.CV_32FC1, new Scalar(0.0));
+      opencv_imgproc.rectangle(boundingBoxMask,
+                               new Rect(detection.x() / 4, detection.y() / 4, detection.width() / 4, detection.height() / 4),
+                               new Scalar(1.0), opencv_imgproc.FILLED, opencv_imgproc.LINE_8, 0);
+
+      opencv_core.bitwise_and(booleanMask, boundingBoxMask, booleanMask);
+      boundingBoxMask.close();
+
+      booleanTime = booleanWatch.totalElapsed();
+      return booleanMask;
    }
 
    public void destroy()

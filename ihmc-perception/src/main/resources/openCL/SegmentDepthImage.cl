@@ -32,9 +32,9 @@ kernel void segmentDepthImage(read_only image2d_t depthImage,
    float pitch = -angle(1.0f, 0.0f, maskFramePoint.x, maskFramePoint.z);
    int maskImagePixelRow = round(parameters[MASK_PRINCIPAL_POINT_Y] + parameters[MASK_FOCAL_LENGTH_Y] * tan(pitch));
 
-   uint maskValue = read_imageui(imageMask, (int2) (maskImagePixelColumn, maskImagePixelRow)).x;
-   if (maskValue > 0)
+   float maskValue = read_imageui(imageMask, (int2) (maskImagePixelColumn, maskImagePixelRow)).x;
+   if (maskValue > 0.0f)
       write_imageui(outputImage, (int2) (x, y), depthValue);
    else
-      write_imageui(outputImage, (int2) (x, y), 0.0);
+      write_imageui(outputImage, (int2) (x, y), 0.0f);
 }
