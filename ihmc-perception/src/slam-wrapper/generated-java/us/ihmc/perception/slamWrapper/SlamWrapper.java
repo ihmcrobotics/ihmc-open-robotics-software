@@ -115,8 +115,6 @@ public static class FactorGraphExternal extends Pointer {
       public native void printResults();
 
       public native void helloWorldTest();
-
-      public native void visualSLAMTest();
 }
 
 }

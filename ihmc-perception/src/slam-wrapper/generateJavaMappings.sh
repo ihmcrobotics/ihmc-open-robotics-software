@@ -46,3 +46,4 @@ cp /usr/lib/x86_64-linux-gnu/libboost_filesystem.so ../../resources/slamWrapper/
 cp /usr/lib/x86_64-linux-gnu/libboost_serialization.so ../../resources/slamWrapper/linux-x86_64
 cp /usr/lib/x86_64-linux-gnu/libboost_timer.so ../../resources/slamWrapper/linux-x86_64
 cp /usr/lib/x86_64-linux-gnu/libboost_chrono.so ../../resources/slamWrapper/linux-x86_64
+cp /usr/lib/x86_64-linux-gnu/libcephes-gtsam.so.1 ../../resources/slamWrapper/linux-x86_64

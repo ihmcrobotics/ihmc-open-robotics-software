@@ -176,7 +176,7 @@ void FactorGraphExternal::helloWorldTest()
    }
 }
 
-void FactorGraphExternal::visualSLAMTest()
-{
-   factorGraphHandler.VisualSLAMTest();
-}
+// void FactorGraphExternal::visualSLAMTest()
+// {
+//    factorGraphHandler.VisualSLAMTest();
+// }
