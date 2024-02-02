@@ -22,6 +22,7 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
    private boolean createdYet = false;
    private Set<RDXSceneLevel> sceneLevels = Set.of(RDXSceneLevel.MODEL);
    private Consumer<Boolean> activenessChangeCallback;
+   private boolean wasActive = false;
 
    public RDXVisualizer(String title)
    {
@@ -63,9 +64,13 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
     */
    public void setActive(boolean active)
    {
-      if (activenessChangeCallback != null && active != isActive())
-         activenessChangeCallback.accept(active);
       this.active.set(active);
+
+      if (activenessChangeCallback != null && active != wasActive)
+      {
+         wasActive = active;
+         activenessChangeCallback.accept(active);
+      }
    }
 
    public boolean isActive()
