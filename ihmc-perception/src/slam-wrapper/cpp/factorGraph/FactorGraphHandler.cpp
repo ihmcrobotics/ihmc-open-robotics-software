@@ -1,7 +1,5 @@
 #include "FactorGraphHandler.h"
 
-
-
 FactorGraphHandler::FactorGraphHandler()
 {
    /* Set ISAM2 parameters here. */
@@ -154,155 +152,155 @@ void FactorGraphHandler::SLAMTest()
    result.print("Result Planes");
 }
 
-#include <gtsam/geometry/Pose3.h>
-#include <gtsam/geometry/Point3.h>
+// #include <gtsam/geometry/Pose3.h>
+// #include <gtsam/geometry/Point3.h>
 
-// We will also need a camera object to hold calibration information and perform projections.
-#include <gtsam/geometry/SimpleCamera.h>
+// // We will also need a camera object to hold calibration information and perform projections.
+// #include <gtsam/geometry/SimpleCamera.h>
 
-/* ************************************************************************* */
-std::vector<gtsam::Point3> createPoints() {
+// /* ************************************************************************* */
+// std::vector<gtsam::Point3> createPoints() {
 
-   // Create the set of ground-truth landmarks
-   std::vector<gtsam::Point3> points;
-   points.push_back(gtsam::Point3(10.0,10.0,10.0));
-   points.push_back(gtsam::Point3(-10.0,10.0,10.0));
-   points.push_back(gtsam::Point3(-10.0,-10.0,10.0));
-   points.push_back(gtsam::Point3(10.0,-10.0,10.0));
-   points.push_back(gtsam::Point3(10.0,10.0,-10.0));
-   points.push_back(gtsam::Point3(-10.0,10.0,-10.0));
-   points.push_back(gtsam::Point3(-10.0,-10.0,-10.0));
-   points.push_back(gtsam::Point3(10.0,-10.0,-10.0));
+//    // Create the set of ground-truth landmarks
+//    std::vector<gtsam::Point3> points;
+//    points.push_back(gtsam::Point3(10.0,10.0,10.0));
+//    points.push_back(gtsam::Point3(-10.0,10.0,10.0));
+//    points.push_back(gtsam::Point3(-10.0,-10.0,10.0));
+//    points.push_back(gtsam::Point3(10.0,-10.0,10.0));
+//    points.push_back(gtsam::Point3(10.0,10.0,-10.0));
+//    points.push_back(gtsam::Point3(-10.0,10.0,-10.0));
+//    points.push_back(gtsam::Point3(-10.0,-10.0,-10.0));
+//    points.push_back(gtsam::Point3(10.0,-10.0,-10.0));
 
-   return points;
-}
+//    return points;
+// }
 
-/* ************************************************************************* */
-std::vector<gtsam::Pose3> createPoses() {
+// /* ************************************************************************* */
+// std::vector<gtsam::Pose3> createPoses() {
 
-   // Create the set of ground-truth poses
-   std::vector<gtsam::Pose3> poses;
-   double radius = 30.0;
-   int i = 0;
-   double theta = 0.0;
-   gtsam::Point3 up(0,0,1);
-   gtsam::Point3 target(0,0,0);
-   for(; i < 8; ++i, theta += 2*M_PI/8) {
+//    // Create the set of ground-truth poses
+//    std::vector<gtsam::Pose3> poses;
+//    double radius = 30.0;
+//    int i = 0;
+//    double theta = 0.0;
+//    gtsam::Point3 up(0,0,1);
+//    gtsam::Point3 target(0,0,0);
+//    for(; i < 8; ++i, theta += 2*M_PI/8) {
 
-      printf("Angle (i): %.3lf\n", theta);
+//       printf("Angle (i): %.3lf\n", theta);
 
-      gtsam::Point3 position = gtsam::Point3(radius*cos(theta), radius*sin(theta), 0.0);
-      gtsam::SimpleCamera camera = gtsam::SimpleCamera::Lookat(position, target, up);
+//       gtsam::Point3 position = gtsam::Point3(radius*cos(theta), radius*sin(theta), 0.0);
+//       gtsam::SimpleCamera camera = gtsam::SimpleCamera::Lookat(position, target, up);
 
-      printf("Position: %.3lf, %.3lf, %.3lf\n", position.x(), position.y(), position.z());
+//       printf("Position: %.3lf, %.3lf, %.3lf\n", position.x(), position.y(), position.z());
 
-      gtsam::Pose3 camPose = camera.pose();
+//       gtsam::Pose3 camPose = camera.pose();
 
-      poses.push_back(camera.pose());
-   }
-   return poses;
-}
-/* ************************************************************************* */
-
-
-void FactorGraphHandler::VisualSLAMTest()
-{
-   using namespace gtsam;
-   using namespace std;
-   // Define the camera calibration parameters
-   gtsam::Cal3_S2::shared_ptr K(new Cal3_S2(50.0, 50.0, 0.0, 50.0, 50.0));
-
-   // Define the camera observation noise model, 1 pixel stddev
-   auto measurementNoise = noiseModel::Isotropic::Sigma(2, 1.0);
-
-   // Create the set of ground-truth landmarks
-   vector<Point3> points = createPoints();
-
-   // Create the set of ground-truth poses
-   vector<Pose3> poses = createPoses();
-
-   // Create an iSAM2 object. Unlike iSAM1, which performs periodic batch steps
-   // to maintain proper linearization and efficient variable ordering, iSAM2
-   // performs partial relinearization/reordering at each step. A parameter
-   // structure is available that allows the user to set various properties, such
-   // as the relinearization threshold and type of linear solver. For this
-   // example, we we set the relinearization threshold small so the iSAM2 result
-   // will approach the batch result.
-   ISAM2Params parameters;
-   parameters.relinearizeThreshold = 0.01;
-   parameters.relinearizeSkip = 1;
-   ISAM2 isam(parameters);
-
-   // Create a Factor Graph and Values to hold the new data
-   NonlinearFactorGraph graph;
-   Values initialEstimate;
-
-   // Loop over the poses, adding the observations to iSAM incrementally
-   for (size_t i = 0; i < poses.size(); ++i) {
+//       poses.push_back(camera.pose());
+//    }
+//    return poses;
+// }
+// /* ************************************************************************* */
 
 
-      printf("Pose: (%ld) \n", i);
+// void FactorGraphHandler::VisualSLAMTest()
+// {
+//    using namespace gtsam;
+//    using namespace std;
+//    // Define the camera calibration parameters
+//    gtsam::Cal3_S2::shared_ptr K(new Cal3_S2(50.0, 50.0, 0.0, 50.0, 50.0));
 
-      // Add factors for each landmark observation
-      for (size_t j = 0; j < points.size(); ++j) {
-         PinholeCamera<Cal3_S2> camera(poses[i], *K);
-         Point2 measurement = camera.project(points[j]);
+//    // Define the camera observation noise model, 1 pixel stddev
+//    auto measurementNoise = noiseModel::Isotropic::Sigma(2, 1.0);
 
-         printf("Measurement (%ld): %.4lf, %.4lf\n", j, measurement.x(), measurement.y());
+//    // Create the set of ground-truth landmarks
+//    vector<Point3> points = createPoints();
 
-         graph.add(gtsam::GenericProjectionFactor<Pose3, Point3, Cal3_S2>(
-               measurement, measurementNoise, Symbol('x', i), Symbol('l', j), K));
-      }
+//    // Create the set of ground-truth poses
+//    vector<Pose3> poses = createPoses();
 
-      // Add an initial guess for the current pose
-      // Intentionally initialize the variables off from the ground truth
-      static Pose3 kDeltaPose(Rot3::Rodrigues(-0.1, 0.2, 0.25),
-                              Point3(0.05, -0.10, 0.20));
-      initialEstimate.insert(Symbol('x', i), poses[i] * kDeltaPose);
+//    // Create an iSAM2 object. Unlike iSAM1, which performs periodic batch steps
+//    // to maintain proper linearization and efficient variable ordering, iSAM2
+//    // performs partial relinearization/reordering at each step. A parameter
+//    // structure is available that allows the user to set various properties, such
+//    // as the relinearization threshold and type of linear solver. For this
+//    // example, we we set the relinearization threshold small so the iSAM2 result
+//    // will approach the batch result.
+//    ISAM2Params parameters;
+//    parameters.relinearizeThreshold = 0.01;
+//    parameters.relinearizeSkip = 1;
+//    ISAM2 isam(parameters);
 
-      // If this is the first iteration, add a prior on the first pose to set the
-      // coordinate frame and a prior on the first landmark to set the scale Also,
-      // as iSAM solves incrementally, we must wait until each is observed at
-      // least twice before adding it to iSAM.
-      if (i == 0) {
-         // Add a prior on pose x0, 30cm std on x,y,z and 0.1 rad on roll,pitch,yaw
-         static auto kPosePrior = noiseModel::Diagonal::Sigmas(
-               (Vector(6) << Vector3::Constant(0.1), Vector3::Constant(0.3))
-                     .finished());
-         graph.addPrior(Symbol('x', 0), poses[0], kPosePrior);
+//    // Create a Factor Graph and Values to hold the new data
+//    NonlinearFactorGraph graph;
+//    Values initialEstimate;
 
-         // Add a prior on landmark l0
-         static auto kPointPrior = noiseModel::Isotropic::Sigma(3, 0.1);
-         graph.addPrior(Symbol('l', 0), points[0], kPointPrior);
+//    // Loop over the poses, adding the observations to iSAM incrementally
+//    for (size_t i = 0; i < poses.size(); ++i) {
 
-         // Add initial guesses to all observed landmarks
-         // Intentionally initialize the variables off from the ground truth
-         static Point3 kDeltaPoint(-0.25, 0.20, 0.15);
-         for (size_t j = 0; j < points.size(); ++j)
-            initialEstimate.insert<Point3>(Symbol('l', j), points[j] + kDeltaPoint);
 
-      } else {
+//       printf("Pose: (%ld) \n", i);
 
-         graph.print("Graph");
-         initialEstimate.print("Initial");
-         isam.printStats();
-         isam.print("ISAM");
+//       // Add factors for each landmark observation
+//       for (size_t j = 0; j < points.size(); ++j) {
+//          PinholeCamera<Cal3_S2> camera(poses[i], *K);
+//          Point2 measurement = camera.project(points[j]);
 
-         // Update iSAM with the new factors
-         isam.update(graph, initialEstimate);
-         // Each call to iSAM2 update(*) performs one iteration of the iterative
-         // nonlinear solver. If accuracy is desired at the expense of time,
-         // update(*) can be called additional times to perform multiple optimizer
-         // iterations every step.
-         isam.update();
-         Values currentEstimate = isam.calculateEstimate();
-         cout << "****************************************************" << endl;
-         cout << "Frame " << i << ": " << endl;
-         currentEstimate.print("Current estimate: ");
+//          printf("Measurement (%ld): %.4lf, %.4lf\n", j, measurement.x(), measurement.y());
 
-         // Clear the factor graph and values for the next iteration
-         graph.resize(0);
-         initialEstimate.clear();
-      }
-   }
-}
+//          graph.add(gtsam::GenericProjectionFactor<Pose3, Point3, Cal3_S2>(
+//                measurement, measurementNoise, Symbol('x', i), Symbol('l', j), K));
+//       }
+
+//       // Add an initial guess for the current pose
+//       // Intentionally initialize the variables off from the ground truth
+//       static Pose3 kDeltaPose(Rot3::Rodrigues(-0.1, 0.2, 0.25),
+//                               Point3(0.05, -0.10, 0.20));
+//       initialEstimate.insert(Symbol('x', i), poses[i] * kDeltaPose);
+
+//       // If this is the first iteration, add a prior on the first pose to set the
+//       // coordinate frame and a prior on the first landmark to set the scale Also,
+//       // as iSAM solves incrementally, we must wait until each is observed at
+//       // least twice before adding it to iSAM.
+//       if (i == 0) {
+//          // Add a prior on pose x0, 30cm std on x,y,z and 0.1 rad on roll,pitch,yaw
+//          static auto kPosePrior = noiseModel::Diagonal::Sigmas(
+//                (Vector(6) << Vector3::Constant(0.1), Vector3::Constant(0.3))
+//                      .finished());
+//          graph.addPrior(Symbol('x', 0), poses[0], kPosePrior);
+
+//          // Add a prior on landmark l0
+//          static auto kPointPrior = noiseModel::Isotropic::Sigma(3, 0.1);
+//          graph.addPrior(Symbol('l', 0), points[0], kPointPrior);
+
+//          // Add initial guesses to all observed landmarks
+//          // Intentionally initialize the variables off from the ground truth
+//          static Point3 kDeltaPoint(-0.25, 0.20, 0.15);
+//          for (size_t j = 0; j < points.size(); ++j)
+//             initialEstimate.insert<Point3>(Symbol('l', j), points[j] + kDeltaPoint);
+
+//       } else {
+
+//          graph.print("Graph");
+//          initialEstimate.print("Initial");
+//          isam.printStats();
+//          isam.print("ISAM");
+
+//          // Update iSAM with the new factors
+//          isam.update(graph, initialEstimate);
+//          // Each call to iSAM2 update(*) performs one iteration of the iterative
+//          // nonlinear solver. If accuracy is desired at the expense of time,
+//          // update(*) can be called additional times to perform multiple optimizer
+//          // iterations every step.
+//          isam.update();
+//          Values currentEstimate = isam.calculateEstimate();
+//          cout << "****************************************************" << endl;
+//          cout << "Frame " << i << ": " << endl;
+//          currentEstimate.print("Current estimate: ");
+
+//          // Clear the factor graph and values for the next iteration
+//          graph.resize(0);
+//          initialEstimate.clear();
+//       }
+//    }
+// }

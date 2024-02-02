@@ -57,7 +57,7 @@ class FactorGraphExternal
 
       void helloWorldTest();
 
-      void visualSLAMTest();
+      // void visualSLAMTest();
 
 
    private:
