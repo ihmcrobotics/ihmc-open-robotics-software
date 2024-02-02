@@ -12,6 +12,7 @@ import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
 import java.util.Set;
+import java.util.function.Consumer;
 
 public abstract class RDXVisualizer implements RDXRenderableProvider
 {
@@ -20,6 +21,7 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
    private final String title;
    private boolean createdYet = false;
    private Set<RDXSceneLevel> sceneLevels = Set.of(RDXSceneLevel.MODEL);
+   private Consumer<Boolean> activenessChangeCallback;
 
    public RDXVisualizer(String title)
    {
@@ -61,6 +63,8 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
     */
    public void setActive(boolean active)
    {
+      if (activenessChangeCallback != null && active != isActive())
+         activenessChangeCallback.accept(active);
       this.active.set(active);
    }
 
@@ -89,6 +93,11 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
          if (sceneLevels.contains(sceneLevel))
             return true;
       return false;
+   }
+
+   public void setActivenessChangeCallback(Consumer<Boolean> activenessChangeCallback)
+   {
+      this.activenessChangeCallback = activenessChangeCallback;
    }
 
    public RDXPanel getPanel()

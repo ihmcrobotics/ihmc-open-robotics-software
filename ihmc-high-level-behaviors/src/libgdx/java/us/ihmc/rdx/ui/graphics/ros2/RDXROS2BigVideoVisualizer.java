@@ -47,6 +47,18 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
+
+      super.setActivenessChangeCallback(isAlive ->
+      {
+         if (isAlive && realtimeROS2Node == null)
+         {
+            subscribe();
+         }
+         else if (!isAlive && realtimeROS2Node != null)
+         {
+            unsubscribe();
+         }
+      });
    }
 
    private void subscribe()
@@ -94,12 +106,6 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.getHidden(getTitle() + "Subscribed"), subscribed))
-      {
-         setSubscribed(subscribed.get());
-      }
-      ImGuiTools.previousWidgetTooltip("Subscribed");
-      ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
       messageSizeReadout.renderImGuiWidgets();
@@ -115,18 +121,6 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
    {
       unsubscribe();
       super.destroy();
-   }
-
-   public void setSubscribed(boolean subscribed)
-   {
-      if (subscribed && realtimeROS2Node == null)
-      {
-         subscribe();
-      }
-      else if (!subscribed && realtimeROS2Node != null)
-      {
-         unsubscribe();
-      }
    }
 
    private void unsubscribe()

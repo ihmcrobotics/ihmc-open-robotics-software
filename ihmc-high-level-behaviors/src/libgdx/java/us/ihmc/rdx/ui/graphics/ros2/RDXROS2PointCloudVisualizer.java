@@ -83,6 +83,18 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
       this.topic = topic;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
+      super.setActivenessChangeCallback(isActive ->
+      {
+         if (isActive && ros2Callback == null)
+         {
+            subscribe();
+         }
+         else if (!isActive && ros2Callback != null)
+         {
+            unsubscribe();
+         }
+      });
+
       if (topic.getType().equals(LidarScanMessage.class))
       {
          lidarActiveHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_LIDAR_SCAN);
@@ -286,12 +298,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.getHidden(getTitle() + "Subscribed"), subscribed))
-      {
-         setSubscribed(subscribed.get());
-      }
-      ImGuiTools.previousWidgetTooltip("Subscribed");
-      ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
       ImGui.sameLine();
@@ -308,18 +314,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
    {
       if (isActive() && sceneLevelCheck(sceneLevels))
          pointCloudRenderer.getRenderables(renderables, pool);
-   }
-
-   public void setSubscribed(boolean subscribed)
-   {
-      if (subscribed && ros2Callback == null)
-      {
-         subscribe();
-      }
-      else if (!subscribed && ros2Callback != null)
-      {
-         unsubscribe();
-      }
    }
 
    private void unsubscribe()

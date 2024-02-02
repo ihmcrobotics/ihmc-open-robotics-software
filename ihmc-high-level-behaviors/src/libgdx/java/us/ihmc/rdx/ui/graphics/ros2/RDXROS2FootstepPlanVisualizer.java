@@ -42,6 +42,18 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
+
+      super.setActivenessChangeCallback(isActive ->
+      {
+         if (isActive && ros2Node == null)
+         {
+            subscribe();
+         }
+         else if (!isActive && ros2Node != null)
+         {
+            unsubscribe();
+         }
+      });
    }
 
    private void subscribe()
@@ -74,12 +86,6 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.getHidden(getTitle() + "Subscribed"), subscribed))
-      {
-         setSubscribed(subscribed.get());
-      }
-      ImGuiTools.previousWidgetTooltip("Subscribed");
-      ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
    }
@@ -98,18 +104,6 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
    {
       unsubscribe();
       super.destroy();
-   }
-
-   public void setSubscribed(boolean subscribed)
-   {
-      if (subscribed && ros2Node == null)
-      {
-         subscribe();
-      }
-      else if (!subscribed && ros2Node != null)
-      {
-         unsubscribe();
-      }
    }
 
    private void unsubscribe()

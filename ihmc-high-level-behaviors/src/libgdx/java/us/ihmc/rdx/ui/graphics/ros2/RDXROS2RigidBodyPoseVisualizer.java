@@ -56,6 +56,18 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
       titleBeforeAdditions = title;
       this.topic = topic;
       this.pubSubImplementation = pubSubImplementation;
+
+      super.setActivenessChangeCallback(isActive ->
+      {
+         if (isActive && ros2Node == null)
+         {
+            subscribe();
+         }
+         else if (!isActive && ros2Node != null)
+         {
+            unsubscribe();
+         }
+      });
    }
 
    @Override
@@ -99,18 +111,6 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
       {
          queueRenderRigidBodyPose(message);
       });
-   }
-
-   public void setSubscribed(boolean subscribed)
-   {
-      if (subscribed && ros2Node == null)
-      {
-         subscribe();
-      }
-      else if (!subscribed && ros2Node != null)
-      {
-         unsubscribe();
-      }
    }
 
    private void unsubscribe()

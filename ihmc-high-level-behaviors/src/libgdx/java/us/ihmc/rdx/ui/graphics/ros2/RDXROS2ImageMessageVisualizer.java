@@ -60,6 +60,14 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
+
+      super.setActivenessChangeCallback(isActive ->
+      {
+         if (isActive && realtimeROS2Node == null)
+            subscribe();
+         else if (!isActive && realtimeROS2Node != null)
+            unsubscribe();
+      });
    }
 
    private void subscribe()
@@ -170,29 +178,12 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.getHidden(getTitle() + "Subscribed"), subscribed))
-      {
-         setSubscribed(subscribed.get());
-      }
-      ImGuiTools.previousWidgetTooltip("Subscribed");
-      ImGui.sameLine();
       super.renderImGuiWidgets();
+      if (super.isActive())
       ImGui.text(topic.getName());
       if (getHasReceivedOne())
       {
          renderStatistics();
-      }
-   }
-
-   public void setSubscribed(boolean subscribed)
-   {
-      if (subscribed && realtimeROS2Node == null)
-      {
-         subscribe();
-      }
-      else if (!subscribed && realtimeROS2Node != null)
-      {
-         unsubscribe();
       }
    }
 
@@ -211,8 +202,8 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
    @Override
    public void destroy()
    {
+      unsubscribe();
       super.destroy();
-      setSubscribed(false);
    }
 
    public void renderStatistics()

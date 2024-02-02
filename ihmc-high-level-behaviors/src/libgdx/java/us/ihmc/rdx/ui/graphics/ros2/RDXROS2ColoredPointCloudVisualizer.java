@@ -78,6 +78,13 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
       this.pubSubImplementation = pubSubImplementation;
       depthChannel = new RDXROS2ColoredPointCloudVisualizerDepthChannel(depthTopic);
       colorChannel = new RDXROS2ColoredPointCloudVisualizerColorChannel(colorTopic);
+      super.setActivenessChangeCallback(isActive ->
+      {
+         if (isActive && realtimeROS2Node == null)
+            subscribe();
+         else if (!isActive && realtimeROS2Node != null)
+            unsubscribe();
+      });
    }
 
    private void subscribe()
@@ -205,12 +212,6 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.getHidden(getTitle() + "Subscribed"), subscribed))
-      {
-         setSubscribed(subscribed.get());
-      }
-      ImGuiTools.previousWidgetTooltip("Subscribed");
-      ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(colorChannel.getTopic().getName());
 
@@ -272,18 +273,6 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
       colorChannel.destroy();
       unsubscribe();
       super.destroy();
-   }
-
-   public void setSubscribed(boolean subscribed)
-   {
-      if (subscribed && realtimeROS2Node == null)
-      {
-         subscribe();
-      }
-      else if (!subscribed && realtimeROS2Node == null)
-      {
-         unsubscribe();
-      }
    }
 
    private void unsubscribe()
