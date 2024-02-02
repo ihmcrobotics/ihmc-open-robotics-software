@@ -5,7 +5,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.TrajectoryTrackingErrorCalculator;
-import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.FormattingTools;
@@ -40,12 +40,14 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
+   /** Sometimes the controller can take a while to report that it's completed walking. */
+   public static final double EXTRA_TIME_ALLOWED = 5.0;
 
    private final FootstepPlanActionState state;
    private final FootstepPlanActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final WalkingFootstepTracker footstepTracker;
+   private final ControllerStatusTracker controllerStatusTracker;
    private final WalkingControllerParameters walkingControllerParameters;
    private final SideDependentList<FramePose3D> commandedGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<FramePose3D> syncedFeetPoses = new SideDependentList<>(() -> new FramePose3D());
@@ -67,7 +69,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                      WorkspaceResourceDirectory saveFileDirectory,
                                      ROS2ControllerHelper ros2ControllerHelper,
                                      ROS2SyncedRobotModel syncedRobot,
-                                     WalkingFootstepTracker footstepTracker,
+                                     ControllerStatusTracker controllerStatusTracker,
                                      ReferenceFrameLibrary referenceFrameLibrary,
                                      WalkingControllerParameters walkingControllerParameters,
                                      FootstepPlanningModule footstepPlanner,
@@ -80,7 +82,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
-      this.footstepTracker = footstepTracker;
+      this.controllerStatusTracker = controllerStatusTracker;
       this.walkingControllerParameters = walkingControllerParameters;
       this.footstepPlanner = footstepPlanner;
       this.footstepPlannerParameters = footstepPlannerParameters;
@@ -335,7 +337,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
       for (RobotSide side : RobotSide.values)
       {
-         trackingCalculators.get(side).computeExecutionTimings(nominalExecutionDuration);
+         trackingCalculators.get(side).computeExecutionTimings(nominalExecutionDuration, nominalExecutionDuration + EXTRA_TIME_ALLOWED);
          trackingCalculators.get(side).computePoseTrackingData(commandedGoalFeetPoses.get(side), syncedFeetPoses.get(side));
          trackingCalculators.get(side).factorInR3Errors(POSITION_TOLERANCE);
          trackingCalculators.get(side).factoryInSO3Errors(ORIENTATION_TOLERANCE);
@@ -344,13 +346,20 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          hitTimeLimit |= trackingCalculators.get(side).getHitTimeLimit();
       }
 
-      int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
+      int incompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();
+      boolean isWalking = controllerStatusTracker.isWalking();
       meetsDesiredCompletionCriteria &= incompleteFootsteps == 0;
+      meetsDesiredCompletionCriteria &= !isWalking;
 
       if (meetsDesiredCompletionCriteria || hitTimeLimit)
+      {
          state.setIsExecuting(false);
+      }
       if (hitTimeLimit)
+      {
          state.setFailed(true);
+         LogTools.info("Walking failed. (time limit)");
+      }
       state.setNominalExecutionDuration(nominalExecutionDuration);
       state.setElapsedExecutionTime(trackingCalculators.get(RobotSide.LEFT).getElapsedTime());
       state.setTotalNumberOfFootsteps(footstepPlanToExecute.getNumberOfSteps());
