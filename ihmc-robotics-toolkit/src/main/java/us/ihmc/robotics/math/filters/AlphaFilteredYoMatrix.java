@@ -56,11 +56,51 @@ public class AlphaFilteredYoMatrix extends YoMatrix
       this.alpha.set(alpha);
    }
 
+   /**
+    * Set the current value of the matrix to be filtered.
+    * <p>
+    * NOTE: This method does not solve for the filtered value. To solve for the filtered value, use {@link #solve()}.
+    * </p>
+    *
+    * @param current the current value of the matrix to be filtered. Not modified.
+    */
+   @Override
+   public void set(DMatrix current)
+   {
+      super.set(current);
+      this.current.set(current);
+   }
+
+   /**
+    * Assuming that the current value has been set, this method solves for the filtered value.
+    * <p>
+    * See {@link #set(DMatrix)} for how to set the matrix's current value.
+    * </p>
+    */
+   public void solve()
+   {
+      filtered.set(previous);
+      CommonOps_DDRM.scale(alpha.getDoubleValue(), filtered);
+
+      super.get(current);
+      CommonOps_DDRM.addEquals(filtered, 1 - alpha.getDoubleValue(), current);
+
+      // Set the previous value to be the output of the filter, so it can be used next time
+      previous.set(filtered);
+      super.set(filtered);
+   }
+
+   /**
+    * Set the current value of the matrix to be filtered and solve for the filtered value.
+    *
+    * @param current the current value of the matrix to be filtered. Not modified.
+    */
    public void setAndSolve(DMatrix current)
    {
       filtered.set(previous);
       CommonOps_DDRM.scale(alpha.getDoubleValue(), filtered);
 
+      super.set(current);
       this.current.set(current);
       CommonOps_DDRM.addEquals(filtered, 1 - alpha.getDoubleValue(), this.current);
 
