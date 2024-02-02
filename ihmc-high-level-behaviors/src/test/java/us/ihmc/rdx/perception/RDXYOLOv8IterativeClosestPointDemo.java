@@ -154,7 +154,7 @@ public class RDXYOLOv8IterativeClosestPointDemo
             List<Point3DReadOnly> ptcld = extractor.extractPointCloud(segmentedDepth);
 
             Point3D centroid = new Point3D();
-            double stdDev = doMath(ptcld, 500, true, centroid);
+            double stdDev = calculateStandardDeviationAndCentroid(ptcld, 500, true, centroid);
 
             ptcld = ptcld.parallelStream().filter(point ->
             {
@@ -295,9 +295,9 @@ public class RDXYOLOv8IterativeClosestPointDemo
       });
    }
 
-   private double doMath(List<? extends Point3DReadOnly> pointCloud, Point3DBasics centroidToPack)
+   private double calculateStandardDeviationAndCentroid(List<? extends Point3DReadOnly> pointCloud, Point3DBasics centroidToPack)
    {
-      return doMath(pointCloud, pointCloud.size(), false, centroidToPack);
+      return calculateStandardDeviationAndCentroid(pointCloud, pointCloud.size(), false, centroidToPack);
    }
 
    /**
@@ -308,7 +308,10 @@ public class RDXYOLOv8IterativeClosestPointDemo
     * @param centroidToPack   Point object into which the centroid will be packed
     * @return The standard deviation of the points
     */
-   private double doMath(List<? extends Point3DReadOnly> pointCloud, int maxComputations, boolean shuffle, Point3DBasics centroidToPack)
+   private double calculateStandardDeviationAndCentroid(List<? extends Point3DReadOnly> pointCloud,
+                                                        int maxComputations,
+                                                        boolean shuffle,
+                                                        Point3DBasics centroidToPack)
    {
       if (shuffle)
          Collections.shuffle(pointCloud);

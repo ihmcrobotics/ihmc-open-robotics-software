@@ -80,17 +80,14 @@ public class YOLOv8DetectionResults
 
       totalWatch.start();
       Mat maskBooleanMat = null;
-      if (!detections.isEmpty())
+      for (YOLOv8Detection detection : detections)
       {
-         for (YOLOv8Detection detection : detections)
+         // Find the detection that matches the query object type
+         if (detection.objectClass() == objectType)
          {
-            // Find the detection that matches the query object type
-            if (detection.objectClass() == objectType)
-            {
-               Mat floatMaskMat = getFloatMaskMatrix(detection);
-               maskBooleanMat = getBooleanMaskMat(detection, floatMaskMat, maskThreshold);
-               floatMaskMat.close();
-            }
+            Mat floatMaskMat = getFloatMaskMat(detection);
+            maskBooleanMat = getBooleanMaskMat(detection, floatMaskMat, maskThreshold);
+            floatMaskMat.close();
          }
       }
       double totalElapsed = totalWatch.totalElapsed();
@@ -123,7 +120,7 @@ public class YOLOv8DetectionResults
       return null;
    }
 
-   private Mat getFloatMaskMatrix(YOLOv8Detection detection)
+   private Mat getFloatMaskMat(YOLOv8Detection detection)
    {
       floatWatch.start();
       Mat floatMaskMat = new Mat(maskHeight, maskWidth, maskOpenCVType, new Scalar(0.0));
