@@ -55,7 +55,7 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
       for (RobotSide robotSide : RobotSide.values)
       {
          // Create the hip pitch joints and add them to the tree
-         Vector3D hipPitchOffsetTorso = new Vector3D(0.0, robotSide.negateIfRightSide(0.5), -torsoLength / 2.0);
+         Vector3D hipPitchOffsetTorso = new Vector3D(0.0, robotSide.negateIfRightSide(0.05), -torsoLength / 2.0);
          RevoluteJointDefinition hipPitchJointDefinition = new RevoluteJointDefinition(hipPitchNames.get(robotSide), hipPitchOffsetTorso, Axis3D.Y);
          torsoBodyDefinition.addChildJoint(hipPitchJointDefinition);
 
