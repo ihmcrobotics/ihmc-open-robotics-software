@@ -6,14 +6,17 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.zedDriver.ZEDOpenDriver;
+import us.ihmc.perception.zedDriver.ZedDriverNativeLibrary;
 
 public class ZEDOpenDriverTest
 {
    @Test
    public void testLoadingImageDimensions()
    {
-      BytedecoTools.loadZEDDriverNative();
+      ZedDriverNativeLibrary.load();
       int[] dims;
       try (ZEDOpenDriver.ZEDOpenDriverExternal zedDriver = new ZEDOpenDriver.ZEDOpenDriverExternal(720, 60))
       {
@@ -30,7 +33,7 @@ public class ZEDOpenDriverTest
    @Test
    public void testLoadingImage()
    {
-      BytedecoTools.loadZEDDriverNative();
+      ZedDriverNativeLibrary.load();
       int[] dims;
       ZEDOpenDriver.ZEDOpenDriverExternal zedDriver = new ZEDOpenDriver.ZEDOpenDriverExternal(1080, 30);
       dims = new int[] {0, 0, 0};
@@ -46,7 +49,7 @@ public class ZEDOpenDriverTest
       LogTools.info("Dimensions: " + dims[0] + ", " + dims[1]);
 
       opencv_imgproc.cvtColor(mat, mat, opencv_imgproc.COLOR_YUV2BGR_YUYV);
-      BytedecoOpenCVTools.display("Image", mat, 0);
+      PerceptionDebugTools.display("Image", mat, 0);
 
       assert (dims[0] == mat.rows());
       assert (dims[1] == mat.cols());

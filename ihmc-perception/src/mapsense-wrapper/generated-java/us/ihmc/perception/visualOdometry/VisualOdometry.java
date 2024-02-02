@@ -22,8 +22,8 @@ public class VisualOdometry extends us.ihmc.perception.visualOdometry.presets.Vi
     /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
     public VisualOdometryExternal(Pointer p) { super(p); }
 
-        public VisualOdometryExternal(@Cast("uint32_t") int nFeatures, @Cast("uint32_t") int minFeatures) { super((Pointer)null); allocate(nFeatures, minFeatures); }
-        private native void allocate(@Cast("uint32_t") int nFeatures, @Cast("uint32_t") int minFeatures);
+        public VisualOdometryExternal(int nFeatures, int minFeatures) { super((Pointer)null); allocate(nFeatures, minFeatures); }
+        private native void allocate(int nFeatures, int minFeatures);
 
         public native void printMat(FloatPointer buffer, int height, int width);
         public native void printMat(FloatBuffer buffer, int height, int width);
@@ -37,9 +37,12 @@ public class VisualOdometry extends us.ihmc.perception.visualOdometry.presets.Vi
         public native void displayMat(@Cast("uint8_t*") byte[] buffer, int height, int width, int delayMilliSeconds);
         
         // void updateMonocular(uint8_t* buffer, int height, int width);
-        public native @Cast("bool") boolean updateStereo(@Cast("uint8_t*") BytePointer bufferLeft, @Cast("uint8_t*") BytePointer bufferRight, int height, int width);
-        public native @Cast("bool") boolean updateStereo(@Cast("uint8_t*") ByteBuffer bufferLeft, @Cast("uint8_t*") ByteBuffer bufferRight, int height, int width);
-        public native @Cast("bool") boolean updateStereo(@Cast("uint8_t*") byte[] bufferLeft, @Cast("uint8_t*") byte[] bufferRight, int height, int width);
+        public native @Cast("bool") boolean updateStereo(@Cast("uint8_t*") BytePointer bufferLeft, @Cast("uint8_t*") BytePointer bufferRight, int height, int width,
+                                DoublePointer latestPose, IntPointer ids, DoublePointer latestPoints, int numPoints);
+        public native @Cast("bool") boolean updateStereo(@Cast("uint8_t*") ByteBuffer bufferLeft, @Cast("uint8_t*") ByteBuffer bufferRight, int height, int width,
+                                DoubleBuffer latestPose, IntBuffer ids, DoubleBuffer latestPoints, int numPoints);
+        public native @Cast("bool") boolean updateStereo(@Cast("uint8_t*") byte[] bufferLeft, @Cast("uint8_t*") byte[] bufferRight, int height, int width,
+                                double[] latestPose, int[] ids, double[] latestPoints, int numPoints);
         
 
         public native void getExternalKeyframe(DoublePointer odometry, @Cast("uint32_t*") IntPointer id);

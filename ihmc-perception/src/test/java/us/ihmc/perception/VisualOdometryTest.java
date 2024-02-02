@@ -1,16 +1,24 @@
 package us.ihmc.perception;
 
+import us.ihmc.perception.slamWrapper.SlamWrapper;
+import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
 import us.ihmc.perception.visualOdometry.VisualOdometry;
+import us.ihmc.perception.visualOdometry.VisualOdometryNativeLibrary;
 
 import java.io.FileNotFoundException;
 
 public class VisualOdometryTest
 {
+   static
+   {
+      SlamWrapperNativeLibrary.load();
+      VisualOdometryNativeLibrary.load();
+   }
+
    public static void main(String[] args) throws FileNotFoundException
    {
-      BytedecoTools.loadMapsenseNative();
-
       VisualOdometry.VisualOdometryExternal visualOdometry = new VisualOdometry.VisualOdometryExternal(500, 300);
+      SlamWrapper.FactorGraphExternal factorGraphExternal = new SlamWrapper.FactorGraphExternal();
 
       testBufferTransfer(visualOdometry);
       testImageTransferAndDisplay(visualOdometry);

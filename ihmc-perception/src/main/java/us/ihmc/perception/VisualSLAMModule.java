@@ -1,6 +1,7 @@
 package us.ihmc.perception;
 
 import org.apache.commons.lang.ArrayUtils;
+import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
 import us.ihmc.perception.visualOdometry.VisualOdometry;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -12,6 +13,7 @@ import us.ihmc.perception.elements.CameraModel;
 import us.ihmc.perception.elements.Keyframe;
 import us.ihmc.perception.elements.Landmark;
 import us.ihmc.perception.slamWrapper.SlamWrapper;
+import us.ihmc.perception.visualOdometry.VisualOdometryNativeLibrary;
 
 import java.util.*;
 
@@ -37,8 +39,10 @@ public class VisualSLAMModule
 
    public VisualSLAMModule()
    {
-      visualOdometryExternal = new VisualOdometry.VisualOdometryExternal(NUMBER_OF_FEATURES, MIN_NUM_FEATURES);
+      VisualOdometryNativeLibrary.load();
+      SlamWrapperNativeLibrary.load();
 
+      visualOdometryExternal = new VisualOdometry.VisualOdometryExternal(NUMBER_OF_FEATURES, MIN_NUM_FEATURES);
       factorGraphExternal = new SlamWrapper.FactorGraphExternal();
 
       double[] poseInitial = new double[] {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};

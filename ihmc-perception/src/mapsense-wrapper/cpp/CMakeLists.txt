@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 project(mapsense)
 
 add_compile_options(-std=c++17)
+add_compile_options(-Wno-unused-parameter)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 list(INSERT CMAKE_MODULE_PATH 0 "${PROJECT_SOURCE_DIR}/cmake")
