@@ -23,19 +23,19 @@ public class VisualSLAMModule
    public static final int NUMBER_OF_FEATURES = 400;
    public static final int MIN_NUM_FEATURES = 350;
 
-   private final VisualOdometry.VisualOdometryExternal visualOdometryExternal;
-   private final SlamWrapper.FactorGraphExternal factorGraphExternal;
-
-   RigidBodyTransform worldToSensorTransform = new RigidBodyTransform();
-
    private int frameIndex = 0;
    private boolean initialized = false;
+   private double[] landmarkPoints = new double[0];
+   private int[] idInts = new int[0];
 
-   private double[] landmarkPoints;
-   private int[] idInts;
-   private double[] latestSensorPose = new double[16];
-   private HashMap<Integer, Keyframe> keyframes = new HashMap<>();
-   private HashMap<Integer, Landmark> landmarks = new HashMap<>();
+   private final RigidBodyTransform worldToSensorTransform = new RigidBodyTransform();
+   private final RigidBodyTransform optimizedSensorToWorldTransform = new RigidBodyTransform();
+   private final HashMap<Integer, Keyframe> keyframes = new HashMap<>();
+   private final HashMap<Integer, Landmark> landmarks = new HashMap<>();
+   private final double[] latestSensorPose = new double[16];
+
+   private final VisualOdometry.VisualOdometryExternal visualOdometryExternal;
+   private final SlamWrapper.FactorGraphExternal factorGraphExternal;
 
    public VisualSLAMModule()
    {
@@ -62,6 +62,8 @@ public class VisualSLAMModule
    {
       /*
        *  Compute both relative pose in last key-frame, and 2D-3D keypoint landmark measurements in current camera frame.
+       *  Provide the final optimized landmarks and pose estimates to the visual odometry module.
+       *  Update state of the visual odometry module.
        */
       LogTools.info("Update Stereo(Dims: {}, {})", leftImage.getRows(), leftImage.getCols());
       boolean initialized = visualOdometryExternal.updateStereo(leftImage.getData(),
@@ -87,6 +89,7 @@ public class VisualSLAMModule
       if (initialized)
       {
          //LogTools.info("Inserting Odometry Factor: x{}", keyframeID[0]);
+         /* Insert odometry factor in the factor graph from the relative pose transform received from visual odometry. */
          factorGraphExternal.addOdometryFactorSE3(keyframeID[0], relativePoseTransformAsArray);
 
          //LogTools.info("Compute transform world-to-sensor.");
@@ -155,7 +158,8 @@ public class VisualSLAMModule
       // TODO: Try Incremental SAM instead of batch optimizer.
       if (initialized)
       {
-         factorGraphExternal.optimize();
+         //factorGraphExternal.optimize();
+         factorGraphExternal.optimizeISAM2((byte) 4);
 
          factorGraphExternal.getPoseById(keyframeID[0], latestSensorPose);
          getLandmarkPoints(landmarks.keySet());
@@ -175,7 +179,7 @@ public class VisualSLAMModule
 
    public void clearISAM2()
    {
-      //factorGraphExternal.clearISAM2();
+      factorGraphExternal.clearISAM2();
    }
 
    public FramePose3D getSensorPose(int index)
@@ -194,11 +198,18 @@ public class VisualSLAMModule
       return pose;
    }
 
+   /**
+    * Get the 3D points of the landmarks in the world frame from the factor graph after optimization.
+    * @param ids Set of landmark IDs to retrieve.
+    * @return List of 3D points in world frame.
+    */
    public ArrayList<Point3D> getLandmarkPoints(Set<Integer> ids)
    {
-      Integer[] idIntObjects = (Integer[]) ids.toArray();
+      Integer[] idIntObjects = Arrays.stream(ids.toArray()).parallel().map(o -> (Integer) o).toArray(Integer[]::new);
       idInts = ArrayUtils.toPrimitive(idIntObjects);
       landmarkPoints = new double[idInts.length * 3];
+
+      // Extract optimized landmark points from factor graph.
       factorGraphExternal.getResultLandmarks(landmarkPoints, idInts, idInts.length);
 
       ArrayList<Point3D> points = new ArrayList<>();
