@@ -72,7 +72,7 @@ bool VisualOdometryExternal::updateStereo(uint8_t* bufferLeft, uint8_t* bufferRi
     PointLandmarkVec landmarks;
     for(int i = 0; i<numPoints; i++)
     {
-        
+        landmarks.push_back(PointLandmark(ids[i], Eigen::Vector2f(latestPoints[i*2], latestPoints[i*2 + 1])));
     }
 
     bool result =_visualOdometry->UpdateStereo(matLeft, matRight);

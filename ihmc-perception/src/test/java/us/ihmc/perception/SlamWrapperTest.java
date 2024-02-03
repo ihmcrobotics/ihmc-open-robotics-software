@@ -29,7 +29,7 @@ public class SlamWrapperTest
    }
 
    @Test
-   public static void testOrientedPlaneFactors()
+   public void testOrientedPlaneFactors()
    {
       SlamWrapperNativeLibrary.load();
 
