@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Hea
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -115,8 +116,8 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
                      TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
                      SubtreeStreams.fromChildren(OneDoFJointBasics.class,
                                                  bulletRobot.getRootBody()).forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
-                     avatarSimulation.getEstimatorThread().initializeStateEstimators(bulletRobot.getFloatingRootJoint().getFrameAfterJoint()
-                                                                                                .getTransformToParent(), jointPositions);
+                     RigidBodyTransform simulationPelvisToWorld = bulletRobot.getFloatingRootJoint().getFrameAfterJoint().getTransformToParent();
+                     avatarSimulation.getEstimatorThread().initializeStateEstimators(simulationPelvisToWorld, jointPositions);
                   }
                }
             }
