@@ -5,6 +5,8 @@ import ihmc_common_msgs.msg.dds.QueueableMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.linsol.svd.SolvePseudoInverseSvd_DDRM;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
@@ -12,6 +14,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.TrajectoryTrackingErrorCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -20,13 +23,18 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
+import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
+import us.ihmc.robotics.math.YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -45,8 +53,8 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final FramePose3D workPose = new FramePose3D();
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = new HandHybridJointspaceTaskspaceTrajectoryMessage();
-   private final Vector3D linearVelocity = new Vector3D();
-   private final Vector3D angularVelocity = new Vector3D();
+   private final FrameVector3D linearVelocity = new FrameVector3D();
+   private final FrameVector3D angularVelocity = new FrameVector3D();
    private final Quaternion localRotationQuaternion = new Quaternion();
    private final Vector3D worldRotationVector = new Vector3D();;
    private final Vector3D localRotationVectorEnd = new Vector3D();
@@ -54,6 +62,10 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final MutableReferenceFrame previousPoseFrame = new MutableReferenceFrame();
    private final MutableReferenceFrame currentPoseFrame = new MutableReferenceFrame();
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
+
+   private final PoseReferenceFrame handFrame = new PoseReferenceFrame("screwHandControlFrame", ReferenceFrame.getWorldFrame());
+   private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
+   private final DampedLeastSquaresSolver leastSquaresSolver = new DampedLeastSquaresSolver(7);
 
    public ScrewPrimitiveActionExecutor(long id,
                                        CRDTInfo crdtInfo,
@@ -67,6 +79,8 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
+      // This is the damping factor for the damped pseudo-inverse
+      leastSquaresSolver.setAlpha(1e-4);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -239,7 +253,28 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
             if (armIKSolver.getQuality() > ArmIKSolver.GOOD_QUALITY_MAX)
                LogTools.warn("Bad quality: {} (i == {})", armIKSolver.getQuality(), i);
 
-            for (int j = 0; j < armIKSolver.getSolutionOneDoFJoints().length; j++)
+            // Compute the velocities of the arm joints using the hand spatial velocities
+            // TODO this only needs to be done if i is not the boundary conditions
+            armIKSolver.getControlFrame(handFrame);
+            jacobianCalculator.clear();
+            jacobianCalculator.setKinematicChain(armIKSolver.getWorkingChest(), armIKSolver.getWorkingHand());
+            jacobianCalculator.setJacobianFrame(handFrame);
+            jacobianCalculator.reset();
+
+            int joints = armIKSolver.getSolutionOneDoFJoints().length;
+            DMatrixRMaj velocityObjective = new DMatrixRMaj(6, 1);
+            DMatrixRMaj jointVelocities = new DMatrixRMaj(joints, 1);
+            angularVelocity.changeFrame(handFrame);
+            linearVelocity.changeFrame(handFrame);
+            angularVelocity.get(velocityObjective);
+            linearVelocity.get(3, velocityObjective);
+            angularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+            linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+
+            leastSquaresSolver.setA(jacobianCalculator.getJacobianMatrix());
+            leastSquaresSolver.solve(velocityObjective, jointVelocities);
+
+            for (int j = 0; j < joints; j++)
             {
                OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = i == 0 ? jointspaceTrajectoryMessage.getJointTrajectoryMessages().add()
                                                                                   : jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(j);
@@ -256,9 +291,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                }
                else
                {
-                  double previousQ = oneDoFJointTrajectoryMessage.getTrajectoryPoints().get(i - 1).getPosition();
-                  double nextQ = trajectoryPoint1DMessage.getPosition();
-                  trajectoryPoint1DMessage.setVelocity((nextQ - previousQ) / deltaTime);
+                  trajectoryPoint1DMessage.setVelocity(jointVelocities.get(i, 0));
                }
             }
 

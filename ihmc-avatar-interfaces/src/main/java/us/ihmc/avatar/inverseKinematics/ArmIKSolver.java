@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointTorqueSoftLimitWeightCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
@@ -29,6 +30,7 @@ import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
@@ -158,6 +160,23 @@ public class ArmIKSolver
          // Try to keep the elbow bent like a human instead of backwards
          privilegedConfigurationCommand.addJoint(workingOneDoFJoint, workingOneDoFJoint.getName().contains("ELBOW") ? 1.04 : 0.0);
       }
+   }
+
+   public RigidBodyBasics getWorkingChest()
+   {
+      return workChest;
+   }
+
+   public RigidBodyBasics getWorkingHand()
+   {
+      return workHand;
+   }
+
+   public void getControlFrame(PoseReferenceFrame controlFrameToPack)
+   {
+      controlFramePose.changeFrame(controlFrameToPack.getParent());
+      controlFrameToPack.setPoseAndUpdate(controlFramePose);
+      controlFramePose.changeFrame(workHand.getBodyFixedFrame());
    }
 
    public void copySourceToWork()
