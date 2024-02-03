@@ -1,5 +1,4 @@
-#ifndef FEATURE_EXTRACTOR_H
-#define FEATURE_EXTRACTOR_H
+#pragma once
 
 #include "opencv4/opencv2/opencv.hpp"
 
@@ -20,4 +19,3 @@ class FeatureExtractor
         cv::Ptr<cv::ORB> _orb;
 };
 
-#endif // FEATURE_EXTRACTOR_H

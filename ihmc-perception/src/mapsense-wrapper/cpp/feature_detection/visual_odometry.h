@@ -28,7 +28,7 @@ class VisualOdometry
       
       VisualOdometry(ApplicationState& app);
       
-      void PreInitialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRight, cv::Mat descCurLeft,  DMatchVec& stereoMatches);
+      void PreInitialize(KeyPointVec& kpCurLeft, cv::Mat descCurLeft);
       cv::Mat Initialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRight, DMatchVec& stereoMatches, KeyframeVec& keyframes);
       bool UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage, PointLandmarkVec& points, Eigen::Matrix4d initialRelativePose);
       // void UpdateMonocular(const cv::Mat& image);
@@ -54,7 +54,7 @@ class VisualOdometry
                                           const cv::Mat& descTrain, const DMatchVec& matches,
                                           const std::vector<int>& kpIDs, PointLandmarkVec& points3D);
 
-      void TriangulateLandmarks(const Keyframe& kfPrev, const Keyframe& kfCur, PointLandmarkVec& points3D);
+      void TriangulateLandmarks(const Keyframe& kfPrev, const Keyframe& kfCur, PointLandmarkVec& points3D, std::vector<int>& keypointIDs);
 
       void TriangulateKeypointsByDisparity(const KeyPointVec& kp, const cv::Mat& disparity, std::vector<Eigen::Vector3f>& points3d);
       void ExtractMatchesAsPoints(const KeyPointVec& kpTrain, const KeyPointVec& kpQuery, const DMatchVec& matches, Point2fVec& pointsTrain, Point2fVec& pointsQuery);
@@ -65,6 +65,7 @@ class VisualOdometry
       cv::Mat TriangulatePoints(Point2fVec& prevPoints, Point2fVec& curPoints, const CameraModel& cam, cv::Mat relativePose);
       cv::Mat CalculateStereoDepth(cv::Mat left, cv::Mat right);
       void UpdateLandmarks(const PointLandmarkVec& landmarks);
+      void UpdateKeyframePose(Eigen::Matrix4d pose);
 
       // void DrawLandmarks(cv::Mat& img, PointLandmarkVec& landmarks);
       void DrawAllMatches(cv::Mat& image);
@@ -121,7 +122,7 @@ class VisualOdometry
       CameraModel _leftCamera;
       CameraModel _rightCamera;
 
-      FeatureExtractor _featureExtractor;
+      FeatureExtractor _extractor;
 
 
       double _baselineDistance = 0.5;
