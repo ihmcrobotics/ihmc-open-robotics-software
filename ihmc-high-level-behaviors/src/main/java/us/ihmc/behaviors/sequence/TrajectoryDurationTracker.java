@@ -23,6 +23,11 @@ public class TrajectoryDurationTracker
       hitTimeLimit = false;
    }
 
+   public void computeExecutionTimings(double nominalExecutionDuration)
+   {
+      computeExecutionTimings(nominalExecutionDuration, nominalExecutionDuration * 1.5);
+   }
+
    public void computeExecutionTimings(double nominalExecutionDuration, double timeout)
    {
       timeIsUp = !executionTimer.isRunning(nominalExecutionDuration);

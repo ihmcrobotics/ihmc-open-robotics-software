@@ -16,14 +16,9 @@ public class TaskspaceTrajectoryTrackingErrorCalculator extends TrajectoryDurati
    {
       super.reset();
 
-      positionError = Double.POSITIVE_INFINITY;
-      orientationError = Double.POSITIVE_INFINITY;
+      positionError = Double.NaN;
+      orientationError = Double.NaN;
       isWithinPositionTolerance = false;
-   }
-
-   public void computeExecutionTimings(double nominalExecutionDuration)
-   {
-      computeExecutionTimings(nominalExecutionDuration, nominalExecutionDuration * 1.5);
    }
 
    public void computePoseTrackingData(FramePose3DReadOnly desired, FramePose3DReadOnly actual)
