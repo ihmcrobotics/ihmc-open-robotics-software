@@ -56,6 +56,9 @@ set(MS_SOURCES
     external/visual_odometry_external.h
     external/visual_odometry_external.cpp
 
+    feature_detection/feature_extractor.cpp
+    feature_detection/feature_extractor.h
+
     core/core.h
 
     tools/buffer_tools.h
@@ -117,26 +120,26 @@ install(FILES ${MS_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-add_library(zed-driver SHARED ${ZOD_SOURCES})
+# add_library(zed-driver SHARED ${ZOD_SOURCES})
 
-target_link_libraries(zed-driver
-    zed_open_capture
-)
+# target_link_libraries(zed-driver
+#     zed_open_capture
+# )
 
-target_include_directories(zed-driver PUBLIC
-     /usr/include/
-     /usr/include/hidapi/
-     drivers/
-     launcher/
-     external/
-)
+# target_include_directories(zed-driver PUBLIC
+#      /usr/include/
+#      /usr/include/hidapi/
+#      drivers/
+#      launcher/
+#      external/
+# )
 
-install(TARGETS zed-driver
-        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
-        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
-install(FILES ${ZOD_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
-target_compile_definitions(zed-driver PUBLIC -DVIDEO_MOD_AVAILABLE=1)
-target_compile_definitions(zed-driver PUBLIC -DSENSORS_MOD_AVAILABLE=1)
+# install(TARGETS zed-driver
+#         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+#         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
+# install(FILES ${ZOD_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
+# target_compile_definitions(zed-driver PUBLIC -DVIDEO_MOD_AVAILABLE=1)
+# target_compile_definitions(zed-driver PUBLIC -DSENSORS_MOD_AVAILABLE=1)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -144,29 +147,29 @@ target_compile_definitions(zed-driver PUBLIC -DSENSORS_MOD_AVAILABLE=1)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # Visual Odometry Player
-add_executable(VisualOdometryNativeDemoLauncher launcher/vo_demo_launcher.cpp launcher/vo_demo_launcher.h)
-target_link_libraries(VisualOdometryNativeDemoLauncher
-    visual-odometry
-)
-target_include_directories(VisualOdometryNativeDemoLauncher PUBLIC
-    /usr/include/
-    feature_detection/
-    geometry/
-    launcher/
-)
+# add_executable(VisualOdometryNativeDemoLauncher launcher/vo_demo_launcher.cpp launcher/vo_demo_launcher.h)
+# target_link_libraries(VisualOdometryNativeDemoLauncher
+#     visual-odometry
+# )
+# target_include_directories(VisualOdometryNativeDemoLauncher PUBLIC
+#     /usr/include/
+#     feature_detection/
+#     geometry/
+#     launcher/
+# )
 
 
-# ZED Player
-add_executable(ZEDPlayer launcher/zed_player.cpp)
-target_link_libraries(ZEDPlayer
-    ${OpenCV_LIBS}
-    zed-driver
-)
-target_include_directories(ZEDPlayer PUBLIC
-    /usr/include/
-    launcher/
-    drivers/
-    ${OpenCV_INCLUDE_DIRS}
-)
+# # ZED Player
+# add_executable(ZEDPlayer launcher/zed_player.cpp)
+# target_link_libraries(ZEDPlayer
+#     ${OpenCV_LIBS}
+#     zed-driver
+# )
+# target_include_directories(ZEDPlayer PUBLIC
+#     /usr/include/
+#     launcher/
+#     drivers/
+#     ${OpenCV_INCLUDE_DIRS}
+# )
 
 

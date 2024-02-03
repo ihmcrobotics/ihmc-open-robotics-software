@@ -6,14 +6,11 @@
 #include "point_landmark.h"
 #include "camera_model.h"
 #include "keyframe.h"
+#include "feature_extractor.h"
 
-
-using KeyPointVec = std::vector<cv::KeyPoint>;
-using Point2fVec = std::vector<cv::Point2f>;
 using PointLandmarkVec = std::vector<PointLandmark>;
 using PointLandmarkMap = std::unordered_map<uint32_t, PointLandmark>;
 using KeyframeVec = std::vector<Keyframe>;
-using DMatchVec = std::vector<cv::DMatch>;
 
 class VisualOdometry
 {
@@ -33,7 +30,7 @@ class VisualOdometry
       
       void PreInitialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRight, cv::Mat descCurLeft,  DMatchVec& stereoMatches);
       cv::Mat Initialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRight, DMatchVec& stereoMatches, KeyframeVec& keyframes);
-      bool UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage);
+      bool UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage, PointLandmarkVec& points, Eigen::Matrix4d initialRelativePose);
       // void UpdateMonocular(const cv::Mat& image);
       void MatchKeypointsToLandmarks(const KeyPointVec& kpCur, const cv::Mat& descCur, const PointLandmarkVec& landmarks, DMatchVec& matches);
 
@@ -46,9 +43,6 @@ class VisualOdometry
       bool UpdateStereoOld(const cv::Mat& leftImage, const cv::Mat& rightImage);
 
       void ExtractPoseLinear();
-      void ExtractKeypoints_FAST(cv::Mat img_1, Point2fVec& points1);
-      void ExtractKeypoints(cv::Mat img, KeyPointVec& points, cv::Mat& desc);
-      void MatchKeypoints(cv::Mat& desc1, cv::Mat& desc2, DMatchVec& matches);
       void TransferKeypointIDs(const std::vector<int>& trainIDs, std::vector<int>& queryIDs, DMatchVec& matches);
       void GridSampleKeypoints(KeyPointVec& keypoints, DMatchVec& matches);
       void ExtractMatchesAsPoints(const KeyPointVec& keypoints, Point2fVec& points);
@@ -70,7 +64,7 @@ class VisualOdometry
       Eigen::Matrix4f TrackCameraPose(const KeyPointVec& kp, cv::Mat& desc, const Keyframe& lastKF, const PointLandmarkMap& landmarks);
       cv::Mat TriangulatePoints(Point2fVec& prevPoints, Point2fVec& curPoints, const CameraModel& cam, cv::Mat relativePose);
       cv::Mat CalculateStereoDepth(cv::Mat left, cv::Mat right);
-      
+      void UpdateLandmarks(const PointLandmarkVec& landmarks);
 
       // void DrawLandmarks(cv::Mat& img, PointLandmarkVec& landmarks);
       void DrawAllMatches(cv::Mat& image);
@@ -106,7 +100,6 @@ class VisualOdometry
 
 
       cv::Ptr<cv::StereoBM> _stereo = cv::StereoBM::create();
-      cv::Ptr<cv::ORB> _orb;
 
       KeyframeVec _keyframes;
       PointLandmarkMap _landmarks;
@@ -127,6 +120,9 @@ class VisualOdometry
 
       CameraModel _leftCamera;
       CameraModel _rightCamera;
+
+      FeatureExtractor _featureExtractor;
+
 
       double _baselineDistance = 0.5;
 
