@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -385,12 +386,25 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          jointTorqueAgainstForceSensorVisualizer.update();
    }
 
+
+   Stopwatch stopwatch = new Stopwatch().start();
+
    @Override
    public void initializeEstimator(RigidBodyTransformReadOnly rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
       pelvisLinearStateUpdater.initializeRootJointPosition(rootJointTransform.getTranslation());
+      if (pelvisRotationalStateUpdater instanceof IMUBasedPelvisRotationalStateUpdater imuBasedPelvisRotationalStateUpdater)
+      {
+         imuBasedPelvisRotationalStateUpdater.setYawOffset(rootJointTransform.getRotation().getYaw());
+
+
+         if (stopwatch.lapElapsed() > 1.0)
+         {
+            stopwatch.lap();
+            LogTools.info("rootJointTransform.getRotation().getYaw() yaw: %.3f".formatted(rootJointTransform.getRotation().getYaw()));
+         }
+      }
       reinitializeStateEstimator.set(true);
-      // Do nothing for the orientation since the IMU is trusted
    }
 
    @Override

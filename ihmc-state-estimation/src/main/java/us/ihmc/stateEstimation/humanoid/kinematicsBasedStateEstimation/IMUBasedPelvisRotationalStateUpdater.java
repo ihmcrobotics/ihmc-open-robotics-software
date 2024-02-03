@@ -2,6 +2,7 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import java.util.List;
 
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -10,6 +11,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
@@ -42,6 +45,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final YoFrameVector3D yoRootJointAngularVelocityInWorld;
 
    private final BooleanParameter zeroYawAtInitialization = new BooleanParameter("zeroEstimatedRootYawAtInitialization", registry, true);
+   private boolean userSuppliedYawOffset = false;
    private final YoDouble initialYaw = new YoDouble("initialEstimatedRootYaw", registry);
 
    private final FiniteDifferenceAngularVelocityYoFrameVector yoRootJointAngularVelocityFromFD;
@@ -121,7 +125,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
          computeOrientationAtEstimateFrame(measurementFrame, imuProcessedOutput.getOrientationMeasurement(), rootJointFrame, rotationFromRootJointFrameToWorld);
          initialYaw.set(rotationFromRootJointFrameToWorld.getYaw());
       }
-      else
+      else if (!userSuppliedYawOffset)
       {
          initialYaw.set(0.0);
       }
@@ -138,15 +142,26 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    }
 
    private final RotationMatrix rotationFromRootJointFrameToWorld = new RotationMatrix();
+   Stopwatch stopwatch = new Stopwatch().start();
 
    private void updateRootJointRotation()
    {
-      computeOrientationAtEstimateFrame(measurementFrame, imuProcessedOutput.getOrientationMeasurement(), rootJointFrame, rotationFromRootJointFrameToWorld);
+      QuaternionReadOnly orientationMeasurement = imuProcessedOutput.getOrientationMeasurement();
+      computeOrientationAtEstimateFrame(measurementFrame, orientationMeasurement, rootJointFrame, rotationFromRootJointFrameToWorld);
 
       rootJoint.setJointOrientation(rotationFromRootJointFrameToWorld);
       rootJointFrame.update();
 
-      if (zeroYawAtInitialization.getValue())
+      if (stopwatch.lapElapsed() > 1.0)
+      {
+         stopwatch.lap();
+         LogTools.info("rotationFromRootJointFrameToWorld yaw: %.3f".formatted(rotationFromRootJointFrameToWorld.getYaw()));
+         LogTools.info("orientationMeasurement yaw: %.3f".formatted(orientationMeasurement.getYaw()));
+         LogTools.info("initialYaw: %.3f".formatted(initialYaw.getValue()));
+         LogTools.info("imuYawDriftEstimator.getYawBiasInWorldFrame(): %.3f".formatted(imuYawDriftEstimator.getYawBiasInWorldFrame()));
+      }
+
+      if (zeroYawAtInitialization.getValue() || userSuppliedYawOffset)
       {
          rotationFromRootJointFrameToWorld.prependYawRotation(-initialYaw.getValue());
       }
@@ -253,5 +268,11 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    public FrameVector3DReadOnly getEstimatedAngularVelocity()
    {
       return yoRootJointAngularVelocityInWorld;
+   }
+
+   public void setYawOffset(double achievedYawInWorld)
+   {
+      this.initialYaw.set(achievedYawInWorld - rotationFromRootJointFrameToWorld.getYaw() + .2);
+      userSuppliedYawOffset = true;
    }
 }
