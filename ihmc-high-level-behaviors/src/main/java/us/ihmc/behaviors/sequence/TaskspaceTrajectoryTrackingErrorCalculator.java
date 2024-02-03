@@ -1,47 +1,29 @@
 package us.ihmc.behaviors.sequence;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.tools.NonWallTimer;
 
 /**
  * This class provides methods for evaluating the tracking error of
  * pose trajectories executed by the robot.
  */
-public class TaskspaceTrajectoryTrackingErrorCalculator
+public class TaskspaceTrajectoryTrackingErrorCalculator extends TrajectoryDurationTracker
 {
    private double positionError;
    private double orientationError;
-   private boolean timeIsUp;
-   private boolean hitTimeLimit;
    private boolean isWithinPositionTolerance;
-   private final NonWallTimer executionTimer = new NonWallTimer();
-
-   public void update(double robotTime)
-   {
-      executionTimer.update(robotTime);
-   }
 
    public void reset()
    {
-      executionTimer.reset();
+      super.reset();
 
       positionError = Double.POSITIVE_INFINITY;
       orientationError = Double.POSITIVE_INFINITY;
-      timeIsUp = false;
-      hitTimeLimit = false;
       isWithinPositionTolerance = false;
    }
 
    public void computeExecutionTimings(double nominalExecutionDuration)
    {
       computeExecutionTimings(nominalExecutionDuration, nominalExecutionDuration * 1.5);
-   }
-
-   public void computeExecutionTimings(double nominalExecutionDuration, double timeout)
-   {
-      timeIsUp = !executionTimer.isRunning(nominalExecutionDuration);
-      // Default timeout is 50% longer than nominal TODO: Introduce parameter
-      hitTimeLimit = !executionTimer.isRunning(timeout);
    }
 
    public void computePoseTrackingData(FramePose3DReadOnly desired, FramePose3DReadOnly actual)
@@ -64,25 +46,10 @@ public class TaskspaceTrajectoryTrackingErrorCalculator
       isWithinPositionTolerance &= orientationError <= orientationErrorTolerance;
    }
 
-   public boolean getTimeIsUp()
-   {
-      return timeIsUp;
-   }
-
-   public boolean getHitTimeLimit()
-   {
-      return hitTimeLimit;
-   }
-
    /** This includes any of the factored in errors of position or orientation. */
    public boolean isWithinPositionTolerance()
    {
       return isWithinPositionTolerance;
-   }
-
-   public double getElapsedTime()
-   {
-      return executionTimer.getElapsedTime();
    }
 
    public double getPositionError()
