@@ -69,13 +69,15 @@ bool VisualOdometryExternal::updateStereo(uint8_t* bufferLeft, uint8_t* bufferRi
     // cv::cvtColor(matLeft, matLeft, cv::COLOR_GRAY2BGR);
     // cv::cvtColor(matRight, matRight, cv::COLOR_GRAY2BGR);
 
-    PointLandmarkVec landmarks;
-    for(int i = 0; i<numPoints; i++)
-    {
-        landmarks.push_back(PointLandmark(ids[i], Eigen::Vector2f(latestPoints[i*2], latestPoints[i*2 + 1])));
-    }
+    Eigen::Matrix4d latestEigenPose = Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor> >(latestPose);    
 
-    bool result =_visualOdometry->UpdateStereo(matLeft, matRight);
+    PointLandmarkVec landmarks;
+    // for(int i = 0; i<numPoints; i++)
+    // {
+    //     landmarks.push_back(PointLandmark(ids[i], Eigen::Vector2f(latestPoints[i*2], latestPoints[i*2 + 1])));
+    // }
+
+    bool result =_visualOdometry->UpdateStereo(matLeft, matRight, landmarks, latestEigenPose);
     return result;
 }
 

@@ -3,12 +3,12 @@
 #include "file_tools.h"
 #include "opencv_tools.h"
 
-
 #include "opencv4/opencv2/core.hpp"
 
 VODemoLauncher::VODemoLauncher()
 {
    VisualOdometry vo(appState);
+   FeatureExtractor extractor(1000);
 
    std::vector<std::string> fileNames;
 
@@ -24,7 +24,7 @@ VODemoLauncher::VODemoLauncher()
    }
    else
    {
-      TestEstimateMotion(vo, fileNames, 0, 1);
+      TestEstimateMotion(vo, extractor, fileNames, 0, 1);
    }
 }
 
@@ -33,13 +33,15 @@ void VODemoLauncher::Run(VisualOdometry& vo, const std::vector<std::string>& fil
    cv::Mat leftImage = cv::imread(leftDatasetDirectory + fileNames[index], cv::IMREAD_GRAYSCALE);
    cv::Mat rightImage = cv::imread(rightDatasetDirectory + fileNames[index], cv::IMREAD_GRAYSCALE);
 
-   vo.UpdateStereo(leftImage, rightImage);
+
+
+   // vo.UpdateStereo(leftImage, rightImage);
 
    vo.Show();
 
 }
 
-void VODemoLauncher::TestExtractKeypoints(VisualOdometry& vo, const std::vector<std::string>& fileNames, int index)
+void VODemoLauncher::ExtractKeypoints(VisualOdometry& vo, FeatureExtractor& extractor, const std::vector<std::string>& fileNames, int index)
 {
    cv::Mat leftImage = cv::imread(leftDatasetDirectory + fileNames[index], cv::IMREAD_GRAYSCALE);
    cv::Mat rightImage = cv::imread(rightDatasetDirectory + fileNames[index], cv::IMREAD_GRAYSCALE);
@@ -47,7 +49,7 @@ void VODemoLauncher::TestExtractKeypoints(VisualOdometry& vo, const std::vector<
    cv::Mat descriptors;
    std::vector<cv::KeyPoint> keypoints;
    
-   vo.ExtractKeypoints(leftImage, keypoints, descriptors);
+   extractor.ExtractKeypoints(leftImage, keypoints, descriptors);
 
    cv::Mat outImage;
    cv::drawKeypoints(leftImage, keypoints, outImage);
@@ -55,7 +57,7 @@ void VODemoLauncher::TestExtractKeypoints(VisualOdometry& vo, const std::vector<
    vo.Show(0);
 }
 
-void VODemoLauncher::TestMatchKeypoints(VisualOdometry& vo, const std::vector<std::string>& fileNames, int index)
+void VODemoLauncher::TestMatchKeypoints(VisualOdometry& vo, FeatureExtractor& extractor, const std::vector<std::string>& fileNames, int index)
 {
    cv::Mat leftImage = cv::imread(leftDatasetDirectory + fileNames[index], cv::IMREAD_GRAYSCALE);
    cv::Mat rightImage = cv::imread(rightDatasetDirectory + fileNames[index], cv::IMREAD_GRAYSCALE);
@@ -67,10 +69,10 @@ void VODemoLauncher::TestMatchKeypoints(VisualOdometry& vo, const std::vector<st
    
    std::vector<cv::DMatch> matches;
 
-   vo.ExtractKeypoints(leftImage, leftKeypoints, leftDescriptors);
-   vo.ExtractKeypoints(rightImage, rightKeypoints, rightDescriptors);
+   extractor.ExtractKeypoints(leftImage, leftKeypoints, leftDescriptors);
+   extractor.ExtractKeypoints(rightImage, rightKeypoints, rightDescriptors);
 
-   vo.MatchKeypoints(leftDescriptors, rightDescriptors, matches);
+   extractor.MatchKeypoints(leftDescriptors, rightDescriptors, matches);
 
    cv::Mat outImage;
    cv::drawMatches(leftImage, leftKeypoints, rightImage, rightKeypoints, matches, outImage);
@@ -90,7 +92,7 @@ void VODemoLauncher::TestStereoDisparityCalculation(VisualOdometry& vo, const st
    vo.Show(0);
 }
 
-void VODemoLauncher::TestStereoTriangulation(VisualOdometry& vo, const std::vector<std::string>& fileNames, int index)
+void VODemoLauncher::TestStereoTriangulation(VisualOdometry& vo, FeatureExtractor& extractor, const std::vector<std::string>& fileNames, int index)
 {
    cv::Mat leftImage = cv::imread(leftDatasetDirectory + fileNames[index], cv::IMREAD_GRAYSCALE);
    cv::Mat rightImage = cv::imread(rightDatasetDirectory + fileNames[index], cv::IMREAD_GRAYSCALE);
@@ -102,7 +104,7 @@ void VODemoLauncher::TestStereoTriangulation(VisualOdometry& vo, const std::vect
 
    cv::Mat disparity = vo.CalculateStereoDepth(leftImage, rightImage);
 
-   vo.ExtractKeypoints(leftImage, kpCur, descCur);
+   extractor.ExtractKeypoints(leftImage, kpCur, descCur);
 
    OpenCVTools::ConvertDisparityToDepth(disparity, depth);
 
@@ -111,7 +113,7 @@ void VODemoLauncher::TestStereoTriangulation(VisualOdometry& vo, const std::vect
    OpenCVTools::DisplayImage("TestStereoTriangulation", disparity, 0);
 }
 
-void VODemoLauncher::TestMatchKeypointsMonocular(VisualOdometry& vo, const std::vector<std::string>& fileNames, int indexOne, int indexTwo)
+void VODemoLauncher::TestMatchKeypointsMonocular(VisualOdometry& vo, FeatureExtractor& extractor, const std::vector<std::string>& fileNames, int indexOne, int indexTwo)
 {
    cv::Mat leftImagePrev = cv::imread(leftDatasetDirectory + fileNames[indexOne], cv::IMREAD_GRAYSCALE);
    cv::Mat leftImageCur = cv::imread(leftDatasetDirectory + fileNames[indexTwo], cv::IMREAD_GRAYSCALE);
@@ -123,10 +125,10 @@ void VODemoLauncher::TestMatchKeypointsMonocular(VisualOdometry& vo, const std::
    
    std::vector<cv::DMatch> matches;
 
-   vo.ExtractKeypoints(leftImagePrev, kpPrev, descPrev);
-   vo.ExtractKeypoints(leftImageCur, kpCur, descCur);
+   extractor.ExtractKeypoints(leftImagePrev, kpPrev, descPrev);
+   extractor.ExtractKeypoints(leftImageCur, kpCur, descCur);
 
-   vo.MatchKeypoints(descPrev, descCur, matches);
+   extractor.MatchKeypoints(descPrev, descCur, matches);
 
    printf("Total Matches Before: %ld\n", matches.size());
    vo.FilterMatchesByDistance(matches, kpPrev, kpCur, 100.0f);
@@ -138,7 +140,7 @@ void VODemoLauncher::TestMatchKeypointsMonocular(VisualOdometry& vo, const std::
    OpenCVTools::DisplayImage("TestMatchKeypointsMonocular", outImage, 0);
 }
 
-void VODemoLauncher::TestEstimateMotion(VisualOdometry& vo, const std::vector<std::string>& fileNames, int indexOne, int indexTwo)
+void VODemoLauncher::TestEstimateMotion(VisualOdometry& vo, FeatureExtractor& extractor, const std::vector<std::string>& fileNames, int indexOne, int indexTwo)
 {
    cv::Mat leftImagePrev = cv::imread(leftDatasetDirectory + fileNames[indexOne], cv::IMREAD_GRAYSCALE);
    cv::Mat leftImageCur = cv::imread(leftDatasetDirectory + fileNames[indexTwo], cv::IMREAD_GRAYSCALE);
@@ -150,10 +152,10 @@ void VODemoLauncher::TestEstimateMotion(VisualOdometry& vo, const std::vector<st
    
    std::vector<cv::DMatch> matches;
 
-   vo.ExtractKeypoints(leftImagePrev, kpPrev, descPrev);
-   vo.ExtractKeypoints(leftImageCur, kpCur, descCur);
+   extractor.ExtractKeypoints(leftImagePrev, kpPrev, descPrev);
+   extractor.ExtractKeypoints(leftImageCur, kpCur, descCur);
 
-   vo.MatchKeypoints(descPrev, descCur, matches);
+   extractor.MatchKeypoints(descPrev, descCur, matches);
 
    printf("Total Matches Before: %ld\n", matches.size());
    vo.FilterMatchesByDistance(matches, kpPrev, kpCur, 100.0f);
