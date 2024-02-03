@@ -7,7 +7,7 @@ import us.ihmc.tools.NonWallTimer;
  * This class provides methods for evaluating the tracking error of
  * pose trajectories executed by the robot.
  */
-public class TrajectoryTrackingErrorCalculator
+public class TaskspaceTrajectoryTrackingErrorCalculator
 {
    private double positionError;
    private double orientationError;
