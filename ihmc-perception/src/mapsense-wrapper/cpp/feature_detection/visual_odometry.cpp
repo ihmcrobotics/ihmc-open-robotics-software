@@ -53,13 +53,13 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage, Point
       Eigen::Matrix4d initialRelativePose = eigPose.cast<double>();
       initialRelativePose.transposeInPlace();
 
-      // Keyframe Insertion Check. Triangulate if Keypoint
       if (eigPose.block<3, 1>(0, 3).norm() > 1)
       {
-         // TODO: Fix order in which Keyframe is inserted with keypoint ids.
          std::vector<int> keypointIDs(_kpCurLeft.size(), -1);
+
+         auto prevKf = _keyframes[_keyframes.size() - 1];
+         TriangulateLandmarks(prevKf, keypointIDs);
          InsertKeyframe(initialRelativePose, _descCurLeft, _kpCurLeft, keypointIDs);      
-         TriangulateLandmarks(_keyframes, _landmarks, keypointIDs);
 
          _lastKeyframeImage = leftImage.clone();
          _state = State::TRACKING;
@@ -71,17 +71,18 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage, Point
    else if(_state == State::TRACKING)
    {
 
-      // Find all 
-
       Eigen::Matrix4f trackedPose = TrackCameraPose(_kpCurLeft, _descCurLeft, _keyframes[_keyframes.size() - 1], _landmarks);
+      Eigen::Matrix4d initialRelativePose = trackedPose.cast<double>();
+      initialRelativePose.transposeInPlace();
 
       // Keyframe Insertion Check. Triangulate if Keypoint
       if (trackedPose.block<3, 1>(0, 3).norm() > 1)
       {
-         // TODO: Fix order in which Keyframe is inserted with keypoint ids.
          std::vector<int> keypointIDs(_kpCurLeft.size(), -1);
+         
+         auto prevKf = _keyframes[_keyframes.size() - 1];
+         TriangulateLandmarks(prevKf, keypointIDs);
          InsertKeyframe(initialRelativePose, _descCurLeft, _kpCurLeft, keypointIDs);      
-         TriangulateLandmarks(_keyframes, _landmarks, keypointIDs);
 
          _lastKeyframeImage = leftImage.clone();
       }
@@ -270,11 +271,10 @@ void VisualOdometry::GridSampleKeypoints(KeyPointVec& keypoints, DMatchVec& matc
 }
 
 
-void VisualOdometry::TriangulateLandmarks(const Keyframe& kfPrev, const Keyframe& kfCur, PointLandmarkVec& points3D, std::vector<int>& keypointIDs)
+void VisualOdometry::TriangulateLandmarks(const Keyframe& kfPrev, std::vector<int>& keypointIDs)
 {
-   auto lastKeyframe = _keyframes[_keyframes.size() - 1];
-   cv::Mat descPrev = lastKeyframe.descLeft;
-   KeyPointVec& kpPrev = lastKeyframe.keypointsLeft;
+   cv::Mat descPrev = kfPrev.descLeft;
+   auto kpPrev = kfPrev.keypointsLeft;
 
    DMatchVec matches;
    _extractor.MatchKeypoints(descPrev, _descCurLeft, matches);
@@ -286,21 +286,14 @@ void VisualOdometry::TriangulateLandmarks(const Keyframe& kfPrev, const Keyframe
    FilterMatchesByDistance(matches, kpPrev, _kpCurLeft, 150.0f);
    printf("Total Matches After Distance Filter: %ld\n", matches.size());fflush(stdout);
 
-   TransferKeypointIDs(lastKeyframe.keypointIDs, keypointIDs, matches);
+   TransferKeypointIDs(kfPrev.keypointIDs, keypointIDs, matches);
    printf("Total Keypoints: %ld\n", keypointIDs.size());fflush(stdout);
-
-   Point2fVec pointsTrain;
-   Point2fVec pointsQuery;
-   ExtractMatchesAsPoints(kpPrev, _kpCurLeft, matches, pointsTrain, pointsQuery);
-   printf("Total Motion Correspondences: %ld\n", pointsTrain.size());fflush(stdout);
 
    _curPoints3D.clear();
    TriangulateLandmarksStereoNormal(_kpCurLeft, _kpCurRight, _descCurLeft, _curMatchesStereo, keypointIDs, _curPoints3D);
    printf("Total Landmarks Triangulated: %ld\n", _curPoints3D.size());fflush(stdout);
 
    _lastKeyframeImage = kfPrev.leftImage.clone();
-   // InsertKeyframe(eigenPose, _descCurLeft, _kpCurLeft, keypointIDs);
-   
    AppendLandmarks(_curPoints3D);
 }
 
@@ -543,5 +536,5 @@ void VisualOdometry::UpdateLandmarks(const PointLandmarkVec& landmarks)
 
 void VisualOdometry::UpdateKeyframePose(Eigen::Matrix4d pose)
 {
-   _keyframes[_keyframes.size() - 1].pose = pose;
+   // _keyframes[_keyframes.size() - 1].pose = std::move(pose);
 }

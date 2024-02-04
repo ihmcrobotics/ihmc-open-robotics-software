@@ -54,7 +54,7 @@ class VisualOdometry
                                           const cv::Mat& descTrain, const DMatchVec& matches,
                                           const std::vector<int>& kpIDs, PointLandmarkVec& points3D);
 
-      void TriangulateLandmarks(const Keyframe& kfPrev, const Keyframe& kfCur, PointLandmarkVec& points3D, std::vector<int>& keypointIDs);
+      void TriangulateLandmarks(const Keyframe& kfPrev, std::vector<int>& keypointIDs);
 
       void TriangulateKeypointsByDisparity(const KeyPointVec& kp, const cv::Mat& disparity, std::vector<Eigen::Vector3f>& points3d);
       void ExtractMatchesAsPoints(const KeyPointVec& kpTrain, const KeyPointVec& kpQuery, const DMatchVec& matches, Point2fVec& pointsTrain, Point2fVec& pointsQuery);
