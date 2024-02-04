@@ -201,8 +201,8 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          double rotationRadius = EuclidCoreTools.norm(syncedHandControlPose.getY(), syncedHandControlPose.getZ()); // this is always the radial distance.
          double totalTranslation = getDefinition().getTranslation();
          // this is the distance the hand must travel along the screw portion
-         double tangentialDistance = totalRotationInRadians * rotationRadius;
-         double totalLinearDistanceOfHand = EuclidCoreTools.norm(tangentialDistance, totalTranslation);
+         double radialDistance = totalRotationInRadians * rotationRadius;
+         double totalLinearDistanceOfHand = EuclidCoreTools.norm(radialDistance, totalTranslation);
 
          // computing the movement duration, which is clamped by the max movement speed
          double durationForRotation = totalRotationInRadians / getDefinition().getMaxAngularVelocity();
@@ -211,7 +211,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          double segmentDuration = movementDuration / (numberOfPoints - 1);
 
          // the way the screw frame is defined, x is always the axis of rotation and translation. This means that the tangential velocity is normal to the x axis and the vector yz
-         double tangentialVelocity = totalRotationInRadians / movementDuration;
+         double tangentialVelocity = radialDistance / movementDuration;
          double axialVelocity = totalTranslation / movementDuration;
          double rotationalVelocity = totalRotationInRadians / movementDuration;
 
@@ -239,7 +239,6 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
             Vector3D tangentVector = new Vector3D();
             tangentVector.cross(rotationAxis, radialPosition);
             tangentVector.normalize();
-            tangentVector.scale(tangentialVelocity);
 
             FrameVector3D linearVelocity = linearVelocities.add();
             linearVelocity.setToZero(affordanceFrame);
