@@ -127,7 +127,6 @@ public class JointStateUpdater
 
          double positionSensorData = jointSensorOutput.getPosition();
          double velocitySensorData = jointSensorOutput.getVelocity();
-         double accelerationSensorData = jointSensorOutput.getAcceleration();
          double torqueSensorData = jointSensorOutput.getEffort();
 
          for (int j = 0; j < imuBasedJointStateEstimators.size(); j++)
@@ -150,7 +149,6 @@ public class JointStateUpdater
 
          oneDoFJoint.setQ(positionSensorData);
          oneDoFJoint.setQd(velocitySensorData);
-         oneDoFJoint.setQdd(accelerationSensorData);
          oneDoFJoint.setTau(torqueSensorData);
       }
 
