@@ -227,10 +227,9 @@ public class ArmIKSolver
    public void solve(FrameVector3DReadOnly desiredAngularVelocity, FrameVector3DReadOnly desiredLinearVelocity)
    {
       // record the desired velocities with a deep copy, and change the frame to world
-      handDesiredAngularVelocity.set(desiredAngularVelocity);
-      handDesiredLinearVelocity.set(desiredLinearVelocity);
-      handDesiredAngularVelocity.changeFrame(armWorldFrame);
-      handDesiredLinearVelocity.changeFrame(armWorldFrame);
+      handDesiredAngularVelocity.setIncludingFrame(desiredAngularVelocity);
+      handDesiredLinearVelocity.setIncludingFrame(desiredLinearVelocity);
+      handDesiredLinearVelocity.checkReferenceFrameMatch(handDesiredAngularVelocity);
 
       solve();
 
@@ -238,7 +237,7 @@ public class ArmIKSolver
       spatialVelocityCommand.set(workChest, workHand);
       spatialVelocityCommand.setSelectionMatrix(selectionMatrix);
       spatialVelocityCommand.setWeightMatrix(weightMatrix);
-      spatialVelocityCommand.setSpatialVelocity(armWorldFrame, handDesiredAngularVelocity, handDesiredLinearVelocity);
+      spatialVelocityCommand.setSpatialVelocity(handDesiredLinearVelocity.getReferenceFrame(), handDesiredAngularVelocity, handDesiredLinearVelocity);
 
       // Populate teh commands list with the settings, privileged configuration, and spatial velocity
       controllerCoreCommand.clear();

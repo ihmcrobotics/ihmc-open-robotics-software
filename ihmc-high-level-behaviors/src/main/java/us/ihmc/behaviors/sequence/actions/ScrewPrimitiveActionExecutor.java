@@ -61,6 +61,8 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final MutableReferenceFrame currentPoseFrame = new MutableReferenceFrame();
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
+   private final FrameVector3D linearVelocity = new FrameVector3D();
+   private final FrameVector3D angularVelocity = new FrameVector3D();
    private final RecyclingArrayList<FrameVector3D> linearVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final RecyclingArrayList<FrameVector3D> angularVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final TDoubleArrayList trajectoryTimes = new TDoubleArrayList();
@@ -126,8 +128,8 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                   firstPose.set(workPose);
 
                   // These contants could be adjusted
-                  double rotationPerPoint = Math.toRadians(8.6);
-                  double translationPerPoint = 0.01;
+                  double rotationPerPoint = Math.toRadians(10);
+                  double translationPerPoint = 0.05;
                   int segments = (int) Math.ceil(Math.abs(getDefinition().getRotation()) / rotationPerPoint
                                                + Math.abs(getDefinition().getTranslation()) / translationPerPoint);
 
@@ -264,18 +266,38 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          linearVelocities.add().setToZero();
          trajectoryTimes.add(movementDuration);
 
+         // start setting up the joint space trajectory
+         ArmIKSolver armIKSolver = armIKSolvers.get(getDefinition().getSide());
+         int numberOfJoints = armIKSolver.getSolutionOneDoFJoints().length;
+         for (int jointNumber = 0; jointNumber < numberOfJoints; jointNumber++)
+         {
+            OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
+            oneDoFJointTrajectoryMessage.getTrajectoryPoints().clear();
+            oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use Default weight
+         }
+
          for (int i = 0; i < numberOfPoints; i++)
          {
             // For the first point, they are the same -- the initial hand pose. For the last point, they're the same.
             Pose3DReadOnly currentPose = getState().getTrajectory().getValueReadOnly(i);
-            FrameVector3D angularVelocity = angularVelocities.get(i);
-            FrameVector3D linearVelocity = linearVelocities.get(i);
+            angularVelocity.setIncludingFrame(angularVelocities.get(i));
+            linearVelocity.setIncludingFrame(linearVelocities.get(i));
             double waypointTime = trajectoryTimes.get(i);
 
             currentPoseFrame.getTransformToParent().set(currentPose);
             currentPoseFrame.getReferenceFrame().update();
 
-            ArmIKSolver armIKSolver = armIKSolvers.get(getDefinition().getSide());
+            SE3TrajectoryPointMessage se3TrajectoryPointMessage = taskspaceTrajectoryMessage.getTaskspaceTrajectoryPoints().add();
+            se3TrajectoryPointMessage.setTime(waypointTime);
+            se3TrajectoryPointMessage.getPosition().set(currentPose.getTranslation());
+            se3TrajectoryPointMessage.getOrientation().set(currentPose.getOrientation());
+            se3TrajectoryPointMessage.getLinearVelocity().set(linearVelocity);
+            se3TrajectoryPointMessage.getAngularVelocity().set(angularVelocity);
+
+            angularVelocity.changeFrame(currentPoseFrame.getReferenceFrame());
+            linearVelocity.changeFrame(currentPoseFrame.getReferenceFrame());
+
+            // what's going on here?
             if (i == 0)
                armIKSolver.copySourceToWork();
             armIKSolver.update(syncedRobot.getReferenceFrames().getChestFrame(), currentPoseFrame.getReferenceFrame());
@@ -284,14 +306,9 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
             if (armIKSolver.getQuality() > ArmIKSolver.GOOD_QUALITY_MAX)
                LogTools.warn("Bad quality: {} (i == {})", armIKSolver.getQuality(), i);
 
-            int numberOfJoints = armIKSolver.getSolutionOneDoFJoints().length;
             for (int j = 0; j < numberOfJoints; j++)
             {
-               OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = i == 0 ? jointspaceTrajectoryMessage.getJointTrajectoryMessages().add()
-                                                                                  : jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(j);
-               if (i == 0)
-                  oneDoFJointTrajectoryMessage.getTrajectoryPoints().clear();
-               oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use default weight
+               OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(j);
 
                TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
                trajectoryPoint1DMessage.setTime(waypointTime);
@@ -299,12 +316,8 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                trajectoryPoint1DMessage.setVelocity(armIKSolver.getSolutionOneDoFJoints()[j].getQd());
             }
 
-            SE3TrajectoryPointMessage se3TrajectoryPointMessage = taskspaceTrajectoryMessage.getTaskspaceTrajectoryPoints().add();
-            se3TrajectoryPointMessage.setTime(waypointTime);
-            se3TrajectoryPointMessage.getPosition().set(currentPose.getTranslation());
-            se3TrajectoryPointMessage.getOrientation().set(currentPose.getOrientation());
-            se3TrajectoryPointMessage.getLinearVelocity().set(linearVelocity);
-            se3TrajectoryPointMessage.getAngularVelocity().set(angularVelocity);
+            angularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+            linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
 
             LogTools.info("Adding point time: %.2f  nextPose: %s %s  linearVel: %s  angularVel: %s"
                     .formatted(time,
