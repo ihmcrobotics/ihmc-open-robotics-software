@@ -276,6 +276,9 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
             oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use Default weight
          }
 
+         // initialize the command, since we're not going to be far.
+         armIKSolver.copySourceToWork();
+
          for (int i = 0; i < numberOfPoints; i++)
          {
             // For the first point, they are the same -- the initial hand pose. For the last point, they're the same.
@@ -297,9 +300,6 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
             angularVelocity.changeFrame(currentPoseFrame.getReferenceFrame());
             linearVelocity.changeFrame(currentPoseFrame.getReferenceFrame());
 
-            // what's going on here?
-            if (i == 0)
-               armIKSolver.copySourceToWork();
             armIKSolver.update(syncedRobot.getReferenceFrames().getChestFrame(), currentPoseFrame.getReferenceFrame());
             armIKSolver.solve(angularVelocity, linearVelocity);
 
