@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.JointStateType;
@@ -15,6 +16,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
+import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoMatrix;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -28,6 +30,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +93,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final AlphaFilteredYoMatrix filteredEstimate;
    private final AlphaFilteredYoMatrix doubleFilteredEstimate;
+
+   /** Using just one value for process model, applying it to all parameters. */
+   private final YoDouble processCovariance;
+   private final YoDouble floatingBaseMeasurementCovariance;
+   private final YoDouble legsMeasurementCovariance;
+   private final YoDouble armsMeasurementCovariance;
+   private final YoDouble spineMeasurementCovariance;
+   private final YoDouble loadedMeasurementCovarianceMultiplier;
 
    /** DEBUG variables */
    private static final boolean DEBUG = true;
@@ -198,29 +209,43 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                                   nDoFs, 1,
                                                                   registry);
 
+      int[] partitionSizes = RegressorTools.sizePartitions(basisSets);
       regressorPartitions = RegressorTools.sizePartitionMatrices(regressorCalculator.getJointTorqueRegressorMatrix(), basisSets);
       parameterPartitions = RegressorTools.sizePartitionVectors(basisSets);
       inertialKalmanFilter = new InertialKalmanFilter(estimateRobotModel,
                                                       basisSets,
                                                       parameters.getURDFParameters(basisSets),
-                                                      CommonOps_DDRM.identity(RegressorTools.sizePartitions(basisSets)[0]),
-                                                      CommonOps_DDRM.identity(RegressorTools.sizePartitions(basisSets)[0]),
+                                                      CommonOps_DDRM.identity(partitionSizes[0]),
+                                                      CommonOps_DDRM.identity(partitionSizes[0]),
                                                       CommonOps_DDRM.identity(nDoFs));
       inertialKalmanFilterEstimate = new YoMatrix("inertialParameterEstimate",
-                                                  RegressorTools.sizePartitions(basisSets)[0], 1,
+                                                  partitionSizes[0], 1,
                                                   getRowNames(basisSets, estimateModelBodies), null,
                                                   registry);
 
       filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate",
                                                    AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(), toolbox.getControlDT()),
-                                                   RegressorTools.sizePartitions(basisSets)[0], 1,
+                                                   partitionSizes[0], 1,
                                                    getRowNames(basisSets, estimateModelBodies), null,
                                                    registry);
       doubleFilteredEstimate = new AlphaFilteredYoMatrix("doubleFilteredInertialParameterEstimate",
                                                          AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(), toolbox.getControlDT()),
-                                                         RegressorTools.sizePartitions(basisSets)[0], 1,
+                                                         partitionSizes[0], 1,
                                                          getRowNames(basisSets, estimateModelBodies), null,
                                                          registry);
+
+      processCovariance = new YoDouble("processCovariance", registry);
+      processCovariance.set(parameters.getProcessModelCovariance());
+      floatingBaseMeasurementCovariance = new YoDouble("floatingBaseMeasurementCovariance", registry);
+      floatingBaseMeasurementCovariance.set(parameters.getFloatingBaseMeasurementCovariance());
+      legsMeasurementCovariance = new YoDouble("legsMeasurementCovariance", registry);
+      legsMeasurementCovariance.set(parameters.getLegMeasurementCovariance());
+      armsMeasurementCovariance = new YoDouble("armsMeasurementCovariance", registry);
+      armsMeasurementCovariance.set(parameters.getArmMeasurementCovariance());
+      spineMeasurementCovariance = new YoDouble("spineMeasurementCovariance", registry);
+      spineMeasurementCovariance.set(parameters.getSpineMeasurementCovariance());
+      loadedMeasurementCovarianceMultiplier = new YoDouble("loadedMeasurementCovarianceMultiplier", registry);
+      loadedMeasurementCovarianceMultiplier.set(parameters.getLoadedMeasurementCovarianceMultiplier());
 
       if (DEBUG)
       {
@@ -247,6 +272,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    {
       if (enableFilter.getBooleanValue())
       {
+         updateFilterCovariances();
+
          updateRegressorModelJointStates();
 
          updateContactJacobians();
@@ -286,6 +313,47 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
             packDebugResidual();
 
 //         updateWatchers();
+      }
+   }
+
+   private void updateFilterCovariances()
+   {
+      // Set diagonal of process covariance
+      CommonOps_DDRM.setIdentity(inertialKalmanFilter.getProcessCovariance());
+      CommonOps_DDRM.scale(processCovariance.getValue(), inertialKalmanFilter.getProcessCovariance());
+
+      // Set diagonal entries of measurement covariance according to the part of the body
+      for (JointReadOnly joint : actualModelJoints)
+      {
+         int[] indices = jointIndexHandler.getJointIndices(joint);
+
+         if (joint.getName().contains("PELVIS"))
+            MatrixMissingTools.setMatrixDiagonal(indices, floatingBaseMeasurementCovariance.getValue(), inertialKalmanFilter.getMeasurementCovariance());
+         else if (joint.getName().contains("HIP") || joint.getName().contains("KNEE") || joint.getName().contains("ANKLE"))
+            MatrixMissingTools.setMatrixDiagonal(indices, legsMeasurementCovariance.getValue(), inertialKalmanFilter.getMeasurementCovariance());
+         else if (joint.getName().contains("SHOULDER") || joint.getName().contains("ELBOW") || joint.getName().contains("WRIST"))
+            MatrixMissingTools.setMatrixDiagonal(indices, armsMeasurementCovariance.getValue(), inertialKalmanFilter.getMeasurementCovariance());
+         else if (joint.getName().contains("SPINE"))
+            MatrixMissingTools.setMatrixDiagonal(indices, spineMeasurementCovariance.getValue(), inertialKalmanFilter.getMeasurementCovariance());
+         else
+            LogTools.info("Joint " + joint.getName() + " not found for measurement covariance");
+      }
+      // Introduce multiplier on the left/right joints depending on whether that side of the robot is loaded
+      for (RobotSide side : RobotSide.values)
+      {
+         if (footSwitches.get(side).hasFootHitGroundFiltered())
+         {
+            for (JointReadOnly joint : actualModelJoints)
+            {
+               if (joint.getName().contains(side.name()))
+               {
+                  int[] indices = jointIndexHandler.getJointIndices(joint);
+                  MatrixMissingTools.scaleMatrixDiagonal(indices, loadedMeasurementCovarianceMultiplier.getValue(), inertialKalmanFilter.getMeasurementCovariance());
+               }
+            }
+         }
+         // TODO: will need a short circuit swith where we only apply the multiplier to one of the sides, at the moment it is possible to apply the multiplier
+         //    to both sides if they are both in contact
       }
    }
 

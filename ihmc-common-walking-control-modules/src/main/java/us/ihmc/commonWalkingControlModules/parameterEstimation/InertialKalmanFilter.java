@@ -123,4 +123,14 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
          this.contactWrenches.get(side).set(contactWrenches.get(side));
       }
    }
+
+   public DMatrixRMaj getProcessCovariance()
+   {
+      return processCovariance;
+   }
+
+   public DMatrixRMaj getMeasurementCovariance()
+   {
+      return measurementCovariance;
+   }
 }
