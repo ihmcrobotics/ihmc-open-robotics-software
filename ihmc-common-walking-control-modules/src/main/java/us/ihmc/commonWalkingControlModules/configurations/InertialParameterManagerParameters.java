@@ -13,4 +13,11 @@ public interface InertialParameterManagerParameters
 
    public abstract double getBreakFrequencyForTorqueFiltering();
    public abstract double getBreakFrequencyForEstimateFiltering();
+
+   public abstract double getProcessModelCovariance();
+   public abstract double getFloatingBaseMeasurementCovariance();
+   public abstract double getLegMeasurementCovariance();
+   public abstract double getArmMeasurementCovariance();
+   public abstract double getSpineMeasurementCovariance();
+   public abstract double getLoadedMeasurementCovarianceMultiplier();
 }
