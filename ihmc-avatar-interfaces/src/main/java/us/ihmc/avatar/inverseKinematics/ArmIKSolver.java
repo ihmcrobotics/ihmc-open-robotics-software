@@ -10,11 +10,16 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointTorqueSoftLimitWeightCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
@@ -70,12 +75,17 @@ public class ArmIKSolver
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final WholeBodyControllerCore controllerCore;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
+   private final SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand();
    private final DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
+
    private final FramePose3D handControlDesiredPose = new FramePose3D();
+   private final FrameVector3D handDesiredAngularVelocity = new FrameVector3D();
+   private final FrameVector3D handDesiredLinearVelocity = new FrameVector3D();
    private final FramePose3D lastHandControlDesiredPose = new FramePose3D();
+
    private final RigidBodyTransform handControlDesiredPoseToChestCoMTransform = new RigidBodyTransform();
    private final SpatialVectorReadOnly zeroVector6D = new SpatialVector(armWorldFrame);
    private final FramePose3D controlFramePose = new FramePose3D();
@@ -212,6 +222,49 @@ public class ArmIKSolver
       boolean desiredHandControlPoseChanged = !handControlDesiredPose.geometricallyEquals(lastHandControlDesiredPose, 0.0001);
       lastHandControlDesiredPose.setIncludingFrame(handControlDesiredPose);
       return desiredHandControlPoseChanged;
+   }
+
+   public void solve(FrameVector3DReadOnly desiredAngularVelocity, FrameVector3DReadOnly desiredLinearVelocity)
+   {
+      // record the desired velocities with a deep copy, and change the frame to world
+      handDesiredAngularVelocity.set(desiredAngularVelocity);
+      handDesiredLinearVelocity.set(desiredLinearVelocity);
+      handDesiredAngularVelocity.changeFrame(armWorldFrame);
+      handDesiredLinearVelocity.changeFrame(armWorldFrame);
+
+      solve();
+
+      // populate the spatial velocity for the IK command list
+      spatialVelocityCommand.set(workChest, workHand);
+      spatialVelocityCommand.setSelectionMatrix(selectionMatrix);
+      spatialVelocityCommand.setWeightMatrix(weightMatrix);
+      spatialVelocityCommand.setSpatialVelocity(armWorldFrame, handDesiredAngularVelocity, handDesiredLinearVelocity);
+
+      // Populate teh commands list with the settings, privileged configuration, and spatial velocity
+      controllerCoreCommand.clear();
+      controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
+      controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommand);
+      controllerCoreCommand.addInverseKinematicsCommand(spatialVelocityCommand);
+
+      // Use this to compute the desired velocity.
+      controllerCore.compute(controllerCoreCommand);
+
+      // Feed the solution velocity back into the working model.
+      ControllerCoreOutput controllerCoreOutput = controllerCore.getControllerCoreOutput();
+      JointDesiredOutputListReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
+      for (int j = 0; j < workingOneDoFJoints.length; j++)
+      {
+         if (output.hasDataForJoint(workingOneDoFJoints[j]))
+         {
+            JointDesiredOutputReadOnly jointDesiredOutput = output.getJointDesiredOutput(workingOneDoFJoints[j]);
+            double desiredVelocity = jointDesiredOutput.getDesiredVelocity();
+            workingOneDoFJoints[j].setQd(desiredVelocity);
+            if (jointDesiredOutput.hasDesiredTorque())
+            {
+               workingOneDoFJoints[j].setTau(jointDesiredOutput.getDesiredTorque());
+            }
+         }
+      }
    }
 
    public void solve()

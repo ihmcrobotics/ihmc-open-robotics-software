@@ -248,33 +248,13 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
             if (i == 0)
                armIKSolver.copySourceToWork();
             armIKSolver.update(syncedRobot.getReferenceFrames().getChestFrame(), currentPoseFrame.getReferenceFrame());
-            armIKSolver.solve();
+            armIKSolver.solve(angularVelocity, linearVelocity);
 
             if (armIKSolver.getQuality() > ArmIKSolver.GOOD_QUALITY_MAX)
                LogTools.warn("Bad quality: {} (i == {})", armIKSolver.getQuality(), i);
 
-            // Compute the velocities of the arm joints using the hand spatial velocities
-            // TODO this only needs to be done if i is not the boundary conditions
-            armIKSolver.getControlFrame(handFrame);
-            jacobianCalculator.clear();
-            jacobianCalculator.setKinematicChain(armIKSolver.getWorkingChest(), armIKSolver.getWorkingHand());
-            jacobianCalculator.setJacobianFrame(handFrame);
-            jacobianCalculator.reset();
-
-            int joints = armIKSolver.getSolutionOneDoFJoints().length;
-            DMatrixRMaj velocityObjective = new DMatrixRMaj(6, 1);
-            DMatrixRMaj jointVelocities = new DMatrixRMaj(joints, 1);
-            angularVelocity.changeFrame(handFrame);
-            linearVelocity.changeFrame(handFrame);
-            angularVelocity.get(velocityObjective);
-            linearVelocity.get(3, velocityObjective);
-            angularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-            linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-
-            leastSquaresSolver.setA(jacobianCalculator.getJacobianMatrix());
-            leastSquaresSolver.solve(velocityObjective, jointVelocities);
-
-            for (int j = 0; j < joints; j++)
+            int numberOfJoints = armIKSolver.getSolutionOneDoFJoints().length;
+            for (int j = 0; j < numberOfJoints; j++)
             {
                OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = i == 0 ? jointspaceTrajectoryMessage.getJointTrajectoryMessages().add()
                                                                                   : jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(j);
@@ -291,7 +271,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                }
                else
                {
-                  trajectoryPoint1DMessage.setVelocity(jointVelocities.get(i, 0));
+                  trajectoryPoint1DMessage.setVelocity(armIKSolver.getSolutionOneDoFJoints()[j].getQd());
                }
             }
 
