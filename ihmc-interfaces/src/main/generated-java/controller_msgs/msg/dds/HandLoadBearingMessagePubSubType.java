@@ -15,7 +15,7 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ccc22c6ed1c89a01bd57dd6c10f7980ec5236dd7b30a030c6ac938bcb6337639";
+   		return "9fc5fdaff0b5bc6cf704491ee99037e8c88c67ed0964fe9bb64a1a78b41be258";
    }
    
    @Override
@@ -64,6 +64,8 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -93,6 +95,9 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getContactNormalInWorld(), current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -109,6 +114,8 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getContactPointInBodyFrame(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getContactNormalInWorld(), cdr);
+      cdr.write_type_6(data.getExecutionDelayTime());
+
    }
 
    public static void read(controller_msgs.msg.dds.HandLoadBearingMessage data, us.ihmc.idl.CDR cdr)
@@ -123,6 +130,8 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getContactPointInBodyFrame(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getContactNormalInWorld(), cdr);	
+      data.setExecutionDelayTime(cdr.read_type_6());
+      	
 
    }
 
@@ -137,6 +146,7 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       ser.write_type_a("contact_normal_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getContactNormalInWorld());
 
+      ser.write_type_6("execution_delay_time", data.getExecutionDelayTime());
    }
 
    @Override
@@ -150,6 +160,7 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       ser.read_type_a("contact_normal_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getContactNormalInWorld());
 
+      data.setExecutionDelayTime(ser.read_type_6("execution_delay_time"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.HandLoadBearingMessage src, controller_msgs.msg.dds.HandLoadBearingMessage dest)
