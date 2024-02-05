@@ -873,8 +873,9 @@ void kernel computeSnappedValuesKernel(global float* params,
     }
 
     uint area_fraction =  255 * n / max_points_possible_under_support;
-    uint normal_x_int = (uint) (255 * (normal.x + 1.0f) / 2.0f);
-    uint normal_y_int = (uint) (255 * (normal.y + 1.0f) / 2.0f);
+    // note these are switched to align with world
+    uint normal_x_int = (uint) (255 * (normal.y + 1.0f) / 2.0f);
+    uint normal_y_int = (uint) (255 * (normal.x + 1.0f) / 2.0f);
     uint normal_z_int = (uint) (255 * (normal.z + 1.0f) / 2.0f);
     int2 storage_key = (int2) (idx_x, idx_y);
 
