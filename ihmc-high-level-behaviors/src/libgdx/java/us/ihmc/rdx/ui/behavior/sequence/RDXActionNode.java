@@ -22,7 +22,6 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
       extends RDXBehaviorTreeNode<S, D>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean selected = new ImBoolean();
    private final ImBoolean expanded = new ImBoolean(true);
    private final ImString rejectionTooltip = new ImString();
    private final RDXActionProgressWidgets progressWidgets = new RDXActionProgressWidgets(this);
@@ -65,9 +64,6 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    {
       if (expanded.get())
       {
-         ImGui.checkbox(labels.get("Selected"), selected);
-         ImGuiTools.previousWidgetTooltip("(Show gizmo)");
-         ImGui.sameLine();
          ImGui.text("Type: %s   Index: %d".formatted(getActionTypeTitle(), getState().getActionIndex()));
          renderImGuiWidgetsInternal();
       }
@@ -79,11 +75,6 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    }
 
    public abstract String getActionTypeTitle();
-
-   public ImBoolean getSelected()
-   {
-      return selected;
-   }
 
    public ImBoolean getExpanded()
    {

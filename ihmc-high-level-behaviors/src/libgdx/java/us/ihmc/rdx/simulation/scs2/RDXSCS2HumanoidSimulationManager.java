@@ -1,5 +1,8 @@
 package us.ihmc.rdx.simulation.scs2;
 
+import gnu.trove.map.TObjectDoubleMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
+import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
@@ -8,10 +11,15 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Hea
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletRobot;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 
@@ -30,6 +38,7 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
    private final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
    private SCS2AvatarSimulation avatarSimulation;
    private Consumer<SCS2AvatarSimulationFactory> externalFactorySetup = null;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    public RDXSCS2HumanoidSimulationManager(RDXBaseUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
    {
@@ -92,6 +101,27 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
 
       avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
       avatarSimulation.setSystemExitOnDestroy(false);
+
+      getAdditionalImGuiWidgets().add(() ->
+      {
+         if (ImGui.button(labels.get("Reinitialize State Estimator")))
+         {
+            if (getSession().getPhysicsEngine() instanceof BulletPhysicsEngine bulletPhysicsEngine)
+            {
+               for (BulletRobot bulletRobot : bulletPhysicsEngine.getBulletRobots())
+               {
+                  if (bulletRobot.getName().equalsIgnoreCase(robotModel.getSimpleRobotName()))
+                  {
+                     TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
+                     SubtreeStreams.fromChildren(OneDoFJointBasics.class,
+                                                 bulletRobot.getRootBody()).forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
+                     avatarSimulation.getEstimatorThread().initializeStateEstimators(bulletRobot.getFloatingRootJoint().getFrameAfterJoint()
+                                                                                                .getTransformToParent(), jointPositions);
+                  }
+               }
+            }
+         }
+      });
 
       return avatarSimulation.getSimulationConstructionSet().getSimulationSession();
    }

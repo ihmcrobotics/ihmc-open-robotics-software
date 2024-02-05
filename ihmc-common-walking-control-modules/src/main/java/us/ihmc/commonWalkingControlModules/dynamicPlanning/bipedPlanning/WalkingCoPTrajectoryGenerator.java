@@ -153,12 +153,12 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator implem
       positionSplitFractionCalculator.setFirstSupportPoseProvider(() ->
                                                                   {
                                                                      RobotSide stanceSide = state.getFootstep(0).getRobotSide().getOppositeSide();
-                                                                     return state.getFootPose(stanceSide);
+                                                                     return state.getCurrentFootPose(stanceSide);
                                                                   });
       positionSplitFractionCalculator.setFirstSwingPoseProvider(() ->
                                                                 {
                                                                    RobotSide stanceSide = state.getFootstep(0).getRobotSide();
-                                                                   return state.getFootPose(stanceSide);
+                                                                   return state.getCurrentFootPose(stanceSide);
                                                                 });
       positionSplitFractionCalculator.setStepPoseGetter((i) -> state.getFootstep(i).getFootstepPose());
 
@@ -248,7 +248,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator implem
       {
          // Record the initial step frames. In case there is a step touching down this frame will be updated.
          PoseReferenceFrame stepFrame = stepFrames.get(robotSide).add();
-         tempPose.setIncludingFrame(state.getFootPose(robotSide));
+         tempPose.setIncludingFrame(state.getCurrentFootPose(robotSide));
          tempPose.changeFrame(stepFrame.getParent());
          stepFrame.setPoseAndUpdate(tempPose);
 

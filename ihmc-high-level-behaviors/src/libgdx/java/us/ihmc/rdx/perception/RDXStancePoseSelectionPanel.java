@@ -165,11 +165,6 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
    private void placeFootstep()
    {
       placed = true;
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         LogTools.warn("[{}] -> Pose: {}", robotSide, stancePoses.get(robotSide));
-      }
    }
 
    public void renderImGuiWidgets()

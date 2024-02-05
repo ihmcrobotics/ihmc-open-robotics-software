@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousPlannerSchedulingTask
 {
+   private final static int MAX_STEPS_PER_SESSION = 20;
    private final static long CONTINUOUS_PLANNING_DELAY_MS = 16;
 
    private ContinuousWalkingState state = ContinuousWalkingState.NOT_STARTED;
@@ -71,6 +72,7 @@ public class ContinuousPlannerSchedulingTask
    private final HumanoidReferenceFrames referenceFrames;
 
    private String message = "";
+   private int stepCounter = 0;
    private int controllerQueueSize = 0;
    private List<QueuedFootstepStatusMessage> controllerQueue;
 
@@ -121,10 +123,12 @@ public class ContinuousPlannerSchedulingTask
    {
       continuousPlanner.syncParametersCallback();
 
-      if (!parameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
+      if (!parameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking()
+      )
       {
          state = ContinuousWalkingState.NOT_STARTED;
 
+         stepCounter = 0;
          sendPauseWalkingMessage();
          setImminentStanceToCurrent();
 
@@ -152,6 +156,7 @@ public class ContinuousPlannerSchedulingTask
       if (continuousPlanner.isInitialized())
       {
          message.setPause(true);
+         message.setClearRemainingFootstepQueue(true);
          pauseWalkingPublisher.publish(message);
       }
    }
@@ -194,7 +199,13 @@ public class ContinuousPlannerSchedulingTask
          statistics.setLastAndTotalWaitingTimes();
 
          if (parameters.getStepPublisherEnabled())
+         {
             continuousPlanner.getImminentStanceFromLatestStatus(footstepStatusMessage, controllerQueue);
+         }
+         else
+         {
+
+         }
 
          debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
          continuousPlanner.setGoalWaypointPoses();
@@ -253,7 +264,7 @@ public class ContinuousPlannerSchedulingTask
             startOfSwingPose.setFromReferenceFrame(referenceFrames.getSoleFrame(stepSide.getOppositeSide()));
             reason = stepChecker.checkValidity(stepSide.getOppositeSide(), candidateStepPose, stanceFootPose, startOfSwingPose);
 
-            if (reason == null)
+            if (reason == null && stepCounter < MAX_STEPS_PER_SESSION)
             {
                publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
 
@@ -262,7 +273,11 @@ public class ContinuousPlannerSchedulingTask
                continuousPlanner.transitionCallback();
                statistics.setStartWaitingTime();
             }
-            else
+            else if (stepCounter >= MAX_STEPS_PER_SESSION)
+            {
+               LogTools.warn("[REASON]: Max Number of Steps Reached");
+            }
+            else if (reason != null)
             {
                parameters.setEnableContinuousWalking(false);
                LogTools.error("Planning failed:" + reason.name());
@@ -291,6 +306,7 @@ public class ContinuousPlannerSchedulingTask
 
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
       {
+         stepCounter++;
          state = ContinuousWalkingState.READY_TO_PLAN;
          statistics.endStepTime();
          statistics.startStepTime();
@@ -330,8 +346,10 @@ public class ContinuousPlannerSchedulingTask
    private void setImminentStanceToCurrent()
    {
       RobotSide closerSide = continuousPlanner.getCloserSideToGoal();
-      FramePose3D closerToGoalFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), referenceFrames.getSoleFrame(closerSide).getTransformToWorldFrame());
-      FramePose3D fartherToGoalFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), referenceFrames.getSoleFrame(closerSide.getOppositeSide()).getTransformToWorldFrame());
+      FramePose3D closerToGoalFootPose = new FramePose3D(referenceFrames.getSoleFrame(closerSide));
+      FramePose3D fartherToGoalFootPose = new FramePose3D(referenceFrames.getSoleFrame(closerSide.getOppositeSide()));
+      closerToGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      fartherToGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       if (continuousPlanner.updateImminentStance(fartherToGoalFootPose, closerToGoalFootPose, closerSide))
       {

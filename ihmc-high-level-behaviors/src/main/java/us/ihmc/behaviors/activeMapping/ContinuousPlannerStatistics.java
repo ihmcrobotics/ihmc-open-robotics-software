@@ -197,7 +197,7 @@ public class ContinuousPlannerStatistics
       StringBuilder builder = new StringBuilder();
       builder.append("ContinuousPlannerStatistics: [");
 
-      builder.append("continuous_walking_speed").append(":").append(statistics.get(TOTAL_DISTANCE_COMPLETED) / statistics.get(TOTAL_CONTINUOUS_WALKING_TIME));
+      builder.append("continuous_walking_speed").append(":").append(statistics.get(TOTAL_DISTANCE_COMPLETED) / statistics.get(TOTAL_CONTINUOUS_WALKING_TIME)).append(", ");
       for (String key : statistics.keySet())
       {
          builder.append(key).append(":").append(statistics.get(key)).append(", ");
