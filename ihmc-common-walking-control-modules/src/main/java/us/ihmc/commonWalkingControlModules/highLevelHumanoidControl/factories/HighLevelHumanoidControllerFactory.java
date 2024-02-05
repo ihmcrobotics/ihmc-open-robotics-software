@@ -11,7 +11,7 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.InertialParameterManagerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
@@ -186,7 +186,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerCoreFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
    }
 
-   public void createInertialParameterManager(InertialParameterManagerParameters parameters)
+   public void createInertialParameterManager(InertialEstimationParameters parameters)
    {
       inertialParameterManagerFactory = new InertialParameterManagerFactory(registry);
       inertialParameterManagerFactory.setInertialParameterManagerProperties(parameters);
