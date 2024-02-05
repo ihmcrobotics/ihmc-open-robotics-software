@@ -26,7 +26,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.mesh.RDXIDMappedColorFunction;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
-import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;

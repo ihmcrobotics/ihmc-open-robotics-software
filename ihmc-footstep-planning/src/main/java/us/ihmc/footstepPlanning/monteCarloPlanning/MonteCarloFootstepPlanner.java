@@ -216,7 +216,7 @@ public class MonteCarloFootstepPlanner
       if (timeSpentPlanningSoFar > request.getTimeout())
          return;
 
-      node.setValue((float) (score + parameters.getDecayFactor() * node.getValue()));
+      node.setValue(Math.max( (float) (score * parameters.getDecayFactor()), node.getValue()));
       node.incrementVisits();
 
       if (!node.getParents().isEmpty())

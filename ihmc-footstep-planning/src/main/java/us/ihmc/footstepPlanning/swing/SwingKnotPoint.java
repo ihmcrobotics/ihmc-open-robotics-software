@@ -278,8 +278,7 @@ public class SwingKnotPoint
       return percentage;
    }
 
-   public boolean doCollisionCheck(ExpandingPolytopeAlgorithm collisionDetector, PlanarRegionsList planarRegionsList, HeightMapData heightMapData,
-                                   SwingKnotOptimizationResult knotResult)
+   public boolean doCollisionCheck(ExpandingPolytopeAlgorithm collisionDetector, PlanarRegionsList planarRegionsList, HeightMapData heightMapData)
    {
       this.collisionResult.setToZero();
       this.collisionResult.setSignedDistance(Double.POSITIVE_INFINITY);

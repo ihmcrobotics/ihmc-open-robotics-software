@@ -235,7 +235,7 @@ public class MonteCarloPlannerTools
 
       if (maxNode != null)
       {
-         LogTools.warn("Optimal Node: {} {} {}", maxNode.getId(), maxNode.getChildren().size(), maxNode.getLevel());
+         //LogTools.warn("Optimal Node: {} {} {}", maxNode.getId(), maxNode.getChildren().size(), maxNode.getLevel());
          path.add(maxNode);
          getOptimalPath(maxNode, path);
       }
@@ -326,6 +326,9 @@ public class MonteCarloPlannerTools
       LogTools.info("Optimal Path Size: {}", path.size());
 
       HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+      environmentHandler.setHeightMap(request.getHeightMapData());
+      environmentHandler.setTerrainMapData(request.getTerrainMapData());
 
       FootstepPlan footstepPlan = new FootstepPlan();
       for (MonteCarloTreeNode node : path)
@@ -337,13 +340,11 @@ public class MonteCarloPlannerTools
          float nodeZ = request.getTerrainMapData().getHeightInWorld(nodeX, nodeY);
          float nodeYaw = footstepNode.getState().getZ32();
 
-         ConvexPolygon2D footPolygon = PlannerTools.createFootPolygon(0.25, 0.12, 0.8);
+         ConvexPolygon2D footPolygon = PlannerTools.createFootPolygon(0.25, 0.12, 0.08);
          FramePose3D footstepPose = getFramePose3D(nodeX, nodeY, nodeZ, nodeYaw);
          footPolygon.applyTransform(footstepPose);
 
-         //         LogTools.warn("Attempting to snap footstep pose to height map");
-         //         MonteCarloPlannerTools.snapFootPoseToHeightMap(request.getHeightMapData(), footstepPose, heightMapSnapper, footPolygon);
-
+         MonteCarloPlannerTools.snapFootPoseToHeightMap(environmentHandler, footstepPose, heightMapSnapper, footPolygons.get(footstepNode.getRobotSide()));
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
          LogTools.debug("Footstep Node -> Position: {}, Yaw: {}", footstepPose.getPosition(), footstepPose.getYaw());
@@ -353,18 +354,24 @@ public class MonteCarloPlannerTools
 
    public static void snapFootPoseToHeightMap(FootstepPlannerEnvironmentHandler environmentHandler, FramePose3D poseToSnap, HeightMapPolygonSnapper snapper, ConvexPolygon2D footPolygon)
    {
-      footPolygon.applyTransform(poseToSnap);
-      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, environmentHandler, 0.1, Math.toRadians(60.0));
-      if (snapTransform != null)
+      ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(footPolygon);
+      footPolygonInWorld.applyTransform(poseToSnap);
+      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygonInWorld, environmentHandler, 0.1, Math.toRadians(45));
+
+      if (snapTransform != null && (snapper.getAreaFraction() > 0.75))
       {
-         snapTransform.getTranslation().setZ(0);
-         snapTransform.getRotation().setYawPitchRoll(0, snapTransform.getRotation().getPitch(), snapTransform.getRotation().getRoll());
-         poseToSnap.getRotation().applyTransform(snapTransform);
-         LogTools.warn("SUCCESS: Snapped footstep pose to height map");
+         poseToSnap.getTranslation().setZ(0.0);
+//         snapTransform.getTranslation().setZ(0);
+//         snapTransform.getRotation().setYawPitchRoll(0, snapTransform.getRotation().getPitch(), snapTransform.getRotation().getRoll());
+         poseToSnap.applyTransform(snapTransform);
+      }
+      else if (snapTransform != null && snapper.getAreaFraction() < 0.75)
+      {
+         LogTools.warn("[SNAP] Snap area too low.");
       }
       else
       {
-         LogTools.warn("Failed to snap footstep pose to height map");
+         LogTools.warn("[SNAP] Failed to snap footstep pose. Null.");
       }
    }
 
@@ -531,10 +538,11 @@ public class MonteCarloPlannerTools
       //      double stepHeightCost = (request.getTerrainMapData().getHeightLocal(rIndex, cIndex) - request.getTerrainMapData().getHeightLocal(rIndex, cIndex)) * 0.01f;
       //      double edgeCost = stepYawCost + stepDistanceCost + stepHeightCost;
 
-      if (debug)
-         LogTools.info(String.format("Rewards -> Goal: %.2f, Contact: %.2f", goalReward, contactReward));
-
       score = goalReward + contactReward;
+
+      if (debug)
+         LogTools.info(String.format("Rewards -> Goal: %.2f, Contact: %.2f, Total: %.2f (%d)", goalReward, contactReward, score, plannerParameters.getInitialValueCutoff()));
+
       return score;
    }
 

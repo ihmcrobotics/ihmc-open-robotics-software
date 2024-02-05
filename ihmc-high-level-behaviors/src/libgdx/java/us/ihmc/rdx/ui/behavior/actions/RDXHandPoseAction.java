@@ -103,7 +103,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
       getDefinition().setDescription("Hand pose");
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPalmTransformToParent().getValue(), getSelected());
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPalmTransformToParent().getValue());
       poseGizmo.create(panel3D);
 
       trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
@@ -285,6 +285,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    @Override
    protected void renderImGuiWidgetsInternal()
    {
+      ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
       ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
       jointSpaceControlWrapper.renderImGuiWidget();
@@ -351,7 +352,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
          if (isClickedOn)
          {
-            getSelected().set(true);
+            poseGizmo.setSelected(true);
          }
 
          poseGizmo.process3DViewInput(input, isMouseHovering);

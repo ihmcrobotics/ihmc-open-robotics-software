@@ -25,6 +25,7 @@ import us.ihmc.tools.IHMCCommonPaths;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class TerrainPlanningDatasetManager
@@ -90,14 +91,16 @@ public class TerrainPlanningDatasetManager
                                           PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
    }
 
-   public void loadRequests(File directory, int totalRequests)
+   public void loadRequests(File directory, int totalLogs)
    {
       footstepPairList.clear();
       File requests = new File(directory.getAbsolutePath() + "/processed_requests.txt");
       try (Scanner scanner = new Scanner(requests))
       {
-         for (int k = 0; k<totalRequests; k++)
+         for (int k = 0; k<totalLogs; k++)
          {
+            LogTools.warn("Loading log: {}", k);
+
             String line = scanner.nextLine();
             LogTools.info("FIRST: {}", line);
             line = scanner.nextLine();
@@ -107,24 +110,21 @@ public class TerrainPlanningDatasetManager
                line = scanner.nextLine();
                LogTools.info("THIRD: {}", line);
 
-               for (int i = 0; i<totalRequests * 2; i++)
+               for (int i = 0; i<10; i++)
                {
-                  footstepPairList.add(new SideDependentList<>());
+                  LogTools.warn("Loading pair: {}", i);
+                  SideDependentList<Pose3D> posePair = new SideDependentList<>(new Pose3D(), new Pose3D());
+                  footstepPairList.add(posePair);
 
                   line = scanner.nextLine();
                   line = line.replace(" ", "");
                   LogTools.info("INPUT: {}", line);
+                  posePair.put(RobotSide.RIGHT, loadPoseFromString(line));
 
-                  if (line.contains("[LEFT]"))
-                  {
-                     footstepPairList.get(i).put(RobotSide.LEFT, loadPoseFromString(line));
-                  }
-                  else if (line.contains("[RIGHT]"))
-                  {
-                     footstepPairList.get(i).put(RobotSide.RIGHT, loadPoseFromString(line));
-                  }
-
-                  LogTools.info("Side: {}, Pose: {}", line.contains("[LEFT]") ? "LEFT" : "RIGHT", line);
+                  line = scanner.nextLine();
+                  line = line.replace(" ", "");
+                  LogTools.info("INPUT: {}", line);
+                  posePair.put(RobotSide.LEFT, loadPoseFromString(line));
                }
             }
          }
@@ -132,6 +132,19 @@ public class TerrainPlanningDatasetManager
       catch (Exception e)
       {
          e.printStackTrace();
+      }
+
+      printAllPairs();
+   }
+
+   public void printAllPairs()
+   {
+      for (int i = 0; i<footstepPairList.size(); i++)
+      {
+         LogTools.info("---------------------------------------------- Pair: {} ---------------------------------------------------------", i);
+         LogTools.info("Left: {}", footstepPairList.get(i).get(RobotSide.LEFT));
+         LogTools.info("Right: {}", footstepPairList.get(i).get(RobotSide.RIGHT));
+         LogTools.info("------------------------------------------------------------------------------------------------------------------");
       }
    }
 
@@ -152,6 +165,9 @@ public class TerrainPlanningDatasetManager
       String[] positionSplit = positionString.split(",");
       String[] orientationSplit = orientationString.split(",");
 
+      LogTools.info("Position: {}", Arrays.toString(positionSplit));
+      LogTools.info("Orientation: {}", Arrays.toString(orientationSplit));
+
       double x = Double.parseDouble(positionSplit[0]);
       double y = Double.parseDouble(positionSplit[1]);
       double z = Double.parseDouble(positionSplit[2]);
@@ -160,6 +176,8 @@ public class TerrainPlanningDatasetManager
       double qy = Double.parseDouble(orientationSplit[1]);
       double qz = Double.parseDouble(orientationSplit[2]);
       double qw = Double.parseDouble(orientationSplit[3]);
+
+      LogTools.info(String.format("[FINAL]: Position: (%f, %f, %f), Orientation: (%f, %f, %f, %f)", x, y, z, qx, qy, qz, qw));
 
       return new Pose3D(new Point3D(x, y, z), new Quaternion(qx, qy, qz, qw));
    }

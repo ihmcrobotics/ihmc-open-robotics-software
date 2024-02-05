@@ -361,6 +361,11 @@ public class ImGuiTools
       return calcTextSize.x;
    }
 
+   public static float calcButtonWidth(String buttonText)
+   {
+      return calcTextSizeX(buttonText) + ImGui.getStyle().getFrameBorderSize() * 2 + ImGui.getStyle().getItemInnerSpacingX() * 2;
+   }
+
    /** @deprecated Use ImGuiUniqueLabelMap instead. */
    public static String uniqueLabel(String label)
    {

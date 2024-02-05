@@ -111,7 +111,6 @@ public class SwingPlannerTools
             if (isDone)
                break;
          }
-         LogTools.warn("Computing Default Trajectory: {}", defaultWaypoints.size());
       }
       else
       {
@@ -134,7 +133,6 @@ public class SwingPlannerTools
          }
       }
 
-      LogTools.info("[{}] Trajectories For Visualization: {}", footstep.getRobotSide(), totalNumberOfWaypoints + 1);
       return copySwingTrajectories(positionTrajectoryGenerator.getTrajectories(), totalNumberOfWaypoints + 1);
    }
 

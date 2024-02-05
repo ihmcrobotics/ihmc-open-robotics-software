@@ -244,6 +244,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    @Override
    public void onEntry()
    {
+      jointControlHelper.resetFunctionGenerators();
    }
 
    @Override
