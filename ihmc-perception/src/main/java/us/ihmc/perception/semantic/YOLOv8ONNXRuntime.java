@@ -16,7 +16,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.tools.IHMCCommonPaths;
 
-public class ONNXRuntime
+public class YOLOv8ONNXRuntime
 {
    private OrtEnvironment environment;
    private OrtSession.SessionOptions sessionOptions;
@@ -30,7 +30,7 @@ public class ONNXRuntime
 
    private int gpuDeviceId = 0;
 
-   public ONNXRuntime(String weightsFile)
+   public YOLOv8ONNXRuntime(String weightsFile)
    {
       try
       {
@@ -122,9 +122,9 @@ public class ONNXRuntime
 
    public static void main(String[] args)
    {
-      ONNXRuntime runtime = new ONNXRuntime(IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("yolov8n.onnx").toString());
+      YOLOv8ONNXRuntime yolov8 = new YOLOv8ONNXRuntime(IHMCCommonPaths.WEIGHTS_DIRECTORY.resolve("yolov8n.onnx").toString());
 
       Mat bgrInputImage = opencv_imgcodecs.imread("/home/bmishra/Downloads/new-york.jpg");
-      runtime.detect(bgrInputImage);
+      yolov8.detect(bgrInputImage);
    }
 }
