@@ -26,7 +26,7 @@ public class YOLOv8ObjectDetector
    private final Net yoloNet;
    private final StringVector outputNames;
 
-   public YOLOv8ObjectDetector()
+   public YOLOv8ObjectDetector(String weightsFilePath)
    {
       WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(YOLOv8ONNX.class, "/yolo/");
       WorkspaceFile onnxFile = new WorkspaceFile(directory, ONNX_FILE_NAME);
@@ -34,7 +34,8 @@ public class YOLOv8ObjectDetector
       if (onnxFile.getFilesystemFile() == null)
          throw new NullPointerException("YOLOv8 ONNX file could not be found");
 
-      yoloNet = opencv_dnn.readNet(onnxFile.getFilesystemFile().toString());
+      // USE: onnxFile.getFilesystemFile().toString()
+      yoloNet = opencv_dnn.readNet(weightsFilePath);
       if (opencv_core.getCudaEnabledDeviceCount() > 0)
       {
          yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_CUDA);
@@ -65,6 +66,22 @@ public class YOLOv8ObjectDetector
       bgrImage.release();
 
       return results;
+   }
+
+   public List<YOLOv8Detection> runForDetectionsOnMat(Mat bgrImage, float confidenceThreshold, float nonMaximumSuppressionThreshold)
+   {
+      Mat blob = opencv_dnn.blobFromImage(bgrImage, SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
+      MatVector outputBlobs = new MatVector(outputNames.size());
+
+      yoloNet.setInput(blob);
+      yoloNet.forward(outputBlobs, outputNames);
+
+      List<YOLOv8Detection> detections = processOutput(outputBlobs, confidenceThreshold, nonMaximumSuppressionThreshold, bgrImage.cols(), bgrImage.rows());
+
+      blob.release();
+      bgrImage.release();
+
+      return detections;
    }
 
    public void destroy()
