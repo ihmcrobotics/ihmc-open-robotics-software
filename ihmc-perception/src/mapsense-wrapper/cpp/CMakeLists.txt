@@ -30,7 +30,7 @@ set(DEP_LIBS ${DEP_LIBS}
 )
 
 
-find_package(HIDAPI REQUIRED)
+#find_package(HIDAPI REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED NO_MODULE)
 
