@@ -6,7 +6,9 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.YOLOv8.YOLOv8Detection;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionResults;
 import us.ihmc.perception.YOLOv8.YOLOv8ObjectDetector;
+import us.ihmc.perception.mapping.SemanticDetection;
 import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.visualOdometry.VisualOdometry;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -48,7 +50,6 @@ public class SemanticSLAMModule
    private final HashMap<Integer, Landmark> landmarks = new HashMap<>();
    private final SlamWrapper.FactorGraphExternal factorGraphExternal;
 
-
    public SemanticSLAMModule()
    {
       VisualOdometryNativeLibrary.load();
@@ -69,13 +70,28 @@ public class SemanticSLAMModule
 
       long acquisitionTime = System.currentTimeMillis();
 
-      List<YOLOv8Detection> results = yoloObjectDetector.runForDetectionsOnMat(leftImage, CONFIDENCE_THRESHOLD, NMS_THRESHOLD);
+      Mat displayLeftImage = leftImage.clone();
+      Mat inferenceLeftImage = leftImage.clone();
 
+      List<YOLOv8Detection> results = yoloObjectDetector.runForDetectionsOnMat(inferenceLeftImage, CONFIDENCE_THRESHOLD, NMS_THRESHOLD);
+
+      LogTools.info("Total Detectios: " + results.size());
+
+      for (YOLOv8Detection yoloDetection : results)
+      {
+         SemanticDetection detection = new SemanticDetection(yoloDetection.y(),
+                                                             yoloDetection.x(),
+                                                             yoloDetection.height(),
+                                                             yoloDetection.width(),
+                                                             yoloDetection.confidence());
+
+         PerceptionDebugTools.plotBoundingBoxDetection(detection, displayLeftImage);
+      }
+
+      PerceptionDebugTools.display("Left Image", displayLeftImage, 1, 1000);
 
       return initialized;
    }
-
-
 
    public void clearISAM2()
    {
