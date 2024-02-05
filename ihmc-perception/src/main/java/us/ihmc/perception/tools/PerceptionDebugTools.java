@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.mapping.SemanticDetection;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -549,5 +550,17 @@ public class PerceptionDebugTools
    public static void clearAllWindows()
    {
       opencv_highgui.destroyAllWindows();
+   }
+
+   public static void plotBoundingBoxDetection(SemanticDetection detection, Mat image)
+   {
+      Scalar color = new Scalar(0, 255, 0, 0);
+      opencv_imgproc.rectangle(image,
+                               new Point(detection.getTopLeftColumn(), detection.getTopLeftRow()),
+                               new Point(detection.getBottomRightColumn(), detection.getBottomRightRow()),
+                               color,
+                               2,
+                               opencv_imgproc.LINE_8,
+                               0);
    }
 }

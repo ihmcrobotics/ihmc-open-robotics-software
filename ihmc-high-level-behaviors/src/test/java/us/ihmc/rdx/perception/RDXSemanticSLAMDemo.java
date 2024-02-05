@@ -24,7 +24,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.semantic.SemanticSLAMModule;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionFileTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -36,7 +35,9 @@ import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -140,15 +141,9 @@ public class RDXSemanticSLAMDemo
          currentImageLeft = PerceptionFileTools.loadImage(leftImageName);
          currentImageRight = PerceptionFileTools.loadImage(rightImageName);
 
-         PerceptionDebugTools.display("Left Image", currentImageLeft, 1);
-         PerceptionDebugTools.display("Right Image", currentImageRight, 1);
-
-         //initialized = semanticSLAM.update(currentImageLeft, currentImageRight);
+         initialized = semanticSLAM.update(currentImageLeft, currentImageRight);
 
          //posesToRenderNotification.set();
-
-         LogTools.info("Visual SLAM Update Completed");
-
          //renderPoses(fileIndex, initialized);
 
          fileIndex += FRAME_SKIP;
