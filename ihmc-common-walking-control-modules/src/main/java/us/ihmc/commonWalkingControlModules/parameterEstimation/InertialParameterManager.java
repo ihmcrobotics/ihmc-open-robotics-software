@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.commonWalkingControlModules.configurations.InertialParameterManagerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -94,7 +94,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private static final boolean DEBUG = true;
    private final YoMatrix residual;
 
-   public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialParameterManagerParameters parameters, YoRegistry parentRegistry)
+   public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters parameters, YoRegistry parentRegistry)
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
@@ -254,11 +254,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          inertialKalmanFilter.setContactWrenches(contactWrenches);
          inertialKalmanFilterEstimate.set(inertialKalmanFilter.calculateEstimate(wholeSystemTorques));
 
-         // Pack estimate back into estimate robot bodies
-         RegressorTools.packRigidBodies(basisSets, inertialKalmanFilterEstimate, estimateModelBodies);
 
          filteredEstimate.setAndSolve(inertialKalmanFilterEstimate);
          doubleFilteredEstimate.setAndSolve(filteredEstimate);
+         // Pack smoothed estimate back into estimate robot bodies
+         RegressorTools.packRigidBodies(basisSets, doubleFilteredEstimate, estimateModelBodies);
 
          updateVisuals();
 

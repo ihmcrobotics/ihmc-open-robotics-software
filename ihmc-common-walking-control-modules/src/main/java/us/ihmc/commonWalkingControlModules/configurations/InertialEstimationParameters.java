@@ -5,7 +5,7 @@ import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 
 import java.util.Set;
 
-public interface InertialParameterManagerParameters
+public interface InertialEstimationParameters
 {
    public abstract Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] getParametersToEstimate();
 
