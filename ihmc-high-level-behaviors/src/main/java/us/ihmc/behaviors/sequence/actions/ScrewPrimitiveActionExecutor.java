@@ -211,6 +211,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          double durationForTranslation = totalLinearDistanceOfHand / getDefinition().getMaxLinearVelocity();
          double movementDuration = Math.max(durationForRotation, durationForTranslation);
          double segmentDuration = movementDuration / (numberOfPoints - 1);
+         movementDuration += 2.0 * segmentDuration
 
          // the way the screw frame is defined, x is always the axis of rotation and translation. This means that the tangential velocity is normal to the x axis and the vector yz
          double tangentialVelocity = radialDistance / movementDuration;
@@ -225,7 +226,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          linearVelocities.add().setToZero();
          trajectoryTimes.add(0.0);
 
-         double time = segmentDuration;
+         double time = 2.0 * segmentDuration; // make the first segment twice as long to allow smooth acceleration
          for (int i = 1; i < numberOfPoints - 1; i++)
          {
             Pose3DReadOnly waypointPose = getState().getTrajectory().getValueReadOnly(i);
@@ -264,7 +265,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          // set the final velocity as zeros and time as the duration
          angularVelocities.add().setToZero();
          linearVelocities.add().setToZero();
-         trajectoryTimes.add(movementDuration);
+         trajectoryTimes.add(movementDuration); // makes the last segment twice as long to allow for smooth deceleration
 
          // start setting up the joint space trajectory
          ArmIKSolver armIKSolver = armIKSolvers.get(getDefinition().getSide());
