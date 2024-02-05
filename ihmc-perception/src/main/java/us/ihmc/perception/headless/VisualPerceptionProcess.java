@@ -1,4 +1,4 @@
-package us.ihmc.sensors;
+package us.ihmc.perception.headless;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import org.bytedeco.javacpp.BytePointer;
@@ -12,54 +12,32 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.semantic.ONNXRuntime;
+import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.zedDriver.ZEDOpenDriver;
-import us.ihmc.perception.zedDriver.ZedDriverNativeLibrary;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
 import java.time.Instant;
 import java.util.function.Supplier;
 
-/*
- * Supported Stereo Resolutions: {'1344.0x376.0': 'OK', '2560.0x720.0': 'OK', '3840.0x1080.0': 'OK', '4416.0x1242.0': 'OK'}
- * Find all possible resolutions with this Python script:
- *
- *
- *   import pandas as pd
- *   import cv2
- *
- *   url = "https://en.wikipedia.org/wiki/List_of_common_resolutions"
- *   table = pd.read_html(url)[0]
- *   table.columns = table.columns.droplevel()
- *   cap = cv2.VideoCapture(2, cv2.CAP_V4L2)
- *   resolutions = {}
- *   for index, row in table[["W", "H"]].iterrows():
- *       cap.set(cv2.CAP_PROP_FRAME_WIDTH, row["W"])
- *       cap.set(cv2.CAP_PROP_FRAME_HEIGHT, row["H"])
- *       width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
- *       height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
- *       resolutions[str(width)+"x"+str(height)] = "OK"
- *   print(resolutions)
- *
- * */
-
-public class ZED2ColorStereoPublisher
+public class VisualPerceptionProcess
 {
-   static
-   {
-      ZedDriverNativeLibrary.load();
-   }
+   private String YOLOv8_WEIGHTS_FILE = IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("yolov8n.onnx").toString();
 
-   private ROS2Helper ros2Helper;
-   private FramePose3D cameraPose = new FramePose3D();
+   private ONNXRuntime onnxRuntime;
 
+   private final ROS2Helper ros2Helper;
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
+   private final FramePose3D cameraPose = new FramePose3D();
+
    private final Mat yuvCombinedImage = new Mat();
    private final Mat color8UC3CombinedImage = new Mat();
 
@@ -87,7 +65,7 @@ public class ZED2ColorStereoPublisher
 
    private volatile boolean running = true;
 
-   public ZED2ColorStereoPublisher(String cameraId,
+   public VisualPerceptionProcess(String cameraId,
                                    int imageHeight,
                                    int imageWidth,
                                    int fps,
@@ -107,6 +85,11 @@ public class ZED2ColorStereoPublisher
 
       imageYUVBytes = new byte[dims[0] * dims[1] * dims[2]];
 
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed2_combined_publisher_node");
+      ros2Helper = new ROS2Helper(ros2Node);
+
+      onnxRuntime = new ONNXRuntime(YOLOv8_WEIGHTS_FILE);
+
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
 
@@ -122,12 +105,6 @@ public class ZED2ColorStereoPublisher
 
    private void updateThread()
    {
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed2_combined_publisher_node");
-      ros2Helper = new ROS2Helper(ros2Node);
-
-      leftColorIntrinsics = new CameraPinholeBrown();
-      rightColorIntrinsics = new CameraPinholeBrown();
-
       while (running)
       {
          update();
@@ -166,6 +143,10 @@ public class ZED2ColorStereoPublisher
                                                                imageHeight,
                                                                imageWidth,
                                                                0.0f);
+
+         onnxRuntime.detect(color8UC3CombinedImage);
+
+         PerceptionDebugTools.display("Image", color8UC3CombinedImage, 1);
       }
    }
 
@@ -178,8 +159,6 @@ public class ZED2ColorStereoPublisher
          BytePointer yuvBytePointer = new BytePointer(imageYUVBytes);
          Mat yuvImage = new Mat(dims[0], dims[1], opencv_core.CV_8UC2, yuvBytePointer);
          opencv_imgproc.cvtColor(yuvImage, mat, opencv_imgproc.COLOR_YUV2BGR_YUYV);
-
-         //PerceptionDebugTools.display("Image", mat, 1);
       }
 
       return status;
@@ -196,8 +175,8 @@ public class ZED2ColorStereoPublisher
    public static void main(String[] args)
    {
       String cameraId = "";
-      ZED2ColorStereoPublisher zed = new ZED2ColorStereoPublisher(cameraId, 1080, 3840, 30, PerceptionAPI.ZED2_STEREO_COLOR, ReferenceFrame::getWorldFrame);
-      zed.run();
+      VisualPerceptionProcess process = new VisualPerceptionProcess(cameraId, 1080, 3840, 30, PerceptionAPI.ZED2_STEREO_COLOR, ReferenceFrame::getWorldFrame);
+      process.run();
       ThreadTools.sleepForever();
    }
 }
