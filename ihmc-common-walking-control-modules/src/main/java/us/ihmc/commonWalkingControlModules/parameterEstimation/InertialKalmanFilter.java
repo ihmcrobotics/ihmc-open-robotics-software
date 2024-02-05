@@ -1,19 +1,23 @@
 package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Set;
 
 public class InertialKalmanFilter extends ExtendedKalmanFilter
 {
    private static final int WRENCH_DIMENSION = 6;
+private static final boolean POST_PROCESS = true;
 
    private final DMatrixRMaj identity;
 
@@ -28,9 +32,17 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    /** This is used as a container to build up a measurement from different contributions, see {@link #measurementModel(DMatrixRMaj)}. */
    private final DMatrixRMaj measurement;
 
+   private AlphaFilteredYoMatrix filteredWholeSystemTorques = null;
+   private AlphaFilteredYoMatrix doubleFilteredWholeSystemTorques = null;
+   private AlphaFilteredYoMatrix filteredMeasurement = null;
+   private AlphaFilteredYoMatrix doubleFilteredMeasurement = null;
+
+
+
    public InertialKalmanFilter(FullRobotModel model, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets,
                                DMatrixRMaj initialParametersForEstimate, DMatrixRMaj initialParameterCovariance,
-                               DMatrixRMaj processCovariance, DMatrixRMaj measurementCovariance)
+                               DMatrixRMaj processCovariance, DMatrixRMaj measurementCovariance,
+                               double postProcessingAlpha, YoRegistry parentRegistry)
    {
       super(initialParametersForEstimate, initialParameterCovariance, processCovariance, measurementCovariance);
 
@@ -52,6 +64,16 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
       }
 
       measurement = new DMatrixRMaj(nDoFs, 1);
+
+      if (POST_PROCESS)
+      {
+         YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+         parentRegistry.addChild(registry);
+         filteredWholeSystemTorques = new AlphaFilteredYoMatrix("filteredWholeSystemTorques", postProcessingAlpha, nDoFs, 1, registry);
+         doubleFilteredWholeSystemTorques = new AlphaFilteredYoMatrix("doubleFilteredWholeSystemTorques", postProcessingAlpha, nDoFs, 1, registry);
+         filteredMeasurement = new AlphaFilteredYoMatrix("filteredMeasurement", postProcessingAlpha, nDoFs, 1, registry);
+         doubleFilteredMeasurement = new AlphaFilteredYoMatrix("doubleFilteredMeasurement", postProcessingAlpha, nDoFs, 1, registry);
+      }
    }
 
    /** For inertial parameters, the process Jacobian is the identity matrix. */
@@ -90,7 +112,35 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
          // NOTE: the minus for the contact wrench contribution
          CommonOps_DDRM.multAddTransA(-1.0, contactJacobians.get(side), contactWrenches.get(side), measurement);
       }
+
+      if (POST_PROCESS)
+      {
+         filter(measurement, filteredMeasurement);
+         filter(filteredMeasurement, doubleFilteredMeasurement);
+         measurement.set(doubleFilteredMeasurement);
+      }
+
       return measurement;
+   }
+
+   @Override
+   public DMatrixRMaj calculateEstimate(DMatrix wholeSystemTorques)
+   {
+      if (POST_PROCESS)
+      {
+         filter(wholeSystemTorques, filteredWholeSystemTorques);
+         filter(filteredWholeSystemTorques, doubleFilteredWholeSystemTorques);
+         return super.calculateEstimate(doubleFilteredWholeSystemTorques);
+      }
+      else
+      {
+         return super.calculateEstimate(wholeSystemTorques);
+      }
+   }
+
+   public void filter(DMatrix matrixToFilter, AlphaFilteredYoMatrix filterContainer)
+   {
+      filterContainer.setAndSolve(matrixToFilter);
    }
 
    public void setRegressorForEstimates(DMatrixRMaj regressorForEstimates)

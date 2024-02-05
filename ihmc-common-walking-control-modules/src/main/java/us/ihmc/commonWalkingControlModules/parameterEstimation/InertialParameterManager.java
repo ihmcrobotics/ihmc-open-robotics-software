@@ -18,9 +18,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoMatrix;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.robotics.math.filters.*;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -57,20 +55,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final int nDoFs;
 
-   private final AlphaFilteredYoMatrix filteredJointVelocities;
-   private final AlphaFilteredYoMatrix doubleFilteredJointVelocities;
-
-   private final DMatrixRMaj rootJointVelocity;
-   private final FilteredVelocityYoVariable[] filteredRootJointAccelerations;
-   private final AlphaFilteredYoVariable[] doubleFilteredRootJointAccelerations;
-
-   private final AlphaFilteredYoMatrix filteredJointAccelerations;
-   private final AlphaFilteredYoMatrix doubleFilteredJointAccelerations;
-
    private final SideDependentList<? extends FootSwitchInterface> footSwitches;
    private final SideDependentList<DMatrixRMaj> contactWrenches;
-   private final SideDependentList<AlphaFilteredYoMatrix> filteredContactWrenches;
-   private final SideDependentList<AlphaFilteredYoMatrix> doubleFilteredContactWrenches;
 
    private final JointIndexHandler jointIndexHandler;
    private final SideDependentList<JointBasics[]> legJoints;
@@ -78,8 +64,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final SideDependentList<DMatrixRMaj> fullContactJacobians;
 
    private final DMatrixRMaj wholeSystemTorques;
-   private final AlphaFilteredYoMatrix filteredWholeSystemTorques;
-   private final AlphaFilteredYoMatrix doubleFilteredWholeSystemTorques;
+
+   private final DMatrixRMaj rootJointVelocity;
+   private final YoDouble[] rootJointVelocities;
+   private final FilteredVelocityYoVariable[] rootJointAccelerations;
+   private final DMatrixRMaj rootJointAcceleration;
 
    private final List<RigidBodyInertialParameters> inertialParameters = new ArrayList<>();
    private final List<YoMatrix> inertialParametersPiBasisWatchers = new ArrayList<>();
@@ -100,7 +89,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoDouble legsMeasurementCovariance;
    private final YoDouble armsMeasurementCovariance;
    private final YoDouble spineMeasurementCovariance;
-   private final YoDouble loadedMeasurementCovarianceMultiplier;
 
    /** DEBUG variables */
    private static final boolean DEBUG = true;
@@ -126,7 +114,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(actualRobotModel.getRootBody(), registry);
       ellipsoidGraphicGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(yoInertiaEllipsoids);
 
-
       RigidBodyBasics clonedElevatorForRegressor = MultiBodySystemFactories.cloneMultiBodySystem(actualRobotModel.getElevator(),
                                                                                                  actualRobotModel.getModelStationaryFrame(),
                                                                                                  "_regressor",
@@ -141,41 +128,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       basisSets = parameters.getParametersToEstimate();
 
-      filteredJointVelocities = new AlphaFilteredYoMatrix("filteredJointVelocities",
-                                                          AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForTorqueFiltering(), toolbox.getControlDT()),
-                                                          nDoFs, 1,
-                                                          registry);
-      doubleFilteredJointVelocities = new AlphaFilteredYoMatrix("doubleFilteredJointVelocities",
-                                                                AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForTorqueFiltering(), toolbox.getControlDT()),
-                                                                nDoFs, 1,
-                                                                registry);
-
-      rootJointVelocity = new DMatrixRMaj(WRENCH_DIMENSION, 1);
-      filteredRootJointAccelerations = new FilteredVelocityYoVariable[WRENCH_DIMENSION];
-      doubleFilteredRootJointAccelerations = new AlphaFilteredYoVariable[WRENCH_DIMENSION];
-      for (int i = 0; i < WRENCH_DIMENSION; ++i)
-      {
-         filteredRootJointAccelerations[i] = new FilteredVelocityYoVariable("filteredRootJointAcceleration_" + i, null,
-                                                                            AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForTorqueFiltering(), toolbox.getControlDT()),
-                                                                            toolbox.getControlDT(),
-                                                                            registry);
-         doubleFilteredRootJointAccelerations[i] = new AlphaFilteredYoVariable("doubleFilteredRootJointAcceleration_" + i, registry,
-                                                                               AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForTorqueFiltering(), toolbox.getControlDT()));
-      }
-
-      filteredJointAccelerations = new AlphaFilteredYoMatrix("filteredJointAccelerations",
-                                                             AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForTorqueFiltering(), toolbox.getControlDT()),
-                                                             nDoFs, 1,
-                                                             registry);
-      doubleFilteredJointAccelerations = new AlphaFilteredYoMatrix("doubleFilteredJointAccelerations",
-                                                                   AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForTorqueFiltering(), toolbox.getControlDT()),
-                                                                   nDoFs, 1,
-                                                                   registry);
-
       this.footSwitches = toolbox.getFootSwitches();
       contactWrenches = new SideDependentList<>();
-      filteredContactWrenches = new SideDependentList<>();
-      doubleFilteredContactWrenches = new SideDependentList<>();
       jointIndexHandler = new JointIndexHandler(actualRobotModel.getElevator().subtreeJointStream().toArray(JointBasics[]::new));
       legJoints = new SideDependentList<>();
       compactContactJacobians = new SideDependentList<>();
@@ -185,29 +139,23 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       for (RobotSide side : RobotSide.values)
       {
          contactWrenches.put(side, new DMatrixRMaj(WRENCH_DIMENSION, 1));
-         filteredContactWrenches.put(side, new AlphaFilteredYoMatrix("filteredContactWrench_" + side,
-                                                                     AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForTorqueFiltering(), toolbox.getControlDT()),
-                                                                     WRENCH_DIMENSION, 1,
-                                                                     registry));
-         doubleFilteredContactWrenches.put(side, new AlphaFilteredYoMatrix("doubleFilteredContactWrench_" + side,
-                                                                           AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForTorqueFiltering(), toolbox.getControlDT()),
-                                                                           WRENCH_DIMENSION, 1,
-                                                                           registry));
-
          legJoints.put(side, MultiBodySystemTools.createJointPath(actualRobotModel.getElevator(), actualRobotModel.getFoot(side)));
          compactContactJacobians.put(side, new GeometricJacobian(legJoints.get(side), footSwitches.get(side).getMeasurementFrame()));
          fullContactJacobians.put(side, new DMatrixRMaj(WRENCH_DIMENSION, nDoFs));
       }
 
       wholeSystemTorques = new DMatrixRMaj(nDoFs, 1);
-      filteredWholeSystemTorques = new AlphaFilteredYoMatrix("filteredWholeSystemTorques",
-                                                            AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForTorqueFiltering(), toolbox.getControlDT()),
-                                                            nDoFs, 1,
-                                                            registry);
-      doubleFilteredWholeSystemTorques = new AlphaFilteredYoMatrix("doubleFilteredWholeSystemTorques",
-                                                                  AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForTorqueFiltering(), toolbox.getControlDT()),
-                                                                  nDoFs, 1,
-                                                                  registry);
+
+      rootJointVelocity = new DMatrixRMaj(WRENCH_DIMENSION, 1);
+      rootJointVelocities = new YoDouble[WRENCH_DIMENSION];
+      rootJointAccelerations = new FilteredVelocityYoVariable[WRENCH_DIMENSION];
+      rootJointAcceleration = new DMatrixRMaj(WRENCH_DIMENSION, 1);
+      for (int i = 0; i < WRENCH_DIMENSION; i++)
+      {
+         rootJointVelocities[i] = new YoDouble("rootJointVelocity_" + i, registry);
+         rootJointAccelerations[i] = new FilteredVelocityYoVariable("rootJointAcceleration_" + i, "", 0.01, rootJointVelocities[i],
+                                                                    toolbox.getControlDT(), registry);
+      }
 
       int[] partitionSizes = RegressorTools.sizePartitions(basisSets);
       regressorPartitions = RegressorTools.sizePartitionMatrices(regressorCalculator.getJointTorqueRegressorMatrix(), basisSets);
@@ -217,21 +165,32 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                       parameters.getURDFParameters(basisSets),
                                                       CommonOps_DDRM.identity(partitionSizes[0]),
                                                       CommonOps_DDRM.identity(partitionSizes[0]),
-                                                      CommonOps_DDRM.identity(nDoFs));
+                                                      CommonOps_DDRM.identity(nDoFs),
+                                                      AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(),
+                                                                                                                      toolbox.getControlDT()),
+                                                      registry);
       inertialKalmanFilterEstimate = new YoMatrix("inertialParameterEstimate",
-                                                  partitionSizes[0], 1,
-                                                  getRowNames(basisSets, estimateModelBodies), null,
+                                                  partitionSizes[0],
+                                                  1,
+                                                  getRowNames(basisSets, estimateModelBodies),
+                                                  null,
                                                   registry);
 
       filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate",
-                                                   AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(), toolbox.getControlDT()),
-                                                   partitionSizes[0], 1,
-                                                   getRowNames(basisSets, estimateModelBodies), null,
+                                                   AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(),
+                                                                                                                   toolbox.getControlDT()),
+                                                   partitionSizes[0],
+                                                   1,
+                                                   getRowNames(basisSets, estimateModelBodies),
+                                                   null,
                                                    registry);
       doubleFilteredEstimate = new AlphaFilteredYoMatrix("doubleFilteredInertialParameterEstimate",
-                                                         AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(), toolbox.getControlDT()),
-                                                         partitionSizes[0], 1,
-                                                         getRowNames(basisSets, estimateModelBodies), null,
+                                                         AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(),
+                                                                                                                         toolbox.getControlDT()),
+                                                         partitionSizes[0],
+                                                         1,
+                                                         getRowNames(basisSets, estimateModelBodies),
+                                                         null,
                                                          registry);
 
       processCovariance = new YoDouble("processCovariance", registry);
@@ -244,8 +203,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       armsMeasurementCovariance.set(parameters.getArmMeasurementCovariance());
       spineMeasurementCovariance = new YoDouble("spineMeasurementCovariance", registry);
       spineMeasurementCovariance.set(parameters.getSpineMeasurementCovariance());
-      loadedMeasurementCovarianceMultiplier = new YoDouble("loadedMeasurementCovarianceMultiplier", registry);
-      loadedMeasurementCovarianceMultiplier.set(parameters.getLoadedMeasurementCovarianceMultiplier());
 
       if (DEBUG)
       {
@@ -270,7 +227,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    public void update()
    {
-      if (enableFilter.getBooleanValue())
+      if (enableFilter.getValue())
       {
          updateFilterCovariances();
 
@@ -287,11 +244,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                            regressorPartitions[0],
                                            regressorPartitions[1],
                                            false);
-         RegressorTools.partitionVector(regressorCalculator.getParameterVector(),
-                                        basisSets,
-                                        parameterPartitions[0],
-                                        parameterPartitions[1],
-                                        false);
+         RegressorTools.partitionVector(regressorCalculator.getParameterVector(), basisSets, parameterPartitions[0], parameterPartitions[1], false);
 
          // KF stuff
          inertialKalmanFilter.setRegressorForEstimates(regressorPartitions[0]);
@@ -309,10 +262,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
          updateVisuals();
 
-         if(DEBUG)
+         if (DEBUG)
             packDebugResidual();
 
-//         updateWatchers();
+         //         updateWatchers();
       }
    }
 
@@ -338,109 +291,36 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          else
             LogTools.info("Joint " + joint.getName() + " not found for measurement covariance");
       }
-      // Introduce multiplier on the left/right joints depending on whether that side of the robot is loaded
-      for (RobotSide side : RobotSide.values)
-      {
-         if (footSwitches.get(side).hasFootHitGroundFiltered())
-         {
-            for (JointReadOnly joint : actualModelJoints)
-            {
-               if (joint.getName().contains(side.name()))
-               {
-                  int[] indices = jointIndexHandler.getJointIndices(joint);
-                  MatrixMissingTools.scaleMatrixDiagonal(indices, loadedMeasurementCovarianceMultiplier.getValue(), inertialKalmanFilter.getMeasurementCovariance());
-               }
-            }
-         }
-         // TODO: will need a short circuit swith where we only apply the multiplier to one of the sides, at the moment it is possible to apply the multiplier
-         //    to both sides if they are both in contact
-      }
    }
 
    private void updateContactWrenches()
    {
-      for (RobotSide side: RobotSide.values)
+      for (RobotSide side : RobotSide.values)
       {
          if (DEBUG)
          {
             // Check that the reference frames of the contact wrenches and the contact Jacobians match
             ReferenceFrame wrenchBodyFrame = footSwitches.get(side).getMeasuredWrench().getReferenceFrame();
             ReferenceFrame wrenchExpressedInFrame = footSwitches.get(side).getMeasuredWrench().getReferenceFrame();
-            ReferenceFrame jacobianFrame =  compactContactJacobians.get(side).getJacobianFrame();
+            ReferenceFrame jacobianFrame = compactContactJacobians.get(side).getJacobianFrame();
             wrenchBodyFrame.checkReferenceFrameMatch(jacobianFrame);
             wrenchExpressedInFrame.checkReferenceFrameMatch(jacobianFrame);
          }
 
          footSwitches.get(side).getMeasuredWrench().get(contactWrenches.get(side));
-
-         filteredContactWrenches.get(side).setAndSolve(contactWrenches.get(side));
-         doubleFilteredContactWrenches.get(side).setAndSolve(filteredContactWrenches.get(side));
-         // Feeding through filtered versions back into contact wrenches for further calculations
-         contactWrenches.get(side).set(doubleFilteredContactWrenches.get(side));
       }
    }
 
    private void updateRegressorModelJointStates()
    {
       for (JointStateType type : JointStateType.values())
-      {
-         if (type == JointStateType.VELOCITY)
-         {
-            int velocityIndex = 0;
-            // Packing into filtered joint velocities
-            for (JointReadOnly joint : actualModelJoints)
-            {
-               joint.getJointVelocity(velocityIndex, filteredJointVelocities);
-               velocityIndex += joint.getDegreesOfFreedom();
-            }
-            filteredJointVelocities.solve();
-            doubleFilteredJointVelocities.setAndSolve(filteredJointVelocities);
-            // Now into regressor model joints
-            velocityIndex = 0;
-            for (JointBasics joint : regressorModelJoints)
-            {
-               joint.setJointVelocity(velocityIndex, doubleFilteredJointAccelerations);
-               velocityIndex += joint.getDegreesOfFreedom();
-            }
-         }
-         if (type == JointStateType.ACCELERATION)
-         {
-            int accelerationIndex = 0;
-            // Packing into filtered joint accelerations
-            for (JointReadOnly joint : actualModelJoints)
-            {
-               joint.getJointAcceleration(accelerationIndex, filteredJointAccelerations);
-               accelerationIndex += joint.getDegreesOfFreedom();
-            }
-            filteredJointAccelerations.solve();
-            doubleFilteredJointAccelerations.setAndSolve(filteredJointAccelerations);
-            // Now into regressor model joints
-            accelerationIndex = 0;
-            for (JointBasics joint : regressorModelJoints)
-            {
-               joint.setJointAcceleration(accelerationIndex, doubleFilteredJointAccelerations);
-               accelerationIndex += joint.getDegreesOfFreedom();
-            }
-         }
-         else
-         {
-            MultiBodySystemTools.copyJointsState(actualModelJoints, regressorModelJoints, type);
-         }
-      }
+         MultiBodySystemTools.copyJointsState(actualModelJoints, regressorModelJoints, type);
 
-      // Do root joint accelerations after as they are handled by a different process
-      for (int i = 0; i < WRENCH_DIMENSION; ++i)
-      {
-         actualModelJoints.get(0).getJointVelocity(0, rootJointVelocity);
-         filteredRootJointAccelerations[i].update(rootJointVelocity.get(i));
-         doubleFilteredRootJointAccelerations[i].update(filteredRootJointAccelerations[i].getValue());
-         // Now into regressor model joints, reuse rootJointVelocity as a container
-         rootJointVelocity.set(i, doubleFilteredRootJointAccelerations[i].getValue());
-      }
-      // TODO: for some reason, doing this tanks performance of the filter. Why?
-      regressorModelJoints.get(0).setJointAcceleration(0, rootJointVelocity);
+      // Update root joint acceleration, which is not populated by default
+      calculateRootJointAccelerations();
+      regressorRobotModel.getRootJoint().setJointAcceleration(0, rootJointAcceleration);
 
-      regressorRobotModel.getRootJoint().updateFramesRecursively();
+      regressorRobotModel.updateFrames();
    }
 
    private void updateWholeSystemTorques()
@@ -451,10 +331,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
          joint.getJointTau(jointIndex, wholeSystemTorques);
       }
-      filteredWholeSystemTorques.setAndSolve(wholeSystemTorques);
-      doubleFilteredWholeSystemTorques.setAndSolve(filteredWholeSystemTorques);
-      // Back into whole system torques
-      wholeSystemTorques.set(doubleFilteredWholeSystemTorques);
    }
 
    private void updateContactJacobians()
@@ -473,7 +349,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          RigidBodyReadOnly actualBody = actualModelBodies[i];
          RigidBodyReadOnly estimateBody = estimateModelBodies[i];
 
-         double scale = EuclidCoreTools.clamp(estimateBody.getInertia().getMass() / actualBody.getInertia().getMass()/2.0, 0.0, 1.0);
+         double scale = EuclidCoreTools.clamp(estimateBody.getInertia().getMass() / actualBody.getInertia().getMass() / 2.0, 0.0, 1.0);
 
          if (estimateBody.getInertia() != null && actualBody.getInertia() != null)
          {
@@ -482,17 +358,28 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       }
    }
 
-//   private void updateWatchers()
-//   {
-//      for (int i = 0; i < inertialParameters.size(); i++)
-//      {
-//         inertialParameters.get(i).getParameterVectorPiBasis(inertialParameterPiBasisContainer);
-//         inertialParametersPiBasisWatchers.get(i).set(inertialParameterPiBasisContainer);
-//
-//         inertialParameters.get(i).getParameterVectorThetaBasis(inertialParameterThetaBasisContainer);
-//         inertialParametersThetaBasisWatchers.get(i).set(inertialParameterThetaBasisContainer);
-//      }
-//   }
+   //   private void updateWatchers()
+   //   {
+   //      for (int i = 0; i < inertialParameters.size(); i++)
+   //      {
+   //         inertialParameters.get(i).getParameterVectorPiBasis(inertialParameterPiBasisContainer);
+   //         inertialParametersPiBasisWatchers.get(i).set(inertialParameterPiBasisContainer);
+   //
+   //         inertialParameters.get(i).getParameterVectorThetaBasis(inertialParameterThetaBasisContainer);
+   //         inertialParametersThetaBasisWatchers.get(i).set(inertialParameterThetaBasisContainer);
+   //      }
+   //   }
+
+   private void calculateRootJointAccelerations()
+   {
+      actualRobotModel.getRootJoint().getJointVelocity(0, rootJointVelocity);
+      for (int i = 0; i < WRENCH_DIMENSION; i++)
+      {
+         rootJointVelocities[i].set(rootJointVelocity.get(i, 0));
+         rootJointAccelerations[i].update(rootJointVelocities[i].getValue());
+         rootJointAcceleration.set(i, 0, rootJointAccelerations[i].getValue());
+      }
+   }
 
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
