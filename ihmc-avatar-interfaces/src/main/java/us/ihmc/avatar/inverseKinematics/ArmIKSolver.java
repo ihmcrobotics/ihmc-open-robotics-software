@@ -229,7 +229,8 @@ public class ArmIKSolver
       // record the desired velocities with a deep copy, and change the frame to world
       handDesiredAngularVelocity.setIncludingFrame(desiredAngularVelocity);
       handDesiredLinearVelocity.setIncludingFrame(desiredLinearVelocity);
-      handDesiredLinearVelocity.checkReferenceFrameMatch(handDesiredAngularVelocity);
+      handDesiredAngularVelocity.changeFrame(workHand.getBodyFixedFrame());
+      handDesiredLinearVelocity.changeFrame(workHand.getBodyFixedFrame());
 
       solve();
 
@@ -237,12 +238,12 @@ public class ArmIKSolver
       spatialVelocityCommand.set(workChest, workHand);
       spatialVelocityCommand.setSelectionMatrix(selectionMatrix);
       spatialVelocityCommand.setWeightMatrix(weightMatrix);
-      spatialVelocityCommand.setSpatialVelocity(handDesiredLinearVelocity.getReferenceFrame(), handDesiredAngularVelocity, handDesiredLinearVelocity);
+      spatialVelocityCommand.setSpatialVelocity(workHand.getBodyFixedFrame(), handDesiredAngularVelocity, handDesiredLinearVelocity);
 
       // Populate teh commands list with the settings, privileged configuration, and spatial velocity
       controllerCoreCommand.clear();
       controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
-      controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommand);
+//      controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommand);
       controllerCoreCommand.addInverseKinematicsCommand(spatialVelocityCommand);
 
       // Use this to compute the desired velocity.
