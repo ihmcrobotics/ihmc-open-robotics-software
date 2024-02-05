@@ -38,6 +38,10 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
             * Contact normal in world frame, pointing away from the environment (only used if load=true).
             */
    public us.ihmc.euclid.tuple3D.Vector3D contact_normal_in_world_;
+   /**
+            * The time to delay this command on the controller side before being executed.
+            */
+   public double execution_delay_time_;
 
    public HandLoadBearingMessage()
    {
@@ -63,6 +67,8 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.contact_point_in_body_frame_, contact_point_in_body_frame_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.contact_normal_in_world_, contact_normal_in_world_);
+      execution_delay_time_ = other.execution_delay_time_;
+
    }
 
    /**
@@ -143,6 +149,21 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
       return contact_normal_in_world_;
    }
 
+   /**
+            * The time to delay this command on the controller side before being executed.
+            */
+   public void setExecutionDelayTime(double execution_delay_time)
+   {
+      execution_delay_time_ = execution_delay_time;
+   }
+   /**
+            * The time to delay this command on the controller side before being executed.
+            */
+   public double getExecutionDelayTime()
+   {
+      return execution_delay_time_;
+   }
+
 
    public static Supplier<HandLoadBearingMessagePubSubType> getPubSubType()
    {
@@ -171,6 +192,8 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
 
       if (!this.contact_point_in_body_frame_.epsilonEquals(other.contact_point_in_body_frame_, epsilon)) return false;
       if (!this.contact_normal_in_world_.epsilonEquals(other.contact_normal_in_world_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_delay_time_, other.execution_delay_time_, epsilon)) return false;
+
 
       return true;
    }
@@ -194,6 +217,8 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
 
       if (!this.contact_point_in_body_frame_.equals(otherMyClass.contact_point_in_body_frame_)) return false;
       if (!this.contact_normal_in_world_.equals(otherMyClass.contact_normal_in_world_)) return false;
+      if(this.execution_delay_time_ != otherMyClass.execution_delay_time_) return false;
+
 
       return true;
    }
@@ -215,7 +240,9 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
       builder.append("contact_point_in_body_frame=");
       builder.append(this.contact_point_in_body_frame_);      builder.append(", ");
       builder.append("contact_normal_in_world=");
-      builder.append(this.contact_normal_in_world_);
+      builder.append(this.contact_normal_in_world_);      builder.append(", ");
+      builder.append("execution_delay_time=");
+      builder.append(this.execution_delay_time_);
       builder.append("}");
       return builder.toString();
    }
