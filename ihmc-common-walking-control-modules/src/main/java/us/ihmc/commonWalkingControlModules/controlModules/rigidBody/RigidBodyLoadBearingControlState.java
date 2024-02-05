@@ -348,12 +348,18 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       setTrajectoryStartTimeToCurrentTime();
 
       // Reset joint trajectory
-      jointControlHelper.overrideTrajectory();
-      jointControlHelper.startTrajectoryExecution();
-      jointControlHelper.queueInitialPointsAtCurrent();
+      if (jointspaceControlActive.getValue())
+      {
+         jointControlHelper.overrideTrajectory();
+         jointControlHelper.startTrajectoryExecution();
+         jointControlHelper.queueInitialPointsAtCurrentDesired();
+      }
 
       // Reset orientation trajectory
-      orientationControlHelper.holdCurrent();
+      if (orientationControlActive.getValue())
+      {
+         orientationControlHelper.holdCurrentDesired();
+      }
    }
 
    @Override
@@ -464,6 +470,16 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
                                                                                0.13,
                                                                                ColorDefinitions.LightGray()));
       return group;
+   }
+
+   public boolean isJointspaceControlActive()
+   {
+      return jointspaceControlActive.getValue();
+   }
+
+   public boolean isOrientationControlActive()
+   {
+      return orientationControlActive.getValue();
    }
 
    public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)

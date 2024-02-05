@@ -592,8 +592,8 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          for (int i = 0; i < jointsToControl.length; i++)
             desiredJointPositionsToPack[i] = jointspaceControlState.getJointDesiredPosition(i);
       }
-      if (loadBearingControlState != null && stateMachine.getCurrentStateKey() == loadBearingControlState.getControlMode()
-          && loadBearingControlState.getControlMode() == RigidBodyControlMode.JOINTSPACE)
+      else if (loadBearingControlState != null && stateMachine.getCurrentStateKey() == loadBearingControlState.getControlMode()
+          && loadBearingControlState.isJointspaceControlActive())
       {
          for (int i = 0; i < jointsToControl.length; i++)
             desiredJointPositionsToPack[i] = loadBearingControlState.getJointDesiredPosition(i);
