@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.perception.semantic.ONNXRuntime;
+import us.ihmc.perception.semantic.YOLOv8ONNXRuntime;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.zedDriver.ZEDOpenDriver;
@@ -32,7 +32,7 @@ public class VisualPerceptionProcess
 {
    private String YOLOv8_WEIGHTS_FILE = IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("yolov8n.onnx").toString();
 
-   private ONNXRuntime onnxRuntime;
+   private YOLOv8ONNXRuntime onnxRuntime;
 
    private final ROS2Helper ros2Helper;
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
@@ -88,7 +88,7 @@ public class VisualPerceptionProcess
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed2_combined_publisher_node");
       ros2Helper = new ROS2Helper(ros2Node);
 
-      onnxRuntime = new ONNXRuntime(YOLOv8_WEIGHTS_FILE);
+      onnxRuntime = new YOLOv8ONNXRuntime(YOLOv8_WEIGHTS_FILE);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
