@@ -25,7 +25,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.NonWallTimer;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionState, HandPoseActionDefinition>
@@ -39,8 +38,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
-   private final NonWallTimer executionTimer = new NonWallTimer();
-   private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
+   private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
    private final RigidBodyTransform chestToPelvisZeroAngles = new RigidBodyTransform();
    private final FramePose3D chestInPelvis = new FramePose3D();
    private final FramePose3D goalChestFrame = new FramePose3D();
@@ -77,7 +75,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    {
       super.update();
 
-      executionTimer.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
+      trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
       state.setCanExecute(state.getPalmFrame().isChildOfWorld());
 
@@ -219,8 +217,10 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             ros2ControllerHelper.publishToController(handHybridJointspaceTaskspaceTrajectoryMessage);
          }
 
-         executionTimer.reset();
+         trackingCalculator.reset();
 
+         state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
+         
          desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
          state.getDesiredTrajectory().setSingleSegmentTrajectory(syncedHandControlPose, desiredHandControlPose, getDefinition().getTrajectoryDuration());
@@ -234,7 +234,10 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    @Override
    public void updateCurrentlyExecuting()
    {
-      if (executionTimer.isExpired(getState().getNominalExecutionDuration() * 1.5))
+      trackingCalculator.computeExecutionTimings(state.getNominalExecutionDuration());
+      state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
+
+      if (trackingCalculator.getHitTimeLimit())
       {
          state.setIsExecuting(false);
          state.setFailed(true);
@@ -248,28 +251,22 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
 
-         boolean wasExecuting = state.getIsExecuting();
-         // Left hand broke on Nadia and not in the robot model?
-         state.setIsExecuting(!completionCalculator.isComplete(desiredHandControlPose,
-                                                               syncedHandControlPose,
-                                                               POSITION_TOLERANCE,
-                                                               ORIENTATION_TOLERANCE,
-                                                               getDefinition().getTrajectoryDuration(),
-                                                               executionTimer,
-                                                               getState(),
-                                                               BehaviorActionCompletionComponent.TRANSLATION,
-                                                               BehaviorActionCompletionComponent.ORIENTATION));
+         trackingCalculator.computePoseTrackingData(desiredHandControlPose, syncedHandControlPose);
+         trackingCalculator.factorInR3Errors(POSITION_TOLERANCE);
+         trackingCalculator.factoryInSO3Errors(ORIENTATION_TOLERANCE);
 
-         state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
-         state.setElapsedExecutionTime(executionTimer.getElapsedTime());
+         boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
+         meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
          state.getCurrentPose().getValue().set(syncedHandControlPose);
          state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
          state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
          state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getLinearPart());
          state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getFilteredWrench().getAngularPart());
 
-         if (!state.getIsExecuting() && wasExecuting)
+         if (meetsDesiredCompletionCriteria)
          {
+            state.setIsExecuting(false);
+
             if (!getDefinition().getJointspaceOnly() && !getDefinition().getHoldPoseInWorldLater())
             {
                disengageHoldPoseInWorld();

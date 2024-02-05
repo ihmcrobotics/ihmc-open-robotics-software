@@ -34,7 +34,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.28.7")
+   api("us.ihmc:ihmc-robot-data-logger:0.28.8")
    api("us.ihmc:ihmc-ros-tools:source")
 
    api("org.bytedeco:javacpp:1.5.9")

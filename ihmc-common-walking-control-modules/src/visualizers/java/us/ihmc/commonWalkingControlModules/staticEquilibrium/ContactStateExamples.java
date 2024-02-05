@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -15,6 +16,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ContactStateExamples
 {
+   private static final double coefficientOfFriction = 0.7;
+
    public static MutableWholeBodyContactState createTriangleFlatGround()
    {
       return createTriangleInput(0.0, 0.0, 0.0);
@@ -51,17 +54,17 @@ public class ContactStateExamples
    public static MutableWholeBodyContactState createFlatSquare()
    {
       MutableWholeBodyContactState input = new MutableWholeBodyContactState();
-      input.addContactPoint(new Point3D(-0.5, -0.5, 0.0), new Vector3D(Axis3D.Z));
-      input.addContactPoint(new Point3D(-0.5, 0.5, 0.0), new Vector3D(Axis3D.Z));
-      input.addContactPoint(new Point3D( 0.5, -0.5, 0.0), new Vector3D(Axis3D.Z));
-      input.addContactPoint(new Point3D( 0.5, 0.5, 0.0), new Vector3D(Axis3D.Z));
+      input.addContactPoint(new Point3D(-0.5, -0.5, 0.0), new Vector3D(Axis3D.Z), coefficientOfFriction);
+      input.addContactPoint(new Point3D(-0.5, 0.5, 0.0), new Vector3D(Axis3D.Z), coefficientOfFriction);
+      input.addContactPoint(new Point3D( 0.5, -0.5, 0.0), new Vector3D(Axis3D.Z), coefficientOfFriction);
+      input.addContactPoint(new Point3D( 0.5, 0.5, 0.0), new Vector3D(Axis3D.Z), coefficientOfFriction);
       return input;
    }
 
    public static MutableWholeBodyContactState createSingleFlatContactPoint(double x, double y)
    {
       MutableWholeBodyContactState input = new MutableWholeBodyContactState();
-      input.addContactPoint(new Point3D(x, y, 0.0), new Vector3D(Axis3D.Z));
+      input.addContactPoint(new Point3D(x, y, 0.0), new Vector3D(Axis3D.Z), coefficientOfFriction);
       return input;
    }
 
@@ -83,7 +86,7 @@ public class ContactStateExamples
          FrameVector3D normal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
          axisAngle.transform(normal);
 
-         input.addContactPoint(contactPoint, normal);
+         input.addContactPoint(contactPoint, normal, coefficientOfFriction);
       }
 
       return input;
@@ -215,6 +218,18 @@ public class ContactStateExamples
       rightHandPose.getOrientation().appendPitchRotation(Math.toRadians(5.0));
       addContactPoint(contactPointFrame, rightHandPose, input, null);
 
+      int numberOfActuationConstraints = 1;
+      int numberOfContactPoints = input.getNumberOfContactPoints();
+
+      DMatrixRMaj actuationConstraintMatrix = input.getActuationConstraintMatrix();
+      DMatrixRMaj actuationConstraintVector = input.getActuationConstraintVector();
+
+      actuationConstraintMatrix.reshape(numberOfActuationConstraints, 3 * numberOfContactPoints);
+      actuationConstraintVector.reshape(numberOfActuationConstraints, 1);
+
+      actuationConstraintMatrix.set(0, 0, 1.0);
+      actuationConstraintVector.set(0, 0, 10.0);
+
       return input;
    }
 
@@ -231,6 +246,6 @@ public class ContactStateExamples
       contactPoint.changeFrame(ReferenceFrame.getWorldFrame());
       normal.changeFrame(ReferenceFrame.getWorldFrame());
 
-      input.addContactPoint(contactPoint, normal);
+      input.addContactPoint(contactPoint, normal, coefficientOfFriction);
    }
 }

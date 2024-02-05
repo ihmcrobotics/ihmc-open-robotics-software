@@ -9,12 +9,11 @@ uint32 sequence_id
 
 # The robot side of the hand that will be load bearing.
 byte robot_side 255
-# Determines whether hybrid load bearing and jointspace control will be used.
-bool use_jointspace_command false
-# The arm desired jointspace trajectory that will be used for hybrid control if use_jointspace_command is true.
-# The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
-JointspaceTrajectoryMessage jointspace_trajectory
-# The time to delay this message on the controller side before being executed.
-float64 execution_delay_time 0
-# Information specific to the load bearing properties.
-LoadBearingMessage load_bearing_message
+# If true it will load the contact point, otherwise the hand will stop bearing load.
+bool load false
+# Sets the coefficient of friction that the controller will use for the contact point (only used if load=true).
+float64 coefficient_of_friction 0
+# Hand contact point expressed in the hand's body-fixed frame (only used if load=true).
+geometry_msgs/Point contact_point_in_body_frame
+# Contact normal in world frame, pointing away from the environment (only used if load=true).
+geometry_msgs/Vector3 contact_normal_in_world

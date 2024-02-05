@@ -1,4 +1,4 @@
-package us.ihmc.perception.sceneGraph.multiBodies.door;
+package us.ihmc.behaviors.simulation.door;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
