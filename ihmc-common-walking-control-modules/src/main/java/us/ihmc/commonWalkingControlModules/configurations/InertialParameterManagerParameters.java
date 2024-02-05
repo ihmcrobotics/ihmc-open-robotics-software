@@ -11,7 +11,7 @@ public interface InertialParameterManagerParameters
 
    public abstract DMatrixRMaj getURDFParameters(Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets);
 
-   public abstract double getBreakFrequencyForTorqueFiltering();
+   public abstract double getBreakFrequencyForPostProcessing();
    public abstract double getBreakFrequencyForEstimateFiltering();
 
    public abstract double getProcessModelCovariance();
@@ -19,5 +19,4 @@ public interface InertialParameterManagerParameters
    public abstract double getLegMeasurementCovariance();
    public abstract double getArmMeasurementCovariance();
    public abstract double getSpineMeasurementCovariance();
-   public abstract double getLoadedMeasurementCovarianceMultiplier();
 }
