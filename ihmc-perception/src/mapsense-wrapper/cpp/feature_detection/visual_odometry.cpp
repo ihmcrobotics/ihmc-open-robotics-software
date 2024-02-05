@@ -150,6 +150,13 @@ cv::Mat VisualOdometry::Initialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRig
       ExtractMatchesAsPoints(kpPrev, _kpCurLeft, matches, pointsTrain, pointsQuery);
       printf("Total Motion Correspondences: %ld\n", pointsTrain.size());fflush(stdout);
 
+      if (pointsTrain.size() < 8)
+      {
+         printf("Motion Correspondences Below Threshold: %ld/8\n", pointsTrain.size());fflush(stdout);
+         printf("----------------------------------- Initialization: End -----------------------------------\n");fflush(stdout);
+         return cv::Mat::eye(4, 4, CV_32FC1);
+      }
+
       cv::Mat mask;
       cv::Mat pose = EstimateMotion(pointsTrain, pointsQuery, mask, _leftCamera);
       printf("Total Motion Correspondences (After Mask): %ld\n", pointsTrain.size());fflush(stdout);
