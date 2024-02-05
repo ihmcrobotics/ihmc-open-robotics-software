@@ -1,5 +1,7 @@
 package us.ihmc.perception.tools;
 
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -109,5 +111,11 @@ public class PerceptionFileTools
       }
 
       return listToReturn;
+   }
+
+   public static Mat loadImage(String filePath)
+   {
+      Mat bgrInputImage = opencv_imgcodecs.imread(filePath);
+      return bgrInputImage;
    }
 }
