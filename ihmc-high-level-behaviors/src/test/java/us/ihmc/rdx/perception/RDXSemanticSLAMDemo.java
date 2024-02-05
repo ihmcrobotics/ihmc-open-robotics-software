@@ -52,11 +52,11 @@ public class RDXSemanticSLAMDemo
    private static final String LEFT_CAMERA_NAME = "image_0/";
    private static final String RIGHT_CAMERA_NAME = "image_1/";
 
-   private static final String DATASET_PATH = System.getProperty("user.home") + "/Workspace/Data/Datasets/sequences/00/";
-   private static final String GROUND_TRUTH_PATH = System.getProperty("user.home") + "/Workspace/Data/Datasets/poses/";
+//   private static final String DATASET_PATH = System.getProperty("user.home") + "/Workspace/Data/Datasets/sequences/00/";
+//   private static final String GROUND_TRUTH_PATH = System.getProperty("user.home") + "/Workspace/Data/Datasets/poses/";
 
-   //private static final String DATASET_PATH = System.getProperty("user.home") + "/Downloads/00/";
-   //private static final String GROUND_TRUTH_PATH = System.getProperty("user.home") + "/Downloads/dataset/poses/";
+   private static final String DATASET_PATH = System.getProperty("user.home") + "/Downloads/00/";
+   private static final String GROUND_TRUTH_PATH = System.getProperty("user.home") + "/Downloads/dataset/poses/";
 
    private boolean active = false;
    private int updateCount = 0;
@@ -68,14 +68,14 @@ public class RDXSemanticSLAMDemo
 
    private ScheduledFuture<?> scheduledFuture = null;
 
-   private final RDXBaseUI baseUI = new RDXBaseUI();
-   private final RDXPanel panel = new RDXPanel("Visual SLAM");
-   private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
    private final ArrayList<ModelInstance> groundTruthPoseModels = new ArrayList<>();
+   private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
+   private final RDXPanel panel = new RDXPanel("Visual SLAM");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
+
    private ModelInstance modelInstance;
    private ModelInstance gtModelInstance;
    private ModelInstance landmarksLineMesh;
-
    private SemanticSLAMModule semanticSLAM;
    private Mat currentImageRight;
    private Mat currentImageLeft;
@@ -83,10 +83,8 @@ public class RDXSemanticSLAMDemo
    private boolean initialized = false;
 
    private final Notification posesToRenderNotification = new Notification();
-
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ArrayList<RigidBodyTransform> gtSensorTransforms = new ArrayList<>();
-
 
    public RDXSemanticSLAMDemo() throws FileNotFoundException
    {
