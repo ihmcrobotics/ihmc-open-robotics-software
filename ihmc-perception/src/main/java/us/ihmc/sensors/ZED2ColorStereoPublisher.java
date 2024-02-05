@@ -6,6 +6,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -55,10 +56,10 @@ public class ZED2ColorStereoPublisher
       ZedDriverNativeLibrary.load();
    }
 
-   private final ROS2Helper ros2Helper;
-   private final Supplier<ReferenceFrame> sensorFrameUpdater;
-   private final FramePose3D cameraPose = new FramePose3D();
+   private ROS2Helper ros2Helper;
+   private FramePose3D cameraPose = new FramePose3D();
 
+   private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final Mat yuvCombinedImage = new Mat();
    private final Mat color8UC3CombinedImage = new Mat();
 
@@ -106,6 +107,21 @@ public class ZED2ColorStereoPublisher
 
       imageYUVBytes = new byte[dims[0] * dims[1] * dims[2]];
 
+      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
+   }
+
+   /**
+    * Must be called from the sensor-specific calling class, after the sensor and logger initialization have succeeded.
+    * We run in a daemon thread, because otherwise it will get killed on Ctrl+C before the shutdown hooks are finished running.
+    * See {@link Runtime#addShutdownHook(Thread)} for details.
+    */
+   public void run()
+   {
+      ThreadTools.startAsDaemon(this::updateThread, getClass().getSimpleName() + "UpdateThread");
+   }
+
+   private void updateThread()
+   {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed2_combined_publisher_node");
       ros2Helper = new ROS2Helper(ros2Node);
 
@@ -115,12 +131,18 @@ public class ZED2ColorStereoPublisher
       while (running)
       {
          update();
-         throttler.waitAndRun(outputPeriod);
+         throttler.waitAndRun(outputPeriod); // do the waiting after we send to remove unnecessary latency
       }
+
+      // Make sure the Realsense
+      ThreadTools.sleep(100);
    }
 
    public void update()
    {
+      leftColorIntrinsics = new CameraPinholeBrown();
+      rightColorIntrinsics = new CameraPinholeBrown();
+
       Instant now = Instant.now();
 
       // Important not to store as a field, as update() needs to be called each frame
@@ -163,9 +185,19 @@ public class ZED2ColorStereoPublisher
       return status;
    }
 
+   /**
+    * Must be called in the shutdown hook from the sensor-specific calling class. Handles Ctrl + C based closing gracefully.
+    */
+   public void destroy()
+   {
+      running = false;
+   }
+
    public static void main(String[] args)
    {
       String cameraId = "";
       ZED2ColorStereoPublisher zed = new ZED2ColorStereoPublisher(cameraId, 1080, 3840, 30, PerceptionAPI.ZED2_STEREO_COLOR, ReferenceFrame::getWorldFrame);
+      zed.run();
+      ThreadTools.sleepForever();
    }
 }
