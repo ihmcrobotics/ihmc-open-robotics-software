@@ -171,6 +171,9 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
          String prefix = simOutput.getName() + "LowLevel";
          kp = new YoDouble(prefix + "Kp", registry);
          kd = new YoDouble(prefix + "Kd", registry);
+
+         kp.set(100.0);
+         kd.set(6.0);
          yoPositionError = new YoDouble(prefix + "PositionError", registry);
          yoVelocityError = new YoDouble(prefix + "VelocityError", registry);
          yoControllerTau = new YoDouble(prefix + "ControllerTau", registry);
@@ -211,8 +214,8 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
          yoPositionError.set(positionError);
          yoVelocityError.set(velocityError);
 
-         kp.set(jointDesiredOutput.hasStiffness() ? jointDesiredOutput.getStiffness() : 0.0);
-         kd.set(jointDesiredOutput.hasDamping() ? jointDesiredOutput.getDamping() : 0.0);
+         //kp.set(jointDesiredOutput.hasStiffness() ? jointDesiredOutput.getStiffness() : 0.0);
+         //kd.set(jointDesiredOutput.hasDamping() ? jointDesiredOutput.getDamping() : 0.0);
 
          updateUnstableVelocityCounter();
          double time = controllerInput.getTime();
