@@ -559,7 +559,15 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    {
       if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
       {
-         hold();
+         if (defaultControlMode.getValue() == RigidBodyControlMode.JOINTSPACE && loadBearingControlState.isJointspaceControlActive())
+         {
+            jointspaceControlState.holdCurrentDesired();
+            requestState(jointspaceControlState.getControlMode());
+         }
+         else
+         {
+            hold();
+         }
       }
    }
 

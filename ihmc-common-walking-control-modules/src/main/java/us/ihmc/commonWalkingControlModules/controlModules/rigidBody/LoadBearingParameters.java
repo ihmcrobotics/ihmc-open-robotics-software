@@ -28,8 +28,8 @@ public class LoadBearingParameters
 
    public LoadBearingParameters(YoRegistry registry)
    {
-      normalForceThresholdForLoaded = new DoubleParameter("HandLoadedForceThreshold", registry, 12.0);
-      linearSlippingThreshold = new DoubleParameter("LinearTrackingSlipThreshold", registry, 0.04);
+      normalForceThresholdForLoaded = new DoubleParameter("handLoadedForceThreshold", registry, 12.0);
+      linearSlippingThreshold = new DoubleParameter("loadBearingLinearTrackingSlipThreshold", registry, 0.04);
 
       holdPositionStiffness = new DoubleParameter("kpXYHandLoadBearingPosition", registry, 100.0);
       holdPositionDampingRatio = new DoubleParameter("zetaXYHandLoadBearingPosition", registry, 0.65);
