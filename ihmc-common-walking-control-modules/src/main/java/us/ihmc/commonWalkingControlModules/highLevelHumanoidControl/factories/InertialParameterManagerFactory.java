@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import us.ihmc.commonWalkingControlModules.configurations.InertialParameterManagerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.parameterEstimation.InertialParameterManager;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -9,7 +9,7 @@ public class InertialParameterManagerFactory
 {
    private final YoRegistry registry;
    private HighLevelHumanoidControllerToolbox toolbox;
-   private InertialParameterManagerParameters parameters;
+   private InertialEstimationParameters parameters;
 
    InertialParameterManagerFactory(YoRegistry registry)
    {
@@ -23,7 +23,7 @@ public class InertialParameterManagerFactory
       this.toolbox = controllerToolbox;
    }
 
-   public void setInertialParameterManagerProperties(InertialParameterManagerParameters properties)
+   public void setInertialParameterManagerProperties(InertialEstimationParameters properties)
    {
       this.parameters = properties;
    }

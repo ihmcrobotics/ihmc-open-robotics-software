@@ -218,6 +218,33 @@ public class MatrixMissingTools
       }
    }
 
+   public static void setMatrixDiagonal(int[] indices, double[] values, DMatrixRMaj matrix)
+   {
+      if (indices.length != values.length)
+         throw new IllegalArgumentException("indices and values must have the same length, was: [indices: " + indices.length + ", values: " + values.length + "]");
+
+      for (int i = 0; i < indices.length; i++)
+      {
+         matrix.unsafe_set(indices[i], indices[i], values[i]);
+      }
+   }
+
+   public static void setMatrixDiagonal(int[] indices, double value, DMatrixRMaj matrix)
+   {
+      for (int index : indices)
+      {
+         matrix.unsafe_set(index, index, value);
+      }
+   }
+
+   public static void scaleMatrixDiagonal(int[] indices, double scale, DMatrixRMaj matrix)
+   {
+      for (int i = 0; i < indices.length; i++)
+      {
+         matrix.unsafe_set(indices[i], indices[i], matrix.unsafe_get(indices[i], indices[i]) * scale);
+      }
+   }
+
    public static DMatrixRMaj createVector(int size, double fillValue)
    {
       DMatrixRMaj vector = new DMatrixRMaj(size, 1);
