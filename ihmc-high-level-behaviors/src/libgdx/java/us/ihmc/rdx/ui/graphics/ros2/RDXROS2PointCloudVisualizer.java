@@ -4,9 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.type.ImBoolean;
-import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
-import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
@@ -14,6 +11,8 @@ import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
+import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
@@ -23,16 +22,15 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
-import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
-import us.ihmc.rdx.imgui.ImPlotIntegerPlot;
-import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLIntBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.ImPlotIntegerPlot;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -55,7 +53,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
    private final ImPlotIntegerPlot segmentIndexPlot = new ImPlotIntegerPlot("Segment", 30);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean subscribed = new ImBoolean(false);
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private int pointsPerSegment;
    private int numberOfSegments;
@@ -75,6 +72,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
    private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
    private ROS2Heartbeat lidarActiveHeartbeat;
+   private boolean subscribed = false;
 
    public RDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
    {
@@ -82,6 +80,18 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
       this.ros2Node = ros2Node;
       this.topic = topic;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+
+      setActivenessChangeCallback(isActive ->
+      {
+         if (isActive && ros2Callback == null)
+         {
+            subscribe();
+         }
+         else if (!isActive && ros2Callback != null)
+         {
+            unsubscribe();
+         }
+      });
 
       if (topic.getType().equals(LidarScanMessage.class))
       {
@@ -91,7 +101,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
 
    private void subscribe()
    {
-      subscribed.set(true);
+      subscribed = true;
       if (topic.getType().equals(LidarScanMessage.class))
       {
          ros2Callback = new IHMCROS2Callback<>(ros2Node, topic.withType(LidarScanMessage.class), this::queueRenderLidarScan);
@@ -147,7 +157,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
    {
       super.update();
 
-      boolean subscribedAndActive = subscribed.get() && isActive();
+      boolean subscribedAndActive = subscribed && isActive();
 
       if (lidarActiveHeartbeat != null)
       {
@@ -286,12 +296,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.getHidden(getTitle() + "Subscribed"), subscribed))
-      {
-         setSubscribed(subscribed.get());
-      }
-      ImGuiTools.previousWidgetTooltip("Subscribed");
-      ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
       ImGui.sameLine();
@@ -310,21 +314,9 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
          pointCloudRenderer.getRenderables(renderables, pool);
    }
 
-   public void setSubscribed(boolean subscribed)
-   {
-      if (subscribed && ros2Callback == null)
-      {
-         subscribe();
-      }
-      else if (!subscribed && ros2Callback != null)
-      {
-         unsubscribe();
-      }
-   }
-
    private void unsubscribe()
    {
-      subscribed.set(false);
+      subscribed = false;
       ros2Callback.destroy();
       ros2Callback = null;
    }
@@ -339,6 +331,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
 
    public boolean isSubscribed()
    {
-      return subscribed.get();
+      return subscribed;
    }
 }
