@@ -72,7 +72,6 @@ public class ArmIKSolver
    // TODO: Mess with these settings
    private final KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
    private final InverseKinematicsOptimizationSettingsCommand activeOptimizationSettings = new InverseKinematicsOptimizationSettingsCommand();
-   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final WholeBodyControllerCore controllerCore;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
@@ -161,15 +160,6 @@ public class ArmIKSolver
 
       // selects everything
       selectionMatrix.resetSelection();
-
-      privilegedConfigurationCommand.setDefaultWeight(0.025);
-      privilegedConfigurationCommand.setDefaultConfigurationGain(50.0);
-
-      for (OneDoFJointBasics workingOneDoFJoint : workingOneDoFJoints)
-      {
-         // Try to keep the elbow bent like a human instead of backwards
-         privilegedConfigurationCommand.addJoint(workingOneDoFJoint, workingOneDoFJoint.getName().contains("ELBOW") ? 1.04 : 0.0);
-      }
    }
 
    public RigidBodyBasics getWorkingChest()
@@ -286,7 +276,6 @@ public class ArmIKSolver
       {
          controllerCoreCommand.clear();
          controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
-         controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommand);
          controllerCoreCommand.addFeedbackControlCommand(spatialFeedbackControlCommand);
 
          controllerCore.compute(controllerCoreCommand);
