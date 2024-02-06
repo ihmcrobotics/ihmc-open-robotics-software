@@ -74,12 +74,10 @@ public class ArmIKSolver
    private final DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
-
    private final FramePose3D handControlDesiredPose = new FramePose3D();
+   private final FramePose3D lastHandControlDesiredPose = new FramePose3D();
    private final FrameVector3D handDesiredAngularVelocity = new FrameVector3D();
    private final FrameVector3D handDesiredLinearVelocity = new FrameVector3D();
-   private final FramePose3D lastHandControlDesiredPose = new FramePose3D();
-
    private final RigidBodyTransform handControlDesiredPoseToChestCoMTransform = new RigidBodyTransform();
    private final SpatialVectorReadOnly zeroVector6D = new SpatialVector(armWorldFrame);
    private final FramePose3D controlFramePose = new FramePose3D();
@@ -194,7 +192,7 @@ public class ArmIKSolver
 
    public void solve(FrameVector3DReadOnly desiredAngularVelocity, FrameVector3DReadOnly desiredLinearVelocity)
    {
-      // record the desired velocities with a deep copy, and change the frame to world
+      // Record the desired velocities with a deep copy, and change the frame to world
       handDesiredAngularVelocity.setIncludingFrame(desiredAngularVelocity);
       handDesiredLinearVelocity.setIncludingFrame(desiredLinearVelocity);
       handDesiredAngularVelocity.changeFrame(workHand.getBodyFixedFrame());
@@ -202,16 +200,15 @@ public class ArmIKSolver
 
       solve();
 
-      // populate the spatial velocity for the IK command list
+      // Populate the spatial velocity for the IK command list
       spatialVelocityCommand.set(workChest, workHand);
       spatialVelocityCommand.setSelectionMatrix(selectionMatrix);
       spatialVelocityCommand.setWeightMatrix(weightMatrix);
       spatialVelocityCommand.setSpatialVelocity(workHand.getBodyFixedFrame(), handDesiredAngularVelocity, handDesiredLinearVelocity);
 
-      // Populate teh commands list with the settings, privileged configuration, and spatial velocity
+      // Populate the commands list with the settings and spatial velocity
       controllerCoreCommand.clear();
       controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
-//      controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommand);
       controllerCoreCommand.addInverseKinematicsCommand(spatialVelocityCommand);
 
       // Use this to compute the desired velocity.

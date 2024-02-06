@@ -134,7 +134,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                   for (int i = 0; i < segments; i++)
                   {
                      Pose3D previousPose = trajectoryPoses.getLast();
-                     Pose3D nextPose = trajectoryPoses.add();
+                     Pose3D currentPose = trajectoryPoses.add();
 
                      workPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), previousPose);
                      workPose.changeFrame(getState().getScrewFrame().getReferenceFrame());
@@ -143,7 +143,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                      workPose.prependTranslation(translationPerSegment, 0.0, 0.0);
 
                      workPose.changeFrame(ReferenceFrame.getWorldFrame());
-                     nextPose.set(workPose);
+                     currentPose.set(workPose);
                   }
                }
             }
@@ -159,7 +159,6 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
       if (getState().getScrewFrame().isChildOfWorld())
       {
          getState().getDesiredTrajectory().getValue().clear();
-
 
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
 
