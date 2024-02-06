@@ -53,7 +53,6 @@ import java.util.stream.Collectors;
 
 public class RDXYOLOv8IterativeClosestPointDemo
 {
-   private static final String CSV_FILE_NAME = "ihmc_mug_points.csv";
    private static final boolean USE_CUSTOM_OBJECT = false;
    private static final YOLOv8DetectableObject OBJECT_TYPE = YOLOv8DetectableObject.CUP;
 
@@ -104,13 +103,13 @@ public class RDXYOLOv8IterativeClosestPointDemo
 
    public RDXYOLOv8IterativeClosestPointDemo()
    {
-      icpWorker = new IterativeClosestPointWorker(OBJECT_TYPE.getCorrespondingShape(), objectLengths, objectRadii, 1000, 1000, new Pose3D(), random);
+      icpWorker = new IterativeClosestPointWorker(OBJECT_TYPE.getPrimitiveApproximation(), objectLengths, objectRadii, 1000, 1000, new Pose3D(), random);
       icpWorker.useProvidedTargetPoint(false);
       icpWorker.setSegmentSphereRadius(Double.MAX_VALUE);
       if (USE_CUSTOM_OBJECT)
       {
          WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(YOLOv8DetectableObject.class, "/yoloICPPointClouds/");
-         WorkspaceResourceFile file = new WorkspaceResourceFile(directory, CSV_FILE_NAME);
+         WorkspaceResourceFile file = new WorkspaceResourceFile(directory, OBJECT_TYPE.getPointCloudFileName());
 
          icpWorker.setDetectionShape(PrimitiveRigidBodyShape.CUSTOM, file.getFilesystemFile().toFile());
       }
@@ -301,7 +300,7 @@ public class RDXYOLOv8IterativeClosestPointDemo
    }
 
    /**
-    * Given a point cloud, computes the centroid and variance of the points
+    * Given a point cloud, computes the centroid and standard deviation of the points
     * @param pointCloud       The list of points used for calculations
     * @param maxComputations  Maximum number of points to use for the computation. First N points in the list will be used.
     * @param shuffle          Whether to shuffle the point cloud before computations. Can be used to find approximate values with N points
