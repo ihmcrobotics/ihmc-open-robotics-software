@@ -92,8 +92,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoDouble spineMeasurementCovariance;
 
    /** DEBUG variables */
-   private static final boolean DEBUG = true;
-   private final YoMatrix residual;
+   private static final boolean DEBUG = false;
+   private YoMatrix residual;
 
    public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters parameters, YoRegistry parentRegistry)
    {
@@ -287,8 +287,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       CommonOps_DDRM.scale(processCovariance.getValue(), inertialKalmanFilter.getProcessCovariance());
 
       // Set diagonal entries of measurement covariance according to the part of the body
-      for (JointReadOnly joint : actualModelJoints)
+      for (int i = 0; i < actualModelJoints.size(); ++i)
       {
+         JointReadOnly joint = actualModelJoints.get(i);
          int[] indices = jointIndexHandler.getJointIndices(joint);
 
          if (joint.getName().contains("PELVIS"))
@@ -324,8 +325,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private void updateRegressorModelJointStates()
    {
-      for (JointStateType type : JointStateType.values())
-         MultiBodySystemTools.copyJointsState(actualModelJoints, regressorModelJoints, type);
+      MultiBodySystemTools.copyJointsState(actualModelJoints, regressorModelJoints, JointStateType.CONFIGURATION);
+      MultiBodySystemTools.copyJointsState(actualModelJoints, regressorModelJoints, JointStateType.VELOCITY);
 
       // Update root joint acceleration, which is not populated by default
       calculateRootJointAccelerations();
@@ -342,8 +343,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private void updateWholeSystemTorques()
    {
       actualRobotModel.getRootJoint().getJointTau(0, wholeSystemTorques);
-      for (OneDoFJointReadOnly joint : actualRobotModel.getOneDoFJoints())
+      for (int i = 0; i < actualRobotModel.getOneDoFJoints().length; ++i)
       {
+         OneDoFJointReadOnly joint = actualRobotModel.getOneDoFJoints()[i];
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
          joint.getJointTau(jointIndex, wholeSystemTorques);
       }
