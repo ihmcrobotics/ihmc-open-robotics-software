@@ -20,6 +20,8 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    private final CRDTUnidirectionalBoolean jointspaceOnly;
    private final CRDTUnidirectionalString palmParentFrameName;
    private final CRDTUnidirectionalRigidBodyTransform palmTransformToParent;
+   private final CRDTUnidirectionalDouble linearPositionWeight;
+   private final CRDTUnidirectionalDouble angularPositionWeight;
 
    public HandPoseActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -31,6 +33,8 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       jointspaceOnly = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
       palmParentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, ReferenceFrame.getWorldFrame().getName());
       palmTransformToParent = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
+      linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 50.0);
+      angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 50.0);
    }
 
    @Override
@@ -44,6 +48,8 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
       jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater.getValue());
       jsonNode.put("jointspaceOnly", jointspaceOnly.getValue());
+      jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
+      jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
    }
 
    @Override
@@ -57,6 +63,12 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       JSONTools.toEuclid(jsonNode, palmTransformToParent.getValue());
       holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
       jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
+      JsonNode linearPositionNode = jsonNode.get("linearPositionWeight");
+      double linearPositionWeightValue = linearPositionNode != null ? linearPositionNode.asDouble() : 50.0;
+      linearPositionWeight.setValue(linearPositionWeightValue);
+      JsonNode angularPositionNode = jsonNode.get("angularPositionWeight");
+      double angularPositionWeightValue = linearPositionNode != null ? angularPositionNode.asDouble() : 50.0;
+      angularPositionWeight.setValue(angularPositionWeightValue);
    }
 
    public void toMessage(HandPoseActionDefinitionMessage message)
@@ -69,6 +81,8 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       message.setTrajectoryDuration(trajectoryDuration.toMessage());
       message.setHoldPoseInWorld(holdPoseInWorldLater.toMessage());
       message.setJointSpaceControl(jointspaceOnly.toMessage());
+      message.setLinearPositionWeight(linearPositionWeight.toMessage());
+      message.setAngularPositionWeight(angularPositionWeight.toMessage());
    }
 
    public void fromMessage(HandPoseActionDefinitionMessage message)
@@ -81,6 +95,8 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       trajectoryDuration.fromMessage(message.getTrajectoryDuration());
       holdPoseInWorldLater.fromMessage(message.getHoldPoseInWorld());
       jointspaceOnly.fromMessage(message.getJointSpaceControl());
+      linearPositionWeight.fromMessage(message.getLinearPositionWeight());
+      angularPositionWeight.fromMessage(message.getAngularPositionWeight());
    }
 
    @Override
@@ -142,5 +158,25 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    public CRDTUnidirectionalRigidBodyTransform getPalmTransformToParent()
    {
       return palmTransformToParent;
+   }
+
+   public double getLinearPositionWeight()
+   {
+      return linearPositionWeight.getValue();
+   }
+
+   public void setLinearPositionWeight(double linearPositionWeight)
+   {
+      this.linearPositionWeight.setValue(linearPositionWeight);
+   }
+
+   public double getAngularPositionWeight()
+   {
+      return angularPositionWeight.getValue();
+   }
+
+   public void setAngularPositionWeight(double angularPositionWeight)
+   {
+      this.angularPositionWeight.setValue(angularPositionWeight);
    }
 }
