@@ -6,8 +6,6 @@ import ihmc_common_msgs.msg.dds.QueueableMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.linsol.svd.SolvePseudoInverseSvd_DDRM;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
@@ -15,7 +13,6 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.TrajectoryTrackingErrorCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -23,23 +20,17 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
-import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.math.YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -58,15 +49,13 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final FramePose3D workPose = new FramePose3D();
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = new HandHybridJointspaceTaskspaceTrajectoryMessage();
-
    private final MutableReferenceFrame currentPoseFrame = new MutableReferenceFrame();
-   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
-
    private final FrameVector3D linearVelocity = new FrameVector3D();
    private final FrameVector3D angularVelocity = new FrameVector3D();
    private final RecyclingArrayList<FrameVector3D> linearVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final RecyclingArrayList<FrameVector3D> angularVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final TDoubleArrayList trajectoryTimes = new TDoubleArrayList();
+   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
    public ScrewPrimitiveActionExecutor(long id,
                                        CRDTInfo crdtInfo,
@@ -167,13 +156,10 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    {
       super.triggerActionExecution();
 
-      LogTools.info("Triggered screw execution.");
-
       if (getState().getScrewFrame().isChildOfWorld())
       {
          getState().getDesiredTrajectory().getValue().clear();
 
-         ReferenceFrame affordanceFrame = getState().getScrewFrame().getReferenceFrame();
 
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
 
@@ -198,46 +184,52 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
          int numberOfPoints = getState().getTrajectory().getSize();
 
-         syncedHandControlPose.changeFrame(affordanceFrame);
+         ReferenceFrame screwAxisFrame = getState().getScrewFrame().getReferenceFrame();
 
-         double totalRotationInRadians = getDefinition().getRotation();
-         double rotationRadius = EuclidCoreTools.norm(syncedHandControlPose.getY(), syncedHandControlPose.getZ()); // this is always the radial distance.
-         double totalTranslation = getDefinition().getTranslation();
-         // this is the distance the hand must travel along the screw portion
-         double radialDistance = totalRotationInRadians * rotationRadius;
-         double totalLinearDistanceOfHand = EuclidCoreTools.norm(radialDistance, totalTranslation);
+         syncedHandControlPose.changeFrame(screwAxisFrame);
+         // This is always the radial distance.
+         double rotationRadius = EuclidCoreTools.norm(syncedHandControlPose.getY(), syncedHandControlPose.getZ());
+         syncedHandControlPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         // computing the movement duration, which is clamped by the max movement speed
-         double durationForRotation = totalRotationInRadians / getDefinition().getMaxAngularVelocity();
+         double signedTotalRotation = getDefinition().getRotation();
+         double signedTotalTranslation = getDefinition().getTranslation();
+         // This is the distance the hand must travel along the screw portion
+         double signedRadialDistance = signedTotalRotation * rotationRadius;
+         double totalLinearDistanceOfHand = EuclidCoreTools.norm(signedRadialDistance, signedTotalTranslation);
+
+         // Computing the movement duration, which is clamped by the max movement speed
+         double durationForRotation = signedTotalRotation / getDefinition().getMaxAngularVelocity();
          double durationForTranslation = totalLinearDistanceOfHand / getDefinition().getMaxLinearVelocity();
          double movementDuration = Math.max(durationForRotation, durationForTranslation);
          double segmentDuration = movementDuration / (numberOfPoints - 1);
 
-         // the way the screw frame is defined, x is always the axis of rotation and translation. This means that the tangential velocity is normal to the x axis and the vector yz
-         double tangentialVelocity = radialDistance / movementDuration;
-         double axialVelocity = totalTranslation / movementDuration;
-         double rotationalVelocity = totalRotationInRadians / movementDuration;
+         // The way the screw frame is defined, x is always the axis of rotation and translation.
+         // This means that the tangential velocity is normal to the x axis and the vector yz
+         double tangentialVelocity = signedRadialDistance / movementDuration;
+         double axialVelocity = signedTotalTranslation / movementDuration;
+         double rotationalVelocity = signedTotalRotation / movementDuration;
 
          movementDuration += 2.0 * segmentDuration;
 
          angularVelocities.clear();
          linearVelocities.clear();
-         trajectoryTimes.reset();
-         // set the initial velocity and time as zero
+         trajectoryTimes.resetQuick();
+
+         // Set the initial velocity and time as zero
          angularVelocities.add().setToZero();
          linearVelocities.add().setToZero();
          trajectoryTimes.add(0.0);
 
-         double time = 2.0 * segmentDuration; // make the first segment twice as long to allow smooth acceleration
+         double time = 2.0 * segmentDuration; // Make the first segment twice as long to allow smooth acceleration
          for (int i = 1; i < numberOfPoints - 1; i++)
          {
             Pose3DReadOnly waypointPose = getState().getTrajectory().getValueReadOnly(i);
 
-            // get those pose in the frame of the affordance
+            // Get those pose in the screw axis frame
             workPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), waypointPose);
-            workPose.changeFrame(affordanceFrame);
+            workPose.changeFrame(screwAxisFrame);
 
-            // get the vector that is tangent to the rotation
+            // Get the vector that is tangent to the rotation
             Vector3DReadOnly rotationAxis = Axis3D.X;
             Vector3D radialPosition = new Vector3D(workPose.getPosition());
             radialPosition.setX(0.0);
@@ -246,30 +238,30 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
             tangentVector.normalize();
 
             FrameVector3D linearVelocity = linearVelocities.add();
-            linearVelocity.setToZero(affordanceFrame);
-            // set the tangent velocity in the linear velocity
+            linearVelocity.setToZero(screwAxisFrame);
+            // Set the tangent velocity in the linear velocity
             linearVelocity.setAndScale(tangentialVelocity, tangentVector);
-            // set the axial velocity
+            // Set the axial velocity
             linearVelocity.setX(axialVelocity);
             linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
 
-            // set the angular velocity
+            // Set the angular velocity
             FrameVector3D angularVelocity = angularVelocities.add();
-            angularVelocity.setToZero(affordanceFrame);
+            angularVelocity.setToZero(screwAxisFrame);
             angularVelocity.setX(rotationalVelocity);
             angularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
 
-            // add the time into the array
+            // Add the time into the array
             trajectoryTimes.add(time);
             time += segmentDuration;
          }
 
-         // set the final velocity as zeros and time as the duration
+         // Set the final velocity as zeros and time as the duration
          angularVelocities.add().setToZero();
          linearVelocities.add().setToZero();
-         trajectoryTimes.add(movementDuration); // makes the last segment twice as long to allow for smooth deceleration
+         trajectoryTimes.add(movementDuration); // Makes the last segment twice as long to allow for smooth deceleration
 
-         // start setting up the joint space trajectory
+         // Start setting up the joint space trajectory
          ArmIKSolver armIKSolver = armIKSolvers.get(getDefinition().getSide());
          int numberOfJoints = armIKSolver.getSolutionOneDoFJoints().length;
          for (int jointNumber = 0; jointNumber < numberOfJoints; jointNumber++)
@@ -279,7 +271,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
             oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use Default weight
          }
 
-         // initialize the command, since we're not going to be far.
+         // Initialize the command, since we're not going to be far.
          armIKSolver.copySourceToWork();
 
          for (int i = 0; i < numberOfPoints; i++)
@@ -347,13 +339,12 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
             }
          }
 
-
+         LogTools.info("Commanding %.3f s trajectory with %d points".formatted(movementDuration, numberOfPoints));
          ros2ControllerHelper.publishToController(handHybridTrajectoryMessage);
 
          trackingCalculator.reset();
 
          getState().setNominalExecutionDuration(movementDuration);
-         LogTools.info("Sending trajectory %f long with %d points", movementDuration, numberOfPoints);
       }
       else
       {
@@ -380,7 +371,6 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
       {
          SE3TrajectoryPointReadOnly lastTrajectoryPose = getState().getDesiredTrajectory().getLastValueReadOnly();
          desiredHandControlPose.set(lastTrajectoryPose.getPosition(), lastTrajectoryPose.getOrientation());
-         syncedHandControlPose.setToZero(ReferenceFrame.getWorldFrame());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
 
          trackingCalculator.computePoseTrackingData(desiredHandControlPose, syncedHandControlPose);
