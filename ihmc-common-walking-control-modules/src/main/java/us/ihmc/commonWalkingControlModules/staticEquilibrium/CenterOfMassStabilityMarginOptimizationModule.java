@@ -64,6 +64,7 @@ public class CenterOfMassStabilityMarginOptimizationModule
    static final int STATIC_EQUILIBRIUM_CONSTRAINTS = 6;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoRegistry debugRegistry = new YoRegistry(getClass().getSimpleName() + "Debug");
    private final LinearProgramSolver linearProgramSolver = new LinearProgramSolver();
    private final double mg;
 
@@ -130,13 +131,16 @@ public class CenterOfMassStabilityMarginOptimizationModule
 
       for (int i = 0; i < MAX_CONTACT_POINTS; i++)
       {
-         contactPointPositions.add(new YoFramePoint3D("contactPoint" + i, ReferenceFrame.getWorldFrame(), registry));
+         contactPointPositions.add(new YoFramePoint3D("contactPoint" + i, ReferenceFrame.getWorldFrame(), debugRegistry));
 
          for (int j = 0; j < NUM_BASIS_VECTORS; j++)
          {
-            basisVectors.add(new YoFrameVector3D("beta_" + i + "_" + j, ReferenceFrame.getWorldFrame(), registry));
+            basisVectors.add(new YoFrameVector3D("beta_" + i + "_" + j, ReferenceFrame.getWorldFrame(), debugRegistry));
          }
       }
+
+      if (DEBUG)
+         registry.addChild(debugRegistry);
 
       if (DEBUG && graphicsListRegistry != null)
       {
