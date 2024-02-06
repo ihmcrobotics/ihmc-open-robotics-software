@@ -11,6 +11,23 @@ import java.util.List;
 
 public class InertiaVisualizationTools
 {
+   public static final double[] COOLWARM_RED_COEFFICIENTS = new double[] {0.22799943, 1.17622677, -0.05769346, 3.08415998, -6.81520504, 3.1203027};
+   public static final double[] COOLWARM_GREEN_COEFFICIENTS = new double[] {0.30822069, 1.26972463, 3.09837548, -10.38670071, 7.89978329, -2.06379977};
+   public static final double[] COOLWARM_BLUE_COEFFICIENTS = new double[] {0.7571628, 1.33148599, 0.18877437, -9.27125131, 10.77877482, -3.61308895};
+
+   private static final double[] PIYG_RED_COEFFICIENTS = new double[] {0.55542857, 2.55793281, -7.64547912, 17.59694419, -23.94099841, 11.07570777};
+   private static final double[] PIYG_GREEN_COEFFICIENTS = new double[] {-4.52665027e-03,
+                                                                         2.96292190e-01,
+                                                                         1.57697343e+01,
+                                                                         -4.01222209e+01,
+                                                                         3.60874809e+01,
+                                                                         -1.16116188e+01};
+   private static final double[] PIYG_BLUE_COEFFICIENTS = new double[] {0.33713237, 0.8968716, 6.34398907, -12.82119389, 0.03361242, 5.35789659};
+
+   private static final double[] VIRIDIS_RED_COEFFICIENTS = new double[] {0.2774879, -0.11255063, 2.10607102, -14.14404302, 23.72334937, -10.90841729};
+   private static final double[] VIRIDIS_GREEN_COEFFICIENTS = new double[] {0.00247317, 1.49535097, -1.31431592, 1.28943779, -0.223256, -0.35398068};
+   private static final double[] VIRIDIS_BLUE_COEFFICIENTS = new double[] {0.31371651, 2.2855777, -9.80527933, 22.74666121, -25.84324129, 10.38676565};
+
    /**
     * Creates a list of ellipsoids visuals corresponding to all the rigid bodies in the system given the root rigid body. The update() can be called for each
     * element of this list in a loop to update the visuals.
@@ -39,7 +56,7 @@ public class InertiaVisualizationTools
     * Creates a graphic group to be returned by getSCS2YoGraphics().
     *
     * @param yoInertiaEllipsoids - The list of inertia ellipsoids to be converted to definitions and added to the group.
-    * */
+    */
    public static YoGraphicDefinition getInertiaEllipsoidGroup(ArrayList<YoInertiaEllipsoid> yoInertiaEllipsoids)
    {
       YoGraphicGroupDefinition ellipsoidGroup = new YoGraphicGroupDefinition("Inertia Ellipsoids");
@@ -69,20 +86,22 @@ public class InertiaVisualizationTools
     */
    public static int[] getRGBForCoolwarmColorMap(double scale)
    {
-      double[] redCoefficients = {0.22799943, 1.17622677, -0.05769346, 3.08415998, -6.81520504, 3.1203027};
-      double[] greenCoefficients = {0.30822069, 1.26972463, 3.09837548, -10.38670071, 7.89978329, -2.06379977};
-      double[] blueCoefficients = {0.7571628, 1.33148599, 0.18877437, -9.27125131, 10.77877482, -3.61308895};
+      checkScaleInUnitWindow(scale);
 
-      if (scale < 0 || scale > 1)
-      {
-         throw new IllegalArgumentException("Value must be between 0 and 1");
-      }
-
-      int red = evaluateRGBPolynomial(redCoefficients, scale);
-      int green = evaluateRGBPolynomial(greenCoefficients, scale);
-      int blue = evaluateRGBPolynomial(blueCoefficients, scale);
+      int red = evaluateRGBPolynomial(COOLWARM_RED_COEFFICIENTS, scale);
+      int green = evaluateRGBPolynomial(COOLWARM_GREEN_COEFFICIENTS, scale);
+      int blue = evaluateRGBPolynomial(COOLWARM_BLUE_COEFFICIENTS, scale);
 
       return new int[] {red, green, blue};
+   }
+
+   public static void getRGBForCoolwarmColorMap(double scale, int[] rgbToPack)
+   {
+      checkScaleInUnitWindow(scale);
+
+      rgbToPack[0] = evaluateRGBPolynomial(COOLWARM_RED_COEFFICIENTS, scale);
+      rgbToPack[1] = evaluateRGBPolynomial(COOLWARM_GREEN_COEFFICIENTS, scale);
+      rgbToPack[2] = evaluateRGBPolynomial(COOLWARM_BLUE_COEFFICIENTS, scale);
    }
 
    /**
@@ -95,22 +114,24 @@ public class InertiaVisualizationTools
     * @param scale Number between 0 and 1, determines the location on the colormap.
     * @return RGB values for the colormap at the given scale.
     */
-   private static int[] getRGBForPiYGColorMap(double scale)
+   public static int[] getRGBForPiYGColorMap(double scale)
    {
-      double[] redCoefficients = {0.55542857, 2.55793281, -7.64547912, 17.59694419, -23.94099841, 11.07570777};
-      double[] greenCoefficients = {-4.52665027e-03, 2.96292190e-01, 1.57697343e+01, -4.01222209e+01, 3.60874809e+01, -1.16116188e+01};
-      double[] blueCoefficients = {0.33713237, 0.8968716, 6.34398907, -12.82119389, 0.03361242, 5.35789659};
+      checkScaleInUnitWindow(scale);
 
-      if (scale < 0 || scale > 1)
-      {
-         throw new IllegalArgumentException("Value must be between 0 and 1");
-      }
-
-      int red = evaluateRGBPolynomial(redCoefficients, scale);
-      int green = evaluateRGBPolynomial(greenCoefficients, scale);
-      int blue = evaluateRGBPolynomial(blueCoefficients, scale);
+      int red = evaluateRGBPolynomial(PIYG_RED_COEFFICIENTS, scale);
+      int green = evaluateRGBPolynomial(PIYG_GREEN_COEFFICIENTS, scale);
+      int blue = evaluateRGBPolynomial(PIYG_BLUE_COEFFICIENTS, scale);
 
       return new int[] {red, green, blue};
+   }
+
+   public static void getRGBForPiYGColorMap(double scale, int[] rgbToPack)
+   {
+      checkScaleInUnitWindow(scale);
+
+      rgbToPack[0] = evaluateRGBPolynomial(PIYG_RED_COEFFICIENTS, scale);
+      rgbToPack[1] = evaluateRGBPolynomial(PIYG_GREEN_COEFFICIENTS, scale);
+      rgbToPack[2] = evaluateRGBPolynomial(PIYG_BLUE_COEFFICIENTS, scale);
    }
 
    /**
@@ -123,22 +144,24 @@ public class InertiaVisualizationTools
     * @param scale Number between 0 and 1, determines the location on the colormap.
     * @return RGB values for the colormap at the given scale.
     */
-   private static int[] getRGBForViridisColorMap(double scale)
+   public static int[] getRGBForViridisColorMap(double scale)
    {
-      double[] redCoefficients = {0.2774879, -0.11255063, 2.10607102, -14.14404302, 23.72334937, -10.90841729};
-      double[] greenCoefficients = {0.00247317, 1.49535097, -1.31431592, 1.28943779, -0.223256, -0.35398068};
-      double[] blueCoefficients = {0.31371651, 2.2855777, -9.80527933, 22.74666121, -25.84324129, 10.38676565};
+      checkScaleInUnitWindow(scale);
 
-      if (scale < 0 || scale > 1)
-      {
-         throw new IllegalArgumentException("Value must be between 0 and 1");
-      }
-
-      int red = evaluateRGBPolynomial(redCoefficients, scale);
-      int green = evaluateRGBPolynomial(greenCoefficients, scale);
-      int blue = evaluateRGBPolynomial(blueCoefficients, scale);
+      int red = evaluateRGBPolynomial(VIRIDIS_RED_COEFFICIENTS, scale);
+      int green = evaluateRGBPolynomial(VIRIDIS_GREEN_COEFFICIENTS, scale);
+      int blue = evaluateRGBPolynomial(VIRIDIS_BLUE_COEFFICIENTS, scale);
 
       return new int[] {red, green, blue};
+   }
+
+   public static void getRGBForViridisColorMap(double scale, int[] rgbToPack)
+   {
+      checkScaleInUnitWindow(scale);
+
+      rgbToPack[0] = evaluateRGBPolynomial(VIRIDIS_RED_COEFFICIENTS, scale);
+      rgbToPack[1] = evaluateRGBPolynomial(VIRIDIS_GREEN_COEFFICIENTS, scale);
+      rgbToPack[2] = evaluateRGBPolynomial(VIRIDIS_BLUE_COEFFICIENTS, scale);
    }
 
    /**
@@ -157,5 +180,13 @@ public class InertiaVisualizationTools
          rgbValue += colorCoefficients[i] * Math.pow(scale, i);
       }
       return (int) Math.round(rgbValue * 255);  // Scale to 0-255 range
+   }
+
+   private static void checkScaleInUnitWindow(double scale)
+   {
+      if (scale < 0 || scale > 1)
+      {
+         throw new IllegalArgumentException("Value must be between 0 and 1");
+      }
    }
 }
