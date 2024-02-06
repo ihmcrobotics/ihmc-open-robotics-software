@@ -20,7 +20,11 @@ public interface HighLevelControllerParameters
 
    double getTimeToMoveInStandPrep();
    double getMinimumTimeInStandReady();
-   double getTimeInStandTransition(HighLevelControllerName controllerName);
+   double getTimeInStandTransition();
+   default double getTimeInStandTransition(HighLevelControllerName controllerName)
+   {
+      return getTimeInStandTransition();
+   }
    double getCalibrationDuration();
 
    /**
