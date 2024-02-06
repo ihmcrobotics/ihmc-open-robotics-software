@@ -15,7 +15,9 @@ import us.ihmc.tools.io.WorkspaceFile;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class YOLOv8ObjectDetector
 {
@@ -58,7 +60,7 @@ public class YOLOv8ObjectDetector
       yoloNet.setInput(blob);
       yoloNet.forward(outputBlobs, outputNames);
 
-      List<YOLOv8Detection> detections = processOutput(outputBlobs, confidenceThreshold, nonMaximumSuppressionThreshold, bgrImage.getImageWidth(), bgrImage.getImageHeight());
+      Set<YOLOv8Detection> detections = processOutput(outputBlobs, confidenceThreshold, nonMaximumSuppressionThreshold, bgrImage.getImageWidth(), bgrImage.getImageHeight());
       YOLOv8DetectionResults results = new YOLOv8DetectionResults(detections, outputBlobs, bgrImage);
 
       blob.release();
@@ -72,13 +74,13 @@ public class YOLOv8ObjectDetector
       DETECTION_SIZE.close();
    }
 
-   private List<YOLOv8Detection> processOutput(MatVector outputBlobs, float confidenceThreshold, float nonMaximumSuppressionThreshold, int imageWidth, int imageHeight)
+   private Set<YOLOv8Detection> processOutput(MatVector outputBlobs, float confidenceThreshold, float nonMaximumSuppressionThreshold, int imageWidth, int imageHeight)
    {
       int shiftWidth = (imageWidth - DETECTION_SIZE.width()) / 2;
       int shiftHeight = (imageHeight - DETECTION_SIZE.height()) / 2;
       int numberOfMasks = outputBlobs.get(1).size(1);
 
-      List<YOLOv8Detection> detections = new ArrayList<>();
+      Set<YOLOv8Detection> detections = new HashSet<>();
 
       try (FloatIndexer output0Indexer = outputBlobs.get(0).createIndexer();
            IntVector detectedClassIds = new IntVector();

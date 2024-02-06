@@ -134,6 +134,20 @@ public class IterativeClosestPointWorker
       setPoseGuess(initialPose);
    }
 
+   public IterativeClosestPointWorker(File pointCloudFile, int numberOfCorrespondences, Pose3DReadOnly initialPose, Random random)
+   {
+      this.numberOfCorrespondences = numberOfCorrespondences;
+      this.random = random;
+
+      targetPoint.set(initialPose.getPosition());
+
+      objectRelativeToCentroidPoints = new DMatrixRMaj(numberOfCorrespondences, 3);
+      measurementRelativeToCentroidPoints = new DMatrixRMaj(numberOfCorrespondences, 3);
+
+      localObjectPoints = new ArrayList<>();
+      setDetectionShape(PrimitiveRigidBodyShape.CUSTOM, pointCloudFile);
+   }
+
    public boolean runICP(int numberOfIterations)
    {
       // Determine around where the point cloud should be segmented

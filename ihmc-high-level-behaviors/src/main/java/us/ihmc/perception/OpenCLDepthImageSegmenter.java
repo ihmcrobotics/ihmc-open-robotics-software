@@ -37,7 +37,7 @@ public class OpenCLDepthImageSegmenter
    }
 
    // TODO: Add mask to depth transform so we can use YOLO with other cameras besides ZED
-   public RawImage removeBackground(RawImage depthImage, RawImage imageMask, int dilationSize)
+   public RawImage removeBackground(RawImage depthImage, RawImage imageMask, int erosionKernelRadius)
    {
       depthImage.get();
       imageMask.get();
@@ -63,8 +63,8 @@ public class OpenCLDepthImageSegmenter
       opencv_imgproc.erode(imageMask.getCpuImageMat(),
                            erodedMat,
                            opencv_imgproc.getStructuringElement(opencv_imgproc.CV_SHAPE_RECT,
-                                                                new Size(2 * dilationSize + 1, 2 * dilationSize + 1),
-                                                                new Point(dilationSize, dilationSize)));
+                                                                new Size(2 * erosionKernelRadius + 1, 2 * erosionKernelRadius + 1),
+                                                                new Point(erosionKernelRadius, erosionKernelRadius)));
 
       if (bytedecoDepthImage != null)
          bytedecoDepthImage.destroy(openCLManager);

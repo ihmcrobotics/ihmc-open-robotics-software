@@ -3,97 +3,101 @@ package us.ihmc.perception.YOLOv8;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
 import javax.annotation.Nullable;
+import java.io.File;
 
 public enum YOLOv8DetectableObject
 {
-   PERSON(null),
-   BICYCLE(PrimitiveRigidBodyShape.CUSTOM),
-   CAR(null),
-   MOTORCYCLE(null),
-   AIRPLANE(PrimitiveRigidBodyShape.ELLIPSOID),
-   BUS(PrimitiveRigidBodyShape.BOX),
-   TRAIN(PrimitiveRigidBodyShape.BOX),
-   TRUCK(null),
-   BOAT(PrimitiveRigidBodyShape.ELLIPSOID),
-   TRAFFIC_LIGHT(PrimitiveRigidBodyShape.BOX),
-   FIRE_HYDRANT(PrimitiveRigidBodyShape.CYLINDER),
-   STOP_SIGN(null),
-   PARKING_METER(PrimitiveRigidBodyShape.BOX),
-   BENCH(null),
-   BIRD(PrimitiveRigidBodyShape.ELLIPSOID),
-   CAT(null),
-   DOG(null),
-   HORSE(null),
-   SHEEP(null),
-   COW(null),
-   ELEPHANT(null),
-   BEAR(null),
-   ZEBRA(null),
-   GIRAFFE(null),
-   BACKPACK(PrimitiveRigidBodyShape.ELLIPSOID),
-   UMBRELLA(null),
-   HANDBAG(PrimitiveRigidBodyShape.BOX),
-   TIE(null),
-   SUITCASE(PrimitiveRigidBodyShape.BOX),
-   FRISBEE(PrimitiveRigidBodyShape.ELLIPSOID),
-   SKIS(null),
-   SNOWBOARD(null),
-   SPORTS_BALL(PrimitiveRigidBodyShape.ELLIPSOID),
-   KITE(null),
-   BASEBALL_BAT(PrimitiveRigidBodyShape.CYLINDER),
-   BASEBALL_GLOVE(null),
-   SKATEBOARD(null),
-   SURFBOARD(null),
-   TENNIS_RACKET(null),
-   BOTTLE(PrimitiveRigidBodyShape.CYLINDER),
-   WINE_GLASS(null),
-   CUP(PrimitiveRigidBodyShape.CYLINDER),
-   FORK(null),
-   KNIFE(null),
-   SPOON(null),
-   BOWL(PrimitiveRigidBodyShape.ELLIPSOID),
-   BANANA(PrimitiveRigidBodyShape.ELLIPSOID),
-   APPLE(PrimitiveRigidBodyShape.ELLIPSOID),
-   SANDWICH(PrimitiveRigidBodyShape.BOX),
-   ORANGE(PrimitiveRigidBodyShape.ELLIPSOID),
-   BROCCOLI(null),
-   CARROT(PrimitiveRigidBodyShape.CONE),
-   HOT_DOG(PrimitiveRigidBodyShape.CYLINDER),
-   PIZZA(PrimitiveRigidBodyShape.ELLIPSOID),
-   DONUT(PrimitiveRigidBodyShape.ELLIPSOID),
-   CAKE(PrimitiveRigidBodyShape.CYLINDER),
-   CHAIR(null),
-   COUCH(null),
-   POTTED_PLANT(null),
-   BED(PrimitiveRigidBodyShape.BOX),
-   DINING_TABLE(null),
-   TOILET(null),
-   TV(PrimitiveRigidBodyShape.BOX),
-   LAPTOP(PrimitiveRigidBodyShape.BOX),
-   MOUSE(PrimitiveRigidBodyShape.ELLIPSOID),
-   REMOTE(PrimitiveRigidBodyShape.BOX),
-   KEYBOARD(PrimitiveRigidBodyShape.BOX),
-   CELL_PHONE(PrimitiveRigidBodyShape.BOX),
-   MICROWAVE(PrimitiveRigidBodyShape.BOX),
-   OVEN(PrimitiveRigidBodyShape.BOX),
-   TOASTER(PrimitiveRigidBodyShape.BOX),
-   SINK(null),
-   REFRIGERATOR(PrimitiveRigidBodyShape.BOX),
-   BOOK(PrimitiveRigidBodyShape.BOX),
-   CLOCK(PrimitiveRigidBodyShape.CYLINDER),
-   VASE(PrimitiveRigidBodyShape.ELLIPSOID),
-   SCISSORS(null),
-   TEDDY_BEAR(null),
-   HAIR_DRIER(null),
-   TOOTHBRUSH(null)
+   PERSON(null, null),
+   BICYCLE(PrimitiveRigidBodyShape.CUSTOM, null),
+   CAR(null, null),
+   MOTORCYCLE(null, null),
+   AIRPLANE(PrimitiveRigidBodyShape.ELLIPSOID, null),
+   BUS(PrimitiveRigidBodyShape.BOX, null),
+   TRAIN(PrimitiveRigidBodyShape.BOX, null),
+   TRUCK(null, null),
+   BOAT(PrimitiveRigidBodyShape.ELLIPSOID, null),
+   TRAFFIC_LIGHT(PrimitiveRigidBodyShape.BOX, null),
+   FIRE_HYDRANT(PrimitiveRigidBodyShape.CYLINDER, null),
+   STOP_SIGN(null, null),
+   PARKING_METER(PrimitiveRigidBodyShape.BOX, null),
+   BENCH(null, null),
+   BIRD(PrimitiveRigidBodyShape.ELLIPSOID, null),
+   CAT(null, null),
+   DOG(null, null),
+   HORSE(null, null),
+   SHEEP(null, null),
+   COW(null, null),
+   ELEPHANT(null, null),
+   BEAR(null, null),
+   ZEBRA(null, null),
+   GIRAFFE(null, null),
+   BACKPACK(PrimitiveRigidBodyShape.ELLIPSOID, null),
+   UMBRELLA(null,null),
+   HANDBAG(PrimitiveRigidBodyShape.BOX, null),
+   TIE(null, null),
+   SUITCASE(PrimitiveRigidBodyShape.BOX, null),
+   FRISBEE(PrimitiveRigidBodyShape.ELLIPSOID, null),
+   SKIS(null, null),
+   SNOWBOARD(null, null),
+   SPORTS_BALL(PrimitiveRigidBodyShape.ELLIPSOID, null),
+   KITE(null, null),
+   BASEBALL_BAT(PrimitiveRigidBodyShape.CYLINDER, null),
+   BASEBALL_GLOVE(null, null),
+   SKATEBOARD(null, null),
+   SURFBOARD(null, null),
+   TENNIS_RACKET(null, null),
+   BOTTLE(PrimitiveRigidBodyShape.CYLINDER, null),
+   WINE_GLASS(null, null),
+   CUP(PrimitiveRigidBodyShape.CYLINDER, "ihmc_mug_points.csv"),
+   FORK(null, null),
+   KNIFE(null, null),
+   SPOON(null, null),
+   BOWL(PrimitiveRigidBodyShape.ELLIPSOID, null),
+   BANANA(PrimitiveRigidBodyShape.ELLIPSOID, null),
+   APPLE(PrimitiveRigidBodyShape.ELLIPSOID, null),
+   SANDWICH(PrimitiveRigidBodyShape.BOX, null),
+   ORANGE(PrimitiveRigidBodyShape.ELLIPSOID, null),
+   BROCCOLI(null, null),
+   CARROT(PrimitiveRigidBodyShape.CONE, null),
+   HOT_DOG(PrimitiveRigidBodyShape.CYLINDER, null),
+   PIZZA(PrimitiveRigidBodyShape.ELLIPSOID, null),
+   DONUT(PrimitiveRigidBodyShape.ELLIPSOID, null),
+   CAKE(PrimitiveRigidBodyShape.CYLINDER, null),
+   CHAIR(null, null),
+   COUCH(null, null),
+   POTTED_PLANT(null, null),
+   BED(PrimitiveRigidBodyShape.BOX, null),
+   DINING_TABLE(null, null),
+   TOILET(null, null),
+   TV(PrimitiveRigidBodyShape.BOX, null),
+   LAPTOP(PrimitiveRigidBodyShape.BOX, null),
+   MOUSE(PrimitiveRigidBodyShape.ELLIPSOID, null),
+   REMOTE(PrimitiveRigidBodyShape.BOX, null),
+   KEYBOARD(PrimitiveRigidBodyShape.BOX, null),
+   CELL_PHONE(PrimitiveRigidBodyShape.BOX, null),
+   MICROWAVE(PrimitiveRigidBodyShape.BOX, null),
+   OVEN(PrimitiveRigidBodyShape.BOX, null),
+   TOASTER(PrimitiveRigidBodyShape.BOX, null),
+   SINK(null, null),
+   REFRIGERATOR(PrimitiveRigidBodyShape.BOX, null),
+   BOOK(PrimitiveRigidBodyShape.BOX, null),
+   CLOCK(PrimitiveRigidBodyShape.CYLINDER, null),
+   VASE(PrimitiveRigidBodyShape.ELLIPSOID, null),
+   SCISSORS(null, null),
+   TEDDY_BEAR(null, null),
+   HAIR_DRIER(null, null),
+   TOOTHBRUSH(null, null)
    ;
 
    @Nullable
-   private PrimitiveRigidBodyShape correspondingShape;
+   private PrimitiveRigidBodyShape primitiveApproximation;
 
-   YOLOv8DetectableObject(PrimitiveRigidBodyShape correspondingShape)
+   private String pointCloudFileName;
+
+   YOLOv8DetectableObject(PrimitiveRigidBodyShape primitiveApproximation, String pointCloudFileName)
    {
-      this.correspondingShape = correspondingShape;
+      this.primitiveApproximation = primitiveApproximation;
+      this.pointCloudFileName = pointCloudFileName;
    }
 
    /**
@@ -102,9 +106,14 @@ public enum YOLOv8DetectableObject
     * If you disagree, feel free to change the corresponding shape (although you're clearly wrong).
     * @return the objectively correct approximation of the object as a primitive shape. Null if no approximation is good.
     */
-   public PrimitiveRigidBodyShape getCorrespondingShape()
+   public PrimitiveRigidBodyShape getPrimitiveApproximation()
    {
-      return correspondingShape;
+      return primitiveApproximation;
+   }
+
+   public String getPointCloudFileName()
+   {
+      return pointCloudFileName;
    }
 
    public int getClassId()
@@ -121,6 +130,7 @@ public enum YOLOv8DetectableObject
    {
       return (byte) this.ordinal();
    }
+
    @Override
    public String toString()
    {
