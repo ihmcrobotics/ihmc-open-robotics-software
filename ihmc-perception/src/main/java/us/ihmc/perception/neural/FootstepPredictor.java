@@ -72,12 +72,17 @@ public class FootstepPredictor
 
    public ArrayList<Point3D> generateFootsteps(Mat heightMap, Point2D startPosition, Point2D goalPosition, Point2D sensorPosition)
    {
+
+
+
       ArrayList<Point3D> footstepPositions = new ArrayList<>();
       FMatrixRMaj linearInput = new FMatrixRMaj(LINEAR_INPUT_SIZE, 1);
       linearInput.set(0, 0, startPosition.getX32());
       linearInput.set(1, 0, startPosition.getY32());
-      linearInput.set(2, 0, goalPosition.getX32());
-      linearInput.set(3, 0, goalPosition.getY32());
+      linearInput.set(2, 0, 0);
+      linearInput.set(3, 0, goalPosition.getX32());
+      linearInput.set(4, 0, goalPosition.getY32());
+      linearInput.set(5, 0, 0);
 
       FMatrixRMaj linearOutput = null;
 

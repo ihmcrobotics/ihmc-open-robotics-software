@@ -422,8 +422,8 @@ if __name__ == "__main__":
     # load dataset
     train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
-    train = False
-    visualize_raw = True
+    train = True
+    visualize_raw = False
 
     if visualize_raw:
         visualize_dataset(train_dataset)    
