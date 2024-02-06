@@ -35,6 +35,7 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
@@ -211,12 +212,13 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          double durationForTranslation = totalLinearDistanceOfHand / getDefinition().getMaxLinearVelocity();
          double movementDuration = Math.max(durationForRotation, durationForTranslation);
          double segmentDuration = movementDuration / (numberOfPoints - 1);
-         movementDuration += 2.0 * segmentDuration;
 
          // the way the screw frame is defined, x is always the axis of rotation and translation. This means that the tangential velocity is normal to the x axis and the vector yz
          double tangentialVelocity = radialDistance / movementDuration;
          double axialVelocity = totalTranslation / movementDuration;
          double rotationalVelocity = totalRotationInRadians / movementDuration;
+
+         movementDuration += 2.0 * segmentDuration;
 
          angularVelocities.clear();
          linearVelocities.clear();
@@ -283,18 +285,18 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          for (int i = 0; i < numberOfPoints; i++)
          {
             // For the first point, they are the same -- the initial hand pose. For the last point, they're the same.
-            Pose3DReadOnly currentPose = getState().getTrajectory().getValueReadOnly(i);
+            Pose3DReadOnly desiredPose = getState().getTrajectory().getValueReadOnly(i);
             angularVelocity.setIncludingFrame(angularVelocities.get(i));
             linearVelocity.setIncludingFrame(linearVelocities.get(i));
             double waypointTime = trajectoryTimes.get(i);
 
-            currentPoseFrame.getTransformToParent().set(currentPose);
+            currentPoseFrame.getTransformToParent().set(desiredPose);
             currentPoseFrame.getReferenceFrame().update();
 
             SE3TrajectoryPointMessage se3TrajectoryPointMessage = taskspaceTrajectoryMessage.getTaskspaceTrajectoryPoints().add();
             se3TrajectoryPointMessage.setTime(waypointTime);
-            se3TrajectoryPointMessage.getPosition().set(currentPose.getTranslation());
-            se3TrajectoryPointMessage.getOrientation().set(currentPose.getOrientation());
+            se3TrajectoryPointMessage.getPosition().set(desiredPose.getTranslation());
+            se3TrajectoryPointMessage.getOrientation().set(desiredPose.getOrientation());
             se3TrajectoryPointMessage.getLinearVelocity().set(linearVelocity);
             se3TrajectoryPointMessage.getAngularVelocity().set(angularVelocity);
 
@@ -322,13 +324,30 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
             LogTools.info("Adding point time: %.2f  nextPose: %s %s  linearVel: %s  angularVel: %s"
                     .formatted(time,
-                               currentPose.getPosition(),
-                               new YawPitchRoll(currentPose.getOrientation()),
+                               desiredPose.getPosition(),
+                               new YawPitchRoll(desiredPose.getOrientation()),
                                linearVelocity,
                                angularVelocity));
 
-            getState().getDesiredTrajectory().addTrajectoryPoint(currentPose, time);
+            getState().getDesiredTrajectory().addTrajectoryPoint(desiredPose, time);
          }
+
+         // Perform smoothing from the jointspace velocities
+         for (int i = 1; i < numberOfPoints - 1; i++)
+         {
+            for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+            {
+               OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(jointIdx);
+               TrajectoryPoint1DMessage previousPoint = oneDoFJointTrajectoryMessage.getTrajectoryPoints().get(i - 1);
+               TrajectoryPoint1DMessage currentPoint = oneDoFJointTrajectoryMessage.getTrajectoryPoints().get(i);
+               TrajectoryPoint1DMessage nextPoint = oneDoFJointTrajectoryMessage.getTrajectoryPoints().get(i + 1);
+               double duration = nextPoint.getTime() - previousPoint.getTime();
+               double displacement = AngleTools.computeAngleDifferenceMinusPiToPi(nextPoint.getPosition(), previousPoint.getPosition());
+               currentPoint.setVelocity(displacement / duration);
+            }
+         }
+
+
          ros2ControllerHelper.publishToController(handHybridTrajectoryMessage);
 
          trackingCalculator.reset();
