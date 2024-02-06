@@ -4,6 +4,7 @@ import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
 import us.ihmc.robotModels.FullRobotModel;
@@ -12,6 +13,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class InertialKalmanFilter extends ExtendedKalmanFilter
@@ -69,10 +72,10 @@ private static final boolean POST_PROCESS = true;
       {
          YoRegistry registry = new YoRegistry(getClass().getSimpleName());
          parentRegistry.addChild(registry);
-         filteredWholeSystemTorques = new AlphaFilteredYoMatrix("filteredWholeSystemTorques", postProcessingAlpha, nDoFs, 1, registry);
-         doubleFilteredWholeSystemTorques = new AlphaFilteredYoMatrix("doubleFilteredWholeSystemTorques", postProcessingAlpha, nDoFs, 1, registry);
-         filteredMeasurement = new AlphaFilteredYoMatrix("filteredMeasurement", postProcessingAlpha, nDoFs, 1, registry);
-         doubleFilteredMeasurement = new AlphaFilteredYoMatrix("doubleFilteredMeasurement", postProcessingAlpha, nDoFs, 1, registry);
+         filteredWholeSystemTorques = new AlphaFilteredYoMatrix("filteredWholeSystemTorques", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
+         doubleFilteredWholeSystemTorques = new AlphaFilteredYoMatrix("doubleFilteredWholeSystemTorques", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
+         filteredMeasurement = new AlphaFilteredYoMatrix("filteredMeasurement", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
+         doubleFilteredMeasurement = new AlphaFilteredYoMatrix("doubleFilteredMeasurement", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
       }
    }
 
@@ -182,5 +185,36 @@ private static final boolean POST_PROCESS = true;
    public DMatrixRMaj getMeasurementCovariance()
    {
       return measurementCovariance;
+   }
+
+   private String[] getRowNames(FullRobotModel model)
+   {
+      List<String> names = new ArrayList<>();
+
+      // Root joint is handled specially
+      for (int i = 0; i < model.getRootJoint().getDegreesOfFreedom(); i++)
+      {
+         String suffix;
+         switch(i)
+         {
+            case 0 -> suffix = "wX";
+            case 1 -> suffix = "wY";
+            case 2 -> suffix = "wZ";
+            case 3 -> suffix = "x";
+            case 4 -> suffix = "y";
+            case 5 -> suffix = "z";
+            default -> throw new RuntimeException("Unhandled case: " + i);
+         }
+         names.add(model.getRootJoint().getName() + "_" + suffix);
+      }
+
+      // One DoF joints
+      OneDoFJointReadOnly[] oneDoFJoints = model.getOneDoFJoints();
+      for (OneDoFJointReadOnly joint : oneDoFJoints)
+      {
+         names.add(joint.getName());
+      }
+
+      return names.toArray(new String[0]);
    }
 }

@@ -157,8 +157,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       double accelerationCalculationAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForAccelerationCalculation(), dt);
       for (int i = 0; i < WRENCH_DIMENSION; i++)
       {
-         rootJointVelocities[i] = new YoDouble("rootJointVelocity_" + i, registry);
-         rootJointAccelerations[i] = new FilteredVelocityYoVariable("rootJointAcceleration_" + i, "",
+         rootJointVelocities[i] = new YoDouble("rootJointVelocity_" + getNameForRootJoint(i), registry);
+         rootJointAccelerations[i] = new FilteredVelocityYoVariable("rootJointAcceleration_" + getNameForRootJoint(i), "",
                                                                     accelerationCalculationAlpha, rootJointVelocities[i], dt, registry);
       }
 
@@ -166,8 +166,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       jointAccelerations = new FilteredVelocityYoVariable[nOneDoFJoints];
       for (int i = 0; i < nOneDoFJoints; i++)
       {
-         jointVelocities[i] = new YoDouble("jointVelocity_" + i, registry);
-         jointAccelerations[i] = new FilteredVelocityYoVariable("jointAcceleration_" + i, "",
+         jointVelocities[i] = new YoDouble("jointVelocity_" + actualRobotModel.getOneDoFJoints()[i].getName(), registry);
+         jointAccelerations[i] = new FilteredVelocityYoVariable("jointAcceleration_" + actualRobotModel.getOneDoFJoints()[i].getName(), "",
                                                                 accelerationCalculationAlpha, jointVelocities[i], dt, registry);
       }
 
@@ -186,7 +186,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       inertialKalmanFilterEstimate = new YoMatrix("inertialParameterEstimate",
                                                   partitionSizes[0],
                                                   1,
-                                                  getRowNames(basisSets, estimateModelBodies),
+                                                  getRowNamesForEstimates(basisSets, estimateModelBodies),
                                                   null,
                                                   registry);
 
@@ -194,13 +194,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate", estimateFilteringAlpha,
                                                    partitionSizes[0],
                                                    1,
-                                                   getRowNames(basisSets, estimateModelBodies),
+                                                   getRowNamesForEstimates(basisSets, estimateModelBodies),
                                                    null,
                                                    registry);
       doubleFilteredEstimate = new AlphaFilteredYoMatrix("doubleFilteredInertialParameterEstimate", estimateFilteringAlpha,
                                                          partitionSizes[0],
                                                          1,
-                                                         getRowNames(basisSets, estimateModelBodies),
+                                                         getRowNamesForEstimates(basisSets, estimateModelBodies),
                                                          null,
                                                          registry);
 
@@ -224,7 +224,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
             if (joint.getDegreesOfFreedom() > 1)
             {
                for (int i = 0; i < joint.getDegreesOfFreedom(); i++)
-                  rowNames[index + i] = joint.getName() + "_" + i;
+                  rowNames[index + i] = joint.getName() + "_" + getNameForRootJoint(i);
             }
             else
             {
@@ -445,7 +445,21 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       residual.set(residualToPack);
    }
 
-   private String[] getRowNames(Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets, RigidBodyReadOnly[] bodies)
+   private String getNameForRootJoint(int i)
+   {
+      return switch (i)
+      {
+         case 0 -> "wX";
+         case 1 -> "wY";
+         case 2 -> "wZ";
+         case 3 -> "x";
+         case 4 -> "y";
+         case 5 -> "z";
+         default -> throw new RuntimeException("Unhandled case: " + i);
+      };
+   }
+
+   private String[] getRowNamesForEstimates(Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets, RigidBodyReadOnly[] bodies)
    {
       List<String> rowNames = new ArrayList<>();
       for (int i = 0; i < basisSets.length; ++i)
