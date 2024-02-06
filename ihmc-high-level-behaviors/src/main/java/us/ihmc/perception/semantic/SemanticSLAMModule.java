@@ -1,7 +1,9 @@
 package us.ihmc.perception.semantic;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.YOLOv8.YOLOv8Detection;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionResults;
@@ -72,6 +74,9 @@ public class SemanticSLAMModule
 
       Mat displayLeftImage = leftImage.clone();
       Mat inferenceLeftImage = leftImage.clone();
+
+      opencv_imgproc.resize(leftImage, leftImage, new Size(1280, 736));
+
 
       List<YOLOv8Detection> results = yoloObjectDetector.runForDetectionsOnMat(inferenceLeftImage, CONFIDENCE_THRESHOLD, NMS_THRESHOLD);
 
