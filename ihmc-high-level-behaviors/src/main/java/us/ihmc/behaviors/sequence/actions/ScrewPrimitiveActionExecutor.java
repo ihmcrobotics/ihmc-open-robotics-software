@@ -211,7 +211,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          double durationForTranslation = totalLinearDistanceOfHand / getDefinition().getMaxLinearVelocity();
          double movementDuration = Math.max(durationForRotation, durationForTranslation);
          double segmentDuration = movementDuration / (numberOfPoints - 1);
-         movementDuration += 2.0 * segmentDuration
+         movementDuration += 2.0 * segmentDuration;
 
          // the way the screw frame is defined, x is always the axis of rotation and translation. This means that the tangential velocity is normal to the x axis and the vector yz
          double tangentialVelocity = radialDistance / movementDuration;
