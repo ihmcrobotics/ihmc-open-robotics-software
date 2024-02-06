@@ -90,15 +90,20 @@ public class BehaviorTreeTopologyOperationQueue
       topologyOperationQueue.add(() ->
       {
          int indexOfNodeToMove = previousParent.getChildren().indexOf(nodeToMove);
-         int indexOfRelativeNode = nextParent.getChildren().indexOf(relativeNode);
+         int insertionIndex = nextParent.getChildren().size();
 
-         int insertionIndex = indexOfRelativeNode;
+         if (insertionType != BehaviorTreeNodeInsertionType.INSERT_AS_CHILD)
+         {
+            int indexOfRelativeNode = nextParent.getChildren().indexOf(relativeNode);
 
-         if (insertionType == BehaviorTreeNodeInsertionType.INSERT_AFTER)
-            ++insertionIndex;
+            insertionIndex = indexOfRelativeNode;
 
-         if (previousParent == nextParent && indexOfRelativeNode > indexOfNodeToMove) // Avoid out of bounds after node's been removed
-            --insertionIndex;
+            if (insertionType == BehaviorTreeNodeInsertionType.INSERT_AFTER)
+               ++insertionIndex;
+
+            if (previousParent == nextParent && indexOfRelativeNode > indexOfNodeToMove) // Avoid out of bounds after node's been removed
+               --insertionIndex;
+         }
 
          BehaviorTreeTopologyOperations.moveAndFreeze(nodeToMove, previousParent, nextParent, insertionIndex);
       });

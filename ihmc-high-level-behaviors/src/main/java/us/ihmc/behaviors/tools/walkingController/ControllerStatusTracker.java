@@ -5,7 +5,6 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.log.LogTools;
 import us.ihmc.log.LogToolsWriteOnly;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
@@ -89,7 +88,7 @@ public class ControllerStatusTracker
       HighLevelControllerName endState = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
       if (latestKnownState != initialState)
       {
-         LogTools.warn("We didn't know the state of the controller: ours: {} != controller said: {}", latestKnownState, initialState);
+         statusLogger.warn("We didn't know the state of the controller: ours: {} != controller said: {}", latestKnownState, initialState);
       }
       if (initialState == HighLevelControllerName.WALKING && endState != HighLevelControllerName.WALKING)
       {
@@ -137,6 +136,8 @@ public class ControllerStatusTracker
       if (walkingStatus == WalkingStatus.STARTED || walkingStatus == WalkingStatus.RESUMED)
       {
          isWalking = true;
+
+         statusLogger.info("Walking {}", walkingStatus == WalkingStatus.STARTED ? "started." : "resumed.");
       }
       else if (walkingStatus == WalkingStatus.ABORT_REQUESTED)
       {
@@ -146,15 +147,15 @@ public class ControllerStatusTracker
          }
 
          footstepTracker.reset();
-         LogTools.info("Walking Aborted.");
+         statusLogger.info("Walking aborted.");
       }
       else if (walkingStatus == WalkingStatus.PAUSED)
       {
-         LogTools.info("Walking Paused.");
+         statusLogger.info("Walking paused.");
       }
       else
       {
-         // Walking completed
+         statusLogger.info("Walking completed.");
          footstepTracker.reset();
          finishedWalkingNotification.set();
       }

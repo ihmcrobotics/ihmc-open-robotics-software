@@ -169,6 +169,11 @@ public class PlaneContactWrenchProcessor implements SCS2YoGraphicHolder
       return desiredExternalWrenchHolder;
    }
 
+   public double getDesiredGroundReactionForceMagnitude(ContactablePlaneBody contactablePlaneBody)
+   {
+      return groundReactionForceMagnitudes.get(contactablePlaneBody).getValue();
+   }
+
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
