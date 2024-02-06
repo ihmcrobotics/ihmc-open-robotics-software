@@ -53,8 +53,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final List<? extends JointBasics> regressorModelJoints;
    private final JointTorqueRegressorCalculator regressorCalculator;
 
-   private final int nDoFs;
-
    private final SideDependentList<? extends FootSwitchInterface> footSwitches;
    private final SideDependentList<DMatrixRMaj> contactWrenches;
 
@@ -69,6 +67,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoDouble[] rootJointVelocities;
    private final FilteredVelocityYoVariable[] rootJointAccelerations;
    private final DMatrixRMaj rootJointAcceleration;
+
+   private final YoDouble[] jointVelocities;
+   private final FilteredVelocityYoVariable[] jointAccelerations;
 
    private final List<RigidBodyInertialParameters> inertialParameters = new ArrayList<>();
    private final List<YoMatrix> inertialParametersPiBasisWatchers = new ArrayList<>();
@@ -124,7 +125,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       regressorCalculator = new JointTorqueRegressorCalculator(regressorRobotModel.getElevator());
       regressorCalculator.setGravitationalAcceleration(-toolbox.getGravityZ());
 
-      nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(estimateRobotModel.getRootJoint().subtreeArray());
+      int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(estimateRobotModel.getRootJoint().subtreeArray());
+      int nOneDoFJoints = estimateRobotModel.getOneDoFJoints().length;
 
       basisSets = parameters.getParametersToEstimate();
 
@@ -146,28 +148,40 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       wholeSystemTorques = new DMatrixRMaj(nDoFs, 1);
 
+      double dt = toolbox.getControlDT();
+
       rootJointVelocity = new DMatrixRMaj(WRENCH_DIMENSION, 1);
       rootJointVelocities = new YoDouble[WRENCH_DIMENSION];
       rootJointAccelerations = new FilteredVelocityYoVariable[WRENCH_DIMENSION];
       rootJointAcceleration = new DMatrixRMaj(WRENCH_DIMENSION, 1);
+      double accelerationCalculationAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForAccelerationCalculation(), dt);
       for (int i = 0; i < WRENCH_DIMENSION; i++)
       {
          rootJointVelocities[i] = new YoDouble("rootJointVelocity_" + i, registry);
-         rootJointAccelerations[i] = new FilteredVelocityYoVariable("rootJointAcceleration_" + i, "", 0.01, rootJointVelocities[i],
-                                                                    toolbox.getControlDT(), registry);
+         rootJointAccelerations[i] = new FilteredVelocityYoVariable("rootJointAcceleration_" + i, "",
+                                                                    accelerationCalculationAlpha, rootJointVelocities[i], dt, registry);
+      }
+
+      jointVelocities = new YoDouble[nOneDoFJoints];
+      jointAccelerations = new FilteredVelocityYoVariable[nOneDoFJoints];
+      for (int i = 0; i < nOneDoFJoints; i++)
+      {
+         jointVelocities[i] = new YoDouble("jointVelocity_" + i, registry);
+         jointAccelerations[i] = new FilteredVelocityYoVariable("jointAcceleration_" + i, "",
+                                                                accelerationCalculationAlpha, jointVelocities[i], dt, registry);
       }
 
       int[] partitionSizes = RegressorTools.sizePartitions(basisSets);
       regressorPartitions = RegressorTools.sizePartitionMatrices(regressorCalculator.getJointTorqueRegressorMatrix(), basisSets);
       parameterPartitions = RegressorTools.sizePartitionVectors(basisSets);
+      double postProcessingAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt);
+
       inertialKalmanFilter = new InertialKalmanFilter(estimateRobotModel,
                                                       basisSets,
                                                       parameters.getURDFParameters(basisSets),
                                                       CommonOps_DDRM.identity(partitionSizes[0]),
                                                       CommonOps_DDRM.identity(partitionSizes[0]),
-                                                      CommonOps_DDRM.identity(nDoFs),
-                                                      AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(),
-                                                                                                                      toolbox.getControlDT()),
+                                                      CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
                                                       registry);
       inertialKalmanFilterEstimate = new YoMatrix("inertialParameterEstimate",
                                                   partitionSizes[0],
@@ -176,17 +190,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                   null,
                                                   registry);
 
-      filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate",
-                                                   AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(),
-                                                                                                                   toolbox.getControlDT()),
+      double estimateFilteringAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(), dt);
+      filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate", estimateFilteringAlpha,
                                                    partitionSizes[0],
                                                    1,
                                                    getRowNames(basisSets, estimateModelBodies),
                                                    null,
                                                    registry);
-      doubleFilteredEstimate = new AlphaFilteredYoMatrix("doubleFilteredInertialParameterEstimate",
-                                                         AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(),
-                                                                                                                         toolbox.getControlDT()),
+      doubleFilteredEstimate = new AlphaFilteredYoMatrix("doubleFilteredInertialParameterEstimate", estimateFilteringAlpha,
                                                          partitionSizes[0],
                                                          1,
                                                          getRowNames(basisSets, estimateModelBodies),
@@ -320,6 +331,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       calculateRootJointAccelerations();
       regressorRobotModel.getRootJoint().setJointAcceleration(0, rootJointAcceleration);
 
+      // Update joint accelerations by processing joint velocities
+      calculateJointAccelerations();
+      for (int i = 0; i < jointAccelerations.length; i++)
+         regressorRobotModel.getOneDoFJoints()[i].setQdd(jointAccelerations[i].getValue());
+
       regressorRobotModel.updateFrames();
    }
 
@@ -378,6 +394,15 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          rootJointVelocities[i].set(rootJointVelocity.get(i, 0));
          rootJointAccelerations[i].update(rootJointVelocities[i].getValue());
          rootJointAcceleration.set(i, 0, rootJointAccelerations[i].getValue());
+      }
+   }
+
+   private void calculateJointAccelerations()
+   {
+      for (int i = 0; i < jointVelocities.length; i++)
+      {
+         jointVelocities[i].set(actualRobotModel.getOneDoFJoints()[i].getQd());
+         jointAccelerations[i].update(jointVelocities[i].getValue());
       }
    }
 
