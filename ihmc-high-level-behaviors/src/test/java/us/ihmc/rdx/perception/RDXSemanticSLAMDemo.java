@@ -14,10 +14,19 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import ihmc_common_msgs.msg.dds.PoseListMessage;
 import imgui.ImGui;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
+import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.CommunicationMode;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -25,16 +34,23 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.semantic.SemanticSLAMModule;
 import us.ihmc.perception.tools.PerceptionFileTools;
+import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Set;
@@ -58,7 +74,7 @@ public class RDXSemanticSLAMDemo
    //private static final String DATASET_PATH = System.getProperty("user.home") + "/Downloads/00/";
    //private static final String GROUND_TRUTH_PATH = System.getProperty("user.home") + "/Downloads/dataset/poses/";
 
-   private boolean active = false;
+   private boolean active = true;
    private int updateCount = 0;
    private int fileIndex = 0;
    private final Scanner gtPoseReader;
@@ -80,14 +96,21 @@ public class RDXSemanticSLAMDemo
    private Mat currentImageRight;
    private Mat currentImageLeft;
 
+   private PoseListMessage poseListMessage = new PoseListMessage();
+
    private boolean initialized = false;
 
    private final Notification posesToRenderNotification = new Notification();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ArrayList<RigidBodyTransform> gtSensorTransforms = new ArrayList<>();
 
+   private ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "semantic_slam_demo");
+   private IHMCROS2Publisher<ImageMessage> posePublisher;
+
    public RDXSemanticSLAMDemo() throws FileNotFoundException
    {
+      posePublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT), ROS2QosProfile.DEFAULT());
+
       gtPoseReader = new Scanner(new File(GROUND_TRUTH_PATH + "00.txt"));
       getGroundTruthPose();
 
@@ -130,7 +153,7 @@ public class RDXSemanticSLAMDemo
 
    public void update()
    {
-      if(active)
+      if (active)
       {
          fileName = String.format("%1$6s", fileIndex).replace(' ', '0') + ".png";
          leftImageName = DATASET_PATH + LEFT_CAMERA_NAME + fileName;
@@ -138,6 +161,29 @@ public class RDXSemanticSLAMDemo
 
          currentImageLeft = PerceptionFileTools.loadImage(leftImageName);
          currentImageRight = PerceptionFileTools.loadImage(rightImageName);
+
+         Instant now = Instant.now();
+
+         //posePublisher.publish(new ImageMessage());
+
+         //ImageMessage imageMessage = new ImageMessage();
+         //BytePointer compressedColorPointer = new BytePointer();
+         //FramePose3D pose = new FramePose3D();
+         //
+         //PerceptionMessageTools.publishCompressedDepthImage(compressedColorPointer,
+         //                                                      PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT),
+         //                                                      imageMessage,
+         //                                                      ros2Helper,
+         //                                                      pose,
+         //                                                      now,
+         //                                                      0,
+         //                                                      currentImageLeft.rows(),
+         //                                                      currentImageLeft.cols(),
+         //                                                      1.0f);
+
+         //LogTools.info("Image Message: {}", imageMessage.getAcquisitionTime());
+
+         //LogTools.warn("Pose: {}", now);
 
          initialized = semanticSLAM.update(currentImageLeft, currentImageRight);
 
@@ -188,7 +234,7 @@ public class RDXSemanticSLAMDemo
       {
          active = true;
 
-         if(scheduledFuture == null)
+         if (scheduledFuture == null)
          {
             scheduledFuture = executor.scheduleAtFixedRate(this::update, 0, 20L, TimeUnit.MILLISECONDS);
          }
@@ -202,7 +248,7 @@ public class RDXSemanticSLAMDemo
 
    public void getGroundTruthPose()
    {
-      while(gtPoseReader.hasNextLine())
+      while (gtPoseReader.hasNextLine())
       {
          String[] gtPoseSplit = gtPoseReader.nextLine().split(" ");
 
@@ -273,7 +319,7 @@ public class RDXSemanticSLAMDemo
          model.getRenderables(renderables, pool);
       }
 
-      for(ModelInstance pose : groundTruthPoseModels)
+      for (ModelInstance pose : groundTruthPoseModels)
       {
          pose.getRenderables(renderables, pool);
       }

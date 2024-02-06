@@ -4,25 +4,18 @@ import org.apache.commons.lang.ArrayUtils;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
-import us.ihmc.perception.RawImage;
-import us.ihmc.perception.YOLOv8.YOLOv8Detection;
-import us.ihmc.perception.YOLOv8.YOLOv8DetectionResults;
-import us.ihmc.perception.YOLOv8.YOLOv8ObjectDetector;
-import us.ihmc.perception.mapping.SemanticDetection;
-import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
-import us.ihmc.perception.tools.PerceptionDebugTools;
-import us.ihmc.perception.visualOdometry.VisualOdometry;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.elements.CameraModel;
+import us.ihmc.perception.YOLOv8.YOLOv8Detection;
+import us.ihmc.perception.YOLOv8.YOLOv8ObjectDetector;
 import us.ihmc.perception.elements.Keyframe;
 import us.ihmc.perception.elements.Landmark;
+import us.ihmc.perception.mapping.SemanticDetection;
 import us.ihmc.perception.slamWrapper.SlamWrapper;
-import us.ihmc.perception.visualOdometry.VisualOdometryNativeLibrary;
+import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.util.*;
@@ -54,7 +47,6 @@ public class SemanticSLAMModule
 
    public SemanticSLAMModule()
    {
-      VisualOdometryNativeLibrary.load();
       SlamWrapperNativeLibrary.load();
 
       factorGraphExternal = new SlamWrapper.FactorGraphExternal();
@@ -76,7 +68,6 @@ public class SemanticSLAMModule
       Mat inferenceLeftImage = leftImage.clone();
 
       opencv_imgproc.resize(leftImage, leftImage, new Size(1280, 736));
-
 
       List<YOLOv8Detection> results = yoloObjectDetector.runForDetectionsOnMat(inferenceLeftImage, CONFIDENCE_THRESHOLD, NMS_THRESHOLD);
 
