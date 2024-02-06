@@ -84,7 +84,7 @@ public class RDXFootstepPlanActionFootstep
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (state.getSoleFrame().isChildOfWorld() && footstepPlan.getSelected().get())
+      if (state.getSoleFrame().isChildOfWorld() && footstepPlan.getShowAdjustmentInteractables().get())
       {
          interactableFootstep.calculate3DViewPick(input);
       }
@@ -92,7 +92,7 @@ public class RDXFootstepPlanActionFootstep
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (state.getSoleFrame().isChildOfWorld() && footstepPlan.getSelected().get())
+      if (state.getSoleFrame().isChildOfWorld() && footstepPlan.getShowAdjustmentInteractables().get())
       {
          interactableFootstep.process3DViewInput(input, false);
       }
@@ -102,7 +102,7 @@ public class RDXFootstepPlanActionFootstep
    {
       if (state.getSoleFrame().isChildOfWorld())
       {
-         if (footstepPlan.getSelected().get())
+         if (footstepPlan.getShowAdjustmentInteractables().get())
             interactableFootstep.getVirtualRenderables(renderables, pool);
          else
             flatFootstepGraphic.getRenderables(renderables, pool);
