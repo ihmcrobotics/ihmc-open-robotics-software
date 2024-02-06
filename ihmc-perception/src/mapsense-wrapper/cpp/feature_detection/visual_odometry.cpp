@@ -53,7 +53,7 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage, Point
       Eigen::Matrix4d initialRelativePose = eigPose.cast<double>();
       initialRelativePose.transposeInPlace();
 
-      if (eigPose.block<3, 1>(0, 3).norm() > 1)
+      // if (eigPose.block<3, 1>(0, 3).norm() > 1)
       {
          std::vector<int> keypointIDs(_kpCurLeft.size(), -1);
 
@@ -169,7 +169,7 @@ cv::Mat VisualOdometry::Initialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRig
 Eigen::Matrix4f VisualOdometry::TrackCameraPose(const KeyPointVec& kp, cv::Mat& desc, const Keyframe& lastKF, const PointLandmarkMap& landmarks)
 {
 
-   printf("TrackCameraPose: (KPs: %ld, KF: %d, Desc:(%d, %d), Landmarks:%ld)\n", kp.size(), lastKF.id, 
+   printf("TrackCameraPose (Begin): (KPs: %ld, KF: %d, Desc:(%d, %d), Landmarks:%ld)\n", kp.size(), lastKF.id, 
             desc.rows, desc.cols, landmarks.size()); fflush(stdout);
 
    _leftCamera.SetTransform(lastKF.pose.inverse().cast<float>());
@@ -217,7 +217,7 @@ Eigen::Matrix4f VisualOdometry::TrackCameraPose(const KeyPointVec& kp, cv::Mat& 
    Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPose(reinterpret_cast<float *>(cameraWorldPose.data));
    eigenPose.transposeInPlace();
 
-   printf("------------------------------- TrackCameraPose: End --------------------------------\n");fflush(stdout);
+   printf("------------------------------- TrackCameraPose: (End) --------------------------------\n");fflush(stdout);
 
    return eigenPose;
 }
