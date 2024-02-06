@@ -202,7 +202,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
       // Copy from the position command since the orientation does not have a control frame.
       feedbackControlCommand.setControlFrameFixedInEndEffector(positionCommand.getBodyFixedPointToControl(),
-                                                               orientationCommand.getBodyFixedOrientationToControl());
+                                                               orientationCommand.getControlFrameOrientation());
 
       feedbackControlCommand.setControlBaseFrame(positionCommand.getControlBaseFrame());
    }
@@ -404,5 +404,11 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(positionHelper.getSCS2YoGraphics());
       return group;
+   }
+
+   @Override
+   public RigidBodyOrientationControlHelper getOrientationControlHelper()
+   {
+      return orientationHelper;
    }
 }

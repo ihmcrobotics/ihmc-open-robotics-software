@@ -15,7 +15,7 @@ public class ScrewPrimitiveActionStateMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2b4d9ea9f83ae7e3f38ed33ce943311f7d68ef7798aea51ee2fb73d66ce64a7e";
+   		return "5a2a5d47079afdc07173d70d83dc0036e78b1f1c0f1486abb36b1ed00d66e665";
    }
    
    @Override
@@ -56,7 +56,7 @@ public class ScrewPrimitiveActionStateMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -97,7 +97,7 @@ public class ScrewPrimitiveActionStateMessagePubSubType implements us.ihmc.pubsu
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getState(), cdr);
       behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
-      if(data.getTrajectory().size() <= 200)
+      if(data.getTrajectory().size() <= 50)
       cdr.write_type_e(data.getTrajectory());else
           throw new RuntimeException("trajectory field exceeds the maximum length");
 

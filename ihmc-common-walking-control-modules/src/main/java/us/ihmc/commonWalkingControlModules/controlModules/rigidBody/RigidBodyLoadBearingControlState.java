@@ -3,38 +3,49 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandConversionTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
-import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.controllers.pidGains.GainCalculator;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -48,91 +59,103 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final long NO_CONTACT_ID = 0L;
-   private static final long IN_CONTACT_ID = 1L;
-   private static final int dofs = Twist.SIZE;
-   private static final FrameVector3D zeroInWorld = new FrameVector3D(worldFrame, 0.0, 0.0, 0.0);
+   private static final FrameVector3D zeroWorld = new FrameVector3D();
 
+   /* Controller Commands */
+   private final RigidBodyBasics bodyToControl;
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
+   private final PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
-   private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final PlaneContactStateCommand planeContactStateCommand = new PlaneContactStateCommand();
 
+   /* Control gains, weights and axis selection */
+   private final LoadBearingParameters loadBearingParameters;
+   private final Vector3DReadOnly linearWeight = new Vector3D(5.0, 5.0, 5.0);
+   private final SelectionMatrix3D positionFeedbackSelectionMatrix = new SelectionMatrix3D();
+   private final SelectionMatrix6D spatialAccelerationSelectionMatrix = new SelectionMatrix6D();
+
+   /* Hand load status */
+   private final GlitchFilteredYoBoolean bodyBarelyLoaded;
    private ControllerCoreOutputReadOnly controllerCoreOutput;
-   private final SelectionMatrix6D accelerationSelectionMatrix = new SelectionMatrix6D();
-   private final SelectionMatrix6D feedbackSelectionMatrix = new SelectionMatrix6D();
-   private final boolean[] isDirectionFeedbackControlled = new boolean[dofs];
+   private final Wrench controllerDesiredWrench = new Wrench();
+   private final FrameVector3D controllerDesiredForce = new FrameVector3D();
+   private final YoFrameVector3D yoControllerDesiredForce;
 
-   private final FramePose3D bodyFixedControlledPose = new FramePose3D();
-   private final SpatialAcceleration bodyAcceleration;
+   /* Active control modes */
+   private final YoBoolean jointspaceControlActive;
+   private final YoBoolean orientationControlActive;
 
-   // TODO: allow multiple contact points
-   private final FramePoint3D previousContactPoint = new FramePoint3D();
-   private final FrameVector3D previousContactNormal = new FrameVector3D();
-   private double previousCoefficientOfFriction;
-
-   private final YoFramePoint3D contactPoint;
-   private final YoFramePoint3D contactPointInWorld;
-
+   /* Reference frames */
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame elevatorFrame;
-   private final PoseReferenceFrame desiredContactFrame;
+   private final FramePoint3D contactPointInBody = new FramePoint3D();
+   private final FramePose3D desiredContactPoseWorld = new FramePose3D();
+   private final PoseReferenceFrame contactControlFrame;
 
-   private final ContactablePlaneBody contactableBody;
-   private final YoDouble coefficientOfFriction;
+   /* Yo-Contact frame components */
    private final YoFrameVector3D contactNormal;
-   private final ReferenceFrame contactFrame;
+   private final YoFramePoint3D currentContactPointInWorld;
+   private final YoFramePoint3D yoDesiredContactPosition;
+   private final YoFrameQuaternion yoDesiredContactOrientation;
+   private final YoFramePoint3D yoContactPointInBodyFrame;
 
-   private final RigidBodyTransform bodyToJointTransform = new RigidBodyTransform();
-   private final RigidBodyTransform contactToJointTransform = new RigidBodyTransform();
-
-   private final FramePoint3D desiredContactPosition = new FramePoint3D(worldFrame);
-   private final FrameQuaternion desiredContactOrientation = new FrameQuaternion(worldFrame);
-   private final FramePoint3D currentContactPosition = new FramePoint3D(worldFrame);
-   private final FrameQuaternion currentContactOrientation = new FrameQuaternion(worldFrame);
-
-   private final YoBoolean hybridModeActive;
+   /* Trajectory handlers */
    private final RigidBodyJointControlHelper jointControlHelper;
+   private final RigidBodyOrientationControlHelper orientationControlHelper;
+   private final SO3TrajectoryControllerCommand orientationTrajectoryCommand = new SO3TrajectoryControllerCommand();
 
-   private PID3DGainsReadOnly taskspaceOrientationGains;
-   private PID3DGainsReadOnly taskspacePositionGains;
+   private final YoDouble coefficientOfFriction;
+   private final SpatialAcceleration bodyAcceleration;
 
-   private Vector3DReadOnly taskspaceAngularWeight;
-   private Vector3DReadOnly taskspaceLinearWeight;
+   /* Error measurements */
+   private final YoFramePoint3D positionError;
+   private final YoFrameQuaternion orientationError;
 
    public RigidBodyLoadBearingControlState(RigidBodyBasics bodyToControl,
-                                           ContactablePlaneBody contactableBody,
                                            RigidBodyBasics elevator,
                                            YoDouble yoTime,
                                            RigidBodyJointControlHelper jointControlHelper,
+                                           RigidBodyOrientationControlHelper orientationControlHelper,
+                                           LoadBearingParameters loadBearingParameters,
                                            YoGraphicsListRegistry graphicsListRegistry,
                                            YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.LOADBEARING, bodyToControl.getName(), yoTime, parentRegistry);
+
+      this.bodyToControl = bodyToControl;
       this.bodyFrame = bodyToControl.getBodyFixedFrame();
       this.elevatorFrame = elevator.getBodyFixedFrame();
-      this.contactFrame = contactableBody.getSoleFrame();
-      this.contactableBody = contactableBody;
+      this.loadBearingParameters = loadBearingParameters;
 
-      bodyFrame.getTransformToDesiredFrame(bodyToJointTransform, bodyToControl.getParentJoint().getFrameAfterJoint());
-
-      bodyAcceleration = new SpatialAcceleration(contactFrame, elevatorFrame, contactFrame);
-      spatialAccelerationCommand.set(elevator, bodyToControl);
-      spatialFeedbackControlCommand.set(elevator, bodyToControl);
+      LogTools.info("Setting up load bearing state " + bodyToControl.getName());
 
       String bodyName = bodyToControl.getName();
+
+      contactControlFrame = new PoseReferenceFrame("contactControlFrame" + bodyName, ReferenceFrame.getWorldFrame());
+      bodyAcceleration = new SpatialAcceleration(contactControlFrame, elevatorFrame, contactControlFrame);
+      pointFeedbackControlCommand.set(elevator, bodyToControl);
+      spatialAccelerationCommand.set(elevator, bodyToControl);
+      yoContactPointInBodyFrame = new YoFramePoint3D("contactPointInBody" + bodyName, bodyFrame, registry);
+
       coefficientOfFriction = new YoDouble(bodyName + "CoefficientOfFriction", registry);
       contactNormal = new YoFrameVector3D(bodyName + "ContactNormal", worldFrame, parentRegistry);
-      contactPoint = new YoFramePoint3D(bodyName + "ContactPoint", contactFrame, parentRegistry);
-      contactPointInWorld = new YoFramePoint3D(bodyName + "ContactPointInWorld", worldFrame, parentRegistry);
-      desiredContactFrame = new PoseReferenceFrame(bodyName + "DesiredContactFrame", worldFrame);
+      currentContactPointInWorld = new YoFramePoint3D(bodyName + "currentContactPoint", worldFrame, registry);
+      yoDesiredContactPosition = new YoFramePoint3D(bodyName + "_DesiredContactPosition", worldFrame, registry);
+      yoDesiredContactOrientation = new YoFrameQuaternion(bodyName + "_DesiredContactOrientation", worldFrame, registry);
+
+      bodyBarelyLoaded = new GlitchFilteredYoBoolean(bodyName + "BarelyLoaded", registry, 60);
+      jointspaceControlActive = new YoBoolean(bodyName + "JointspaceControlActive", registry);
+      orientationControlActive = new YoBoolean(bodyName + "OrientationControlActive", registry);
+      yoControllerDesiredForce = new YoFrameVector3D(bodyName + "DesiredForce", ReferenceFrame.getWorldFrame(), parentRegistry);
+
+      positionError = new YoFramePoint3D(bodyName + "PositionError", contactControlFrame, registry);
+      orientationError = new YoFrameQuaternion(bodyName + "OrientationError", contactControlFrame, registry);
 
       planeContactStateCommand.setContactingRigidBody(bodyToControl);
 
       this.jointControlHelper = jointControlHelper;
-      String prefix = bodyName + "Loadbearing";
-      hybridModeActive = new YoBoolean(prefix + "HybridModeActive", registry);
+      this.orientationControlHelper = orientationControlHelper;
 
       setupViz(graphicsListRegistry, bodyName);
    }
@@ -144,217 +167,253 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
       String listName = getClass().getSimpleName();
 
-      YoGraphicVector surfaceNormal = new YoGraphicVector(bodyName + "ContactNormal", contactPointInWorld, contactNormal, 0.1, YoAppearance.Black());
+      YoGraphicVector surfaceNormal = new YoGraphicVector(bodyName + "ContactNormal", currentContactPointInWorld, contactNormal, 0.1, YoAppearance.Black());
       graphicsListRegistry.registerYoGraphic(listName, surfaceNormal);
       graphics.add(surfaceNormal);
 
-      YoGraphicPosition contactPoint = new YoGraphicPosition(bodyName + "ContactPoint", contactPointInWorld, 0.01, YoAppearance.Black());
+      YoGraphicPosition contactPoint = new YoGraphicPosition(bodyName + "ContactPoint", currentContactPointInWorld, 0.01, YoAppearance.Black());
       graphicsListRegistry.registerYoGraphic(listName, contactPoint);
       graphics.add(contactPoint);
 
+      YoGraphicVector controllerDesiredForce = new YoGraphicVector(bodyName + "DesiredForceGraphic",
+                                                                   currentContactPointInWorld,
+                                                                   yoControllerDesiredForce,
+                                                                   0.015,
+                                                                   YoAppearance.Red());
+      graphicsListRegistry.registerYoGraphic(listName, controllerDesiredForce);
+      graphics.add(controllerDesiredForce);
+
+      YoGraphicCoordinateSystem contactControlFrame = new YoGraphicCoordinateSystem(bodyName + "LoadBearingControlFrame", yoDesiredContactPosition,
+                                                                                    yoDesiredContactOrientation,
+                                                                                    0.17,
+                                                                                    YoAppearance.LightGray());
+      graphicsListRegistry.registerYoGraphic(listName, contactControlFrame);
+      graphics.add(contactControlFrame);
+
       hideGraphics();
-   }
-
-   public void setWeights(Vector3DReadOnly taskspaceAngularWeight, Vector3DReadOnly taskspaceLinearWeight)
-   {
-      this.taskspaceAngularWeight = taskspaceAngularWeight;
-      this.taskspaceLinearWeight = taskspaceLinearWeight;
-   }
-
-   public void setGains(PID3DGainsReadOnly taskspaceOrientationGains, PID3DGainsReadOnly taskspacePositionGains)
-   {
-      this.taskspaceOrientationGains = taskspaceOrientationGains;
-      this.taskspacePositionGains = taskspacePositionGains;
-   }
-
-   public void setCoefficientOfFriction(double coefficientOfFriction)
-   {
-      this.coefficientOfFriction.set(coefficientOfFriction);
-   }
-
-   public void setContactNormalInWorldFrame(Vector3D contactNormalInWorldFrame)
-   {
-      contactNormal.set(contactNormalInWorldFrame);
-   }
-
-   public void setAndUpdateContactFrame(RigidBodyTransform bodyToContactFrame)
-   {
-      contactToJointTransform.set(bodyToJointTransform);
-      contactToJointTransform.multiply(bodyToContactFrame);
-      contactableBody.setSoleFrameTransformFromParentJoint(contactToJointTransform);
-      contactPoint.setToZero();
    }
 
    @Override
    public void doAction(double timeInState)
    {
-      updateInternal();
+      currentContactPointInWorld.setMatchingFrame(contactPointInBody);
+
+      if (controllerCoreOutput.getDesiredExternalWrench(controllerDesiredWrench, bodyToControl))
+      { // Determine load status from controller core desired, assume it tracks
+         double desiredForceLoadMagnitudeSquared = controllerDesiredWrench.getLinearPart().normSquared();
+         bodyBarelyLoaded.update(desiredForceLoadMagnitudeSquared < MathTools.square(loadBearingParameters.getNormalForceThresholdForLoaded()));
+
+         controllerDesiredForce.setIncludingFrame(controllerDesiredWrench.getReferenceFrame(), controllerDesiredWrench.getLinearPart());
+         controllerDesiredForce.changeFrame(ReferenceFrame.getWorldFrame());
+         yoControllerDesiredForce.set(controllerDesiredForce);
+      }
+      else
+      { // If no desired wrench, set to barely loaded
+         bodyBarelyLoaded.set(true);
+      }
 
       // assemble contact command
       planeContactStateCommand.clearContactPoints();
       planeContactStateCommand.setCoefficientOfFriction(coefficientOfFriction.getDoubleValue());
       planeContactStateCommand.setContactNormal(contactNormal);
-      planeContactStateCommand.addPointInContact(contactPoint);
-      planeContactStateCommand.setHasContactStateChanged(hasContactStateNotChanged());
+      planeContactStateCommand.addPointInContact(getYoContactPointInBodyFrame());
+      planeContactStateCommand.setHasContactStateChanged(false);
 
       // assemble zero acceleration command
-      bodyAcceleration.setToZero(contactFrame, elevatorFrame, contactFrame);
+      bodyAcceleration.setToZero(contactControlFrame, elevatorFrame, contactControlFrame);
       bodyAcceleration.setBodyFrame(bodyFrame);
-      spatialAccelerationCommand.setSpatialAcceleration(contactFrame, bodyAcceleration);
-      spatialAccelerationCommand.setSelectionMatrix(accelerationSelectionMatrix);
+      spatialAccelerationCommand.setSpatialAcceleration(contactControlFrame, bodyAcceleration);
+      spatialAccelerationSelectionMatrix.getAngularPart().clearSelection();
+      spatialAccelerationSelectionMatrix.getLinearPart().selectAxis(Axis3D.X.ordinal(), !bodyBarelyLoaded.getValue());
+      spatialAccelerationSelectionMatrix.getLinearPart().selectAxis(Axis3D.Y.ordinal(), !bodyBarelyLoaded.getValue());
+      spatialAccelerationSelectionMatrix.getLinearPart().selectAxis(Axis3D.Z.ordinal(), true);
+      spatialAccelerationCommand.setSelectionMatrix(spatialAccelerationSelectionMatrix);
+      spatialAccelerationCommand.getWeightMatrix().getLinearPart().setWeights(linearWeight);
 
-      // assemble feedback control command
-      bodyFixedControlledPose.setToZero(contactFrame);
-      bodyFixedControlledPose.changeFrame(bodyFrame);
-      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
-      spatialFeedbackControlCommand.setInverseDynamics(desiredContactOrientation, desiredContactPosition, zeroInWorld, zeroInWorld, zeroInWorld, zeroInWorld);
-      spatialFeedbackControlCommand.setSelectionMatrix(feedbackSelectionMatrix);
+      positionError.setMatchingFrame(yoDesiredContactPosition);
+      orientationError.setMatchingFrame(yoDesiredContactOrientation);
 
-      spatialFeedbackControlCommand.setOrientationGains(taskspaceOrientationGains);
-      spatialFeedbackControlCommand.setPositionGains(taskspacePositionGains);
-      spatialFeedbackControlCommand.setWeightsForSolver(taskspaceAngularWeight, taskspaceLinearWeight);
-
-      if (hybridModeActive.getBooleanValue())
+      // assemble spatial feedback command
+      if (bodyBarelyLoaded.getValue())
       {
-         double timeInTrajectory = getTimeInTrajectory();
-         jointControlHelper.doAction(timeInTrajectory);
+         pointFeedbackControlCommand.setBodyFixedPointToControl(contactPointInBody);
+         pointFeedbackControlCommand.setGainsFrame(contactControlFrame);
+         pointFeedbackControlCommand.setInverseDynamics(desiredContactPoseWorld.getPosition(), zeroWorld, zeroWorld);
+         pointFeedbackControlCommand.setWeightsForSolver(linearWeight);
+
+         double kp = loadBearingParameters.getHoldPositionStiffness();
+         double zeta = loadBearingParameters.getHoldPositionDampingRatio();
+         double kd = GainCalculator.computeDerivativeGain(kp, zeta);
+         pointFeedbackControlCommand.getGains().setProportialAndDerivativeGains(kp, kd);
+
+         positionFeedbackSelectionMatrix.selectAxis(Axis3D.X.ordinal(), true);
+         positionFeedbackSelectionMatrix.selectAxis(Axis3D.Y.ordinal(), true);
+         positionFeedbackSelectionMatrix.selectAxis(Axis3D.Z.ordinal(), false);
+         pointFeedbackControlCommand.setSelectionMatrix(positionFeedbackSelectionMatrix);
       }
 
-      previousContactNormal.setIncludingFrame(contactNormal);
-      previousContactPoint.setIncludingFrame(contactPoint);
-      previousCoefficientOfFriction = coefficientOfFriction.getDoubleValue();
+      // update jointspace and orientation trajectories if active
+      double timeInTrajectory = getTimeInTrajectory();
+      if (jointspaceControlActive.getValue())
+      {
+         jointControlHelper.doAction(timeInTrajectory);
+      }
+      if (orientationControlActive.getValue())
+      {
+         orientationControlHelper.doAction(timeInTrajectory);
+      }
 
       updateGraphics();
    }
 
-   private void updateInternal()
+   public void load(double coefficientOfFriction,
+                    Point3D contactPointInBodyFrame,
+                    Vector3D contactNormalInWorldFrame,
+                    boolean jointspaceControlActive,
+                    boolean orientationControlActive)
    {
-      // update current contact information
-      currentContactPosition.setToZero(contactFrame);
-      currentContactOrientation.setToZero(contactFrame);
-      currentContactPosition.changeFrame(desiredContactPosition.getReferenceFrame());
-      currentContactOrientation.changeFrame(desiredContactOrientation.getReferenceFrame());
+      this.coefficientOfFriction.set(coefficientOfFriction);
 
-      // TODO: figure out which directions to control based on support area
-      // This requires the selection matrix in the command to be in contact frame.
-      // For now we just hold the orientation and not the position of the contact point in world frame
-      for (int i = 0; i < dofs; i++)
-         isDirectionFeedbackControlled[i] = false;
-      isDirectionFeedbackControlled[0] = true; // control x orientation
-      isDirectionFeedbackControlled[1] = true; // control y orientation
-      isDirectionFeedbackControlled[2] = true; // control z orientation
-      desiredContactPosition.setX(currentContactPosition.getX()); // do not control x position
-      desiredContactPosition.setY(currentContactPosition.getY()); // do not control y position
-      desiredContactPosition.setZ(currentContactPosition.getZ()); // do not control z position
+      // Initialize contact point and contact normal
+      this.contactPointInBody.setIncludingFrame(bodyFrame, contactPointInBodyFrame);
+      this.contactNormal.set(contactNormalInWorldFrame);
 
-      // update things for visualization
-      desiredContactPosition.checkReferenceFrameMatch(desiredContactFrame.getParent());
-      desiredContactOrientation.checkReferenceFrameMatch(desiredContactFrame.getParent());
-      desiredContactFrame.setPoseAndUpdate(desiredContactPosition, desiredContactOrientation);
-      contactPointInWorld.setMatchingFrame(contactPoint);
+      // Compute desired contact pose, which is static in world, has an origin at the contact point and has Z pointing parallel to the contact normal
+      desiredContactPoseWorld.setReferenceFrame(ReferenceFrame.getWorldFrame());
+      desiredContactPoseWorld.getPosition().setMatchingFrame(this.contactPointInBody);
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, contactNormalInWorldFrame, desiredContactPoseWorld.getOrientation());
+      contactControlFrame.setPoseAndUpdate(desiredContactPoseWorld);
 
-      // assemble the selection matrices for the controller core commands
-      accelerationSelectionMatrix.resetSelection();
-      feedbackSelectionMatrix.resetSelection();
+      // Update yovariables
+      yoDesiredContactPosition.setMatchingFrame(desiredContactPoseWorld.getPosition());
+      yoDesiredContactOrientation.setMatchingFrame(desiredContactPoseWorld.getOrientation());
+      this.yoContactPointInBodyFrame.set(contactPointInBodyFrame);
 
-      for (int i = dofs - 1; i >= 0; i--)
-      {
-         if (isDirectionFeedbackControlled[i])
-            accelerationSelectionMatrix.selectAxis(i, false);
-         else
-            feedbackSelectionMatrix.selectAxis(i, false);
-      }
+      // Update active control modes
+      this.jointspaceControlActive.set(jointspaceControlActive);
+      this.orientationControlActive.set(orientationControlActive);
    }
 
-   public boolean handleLoadbearingCommand(LoadBearingCommand command)
-   {
-      setCoefficientOfFriction(command.getCoefficientOfFriction());
-      setContactNormalInWorldFrame(command.getContactNormalInWorldFrame());
-      setAndUpdateContactFrame(command.getBodyFrameToContactFrame());
-      return true;
-   }
-
-   public boolean handleJointTrajectoryCommand(JointspaceTrajectoryCommand command, double[] initialJointPositions)
+   public boolean handleJointTrajectoryCommand(JointspaceTrajectoryCommand jointspaceCommand, double[] initialJointPositions)
    {
       if (jointControlHelper == null)
       {
-         LogTools.warn(warningPrefix + "Can not use hybrid mode. Was not created with a jointspace helper.");
+         LogTools.warn(warningPrefix + "Cannot use jointspace mode. Was not created with a jointspace helper.");
          return false;
       }
 
-      if (!handleCommandInternal(command))
+      if (!handleCommandInternal(jointspaceCommand))
       {
          return false;
       }
 
-      if (!jointControlHelper.handleTrajectoryCommand(command, initialJointPositions))
+      if (!jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
       {
          return false;
       }
 
-      hybridModeActive.set(true);
+      return true;
+   }
+
+   public boolean handleOrientationTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceTrajectory)
+   {
+      if (orientationControlHelper == null)
+      {
+         LogTools.warn(warningPrefix + "Cannot use orientation mode. Was not created with an orientation helper.");
+         return false;
+      }
+
+      if (!handleCommandInternal(taskspaceTrajectory))
+      {
+         return false;
+      }
+
+      CommandConversionTools.convertToSO3(taskspaceTrajectory, orientationTrajectoryCommand);
+      if (!orientationControlHelper.handleTrajectoryCommand(orientationTrajectoryCommand))
+      {
+         return false;
+      }
+
       return true;
    }
 
    @Override
    public void onEntry()
    {
-      desiredContactPosition.setToZero(contactFrame);
-      desiredContactOrientation.setToZero(contactFrame);
+      // Set to barely loaded during first tick
+      bodyBarelyLoaded.set(true);
 
-      desiredContactPosition.changeFrame(worldFrame);
-      desiredContactOrientation.changeFrame(worldFrame);
+      // Reset trajectory time
+      trajectoryDone.set(false);
+      setTrajectoryStartTimeToCurrentTime();
 
-      previousContactPoint.setToZero(worldFrame);
-      previousContactNormal.setToZero(worldFrame);
-      previousCoefficientOfFriction = 0.0;
-   }
+      // Reset joint trajectory
+      if (jointspaceControlActive.getValue())
+      {
+         jointControlHelper.overrideTrajectory();
+         jointControlHelper.startTrajectoryExecution();
+         jointControlHelper.queueInitialPointsAtCurrentDesired();
+      }
 
-   private boolean hasContactStateNotChanged()
-   {
-      boolean hasContactStateNotChanged = previousContactNormal.equals(contactNormal);
-      hasContactStateNotChanged &= previousContactPoint.equals(contactPoint);
-      hasContactStateNotChanged &= previousCoefficientOfFriction == coefficientOfFriction.getDoubleValue();
-
-      return hasContactStateNotChanged;
+      // Reset orientation trajectory
+      if (orientationControlActive.getValue())
+      {
+         orientationControlHelper.holdCurrentDesired();
+      }
    }
 
    @Override
    public void onExit(double timeInState)
    {
       hideGraphics();
-      hybridModeActive.set(false);
+
+      yoDesiredContactPosition.setToNaN();
+      yoDesiredContactOrientation.setToNaN();
+      currentContactPointInWorld.setToNaN();
+
+      // from RigidBodyJointspaceControlState.holdCurrent
+      jointControlHelper.overrideTrajectory();
+      jointControlHelper.setWeightsToDefaults();
+      jointControlHelper.queueInitialPointsAtCurrent();
    }
 
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       inverseDynamicsCommandList.clear();
-      inverseDynamicsCommandList.addCommand(spatialAccelerationCommand);
       inverseDynamicsCommandList.addCommand(planeContactStateCommand);
+      inverseDynamicsCommandList.addCommand(spatialAccelerationCommand);
       return inverseDynamicsCommandList;
    }
 
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      if (hybridModeActive.getBooleanValue())
+      feedbackControlCommandList.clear();
+
+      if (bodyBarelyLoaded.getValue())
       {
-         feedbackControlCommandList.clear();
-         feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
+         feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
+      }
+      if (jointspaceControlActive.getValue())
+      {
          feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
-         return feedbackControlCommandList;
+      }
+      if (orientationControlActive.getValue())
+      {
+         feedbackControlCommandList.addCommand(orientationControlHelper.getFeedbackControlCommand());
       }
 
-      return spatialFeedbackControlCommand;
+      return feedbackControlCommandList;
    }
 
    @Override
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
    {
       feedbackControlCommandList.clear();
-      feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
+      feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
       feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
+      feedbackControlCommandList.addCommand(orientationControlHelper.getFeedbackControlCommand());
       return feedbackControlCommandList;
    }
 
@@ -381,20 +440,70 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    }
 
    @Override
+   public boolean isDone(double time)
+   {
+      double positionErrorSquared = EuclidCoreTools.normSquared(positionError.getX(), positionError.getY(), positionError.getZ());
+      double linearTrackingSlipThresholdSquared = EuclidCoreTools.square(loadBearingParameters.getLinearTrackingSlipThreshold());
+      return positionErrorSquared > linearTrackingSlipThresholdSquared;
+   }
+
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D(contactPoint.getNamePrefix(), contactPointInWorld, 0.01, ColorDefinitions.Black()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D(yoContactPointInBodyFrame.getNamePrefix(),
+                                                                    currentContactPointInWorld,
+                                                                    0.01,
+                                                                    ColorDefinitions.Black()));
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(contactNormal.getNamePrefix(),
-                                                                    contactPointInWorld,
+                                                                    currentContactPointInWorld,
                                                                     contactNormal,
                                                                     0.1,
                                                                     ColorDefinitions.Black()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(bodyToControl.getName() + "ControllerForce",
+                                                                    currentContactPointInWorld,
+                                                                    yoControllerDesiredForce,
+                                                                    0.01,
+                                                                    ColorDefinitions.Red()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D(bodyToControl.getName() + "ContactControlFrame", yoDesiredContactPosition,
+                                                                               yoDesiredContactOrientation,
+                                                                               0.13,
+                                                                               ColorDefinitions.LightGray()));
       return group;
+   }
+
+   public boolean isJointspaceControlActive()
+   {
+      return jointspaceControlActive.getValue();
+   }
+
+   public boolean isOrientationControlActive()
+   {
+      return orientationControlActive.getValue();
    }
 
    public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
    {
       this.controllerCoreOutput = controllerCoreOutput;
+   }
+
+   public FramePoint3DReadOnly getYoContactPointInBodyFrame()
+   {
+      return yoContactPointInBodyFrame;
+   }
+
+   public FrameVector3DReadOnly getContactNormal()
+   {
+      return contactNormal;
+   }
+
+   public void updateWholeBodyContactState(WholeBodyContactState wholeBodyContactStateToUpdate)
+   {
+      wholeBodyContactStateToUpdate.addContactPoints(planeContactStateCommand);
+   }
+
+   public double getJointDesiredPosition(int jointIdx)
+   {
+      return jointControlHelper.getJointDesiredPosition(jointIdx);
    }
 }

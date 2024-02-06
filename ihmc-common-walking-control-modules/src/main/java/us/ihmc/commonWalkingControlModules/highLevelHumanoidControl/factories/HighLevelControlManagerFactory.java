@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.LoadBearingParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
@@ -75,6 +76,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private CoPTrajectoryParameters copTrajectoryParameters;
    private SplitFractionCalculatorParametersReadOnly splitFractionParameters = new DefaultSplitFractionCalculatorParameters();
    private MomentumOptimizationSettings momentumOptimizationSettings;
+   private final LoadBearingParameters loadBearingParameters = new LoadBearingParameters(registry);
 
    private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspaceOrientationGainMap = new HashMap<>();
@@ -254,6 +256,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     taskspaceOrientationGains,
                                                                     taskspacePositionGains,
                                                                     contactableBody,
+                                                                    loadBearingParameters,
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
                                                                     yoTime,

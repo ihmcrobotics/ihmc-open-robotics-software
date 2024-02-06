@@ -8,6 +8,7 @@ import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandWrenchActionDefinition;
 import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionDefinition;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
+import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionDefinition;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -52,11 +53,15 @@ public class BehaviorTreeDefinitionBuilder
       {
          return new SakeHandCommandActionDefinition(crdtInfo, saveFileDirectory);
       }
+      if (definitionType == ScrewPrimitiveActionDefinition.class)
+      {
+         return new ScrewPrimitiveActionDefinition(crdtInfo, saveFileDirectory);
+      }
       if (definitionType == WaitDurationActionDefinition.class)
       {
          return new WaitDurationActionDefinition(crdtInfo, saveFileDirectory);
       }
 
-      return null;
+      throw new RuntimeException("Node definition type not found: " + definitionType.getSimpleName());
    }
 }

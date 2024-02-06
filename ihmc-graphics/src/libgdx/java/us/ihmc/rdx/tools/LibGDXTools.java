@@ -396,6 +396,21 @@ public class LibGDXTools
       gdxColor.a = (float) colorDefinition.getAlpha();
    }
 
+   public static ColorDefinition toColorDefinition(Color gdxColor)
+   {
+      ColorDefinition colorDefinition = new ColorDefinition();
+      toColorDefinition(gdxColor, colorDefinition);
+      return colorDefinition;
+   }
+
+   public static void toColorDefinition(Color gdxColor, ColorDefinition colorDefinition)
+   {
+      colorDefinition.setRed(gdxColor.r);
+      colorDefinition.setGreen(gdxColor.g);
+      colorDefinition.setBlue(gdxColor.b);
+      colorDefinition.setAlpha(gdxColor.a);
+   }
+
    public static void toLibGDX(Vector3 bulletColor, Color gdxColor)
    {
       gdxColor.r = bulletColor.x;
