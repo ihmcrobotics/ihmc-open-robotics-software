@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -12,8 +11,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -83,8 +80,8 @@ public class FootTrajectoryPredictor
       {
          MultipleWaypointsPositionTrajectoryGenerator footTrajectory = footTrajectories.get(robotSide);
          footTrajectory.clear();
-         footTrajectory.appendWaypoint(0.0, state.getFootPose(robotSide).getPosition(), zeroVector);
-         footTrajectory.appendWaypoint(sufficientlyLongTime, state.getFootPose(robotSide).getPosition(), zeroVector);
+         footTrajectory.appendWaypoint(0.0, state.getCurrentFootPose(robotSide).getPosition(), zeroVector);
+         footTrajectory.appendWaypoint(sufficientlyLongTime, state.getCurrentFootPose(robotSide).getPosition(), zeroVector);
          footTrajectory.initialize();
       }
    }
@@ -101,8 +98,8 @@ public class FootTrajectoryPredictor
       {
          MultipleWaypointsPositionTrajectoryGenerator footTrajectory = footTrajectories.get(robotSide);
          footTrajectory.clear();
-         footTrajectory.appendWaypoint(0.0, state.getFootPose(robotSide).getPosition(), zeroVector);
-         footTrajectory.appendWaypoint(transferDuration, state.getFootPose(robotSide).getPosition(), zeroVector);
+         footTrajectory.appendWaypoint(0.0, state.getCurrentFootPose(robotSide).getPosition(), zeroVector);
+         footTrajectory.appendWaypoint(transferDuration, state.getCurrentFootPose(robotSide).getPosition(), zeroVector);
       }
 
       RobotSide swingSide = footstep.getRobotSide();
@@ -111,7 +108,7 @@ public class FootTrajectoryPredictor
 
 
       footTrajectories.get(stanceSide)
-                      .appendWaypoint(transferDuration + swingDuration, state.getFootPose(stanceSide).getPosition(), zeroVector);
+                      .appendWaypoint(transferDuration + swingDuration, state.getCurrentFootPose(stanceSide).getPosition(), zeroVector);
 
 
       if (swingWaypointsToUse.isEmpty())
@@ -119,7 +116,7 @@ public class FootTrajectoryPredictor
          predictSwingFootTrajectory(transferDuration,
                                     transferDuration + swingDuration,
                                     predictorSwingHeight.getValue(),
-                                    state.getFootPose(swingSide).getPosition(),
+                                    state.getCurrentFootPose(swingSide).getPosition(),
                                     footstep.getFootstepPose().getPosition(),
                                     footTrajectories.get(swingSide));
       }

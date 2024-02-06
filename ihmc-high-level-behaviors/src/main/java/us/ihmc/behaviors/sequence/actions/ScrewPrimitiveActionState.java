@@ -12,6 +12,9 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveActionDefinition>
 {
+   /** This limit is defined in the .msg file and limited to the size in the SE3TrajectoryMessage. */
+   public static final int TRAJECTORY_SIZE_LIMIT = new ScrewPrimitiveActionStateMessage().getTrajectory().getCurrentCapacity();
+
    private final DetachableReferenceFrame screwFrame;
    private final CRDTUnidirectionalPoseList trajectory;
    private final CRDTUnidirectionalVector3D force;
