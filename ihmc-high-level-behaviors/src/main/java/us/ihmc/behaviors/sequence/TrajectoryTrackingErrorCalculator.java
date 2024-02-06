@@ -34,9 +34,14 @@ public class TrajectoryTrackingErrorCalculator
 
    public void computeExecutionTimings(double nominalExecutionDuration)
    {
+      computeExecutionTimings(nominalExecutionDuration, nominalExecutionDuration * 1.5);
+   }
+
+   public void computeExecutionTimings(double nominalExecutionDuration, double timeout)
+   {
       timeIsUp = !executionTimer.isRunning(nominalExecutionDuration);
       // Default timeout is 50% longer than nominal TODO: Introduce parameter
-      hitTimeLimit = !executionTimer.isRunning(nominalExecutionDuration * 1.5);
+      hitTimeLimit = !executionTimer.isRunning(timeout);
    }
 
    public void computePoseTrackingData(FramePose3DReadOnly desired, FramePose3DReadOnly actual)

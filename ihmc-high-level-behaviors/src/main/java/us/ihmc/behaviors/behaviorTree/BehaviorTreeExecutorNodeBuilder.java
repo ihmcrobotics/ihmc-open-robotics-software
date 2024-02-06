@@ -6,6 +6,8 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
 import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -19,6 +21,8 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final LogToolsLogger logToolsLogger = new LogToolsLogger();
+   private final ControllerStatusTracker controllerStatusTracker;
    private final WalkingFootstepTracker footstepTracker;
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -35,7 +39,8 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       this.referenceFrameLibrary = referenceFrameLibrary;
       this.ros2ControllerHelper = ros2ControllerHelper;
 
-      footstepTracker = new WalkingFootstepTracker(ros2ControllerHelper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
+      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2ControllerHelper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
+      footstepTracker = controllerStatusTracker.getFootstepTracker();
       footstepPlanner = new FootstepPlanningModule(FootstepPlanningModule.class.getSimpleName());
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
@@ -67,7 +72,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
                                                saveFileDirectory,
                                                ros2ControllerHelper,
                                                syncedRobot,
-                                               footstepTracker,
+                                               controllerStatusTracker,
                                                referenceFrameLibrary,
                                                walkingControllerParameters,
                                                footstepPlanner,

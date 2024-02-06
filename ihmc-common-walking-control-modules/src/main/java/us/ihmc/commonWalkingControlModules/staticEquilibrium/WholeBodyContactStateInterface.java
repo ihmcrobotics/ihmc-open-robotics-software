@@ -16,6 +16,11 @@ public interface WholeBodyContactStateInterface
    ReferenceFrame getContactFrame(int contactPointIndex);
 
    /**
+    * Coefficient of friction for the given contact point
+    */
+   double getCoefficientOfFriction(int contactPointIndex);
+
+   /**
     * The actuation constraint matrix is C in the constraint C f <= d
     * Where f = [f_0x, f_0y, f_0z, f_1x... ] are the ground reaction forces in world frame.
     */

@@ -5,7 +5,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.TrajectoryTrackingErrorCalculator;
-import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.FormattingTools;
@@ -45,7 +45,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private final FootstepPlanActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final WalkingFootstepTracker footstepTracker;
+   private final ControllerStatusTracker controllerStatusTracker;
    private final WalkingControllerParameters walkingControllerParameters;
    private final SideDependentList<FramePose3D> commandedGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<FramePose3D> syncedFeetPoses = new SideDependentList<>(() -> new FramePose3D());
@@ -67,7 +67,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                      WorkspaceResourceDirectory saveFileDirectory,
                                      ROS2ControllerHelper ros2ControllerHelper,
                                      ROS2SyncedRobotModel syncedRobot,
-                                     WalkingFootstepTracker footstepTracker,
+                                     ControllerStatusTracker controllerStatusTracker,
                                      ReferenceFrameLibrary referenceFrameLibrary,
                                      WalkingControllerParameters walkingControllerParameters,
                                      FootstepPlanningModule footstepPlanner,
@@ -80,7 +80,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
-      this.footstepTracker = footstepTracker;
+      this.controllerStatusTracker = controllerStatusTracker;
       this.walkingControllerParameters = walkingControllerParameters;
       this.footstepPlanner = footstepPlanner;
       this.footstepPlannerParameters = footstepPlannerParameters;
@@ -255,7 +255,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          {
             for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
             {
-               if (i == 0 || i == footstepPlan.getNumberOfSteps() - 1)
+               if (i == 0)
                   footstepPlan.getFootstep(i).setTransferDuration(getDefinition().getTransferDuration() / 2.0);
                else
                   footstepPlan.getFootstep(i).setTransferDuration(getDefinition().getTransferDuration());
@@ -276,6 +276,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlanToExecute,
                                                                                                                     definition.getSwingDuration(),
                                                                                                                     definition.getTransferDuration());
+      double finalTransferDuration = 0.01; // We don't want any unecessary pauses at the end; but it can't be 0
+      footstepDataListMessage.setFinalTransferDuration(finalTransferDuration);
       footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       LogTools.info("Commanding {} footsteps", footstepDataListMessage.getFootstepDataList().size());
@@ -289,7 +291,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                                                                          definition.getSwingDuration(),
                                                                                          walkingControllerParameters.getDefaultInitialTransferTime(),
                                                                                          definition.getTransferDuration(),
-                                                                                         walkingControllerParameters.getDefaultFinalTransferTime());
+                                                                                         finalTransferDuration);
       for (RobotSide side : RobotSide.values)
       {
          indexOfLastFoot.put(side, -1);
@@ -344,13 +346,20 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          hitTimeLimit |= trackingCalculators.get(side).getHitTimeLimit();
       }
 
-      int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
+      int incompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();
+      boolean isWalking = controllerStatusTracker.isWalking();
       meetsDesiredCompletionCriteria &= incompleteFootsteps == 0;
+      meetsDesiredCompletionCriteria &= !isWalking;
 
       if (meetsDesiredCompletionCriteria || hitTimeLimit)
+      {
          state.setIsExecuting(false);
+      }
       if (hitTimeLimit)
+      {
          state.setFailed(true);
+         LogTools.info("Walking failed. (time limit)");
+      }
       state.setNominalExecutionDuration(nominalExecutionDuration);
       state.setElapsedExecutionTime(trackingCalculators.get(RobotSide.LEFT).getElapsedTime());
       state.setTotalNumberOfFootsteps(footstepPlanToExecute.getNumberOfSteps());
