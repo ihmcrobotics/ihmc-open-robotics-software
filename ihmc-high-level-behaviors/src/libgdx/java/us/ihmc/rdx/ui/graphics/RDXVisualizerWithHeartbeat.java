@@ -48,7 +48,6 @@ public class RDXVisualizerWithHeartbeat
       {
          heartbeat.setAlive(visualizer.isActive());
 
-         // FIXME: I don't like checking every render loop
          for (RDXVisualizerWithHeartbeat dependentVisualizer : dependentVisualizers)
          {
             if (dependentVisualizer.getHeartbeat() != null && !dependentVisualizer.isActive())
