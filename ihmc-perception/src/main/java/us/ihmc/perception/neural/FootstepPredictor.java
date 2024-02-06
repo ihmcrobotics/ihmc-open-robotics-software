@@ -27,8 +27,8 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
 public class FootstepPredictor
 {
-   private static final int LINEAR_INPUT_SIZE = 4;
-   private static final int LINEAR_OUTPUT_SIZE = 20;
+   private static final int LINEAR_INPUT_SIZE = 7;
+   private static final int LINEAR_OUTPUT_SIZE = 40;
 
    private static final int IMAGE_INPUT_HEIGHT = 201;
    private static final int IMAGE_INPUT_WIDTH = 201;
@@ -72,9 +72,6 @@ public class FootstepPredictor
 
    public ArrayList<Point3D> generateFootsteps(Mat heightMap, Point2D startPosition, Point2D goalPosition, Point2D sensorPosition)
    {
-
-
-
       ArrayList<Point3D> footstepPositions = new ArrayList<>();
       FMatrixRMaj linearInput = new FMatrixRMaj(LINEAR_INPUT_SIZE, 1);
       linearInput.set(0, 0, startPosition.getX32());
@@ -97,9 +94,9 @@ public class FootstepPredictor
 
       if (linearOutput != null)
       {
-         for (int i = 0; i < LINEAR_OUTPUT_SIZE / 2; i++)
+         for (int i = 0; i < LINEAR_OUTPUT_SIZE / 4; i++)
          {
-            Point3D point = new Point3D(linearOutput.get(2 * i, 0) + sensorPosition.getX32(), linearOutput.get(2 * i + 1, 0) + sensorPosition.getY32(), 1.0);
+            Point3D point = new Point3D(linearOutput.get(4 * i, 0) + sensorPosition.getX32(), linearOutput.get(4 * i + 1, 0) + sensorPosition.getY32(), 1.0);
             footstepPositions.add(point);
          }
       }
