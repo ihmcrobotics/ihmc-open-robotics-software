@@ -14,6 +14,8 @@ public interface InertialEstimationParameters
    public abstract double getBreakFrequencyForPostProcessing();
    public abstract double getBreakFrequencyForEstimateFiltering();
 
+   public abstract double getBreakFrequencyForAccelerationCalculation();
+
    public abstract double getProcessModelCovariance();
    public abstract double getFloatingBaseMeasurementCovariance();
    public abstract double getLegMeasurementCovariance();
