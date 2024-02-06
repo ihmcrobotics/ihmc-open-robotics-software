@@ -2,7 +2,6 @@ package us.ihmc.rdx.imgui;
 
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotCol;
-import imgui.flag.ImGuiCond;
 import us.ihmc.commons.time.Stopwatch;
 
 /**

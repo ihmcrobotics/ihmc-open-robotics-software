@@ -79,7 +79,14 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       }
       if (nodeType == FootstepPlanActionDefinition.class)
       {
-         return new RDXFootstepPlanAction(id, crdtInfo, saveFileDirectory, baseUI, robotModel, syncedRobot, referenceFrameLibrary);
+         return new RDXFootstepPlanAction(id,
+                                          crdtInfo,
+                                          saveFileDirectory,
+                                          baseUI,
+                                          robotModel,
+                                          syncedRobot,
+                                          referenceFrameLibrary,
+                                          footstepPlannerParametersBasics);
       }
       if (nodeType == HandPoseActionDefinition.class)
       {
@@ -88,13 +95,17 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
                                       saveFileDirectory,
                                       panel3D,
                                       robotModel,
-                                      syncedRobot.getFullRobotModel(),
+                                      syncedRobot,
                                       selectionCollisionModel,
                                       referenceFrameLibrary);
       }
       if (nodeType == HandWrenchActionDefinition.class)
       {
          return new RDXHandWrenchAction(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == ScrewPrimitiveActionDefinition.class)
+      {
+         return new RDXScrewPrimitiveAction(id, crdtInfo, saveFileDirectory, panel3D, referenceFrameLibrary);
       }
       if (nodeType == PelvisHeightPitchActionDefinition.class)
       {
@@ -114,10 +125,6 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       if (nodeType == WaitDurationActionDefinition.class)
       {
          return new RDXWaitDurationAction(id, crdtInfo, saveFileDirectory);
-      }
-      if (nodeType == WalkActionDefinition.class)
-      {
-         return new RDXWalkAction(id, crdtInfo, saveFileDirectory, panel3D, robotModel, referenceFrameLibrary, footstepPlannerParametersBasics);
       }
       else
       {

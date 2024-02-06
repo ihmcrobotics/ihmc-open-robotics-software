@@ -18,7 +18,6 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 
 import java.util.List;
@@ -74,8 +73,12 @@ public class RDXModelBuilder
 
    public static Model buildModelFromMesh(ModelBuilder modelBuilder, RDXMultiColorMeshBuilder meshBuilder)
    {
+      return buildModelFromMesh(modelBuilder, meshBuilder.generateMesh());
+   }
+
+   public static Model buildModelFromMesh(ModelBuilder modelBuilder, Mesh mesh)
+   {
       modelBuilder.begin();
-      Mesh mesh = meshBuilder.generateMesh();
 
       MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
       Material material = new Material();
@@ -160,24 +163,24 @@ public class RDXModelBuilder
       return buildModelInstance(meshBuilder -> meshBuilder.addBox(lx, ly, lz, color), "box");
    }
 
-   public static ModelInstance createCylinder(float height, float radius, Color color)
+   public static ModelInstance createCylinder(float height, float radius, Point3D offset, Color color)
    {
-      return buildModelInstance(meshBuilder -> meshBuilder.addCylinder(height, radius, new Point3D(), color), "cylinder");
+      return buildModelInstance(meshBuilder -> meshBuilder.addCylinder(height, radius, offset, color), "cylinder");
    }
 
-   public static ModelInstance createEllipsoid(float xRadius, float yRadius, float zRadius, Color color)
+   public static ModelInstance createEllipsoid(float xRadius, float yRadius, float zRadius, Point3D offset, Color color)
    {
-      return buildModelInstance(meshBuilder -> meshBuilder.addEllipsoid(xRadius, yRadius, zRadius, new Point3D(), color), "ellipsoid");
+      return buildModelInstance(meshBuilder -> meshBuilder.addEllipsoid(xRadius, yRadius, zRadius, offset, color), "ellipsoid");
    }
 
-   public static ModelInstance createPrism(float triangleWidth, float prismThickness, float triangleHeight, Color color)
+   public static ModelInstance createPrism(float triangleWidth, float prismThickness, float triangleHeight, Point3D offset, Color color)
    {
-      return buildModelInstance(meshBuilder -> meshBuilder.addIsoscelesTriangularPrism(triangleWidth, triangleHeight, prismThickness, new Point3D(), color), "prism");
+      return buildModelInstance(meshBuilder -> meshBuilder.addIsoscelesTriangularPrism(triangleWidth, triangleHeight, prismThickness, offset, color), "prism");
    }
 
-   public static ModelInstance createCone(float height, float radius, Color color)
+   public static ModelInstance createCone(float height, float radius, Point3D offset, Color color)
    {
-      return buildModelInstance(meshBuilder -> meshBuilder.addCone(height, radius, new Point3D(), color), "cone");
+      return buildModelInstance(meshBuilder -> meshBuilder.addCone(height, radius, offset, color), "cone");
    }
 
    public static ModelInstance createArrow(double length, Color color)

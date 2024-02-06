@@ -339,7 +339,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * origin of the {@code controlFrame}. It has to be expressed in {@code controlFrame}.
     * </p>
     * <p>
-    * The given {@code controlFrame} should be located at the point of interest and has to be attached
+    * The given {@code controlFrame} should be located at the point of interest and has to be attachefd
     * to the end-effector. For instance, when controlling a foot, the {@code controlFrame} should be
     * located somewhere on the sole of the foot.
     * </p>

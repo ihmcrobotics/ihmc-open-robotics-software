@@ -15,7 +15,7 @@ public class HandPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c62ef7183c826b5d30f6e2c6f7676ec5810e37249fe82e9024aee1550795f4ff";
+   		return "3ee480603dd0e84932eebb1c9a91ecee9ececb88c8466b2b2b308fe90fc21c62";
    }
    
    @Override
@@ -58,7 +58,9 @@ public class HandPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -83,8 +85,9 @@ public class HandPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getGoalChestTransformToWorld(), current_alignment);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getForce(), current_alignment);
 
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getTorque(), current_alignment);
 
       current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -99,8 +102,8 @@ public class HandPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getState(), cdr);
       behavior_msgs.msg.dds.HandPoseActionDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getGoalChestTransformToWorld(), cdr);
-      cdr.write_type_6(data.getHandWrenchMagnitudeLinear());
-
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getForce(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getTorque(), cdr);
       for(int i0 = 0; i0 < data.getJointAngles().length; ++i0)
       {
         	cdr.write_type_6(data.getJointAngles()[i0]);	
@@ -115,8 +118,8 @@ public class HandPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.HandPoseActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getGoalChestTransformToWorld(), cdr);	
-      data.setHandWrenchMagnitudeLinear(cdr.read_type_6());
-      	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getForce(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getTorque(), cdr);	
       for(int i0 = 0; i0 < data.getJointAngles().length; ++i0)
       {
         	data.getJointAngles()[i0] = cdr.read_type_6();
@@ -137,7 +140,10 @@ public class HandPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       ser.write_type_a("goal_chest_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getGoalChestTransformToWorld());
 
-      ser.write_type_6("hand_wrench_magnitude_linear", data.getHandWrenchMagnitudeLinear());
+      ser.write_type_a("force", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getForce());
+
+      ser.write_type_a("torque", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getTorque());
+
       ser.write_type_f("joint_angles", data.getJointAngles());
       ser.write_type_6("solution_quality", data.getSolutionQuality());
    }
@@ -151,7 +157,10 @@ public class HandPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       ser.read_type_a("goal_chest_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getGoalChestTransformToWorld());
 
-      data.setHandWrenchMagnitudeLinear(ser.read_type_6("hand_wrench_magnitude_linear"));
+      ser.read_type_a("force", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getForce());
+
+      ser.read_type_a("torque", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getTorque());
+
       ser.read_type_f("joint_angles", data.getJointAngles());
       data.setSolutionQuality(ser.read_type_6("solution_quality"));
    }

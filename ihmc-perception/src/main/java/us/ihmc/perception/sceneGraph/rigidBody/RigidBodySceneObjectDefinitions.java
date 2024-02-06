@@ -6,6 +6,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.SceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
@@ -16,12 +17,6 @@ import us.ihmc.robotics.EuclidCoreMissingTools;
  */
 public class RigidBodySceneObjectDefinitions
 {
-   /**
-    * This is the width of the markers printed with IHMC's large format
-    * printer. Send ihmc-perception/src/main/resources/arUcoMarkers/Markers0Through3.pdf
-    * to IT to get new ones printed.
-    */
-   public static final double LARGE_MARKER_WIDTH = 0.1982;
 
    public static final String BOX_NAME = "Box";
    public static final int BOX_MARKER_ID = 2;
@@ -68,7 +63,7 @@ public class RigidBodySceneObjectDefinitions
 
    public static final String DEBRIS_NAME = "2x4Debris";
    public static final int DEBRIS_MARKER_ID = 7;
-   public static final double DEBRIS_MARKER_WIDTH = LARGE_MARKER_WIDTH;
+   public static final double DEBRIS_MARKER_WIDTH = SceneObjectDefinitions.LARGE_MARKER_WIDTH;
    public static final RigidBodyTransform DEBRIS_TRANSFORM_TO_MARKER = new RigidBodyTransform();
    public static final String DEBRIS_VISUAL_MODEL_FILE_PATH = "environmentObjects/debris/2x4.g3dj";
    public static final RigidBodyTransform DEBRIS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
@@ -82,7 +77,7 @@ public class RigidBodySceneObjectDefinitions
    static
    {
       ARUCO_MARKER_SIZES.put(BOX_MARKER_ID, BOX_MARKER_SIZE);
-      ARUCO_MARKER_SIZES.put(CAN_OF_SOUP_MARKER_ID, RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
+      ARUCO_MARKER_SIZES.put(CAN_OF_SOUP_MARKER_ID, SceneObjectDefinitions.LARGE_MARKER_WIDTH);
    }
 
    public static final String SHOE_NAME = "Shoe";
@@ -124,6 +119,11 @@ public class RigidBodySceneObjectDefinitions
    public static final String MUG_NAME = "Mug";
    public static final String MUG_VISUAL_MODEL_FILE_PATH = "environmentObjects/mug/mug.g3dj";
    public static final RigidBodyTransform MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      EuclidCoreMissingTools.setYawPitchRollDegrees(MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 0, -90, -90);
+      MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.1);
+   }
 
    public static final String BIKE_NAME = "Bike";
    public static final String BIKE_VISUAL_MODEL_FILE_PATH = "environmentObjects/bike/bike.g3dj";
@@ -133,6 +133,15 @@ public class RigidBodySceneObjectDefinitions
 //      EuclidCoreMissingTools.setYawPitchRollDegrees(CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 90, 90, 0);
 //      CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.2);
 //      CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(-0.05);
+   }
+
+   public static final String DRILL_NAME = "Drill";
+   public static final String DRILL_VISUAL_MODEL_FILE_PATH = "environmentObjects/drill/drill.g3dj";
+   public static final RigidBodyTransform DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      EuclidCoreMissingTools.setYawPitchRollDegrees(DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 0, 90, -90);
+      DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.05);
    }
 
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
@@ -276,5 +285,17 @@ public class RigidBodySceneObjectDefinitions
                                                        BIKE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       LogTools.info("Adding Bike to scene graph.");
       modificationQueue.accept(new SceneGraphNodeAddition(bike, parentNode));
+   }
+
+   public static void ensureDrillNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   {
+      SceneNode drill = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                        DRILL_NAME,
+                                                        sceneGraph.getIDToNodeMap(),
+                                                        parentNode.getID(),
+                                                        new RigidBodyTransform(), DRILL_VISUAL_MODEL_FILE_PATH,
+                                                        DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      LogTools.info("Adding Drill to scene graph.");
+      modificationQueue.accept(new SceneGraphNodeAddition(drill, parentNode));
    }
 }

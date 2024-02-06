@@ -15,7 +15,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4efae87b95f2686d5869329858ad8cfeabd4fbc7239703b0efda2b2f190bd0d7";
+   		return "c145717a33db0320a723daa494936b7b4c0bee98476caae10e8ada577d1e83f9";
    }
    
    @Override
@@ -70,13 +70,10 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 500; ++i0)
+      {
+          current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -121,17 +118,12 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getDesiredTrajectory().size(); ++i0)
+      {
+          current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getCdrSerializedSize(data.getDesiredTrajectory().get(i0), current_alignment);}
 
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getCurrentPose(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -162,15 +154,12 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       cdr.write_type_6(data.getElapsedExecutionTime());
 
-      cdr.write_type_6(data.getCurrentPositionDistanceToGoal());
+      if(data.getDesiredTrajectory().size() <= 500)
+      cdr.write_type_e(data.getDesiredTrajectory());else
+          throw new RuntimeException("desired_trajectory field exceeds the maximum length");
 
-      cdr.write_type_6(data.getStartPositionDistanceToGoal());
-
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getCurrentPose(), cdr);
       cdr.write_type_6(data.getPositionDistanceToGoalTolerance());
-
-      cdr.write_type_6(data.getCurrentOrientationDistanceToGoal());
-
-      cdr.write_type_6(data.getStartOrientationDistanceToGoal());
 
       cdr.write_type_6(data.getOrientationDistanceToGoalTolerance());
 
@@ -195,15 +184,9 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       	
       data.setElapsedExecutionTime(cdr.read_type_6());
       	
-      data.setCurrentPositionDistanceToGoal(cdr.read_type_6());
-      	
-      data.setStartPositionDistanceToGoal(cdr.read_type_6());
-      	
+      cdr.read_type_e(data.getDesiredTrajectory());	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getCurrentPose(), cdr);	
       data.setPositionDistanceToGoalTolerance(cdr.read_type_6());
-      	
-      data.setCurrentOrientationDistanceToGoal(cdr.read_type_6());
-      	
-      data.setStartOrientationDistanceToGoal(cdr.read_type_6());
       	
       data.setOrientationDistanceToGoalTolerance(cdr.read_type_6());
       	
@@ -223,11 +206,10 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       ser.write_type_7("failed", data.getFailed());
       ser.write_type_6("nominal_execution_duration", data.getNominalExecutionDuration());
       ser.write_type_6("elapsed_execution_time", data.getElapsedExecutionTime());
-      ser.write_type_6("current_position_distance_to_goal", data.getCurrentPositionDistanceToGoal());
-      ser.write_type_6("start_position_distance_to_goal", data.getStartPositionDistanceToGoal());
+      ser.write_type_e("desired_trajectory", data.getDesiredTrajectory());
+      ser.write_type_a("current_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getCurrentPose());
+
       ser.write_type_6("position_distance_to_goal_tolerance", data.getPositionDistanceToGoalTolerance());
-      ser.write_type_6("current_orientation_distance_to_goal", data.getCurrentOrientationDistanceToGoal());
-      ser.write_type_6("start_orientation_distance_to_goal", data.getStartOrientationDistanceToGoal());
       ser.write_type_6("orientation_distance_to_goal_tolerance", data.getOrientationDistanceToGoalTolerance());
    }
 
@@ -244,11 +226,10 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       data.setFailed(ser.read_type_7("failed"));
       data.setNominalExecutionDuration(ser.read_type_6("nominal_execution_duration"));
       data.setElapsedExecutionTime(ser.read_type_6("elapsed_execution_time"));
-      data.setCurrentPositionDistanceToGoal(ser.read_type_6("current_position_distance_to_goal"));
-      data.setStartPositionDistanceToGoal(ser.read_type_6("start_position_distance_to_goal"));
+      ser.read_type_e("desired_trajectory", data.getDesiredTrajectory());
+      ser.read_type_a("current_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getCurrentPose());
+
       data.setPositionDistanceToGoalTolerance(ser.read_type_6("position_distance_to_goal_tolerance"));
-      data.setCurrentOrientationDistanceToGoal(ser.read_type_6("current_orientation_distance_to_goal"));
-      data.setStartOrientationDistanceToGoal(ser.read_type_6("start_orientation_distance_to_goal"));
       data.setOrientationDistanceToGoalTolerance(ser.read_type_6("orientation_distance_to_goal_tolerance"));
    }
 

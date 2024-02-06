@@ -1,6 +1,6 @@
 package us.ihmc.perception.sceneGraph.multiBodies.door;
 
-import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
+import us.ihmc.perception.sceneGraph.SceneObjectDefinitions;
 
 /**
  * The parameters for the real and simulated door.
@@ -43,12 +43,19 @@ public class DoorModelParameters
    public static final double DOOR_FRAME_PILLAR_SIZE_X = 0.0889;
    /** Frame post Z size. */
    public static final double DOOR_FRAME_PILLAR_SIZE_Z = 2.159;
+   /** The angle of the lever in which the bolt is fully drawn i.e. the end stop */
+   public static final double DOOR_LEVER_MAX_TURN_ANGLE = 0.4 * Math.PI / 2.0;
+   /**
+    * The torque required to turn the lever to the max angle.
+    * 4 Nm seems to be typical door handle torque, but we're making it easy.
+    */
+   public static final double DOOR_LEVER_MAX_TORQUE = 1.0;
    public static final double DOOR_BOLT_HEIGHT = 0.015;
    public static final double DOOR_BOLT_HOLE_HEIGHT = DOOR_BOLT_HEIGHT + 0.01;
    public static final double DOOR_BOLT_TRAVEL = 0.015;
 
    /** This refers to the edges of the black parts with no margin. The margins included will be wider than this. */
-   public static final double DOOR_ARUCO_MARKER_WIDTH = RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH;
+   public static final double DOOR_ARUCO_MARKER_WIDTH = SceneObjectDefinitions.LARGE_MARKER_WIDTH;
    public static final int LEFT_PULL_DOOR_MARKER_ID = 0;
    public static final int RIGHT_PUSH_DOOR_MARKER_ID = 1;
    public static final int RIGHT_PULL_DOOR_MARKER_ID = 10;

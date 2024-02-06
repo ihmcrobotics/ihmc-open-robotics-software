@@ -405,6 +405,7 @@ public class RDXSCS2Session
       terrainObjects.clear();
       showRobotPairs.clear();
       showRobotMap.clear();
+      additionalImGuiWidgets.clear();
    }
 
    public void waitForSessionToBeStopped()

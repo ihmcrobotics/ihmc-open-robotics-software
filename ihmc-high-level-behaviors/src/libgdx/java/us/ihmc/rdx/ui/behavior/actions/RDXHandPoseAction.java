@@ -7,12 +7,17 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
+import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -35,6 +40,7 @@ import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXIKSolverColors;
+import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.interaction.MouseCollidable;
@@ -58,7 +64,9 @@ import java.util.List;
 public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPoseActionDefinition>
 {
    private final HandPoseActionState state;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiHandWidget handIconWidget = new ImGuiHandWidget();
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
    private final SideDependentList<String> handNames = new SideDependentList<>();
@@ -85,7 +93,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                             WorkspaceResourceDirectory saveFileDirectory,
                             RDX3DPanel panel3D,
                             DRCRobotModel robotModel,
-                            FullHumanoidRobotModel syncedFullRobotModel,
+                            ROS2SyncedRobotModel syncedRobot,
                             RobotCollisionModel selectionCollisionModel,
                             ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -93,9 +101,11 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
       state = getState();
 
+      this.syncedRobot = syncedRobot;
+
       getDefinition().setDescription("Hand pose");
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPalmTransformToParent().getValue(), getSelected());
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPalmTransformToParent().getValue());
       poseGizmo.create(panel3D);
 
       trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
@@ -117,6 +127,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                                             imBoolean.set(true);
                                                       });
 
+      FullHumanoidRobotModel syncedFullRobotModel = syncedRobot.getFullRobotModel();
       for (RobotSide side : RobotSide.values)
       {
          handNames.put(side, syncedFullRobotModel.getHand(side).getName());
@@ -204,15 +215,37 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
          if (getParent().getState() instanceof ActionSequenceState parent)
          {
-            HandPoseActionState previousHandPose = parent.findNextPreviousAction(HandPoseActionState.class,
-                                                                                 getState().getActionIndex(),
-                                                                                 getDefinition().getSide());
-            if (previousHandPose != null)
+            HandPoseActionState previousHandAction = parent.findNextPreviousAction(HandPoseActionState.class,
+                                                                                   getState().getActionIndex(),
+                                                                                   getDefinition().getSide());
+
+            boolean previousHandActionExists = previousHandAction != null;
+            boolean weAreAfterIt = previousHandActionExists && parent.getExecutionNextIndex() > previousHandAction.getActionIndex();
+
+            boolean previousIsExecuting = previousHandActionExists && previousHandAction.getIsExecuting();
+            boolean showFromPreviousHand = previousHandActionExists;
+            boolean showFromCurrentHand = !showFromPreviousHand && state.getIsNextForExecution() && ! previousIsExecuting;
+
+            ReferenceFrame fromFrame = null;
+            if (showFromPreviousHand)
+            {
+               fromFrame = previousHandAction.getPalmFrame().getReferenceFrame();
+            }
+            if (showFromCurrentHand)
+            {
+               fromFrame = syncedRobot.getReferenceFrames().getHandFrame(getDefinition().getSide());
+            }
+
+            if (fromFrame != null)
             {
                double lineWidth = 0.01;
                trajectoryGraphic.update(lineWidth,
-                                        previousHandPose.getPalmFrame().getReferenceFrame().getTransformToRoot(),
+                                        fromFrame.getTransformToRoot(),
                                         getState().getPalmFrame().getReferenceFrame().getTransformToRoot());
+            }
+            else
+            {
+               trajectoryGraphic.clear();
             }
          }
       }
@@ -252,8 +285,18 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    }
 
    @Override
+   public void renderTreeViewIconArea()
+   {
+      super.renderTreeViewIconArea();
+
+      handIconWidget.render(getDefinition().getSide(), ImGui.getFrameHeight());
+      ImGui.sameLine();
+   }
+
+   @Override
    protected void renderImGuiWidgetsInternal()
    {
+      ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
       ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
       jointSpaceControlWrapper.renderImGuiWidget();
@@ -267,6 +310,18 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       trajectoryDurationWidget.renderImGuiWidget();
       ImGui.text("IK Solution Quality: %.2f".formatted(state.getSolutionQuality()));
       ImGui.popItemWidth();
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Set Pose to Synced Hand")))
+      {
+         CRDTDetachableReferenceFrame actionPalmFrame = getState().getPalmFrame();
+         CRDTUnidirectionalRigidBodyTransform palmTransformToParent = getDefinition().getPalmTransformToParent();
+         MovingReferenceFrame syncedPalmFrame = syncedRobot.getReferenceFrames().getHandFrame(getDefinition().getSide());
+         FramePose3D syncedPalmPose = new FramePose3D();
+         syncedPalmPose.setToZero(syncedPalmFrame);
+         syncedPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
+         palmTransformToParent.getValue().set(syncedPalmPose);
+         actionPalmFrame.update();
+      }
    }
 
    public void render3DPanelImGuiOverlays()
@@ -308,7 +363,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
          if (isClickedOn)
          {
-            getSelected().set(true);
+            poseGizmo.setSelected(true);
          }
 
          poseGizmo.process3DViewInput(input, isMouseHovering);
@@ -322,7 +377,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    {
       if (state.getPalmFrame().isChildOfWorld())
       {
-         highlightModels.get(getDefinition().getSide()).getRenderables(renderables, pool);
+         if (getSelected() || poseGizmo.isSelected() || handIconWidget.getIsHovered())
+            highlightModels.get(getDefinition().getSide()).getRenderables(renderables, pool);
          poseGizmo.getVirtualRenderables(renderables, pool);
 
          if (state.getIsNextForExecution())

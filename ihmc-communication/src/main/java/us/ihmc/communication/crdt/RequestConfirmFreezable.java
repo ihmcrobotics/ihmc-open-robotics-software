@@ -1,6 +1,7 @@
 package us.ihmc.communication.crdt;
 
-import gnu.trove.set.hash.TLongHashSet;
+import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.map.hash.TLongLongHashMap;
 import ihmc_common_msgs.msg.dds.ConfirmableRequestMessage;
 import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.commons.thread.Notification;
@@ -10,16 +11,52 @@ import us.ihmc.log.LogTools;
  * A freezable node that has a mechanism for the freeze
  * to end early if we know the change has propagated.
  *
- * We assume messages are not dropped and do not arrive out of order.
+ * <p>
+ * A call to {@link #freeze} initiates incrementing and sending out a
+ * monotonically increasing
+ * request number. Another node receives that and sends back the same
+ * number, calling it the confirmation number. The initial sender
+ * stores a set of all the unconfirmed request numbers. As it recieves
+ * a confirmation number that matches a request it sent out, it removes
+ * it from the set and calls {@link #unfreeze}.
+ * </p>
+ *
+ * <p>
+ * A singleton CRDTInfo object exists for a node in the CRDT graph
+ * which has an update number that is 0 for the first update and
+ * monotonically increases on each subsequent update. In this class
+ * that update number is used to "timeout" the freeze if a confirmation
+ * is not recieved within the max freeze duration.
+ * </p>
+ *
+ * <p>
+ * The {@link #unfreeze} method works pulling back that timeout to
+ * the current update number.
+ * </p>
+ *
+ * <p>
+ * This class handles dropped and out of order messages. It does so by
+ * resending requests until they are confirmed and resending
+ * confirmations until they expire.
+ * </p>
+ *
+ * <p>
+ * TODO: This class currently doesn't work with more than two nodes
+ *   in the CRDT graph.
+ * </p>
  */
 public class RequestConfirmFreezable implements Freezable
 {
    private final CRDTInfo crdtInfo;
    private final MutableLong nextRequestID = new MutableLong();
+   /** This reduces the request creation to once per update.
+    *  Often, many changes occur in a single tick, like loading the initial state. */
    private final Notification needToSendRequest = new Notification();
-   private final Notification needToSendConfirmation = new Notification();
-   private final TLongHashSet unconfirmedRequests = new TLongHashSet();
-   private long confirmationNumber;
+   private final TLongArrayList unconfirmedRequests = new TLongArrayList();
+   private final TLongLongHashMap requestTimeouts = new TLongLongHashMap();
+   private final TLongArrayList recentConfirmations = new TLongArrayList();
+   private final TLongLongHashMap confirmationTimeouts = new TLongLongHashMap();
+   private transient final TLongArrayList timedOutEntries = new TLongArrayList();
    private long updateNumberToUnfreeze = 0;
    private boolean isFrozen = false;
 
@@ -31,11 +68,14 @@ public class RequestConfirmFreezable implements Freezable
    @Override
    public void freeze()
    {
-      if (!isFrozen)
-         LogTools.debug(1, "Freezing: %s  Actor: %s".formatted(this.getClass().getSimpleName(), crdtInfo.getActorDesignation()));
-      isFrozen = true;
-
       updateNumberToUnfreeze = crdtInfo.getUpdateNumber() + crdtInfo.getMaxFreezeDuration();
+
+      if (!isFrozen)
+         LogTools.debug(1, "%s Update #%d: Freezing: %s until Update #%d".formatted(crdtInfo.getActorDesignation(),
+                                                                                    crdtInfo.getUpdateNumber(),
+                                                                                    this.getClass().getSimpleName(),
+                                                                                    updateNumberToUnfreeze));
+      isFrozen = true;
 
       needToSendRequest.set();
    }
@@ -52,7 +92,11 @@ public class RequestConfirmFreezable implements Freezable
       boolean isFrozen = crdtInfo.getUpdateNumber() < updateNumberToUnfreeze;
 
       if (isFrozen != this.isFrozen)
-         LogTools.debug("Frozen %b -> %b %s Actor: %s".formatted(this.isFrozen, isFrozen, this.getClass().getSimpleName(), crdtInfo.getActorDesignation()));
+         LogTools.debug("%s Update #%d: Frozen %b -> %b %s".formatted(crdtInfo.getActorDesignation(),
+                                                                      crdtInfo.getUpdateNumber(),
+                                                                      this.isFrozen,
+                                                                      isFrozen,
+                                                                      this.getClass().getSimpleName()));
 
       this.isFrozen = isFrozen;
 
@@ -61,52 +105,100 @@ public class RequestConfirmFreezable implements Freezable
 
    public void toMessage(ConfirmableRequestMessage message)
    {
-      message.setIsRequest(false);
-      message.setIsConfirmation(false);
+      removeTimedOutEntries(unconfirmedRequests, requestTimeouts, true);
+      removeTimedOutEntries(recentConfirmations, confirmationTimeouts, false);
 
       if (needToSendRequest.poll())
       {
          long requestNumber = nextRequestID.incrementAndGet();
-         LogTools.debug("Request: {}:{} Actor: {}", this.getClass().getSimpleName(), requestNumber, crdtInfo.getActorDesignation().name());
-         message.setIsRequest(true);
-         message.setRequestNumber(requestNumber);
          unconfirmedRequests.add(requestNumber);
+         requestTimeouts.put(requestNumber, updateNumberToUnfreeze);
       }
 
-      if (needToSendConfirmation.poll())
+      message.getRequestNumbers().resetQuick();
+      message.getConfirmationNumbers().resetQuick();
+
+      for (int i = 0; i < unconfirmedRequests.size(); i++)
       {
-         LogTools.debug("Confirming: {}:{} Actor: {}", this.getClass().getSimpleName(), confirmationNumber, crdtInfo.getActorDesignation().name());
-         message.setIsConfirmation(true);
-         message.setConfirmationNumber(confirmationNumber);
+         long requestNumber = unconfirmedRequests.get(i);
+         LogTools.debug("%s Update #%d: %s requesting. Request #%d".formatted(crdtInfo.getActorDesignation(),
+                                                                              crdtInfo.getUpdateNumber(),
+                                                                              this.getClass().getSimpleName(),
+                                                                              requestNumber));
+         message.getRequestNumbers().add(requestNumber);
+      }
+
+      for (int i = 0; i < recentConfirmations.size(); i++)
+      {
+         long confirmationNumber = recentConfirmations.get(i);
+         message.getConfirmationNumbers().add(confirmationNumber);
       }
    }
 
    public void fromMessage(ConfirmableRequestMessage message)
    {
-      if (message.getIsRequest())
+      for (int i = 0; i < message.getRequestNumbers().size(); i++)
       {
-         confirmationNumber = message.getRequestNumber();
-         needToSendConfirmation.set();
+         long confirmationNumber = message.getRequestNumbers().get(i);
+
+         if (!recentConfirmations.contains(confirmationNumber))
+         {
+            LogTools.debug("%s Update #%d: %s confirming. Request #%d".formatted(crdtInfo.getActorDesignation(),
+                                                                                 crdtInfo.getUpdateNumber(),
+                                                                                 this.getClass().getSimpleName(),
+                                                                                 confirmationNumber));
+            recentConfirmations.add(confirmationNumber);
+            confirmationTimeouts.put(confirmationNumber, crdtInfo.getUpdateNumber() + crdtInfo.getMaxFreezeDuration());
+         }
+
+         nextRequestID.setValue(confirmationNumber + 1); // Avoid duplicate request numbers for clarity
       }
 
-      if (message.getIsConfirmation())
+      for (int i = 0; i < message.getConfirmationNumbers().size(); i++)
       {
-         long confirmationsRequestUUID = message.getConfirmationNumber();
+         long confirmedRequestNumber = message.getConfirmationNumbers().get(i);
 
-         boolean removed = unconfirmedRequests.remove(confirmationsRequestUUID);
-
-         if (removed)
+         if (unconfirmedRequests.contains(confirmedRequestNumber))
          {
-            LogTools.debug("Confirmed: {}:{} Actor: {}", this.getClass().getSimpleName(), confirmationsRequestUUID, crdtInfo.getActorDesignation().name());
-            if (!unconfirmedRequests.isEmpty())
-               LogTools.debug("Still unconfirmed requests: {}", unconfirmedRequests);
+            unconfirmedRequests.remove(confirmedRequestNumber);
+            requestTimeouts.remove(confirmedRequestNumber);
 
+            LogTools.debug("%s Update #%d: %s recieved confirmation for Request #%d. Unfreezing.".formatted(crdtInfo.getActorDesignation(),
+                                                                                                            crdtInfo.getUpdateNumber(),
+                                                                                                            this.getClass().getSimpleName(),
+                                                                                                            confirmedRequestNumber));
+            if (!unconfirmedRequests.isEmpty())
+               LogTools.debug("%s Update #%d: Still unconfirmed requests: %s".formatted(crdtInfo.getActorDesignation(),
+                                                                                        crdtInfo.getUpdateNumber(),
+                                                                                        unconfirmedRequests));
             unfreeze();
          }
-         else
+      }
+   }
+
+   private void removeTimedOutEntries(TLongArrayList numbers, TLongLongHashMap timeouts, boolean areRequests)
+   {
+      timedOutEntries.clear();
+      for (int i = 0; i < numbers.size(); i++)
+      {
+         if (crdtInfo.getUpdateNumber() >= timeouts.get(numbers.get(i)))
          {
-            LogTools.error("Received a different request ID than sent. Sent: {} Recieved: {}", unconfirmedRequests, confirmationsRequestUUID);
+            timedOutEntries.add(numbers.get(i));
          }
+      }
+
+      for (int i = 0; i < timedOutEntries.size(); i++)
+      {
+         if (areRequests)
+         {
+            LogTools.error("%s Update #%d: %s never received confirmation for Request #%d".formatted(crdtInfo.getActorDesignation(),
+                                                                                                     crdtInfo.getUpdateNumber(),
+                                                                                                     this.getClass().getSimpleName(),
+                                                                                                     timedOutEntries.get(i)));
+         }
+
+         numbers.remove(timedOutEntries.get(i));
+         timeouts.remove(timedOutEntries.get(i));
       }
    }
 
