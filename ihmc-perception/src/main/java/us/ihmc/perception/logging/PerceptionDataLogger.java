@@ -547,7 +547,7 @@ public class PerceptionDataLogger
 
    public void storeBytesFromPointer(String namespace, BytePointer bytePointer)
    {
-      executorService.submit(() ->
+      //executorService.submit(() ->
                              {
                                 synchronized (hdf5Manager)
                                 {
@@ -558,7 +558,8 @@ public class PerceptionDataLogger
 
                                    hdf5Tools.storeBytes(group, imageCount, bytePointer);
                                 }
-                             });
+                             }
+                             //);
    }
 
    public void storeFloatsFromPointer(String namespace, FloatPointer floatPointer, int rows, int columns)
@@ -576,7 +577,7 @@ public class PerceptionDataLogger
 
    public void storeLongsFromPointer(String namespace, LongPointer longPointer, int columns)
    {
-      executorService.submit(() ->
+      //executorService.submit(() ->
                              {
                                 synchronized (hdf5Manager)
                                 {
@@ -590,7 +591,8 @@ public class PerceptionDataLogger
                                    longPointer.position(0);
                                    longPointer.limit(0);
                                 }
-                             });
+                             }
+                             //);
    }
 
    public void storeLongs(String namespace, long value)

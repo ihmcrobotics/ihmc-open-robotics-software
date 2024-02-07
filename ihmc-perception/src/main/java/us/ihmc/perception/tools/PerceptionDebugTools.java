@@ -346,7 +346,7 @@ public class PerceptionDebugTools
       OpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
 
       opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size((int) (image.cols() * scale), (int) (image.rows() * scale)));
-      display(tag, finalDisplayDepth, delay);
+      display(tag, finalDisplayDepth, delay, finalDisplayDepth.rows());
    }
 
    public void testProjection(Mat depth)
