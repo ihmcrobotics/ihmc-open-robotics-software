@@ -283,13 +283,13 @@ public class PlannerTools
                                                                    double defaultSwingDuration,
                                                                    double defaultInitialTransferDuration,
                                                                    double defaultTransferDuration,
-                                                                   double defaultFinalTransferDuration)
+                                                                   double finalTransferDuration)
    {
       return calculateFootstepCompletionTime(footstepPlan,
                                              defaultSwingDuration,
                                              defaultInitialTransferDuration,
                                              defaultTransferDuration,
-                                             defaultFinalTransferDuration,
+                                             finalTransferDuration,
                                              footstepPlan.getNumberOfSteps());
    }
 
@@ -302,7 +302,7 @@ public class PlannerTools
                                                         double defaultSwingDuration,
                                                         double defaultInitialTransferDuration,
                                                         double defaultTransferDuration,
-                                                        double defaultFinalTransferDuration,
+                                                        double finalTransferDuration,
                                                         int numberOfFootstepsToAddUp)
    {
       int numberOfSteps = footstepPlan.getNumberOfSteps();
@@ -317,10 +317,6 @@ public class PlannerTools
             if (i == 0)
             {
                planExecutionTime += defaultInitialTransferDuration;
-            }
-            else if (i == numberOfSteps - 1)
-            {
-               planExecutionTime += defaultFinalTransferDuration;
             }
             else
             {
@@ -341,6 +337,7 @@ public class PlannerTools
             planExecutionTime += swingDuration;
          }
       }
+      planExecutionTime += finalTransferDuration;
       return planExecutionTime;
    }
 }

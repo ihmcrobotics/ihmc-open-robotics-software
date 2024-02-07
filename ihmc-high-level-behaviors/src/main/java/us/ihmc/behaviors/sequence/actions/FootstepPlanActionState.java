@@ -112,7 +112,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
    public boolean areFramesInWorld()
    {
-      return referenceFrameLibrary.containsFrame(getDefinition().getParentFrameName());
+      return referenceFrameLibrary.containsFrame(getDefinition().getParentFrameName()) && goalFrame.isChildOfWorld();
    }
 
    public RecyclingArrayList<FootstepPlanActionFootstepState> getFootsteps()

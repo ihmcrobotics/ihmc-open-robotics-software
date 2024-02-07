@@ -1,22 +1,21 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
-import imgui.type.ImBoolean;
-import perception_msgs.msg.dds.BigVideoPacket;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.BigVideoPacket;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
-import us.ihmc.rdx.imgui.ImPlotDoublePlot;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.ImPlotDoublePlot;
+import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -47,6 +46,18 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
+
+      setActivenessChangeCallback(isAlive ->
+      {
+         if (isAlive && realtimeROS2Node == null)
+         {
+            subscribe();
+         }
+         else if (!isAlive && realtimeROS2Node != null)
+         {
+            unsubscribe();
+         }
+      });
    }
 
    private void subscribe()
@@ -94,12 +105,6 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.getHidden(getTitle() + "Subscribed"), subscribed))
-      {
-         setSubscribed(subscribed.get());
-      }
-      ImGuiTools.previousWidgetTooltip("Subscribed");
-      ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
       messageSizeReadout.renderImGuiWidgets();
@@ -115,18 +120,6 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
    {
       unsubscribe();
       super.destroy();
-   }
-
-   public void setSubscribed(boolean subscribed)
-   {
-      if (subscribed && realtimeROS2Node == null)
-      {
-         subscribe();
-      }
-      else if (!subscribed && realtimeROS2Node != null)
-      {
-         unsubscribe();
-      }
    }
 
    private void unsubscribe()

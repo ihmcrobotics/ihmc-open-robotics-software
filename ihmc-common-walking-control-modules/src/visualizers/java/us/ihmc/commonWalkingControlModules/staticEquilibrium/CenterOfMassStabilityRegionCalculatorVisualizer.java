@@ -44,11 +44,11 @@ public class CenterOfMassStabilityRegionCalculatorVisualizer
 
       while (!calculator.hasSolvedWholeRegion())
       {
-         calculator.update();
+         calculator.performCoMRegionQuery();
          scs2.simulateNow(1);
       }
 
-      ConvexPolygon2DReadOnly supportRegion0 = calculator.getSupportRegion();
+      ConvexPolygon2DReadOnly supportRegion0 = calculator.getFeasibleCoMRegion();
       for (int i = 0; i < supportRegion0.getNumberOfVertices(); i++)
       {
          System.out.println("\t" + supportRegion0.getVertex(i));
@@ -84,7 +84,7 @@ public class CenterOfMassStabilityRegionCalculatorVisualizer
       {
          double renderedHeight = 0.0;
 
-         ConvexPolygon2DReadOnly supportRegion = calculator.getSupportRegion();
+         ConvexPolygon2DReadOnly supportRegion = calculator.getFeasibleCoMRegion();
          supportRegionGraphics.identity();
          supportRegionGraphics.appendTranslation(0.0, 0.0, renderedHeight);
 

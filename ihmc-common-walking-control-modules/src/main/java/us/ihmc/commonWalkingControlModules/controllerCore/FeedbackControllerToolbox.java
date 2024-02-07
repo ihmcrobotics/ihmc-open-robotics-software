@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
+import us.ihmc.commonWalkingControlModules.controlModules.YoOrientationFrame;
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
+import us.ihmc.commonWalkingControlModules.controlModules.YoTranslationFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
@@ -32,6 +34,8 @@ import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -727,7 +731,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    }
 
    /**
-    * Retrieves and returns the control frame {@code YoSE3OffsetFrame} associated to the given
+    * Retrieves and returns a spatial feedback control frame {@code YoSE3OffsetFrame} associated to the given
     * end-effector, if it does not exist it is created.
     *
     * @param endEffector        the end-effector to which the control frame is associated.
@@ -736,11 +740,45 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     *                           variable is not a required variable and
     *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
     *                           {@code true}.
-    * @return the unique {@code YoSE3OffsetFrame} control frame associated with the given end-effector.
+    * @return a unique {@code YoSE3OffsetFrame} spatial feedback control frame associated with the given end-effector.
     */
-   public YoSE3OffsetFrame getOrCreateControlFrame(RigidBodyBasics endEffector, int controllerIndex, boolean isRequiredVariable)
+   public YoSE3OffsetFrame getOrCreateSpatialFeedbackControlFrame(RigidBodyBasics endEffector, int controllerIndex, boolean isRequiredVariable)
    {
-      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreateControlFrame(endEffector.getBodyFixedFrame(), isRequiredVariable);
+      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreateSpatialFeedbackControlFrame(endEffector.getBodyFixedFrame(), isRequiredVariable);
+   }
+
+   /**
+    * Retrieves and returns a point feedback control frame {@code YoTranslationFrame} associated to the given
+    * end-effector, if it does not exist it is created.
+    *
+    * @param endEffector        the end-effector to which the control frame is associated.
+    * @param controllerIndex    the index of the feedback controller requesting the data.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
+    * @return a unique {@code YoTranslationFrame} point feedback control frame associated with the given end-effector.
+    */
+   public YoTranslationFrame getOrCreatePointFeedbackControlFrame(RigidBodyBasics endEffector, int controllerIndex, boolean isRequiredVariable)
+   {
+      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreatePointFeedbackControlFrame(endEffector.getBodyFixedFrame(), isRequiredVariable);
+   }
+
+   /**
+    * Retrieves and returns an orientation feedback control frame {@code YoOrientationFrame} associated to the given
+    * end-effector, if it does not exist it is created.
+    *
+    * @param endEffector        the end-effector to which the control frame is associated.
+    * @param controllerIndex    the index of the feedback controller requesting the data.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
+    * @return a unique {@code YoOrientationFrame} orientation feedback control frame associated with the given end-effector.
+    */
+   public YoOrientationFrame getOrCreateOrientationFeedbackControlFrame(RigidBodyBasics endEffector, int controllerIndex, boolean isRequiredVariable)
+   {
+      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreateOrientationFeedbackControlFrame(endEffector.getBodyFixedFrame(), isRequiredVariable);
    }
 
    /**
@@ -889,6 +927,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       private final YoRegistry registry;
       private final YoRegistry debugRegistry;
       private final String namePrefix;
+      private final String controlFrameNameSuffix = "BodyFixedControlFrame";
+
       private final EnumMap<Type, FBPoint3D> positionDataMap = new EnumMap<>(Type.class);
       private final EnumMap<Type, FBQuaternion3D> orientationDataMap = new EnumMap<>(Type.class);
       private final EnumMap<Type, EnumMap<SpaceData3D, FBVector3D>> vectorDataMap = new EnumMap<>(Type.class);
@@ -897,7 +937,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
       private YoPID3DGains orientationGains;
       private YoPID3DGains positionGains;
-      private YoSE3OffsetFrame controlFrame;
+
+      private YoFrameVector3D controlFrameTranslationToParent;
+      private YoFrameQuaternion controlFrameRotationToParent;
+
+      private YoSE3OffsetFrame spatialFeedbackControlFrame;
+      private YoTranslationFrame pointFeedbackControlFrame;
+      private YoOrientationFrame orientationFeedbackControlFrame;
 
       private final List<FeedbackControllerData> clearableData = new ArrayList<>();
 
@@ -1028,11 +1074,46 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return positionGains;
       }
 
-      public YoSE3OffsetFrame getOrCreateControlFrame(ReferenceFrame parentFrame, boolean isRequiredVariable)
+      public YoSE3OffsetFrame getOrCreateSpatialFeedbackControlFrame(ReferenceFrame parentFrame, boolean isRequiredVariable)
       {
-         if (controlFrame == null)
-            controlFrame = new YoSE3OffsetFrame(namePrefix + "BodyFixedControlFrame", parentFrame, isRequiredVariable ? registry : debugRegistry);
-         return controlFrame;
+         if (spatialFeedbackControlFrame == null)
+            spatialFeedbackControlFrame = new YoSE3OffsetFrame(namePrefix + "Spatial" + controlFrameNameSuffix,
+                                                               getOrCreateControlFrameTranslationOffset(parentFrame, isRequiredVariable),
+                                                               getOrCreateControlFrameOrientationOffset(parentFrame, isRequiredVariable),
+                                                               parentFrame);
+         return spatialFeedbackControlFrame;
+      }
+
+      public YoTranslationFrame getOrCreatePointFeedbackControlFrame(ReferenceFrame parentFrame, boolean isRequiredVariable)
+      {
+         if (pointFeedbackControlFrame == null)
+            pointFeedbackControlFrame = new YoTranslationFrame(namePrefix + "Point" + controlFrameNameSuffix,
+                                                               getOrCreateControlFrameTranslationOffset(parentFrame, isRequiredVariable),
+                                                               parentFrame);
+         return pointFeedbackControlFrame;
+      }
+
+      public YoOrientationFrame getOrCreateOrientationFeedbackControlFrame(ReferenceFrame parentFrame, boolean isRequiredVariable)
+      {
+         if (orientationFeedbackControlFrame == null)
+            orientationFeedbackControlFrame = new YoOrientationFrame(namePrefix + "Orientation" + controlFrameNameSuffix,
+                                                                     getOrCreateControlFrameOrientationOffset(parentFrame, isRequiredVariable),
+                                                                     parentFrame);
+         return orientationFeedbackControlFrame;
+      }
+
+      private YoFrameVector3D getOrCreateControlFrameTranslationOffset(ReferenceFrame parentFrame, boolean isRequiredVariable)
+      {
+         if (controlFrameTranslationToParent == null)
+            controlFrameTranslationToParent = new YoFrameVector3D(namePrefix + controlFrameNameSuffix, parentFrame, isRequiredVariable ? registry : debugRegistry);
+         return controlFrameTranslationToParent;
+      }
+
+      private YoFrameQuaternion getOrCreateControlFrameOrientationOffset(ReferenceFrame parentFrame, boolean isRequiredVariable)
+      {
+         if (controlFrameRotationToParent == null)
+            controlFrameRotationToParent = new YoFrameQuaternion(namePrefix + controlFrameNameSuffix, parentFrame, isRequiredVariable ? registry : debugRegistry);
+         return controlFrameRotationToParent;
       }
 
       private static <K, E extends Enum<E>, V> EnumMap<E, V> getSubEnumMap(Map<K, EnumMap<E, V>> enclosingMap, K key, Class<E> subMapEnumType)

@@ -1,6 +1,5 @@
-package us.ihmc.perception.sceneGraph.multiBodies.door;
+package us.ihmc.behaviors.simulation.door;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -8,6 +7,10 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.scs2.definition.robot.*;
 import us.ihmc.scs2.definition.state.OneDoFJointState;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletMultiBodyLinkCollider;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletRobot;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimPrismaticJoint;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
@@ -27,6 +30,8 @@ import static us.ihmc.perception.sceneGraph.multiBodies.door.DoorModelParameters
  */
 public class DoorDefinition extends RobotDefinition
 {
+   public static final String DOOR_ROBOT_NAME = "door";
+
    private SixDoFJointState initialSixDoFState;
    private OneDoFJointState initialHingeState;
    private OneDoFJointState initialLeverState;
@@ -36,7 +41,7 @@ public class DoorDefinition extends RobotDefinition
 
    public DoorDefinition()
    {
-      super("door");
+      super(DOOR_ROBOT_NAME);
    }
 
    public DoorPanelDefinition getDoorPanelDefinition()
@@ -100,38 +105,54 @@ public class DoorDefinition extends RobotDefinition
       setRootBodyDefinition(rootBodyDefinition);
    }
 
-   public static void applyPDController(Robot robot)
+   public static void setupPhysics(Robot robot, SimulationSession simulationSession)
    {
       SimRevoluteJoint doorLeverJoint = (SimRevoluteJoint) robot.getJoint("doorLeverJoint");
       SimPrismaticJoint doorBoltJoint = (SimPrismaticJoint) robot.getJoint("doorBoltJoint");
 
-      // TODO: Make this happen at simulation rate instead of control rate
-      robot.getControllerManager().addController(() ->
+      simulationSession.addBeforePhysicsCallback(time ->
       {
-         double p = 2.0;
-         double d = 1.0;
+         double leverSpringK = DOOR_LEVER_MAX_TORQUE / DOOR_LEVER_MAX_TURN_ANGLE;
+         double leverDamping = 1.0;
 
-         double errorQ = doorLeverJoint.getQ();
-         double errorQd = doorLeverJoint.getQd();
+         double leverErrorQ = doorLeverJoint.getQ();
+         double leverErrorQd = doorLeverJoint.getQd();
 
-         doorLeverJoint.setTau(-p * errorQ - d * errorQd);
+         doorLeverJoint.setTau(-leverSpringK * leverErrorQ - leverDamping * leverErrorQd);
 
-         double angleOfFullPull = 0.4 * Math.PI / 2.0;
-         double pullAmountQ = -Math.abs(doorLeverJoint.getQ()) * DOOR_BOLT_TRAVEL / angleOfFullPull;
+         // Compute the bolt desired position as a proportion of the max bolt travel, the lever end stop,
+         // and current lever position
+         double boltDesiredQ = -Math.abs(doorLeverJoint.getQ()) * DOOR_BOLT_TRAVEL / DOOR_LEVER_MAX_TURN_ANGLE;
 
-         double boltFromPullAmountQ = doorBoltJoint.getQ() - pullAmountQ;
-         if (boltFromPullAmountQ < 0.0)
-            boltFromPullAmountQ = 0.0;
+         // Compute the error for the hard mechanism, which we simulated as a spring damper,
+         // but in real life it's a physical constraint. We remove any negative error, as this
+         // strong component should only ever serve to pull the latch in the opening direction.
+         double boltMechanismErrorQ = doorBoltJoint.getQ() - boltDesiredQ;
+         if (boltMechanismErrorQ < 0.0)
+            boltMechanismErrorQ = 0.0;
 
-         d = 5.0;
+         //
+         double boltSpringK = 8.0; // Light spring that tried to restore the bolt to zero position (fully extended)
+         double mechanismK = 1000.0; // Strong spring that simulates a hard mechanism
+         double boltKTerm = boltSpringK * doorBoltJoint.getQ() + mechanismK * boltMechanismErrorQ;
+         double boltDamping = 5.0;
+         double boltErrorQd = doorBoltJoint.getQd();
 
-         double springK = 8.0;
-         double mechanismK = 50.0;
-         errorQ = springK * doorBoltJoint.getQ() + mechanismK * boltFromPullAmountQ;
-         errorQd = doorBoltJoint.getQd();
-
-         doorBoltJoint.setTau(-errorQ - d * errorQd);
+         doorBoltJoint.setTau(-boltKTerm - boltDamping * boltErrorQd);
       });
+
+      if (simulationSession.getPhysicsEngine() instanceof BulletPhysicsEngine bulletPhysicsEngine)
+      {
+         for (BulletRobot bulletRobot : bulletPhysicsEngine.getBulletRobots())
+         {
+            if (bulletRobot.getName().equals(robot.getName()))
+            {
+               // The bolt should be slippery
+               BulletMultiBodyLinkCollider boltLinkCollider = bulletRobot.getBulletMultiBodyRobot().getBulletMultiBodyLinkCollider(3);
+               boltLinkCollider.setFriction(0.001);
+            }
+         }
+      }
    }
 
    public SixDoFJointState getInitialSixDoFState()

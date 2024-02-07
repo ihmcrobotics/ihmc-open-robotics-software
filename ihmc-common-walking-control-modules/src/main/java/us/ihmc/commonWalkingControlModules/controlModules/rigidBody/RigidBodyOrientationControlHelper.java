@@ -178,13 +178,13 @@ public class RigidBodyOrientationControlHelper
    private void setDefaultControlFrame()
    {
       controlFrameOrientation.setFromReferenceFrame(defaultControlFrame);
-      feedbackControlCommand.setBodyFixedOrientationToControl(controlFrameOrientation);
+      feedbackControlCommand.setControlFrameFixedInEndEffector(controlFrameOrientation);
    }
 
    private void setControlFrameOrientation(Orientation3DReadOnly controlFrameOrientationInBodyFrame)
    {
       controlFrameOrientation.set(controlFrameOrientationInBodyFrame);
-      feedbackControlCommand.setBodyFixedOrientationToControl(controlFrameOrientation);
+      feedbackControlCommand.setControlFrameFixedInEndEffector(controlFrameOrientation);
    }
 
    public static void modifyControlFrame(FrameQuaternionBasics desiredOrientationToModify, QuaternionReadOnly previousControlFrameOrientation,
@@ -197,7 +197,7 @@ public class RigidBodyOrientationControlHelper
    public void holdCurrent()
    {
       clear();
-      desiredOrientation.setIncludingFrame(controlFrameOrientation);
+      desiredOrientation.setIncludingFrame(bodyFrame, controlFrameOrientation);
       queueInitialPoint(desiredOrientation);
    }
 
