@@ -17,12 +17,12 @@
     "upperBound" : 1.0
   },
   "Feasible Contact Reward" : {
-    "value" : 533.980608,
+    "value" : 403.669715,
     "lowerBound" : 0.0,
     "upperBound" : 1000.0
   },
   "Goal Reward" : {
-    "value" : 97.647059,
+    "value" : 90.909094,
     "lowerBound" : 0.0,
     "upperBound" : 100.0
   },
@@ -57,7 +57,7 @@
     "upperBound" : 5.0
   },
   "Initial value cutoff" : {
-    "value" : 211,
+    "value" : 162,
     "lowerBound" : -1000,
     "upperBound" : 1000
   },
