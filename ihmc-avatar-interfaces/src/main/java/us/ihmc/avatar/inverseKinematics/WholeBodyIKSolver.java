@@ -1,13 +1,13 @@
 package us.ihmc.avatar.inverseKinematics;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
+import org.apache.commons.math3.analysis.function.Inverse;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -15,16 +15,15 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -95,8 +94,9 @@ public class WholeBodyIKSolver
                                                                   CONTROL_DT,
                                                                   new YoGraphicsListRegistry(),
                                                                   new YoRegistry("IK-Toolbox"));
-      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(this.ghostFullRobotModel, toolboxController.getDesiredReferenceFrames()));
-//      toolboxController.setInitialRobotConfiguration(syncedRobotModel);
+      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(this.ghostFullRobotModel,
+                                                                                         toolboxController.getDesiredReferenceFrames()));
+      //      toolboxController.setInitialRobotConfiguration(syncedRobotModel);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -108,13 +108,15 @@ public class WholeBodyIKSolver
       {
          if (this.ghostFullRobotModel.getHand(side) != null)
          {
-            armRigidBodyMessages.put(side, MessageTools.createKinematicsToolboxRigidBodyMessage(this.ghostFullRobotModel.getHand(side), desiredArmPoses.get(side)));
+            armRigidBodyMessages.put(side,
+                                     MessageTools.createKinematicsToolboxRigidBodyMessage(this.ghostFullRobotModel.getHand(side), desiredArmPoses.get(side)));
          }
          else
          {
             throw new RuntimeException("Ghost Robot has no hands");
          }
-         footRigidBodyMessages.put(side, MessageTools.createKinematicsToolboxRigidBodyMessage(this.ghostFullRobotModel.getFoot(side), desiredFootPoses.get(side)));
+         footRigidBodyMessages.put(side,
+                                   MessageTools.createKinematicsToolboxRigidBodyMessage(this.ghostFullRobotModel.getFoot(side), desiredFootPoses.get(side)));
       }
       pelvisMessage = MessageTools.createKinematicsToolboxRigidBodyMessage(this.ghostFullRobotModel.getPelvis(), desiredPelvisPose);
       pelvisMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1000));
@@ -122,7 +124,6 @@ public class WholeBodyIKSolver
       chestMessage = MessageTools.createKinematicsToolboxRigidBodyMessage(this.ghostFullRobotModel.getChest(), desiredChestPose);
       pelvisMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1000));
       pelvisMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(800));
-
    }
 
    public void initialize()
@@ -139,7 +140,7 @@ public class WholeBodyIKSolver
 
    public void update()
    {
-//      ghostFullRobotModel.getRootJoint().setJointConfiguration(toolboxController.getDesiredRootJoint().getJointPose());
+      //      ghostFullRobotModel.getRootJoint().setJointConfiguration(toolboxController.getDesiredRootJoint().getJointPose());
       MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(toolboxController.getDesiredOneDoFJoints(), ghostFullRobotModel.getOneDoFJoints());
       ghostFullRobotModel.updateFrames();
    }
@@ -149,6 +150,19 @@ public class WholeBodyIKSolver
       KinematicsToolboxConfigurationMessage configurationMessage = new KinematicsToolboxConfigurationMessage();
       configurationMessage.setDisableSupportPolygonConstraint(true);
       commandInputManager.submitMessage(configurationMessage);
+
+      toolboxController.getActiveOptimizationSettings().setComputeJointTorques(InverseKinematicsOptimizationSettingsCommand.ActivationState.ENABLED);
+      for (OneDoFJointBasics oneDoFJoint : ghostFullRobotModel.getOneDoFJoints())
+      {
+         if (oneDoFJoint.equals(this.ghostFullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH)))
+            toolboxController.getActiveOptimizationSettings().deactivateJoint(oneDoFJoint);
+         else if (oneDoFJoint.equals(this.ghostFullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.ANKLE_PITCH)))
+            toolboxController.getActiveOptimizationSettings().deactivateJoint(oneDoFJoint);
+         else if (oneDoFJoint.equals(this.ghostFullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH)))
+            toolboxController.getActiveOptimizationSettings().deactivateJoint(oneDoFJoint);
+         else
+            toolboxController.getActiveOptimizationSettings().activateJoint(oneDoFJoint);
+      }
 
       HumanoidKinematicsToolboxConfigurationMessage humanoidConfigurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
       humanoidConfigurationMessage.setEnableAutoSupportPolygon(false);
@@ -181,23 +195,20 @@ public class WholeBodyIKSolver
          // Add messages for feet
          commandInputManager.submitMessage(footRigidBodyMessages.get(side));
       }
-//      commandInputManager.submitMessage(this.pelvisMessage);
-//      commandInputManager.submitMessage(this.chestMessage);
+      //      commandInputManager.submitMessage(this.pelvisMessage);
+      //      commandInputManager.submitMessage(this.chestMessage);
 
       // Hold the current pose for the chest and pelvis
       KinematicsToolboxRigidBodyMessage holdPelvisMessage = KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose(ghostFullRobotModel.getPelvis());
       holdPelvisMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
-      holdPelvisMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(100));
+      holdPelvisMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(200));
       KinematicsToolboxRigidBodyMessage holdChestMessage = KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose(ghostFullRobotModel.getChest());
       holdChestMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
       holdChestMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(100));
       commandInputManager.submitMessage(holdPelvisMessage);
       commandInputManager.submitMessage(holdChestMessage);
 
-
       toolboxController.updateRobotConfigurationData(extractRobotConfigurationData(ghostFullRobotModel));
-
-
 
       isBusy = true;
       for (int i = 0; i < NUM_ITERATIONS; i++)
@@ -206,8 +217,8 @@ public class WholeBodyIKSolver
       }
       isBusy = false;
 
-//      if (toolboxController.getSolution().getSolutionQuality() > 10.0)
-//         LogTools.info("Bad solution quality for IK {}", toolboxController.getSolution().getSolutionQuality());
+      //      if (toolboxController.getSolution().getSolutionQuality() > 10.0)
+      //         LogTools.info("Bad solution quality for IK {}", toolboxController.getSolution().getSolutionQuality());
 
    }
 
@@ -237,7 +248,8 @@ public class WholeBodyIKSolver
    public void updateDesiredHandPose(RobotSide side, FramePose3D desiredHandPose)
    {
       desiredArmPoses.get(side).set(desiredHandPose);
-      KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(ghostFullRobotModel.getHand(side), desiredArmPoses.get(side));
+      KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(ghostFullRobotModel.getHand(side),
+                                                                                                       desiredArmPoses.get(side));
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(5));
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(5));
       armRigidBodyMessages.get(side).set(message);
@@ -246,8 +258,9 @@ public class WholeBodyIKSolver
    public void updateDesiredFootPose(RobotSide side, FramePose3D desiredFootPose)
    {
       desiredFootPoses.get(side).set(desiredFootPose);
-//      ghostFullRobotModel.getSoleFrame(side).get
-      KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(ghostFullRobotModel.getFoot(side), desiredFootPoses.get(side));
+      //      ghostFullRobotModel.getSoleFrame(side).get
+      KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(ghostFullRobotModel.getFoot(side),
+                                                                                                       desiredFootPoses.get(side));
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(5));
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(5));
       footRigidBodyMessages.get(side).set(message);
