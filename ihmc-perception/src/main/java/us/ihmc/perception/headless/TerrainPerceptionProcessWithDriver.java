@@ -206,6 +206,7 @@ public class TerrainPerceptionProcessWithDriver
     */
    private void update()
    {
+      ros2PropertySetGroup.update();
       if (realsense.readFrameData())
       {
          realsense.updateDataBytePointers();
