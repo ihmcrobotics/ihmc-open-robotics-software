@@ -53,7 +53,6 @@ public class RDXCenterposeSceneGraphDemo
                   = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
                                                       DomainFactory.PubSubImplementation.FAST_RTPS,
                                                       PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            zed2LeftColorImageVisualizer.setSubscribed(true);
             zed2LeftColorImageVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2LeftColorImageVisualizer);
 
@@ -70,7 +69,6 @@ public class RDXCenterposeSceneGraphDemo
                                                            DomainFactory.PubSubImplementation.FAST_RTPS,
                                                            PerceptionAPI.ZED2_DEPTH,
                                                            PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            zed2ColoredPointCloudVisualizer.setSubscribed(true);
             zed2ColoredPointCloudVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 

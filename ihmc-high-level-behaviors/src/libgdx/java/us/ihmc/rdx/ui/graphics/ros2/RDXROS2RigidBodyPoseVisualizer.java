@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import geometry_msgs.PoseStamped;
 import imgui.internal.ImGui;
-import imgui.type.ImBoolean;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -17,10 +16,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
+import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
@@ -46,7 +45,6 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
    private ROS2Node ros2Node;
    private final String titleBeforeAdditions;
    private final DomainFactory.PubSubImplementation pubSubImplementation;
-   private final ImBoolean subscribed = new ImBoolean(false);
    private final Object syncObject = new Object();
    private final Pose3D message = new Pose3D();
 
@@ -56,6 +54,18 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
       titleBeforeAdditions = title;
       this.topic = topic;
       this.pubSubImplementation = pubSubImplementation;
+
+      setActivenessChangeCallback(isActive ->
+      {
+         if (isActive && ros2Node == null)
+         {
+            subscribe();
+         }
+         else if (!isActive && ros2Node != null)
+         {
+            unsubscribe();
+         }
+      });
    }
 
    @Override
@@ -91,8 +101,6 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
 
    private void subscribe()
    {
-      subscribed.set(true);
-
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
 
       new IHMCROS2Callback<>(ros2Node, PerceptionAPI.MOCAP_RIGID_BODY, (message) ->
@@ -101,21 +109,8 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
       });
    }
 
-   public void setSubscribed(boolean subscribed)
-   {
-      if (subscribed && ros2Node == null)
-      {
-         subscribe();
-      }
-      else if (!subscribed && ros2Node != null)
-      {
-         unsubscribe();
-      }
-   }
-
    private void unsubscribe()
    {
-      subscribed.set(false);
       if (ros2Node != null)
       {
          ros2Node.destroy();
