@@ -141,6 +141,11 @@ public class RDXFootstepGraphic implements RenderableProvider
 
    }
 
+   public void setColor(Color color)
+   {
+      this.color.set(color);
+   }
+
    public boolean getMouseHovering()
    {
       return mouseHovering;

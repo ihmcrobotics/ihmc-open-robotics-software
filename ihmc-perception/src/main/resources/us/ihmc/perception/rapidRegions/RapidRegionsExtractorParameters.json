@@ -26,12 +26,12 @@
     "upperBound" : 1.0
   },
   "Merge angular threshold" : {
-    "value" : 0.970874,
+    "value" : 0.889163,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Connection threshold" : {
-    "value" : 6,
+    "value" : 5,
     "lowerBound" : 0,
     "upperBound" : 8
   },
