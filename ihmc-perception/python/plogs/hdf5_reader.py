@@ -300,3 +300,8 @@ def plot_position(start_index, end_index, data_list, style_list, tag, type_strin
 
 
     plt.show()
+
+def load_raw_height_maps(data, namespace, index):
+    height_map = data[namespace][:]
+    return height_map
+    
