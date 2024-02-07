@@ -15,7 +15,7 @@
     "lowerBound" : 1,
     "upperBound" : 100
   },
-  "Rapid regions enabled" : false,
+  "Rapid regions enabled" : true,
   "Height map enabled" : true,
   "Logging enabled" : false,
   "Publish color" : true,
