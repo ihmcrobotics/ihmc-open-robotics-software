@@ -83,6 +83,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final List<YoMatrix> inertialParametersThetaBasisWatchers = new ArrayList<>();
 
    private final Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets;
+   private final RigidBodyBasics[] regressorModelBodiesToProcess;
    private final DMatrixRMaj[] regressorBlocks;
    private final DMatrixRMaj regressor;
 
@@ -119,7 +120,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       RigidBodyBasics clonedElevatorForEstimates = MultiBodySystemFactories.cloneMultiBodySystem(actualRobotModel.getElevator(),
                                                                                      actualRobotModel.getModelStationaryFrame(),
                                                                                      "_estimate");
-      estimateRobotModel = new FullHumanoidRobotModelWrapper(clonedElevatorForEstimates, true);
+      estimateRobotModel = new FullHumanoidRobotModelWrapper(clonedElevatorForEstimates, false);
       estimateModelBodies = estimateRobotModel.getRootBody().subtreeArray();
       yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(actualRobotModel.getRootBody(), registry);
       ellipsoidGraphicGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(yoInertiaEllipsoids);
@@ -127,7 +128,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       RigidBodyBasics clonedElevatorForInverseDynamics = MultiBodySystemFactories.cloneMultiBodySystem(actualRobotModel.getElevator(),
                                                                                                  actualRobotModel.getModelStationaryFrame(),
                                                                                                  "_inverseDynamics");
-      inverseDynamicsRobotModel = new FullHumanoidRobotModelWrapper(clonedElevatorForInverseDynamics, true);
+      inverseDynamicsRobotModel = new FullHumanoidRobotModelWrapper(clonedElevatorForInverseDynamics, false);
       inverseDynamicsModelBodies = inverseDynamicsRobotModel.getRootBody().subtreeArray();
       inverseDynamicsModelJoints = inverseDynamicsRobotModel.getRootJoint().subtreeList();
       inverseDynamicsCalculator = new InverseDynamicsCalculator(inverseDynamicsRobotModel.getElevator());
@@ -156,6 +157,19 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       for (int i = 0; i < nNonEmptyBasisSets; i++)
          regressorBlocks[i] = new DMatrixRMaj(nDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
       regressor = new DMatrixRMaj(nDoFs, estimateSize);
+
+      zeroInverseDynamicsParameters(inverseDynamicsModelBodies, basisSets);
+
+      regressorModelBodiesToProcess = new RigidBodyBasics[nNonEmptyBasisSets];
+      int regressorIndex = 0;
+      for (int i = 0; i < basisSets.length; ++i)
+      {
+         if (!basisSets[i].isEmpty())
+         {
+            regressorModelBodiesToProcess[regressorIndex] = regressorModelBodies[i];
+            regressorIndex++;
+         }
+      }
 
       this.footSwitches = toolbox.getFootSwitches();
       contactWrenches = new SideDependentList<>();
@@ -277,22 +291,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          updateContactWrenches();
          updateWholeSystemTorques();
 
-
          regressorTimer.startMeasurement();
-         zeroInverseDynamicsParameters(inverseDynamicsModelBodies, basisSets);
          inverseDynamicsCalculator.compute();
+         regressorCalculator.compute(regressorModelBodiesToProcess);
          regressorTimer.stopMeasurement();
 
-         int regressorIndex = 0;
-         for (int i = 0; i < regressorModelBodies.length; i++)
-         {
-            if (!basisSets[i].isEmpty())
-            {
-               regressorCalculator.compute(regressorModelBodies[i]);
-               regressorBlocks[regressorIndex].set(regressorCalculator.getJointTorqueRegressorMatrixBlock(regressorModelBodies[i]));
-               regressorIndex++;
-            }
-         }
+         for (int i = 0; i < regressorModelBodiesToProcess.length; i++)
+            regressorBlocks[i].set(regressorCalculator.getJointTorqueRegressorMatrixBlock(regressorModelBodiesToProcess[i]));
          packRegressorFromBlocks(regressorBlocks, basisSets, regressor);
 
          // KF stuff
@@ -488,10 +493,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          if (!basisSet.isEmpty())
          {
-            for (JointTorqueRegressorCalculator.SpatialInertiaBasisOption option : basisSet)
+            for (int i = 0; i < JointTorqueRegressorCalculator.SpatialInertiaBasisOption.values.length; ++i)
             {
-               MatrixMissingTools.setMatrixColumn(regressorToPack, regressorToPackColumnIndex, regressorBlocks[regressorBlockIndex], option.ordinal());
-               regressorToPackColumnIndex++;
+               if (basisSet.contains(JointTorqueRegressorCalculator.SpatialInertiaBasisOption.values[i]))
+               {
+                  MatrixMissingTools.setMatrixColumn(regressorToPack, regressorToPackColumnIndex, regressorBlocks[regressorBlockIndex], i);
+                  regressorToPackColumnIndex++;
+                  }
             }
             regressorBlockIndex++;
          }
