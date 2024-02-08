@@ -24,7 +24,6 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.simulation.bullet.RDXBulletPhysicsManager;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectLibrary;
@@ -50,7 +49,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
    private final RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo();
    private final RDX3DPanel panel3D;
    private final RDXPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
-   private final RDXBulletPhysicsManager bulletPhysicsManager = new RDXBulletPhysicsManager();
 
    private final TreeSet<String> environmentFileNames = new TreeSet<>();
    private final Point3D tempIntersection = new Point3D();
@@ -78,7 +76,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    public void create()
    {
-      bulletPhysicsManager.create();
       pose3DGizmo.create(panel3D);
       panel3D.getScene().addRenderableProvider(this::getRenderables);
       panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
@@ -112,8 +109,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
                selectedObject.setPositionInWorld(pickPoint);
                pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
 
-               selectedObject.copyThisTransformToBulletMultiBody();
-
                if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
                {
                   isPlacing = false;
@@ -123,8 +118,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
             {
                pose3DGizmo.process3DViewInput(viewInput);
                selectedObject.setTransformToWorld(pose3DGizmo.getTransformToParent());
-
-               selectedObject.copyThisTransformToBulletMultiBodyParentOnly();
 
                intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
                if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
@@ -336,7 +329,7 @@ public class RDXEnvironmentBuilder extends RDXPanel
                tempTransform.set(tempOrientation, tempTranslation);
                object.setTransformToWorld(tempTransform);
                addObject(object);
-               object.copyThisTransformToBulletMultiBody();
+//               object.copyThisTransformToBulletMultiBody();
             }
             else
             {
@@ -394,7 +387,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
    public void removeObject(RDXEnvironmentObject environmentObject)
    {
       allObjects.remove(environmentObject);
-      environmentObject.removeFromBullet();
 
       if (environmentObject instanceof RDXPointLightObject lightObject)
       {
@@ -446,11 +438,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
             intersectedObject.getCollisionMeshRenderables(renderables, pool);
          }
       }
-   }
-
-   public void destroy()
-   {
-      bulletPhysicsManager.destroy();
    }
 
    public ArrayList<RDXEnvironmentObject> getAllObjects()
