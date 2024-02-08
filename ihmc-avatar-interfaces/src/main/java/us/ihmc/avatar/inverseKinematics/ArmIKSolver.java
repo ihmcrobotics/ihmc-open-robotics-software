@@ -198,6 +198,7 @@ public class ArmIKSolver
       handDesiredAngularVelocity.changeFrame(workHand.getBodyFixedFrame());
       handDesiredLinearVelocity.changeFrame(workHand.getBodyFixedFrame());
 
+      // Perform the position only solution which iterates many times
       solve();
 
       // Populate the spatial velocity for the IK command list
@@ -214,7 +215,7 @@ public class ArmIKSolver
       // Use this to compute the desired velocity.
       controllerCore.compute(controllerCoreCommand);
 
-      // Feed the solution velocity back into the working model.
+      // Feed the solution velocity back into the working model and compute once
       ControllerCoreOutput controllerCoreOutput = controllerCore.getControllerCoreOutput();
       JointDesiredOutputListReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
       for (int j = 0; j < workingOneDoFJoints.length; j++)
