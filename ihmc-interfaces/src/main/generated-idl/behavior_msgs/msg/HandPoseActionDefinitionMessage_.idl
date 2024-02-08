@@ -42,6 +42,8 @@ module behavior_msgs
          * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
          */
         boolean joint_space_control;
+        double linear_position_weight;
+        double angular_position_weight;
       };
     };
   };

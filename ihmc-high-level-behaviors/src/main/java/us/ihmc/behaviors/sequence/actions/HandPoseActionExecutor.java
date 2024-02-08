@@ -182,13 +182,12 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
          SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
          se3TrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
-         // Select all axes and use default weights
-         // se3TrajectoryMessage.getLinearWeightMatrix().setXWeight(50.0);
-         // se3TrajectoryMessage.getLinearWeightMatrix().setYWeight(50.0);
-         // se3TrajectoryMessage.getLinearWeightMatrix().setZWeight(50.0);
-         // se3TrajectoryMessage.getAngularWeightMatrix().setXWeight(50.0);
-         // se3TrajectoryMessage.getAngularWeightMatrix().setYWeight(50.0);
-         // se3TrajectoryMessage.getAngularWeightMatrix().setZWeight(50.0);
+         se3TrajectoryMessage.getLinearWeightMatrix().setXWeight(getDefinition().getLinearPositionWeight());
+         se3TrajectoryMessage.getLinearWeightMatrix().setYWeight(getDefinition().getLinearPositionWeight());
+         se3TrajectoryMessage.getLinearWeightMatrix().setZWeight(getDefinition().getLinearPositionWeight());
+         se3TrajectoryMessage.getAngularWeightMatrix().setXWeight(getDefinition().getAngularPositionWeight());
+         se3TrajectoryMessage.getAngularWeightMatrix().setYWeight(getDefinition().getAngularPositionWeight());
+         se3TrajectoryMessage.getAngularWeightMatrix().setZWeight(getDefinition().getAngularPositionWeight());
          se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameID);
          SE3TrajectoryPointMessage se3TrajectoryPointMessage = se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add();
          se3TrajectoryPointMessage.setTime(getDefinition().getTrajectoryDuration());
