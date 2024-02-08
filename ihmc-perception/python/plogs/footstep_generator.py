@@ -31,10 +31,25 @@ def run_footstep_generator(height_map):
 
     print(valid_sequences)
 
+def load_height_maps(data):
+    height_maps = []
+    for i in range(len(data.keys())):
+        height_map = load_raw_height_maps(data, "matrix_" + str(i))
+        height_maps.append(height_map)
+    return height_maps
+
+
 if __name__ == "__main__":
     # Load the data
-    data = h5py.File("/home/bmishra/.ihmc/logs/perception/flat_ground.hdf5", "r")
+    data = h5py.File("/home/bmishra/.ihmc/logs/perception/horizontal_stairs.hdf5", "r")
 
-    height_map = load_raw_height_maps(data, "/matrix", 0)
+    height_maps = load_height_maps(data)
 
-    print(height_map)
+    print("Total Height Maps: ", len(height_maps))
+
+    for index, height_map in enumerate(height_maps):
+        print("Plotting Height Map: ", index, height_map.shape) 
+
+        show_height_map(height_map, 10)
+
+    
