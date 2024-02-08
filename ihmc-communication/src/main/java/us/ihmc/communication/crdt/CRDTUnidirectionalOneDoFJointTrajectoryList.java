@@ -13,7 +13,7 @@ public class CRDTUnidirectionalOneDoFJointTrajectoryList extends CRDTUnidirectio
 {
    public CRDTUnidirectionalOneDoFJointTrajectoryList(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
    {
-      super(sideThatCanModify, crdtInfo, () -> new RecyclingArrayList<>(RecyclingArrayList::new));
+      super(sideThatCanModify, crdtInfo, () -> new RecyclingArrayList<>(() -> new RecyclingArrayList<>(OneDoFTrajectoryPoint::new)));
    }
 
    public OneDoFTrajectoryPointReadOnly getValueReadOnly(int jointIndex, int trajectoryPointIndex)
