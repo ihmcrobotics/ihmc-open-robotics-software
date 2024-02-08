@@ -192,7 +192,6 @@ public class RDXPerceptionUI
          @Override
          public void dispose()
          {
-            environmentBuilder.destroy();
             perceptionLoggingPanel.destroy();
             globalVisualizersUI.destroy();
             baseUI.dispose();
