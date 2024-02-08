@@ -31,8 +31,10 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    private final ImGuiSliderDoubleWrapper rotationWidget;
    private final ImGuiSliderDoubleWrapper maxLinearVelocityWidget;
    private final ImGuiSliderDoubleWrapper maxAngularVelocityWidget;
+   private final ImBooleanWrapper jointspaceOnlyWidget;
    private final ImGuiSliderDoubleWrapper linearPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper angularPositionWeightWidget;
+   private final ImGuiSliderDoubleWrapper jointspaceWeightWidget;
    private final RDXSelectablePose3DGizmo screwAxisGizmo;
    private final RDXDashedLineMesh screwAxisGraphic = new RDXDashedLineMesh(Color.WHITE, Axis3D.X, 0.04);
    private final RDXTrajectoryGraphic trajectoryGraphic = new RDXTrajectoryGraphic();
@@ -70,6 +72,15 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
                                                               getDefinition()::getMaxAngularVelocity,
                                                               getDefinition()::setMaxAngularVelocity);
       maxAngularVelocityWidget.addWidgetAligner(widgetAligner);
+      jointspaceOnlyWidget = new ImBooleanWrapper(getDefinition()::getJointspaceOnly,
+                                                  getDefinition()::setJointspaceOnly,
+                                                      imBoolean -> {
+                                                         if (ImGui.radioButton(labels.get("Hybrid"), !imBoolean.get()))
+                                                            imBoolean.set(false);
+                                                         ImGui.sameLine();
+                                                         if (ImGui.radioButton(labels.get("Jointspace Only"), imBoolean.get()))
+                                                            imBoolean.set(true);
+                                                      });
       linearPositionWeightWidget = new ImGuiSliderDoubleWrapper("Linear Position Weight", "%.2f", 0.0, 70.0,
                                                                 getDefinition()::getLinearPositionWeight,
                                                                 getDefinition()::setLinearPositionWeight);
@@ -80,6 +91,11 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
                                                                 getDefinition()::setAngularPositionWeight);
       angularPositionWeightWidget.addButton("Use Default Weights", () -> getDefinition().setAngularPositionWeight(-1.0));
       angularPositionWeightWidget.addWidgetAligner(widgetAligner);
+      jointspaceWeightWidget = new ImGuiSliderDoubleWrapper("Jointspace Weight", "%.2f", 0.0, 70.0,
+                                                            getDefinition()::getJointspaceWeight,
+                                                            getDefinition()::setJointspaceWeight);
+      jointspaceWeightWidget.addButton("Use Default Weights", () -> getDefinition().setJointspaceWeight(-1.0));
+      jointspaceWeightWidget.addWidgetAligner(widgetAligner);
    }
 
    @Override
@@ -119,8 +135,10 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       rotationWidget.renderImGuiWidget();
       maxLinearVelocityWidget.renderImGuiWidget();
       maxAngularVelocityWidget.renderImGuiWidget();
+      jointspaceOnlyWidget.renderImGuiWidget();
       linearPositionWeightWidget.renderImGuiWidget();
       angularPositionWeightWidget.renderImGuiWidget();
+      jointspaceWeightWidget.renderImGuiWidget();
    }
 
    @Override
