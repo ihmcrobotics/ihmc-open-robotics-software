@@ -127,7 +127,6 @@ public class RDXSteppableRegionCalculatorDemo
             RDXROS2PointCloudVisualizer ousterPointCloudVisualizer = new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
                                                                                                      ros2Node,
                                                                                                      PerceptionAPI.OUSTER_LIDAR_SCAN);
-            ousterPointCloudVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(ousterPointCloudVisualizer);
 
             baseUI.getImGuiPanelManager().addPanel(ousterLidarSimulator);

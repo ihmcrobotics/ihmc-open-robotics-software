@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStaticStabilityRegionCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -17,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -26,7 +28,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector2D;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,11 +35,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
-import us.ihmc.yoVariables.listener.YoParameterChangedListener;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.parameters.YoParameter;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -51,8 +48,6 @@ public class PelvisICPBasedTranslationManager
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble supportPolygonSafeMargin = new YoDouble("supportPolygonSafeMargin", registry);
-   private final DoubleProvider frozenOffsetDecayBreakFrequency = new DoubleParameter("frozenOffsetDecayBreakFrequency", registry, 0.0531);
-   private final double dt;
 
    private final YoFramePoint2D desiredPelvisPosition = new YoFramePoint2D("desiredPelvis", worldFrame, registry);
    private final YoFramePoint2D currentPelvisPosition = new YoFramePoint2D("currentPelvis", worldFrame, registry);
@@ -75,7 +70,7 @@ public class PelvisICPBasedTranslationManager
 
    private final YoBoolean isEnabled = new YoBoolean("isPelvisTranslationManagerEnabled", registry);
    private final YoBoolean isRunning = new YoBoolean("isPelvisTranslationManagerRunning", registry);
-   private final YoBoolean isFrozen = new YoBoolean("isPelvisTranslationManagerFrozen", registry);
+   private final YoBoolean isResetting = new YoBoolean("isPelvisTranslationManagerResetting", registry);
 
    private final BooleanParameter manualMode = new BooleanParameter("manualModeICPOffset", registry, false);
 
@@ -84,6 +79,9 @@ public class PelvisICPBasedTranslationManager
 
    private final YoBoolean isTrajectoryStopped = new YoBoolean("isPelvisTranslationalTrajectoryStopped", registry);
 
+   private final YoDouble resetTime = new YoDouble("resetTime", registry);
+   private final YoDouble resetDuration = new YoDouble("resetDuration", registry);
+
    private ReferenceFrame supportFrame;
    private final ReferenceFrame pelvisZUpFrame;
    private final ReferenceFrame midFeetZUpFrame;
@@ -91,13 +89,15 @@ public class PelvisICPBasedTranslationManager
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private FrameConvexPolygon2DReadOnly supportPolygon;
+   private final CenterOfMassStaticStabilityRegionCalculator multiContactCoMRegionCalculator;
 
    private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();
    private final FramePoint2D tempPosition2d = new FramePoint2D();
    private final FrameVector2D tempError2d = new FrameVector2D();
    private final FrameVector2D tempICPOffset = new FrameVector2D();
-   private final FrameVector2D icpOffsetForFreezing = new FrameVector2D();
+   private final FrameVector2D icpOffsetWhenResetRequested = new FrameVector2D();
+   private final FrameVector2D icpOffsetForReset = new FrameVector2D();
 
    private final YoLong lastCommandId;
 
@@ -119,8 +119,6 @@ public class PelvisICPBasedTranslationManager
                                            BipedSupportPolygons bipedSupportPolygons,
                                            YoRegistry parentRegistry)
    {
-      dt = controllerToolbox.getControlDT();
-
       supportPolygonSafeMargin.set(pelvisTranslationICPSupportPolygonSafeMargin);
 
       yoTime = controllerToolbox.getYoTime();
@@ -128,6 +126,7 @@ public class PelvisICPBasedTranslationManager
       pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
       midFeetZUpFrame = controllerToolbox.getReferenceFrames().getMidFeetZUpFrame();
       soleZUpFrames = controllerToolbox.getReferenceFrames().getSoleZUpFrames();
+      multiContactCoMRegionCalculator = controllerToolbox.getMultiContactRegionCalculator();
 
       this.bipedSupportPolygons = bipedSupportPolygons;
 
@@ -140,14 +139,7 @@ public class PelvisICPBasedTranslationManager
       integralGain.set(1.5);
       maximumIntegralError.set(0.08);
 
-      manualMode.addListener(new YoParameterChangedListener()
-      {
-         @Override
-         public void changed(YoParameter v)
-         {
-            initialize();
-         }
-      });
+      manualMode.addListener(v -> initialize());
 
       String namePrefix = "PelvisXYTranslation";
       lastCommandId = new YoLong(namePrefix + "LastCommandId", registry);
@@ -162,20 +154,29 @@ public class PelvisICPBasedTranslationManager
       parentRegistry.addChild(registry);
    }
 
-   public void compute(RobotSide supportLeg)
+   public void compute(RobotSide supportLeg, boolean isUpperBodyLoadBearing)
    {
       tempPosition2d.setToZero(pelvisZUpFrame);
       tempPosition2d.changeFrame(worldFrame);
       currentPelvisPosition.set(tempPosition2d);
 
-      if (isFrozen.getBooleanValue())
+      if (isResetting.getBooleanValue())
       {
-         double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(frozenOffsetDecayBreakFrequency.getValue(), dt);
-         icpOffsetForFreezing.scale(alpha);
+         double alpha = EuclidCoreTools.clamp(1.0 - (yoTime.getValue() - resetTime.getValue()) / resetDuration.getValue(), 0.0, 1.0);
+         icpOffsetForReset.setIncludingFrame(icpOffsetWhenResetRequested);
+         icpOffsetForReset.scale(alpha);
+         pelvisPositionCumulatedError.setToZero();
+         if (yoTime.getValue() - resetTime.getValue() > resetDuration.getValue())
+            disable();
          return;
       }
 
-      if (supportLeg == null)
+      if (isUpperBodyLoadBearing && multiContactCoMRegionCalculator.hasSolvedWholeRegion())
+      {
+         supportFrame = multiContactCoMRegionCalculator.getFeasibleCoMRegion().getReferenceFrame();
+         supportPolygon = multiContactCoMRegionCalculator.getFeasibleCoMRegion();
+      }
+      else if (supportLeg == null)
       {
          supportFrame = midFeetZUpFrame;
          supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
@@ -245,9 +246,9 @@ public class PelvisICPBasedTranslationManager
       return isEnabled.getBooleanValue();
    }
 
-   public void goToHome()
+   public void goToHome(double trajectoryDuration)
    {
-      freeze();
+      reset(trajectoryDuration);
    }
 
    public void holdCurrentPosition()
@@ -444,13 +445,7 @@ public class PelvisICPBasedTranslationManager
 
       if (se3Trajectory.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
-         if (isRunning.getBooleanValue())
-            tempPosition.setIncludingFrame(positionTrajectoryGenerator.getPosition());
-         else
-            tempPosition.setToZero(pelvisZUpFrame);
-         tempPosition.changeFrame(worldFrame);
-         tempVelocity.setToZero(worldFrame);
-
+         packCurrentDesiredPositionAndVelocity(tempPosition, tempVelocity);
          positionTrajectoryGenerator.clear();
          positionTrajectoryGenerator.changeFrame(worldFrame);
          positionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
@@ -476,6 +471,29 @@ public class PelvisICPBasedTranslationManager
       positionTrajectoryGenerator.initialize();
       isTrajectoryStopped.set(false);
       isRunning.set(true);
+      isResetting.set(false);
+   }
+
+   private void packCurrentDesiredPositionAndVelocity(FramePoint3D currentDesiredPosition, FrameVector3D currentDesiredVelocity)
+   {
+      if (isResetting.getValue())
+      {
+         tempPosition2d.setToZero(pelvisZUpFrame);
+         tempPosition2d.changeFrame(icpOffsetForReset.getReferenceFrame());
+         tempPosition2d.scaleAdd(1.0 / proportionalGain.getValue(), icpOffsetForReset, tempPosition2d);
+         currentDesiredPosition.setIncludingFrame(tempPosition2d, 0.0);
+      }
+      else if (isRunning.getBooleanValue())
+      {
+         currentDesiredPosition.setIncludingFrame(positionTrajectoryGenerator.getPosition());
+      }
+      else
+      {
+         currentDesiredPosition.setToZero(pelvisZUpFrame);
+      }
+
+      currentDesiredPosition.changeFrame(worldFrame);
+      currentDesiredVelocity.setToZero(worldFrame);
    }
 
    private int queueExceedingTrajectoryPointsIfNeeded(PelvisTrajectoryCommand command)
@@ -558,7 +576,7 @@ public class PelvisICPBasedTranslationManager
       if (!isEnabled.getBooleanValue() || (!isRunning.getBooleanValue() && !manualMode.getValue()))
       {
          desiredICPOffset.setToZero();
-         icpOffsetForFreezing.setToZero();
+         icpOffsetForReset.setToZero();
          desiredICPToModify.changeFrame(worldFrame);
          desiredCoMToModify.changeFrame(worldFrame);
          desiredCoPToModify.changeFrame(worldFrame);
@@ -575,15 +593,15 @@ public class PelvisICPBasedTranslationManager
          tempICPOffset.changeFrame(supportFrame);
       }
 
-      if (isFrozen.getBooleanValue())
+      if (isResetting.getBooleanValue())
       {
-         desiredICPOffset.setMatchingFrame(icpOffsetForFreezing);
-         desiredICPToModify.changeFrame(icpOffsetForFreezing.getReferenceFrame());
-         desiredCoPToModify.changeFrame(icpOffsetForFreezing.getReferenceFrame());
-         desiredCoMToModify.changeFrame(icpOffsetForFreezing.getReferenceFrame());
-         desiredICPToModify.add(icpOffsetForFreezing);
-         desiredCoPToModify.add(icpOffsetForFreezing);
-         desiredCoMToModify.add(icpOffsetForFreezing);
+         desiredICPOffset.setMatchingFrame(icpOffsetForReset);
+         desiredICPToModify.changeFrame(icpOffsetForReset.getReferenceFrame());
+         desiredCoPToModify.changeFrame(icpOffsetForReset.getReferenceFrame());
+         desiredCoMToModify.changeFrame(icpOffsetForReset.getReferenceFrame());
+         desiredICPToModify.add(icpOffsetForReset);
+         desiredCoPToModify.add(icpOffsetForReset);
+         desiredCoMToModify.add(icpOffsetForReset);
       }
 
       else
@@ -596,8 +614,8 @@ public class PelvisICPBasedTranslationManager
          safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredICPToModify);
          safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredCoPToModify);
 
-         icpOffsetForFreezing.setIncludingFrame(desiredICPToModify);
-         icpOffsetForFreezing.sub(originalICPToModify);
+         icpOffsetWhenResetRequested.setIncludingFrame(desiredICPToModify);
+         icpOffsetWhenResetRequested.sub(originalICPToModify);
       }
 
       desiredICPToModify.changeFrame(worldFrame);
@@ -609,7 +627,7 @@ public class PelvisICPBasedTranslationManager
    {
       isEnabled.set(false);
       isRunning.set(false);
-      isFrozen.set(false);
+      isResetting.set(false);
       isTrajectoryStopped.set(false);
 
       pelvisPositionError.setToZero();
@@ -628,16 +646,24 @@ public class PelvisICPBasedTranslationManager
       if (isEnabled.getBooleanValue())
          return;
       isEnabled.set(true);
-      isFrozen.set(false);
+      isResetting.set(false);
       isTrajectoryStopped.set(false);
       initialize();
    }
 
-   public void freeze()
+   public void reset()
    {
-      isFrozen.set(true);
+      reset(5.0);
+   }
+
+   public void reset(double duration)
+   {
+      isResetting.set(true);
       streamTimestampOffset.setToNaN();
       streamTimestampSource.setToNaN();
+
+      resetTime.set(yoTime.getValue());
+      resetDuration.set(duration);
    }
 
    private void initialize()

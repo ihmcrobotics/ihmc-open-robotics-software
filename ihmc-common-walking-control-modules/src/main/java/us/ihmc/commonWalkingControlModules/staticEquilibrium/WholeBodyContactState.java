@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.ejml.data.DMatrixRMaj;
@@ -132,13 +133,14 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       for (int contactIdx = 0; contactIdx < contactStateCommand.getNumberOfContactPoints(); contactIdx++)
       {
          FramePoint3DBasics contactPoint = contactStateCommand.getContactPoint(contactIdx);
-         addContactPoint(contactingRigidBody, contactPoint, contactNormal);
+         double coefficientOfFriction = contactStateCommand.getCoefficientOfFriction();
+         addContactPoint(contactingRigidBody, contactPoint, contactNormal, coefficientOfFriction);
       }
    }
 
-   public void addContactPoint(RigidBodyBasics contactingBody, FrameTuple3DReadOnly contactPoint, FrameVector3DReadOnly surfaceNormal)
+   public void addContactPoint(RigidBodyBasics contactingBody, FrameTuple3DReadOnly contactPoint, FrameVector3DReadOnly surfaceNormal, double coefficientOfFriction)
    {
-      contactPoints.add().set(contactingBody, contactPoint, surfaceNormal);
+      contactPoints.add().set(contactingBody, contactPoint, surfaceNormal, coefficientOfFriction);
    }
 
    public void update()
@@ -208,6 +210,7 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       private RigidBodyBasics contactingBody;
       private final FramePose3D contactPose = new FramePose3D();
       private final PoseReferenceFrame contactFrame;
+      private double coefficientOfFriction;
 
       ContactPoint(int index)
       {
@@ -219,11 +222,13 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       {
          contactingBody = null;
          contactPose.setToNaN();
+         coefficientOfFriction = Double.NaN;
       }
 
-      void set(RigidBodyBasics contactingBody, FrameTuple3DReadOnly contactPoint, FrameVector3DReadOnly surfaceNormal)
+      void set(RigidBodyBasics contactingBody, FrameTuple3DReadOnly contactPoint, FrameVector3DReadOnly surfaceNormal, double coefficientOfFriction)
       {
          this.contactingBody = contactingBody;
+         this.coefficientOfFriction = coefficientOfFriction;
 
          // Set orientation in given frame
          contactPose.setReferenceFrame(surfaceNormal.getReferenceFrame());
@@ -250,6 +255,12 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
    public int getNumberOfContactPoints()
    {
       return contactPoints.size();
+   }
+
+   @Override
+   public double getCoefficientOfFriction(int contactPointIndex)
+   {
+      return contactPoints.get(contactPointIndex).coefficientOfFriction;
    }
 
    public DMatrixRMaj getConstraintLowerBound()
