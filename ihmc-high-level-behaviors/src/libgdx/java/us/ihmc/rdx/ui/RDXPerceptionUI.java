@@ -81,7 +81,6 @@ public class RDXPerceptionUI
                                                                                                                    PubSubImplementation.FAST_RTPS,
                                                                                                                    PerceptionAPI.D455_DEPTH_IMAGE,
                                                                                                                    PerceptionAPI.D455_COLOR_IMAGE);
-            d455ColoredDepthVisualizer.setSubscribed(true);
             d455ColoredDepthVisualizer.setActive(true);
             globalVisualizersUI.addVisualizer(d455ColoredDepthVisualizer);
 
@@ -117,46 +116,39 @@ public class RDXPerceptionUI
             RDXROS2BigVideoVisualizer blackflyRightVideoVisualizer = new RDXROS2BigVideoVisualizer("IHMC Blackfly Right",
                                                                                                    PubSubImplementation.FAST_RTPS,
                                                                                                    PerceptionAPI.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
-            blackflyRightVideoVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(blackflyRightVideoVisualizer);
 
             RDXROS2ColoredPointCloudVisualizer l515ColoredDepthVisualizer = new RDXROS2ColoredPointCloudVisualizer("L515 Colored Depth",
                                                                                                                    PubSubImplementation.FAST_RTPS,
                                                                                                                    PerceptionAPI.L515_DEPTH_IMAGE,
                                                                                                                    PerceptionAPI.L515_COLOR_IMAGE);
-            l515ColoredDepthVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(l515ColoredDepthVisualizer);
 
             RDXROS2ColoredPointCloudVisualizer d435ColoredDepthVisualizer = new RDXROS2ColoredPointCloudVisualizer("D435 Colored Depth",
                                                                                                                    PubSubImplementation.FAST_RTPS,
                                                                                                                    PerceptionAPI.D435_DEPTH_IMAGE,
                                                                                                                    PerceptionAPI.D435_COLOR_IMAGE);
-            d435ColoredDepthVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(d435ColoredDepthVisualizer);
 
             RDXROS2PointCloudVisualizer l515ColoredPointCloudVisualizer = new RDXROS2PointCloudVisualizer("L515 Colored Point Cloud",
                                                                                                           ros2Node,
                                                                                                           PerceptionAPI.FUSED_SENSOR_HEAD_POINT_CLOUD);
-            l515ColoredPointCloudVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(l515ColoredPointCloudVisualizer);
 
             RDXROS2PointCloudVisualizer d435ColoredPointCloudVisualizer = new RDXROS2PointCloudVisualizer("D435 Colored Point Cloud",
                                                                                                           ros2Node,
                                                                                                           PerceptionAPI.D435_COLORED_POINT_CLOUD);
-            d435ColoredPointCloudVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(d435ColoredPointCloudVisualizer);
 
             RDXROS2OusterPointCloudVisualizer ousterPointCloudVisualizer = new RDXROS2OusterPointCloudVisualizer("Ouster Point Cloud",
                                                                                                                  PubSubImplementation.FAST_RTPS,
                                                                                                                  PerceptionAPI.OUSTER_DEPTH_IMAGE);
 
-            ousterPointCloudVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(ousterPointCloudVisualizer);
 
             RDXROS2RigidBodyPoseVisualizer mocapPoseVisualizer = new RDXROS2RigidBodyPoseVisualizer("Mocap Pose",
                                                                                                     PubSubImplementation.FAST_RTPS,
                                                                                                     PerceptionAPI.MOCAP_RIGID_BODY);
-            mocapPoseVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(mocapPoseVisualizer);
 
 
