@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.JointStateType;
@@ -24,21 +25,21 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class InertialParameterManager implements SCS2YoGraphicHolder
 {
    private static final int WRENCH_DIMENSION = 6;
 
    private final YoBoolean enableFilter;
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FullHumanoidRobotModel actualRobotModel;
    private final RigidBodyReadOnly[] actualModelBodies;
@@ -49,7 +50,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final ArrayList<YoInertiaEllipsoid> yoInertiaEllipsoids;
    private final YoGraphicDefinition ellipsoidGraphicGroup;
 
+   private final FullHumanoidRobotModel inverseDynamicsRobotModel;
+   private final RigidBodyBasics[] inverseDynamicsModelBodies;
+   private final List<? extends JointBasics> inverseDynamicsModelJoints;
+   private final InverseDynamicsCalculator inverseDynamicsCalculator;
+
    private final FullHumanoidRobotModel regressorRobotModel;
+   private final RigidBodyBasics[] regressorModelBodies;
    private final List<? extends JointBasics> regressorModelJoints;
    private final JointTorqueRegressorCalculator regressorCalculator;
 
@@ -76,8 +83,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final List<YoMatrix> inertialParametersThetaBasisWatchers = new ArrayList<>();
 
    private final Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets;
-   private final DMatrixRMaj[] regressorPartitions;
-   private final DMatrixRMaj[] parameterPartitions;
+   private final DMatrixRMaj[] regressorBlocks;
+   private final DMatrixRMaj regressor;
+
    private final InertialKalmanFilter inertialKalmanFilter;
    private final YoMatrix inertialKalmanFilterEstimate;
 
@@ -93,11 +101,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    /** DEBUG variables */
    private static final boolean DEBUG = false;
-   private YoMatrix residual;
+   private YoMatrix residual = null;
+   private DMatrixRMaj[] regressorPartitions = null;
+   private DMatrixRMaj[] parameterPartitions = null;
 
    public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters parameters, YoRegistry parentRegistry)
    {
-      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       enableFilter = new YoBoolean("enableFilter", registry);
@@ -115,20 +124,38 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(actualRobotModel.getRootBody(), registry);
       ellipsoidGraphicGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(yoInertiaEllipsoids);
 
+      RigidBodyBasics clonedElevatorForInverseDynamics = MultiBodySystemFactories.cloneMultiBodySystem(actualRobotModel.getElevator(),
+                                                                                                 actualRobotModel.getModelStationaryFrame(),
+                                                                                                 "_inverseDynamics");
+      inverseDynamicsRobotModel = new FullHumanoidRobotModelWrapper(clonedElevatorForInverseDynamics, true);
+      inverseDynamicsModelBodies = inverseDynamicsRobotModel.getRootBody().subtreeArray();
+      inverseDynamicsModelJoints = inverseDynamicsRobotModel.getRootJoint().subtreeList();
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(inverseDynamicsRobotModel.getElevator());
+      inverseDynamicsCalculator.setGravitationalAcceleration(-toolbox.getGravityZ());
+
       RigidBodyBasics clonedElevatorForRegressor = MultiBodySystemFactories.cloneMultiBodySystem(actualRobotModel.getElevator(),
                                                                                                  actualRobotModel.getModelStationaryFrame(),
-                                                                                                 "_regressor",
-                                                                                                 MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER,
-                                                                                                 MultiBodySystemFactories.DEFAULT_JOINT_BUILDER);
+                                                                                                 "_regressor");
       regressorRobotModel = new FullHumanoidRobotModelWrapper(clonedElevatorForRegressor, true);
+      regressorModelBodies = regressorRobotModel.getRootBody().subtreeArray();
       regressorModelJoints = regressorRobotModel.getRootJoint().subtreeList();
       regressorCalculator = new JointTorqueRegressorCalculator(regressorRobotModel.getElevator());
       regressorCalculator.setGravitationalAcceleration(-toolbox.getGravityZ());
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(estimateRobotModel.getRootJoint().subtreeArray());
       int nOneDoFJoints = estimateRobotModel.getOneDoFJoints().length;
-
       basisSets = parameters.getParametersToEstimate();
+      int[] sizes = RegressorTools.sizePartitions(basisSets);
+      int estimateSize = sizes[0];
+      int nNonEmptyBasisSets = 0;
+      for (Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption> basisSet : basisSets)
+         if (!basisSet.isEmpty())
+            nNonEmptyBasisSets++;
+
+      regressorBlocks = new DMatrixRMaj[nNonEmptyBasisSets];
+      for (int i = 0; i < nNonEmptyBasisSets; i++)
+         regressorBlocks[i] = new DMatrixRMaj(nDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+      regressor = new DMatrixRMaj(nDoFs, estimateSize);
 
       this.footSwitches = toolbox.getFootSwitches();
       contactWrenches = new SideDependentList<>();
@@ -171,20 +198,17 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                                 accelerationCalculationAlpha, jointVelocities[i], dt, registry);
       }
 
-      int[] partitionSizes = RegressorTools.sizePartitions(basisSets);
-      regressorPartitions = RegressorTools.sizePartitionMatrices(regressorCalculator.getJointTorqueRegressorMatrix(), basisSets);
-      parameterPartitions = RegressorTools.sizePartitionVectors(basisSets);
       double postProcessingAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt);
 
       inertialKalmanFilter = new InertialKalmanFilter(estimateRobotModel,
                                                       basisSets,
                                                       parameters.getURDFParameters(basisSets),
-                                                      CommonOps_DDRM.identity(partitionSizes[0]),
-                                                      CommonOps_DDRM.identity(partitionSizes[0]),
+                                                      CommonOps_DDRM.identity(estimateSize),
+                                                      CommonOps_DDRM.identity(estimateSize),
                                                       CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
                                                       registry);
       inertialKalmanFilterEstimate = new YoMatrix("inertialParameterEstimate",
-                                                  partitionSizes[0],
+                                                  estimateSize,
                                                   1,
                                                   getRowNamesForEstimates(basisSets, estimateModelBodies),
                                                   null,
@@ -192,13 +216,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       double estimateFilteringAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(), dt);
       filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate", estimateFilteringAlpha,
-                                                   partitionSizes[0],
+                                                   estimateSize,
                                                    1,
                                                    getRowNamesForEstimates(basisSets, estimateModelBodies),
                                                    null,
                                                    registry);
       doubleFilteredEstimate = new AlphaFilteredYoMatrix("doubleFilteredInertialParameterEstimate", estimateFilteringAlpha,
-                                                         partitionSizes[0],
+                                                         estimateSize,
                                                          1,
                                                          getRowNamesForEstimates(basisSets, estimateModelBodies),
                                                          null,
@@ -217,6 +241,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       if (DEBUG)
       {
+         regressorPartitions = RegressorTools.sizePartitionMatrices(regressorCalculator.getJointTorqueRegressorMatrix(), basisSets);
+         parameterPartitions = RegressorTools.sizePartitionVectors(basisSets);
+         
          String[] rowNames = new String[nDoFs];
          int index = 0;
          for (JointReadOnly joint : actualModelJoints)
@@ -236,6 +263,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       }
    }
 
+   private final ExecutionTimer regressorTimer = new ExecutionTimer("RegressorTimer", registry);
+
    public void update()
    {
       if (enableFilter.getValue())
@@ -248,19 +277,27 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          updateContactWrenches();
          updateWholeSystemTorques();
 
-         regressorCalculator.compute();
 
-         RegressorTools.partitionRegressor(regressorCalculator.getJointTorqueRegressorMatrix(),
-                                           basisSets,
-                                           regressorPartitions[0],
-                                           regressorPartitions[1],
-                                           false);
-         RegressorTools.partitionVector(regressorCalculator.getParameterVector(), basisSets, parameterPartitions[0], parameterPartitions[1], false);
+         regressorTimer.startMeasurement();
+         zeroInverseDynamicsParameters(inverseDynamicsModelBodies, basisSets);
+         inverseDynamicsCalculator.compute();
+         regressorTimer.stopMeasurement();
+
+         int regressorIndex = 0;
+         for (int i = 0; i < regressorModelBodies.length; i++)
+         {
+            if (!basisSets[i].isEmpty())
+            {
+               regressorCalculator.compute(regressorModelBodies[i]);
+               regressorBlocks[regressorIndex].set(regressorCalculator.getJointTorqueRegressorMatrixBlock(regressorModelBodies[i]));
+               regressorIndex++;
+            }
+         }
+         packRegressorFromBlocks(regressorBlocks, basisSets, regressor);
 
          // KF stuff
-         inertialKalmanFilter.setRegressorForEstimates(regressorPartitions[0]);
-         inertialKalmanFilter.setRegressorForNominal(regressorPartitions[1]);
-         inertialKalmanFilter.setParametersForNominal(parameterPartitions[1]);
+         inertialKalmanFilter.setTorqueFromNominal(inverseDynamicsCalculator.getJointTauMatrix());
+         inertialKalmanFilter.setRegressor(regressor);
          inertialKalmanFilter.setContactJacobians(fullContactJacobians);
          inertialKalmanFilter.setContactWrenches(contactWrenches);
          inertialKalmanFilterEstimate.set(inertialKalmanFilter.calculateEstimate(wholeSystemTorques));
@@ -328,16 +365,28 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       MultiBodySystemTools.copyJointsState(actualModelJoints, regressorModelJoints, JointStateType.CONFIGURATION);
       MultiBodySystemTools.copyJointsState(actualModelJoints, regressorModelJoints, JointStateType.VELOCITY);
 
+      // TODO: duplicate
+      MultiBodySystemTools.copyJointsState(actualModelJoints, inverseDynamicsModelJoints, JointStateType.CONFIGURATION);
+      MultiBodySystemTools.copyJointsState(actualModelJoints, inverseDynamicsModelJoints, JointStateType.VELOCITY);
+
       // Update root joint acceleration, which is not populated by default
       calculateRootJointAccelerations();
       regressorRobotModel.getRootJoint().setJointAcceleration(0, rootJointAcceleration);
+      // TODO: duplicate
+      inverseDynamicsRobotModel.getRootJoint().setJointAcceleration(0, rootJointAcceleration);
 
       // Update joint accelerations by processing joint velocities
       calculateJointAccelerations();
       for (int i = 0; i < jointAccelerations.length; i++)
+      {
          regressorRobotModel.getOneDoFJoints()[i].setQdd(jointAccelerations[i].getValue());
+         // TODO: duplicate
+         inverseDynamicsRobotModel.getOneDoFJoints()[i].setQdd(jointAccelerations[i].getValue());
+      }
 
       regressorRobotModel.updateFrames();
+      // TODO: duplicate
+      inverseDynamicsRobotModel.updateFrames();
    }
 
    private void updateWholeSystemTorques()
@@ -357,22 +406,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          compactContactJacobians.get(side).compute();
          jointIndexHandler.compactBlockToFullBlock(legJoints.get(side), compactContactJacobians.get(side).getJacobianMatrix(), fullContactJacobians.get(side));
-      }
-   }
-
-   private void updateVisuals()
-   {
-      for (int i = 0; i < estimateModelBodies.length; i++)
-      {
-         RigidBodyReadOnly actualBody = actualModelBodies[i];
-         RigidBodyReadOnly estimateBody = estimateModelBodies[i];
-
-         double scale = EuclidCoreTools.clamp(estimateBody.getInertia().getMass() / actualBody.getInertia().getMass() / 2.0, 0.0, 1.0);
-
-         if (estimateBody.getInertia() != null && actualBody.getInertia() != null)
-         {
-            yoInertiaEllipsoids.get(i).update(scale);
-         }
       }
    }
 
@@ -405,6 +438,79 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          jointVelocities[i].set(actualRobotModel.getOneDoFJoints()[i].getQd());
          jointAccelerations[i].update(jointVelocities[i].getValue());
+      }
+   }
+
+   private void zeroInverseDynamicsParameters(RigidBodyBasics[] bodies, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets)
+   {
+      if (bodies.length != basisSets.length)
+         throw new RuntimeException("Mismatch between bodies and basis sets");
+
+      for (int i = 0; i < basisSets.length; ++i)
+      {
+         if (!basisSets[i].isEmpty())
+            for (JointTorqueRegressorCalculator.SpatialInertiaBasisOption option : basisSets[i])
+            {
+               switch (option)
+               {
+                  case M -> bodies[i].getInertia().setMass(0.0);
+                  case MCOM_X -> bodies[i].getInertia().getCenterOfMassOffset().setX(0.0);
+                  case MCOM_Y -> bodies[i].getInertia().getCenterOfMassOffset().setY(0.0);
+                  case MCOM_Z -> bodies[i].getInertia().getCenterOfMassOffset().setZ(0.0);
+                  case I_XX -> bodies[i].getInertia().getMomentOfInertia().setM00(0.0);
+                  case I_XY ->
+                  {
+                     bodies[i].getInertia().getMomentOfInertia().setM01(0.0);
+                     bodies[i].getInertia().getMomentOfInertia().setM10(0.0);
+                  }
+                  case I_YY -> bodies[i].getInertia().getMomentOfInertia().setM11(0.0);
+                  case I_XZ ->
+                  {
+                     bodies[i].getInertia().getMomentOfInertia().setM02(0.0);
+                     bodies[i].getInertia().getMomentOfInertia().setM20(0.0);
+                  }
+                  case I_YZ ->
+                  {
+                     bodies[i].getInertia().getMomentOfInertia().setM12(0.0);
+                     bodies[i].getInertia().getMomentOfInertia().setM21(0.0);
+                  }
+                  case I_ZZ -> bodies[i].getInertia().getMomentOfInertia().setM22(0.0);
+               }
+            }
+      }
+   }
+
+   private void packRegressorFromBlocks(DMatrixRMaj[] regressorBlocks, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets, DMatrixRMaj regressorToPack)
+   {
+      int regressorBlockIndex = 0;
+      int regressorToPackColumnIndex = 0;
+      for (Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption> basisSet : basisSets)
+      {
+         if (!basisSet.isEmpty())
+         {
+            for (JointTorqueRegressorCalculator.SpatialInertiaBasisOption option : basisSet)
+            {
+               MatrixMissingTools.setMatrixColumn(regressorToPack, regressorToPackColumnIndex, regressorBlocks[regressorBlockIndex], option.ordinal());
+               regressorToPackColumnIndex++;
+            }
+            regressorBlockIndex++;
+         }
+      }
+   }
+
+   private void updateVisuals()
+   {
+      for (int i = 0; i < estimateModelBodies.length; i++)
+      {
+         RigidBodyReadOnly actualBody = actualModelBodies[i];
+         RigidBodyReadOnly estimateBody = estimateModelBodies[i];
+
+         double scale = EuclidCoreTools.clamp(estimateBody.getInertia().getMass() / actualBody.getInertia().getMass() / 2.0, 0.0, 1.0);
+
+         if (estimateBody.getInertia() != null && actualBody.getInertia() != null)
+         {
+            yoInertiaEllipsoids.get(i).update(scale);
+         }
       }
    }
 
