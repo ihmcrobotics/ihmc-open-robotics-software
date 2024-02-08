@@ -24,10 +24,8 @@ private static final boolean POST_PROCESS = true;
 
    private final DMatrixRMaj identity;
 
+   private final DMatrixRMaj torqueFromNominal;
    private final DMatrixRMaj regressorForEstimates;
-   private final DMatrixRMaj regressorForNominal;
-
-   private final DMatrixRMaj parametersForNominal;
 
    private final SideDependentList<DMatrixRMaj> contactJacobians = new SideDependentList<>();
    private final SideDependentList<DMatrixRMaj> contactWrenches = new SideDependentList<>();
@@ -55,10 +53,9 @@ private static final boolean POST_PROCESS = true;
 
       identity = CommonOps_DDRM.identity(partitionSizes[0]);
 
-      regressorForEstimates = new DMatrixRMaj(nDoFs, partitionSizes[0]);
-      regressorForNominal = new DMatrixRMaj(nDoFs, partitionSizes[1]);
+      torqueFromNominal = new DMatrixRMaj(nDoFs, 1);
 
-      parametersForNominal = new DMatrixRMaj(partitionSizes[1], 1);
+      regressorForEstimates = new DMatrixRMaj(nDoFs, partitionSizes[0]);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -108,8 +105,8 @@ private static final boolean POST_PROCESS = true;
    @Override
    protected DMatrixRMaj measurementModel(DMatrixRMaj parametersForEstimate)
    {
-      CommonOps_DDRM.mult(regressorForEstimates, parametersForEstimate, measurement);
-      CommonOps_DDRM.multAdd(regressorForNominal, parametersForNominal, measurement);
+      measurement.set(torqueFromNominal);
+      CommonOps_DDRM.multAdd(regressorForEstimates, parametersForEstimate, measurement);
       for (RobotSide side : RobotSide.values)
       {
          // NOTE: the minus for the contact wrench contribution
@@ -146,19 +143,14 @@ private static final boolean POST_PROCESS = true;
       filterContainer.setAndSolve(matrixToFilter);
    }
 
-   public void setRegressorForEstimates(DMatrixRMaj regressorForEstimates)
+   public void setRegressor(DMatrixRMaj regressorForEstimates)
    {
       this.regressorForEstimates.set(regressorForEstimates);
    }
 
-   public void setRegressorForNominal(DMatrixRMaj regressorForNominal)
+   public void setTorqueFromNominal(DMatrixRMaj torqueFromNominal)
    {
-      this.regressorForNominal.set(regressorForNominal);
-   }
-
-   public void setParametersForNominal(DMatrixRMaj parametersForNominal)
-   {
-      this.parametersForNominal.set(parametersForNominal);
+      this.torqueFromNominal.set(torqueFromNominal);
    }
 
    public void setContactJacobians(SideDependentList<DMatrixRMaj> contactJacobians)
