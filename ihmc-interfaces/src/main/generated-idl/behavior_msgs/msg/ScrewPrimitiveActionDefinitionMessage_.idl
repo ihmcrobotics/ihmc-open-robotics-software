@@ -52,6 +52,7 @@ module behavior_msgs
         boolean jointspace_only;
         double linear_position_weight;
         double angular_position_weight;
+        double jointspace_weight;
       };
     };
   };

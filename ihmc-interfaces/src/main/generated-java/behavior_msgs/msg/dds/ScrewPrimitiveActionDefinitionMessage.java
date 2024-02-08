@@ -46,6 +46,7 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
    public boolean jointspace_only_;
    public double linear_position_weight_;
    public double angular_position_weight_;
+   public double jointspace_weight_;
 
    public ScrewPrimitiveActionDefinitionMessage()
    {
@@ -82,6 +83,8 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
       linear_position_weight_ = other.linear_position_weight_;
 
       angular_position_weight_ = other.angular_position_weight_;
+
+      jointspace_weight_ = other.jointspace_weight_;
 
    }
 
@@ -235,6 +238,15 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
       return angular_position_weight_;
    }
 
+   public void setJointspaceWeight(double jointspace_weight)
+   {
+      jointspace_weight_ = jointspace_weight;
+   }
+   public double getJointspaceWeight()
+   {
+      return jointspace_weight_;
+   }
+
 
    public static Supplier<ScrewPrimitiveActionDefinitionMessagePubSubType> getPubSubType()
    {
@@ -273,6 +285,8 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.angular_position_weight_, other.angular_position_weight_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.jointspace_weight_, other.jointspace_weight_, epsilon)) return false;
+
 
       return true;
    }
@@ -306,6 +320,8 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
 
       if(this.angular_position_weight_ != otherMyClass.angular_position_weight_) return false;
 
+      if(this.jointspace_weight_ != otherMyClass.jointspace_weight_) return false;
+
 
       return true;
    }
@@ -337,7 +353,9 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
       builder.append("linear_position_weight=");
       builder.append(this.linear_position_weight_);      builder.append(", ");
       builder.append("angular_position_weight=");
-      builder.append(this.angular_position_weight_);
+      builder.append(this.angular_position_weight_);      builder.append(", ");
+      builder.append("jointspace_weight=");
+      builder.append(this.jointspace_weight_);
       builder.append("}");
       return builder.toString();
    }

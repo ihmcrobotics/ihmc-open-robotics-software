@@ -31,4 +31,6 @@ float64 linear_position_weight
 
 float64 angular_position_weight
 
+float64 jointspace_weight
+
 
