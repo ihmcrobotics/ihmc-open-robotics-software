@@ -48,6 +48,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
    private final FramePose3D workPose = new FramePose3D();
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
+   private final ArmTrajectoryMessage jointspaceOnlyTrajectoryMessage = new ArmTrajectoryMessage();
    private final HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = new HandHybridJointspaceTaskspaceTrajectoryMessage();
    private final MutableReferenceFrame currentPoseFrame = new MutableReferenceFrame();
    private final FrameVector3D linearVelocity = new FrameVector3D();
@@ -162,6 +163,8 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
 
+         jointspaceOnlyTrajectoryMessage.setRobotSide(getDefinition().getSide().toByte());
+         jointspaceOnlyTrajectoryMessage.setForceExecution(true);
          handHybridTrajectoryMessage.setRobotSide(getDefinition().getSide().toByte());
          handHybridTrajectoryMessage.setForceExecution(true);
 
@@ -338,8 +341,17 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
             }
          }
 
-         LogTools.info("Commanding %.3f s trajectory with %d points".formatted(movementDuration, numberOfPoints));
-         ros2ControllerHelper.publishToController(handHybridTrajectoryMessage);
+         if (getDefinition().getJointspaceOnly())
+         {
+            LogTools.info("Commanding %.3f s jointspace only trajectory with %d points".formatted(movementDuration, numberOfPoints));
+            jointspaceOnlyTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
+            ros2ControllerHelper.publishToController(jointspaceOnlyTrajectoryMessage);
+         }
+         else
+         {
+            LogTools.info("Commanding %.3f s hybrid trajectory with %d points".formatted(movementDuration, numberOfPoints));
+            ros2ControllerHelper.publishToController(handHybridTrajectoryMessage);
+         }
 
          trackingCalculator.reset();
 

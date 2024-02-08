@@ -23,6 +23,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    private final CRDTUnidirectionalDouble rotation;
    private final CRDTUnidirectionalDouble maxLinearVelocity;
    private final CRDTUnidirectionalDouble maxAngularVelocity;
+   private final CRDTUnidirectionalBoolean jointspaceOnly;
    private final CRDTUnidirectionalDouble linearPositionWeight;
    private final CRDTUnidirectionalDouble angularPositionWeight;
 
@@ -37,6 +38,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       rotation = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
       maxLinearVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.1);
       maxAngularVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.6);
+      jointspaceOnly = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, true); // Jointspace only works best for now
       linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
       angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
    }
@@ -53,6 +55,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       jsonNode.put("rotation", rotation.getValue());
       jsonNode.put("maxLinearVelocity", maxLinearVelocity.getValue());
       jsonNode.put("maxAngularVelocity", maxAngularVelocity.getValue());
+      jsonNode.put("jointspaceOnly", jointspaceOnly.getValue());
       jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
       jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
    }
@@ -69,6 +72,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       rotation.setValue(jsonNode.get("rotation").asDouble());
       maxLinearVelocity.setValue(jsonNode.get("maxLinearVelocity").asDouble());
       maxAngularVelocity.setValue(jsonNode.get("maxAngularVelocity").asDouble());
+      jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
       linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
       angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
    }
@@ -84,6 +88,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       message.setTranslation(translation.toMessage());
       message.setMaxLinearVelocity(maxLinearVelocity.toMessage());
       message.setMaxAngularVelocity(maxAngularVelocity.toMessage());
+      message.setJointspaceOnly(jointspaceOnly.toMessage());
       message.setLinearPositionWeight(linearPositionWeight.toMessage());
       message.setAngularPositionWeight(angularPositionWeight.toMessage());
    }
@@ -99,6 +104,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       translation.fromMessage(message.getTranslation());
       maxLinearVelocity.fromMessage(message.getMaxLinearVelocity());
       maxAngularVelocity.fromMessage(message.getMaxAngularVelocity());
+      jointspaceOnly.fromMessage(message.getJointspaceOnly());
       linearPositionWeight.fromMessage(message.getLinearPositionWeight());
       angularPositionWeight.fromMessage(message.getAngularPositionWeight());
    }
@@ -167,6 +173,16 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    public void setMaxAngularVelocity(double maxAngularVelocity)
    {
       this.maxAngularVelocity.setValue(maxAngularVelocity);
+   }
+
+   public boolean getJointspaceOnly()
+   {
+      return jointspaceOnly.getValue();
+   }
+
+   public void setJointspaceOnly(boolean jointspaceOnly)
+   {
+      this.jointspaceOnly.setValue(jointspaceOnly);
    }
 
    public double getLinearPositionWeight()
