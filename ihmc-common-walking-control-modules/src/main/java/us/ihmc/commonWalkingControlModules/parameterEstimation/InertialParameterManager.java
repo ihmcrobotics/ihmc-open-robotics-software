@@ -51,12 +51,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoGraphicDefinition ellipsoidGraphicGroup;
 
    private final FullHumanoidRobotModel inverseDynamicsRobotModel;
-   private final RigidBodyBasics[] inverseDynamicsModelBodies;
    private final List<? extends JointBasics> inverseDynamicsModelJoints;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final FullHumanoidRobotModel regressorRobotModel;
-   private final RigidBodyBasics[] regressorModelBodies;
    private final List<? extends JointBasics> regressorModelJoints;
    private final JointTorqueRegressorCalculator regressorCalculator;
 
@@ -129,7 +127,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                                                                  actualRobotModel.getModelStationaryFrame(),
                                                                                                  "_inverseDynamics");
       inverseDynamicsRobotModel = new FullHumanoidRobotModelWrapper(clonedElevatorForInverseDynamics, false);
-      inverseDynamicsModelBodies = inverseDynamicsRobotModel.getRootBody().subtreeArray();
+      RigidBodyBasics[] inverseDynamicsModelBodies = inverseDynamicsRobotModel.getRootBody().subtreeArray();
       inverseDynamicsModelJoints = inverseDynamicsRobotModel.getRootJoint().subtreeList();
       inverseDynamicsCalculator = new InverseDynamicsCalculator(inverseDynamicsRobotModel.getElevator());
       inverseDynamicsCalculator.setGravitationalAcceleration(-toolbox.getGravityZ());
@@ -137,8 +135,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       RigidBodyBasics clonedElevatorForRegressor = MultiBodySystemFactories.cloneMultiBodySystem(actualRobotModel.getElevator(),
                                                                                                  actualRobotModel.getModelStationaryFrame(),
                                                                                                  "_regressor");
-      regressorRobotModel = new FullHumanoidRobotModelWrapper(clonedElevatorForRegressor, true);
-      regressorModelBodies = regressorRobotModel.getRootBody().subtreeArray();
+      regressorRobotModel = new FullHumanoidRobotModelWrapper(clonedElevatorForRegressor, false);
+      RigidBodyBasics[] regressorModelBodies = regressorRobotModel.getRootBody().subtreeArray();
       regressorModelJoints = regressorRobotModel.getRootJoint().subtreeList();
       regressorCalculator = new JointTorqueRegressorCalculator(regressorRobotModel.getElevator());
       regressorCalculator.setGravitationalAcceleration(-toolbox.getGravityZ());
@@ -370,36 +368,35 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       MultiBodySystemTools.copyJointsState(actualModelJoints, regressorModelJoints, JointStateType.CONFIGURATION);
       MultiBodySystemTools.copyJointsState(actualModelJoints, regressorModelJoints, JointStateType.VELOCITY);
 
-      // TODO: duplicate
       MultiBodySystemTools.copyJointsState(actualModelJoints, inverseDynamicsModelJoints, JointStateType.CONFIGURATION);
       MultiBodySystemTools.copyJointsState(actualModelJoints, inverseDynamicsModelJoints, JointStateType.VELOCITY);
+
+      // Update joint accelerations by processing joint velocities
+      calculateJointAccelerations();
+      OneDoFJointBasics[] regressorOneDoFJoints = regressorRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] inverseDynamicsOneDoFJoints = inverseDynamicsRobotModel.getOneDoFJoints();
+      for (int i = 0; i < jointAccelerations.length; i++)
+      {
+         regressorOneDoFJoints[i].setQdd(jointAccelerations[i].getValue());
+         inverseDynamicsOneDoFJoints[i].setQdd(jointAccelerations[i].getValue());
+      }
 
       // Update root joint acceleration, which is not populated by default
       calculateRootJointAccelerations();
       regressorRobotModel.getRootJoint().setJointAcceleration(0, rootJointAcceleration);
-      // TODO: duplicate
       inverseDynamicsRobotModel.getRootJoint().setJointAcceleration(0, rootJointAcceleration);
 
-      // Update joint accelerations by processing joint velocities
-      calculateJointAccelerations();
-      for (int i = 0; i < jointAccelerations.length; i++)
-      {
-         regressorRobotModel.getOneDoFJoints()[i].setQdd(jointAccelerations[i].getValue());
-         // TODO: duplicate
-         inverseDynamicsRobotModel.getOneDoFJoints()[i].setQdd(jointAccelerations[i].getValue());
-      }
-
       regressorRobotModel.updateFrames();
-      // TODO: duplicate
       inverseDynamicsRobotModel.updateFrames();
    }
 
    private void updateWholeSystemTorques()
    {
       actualRobotModel.getRootJoint().getJointTau(0, wholeSystemTorques);
-      for (int i = 0; i < actualRobotModel.getOneDoFJoints().length; ++i)
+      OneDoFJointBasics[] actualOneDoFJoints = actualRobotModel.getOneDoFJoints();
+      for (int i = 0; i < actualOneDoFJoints.length; ++i)
       {
-         OneDoFJointReadOnly joint = actualRobotModel.getOneDoFJoints()[i];
+         OneDoFJointReadOnly joint = actualOneDoFJoints[i];
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
          joint.getJointTau(jointIndex, wholeSystemTorques);
       }
@@ -439,9 +436,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private void calculateJointAccelerations()
    {
+      OneDoFJointBasics[] actualOneDoFJoints = actualRobotModel.getOneDoFJoints();
       for (int i = 0; i < jointVelocities.length; i++)
       {
-         jointVelocities[i].set(actualRobotModel.getOneDoFJoints()[i].getQd());
+         jointVelocities[i].set(actualOneDoFJoints[i].getQd());
          jointAccelerations[i].update(jointVelocities[i].getValue());
       }
    }
