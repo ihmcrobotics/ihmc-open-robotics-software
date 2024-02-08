@@ -46,6 +46,10 @@ module behavior_msgs
          * The max angular velocity
          */
         double max_angular_velocity;
+        /**
+         * Whether the trajectory is controlled in jointspace (true) or hybrid jointspace and taskspace (false)
+         */
+        boolean jointspace_only;
         double linear_position_weight;
         double angular_position_weight;
       };
