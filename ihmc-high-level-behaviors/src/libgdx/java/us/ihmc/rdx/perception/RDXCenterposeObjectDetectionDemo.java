@@ -38,7 +38,6 @@ public class RDXCenterposeObjectDetectionDemo
             RDXROS2ImageMessageVisualizer zed2LeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
                                                                                                            PubSubImplementation.FAST_RTPS,
                                                                                                            PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            zed2LeftColorImageVisualizer.setSubscribed(true);
             zed2LeftColorImageVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2LeftColorImageVisualizer);
 
@@ -62,14 +61,12 @@ public class RDXCenterposeObjectDetectionDemo
             RDXROS2ImageMessageVisualizer zed2RightColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Right",
                                                                                                             PubSubImplementation.FAST_RTPS,
                                                                                                             PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT));
-            zed2RightColorImageVisualizer.setSubscribed(true);
             zed2RightColorImageVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2RightColorImageVisualizer);
 
             RDXROS2ImageMessageVisualizer zed2DepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Depth",
                                                                                                        PubSubImplementation.FAST_RTPS,
                                                                                                        PerceptionAPI.ZED2_DEPTH);
-            zed2DepthImageVisualizer.setSubscribed(true);
             zed2DepthImageVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2DepthImageVisualizer);
 
@@ -78,7 +75,6 @@ public class RDXCenterposeObjectDetectionDemo
                                                                                                                         PerceptionAPI.ZED2_DEPTH,
                                                                                                                         PerceptionAPI.ZED2_COLOR_IMAGES.get(
                                                                                                                               RobotSide.LEFT));
-            zed2ColoredPointCloudVisualizer.setSubscribed(true);
             zed2ColoredPointCloudVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 

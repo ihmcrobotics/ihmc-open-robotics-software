@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
@@ -24,15 +23,14 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
-import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
-import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
-import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.rdx.imgui.ImPlotDoublePlot;
 import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
+import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
+import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
+import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -56,7 +54,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
    private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean subscribed = new ImBoolean(false);
+   private boolean subscribed = false;
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private int totalNumberOfPoints;
@@ -79,11 +77,23 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
+
+      setActivenessChangeCallback(isActive ->
+      {
+         if (isActive && realtimeROS2Node == null)
+         {
+            subscribe();
+         }
+         else if (!isActive && realtimeROS2Node != null)
+         {
+            unsubscribe();
+         }
+      });
    }
 
    private void subscribe()
    {
-      subscribed.set(true);
+      subscribed = true;
       this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
       ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, ROS2QosProfile.BEST_EFFORT(), this::queueRenderImageBasedPointCloud);
       realtimeROS2Node.spin();
@@ -115,7 +125,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
    {
       super.update();
 
-      if (subscribed.get() && isActive() && frequencyPlot.anyPingsYet())
+      if (subscribed && isActive() && frequencyPlot.anyPingsYet())
       {
          int numberOfBytes;
          long acquisitionTimeSecondsSinceEpoch;
@@ -195,12 +205,6 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.getHidden(getTitle() + "Subscribed"), subscribed))
-      {
-         setSubscribed(subscribed.get());
-      }
-      ImGuiTools.previousWidgetTooltip("Subscribed");
-      ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
       if (frequencyPlot.anyPingsYet())
@@ -230,21 +234,9 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
       super.destroy();
    }
 
-   public void setSubscribed(boolean subscribed)
-   {
-      if (subscribed && realtimeROS2Node == null)
-      {
-         subscribe();
-      }
-      else if (!subscribed && realtimeROS2Node != null)
-      {
-         unsubscribe();
-      }
-   }
-
    private void unsubscribe()
    {
-      subscribed.set(false);
+      subscribed = false;
       if (realtimeROS2Node != null)
       {
          realtimeROS2Node.destroy();
@@ -254,6 +246,6 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
 
    public boolean isSubscribed()
    {
-      return subscribed.get();
+      return subscribed;
    }
 }
