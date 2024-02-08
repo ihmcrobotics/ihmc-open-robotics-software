@@ -26,6 +26,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    private final CRDTUnidirectionalBoolean jointspaceOnly;
    private final CRDTUnidirectionalDouble linearPositionWeight;
    private final CRDTUnidirectionalDouble angularPositionWeight;
+   private final CRDTUnidirectionalDouble jointspaceWeight;
 
    public ScrewPrimitiveActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -41,6 +42,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       jointspaceOnly = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, true); // Jointspace only works best for now
       linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
       angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
+      jointspaceWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
    }
 
    @Override
@@ -58,6 +60,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       jsonNode.put("jointspaceOnly", jointspaceOnly.getValue());
       jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
       jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
+      jsonNode.put("jointspaceWeight", jointspaceWeight.getValue());
    }
 
    @Override
@@ -75,6 +78,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
       linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
       angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
+      jointspaceWeight.setValue(jsonNode.get("jointspaceWeight").asDouble());
    }
 
    public void toMessage(ScrewPrimitiveActionDefinitionMessage message)
@@ -91,6 +95,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       message.setJointspaceOnly(jointspaceOnly.toMessage());
       message.setLinearPositionWeight(linearPositionWeight.toMessage());
       message.setAngularPositionWeight(angularPositionWeight.toMessage());
+      message.setJointspaceWeight(jointspaceWeight.toMessage());
    }
 
    public void fromMessage(ScrewPrimitiveActionDefinitionMessage message)
@@ -107,6 +112,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       jointspaceOnly.fromMessage(message.getJointspaceOnly());
       linearPositionWeight.fromMessage(message.getLinearPositionWeight());
       angularPositionWeight.fromMessage(message.getAngularPositionWeight());
+      jointspaceWeight.fromMessage(message.getJointspaceWeight());
    }
 
    @Override
@@ -203,5 +209,15 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    public void setAngularPositionWeight(double angularPositionWeight)
    {
       this.angularPositionWeight.setValue(angularPositionWeight);
+   }
+
+   public double getJointspaceWeight()
+   {
+      return jointspaceWeight.getValue();
+   }
+
+   public void setJointspaceWeight(double jointspaceWeight)
+   {
+      this.jointspaceWeight.setValue(jointspaceWeight);
    }
 }

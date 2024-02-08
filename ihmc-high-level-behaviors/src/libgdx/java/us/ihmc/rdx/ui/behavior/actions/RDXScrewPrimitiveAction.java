@@ -34,6 +34,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    private final ImBooleanWrapper jointspaceOnlyWidget;
    private final ImGuiSliderDoubleWrapper linearPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper angularPositionWeightWidget;
+   private final ImGuiSliderDoubleWrapper jointspaceWeightWidget;
    private final RDXSelectablePose3DGizmo screwAxisGizmo;
    private final RDXDashedLineMesh screwAxisGraphic = new RDXDashedLineMesh(Color.WHITE, Axis3D.X, 0.04);
    private final RDXTrajectoryGraphic trajectoryGraphic = new RDXTrajectoryGraphic();
@@ -90,6 +91,11 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
                                                                 getDefinition()::setAngularPositionWeight);
       angularPositionWeightWidget.addButton("Use Default Weights", () -> getDefinition().setAngularPositionWeight(-1.0));
       angularPositionWeightWidget.addWidgetAligner(widgetAligner);
+      jointspaceWeightWidget = new ImGuiSliderDoubleWrapper("Jointspace Weight", "%.2f", 0.0, 70.0,
+                                                            getDefinition()::getJointspaceWeight,
+                                                            getDefinition()::setJointspaceWeight);
+      jointspaceWeightWidget.addButton("Use Default Weights", () -> getDefinition().setJointspaceWeight(-1.0));
+      jointspaceWeightWidget.addWidgetAligner(widgetAligner);
    }
 
    @Override
@@ -132,6 +138,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       jointspaceOnlyWidget.renderImGuiWidget();
       linearPositionWeightWidget.renderImGuiWidget();
       angularPositionWeightWidget.renderImGuiWidget();
+      jointspaceWeightWidget.renderImGuiWidget();
    }
 
    @Override

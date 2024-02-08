@@ -270,7 +270,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          {
             OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
             oneDoFJointTrajectoryMessage.getTrajectoryPoints().clear();
-            oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use Default weight
+            oneDoFJointTrajectoryMessage.setWeight(getDefinition().getJointspaceWeight());
          }
 
          // Initialize the command, since we're not going to be far.
