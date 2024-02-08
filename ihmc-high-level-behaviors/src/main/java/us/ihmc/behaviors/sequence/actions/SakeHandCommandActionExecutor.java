@@ -23,7 +23,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
 {
    /** TODO: Make this variable. */
    private static final double WAIT_TIME = 2.5;
-   public static final double ANGLE_TOLERANCE = Math.toRadians(5.0);
+   public static final double ANGLE_TOLERANCE = Math.toRadians(40.0); // We want to allow a bunch of compliance
 
    private final SakeHandCommandActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -108,6 +108,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       state.getDesiredJointTrajectories().addTrajectoryPoint(1, x2KnuckleJoints.get(getDefinition().getSide()).getQ(), 0.0);
       state.getDesiredJointTrajectories().addTrajectoryPoint(1, goalJointAngle, WAIT_TIME);
       state.setNominalExecutionDuration(WAIT_TIME);
+      state.setPositionDistanceToGoalTolerance(ANGLE_TOLERANCE);
    }
 
    @Override
@@ -127,13 +128,15 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       state.getCurrentJointAngles().getValue()[0] = x1KnuckleJoints.get(getDefinition().getSide()).getQ();
       state.getCurrentJointAngles().getValue()[1] = x2KnuckleJoints.get(getDefinition().getSide()).getQ();
 
-//      trackingCalculator.addJointData(syncedRobot.getFullRobotModel().get);
-//      trackingCalculator.applyTolerance(ANGLE_TOLERANCE);
+      trackingCalculator.resetErrorMeasurement();
+      trackingCalculator.addJointData(x1KnuckleJoints.get(getDefinition().getSide()).getQ(),
+                                      state.getDesiredJointTrajectories().getLastValueReadOnly(0).getPosition());
+      trackingCalculator.addJointData(x2KnuckleJoints.get(getDefinition().getSide()).getQ(),
+                                      state.getDesiredJointTrajectories().getLastValueReadOnly(1).getPosition());
+      trackingCalculator.applyTolerance(ANGLE_TOLERANCE);
 
-//      boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
-//      meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
-
-      boolean meetsDesiredCompletionCriteria = trackingCalculator.getTimeIsUp();
+      boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
+      meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
 
       if (meetsDesiredCompletionCriteria)
       {

@@ -9,10 +9,8 @@ public class JointspaceTrajectoryTrackingErrorCalculator extends TrajectoryDurat
    private double totalAbsolutePositionError;
    private boolean isWithinPositionTolerance;
 
-   public void reset()
+   public void resetErrorMeasurement()
    {
-      super.reset();
-
       totalAbsolutePositionError = Double.NaN;
       isWithinPositionTolerance = false;
    }
