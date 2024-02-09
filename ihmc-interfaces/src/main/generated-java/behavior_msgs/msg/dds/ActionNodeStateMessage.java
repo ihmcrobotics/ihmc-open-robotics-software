@@ -53,6 +53,14 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
             */
    public us.ihmc.euclid.geometry.Pose3D current_pose_;
    /**
+            * Desired jointspace trajectories
+            */
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage>  desired_joint_trajectories_;
+   /**
+            * Current joint angles for tracking jointspace trajectories
+            */
+   public double[] current_joint_angles_;
+   /**
             * Position distance to goal tolerance
             */
    public double position_distance_to_goal_tolerance_;
@@ -66,6 +74,9 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
       desired_trajectory_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage> (500, new ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
       current_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      desired_joint_trajectories_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage> (7, new controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType());
+      current_joint_angles_ = new double[7];
+
 
    }
 
@@ -96,6 +107,13 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
 
       desired_trajectory_.set(other.desired_trajectory_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.current_pose_, current_pose_);
+      desired_joint_trajectories_.set(other.desired_joint_trajectories_);
+      for(int i1 = 0; i1 < current_joint_angles_.length; ++i1)
+      {
+            current_joint_angles_[i1] = other.current_joint_angles_[i1];
+
+      }
+
       position_distance_to_goal_tolerance_ = other.position_distance_to_goal_tolerance_;
 
       orientation_distance_to_goal_tolerance_ = other.orientation_distance_to_goal_tolerance_;
@@ -249,6 +267,24 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       return current_pose_;
    }
 
+
+   /**
+            * Desired jointspace trajectories
+            */
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage>  getDesiredJointTrajectories()
+   {
+      return desired_joint_trajectories_;
+   }
+
+
+   /**
+            * Current joint angles for tracking jointspace trajectories
+            */
+   public double[] getCurrentJointAngles()
+   {
+      return current_joint_angles_;
+   }
+
    /**
             * Position distance to goal tolerance
             */
@@ -322,6 +358,18 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       }
 
       if (!this.current_pose_.epsilonEquals(other.current_pose_, epsilon)) return false;
+      if (this.desired_joint_trajectories_.size() != other.desired_joint_trajectories_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.desired_joint_trajectories_.size(); i++)
+         {  if (!this.desired_joint_trajectories_.get(i).epsilonEquals(other.desired_joint_trajectories_.get(i), epsilon)) return false; }
+      }
+
+      for(int i3 = 0; i3 < current_joint_angles_.length; ++i3)
+      {
+                if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_joint_angles_[i3], other.current_joint_angles_[i3], epsilon)) return false;
+      }
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_distance_to_goal_tolerance_, other.position_distance_to_goal_tolerance_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.orientation_distance_to_goal_tolerance_, other.orientation_distance_to_goal_tolerance_, epsilon)) return false;
@@ -358,6 +406,12 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
 
       if (!this.desired_trajectory_.equals(otherMyClass.desired_trajectory_)) return false;
       if (!this.current_pose_.equals(otherMyClass.current_pose_)) return false;
+      if (!this.desired_joint_trajectories_.equals(otherMyClass.desired_joint_trajectories_)) return false;
+      for(int i5 = 0; i5 < current_joint_angles_.length; ++i5)
+      {
+                if(this.current_joint_angles_[i5] != otherMyClass.current_joint_angles_[i5]) return false;
+
+      }
       if(this.position_distance_to_goal_tolerance_ != otherMyClass.position_distance_to_goal_tolerance_) return false;
 
       if(this.orientation_distance_to_goal_tolerance_ != otherMyClass.orientation_distance_to_goal_tolerance_) return false;
@@ -394,6 +448,10 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       builder.append(this.desired_trajectory_);      builder.append(", ");
       builder.append("current_pose=");
       builder.append(this.current_pose_);      builder.append(", ");
+      builder.append("desired_joint_trajectories=");
+      builder.append(this.desired_joint_trajectories_);      builder.append(", ");
+      builder.append("current_joint_angles=");
+      builder.append(java.util.Arrays.toString(this.current_joint_angles_));      builder.append(", ");
       builder.append("position_distance_to_goal_tolerance=");
       builder.append(this.position_distance_to_goal_tolerance_);      builder.append(", ");
       builder.append("orientation_distance_to_goal_tolerance=");
