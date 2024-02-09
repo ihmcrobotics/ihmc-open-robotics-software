@@ -5,12 +5,16 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTUnidirectionalDoubleArray;
+import us.ihmc.communication.crdt.CRDTUnidirectionalOneDoFJointTrajectoryList;
 import us.ihmc.communication.crdt.CRDTUnidirectionalPose3D;
 import us.ihmc.communication.crdt.CRDTUnidirectionalSE3Trajectory;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 public abstract class ActionNodeState<D extends ActionNodeDefinition> extends BehaviorTreeNodeState<D>
 {
+   public static final int SUPPORTED_NUMBER_OF_JOINTS = 7;
+
    /** The index is not CRDT synced because it's a simple local calculation. */
    private int actionIndex = -1;
    private final CRDTUnidirectionalBoolean isNextForExecution;
@@ -22,6 +26,8 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    private final CRDTUnidirectionalDouble elapsedExecutionTime;
    private final CRDTUnidirectionalSE3Trajectory desiredTrajectory;
    private final CRDTUnidirectionalPose3D currentPose;
+   private final CRDTUnidirectionalOneDoFJointTrajectoryList desiredJointTrajectories;
+   private final CRDTUnidirectionalDoubleArray currentJointAngles;
    private final CRDTUnidirectionalDouble positionDistanceToGoalTolerance;
    private final CRDTUnidirectionalDouble orientationDistanceToGoalTolerance;
 
@@ -38,6 +44,8 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       elapsedExecutionTime = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       desiredTrajectory = new CRDTUnidirectionalSE3Trajectory(ROS2ActorDesignation.ROBOT, crdtInfo);
       currentPose = new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, crdtInfo);
+      desiredJointTrajectories = new CRDTUnidirectionalOneDoFJointTrajectoryList(ROS2ActorDesignation.ROBOT, crdtInfo);
+      currentJointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, SUPPORTED_NUMBER_OF_JOINTS);
       positionDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       orientationDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
    }
@@ -55,6 +63,8 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       message.setElapsedExecutionTime(elapsedExecutionTime.toMessage());
       desiredTrajectory.toMessage(message.getDesiredTrajectory());
       currentPose.toMessage(message.getCurrentPose());
+      desiredJointTrajectories.toMessage(message.getDesiredJointTrajectories());
+      currentJointAngles.toMessage(message.getCurrentJointAngles());
       message.setPositionDistanceToGoalTolerance(positionDistanceToGoalTolerance.toMessage());
       message.setOrientationDistanceToGoalTolerance(orientationDistanceToGoalTolerance.toMessage());
    }
@@ -72,6 +82,8 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       elapsedExecutionTime.fromMessage(message.getElapsedExecutionTime());
       desiredTrajectory.fromMessage(message.getDesiredTrajectory());
       currentPose.fromMessage(message.getCurrentPose());
+      desiredJointTrajectories.fromMessage(message.getDesiredJointTrajectories());
+      currentJointAngles.fromMessage(message.getCurrentJointAngles());
       positionDistanceToGoalTolerance.fromMessage(message.getPositionDistanceToGoalTolerance());
       orientationDistanceToGoalTolerance.fromMessage(message.getOrientationDistanceToGoalTolerance());
    }
@@ -160,6 +172,16 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    public CRDTUnidirectionalPose3D getCurrentPose()
    {
       return currentPose;
+   }
+
+   public CRDTUnidirectionalOneDoFJointTrajectoryList getDesiredJointTrajectories()
+   {
+      return desiredJointTrajectories;
+   }
+
+   public CRDTUnidirectionalDoubleArray getCurrentJointAngles()
+   {
+      return currentJointAngles;
    }
 
    public double getPositionDistanceToGoalTolerance()
