@@ -29,6 +29,6 @@ public class RDXLabFloorObject extends RDXEnvironmentObject
    @Override
    public void setSelected(boolean selected)
    {
-      setRawIsSelected(selected);
+      // (NK) Do nothing
    }
 }
