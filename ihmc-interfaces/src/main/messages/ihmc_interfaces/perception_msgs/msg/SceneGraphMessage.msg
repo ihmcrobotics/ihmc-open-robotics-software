@@ -10,6 +10,7 @@ byte ARUCO_MARKER_NODE_TYPE=3
 byte CENTERPOSE_NODE_TYPE=4
 byte STATIC_RELATIVE_NODE_TYPE=5
 byte PRIMITIVE_RIGID_BODY_NODE_TYPE=6
+byte YOLO_ICP_SCENE_NODE_TYPE=7
 
 # The ID to assign to the next instantiated node
 uint32 next_id

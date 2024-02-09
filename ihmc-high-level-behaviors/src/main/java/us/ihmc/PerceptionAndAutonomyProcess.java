@@ -19,6 +19,7 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.YOLOv8.YOLOv8IterativeClosestPointManager;
 import us.ihmc.perception.iterativeClosestPoint.IterativeClosestPointManager;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
@@ -133,6 +134,7 @@ public class PerceptionAndAutonomyProcess
    private ROS2DemandGraphNode centerposeDemandNode;
 
    private final IterativeClosestPointManager icpManager;
+   private final YOLOv8IterativeClosestPointManager yoloICPManager;
 
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
    private ReferenceFrameLibrary behaviorTreeReferenceFrameLibrary;
@@ -196,6 +198,9 @@ public class PerceptionAndAutonomyProcess
 
       icpManager = new IterativeClosestPointManager(ros2Helper, sceneGraph);
       icpManager.startWorkers();
+
+      yoloICPManager = new YOLOv8IterativeClosestPointManager(ros2Helper);
+      yoloICPManager.start();
    }
 
    /** Needs to be a separate method to allow constructing test bench version. */
@@ -266,6 +271,7 @@ public class PerceptionAndAutonomyProcess
       }
 
       icpManager.destroy();
+      yoloICPManager.destroy();
 
       zedPointCloudDemandNode.destroy();
       zedColorDemandNode.destroy();
@@ -303,6 +309,9 @@ public class PerceptionAndAutonomyProcess
 
          if (zedDepthImage != null && !zedDepthImage.isEmpty() && icpManager.isDemanded())
             icpManager.setEnvironmentPointCloud(zedDepthImage);
+
+         if (zedDepthImage != null && !zedDepthImage.isEmpty() && zedColorImages.get(RobotSide.LEFT) != null && !zedColorImages.get(RobotSide.LEFT).isEmpty())
+            yoloICPManager.setDetectionImages(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
 
          zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
          for (RobotSide side : RobotSide.values)
@@ -412,6 +421,8 @@ public class PerceptionAndAutonomyProcess
       // Update CenterPose stuff
       if (centerposeDemandNode.isDemanded())
          centerposeDetectionManager.updateSceneGraph(sceneGraph);
+
+      yoloICPManager.updateSceneGraph(sceneGraph);
 
       // Update general stuff
       sceneGraph.updateOnRobotOnly(robotPelvisFrameSupplier.get());

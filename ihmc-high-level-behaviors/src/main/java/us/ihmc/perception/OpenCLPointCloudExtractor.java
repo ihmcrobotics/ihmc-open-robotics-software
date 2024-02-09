@@ -103,7 +103,5 @@ public class OpenCLPointCloudExtractor
 
       openCLProgram.close();
       kernel.close();
-
-      openCLManager.destroy();
    }
 }

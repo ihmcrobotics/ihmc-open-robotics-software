@@ -13,6 +13,7 @@ import us.ihmc.perception.RawImage;
 
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -74,6 +75,24 @@ public class YOLOv8DetectionResults
       return segmentationImages;
    }
 
+   public Map<YOLOv8Detection, RawImage> getICPSegmentationImages(float maskThreshold)
+   {
+      Map<YOLOv8Detection, RawImage> segmentationImages = new HashMap<>();
+
+      for (YOLOv8Detection detection : detections)
+      {
+         if (detection.objectClass().getPointCloudFileName() != null)
+         {
+            Mat floatMaskMat = getFloatMaskMat(detection);
+            Mat booleanMaskMat = getBooleanMaskMat(detection, floatMaskMat, maskThreshold);
+            segmentationImages.put(detection, createRawImageWithMat(booleanMaskMat));
+            floatMaskMat.close();
+         }
+      }
+
+      return segmentationImages;
+   }
+
    public RawImage getSegmentationMatrixForObject(YOLOv8DetectableObject objectType, float maskThreshold)
    {
       if (objectMasks.containsKey(objectType))
@@ -114,6 +133,18 @@ public class YOLOv8DetectionResults
    public Set<YOLOv8Detection> getDetections()
    {
       return detections;
+   }
+
+   public Set<YOLOv8Detection> getICPDetections()
+   {
+      Set<YOLOv8Detection> icpDetections = new HashSet<>();
+      for (YOLOv8Detection detection : detections)
+      {
+         if (detection.objectClass().getPointCloudFileName() != null)
+            icpDetections.add(detection);
+      }
+
+      return icpDetections;
    }
 
    private Mat getFloatMaskMat(YOLOv8Detection detection)

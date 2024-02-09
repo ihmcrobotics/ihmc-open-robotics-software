@@ -21,6 +21,7 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
    public static final byte CENTERPOSE_NODE_TYPE = (byte) 4;
    public static final byte STATIC_RELATIVE_NODE_TYPE = (byte) 5;
    public static final byte PRIMITIVE_RIGID_BODY_NODE_TYPE = (byte) 6;
+   public static final byte YOLO_ICP_SCENE_NODE_TYPE = (byte) 7;
    /**
             * The ID to assign to the next instantiated node
             */

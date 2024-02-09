@@ -181,7 +181,7 @@ public class ROS2SceneGraphSubscription
          {
             subscriptionNode.setSceneNodeMessage(sceneGraphMessage.getSceneNodes().get(indexInTypesList));
          }
-         case SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE ->
+         case SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE, SceneGraphMessage.YOLO_ICP_SCENE_NODE_TYPE ->
          {
             DetectableSceneNodeMessage detectableSceneNodeMessage = sceneGraphMessage.getDetectableSceneNodes().get(indexInTypesList);
             subscriptionNode.setDetectableSceneNodeMessage(detectableSceneNodeMessage);

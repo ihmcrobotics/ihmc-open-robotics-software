@@ -2,43 +2,33 @@ package us.ihmc.perception.YOLOv8;
 
 import org.ddogleg.struct.Tuple3;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.OpenCLPointCloudExtractor;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.iterativeClosestPoint.IterativeClosestPointWorker;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.YOLOv8IterativeClosestPointNode;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
-import us.ihmc.tools.io.WorkspaceResourceFile;
 import us.ihmc.tools.thread.RestartableThread;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class YOLOv8IterativeClosestPointManager
 {
+   // TODO: Make these variable
    private static final float YOLO_CONFIDENCE_THRESHOLD = 0.3f;
    private static final float YOLO_NMS_THRESHOLD = 0.1f;
    private static final float YOLO_SEGMENTATION_THRESHOLD = 0.0f;
-   private static final int EROSION_KERNEL_RADIUS = 2;
-   private static final double Z_SCORE_THRESHOLD = 1.0;
-   private static final int OUTLIER_REJECTION_SAMPLES = 300;
-   private static final double DISTANCE_THRESHOLD = 10.0;
-   private static final double ICP_WORK_FREQUENCY = 20.0;
-   private static final int ICP_ITERATIONS = 2;
-   private static final Random RANDOM = new Random(System.nanoTime());
 
    private final OpenCLManager openCLManager = new OpenCLManager();
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor(openCLManager);
@@ -46,25 +36,26 @@ public class YOLOv8IterativeClosestPointManager
 
    private final WorkspaceResourceDirectory pointCloudDirectory = new WorkspaceResourceDirectory(YOLOv8DetectableObject.class, "/yoloICPPointClouds/");
 
-   private final SceneGraph sceneGraph;
+   private final ROS2Helper ros2Helper;
 
    private final YOLOv8ObjectDetector yoloDetector = new YOLOv8ObjectDetector();
    private RawImage yoloDetectionImage;
    private RawImage icpEnvironmentDepthImage;
    private long lastYoloImageSequenceNumber = -1;
    private long lastICPImageSequenceNumber = -1;
-   private Set<YOLOv8Detection> oldDetections = new HashSet<>();
+   private final Set<YOLOv8Detection> oldDetections = ConcurrentHashMap.newKeySet();
    private final RestartableThread yoloICPThread;
    private final Lock imageUpdateLock = new ReentrantLock();
    private final Condition newImagesAvailable = imageUpdateLock.newCondition();
+   private final Notification readyToRunNotification = new Notification();
 
-   private final Map<YOLOv8Detection, IterativeClosestPointWorker> detectionToWorkerMap = new HashMap<>();
-   private final Map<IterativeClosestPointWorker, YOLOv8IterativeClosestPointNode> workerToNodeMap = new HashMap<>();
+   private final ConcurrentHashMap<YOLOv8Detection, YOLOv8IterativeClosestPointNodeCombo> detectionToWorkerMap = new ConcurrentHashMap<>();
 
-   public YOLOv8IterativeClosestPointManager(SceneGraph sceneGraph)
+   public YOLOv8IterativeClosestPointManager(ROS2Helper ros2Helper)
    {
-      this.sceneGraph = sceneGraph;
+      this.ros2Helper = ros2Helper;
       yoloICPThread = new RestartableThread("YOLODetector", this::runYOLODetection);
+      readyToRunNotification.set();
    }
 
    public void setDetectionImages(RawImage yoloColorImage, RawImage icpDepthImage)
@@ -87,17 +78,46 @@ public class YOLOv8IterativeClosestPointManager
       {
          imageUpdateLock.unlock();
       }
+   }
 
-      yoloColorImage.release();
-      icpDepthImage.release();
+   public void updateSceneGraph(ROS2SceneGraph sceneGraph)
+   {
+      for (Map.Entry<YOLOv8Detection, YOLOv8IterativeClosestPointNodeCombo> detectionComboEntry : detectionToWorkerMap.entrySet())
+      {
+         if (!detectionComboEntry.getValue().updateSceneGraph(sceneGraph, detectionComboEntry.getKey()))
+            detectionToWorkerMap.remove(detectionComboEntry.getKey());
+      }
+   }
+
+   public void start()
+   {
+      yoloICPThread.start();
+   }
+
+   public void destroy()
+   {
+      yoloICPThread.stop();
+      segmenter.destroy();
+      extractor.destroy();
+      openCLManager.destroy();
+
+      yoloDetector.destroy();
+
+      if (yoloDetectionImage != null)
+         yoloDetectionImage.release();
+      if (icpEnvironmentDepthImage != null)
+         icpEnvironmentDepthImage.release();
    }
 
    private void runYOLODetection()
    {
+      RawImage yoloColorImageCopy = null;
+      RawImage icpDepthImageCopy = null;
 
       imageUpdateLock.lock();
       try
       {
+         // Wait for new images to arrive
          while ((yoloDetectionImage == null || yoloDetectionImage.isEmpty() || yoloDetectionImage.getSequenceNumber() == lastYoloImageSequenceNumber)
                 && (icpEnvironmentDepthImage == null || icpEnvironmentDepthImage.isEmpty()
                     || icpEnvironmentDepthImage.getSequenceNumber() == lastICPImageSequenceNumber))
@@ -105,9 +125,12 @@ public class YOLOv8IterativeClosestPointManager
             newImagesAvailable.await();
          }
 
-         runYOLOAndICP();
+         // Copy the images
+         yoloColorImageCopy = yoloDetectionImage.get();
+         icpDepthImageCopy = icpEnvironmentDepthImage.get();
 
          lastYoloImageSequenceNumber = yoloDetectionImage.getSequenceNumber();
+         lastICPImageSequenceNumber = icpEnvironmentDepthImage.getSequenceNumber();
 
       }
       catch (InterruptedException interruptedException)
@@ -118,84 +141,104 @@ public class YOLOv8IterativeClosestPointManager
       {
          imageUpdateLock.unlock();
       }
+
+      // Run YOLO and ICP in a non-blocking way
+      if (yoloColorImageCopy != null && icpDepthImageCopy != null && readyToRunNotification.poll())
+      {
+         runYOLOAndICP(yoloColorImageCopy, icpDepthImageCopy);
+         yoloColorImageCopy.release();
+         icpDepthImageCopy.release();
+      }
    }
 
-   private void runYOLOAndICP()
+   private void runYOLOAndICP(RawImage yoloColorImage, RawImage icpDepthImage)
    {
-      YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(yoloDetectionImage, YOLO_CONFIDENCE_THRESHOLD, YOLO_NMS_THRESHOLD);
-      Map<YOLOv8Detection, RawImage> objectMasks = yoloResults.getSegmentationImages(YOLO_SEGMENTATION_THRESHOLD);
+      // Get the results and object masks
+      YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(yoloColorImage, YOLO_CONFIDENCE_THRESHOLD, YOLO_NMS_THRESHOLD);
+      Map<YOLOv8Detection, RawImage> objectMasks = yoloResults.getICPSegmentationImages(YOLO_SEGMENTATION_THRESHOLD);
 
-      Set<YOLOv8Detection> newDetections = yoloResults.getDetections();
-      Map<YOLOv8Detection, YOLOv8Detection> oldNewMatchingDetections = organizeDetections(oldDetections, newDetections);
+      // Get the new detections
+      Set<YOLOv8Detection> newDetections = yoloResults.getICPDetections();
 
+      /* Organize the detections.
+       * Old and new detections which match will be returned in the map, and removed from their respective sets.
+       * The new detections remaining in the set are considered to be new instances of the detected object.
+       * The old detections remaining in the set are considered to be old instances of the object no longer in the scene.
+       */
+      Map<YOLOv8Detection, YOLOv8Detection> oldNewMatchingDetections = organizeDetections(detectionToWorkerMap.values(), oldDetections, newDetections);
+
+      // Remove the old detection (objects no longer in the scene) and associated stuff
+      for (YOLOv8Detection oldDetection : oldDetections)
+      {
+         if (detectionToWorkerMap.get(oldDetection).destroy()) // Attempt to remove the old detection
+         {
+            oldDetections.remove(oldDetection);
+         }
+      }
+
+      // Run ICP on the matching detections
       for (Map.Entry<YOLOv8Detection, YOLOv8Detection> oldNewPair : oldNewMatchingDetections.entrySet())
       {
          YOLOv8Detection oldDetection = oldNewPair.getKey();
          YOLOv8Detection newDetection = oldNewPair.getValue();
 
-         IterativeClosestPointWorker icpWorker = detectionToWorkerMap.get(oldDetection);
-         if (icpWorker == null)
-            throw new NullPointerException("Can't find the ICP worker you're looking for.");
+         if (objectMasks.get(newDetection) != null)
+         {
+            detectionToWorkerMap.get(oldDetection).runICP(newDetection, icpDepthImage, objectMasks.get(newDetection));
 
-         RawImage segmentedDepth = segmenter.removeBackground(icpEnvironmentDepthImage, objectMasks.get(newDetection), EROSION_KERNEL_RADIUS);
-         List<Point3DReadOnly> segmentedPointCloud = extractor.extractPointCloud(segmentedDepth);
-         icpWorker.setEnvironmentPointCloud(segmentedPointCloud);
-         icpWorker.runICP(ICP_ITERATIONS);
-
-         // replace old key with new one
-         detectionToWorkerMap.put(newDetection, detectionToWorkerMap.remove(oldDetection));
-
-         segmentedDepth.release();
+            // replace old key with new one
+            detectionToWorkerMap.put(newDetection, detectionToWorkerMap.remove(oldDetection));
+            // replace old detection with new detection (new one is old now)
+            oldDetections.remove(oldDetection);
+            oldDetections.add(newDetection);
+         }
       }
 
+      // Create new ICP workers for brand-new detections
       for (YOLOv8Detection newDetection : newDetections)
       {
-         IterativeClosestPointWorker icpWorker = createICPWorker(newDetection);
-         detectionToWorkerMap.put(newDetection, icpWorker);
-
-         RawImage segmentedDepth = segmenter.removeBackground(icpEnvironmentDepthImage, objectMasks.get(newDetection), EROSION_KERNEL_RADIUS);
-         List<Point3DReadOnly> segmentedPointCloud = extractor.extractPointCloud(segmentedDepth);
-         icpWorker.setEnvironmentPointCloud(segmentedPointCloud);
-         icpWorker.runICP(ICP_ITERATIONS);
-         // TODO: Worker -> scene node map, add node in scene graph update if a worker not associated with scene node
-      }
-
-      for (YOLOv8Detection oldDetection : oldDetections)
-      {
-         // Remove the old detection and associated stuff TODO: update the scene graph of this removal
-         workerToNodeMap.remove(detectionToWorkerMap.remove(oldDetection));
-         oldDetections.remove(oldDetection);
+         detectionToWorkerMap.put(newDetection, new YOLOv8IterativeClosestPointNodeCombo(ros2Helper, pointCloudDirectory, openCLManager));
+         oldDetections.add(newDetection);
       }
 
       for (RawImage mask : objectMasks.values())
          mask.release();
       yoloResults.destroy();
+
+      readyToRunNotification.set();
    }
 
    /**
+    * Old and new detections which match will be returned in the map, and removed from their respective sets.
+    * The new detections remaining in the set are considered to be new instances of the detected object.
+    * The old detections remaining in the set are considered to be old instances of the object no longer in the scene.
     *
-    * @param oldDetections Previous YOLOv8 detections. MODIFIED: old detections which were matched to new ones will be removed from the set.
+    * @param oldDetectionCombos Previous YOLOv8 detections. MODIFIED: old detections which were matched to new ones will be removed from the set.
     * @param newDetections New YOLOv8 detections. MODIFIED: new detections which were matched to new ones will be removed from the set.
-    * @return Map of closest old and new detections
+    * @return Map of closest (matching) old and new detections
     */
-   private Map<YOLOv8Detection, YOLOv8Detection> organizeDetections(Set<YOLOv8Detection> oldDetections, Set<YOLOv8Detection> newDetections)
+   private Map<YOLOv8Detection, YOLOv8Detection> organizeDetections(Collection<YOLOv8IterativeClosestPointNodeCombo> oldDetectionCombos,
+                                                                    Set<YOLOv8Detection> oldDetections,
+                                                                    Set<YOLOv8Detection> newDetections)
    {
       // Priority queue of all possible detection pairs ordered by distance between them
       PriorityQueue<Tuple3<YOLOv8Detection, YOLOv8Detection, Double>> matchingDetections = new PriorityQueue<>(Comparator.comparingDouble(Tuple3::getD2));
 
       // Add all detections which possibly match to the queue
-      for (YOLOv8Detection oldDetection : oldDetections)
+      for (YOLOv8IterativeClosestPointNodeCombo oldDetectionCombo : oldDetectionCombos)
       {
+         YOLOv8Detection oldDetection = oldDetectionCombo.getLastDetection();
          for (YOLOv8Detection newDetection : newDetections)
          {
             double distanceSquared = MathTools.square(oldDetection.x() - newDetection.x())
                                      + MathTools.square(oldDetection.y() - newDetection.y());
 
-            if (oldDetection.objectClass() == newDetection.objectClass() && distanceSquared < DISTANCE_THRESHOLD)
+            if (oldDetection.objectClass() == newDetection.objectClass() && distanceSquared < oldDetectionCombo.getDistanceThreshold())
                matchingDetections.add(new Tuple3<>(oldDetection, newDetection, distanceSquared));
          }
       }
 
+      // Match up old and new detections
       Map<YOLOv8Detection, YOLOv8Detection> oldNewMatchingDetectionMap = new HashMap<>();
       while (!oldDetections.isEmpty() && !newDetections.isEmpty())
       {
@@ -214,18 +257,5 @@ public class YOLOv8IterativeClosestPointManager
       }
 
       return oldNewMatchingDetectionMap;
-   }
-
-   private IterativeClosestPointWorker createICPWorker (YOLOv8Detection targetObject)
-   {
-      String pointCloudFileName = targetObject.objectClass().getPointCloudFileName();
-      if (pointCloudFileName == null)
-         return null;
-
-      WorkspaceResourceFile pointCloudFile = new WorkspaceResourceFile(pointCloudDirectory, pointCloudFileName);
-      IterativeClosestPointWorker worker = new IterativeClosestPointWorker(pointCloudFile.getFilesystemFile().toFile(), 1000, new Pose3D(), RANDOM);
-      worker.useProvidedTargetPoint(false);
-      worker.setSegmentSphereRadius(Double.MAX_VALUE);
-      return worker;
    }
 }

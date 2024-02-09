@@ -35,6 +35,9 @@ module perception_msgs
       const octet PRIMITIVE_RIGID_BODY_NODE_TYPE =
       6;
 
+      const octet YOLO_ICP_SCENE_NODE_TYPE =
+      7;
+
 
       /**
        * Gives the current state of the complete collection of detectable scene nodes.
