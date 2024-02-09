@@ -63,12 +63,8 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       JSONTools.toEuclid(jsonNode, palmTransformToParent.getValue());
       holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
       jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
-      JsonNode linearPositionNode = jsonNode.get("linearPositionWeight");
-      double linearPositionWeightValue = linearPositionNode != null ? linearPositionNode.asDouble() : 50.0;
-      linearPositionWeight.setValue(linearPositionWeightValue);
-      JsonNode angularPositionNode = jsonNode.get("angularPositionWeight");
-      double angularPositionWeightValue = linearPositionNode != null ? angularPositionNode.asDouble() : 50.0;
-      angularPositionWeight.setValue(angularPositionWeightValue);
+      linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
+      angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
    }
 
    public void toMessage(HandPoseActionDefinitionMessage message)
