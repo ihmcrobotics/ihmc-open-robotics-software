@@ -293,7 +293,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       for (OneDoFJointBasics solutionOneDoFJoint : armIKSolvers.get(getDefinition().getSide()).getSolutionOneDoFJoints())
       {
          OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
-         oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use default weight
+         oneDoFJointTrajectoryMessage.setWeight(getDefinition().getJointspaceWeight());
 
          TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
          trajectoryPoint1DMessage.setTime(getDefinition().getTrajectoryDuration());
