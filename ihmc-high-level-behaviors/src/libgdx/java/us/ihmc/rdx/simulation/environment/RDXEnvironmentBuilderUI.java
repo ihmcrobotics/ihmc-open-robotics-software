@@ -39,7 +39,6 @@ public class RDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
    @Override
    public void dispose()
    {
-      environmentBuilder.destroy();
       baseUI.dispose();
    }
 
