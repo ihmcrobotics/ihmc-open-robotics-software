@@ -22,6 +22,11 @@ float64 max_linear_velocity
 # The max angular velocity
 float64 max_angular_velocity
 
+# Whether the trajectory is controlled in jointspace (true) or hybrid jointspace and taskspace (false)
+bool jointspace_only
+
 float64 linear_position_weight
 
 float64 angular_position_weight
+
+float64 jointspace_weight

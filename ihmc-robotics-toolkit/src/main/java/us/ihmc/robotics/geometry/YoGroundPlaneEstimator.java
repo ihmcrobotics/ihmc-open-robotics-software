@@ -54,6 +54,8 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
                                                       1, YoAppearance.Glass());
          graphicsListRegistry.registerYoGraphic(prefix + "GroundPlaneEstimate", groundPlaneVisualizer);
       }
+
+      hideGraphics();
    }
 
    /**
@@ -104,5 +106,11 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
       yoGroundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
 
       groundPlaneVisualizer.update();
+   }
+
+   public void hideGraphics()
+   {
+      yoGroundPlaneNormal.setToNaN();
+      yoGroundPlanePoint.setToNaN();
    }
 }
