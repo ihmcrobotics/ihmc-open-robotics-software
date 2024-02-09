@@ -1,0 +1,28 @@
+#ifndef __perception_msgs__msg__YOLOv8ParametersMessage__idl__
+#define __perception_msgs__msg__YOLOv8ParametersMessage__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Parameters for running YOLOv8
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::YOLOv8ParametersMessage_")
+      struct YOLOv8ParametersMessage
+      {
+        /**
+         * Confidence required to consider a mask a valid detection
+         */
+        float confidence_threshold;
+        float non_maximum_suppression_threshold;
+        float segmentation_threshold;
+      };
+    };
+  };
+};
+
+#endif

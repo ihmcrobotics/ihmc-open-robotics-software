@@ -51,4 +51,7 @@ perception_msgs/StaticRelativeSceneNodeMessage[] static_relative_scene_nodes
 # Reshapable rigid body scene nodes
 perception_msgs/PrimitiveRigidBodySceneNodeMessage[] primitive_rigid_body_scene_nodes
 
+# YOLO ICP scene nodes
+perception_msgs/YOLOv8ICPNodeMessage[] yolo_icp_scene_nodes
+
 

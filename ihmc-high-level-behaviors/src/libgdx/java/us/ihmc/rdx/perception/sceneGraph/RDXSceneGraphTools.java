@@ -10,11 +10,15 @@ import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscriptionNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDX3DPanel;
 
 public class RDXSceneGraphTools
 {
-   public static RDXSceneNode createNodeFromMessage(ROS2SceneGraphSubscriptionNode subscriptionNode, RDX3DPanel panel3D, SceneGraph sceneGraph)
+   public static RDXSceneNode createNodeFromMessage(ROS2SceneGraphSubscriptionNode subscriptionNode,
+                                                    RDX3DPanel panel3D,
+                                                    ImGuiUniqueLabelMap labels,
+                                                    SceneGraph sceneGraph)
    {
       // We create one using this and copy to save on code maintenance
       SceneNode sceneNodeToCopy = ROS2SceneGraphTools.createNodeFromMessage(subscriptionNode, sceneGraph);
@@ -29,7 +33,7 @@ public class RDXSceneGraphTools
       }
       else if (sceneNodeToCopy instanceof YOLOv8IterativeClosestPointNode yoloICPSceneNode)
       {
-         return new RDXYoloDetectableSceneNode(yoloICPSceneNode);
+         return new RDXYOLOv8IterativeClosestPointNode(yoloICPSceneNode, labels);
       }
       else if (sceneNodeToCopy instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {

@@ -46,6 +46,7 @@ public class ROS2SceneGraphPublisher
       sceneGraphMessage.getPredefinedRigidBodySceneNodes().clear();
       sceneGraphMessage.getArucoMarkerSceneNodes().clear();
       sceneGraphMessage.getCenterposeSceneNodes().clear();
+      sceneGraphMessage.getYoloIcpSceneNodes().clear();
       sceneGraphMessage.getStaticRelativeSceneNodes().clear();
       sceneGraphMessage.getPrimitiveRigidBodySceneNodes().clear();
 
@@ -116,11 +117,17 @@ public class ROS2SceneGraphPublisher
             centerposeNodeMessage.setEnableTracking(centerposeNode.isEnableTracking());
             detectableSceneNodeMessage = centerposeNodeMessage.getDetectableSceneNode();
          }
-         else if (sceneNode instanceof YOLOv8IterativeClosestPointNode)
+         else if (sceneNode instanceof YOLOv8IterativeClosestPointNode yoloICPNode)
          {
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.YOLO_ICP_SCENE_NODE_TYPE);
-            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getDetectableSceneNodes().size());
-            detectableSceneNodeMessage = sceneGraphMessage.getDetectableSceneNodes().add();
+            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getYoloIcpSceneNodes().size());
+            YOLOv8ICPNodeMessage yoloICPNodeMessage = sceneGraphMessage.getYoloIcpSceneNodes().add();
+            yoloICPNodeMessage.setMaskErosionKernelRadius(yoloICPNode.getMaskErosionKernelRadius());
+            yoloICPNodeMessage.setOutlierFilterThreshold(yoloICPNode.getOutlierFilterThreshold());
+            yoloICPNodeMessage.setIcpIterations(yoloICPNode.getICPIterations());
+            yoloICPNodeMessage.setBaseDistanceThreshold(yoloICPNode.getBaseDistanceThreshold());
+            yoloICPNodeMessage.setRunIcp(yoloICPNode.isRunningICP());
+            detectableSceneNodeMessage = yoloICPNodeMessage.getDetectableSceneNode();
          }
          else
          {
