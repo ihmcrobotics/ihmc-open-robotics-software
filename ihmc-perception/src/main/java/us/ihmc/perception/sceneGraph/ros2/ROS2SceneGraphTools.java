@@ -74,7 +74,14 @@ public class ROS2SceneGraphTools
       }
       else if (nodeType == SceneGraphMessage.YOLO_ICP_SCENE_NODE_TYPE)
       {
-         sceneNode = new YOLOv8IterativeClosestPointNode(nodeID, nodeName);
+         sceneNode = new YOLOv8IterativeClosestPointNode(nodeID,
+                                                         nodeName,
+                                                         subscriptionNode.getYOLOv8ICPNodeMessage().getMaskErosionKernelRadius(),
+                                                         subscriptionNode.getYOLOv8ICPNodeMessage().getOutlierFilterThreshold(),
+                                                         subscriptionNode.getYOLOv8ICPNodeMessage().getIcpIterations(),
+                                                         subscriptionNode.getYOLOv8ICPNodeMessage().getBaseDistanceThreshold(),
+                                                         subscriptionNode.getYOLOv8ICPNodeMessage().getRunIcp(),
+                                                         subscriptionNode.getYOLOv8ICPNodeMessage().getMovementDistanceThreshold());
       }
       else if (nodeType == SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE)
       {

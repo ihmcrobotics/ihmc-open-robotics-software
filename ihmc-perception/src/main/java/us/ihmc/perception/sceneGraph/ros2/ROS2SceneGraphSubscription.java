@@ -11,6 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.YOLOv8IterativeClosestPointNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
@@ -131,6 +132,15 @@ public class ROS2SceneGraphSubscription
             centerposeNode.setVertices2D(subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices());
             centerposeNode.setEnableTracking(subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
          }
+         if (localNode instanceof YOLOv8IterativeClosestPointNode yoloICPNode)
+         {
+            yoloICPNode.setMaskErosionKernelRadius(subscriptionNode.getYOLOv8ICPNodeMessage().getMaskErosionKernelRadius());
+            yoloICPNode.setOutlierFilterThreshold(subscriptionNode.getYOLOv8ICPNodeMessage().getOutlierFilterThreshold());
+            yoloICPNode.setICPIterations(subscriptionNode.getYOLOv8ICPNodeMessage().getIcpIterations());
+            yoloICPNode.setBaseDistanceThreshold(subscriptionNode.getYOLOv8ICPNodeMessage().getBaseDistanceThreshold());
+            yoloICPNode.setRunICP(subscriptionNode.getYOLOv8ICPNodeMessage().getRunIcp());
+            yoloICPNode.setMovementDistanceThreshold(subscriptionNode.getYOLOv8ICPNodeMessage().getMovementDistanceThreshold());
+         }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {
             staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessage().getDistanceToDisableTracking());
@@ -181,7 +191,7 @@ public class ROS2SceneGraphSubscription
          {
             subscriptionNode.setSceneNodeMessage(sceneGraphMessage.getSceneNodes().get(indexInTypesList));
          }
-         case SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE, SceneGraphMessage.YOLO_ICP_SCENE_NODE_TYPE ->
+         case SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE ->
          {
             DetectableSceneNodeMessage detectableSceneNodeMessage = sceneGraphMessage.getDetectableSceneNodes().get(indexInTypesList);
             subscriptionNode.setDetectableSceneNodeMessage(detectableSceneNodeMessage);
@@ -207,6 +217,13 @@ public class ROS2SceneGraphSubscription
             subscriptionNode.setCenterposeNodeMessage(centerposeNodeMessage);
             subscriptionNode.setDetectableSceneNodeMessage(centerposeNodeMessage.getDetectableSceneNode());
             subscriptionNode.setSceneNodeMessage(centerposeNodeMessage.getDetectableSceneNode().getSceneNode());
+         }
+         case SceneGraphMessage.YOLO_ICP_SCENE_NODE_TYPE ->
+         {
+            YOLOv8ICPNodeMessage yoloICPNodeMessage = sceneGraphMessage.getYoloIcpSceneNodes().get(indexInTypesList);
+            subscriptionNode.setYOLOv8ICPNodeMessage(yoloICPNodeMessage);
+            subscriptionNode.setDetectableSceneNodeMessage(yoloICPNodeMessage.getDetectableSceneNode());
+            subscriptionNode.setSceneNodeMessage(yoloICPNodeMessage.getDetectableSceneNode().getSceneNode());
          }
          case SceneGraphMessage.STATIC_RELATIVE_NODE_TYPE ->
          {

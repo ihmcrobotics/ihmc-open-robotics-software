@@ -53,7 +53,7 @@ public class RDXSceneGraphUI
    {
       sceneGraph = new ROS2SceneGraph(new SceneNode(SceneGraph.ROOT_NODE_ID, SceneGraph.ROOT_NODE_NAME), (sceneGraph, ros2SceneGraphSubscriptionNode) ->
       {
-         RDXSceneNode uiSceneNode = RDXSceneGraphTools.createNodeFromMessage(ros2SceneGraphSubscriptionNode, panel3D, sceneGraph);
+         RDXSceneNode uiSceneNode = RDXSceneGraphTools.createNodeFromMessage(ros2SceneGraphSubscriptionNode, panel3D, labels, sceneGraph);
          addUISceneNode(uiSceneNode);
          return uiSceneNode.getSceneNode();
       }, ros2PublishSubscribeAPI, ROS2ActorDesignation.OPERATOR);

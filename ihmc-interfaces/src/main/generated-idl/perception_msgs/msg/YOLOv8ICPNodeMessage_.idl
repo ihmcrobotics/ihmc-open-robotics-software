@@ -1,0 +1,33 @@
+#ifndef __perception_msgs__msg__YOLOv8ICPNodeMessage__idl__
+#define __perception_msgs__msg__YOLOv8ICPNodeMessage__idl__
+
+#include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Perception scene node for YOLOv8 ICP detection
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::YOLOv8ICPNodeMessage_")
+      struct YOLOv8ICPNodeMessage
+      {
+        /**
+         * Detectable scene node information
+         */
+        perception_msgs::msg::dds::DetectableSceneNodeMessage detectable_scene_node;
+        long mask_erosion_kernel_radius;
+        double outlier_filter_threshold;
+        long icp_iterations;
+        double base_distance_threshold;
+        boolean run_icp;
+        double movement_distance_threshold;
+      };
+    };
+  };
+};
+
+#endif

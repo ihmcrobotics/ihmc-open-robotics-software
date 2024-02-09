@@ -1,8 +1,11 @@
 package us.ihmc.perception.YOLOv8;
 
 import org.ddogleg.struct.Tuple3;
+import perception_msgs.msg.dds.YOLOv8ParametersMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.OpenCLPointCloudExtractor;
@@ -25,11 +28,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class YOLOv8IterativeClosestPointManager
 {
-   // TODO: Make these variable
-   private static final float YOLO_CONFIDENCE_THRESHOLD = 0.3f;
-   private static final float YOLO_NMS_THRESHOLD = 0.1f;
-   private static final float YOLO_SEGMENTATION_THRESHOLD = 0.0f;
-
    private final OpenCLManager openCLManager = new OpenCLManager();
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor(openCLManager);
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter(openCLManager);
@@ -51,11 +49,24 @@ public class YOLOv8IterativeClosestPointManager
 
    private final ConcurrentHashMap<YOLOv8Detection, YOLOv8IterativeClosestPointNodeCombo> detectionToWorkerMap = new ConcurrentHashMap<>();
 
+   private final IHMCROS2Input<YOLOv8ParametersMessage> yoloParameterSubscription;
+   private float yoloConfidenceThreshold = 0.3f;
+   private float yoloNMSThreshold = 0.1f;
+   private float yoloSegmentationThreshold = 0.0f;
+
    public YOLOv8IterativeClosestPointManager(ROS2Helper ros2Helper)
    {
       this.ros2Helper = ros2Helper;
       yoloICPThread = new RestartableThread("YOLODetector", this::runYOLODetection);
       readyToRunNotification.set();
+
+      yoloParameterSubscription = ros2Helper.subscribe(PerceptionAPI.YOLO_PARAMETERS);
+      yoloParameterSubscription.addCallback(parametersMessage ->
+      {
+         yoloConfidenceThreshold = parametersMessage.getConfidenceThreshold();
+         yoloNMSThreshold = parametersMessage.getNonMaximumSuppressionThreshold();
+         yoloSegmentationThreshold = parametersMessage.getSegmentationThreshold();
+      });
    }
 
    public void setDetectionImages(RawImage yoloColorImage, RawImage icpDepthImage)
@@ -157,8 +168,8 @@ public class YOLOv8IterativeClosestPointManager
    private void runYOLOAndICP(RawImage yoloColorImage, RawImage icpDepthImage)
    {
       // Get the results and object masks
-      YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(yoloColorImage, YOLO_CONFIDENCE_THRESHOLD, YOLO_NMS_THRESHOLD);
-      Map<YOLOv8Detection, RawImage> objectMasks = yoloResults.getICPSegmentationImages(YOLO_SEGMENTATION_THRESHOLD);
+      YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(yoloColorImage, yoloConfidenceThreshold, yoloNMSThreshold);
+      Map<YOLOv8Detection, RawImage> objectMasks = yoloResults.getICPSegmentationImages(yoloSegmentationThreshold);
 
       // Get the new detections
       Set<YOLOv8Detection> newDetections = yoloResults.getICPDetections();
@@ -171,13 +182,7 @@ public class YOLOv8IterativeClosestPointManager
       Map<YOLOv8Detection, YOLOv8Detection> oldNewMatchingDetections = organizeDetections(detectionToWorkerMap.values(), oldDetections, newDetections);
 
       // Remove the old detection (objects no longer in the scene) and associated stuff
-      for (YOLOv8Detection oldDetection : oldDetections)
-      {
-         if (detectionToWorkerMap.get(oldDetection).destroy()) // Attempt to remove the old detection
-         {
-            oldDetections.remove(oldDetection);
-         }
-      }
+      oldDetections.removeIf(oldDetection -> detectionToWorkerMap.get(oldDetection).destroy());
 
       // Run ICP on the matching detections
       for (Map.Entry<YOLOv8Detection, YOLOv8Detection> oldNewPair : oldNewMatchingDetections.entrySet())
