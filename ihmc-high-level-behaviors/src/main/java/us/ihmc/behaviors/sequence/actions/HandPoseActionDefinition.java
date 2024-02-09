@@ -22,6 +22,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    private final CRDTUnidirectionalRigidBodyTransform palmTransformToParent;
    private final CRDTUnidirectionalDouble linearPositionWeight;
    private final CRDTUnidirectionalDouble angularPositionWeight;
+   private final CRDTUnidirectionalDouble jointspaceWeight;
 
    public HandPoseActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -35,6 +36,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       palmTransformToParent = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
       linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 50.0);
       angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 50.0);
+      jointspaceWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
    }
 
    @Override
@@ -50,6 +52,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       jsonNode.put("jointspaceOnly", jointspaceOnly.getValue());
       jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
       jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
+      jsonNode.put("jointspaceWeight", jointspaceWeight.getValue());
    }
 
    @Override
@@ -63,12 +66,9 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       JSONTools.toEuclid(jsonNode, palmTransformToParent.getValue());
       holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
       jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
-      JsonNode linearPositionNode = jsonNode.get("linearPositionWeight");
-      double linearPositionWeightValue = linearPositionNode != null ? linearPositionNode.asDouble() : 50.0;
-      linearPositionWeight.setValue(linearPositionWeightValue);
-      JsonNode angularPositionNode = jsonNode.get("angularPositionWeight");
-      double angularPositionWeightValue = linearPositionNode != null ? angularPositionNode.asDouble() : 50.0;
-      angularPositionWeight.setValue(angularPositionWeightValue);
+      linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
+      angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
+      jointspaceWeight.setValue(jsonNode.get("jointspaceWeight").asDouble());
    }
 
    public void toMessage(HandPoseActionDefinitionMessage message)
@@ -83,6 +83,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       message.setJointSpaceControl(jointspaceOnly.toMessage());
       message.setLinearPositionWeight(linearPositionWeight.toMessage());
       message.setAngularPositionWeight(angularPositionWeight.toMessage());
+      message.setJointspaceWeight(jointspaceWeight.toMessage());
    }
 
    public void fromMessage(HandPoseActionDefinitionMessage message)
@@ -97,6 +98,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       jointspaceOnly.fromMessage(message.getJointSpaceControl());
       linearPositionWeight.fromMessage(message.getLinearPositionWeight());
       angularPositionWeight.fromMessage(message.getAngularPositionWeight());
+      jointspaceWeight.fromMessage(message.getJointspaceWeight());
    }
 
    @Override
@@ -178,5 +180,15 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    public void setAngularPositionWeight(double angularPositionWeight)
    {
       this.angularPositionWeight.setValue(angularPositionWeight);
+   }
+
+   public double getJointspaceWeight()
+   {
+      return jointspaceWeight.getValue();
+   }
+
+   public void setJointspaceWeight(double jointspaceWeight)
+   {
+      this.jointspaceWeight.setValue(jointspaceWeight);
    }
 }
