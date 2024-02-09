@@ -182,13 +182,12 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
          SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
          se3TrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
-         // Select all axes and use default weights
-         // se3TrajectoryMessage.getLinearWeightMatrix().setXWeight(50.0);
-         // se3TrajectoryMessage.getLinearWeightMatrix().setYWeight(50.0);
-         // se3TrajectoryMessage.getLinearWeightMatrix().setZWeight(50.0);
-         // se3TrajectoryMessage.getAngularWeightMatrix().setXWeight(50.0);
-         // se3TrajectoryMessage.getAngularWeightMatrix().setYWeight(50.0);
-         // se3TrajectoryMessage.getAngularWeightMatrix().setZWeight(50.0);
+         se3TrajectoryMessage.getLinearWeightMatrix().setXWeight(getDefinition().getLinearPositionWeight());
+         se3TrajectoryMessage.getLinearWeightMatrix().setYWeight(getDefinition().getLinearPositionWeight());
+         se3TrajectoryMessage.getLinearWeightMatrix().setZWeight(getDefinition().getLinearPositionWeight());
+         se3TrajectoryMessage.getAngularWeightMatrix().setXWeight(getDefinition().getAngularPositionWeight());
+         se3TrajectoryMessage.getAngularWeightMatrix().setYWeight(getDefinition().getAngularPositionWeight());
+         se3TrajectoryMessage.getAngularWeightMatrix().setZWeight(getDefinition().getAngularPositionWeight());
          se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameID);
          SE3TrajectoryPointMessage se3TrajectoryPointMessage = se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add();
          se3TrajectoryPointMessage.setTime(getDefinition().getTrajectoryDuration());
@@ -294,7 +293,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       for (OneDoFJointBasics solutionOneDoFJoint : armIKSolvers.get(getDefinition().getSide()).getSolutionOneDoFJoints())
       {
          OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
-         oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use default weight
+         oneDoFJointTrajectoryMessage.setWeight(getDefinition().getJointspaceWeight());
 
          TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
          trajectoryPoint1DMessage.setTime(getDefinition().getTrajectoryDuration());
