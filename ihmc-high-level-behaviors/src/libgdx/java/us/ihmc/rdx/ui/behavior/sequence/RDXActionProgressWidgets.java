@@ -4,6 +4,7 @@ import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
 import imgui.internal.ImGui;
+import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.communication.crdt.CRDTUnidirectionalVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,6 +16,7 @@ import us.ihmc.rdx.ui.behavior.actions.RDXHandPoseAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXScrewPrimitiveAction;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -33,6 +35,9 @@ public class RDXActionProgressWidgets
    private final ImPlotPlot orientationErrorPlot = new ImPlotPlot();
    private final ImPlotBasicDoublePlotLine currentOrientationPlotLine = new ImPlotBasicDoublePlotLine();
    private final ImPlotBasicDoublePlotLine desiredOrientationPlotLine = new ImPlotBasicDoublePlotLine();
+   private final ImPlotPlot[] jointspacePositionErrorPlot = new ImPlotPlot[ActionNodeState.SUPPORTED_NUMBER_OF_JOINTS];
+   private final ImPlotBasicDoublePlotLine[] currentJointspacePositionErrorPlotLine = new ImPlotBasicDoublePlotLine[jointspacePositionErrorPlot.length];
+   private final ImPlotBasicDoublePlotLine[] desiredJointspacePositionErrorPlotLine = new ImPlotBasicDoublePlotLine[jointspacePositionErrorPlot.length];
    private final ImPlotPlot footstepsRemainingPlot = new ImPlotPlot();
    private final ImPlotBasicDoublePlotLine footstepsRemainingPlotLine = new ImPlotBasicDoublePlotLine();
    private final SideDependentList<ImPlotPlot> footPositionErrors = new SideDependentList<>(new ImPlotPlot(), new ImPlotPlot());
@@ -56,6 +61,8 @@ public class RDXActionProgressWidgets
          = new MultipleWaypointsPositionTrajectoryGenerator("Position", 500, ReferenceFrame.getWorldFrame(), new YoRegistry("DummyParent"));
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator
          = new MultipleWaypointsOrientationTrajectoryGenerator("Orientation", 500, ReferenceFrame.getWorldFrame(), new YoRegistry("DummyParent"));
+   private final MultipleWaypointsTrajectoryGenerator jointspaceTrajectoryGenerator
+         = new MultipleWaypointsTrajectoryGenerator("Jointspace", 500, new YoRegistry("DummyParent"));
    private boolean elapsedTimeIsValid;
 
    public RDXActionProgressWidgets(RDXActionNode<?, ?> action)
@@ -64,6 +71,13 @@ public class RDXActionProgressWidgets
 
       setupPlot(positionErrorPlot, 0.1, currentPositionErrorPlotLine, desiredPositionErrorPlotLine);
       setupPlot(orientationErrorPlot, 45.0, currentOrientationPlotLine, desiredOrientationPlotLine);
+      for (int i = 0; i < jointspacePositionErrorPlot.length; i++)
+      {
+         jointspacePositionErrorPlot[i] = new ImPlotPlot();
+         currentJointspacePositionErrorPlotLine[i] = new ImPlotBasicDoublePlotLine();
+         desiredJointspacePositionErrorPlotLine[i] = new ImPlotBasicDoublePlotLine();
+         setupPlot(jointspacePositionErrorPlot[i], 5.0, currentJointspacePositionErrorPlotLine[i], desiredJointspacePositionErrorPlotLine[i]);
+      }
       setupPlot(footstepsRemainingPlot, 1.0, footstepsRemainingPlotLine);
       for (RobotSide side : RobotSide.values)
       {
@@ -107,6 +121,11 @@ public class RDXActionProgressWidgets
          desiredPositionErrorPlotLine.clear();
          currentOrientationPlotLine.clear();
          desiredOrientationPlotLine.clear();
+         for (int i = 0; i < jointspacePositionErrorPlot.length; i++)
+         {
+            currentJointspacePositionErrorPlotLine[i].clear();
+            desiredJointspacePositionErrorPlotLine[i].clear();
+         }
          footstepsRemainingPlotLine.clear();
          for (RobotSide side : RobotSide.values)
          {
@@ -222,6 +241,63 @@ public class RDXActionProgressWidgets
          if (renderAsPlots)
          {
             orientationErrorPlot.render(dividedBarWidth, PLOT_HEIGHT);
+         }
+         else
+         {
+            double barEndValue = Math.max(Math.min(initialToEnd, currentToEnd), 2.0 * tolerance);
+            double toleranceMarkPercent = tolerance / barEndValue;
+            double percentLeft = currentToEnd / barEndValue;
+            ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
+                                         dividedBarWidth,
+                                         dataColor,
+                                         percentLeft,
+                                         toleranceMarkPercent,
+                                         "%.2f / %.2f".formatted(Math.toDegrees(currentToEnd), Math.toDegrees(initialToEnd)));
+         }
+      }
+      else
+      {
+         renderBlankProgress(dividedBarWidth, renderAsPlots, true);
+      }
+   }
+
+   public void renderJointspacePositionError(int jointIndex, float dividedBarWidth, boolean renderAsPlots)
+   {
+      if (action.getState().getDesiredJointTrajectories().getNumberOfJoints() > jointIndex)
+      {
+         if (elapsedTimeIsValid)
+         {
+            jointspaceTrajectoryGenerator.clear();
+            for (int i = 0; i < action.getState().getDesiredJointTrajectories().getNumberOfPoints(jointIndex); i++)
+            {
+               jointspaceTrajectoryGenerator.appendWaypoint(action.getState().getDesiredJointTrajectories().getValueReadOnly(jointIndex, i));
+            }
+            jointspaceTrajectoryGenerator.initialize();
+            jointspaceTrajectoryGenerator.compute(elapsedExecutionTime);
+         }
+
+         double initialPosition = action.getState().getDesiredJointTrajectories().getFirstValueReadOnly(jointIndex).getPosition();
+         double endPosition = action.getState().getDesiredJointTrajectories().getLastValueReadOnly(jointIndex).getPosition();
+         double currentPosition = action.getState().getCurrentJointAngles().getValueReadOnly(jointIndex);
+         double desiredPosition = elapsedTimeIsValid ? jointspaceTrajectoryGenerator.getValue() : endPosition;
+
+         double initialToEnd = Math.abs(initialPosition - endPosition);
+         double currentToEnd = Math.abs(currentPosition - endPosition);
+         double desiredToEnd = Math.abs(desiredPosition - endPosition);
+         double tolerance = action.getState().getPositionDistanceToGoalTolerance();
+         double error = Math.abs(currentToEnd - desiredToEnd);
+         int dataColor = error < tolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
+
+         if (action.getState().getIsExecuting())
+         {
+            currentJointspacePositionErrorPlotLine[jointIndex].setDataColor(dataColor);
+            currentJointspacePositionErrorPlotLine[jointIndex].addValue(Math.toDegrees(currentToEnd));
+            desiredJointspacePositionErrorPlotLine[jointIndex].setDataColor(ImGuiTools.GRAY);
+            desiredJointspacePositionErrorPlotLine[jointIndex].addValue(Math.toDegrees(desiredToEnd));
+         }
+         if (renderAsPlots)
+         {
+            jointspacePositionErrorPlot[jointIndex].render(dividedBarWidth, PLOT_HEIGHT);
          }
          else
          {

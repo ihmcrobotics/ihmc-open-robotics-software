@@ -339,7 +339,7 @@ public class WalkingCommandConsumer
          if (command.getRequest(HumanoidBodyPart.PELVIS))
          {
             pelvisOrientationManager.goToHomeFromCurrentDesired(command.getTrajectoryTime());
-            balanceManager.goHome();
+            balanceManager.goHome(command.getTrajectoryTime());
             comHeightManager.goHome(command.getTrajectoryTime());
          }
 

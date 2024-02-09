@@ -40,8 +40,13 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
             * The max angular velocity
             */
    public double max_angular_velocity_;
+   /**
+            * Whether the trajectory is controlled in jointspace (true) or hybrid jointspace and taskspace (false)
+            */
+   public boolean jointspace_only_;
    public double linear_position_weight_;
    public double angular_position_weight_;
+   public double jointspace_weight_;
 
    public ScrewPrimitiveActionDefinitionMessage()
    {
@@ -73,9 +78,13 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
 
       max_angular_velocity_ = other.max_angular_velocity_;
 
+      jointspace_only_ = other.jointspace_only_;
+
       linear_position_weight_ = other.linear_position_weight_;
 
       angular_position_weight_ = other.angular_position_weight_;
+
+      jointspace_weight_ = other.jointspace_weight_;
 
    }
 
@@ -196,6 +205,21 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
       return max_angular_velocity_;
    }
 
+   /**
+            * Whether the trajectory is controlled in jointspace (true) or hybrid jointspace and taskspace (false)
+            */
+   public void setJointspaceOnly(boolean jointspace_only)
+   {
+      jointspace_only_ = jointspace_only;
+   }
+   /**
+            * Whether the trajectory is controlled in jointspace (true) or hybrid jointspace and taskspace (false)
+            */
+   public boolean getJointspaceOnly()
+   {
+      return jointspace_only_;
+   }
+
    public void setLinearPositionWeight(double linear_position_weight)
    {
       linear_position_weight_ = linear_position_weight;
@@ -212,6 +236,15 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
    public double getAngularPositionWeight()
    {
       return angular_position_weight_;
+   }
+
+   public void setJointspaceWeight(double jointspace_weight)
+   {
+      jointspace_weight_ = jointspace_weight;
+   }
+   public double getJointspaceWeight()
+   {
+      return jointspace_weight_;
    }
 
 
@@ -246,9 +279,13 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_angular_velocity_, other.max_angular_velocity_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.jointspace_only_, other.jointspace_only_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.linear_position_weight_, other.linear_position_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.angular_position_weight_, other.angular_position_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.jointspace_weight_, other.jointspace_weight_, epsilon)) return false;
 
 
       return true;
@@ -277,9 +314,13 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
 
       if(this.max_angular_velocity_ != otherMyClass.max_angular_velocity_) return false;
 
+      if(this.jointspace_only_ != otherMyClass.jointspace_only_) return false;
+
       if(this.linear_position_weight_ != otherMyClass.linear_position_weight_) return false;
 
       if(this.angular_position_weight_ != otherMyClass.angular_position_weight_) return false;
+
+      if(this.jointspace_weight_ != otherMyClass.jointspace_weight_) return false;
 
 
       return true;
@@ -307,10 +348,14 @@ public class ScrewPrimitiveActionDefinitionMessage extends Packet<ScrewPrimitive
       builder.append(this.max_linear_velocity_);      builder.append(", ");
       builder.append("max_angular_velocity=");
       builder.append(this.max_angular_velocity_);      builder.append(", ");
+      builder.append("jointspace_only=");
+      builder.append(this.jointspace_only_);      builder.append(", ");
       builder.append("linear_position_weight=");
       builder.append(this.linear_position_weight_);      builder.append(", ");
       builder.append("angular_position_weight=");
-      builder.append(this.angular_position_weight_);
+      builder.append(this.angular_position_weight_);      builder.append(", ");
+      builder.append("jointspace_weight=");
+      builder.append(this.jointspace_weight_);
       builder.append("}");
       return builder.toString();
    }
