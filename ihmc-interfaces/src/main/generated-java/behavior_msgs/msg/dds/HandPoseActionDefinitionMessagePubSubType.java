@@ -15,7 +15,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0f812d8d3a984044e93e1de1fe6cbd4de8ef3a2d13e4442e9694f0d44bdac9c2";
+   		return "01399b202ed55ff0a035b69db3759dc1e2810921f9c352ad25aa426aa93a135c";
    }
    
    @Override
@@ -69,6 +69,8 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -106,6 +108,9 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -130,6 +135,8 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getAngularPositionWeight());
 
+      cdr.write_type_6(data.getJointspaceWeight());
+
    }
 
    public static void read(behavior_msgs.msg.dds.HandPoseActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -149,6 +156,8 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       	
       data.setAngularPositionWeight(cdr.read_type_6());
       	
+      data.setJointspaceWeight(cdr.read_type_6());
+      	
 
    }
 
@@ -166,6 +175,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       ser.write_type_7("joint_space_control", data.getJointSpaceControl());
       ser.write_type_6("linear_position_weight", data.getLinearPositionWeight());
       ser.write_type_6("angular_position_weight", data.getAngularPositionWeight());
+      ser.write_type_6("jointspace_weight", data.getJointspaceWeight());
    }
 
    @Override
@@ -182,6 +192,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       data.setJointSpaceControl(ser.read_type_7("joint_space_control"));
       data.setLinearPositionWeight(ser.read_type_6("linear_position_weight"));
       data.setAngularPositionWeight(ser.read_type_6("angular_position_weight"));
+      data.setJointspaceWeight(ser.read_type_6("jointspace_weight"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.HandPoseActionDefinitionMessage src, behavior_msgs.msg.dds.HandPoseActionDefinitionMessage dest)

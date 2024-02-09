@@ -78,6 +78,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final ImDoubleWrapper trajectoryDurationWidget;
    private final ImGuiSliderDoubleWrapper linearPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper angularPositionWeightWidget;
+   private final ImGuiSliderDoubleWrapper jointspaceWeightWidget;
    private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
    private final ImBooleanWrapper jointSpaceControlWrapper;
@@ -136,6 +137,11 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                                                  getDefinition()::setAngularPositionWeight);
       angularPositionWeightWidget.addButton("Use Default Weights", () -> getDefinition().setAngularPositionWeight(-1.0));
       angularPositionWeightWidget.addWidgetAligner(widgetAligner);
+      jointspaceWeightWidget = new ImGuiSliderDoubleWrapper("Jointspace Weight", "%.2f", 0.0, 70.0,
+                                                            getDefinition()::getJointspaceWeight,
+                                                            getDefinition()::setJointspaceWeight);
+      jointspaceWeightWidget.addButton("Use Default Weights", () -> getDefinition().setJointspaceWeight(-1.0));
+      jointspaceWeightWidget.addWidgetAligner(widgetAligner);
 
       FullHumanoidRobotModel syncedFullRobotModel = syncedRobot.getFullRobotModel();
       for (RobotSide side : RobotSide.values)
@@ -318,11 +324,13 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       parentFrameComboBox.render();
       ImGui.pushItemWidth(80.0f);
       trajectoryDurationWidget.renderImGuiWidget();
-      if (!getDefinition().getJointspaceOnly())
-      {
-         linearPositionWeightWidget.renderImGuiWidget();
-         angularPositionWeightWidget.renderImGuiWidget();
-      }
+      if (getDefinition().getJointspaceOnly())
+         ImGui.beginDisabled();
+      linearPositionWeightWidget.renderImGuiWidget();
+      angularPositionWeightWidget.renderImGuiWidget();
+      if (getDefinition().getJointspaceOnly())
+         ImGui.endDisabled();
+      jointspaceWeightWidget.renderImGuiWidget();
       ImGui.text("IK Solution Quality: %.2f".formatted(state.getSolutionQuality()));
       ImGui.popItemWidth();
       ImGui.sameLine();

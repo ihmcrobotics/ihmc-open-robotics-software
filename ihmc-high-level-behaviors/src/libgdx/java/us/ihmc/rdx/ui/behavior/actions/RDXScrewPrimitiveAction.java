@@ -136,8 +136,12 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       maxLinearVelocityWidget.renderImGuiWidget();
       maxAngularVelocityWidget.renderImGuiWidget();
       jointspaceOnlyWidget.renderImGuiWidget();
+      if (getDefinition().getJointspaceOnly())
+         ImGui.beginDisabled();
       linearPositionWeightWidget.renderImGuiWidget();
       angularPositionWeightWidget.renderImGuiWidget();
+      if (getDefinition().getJointspaceOnly())
+         ImGui.endDisabled();
       jointspaceWeightWidget.renderImGuiWidget();
    }
 
