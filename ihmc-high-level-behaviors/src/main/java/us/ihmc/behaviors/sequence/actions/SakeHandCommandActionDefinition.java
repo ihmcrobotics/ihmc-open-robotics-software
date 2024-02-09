@@ -54,7 +54,7 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       super.toMessage(message.getDefinition());
 
       message.setRobotSide(side.toMessage().toByte());
-      message.setConfiguration(SakeHandCommandOption.values[handConfigurationIndex.toMessage()].getCommandNumber());
+      message.setConfiguration(handConfigurationIndex.toMessage());
       message.setPositionRatio(goalPosition.toMessage());
       message.setTorqueRatio(goalTorque.toMessage());
    }
