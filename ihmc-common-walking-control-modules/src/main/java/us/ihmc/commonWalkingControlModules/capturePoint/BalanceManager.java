@@ -50,7 +50,6 @@ import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.*;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicPoint2DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicPointcloud3DDefinition;
@@ -791,7 +790,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
    public void freezePelvisXYControl()
    {
-      pelvisICPBasedTranslationManager.freeze();
+      pelvisICPBasedTranslationManager.reset();
    }
 
    public int getMaxNumberOfStepsToConsider()
@@ -878,10 +877,10 @@ public class BalanceManager implements SCS2YoGraphicHolder
       return contactStateManager.getExtraTimeAdjustmentForSwing();
    }
 
-   public void goHome()
+   public void goHome(double trajectoryDuration)
    {
       if (pelvisICPBasedTranslationManager.isEnabled())
-         pelvisICPBasedTranslationManager.goToHome();
+         pelvisICPBasedTranslationManager.goToHome(trajectoryDuration);
    }
 
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
