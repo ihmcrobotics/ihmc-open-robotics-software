@@ -2,6 +2,7 @@ package us.ihmc.rdx.perception.sceneGraph;
 
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.YOLOv8IterativeClosestPointNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
@@ -25,6 +26,10 @@ public class RDXSceneGraphTools
       else if (sceneNodeToCopy instanceof CenterposeNode centerposeNode)
       {
          return new RDXCenterposeNode(centerposeNode, panel3D);
+      }
+      else if (sceneNodeToCopy instanceof YOLOv8IterativeClosestPointNode yoloICPSceneNode)
+      {
+         return new RDXYoloDetectableSceneNode(yoloICPSceneNode);
       }
       else if (sceneNodeToCopy instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {

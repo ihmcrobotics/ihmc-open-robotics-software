@@ -123,6 +123,5 @@ public class OpenCLDepthImageSegmenter
 
       openCLProgram.close();
       kernel.close();
-      openCLManager.destroy();
    }
 }

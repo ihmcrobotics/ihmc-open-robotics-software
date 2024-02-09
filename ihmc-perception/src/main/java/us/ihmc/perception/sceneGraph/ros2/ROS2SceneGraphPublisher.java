@@ -11,6 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.YOLOv8IterativeClosestPointNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
@@ -114,6 +115,12 @@ public class ROS2SceneGraphPublisher
             }
             centerposeNodeMessage.setEnableTracking(centerposeNode.isEnableTracking());
             detectableSceneNodeMessage = centerposeNodeMessage.getDetectableSceneNode();
+         }
+         else if (sceneNode instanceof YOLOv8IterativeClosestPointNode)
+         {
+            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.YOLO_ICP_SCENE_NODE_TYPE);
+            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getDetectableSceneNodes().size());
+            detectableSceneNodeMessage = sceneGraphMessage.getDetectableSceneNodes().add();
          }
          else
          {
