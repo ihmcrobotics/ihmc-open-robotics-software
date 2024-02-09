@@ -82,11 +82,14 @@ public class YOLOv8IterativeClosestPointManager
 
    public void updateSceneGraph(ROS2SceneGraph sceneGraph)
    {
-      for (Map.Entry<YOLOv8Detection, YOLOv8IterativeClosestPointNodeCombo> detectionComboEntry : detectionToWorkerMap.entrySet())
+      sceneGraph.modifyTree(modificationQueue ->
       {
-         if (!detectionComboEntry.getValue().updateSceneGraph(sceneGraph, detectionComboEntry.getKey()))
-            detectionToWorkerMap.remove(detectionComboEntry.getKey());
-      }
+         for (Map.Entry<YOLOv8Detection, YOLOv8IterativeClosestPointNodeCombo> detectionComboEntry : detectionToWorkerMap.entrySet())
+         {
+            if (!detectionComboEntry.getValue().updateSceneGraph(sceneGraph, modificationQueue, detectionComboEntry.getKey()))
+               detectionToWorkerMap.remove(detectionComboEntry.getKey());
+         }
+      });
    }
 
    public void start()
@@ -228,13 +231,15 @@ public class YOLOv8IterativeClosestPointManager
       for (YOLOv8IterativeClosestPointNodeCombo oldDetectionCombo : oldDetectionCombos)
       {
          YOLOv8Detection oldDetection = oldDetectionCombo.getLastDetection();
-         for (YOLOv8Detection newDetection : newDetections)
+         if (oldDetection != null)
          {
-            double distanceSquared = MathTools.square(oldDetection.x() - newDetection.x())
-                                     + MathTools.square(oldDetection.y() - newDetection.y());
+            for (YOLOv8Detection newDetection : newDetections)
+            {
+               double distanceSquared = MathTools.square(oldDetection.x() - newDetection.x()) + MathTools.square(oldDetection.y() - newDetection.y());
 
-            if (oldDetection.objectClass() == newDetection.objectClass() && distanceSquared < oldDetectionCombo.getDistanceThreshold())
-               matchingDetections.add(new Tuple3<>(oldDetection, newDetection, distanceSquared));
+               if (oldDetection.objectClass() == newDetection.objectClass() && distanceSquared < oldDetectionCombo.getDistanceThreshold())
+                  matchingDetections.add(new Tuple3<>(oldDetection, newDetection, distanceSquared));
+            }
          }
       }
 

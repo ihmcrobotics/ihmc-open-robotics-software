@@ -13,6 +13,8 @@ import us.ihmc.perception.filters.TimeBasedDetectionFilter;
 import us.ihmc.perception.iterativeClosestPoint.IterativeClosestPointWorker;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.sceneGraph.YOLOv8IterativeClosestPointNode;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
@@ -66,14 +68,13 @@ public class YOLOv8IterativeClosestPointNodeCombo
     * @param detection detection associated with the node/ICP worker (only used when creating)
     * @return true if the node was normally updated, false if the node was removed from the scene graph.
     */
-   public boolean updateSceneGraph(ROS2SceneGraph sceneGraph, YOLOv8Detection detection)
+   public boolean updateSceneGraph(ROS2SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, YOLOv8Detection detection)
    {
       if (selfDestruct)
       {
-         // FIXME: This doesn't remove the RDX node??
-         System.out.println("Removing node " + node.getID());
          node.setCurrentlyDetected(false);
-         sceneGraph.modifyTree(modificationQueue -> new SceneGraphNodeRemoval(node, sceneGraph));
+         modificationQueue.accept(new SceneGraphClearSubtree(node));
+         modificationQueue.accept(new SceneGraphNodeRemoval(node, sceneGraph));
          return false;
       }
       else if (!isCreated)
@@ -95,11 +96,9 @@ public class YOLOv8IterativeClosestPointNodeCombo
 
    public boolean destroy()
    {
-      System.out.println("Considering destruction for node " + node.getID());
       distanceThreshold += 400.0;
       if (!detectionFilter.isDetected())
       {
-         System.out.println("Accepting destruction for node " + node.getID());
          selfDestruct = true;
          extractor.destroy();
          segmenter.destroy();
