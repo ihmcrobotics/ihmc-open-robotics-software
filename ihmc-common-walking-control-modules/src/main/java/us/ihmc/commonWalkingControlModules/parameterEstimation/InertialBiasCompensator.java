@@ -28,17 +28,12 @@ public class InertialBiasCompensator
    public void update(int index, double measurement)
    {
       if (counter < windowSize)
-      {
          measurements[index][counter] = measurement;
-         counter++;
-      }
-      else
-      {
+      else  // catches failure cases where the number of measurements would otherwise be overfilled and overwritten
          calculateBias();
-      }
    }
 
-   private void calculateBias()
+   public void calculateBias()
    {
       for (int i = 0; i < measurements.length; ++i)
       {
@@ -48,6 +43,11 @@ public class InertialBiasCompensator
 
          bias[i].set(sum / windowSize);
       }
+   }
+
+   public void incrementCounter()
+   {
+      counter++;
    }
 
    public void resetCounter()

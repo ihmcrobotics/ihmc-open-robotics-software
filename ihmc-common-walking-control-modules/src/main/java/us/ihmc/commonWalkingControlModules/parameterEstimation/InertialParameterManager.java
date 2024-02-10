@@ -444,6 +444,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    {
       if (biasCompensator.isWindowFilled())
       {
+         biasCompensator.calculateBias();
          for (int i = 0; i < bias.getNumRows(); i++)
          {
             bias.set(i, 0, biasCompensator.getBias(i));
@@ -462,6 +463,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                biasCompensator.update(indices[k], residual.get(indices[k], 0));
             }
          }
+         biasCompensator.incrementCounter();
       }
    }
 
