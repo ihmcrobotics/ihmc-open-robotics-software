@@ -265,10 +265,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       String[] rowNames = getRowNamesForJoints(nDoFs);
       residual = new YoMatrix("residual", nDoFs, 1, rowNames, registry);
 
+      double windowSizeInSeconds = parameters.getBiasCompensationWindowSizeInSeconds();
+      int windowSizeInTicks = (int) (windowSizeInSeconds / dt);
       enableBiasCompensator = new YoBoolean("enableBiasCompensator", registry);
       enableBiasCompensator.set(false);
-      // TODO: parameter for bias compensator
-      biasCompensator = new InertialBiasCompensator(nDoFs, 1000, rowNames, registry);
+      biasCompensator = new InertialBiasCompensator(nDoFs, windowSizeInTicks, rowNames, registry);
       bias = new DMatrixRMaj(nDoFs, 1);
       eraseBias = new YoBoolean("eraseBias", registry);
       eraseBias.set(false);
@@ -286,6 +287,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          if (eraseBias.getValue())
          {
             bias.zero();
+            biasCompensator.zero();
             eraseBias.set(false);
          }
 
@@ -446,18 +448,18 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          {
             bias.set(i, 0, biasCompensator.getBias(i));
          }
-         biasCompensator.reset();
+         biasCompensator.resetCounter();
          enableBiasCompensator.set(false);
       }
       else
       {
-         for (int i = 0; i < actualModelJoints.size(); ++i)
+         for (int j = 0; j < actualModelJoints.size(); ++j)
          {
-            JointReadOnly joint = actualModelJoints.get(i);
+            JointReadOnly joint = actualModelJoints.get(j);
             int[] indices = jointIndexHandler.getJointIndices(joint);
-            for (int j = 0; j < indices.length; ++j)
+            for (int k = 0; k < indices.length; ++k)
             {
-               biasCompensator.update(indices[j], residual.get(indices[j], 0));
+               biasCompensator.update(indices[k], residual.get(indices[k], 0));
             }
          }
       }

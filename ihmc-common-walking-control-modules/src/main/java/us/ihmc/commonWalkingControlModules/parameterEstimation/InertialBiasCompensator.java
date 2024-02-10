@@ -50,9 +50,17 @@ public class InertialBiasCompensator
       }
    }
 
-   public void reset()
+   public void resetCounter()
    {
       counter = 0;
+   }
+
+   public void zero()
+   {
+      for (int i = 0; i < bias.length; ++i)
+      {
+         bias[i].set(0.0);
+      }
    }
 
    public boolean isWindowFilled()
