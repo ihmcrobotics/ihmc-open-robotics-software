@@ -20,7 +20,6 @@ import java.util.Set;
 public class InertialKalmanFilter extends ExtendedKalmanFilter
 {
    private static final int WRENCH_DIMENSION = 6;
-private static final boolean POST_PROCESS = true;
 
    private final DMatrixRMaj identity;
 
@@ -37,8 +36,6 @@ private static final boolean POST_PROCESS = true;
    private AlphaFilteredYoMatrix doubleFilteredWholeSystemTorques = null;
    private AlphaFilteredYoMatrix filteredMeasurement = null;
    private AlphaFilteredYoMatrix doubleFilteredMeasurement = null;
-
-
 
    public InertialKalmanFilter(FullRobotModel model, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets,
                                DMatrixRMaj initialParametersForEstimate, DMatrixRMaj initialParameterCovariance,
@@ -65,15 +62,13 @@ private static final boolean POST_PROCESS = true;
 
       measurement = new DMatrixRMaj(nDoFs, 1);
 
-      if (POST_PROCESS)
-      {
-         YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-         parentRegistry.addChild(registry);
-         filteredWholeSystemTorques = new AlphaFilteredYoMatrix("filteredWholeSystemTorques", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
-         doubleFilteredWholeSystemTorques = new AlphaFilteredYoMatrix("doubleFilteredWholeSystemTorques", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
-         filteredMeasurement = new AlphaFilteredYoMatrix("filteredMeasurement", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
-         doubleFilteredMeasurement = new AlphaFilteredYoMatrix("doubleFilteredMeasurement", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
-      }
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+      parentRegistry.addChild(registry);
+
+      filteredWholeSystemTorques = new AlphaFilteredYoMatrix("filteredWholeSystemTorques", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
+      doubleFilteredWholeSystemTorques = new AlphaFilteredYoMatrix("doubleFilteredWholeSystemTorques", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
+      filteredMeasurement = new AlphaFilteredYoMatrix("filteredMeasurement", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
+      doubleFilteredMeasurement = new AlphaFilteredYoMatrix("doubleFilteredMeasurement", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
    }
 
    /** For inertial parameters, the process Jacobian is the identity matrix. */
@@ -113,12 +108,9 @@ private static final boolean POST_PROCESS = true;
          CommonOps_DDRM.multAddTransA(-1.0, contactJacobians.get(side), contactWrenches.get(side), measurement);
       }
 
-      if (POST_PROCESS)
-      {
-         filter(measurement, filteredMeasurement);
-         filter(filteredMeasurement, doubleFilteredMeasurement);
-         measurement.set(doubleFilteredMeasurement);
-      }
+      filter(measurement, filteredMeasurement);
+      filter(filteredMeasurement, doubleFilteredMeasurement);
+      measurement.set(doubleFilteredMeasurement);
 
       return measurement;
    }
@@ -126,16 +118,9 @@ private static final boolean POST_PROCESS = true;
    @Override
    public DMatrixRMaj calculateEstimate(DMatrix wholeSystemTorques)
    {
-      if (POST_PROCESS)
-      {
-         filter(wholeSystemTorques, filteredWholeSystemTorques);
-         filter(filteredWholeSystemTorques, doubleFilteredWholeSystemTorques);
-         return super.calculateEstimate(doubleFilteredWholeSystemTorques);
-      }
-      else
-      {
-         return super.calculateEstimate(wholeSystemTorques);
-      }
+      filter(wholeSystemTorques, filteredWholeSystemTorques);
+      filter(filteredWholeSystemTorques, doubleFilteredWholeSystemTorques);
+      return super.calculateEstimate(doubleFilteredWholeSystemTorques);
    }
 
    public void filter(DMatrix matrixToFilter, AlphaFilteredYoMatrix filterContainer)

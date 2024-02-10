@@ -98,11 +98,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoDouble armsMeasurementCovariance;
    private final YoDouble spineMeasurementCovariance;
 
-   /** DEBUG variables */
-   private static final boolean DEBUG = false;
-   private YoMatrix residual = null;
-   private DMatrixRMaj[] regressorPartitions = null;
-   private DMatrixRMaj[] parameterPartitions = null;
+   private final YoMatrix residual;
 
    public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters parameters, YoRegistry parentRegistry)
    {
@@ -187,6 +183,17 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       wholeSystemTorques = new DMatrixRMaj(nDoFs, 1);
 
+      // Check that the reference frames of the contact wrenches and the contact Jacobians match
+      // (pretty sure they do)
+//      for (RobotSide side : RobotSide.values)
+//      {
+//         ReferenceFrame wrenchBodyFrame = footSwitches.get(side).getMeasuredWrench().getReferenceFrame();
+//         ReferenceFrame wrenchExpressedInFrame = footSwitches.get(side).getMeasuredWrench().getReferenceFrame();
+//         ReferenceFrame jacobianFrame = compactContactJacobians.get(side).getJacobianFrame();
+//         wrenchBodyFrame.checkReferenceFrameMatch(jacobianFrame);
+//         wrenchExpressedInFrame.checkReferenceFrameMatch(jacobianFrame);
+//      }
+
       double dt = toolbox.getControlDT();
 
       rootJointVelocity = new DMatrixRMaj(WRENCH_DIMENSION, 1);
@@ -251,28 +258,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       spineMeasurementCovariance = new YoDouble("spineMeasurementCovariance", registry);
       spineMeasurementCovariance.set(parameters.getSpineMeasurementCovariance());
 
-      if (DEBUG)
-      {
-         regressorPartitions = RegressorTools.sizePartitionMatrices(regressorCalculator.getJointTorqueRegressorMatrix(), basisSets);
-         parameterPartitions = RegressorTools.sizePartitionVectors(basisSets);
-         
-         String[] rowNames = new String[nDoFs];
-         int index = 0;
-         for (JointReadOnly joint : actualModelJoints)
-         {
-            if (joint.getDegreesOfFreedom() > 1)
-            {
-               for (int i = 0; i < joint.getDegreesOfFreedom(); i++)
-                  rowNames[index + i] = joint.getName() + "_" + getNameForRootJoint(i);
-            }
-            else
-            {
-               rowNames[index] = joint.getName();
-            }
-            index += joint.getDegreesOfFreedom();
-         }
-         residual = new YoMatrix("residual", nDoFs, 1, rowNames, registry);
-      }
+      String[] rowNames = getRowNamesForJoints(nDoFs);
+      residual = new YoMatrix("residual", nDoFs, 1, rowNames, registry);
    }
 
    private final ExecutionTimer regressorTimer = new ExecutionTimer("RegressorTimer", registry);
@@ -304,7 +291,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          inertialKalmanFilter.setContactJacobians(fullContactJacobians);
          inertialKalmanFilter.setContactWrenches(contactWrenches);
          inertialKalmanFilterEstimate.set(inertialKalmanFilter.calculateEstimate(wholeSystemTorques));
-
+         inertialKalmanFilter.getMeasurementResidual(residual);
 
          filteredEstimate.setAndSolve(inertialKalmanFilterEstimate);
          doubleFilteredEstimate.setAndSolve(filteredEstimate);
@@ -312,9 +299,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          RegressorTools.packRigidBodies(basisSets, doubleFilteredEstimate, estimateModelBodies);
 
          updateVisuals();
-
-         if (DEBUG)
-            packDebugResidual();
 
          //         updateWatchers();
       }
@@ -348,19 +332,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private void updateContactWrenches()
    {
       for (RobotSide side : RobotSide.values)
-      {
-         if (DEBUG)
-         {
-            // Check that the reference frames of the contact wrenches and the contact Jacobians match
-            ReferenceFrame wrenchBodyFrame = footSwitches.get(side).getMeasuredWrench().getReferenceFrame();
-            ReferenceFrame wrenchExpressedInFrame = footSwitches.get(side).getMeasuredWrench().getReferenceFrame();
-            ReferenceFrame jacobianFrame = compactContactJacobians.get(side).getJacobianFrame();
-            wrenchBodyFrame.checkReferenceFrameMatch(jacobianFrame);
-            wrenchExpressedInFrame.checkReferenceFrameMatch(jacobianFrame);
-         }
-
          footSwitches.get(side).getMeasuredWrench().get(contactWrenches.get(side));
-      }
    }
 
    private void updateRegressorModelJointStates()
@@ -528,37 +500,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       return group;
    }
 
-   private void packDebugResidual()
-   {
-      // Size the residual off of the generalized forces container
-      DMatrixRMaj residualToPack = new DMatrixRMaj(residual);
-
-      // Start with system torques
-      residualToPack.set(wholeSystemTorques);
-
-      // Minus contribution from contact wrenches
-      for (RobotSide side : RobotSide.values)
-         CommonOps_DDRM.multAddTransA(fullContactJacobians.get(side), contactWrenches.get(side), residualToPack);
-
-      RegressorTools.partitionRegressor(regressorCalculator.getJointTorqueRegressorMatrix(),
-                                        basisSets,
-                                        regressorPartitions[0],
-                                        regressorPartitions[1],
-                                        true);
-      RegressorTools.partitionVector(regressorCalculator.getParameterVector(),
-                                     basisSets,
-                                     parameterPartitions[0],
-                                     parameterPartitions[1],
-                                     true);
-
-      // Iterate over each rigid body and subtract the contribution of its inertial parameters
-      for (int i = 0; i < regressorPartitions.length; ++i)
-      {
-         CommonOps_DDRM.multAdd(-1.0, regressorPartitions[i], parameterPartitions[i], residualToPack);
-      }
-      residual.set(residualToPack);
-   }
-
    private String getNameForRootJoint(int i)
    {
       return switch (i)
@@ -571,6 +512,26 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          case 5 -> "z";
          default -> throw new RuntimeException("Unhandled case: " + i);
       };
+   }
+
+   private String[] getRowNamesForJoints(int nDoFs)
+   {
+      String[] rowNames = new String[nDoFs];
+      int index = 0;
+      for (JointReadOnly joint : actualModelJoints)
+      {
+         if (joint.getDegreesOfFreedom() > 1)
+         {
+            for (int i = 0; i < joint.getDegreesOfFreedom(); i++)
+               rowNames[index + i] = joint.getName() + "_" + getNameForRootJoint(i);
+         }
+         else
+         {
+            rowNames[index] = joint.getName();
+         }
+         index += joint.getDegreesOfFreedom();
+      }
+      return rowNames;
    }
 
    private String[] getRowNamesForEstimates(Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets, RigidBodyReadOnly[] bodies)
