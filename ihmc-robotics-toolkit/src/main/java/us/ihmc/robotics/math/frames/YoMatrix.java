@@ -191,7 +191,7 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
    {
       if (original instanceof DMatrix otherMatrix)
       {
-         reshape(otherMatrix.getNumRows(), otherMatrix.getNumRows());
+         reshape(otherMatrix.getNumRows(), otherMatrix.getNumCols());
          for (int row = 0; row < getNumRows(); row++)
          {
             for (int col = 0; col < getNumCols(); col++)
