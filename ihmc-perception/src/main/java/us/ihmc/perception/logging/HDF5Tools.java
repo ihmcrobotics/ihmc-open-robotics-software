@@ -17,10 +17,15 @@ public class HDF5Tools
    /**
     * Method to generate HDF5 file name for a new log file
     */
-   public static String generateLogFileName()
+   public static String generateFileName()
+   {
+      return generateFileName("PerceptionLog");
+   }
+
+   public static String generateFileName(String suffix)
    {
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-      String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
+      String logFileName = dateFormat.format(new Date()) + "_" + suffix + ".hdf5";
       return logFileName;
    }
 

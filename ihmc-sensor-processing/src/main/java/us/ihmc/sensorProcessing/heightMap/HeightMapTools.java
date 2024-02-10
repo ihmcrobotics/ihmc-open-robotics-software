@@ -1,5 +1,7 @@
 package us.ihmc.sensorProcessing.heightMap;
 
+import us.ihmc.log.LogTools;
+
 /**
  * Height map indexing tools. The height map spans a square region and is parametrized by the following values:
  * - A discretization value
@@ -17,6 +19,7 @@ public class HeightMapTools
     */
    public static int computeCenterIndex(double gridSize, double resolution)
    {
+      LogTools.warn("Grid Size: {}, Resolution: {}, Result: {}", gridSize, resolution, (int) Math.round(0.5 * gridSize / resolution));
       return (int) Math.round(0.5 * gridSize / resolution);
    }
 

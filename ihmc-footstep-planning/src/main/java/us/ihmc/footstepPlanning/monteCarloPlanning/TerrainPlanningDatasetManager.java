@@ -8,10 +8,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
-import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerLoggingTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.logging.HDF5Tools;
@@ -33,12 +30,12 @@ public class TerrainPlanningDatasetManager
    private ArrayList<SideDependentList<Pose3D>> footstepPairList = new ArrayList<>();
    private PerceptionDataLogger perceptionDataLogger;
 
-   public void configureLogger()
+   public void configureLogger(String suffix)
    {
       if (perceptionDataLogger == null)
       {
          perceptionDataLogger = new PerceptionDataLogger();
-         String logFileName = HDF5Tools.generateLogFileName();
+         String logFileName = HDF5Tools.generateFileName("AStarDataset_" + suffix);
          FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
          perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
@@ -89,6 +86,8 @@ public class TerrainPlanningDatasetManager
       PerceptionLoggingTools.logHeightMap(perceptionDataLogger,
                                           heightMap,
                                           PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
+
+      perceptionDataLogger.printStats();
    }
 
    public void loadRequests(File directory, int totalLogs)
