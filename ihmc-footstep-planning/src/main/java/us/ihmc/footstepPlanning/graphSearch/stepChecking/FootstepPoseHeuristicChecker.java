@@ -140,10 +140,10 @@ public class FootstepPoseHeuristicChecker
       {
          return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE;
       }
-//      else if (stepLength.getValue() < parameters.getMinimumStepLength())
-//      {
-//         return BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH;
-//      }
+      else if (stepLength.getValue() < parameters.getMinimumStepLength())
+      {
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH;
+      }
       else if (Math.abs(stepHeight.getValue()) > maximumStepZ)
       {
          return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW;
