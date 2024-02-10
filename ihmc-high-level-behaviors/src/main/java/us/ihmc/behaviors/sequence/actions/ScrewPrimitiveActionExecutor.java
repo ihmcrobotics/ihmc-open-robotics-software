@@ -57,6 +57,19 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final RecyclingArrayList<FrameVector3D> angularVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final TDoubleArrayList trajectoryTimes = new TDoubleArrayList();
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
+   private int numberOfPoints;
+   private double rotationRadius;
+   private double signedTotalRotation;
+   private double signedTotalTranslation;
+   private double signedRadialDistance;
+   private double totalLinearDistanceOfHand;
+   private double durationForRotation;
+   private double durationForTranslation;
+   private double movementDuration;
+   private double segmentDuration;
+   private double tangentialVelocity;
+   private double axialVelocity;
+   private double rotationalVelocity;
 
    public ScrewPrimitiveActionExecutor(long id,
                                        CRDTInfo crdtInfo,
@@ -146,6 +159,35 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                      workPose.changeFrame(ReferenceFrame.getWorldFrame());
                      currentPose.set(workPose);
                   }
+
+                  numberOfPoints = getState().getTrajectory().getSize();
+
+                  syncedHandControlPose.changeFrame(getState().getScrewFrame().getReferenceFrame());
+                  // This is always the radial distance.
+                  rotationRadius = EuclidCoreTools.norm(syncedHandControlPose.getY(), syncedHandControlPose.getZ());
+                  syncedHandControlPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+                  signedTotalRotation = getDefinition().getRotation();
+                  signedTotalTranslation = getDefinition().getTranslation();
+                  // This is the distance the hand must travel along the screw portion
+                  signedRadialDistance = signedTotalRotation * rotationRadius;
+                  totalLinearDistanceOfHand = EuclidCoreTools.norm(signedRadialDistance, signedTotalTranslation);
+
+                  // Computing the movement duration, which is clamped by the max movement speed
+                  durationForRotation = signedTotalRotation / getDefinition().getMaxAngularVelocity();
+                  durationForTranslation = totalLinearDistanceOfHand / getDefinition().getMaxLinearVelocity();
+                  movementDuration = Math.max(durationForRotation, durationForTranslation);
+                  segmentDuration = movementDuration / (numberOfPoints - 1);
+
+                  // The way the screw frame is defined, x is always the axis of rotation and translation.
+                  // This means that the tangential velocity is normal to the x axis and the vector yz
+                  tangentialVelocity = signedRadialDistance / movementDuration;
+                  axialVelocity = signedTotalTranslation / movementDuration;
+                  rotationalVelocity = signedTotalRotation / movementDuration;
+
+                  movementDuration += 2.0 * segmentDuration;
+
+                  getState().getTrajectoryDuration().setValue(movementDuration);
                }
             }
          }
@@ -184,34 +226,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          taskspaceTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
          taskspaceTrajectoryMessage.getTaskspaceTrajectoryPoints().clear();
 
-         int numberOfPoints = getState().getTrajectory().getSize();
-
          ReferenceFrame screwAxisFrame = getState().getScrewFrame().getReferenceFrame();
-
-         syncedHandControlPose.changeFrame(screwAxisFrame);
-         // This is always the radial distance.
-         double rotationRadius = EuclidCoreTools.norm(syncedHandControlPose.getY(), syncedHandControlPose.getZ());
-         syncedHandControlPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-         double signedTotalRotation = getDefinition().getRotation();
-         double signedTotalTranslation = getDefinition().getTranslation();
-         // This is the distance the hand must travel along the screw portion
-         double signedRadialDistance = signedTotalRotation * rotationRadius;
-         double totalLinearDistanceOfHand = EuclidCoreTools.norm(signedRadialDistance, signedTotalTranslation);
-
-         // Computing the movement duration, which is clamped by the max movement speed
-         double durationForRotation = signedTotalRotation / getDefinition().getMaxAngularVelocity();
-         double durationForTranslation = totalLinearDistanceOfHand / getDefinition().getMaxLinearVelocity();
-         double movementDuration = Math.max(durationForRotation, durationForTranslation);
-         double segmentDuration = movementDuration / (numberOfPoints - 1);
-
-         // The way the screw frame is defined, x is always the axis of rotation and translation.
-         // This means that the tangential velocity is normal to the x axis and the vector yz
-         double tangentialVelocity = signedRadialDistance / movementDuration;
-         double axialVelocity = signedTotalTranslation / movementDuration;
-         double rotationalVelocity = signedTotalRotation / movementDuration;
-
-         movementDuration += 2.0 * segmentDuration;
 
          angularVelocities.clear();
          linearVelocities.clear();

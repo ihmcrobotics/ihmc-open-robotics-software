@@ -128,7 +128,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       int limit = ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT;
       if (size == limit)
          ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
-      ImGui.text("Trajectory points: %d/%d".formatted(size, limit));
+      ImGui.text("Trajectory points: %d/%d  Duration: %.1f s".formatted(size, limit, getState().getTrajectoryDuration().getValue()));
       if (size == limit)
          ImGui.popStyleColor();
       translationWidget.renderImGuiWidget();
