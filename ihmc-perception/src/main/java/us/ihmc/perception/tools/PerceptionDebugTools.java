@@ -247,16 +247,16 @@ public class PerceptionDebugTools
    public static String heightMapToString(String name, HeightMapData heightMapData, int skip)
    {
       StringBuilder matString = new StringBuilder("Mat: [" + name + "]\n");
-      LogTools.info("Height Map: [Center: {}]", heightMapData.getGridCenter());
+      LogTools.info("Height Map: [Center: {}, Size: {}]", heightMapData.getGridCenter(), heightMapData.getCellsPerAxis());
       for (int i = 0; i < heightMapData.getCellsPerAxis(); i += skip)
       {
          for (int j = 0; j < heightMapData.getCellsPerAxis(); j += skip)
          {
             double height = heightMapData.getHeightAt(i, j);
-            if (height > 0.0001)
-               matString.append(String.format("%.2f", height)).append(" ");
-            else
-               matString.append("||||").append(" ");
+            //if (height > 0.0001)
+               matString.append(String.format("%.1f", height)).append(" ");
+            //else
+            //   matString.append("||||").append(" ");
          }
          matString.append("\n");
       }
@@ -450,7 +450,7 @@ public class PerceptionDebugTools
 
    public static void plotTiltedRectangle(Mat displayImage, Point2D origin, float yaw, int size, int side)
    {
-      LogTools.debug("Footstep Plotted: {} {} {}",
+      LogTools.info("Footstep Plotted: {} {} {}",
                      (int) (origin.getY() * 50 + displayImage.rows() / 2),
                      (int) (origin.getX() * 50 + displayImage.cols() / 2),
                      side);
