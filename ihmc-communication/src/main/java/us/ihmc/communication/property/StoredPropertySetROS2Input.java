@@ -83,7 +83,7 @@ public class StoredPropertySetROS2Input
                                                                storedPropertySetToUpdate,
                                                                () ->
          {
-//            LogTools.info("Accepting property set update for {}", storedPropertySetToUpdate.getTitle());
+            LogTools.info("Accepting property set update for {}", storedPropertySetToUpdate.getTitle());
             anyValuesChanged.set(true);
 
             for (PropertyChangeNotification propertyChangeNotification : propertyChangeNotifications)

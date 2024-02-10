@@ -47,7 +47,6 @@ public class FootstepPlannerLogLoader
    private final JSONSerializer<SwingPlannerParametersPacket> swingParametersSerializer  = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
-   private File logDirectory = null;
    private FootstepPlannerLog log = null;
    private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -125,7 +124,7 @@ public class FootstepPlannerLogLoader
    public LoadResult load()
    {
       JFileChooser fileChooser = new JFileChooser();
-      logDirectory = new File(FootstepPlannerLogger.getDefaultLogsDirectory());
+      File logDirectory = new File(FootstepPlannerLogger.getDefaultLogsDirectory());
       fileChooser.setCurrentDirectory(logDirectory);
       fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
       int chooserState = fileChooser.showOpenDialog(null);
@@ -543,10 +542,5 @@ public class FootstepPlannerLogLoader
       outputStream.close();
       printStream.close();
 
-   }
-
-   public File getLogDirectory()
-   {
-      return logDirectory;
    }
 }
