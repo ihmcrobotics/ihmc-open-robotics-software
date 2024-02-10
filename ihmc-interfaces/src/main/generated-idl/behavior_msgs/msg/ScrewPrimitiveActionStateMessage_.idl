@@ -32,6 +32,7 @@ module behavior_msgs
          * Hand torque
          */
         geometry_msgs::msg::dds::Vector3 torque;
+        double trajectory_duration;
       };
     };
   };

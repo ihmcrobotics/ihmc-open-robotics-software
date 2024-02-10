@@ -25,6 +25,7 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
             * Hand torque
             */
    public us.ihmc.euclid.tuple3D.Vector3D torque_;
+   public double trajectory_duration_;
 
    public ScrewPrimitiveActionStateMessage()
    {
@@ -49,6 +50,8 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
       trajectory_.set(other.trajectory_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.force_, force_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.torque_, torque_);
+      trajectory_duration_ = other.trajectory_duration_;
+
    }
 
 
@@ -93,6 +96,15 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
       return torque_;
    }
 
+   public void setTrajectoryDuration(double trajectory_duration)
+   {
+      trajectory_duration_ = trajectory_duration;
+   }
+   public double getTrajectoryDuration()
+   {
+      return trajectory_duration_;
+   }
+
 
    public static Supplier<ScrewPrimitiveActionStateMessagePubSubType> getPubSubType()
    {
@@ -122,6 +134,8 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
 
       if (!this.force_.epsilonEquals(other.force_, epsilon)) return false;
       if (!this.torque_.epsilonEquals(other.torque_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
+
 
       return true;
    }
@@ -140,6 +154,8 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
       if (!this.trajectory_.equals(otherMyClass.trajectory_)) return false;
       if (!this.force_.equals(otherMyClass.force_)) return false;
       if (!this.torque_.equals(otherMyClass.torque_)) return false;
+      if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
+
 
       return true;
    }
@@ -159,7 +175,9 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
       builder.append("force=");
       builder.append(this.force_);      builder.append(", ");
       builder.append("torque=");
-      builder.append(this.torque_);
+      builder.append(this.torque_);      builder.append(", ");
+      builder.append("trajectory_duration=");
+      builder.append(this.trajectory_duration_);
       builder.append("}");
       return builder.toString();
    }
