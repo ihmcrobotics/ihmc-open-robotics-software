@@ -313,7 +313,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          inertialKalmanFilter.setRegressor(regressor);
          inertialKalmanFilter.setContactJacobians(fullContactJacobians);
          inertialKalmanFilter.setContactWrenches(contactWrenches);
-         CommonOps_DDRM.addEquals(wholeSystemTorques, bias);  // adding in bias
+         CommonOps_DDRM.subtractEquals(wholeSystemTorques, bias);  // subtract bias to result in zero mean noise
          inertialKalmanFilterEstimate.set(inertialKalmanFilter.calculateEstimate(wholeSystemTorques));
          inertialKalmanFilter.getMeasurementResidual(residual);
 
