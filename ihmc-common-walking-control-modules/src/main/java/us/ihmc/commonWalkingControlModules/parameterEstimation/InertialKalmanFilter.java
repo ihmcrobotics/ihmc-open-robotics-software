@@ -32,10 +32,11 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    /** This is used as a container to build up a measurement from different contributions, see {@link #measurementModel(DMatrixRMaj)}. */
    private final DMatrixRMaj measurement;
 
-   private AlphaFilteredYoMatrix filteredWholeSystemTorques = null;
-   private AlphaFilteredYoMatrix doubleFilteredWholeSystemTorques = null;
-   private AlphaFilteredYoMatrix filteredMeasurement = null;
-   private AlphaFilteredYoMatrix doubleFilteredMeasurement = null;
+   private final AlphaFilteredYoMatrix filteredWholeSystemTorques;
+   private final AlphaFilteredYoMatrix doubleFilteredWholeSystemTorques;
+   private final AlphaFilteredYoMatrix filteredMeasurement;
+   private final AlphaFilteredYoMatrix doubleFilteredMeasurement;
+
 
    public InertialKalmanFilter(FullRobotModel model, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets,
                                DMatrixRMaj initialParametersForEstimate, DMatrixRMaj initialParameterCovariance,
@@ -152,6 +153,15 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
       {
          this.contactWrenches.get(side).set(contactWrenches.get(side));
       }
+   }
+
+   public void setPostProcessingAlpha(double postProcessingAlpha)
+   {
+      filteredWholeSystemTorques.setAlpha(postProcessingAlpha);
+      doubleFilteredWholeSystemTorques.setAlpha(postProcessingAlpha);
+
+      filteredMeasurement.setAlpha(postProcessingAlpha);
+      doubleFilteredMeasurement.setAlpha(postProcessingAlpha);
    }
 
    public DMatrixRMaj getProcessCovariance()

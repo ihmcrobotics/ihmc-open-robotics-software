@@ -38,6 +38,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private static final int WRENCH_DIMENSION = 6;
 
    private final YoBoolean enableFilter;
+   private final YoBoolean resetFilter;
+   private final YoBoolean resetConfig;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FullHumanoidRobotModel actualRobotModel;
@@ -104,12 +106,22 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final DMatrixRMaj bias;
    private final YoBoolean eraseBias;
 
-   public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters parameters, YoRegistry parentRegistry)
+   private final InertialEstimationParameters parameters;
+   private final double postProcessingAlpha;
+   private final double estimateFilteringAlpha;
+   private final double accelerationCalculationAlpha;
+
+   public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
+      this.parameters = inertialEstimationParameters;
 
       enableFilter = new YoBoolean("enableFilter", registry);
       enableFilter.set(false);
+      resetFilter = new YoBoolean("resetFilter", registry);
+      resetFilter.set(false);
+      resetConfig = new YoBoolean("resetConfig", registry);
+      resetConfig.set(false);
 
       actualRobotModel = toolbox.getFullRobotModel();
       actualModelBodies = actualRobotModel.getRootBody().subtreeArray();
@@ -204,7 +216,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       rootJointVelocities = new YoDouble[WRENCH_DIMENSION];
       rootJointAccelerations = new FilteredVelocityYoVariable[WRENCH_DIMENSION];
       rootJointAcceleration = new DMatrixRMaj(WRENCH_DIMENSION, 1);
-      double accelerationCalculationAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForAccelerationCalculation(), dt);
+      accelerationCalculationAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForAccelerationCalculation(), dt);
       for (int i = 0; i < WRENCH_DIMENSION; i++)
       {
          rootJointVelocities[i] = new YoDouble("rootJointVelocity_" + getNameForRootJoint(i), registry);
@@ -221,7 +233,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                                 accelerationCalculationAlpha, jointVelocities[i], dt, registry);
       }
 
-      double postProcessingAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt);
+      postProcessingAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt);
 
       inertialKalmanFilter = new InertialKalmanFilter(estimateRobotModel,
                                                       basisSets,
@@ -237,7 +249,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                   null,
                                                   registry);
 
-      double estimateFilteringAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(), dt);
+      estimateFilteringAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(), dt);
       filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate", estimateFilteringAlpha,
                                                    estimateSize,
                                                    1,
@@ -277,8 +289,81 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final ExecutionTimer regressorTimer = new ExecutionTimer("RegressorTimer", registry);
 
+   public void initialize()
+   {
+      // Bias compensation for residuals
+
+
+      // Contact Wrench bias
+   }
+   public void reset()
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         fullContactJacobians.get(side).zero();
+         contactWrenches.get(side).zero();
+      }
+
+      wholeSystemTorques.zero();
+      rootJointVelocity.zero();
+      rootJointAcceleration.zero();
+      for (int i = 0; i < WRENCH_DIMENSION; i++)
+      {
+         rootJointVelocities[i].set(0.0);
+         rootJointAccelerations[i].set(0.0);
+         rootJointAccelerations[i].reset();
+      }
+
+      for (int i = 0; i < jointVelocities.length; i++)
+      {
+         jointVelocities[i].set(0.0);
+         jointAccelerations[i].set(0.0);
+         jointAccelerations[i].reset();
+      }
+
+      inertialKalmanFilterEstimate.zero();
+      filteredEstimate.zero();
+      doubleFilteredEstimate.zero();
+
+      residual.zero();
+      bias.zero();
+   }
+
+   public void resetConfig()
+   {
+      processCovariance.set(parameters.getProcessModelCovariance());
+      floatingBaseMeasurementCovariance.set(parameters.getFloatingBaseMeasurementCovariance());
+      legsMeasurementCovariance.set(parameters.getLegMeasurementCovariance());
+      armsMeasurementCovariance.set(parameters.getArmMeasurementCovariance());
+      spineMeasurementCovariance.set(parameters.getSpineMeasurementCovariance());
+
+      inertialKalmanFilter.setPostProcessingAlpha(postProcessingAlpha);
+      filteredEstimate.setAlpha(estimateFilteringAlpha);
+      doubleFilteredEstimate.setAlpha(estimateFilteringAlpha);
+
+      for (int i = 0; i < WRENCH_DIMENSION; i++)
+         rootJointAccelerations[i].setAlpha(accelerationCalculationAlpha);
+
+      for (int i = 0; i < jointAccelerations.length; i++)
+         jointAccelerations[i].setAlpha(accelerationCalculationAlpha);
+
+   }
+
    public void update()
    {
+      if (resetFilter.getValue())
+      {
+         reset();
+         resetFilter.set(false);
+         enableFilter.set(false);  // Also turn off the estimator if we reset
+      }
+
+      if (resetConfig.getValue())
+      {
+         resetConfig();
+         resetConfig.set(false);
+      }
+
       if (enableFilter.getValue())
       {
          if (enableBiasCompensator.getValue())
