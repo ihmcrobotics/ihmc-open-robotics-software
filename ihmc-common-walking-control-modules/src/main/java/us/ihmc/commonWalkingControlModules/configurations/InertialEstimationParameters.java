@@ -16,11 +16,11 @@ public interface InertialEstimationParameters
 
    public abstract double getBreakFrequencyForAccelerationCalculation();
 
+   public abstract double getBreakFrequencyForBiasCompensation();
+
    public abstract double getProcessModelCovariance();
    public abstract double getFloatingBaseMeasurementCovariance();
    public abstract double getLegMeasurementCovariance();
    public abstract double getArmMeasurementCovariance();
    public abstract double getSpineMeasurementCovariance();
-
-   public abstract double getBiasCompensationWindowSizeInSeconds();
 }
