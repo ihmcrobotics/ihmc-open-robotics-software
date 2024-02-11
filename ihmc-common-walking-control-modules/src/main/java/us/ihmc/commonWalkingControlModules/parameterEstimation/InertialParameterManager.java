@@ -101,15 +101,15 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final YoMatrix residual;
 
-   private final YoBoolean enableBiasCompensator;
-   private final InertialBiasCompensator biasCompensator;
-   private final DMatrixRMaj bias;
+   private final AlphaFilteredYoMatrix bias;
+   private final DMatrixRMaj biasVector;
    private final YoBoolean eraseBias;
 
    private final InertialEstimationParameters parameters;
    private final double postProcessingAlpha;
    private final double estimateFilteringAlpha;
    private final double accelerationCalculationAlpha;
+   private final double biasCompensationAlpha;
 
    public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
    {
@@ -199,17 +199,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       wholeSystemTorques = new DMatrixRMaj(nDoFs, 1);
 
-      // Check that the reference frames of the contact wrenches and the contact Jacobians match
-      // (pretty sure they do)
-//      for (RobotSide side : RobotSide.values)
-//      {
-//         ReferenceFrame wrenchBodyFrame = footSwitches.get(side).getMeasuredWrench().getReferenceFrame();
-//         ReferenceFrame wrenchExpressedInFrame = footSwitches.get(side).getMeasuredWrench().getReferenceFrame();
-//         ReferenceFrame jacobianFrame = compactContactJacobians.get(side).getJacobianFrame();
-//         wrenchBodyFrame.checkReferenceFrameMatch(jacobianFrame);
-//         wrenchExpressedInFrame.checkReferenceFrameMatch(jacobianFrame);
-//      }
-
       double dt = toolbox.getControlDT();
 
       rootJointVelocity = new DMatrixRMaj(WRENCH_DIMENSION, 1);
@@ -277,25 +266,15 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       String[] rowNames = getRowNamesForJoints(nDoFs);
       residual = new YoMatrix("residual", nDoFs, 1, rowNames, registry);
 
-      double windowSizeInSeconds = parameters.getBiasCompensationWindowSizeInSeconds();
-      int windowSizeInTicks = (int) (windowSizeInSeconds / dt);
-      enableBiasCompensator = new YoBoolean("enableBiasCompensator", registry);
-      enableBiasCompensator.set(false);
-      biasCompensator = new InertialBiasCompensator(nDoFs, windowSizeInTicks, rowNames, registry);
-      bias = new DMatrixRMaj(nDoFs, 1);
+      biasCompensationAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForBiasCompensation(), dt);
+      bias = new AlphaFilteredYoMatrix("bias", biasCompensationAlpha, nDoFs, 1, rowNames, null, registry);
+      biasVector = new DMatrixRMaj(nDoFs, 1);
       eraseBias = new YoBoolean("eraseBias", registry);
       eraseBias.set(false);
    }
 
    private final ExecutionTimer regressorTimer = new ExecutionTimer("RegressorTimer", registry);
 
-   public void initialize()
-   {
-      // Bias compensation for residuals
-
-
-      // Contact Wrench bias
-   }
    public void reset()
    {
       for (RobotSide side : RobotSide.values)
@@ -327,6 +306,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       residual.zero();
       bias.zero();
+      biasVector.zero();
    }
 
    public void resetConfig()
@@ -366,14 +346,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       if (enableFilter.getValue())
       {
-         if (enableBiasCompensator.getValue())
-            computeTorqueBias();
-
          if (eraseBias.getValue())
          {
             bias.zero();
-            biasCompensator.zero();
-            eraseBias.set(false);
+            biasVector.zero();
          }
 
          updateFilterCovariances();
@@ -398,9 +374,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          inertialKalmanFilter.setRegressor(regressor);
          inertialKalmanFilter.setContactJacobians(fullContactJacobians);
          inertialKalmanFilter.setContactWrenches(contactWrenches);
-         CommonOps_DDRM.subtractEquals(wholeSystemTorques, bias);  // subtract bias to result in zero mean noise
+         CommonOps_DDRM.subtractEquals(wholeSystemTorques, biasVector);  // subtract bias to result in zero mean noise
          inertialKalmanFilterEstimate.set(inertialKalmanFilter.calculateEstimate(wholeSystemTorques));
          inertialKalmanFilter.getMeasurementResidual(residual);
+         bias.setAndSolve(residual);
+         biasVector.set(bias);
 
          filteredEstimate.setAndSolve(inertialKalmanFilterEstimate);
          doubleFilteredEstimate.setAndSolve(filteredEstimate);
@@ -522,33 +500,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          jointVelocities[i].set(actualOneDoFJoints[i].getQd());
          jointAccelerations[i].update(jointVelocities[i].getValue());
-      }
-   }
-
-   private void computeTorqueBias()
-   {
-      if (biasCompensator.isWindowFilled())
-      {
-         biasCompensator.calculateBias();
-         for (int i = 0; i < bias.getNumRows(); i++)
-         {
-            bias.set(i, 0, biasCompensator.getBias(i));
-         }
-         biasCompensator.resetCounter();
-         enableBiasCompensator.set(false);
-      }
-      else
-      {
-         for (int j = 0; j < actualModelJoints.size(); ++j)
-         {
-            JointReadOnly joint = actualModelJoints.get(j);
-            int[] indices = jointIndexHandler.getJointIndices(joint);
-            for (int k = 0; k < indices.length; ++k)
-            {
-               biasCompensator.update(indices[k], residual.get(indices[k], 0));
-            }
-         }
-         biasCompensator.incrementCounter();
       }
    }
 
