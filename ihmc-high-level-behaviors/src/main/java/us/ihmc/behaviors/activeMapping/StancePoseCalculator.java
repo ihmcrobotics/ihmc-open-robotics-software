@@ -40,13 +40,22 @@ public class StancePoseCalculator
       this.heightMapPolygonSnapper = new HeightMapPolygonSnapper();
    }
 
-   public SideDependentList<FramePose3D> getStancePoses(FramePose3D goalPose, TerrainMapData terrainMap, HeightMapData heightMapData)
+   public SideDependentList<FramePose3D> calculateStancePoses(FramePose3D goalPose, TerrainMapData terrainMap, HeightMapData heightMapData)
    {
+      reset();
       insertCandidatePoses(leftPoses, goalPose, RobotSide.LEFT);
       insertCandidatePoses(rightPoses, goalPose, RobotSide.RIGHT);
       searchForOptimalGoalStance(leftPoses, rightPoses, goalPose, terrainMap);
       snapPosesToHeightMapData(heightMapData);
-      return bestFramePoses;
+      return new SideDependentList<>(bestFramePoses.get(RobotSide.LEFT), bestFramePoses.get(RobotSide.RIGHT));
+   }
+
+   public void reset()
+   {
+      leftPoses.clear();
+      rightPoses.clear();
+      bestFramePoses.get(RobotSide.LEFT).setToZero();
+      bestFramePoses.get(RobotSide.RIGHT).setToZero();
    }
 
    public void insertCandidatePoses(ArrayList<FramePose3D> poses, FramePose3D goalPose, RobotSide side)

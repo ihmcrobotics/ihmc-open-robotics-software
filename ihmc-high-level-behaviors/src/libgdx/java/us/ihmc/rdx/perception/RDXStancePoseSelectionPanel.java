@@ -14,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -93,7 +92,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
          if (selectionActive)
          {
             latestPose.getTranslation().setZ(height);
-            stancePoses.set(stancePoseCalculator.getStancePoses(latestPose, terrainMapData, heightMapData));
+            stancePoses.set(stancePoseCalculator.calculateStancePoses(latestPose, terrainMapData, heightMapData));
             for (RobotSide robotSide : RobotSide.values)
             {
                footstepGraphics.get(robotSide).setPose(stancePoses.get(robotSide));

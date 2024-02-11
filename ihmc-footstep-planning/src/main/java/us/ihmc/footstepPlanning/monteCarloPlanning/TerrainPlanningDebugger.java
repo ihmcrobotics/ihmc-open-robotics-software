@@ -139,6 +139,17 @@ public class TerrainPlanningDebugger
       plotFootPoses(heightMapColorImage, poses, 1);
    }
 
+   public void plotFootFramePoses(SideDependentList<FramePose3D> poses, int mode)
+   {
+      if (!enabled)
+         return;
+
+      SideDependentList<Pose3D> poses3D = new SideDependentList<>(new Pose3D(poses.get(RobotSide.LEFT)), new Pose3D(poses.get(RobotSide.RIGHT)));
+
+      plotFootPoses(contactHeatMapColorImage, poses3D, mode);
+      plotFootPoses(heightMapColorImage, poses3D, mode);
+   }
+
    public void plotMonteCarloFootstepPlan(FootstepPlan plan)
    {
       if (!enabled)
@@ -171,7 +182,7 @@ public class TerrainPlanningDebugger
       PerceptionDebugTools.display("Display", stacked, delay, 1500);
    }
 
-   private void plotFootPoses(Mat image, SideDependentList<Pose3D> poses, int mode)
+   public void plotFootPoses(Mat image, SideDependentList<Pose3D> poses, int mode)
    {
       if (!enabled)
          return;
