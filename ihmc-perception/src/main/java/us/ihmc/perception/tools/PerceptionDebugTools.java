@@ -466,7 +466,7 @@ public class PerceptionDebugTools
             color = new Scalar(255, 100, 0, 0);
             break;
          case 2: // start poses are black
-            color = new Scalar(0, 0, 0, 0);
+            color = new Scalar(0, 255, 255, 0);
             break;
          case 3: // goal poses are white
             color = new Scalar(255, 255, 255, 0);
