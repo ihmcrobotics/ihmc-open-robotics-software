@@ -346,12 +346,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       if (enableFilter.getValue())
       {
-         if (eraseBias.getValue())
-         {
-            bias.zero();
-            biasVector.zero();
-         }
-
          updateFilterCovariances();
 
          updateRegressorModelJointStates();
@@ -377,8 +371,16 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          CommonOps_DDRM.subtractEquals(wholeSystemTorques, biasVector);  // subtract bias to result in zero mean noise
          inertialKalmanFilterEstimate.set(inertialKalmanFilter.calculateEstimate(wholeSystemTorques));
          inertialKalmanFilter.getMeasurementResidual(residual);
-         bias.setAndSolve(residual);
-         biasVector.set(bias);
+         if (eraseBias.getValue())
+         {
+            bias.zero();
+            biasVector.zero();
+         }
+         else
+         {
+            bias.setAndSolve(residual);
+            biasVector.set(bias);
+         }
 
          filteredEstimate.setAndSolve(inertialKalmanFilterEstimate);
          doubleFilteredEstimate.setAndSolve(filteredEstimate);
