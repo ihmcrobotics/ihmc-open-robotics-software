@@ -54,7 +54,7 @@ module behavior_msgs
         /**
          * Desired trajectory
          */
-        sequence<ihmc_common_msgs::msg::dds::SE3TrajectoryPointMessage, 500> desired_trajectory;
+        sequence<ihmc_common_msgs::msg::dds::SE3TrajectoryPointMessage, 500> commanded_trajectory;
         /**
          * Current pose
          */
@@ -62,7 +62,7 @@ module behavior_msgs
         /**
          * Desired jointspace trajectories
          */
-        sequence<controller_msgs::msg::dds::OneDoFJointTrajectoryMessage, 7> desired_joint_trajectories;
+        sequence<controller_msgs::msg::dds::OneDoFJointTrajectoryMessage, 7> commanded_joint_trajectories;
         /**
          * Current joint angles for tracking jointspace trajectories
          */

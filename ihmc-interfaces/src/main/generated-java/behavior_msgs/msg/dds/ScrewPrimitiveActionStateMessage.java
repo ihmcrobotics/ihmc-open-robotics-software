@@ -16,7 +16,7 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
             * Definition
             */
    public behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage definition_;
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  trajectory_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  preview_trajectory_;
    /**
             * Hand force
             */
@@ -25,13 +25,15 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
             * Hand torque
             */
    public us.ihmc.euclid.tuple3D.Vector3D torque_;
-   public double trajectory_duration_;
+   public double preview_trajectory_duration_;
+   public double preview_trajectory_linear_velocity_;
+   public double preview_trajectory_angular_velocity_;
 
    public ScrewPrimitiveActionStateMessage()
    {
       state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage();
-      trajectory_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (50, new geometry_msgs.msg.dds.PosePubSubType());
+      preview_trajectory_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (50, new geometry_msgs.msg.dds.PosePubSubType());
       force_ = new us.ihmc.euclid.tuple3D.Vector3D();
       torque_ = new us.ihmc.euclid.tuple3D.Vector3D();
 
@@ -47,10 +49,14 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
-      trajectory_.set(other.trajectory_);
+      preview_trajectory_.set(other.preview_trajectory_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.force_, force_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.torque_, torque_);
-      trajectory_duration_ = other.trajectory_duration_;
+      preview_trajectory_duration_ = other.preview_trajectory_duration_;
+
+      preview_trajectory_linear_velocity_ = other.preview_trajectory_linear_velocity_;
+
+      preview_trajectory_angular_velocity_ = other.preview_trajectory_angular_velocity_;
 
    }
 
@@ -73,9 +79,9 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getTrajectory()
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getPreviewTrajectory()
    {
-      return trajectory_;
+      return preview_trajectory_;
    }
 
 
@@ -96,13 +102,31 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
       return torque_;
    }
 
-   public void setTrajectoryDuration(double trajectory_duration)
+   public void setPreviewTrajectoryDuration(double preview_trajectory_duration)
    {
-      trajectory_duration_ = trajectory_duration;
+      preview_trajectory_duration_ = preview_trajectory_duration;
    }
-   public double getTrajectoryDuration()
+   public double getPreviewTrajectoryDuration()
    {
-      return trajectory_duration_;
+      return preview_trajectory_duration_;
+   }
+
+   public void setPreviewTrajectoryLinearVelocity(double preview_trajectory_linear_velocity)
+   {
+      preview_trajectory_linear_velocity_ = preview_trajectory_linear_velocity;
+   }
+   public double getPreviewTrajectoryLinearVelocity()
+   {
+      return preview_trajectory_linear_velocity_;
+   }
+
+   public void setPreviewTrajectoryAngularVelocity(double preview_trajectory_angular_velocity)
+   {
+      preview_trajectory_angular_velocity_ = preview_trajectory_angular_velocity;
+   }
+   public double getPreviewTrajectoryAngularVelocity()
+   {
+      return preview_trajectory_angular_velocity_;
    }
 
 
@@ -125,16 +149,20 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
 
       if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
-      if (this.trajectory_.size() != other.trajectory_.size()) { return false; }
+      if (this.preview_trajectory_.size() != other.preview_trajectory_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.trajectory_.size(); i++)
-         {  if (!this.trajectory_.get(i).epsilonEquals(other.trajectory_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.preview_trajectory_.size(); i++)
+         {  if (!this.preview_trajectory_.get(i).epsilonEquals(other.preview_trajectory_.get(i), epsilon)) return false; }
       }
 
       if (!this.force_.epsilonEquals(other.force_, epsilon)) return false;
       if (!this.torque_.epsilonEquals(other.torque_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.preview_trajectory_duration_, other.preview_trajectory_duration_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.preview_trajectory_linear_velocity_, other.preview_trajectory_linear_velocity_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.preview_trajectory_angular_velocity_, other.preview_trajectory_angular_velocity_, epsilon)) return false;
 
 
       return true;
@@ -151,10 +179,14 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
-      if (!this.trajectory_.equals(otherMyClass.trajectory_)) return false;
+      if (!this.preview_trajectory_.equals(otherMyClass.preview_trajectory_)) return false;
       if (!this.force_.equals(otherMyClass.force_)) return false;
       if (!this.torque_.equals(otherMyClass.torque_)) return false;
-      if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
+      if(this.preview_trajectory_duration_ != otherMyClass.preview_trajectory_duration_) return false;
+
+      if(this.preview_trajectory_linear_velocity_ != otherMyClass.preview_trajectory_linear_velocity_) return false;
+
+      if(this.preview_trajectory_angular_velocity_ != otherMyClass.preview_trajectory_angular_velocity_) return false;
 
 
       return true;
@@ -170,14 +202,18 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
       builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
-      builder.append("trajectory=");
-      builder.append(this.trajectory_);      builder.append(", ");
+      builder.append("preview_trajectory=");
+      builder.append(this.preview_trajectory_);      builder.append(", ");
       builder.append("force=");
       builder.append(this.force_);      builder.append(", ");
       builder.append("torque=");
       builder.append(this.torque_);      builder.append(", ");
-      builder.append("trajectory_duration=");
-      builder.append(this.trajectory_duration_);
+      builder.append("preview_trajectory_duration=");
+      builder.append(this.preview_trajectory_duration_);      builder.append(", ");
+      builder.append("preview_trajectory_linear_velocity=");
+      builder.append(this.preview_trajectory_linear_velocity_);      builder.append(", ");
+      builder.append("preview_trajectory_angular_velocity=");
+      builder.append(this.preview_trajectory_angular_velocity_);
       builder.append("}");
       return builder.toString();
    }
