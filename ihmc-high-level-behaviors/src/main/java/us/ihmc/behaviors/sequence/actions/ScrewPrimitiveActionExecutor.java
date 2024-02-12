@@ -180,7 +180,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                   totalLinearDistanceOfHand = EuclidCoreTools.norm(signedRadialDistance, signedTotalTranslation);
 
                   // Computing the movement duration, which is clamped by the max movement speed
-                  durationForRotation = signedTotalRotation / definition.getMaxAngularVelocity();
+                  durationForRotation = Math.abs(signedTotalRotation) / definition.getMaxAngularVelocity();
                   durationForTranslation = totalLinearDistanceOfHand / definition.getMaxLinearVelocity();
                   movementDuration = Math.max(durationForRotation, durationForTranslation);
                   segmentDuration = movementDuration / (numberOfPoints - 1);
