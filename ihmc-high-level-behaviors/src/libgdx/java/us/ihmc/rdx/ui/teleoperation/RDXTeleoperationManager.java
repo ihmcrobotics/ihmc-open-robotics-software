@@ -332,6 +332,7 @@ public class RDXTeleoperationManager extends RDXPanel
       desiredRobot.update();
 
       locomotionManager.update();
+      armManager.update(interactablesEnabled.get());
 
       if (interactablesEnabled.get())
       {
@@ -341,8 +342,6 @@ public class RDXTeleoperationManager extends RDXPanel
          {
             if (robotHasArms)
             {
-               armManager.update();
-               
                boolean handInteractablesAreDeleted = true;
                for (RobotSide side : interactableHands.sides())
                {
