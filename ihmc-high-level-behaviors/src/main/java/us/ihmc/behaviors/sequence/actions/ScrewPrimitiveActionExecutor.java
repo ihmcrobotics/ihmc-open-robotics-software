@@ -205,11 +205,12 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                   state.getPreviewTrajectoryLinearVelocity().setValue(totalLinearDistanceOfHand / movementDuration);
                   state.getPreviewTrajectoryAngularVelocity().setValue(rotationalVelocity);
 
-                  // Calculate IK preview
                   if (state.getIsNextForExecution())
                   {
+                     // These calculations are used for both preview and execution
                      calculateTrajectoryTimesAndVelocities();
 
+                     // Calculate preview for operator
                      ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
                      armIKSolver.copySourceToWork(); // Initialize the command, since we're not going to be far.
 

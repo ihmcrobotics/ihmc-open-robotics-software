@@ -19,6 +19,9 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
 
+/**
+ * A 3D arm graphic that can be posed and colored for visualizing arm configurations.
+ */
 public class RDXArmMultiBodyGraphic
 {
    private final RDXRigidBody rootBody;
