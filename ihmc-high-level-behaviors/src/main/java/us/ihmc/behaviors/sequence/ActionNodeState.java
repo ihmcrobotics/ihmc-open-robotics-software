@@ -24,9 +24,9 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    private final CRDTUnidirectionalBoolean failed;
    private final CRDTUnidirectionalDouble nominalExecutionDuration;
    private final CRDTUnidirectionalDouble elapsedExecutionTime;
-   private final CRDTUnidirectionalSE3Trajectory desiredTrajectory;
+   private final CRDTUnidirectionalSE3Trajectory commandedTrajectory;
    private final CRDTUnidirectionalPose3D currentPose;
-   private final CRDTUnidirectionalOneDoFJointTrajectoryList desiredJointTrajectories;
+   private final CRDTUnidirectionalOneDoFJointTrajectoryList commandedJointTrajectories;
    private final CRDTUnidirectionalDoubleArray currentJointAngles;
    private final CRDTUnidirectionalDouble positionDistanceToGoalTolerance;
    private final CRDTUnidirectionalDouble orientationDistanceToGoalTolerance;
@@ -42,9 +42,9 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       failed = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
       nominalExecutionDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       elapsedExecutionTime = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
-      desiredTrajectory = new CRDTUnidirectionalSE3Trajectory(ROS2ActorDesignation.ROBOT, crdtInfo);
+      commandedTrajectory = new CRDTUnidirectionalSE3Trajectory(ROS2ActorDesignation.ROBOT, crdtInfo);
       currentPose = new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, crdtInfo);
-      desiredJointTrajectories = new CRDTUnidirectionalOneDoFJointTrajectoryList(ROS2ActorDesignation.ROBOT, crdtInfo);
+      commandedJointTrajectories = new CRDTUnidirectionalOneDoFJointTrajectoryList(ROS2ActorDesignation.ROBOT, crdtInfo);
       currentJointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, SUPPORTED_NUMBER_OF_JOINTS);
       positionDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       orientationDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
@@ -61,9 +61,9 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       message.setFailed(failed.toMessage());
       message.setNominalExecutionDuration(nominalExecutionDuration.toMessage());
       message.setElapsedExecutionTime(elapsedExecutionTime.toMessage());
-      desiredTrajectory.toMessage(message.getDesiredTrajectory());
+      commandedTrajectory.toMessage(message.getCommandedTrajectory());
       currentPose.toMessage(message.getCurrentPose());
-      desiredJointTrajectories.toMessage(message.getDesiredJointTrajectories());
+      commandedJointTrajectories.toMessage(message.getCommandedJointTrajectories());
       currentJointAngles.toMessage(message.getCurrentJointAngles());
       message.setPositionDistanceToGoalTolerance(positionDistanceToGoalTolerance.toMessage());
       message.setOrientationDistanceToGoalTolerance(orientationDistanceToGoalTolerance.toMessage());
@@ -80,9 +80,9 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       failed.fromMessage(message.getFailed());
       nominalExecutionDuration.fromMessage(message.getNominalExecutionDuration());
       elapsedExecutionTime.fromMessage(message.getElapsedExecutionTime());
-      desiredTrajectory.fromMessage(message.getDesiredTrajectory());
+      commandedTrajectory.fromMessage(message.getCommandedTrajectory());
       currentPose.fromMessage(message.getCurrentPose());
-      desiredJointTrajectories.fromMessage(message.getDesiredJointTrajectories());
+      commandedJointTrajectories.fromMessage(message.getCommandedJointTrajectories());
       currentJointAngles.fromMessage(message.getCurrentJointAngles());
       positionDistanceToGoalTolerance.fromMessage(message.getPositionDistanceToGoalTolerance());
       orientationDistanceToGoalTolerance.fromMessage(message.getOrientationDistanceToGoalTolerance());
@@ -164,9 +164,9 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       return elapsedExecutionTime.getValue();
    }
 
-   public CRDTUnidirectionalSE3Trajectory getDesiredTrajectory()
+   public CRDTUnidirectionalSE3Trajectory getCommandedTrajectory()
    {
-      return desiredTrajectory;
+      return commandedTrajectory;
    }
 
    public CRDTUnidirectionalPose3D getCurrentPose()
@@ -174,9 +174,9 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       return currentPose;
    }
 
-   public CRDTUnidirectionalOneDoFJointTrajectoryList getDesiredJointTrajectories()
+   public CRDTUnidirectionalOneDoFJointTrajectoryList getCommandedJointTrajectories()
    {
-      return desiredJointTrajectories;
+      return commandedJointTrajectories;
    }
 
    public CRDTUnidirectionalDoubleArray getCurrentJointAngles()
