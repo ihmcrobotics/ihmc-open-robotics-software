@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionDefinition;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -13,21 +14,27 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.mesh.RDXDashedLineMesh;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.rdx.ui.graphics.RDXArmMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
+import us.ihmc.rdx.ui.teleoperation.RDXIKSolverColors;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionState, ScrewPrimitiveActionDefinition>
 {
    private final ScrewPrimitiveActionState state;
    private final ScrewPrimitiveActionDefinition definition;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo objectFrameComboBox;
    private final ImGuiSliderDoubleWrapper translationWidget;
@@ -38,16 +45,19 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    private final ImGuiSliderDoubleWrapper linearPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper angularPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper jointspaceWeightWidget;
+   private final ImGuiSliderDoubleWrapper previewTimeWidget;
    private final RDXSelectablePose3DGizmo screwAxisGizmo;
    private final RDXDashedLineMesh screwAxisGraphic = new RDXDashedLineMesh(Color.WHITE, Axis3D.X, 0.04);
    private final RDXTrajectoryGraphic trajectoryGraphic = new RDXTrajectoryGraphic();
    private final RecyclingArrayList<FramePose3D> trajectoryPoses = new RecyclingArrayList<>(FramePose3D::new);
+   private final SideDependentList<RDXArmMultiBodyGraphic> armMultiBodyGraphics = new SideDependentList<>();
 
    public RDXScrewPrimitiveAction(long id,
                                   CRDTInfo crdtInfo,
                                   WorkspaceResourceDirectory saveFileDirectory,
                                   RDX3DPanel panel3D,
-                                  ReferenceFrameLibrary referenceFrameLibrary)
+                                  ReferenceFrameLibrary referenceFrameLibrary,
+                                  ROS2SyncedRobotModel syncedRobot)
    {
       super(new ScrewPrimitiveActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
@@ -55,6 +65,8 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       definition = getDefinition();
 
       definition.setDescription("Screw primitive");
+
+      this.syncedRobot = syncedRobot;
 
       screwAxisGizmo = new RDXSelectablePose3DGizmo(definition.getScrewAxisPoseInObjectFrame().getValue(), ReferenceFrame.getWorldFrame());
       screwAxisGizmo.create(panel3D);
@@ -102,6 +114,15 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
                                                             definition::setJointspaceWeight);
       jointspaceWeightWidget.addButton("Use Default Weights", () -> definition.setJointspaceWeight(-1.0));
       jointspaceWeightWidget.addWidgetAligner(widgetAligner);
+      previewTimeWidget = new ImGuiSliderDoubleWrapper("Preview Time", "%.2f", 0.0, 1.0,
+                                                       state.getPreviewRequestedTime()::getValue,
+                                                       state.getPreviewRequestedTime()::setValue);
+      previewTimeWidget.addWidgetAligner(widgetAligner);
+
+      for (RobotSide side : RobotSide.values)
+      {
+         armMultiBodyGraphics.put(side, new RDXArmMultiBodyGraphic(syncedRobot.getRobotModel(), syncedRobot.getFullRobotModel(), side));
+      }
    }
 
    @Override
@@ -122,6 +143,18 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
          for (int i = 0; i < state.getPreviewTrajectory().getSize(); i++)
             trajectoryPoses.add().set(state.getPreviewTrajectory().getValueReadOnly(i));
          trajectoryGraphic.update(trajectoryLineWidth, trajectoryPoses);
+
+         if (state.getIsNextForExecution())
+         {
+            RDXArmMultiBodyGraphic armMultiBodyGraphic = armMultiBodyGraphics.get(getDefinition().getSide());
+            armMultiBodyGraphic.getFloatingJoint().getJointPose().set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getChestFrame));
+            for (int i = 0; i < armMultiBodyGraphic.getJoints().length; i++)
+            {
+               armMultiBodyGraphic.getJoints()[i].setQ(state.getPreviewJointAngles().getValueReadOnly(i));
+            }
+            armMultiBodyGraphic.updateAfterModifyingConfiguration();
+            armMultiBodyGraphic.setColor(RDXIKSolverColors.getColor(state.getPreviewSolutionQuality().getValue()));
+         }
       }
    }
 
@@ -155,6 +188,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       if (definition.getJointspaceOnly())
          ImGui.endDisabled();
       jointspaceWeightWidget.renderImGuiWidget();
+      previewTimeWidget.renderImGuiWidget();
    }
 
    @Override
@@ -183,6 +217,9 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
          screwAxisGizmo.getVirtualRenderables(renderables, pool);
          screwAxisGraphic.getRenderables(renderables, pool);
          trajectoryGraphic.getRenderables(renderables, pool);
+
+         if (state.getIsNextForExecution())
+            armMultiBodyGraphics.get(getDefinition().getSide()).getRootBody().getVisualRenderables(renderables, pool);
       }
    }
 

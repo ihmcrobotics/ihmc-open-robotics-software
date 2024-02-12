@@ -30,12 +30,14 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimitiveActionState, ScrewPrimitiveActionDefinition>
 {
@@ -51,15 +53,19 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
    private final FramePose3D workPose = new FramePose3D();
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
+   private final MultipleWaypointsPoseTrajectoryGenerator poseTrajectoryGenerator
+         = new MultipleWaypointsPoseTrajectoryGenerator("", ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT, new YoRegistry("Dummy"));
    private final ArmTrajectoryMessage jointspaceOnlyTrajectoryMessage = new ArmTrajectoryMessage();
    private final HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = new HandHybridJointspaceTaskspaceTrajectoryMessage();
    private final MutableReferenceFrame currentPoseFrame = new MutableReferenceFrame();
+   private final FramePose3D currentPose = new FramePose3D();
    private final FrameVector3D linearVelocity = new FrameVector3D();
    private final FrameVector3D angularVelocity = new FrameVector3D();
    private final RecyclingArrayList<FrameVector3D> linearVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final RecyclingArrayList<FrameVector3D> angularVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final TDoubleArrayList trajectoryTimes = new TDoubleArrayList();
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
+   private final int numberOfJoints = ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS;
    private int numberOfPoints;
    private double rotationRadius;
    private double signedTotalRotation;
@@ -151,6 +157,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                      segments = ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT - 1; // We have to fit within the message size limit
                   }
 
+                  // Generate the trajectory poses
                   for (int i = 0; i < segments; i++)
                   {
                      Pose3D previousPose = trajectoryPoses.getLast();
@@ -168,6 +175,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
                   numberOfPoints = state.getPreviewTrajectory().getSize();
 
+                  syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
                   syncedHandControlPose.changeFrame(state.getScrewFrame().getReferenceFrame());
                   // This is always the radial distance.
                   rotationRadius = EuclidCoreTools.norm(syncedHandControlPose.getY(), syncedHandControlPose.getZ());
@@ -196,10 +204,99 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                   state.getPreviewTrajectoryDuration().setValue(movementDuration);
                   state.getPreviewTrajectoryLinearVelocity().setValue(totalLinearDistanceOfHand / movementDuration);
                   state.getPreviewTrajectoryAngularVelocity().setValue(rotationalVelocity);
+
+                  // Calculate IK preview
+                  if (state.getIsNextForExecution())
+                  {
+                     calculateTrajectoryTimesAndVelocities();
+
+                     ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
+                     armIKSolver.copySourceToWork(); // Initialize the command, since we're not going to be far.
+
+                     poseTrajectoryGenerator.clear(ReferenceFrame.getWorldFrame());
+                     for (int i = 0; i < numberOfPoints; i++)
+                     {
+                        currentPose.set(state.getPreviewTrajectory().getValueReadOnly(i));
+                        poseTrajectoryGenerator.appendPoseWaypoint(trajectoryTimes.get(i), currentPose, linearVelocities.get(i), angularVelocities.get(i));
+                     }
+
+                     poseTrajectoryGenerator.initialize();
+                     poseTrajectoryGenerator.compute(movementDuration * state.getPreviewRequestedTime().getValue());
+
+                     currentPoseFrame.getTransformToParent().set(poseTrajectoryGenerator.getPose());
+                     currentPoseFrame.getReferenceFrame().update();
+                     linearVelocity.set(poseTrajectoryGenerator.getVelocity());
+                     angularVelocity.set(poseTrajectoryGenerator.getAngularVelocity());
+
+                     armIKSolver.update(syncedRobot.getReferenceFrames().getChestFrame(), currentPoseFrame.getReferenceFrame());
+                     armIKSolver.solve(angularVelocity, linearVelocity);
+
+                     // Send the solution back to the UI so the user knows what's gonna happen with the arm.
+                     state.getPreviewSolutionQuality().setValue(armIKSolver.getQuality());
+                     for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
+                     {
+                        state.getPreviewJointAngles().getValue()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+                     }
+                  }
                }
             }
          }
       }
+   }
+
+   private void calculateTrajectoryTimesAndVelocities()
+   {
+      ReferenceFrame screwAxisFrame = state.getScrewFrame().getReferenceFrame();
+
+      angularVelocities.clear();
+      linearVelocities.clear();
+      trajectoryTimes.resetQuick();
+
+      // Set the initial velocity and time as zero
+      angularVelocities.add().setToZero();
+      linearVelocities.add().setToZero();
+      trajectoryTimes.add(0.0);
+
+      double time = 2.0 * segmentDuration; // Make the first segment twice as long to allow smooth acceleration
+      for (int i = 1; i < numberOfPoints - 1; i++)
+      {
+         Pose3DReadOnly waypointPose = state.getPreviewTrajectory().getValueReadOnly(i);
+
+         // Get those pose in the screw axis frame
+         workPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), waypointPose);
+         workPose.changeFrame(screwAxisFrame);
+
+         // Get the vector that is tangent to the rotation
+         Vector3DReadOnly rotationAxis = Axis3D.X;
+         Vector3D radialPosition = new Vector3D(workPose.getPosition());
+         radialPosition.setX(0.0);
+         Vector3D tangentVector = new Vector3D();
+         tangentVector.cross(rotationAxis, radialPosition);
+         tangentVector.normalize();
+
+         FrameVector3D linearVelocity = linearVelocities.add();
+         linearVelocity.setToZero(screwAxisFrame);
+         // Set the tangent velocity in the linear velocity
+         linearVelocity.setAndScale(tangentialVelocity, tangentVector);
+         // Set the axial velocity
+         linearVelocity.setX(axialVelocity);
+         linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+
+         // Set the angular velocity
+         FrameVector3D angularVelocity = angularVelocities.add();
+         angularVelocity.setToZero(screwAxisFrame);
+         angularVelocity.setX(rotationalVelocity);
+         angularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+
+         // Add the time into the array
+         trajectoryTimes.add(time);
+         time += segmentDuration;
+      }
+
+      // Set the final velocity as zeros and time as the duration
+      angularVelocities.add().setToZero();
+      linearVelocities.add().setToZero();
+      trajectoryTimes.add(movementDuration); // Makes the last segment twice as long to allow for smooth deceleration
    }
 
    @Override
@@ -207,6 +304,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    {
       super.triggerActionExecution();
 
+      // Fail if invalid
       if (Double.isNaN(state.getPreviewTrajectoryLinearVelocity().getValue())
        || Double.isNaN(state.getPreviewTrajectoryAngularVelocity().getValue()))
       {
@@ -218,11 +316,10 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          return;
       }
 
+      // Compute smooth trajectory and publish command
       if (state.getScrewFrame().isChildOfWorld())
       {
          state.getCommandedTrajectory().getValue().clear();
-
-         syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
 
          jointspaceOnlyTrajectoryMessage.setRobotSide(definition.getSide().toByte());
          jointspaceOnlyTrajectoryMessage.setForceExecution(true);
@@ -245,61 +342,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          taskspaceTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
          taskspaceTrajectoryMessage.getTaskspaceTrajectoryPoints().clear();
 
-         ReferenceFrame screwAxisFrame = state.getScrewFrame().getReferenceFrame();
-
-         angularVelocities.clear();
-         linearVelocities.clear();
-         trajectoryTimes.resetQuick();
-
-         // Set the initial velocity and time as zero
-         angularVelocities.add().setToZero();
-         linearVelocities.add().setToZero();
-         trajectoryTimes.add(0.0);
-
-         double time = 2.0 * segmentDuration; // Make the first segment twice as long to allow smooth acceleration
-         for (int i = 1; i < numberOfPoints - 1; i++)
-         {
-            Pose3DReadOnly waypointPose = state.getPreviewTrajectory().getValueReadOnly(i);
-
-            // Get those pose in the screw axis frame
-            workPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), waypointPose);
-            workPose.changeFrame(screwAxisFrame);
-
-            // Get the vector that is tangent to the rotation
-            Vector3DReadOnly rotationAxis = Axis3D.X;
-            Vector3D radialPosition = new Vector3D(workPose.getPosition());
-            radialPosition.setX(0.0);
-            Vector3D tangentVector = new Vector3D();
-            tangentVector.cross(rotationAxis, radialPosition);
-            tangentVector.normalize();
-
-            FrameVector3D linearVelocity = linearVelocities.add();
-            linearVelocity.setToZero(screwAxisFrame);
-            // Set the tangent velocity in the linear velocity
-            linearVelocity.setAndScale(tangentialVelocity, tangentVector);
-            // Set the axial velocity
-            linearVelocity.setX(axialVelocity);
-            linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-
-            // Set the angular velocity
-            FrameVector3D angularVelocity = angularVelocities.add();
-            angularVelocity.setToZero(screwAxisFrame);
-            angularVelocity.setX(rotationalVelocity);
-            angularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-
-            // Add the time into the array
-            trajectoryTimes.add(time);
-            time += segmentDuration;
-         }
-
-         // Set the final velocity as zeros and time as the duration
-         angularVelocities.add().setToZero();
-         linearVelocities.add().setToZero();
-         trajectoryTimes.add(movementDuration); // Makes the last segment twice as long to allow for smooth deceleration
-
          // Start setting up the joint space trajectory
-         ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
-         int numberOfJoints = armIKSolver.getSolutionOneDoFJoints().length;
          for (int jointNumber = 0; jointNumber < numberOfJoints; jointNumber++)
          {
             OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
@@ -307,8 +350,8 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
             oneDoFJointTrajectoryMessage.setWeight(definition.getJointspaceWeight());
          }
 
-         // Initialize the command, since we're not going to be far.
-         armIKSolver.copySourceToWork();
+         ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
+         armIKSolver.copySourceToWork(); // Initialize the command, since we're not going to be far.
 
          for (int i = 0; i < numberOfPoints; i++)
          {
@@ -328,9 +371,6 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
             se3TrajectoryPointMessage.getLinearVelocity().set(linearVelocity);
             se3TrajectoryPointMessage.getAngularVelocity().set(angularVelocity);
 
-            angularVelocity.changeFrame(currentPoseFrame.getReferenceFrame());
-            linearVelocity.changeFrame(currentPoseFrame.getReferenceFrame());
-
             armIKSolver.update(syncedRobot.getReferenceFrames().getChestFrame(), currentPoseFrame.getReferenceFrame());
             armIKSolver.solve(angularVelocity, linearVelocity);
 
@@ -347,17 +387,14 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                trajectoryPoint1DMessage.setVelocity(armIKSolver.getSolutionOneDoFJoints()[j].getQd());
             }
 
-            angularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-            linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-
             LogTools.info("Adding point time: %.2f  nextPose: %s %s  linearVel: %s  angularVel: %s"
-                    .formatted(time,
+                    .formatted(waypointTime,
                                desiredPose.getPosition(),
                                new YawPitchRoll(desiredPose.getOrientation()),
                                linearVelocity,
                                angularVelocity));
 
-            state.getCommandedTrajectory().addTrajectoryPoint(desiredPose, time);
+            state.getCommandedTrajectory().addTrajectoryPoint(desiredPose, waypointTime);
          }
 
          // Perform smoothing from the jointspace velocities
