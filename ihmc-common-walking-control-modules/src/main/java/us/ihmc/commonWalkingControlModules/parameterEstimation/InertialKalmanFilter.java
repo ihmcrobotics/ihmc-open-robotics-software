@@ -161,7 +161,7 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
       }
    }
 
-   public void setBias(DMatrixRMaj bias)
+   public void setBias(DMatrix bias)
    {
       this.bias.set(bias);
    }
