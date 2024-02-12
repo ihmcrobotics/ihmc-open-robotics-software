@@ -9,6 +9,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoMatrix;
+import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -19,11 +20,17 @@ import java.util.Set;
 
 public class InertialKalmanFilter extends ExtendedKalmanFilter
 {
+   private static final boolean MORE_YOVARIABLES = false;
+
    private static final int WRENCH_DIMENSION = 6;
 
    private final DMatrixRMaj identity;
 
    private final DMatrixRMaj torqueFromNominal;
+   private final DMatrixRMaj torqueFromEstimates;
+   private final DMatrixRMaj torqueFromContactWrenches;
+   private final DMatrixRMaj torqueFromBias;
+
    private final DMatrixRMaj regressorForEstimates;
 
    private final SideDependentList<DMatrixRMaj> contactJacobians = new SideDependentList<>();
@@ -37,8 +44,11 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    private final AlphaFilteredYoMatrix filteredMeasurement;
    private final AlphaFilteredYoMatrix doubleFilteredMeasurement;
 
-   private final DMatrixRMaj bias;
-
+   /** MORE_YOVARIABLES **/
+   private YoMatrix yoTorqueFromNominal = null;
+   private YoMatrix yoTorqueFromEstimates = null;
+   private YoMatrix yoTorqueFromContactWrenches = null;
+   private YoMatrix yoTorqueFromBias = null;
 
    public InertialKalmanFilter(FullRobotModel model, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets,
                                DMatrixRMaj initialParametersForEstimate, DMatrixRMaj initialParameterCovariance,
@@ -54,6 +64,9 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
       identity = CommonOps_DDRM.identity(partitionSizes[0]);
 
       torqueFromNominal = new DMatrixRMaj(nDoFs, 1);
+      torqueFromEstimates = new DMatrixRMaj(nDoFs, 1);
+      torqueFromContactWrenches = new DMatrixRMaj(nDoFs, 1);
+      torqueFromBias = new DMatrixRMaj(nDoFs, 1);
 
       regressorForEstimates = new DMatrixRMaj(nDoFs, partitionSizes[0]);
 
@@ -73,7 +86,13 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
       filteredMeasurement = new AlphaFilteredYoMatrix("filteredMeasurement", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
       doubleFilteredMeasurement = new AlphaFilteredYoMatrix("doubleFilteredMeasurement", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
 
-      bias = new DMatrixRMaj(nDoFs, 1);
+      if (MORE_YOVARIABLES)
+      {
+         yoTorqueFromNominal = new YoMatrix("torqueFromNominal", nDoFs, 1, getRowNames(model), null, registry);
+         yoTorqueFromEstimates = new YoMatrix("torqueFromEstimates", nDoFs, 1, getRowNames(model), null, registry);
+         yoTorqueFromContactWrenches = new YoMatrix("torqueFromContactWrenches", nDoFs, 1, getRowNames(model), null, registry);
+         yoTorqueFromBias = new YoMatrix("torqueFromBias", nDoFs, 1, getRowNames(model), null, registry);
+      }
    }
 
    /** For inertial parameters, the process Jacobian is the identity matrix. */
@@ -105,19 +124,36 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    @Override
    protected DMatrixRMaj measurementModel(DMatrixRMaj parametersForEstimate)
    {
+      // Torque from inverse dynamics on nominal model
       measurement.set(torqueFromNominal);
-      CommonOps_DDRM.multAdd(regressorForEstimates, parametersForEstimate, measurement);
+
+      // Torque from regressor on estimated parameters
+      CommonOps_DDRM.mult(regressorForEstimates, parametersForEstimate, torqueFromEstimates);
+      CommonOps_DDRM.addEquals(measurement, torqueFromEstimates);
+
+      // Torque from contact wrenches
+      torqueFromContactWrenches.zero();
       for (RobotSide side : RobotSide.values)
       {
          // NOTE: the minus for the contact wrench contribution
-         CommonOps_DDRM.multAddTransA(-1.0, contactJacobians.get(side), contactWrenches.get(side), measurement);
+         CommonOps_DDRM.multAddTransA(-1.0, contactJacobians.get(side), contactWrenches.get(side), torqueFromContactWrenches);
       }
+      CommonOps_DDRM.addEquals(measurement, torqueFromContactWrenches);
 
-      CommonOps_DDRM.addEquals(measurement, bias);
+      // Torque from bias
+      CommonOps_DDRM.addEquals(measurement, torqueFromBias);
 
       filter(measurement, filteredMeasurement);
       filter(filteredMeasurement, doubleFilteredMeasurement);
       measurement.set(doubleFilteredMeasurement);
+
+      if (MORE_YOVARIABLES)
+      {
+         yoTorqueFromNominal.set(torqueFromNominal);
+         yoTorqueFromEstimates.set(torqueFromEstimates);
+         yoTorqueFromContactWrenches.set(torqueFromContactWrenches);
+         yoTorqueFromBias.set(torqueFromBias);
+      }
 
       return measurement;
    }
@@ -163,7 +199,7 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
 
    public void setBias(DMatrix bias)
    {
-      this.bias.set(bias);
+      this.torqueFromBias.set(bias);
    }
 
    public void setPostProcessingAlpha(double postProcessingAlpha)
