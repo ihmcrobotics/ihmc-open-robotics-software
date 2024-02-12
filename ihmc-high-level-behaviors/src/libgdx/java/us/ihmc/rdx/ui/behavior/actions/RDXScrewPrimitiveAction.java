@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionDefinition;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -51,6 +52,8 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    private final RDXTrajectoryGraphic trajectoryGraphic = new RDXTrajectoryGraphic();
    private final RecyclingArrayList<FramePose3D> trajectoryPoses = new RecyclingArrayList<>(FramePose3D::new);
    private final SideDependentList<RDXArmMultiBodyGraphic> armMultiBodyGraphics = new SideDependentList<>();
+   private boolean playbackPreview = false;
+   private final Stopwatch playbackStopwatch = new Stopwatch();
 
    public RDXScrewPrimitiveAction(long id,
                                   CRDTInfo crdtInfo,
@@ -117,6 +120,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       previewTimeWidget = new ImGuiSliderDoubleWrapper("Preview Time", "%.2f", 0.0, 1.0,
                                                        state.getPreviewRequestedTime()::getValue,
                                                        state.getPreviewRequestedTime()::setValue);
+      previewTimeWidget.addButton("Play", this::togglePlayPausePreview);
       previewTimeWidget.addWidgetAligner(widgetAligner);
 
       for (RobotSide side : RobotSide.values)
@@ -155,6 +159,14 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
             armMultiBodyGraphic.updateAfterModifyingConfiguration();
             armMultiBodyGraphic.setColor(RDXIKSolverColors.getColor(state.getPreviewSolutionQuality().getValue()));
          }
+
+         if (playbackPreview)
+         {
+            double requestedTime = state.getPreviewRequestedTime().getValue();
+            requestedTime += playbackStopwatch.lap() / state.getPreviewTrajectoryDuration().getValue();
+            requestedTime %= 1.0;
+            state.getPreviewRequestedTime().setValue(requestedTime);
+         }
       }
    }
 
@@ -189,6 +201,17 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
          ImGui.endDisabled();
       jointspaceWeightWidget.renderImGuiWidget();
       previewTimeWidget.renderImGuiWidget();
+   }
+
+   private void togglePlayPausePreview()
+   {
+      playbackPreview = !playbackPreview;
+      previewTimeWidget.addButton(playbackPreview ? "Pause" : "Play", this::togglePlayPausePreview);
+
+      if (playbackPreview)
+      {
+         playbackStopwatch.reset();
+      }
    }
 
    @Override
