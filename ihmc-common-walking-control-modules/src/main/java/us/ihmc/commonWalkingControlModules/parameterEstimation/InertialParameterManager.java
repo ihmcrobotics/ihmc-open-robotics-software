@@ -111,6 +111,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final double accelerationCalculationAlpha;
    private final double biasCompensationAlpha;
 
+   private final YoDouble normalizedInnovation;
+
    public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
@@ -271,6 +273,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       biasVector = new DMatrixRMaj(nDoFs, 1);
       eraseBias = new YoBoolean("eraseBias", registry);
       eraseBias.set(false);
+
+      normalizedInnovation = new YoDouble("normalizedInnovation", registry);
+      normalizedInnovation.set(0.0);
    }
 
    private final ExecutionTimer regressorTimer = new ExecutionTimer("RegressorTimer", registry);
@@ -368,7 +373,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          inertialKalmanFilter.setRegressor(regressor);
          inertialKalmanFilter.setContactJacobians(fullContactJacobians);
          inertialKalmanFilter.setContactWrenches(contactWrenches);
-         CommonOps_DDRM.subtractEquals(wholeSystemTorques, biasVector);  // subtract bias to result in zero mean noise
+         inertialKalmanFilter.setBias(biasVector);
+//         CommonOps_DDRM.subtractEquals(wholeSystemTorques, biasVector);  // subtract bias to result in zero mean noise
          inertialKalmanFilterEstimate.set(inertialKalmanFilter.calculateEstimate(wholeSystemTorques));
          inertialKalmanFilter.getMeasurementResidual(residual);
          if (eraseBias.getValue())
@@ -384,6 +390,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
          filteredEstimate.setAndSolve(inertialKalmanFilterEstimate);
          doubleFilteredEstimate.setAndSolve(filteredEstimate);
+
+         normalizedInnovation.set(inertialKalmanFilter.calculateNormalizedInnovation());
+
          // Pack smoothed estimate back into estimate robot bodies
          RegressorTools.packRigidBodies(basisSets, doubleFilteredEstimate, estimateModelBodies);
 

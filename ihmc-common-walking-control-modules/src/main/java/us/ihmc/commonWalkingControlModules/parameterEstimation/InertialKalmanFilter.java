@@ -37,6 +37,8 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    private final AlphaFilteredYoMatrix filteredMeasurement;
    private final AlphaFilteredYoMatrix doubleFilteredMeasurement;
 
+   private final DMatrixRMaj bias;
+
 
    public InertialKalmanFilter(FullRobotModel model, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets,
                                DMatrixRMaj initialParametersForEstimate, DMatrixRMaj initialParameterCovariance,
@@ -70,6 +72,8 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
       doubleFilteredWholeSystemTorques = new AlphaFilteredYoMatrix("doubleFilteredWholeSystemTorques", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
       filteredMeasurement = new AlphaFilteredYoMatrix("filteredMeasurement", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
       doubleFilteredMeasurement = new AlphaFilteredYoMatrix("doubleFilteredMeasurement", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
+
+      bias = new DMatrixRMaj(nDoFs, 1);
    }
 
    /** For inertial parameters, the process Jacobian is the identity matrix. */
@@ -108,6 +112,8 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
          // NOTE: the minus for the contact wrench contribution
          CommonOps_DDRM.multAddTransA(-1.0, contactJacobians.get(side), contactWrenches.get(side), measurement);
       }
+
+      CommonOps_DDRM.addEquals(measurement, bias);
 
       filter(measurement, filteredMeasurement);
       filter(filteredMeasurement, doubleFilteredMeasurement);
@@ -153,6 +159,11 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
       {
          this.contactWrenches.get(side).set(contactWrenches.get(side));
       }
+   }
+
+   public void setBias(DMatrixRMaj bias)
+   {
+      this.bias.set(bias);
    }
 
    public void setPostProcessingAlpha(double postProcessingAlpha)
