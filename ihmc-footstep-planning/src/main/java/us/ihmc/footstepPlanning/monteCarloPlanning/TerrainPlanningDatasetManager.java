@@ -81,7 +81,7 @@ public class TerrainPlanningDatasetManager
    public void logCompletePlan(FootstepPlannerOutput plannerOutput, Mat heightMap, RigidBodyTransform sensorTransform, SideDependentList<FramePose3D> startPose,
                                SideDependentList<FramePose3D> goalPose, boolean sidednessBit)
    {
-      FootstepPlannerLoggingTools.printFootstepPlan(plannerOutput);
+      //FootstepPlannerLoggingTools.printFootstepPlan(plannerOutput);
       FootstepPlannerLoggingTools.logFootsteps(plannerOutput,
                                                perceptionDataLogger,
                                                sensorTransform,
@@ -92,7 +92,7 @@ public class TerrainPlanningDatasetManager
                                           heightMap,
                                           PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
 
-      perceptionDataLogger.printStats();
+      //perceptionDataLogger.printStats();
    }
 
    public void loadRequests(File directory, int totalLogs)
