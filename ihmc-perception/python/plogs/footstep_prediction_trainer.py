@@ -84,7 +84,7 @@ class FootstepDataset(Dataset):
                 
                 # set zero footsteps to last two steps in plan
                 if count_footsteps < self.n_steps:
-                    print("Shapes: ", count_footsteps, self.n_steps, last_two_step_positions.shape, last_two_step_orientations.shape)
+                    # print("Shapes: ", count_footsteps, self.n_steps, last_two_step_positions.shape, last_two_step_orientations.shape)
                     self.footstep_plan_positions[count_footsteps:self.n_steps, :] = np.tile(last_two_step_positions, (self.n_steps - count_footsteps, 1))[:self.n_steps - count_footsteps, :]
                     self.footstep_plan_orientations[count_footsteps:self.n_steps, :] = np.tile(last_two_step_orientations, (self.n_steps - count_footsteps, 1))[:self.n_steps - count_footsteps, :]
 
@@ -347,6 +347,7 @@ def load_validate(val_dataset):
             predict_output = model(height_map_input, linear_input)
 
             visualize_output(height_map_input, linear_input, predict_output, i, val_dataset)
+            visualize_output(height_map_input, linear_input, target_output, i, val_dataset)
 
             
 def visualize_output(height_map_input, linear_input, final_output, i, val_dataset, n_steps=10):
@@ -378,20 +379,20 @@ def visualize_output(height_map_input, linear_input, final_output, i, val_datase
 
 def load_dataset(validation_split):
     home = os.path.expanduser('~')
-    path = home + '/.ihmc/logs/perception/'
+    path = home + '/.ihmc/logs/planning-datasets/'
     
-    new_format_files = ['20231018_135001_PerceptionLog.hdf5', 
-                        '20231018_143108_PerceptionLog.hdf5']
+    # new_format_files = ['20231018_135001_PerceptionLog.hdf5', 
+    #                     '20231018_143108_PerceptionLog.hdf5']
     
     files = \
     [
-        # '20231015_183228_PerceptionLog.hdf5', 
-        # '20231015_234600_PerceptionLog.hdf5', 
-        # '20231016_025456_PerceptionLog.hdf5',
-        # '20231023_131517_PerceptionLog.hdf5',
-        # '20231023_160823_PerceptionLog.hdf5',
-        '20231028_171524_PerceptionLog.hdf5',
+        "20240212_020130_AStarDataset_Generated.hdf5",      
+        "20240212_031849_AStarDataset_Generated_200.hdf5",  
+        "20240212_043439_AStarDataset_Generated_400.hdf5",
+        "20240212_023954_AStarDataset_Generated_100.hdf5",
+        "20240212_035650_AStarDataset_Generated_300.hdf5"
     ]
+
     
     datasets = []
 
@@ -422,7 +423,7 @@ if __name__ == "__main__":
     # load dataset
     train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
-    train = True
+    train = False
     visualize_raw = False
 
     if visualize_raw:
@@ -431,7 +432,7 @@ if __name__ == "__main__":
 
     if train:
         # train and store model
-        criterion=torch.nn.L1Loss()
+        criterion=torch.nn.MSELoss()
         train_store(train_dataset, val_dataset, batch_size=10, epochs=30, criterion=criterion)
 
     else:
