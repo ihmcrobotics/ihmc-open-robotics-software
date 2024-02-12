@@ -101,15 +101,16 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final YoMatrix residual;
 
-   private final AlphaFilteredYoMatrix bias;
-   private final DMatrixRMaj biasVector;
+   private final YoBoolean calculateBias;
+   private final InertialBiasCompensator biasCompensator;
+   private final YoMatrix bias;
+   private final YoBoolean excludeBias;
    private final YoBoolean eraseBias;
 
    private final InertialEstimationParameters parameters;
    private final double postProcessingAlpha;
    private final double estimateFilteringAlpha;
    private final double accelerationCalculationAlpha;
-   private final double biasCompensationAlpha;
 
    private final YoDouble normalizedInnovation;
 
@@ -268,9 +269,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       String[] rowNames = getRowNamesForJoints(nDoFs);
       residual = new YoMatrix("residual", nDoFs, 1, rowNames, registry);
 
-      biasCompensationAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForBiasCompensation(), dt);
-      bias = new AlphaFilteredYoMatrix("bias", biasCompensationAlpha, nDoFs, 1, rowNames, null, registry);
-      biasVector = new DMatrixRMaj(nDoFs, 1);
+      int windowSize = (int) (5 / dt);  // TODO: make parameter
+      calculateBias = new YoBoolean("calculateBias", registry);
+      biasCompensator = new InertialBiasCompensator(nDoFs, windowSize, getRowNamesForJoints(nDoFs), registry);
+      bias = new YoMatrix("bias", nDoFs, 1, rowNames, null, registry);
+      excludeBias = new YoBoolean("excludeBias", registry);
+      excludeBias.set(false);
       eraseBias = new YoBoolean("eraseBias", registry);
       eraseBias.set(false);
 
@@ -311,7 +315,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       residual.zero();
       bias.zero();
-      biasVector.zero();
    }
 
    public void resetConfig()
@@ -349,6 +352,27 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          resetConfig.set(false);
       }
 
+      if (calculateBias.getValue())
+      {
+         if (biasCompensator.isWindowFilled())
+         {
+            biasCompensator.calculateBias();
+            calculateBias.set(false);
+         }
+         else
+         {
+            biasCompensator.update(residual);
+            biasCompensator.incrementCounter();
+         }
+      }
+
+      if (eraseBias.getValue())
+      {
+         biasCompensator.reset();
+         calculateBias.set(false);
+         eraseBias.set(false);
+      }
+
       if (enableFilter.getValue())
       {
          updateFilterCovariances();
@@ -373,20 +397,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          inertialKalmanFilter.setRegressor(regressor);
          inertialKalmanFilter.setContactJacobians(fullContactJacobians);
          inertialKalmanFilter.setContactWrenches(contactWrenches);
-         inertialKalmanFilter.setBias(biasVector);
-//         CommonOps_DDRM.subtractEquals(wholeSystemTorques, biasVector);  // subtract bias to result in zero mean noise
+
+         if (excludeBias.getValue())
+            inertialKalmanFilter.setBias(biasCompensator.getZero());
+         else
+            inertialKalmanFilter.setBias(biasCompensator.getBias());
+
          inertialKalmanFilterEstimate.set(inertialKalmanFilter.calculateEstimate(wholeSystemTorques));
          inertialKalmanFilter.getMeasurementResidual(residual);
-         if (eraseBias.getValue())
-         {
-            bias.zero();
-            biasVector.zero();
-         }
-         else
-         {
-            bias.setAndSolve(residual);
-            biasVector.set(bias);
-         }
 
          filteredEstimate.setAndSolve(inertialKalmanFilterEstimate);
          doubleFilteredEstimate.setAndSolve(filteredEstimate);
