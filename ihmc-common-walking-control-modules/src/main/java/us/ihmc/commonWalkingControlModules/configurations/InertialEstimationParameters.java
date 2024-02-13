@@ -1,12 +1,15 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
 import org.ejml.data.DMatrixRMaj;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.InertialParameterManagerFactory;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 
 import java.util.Set;
 
 public interface InertialEstimationParameters
 {
+   public abstract InertialParameterManagerFactory.EstimatorType getTypeOfEstimatorToUse();
+
    public abstract Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] getParametersToEstimate();
 
    public abstract DMatrixRMaj getURDFParameters(Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets);
