@@ -135,6 +135,7 @@ public class PerceptionAndAutonomyProcess
 
    private final IterativeClosestPointManager icpManager;
    private final YOLOv8IterativeClosestPointManager yoloICPManager;
+   private ROS2DemandGraphNode yoloICPDemandNode;
 
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
    private ReferenceFrameLibrary behaviorTreeReferenceFrameLibrary;
@@ -282,6 +283,7 @@ public class PerceptionAndAutonomyProcess
       blackflyImageDemandNodes.forEach(ROS2DemandGraphNode::destroy);
       arUcoDetectionDemandNode.destroy();
       centerposeDemandNode.destroy();
+      yoloICPDemandNode.destroy();
 
       if (zedHeartbeat != null)
          zedHeartbeat.destroy();
@@ -310,7 +312,8 @@ public class PerceptionAndAutonomyProcess
          if (zedDepthImage != null && !zedDepthImage.isEmpty() && icpManager.isDemanded())
             icpManager.setEnvironmentPointCloud(zedDepthImage);
 
-         if (zedDepthImage != null && !zedDepthImage.isEmpty() && zedColorImages.get(RobotSide.LEFT) != null && !zedColorImages.get(RobotSide.LEFT).isEmpty())
+         if (yoloICPDemandNode.isDemanded() && zedDepthImage != null && !zedDepthImage.isEmpty() && zedColorImages.get(RobotSide.LEFT) != null
+             && !zedColorImages.get(RobotSide.LEFT).isEmpty())
             yoloICPManager.setDetectionImages(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
 
          zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
@@ -422,7 +425,8 @@ public class PerceptionAndAutonomyProcess
       if (centerposeDemandNode.isDemanded())
          centerposeDetectionManager.updateSceneGraph(sceneGraph);
 
-      yoloICPManager.updateSceneGraph(sceneGraph);
+      if (yoloICPDemandNode.isDemanded())
+         yoloICPManager.updateSceneGraph(sceneGraph);
 
       // Update general stuff
       sceneGraph.updateOnRobotOnly(robotPelvisFrameSupplier.get());
@@ -474,6 +478,7 @@ public class PerceptionAndAutonomyProcess
 
       centerposeDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_CENTERPOSE);
 
+      yoloICPDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_ICP);
       // build the graph
       zedDepthDemandNode.addDependents(zedPointCloudDemandNode);
       zedColorDemandNode.addDependents(zedPointCloudDemandNode, centerposeDemandNode);
