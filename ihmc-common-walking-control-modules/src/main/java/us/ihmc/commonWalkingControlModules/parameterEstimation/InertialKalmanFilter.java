@@ -39,10 +39,10 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    /** This is used as a container to build up a measurement from different contributions, see {@link #measurementModel(DMatrixRMaj)}. */
    private final DMatrixRMaj measurement;
 
-   private final AlphaFilteredYoMatrix filteredWholeSystemTorques;
-   private final AlphaFilteredYoMatrix doubleFilteredWholeSystemTorques;
-   private final AlphaFilteredYoMatrix filteredMeasurement;
-   private final AlphaFilteredYoMatrix doubleFilteredMeasurement;
+   protected final AlphaFilteredYoMatrix filteredWholeSystemTorques;
+   protected final AlphaFilteredYoMatrix doubleFilteredWholeSystemTorques;
+   protected final AlphaFilteredYoMatrix filteredMeasurement;
+   protected final AlphaFilteredYoMatrix doubleFilteredMeasurement;
 
    /** MORE_YOVARIABLES **/
    private YoMatrix yoTorqueFromNominal = null;
@@ -161,12 +161,23 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    @Override
    public DMatrixRMaj calculateEstimate(DMatrix wholeSystemTorques)
    {
-      filter(wholeSystemTorques, filteredWholeSystemTorques);
-      filter(filteredWholeSystemTorques, doubleFilteredWholeSystemTorques);
+      filterTorques(wholeSystemTorques);
       return super.calculateEstimate(doubleFilteredWholeSystemTorques);
    }
 
-   public void filter(DMatrix matrixToFilter, AlphaFilteredYoMatrix filterContainer)
+   @Override
+   protected void updateStep(DMatrix actual)
+   {
+      super.updateStep(actual);
+   }
+
+   protected void filterTorques(DMatrix torques)
+   {
+      filter(torques, filteredWholeSystemTorques);
+      filter(filteredWholeSystemTorques, doubleFilteredWholeSystemTorques);
+   }
+
+   private void filter(DMatrix matrixToFilter, AlphaFilteredYoMatrix filterContainer)
    {
       filterContainer.setAndSolve(matrixToFilter);
    }

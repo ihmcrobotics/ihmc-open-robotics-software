@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.parameterEstimation;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.InertialParameterManagerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -41,6 +42,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoBoolean resetFilter;
    private final YoBoolean resetConfig;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+   private final int nDoFs;
+   private final int nMeasurements;
 
    private final FullHumanoidRobotModel actualRobotModel;
    private final RigidBodyReadOnly[] actualModelBodies;
@@ -86,8 +90,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final DMatrixRMaj[] regressorBlocks;
    private final DMatrixRMaj regressor;
 
-   private final InertialKalmanFilter inertialKalmanFilter;
-   private final YoMatrix inertialKalmanFilterEstimate;
+   private InertialKalmanFilter filter;
+   private final YoMatrix estimate;
 
    private final AlphaFilteredYoMatrix filteredEstimate;
    private final AlphaFilteredYoMatrix doubleFilteredEstimate;
@@ -114,7 +118,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final YoDouble normalizedInnovation;
 
-   public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
+   private final ExecutionTimer regressorTimer = new ExecutionTimer("RegressorTimer", registry);
+
+   public InertialParameterManager(InertialParameterManagerFactory.EstimatorType type, HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       this.parameters = inertialEstimationParameters;
@@ -156,11 +162,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       regressorCalculator = new JointTorqueRegressorCalculator(regressorRobotModel.getElevator());
       regressorCalculator.setGravitationalAcceleration(-toolbox.getGravityZ());
 
-      int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(estimateRobotModel.getRootJoint().subtreeArray());
       int nOneDoFJoints = estimateRobotModel.getOneDoFJoints().length;
+      nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(estimateRobotModel.getRootJoint().subtreeArray());
       basisSets = parameters.getParametersToEstimate();
       int[] sizes = RegressorTools.sizePartitions(basisSets);
-      int estimateSize = sizes[0];
+      nMeasurements = sizes[0];
       int nNonEmptyBasisSets = 0;
       for (Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption> basisSet : basisSets)
          if (!basisSet.isEmpty())
@@ -169,7 +175,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       regressorBlocks = new DMatrixRMaj[nNonEmptyBasisSets];
       for (int i = 0; i < nNonEmptyBasisSets; i++)
          regressorBlocks[i] = new DMatrixRMaj(nDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
-      regressor = new DMatrixRMaj(nDoFs, estimateSize);
+      regressor = new DMatrixRMaj(nDoFs, nMeasurements);
 
       zeroInverseDynamicsParameters(inverseDynamicsModelBodies, basisSets);
 
@@ -227,29 +233,22 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       postProcessingAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt);
 
-      inertialKalmanFilter = new InertialKalmanFilter(estimateRobotModel,
-                                                      basisSets,
-                                                      parameters.getURDFParameters(basisSets),
-                                                      CommonOps_DDRM.identity(estimateSize),
-                                                      CommonOps_DDRM.identity(estimateSize),
-                                                      CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
-                                                      registry);
-      inertialKalmanFilterEstimate = new YoMatrix("inertialParameterEstimate",
-                                                  estimateSize,
-                                                  1,
-                                                  getRowNamesForEstimates(basisSets, estimateModelBodies),
-                                                  null,
-                                                  registry);
+      estimate = new YoMatrix("inertialParameterEstimate",
+                              nMeasurements,
+                              1,
+                              getRowNamesForEstimates(basisSets, estimateModelBodies),
+                              null,
+                              registry);
 
       estimateFilteringAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(), dt);
       filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate", estimateFilteringAlpha,
-                                                   estimateSize,
+                                                   nMeasurements,
                                                    1,
                                                    getRowNamesForEstimates(basisSets, estimateModelBodies),
                                                    null,
                                                    registry);
       doubleFilteredEstimate = new AlphaFilteredYoMatrix("doubleFilteredInertialParameterEstimate", estimateFilteringAlpha,
-                                                         estimateSize,
+                                                         nMeasurements,
                                                          1,
                                                          getRowNamesForEstimates(basisSets, estimateModelBodies),
                                                          null,
@@ -280,9 +279,32 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       normalizedInnovation = new YoDouble("normalizedInnovation", registry);
       normalizedInnovation.set(0.0);
+
+      // Construct the type of filter used based on enum value
+      setFilter(type);
    }
 
-   private final ExecutionTimer regressorTimer = new ExecutionTimer("RegressorTimer", registry);
+   private void setFilter(InertialParameterManagerFactory.EstimatorType type)
+   {
+      switch (type)
+      {
+         case KF -> filter = new InertialKalmanFilter(estimateRobotModel,
+                                                      basisSets,
+                                                      parameters.getURDFParameters(basisSets),
+                                                      CommonOps_DDRM.identity(nMeasurements),
+                                                      CommonOps_DDRM.identity(nMeasurements),
+                                                      CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
+                                                      registry);
+         case CONSTRAINED_EKF -> filter = new InertialConstrainedKalmanFilter(estimateRobotModel,
+                                                                              basisSets,
+                                                                              parameters.getURDFParameters(basisSets),
+                                                                              CommonOps_DDRM.identity(nMeasurements),
+                                                                              CommonOps_DDRM.identity(nMeasurements),
+                                                                              CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
+                                                                              registry);
+         case PHYSICALLY_CONSISTENT_EKF -> throw new UnsupportedOperationException("Not yet implemented");
+      }
+   }
 
    public void reset()
    {
@@ -309,7 +331,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          jointAccelerations[i].reset();
       }
 
-      inertialKalmanFilterEstimate.zero();
+      estimate.zero();
       filteredEstimate.zero();
       doubleFilteredEstimate.zero();
 
@@ -325,7 +347,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       armsMeasurementCovariance.set(parameters.getArmMeasurementCovariance());
       spineMeasurementCovariance.set(parameters.getSpineMeasurementCovariance());
 
-      inertialKalmanFilter.setPostProcessingAlpha(postProcessingAlpha);
+      filter.setPostProcessingAlpha(postProcessingAlpha);
       filteredEstimate.setAlpha(estimateFilteringAlpha);
       doubleFilteredEstimate.setAlpha(estimateFilteringAlpha);
 
@@ -392,24 +414,23 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
             regressorBlocks[i].set(regressorCalculator.getJointTorqueRegressorMatrixBlock(regressorModelBodiesToProcess[i]));
          packRegressorFromBlocks(regressorBlocks, basisSets, regressor);
 
-         // KF stuff
-         inertialKalmanFilter.setTorqueFromNominal(inverseDynamicsCalculator.getJointTauMatrix());
-         inertialKalmanFilter.setRegressor(regressor);
-         inertialKalmanFilter.setContactJacobians(fullContactJacobians);
-         inertialKalmanFilter.setContactWrenches(contactWrenches);
+         filter.setTorqueFromNominal(inverseDynamicsCalculator.getJointTauMatrix());
+         filter.setRegressor(regressor);
+         filter.setContactJacobians(fullContactJacobians);
+         filter.setContactWrenches(contactWrenches);
 
          if (excludeBias.getValue())
-            inertialKalmanFilter.setBias(biasCompensator.getZero());
+            filter.setBias(biasCompensator.getZero());
          else
-            inertialKalmanFilter.setBias(biasCompensator.getBias());
+            filter.setBias(biasCompensator.getBias());
 
-         inertialKalmanFilterEstimate.set(inertialKalmanFilter.calculateEstimate(wholeSystemTorques));
-         inertialKalmanFilter.getMeasurementResidual(residual);
+         estimate.set(filter.calculateEstimate(wholeSystemTorques));
+         filter.getMeasurementResidual(residual);
 
-         filteredEstimate.setAndSolve(inertialKalmanFilterEstimate);
+         filteredEstimate.setAndSolve(estimate);
          doubleFilteredEstimate.setAndSolve(filteredEstimate);
 
-         normalizedInnovation.set(inertialKalmanFilter.calculateNormalizedInnovation());
+         normalizedInnovation.set(filter.calculateNormalizedInnovation());
 
          // Pack smoothed estimate back into estimate robot bodies
          RegressorTools.packRigidBodies(basisSets, doubleFilteredEstimate, estimateModelBodies);
@@ -423,8 +444,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private void updateFilterCovariances()
    {
       // Set diagonal of process covariance
-      CommonOps_DDRM.setIdentity(inertialKalmanFilter.getProcessCovariance());
-      CommonOps_DDRM.scale(processCovariance.getValue(), inertialKalmanFilter.getProcessCovariance());
+      CommonOps_DDRM.setIdentity(filter.getProcessCovariance());
+      CommonOps_DDRM.scale(processCovariance.getValue(), filter.getProcessCovariance());
 
       // Set diagonal entries of measurement covariance according to the part of the body
       for (int i = 0; i < actualModelJoints.size(); ++i)
@@ -433,13 +454,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          int[] indices = jointIndexHandler.getJointIndices(joint);
 
          if (joint.getName().contains("PELVIS"))
-            MatrixMissingTools.setMatrixDiagonal(indices, floatingBaseMeasurementCovariance.getValue(), inertialKalmanFilter.getMeasurementCovariance());
+            MatrixMissingTools.setMatrixDiagonal(indices, floatingBaseMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
          else if (joint.getName().contains("HIP") || joint.getName().contains("KNEE") || joint.getName().contains("ANKLE"))
-            MatrixMissingTools.setMatrixDiagonal(indices, legsMeasurementCovariance.getValue(), inertialKalmanFilter.getMeasurementCovariance());
+            MatrixMissingTools.setMatrixDiagonal(indices, legsMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
          else if (joint.getName().contains("SHOULDER") || joint.getName().contains("ELBOW") || joint.getName().contains("WRIST"))
-            MatrixMissingTools.setMatrixDiagonal(indices, armsMeasurementCovariance.getValue(), inertialKalmanFilter.getMeasurementCovariance());
+            MatrixMissingTools.setMatrixDiagonal(indices, armsMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
          else if (joint.getName().contains("SPINE"))
-            MatrixMissingTools.setMatrixDiagonal(indices, spineMeasurementCovariance.getValue(), inertialKalmanFilter.getMeasurementCovariance());
+            MatrixMissingTools.setMatrixDiagonal(indices, spineMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
          else
             LogTools.info("Joint " + joint.getName() + " not found for measurement covariance");
       }
