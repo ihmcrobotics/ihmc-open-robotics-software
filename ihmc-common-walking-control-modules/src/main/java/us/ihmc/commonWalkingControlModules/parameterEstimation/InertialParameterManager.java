@@ -269,9 +269,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       String[] rowNames = getRowNamesForJoints(nDoFs);
       residual = new YoMatrix("residual", nDoFs, 1, rowNames, registry);
 
-      int windowSize = (int) (5 / dt);  // TODO: make parameter
+      int windowSizeInTicks = (int) (parameters.getBiasCompensationWindowSizeInSeconds() / dt);
       calculateBias = new YoBoolean("calculateBias", registry);
-      biasCompensator = new InertialBiasCompensator(nDoFs, windowSize, getRowNamesForJoints(nDoFs), registry);
+      biasCompensator = new InertialBiasCompensator(nDoFs, windowSizeInTicks, getRowNamesForJoints(nDoFs), registry);
       bias = new YoMatrix("bias", nDoFs, 1, rowNames, null, registry);
       excludeBias = new YoBoolean("excludeBias", registry);
       excludeBias.set(false);
