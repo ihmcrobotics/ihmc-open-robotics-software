@@ -63,16 +63,17 @@ public class YOLOv8IterativeClosestPointNodeCombo
     * Should be called in the scene graph update loop.
     *
     * @param sceneGraph the scene graph
-    * @param detection detection associated with the node/ICP worker (only used when creating)
     * @return true if the node was normally updated, false if the node was removed from the scene graph.
     */
-   public boolean updateSceneGraph(ROS2SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, YOLOv8Detection detection)
+   public boolean updateSceneGraph(ROS2SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
       if (sceneGraph.getIDToNodeMap().get(nodeID) != null)
          node = (YOLOv8IterativeClosestPointNode) sceneGraph.getIDToNodeMap().get(nodeID);
 
       if (selfDestruct && node != null)
       {
+         System.out.println("Destroying in updateSceneGraph()");
+         System.out.flush();
          node.setCurrentlyDetected(false);
          modificationQueue.accept(new SceneGraphClearSubtree(node));
          modificationQueue.accept(new SceneGraphNodeRemoval(node, sceneGraph));
@@ -80,7 +81,7 @@ public class YOLOv8IterativeClosestPointNodeCombo
       }
       else if (!isCreated)
       {
-         create(detection, sceneGraph, modificationQueue);
+         create(sceneGraph, modificationQueue);
          isCreated = true;
       }
       else
@@ -103,6 +104,8 @@ public class YOLOv8IterativeClosestPointNodeCombo
 
       if (!detectionFilter.isDetected())
       {
+         System.out.println("Destroying in destroy()");
+         System.out.flush();
          selfDestruct = true;
          extractor.destroy();
          segmenter.destroy();
@@ -112,14 +115,14 @@ public class YOLOv8IterativeClosestPointNodeCombo
       return false;
    }
 
-   public void runICP(YOLOv8Detection newDetection, RawImage depthImage, RawImage mask)
+   public void runICP(RawImage depthImage, RawImage mask)
    {
       depthImage.get();
       mask.get();
 
       detectionIsRunning = true;
 
-      if (!selfDestruct)
+      if (isCreated && !selfDestruct)
       {
          if (node.isRunningICP())
          {
@@ -138,12 +141,15 @@ public class YOLOv8IterativeClosestPointNodeCombo
             segmentedDepth.release();
             detectionFilter.registerDetection();
          }
-
-         lastDetection = newDetection;
       }
 
       depthImage.release();
       mask.release();
+   }
+
+   public void setDetection(YOLOv8Detection detection)
+   {
+      lastDetection = detection;
    }
 
    public YOLOv8Detection getLastDetection()
@@ -156,36 +162,37 @@ public class YOLOv8IterativeClosestPointNodeCombo
       return distanceThreshold;
    }
 
-   private void create(YOLOv8Detection detection, ROS2SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
+   private void create(ROS2SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
-      lastDetection = detection;
+      if (lastDetection != null)
+      {
+         String pointCloudFileName = lastDetection.objectClass().getPointCloudFileName();
+         if (pointCloudFileName == null)
+            throw new NullPointerException("We can't run ICP on this object yet because we don't have a model point cloud file.");
 
-      String pointCloudFileName = detection.objectClass().getPointCloudFileName();
-      if (pointCloudFileName == null)
-         throw new NullPointerException("We can't run ICP on this object yet because we don't have a model point cloud file.");
+         WorkspaceResourceFile pointCloudFile = new WorkspaceResourceFile(pointCloudDirectory, pointCloudFileName);
+         icpWorker = new IterativeClosestPointWorker(lastDetection.objectClass().getPrimitiveApproximation(),
+                                                     new Vector3D(1.0, 1.0, 1.0),
+                                                     new Vector3D(1.0, 1.0, 1.0),
+                                                     1000,
+                                                     1000,
+                                                     new Pose3D(),
+                                                     new Random(System.nanoTime()));
 
-      WorkspaceResourceFile pointCloudFile = new WorkspaceResourceFile(pointCloudDirectory, pointCloudFileName);
-      icpWorker = new IterativeClosestPointWorker(detection.objectClass().getPrimitiveApproximation(),
-                                                  new Vector3D(1.0, 1.0, 1.0),
-                                                  new Vector3D(1.0, 1.0, 1.0),
-                                                  1000,
-                                                  1000,
-                                                  new Pose3D(),
-                                                  new Random(System.nanoTime()));
+         icpWorker.useProvidedTargetPoint(false);
+         icpWorker.setSegmentSphereRadius(Double.MAX_VALUE);
+         icpWorker.setDetectionShape(PrimitiveRigidBodyShape.CUSTOM, pointCloudFile.getFilesystemFile().toFile());
 
-      icpWorker.useProvidedTargetPoint(false);
-      icpWorker.setSegmentSphereRadius(Double.MAX_VALUE);
-      icpWorker.setDetectionShape(PrimitiveRigidBodyShape.CUSTOM, pointCloudFile.getFilesystemFile().toFile());
+         nodeID = sceneGraph.getNextID().getAndIncrement();
+         icpWorker.setSceneNodeID(nodeID);
 
-      nodeID = sceneGraph.getNextID().getAndIncrement();
-      icpWorker.setSceneNodeID(nodeID);
+         String nodeName = lastDetection.objectClass().toString().substring(0, 1).toUpperCase() + lastDetection.objectClass().toString().substring(1) + " " + nodeID;
+         node = new YOLOv8IterativeClosestPointNode(nodeID, nodeName, 1, 2.0, 1, 3000.0, true, distanceThreshold);
+         modificationQueue.accept(new SceneGraphNodeAddition(node, sceneGraph.getRootNode()));
+         sceneGraph.getIDToNodeMap().put(nodeID, node);
+         distanceThreshold = node.getBaseDistanceThreshold();
 
-      String nodeName = detection.objectClass().toString().substring(0, 1).toUpperCase() + detection.objectClass().toString().substring(1) + " " + nodeID;
-      node = new YOLOv8IterativeClosestPointNode(nodeID, nodeName, 1, 2.0, 1, 3000.0, true, distanceThreshold);
-      modificationQueue.accept(new SceneGraphNodeAddition(node, sceneGraph.getRootNode()));
-      sceneGraph.getIDToNodeMap().put(nodeID, node);
-      distanceThreshold = node.getBaseDistanceThreshold();
-
-      detectionFilter.registerDetection();
+         detectionFilter.registerDetection();
+      }
    }
 }
