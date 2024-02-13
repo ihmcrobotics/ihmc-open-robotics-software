@@ -118,6 +118,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final YoDouble normalizedInnovation;
 
+   private final ExecutionTimer regressorTimer = new ExecutionTimer("RegressorTimer", registry);
+
    public InertialParameterManager(InertialParameterManagerFactory.EstimatorType type, HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
@@ -281,8 +283,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       // Construct the type of filter used based on enum value
       setFilter(type);
    }
-
-   private final ExecutionTimer regressorTimer = new ExecutionTimer("RegressorTimer", registry);
 
    private void setFilter(InertialParameterManagerFactory.EstimatorType type)
    {
