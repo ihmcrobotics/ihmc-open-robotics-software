@@ -114,6 +114,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final YoDouble normalizedInnovation;
 
+   private final InertialConstrainedKalmanFilter constrainedKalmanFilter;
+
    public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
@@ -280,6 +282,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       normalizedInnovation = new YoDouble("normalizedInnovation", registry);
       normalizedInnovation.set(0.0);
+
+      constrainedKalmanFilter = new InertialConstrainedKalmanFilter(estimateRobotModel,
+                                                                    basisSets,
+                                                                    parameters.getURDFParameters(basisSets),
+                                                                    CommonOps_DDRM.identity(estimateSize),
+                                                                    CommonOps_DDRM.identity(estimateSize),
+                                                                    CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
+                                                                    registry);
    }
 
    private final ExecutionTimer regressorTimer = new ExecutionTimer("RegressorTimer", registry);
@@ -393,23 +403,42 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          packRegressorFromBlocks(regressorBlocks, basisSets, regressor);
 
          // KF stuff
-         inertialKalmanFilter.setTorqueFromNominal(inverseDynamicsCalculator.getJointTauMatrix());
-         inertialKalmanFilter.setRegressor(regressor);
-         inertialKalmanFilter.setContactJacobians(fullContactJacobians);
-         inertialKalmanFilter.setContactWrenches(contactWrenches);
+//         inertialKalmanFilter.setTorqueFromNominal(inverseDynamicsCalculator.getJointTauMatrix());
+//         inertialKalmanFilter.setRegressor(regressor);
+//         inertialKalmanFilter.setContactJacobians(fullContactJacobians);
+//         inertialKalmanFilter.setContactWrenches(contactWrenches);
+//
+//         if (excludeBias.getValue())
+//            inertialKalmanFilter.setBias(biasCompensator.getZero());
+//         else
+//            inertialKalmanFilter.setBias(biasCompensator.getBias());
+//
+//         inertialKalmanFilterEstimate.set(inertialKalmanFilter.calculateEstimate(wholeSystemTorques));
+//         inertialKalmanFilter.getMeasurementResidual(residual);
+//
+//         filteredEstimate.setAndSolve(inertialKalmanFilterEstimate);
+//         doubleFilteredEstimate.setAndSolve(filteredEstimate);
+//
+//         normalizedInnovation.set(inertialKalmanFilter.calculateNormalizedInnovation());
+
+         // Constrained KF stuff
+         constrainedKalmanFilter.setTorqueFromNominal(inverseDynamicsCalculator.getJointTauMatrix());
+         constrainedKalmanFilter.setRegressor(regressor);
+         constrainedKalmanFilter.setContactJacobians(fullContactJacobians);
+         constrainedKalmanFilter.setContactWrenches(contactWrenches);
 
          if (excludeBias.getValue())
-            inertialKalmanFilter.setBias(biasCompensator.getZero());
+            constrainedKalmanFilter.setBias(biasCompensator.getZero());
          else
-            inertialKalmanFilter.setBias(biasCompensator.getBias());
+            constrainedKalmanFilter.setBias(biasCompensator.getBias());
 
-         inertialKalmanFilterEstimate.set(inertialKalmanFilter.calculateEstimate(wholeSystemTorques));
-         inertialKalmanFilter.getMeasurementResidual(residual);
+         inertialKalmanFilterEstimate.set(constrainedKalmanFilter.calculateEstimate(wholeSystemTorques));
+         constrainedKalmanFilter.getMeasurementResidual(residual);
 
          filteredEstimate.setAndSolve(inertialKalmanFilterEstimate);
          doubleFilteredEstimate.setAndSolve(filteredEstimate);
 
-         normalizedInnovation.set(inertialKalmanFilter.calculateNormalizedInnovation());
+         normalizedInnovation.set(constrainedKalmanFilter.calculateNormalizedInnovation());
 
          // Pack smoothed estimate back into estimate robot bodies
          RegressorTools.packRigidBodies(basisSets, doubleFilteredEstimate, estimateModelBodies);
@@ -423,8 +452,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private void updateFilterCovariances()
    {
       // Set diagonal of process covariance
-      CommonOps_DDRM.setIdentity(inertialKalmanFilter.getProcessCovariance());
-      CommonOps_DDRM.scale(processCovariance.getValue(), inertialKalmanFilter.getProcessCovariance());
+      CommonOps_DDRM.setIdentity(constrainedKalmanFilter.getProcessCovariance());
+      CommonOps_DDRM.scale(processCovariance.getValue(), constrainedKalmanFilter.getProcessCovariance());
 
       // Set diagonal entries of measurement covariance according to the part of the body
       for (int i = 0; i < actualModelJoints.size(); ++i)
@@ -433,13 +462,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          int[] indices = jointIndexHandler.getJointIndices(joint);
 
          if (joint.getName().contains("PELVIS"))
-            MatrixMissingTools.setMatrixDiagonal(indices, floatingBaseMeasurementCovariance.getValue(), inertialKalmanFilter.getMeasurementCovariance());
+            MatrixMissingTools.setMatrixDiagonal(indices, floatingBaseMeasurementCovariance.getValue(), constrainedKalmanFilter.getMeasurementCovariance());
          else if (joint.getName().contains("HIP") || joint.getName().contains("KNEE") || joint.getName().contains("ANKLE"))
-            MatrixMissingTools.setMatrixDiagonal(indices, legsMeasurementCovariance.getValue(), inertialKalmanFilter.getMeasurementCovariance());
+            MatrixMissingTools.setMatrixDiagonal(indices, legsMeasurementCovariance.getValue(), constrainedKalmanFilter.getMeasurementCovariance());
          else if (joint.getName().contains("SHOULDER") || joint.getName().contains("ELBOW") || joint.getName().contains("WRIST"))
-            MatrixMissingTools.setMatrixDiagonal(indices, armsMeasurementCovariance.getValue(), inertialKalmanFilter.getMeasurementCovariance());
+            MatrixMissingTools.setMatrixDiagonal(indices, armsMeasurementCovariance.getValue(), constrainedKalmanFilter.getMeasurementCovariance());
          else if (joint.getName().contains("SPINE"))
-            MatrixMissingTools.setMatrixDiagonal(indices, spineMeasurementCovariance.getValue(), inertialKalmanFilter.getMeasurementCovariance());
+            MatrixMissingTools.setMatrixDiagonal(indices, spineMeasurementCovariance.getValue(), constrainedKalmanFilter.getMeasurementCovariance());
          else
             LogTools.info("Joint " + joint.getName() + " not found for measurement covariance");
       }
