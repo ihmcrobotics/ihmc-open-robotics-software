@@ -372,31 +372,45 @@ def visualize_output(height_map_input, linear_input, final_output, i, val_datase
     goal_pose = linear_input[3:6]
     start_side = linear_input[6]
     plan_poses = output[0:4*n_steps].reshape((n_steps, 4))[:, 0:3]
+    plan_sides = output[0:4*n_steps].reshape((n_steps, 4))[:, 3]
+
+    print("Linear Input: ", linear_input)
+    print("Side of First Footstep: ", output)
 
     # visualize plan
-    visualize_plan(height_map, plan_poses, 
-                    start_pose, goal_pose)
+    visualize_plan(height_map, plan_poses, plan_sides, 
+                    start_pose, goal_pose, start_side)
 
 def load_dataset(validation_split):
     home = os.path.expanduser('~')
-    path = home + '/.ihmc/logs/planning-datasets/'
+    path = home + '/Downloads/Planning_Datasets/'
     
     # new_format_files = ['20231018_135001_PerceptionLog.hdf5', 
     #                     '20231018_143108_PerceptionLog.hdf5']
     
-    files = \
-    [
-        "20240212_020130_AStarDataset_Generated.hdf5",      
-        "20240212_031849_AStarDataset_Generated_200.hdf5",  
-        "20240212_043439_AStarDataset_Generated_400.hdf5",
-        "20240212_023954_AStarDataset_Generated_100.hdf5",
-        "20240212_035650_AStarDataset_Generated_300.hdf5"
-    ]
+    # files = \
+    # [
+    #     "20240212_020130_AStarDataset_Generated.hdf5",      
+    #     "20240212_031849_AStarDataset_Generated_200.hdf5",  
+    #     "20240212_043439_AStarDataset_Generated_400.hdf5",
+    #     "20240212_023954_AStarDataset_Generated_100.hdf5",
+    #     "20240212_035650_AStarDataset_Generated_300.hdf5"
+    # ]
+
+    files = os.listdir(path)
+
+    # filter by no "MCFP" in file name
+    files = [file for file in files if "MCFP" in file]
+
+    files = files[:1]
 
     
     datasets = []
 
     for file in files:
+
+        print("Loading File: ", file)
+
         data = h5py.File(path + file, 'r')
         dataset = FootstepDataset(data, file)
         datasets.append(dataset)
@@ -416,6 +430,7 @@ def visualize_dataset(dataset):
         linear_input = linear_input.to(device)
         target_output = target_output.to(device)
 
+
         visualize_output(height_map_input, linear_input, target_output, i, val_dataset)
 
 if __name__ == "__main__":
@@ -424,7 +439,7 @@ if __name__ == "__main__":
     train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
     train = False
-    visualize_raw = False
+    visualize_raw = True
 
     if visualize_raw:
         visualize_dataset(train_dataset)    
