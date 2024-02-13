@@ -198,10 +198,10 @@ class FootstepPredictor(Module):
         # fully connected layers
         self.fc0 = torch.nn.Linear(input_size, 64)
         self.bn0 = torch.nn.BatchNorm1d(64)
-        self.dropout0 = torch.nn.Dropout(0.5)
+        self.dropout0 = torch.nn.Dropout(0.1)
         self.fc1 = torch.nn.Linear(128 * 6 * 6 + 64, 2048)
         self.bn1 = torch.nn.BatchNorm1d(2048)
-        self.dropout1 = torch.nn.Dropout(0.5)
+        self.dropout1 = torch.nn.Dropout(0.1)
         self.fc2 = torch.nn.Linear(2048, 1024)
         self.bn2 = torch.nn.BatchNorm1d(1024)
         self.fc3 = torch.nn.Linear(1024, 512)
@@ -432,7 +432,7 @@ if __name__ == "__main__":
 
     if train:
         # train and store model
-        criterion=torch.nn.MSELoss()
+        criterion=torch.nn.L1Loss()
         train_store(train_dataset, val_dataset, batch_size=10, epochs=30, criterion=criterion)
 
     else:
