@@ -1,12 +1,12 @@
 package us.ihmc.avatar.sakeGripper;
 
+/**
+ * The following commands are matched to the HandSakeDesiredCommandMessage
+ * A goal value of -1.0 indicates the command is not associated with that goal value
+ * e.g. RESET does not change goal position; The hand remains in same position.
+ */
 public enum SakeHandCommandOption
 {
-   /*
-   The following commands are matched to the HandSakeDesiredCommandMessage
-   A goal value of -1.0 indicates the command is not associated with that goal value
-   e.g. RESET does not change goal position; The hand remains in same position.
-   */
    CALIBRATE(0, 0.0, 0.3),
    RESET(1, -1.0, 0.0),
    FULLY_OPEN(2, 1.0, 0.3),
@@ -20,14 +20,14 @@ public enum SakeHandCommandOption
    OPEN(5, 0.5, 0.3);
 
    private final int commandNumber;
-   private final double goalPosition;
-   private final double goalTorque;
+   private final double normalizedHandOpenAngle;
+   private final double maxTorque;
 
-   SakeHandCommandOption(int commandNumber, double goalPosition, double goalTorque)
+   SakeHandCommandOption(int commandNumber, double normalizedHandOpenAngle, double maxTorque)
    {
       this.commandNumber = commandNumber;
-      this.goalPosition = goalPosition;
-      this.goalTorque = goalTorque;
+      this.normalizedHandOpenAngle = normalizedHandOpenAngle;
+      this.maxTorque = maxTorque;
    }
 
    public final static SakeHandCommandOption[] values = values();
@@ -36,20 +36,24 @@ public enum SakeHandCommandOption
    {
       return values[enumAsByte];
    }
+
    public byte toByte()
    {
       return (byte) ordinal();
    }
+
    public int getCommandNumber()
    {
       return commandNumber;
    }
-   public double getGoalPosition()
+
+   public double getNormalizedHandOpenAngle()
    {
-      return goalPosition;
+      return normalizedHandOpenAngle;
    }
-   public double getGoalTorque()
+
+   public double getMaxTorque()
    {
-      return goalTorque;
+      return maxTorque;
    }
 }

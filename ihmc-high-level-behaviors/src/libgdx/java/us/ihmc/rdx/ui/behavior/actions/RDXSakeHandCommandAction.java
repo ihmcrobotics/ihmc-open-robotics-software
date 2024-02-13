@@ -40,14 +40,14 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
                                                     imInt -> ImGui.combo(labels.get("Predefined Options"),
                                                                          imInt,
                                                                          handConfigurationNames));
-      positionWidget = new ImDoubleWrapper(getDefinition()::getGoalPosition,
-                                           getDefinition()::setGoalPosition,
+      positionWidget = new ImDoubleWrapper(getDefinition()::getDesiredNormalizedHandOpenAngle,
+                                           getDefinition()::setDesiredNormalizedHandOpenAngle,
                                            imDouble -> ImGuiTools.sliderDouble(labels.get("Position"), imDouble, 0.0, 1.0,
-                                                          "%.1f deg".formatted(getDefinition().getGoalPosition() * MAX_ANGLE_BETWEEN_FINGERS)));
-      torqueWidget = new ImDoubleWrapper(getDefinition()::getGoalTorque,
-                                           getDefinition()::setGoalTorque,
+                                                          "%.1f deg".formatted(getDefinition().getDesiredNormalizedHandOpenAngle() * MAX_ANGLE_BETWEEN_FINGERS)));
+      torqueWidget = new ImDoubleWrapper(getDefinition()::getMaxTorque,
+                                           getDefinition()::setMaxTorque,
                                            imDouble -> ImGuiTools.sliderDouble(labels.get("Torque"), imDouble, 0.0, 1.0,
-                                                                               "%.1f N".formatted(getDefinition().getGoalTorque() * MAX_TORQUE_NEWTONS)));
+                                                                               "%.1f N".formatted(getDefinition().getMaxTorque() * MAX_TORQUE_NEWTONS)));
       executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
                                                           getDefinition()::setExecuteWithNextAction,
                                                           imBoolean -> imgui.ImGui.checkbox(labels.get("Execute with next action"),
@@ -63,6 +63,13 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    public void update()
    {
       super.update();
+
+      SakeHandCommandOption sakeCommandOption = getDefinition().getSakeCommandOption();
+      if (sakeCommandOption != SakeHandCommandOption.GOTO)
+      {
+         getDefinition().setDesiredNormalizedHandOpenAngle(sakeCommandOption.getNormalizedHandOpenAngle());
+         getDefinition().setMaxTorque(sakeCommandOption.getMaxTorque());
+      }
    }
 
    @Override
@@ -76,13 +83,6 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
       ImGui.sameLine();
       handCommandEnumWidget.renderImGuiWidget();
       ImGui.popItemWidth();
-
-      SakeHandCommandOption sakeCommandOption = getDefinition().getSakeCommandOption();
-      if (sakeCommandOption != SakeHandCommandOption.GOTO)
-      {
-         getDefinition().setGoalPosition(sakeCommandOption.getGoalPosition());
-         getDefinition().setGoalTorque(sakeCommandOption.getGoalTorque());
-      }
 
       positionWidget.renderImGuiWidget();
       torqueWidget.renderImGuiWidget();

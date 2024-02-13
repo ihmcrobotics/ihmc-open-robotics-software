@@ -14,8 +14,8 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
 {
    private final CRDTUnidirectionalEnumField<RobotSide> side;
    private final CRDTUnidirectionalInteger handConfigurationIndex;
-   private final CRDTUnidirectionalDouble goalPosition;
-   private final CRDTUnidirectionalDouble goalTorque;
+   private final CRDTUnidirectionalDouble desiredNormalizedHandOpenAngle;
+   private final CRDTUnidirectionalDouble maxTorque;
 
    public SakeHandCommandActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -23,8 +23,8 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
 
       side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
       handConfigurationIndex = new CRDTUnidirectionalInteger(ROS2ActorDesignation.OPERATOR, crdtInfo, SakeHandCommandOption.GOTO.ordinal());
-      goalPosition = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.0); // default to open
-      goalTorque = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0); // default to none
+      desiredNormalizedHandOpenAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.0); // default to open
+      maxTorque = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0); // default to none
    }
 
    @Override
@@ -34,8 +34,8 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
 
       jsonNode.put("side", side.getValue().getLowerCaseName());
       jsonNode.put("configuration", SakeHandCommandOption.values[handConfigurationIndex.getValue()].name());
-      jsonNode.put("position", goalPosition.getValue());
-      jsonNode.put("torque", goalTorque.getValue());
+      jsonNode.put("position", desiredNormalizedHandOpenAngle.getValue());
+      jsonNode.put("torque", maxTorque.getValue());
    }
 
    @Override
@@ -45,8 +45,8 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       handConfigurationIndex.setValue(SakeHandCommandOption.valueOf(jsonNode.get("configuration").asText()).ordinal());
-      goalPosition.setValue(jsonNode.get("position").asDouble());
-      goalTorque.setValue(jsonNode.get("torque").asDouble());
+      desiredNormalizedHandOpenAngle.setValue(jsonNode.get("position").asDouble());
+      maxTorque.setValue(jsonNode.get("torque").asDouble());
    }
 
    public void toMessage(SakeHandCommandActionDefinitionMessage message)
@@ -55,8 +55,8 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
 
       message.setRobotSide(side.toMessage().toByte());
       message.setConfiguration(handConfigurationIndex.toMessage());
-      message.setPositionRatio(goalPosition.toMessage());
-      message.setTorqueRatio(goalTorque.toMessage());
+      message.setPositionRatio(desiredNormalizedHandOpenAngle.toMessage());
+      message.setTorqueRatio(maxTorque.toMessage());
    }
 
    public void fromMessage(SakeHandCommandActionDefinitionMessage message)
@@ -65,8 +65,8 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
 
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
       handConfigurationIndex.fromMessage((int) message.getConfiguration());
-      goalPosition.fromMessage(message.getPositionRatio());
-      goalTorque.fromMessage(message.getTorqueRatio());
+      desiredNormalizedHandOpenAngle.fromMessage(message.getPositionRatio());
+      maxTorque.fromMessage(message.getTorqueRatio());
    }
 
    public RobotSide getSide()
@@ -94,23 +94,23 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       this.handConfigurationIndex.setValue(handConfigurationIndex);
    }
 
-   public double getGoalPosition()
+   public double getDesiredNormalizedHandOpenAngle()
    {
-      return goalPosition.getValue();
+      return desiredNormalizedHandOpenAngle.getValue();
    }
 
-   public double getGoalTorque()
+   public double getMaxTorque()
    {
-      return goalTorque.getValue();
+      return maxTorque.getValue();
    }
 
-   public void setGoalPosition(double goalPosition)
+   public void setDesiredNormalizedHandOpenAngle(double desiredNormalizedHandOpenAngle)
    {
-      this.goalPosition.setValue(goalPosition);
+      this.desiredNormalizedHandOpenAngle.setValue(desiredNormalizedHandOpenAngle);
    }
 
-   public void setGoalTorque(double goalTorque)
+   public void setMaxTorque(double maxTorque)
    {
-      this.goalTorque.setValue(goalTorque);
+      this.maxTorque.setValue(maxTorque);
    }
 }

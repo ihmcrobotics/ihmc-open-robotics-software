@@ -21,9 +21,15 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCommandActionState, SakeHandCommandActionDefinition>
 {
-   /** TODO: Make this variable. */
-   private static final double WAIT_TIME = 2.5;
+   /**
+    * This is the typically how long the basic OPEN and CLOSE commands take on the real robot.
+    * TODO: Make this derivative of the command by adding and supporting
+    *   desired finger velocities.
+    */
+   private static final double NOMINAL_TRAJECORY_DURATION = 2.5;
    public static final double ANGLE_TOLERANCE = Math.toRadians(40.0); // We want to allow a bunch of compliance
+   /** If it's already within 5 degrees, we will just mark is as completed. */
+   public static final double INITIAL_SATISFACTION_TOLERANCE = Math.toRadians(5.0);
 
    private final SakeHandCommandActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -65,80 +71,112 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    {
       super.triggerActionExecution();
 
-      // FIXME: Needs major work
-      if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.GOTO)
-      {
-         SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
-         message.setRobotSide(getDefinition().getSide().toByte());
-         message.setDesiredHandConfiguration((byte) SakeHandCommandOption.values[getDefinition().getHandConfigurationIndex()].getCommandNumber());
-         message.setPostionRatio(getDefinition().getGoalPosition());
-         message.setTorqueRatio(-1.0);
-
-         ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
-
-         message.setPostionRatio(-1.0);
-         message.setTorqueRatio(getDefinition().getGoalTorque());
-
-         ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
-      }
-      else if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.OPEN)
-      {
-         ros2ControllerHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                      HumanoidMessageTools.createHandDesiredConfigurationMessage(getDefinition().getSide(),
-                                                                                                 HandConfiguration.OPEN));
-      }
-      else if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.CLOSE)
-      {
-         ros2ControllerHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                      HumanoidMessageTools.createHandDesiredConfigurationMessage(getDefinition().getSide(),
-                                                                                                 HandConfiguration.CLOSE));
-      }
-
-      trackingCalculator.reset();
-
-      double inputOpenAmountForSideZeroToHalf = getDefinition().getGoalPosition();
+      double inputOpenAmountForSideZeroToHalf = getDefinition().getDesiredNormalizedHandOpenAngle();
       double goalJointAngle = inputOpenAmountForSideZeroToHalf * Math.toRadians(SakeHandParameters.MAX_ANGLE_BETWEEN_FINGERS);
       double goalOpenAngle = goalJointAngle * 2.0;
 
-      LogTools.info("Commanding hand to position %.2f%s".formatted(Math.toDegrees(goalOpenAngle), EuclidCoreMissingTools.DEGREE_SYMBOL));
+      trackingCalculator.reset();
 
-      state.getCommandedJointTrajectories().clear(2);
-      state.getCommandedJointTrajectories().addTrajectoryPoint(0, x1KnuckleJoints.get(getDefinition().getSide()).getQ(), 0.0);
-      state.getCommandedJointTrajectories().addTrajectoryPoint(0, goalJointAngle, WAIT_TIME);
-      state.getCommandedJointTrajectories().addTrajectoryPoint(1, x2KnuckleJoints.get(getDefinition().getSide()).getQ(), 0.0);
-      state.getCommandedJointTrajectories().addTrajectoryPoint(1, goalJointAngle, WAIT_TIME);
-      state.setNominalExecutionDuration(WAIT_TIME);
-      state.setPositionDistanceToGoalTolerance(ANGLE_TOLERANCE);
+      trackingCalculator.resetErrorMeasurement();
+      trackingCalculator.addJointData(x1KnuckleJoints.get(getDefinition().getSide()).getQ(), goalJointAngle);
+      trackingCalculator.addJointData(x2KnuckleJoints.get(getDefinition().getSide()).getQ(), goalJointAngle);
+      trackingCalculator.applyTolerance(INITIAL_SATISFACTION_TOLERANCE);
+
+      LogTools.info("x1: %.2f%s  x2: %.2f%s  Goal position: %.2f%s Option: %.2f%s  Error: %.2f%s"
+                          .formatted(Math.toDegrees(x1KnuckleJoints.get(getDefinition().getSide()).getQ()),
+                                     EuclidCoreMissingTools.DEGREE_SYMBOL,
+                                     Math.toDegrees(x2KnuckleJoints.get(getDefinition().getSide()).getQ()),
+                                     EuclidCoreMissingTools.DEGREE_SYMBOL,
+                                     Math.toDegrees(goalJointAngle),
+                                     EuclidCoreMissingTools.DEGREE_SYMBOL,
+                                     Math.toDegrees(getDefinition().getSakeCommandOption().getNormalizedHandOpenAngle()),
+                                     EuclidCoreMissingTools.DEGREE_SYMBOL,
+                                     Math.toDegrees(trackingCalculator.getTotalAbsolutePositionError()),
+                                     EuclidCoreMissingTools.DEGREE_SYMBOL));
+
+      if (trackingCalculator.isWithinPositionTolerance())
+      {
+         LogTools.info("Gripper is already at the desired position. Proceeding to next action. (Error: %.2f)"
+                             .formatted(trackingCalculator.getTotalAbsolutePositionError()));
+         state.setNominalExecutionDuration(0.0);
+         state.setPositionDistanceToGoalTolerance(INITIAL_SATISFACTION_TOLERANCE);
+      }
+      else
+      {
+         if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.GOTO)
+         {
+            // FIXME: Needs major work
+            SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
+            message.setRobotSide(getDefinition().getSide().toByte());
+            message.setDesiredHandConfiguration((byte) SakeHandCommandOption.values[getDefinition().getHandConfigurationIndex()].getCommandNumber());
+            message.setPostionRatio(getDefinition().getDesiredNormalizedHandOpenAngle());
+            message.setTorqueRatio(-1.0);
+
+            ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
+
+            message.setPostionRatio(-1.0);
+            message.setTorqueRatio(getDefinition().getMaxTorque());
+
+            LogTools.info("Commanding hand to GOTO position %.2f%s".formatted(Math.toDegrees(goalOpenAngle),
+                                                                         EuclidCoreMissingTools.DEGREE_SYMBOL));
+            ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
+         }
+         else if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.OPEN)
+         {
+            LogTools.info("Commanding hand to OPEN position %.2f%s".formatted(Math.toDegrees(goalOpenAngle),
+                                                                              EuclidCoreMissingTools.DEGREE_SYMBOL));
+            ros2ControllerHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                         HumanoidMessageTools.createHandDesiredConfigurationMessage(getDefinition().getSide(),
+                                                                                                    HandConfiguration.OPEN));
+         }
+         else if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.CLOSE)
+         {
+            LogTools.info("Commanding hand to CLOSE position %.2f%s".formatted(Math.toDegrees(goalOpenAngle),
+                                                                               EuclidCoreMissingTools.DEGREE_SYMBOL));
+            ros2ControllerHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                         HumanoidMessageTools.createHandDesiredConfigurationMessage(getDefinition().getSide(),
+                                                                                                    HandConfiguration.CLOSE));
+         }
+
+         state.getCommandedJointTrajectories().clear(2);
+         state.getCommandedJointTrajectories().addTrajectoryPoint(0, x1KnuckleJoints.get(getDefinition().getSide()).getQ(), 0.0);
+         state.getCommandedJointTrajectories().addTrajectoryPoint(0, goalJointAngle, NOMINAL_TRAJECORY_DURATION);
+         state.getCommandedJointTrajectories().addTrajectoryPoint(1, x2KnuckleJoints.get(getDefinition().getSide()).getQ(), 0.0);
+         state.getCommandedJointTrajectories().addTrajectoryPoint(1, goalJointAngle, NOMINAL_TRAJECORY_DURATION);
+         state.setNominalExecutionDuration(NOMINAL_TRAJECORY_DURATION);
+         state.setPositionDistanceToGoalTolerance(ANGLE_TOLERANCE);
+      }
    }
 
    @Override
    public void updateCurrentlyExecuting()
    {
       trackingCalculator.computeExecutionTimings(state.getNominalExecutionDuration());
+
       state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
-
-      if (trackingCalculator.getHitTimeLimit())
-      {
-         state.setIsExecuting(false);
-         state.setFailed(true);
-         LogTools.error("Task execution timed out.");
-         return;
-      }
-
       state.getCurrentJointAngles().getValue()[0] = x1KnuckleJoints.get(getDefinition().getSide()).getQ();
       state.getCurrentJointAngles().getValue()[1] = x2KnuckleJoints.get(getDefinition().getSide()).getQ();
 
-      trackingCalculator.resetErrorMeasurement();
-      trackingCalculator.addJointData(x1KnuckleJoints.get(getDefinition().getSide()).getQ(),
-                                      state.getCommandedJointTrajectories().getLastValueReadOnly(0).getPosition());
-      trackingCalculator.addJointData(x2KnuckleJoints.get(getDefinition().getSide()).getQ(),
-                                      state.getCommandedJointTrajectories().getLastValueReadOnly(1).getPosition());
-      trackingCalculator.applyTolerance(ANGLE_TOLERANCE);
+      if (trackingCalculator.getHitTimeLimit())
+      {
+         state.setFailed(true);
+         state.setIsExecuting(false);
+         LogTools.error("Task execution timed out.");
+      }
+      else if (!state.getCommandedJointTrajectories().isEmpty())
+      {
+         trackingCalculator.resetErrorMeasurement();
+         trackingCalculator.addJointData(x1KnuckleJoints.get(getDefinition().getSide()).getQ(),
+                                         state.getCommandedJointTrajectories().getLastValueReadOnly(0).getPosition());
+         trackingCalculator.addJointData(x2KnuckleJoints.get(getDefinition().getSide()).getQ(),
+                                         state.getCommandedJointTrajectories().getLastValueReadOnly(1).getPosition());
+         trackingCalculator.applyTolerance(state.getPositionDistanceToGoalTolerance());
 
-      boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
-      meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
-
-      if (meetsDesiredCompletionCriteria)
+         boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
+         meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
+         state.setIsExecuting(meetsDesiredCompletionCriteria);
+      }
+      else // Hand already in desired configuration
       {
          state.setIsExecuting(false);
       }

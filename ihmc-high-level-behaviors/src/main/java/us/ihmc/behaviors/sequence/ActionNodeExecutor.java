@@ -22,6 +22,7 @@ public abstract class ActionNodeExecutor<S extends ActionNodeState<D>,
       getState().setNominalExecutionDuration(0.0);
       getState().setElapsedExecutionTime(0.0);
       getState().getCommandedTrajectory().getValue().clear();
+      getState().getCommandedJointTrajectories().clear(0);
    }
 
    /** Called every tick only when this action is executing. */
