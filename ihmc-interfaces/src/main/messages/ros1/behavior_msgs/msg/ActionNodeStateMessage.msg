@@ -27,10 +27,16 @@ float64 nominal_execution_duration
 float64 elapsed_execution_time
 
 # Desired trajectory
-ihmc_common_msgs/SE3TrajectoryPointMessage[] desired_trajectory
+ihmc_common_msgs/SE3TrajectoryPointMessage[] commanded_trajectory
 
 # Current pose
 geometry_msgs/Pose current_pose
+
+# Desired jointspace trajectories
+controller_msgs/OneDoFJointTrajectoryMessage[] commanded_joint_trajectories
+
+# Current joint angles for tracking jointspace trajectories
+float64[] current_joint_angles
 
 # Position distance to goal tolerance
 float64 position_distance_to_goal_tolerance

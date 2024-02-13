@@ -1,38 +1,63 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
+import us.ihmc.behaviors.sequence.JointspaceTrajectoryTrackingErrorCalculator;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.tools.Timer;
+import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCommandActionState, SakeHandCommandActionDefinition>
 {
    /** TODO: Make this variable. */
-   private static final double WAIT_TIME = 0.5;
+   private static final double WAIT_TIME = 2.5;
+   public static final double ANGLE_TOLERANCE = Math.toRadians(40.0); // We want to allow a bunch of compliance
 
    private final SakeHandCommandActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private final Timer executionTimer = new Timer();
+   private final ROS2SyncedRobotModel syncedRobot;
+   private final JointspaceTrajectoryTrackingErrorCalculator trackingCalculator = new JointspaceTrajectoryTrackingErrorCalculator();
+   private final SideDependentList<RevoluteJoint> x1KnuckleJoints = new SideDependentList<>();
+   private final SideDependentList<RevoluteJoint> x2KnuckleJoints = new SideDependentList<>();
 
-   public SakeHandCommandActionExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2ControllerHelper ros2ControllerHelper)
+   public SakeHandCommandActionExecutor(long id,
+                                        CRDTInfo crdtInfo,
+                                        WorkspaceResourceDirectory saveFileDirectory,
+                                        ROS2ControllerHelper ros2ControllerHelper,
+                                        ROS2SyncedRobotModel syncedRobot)
    {
       super(new SakeHandCommandActionState(id, crdtInfo, saveFileDirectory));
 
       state = getState();
 
       this.ros2ControllerHelper = ros2ControllerHelper;
+      this.syncedRobot = syncedRobot;
+
+      for (RobotSide side : RobotSide.values)
+      {
+         x1KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(0));
+         x2KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(1));
+      }
    }
 
    @Override
    public void update()
    {
       super.update();
+
+      trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
    }
 
    @Override
@@ -69,15 +94,53 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
                                                                                                  HandConfiguration.CLOSE));
       }
 
-      executionTimer.reset();
+      trackingCalculator.reset();
+
+      double inputOpenAmountForSideZeroToHalf = getDefinition().getGoalPosition();
+      double goalJointAngle = inputOpenAmountForSideZeroToHalf * Math.toRadians(SakeHandParameters.MAX_ANGLE_BETWEEN_FINGERS);
+      double goalOpenAngle = goalJointAngle * 2.0;
+
+      LogTools.info("Commanding hand to position %.2f%s".formatted(Math.toDegrees(goalOpenAngle), EuclidCoreMissingTools.DEGREE_SYMBOL));
+
+      state.getCommandedJointTrajectories().clear(2);
+      state.getCommandedJointTrajectories().addTrajectoryPoint(0, x1KnuckleJoints.get(getDefinition().getSide()).getQ(), 0.0);
+      state.getCommandedJointTrajectories().addTrajectoryPoint(0, goalJointAngle, WAIT_TIME);
+      state.getCommandedJointTrajectories().addTrajectoryPoint(1, x2KnuckleJoints.get(getDefinition().getSide()).getQ(), 0.0);
+      state.getCommandedJointTrajectories().addTrajectoryPoint(1, goalJointAngle, WAIT_TIME);
+      state.setNominalExecutionDuration(WAIT_TIME);
+      state.setPositionDistanceToGoalTolerance(ANGLE_TOLERANCE);
    }
 
    @Override
    public void updateCurrentlyExecuting()
    {
-      state.setIsExecuting(executionTimer.isRunning(WAIT_TIME));
+      trackingCalculator.computeExecutionTimings(state.getNominalExecutionDuration());
+      state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
 
-      state.setNominalExecutionDuration(WAIT_TIME);
-      state.setElapsedExecutionTime(executionTimer.getElapsedTime());
+      if (trackingCalculator.getHitTimeLimit())
+      {
+         state.setIsExecuting(false);
+         state.setFailed(true);
+         LogTools.error("Task execution timed out.");
+         return;
+      }
+
+      state.getCurrentJointAngles().getValue()[0] = x1KnuckleJoints.get(getDefinition().getSide()).getQ();
+      state.getCurrentJointAngles().getValue()[1] = x2KnuckleJoints.get(getDefinition().getSide()).getQ();
+
+      trackingCalculator.resetErrorMeasurement();
+      trackingCalculator.addJointData(x1KnuckleJoints.get(getDefinition().getSide()).getQ(),
+                                      state.getCommandedJointTrajectories().getLastValueReadOnly(0).getPosition());
+      trackingCalculator.addJointData(x2KnuckleJoints.get(getDefinition().getSide()).getQ(),
+                                      state.getCommandedJointTrajectories().getLastValueReadOnly(1).getPosition());
+      trackingCalculator.applyTolerance(ANGLE_TOLERANCE);
+
+      boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
+      meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
+
+      if (meetsDesiredCompletionCriteria)
+      {
+         state.setIsExecuting(false);
+      }
    }
 }

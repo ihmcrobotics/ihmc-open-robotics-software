@@ -5,7 +5,11 @@ import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.rdx.imgui.*;
+import us.ihmc.rdx.imgui.ImBooleanWrapper;
+import us.ihmc.rdx.imgui.ImDoubleWrapper;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.widgets.ImGuiGripperWidget;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -43,7 +47,7 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
       torqueWidget = new ImDoubleWrapper(getDefinition()::getGoalTorque,
                                            getDefinition()::setGoalTorque,
                                            imDouble -> ImGuiTools.sliderDouble(labels.get("Torque"), imDouble, 0.0, 1.0,
-                                                          "%.1f N".formatted(getDefinition().getGoalTorque() * MAX_TORQUE_NEWTONS)));
+                                                                               "%.1f N".formatted(getDefinition().getGoalTorque() * MAX_TORQUE_NEWTONS)));
       executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
                                                           getDefinition()::setExecuteWithNextAction,
                                                           imBoolean -> imgui.ImGui.checkbox(labels.get("Execute with next action"),
@@ -64,7 +68,7 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      imgui.ImGui.sameLine();
+      ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
       
       ImGui.pushItemWidth(100.0f);

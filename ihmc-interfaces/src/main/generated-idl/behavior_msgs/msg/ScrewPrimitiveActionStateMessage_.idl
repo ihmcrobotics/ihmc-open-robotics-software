@@ -23,7 +23,7 @@ module behavior_msgs
          * Definition
          */
         behavior_msgs::msg::dds::ScrewPrimitiveActionDefinitionMessage definition;
-        sequence<geometry_msgs::msg::dds::Pose, 50> trajectory;
+        sequence<geometry_msgs::msg::dds::Pose, 50> preview_trajectory;
         /**
          * Hand force
          */
@@ -32,6 +32,9 @@ module behavior_msgs
          * Hand torque
          */
         geometry_msgs::msg::dds::Vector3 torque;
+        double preview_trajectory_duration;
+        double preview_trajectory_linear_velocity;
+        double preview_trajectory_angular_velocity;
       };
     };
   };

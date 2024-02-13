@@ -52,7 +52,6 @@ public class RDXROS2PointCloudSensorDemo
             RDXROS2PointCloudVisualizer ousterPointCloudVisualizer = new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
                                                                                                      ros2Node,
                                                                                                      PerceptionAPI.OUSTER_POINT_CLOUD);
-            ousterPointCloudVisualizer.setSubscribed(true);
             globalVisualizersPanel.addVisualizer(ousterPointCloudVisualizer);
 
             globalVisualizersPanel.create();
