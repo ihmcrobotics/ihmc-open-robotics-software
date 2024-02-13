@@ -24,7 +24,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
+import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
+import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
@@ -79,6 +81,9 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImDoubleWrapper trajectoryDurationWidget;
+   private final ImGuiSliderDoubleWrapper linearPositionWeightWidget;
+   private final ImGuiSliderDoubleWrapper angularPositionWeightWidget;
+   private final ImGuiSliderDoubleWrapper jointspaceWeightWidget;
    private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
    private final ImBooleanWrapper jointSpaceControlWrapper;
@@ -126,6 +131,22 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                                          if (ImGui.radioButton(labels.get("Jointspace Only"), imBoolean.get()))
                                                             imBoolean.set(true);
                                                       });
+      ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
+      linearPositionWeightWidget = new ImGuiSliderDoubleWrapper("Linear Position Weight", "%.2f", 0.0, 100.0,
+                                                                getDefinition()::getLinearPositionWeight,
+                                                                getDefinition()::setLinearPositionWeight);
+      linearPositionWeightWidget.addButton("Use Default Weights", () -> getDefinition().setLinearPositionWeight(-1.0));
+      linearPositionWeightWidget.addWidgetAligner(widgetAligner);
+      angularPositionWeightWidget = new ImGuiSliderDoubleWrapper("Angular Position Weight", "%.2f", 0.0, 100.0,
+                                                                 getDefinition()::getAngularPositionWeight,
+                                                                 getDefinition()::setAngularPositionWeight);
+      angularPositionWeightWidget.addButton("Use Default Weights", () -> getDefinition().setAngularPositionWeight(-1.0));
+      angularPositionWeightWidget.addWidgetAligner(widgetAligner);
+      jointspaceWeightWidget = new ImGuiSliderDoubleWrapper("Jointspace Weight", "%.2f", 0.0, 70.0,
+                                                            getDefinition()::getJointspaceWeight,
+                                                            getDefinition()::setJointspaceWeight);
+      jointspaceWeightWidget.addButton("Use Default Weights", () -> getDefinition().setJointspaceWeight(-1.0));
+      jointspaceWeightWidget.addWidgetAligner(widgetAligner);
 
       FullHumanoidRobotModel syncedFullRobotModel = syncedRobot.getFullRobotModel();
       for (RobotSide side : RobotSide.values)
@@ -308,6 +329,13 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       parentFrameComboBox.render();
       ImGui.pushItemWidth(80.0f);
       trajectoryDurationWidget.renderImGuiWidget();
+      if (getDefinition().getJointspaceOnly())
+         ImGui.beginDisabled();
+      linearPositionWeightWidget.renderImGuiWidget();
+      angularPositionWeightWidget.renderImGuiWidget();
+      if (getDefinition().getJointspaceOnly())
+         ImGui.endDisabled();
+      jointspaceWeightWidget.renderImGuiWidget();
       ImGui.text("IK Solution Quality: %.2f".formatted(state.getSolutionQuality()));
       ImGui.popItemWidth();
       ImGui.sameLine();

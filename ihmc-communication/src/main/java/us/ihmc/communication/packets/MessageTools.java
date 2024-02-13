@@ -35,7 +35,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.math.QuaternionCalculus;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.time.TimeTools;
@@ -1285,6 +1287,20 @@ public class MessageTools
       trajectoryPoint.getOrientation().set(trajectoryPointMessage.getOrientation());
       trajectoryPoint.getLinearVelocity().set(trajectoryPointMessage.getLinearVelocity());
       trajectoryPoint.getAngularVelocity().set(trajectoryPointMessage.getAngularVelocity());
+   }
+
+   public static void toMessage(OneDoFTrajectoryPointReadOnly trajectoryPoint, TrajectoryPoint1DMessage trajectoryPointMessage)
+   {
+      trajectoryPointMessage.setTime(trajectoryPoint.getTime());
+      trajectoryPointMessage.setPosition(trajectoryPoint.getPosition());
+      trajectoryPointMessage.setVelocity(trajectoryPoint.getVelocity());
+   }
+
+   public static void fromMessage(TrajectoryPoint1DMessage trajectoryPointMessage, OneDoFTrajectoryPoint trajectoryPoint)
+   {
+      trajectoryPoint.setTime(trajectoryPointMessage.getTime());
+      trajectoryPoint.setPosition(trajectoryPointMessage.getPosition());
+      trajectoryPoint.setVelocity(trajectoryPointMessage.getVelocity());
    }
 
    public static void toMessage(Instant instant, InstantMessage instantMessage)

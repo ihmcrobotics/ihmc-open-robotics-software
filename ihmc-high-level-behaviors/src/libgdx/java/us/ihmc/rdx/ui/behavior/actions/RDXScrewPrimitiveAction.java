@@ -20,19 +20,24 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionState, ScrewPrimitiveActionDefinition>
 {
+   private final ScrewPrimitiveActionState state;
+   private final ScrewPrimitiveActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo objectFrameComboBox;
    private final ImGuiSliderDoubleWrapper translationWidget;
    private final ImGuiSliderDoubleWrapper rotationWidget;
    private final ImGuiSliderDoubleWrapper maxLinearVelocityWidget;
    private final ImGuiSliderDoubleWrapper maxAngularVelocityWidget;
+   private final ImBooleanWrapper jointspaceOnlyWidget;
    private final ImGuiSliderDoubleWrapper linearPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper angularPositionWeightWidget;
+   private final ImGuiSliderDoubleWrapper jointspaceWeightWidget;
    private final RDXSelectablePose3DGizmo screwAxisGizmo;
    private final RDXDashedLineMesh screwAxisGraphic = new RDXDashedLineMesh(Color.WHITE, Axis3D.X, 0.04);
    private final RDXTrajectoryGraphic trajectoryGraphic = new RDXTrajectoryGraphic();
@@ -46,40 +51,57 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    {
       super(new ScrewPrimitiveActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
-      getDefinition().setDescription("Screw primitive");
+      state = getState();
+      definition = getDefinition();
 
-      screwAxisGizmo = new RDXSelectablePose3DGizmo(getDefinition().getScrewAxisPoseInObjectFrame().getValue(), ReferenceFrame.getWorldFrame());
+      definition.setDescription("Screw primitive");
+
+      screwAxisGizmo = new RDXSelectablePose3DGizmo(definition.getScrewAxisPoseInObjectFrame().getValue(), ReferenceFrame.getWorldFrame());
       screwAxisGizmo.create(panel3D);
 
       objectFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Object frame",
                                                                 referenceFrameLibrary,
-                                                                getDefinition()::getObjectFrameName,
-                                                                getDefinition()::setObjectFrameName);
+                                                                definition::getObjectFrameName,
+                                                                definition::setObjectFrameName);
       ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
-      translationWidget = new ImGuiSliderDoubleWrapper("Translation", "%.2f", -0.4, 0.4, getDefinition()::getTranslation, getDefinition()::setTranslation);
+      translationWidget = new ImGuiSliderDoubleWrapper("Translation", "%.2f", -0.4, 0.4, definition::getTranslation, definition::setTranslation);
       translationWidget.addWidgetAligner(widgetAligner);
       rotationWidget = new ImGuiSliderDoubleWrapper("Rotation", "%.2f", -2.0 * Math.PI, 2.0 * Math.PI,
-                                                    getDefinition()::getRotation,
-                                                    getDefinition()::setRotation);
+                                                    definition::getRotation,
+                                                    definition::setRotation);
       rotationWidget.addWidgetAligner(widgetAligner);
       maxLinearVelocityWidget = new ImGuiSliderDoubleWrapper("Max Linear Velocity", "%.2f", 0.05, 1.0,
-                                                             getDefinition()::getMaxLinearVelocity,
-                                                             getDefinition()::setMaxLinearVelocity);
+                                                             definition::getMaxLinearVelocity,
+                                                             definition::setMaxLinearVelocity);
       maxLinearVelocityWidget.addWidgetAligner(widgetAligner);
       maxAngularVelocityWidget = new ImGuiSliderDoubleWrapper("Max Angular Velocity", "%.2f", 0.1, Math.PI,
-                                                              getDefinition()::getMaxAngularVelocity,
-                                                              getDefinition()::setMaxAngularVelocity);
+                                                              definition::getMaxAngularVelocity,
+                                                              definition::setMaxAngularVelocity);
       maxAngularVelocityWidget.addWidgetAligner(widgetAligner);
+      jointspaceOnlyWidget = new ImBooleanWrapper(definition::getJointspaceOnly,
+                                                  definition::setJointspaceOnly,
+                                                      imBoolean -> {
+                                                         if (ImGui.radioButton(labels.get("Hybrid"), !imBoolean.get()))
+                                                            imBoolean.set(false);
+                                                         ImGui.sameLine();
+                                                         if (ImGui.radioButton(labels.get("Jointspace Only"), imBoolean.get()))
+                                                            imBoolean.set(true);
+                                                      });
       linearPositionWeightWidget = new ImGuiSliderDoubleWrapper("Linear Position Weight", "%.2f", 0.0, 70.0,
-                                                                getDefinition()::getLinearPositionWeight,
-                                                                getDefinition()::setLinearPositionWeight);
-      linearPositionWeightWidget.addButton("Use Default Weights", () -> getDefinition().setLinearPositionWeight(-1.0));
+                                                                definition::getLinearPositionWeight,
+                                                                definition::setLinearPositionWeight);
+      linearPositionWeightWidget.addButton("Use Default Weights", () -> definition.setLinearPositionWeight(-1.0));
       linearPositionWeightWidget.addWidgetAligner(widgetAligner);
       angularPositionWeightWidget = new ImGuiSliderDoubleWrapper("Angular Position Weight", "%.2f", 0.0, 70.0,
-                                                                getDefinition()::getAngularPositionWeight,
-                                                                getDefinition()::setAngularPositionWeight);
-      angularPositionWeightWidget.addButton("Use Default Weights", () -> getDefinition().setAngularPositionWeight(-1.0));
+                                                                definition::getAngularPositionWeight,
+                                                                definition::setAngularPositionWeight);
+      angularPositionWeightWidget.addButton("Use Default Weights", () -> definition.setAngularPositionWeight(-1.0));
       angularPositionWeightWidget.addWidgetAligner(widgetAligner);
+      jointspaceWeightWidget = new ImGuiSliderDoubleWrapper("Jointspace Weight", "%.2f", 0.0, 70.0,
+                                                            definition::getJointspaceWeight,
+                                                            definition::setJointspaceWeight);
+      jointspaceWeightWidget.addButton("Use Default Weights", () -> definition.setJointspaceWeight(-1.0));
+      jointspaceWeightWidget.addWidgetAligner(widgetAligner);
    }
 
    @Override
@@ -87,9 +109,9 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    {
       super.update();
 
-      if (getState().getScrewFrame().isChildOfWorld())
+      if (state.getScrewFrame().isChildOfWorld())
       {
-         screwAxisGizmo.getPoseGizmo().setGizmoFrame(getState().getScrewFrame().getReferenceFrame());
+         screwAxisGizmo.getPoseGizmo().setGizmoFrame(state.getScrewFrame().getReferenceFrame());
          screwAxisGizmo.getPoseGizmo().update();
 
          double screwAxisLineWidth = 0.005;
@@ -97,8 +119,8 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
 
          double trajectoryLineWidth = 0.01;
          trajectoryPoses.clear();
-         for (int i = 0; i < getState().getTrajectory().getSize(); i++)
-            trajectoryPoses.add().set(getState().getTrajectory().getValueReadOnly(i));
+         for (int i = 0; i < state.getPreviewTrajectory().getSize(); i++)
+            trajectoryPoses.add().set(state.getPreviewTrajectory().getValueReadOnly(i));
          trajectoryGraphic.update(trajectoryLineWidth, trajectoryPoses);
       }
    }
@@ -108,25 +130,37 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    {
       ImGui.checkbox(labels.get("Adjust Screw Axis Pose"), screwAxisGizmo.getSelected());
       objectFrameComboBox.render();
-      int size = getState().getTrajectory().getSize();
+      int size = state.getPreviewTrajectory().getSize();
       int limit = ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT;
       if (size == limit)
          ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
-      ImGui.text("Trajectory points: %d/%d".formatted(size, limit));
+      ImGui.text("Trajectory points: %d/%d  Duration: %.1f s  Velocity %.2f m/s  %.2f %s/s"
+                       .formatted(size,
+                                  limit,
+                                  state.getPreviewTrajectoryDuration().getValue(),
+                                  state.getPreviewTrajectoryLinearVelocity().getValue(),
+                                  state.getPreviewTrajectoryAngularVelocity().getValue(),
+                                  EuclidCoreMissingTools.DEGREE_SYMBOL));
       if (size == limit)
          ImGui.popStyleColor();
       translationWidget.renderImGuiWidget();
       rotationWidget.renderImGuiWidget();
       maxLinearVelocityWidget.renderImGuiWidget();
       maxAngularVelocityWidget.renderImGuiWidget();
+      jointspaceOnlyWidget.renderImGuiWidget();
+      if (definition.getJointspaceOnly())
+         ImGui.beginDisabled();
       linearPositionWeightWidget.renderImGuiWidget();
       angularPositionWeightWidget.renderImGuiWidget();
+      if (definition.getJointspaceOnly())
+         ImGui.endDisabled();
+      jointspaceWeightWidget.renderImGuiWidget();
    }
 
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (getState().getScrewFrame().isChildOfWorld())
+      if (state.getScrewFrame().isChildOfWorld())
       {
          screwAxisGizmo.calculate3DViewPick(input);
       }
@@ -135,7 +169,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (getState().getScrewFrame().isChildOfWorld())
+      if (state.getScrewFrame().isChildOfWorld())
       {
          screwAxisGizmo.process3DViewInput(input);
       }
@@ -144,7 +178,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (getState().getScrewFrame().isChildOfWorld())
+      if (state.getScrewFrame().isChildOfWorld())
       {
          screwAxisGizmo.getVirtualRenderables(renderables, pool);
          screwAxisGraphic.getRenderables(renderables, pool);
@@ -155,6 +189,6 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    @Override
    public String getActionTypeTitle()
    {
-      return getDefinition().getSide().getPascalCaseName() + " Screw Primitive";
+      return definition.getSide().getPascalCaseName() + " Screw Primitive";
    }
 }
