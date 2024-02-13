@@ -111,6 +111,11 @@ public class GroundPlaneEstimator
     */
    public void projectZ(FramePoint3DBasics pointToPack)
    {
+      projectZ(pointToPack, groundPlane);
+   }
+
+   public static void projectZ(FramePoint3DBasics pointToPack, Plane3DReadOnly groundPlane)
+   {
       ReferenceFrame originalFrame = pointToPack.getReferenceFrame();
       pointToPack.changeFrame(ReferenceFrame.getWorldFrame());
       pointToPack.setZ(groundPlane.getZOnPlane(pointToPack.getX(), pointToPack.getY()));

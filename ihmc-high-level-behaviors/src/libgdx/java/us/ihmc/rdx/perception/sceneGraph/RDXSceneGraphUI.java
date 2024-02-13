@@ -349,7 +349,7 @@ public class RDXSceneGraphUI
 
                if (uiSceneNodes.containsKey(sceneNode))
                {
-                  if (ImGui.collapsingHeader(labels.get(sceneNode.getName()), ImGuiTreeNodeFlags.DefaultOpen))
+                  if (ImGui.collapsingHeader(labels.get(sceneNode.getName())))
                   {
                      uiSceneNodes.get(sceneNode).renderImGuiWidgets(modificationQueue, sceneGraph);
                   }

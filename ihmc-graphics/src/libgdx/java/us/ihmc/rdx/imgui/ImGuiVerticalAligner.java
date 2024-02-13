@@ -15,6 +15,11 @@ public class ImGuiVerticalAligner
    protected void submitCursorX(float cursorX)
    {
       cursorMaxX = Math.max(cursorMaxX, cursorX);
+
+      // FIXME: I don't know why, but this values runs away when docking/undocking panels
+      // TODO: See if it goes away in future ImGui version? - @dcalvert
+      if (cursorMaxX > 250)
+         cursorMaxX = 0;
    }
 
    protected void setCursorXToAligned()
