@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.OpenCLPointCloudExtractor;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.filters.DetectionFilter;
 import us.ihmc.perception.filters.TimeBasedDetectionFilter;
 import us.ihmc.perception.iterativeClosestPoint.IterativeClosestPointWorker;
 import us.ihmc.perception.opencl.OpenCLManager;
@@ -62,8 +63,9 @@ public class YOLOv8IterativeClosestPointNodeCombo
     * Creates a new node & ICP worker if they have not been created yet.
     * Should be called in the scene graph update loop.
     *
-    * @param sceneGraph the scene graph
-    * @return true if the node was normally updated, false if the node was removed from the scene graph.
+    * @param sceneGraph The scene graph
+    * @param modificationQueue Modification queue of the scene graph
+    * @return true if node was updated or created normally, false if the node was removed from the scene graph.
     */
    public boolean updateSceneGraph(ROS2SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
@@ -81,8 +83,8 @@ public class YOLOv8IterativeClosestPointNodeCombo
       }
       else if (!isCreated)
       {
-         create(sceneGraph, modificationQueue);
-         isCreated = true;
+         if (create(sceneGraph, modificationQueue))
+            isCreated = true;
       }
       else
       {
@@ -97,7 +99,13 @@ public class YOLOv8IterativeClosestPointNodeCombo
       return true;
    }
 
-   public boolean destroy()
+   /**
+    * Destroys itself if the detection has expired.
+    * Each time this method is called, the distance threshold increases.
+    *
+    * @return true if detection has expired and destruction is initiated, false if detection has not expired.
+    */
+   public boolean destroyIfExpired()
    {
       distanceThreshold += 400.0;
       detectionIsRunning = false;
@@ -126,20 +134,27 @@ public class YOLOv8IterativeClosestPointNodeCombo
       {
          if (node.isRunningICP())
          {
+            // Node has received a new detection.
+            detectionFilter.registerDetection();
+
+            // decrease distance threshold if it has been increased beyond default threshold
             if (distanceThreshold > node.getBaseDistanceThreshold())
                distanceThreshold -= 100.0;
-            RawImage segmentedDepth = segmenter.removeBackground(depthImage, mask, node.getMaskErosionKernelRadius());
-            List<Point3DReadOnly> segmentedPointCloud = extractor.extractPointCloud(segmentedDepth);
-            icpWorker.setEnvironmentPointCloud(YOLOv8Tools.filterOutliers(segmentedPointCloud, node.getOutlierFilterThreshold(), OUTLIER_REJECTION_SAMPLES));
-            if (icpWorker.runICP(node.getICPIterations()))
+
+            // Process images & run ICP
+            RawImage segmentedDepth = segmenter.removeBackground(depthImage, mask, node.getMaskErosionKernelRadius()); // segment depth image using the mask
+            List<Point3DReadOnly> segmentedPointCloud = extractor.extractPointCloud(segmentedDepth); // extract the point cloud from the depth image
+            segmentedPointCloud = YOLOv8Tools.filterOutliers(segmentedPointCloud, node.getOutlierFilterThreshold(), OUTLIER_REJECTION_SAMPLES); // remove outliers
+            icpWorker.setEnvironmentPointCloud(segmentedPointCloud); // provide segmented & filtered point cloud to the ICP worker
+            if (icpWorker.runICP(node.getICPIterations())) // run ICP & publish results if successful
                ros2Helper.publish(PerceptionAPI.ICP_RESULT, icpWorker.getResult());
 
+            // Update transform which will be provided to the node
             synchronized (transformSynchronizer)
             {
                lastCentroidToWorldTransform = new RigidBodyTransform(icpWorker.getResultPose());
             }
             segmentedDepth.release();
-            detectionFilter.registerDetection();
          }
       }
 
@@ -162,8 +177,9 @@ public class YOLOv8IterativeClosestPointNodeCombo
       return distanceThreshold;
    }
 
-   private void create(ROS2SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
+   private boolean create(ROS2SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
+      // ensure a detection has been provided before creating
       if (lastDetection != null)
       {
          String pointCloudFileName = lastDetection.objectClass().getPointCloudFileName();
@@ -193,6 +209,10 @@ public class YOLOv8IterativeClosestPointNodeCombo
          distanceThreshold = node.getBaseDistanceThreshold();
 
          detectionFilter.registerDetection();
+
+         return true;
       }
+
+      return false;
    }
 }
