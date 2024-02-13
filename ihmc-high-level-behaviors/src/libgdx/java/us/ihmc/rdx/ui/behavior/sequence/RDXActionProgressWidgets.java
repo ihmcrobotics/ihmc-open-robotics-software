@@ -149,21 +149,21 @@ public class RDXActionProgressWidgets
 
    public void renderPositionError(float dividedBarWidth, boolean renderAsPlots)
    {
-      if (!action.getState().getDesiredTrajectory().isEmpty())
+      if (!action.getState().getCommandedTrajectory().isEmpty())
       {
          if (elapsedTimeIsValid)
          {
             positionTrajectoryGenerator.clear();
-            for (int i = 0; i < action.getState().getDesiredTrajectory().getSize(); i++)
+            for (int i = 0; i < action.getState().getCommandedTrajectory().getSize(); i++)
             {
-               positionTrajectoryGenerator.appendWaypoint(action.getState().getDesiredTrajectory().getValueReadOnly(i));
+               positionTrajectoryGenerator.appendWaypoint(action.getState().getCommandedTrajectory().getValueReadOnly(i));
             }
             positionTrajectoryGenerator.initialize();
             positionTrajectoryGenerator.compute(elapsedExecutionTime);
          }
 
-         Point3DReadOnly initialPosition = action.getState().getDesiredTrajectory().getFirstValueReadOnly().getPosition();
-         Point3DReadOnly endPosition = action.getState().getDesiredTrajectory().getLastValueReadOnly().getPosition();
+         Point3DReadOnly initialPosition = action.getState().getCommandedTrajectory().getFirstValueReadOnly().getPosition();
+         Point3DReadOnly endPosition = action.getState().getCommandedTrajectory().getLastValueReadOnly().getPosition();
          Point3DReadOnly currentPosition = action.getState().getCurrentPose().getValueReadOnly().getPosition();
          Point3DReadOnly desiredPosition = elapsedTimeIsValid ? positionTrajectoryGenerator.getPosition() : endPosition;
 
@@ -206,21 +206,21 @@ public class RDXActionProgressWidgets
 
    public void renderOrientationError(float dividedBarWidth, boolean renderAsPlots)
    {
-      if (!action.getState().getDesiredTrajectory().isEmpty())
+      if (!action.getState().getCommandedTrajectory().isEmpty())
       {
          if (elapsedTimeIsValid)
          {
             orientationTrajectoryGenerator.clear();
-            for (int i = 0; i < action.getState().getDesiredTrajectory().getSize(); i++)
+            for (int i = 0; i < action.getState().getCommandedTrajectory().getSize(); i++)
             {
-               orientationTrajectoryGenerator.appendWaypoint(action.getState().getDesiredTrajectory().getValueReadOnly(i));
+               orientationTrajectoryGenerator.appendWaypoint(action.getState().getCommandedTrajectory().getValueReadOnly(i));
             }
             orientationTrajectoryGenerator.initialize();
             orientationTrajectoryGenerator.compute(elapsedExecutionTime);
          }
 
-         QuaternionReadOnly initialOrientation = action.getState().getDesiredTrajectory().getFirstValueReadOnly().getOrientation();
-         QuaternionReadOnly endOrientation = action.getState().getDesiredTrajectory().getLastValueReadOnly().getOrientation();
+         QuaternionReadOnly initialOrientation = action.getState().getCommandedTrajectory().getFirstValueReadOnly().getOrientation();
+         QuaternionReadOnly endOrientation = action.getState().getCommandedTrajectory().getLastValueReadOnly().getOrientation();
          QuaternionReadOnly currentOrientation = action.getState().getCurrentPose().getValueReadOnly().getOrientation();
          QuaternionReadOnly desiredOrientation = elapsedTimeIsValid ? orientationTrajectoryGenerator.getOrientation(): endOrientation;
 
@@ -263,21 +263,21 @@ public class RDXActionProgressWidgets
 
    public void renderJointspacePositionError(int jointIndex, float dividedBarWidth, boolean renderAsPlots)
    {
-      if (action.getState().getDesiredJointTrajectories().getNumberOfJoints() > jointIndex)
+      if (action.getState().getCommandedJointTrajectories().getNumberOfJoints() > jointIndex)
       {
          if (elapsedTimeIsValid)
          {
             jointspaceTrajectoryGenerator.clear();
-            for (int i = 0; i < action.getState().getDesiredJointTrajectories().getNumberOfPoints(jointIndex); i++)
+            for (int i = 0; i < action.getState().getCommandedJointTrajectories().getNumberOfPoints(jointIndex); i++)
             {
-               jointspaceTrajectoryGenerator.appendWaypoint(action.getState().getDesiredJointTrajectories().getValueReadOnly(jointIndex, i));
+               jointspaceTrajectoryGenerator.appendWaypoint(action.getState().getCommandedJointTrajectories().getValueReadOnly(jointIndex, i));
             }
             jointspaceTrajectoryGenerator.initialize();
             jointspaceTrajectoryGenerator.compute(elapsedExecutionTime);
          }
 
-         double initialPosition = action.getState().getDesiredJointTrajectories().getFirstValueReadOnly(jointIndex).getPosition();
-         double endPosition = action.getState().getDesiredJointTrajectories().getLastValueReadOnly(jointIndex).getPosition();
+         double initialPosition = action.getState().getCommandedJointTrajectories().getFirstValueReadOnly(jointIndex).getPosition();
+         double endPosition = action.getState().getCommandedJointTrajectories().getLastValueReadOnly(jointIndex).getPosition();
          double currentPosition = action.getState().getCurrentJointAngles().getValueReadOnly(jointIndex);
          double desiredPosition = elapsedTimeIsValid ? jointspaceTrajectoryGenerator.getValue() : endPosition;
 

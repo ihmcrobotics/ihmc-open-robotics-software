@@ -222,7 +222,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          
          desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
-         state.getDesiredTrajectory().setSingleSegmentTrajectory(syncedHandControlPose, desiredHandControlPose, getDefinition().getTrajectoryDuration());
+         state.getCommandedTrajectory().setSingleSegmentTrajectory(syncedHandControlPose, desiredHandControlPose, getDefinition().getTrajectoryDuration());
       }
       else
       {
