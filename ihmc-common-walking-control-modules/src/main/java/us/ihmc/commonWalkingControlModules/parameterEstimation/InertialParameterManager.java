@@ -99,6 +99,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoDouble armsMeasurementCovariance;
    private final YoDouble spineMeasurementCovariance;
 
+   private final YoBoolean reduceProcessCovarianceWhileWalking;
+   private final YoDouble processCovarianceWalkingMultiplier;
+   private final YoDouble processCovariancePassedToFilter;
+
    private final YoMatrix residual;
 
    private final YoBoolean calculateBias;
@@ -266,6 +270,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       spineMeasurementCovariance = new YoDouble("spineMeasurementCovariance", registry);
       spineMeasurementCovariance.set(parameters.getSpineMeasurementCovariance());
 
+      reduceProcessCovarianceWhileWalking = new YoBoolean("reduceProcessCovarianceWhileWalking", registry);
+      processCovarianceWalkingMultiplier = new YoDouble("processCovarianceWalkingMultiplier", registry);
+      processCovarianceWalkingMultiplier.set(parameters.getProcessCovarianceMultiplierForWalking());
+      processCovariancePassedToFilter = new YoDouble("processCovariancePassedToFilter", registry);
+
       String[] rowNames = getRowNamesForJoints(nDoFs);
       residual = new YoMatrix("residual", nDoFs, 1, rowNames, registry);
 
@@ -424,7 +433,16 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    {
       // Set diagonal of process covariance
       CommonOps_DDRM.setIdentity(inertialKalmanFilter.getProcessCovariance());
-      CommonOps_DDRM.scale(processCovariance.getValue(), inertialKalmanFilter.getProcessCovariance());
+
+      processCovariancePassedToFilter.set(processCovariance.getValue());
+      if (reduceProcessCovarianceWhileWalking.getValue())
+      {
+         // If process covariance modification while walking is enabled, we need to see if the robot is walking by inspecting the foot switches
+         // NOTE: the XOR on the foot switches
+         if (footSwitches.get(RobotSide.LEFT).hasFootHitGroundFiltered() ^ footSwitches.get(RobotSide.RIGHT).hasFootHitGroundFiltered())
+            processCovariancePassedToFilter.set(processCovariancePassedToFilter.getValue() * processCovarianceWalkingMultiplier.getValue());
+      }
+      CommonOps_DDRM.scale(processCovariancePassedToFilter.getValue(), inertialKalmanFilter.getProcessCovariance());
 
       // Set diagonal entries of measurement covariance according to the part of the body
       for (int i = 0; i < actualModelJoints.size(); ++i)
