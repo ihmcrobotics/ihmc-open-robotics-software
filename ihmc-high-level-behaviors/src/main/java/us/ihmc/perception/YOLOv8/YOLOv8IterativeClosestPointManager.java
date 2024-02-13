@@ -179,7 +179,7 @@ public class YOLOv8IterativeClosestPointManager
       Set<YOLOv8IterativeClosestPointNodeCombo> unmatchedYOLOICPCombos = organizeDetections(yoloICPNodeComboSet, newDetections);
 
       // Signal combos which did not receive a new detection to consider destruction
-      unmatchedYOLOICPCombos.forEach(YOLOv8IterativeClosestPointNodeCombo::destroy);
+      unmatchedYOLOICPCombos.forEach(YOLOv8IterativeClosestPointNodeCombo::destroyIfExpired);
 
       // Create new combos for new detections
       for (YOLOv8Detection newDetection : newDetections)
@@ -217,6 +217,8 @@ public class YOLOv8IterativeClosestPointManager
     * @param newDetections New YOLO detections, not yet matched to the YOLO ICP combos.
     *                      MODIFIED: detections which were matched to YOLO ICP combos will be removed from the set
     * @return Set of YOLO ICP combos which did not receive a new detection
+    *
+    * TODO: This is a basic distance based organization. Velocity based organization would be cooler.
     */
    private Set<YOLOv8IterativeClosestPointNodeCombo> organizeDetections(Map<YOLOv8IterativeClosestPointNodeCombo, YOLOv8IterativeClosestPointNodeCombo> detectionCombos,
                                                                         Set<YOLOv8Detection> newDetections)
