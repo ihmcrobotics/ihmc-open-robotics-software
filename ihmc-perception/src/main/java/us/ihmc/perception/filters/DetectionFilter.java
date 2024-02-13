@@ -4,6 +4,7 @@ import gnu.trove.iterator.TFloatIterator;
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.linked.TFloatLinkedList;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 
 /**
  * This is for filtering the acceptance of detected objects in
@@ -12,35 +13,30 @@ import us.ihmc.commons.thread.Notification;
  */
 public class DetectionFilter
 {
-   public int historyLength = 30; // 1 second at 30 HZ
+   public final int HISTORY_LENGTH = SceneGraph.UPDATE_FREQUENCY; // 1 second at scene graph's frequency
    public float acceptanceThreshold = 0.6f;
-   public float detectionThreshold = 0.2f;
 
    private final TFloatList detections = new TFloatLinkedList();
    private final Notification detected = new Notification();
-   private boolean isAcceptable = false;
    private boolean isDetected = false;
 
    public DetectionFilter()
    {
-      // use default values
+      // use default threshold
    }
 
-   public DetectionFilter(int historyLength, float acceptanceThreshold, float detectionThreshold)
+   public DetectionFilter(float acceptanceThreshold)
    {
-      this.historyLength = historyLength;
       this.acceptanceThreshold = acceptanceThreshold;
-      this.detectionThreshold = detectionThreshold;
    }
 
+   /**
+    * Lets the filter know that an object has been detected.
+    * Should be called in the SceneGraph's update loop.
+    */
    public void registerDetection()
    {
       detected.set();
-   }
-
-   public boolean isAcceptable()
-   {
-      return isAcceptable;
    }
 
    public boolean isDetected()
@@ -50,14 +46,19 @@ public class DetectionFilter
 
    public boolean hasEnoughSamples()
    {
-      return detections.size() >= historyLength;
+      return detections.size() >= HISTORY_LENGTH;
+   }
+
+   public void setAcceptanceThreshold(float threshold)
+   {
+      this.acceptanceThreshold = threshold;
    }
 
    public void update()
    {
       detections.add(detected.poll() ? 1.0f : 0.0f);
 
-      while (detections.size() > historyLength)
+      while (detections.size() > HISTORY_LENGTH)
          detections.removeAt(0);
 
       float average = 0.0f;
@@ -67,7 +68,6 @@ public class DetectionFilter
       }
       average /= (float) detections.size();
 
-      isAcceptable = detections.size() == historyLength && average >= acceptanceThreshold;
-      isDetected = detections.size() == historyLength && average >= detectionThreshold;
+      isDetected = detections.size() == HISTORY_LENGTH && average >= acceptanceThreshold;
    }
 }
