@@ -291,13 +291,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                       CommonOps_DDRM.identity(nMeasurements),
                                                       CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
                                                       registry);
-         case CONSTRAINED_EKF -> filter = new InertialConstrainedKalmanFilter(estimateRobotModel,
-                                                                              basisSets,
-                                                                              parameters.getURDFParameters(basisSets),
-                                                                              CommonOps_DDRM.identity(nMeasurements),
-                                                                              CommonOps_DDRM.identity(nMeasurements),
-                                                                              CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
-                                                                              registry);
+         case CONSTRAINED_KF -> filter = new InertialConstrainedKalmanFilter(estimateRobotModel,
+                                                                             basisSets,
+                                                                             parameters.getURDFParameters(basisSets),
+                                                                             CommonOps_DDRM.identity(nMeasurements),
+                                                                             CommonOps_DDRM.identity(nMeasurements),
+                                                                             CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
+                                                                             registry);
          case PHYSICALLY_CONSISTENT_EKF -> filter = new InertialPhysicallyConsistentKalmanFilter(estimateRobotModel,
                                                                                           basisSets,
                                                                                           parameters.getURDFParameters(basisSets),
