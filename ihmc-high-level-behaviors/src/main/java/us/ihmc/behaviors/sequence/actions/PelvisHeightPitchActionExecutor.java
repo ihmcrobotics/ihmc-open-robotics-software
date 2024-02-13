@@ -90,7 +90,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
          syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
          desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
          desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());
-         state.getDesiredTrajectory().setSingleSegmentTrajectory(syncedPelvisPose, desiredPelvisPose, getDefinition().getTrajectoryDuration());
+         state.getCommandedTrajectory().setSingleSegmentTrajectory(syncedPelvisPose, desiredPelvisPose, getDefinition().getTrajectoryDuration());
       }
       else
       {
