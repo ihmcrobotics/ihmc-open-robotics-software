@@ -12,28 +12,47 @@ import us.ihmc.commons.thread.Notification;
  */
 public class DetectionFilter
 {
-   public final int HISTORY = 30; // 1 second at 30 HZ
-   public final float ACCEPTANCE_THRESHOLD = 0.6f;
+   public int historyLength = 30; // 1 second at 30 HZ
+   public float acceptanceThreshold = 0.6f;
+   public float detectionThreshold = 0.2f;
 
    private final TFloatList detections = new TFloatLinkedList();
    private final Notification detected = new Notification();
-   private boolean isStableDetectionResult;
+   private boolean isAcceptable = false;
+   private boolean isDetected = false;
+
+   public DetectionFilter()
+   {
+      // use default values
+   }
+
+   public DetectionFilter(int historyLength, float acceptanceThreshold, float detectionThreshold)
+   {
+      this.historyLength = historyLength;
+      this.acceptanceThreshold = acceptanceThreshold;
+      this.detectionThreshold = detectionThreshold;
+   }
 
    public void registerDetection()
    {
       detected.set();
    }
 
-   public boolean isStableDetectionResult()
+   public boolean isAcceptable()
    {
-      return isStableDetectionResult;
+      return isAcceptable;
+   }
+
+   public boolean isDetected()
+   {
+      return isDetected;
    }
 
    public void update()
    {
       detections.add(detected.poll() ? 1.0f : 0.0f);
 
-      while (detections.size() > HISTORY)
+      while (detections.size() > historyLength)
          detections.removeAt(0);
 
       float average = 0.0f;
@@ -43,6 +62,7 @@ public class DetectionFilter
       }
       average /= (float) detections.size();
 
-      isStableDetectionResult = detections.size() == HISTORY && average >= ACCEPTANCE_THRESHOLD;
+      isAcceptable = detections.size() == historyLength && average >= acceptanceThreshold;
+      isDetected = detections.size() == historyLength && average >= detectionThreshold;
    }
 }
