@@ -27,6 +27,7 @@ import us.ihmc.perception.ouster.OusterDepthImageRetriever;
 import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectionUpdater;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
@@ -193,7 +194,7 @@ public class PerceptionAndAutonomyProcess
 
       this.robotPelvisFrameSupplier = robotPelvisFrameSupplier;
       sceneGraph = new ROS2SceneGraph(ros2Helper);
-      sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", ROS2BehaviorTreeState.SYNC_FREQUENCY, this::updateSceneGraph);
+      sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", SceneGraph.UPDATE_FREQUENCY, this::updateSceneGraph);
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2Helper);
 
