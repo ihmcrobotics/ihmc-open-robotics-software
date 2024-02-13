@@ -40,10 +40,10 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
                                                     imInt -> ImGui.combo(labels.get("Predefined Options"),
                                                                          imInt,
                                                                          handConfigurationNames));
-      positionWidget = new ImDoubleWrapper(getDefinition()::getDesiredNormalizedHandOpenAngle,
-                                           getDefinition()::setDesiredNormalizedHandOpenAngle,
+      positionWidget = new ImDoubleWrapper(getDefinition()::getHandOpenAngle,
+                                           getDefinition()::setHandOpenAngle,
                                            imDouble -> ImGuiTools.sliderDouble(labels.get("Position"), imDouble, 0.0, 1.0,
-                                                          "%.1f deg".formatted(getDefinition().getDesiredNormalizedHandOpenAngle() * MAX_ANGLE_BETWEEN_FINGERS)));
+                                                          "%.1f deg".formatted(getDefinition().getHandOpenAngle() * MAX_ANGLE_BETWEEN_FINGERS)));
       torqueWidget = new ImDoubleWrapper(getDefinition()::getMaxTorque,
                                            getDefinition()::setMaxTorque,
                                            imDouble -> ImGuiTools.sliderDouble(labels.get("Torque"), imDouble, 0.0, 1.0,
@@ -67,7 +67,7 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
       SakeHandCommandOption sakeCommandOption = getDefinition().getSakeCommandOption();
       if (sakeCommandOption != SakeHandCommandOption.GOTO)
       {
-         getDefinition().setDesiredNormalizedHandOpenAngle(sakeCommandOption.getNormalizedHandOpenAngle());
+         getDefinition().setHandOpenAngle(sakeCommandOption.getNormalizedHandOpenAngle());
          getDefinition().setMaxTorque(sakeCommandOption.getMaxTorque());
       }
    }

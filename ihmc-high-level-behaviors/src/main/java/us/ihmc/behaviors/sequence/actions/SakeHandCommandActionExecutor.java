@@ -71,7 +71,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    {
       super.triggerActionExecution();
 
-      double inputOpenAmountForSideZeroToHalf = getDefinition().getDesiredNormalizedHandOpenAngle();
+      double inputOpenAmountForSideZeroToHalf = getDefinition().getHandOpenAngle();
       double goalJointAngle = inputOpenAmountForSideZeroToHalf * Math.toRadians(SakeHandParameters.MAX_ANGLE_BETWEEN_FINGERS);
       double goalOpenAngle = goalJointAngle * 2.0;
 
@@ -109,7 +109,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
             SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
             message.setRobotSide(getDefinition().getSide().toByte());
             message.setDesiredHandConfiguration((byte) SakeHandCommandOption.values[getDefinition().getHandConfigurationIndex()].getCommandNumber());
-            message.setPostionRatio(getDefinition().getDesiredNormalizedHandOpenAngle());
+            message.setPostionRatio(getDefinition().getHandOpenAngle());
             message.setTorqueRatio(-1.0);
 
             ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
