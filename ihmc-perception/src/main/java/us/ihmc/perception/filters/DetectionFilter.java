@@ -48,6 +48,11 @@ public class DetectionFilter
       return isDetected;
    }
 
+   public boolean hasEnoughSamples()
+   {
+      return detections.size() >= historyLength;
+   }
+
    public void update()
    {
       detections.add(detected.poll() ? 1.0f : 0.0f);
