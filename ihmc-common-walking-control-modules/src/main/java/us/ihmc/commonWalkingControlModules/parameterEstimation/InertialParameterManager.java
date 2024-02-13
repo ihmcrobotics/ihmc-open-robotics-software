@@ -81,10 +81,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoDouble[] jointVelocities;
    private final FilteredVelocityYoVariable[] jointAccelerations;
 
-   private final List<RigidBodyInertialParameters> inertialParameters = new ArrayList<>();
-   private final List<YoMatrix> inertialParametersPiBasisWatchers = new ArrayList<>();
-   private final List<YoMatrix> inertialParametersThetaBasisWatchers = new ArrayList<>();
-
    private final Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets;
    private final RigidBodyBasics[] regressorModelBodiesToProcess;
    private final DMatrixRMaj[] regressorBlocks;
@@ -302,7 +298,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                                               CommonOps_DDRM.identity(nMeasurements),
                                                                               CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
                                                                               registry);
-         case PHYSICALLY_CONSISTENT_EKF -> throw new UnsupportedOperationException("Not yet implemented");
+         case PHYSICALLY_CONSISTENT_EKF -> filter = new InertialPhysicallyConsistentKalmanFilter(estimateRobotModel,
+                                                                                          basisSets,
+                                                                                          parameters.getURDFParameters(basisSets),
+                                                                                          CommonOps_DDRM.identity(nMeasurements),
+                                                                                          CommonOps_DDRM.identity(nMeasurements),
+                                                                                          CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
+                                                                                          registry);
       }
    }
 
@@ -436,8 +438,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          RegressorTools.packRigidBodies(basisSets, doubleFilteredEstimate, estimateModelBodies);
 
          updateVisuals();
-
-         //         updateWatchers();
       }
    }
 
@@ -519,18 +519,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          jointIndexHandler.compactBlockToFullBlock(legJoints.get(side), compactContactJacobians.get(side).getJacobianMatrix(), fullContactJacobians.get(side));
       }
    }
-
-   //   private void updateWatchers()
-   //   {
-   //      for (int i = 0; i < inertialParameters.size(); i++)
-   //      {
-   //         inertialParameters.get(i).getParameterVectorPiBasis(inertialParameterPiBasisContainer);
-   //         inertialParametersPiBasisWatchers.get(i).set(inertialParameterPiBasisContainer);
-   //
-   //         inertialParameters.get(i).getParameterVectorThetaBasis(inertialParameterThetaBasisContainer);
-   //         inertialParametersThetaBasisWatchers.get(i).set(inertialParameterThetaBasisContainer);
-   //      }
-   //   }
 
    private void calculateRootJointAccelerations()
    {
