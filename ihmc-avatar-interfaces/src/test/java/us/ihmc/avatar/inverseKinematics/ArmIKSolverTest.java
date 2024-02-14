@@ -8,9 +8,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.TestInfo;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.MemoryTools;
 
@@ -50,14 +52,21 @@ public abstract class ArmIKSolverTest
       }
       fullRobotModel.updateFrames();
 
-      FramePose3D taskspacePose = new FramePose3D(fullRobotModel.getHandControlFrame(RobotSide.LEFT));
-      taskspacePose.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
+      // Match the source's hand control frame (so the IK shouldn't move since it's already in the correct spot)
+      // Expected this to work but it doesn't...
+//      ReferenceFrame desiredHandControlFrame = fullRobotModel.getHandControlFrame(RobotSide.LEFT);
+//      desiredHandControlFrame.update();
+      
+      PoseReferenceFrame desiredHandControlFrame = new PoseReferenceFrame("desiredHandControlFrame", ReferenceFrame.getWorldFrame());
+      FramePose3D handControlFramePose = new FramePose3D(fullRobotModel.getHandControlFrame(RobotSide.LEFT));
+      handControlFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredHandControlFrame.setPoseAndUpdate(handControlFramePose);
 
       // Inverse Kinematics
       ArmIKSolver armIKSolver = new ArmIKSolver(RobotSide.LEFT, robotModel, fullRobotModel);
 
       armIKSolver.copySourceToWork();
-      armIKSolver.update(fullRobotModel.getChest().getBodyFixedFrame(), taskspacePose.getReferenceFrame());
+      armIKSolver.update(fullRobotModel.getChest().getBodyFixedFrame(), desiredHandControlFrame);
       armIKSolver.solve();
 
       for (int i = 0; i < armJointNames.length; i++)
