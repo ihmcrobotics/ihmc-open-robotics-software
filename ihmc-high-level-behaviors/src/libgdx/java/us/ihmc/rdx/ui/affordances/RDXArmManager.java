@@ -123,30 +123,14 @@ public class RDXArmManager
       handManager.create(baseUI, communicationHelper, syncedRobot);
    }
 
-   public void update()
+   public void update(boolean interactablesEnabled)
    {
       handManager.update();
 
-      boolean desiredHandPoseChanged = false;
+      boolean showWrench = indicateWrenchOnScreen.get();
+
       for (RobotSide side : interactableHands.sides())
       {
-         armIKSolvers.get(side).update(syncedRobot.getReferenceFrames().getChestFrame(),
-                                       interactableHands.get(side).getControlReferenceFrame());
-
-         // wrench expressed in wrist pitch body fixed-frame
-         boolean showWrench = indicateWrenchOnScreen.get();
-         if (interactableHands.get(side).getEstimatedHandWrenchArrows().getShow() != showWrench)
-            interactableHands.get(side).getEstimatedHandWrenchArrows().setShow(showWrench);
-         interactableHands.get(side).updateEstimatedWrench(syncedRobot.getHandWrenchCalculators().get(side).getFilteredWrench());
-
-         // Check if the desired hand pose changed and we need to run the solver again.
-         // We only want to evaluate this when we are going to take action on it
-         // Otherwise, we will not notice the desired changed while the solver was still solving
-         if (readyToSolve)
-         {
-            desiredHandPoseChanged |= armIKSolvers.get(side).getDesiredHandControlPoseChanged();
-         }
-
          if (showWrench)
          {
             panelHandWrenchIndicator.update(side,
@@ -155,44 +139,66 @@ public class RDXArmManager
          }
       }
 
-      // The following puts the solver on a thread as to not slow down the UI
-      if (readyToSolve && desiredHandPoseChanged)
+      if (interactablesEnabled)
       {
-         readyToSolve = false;
+         boolean desiredHandPoseChanged = false;
          for (RobotSide side : interactableHands.sides())
          {
-            armIKSolvers.get(side).copySourceToWork();
+            armIKSolvers.get(side).update(syncedRobot.getReferenceFrames().getChestFrame(), interactableHands.get(side).getControlReferenceFrame());
+
+            // wrench expressed in wrist pitch body fixed-frame
+            if (interactableHands.get(side).getEstimatedHandWrenchArrows().getShow() != showWrench)
+               interactableHands.get(side).getEstimatedHandWrenchArrows().setShow(showWrench);
+            interactableHands.get(side).updateEstimatedWrench(syncedRobot.getHandWrenchCalculators().get(side).getFilteredWrench());
+
+            // Check if the desired hand pose changed and we need to run the solver again.
+            // We only want to evaluate this when we are going to take action on it
+            // Otherwise, we will not notice the desired changed while the solver was still solving
+            if (readyToSolve)
+            {
+               desiredHandPoseChanged |= armIKSolvers.get(side).getDesiredHandControlPoseChanged();
+            }
          }
 
-         MissingThreadTools.startAThread("IKSolver", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+         // The following puts the solver on a thread as to not slow down the UI
+         if (readyToSolve && desiredHandPoseChanged)
          {
-            try
+            readyToSolve = false;
+            for (RobotSide side : interactableHands.sides())
             {
-               for (RobotSide side : interactableHands.sides())
+               armIKSolvers.get(side).copySourceToWork();
+            }
+
+            MissingThreadTools.startAThread("IKSolver", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+            {
+               try
                {
-                  armIKSolvers.get(side).solve();
+                  for (RobotSide side : interactableHands.sides())
+                  {
+                     armIKSolvers.get(side).solve();
+                  }
                }
-            }
-            finally
-            {
-               readyToCopySolution = true;
-            }
-         });
-      }
-
-      if (readyToCopySolution)
-      {
-         readyToCopySolution = false;
-         for (RobotSide side : interactableHands.sides())
-         {
-            MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(armIKSolvers.get(side).getSolutionOneDoFJoints(), desiredRobotArmJoints.get(side));
+               finally
+               {
+                  readyToCopySolution = true;
+               }
+            });
          }
 
-         readyToSolve = true;
-      }
+         if (readyToCopySolution)
+         {
+            readyToCopySolution = false;
+            for (RobotSide side : interactableHands.sides())
+            {
+               MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(armIKSolvers.get(side).getSolutionOneDoFJoints(), desiredRobotArmJoints.get(side));
+            }
 
-      desiredRobot.getDesiredFullRobotModel().getRootJoint().setJointConfiguration(syncedRobot.getFullRobotModel().getRootJoint().getJointPose());
-      desiredRobot.getDesiredFullRobotModel().updateFrames();
+            readyToSolve = true;
+         }
+
+         desiredRobot.getDesiredFullRobotModel().getRootJoint().setJointConfiguration(syncedRobot.getFullRobotModel().getRootJoint().getJointPose());
+         desiredRobot.getDesiredFullRobotModel().updateFrames();
+      }
    }
 
    public void renderImGuiWidgets()
