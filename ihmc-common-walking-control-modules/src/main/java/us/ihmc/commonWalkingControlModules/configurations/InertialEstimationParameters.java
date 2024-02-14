@@ -32,4 +32,7 @@ public interface InertialEstimationParameters
    /** CONSTRAINED_KF */
 
    public abstract int getMaxNumberOfIterationsForQP();
+
+   public abstract double getMinimumMassMultiplier();
+   public abstract double getMinimumDiagonalInertiaMultiplier();
 }

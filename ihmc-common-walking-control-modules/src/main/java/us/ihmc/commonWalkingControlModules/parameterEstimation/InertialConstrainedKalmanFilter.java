@@ -10,6 +10,7 @@ import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSol
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Set;
 
@@ -37,6 +38,17 @@ public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
    private final DMatrixRMaj updatedCovarianceComponentInvertedContainer;
    private final LinearSolverSafe<DMatrixRMaj> updatedCovarianceSolver;
 
+
+   Set<SpatialInertiaBasisOption>[] basisSets;
+
+   private final YoDouble minimumMassMultiplier;
+   private final YoDouble minimumDiagonalInertiaMultiplier;
+
+   private final DMatrixRMaj urdfValues;
+   private final SpatialInertiaBasisOption[] parameterOptions;
+
+   private final DMatrixRMaj constraintMatrix;
+   private final DMatrixRMaj constraintVector;
 
    public InertialConstrainedKalmanFilter(FullRobotModel model,
                                           Set<SpatialInertiaBasisOption>[] basisSets,
@@ -82,7 +94,34 @@ public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
       updatedCovarianceSolver = new LinearSolverSafe<>(LinearSolverFactory_DDRM.symmPosDef(measurementSize));
 
       qpSolver = new SimpleEfficientActiveSetQPSolver();
+      qpSolver.setUseWarmStart(true);
       qpSolver.setMaxNumberOfIterations(parameters.getMaxNumberOfIterationsForQP());
+
+      this.basisSets = basisSets;
+
+      minimumMassMultiplier = new YoDouble("minimumMassMultiplier", registry);
+      minimumMassMultiplier.set(parameters.getMinimumMassMultiplier());
+      minimumDiagonalInertiaMultiplier = new YoDouble("minimumDiagonalInertiaMultiplier", registry);
+      minimumDiagonalInertiaMultiplier.set(parameters.getMinimumDiagonalInertiaMultiplier());
+
+      urdfValues = new DMatrixRMaj(processSize, 1);
+      urdfValues.set(parameters.getURDFParameters(basisSets));
+      parameterOptions = new SpatialInertiaBasisOption[processSize];
+      int i = 0;
+      for (Set<SpatialInertiaBasisOption> basisSet : basisSets)
+      {
+         for (SpatialInertiaBasisOption option : SpatialInertiaBasisOption.values)
+         {
+            if (basisSet.contains(option))
+            {
+               parameterOptions[i] = option;
+               i++;
+            }
+         }
+      }
+
+      constraintMatrix = new DMatrixRMaj(processSize, processSize);
+      constraintVector = new DMatrixRMaj(processSize, 1);
    }
 
    @Override
@@ -132,8 +171,8 @@ public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
       costScalar = CommonOps_DDRM.dot(costScalarContainer, measurementResidual);
 
       // Solve QP
-      qpSolver.clear();  // TODO: see if you can remove this
       qpSolver.setQuadraticCostFunction(costMatrix, costVector, costScalar);
+      populateConstraints();
       qpSolver.solve(delta);
 
       // The QP only gives us the delta of the solution, we need to add it to the predicted state to get the updated state
@@ -159,5 +198,42 @@ public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
       CommonOps_DDRM.mult(predictedCovariance, updatedCovarianceContainer1, updatedCovarianceContainer2);
       CommonOps_DDRM.scale(-1.0, updatedCovarianceContainer2);
       CommonOps_DDRM.add(updatedCovarianceContainer2, predictedCovariance, updatedCovariance);
+   }
+
+
+   private void populateConstraints()
+   {
+      constraintVector.set(urdfValues);
+      for (int i = 0; i < constraintVector.getNumElements(); ++i)
+      {
+         switch(parameterOptions[i])
+         {
+            case M ->
+            {
+               constraintMatrix.set(i, i, 1.0);
+               constraintVector.set(i, 0, constraintVector.get(i, 0) * minimumMassMultiplier.getValue());
+            }
+            case I_XX, I_YY, I_ZZ ->
+            {
+               constraintMatrix.set(i, i, 1.0);
+               constraintVector.set(i, 0, constraintVector.get(i, 0) * minimumDiagonalInertiaMultiplier.getValue());
+            }
+            case MCOM_X, MCOM_Y, MCOM_Z, I_XY, I_XZ, I_YZ ->
+            {
+               // For now, we do nothing to constrain these parameters, so constraint matrix and constraint vector terms are both zero
+               constraintMatrix.set(i, i, 0.0);
+               constraintVector.set(i, 0);
+            }
+         }
+      }
+
+      // Because the solution of the constrained QP is the parameter deltas from the predicted state, we need to subtract the predicted state
+      CommonOps_DDRM.subtractEquals(constraintVector, predictedState);
+
+      // We've so far set up things for Cx > d, we need to scale both sides by -1 to flip the inequality
+      CommonOps_DDRM.scale(-1.0, constraintMatrix);
+      CommonOps_DDRM.scale(-1.0, constraintVector);
+
+      qpSolver.setLinearInequalityConstraints(constraintMatrix, constraintVector);
    }
 }
