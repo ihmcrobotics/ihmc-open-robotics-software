@@ -52,7 +52,7 @@ public class RDXHandConfigurationManager
          handQuickAccessButtons.put(side, new RDXHandQuickAccessButtons(baseUI, side, openHand, closeHand, calibrateHand, resetHand));
 
          handPositionSliders.put(side, new RDXSakeHandPositionSlider(communicationHelper, side));
-         handTorqueSliders.put(side, new RDXSakeHandTorqueSlider(syncedRobotModel, communicationHelper, side));
+         handTorqueSliders.put(side, new RDXSakeHandTorqueSlider(communicationHelper, side));
       }
 
       if (syncedRobotModel.getRobotModel().getHandModels().toString().contains("SakeHand"))
@@ -73,6 +73,7 @@ public class RDXHandConfigurationManager
       {
          sakeHandInfo.get(side).update();
          handQuickAccessButtons.get(side).update(sakeHandInfo.get(side));
+         handTorqueSliders.get(side).update();
       }
    }
 
