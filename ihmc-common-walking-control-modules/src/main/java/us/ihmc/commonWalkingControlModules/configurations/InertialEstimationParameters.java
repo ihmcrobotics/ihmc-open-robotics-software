@@ -28,4 +28,8 @@ public interface InertialEstimationParameters
    public abstract double getLegMeasurementCovariance();
    public abstract double getArmMeasurementCovariance();
    public abstract double getSpineMeasurementCovariance();
+
+   /** CONSTRAINED_KF */
+
+   public abstract int getMaxNumberOfIterationsForQP();
 }

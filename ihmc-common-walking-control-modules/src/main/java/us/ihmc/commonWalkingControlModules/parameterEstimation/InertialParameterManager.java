@@ -293,6 +293,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          {
             filter = new InertialKalmanFilter(estimateRobotModel,
                                               basisSets,
+                                              parameters,
                                               parameters.getURDFParameters(basisSets),
                                               CommonOps_DDRM.identity(nMeasurements),
                                               CommonOps_DDRM.identity(nMeasurements),
@@ -304,6 +305,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          {
             filter = new InertialConstrainedKalmanFilter(estimateRobotModel,
                                                          basisSets,
+                                                         parameters,
                                                          parameters.getURDFParameters(basisSets),
                                                          CommonOps_DDRM.identity(nMeasurements),
                                                          CommonOps_DDRM.identity(nMeasurements),
@@ -315,6 +317,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          {
             filter = new InertialPhysicallyConsistentKalmanFilter(estimateRobotModel,
                                                                   basisSets,
+                                                                  parameters,
                                                                   parameters.getURDFParameters(basisSets),
                                                                   CommonOps_DDRM.identity(nMeasurements),
                                                                   CommonOps_DDRM.identity(nMeasurements),

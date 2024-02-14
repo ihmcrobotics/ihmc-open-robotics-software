@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.parameterEstimation;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
@@ -37,6 +38,7 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
 
    public InertialPhysicallyConsistentKalmanFilter(FullRobotModel model,
                                                    Set<SpatialInertiaBasisOption>[] basisSets,
+                                                   InertialEstimationParameters parameters,
                                                    DMatrixRMaj initialParametersForEstimate,
                                                    DMatrixRMaj initialParameterCovariance,
                                                    DMatrixRMaj processCovariance,
@@ -46,6 +48,7 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
    {
       super(model,
             basisSets,
+            parameters,
             initialParametersForEstimate,
             initialParameterCovariance,
             processCovariance,
