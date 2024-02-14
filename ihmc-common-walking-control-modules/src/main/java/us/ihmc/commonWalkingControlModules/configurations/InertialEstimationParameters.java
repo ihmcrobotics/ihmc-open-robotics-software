@@ -22,6 +22,8 @@ public interface InertialEstimationParameters
    public abstract double getBiasCompensationWindowSizeInSeconds();
 
    public abstract double getProcessModelCovariance();
+   public double[] getProcessModelCovarianceForBody();
+
    public abstract double getFloatingBaseMeasurementCovariance();
    public abstract double getLegMeasurementCovariance();
    public abstract double getArmMeasurementCovariance();
