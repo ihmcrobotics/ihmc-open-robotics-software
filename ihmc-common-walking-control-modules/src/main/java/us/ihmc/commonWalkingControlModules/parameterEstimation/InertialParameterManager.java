@@ -11,6 +11,9 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.spatial.SpatialInertia;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -119,7 +122,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private double[] defaultProcessCovariances;  // keep track for resetting purposes
 
-   private YoBoolean passThroughEstimatesToController;
+   private final YoBoolean passThroughEstimatesToController;
+
+   private final YoBoolean tare;
+   private final SpatialInertiaReadOnly[] urdfSpatialInertias;
+   private final YoSpatialInertiaTemporary[] tareSpatialInertias;
 
    public InertialParameterManager(InertialParameterManagerFactory.EstimatorType type, HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
    {
@@ -287,6 +294,16 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       passThroughEstimatesToController = new YoBoolean("passThroughEstimatesToController", registry);
       passThroughEstimatesToController.set(false);
+
+      tare = new YoBoolean("tare", registry);
+      tare.set(false);
+      tareSpatialInertias = new YoSpatialInertiaTemporary[estimateModelBodies.length];
+      urdfSpatialInertias = new SpatialInertiaBasics[estimateModelBodies.length];
+      for (int i = 0; i < estimateModelBodies.length; i++)
+      {
+         tareSpatialInertias[i] = new YoSpatialInertiaTemporary(estimateModelBodies[i].getInertia(), "_tare", registry);
+         urdfSpatialInertias[i] = new SpatialInertia(estimateModelBodies[i].getInertia());
+      }
    }
 
    private void setFilter(InertialParameterManagerFactory.EstimatorType type)
@@ -431,6 +448,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          biasCompensator.reset();
          calculateBias.set(false);
          eraseBias.set(false);
+      }
+
+      if (tare.getValue())
+      {
+         updateTareSpatialInertias();
+         tare.set(false);
       }
 
       if (enableFilter.getValue())
@@ -651,19 +674,47 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    {
       for (int i = 0; i < estimateModelBodies.length; i++)
       {
-         RigidBodyReadOnly estimateBody = estimateModelBodies[i];
-         RigidBodyBasics actualBody = actualModelBodies[i];
+         if (!basisSets[i].isEmpty())  // Only update the bodies we're estimating
+         {
+            SpatialInertiaReadOnly estimateBodyInertia = estimateModelBodies[i].getInertia();
+            SpatialInertiaReadOnly tareBodyInertia = tareSpatialInertias[i];
+            SpatialInertiaReadOnly urdfBodyInertia = urdfSpatialInertias[i];
 
-         // TODO: put some safety checks here so we don't send nutty stuff to the robot maybe innovation gating?
-         actualBody.getInertia().setMass(estimateBody.getInertia().getMass());
-         actualBody.getInertia().setCenterOfMassOffset(estimateBody.getInertia().getCenterOfMassOffset());
-         actualBody.getInertia().setMomentOfInertia(estimateBody.getInertia().getMomentOfInertia().getM00(),  // Ixx
-                                                    estimateBody.getInertia().getMomentOfInertia().getM01(),  // Ixy
-                                                   estimateBody.getInertia().getMomentOfInertia().getM02(),  // Ixz
-                                                   estimateBody.getInertia().getMomentOfInertia().getM11(),  // Iyy
-                                                   estimateBody.getInertia().getMomentOfInertia().getM12(),  // Iyz
-                                                   estimateBody.getInertia().getMomentOfInertia().getM22());  // Izz
+            SpatialInertiaBasics actualBodyInertia = actualModelBodies[i].getInertia();
+
+            // TODO: put some safety checks here so we don't send nutty stuff to the robot maybe innovation gating?
+            // Calculate the current differences from the tare value, these deltas are what we send to the controller
+            double deltaMass = estimateBodyInertia.getMass() - tareBodyInertia.getMass();
+            actualBodyInertia.setMass(urdfBodyInertia.getMass() + deltaMass);
+
+            double deltaCoMX = estimateBodyInertia.getCenterOfMassOffset().getX() - tareBodyInertia.getCenterOfMassOffset().getX();
+            double deltaCoMY = estimateBodyInertia.getCenterOfMassOffset().getY() - tareBodyInertia.getCenterOfMassOffset().getY();
+            double deltaCoMZ = estimateBodyInertia.getCenterOfMassOffset().getZ() - tareBodyInertia.getCenterOfMassOffset().getZ();
+            actualBodyInertia.setCenterOfMassOffset(urdfBodyInertia.getCenterOfMassOffset().getX() + deltaCoMX,
+                                                   urdfBodyInertia.getCenterOfMassOffset().getY() + deltaCoMY,
+                                                   urdfBodyInertia.getCenterOfMassOffset().getZ() + deltaCoMZ);
+
+            double deltaIxx = estimateBodyInertia.getMomentOfInertia().getM00() - tareBodyInertia.getMomentOfInertia().getM00();
+            double deltaIxy = estimateBodyInertia.getMomentOfInertia().getM01() - tareBodyInertia.getMomentOfInertia().getM01();
+            double deltaIxz = estimateBodyInertia.getMomentOfInertia().getM02() - tareBodyInertia.getMomentOfInertia().getM02();
+            double deltaIyy = estimateBodyInertia.getMomentOfInertia().getM11() - tareBodyInertia.getMomentOfInertia().getM11();
+            double deltaIyz = estimateBodyInertia.getMomentOfInertia().getM12() - tareBodyInertia.getMomentOfInertia().getM12();
+            double deltaIzz = estimateBodyInertia.getMomentOfInertia().getM22() - tareBodyInertia.getMomentOfInertia().getM22();
+            actualBodyInertia.setMomentOfInertia(urdfBodyInertia.getMomentOfInertia().getM00() + deltaIxx,
+                                               urdfBodyInertia.getMomentOfInertia().getM01() + deltaIxy,
+                                               urdfBodyInertia.getMomentOfInertia().getM02() + deltaIxz,
+                                               urdfBodyInertia.getMomentOfInertia().getM11() + deltaIyy,
+                                               urdfBodyInertia.getMomentOfInertia().getM12() + deltaIyz,
+                                               urdfBodyInertia.getMomentOfInertia().getM22() + deltaIzz);
+         }
       }
+   }
+
+   private void updateTareSpatialInertias()
+   {
+      for (int i = 0; i < estimateModelBodies.length; i++)
+         if (!basisSets[i].isEmpty())  // Only tare the bodies we're estimating
+            tareSpatialInertias[i].set(estimateModelBodies[i].getInertia());
    }
 
    private void updateVisuals()
