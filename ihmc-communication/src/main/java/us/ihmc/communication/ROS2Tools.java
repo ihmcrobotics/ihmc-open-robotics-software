@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.SakeHandStatusMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import mission_control_msgs.msg.dds.*;
@@ -94,6 +95,8 @@ public class ROS2Tools
                                                                                                            .withTypeName(HandDesiredConfigurationMessage.class);
    private static final ROS2Topic<SakeHandDesiredCommandMessage> HAND_SAKE_DESIRED_COMMAND = HUMANOID_CONTROLLER.withInput()
                                                                                                                 .withTypeName(SakeHandDesiredCommandMessage.class);
+   private static final ROS2Topic<SakeHandStatusMessage> HAND_SAKE_DESIRED_STATUS = HUMANOID_CONTROLLER.withOutput()
+                                                                                                       .withTypeName(SakeHandStatusMessage.class);
    private static final ROS2Topic<HandJointAnglePacket> HAND_JOINT_ANGLES = HUMANOID_CONTROLLER.withOutput().withTypeName(HandJointAnglePacket.class);
 
    public static final ROS2Topic<Float64> BOX_MASS = IHMC_ROOT.withSuffix("box_mass").withType(Float64.class);
@@ -113,6 +116,11 @@ public class ROS2Tools
    public static ROS2Topic<SakeHandDesiredCommandMessage> getHandSakeCommandTopic(String robotName)
    {
       return HAND_SAKE_DESIRED_COMMAND.withRobot(robotName);
+   }
+
+   public static ROS2Topic<SakeHandStatusMessage> getHandSakeStatusTopic(String robotName)
+   {
+      return HAND_SAKE_DESIRED_STATUS.withRobot(robotName);
    }
 
    public static ROS2Topic<HandJointAnglePacket> getHandJointAnglesTopic(String robotName)

@@ -15,7 +15,7 @@ import us.ihmc.rdx.ui.widgets.ImGuiGripperWidget;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_ANGLE_BETWEEN_FINGERS;
-import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_TORQUE_NEWTONS;
+import static us.ihmc.avatar.sakeGripper.SakeHandParameters.FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT;
 
 public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActionState, SakeHandCommandActionDefinition>
 {
@@ -47,7 +47,7 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
       torqueWidget = new ImDoubleWrapper(getDefinition()::getMaxTorque,
                                            getDefinition()::setMaxTorque,
                                            imDouble -> ImGuiTools.sliderDouble(labels.get("Torque"), imDouble, 0.0, 1.0,
-                                                                               "%.1f N".formatted(getDefinition().getMaxTorque() * MAX_TORQUE_NEWTONS)));
+                                                                               "%.1f N".formatted(getDefinition().getMaxTorque() * FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT)));
       executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
                                                           getDefinition()::setExecuteWithNextAction,
                                                           imBoolean -> imgui.ImGui.checkbox(labels.get("Execute with next action"),
