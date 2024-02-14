@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.behavior.actions;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -18,10 +17,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
@@ -30,33 +26,25 @@ import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
-import us.ihmc.rdx.simulation.scs2.RDXFrameNodePart;
-import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
-import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
-import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.rdx.ui.graphics.RDXArmMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXIKSolverColors;
 import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.interaction.MouseCollidable;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.wholeBodyController.HandTransformTools;
 
@@ -71,7 +59,6 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final ImGuiHandWidget handIconWidget = new ImGuiHandWidget();
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
-   private final SideDependentList<String> handNames = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransformReadOnly> handGraphicToControlFrameTransforms = new SideDependentList<>();
    private final MutableReferenceFrame graphicFrame = new MutableReferenceFrame();
    private final MutableReferenceFrame collisionShapeFrame = new MutableReferenceFrame();
@@ -87,9 +74,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
    private final ImBooleanWrapper jointSpaceControlWrapper;
-   private final SideDependentList<RDXRigidBody> armMultiBodyGraphics = new SideDependentList<>();
-   private final SideDependentList<OneDoFJointBasics[]> armGraphicOneDoFJoints = new SideDependentList<>();
-   private final SideDependentList<Color> currentColor = new SideDependentList<>();
+   private final SideDependentList<RDXArmMultiBodyGraphic> armMultiBodyGraphics = new SideDependentList<>();
    private final RDX3DPanelTooltip tooltip;
    private final RDXTrajectoryGraphic trajectoryGraphic = new RDXTrajectoryGraphic();
 
@@ -151,12 +136,10 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       FullHumanoidRobotModel syncedFullRobotModel = syncedRobot.getFullRobotModel();
       for (RobotSide side : RobotSide.values)
       {
-         handNames.put(side, syncedFullRobotModel.getHand(side).getName());
-
          handGraphicToControlFrameTransforms.put(side, HandTransformTools.getHandGraphicToControlFrameTransform(syncedFullRobotModel,
                                                                                                                 robotModel.getUIParameters(),
                                                                                                                 side));
-         String handBodyName = handNames.get(side);
+         String handBodyName = syncedFullRobotModel.getHand(side).getName();
          String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(handBodyName));
          highlightModels.put(side, new RDXInteractableHighlightModel(modelFileName));
 
@@ -171,26 +154,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             mouseCollidables.add(new MouseCollidable(handCollidable));
          }
 
-         HumanoidJointNameMap jointMap = robotModel.getJointMap();
-         ArmJointName firstArmJointName = jointMap.getArmJointNames()[0];
-         RobotDefinition armDefinition = RobotDefinitionTools.cloneLimbOnlyDefinitionWithElevator(robotModel.getRobotDefinition(),
-                                                                                                  jointMap.getChestName(),
-                                                                                                  jointMap.getArmJointName(side, firstArmJointName));
-         MaterialDefinition material = new MaterialDefinition(RDXIKSolverColors.GOOD_QUALITY_COLOR_DEFINITION);
-         currentColor.put(side, RDXIKSolverColors.GOOD_QUALITY_COLOR);
-         RobotDefinition.forEachRigidBodyDefinition(armDefinition.getRootBodyDefinition(), body ->
-         {
-            body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material));
-         });
-         RigidBodyBasics armOnlyMultiBody
-               = MultiBodySystemMissingTools.getDetachedCopyOfSubtreeWithElevator(syncedFullRobotModel.getChest(),
-                                                                                  syncedFullRobotModel.getArmJoint(side, firstArmJointName),
-                                                                                  syncedFullRobotModel.getHand(side).getName());
-         armMultiBodyGraphics.put(side,
-                                  RDXMultiBodySystemFactories.toRDXMultiBodySystem(armOnlyMultiBody, armDefinition, RDXVisualTools.DESIRED_ROBOT_SCALING));
-         armMultiBodyGraphics.get(side).getRigidBodiesToHide().add("elevator");
-         armMultiBodyGraphics.get(side).getRigidBodiesToHide().add(jointMap.getChestName());
-         armGraphicOneDoFJoints.put(side, MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, armMultiBodyGraphics.get(side)));
+         armMultiBodyGraphics.put(side, new RDXArmMultiBodyGraphic(robotModel, syncedFullRobotModel, side));
       }
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
@@ -274,35 +238,14 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
    private void visualizeIK()
    {
-      SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getDefinition().getSide()).getRigidBody().getChildrenJoints().get(0);
-      floatingJoint.getJointPose().set(state.getGoalChestToWorldTransform().getValueReadOnly());
-
-      for (int i = 0; i < armGraphicOneDoFJoints.get(getDefinition().getSide()).length; i++)
+      RDXArmMultiBodyGraphic armMultiBodyGraphic = armMultiBodyGraphics.get(getDefinition().getSide());
+      armMultiBodyGraphic.getFloatingJoint().getJointPose().set(state.getGoalChestToWorldTransform().getValueReadOnly());
+      for (int i = 0; i < armMultiBodyGraphic.getJoints().length; i++)
       {
-         armGraphicOneDoFJoints.get(getDefinition().getSide())[i].setQ(state.getJointAngles().getValueReadOnly(i));
+         armMultiBodyGraphic.getJoints()[i].setQ(state.getJointAngles().getValueReadOnly(i));
       }
-      armMultiBodyGraphics.get(getDefinition().getSide()).updateFramesRecursively();
-      armMultiBodyGraphics.get(getDefinition().getSide()).updateSubtreeGraphics();
-
-      // We probably don't want to recolor the mesh every tick.
-      Color color = RDXIKSolverColors.getColor(state.getSolutionQuality());
-      if (color != currentColor.get(getDefinition().getSide()))
-      {
-         currentColor.put(getDefinition().getSide(), color);
-         for (RigidBodyBasics body : armMultiBodyGraphics.get(getDefinition().getSide()).subtreeIterable())
-         {
-            if (body instanceof RDXRigidBody rdxRigidBody)
-            {
-               if (rdxRigidBody.getVisualGraphicsNode() != null)
-               {
-                  for (RDXFrameNodePart part : rdxRigidBody.getVisualGraphicsNode().getParts())
-                  {
-                     part.getModelInstance().setDiffuseColor(color);
-                  }
-               }
-            }
-         }
-      }
+      armMultiBodyGraphic.updateAfterModifyingConfiguration();
+      armMultiBodyGraphic.setColor(RDXIKSolverColors.getColor(state.getSolutionQuality()));
    }
 
    @Override
@@ -410,7 +353,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          poseGizmo.getVirtualRenderables(renderables, pool);
 
          if (state.getIsNextForExecution())
-            armMultiBodyGraphics.get(getDefinition().getSide()).getVisualRenderables(renderables, pool);
+            armMultiBodyGraphics.get(getDefinition().getSide()).getRootBody().getVisualRenderables(renderables, pool);
 
          trajectoryGraphic.getRenderables(renderables, pool);
       }

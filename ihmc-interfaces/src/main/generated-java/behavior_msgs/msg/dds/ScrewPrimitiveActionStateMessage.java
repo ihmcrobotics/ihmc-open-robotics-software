@@ -28,6 +28,12 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
    public double preview_trajectory_duration_;
    public double preview_trajectory_linear_velocity_;
    public double preview_trajectory_angular_velocity_;
+   /**
+            * The user requested IK preview time normalized from 0.0 to 1.0
+            */
+   public double preview_requested_time_;
+   public double[] preview_joint_angles_;
+   public double preview_solution_quality_;
 
    public ScrewPrimitiveActionStateMessage()
    {
@@ -36,6 +42,8 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
       preview_trajectory_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (50, new geometry_msgs.msg.dds.PosePubSubType());
       force_ = new us.ihmc.euclid.tuple3D.Vector3D();
       torque_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      preview_joint_angles_ = new double[7];
+
 
    }
 
@@ -57,6 +65,16 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
       preview_trajectory_linear_velocity_ = other.preview_trajectory_linear_velocity_;
 
       preview_trajectory_angular_velocity_ = other.preview_trajectory_angular_velocity_;
+
+      preview_requested_time_ = other.preview_requested_time_;
+
+      for(int i1 = 0; i1 < preview_joint_angles_.length; ++i1)
+      {
+            preview_joint_angles_[i1] = other.preview_joint_angles_[i1];
+
+      }
+
+      preview_solution_quality_ = other.preview_solution_quality_;
 
    }
 
@@ -129,6 +147,36 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
       return preview_trajectory_angular_velocity_;
    }
 
+   /**
+            * The user requested IK preview time normalized from 0.0 to 1.0
+            */
+   public void setPreviewRequestedTime(double preview_requested_time)
+   {
+      preview_requested_time_ = preview_requested_time;
+   }
+   /**
+            * The user requested IK preview time normalized from 0.0 to 1.0
+            */
+   public double getPreviewRequestedTime()
+   {
+      return preview_requested_time_;
+   }
+
+
+   public double[] getPreviewJointAngles()
+   {
+      return preview_joint_angles_;
+   }
+
+   public void setPreviewSolutionQuality(double preview_solution_quality)
+   {
+      preview_solution_quality_ = preview_solution_quality;
+   }
+   public double getPreviewSolutionQuality()
+   {
+      return preview_solution_quality_;
+   }
+
 
    public static Supplier<ScrewPrimitiveActionStateMessagePubSubType> getPubSubType()
    {
@@ -164,6 +212,15 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.preview_trajectory_angular_velocity_, other.preview_trajectory_angular_velocity_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.preview_requested_time_, other.preview_requested_time_, epsilon)) return false;
+
+      for(int i3 = 0; i3 < preview_joint_angles_.length; ++i3)
+      {
+                if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.preview_joint_angles_[i3], other.preview_joint_angles_[i3], epsilon)) return false;
+      }
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.preview_solution_quality_, other.preview_solution_quality_, epsilon)) return false;
+
 
       return true;
    }
@@ -187,6 +244,15 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
       if(this.preview_trajectory_linear_velocity_ != otherMyClass.preview_trajectory_linear_velocity_) return false;
 
       if(this.preview_trajectory_angular_velocity_ != otherMyClass.preview_trajectory_angular_velocity_) return false;
+
+      if(this.preview_requested_time_ != otherMyClass.preview_requested_time_) return false;
+
+      for(int i5 = 0; i5 < preview_joint_angles_.length; ++i5)
+      {
+                if(this.preview_joint_angles_[i5] != otherMyClass.preview_joint_angles_[i5]) return false;
+
+      }
+      if(this.preview_solution_quality_ != otherMyClass.preview_solution_quality_) return false;
 
 
       return true;
@@ -213,7 +279,13 @@ public class ScrewPrimitiveActionStateMessage extends Packet<ScrewPrimitiveActio
       builder.append("preview_trajectory_linear_velocity=");
       builder.append(this.preview_trajectory_linear_velocity_);      builder.append(", ");
       builder.append("preview_trajectory_angular_velocity=");
-      builder.append(this.preview_trajectory_angular_velocity_);
+      builder.append(this.preview_trajectory_angular_velocity_);      builder.append(", ");
+      builder.append("preview_requested_time=");
+      builder.append(this.preview_requested_time_);      builder.append(", ");
+      builder.append("preview_joint_angles=");
+      builder.append(java.util.Arrays.toString(this.preview_joint_angles_));      builder.append(", ");
+      builder.append("preview_solution_quality=");
+      builder.append(this.preview_solution_quality_);
       builder.append("}");
       return builder.toString();
    }
