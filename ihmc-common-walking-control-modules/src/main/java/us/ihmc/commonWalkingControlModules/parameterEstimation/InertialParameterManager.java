@@ -15,6 +15,7 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
+import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.MatrixMissingTools;
@@ -92,8 +93,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final AlphaFilteredYoMatrix filteredEstimate;
    private final AlphaFilteredYoMatrix doubleFilteredEstimate;
 
-   /** Using just one value for process model, applying it to all parameters. */
-   private final YoDouble processCovariance;
+   /** We specify the process covariances for every parameter in a rigid body, then use the same for all bodies */
+   private YoDouble[] processCovariancesForSingleBody;
    private final YoDouble floatingBaseMeasurementCovariance;
    private final YoDouble legsMeasurementCovariance;
    private final YoDouble armsMeasurementCovariance;
@@ -115,6 +116,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoDouble normalizedInnovation;
 
    private final ExecutionTimer regressorTimer = new ExecutionTimer("RegressorTimer", registry);
+
+   private double[] defaultProcessCovariances;  // keep track for resetting purposes
 
    public InertialParameterManager(InertialParameterManagerFactory.EstimatorType type, HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
    {
@@ -250,8 +253,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                          null,
                                                          registry);
 
-      processCovariance = new YoDouble("processCovariance", registry);
-      processCovariance.set(parameters.getProcessModelCovariance());
+      // Process covariances are initialized here, but actually set later depending on the type of filter used
+      // (and thus on the type of parameter -- which will require different covariances for different units)
+      processCovariancesForSingleBody = new YoDouble[RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
       floatingBaseMeasurementCovariance = new YoDouble("floatingBaseMeasurementCovariance", registry);
       floatingBaseMeasurementCovariance.set(parameters.getFloatingBaseMeasurementCovariance());
       legsMeasurementCovariance = new YoDouble("legsMeasurementCovariance", registry);
@@ -282,29 +286,51 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private void setFilter(InertialParameterManagerFactory.EstimatorType type)
    {
+      defaultProcessCovariances = parameters.getProcessModelCovarianceForBody();
       switch (type)
       {
-         case KF -> filter = new InertialKalmanFilter(estimateRobotModel,
-                                                      basisSets,
-                                                      parameters.getURDFParameters(basisSets),
-                                                      CommonOps_DDRM.identity(nMeasurements),
-                                                      CommonOps_DDRM.identity(nMeasurements),
-                                                      CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
-                                                      registry);
-         case CONSTRAINED_KF -> filter = new InertialConstrainedKalmanFilter(estimateRobotModel,
-                                                                             basisSets,
-                                                                             parameters.getURDFParameters(basisSets),
-                                                                             CommonOps_DDRM.identity(nMeasurements),
-                                                                             CommonOps_DDRM.identity(nMeasurements),
-                                                                             CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
-                                                                             registry);
-         case PHYSICALLY_CONSISTENT_EKF -> filter = new InertialPhysicallyConsistentKalmanFilter(estimateRobotModel,
-                                                                                          basisSets,
-                                                                                          parameters.getURDFParameters(basisSets),
-                                                                                          CommonOps_DDRM.identity(nMeasurements),
-                                                                                          CommonOps_DDRM.identity(nMeasurements),
-                                                                                          CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
-                                                                                          registry);
+         case KF ->
+         {
+            filter = new InertialKalmanFilter(estimateRobotModel,
+                                              basisSets,
+                                              parameters.getURDFParameters(basisSets),
+                                              CommonOps_DDRM.identity(nMeasurements),
+                                              CommonOps_DDRM.identity(nMeasurements),
+                                              CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
+                                              registry);
+            createProcessCovariances(RigidBodyInertialParametersTools.getNamesForPiBasis(), defaultProcessCovariances);
+         }
+         case CONSTRAINED_KF ->
+         {
+            filter = new InertialConstrainedKalmanFilter(estimateRobotModel,
+                                                         basisSets,
+                                                         parameters.getURDFParameters(basisSets),
+                                                         CommonOps_DDRM.identity(nMeasurements),
+                                                         CommonOps_DDRM.identity(nMeasurements),
+                                                         CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
+                                                         registry);
+            createProcessCovariances(RigidBodyInertialParametersTools.getNamesForPiBasis(), defaultProcessCovariances);
+         }
+         case PHYSICALLY_CONSISTENT_EKF ->
+         {
+            filter = new InertialPhysicallyConsistentKalmanFilter(estimateRobotModel,
+                                                                  basisSets,
+                                                                  parameters.getURDFParameters(basisSets),
+                                                                  CommonOps_DDRM.identity(nMeasurements),
+                                                                  CommonOps_DDRM.identity(nMeasurements),
+                                                                  CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
+                                                                  registry);
+            createProcessCovariances(RigidBodyInertialParametersTools.getNamesForThetaBasis(), defaultProcessCovariances);
+         }
+      }
+   }
+
+   private void createProcessCovariances(String[] names, double[] defaults)
+   {
+      for (int i = 0; i < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; ++i)
+      {
+         processCovariancesForSingleBody[i] = new YoDouble("processCovariance_" + names[i], registry);
+         processCovariancesForSingleBody[i].set(defaults[i]);
       }
    }
 
@@ -343,7 +369,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    public void resetConfig()
    {
-      processCovariance.set(parameters.getProcessModelCovariance());
+      for (int i = 0; i < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; ++i)
+         processCovariancesForSingleBody[i].set(defaultProcessCovariances[i]);
+
       floatingBaseMeasurementCovariance.set(parameters.getFloatingBaseMeasurementCovariance());
       legsMeasurementCovariance.set(parameters.getLegMeasurementCovariance());
       armsMeasurementCovariance.set(parameters.getArmMeasurementCovariance());
@@ -444,13 +472,18 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private void updateFilterCovariances()
    {
       // Set diagonal of process covariance
-      CommonOps_DDRM.setIdentity(filter.getProcessCovariance());
-      CommonOps_DDRM.scale(processCovariance.getValue(), filter.getProcessCovariance());
+      DMatrixRMaj processCovariance = filter.getProcessCovariance();
+      int parameterIndex = 0;
+      for (int i = 0; i < processCovariance.getNumRows(); ++i)  // we'll set the diagonals
+      {
+         processCovariance.set(i, i, processCovariancesForSingleBody[parameterIndex].getValue());
+         parameterIndex++;
+      }
 
       // Set diagonal entries of measurement covariance according to the part of the body
-      for (int i = 0; i < actualModelJoints.size(); ++i)
+      for (int j = 0; j < actualModelJoints.size(); ++j)
       {
-         JointReadOnly joint = actualModelJoints.get(i);
+         JointReadOnly joint = actualModelJoints.get(j);
          int[] indices = jointIndexHandler.getJointIndices(joint);
 
          if (joint.getName().contains("PELVIS"))
@@ -672,48 +705,5 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       }
 
       return rowNames.toArray(new String[0]);
-   }
-
-   private enum ParameterRepresentation
-   {
-      PI_BASIS, THETA_BASIS;
-
-      private static String[] getRowNames(ParameterRepresentation representation)
-      {
-         String[] rowNames = new String[RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
-         switch (representation)
-         {
-            case PI_BASIS:
-            {
-               rowNames[0] = "m";
-               rowNames[1] = "comX";
-               rowNames[2] = "comY";
-               rowNames[3] = "comZ";
-               rowNames[4] = "Ixx";
-               rowNames[5] = "Ixy";
-               rowNames[6] = "Iyy";
-               rowNames[7] = "Ixz";
-               rowNames[8] = "Iyz";
-               rowNames[9] = "Izz";
-               return rowNames;
-            }
-            case THETA_BASIS:
-            {
-               rowNames[0] = "alpha";
-               rowNames[1] = "dx";
-               rowNames[2] = "dy";
-               rowNames[3] = "dz";
-               rowNames[4] = "sxy";
-               rowNames[5] = "sxz";
-               rowNames[6] = "syz";
-               rowNames[7] = "tx";
-               rowNames[8] = "ty";
-               rowNames[9] = "tz";
-               return rowNames;
-            }
-            default:
-               throw new RuntimeException("Unhandled case: " + representation);
-         }
-      }
    }
 }
