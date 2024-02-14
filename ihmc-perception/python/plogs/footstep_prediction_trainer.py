@@ -397,12 +397,12 @@ def load_dataset(validation_split):
     #     "20240212_035650_AStarDataset_Generated_300.hdf5"
     # ]
 
-    files = os.listdir(path)
+    files = sorted(os.listdir(path))
 
     # filter by no "MCFP" in file name
-    files = [file for file in files if "MCFP" in file]
+    # files = [file for file in files if "MCFP" in file]
 
-    files = files[:1]
+    # files = files[:1]
 
     
     datasets = []
