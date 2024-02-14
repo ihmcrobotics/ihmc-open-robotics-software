@@ -41,7 +41,7 @@ public class TerrainPlanningDatasetManager
    public void startLogger(String suffix)
    {
       perceptionDataLogger = new PerceptionDataLogger();
-      String logFileName = HDF5Tools.generateFileName("AStarDataset_" + suffix);
+      String logFileName = HDF5Tools.generateFileName(suffix);
       FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
       perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
