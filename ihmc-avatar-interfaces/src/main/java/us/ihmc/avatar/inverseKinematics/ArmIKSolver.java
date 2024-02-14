@@ -153,6 +153,11 @@ public class ArmIKSolver
 
       // selects everything
       selectionMatrix.resetSelection();
+      if (robotModel.getJointMap().getArmJointNames().length == 4)
+      {
+         selectionMatrix.getAngularPart().selectXAxis(false);
+         selectionMatrix.getAngularPart().selectYAxis(false);
+      }
    }
 
    public void copySourceToWork()
