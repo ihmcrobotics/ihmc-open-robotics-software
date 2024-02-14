@@ -10,6 +10,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
+import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
@@ -48,7 +49,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final int nDoFs;
-   private final int nMeasurements;
+   private final int nParameters;
 
    private final FullHumanoidRobotModel actualRobotModel;
    private final RigidBodyBasics[] actualModelBodies;
@@ -128,6 +129,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final SpatialInertiaReadOnly[] urdfSpatialInertias;
    private final YoSpatialInertiaTemporary[] tareSpatialInertias;
 
+   private final SpatialInertiaBasisOption[] processBasisOptions;
+
    public InertialParameterManager(InertialParameterManagerFactory.EstimatorType type, HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
@@ -174,7 +177,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(estimateRobotModel.getRootJoint().subtreeArray());
       basisSets = parameters.getParametersToEstimate();
       int[] sizes = RegressorTools.sizePartitions(basisSets);
-      nMeasurements = sizes[0];
+      nParameters = sizes[0];
       int nNonEmptyBasisSets = 0;
       for (Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption> basisSet : basisSets)
          if (!basisSet.isEmpty())
@@ -183,7 +186,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       regressorBlocks = new DMatrixRMaj[nNonEmptyBasisSets];
       for (int i = 0; i < nNonEmptyBasisSets; i++)
          regressorBlocks[i] = new DMatrixRMaj(nDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
-      regressor = new DMatrixRMaj(nDoFs, nMeasurements);
+      regressor = new DMatrixRMaj(nDoFs, nParameters);
 
       zeroInverseDynamicsParameters(inverseDynamicsModelBodies, basisSets);
 
@@ -241,22 +244,19 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       postProcessingAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt);
 
-      estimate = new YoMatrix("inertialParameterEstimate",
-                              nMeasurements,
+      estimate = new YoMatrix("inertialParameterEstimate", nParameters,
                               1,
                               getRowNamesForEstimates(basisSets, estimateModelBodies),
                               null,
                               registry);
 
       estimateFilteringAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(), dt);
-      filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate", estimateFilteringAlpha,
-                                                   nMeasurements,
+      filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate", estimateFilteringAlpha, nParameters,
                                                    1,
                                                    getRowNamesForEstimates(basisSets, estimateModelBodies),
                                                    null,
                                                    registry);
-      doubleFilteredEstimate = new AlphaFilteredYoMatrix("doubleFilteredInertialParameterEstimate", estimateFilteringAlpha,
-                                                         nMeasurements,
+      doubleFilteredEstimate = new AlphaFilteredYoMatrix("doubleFilteredInertialParameterEstimate", estimateFilteringAlpha, nParameters,
                                                          1,
                                                          getRowNamesForEstimates(basisSets, estimateModelBodies),
                                                          null,
@@ -304,6 +304,21 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          tareSpatialInertias[i] = new YoSpatialInertiaTemporary(estimateModelBodies[i].getInertia(), "_tare", registry);
          urdfSpatialInertias[i] = new SpatialInertia(estimateModelBodies[i].getInertia());
       }
+
+      processBasisOptions = new SpatialInertiaBasisOption[nParameters];
+      int index = 0;
+      for (Set<SpatialInertiaBasisOption> basisSet : basisSets)
+      {
+         for (SpatialInertiaBasisOption basisOption : SpatialInertiaBasisOption.values)
+         {
+            if (basisSet.contains(basisOption))
+            {
+               processBasisOptions[index] = basisOption;
+               index++;
+            }
+         }
+      }
+
    }
 
    private void setFilter(InertialParameterManagerFactory.EstimatorType type)
@@ -317,8 +332,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                               basisSets,
                                               parameters,
                                               parameters.getURDFParameters(basisSets),
-                                              CommonOps_DDRM.identity(nMeasurements),
-                                              CommonOps_DDRM.identity(nMeasurements),
+                                              CommonOps_DDRM.identity(nParameters),
+                                              CommonOps_DDRM.identity(nParameters),
                                               CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
                                               registry);
             createProcessCovariances(RigidBodyInertialParametersTools.getNamesForPiBasis(), defaultProcessCovariances);
@@ -329,8 +344,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                          basisSets,
                                                          parameters,
                                                          parameters.getURDFParameters(basisSets),
-                                                         CommonOps_DDRM.identity(nMeasurements),
-                                                         CommonOps_DDRM.identity(nMeasurements),
+                                                         CommonOps_DDRM.identity(nParameters),
+                                                         CommonOps_DDRM.identity(nParameters),
                                                          CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
                                                          registry);
             createProcessCovariances(RigidBodyInertialParametersTools.getNamesForPiBasis(), defaultProcessCovariances);
@@ -341,8 +356,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                                   basisSets,
                                                                   parameters,
                                                                   parameters.getURDFParameters(basisSets),
-                                                                  CommonOps_DDRM.identity(nMeasurements),
-                                                                  CommonOps_DDRM.identity(nMeasurements),
+                                                                  CommonOps_DDRM.identity(nParameters),
+                                                                  CommonOps_DDRM.identity(nParameters),
                                                                   CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
                                                                   registry);
             createProcessCovariances(RigidBodyInertialParametersTools.getNamesForThetaBasis(), defaultProcessCovariances);
@@ -512,7 +527,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       for (int i = 0; i < processCovariance.getNumRows(); ++i)  // we'll set the diagonals
       {
          // Mod by the number of parameters per rigid body to cycle through the parameters
-         processCovariance.set(i, i, processCovariancesForSingleBody[parameterIndex % RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY].getValue());
+         processCovariance.set(i, i, processCovariancesForSingleBody[processBasisOptions[i % RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY].ordinal()].getValue());
          parameterIndex++;
       }
 
