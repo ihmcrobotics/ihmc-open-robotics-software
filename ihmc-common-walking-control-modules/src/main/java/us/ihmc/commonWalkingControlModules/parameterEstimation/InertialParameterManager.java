@@ -48,7 +48,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final int nMeasurements;
 
    private final FullHumanoidRobotModel actualRobotModel;
-   private final RigidBodyReadOnly[] actualModelBodies;
+   private final RigidBodyBasics[] actualModelBodies;
    private final List<? extends JointBasics> actualModelJoints;
 
    private final FullHumanoidRobotModel estimateRobotModel;
@@ -118,6 +118,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final ExecutionTimer regressorTimer = new ExecutionTimer("RegressorTimer", registry);
 
    private double[] defaultProcessCovariances;  // keep track for resetting purposes
+
+   private YoBoolean passThroughEstimatesToController;
 
    public InertialParameterManager(InertialParameterManagerFactory.EstimatorType type, HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
    {
@@ -282,6 +284,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       // Construct the type of filter used based on enum value
       setFilter(type);
+
+      passThroughEstimatesToController = new YoBoolean("passThroughEstimatesToController", registry);
+      passThroughEstimatesToController.set(false);
    }
 
    private void setFilter(InertialParameterManagerFactory.EstimatorType type)
@@ -468,6 +473,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          // Pack smoothed estimate back into estimate robot bodies
          RegressorTools.packRigidBodies(basisSets, doubleFilteredEstimate, estimateModelBodies);
 
+         // Pass through estimates to controller
+         if (passThroughEstimatesToController.getValue())
+            updateActualRobotModel();
+
          updateVisuals();
       }
    }
@@ -635,6 +644,25 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
             }
             regressorBlockIndex++;
          }
+      }
+   }
+
+   private void updateActualRobotModel()
+   {
+      for (int i = 0; i < estimateModelBodies.length; i++)
+      {
+         RigidBodyReadOnly estimateBody = estimateModelBodies[i];
+         RigidBodyBasics actualBody = actualModelBodies[i];
+
+         // TODO: put some safety checks here so we don't send nutty stuff to the robot maybe innovation gating?
+         actualBody.getInertia().setMass(estimateBody.getInertia().getMass());
+         actualBody.getInertia().setCenterOfMassOffset(estimateBody.getInertia().getCenterOfMassOffset());
+         actualBody.getInertia().setMomentOfInertia(estimateBody.getInertia().getMomentOfInertia().getM00(),  // Ixx
+                                                    estimateBody.getInertia().getMomentOfInertia().getM01(),  // Ixy
+                                                   estimateBody.getInertia().getMomentOfInertia().getM02(),  // Ixz
+                                                   estimateBody.getInertia().getMomentOfInertia().getM11(),  // Iyy
+                                                   estimateBody.getInertia().getMomentOfInertia().getM12(),  // Iyz
+                                                   estimateBody.getInertia().getMomentOfInertia().getM22());  // Izz
       }
    }
 
