@@ -479,7 +479,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       int parameterIndex = 0;
       for (int i = 0; i < processCovariance.getNumRows(); ++i)  // we'll set the diagonals
       {
-         processCovariance.set(i, i, processCovariancesForSingleBody[parameterIndex].getValue());
+         // Mod by the number of parameters per rigid body to cycle through the parameters
+         processCovariance.set(i, i, processCovariancesForSingleBody[parameterIndex % RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY].getValue());
          parameterIndex++;
       }
 
