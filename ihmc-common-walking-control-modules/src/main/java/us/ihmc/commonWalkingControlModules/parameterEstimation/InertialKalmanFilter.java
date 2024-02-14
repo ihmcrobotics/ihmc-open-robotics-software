@@ -20,24 +20,26 @@ import java.util.Set;
 
 public class InertialKalmanFilter extends ExtendedKalmanFilter
 {
-   private static final boolean MORE_YOVARIABLES = false;
+   protected static final boolean MORE_YOVARIABLES = false;
 
    private static final int WRENCH_DIMENSION = 6;
 
+   protected final YoRegistry registry;
+
    private final DMatrixRMaj identity;
 
-   private final DMatrixRMaj torqueFromNominal;
-   private final DMatrixRMaj torqueFromEstimates;
-   private final DMatrixRMaj torqueFromContactWrenches;
-   private final DMatrixRMaj torqueFromBias;
+   protected final DMatrixRMaj torqueFromNominal;
+   protected final DMatrixRMaj torqueFromEstimates;
+   protected final DMatrixRMaj torqueFromContactWrenches;
+   protected final DMatrixRMaj torqueFromBias;
 
-   private final DMatrixRMaj regressorForEstimates;
+   protected final DMatrixRMaj regressorForEstimates;
 
-   private final SideDependentList<DMatrixRMaj> contactJacobians = new SideDependentList<>();
-   private final SideDependentList<DMatrixRMaj> contactWrenches = new SideDependentList<>();
+   protected final SideDependentList<DMatrixRMaj> contactJacobians = new SideDependentList<>();
+   protected final SideDependentList<DMatrixRMaj> contactWrenches = new SideDependentList<>();
 
    /** This is used as a container to build up a measurement from different contributions, see {@link #measurementModel(DMatrixRMaj)}. */
-   private final DMatrixRMaj measurement;
+   protected final DMatrixRMaj measurement;
 
    protected final AlphaFilteredYoMatrix filteredWholeSystemTorques;
    protected final AlphaFilteredYoMatrix doubleFilteredWholeSystemTorques;
@@ -45,10 +47,10 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    protected final AlphaFilteredYoMatrix doubleFilteredMeasurement;
 
    /** MORE_YOVARIABLES **/
-   private YoMatrix yoTorqueFromNominal = null;
-   private YoMatrix yoTorqueFromEstimates = null;
-   private YoMatrix yoTorqueFromContactWrenches = null;
-   private YoMatrix yoTorqueFromBias = null;
+   protected YoMatrix yoTorqueFromNominal = null;
+   protected YoMatrix yoTorqueFromEstimates = null;
+   protected YoMatrix yoTorqueFromContactWrenches = null;
+   protected YoMatrix yoTorqueFromBias = null;
 
    public InertialKalmanFilter(FullRobotModel model, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets,
                                DMatrixRMaj initialParametersForEstimate, DMatrixRMaj initialParameterCovariance,
@@ -78,7 +80,7 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
 
       measurement = new DMatrixRMaj(nDoFs, 1);
 
-      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+      registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       filteredWholeSystemTorques = new AlphaFilteredYoMatrix("filteredWholeSystemTorques", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
@@ -177,7 +179,7 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
       filter(filteredWholeSystemTorques, doubleFilteredWholeSystemTorques);
    }
 
-   private void filter(DMatrix matrixToFilter, AlphaFilteredYoMatrix filterContainer)
+   protected void filter(DMatrix matrixToFilter, AlphaFilteredYoMatrix filterContainer)
    {
       filterContainer.setAndSolve(matrixToFilter);
    }

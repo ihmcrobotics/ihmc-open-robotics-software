@@ -7,12 +7,9 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
@@ -30,7 +27,7 @@ public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
    private double costScalar;
    private final DMatrixRMaj costScalarContainer;
 
-   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
+   private final SimpleEfficientActiveSetQPSolver qpSolver;
 
    private final DMatrixRMaj delta;
 
@@ -80,15 +77,18 @@ public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
       updatedCovarianceComponentInvertedContainer = new DMatrixRMaj(measurementSize, measurementSize);
       // even though the final result of the larger calculation is processSize, this inner inversion is measurementSize
       updatedCovarianceSolver = new LinearSolverSafe<>(LinearSolverFactory_DDRM.symmPosDef(measurementSize));
+
+      qpSolver = new SimpleEfficientActiveSetQPSolver();
+      qpSolver.setMaxNumberOfIterations(25);
    }
 
    @Override
    public DMatrixRMaj calculateEstimate(DMatrix wholeSystemTorques)
    {
-      super.filterTorques(wholeSystemTorques);
-      super.predictionStep();
-      updateStep(super.doubleFilteredWholeSystemTorques);
-      super.cleanupStep();
+      filterTorques(wholeSystemTorques);
+      predictionStep();
+      updateStep(doubleFilteredWholeSystemTorques);
+      cleanupStep();
 
       return updatedState;
    }
@@ -96,24 +96,15 @@ public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
    @Override
    public void updateStep(DMatrix actual)
    {
-      // From super
-      measurementResidual.set(actual);
-      CommonOps_DDRM.subtractEquals(measurementResidual, measurementModel(predictedState));
+      calculateMeasurementResidual(actual);
 
-      // From super
       measurementJacobian.set(linearizeMeasurementModel(predictedState));  // NOTE: measurement model linearization occurs at x_(k|k-1)
 
-      // From super
-      residualCovariance.zero();
-      CommonOps_DDRM.mult(measurementJacobian, predictedCovariance, residualCovarianceContainer);
-      CommonOps_DDRM.multTransB(residualCovarianceContainer, measurementJacobian, residualCovariance);
-      CommonOps_DDRM.addEquals(residualCovariance, measurementCovariance);
+      calculateResidualCovarianceAndInverse();
 
-      // New stuff below TODO: doc this
-
+      // Invert the predicted covariance and measurement covariances for use in the cost function of a QP
       predictedCovarianceSolver.setA(predictedCovariance);
       predictedCovarianceSolver.invert(inversePredictedCovariance);
-
       measurementCovarianceSolver.setA(measurementCovariance);
       measurementCovarianceSolver.invert(inverseMeasurementCovariance);
 
@@ -134,17 +125,23 @@ public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
 
       // Build cost scalar
       costScalarContainer.zero();
-      CommonOps_DDRM.multTransA(measurementResidual, inverseMeasurementCovariance, costScalarContainer);  // reusing costVectorContainer calculation
+      CommonOps_DDRM.multTransA(measurementResidual, inverseMeasurementCovariance, costScalarContainer);
       costScalar = CommonOps_DDRM.dot(costScalarContainer, measurementResidual);
 
       // Solve QP
-      qpSolver.clear();
+      qpSolver.clear();  // TODO: see if you can remove this
       qpSolver.setQuadraticCostFunction(costMatrix, costVector, costScalar);
-      qpSolver.setMaxNumberOfIterations(100);
-      int numberOfIterations = qpSolver.solve(delta);
+      qpSolver.solve(delta);
 
+      // The QP only gives us the delta of the solution, we need to add it to the predicted state to get the updated state
       CommonOps_DDRM.add(predictedState, delta, updatedState);
 
+      calculateUpdatedCovariance();
+   }
+
+   @Override
+   protected final void calculateUpdatedCovariance()
+   {
       // Following covariance update in Varin paper
       CommonOps_DDRM.mult(measurementJacobian, predictedCovariance, updatedCovarianceContainer1);
       CommonOps_DDRM.multTransB(updatedCovarianceContainer1, measurementJacobian, updatedCovarianceContainer2);
@@ -159,36 +156,5 @@ public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
       CommonOps_DDRM.mult(predictedCovariance, updatedCovarianceContainer1, updatedCovarianceContainer2);
       CommonOps_DDRM.scale(-1.0, updatedCovarianceContainer2);
       CommonOps_DDRM.add(updatedCovarianceContainer2, predictedCovariance, updatedCovariance);
-   }
-
-   private String[] getRowNames(FullRobotModel model)
-   {
-      List<String> names = new ArrayList<>();
-
-      // Root joint is handled specially
-      for (int i = 0; i < model.getRootJoint().getDegreesOfFreedom(); i++)
-      {
-         String suffix;
-         switch(i)
-         {
-            case 0 -> suffix = "wX";
-            case 1 -> suffix = "wY";
-            case 2 -> suffix = "wZ";
-            case 3 -> suffix = "x";
-            case 4 -> suffix = "y";
-            case 5 -> suffix = "z";
-            default -> throw new RuntimeException("Unhandled case: " + i);
-         }
-         names.add(model.getRootJoint().getName() + "_" + suffix);
-      }
-
-      // One DoF joints
-      OneDoFJointReadOnly[] oneDoFJoints = model.getOneDoFJoints();
-      for (OneDoFJointReadOnly joint : oneDoFJoints)
-      {
-         names.add(joint.getName());
-      }
-
-      return names.toArray(new String[0]);
    }
 }
