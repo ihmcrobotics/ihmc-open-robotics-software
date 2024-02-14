@@ -5,6 +5,7 @@ import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
 import us.ihmc.robotModels.FullRobotModel;
@@ -39,6 +40,7 @@ public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
 
    public InertialConstrainedKalmanFilter(FullRobotModel model,
                                           Set<SpatialInertiaBasisOption>[] basisSets,
+                                          InertialEstimationParameters parameters,
                                           DMatrixRMaj initialParametersForEstimate,
                                           DMatrixRMaj initialParameterCovariance,
                                           DMatrixRMaj processCovariance,
@@ -48,6 +50,7 @@ public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
    {
       super(model,
             basisSets,
+            parameters,
             initialParametersForEstimate,
             initialParameterCovariance,
             processCovariance,
@@ -79,7 +82,7 @@ public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
       updatedCovarianceSolver = new LinearSolverSafe<>(LinearSolverFactory_DDRM.symmPosDef(measurementSize));
 
       qpSolver = new SimpleEfficientActiveSetQPSolver();
-      qpSolver.setMaxNumberOfIterations(25);
+      qpSolver.setMaxNumberOfIterations(parameters.getMaxNumberOfIterationsForQP());
    }
 
    @Override

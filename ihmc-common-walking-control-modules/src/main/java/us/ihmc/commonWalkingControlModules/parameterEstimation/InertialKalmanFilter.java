@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.parameterEstimation;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -53,6 +54,7 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    protected YoMatrix yoTorqueFromBias = null;
 
    public InertialKalmanFilter(FullRobotModel model, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets,
+                               InertialEstimationParameters parameters,
                                DMatrixRMaj initialParametersForEstimate, DMatrixRMaj initialParameterCovariance,
                                DMatrixRMaj processCovariance, DMatrixRMaj measurementCovariance,
                                double postProcessingAlpha, YoRegistry parentRegistry)
