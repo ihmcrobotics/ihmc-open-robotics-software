@@ -309,7 +309,7 @@ public class PerceptionDebugTools
       }
 
       int code = opencv_highgui.waitKeyEx(delay);
-      if (code == 113 || code != -1) // Keycode for 'q'
+      if (code == 113) // Keycode for 'q'
       {
          System.exit(0);
       }
@@ -450,7 +450,7 @@ public class PerceptionDebugTools
 
    public static void plotTiltedRectangle(Mat displayImage, Point2D origin, float yaw, int size, int side)
    {
-      LogTools.info("Footstep Plotted: {} {} {}",
+      LogTools.debug("Footstep Plotted: {} {} {}",
                      (int) (origin.getY() * 50 + displayImage.rows() / 2),
                      (int) (origin.getX() * 50 + displayImage.cols() / 2),
                      side);
