@@ -44,11 +44,13 @@ public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
    private final YoDouble minimumMassMultiplier;
    private final YoDouble minimumDiagonalInertiaMultiplier;
 
-   private final DMatrixRMaj urdfValues;
+   private final DMatrixRMaj constraintURDFValues;
    private final SpatialInertiaBasisOption[] parameterOptions;
 
    private final DMatrixRMaj constraintMatrix;
    private final DMatrixRMaj constraintVector;
+
+   private final int[] indices;
 
    public InertialConstrainedKalmanFilter(FullRobotModel model,
                                           Set<SpatialInertiaBasisOption>[] basisSets,
@@ -104,24 +106,38 @@ public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
       minimumDiagonalInertiaMultiplier = new YoDouble("minimumDiagonalInertiaMultiplier", registry);
       minimumDiagonalInertiaMultiplier.set(parameters.getMinimumDiagonalInertiaMultiplier());
 
-      urdfValues = new DMatrixRMaj(processSize, 1);
-      urdfValues.set(parameters.getURDFParameters(basisSets));
-      parameterOptions = new SpatialInertiaBasisOption[processSize];
-      int i = 0;
+      int nConstraints = countNumberOfConstraints(basisSets);
+
+      DMatrixRMaj urdfValues = parameters.getURDFParameters(basisSets);
+      constraintURDFValues = new DMatrixRMaj(nConstraints, 1);
+      parameterOptions = new SpatialInertiaBasisOption[nConstraints];
+      indices = new int[nConstraints];
+      int containedIndex = 0;
+      int index = 0;
       for (Set<SpatialInertiaBasisOption> basisSet : basisSets)
       {
          for (SpatialInertiaBasisOption option : SpatialInertiaBasisOption.values)
          {
             if (basisSet.contains(option))
             {
-               parameterOptions[i] = option;
-               i++;
+               if (option == SpatialInertiaBasisOption.M ||
+                   option == SpatialInertiaBasisOption. I_XX ||
+                   option == SpatialInertiaBasisOption.I_YY ||
+                   option == SpatialInertiaBasisOption.I_ZZ)
+               {
+                  parameterOptions[containedIndex] = option;
+                  constraintURDFValues.set(containedIndex, urdfValues.get(index));
+                  indices[containedIndex] = index;
+                  containedIndex++;
+               }
+
+               index++;
             }
          }
       }
 
-      constraintMatrix = new DMatrixRMaj(processSize, processSize);
-      constraintVector = new DMatrixRMaj(processSize, 1);
+      constraintMatrix = new DMatrixRMaj(nConstraints, processSize);
+      constraintVector = new DMatrixRMaj(nConstraints, 1);
    }
 
    @Override
@@ -203,37 +219,53 @@ public class InertialConstrainedKalmanFilter extends InertialKalmanFilter
 
    private void populateConstraints()
    {
-      constraintVector.set(urdfValues);
+      constraintVector.set(constraintURDFValues);
       for (int i = 0; i < constraintVector.getNumElements(); ++i)
       {
          switch(parameterOptions[i])
          {
             case M ->
             {
-               constraintMatrix.set(i, i, 1.0);
-               constraintVector.set(i, 0, constraintVector.get(i, 0) * minimumMassMultiplier.getValue());
+               constraintMatrix.set(i, indices[i], 1.0);
+               // Because the solution of the constrained QP is the parameter deltas from the predicted state, we need to subtract the predicted state
+               constraintVector.set(i, 0, constraintVector.get(i, 0) * minimumMassMultiplier.getValue() - predictedState.get(indices[i]));
             }
             case I_XX, I_YY, I_ZZ ->
             {
-               constraintMatrix.set(i, i, 1.0);
-               constraintVector.set(i, 0, constraintVector.get(i, 0) * minimumDiagonalInertiaMultiplier.getValue());
+               constraintMatrix.set(i, indices[i], 1.0);
+               // Because the solution of the constrained QP is the parameter deltas from the predicted state, we need to subtract the predicted state
+               constraintVector.set(i, 0, constraintVector.get(i, 0) * minimumDiagonalInertiaMultiplier.getValue() - predictedState.get(indices[i]));
             }
             case MCOM_X, MCOM_Y, MCOM_Z, I_XY, I_XZ, I_YZ ->
             {
-               // For now, we do nothing to constrain these parameters, so constraint matrix and constraint vector terms are both zero
-               constraintMatrix.set(i, i, 0.0);
-               constraintVector.set(i, 0);
+               // We're not actively constraining these parameters yet
             }
          }
       }
-
-      // Because the solution of the constrained QP is the parameter deltas from the predicted state, we need to subtract the predicted state
-      CommonOps_DDRM.subtractEquals(constraintVector, predictedState);
 
       // We've so far set up things for Cx > d, we need to scale both sides by -1 to flip the inequality
       CommonOps_DDRM.scale(-1.0, constraintMatrix);
       CommonOps_DDRM.scale(-1.0, constraintVector);
 
       qpSolver.setLinearInequalityConstraints(constraintMatrix, constraintVector);
+   }
+
+   private int countNumberOfConstraints(Set<SpatialInertiaBasisOption>[] basisSets)
+   {
+      int nConstraints = 0;
+      for (Set<SpatialInertiaBasisOption> basisSet : basisSets)
+      {
+         for (SpatialInertiaBasisOption option : basisSet)
+         {
+            if (option == SpatialInertiaBasisOption.M ||
+                option == SpatialInertiaBasisOption.I_XX ||
+                option == SpatialInertiaBasisOption.I_YY ||
+                option == SpatialInertiaBasisOption.I_ZZ)
+            {
+               nConstraints++;
+            }
+         }
+      }
+      return nConstraints;
    }
 }
