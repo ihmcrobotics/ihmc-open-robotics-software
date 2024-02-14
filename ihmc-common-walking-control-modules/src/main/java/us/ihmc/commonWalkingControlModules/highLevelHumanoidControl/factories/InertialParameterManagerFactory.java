@@ -10,12 +10,14 @@ public class InertialParameterManagerFactory
    private final YoRegistry registry;
    private HighLevelHumanoidControllerToolbox toolbox;
    private InertialEstimationParameters parameters;
+   private EstimatorType type;
 
    InertialParameterManagerFactory(YoRegistry registry)
    {
       this.registry =  registry;
       this.toolbox = null;
       this.parameters = null;
+      this.type = null;
    }
 
    public void setControllerToolbox(HighLevelHumanoidControllerToolbox controllerToolbox)
@@ -26,10 +28,16 @@ public class InertialParameterManagerFactory
    public void setInertialParameterManagerProperties(InertialEstimationParameters properties)
    {
       this.parameters = properties;
+      this.type = properties.getTypeOfEstimatorToUse();
    }
 
    public InertialParameterManager createInertialParameterManager()
    {
-      return new InertialParameterManager(toolbox, parameters, registry);
+      return new InertialParameterManager(type, toolbox, parameters, registry);
+   }
+
+   public enum EstimatorType
+   {
+      KF, CONSTRAINED_KF, PHYSICALLY_CONSISTENT_EKF
    }
 }

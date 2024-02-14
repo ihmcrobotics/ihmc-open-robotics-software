@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.parameterEstimation;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -20,37 +21,40 @@ import java.util.Set;
 
 public class InertialKalmanFilter extends ExtendedKalmanFilter
 {
-   private static final boolean MORE_YOVARIABLES = false;
+   protected static final boolean MORE_YOVARIABLES = false;
 
    private static final int WRENCH_DIMENSION = 6;
 
+   protected final YoRegistry registry;
+
    private final DMatrixRMaj identity;
 
-   private final DMatrixRMaj torqueFromNominal;
-   private final DMatrixRMaj torqueFromEstimates;
-   private final DMatrixRMaj torqueFromContactWrenches;
-   private final DMatrixRMaj torqueFromBias;
+   protected final DMatrixRMaj torqueFromNominal;
+   protected final DMatrixRMaj torqueFromEstimates;
+   protected final DMatrixRMaj torqueFromContactWrenches;
+   protected final DMatrixRMaj torqueFromBias;
 
-   private final DMatrixRMaj regressorForEstimates;
+   protected final DMatrixRMaj regressorForEstimates;
 
-   private final SideDependentList<DMatrixRMaj> contactJacobians = new SideDependentList<>();
-   private final SideDependentList<DMatrixRMaj> contactWrenches = new SideDependentList<>();
+   protected final SideDependentList<DMatrixRMaj> contactJacobians = new SideDependentList<>();
+   protected final SideDependentList<DMatrixRMaj> contactWrenches = new SideDependentList<>();
 
    /** This is used as a container to build up a measurement from different contributions, see {@link #measurementModel(DMatrixRMaj)}. */
-   private final DMatrixRMaj measurement;
+   protected final DMatrixRMaj measurement;
 
-   private final AlphaFilteredYoMatrix filteredWholeSystemTorques;
-   private final AlphaFilteredYoMatrix doubleFilteredWholeSystemTorques;
-   private final AlphaFilteredYoMatrix filteredMeasurement;
-   private final AlphaFilteredYoMatrix doubleFilteredMeasurement;
+   protected final AlphaFilteredYoMatrix filteredWholeSystemTorques;
+   protected final AlphaFilteredYoMatrix doubleFilteredWholeSystemTorques;
+   protected final AlphaFilteredYoMatrix filteredMeasurement;
+   protected final AlphaFilteredYoMatrix doubleFilteredMeasurement;
 
    /** MORE_YOVARIABLES **/
-   private YoMatrix yoTorqueFromNominal = null;
-   private YoMatrix yoTorqueFromEstimates = null;
-   private YoMatrix yoTorqueFromContactWrenches = null;
-   private YoMatrix yoTorqueFromBias = null;
+   protected YoMatrix yoTorqueFromNominal = null;
+   protected YoMatrix yoTorqueFromEstimates = null;
+   protected YoMatrix yoTorqueFromContactWrenches = null;
+   protected YoMatrix yoTorqueFromBias = null;
 
    public InertialKalmanFilter(FullRobotModel model, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets,
+                               InertialEstimationParameters parameters,
                                DMatrixRMaj initialParametersForEstimate, DMatrixRMaj initialParameterCovariance,
                                DMatrixRMaj processCovariance, DMatrixRMaj measurementCovariance,
                                double postProcessingAlpha, YoRegistry parentRegistry)
@@ -78,7 +82,7 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
 
       measurement = new DMatrixRMaj(nDoFs, 1);
 
-      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+      registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       filteredWholeSystemTorques = new AlphaFilteredYoMatrix("filteredWholeSystemTorques", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
@@ -161,12 +165,23 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    @Override
    public DMatrixRMaj calculateEstimate(DMatrix wholeSystemTorques)
    {
-      filter(wholeSystemTorques, filteredWholeSystemTorques);
-      filter(filteredWholeSystemTorques, doubleFilteredWholeSystemTorques);
+      filterTorques(wholeSystemTorques);
       return super.calculateEstimate(doubleFilteredWholeSystemTorques);
    }
 
-   public void filter(DMatrix matrixToFilter, AlphaFilteredYoMatrix filterContainer)
+   @Override
+   protected void updateStep(DMatrix actual)
+   {
+      super.updateStep(actual);
+   }
+
+   protected void filterTorques(DMatrix torques)
+   {
+      filter(torques, filteredWholeSystemTorques);
+      filter(filteredWholeSystemTorques, doubleFilteredWholeSystemTorques);
+   }
+
+   protected void filter(DMatrix matrixToFilter, AlphaFilteredYoMatrix filterContainer)
    {
       filterContainer.setAndSolve(matrixToFilter);
    }
