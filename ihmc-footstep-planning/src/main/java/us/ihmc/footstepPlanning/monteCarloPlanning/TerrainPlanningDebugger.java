@@ -179,6 +179,10 @@ public class TerrainPlanningDebugger
 
       heightMapColorImage.copyTo(top);
       contactHeatMapColorImage.copyTo(bottom);
+
+      // make the stacked image brighter
+      opencv_core.convertScaleAbs(stacked, stacked, 1.5, 0);
+
       PerceptionDebugTools.display("Display", stacked, delay, 1500);
    }
 
