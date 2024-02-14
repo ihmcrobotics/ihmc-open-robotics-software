@@ -43,7 +43,7 @@ public class YoSpatialInertiaTemporary implements SpatialInertiaBasics, Settable
       this.expressedInFrame = expressedInFrame;
       this.mass = new YoDouble(bodyFrame.getName() + "_mass" + nameSuffix, registry);
       this.centerOfMassOffset = new YoFrameVector3D(bodyFrame.getName() + "_centerOfMassOffset" + nameSuffix, expressedInFrame, registry);
-      this.momentOfInertia = new YoMatrix3D(bodyFrame.getName() + "_momentOfInertia", registry);
+      this.momentOfInertia = new YoMatrix3D(bodyFrame.getName() + "_momentOfInertia" + nameSuffix, registry);
    }
 
    public void applyTransform(Transform transform) {
