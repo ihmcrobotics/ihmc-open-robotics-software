@@ -204,7 +204,7 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
       }
    }
 
-   public void setContactWrenches(SideDependentList<DMatrixRMaj> contactWrenches)
+   public void setContactWrenches(SideDependentList<DMatrix> contactWrenches)
    {
       for (RobotSide side : RobotSide.values)
       {
