@@ -13,7 +13,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
  */
 public class DetectionFilter
 {
-   public final int HISTORY_LENGTH = SceneGraph.UPDATE_FREQUENCY; // 1 second at scene graph's frequency
+   public final int HISTORY_LENGTH = (int) SceneGraph.UPDATE_FREQUENCY; // 1 second at scene graph's frequency
    public float acceptanceThreshold = 0.6f;
 
    private final TFloatList detections = new TFloatLinkedList();
