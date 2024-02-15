@@ -1,5 +1,7 @@
 package us.ihmc.avatar.sakeGripper;
 
+import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
+
 public class SakeHandParameters
 {
    /**
@@ -60,5 +62,27 @@ public class SakeHandParameters
    public static double normalizeKnuckleTorque(double knuckleTorque)
    {
       return knuckleTorque / MAX_KNUCKLE_TORQUE;
+   }
+
+   public static double knuckleJointAngleToHandOpenAngle(double knuckleJointAngle)
+   {
+      double jointRange = OPEN_KNUCKLE_JOINT_ANGLE_DEGREES - CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES;
+      double normalizedHandOpenAngle = (knuckleJointAngle - CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES) / jointRange;
+      return denormalizeHandOpenAngle(normalizedHandOpenAngle);
+   }
+
+   public static double handOpenAngleToKnuckleJointAngle(double handOpenAngle)
+   {
+      double normalizedHandOpenAngle = normalizeHandOpenAngle(handOpenAngle);
+      double jointRange = OPEN_KNUCKLE_JOINT_ANGLE_DEGREES - CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES;
+      return (normalizedHandOpenAngle * jointRange) + CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES;
+   }
+
+   public static void resetDesiredCommandMessage(SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage)
+   {
+      sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(-1.0);
+      sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(-1.0);
+      sakeHandDesiredCommandMessage.setRequestCalibration(false);
+      sakeHandDesiredCommandMessage.setRequestCalibration(false);
    }
 }

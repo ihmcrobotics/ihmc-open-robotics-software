@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.teleoperation;
 
-import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -11,7 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfigurat
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.interactable.RDXSakeHandSliders;
+import us.ihmc.rdx.ui.interactable.RDXSakeHandWidgets;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -27,7 +26,7 @@ public class RDXHandConfigurationManager
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final SideDependentList<RDXSakeHandInformation> sakeHandInfo = new SideDependentList<>();
    private final SideDependentList<RDXHandQuickAccessButtons> handQuickAccessButtons = new SideDependentList<>();
-   private final SideDependentList<RDXSakeHandSliders> handSliders = new SideDependentList<>();
+   private final SideDependentList<RDXSakeHandWidgets> sakeHandWidgets = new SideDependentList<>();
 
    public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -49,7 +48,7 @@ public class RDXHandConfigurationManager
          Runnable resetHand = () -> publishHandCommand(side, HandConfiguration.RESET);
          handQuickAccessButtons.put(side, new RDXHandQuickAccessButtons(baseUI, side, openHand, closeHand, calibrateHand, resetHand));
 
-         handSliders.put(side, new RDXSakeHandSliders(communicationHelper, side));
+         sakeHandWidgets.put(side, new RDXSakeHandWidgets(communicationHelper, side));
       }
 
       if (syncedRobotModel.getRobotModel().getHandModels().toString().contains("SakeHand"))
@@ -70,7 +69,7 @@ public class RDXHandConfigurationManager
       {
          sakeHandInfo.get(side).update();
          handQuickAccessButtons.get(side).update(sakeHandInfo.get(side));
-         handSliders.get(side).update();
+         sakeHandWidgets.get(side).update();
       }
    }
 
@@ -80,33 +79,33 @@ public class RDXHandConfigurationManager
       {
          ImGui.image(handIcons.get(side).getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Calibrate", side.getCamelCaseName())))
-         {
-            publishHandCommand(side, HandConfiguration.CALIBRATE);
-         }
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Open", side.getCamelCaseName())))
-         {
-            publishHandCommand(side, HandConfiguration.OPEN);
-         }
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Close", side.getCamelCaseName())))
-         {
-            publishHandCommand(side, HandConfiguration.CLOSE);
-         }
-         ImGui.sameLine();
-         ImGui.pushItemWidth(100.0f);
-         ImGui.combo(labels.get("Grip", side.getCamelCaseName()), handConfigurationIndices.get(side), handConfigurationNames);
-         ImGui.popItemWidth();
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Send", side.getCamelCaseName())))
-         {
-            HandDesiredConfigurationMessage message
-                  = HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.values[handConfigurationIndices.get(side).get()]);
-            communicationHelper.publish(ROS2Tools::getHandConfigurationTopic, message);
-         }
+//         if (ImGui.button(labels.get("Calibrate", side.getCamelCaseName())))
+//         {
+//            publishHandCommand(side, HandConfiguration.CALIBRATE);
+//         }
+//         ImGui.sameLine();
+//         if (ImGui.button(labels.get("Open", side.getCamelCaseName())))
+//         {
+//            publishHandCommand(side, HandConfiguration.OPEN);
+//         }
+//         ImGui.sameLine();
+//         if (ImGui.button(labels.get("Close", side.getCamelCaseName())))
+//         {
+//            publishHandCommand(side, HandConfiguration.CLOSE);
+//         }
+//         ImGui.sameLine();
+//         ImGui.pushItemWidth(100.0f);
+//         ImGui.combo(labels.get("Grip", side.getCamelCaseName()), handConfigurationIndices.get(side), handConfigurationNames);
+//         ImGui.popItemWidth();
+//         ImGui.sameLine();
+//         if (ImGui.button(labels.get("Send", side.getCamelCaseName())))
+//         {
+//            HandDesiredConfigurationMessage message
+//                  = HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.values[handConfigurationIndices.get(side).get()]);
+//            communicationHelper.publish(ROS2Tools::getHandConfigurationTopic, message);
+//         }
 
-         handSliders.get(side).renderImGuiWidgets();
+         sakeHandWidgets.get(side).renderImGuiWidgets();
       }
       if (!sakeHandInfo.isEmpty())
          ImGui.text("Sake EZGrippers:");

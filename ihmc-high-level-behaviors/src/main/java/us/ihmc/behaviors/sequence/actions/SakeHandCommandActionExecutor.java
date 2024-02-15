@@ -99,6 +99,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       else
       {
          sakeHandDesiredCommandMessage.setRobotSide(definition.getSide().toByte());
+         SakeHandParameters.resetDesiredCommandMessage(sakeHandDesiredCommandMessage);
          sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(SakeHandParameters.normalizeHandOpenAngle(definition.getHandOpenAngle()));
          sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(
                                                        SakeHandParameters.normalizeFingertipGripForceLimit(definition.getFingertipGripForceLimit()));

@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.teleoperation;
 
-import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import controller_msgs.msg.dds.SakeHandStatusMessage;
 import imgui.ImGui;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -34,7 +33,7 @@ public class RDXSakeHandInformation
 
    public void update()
    {
-      calibrated = statusInput.getLatest().getCalibrated();
+      calibrated = statusInput.getLatest().getIsCalibrated();
       needsReset = statusInput.getLatest().getNeedsReset();
    }
 
@@ -57,15 +56,6 @@ public class RDXSakeHandInformation
       else
       {
          ImGui.text("No status received.");
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Reset", side.getCamelCaseName())))
-      {
-         SakeHandDesiredCommandMessage sakeCommand = new SakeHandDesiredCommandMessage();
-         sakeCommand.setRobotSide(side.toByte());
-         sakeCommand.setDesiredHandConfiguration(SakeHandDesiredCommandMessage.HAND_CONFIGURATION_RESET);
-         communicationHelper.publish(ROS2Tools.getControllerInputTopic(communicationHelper.getRobotName()).withTypeName(SakeHandDesiredCommandMessage.class),
-                                     sakeCommand);
       }
    }
 

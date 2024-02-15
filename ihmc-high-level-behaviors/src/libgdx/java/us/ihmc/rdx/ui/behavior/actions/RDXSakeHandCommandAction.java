@@ -67,7 +67,7 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
 
       for (SakeHandPresets preset : SakeHandPresets.values)
       {
-         if (ImGui.button(labels.get(preset.name())))
+         if (ImGui.button(labels.get(preset.getPascalCasedName())))
          {
             definition.setHandOpenAngle(preset.getHandOpenAngle());
             definition.setFingertipGripForceLimit(preset.getFingertipGripForceLimit());
