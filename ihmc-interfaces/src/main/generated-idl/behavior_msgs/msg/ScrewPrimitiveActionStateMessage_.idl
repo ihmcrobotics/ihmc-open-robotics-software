@@ -35,6 +35,12 @@ module behavior_msgs
         double preview_trajectory_duration;
         double preview_trajectory_linear_velocity;
         double preview_trajectory_angular_velocity;
+        /**
+         * The user requested IK preview time normalized from 0.0 to 1.0
+         */
+        double preview_requested_time;
+        double preview_joint_angles[7];
+        double preview_solution_quality;
       };
     };
   };
