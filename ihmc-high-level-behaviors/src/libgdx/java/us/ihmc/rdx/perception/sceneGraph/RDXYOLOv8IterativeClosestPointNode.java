@@ -20,6 +20,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
+import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -50,6 +51,7 @@ public class RDXYOLOv8IterativeClosestPointNode extends RDXDetectableSceneNode
    private final ImInt maskErosionKernelRadius;
    private final ImDouble outlierFilterThreshold;
    private final ImDouble movementDistanceThreshold;
+   private final ImGuiPlot movementDistanceThresholdPlot = new ImGuiPlot("Distance Threshold", 1000, 0, 20);
 
    public RDXYOLOv8IterativeClosestPointNode(YOLOv8IterativeClosestPointNode yoloSceneNode, ImGuiUniqueLabelMap labels)
    {
@@ -90,7 +92,7 @@ public class RDXYOLOv8IterativeClosestPointNode extends RDXDetectableSceneNode
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
 
-      ImGui.text("Distance Threshold: " + yoloSceneNode.getMovementDistanceThreshold());
+      movementDistanceThresholdPlot.render(yoloSceneNode.getMovementDistanceThreshold());
 
       if (expandCollapseRenderer.render(showParameters))
       {
