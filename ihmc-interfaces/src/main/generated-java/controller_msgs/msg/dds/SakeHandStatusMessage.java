@@ -30,6 +30,11 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
             * 1.0: dynamixel max torque which will quickly overheat the motor
             */
    public double normalized_current_torque_;
+   /**
+            * The desired dynamixel position, normalized to the gripper range of motion
+            * 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)
+            */
+   public double normalized_desired_position_;
    public boolean is_calibrated_;
    public boolean needs_reset_;
 
@@ -52,6 +57,8 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       normalized_current_position_ = other.normalized_current_position_;
 
       normalized_current_torque_ = other.normalized_current_torque_;
+
+      normalized_desired_position_ = other.normalized_desired_position_;
 
       is_calibrated_ = other.is_calibrated_;
 
@@ -121,6 +128,23 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       return normalized_current_torque_;
    }
 
+   /**
+            * The desired dynamixel position, normalized to the gripper range of motion
+            * 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)
+            */
+   public void setNormalizedDesiredPosition(double normalized_desired_position)
+   {
+      normalized_desired_position_ = normalized_desired_position;
+   }
+   /**
+            * The desired dynamixel position, normalized to the gripper range of motion
+            * 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)
+            */
+   public double getNormalizedDesiredPosition()
+   {
+      return normalized_desired_position_;
+   }
+
    public void setIsCalibrated(boolean is_calibrated)
    {
       is_calibrated_ = is_calibrated;
@@ -165,6 +189,8 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_current_torque_, other.normalized_current_torque_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_desired_position_, other.normalized_desired_position_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_calibrated_, other.is_calibrated_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.needs_reset_, other.needs_reset_, epsilon)) return false;
@@ -190,6 +216,8 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if(this.normalized_current_torque_ != otherMyClass.normalized_current_torque_) return false;
 
+      if(this.normalized_desired_position_ != otherMyClass.normalized_desired_position_) return false;
+
       if(this.is_calibrated_ != otherMyClass.is_calibrated_) return false;
 
       if(this.needs_reset_ != otherMyClass.needs_reset_) return false;
@@ -212,6 +240,8 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       builder.append(this.normalized_current_position_);      builder.append(", ");
       builder.append("normalized_current_torque=");
       builder.append(this.normalized_current_torque_);      builder.append(", ");
+      builder.append("normalized_desired_position=");
+      builder.append(this.normalized_desired_position_);      builder.append(", ");
       builder.append("is_calibrated=");
       builder.append(this.is_calibrated_);      builder.append(", ");
       builder.append("needs_reset=");

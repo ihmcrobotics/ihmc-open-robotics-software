@@ -20,6 +20,10 @@ float64 normalized_current_position
 # 1.0: dynamixel max torque which will quickly overheat the motor
 float64 normalized_current_torque
 
+# The desired dynamixel position, normalized to the gripper range of motion
+# 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)
+float64 normalized_desired_position
+
 bool is_calibrated
 
 bool needs_reset
