@@ -10,6 +10,8 @@ public class SakeHandParameters
    public static double OPEN_FINGER_ANGLE = 102.0;
    /** Sake hand can produce 29 N of grip force between the fingertips */
    public static double FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT = 29.0;
+   /** This is a safe amount of force. */
+   public static double FINGERTIP_GRIP_FORCE_SAFE_THRESHOLD = 8.7;
    /** This is a moderate amount of force. */
    public static double FINGERTIP_GRIP_FORCE_MODERATE_THRESHOLD = 14.5;
    /** This is a high amount of force. */
