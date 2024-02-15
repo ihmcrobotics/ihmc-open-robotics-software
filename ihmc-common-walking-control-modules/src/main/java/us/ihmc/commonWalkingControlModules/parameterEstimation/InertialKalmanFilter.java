@@ -4,8 +4,13 @@ import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
 import us.ihmc.robotModels.FullRobotModel;
@@ -21,7 +26,7 @@ import java.util.Set;
 
 public class InertialKalmanFilter extends ExtendedKalmanFilter
 {
-   protected static final boolean MORE_YOVARIABLES = false;
+   protected static final boolean MORE_YOVARIABLES = true;
 
    private static final int WRENCH_DIMENSION = 6;
 
@@ -47,11 +52,17 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    protected final AlphaFilteredYoMatrix filteredMeasurement;
    protected final AlphaFilteredYoMatrix doubleFilteredMeasurement;
 
+   private final InverseDynamicsCalculator inverseDynamicsCalculator;
+   private final SideDependentList<RigidBodyReadOnly> feet;
+
    /** MORE_YOVARIABLES **/
    protected YoMatrix yoTorqueFromNominal = null;
    protected YoMatrix yoTorqueFromEstimates = null;
    protected YoMatrix yoTorqueFromContactWrenches = null;
    protected YoMatrix yoTorqueFromBias = null;
+
+   private final FullRobotModel model;
+   private final Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets;
 
    public InertialKalmanFilter(FullRobotModel model, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets,
                                InertialEstimationParameters parameters,
@@ -61,6 +72,8 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    {
       super(initialParametersForEstimate, initialParameterCovariance, processCovariance, measurementCovariance);
 
+      this.model = model;
+      this.basisSets = basisSets;
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(model.getRootJoint().subtreeArray());
       int[] partitionSizes = RegressorTools.sizePartitions(basisSets);
@@ -97,6 +110,10 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
          yoTorqueFromContactWrenches = new YoMatrix("torqueFromContactWrenches", nDoFs, 1, getRowNames(model), null, registry);
          yoTorqueFromBias = new YoMatrix("torqueFromBias", nDoFs, 1, getRowNames(model), null, registry);
       }
+
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(model.getElevator());
+      inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
+      feet = getRobotFeet(model);
    }
 
    /** For inertial parameters, the process Jacobian is the identity matrix. */
@@ -128,21 +145,26 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    @Override
    protected DMatrixRMaj measurementModel(DMatrixRMaj parametersForEstimate)
    {
+      packEstimatedParametersIntoModel(parametersForEstimate);
+
+      inverseDynamicsCalculator.compute();
+      measurement.set(inverseDynamicsCalculator.getJointTauMatrix());
+
       // Torque from inverse dynamics on nominal model
-      measurement.set(torqueFromNominal);
+//      measurement.set(torqueFromNominal);
 
       // Torque from regressor on estimated parameters
-      CommonOps_DDRM.mult(regressorForEstimates, parametersForEstimate, torqueFromEstimates);
-      CommonOps_DDRM.addEquals(measurement, torqueFromEstimates);
+//      CommonOps_DDRM.mult(regressorForEstimates, parametersForEstimate, torqueFromEstimates);
+//      CommonOps_DDRM.addEquals(measurement, torqueFromEstimates);
 
       // Torque from contact wrenches
-      torqueFromContactWrenches.zero();
-      for (RobotSide side : RobotSide.values)
-      {
-         // NOTE: the minus for the contact wrench contribution
-         CommonOps_DDRM.multAddTransA(-1.0, contactJacobians.get(side), contactWrenches.get(side), torqueFromContactWrenches);
-      }
-      CommonOps_DDRM.addEquals(measurement, torqueFromContactWrenches);
+//      torqueFromContactWrenches.zero();
+//      for (RobotSide side : RobotSide.values)
+//      {
+//         // NOTE: the minus for the contact wrench contribution
+//         CommonOps_DDRM.multAddTransA(-1.0, contactJacobians.get(side), contactWrenches.get(side), torqueFromContactWrenches);
+//      }
+//      CommonOps_DDRM.addEquals(measurement, torqueFromContactWrenches);
 
       // Torque from bias
       CommonOps_DDRM.addEquals(measurement, torqueFromBias);
@@ -169,12 +191,6 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
       return super.calculateEstimate(doubleFilteredWholeSystemTorques);
    }
 
-   @Override
-   protected void updateStep(DMatrix actual)
-   {
-      super.updateStep(actual);
-   }
-
    protected void filterTorques(DMatrix torques)
    {
       filter(torques, filteredWholeSystemTorques);
@@ -191,25 +207,10 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
       this.regressorForEstimates.set(regressorForEstimates);
    }
 
-   public void setTorqueFromNominal(DMatrixRMaj torqueFromNominal)
-   {
-      this.torqueFromNominal.set(torqueFromNominal);
-   }
-
-   public void setContactJacobians(SideDependentList<DMatrixRMaj> contactJacobians)
+   public void setContactWrenches(SideDependentList<Wrench> contactWrenches)
    {
       for (RobotSide side : RobotSide.values)
-      {
-         this.contactJacobians.get(side).set(contactJacobians.get(side));
-      }
-   }
-
-   public void setContactWrenches(SideDependentList<DMatrixRMaj> contactWrenches)
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         this.contactWrenches.get(side).set(contactWrenches.get(side));
-      }
+         inverseDynamicsCalculator.setExternalWrench(feet.get(side), contactWrenches.get(side));
    }
 
    public void setBias(DMatrix bias)
@@ -234,6 +235,53 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    public DMatrixRMaj getMeasurementCovariance()
    {
       return measurementCovariance;
+   }
+
+   private void packEstimatedParametersIntoModel(DMatrixRMaj parameters)
+   {
+      RigidBodyBasics[] bodies = model.getRootBody().subtreeArray();
+
+      int parameterIndex = 0;
+      for (int i = 0; i < basisSets.length; ++i)
+      {
+         SpatialInertiaBasics inertia = bodies[i].getInertia();
+
+         for (JointTorqueRegressorCalculator.SpatialInertiaBasisOption option : JointTorqueRegressorCalculator.SpatialInertiaBasisOption.values)
+         {
+            if (basisSets[i].contains(option))
+            {
+               double parameter = parameters.get(parameterIndex, 0);
+               switch (option)
+               {
+                  case M -> inertia.setMass(parameter);
+                  case MCOM_X -> inertia.getCenterOfMassOffset().setX(parameter);
+                  case MCOM_Y -> inertia.getCenterOfMassOffset().setY(parameter);
+                  case MCOM_Z -> inertia.getCenterOfMassOffset().setZ(parameter);
+                  case I_XX -> inertia.getMomentOfInertia().setM00(parameter);
+                  case I_XY -> inertia.getMomentOfInertia().setM01(parameter);
+                  case I_XZ -> inertia.getMomentOfInertia().setM02(parameter);
+                  case I_YY -> inertia.getMomentOfInertia().setM11(parameter);
+                  case I_YZ -> inertia.getMomentOfInertia().setM12(parameter);
+                  case I_ZZ -> inertia.getMomentOfInertia().setM22(parameter);
+               }
+               parameterIndex++;
+            }
+         }
+      }
+   }
+
+   private SideDependentList<RigidBodyReadOnly> getRobotFeet(FullRobotModel model)
+   {
+      SideDependentList<RigidBodyReadOnly> feet = new SideDependentList<>();
+      for (RigidBodyReadOnly body : model.getRootBody().subtreeArray())
+      {
+         if (body.getName().contains("LEFT_FOOT"))
+            feet.put(RobotSide.LEFT, body);
+         else if (body.getName().contains("RIGHT_FOOT"))
+            feet.put(RobotSide.RIGHT, body);
+      }
+
+      return feet;
    }
 
    private String[] getRowNames(FullRobotModel model)

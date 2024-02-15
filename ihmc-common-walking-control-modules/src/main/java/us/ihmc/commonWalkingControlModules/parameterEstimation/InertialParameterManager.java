@@ -13,6 +13,8 @@ import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialInertia;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
@@ -57,6 +59,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final FullHumanoidRobotModel estimateRobotModel;
    private final RigidBodyBasics[] estimateModelBodies;
+   private final List<? extends JointBasics> estimateModelJoints;
    private final ArrayList<YoInertiaEllipsoid> yoInertiaEllipsoids;
    private final YoGraphicDefinition ellipsoidGraphicGroup;
 
@@ -69,12 +72,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final JointTorqueRegressorCalculator regressorCalculator;
 
    private final SideDependentList<? extends FootSwitchInterface> footSwitches;
-   private final SideDependentList<DMatrixRMaj> contactWrenches;
+   private final SideDependentList<Wrench> contactWrenches;
+   private final SideDependentList<SpatialVector> contactSpatialVectors;
 
    private final JointIndexHandler jointIndexHandler;
-   private final SideDependentList<JointBasics[]> legJoints;
-   private final SideDependentList<GeometricJacobian> compactContactJacobians;
-   private final SideDependentList<DMatrixRMaj> fullContactJacobians;
 
    private final DMatrixRMaj wholeSystemTorques;
 
@@ -156,6 +157,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                                                      "_estimate");
       estimateRobotModel = new FullHumanoidRobotModelWrapper(clonedElevatorForEstimates, false);
       estimateModelBodies = estimateRobotModel.getRootBody().subtreeArray();
+      estimateModelJoints = estimateRobotModel.getRootJoint().subtreeList();
       yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(actualRobotModel.getRootBody(), registry);
       ellipsoidGraphicGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(yoInertiaEllipsoids);
 
@@ -207,18 +209,18 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       this.footSwitches = toolbox.getFootSwitches();
       contactWrenches = new SideDependentList<>();
+      contactSpatialVectors = new SideDependentList<>();
       jointIndexHandler = new JointIndexHandler(actualRobotModel.getElevator().subtreeJointStream().toArray(JointBasics[]::new));
-      legJoints = new SideDependentList<>();
-      compactContactJacobians = new SideDependentList<>();
-      fullContactJacobians = new SideDependentList<>();
-
-      // NOTE: for the leg joints and compact jacobians, we use the actual robot model because it has the full model information, including all joint names
       for (RobotSide side : RobotSide.values)
       {
-         contactWrenches.put(side, new DMatrixRMaj(WRENCH_DIMENSION, 1));
-         legJoints.put(side, MultiBodySystemTools.createJointPath(actualRobotModel.getElevator(), actualRobotModel.getFoot(side)));
-         compactContactJacobians.put(side, new GeometricJacobian(legJoints.get(side), footSwitches.get(side).getMeasurementFrame()));
-         fullContactJacobians.put(side, new DMatrixRMaj(WRENCH_DIMENSION, nDoFs));
+         for (RigidBodyReadOnly body : estimateModelBodies)
+         {
+            if (body.getName().contains(side.getUpperCaseName() + "_FOOT"))
+            {
+               contactWrenches.put(side, new Wrench(body.getBodyFixedFrame(), body.getBodyFixedFrame()));
+               contactSpatialVectors.put(side, new SpatialVector(body.getBodyFixedFrame()));
+            }
+         }
       }
 
       wholeSystemTorques = new DMatrixRMaj(nDoFs, 1);
@@ -385,11 +387,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    public void reset()
    {
-      for (RobotSide side : RobotSide.values)
-      {
-         fullContactJacobians.get(side).zero();
-         contactWrenches.get(side).zero();
-      }
+//      for (RobotSide side : RobotSide.values)
+//         contactWrenches.get(side).zero();
 
       wholeSystemTorques.zero();
       rootJointVelocity.zero();
@@ -486,7 +485,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
          updateRegressorModelJointStates();
 
-         updateContactJacobians();
+//         updateContactJacobians();
          updateContactWrenches();
          updateWholeSystemTorques();
 
@@ -499,9 +498,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
             regressorBlocks[i].set(regressorCalculator.getJointTorqueRegressorMatrixBlock(regressorModelBodiesToProcess[i]));
          packRegressorFromBlocks(regressorBlocks, basisSets, regressor);
 
-         filter.setTorqueFromNominal(inverseDynamicsCalculator.getJointTauMatrix());
+//         filter.setTorqueFromNominal(inverseDynamicsCalculator.getJointTauMatrix());
          filter.setRegressor(regressor);
-         filter.setContactJacobians(fullContactJacobians);
+//         filter.setContactJacobians(fullContactJacobians);
          filter.setContactWrenches(contactWrenches);
 
          if (excludeBias.getValue())
@@ -569,7 +568,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private void updateContactWrenches()
    {
       for (RobotSide side : RobotSide.values)
-         footSwitches.get(side).getMeasuredWrench().get(contactWrenches.get(side));
+      {
+         // Set matching frame to transform wrench from ankle frame to foot frame
+         contactSpatialVectors.get(side).setMatchingFrame(footSwitches.get(side).getMeasuredWrench());
+         contactWrenches.get(side).setMatchingFrame(contactSpatialVectors.get(side));
+      }
    }
 
    private void updateRegressorModelJointStates()
@@ -580,23 +583,30 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       MultiBodySystemTools.copyJointsState(actualModelJoints, inverseDynamicsModelJoints, JointStateType.CONFIGURATION);
       MultiBodySystemTools.copyJointsState(actualModelJoints, inverseDynamicsModelJoints, JointStateType.VELOCITY);
 
+      MultiBodySystemTools.copyJointsState(actualModelJoints, estimateModelJoints, JointStateType.CONFIGURATION);
+      MultiBodySystemTools.copyJointsState(actualModelJoints, estimateModelJoints, JointStateType.VELOCITY);
+
       // Update joint accelerations by processing joint velocities
       calculateJointAccelerations();
       OneDoFJointBasics[] regressorOneDoFJoints = regressorRobotModel.getOneDoFJoints();
       OneDoFJointBasics[] inverseDynamicsOneDoFJoints = inverseDynamicsRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] estimateOneDoFJoints = estimateRobotModel.getOneDoFJoints();
       for (int i = 0; i < jointAccelerations.length; i++)
       {
          regressorOneDoFJoints[i].setQdd(jointAccelerations[i].getValue());
          inverseDynamicsOneDoFJoints[i].setQdd(jointAccelerations[i].getValue());
+         estimateOneDoFJoints[i].setQdd(jointAccelerations[i].getValue());
       }
 
       // Update root joint acceleration, which is not populated by default
       calculateRootJointAccelerations();
       regressorRobotModel.getRootJoint().setJointAcceleration(0, rootJointAcceleration);
       inverseDynamicsRobotModel.getRootJoint().setJointAcceleration(0, rootJointAcceleration);
+      estimateRobotModel.getRootJoint().setJointAcceleration(0, rootJointAcceleration);
 
       regressorRobotModel.updateFrames();
       inverseDynamicsRobotModel.updateFrames();
+      estimateRobotModel.updateFrames();
    }
 
    private void updateWholeSystemTorques()
@@ -611,14 +621,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       }
    }
 
-   private void updateContactJacobians()
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         compactContactJacobians.get(side).compute();
-         jointIndexHandler.compactBlockToFullBlock(legJoints.get(side), compactContactJacobians.get(side).getJacobianMatrix(), fullContactJacobians.get(side));
-      }
-   }
+//   private void updateContactJacobians()
+//   {
+//      for (RobotSide side : RobotSide.values)
+//      {
+//         compactContactJacobians.get(side).compute();
+//         jointIndexHandler.compactBlockToFullBlock(legJoints.get(side), compactContactJacobians.get(side).getJacobianMatrix(), fullContactJacobians.get(side));
+//      }
+//   }
 
    private void calculateRootJointAccelerations()
    {
