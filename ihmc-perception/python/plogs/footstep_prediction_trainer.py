@@ -34,7 +34,6 @@ class FootstepDataset(Dataset):
 
         self.sensor_positions[:, 2] = 0
 
-        self.footstep_plan_sides = get_data(data, 'plan/footstep/side/')
         self.footstep_plan_positions = get_data(data, 'plan/footstep/position/')
         self.footstep_plan_orientations = get_data(data, 'plan/footstep/orientation/')
 
@@ -149,43 +148,14 @@ class FootstepDataset(Dataset):
         goal_pose = np.array([self.goal_positions[index, 0] - sensor_pose[0], self.goal_positions[index, 1] - sensor_pose[1], goal_yaw])
 
     
-        # first_plan_step = self.footstep_plan_positions[index*self.n_steps, :]
-
-
-        
-
-        # # vector from start to firststep
-        # start_to_first = first_plan_step - self.start_positions[index, :]
-
-        # # vector for start pose by rotating [1,0,0] by start_yaw
-        # start_vector = np.array([np.cos(start_yaw), np.sin(start_yaw), 0], dtype=np.float32)
-
-        # # get cross product of start_to_first and start_vector
-        # cross_product = np.cross(start_to_first, start_vector)
-
-        # # get sign of cross product
-        # side_parity = np.sign(cross_product[2]) > 0
-
-        
-        # set plan sides to be alternating [[0],[1],[0],[1],[0],[1],[0],[1],[0],[1]] or opposite [[1],[0],[1],[0],[1],[0],[1],[0],[1],[0] based on start_side
-        # footstep_plan_sides = np.zeros((self.n_steps, 1), dtype=np.float32)
-        # footstep_plan_sides[::2] = 1- start_side
-        # footstep_plan_sides[1::2] = start_side
-        
-
-        # print("Start: ", start_pose, "First Step: ", first_plan_step, "Start Side: ", start_side, "Plan Sides: ", footstep_plan_sides)
-
         # convert quaternion to yaw
         footstep_plan_quaternions = self.footstep_plan_orientations[index*n_steps:index*n_steps + self.n_steps, :]
         footstep_plan_yaws = np.arctan2(2 * (footstep_plan_quaternions[:, 0] * footstep_plan_quaternions[:, 1] + footstep_plan_quaternions[:, 3] * footstep_plan_quaternions[:, 2]),
                     1 - 2 * (footstep_plan_quaternions[:, 0]**2 + footstep_plan_quaternions[:, 3]**2))
         
-        # footstep_plan_sides = self.footstep_plan_sides[index*self.n_steps:(index+1)*self.n_steps]
-        
         footstep_plan_poses = self.footstep_plan_positions[index*n_steps:index*n_steps + self.n_steps, :] - sensor_pose
         footstep_plan_poses[:, 2] = footstep_plan_yaws
         footstep_plan_poses = np.array([footstep_plan_poses], dtype=np.float32)
-
 
         # Inputs
         # --------- Image Inputs (float54)
@@ -194,15 +164,12 @@ class FootstepDataset(Dataset):
         # --------- Pose Inputs (X, Y, Yaw) with float 64
         start_pose = torch.Tensor(start_pose).to(device)
         goal_pose = torch.Tensor(goal_pose).to(device)
-        # linear_input = torch.cat((start_pose, goal_pose), dim=0) # without start side
-        linear_input = torch.cat((start_pose, goal_pose), dim=0) # with start side
+        linear_input = torch.cat((start_pose, goal_pose), dim=0) 
 
         # Outputs
         # --------- 3D Pose Outputs
         footstep_plan_poses = torch.Tensor(footstep_plan_poses).to(device)
         linear_output = torch.flatten(footstep_plan_poses)
-
-        print("Shapes (GetItem:) ", height_map_input.shape, linear_input.shape, linear_output.shape)
 
         return height_map_input, linear_input, linear_output
         
@@ -338,7 +305,7 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion):
     model = FootstepPredictor(input_size, output_size).to(device)
 
     # define optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-2, weight_decay = 1e-8)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay = 1e-8)
 
     # train the model
     for epoch in range(epochs):
@@ -433,9 +400,6 @@ def visualize_output(height_map_input, linear_input, final_output, i, val_datase
     start_pose = linear_input[0:3]
     goal_pose = linear_input[3:6]
     plan_poses = output[0:3*n_steps].reshape((n_steps, 3))[:, 0:3]
-
-    # print("Linear Input: ", linear_input)
-    # print("Side of First Footstep: ", output)
 
     # visualize plan
     visualize_plan(height_map, plan_poses, 
