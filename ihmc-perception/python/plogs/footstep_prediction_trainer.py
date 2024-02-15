@@ -65,7 +65,7 @@ class FootstepDataset(Dataset):
             # check if there are no non-zero norm steps in the plan
             count_footsteps = np.count_nonzero(np.linalg.norm(current_plan_positions, axis=1))
 
-            valid = not(count_footsteps < 6)
+            valid = not(count_footsteps < 4)
 
             if valid:
                 new_height_maps.append(self.height_maps[i])
@@ -374,8 +374,8 @@ def visualize_output(height_map_input, linear_input, final_output, i, val_datase
     plan_poses = output[0:4*n_steps].reshape((n_steps, 4))[:, 0:3]
     plan_sides = output[0:4*n_steps].reshape((n_steps, 4))[:, 3]
 
-    print("Linear Input: ", linear_input)
-    print("Side of First Footstep: ", output)
+    # print("Linear Input: ", linear_input)
+    # print("Side of First Footstep: ", output)
 
     # visualize plan
     visualize_plan(height_map, plan_poses, plan_sides, 
@@ -398,6 +398,7 @@ def load_dataset(validation_split):
     # ]
 
     files = sorted(os.listdir(path))
+    files = [file for file in files if ".hdf5" in file]
 
     # filter by no "MCFP" in file name
     # files = [file for file in files if "MCFP" in file]

@@ -65,8 +65,9 @@ public class FootstepPlannerLoggingTools
       perceptionDataLogger.storeFloats(PerceptionLoggerConstants.INITIAL_FOOTSTEP_SIDE, sidednessBit ? 0.0f : 1.0f);
       perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_POSITION, new Point3D(transformToWorld.getTranslation()));
       perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, new Quaternion(transformToWorld.getRotation()));
-      perceptionDataLogger.storeFloats(PerceptionLoggerConstants.START_FOOTSTEP_POSITION, new Point3D(startPose.get(RobotSide.LEFT).getTranslation()));
-      perceptionDataLogger.storeFloats(PerceptionLoggerConstants.START_FOOTSTEP_ORIENTATION, new Quaternion(startPose.get(RobotSide.LEFT).getOrientation()));
+
+      perceptionDataLogger.storeFloats(PerceptionLoggerConstants.START_FOOTSTEP_POSITION, new Point3D(startPose.get(sidednessBit ? RobotSide.LEFT : RobotSide.RIGHT).getTranslation()));
+      perceptionDataLogger.storeFloats(PerceptionLoggerConstants.START_FOOTSTEP_ORIENTATION, new Quaternion(startPose.get(sidednessBit ? RobotSide.LEFT : RobotSide.RIGHT).getOrientation()));
       perceptionDataLogger.storeFloats(PerceptionLoggerConstants.GOAL_FOOTSTEP_POSITION, new Point3D(goalPose.get(RobotSide.LEFT).getTranslation()));
       perceptionDataLogger.storeFloats(PerceptionLoggerConstants.GOAL_FOOTSTEP_ORIENTATION, new Quaternion(goalPose.get(RobotSide.LEFT).getOrientation()));
    }
