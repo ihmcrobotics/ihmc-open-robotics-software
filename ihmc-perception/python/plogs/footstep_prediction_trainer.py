@@ -1,4 +1,5 @@
 import torch
+import gc
 torch.cuda.empty_cache()
 
 import torch.nn.functional as F
@@ -296,10 +297,10 @@ class FootstepPredictor(Module):
 
         return x
 
-def train_store(train_dataset, val_dataset, batch_size, epochs, criterion):
+def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model_path):
     
     train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
-    val_loader = DataLoader(dataset=val_dataset, batch_size=len(val_dataset.indices), shuffle=False, num_workers=0)
+    val_loader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
     input_size = train_dataset[0][1].shape[0]
     output_size = train_dataset[0][2].shape[0]
     model = FootstepPredictor(input_size, output_size).to(device)
@@ -309,6 +310,9 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion):
 
     # train the model
     for epoch in range(epochs):
+        gc.collect()
+        torch.cuda.empty_cache()
+
         loop=tqdm(train_loader, bar_format='{l_bar}{bar:30}{r_bar}{bar:-30b}')
         running_loss=0
         for i, (x1, x2, y) in enumerate(loop):
@@ -346,20 +350,24 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion):
                 print("Validiation loss - ",valid_loss,"\n")
                 writer.add_scalar('validation loss', valid_loss, epoch * len(train_loader) + i)
 
+        del x1, x2, y, y_pred, loss
+        gc.collect()
+        torch.cuda.empty_cache()
+
     # save the model
-    torch.save(model.state_dict(), 'footstep_predictor.pt')
-    torch.onnx.export(model, (x1[0].unsqueeze(0), x2[0].unsqueeze(0)), 'footstep_predictor.onnx', verbose=False)
+    torch.save(model.state_dict(), model_path + 'footstep_predictor.pt')
+    torch.onnx.export(model, (x1[0].unsqueeze(0), x2[0].unsqueeze(0)), model_path + 'footstep_predictor.onnx', verbose=False)
     writer.close()
 
 
-def load_validate(val_dataset):
-    loader = DataLoader(val_dataset, batch_size=1, shuffle=True)
+def load_validate(val_dataset, batch_size, model_path):
+    loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
     
     # Load the model
     input_size = val_dataset[0][1].shape[0]
     output_size = val_dataset[0][2].shape[0]
     model = FootstepPredictor(input_size, output_size)
-    model.load_state_dict(torch.load('footstep_predictor.pt'))
+    model.load_state_dict(torch.load(model_path + 'footstep_predictor.pt'))
     model.eval()
     model.to(device)
 
@@ -373,13 +381,13 @@ def load_validate(val_dataset):
             predict_output = model(height_map_input, linear_input)
 
             # get only the first 4 steps
-            predict_output = predict_output[0:3*n_steps].reshape((n_steps, 3))
+            predict_output = predict_output[0:3*n_steps, :].reshape((n_steps, 3))
 
-            visualize_output(height_map_input, linear_input, predict_output, i, val_dataset)
-            visualize_output(height_map_input, linear_input, target_output, i, val_dataset)
+            visualize_output(height_map_input, linear_input, predict_output, i, val_dataset, label="Prediction")
+            visualize_output(height_map_input, linear_input, target_output, i, val_dataset, label="Target")
 
             
-def visualize_output(height_map_input, linear_input, final_output, i, val_dataset, n_steps=4):
+def visualize_output(height_map_input, linear_input, final_output, i, val_dataset, n_steps=4, label="Footstep Plan"):
 
     output = final_output.cpu().numpy()
     output = output.squeeze()
@@ -403,29 +411,20 @@ def visualize_output(height_map_input, linear_input, final_output, i, val_datase
 
     # visualize plan
     visualize_plan(height_map, plan_poses, 
-                    start_pose, goal_pose)
+                    start_pose, goal_pose, label=label)
 
 def load_dataset(validation_split):
     home = os.path.expanduser('~')
     path = home + '/Downloads/Planning_Datasets/'
     
-    # new_format_files = ['20231018_135001_PerceptionLog.hdf5', 
+    # input_files = ['20231018_135001_PerceptionLog.hdf5', 
     #                     '20231018_143108_PerceptionLog.hdf5']
     
-    # files = \
-    # [
-    #     "20240212_020130_AStarDataset_Generated.hdf5",      
-    #     "20240212_031849_AStarDataset_Generated_200.hdf5",  
-    #     "20240212_043439_AStarDataset_Generated_400.hdf5",
-    #     "20240212_023954_AStarDataset_Generated_100.hdf5",
-    #     "20240212_035650_AStarDataset_Generated_300.hdf5"
-    # ]
-
     files = sorted(os.listdir(path))
     files = [file for file in files if ".hdf5" in file]
 
     labels = [
-                'MCFP', 
+                # 'MCFP', 
                 'AStar'
     ]
 
@@ -433,7 +432,7 @@ def load_dataset(validation_split):
     files = [file for file in files if any(label in file for label in labels)]
     
 
-    files = files[:6]
+    # files = files[:6]
 
     
     datasets = []
@@ -466,6 +465,10 @@ def visualize_dataset(dataset):
 
 if __name__ == "__main__":
 
+    home = os.path.expanduser('~')
+    model_path = home + '/Downloads/Model_Weights/'
+    datasets_path = home + '/Downloads/Planning_Datasets/'
+
     n_steps = 4
 
     # load dataset
@@ -481,11 +484,11 @@ if __name__ == "__main__":
     if train:
         # train and store model
         criterion=torch.nn.L1Loss()
-        train_store(train_dataset, val_dataset, batch_size=2, epochs=30, criterion=criterion)
+        train_store(train_dataset, val_dataset, batch_size=2, epochs=30, criterion=criterion, model_path=model_path)
 
     else:
         # load and validate model
-        load_validate(val_dataset)
+        load_validate(val_dataset, batch_size=1, model_path=model_path)
 
 
     torch.cuda.empty_cache()
