@@ -16,6 +16,10 @@ public class SakeHandParameters
    public static double FINGERTIP_GRIP_FORCE_MODERATE_THRESHOLD = 14.5;
    /** This is a high amount of force. */
    public static double FINGERTIP_GRIP_FORCE_HIGH_THRESHOLD = 20.3;
+   /** The stall torque of the dynamixel that drives the gripper. */
+   public static double DYNAMIXEL_MX_64AR_STALL_TORQUE = 6.0;
+   /** Rough guess how much knuckle torque corresponding to our limit above. */
+   public static double MAX_KNUCKLE_TORQUE = 4.5;
 
    /**
     * @param normalizedHandOpenAngle 0.0 (closed) to 1.0 (open)
@@ -43,5 +47,15 @@ public class SakeHandParameters
    public static double normalizeFingertipGripForceLimit(double fingertipGripForceLimit)
    {
       return fingertipGripForceLimit / FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT;
+   }
+
+   public static double denormalizeKnuckleTorque(double knuckleTorque)
+   {
+      return knuckleTorque * MAX_KNUCKLE_TORQUE;
+   }
+
+   public static double normalizeKnuckleTorque(double knuckleTorque)
+   {
+      return knuckleTorque / MAX_KNUCKLE_TORQUE;
    }
 }
