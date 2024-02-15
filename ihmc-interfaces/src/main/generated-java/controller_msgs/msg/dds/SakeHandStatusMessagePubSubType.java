@@ -15,7 +15,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4fbaf008faa78dab77c414c281d498e45e32559066898e55a0aa423b7c18419e";
+   		return "ed25e34995e7c3d45b5f271ab90d387ef27134d803c3d9bfcbc31ca616ef8194";
    }
    
    @Override
@@ -52,11 +52,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -81,13 +77,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -111,19 +101,15 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void write(controller_msgs.msg.dds.SakeHandStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
-
       cdr.write_type_9(data.getRobotSide());
 
       cdr.write_type_6(data.getTemperature());
 
-      cdr.write_type_6(data.getPresentTorqueRatio());
+      cdr.write_type_6(data.getNormalizedCurrentPosition());
 
-      cdr.write_type_6(data.getPostionRatio());
+      cdr.write_type_6(data.getNormalizedCurrentTorque());
 
-      cdr.write_type_6(data.getGoalTorqueRatio());
-
-      cdr.write_type_7(data.getCalibrated());
+      cdr.write_type_7(data.getIsCalibrated());
 
       cdr.write_type_7(data.getNeedsReset());
 
@@ -131,19 +117,15 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(controller_msgs.msg.dds.SakeHandStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
-      	
       data.setRobotSide(cdr.read_type_9());
       	
       data.setTemperature(cdr.read_type_6());
       	
-      data.setPresentTorqueRatio(cdr.read_type_6());
+      data.setNormalizedCurrentPosition(cdr.read_type_6());
       	
-      data.setPostionRatio(cdr.read_type_6());
+      data.setNormalizedCurrentTorque(cdr.read_type_6());
       	
-      data.setGoalTorqueRatio(cdr.read_type_6());
-      	
-      data.setCalibrated(cdr.read_type_7());
+      data.setIsCalibrated(cdr.read_type_7());
       	
       data.setNeedsReset(cdr.read_type_7());
       	
@@ -153,26 +135,22 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(controller_msgs.msg.dds.SakeHandStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_6("temperature", data.getTemperature());
-      ser.write_type_6("present_torque_ratio", data.getPresentTorqueRatio());
-      ser.write_type_6("postion_ratio", data.getPostionRatio());
-      ser.write_type_6("goal_torque_ratio", data.getGoalTorqueRatio());
-      ser.write_type_7("calibrated", data.getCalibrated());
+      ser.write_type_6("normalized_current_position", data.getNormalizedCurrentPosition());
+      ser.write_type_6("normalized_current_torque", data.getNormalizedCurrentTorque());
+      ser.write_type_7("is_calibrated", data.getIsCalibrated());
       ser.write_type_7("needs_reset", data.getNeedsReset());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.SakeHandStatusMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setTemperature(ser.read_type_6("temperature"));
-      data.setPresentTorqueRatio(ser.read_type_6("present_torque_ratio"));
-      data.setPostionRatio(ser.read_type_6("postion_ratio"));
-      data.setGoalTorqueRatio(ser.read_type_6("goal_torque_ratio"));
-      data.setCalibrated(ser.read_type_7("calibrated"));
+      data.setNormalizedCurrentPosition(ser.read_type_6("normalized_current_position"));
+      data.setNormalizedCurrentTorque(ser.read_type_6("normalized_current_torque"));
+      data.setIsCalibrated(ser.read_type_7("is_calibrated"));
       data.setNeedsReset(ser.read_type_7("needs_reset"));
    }
 
