@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.planarWalker.BWC;
 
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.simulation.robot.Robot;
 
@@ -21,7 +22,7 @@ public class BWCPlanarWalkingSimulation
       scs.addTerrainObject(new FlatGroundDefinition());
 
       BWCPlanarWalkingRobot controllerRobot = new BWCPlanarWalkingRobot(robot, scs.getTime());
-      BWCPlanarWalkingController controller = new BWCPlanarWalkingController(controllerRobot);
+      BWCPlanarWalkingController controller = new BWCPlanarWalkingController(controllerRobot, RobotSide.LEFT);
 
       robot.addThrottledController(controller, scs.getDT() * simTicksPerControlTick);
 

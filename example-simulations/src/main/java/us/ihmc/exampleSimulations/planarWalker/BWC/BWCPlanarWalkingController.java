@@ -48,7 +48,7 @@ public class BWCPlanarWalkingController implements Controller
 
    private final SideDependentList<YoBoolean> hasFootHitGround = new SideDependentList<>();
 
-   public BWCPlanarWalkingController(BWCPlanarWalkingRobot controllerRobot)
+   public BWCPlanarWalkingController(BWCPlanarWalkingRobot controllerRobot, RobotSide initialSwingSide)
    {
       this.controllerRobot = controllerRobot;
 
@@ -76,16 +76,17 @@ public class BWCPlanarWalkingController implements Controller
          desiredSupportLegLength.get(robotSide).set((BWCPlanarWalkingRobotDefinition.shinLength + BWCPlanarWalkingRobotDefinition.thighLength) / 2);
          hasFootHitGround.put(robotSide, new YoBoolean(robotSide.getLowerCaseName() + "HasFootHitGround", registry));
 
-         StateMachineFactory<LegStateName, State> stateStateMachineFactory = new StateMachineFactory<>(LegStateName.class);
-         stateStateMachineFactory.setNamePrefix(robotSide.getLowerCaseName() + "LegState").setRegistry(registry).buildYoClock(controllerRobot.getTime());
+         StateMachineFactory<LegStateName, State> stateMachineFactory = new StateMachineFactory<>(LegStateName.class);
+         stateMachineFactory.setNamePrefix(robotSide.getLowerCaseName() + "LegState").setRegistry(registry).buildYoClock(controllerRobot.getTime());
 
-         stateStateMachineFactory.addState(LegStateName.SUPPORT, new SupportFootState(robotSide));
-         stateStateMachineFactory.addState(LegStateName.SWING, new SwingFootState(robotSide));
+         stateMachineFactory.addState(LegStateName.SUPPORT, new SupportFootState(robotSide));
+         stateMachineFactory.addState(LegStateName.SWING, new SwingFootState(robotSide));
 
-         stateStateMachineFactory.addDoneTransition(LegStateName.SWING, LegStateName.SUPPORT);
-         stateStateMachineFactory.addTransition(LegStateName.SUPPORT, LegStateName.SWING, new StartSwingCondition(robotSide));
+         stateMachineFactory.addDoneTransition(LegStateName.SWING, LegStateName.SUPPORT);
+         stateMachineFactory.addTransition(LegStateName.SUPPORT, LegStateName.SWING, new StartSwingCondition(robotSide));
 
-         legStateMachines.put(robotSide, stateStateMachineFactory.build(LegStateName.SUPPORT));
+         LegStateName initialState = robotSide == initialSwingSide ? LegStateName.SWING : LegStateName.SUPPORT;
+         legStateMachines.put(robotSide, stateMachineFactory.build(initialState));
       }
 
       registry.addChild(controllerRobot.getYoRegistry());
