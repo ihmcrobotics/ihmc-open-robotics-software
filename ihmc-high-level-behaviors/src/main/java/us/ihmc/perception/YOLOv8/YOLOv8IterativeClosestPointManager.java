@@ -1,5 +1,6 @@
 package us.ihmc.perception.YOLOv8;
 
+import org.ddogleg.struct.Tuple2;
 import org.ddogleg.struct.Tuple3;
 import perception_msgs.msg.dds.YOLOv8ParametersMessage;
 import us.ihmc.commons.MathTools;
@@ -10,6 +11,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.OpenCLPointCloudExtractor;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.filters.DetectionFilter;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -17,7 +19,9 @@ import us.ihmc.tools.thread.RestartableThread;
 
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,12 +49,15 @@ public class YOLOv8IterativeClosestPointManager
    private final Condition newImagesAvailable = imageUpdateLock.newCondition();
    private final Notification readyToRunNotification = new Notification();
 
+   private final Map<YOLOv8Detection, Tuple2<DetectionFilter, Boolean>> candidateDetections = new ConcurrentHashMap<>();
    private final Map<YOLOv8IterativeClosestPointNodeCombo, YOLOv8IterativeClosestPointNodeCombo> yoloICPNodeComboSet = new ConcurrentHashMap<>();
 
    private final IHMCROS2Input<YOLOv8ParametersMessage> yoloParameterSubscription;
    private float yoloConfidenceThreshold = 0.3f;
    private float yoloNMSThreshold = 0.1f;
    private float yoloSegmentationThreshold = 0.0f;
+   private double candidateMovementThreshold = 3000.0;
+   private float candidateAcceptanceThreshold = 0.6f;
 
    public YOLOv8IterativeClosestPointManager(ROS2Helper ros2Helper)
    {
@@ -64,6 +71,8 @@ public class YOLOv8IterativeClosestPointManager
          yoloConfidenceThreshold = parametersMessage.getConfidenceThreshold();
          yoloNMSThreshold = parametersMessage.getNonMaximumSuppressionThreshold();
          yoloSegmentationThreshold = parametersMessage.getSegmentationThreshold();
+         candidateAcceptanceThreshold = parametersMessage.getCandidateAcceptanceThreshold();
+         candidateMovementThreshold = parametersMessage.getCandidateMovementThreshold();
       });
    }
 
@@ -93,11 +102,42 @@ public class YOLOv8IterativeClosestPointManager
    {
       sceneGraph.modifyTree(modificationQueue ->
       {
-         for (YOLOv8IterativeClosestPointNodeCombo yoloICPCombo : yoloICPNodeComboSet.keySet())
+         synchronized (candidateDetections)
          {
-            if (!yoloICPCombo.updateSceneGraph(sceneGraph, modificationQueue))
-               yoloICPNodeComboSet.remove(yoloICPCombo);
+            Iterator<Entry<YOLOv8Detection, Tuple2<DetectionFilter, Boolean>>> candidateIterator = candidateDetections.entrySet().iterator();
+            while (candidateIterator.hasNext())
+            {
+               Map.Entry<YOLOv8Detection, Tuple2<DetectionFilter, Boolean>> candidateDetectionEntry = candidateIterator.next();
+               YOLOv8Detection candidateDetection = candidateDetectionEntry.getKey();
+               DetectionFilter filter = candidateDetectionEntry.getValue().getData0();
+
+               // Register the detection if it has been detected...
+               if (candidateDetectionEntry.getValue().getData1())
+                  filter.registerDetection();
+
+               filter.update();
+
+               if (filter.hasEnoughSamples())
+               {
+                  if (filter.isDetected())
+                  {
+                     YOLOv8IterativeClosestPointNodeCombo newYOLOICPCombo = new YOLOv8IterativeClosestPointNodeCombo(candidateDetection,
+                                                                                                                     filter,
+                                                                                                                     sceneGraph,
+                                                                                                                     modificationQueue,
+                                                                                                                     pointCloudDirectory,
+                                                                                                                     ros2Helper,
+                                                                                                                     openCLManager);
+                     yoloICPNodeComboSet.put(newYOLOICPCombo, newYOLOICPCombo);
+                  }
+
+                  candidateIterator.remove();
+               }
+            }
          }
+
+         // call updateSceneGraph on each combo and remove if node has been removed in the update
+         yoloICPNodeComboSet.keySet().removeIf(yoloICPCombo -> !yoloICPCombo.updateSceneGraph(sceneGraph, modificationQueue));
       });
    }
 
@@ -176,18 +216,15 @@ public class YOLOv8IterativeClosestPointManager
       Set<YOLOv8Detection> newDetections = yoloResults.getICPDetections();
 
       // Give the YOLO ICP combos new detections
-      Set<YOLOv8IterativeClosestPointNodeCombo> unmatchedYOLOICPCombos = organizeDetections(yoloICPNodeComboSet, newDetections);
+      Set<YOLOv8IterativeClosestPointNodeCombo> unmatchedYOLOICPCombos = matchOldAndNewDetections(yoloICPNodeComboSet, newDetections);
+
+      synchronized (candidateDetections)
+      {
+         matchCandidateAndNewDetections(candidateDetections, newDetections);
+      }
 
       // Signal combos which did not receive a new detection to consider destruction
       unmatchedYOLOICPCombos.forEach(YOLOv8IterativeClosestPointNodeCombo::destroyIfExpired);
-
-      // Create new combos for new detections
-      for (YOLOv8Detection newDetection : newDetections)
-      {
-         YOLOv8IterativeClosestPointNodeCombo newCombo = new YOLOv8IterativeClosestPointNodeCombo(ros2Helper, pointCloudDirectory, openCLManager);
-         newCombo.setDetection(newDetection);
-         yoloICPNodeComboSet.put(newCombo, newCombo);
-      }
 
       // Run ICP on all new detections
       for (YOLOv8IterativeClosestPointNodeCombo yoloICPCombo : yoloICPNodeComboSet.keySet())
@@ -220,12 +257,12 @@ public class YOLOv8IterativeClosestPointManager
     *
     * TODO: This is a basic distance based organization. Velocity based organization would be cooler.
     */
-   private Set<YOLOv8IterativeClosestPointNodeCombo> organizeDetections(Map<YOLOv8IterativeClosestPointNodeCombo, YOLOv8IterativeClosestPointNodeCombo> detectionCombos,
-                                                                        Set<YOLOv8Detection> newDetections)
+   private Set<YOLOv8IterativeClosestPointNodeCombo> matchOldAndNewDetections(Map<YOLOv8IterativeClosestPointNodeCombo, YOLOv8IterativeClosestPointNodeCombo> detectionCombos,
+                                                                              Set<YOLOv8Detection> newDetections)
    {
       // Priority queue of all possible detection pairs ordered by distance between them
-      PriorityQueue<Tuple3<YOLOv8IterativeClosestPointNodeCombo, YOLOv8Detection, Double>> possiblyMatchingDetections
-            = new PriorityQueue<>(Comparator.comparingDouble(Tuple3::getD2));
+      PriorityQueue<Tuple3<YOLOv8IterativeClosestPointNodeCombo, YOLOv8Detection, Double>> possiblyMatchingDetections = new PriorityQueue<>(Comparator.comparingDouble(
+            Tuple3::getD2));
 
       // Add all detections which possibly match to the queue
       for (YOLOv8IterativeClosestPointNodeCombo oldDetectionCombo : detectionCombos.keySet())
@@ -235,17 +272,21 @@ public class YOLOv8IterativeClosestPointManager
          {
             for (YOLOv8Detection newDetection : newDetections)
             {
-               double distanceSquared = MathTools.square(oldDetection.x() - newDetection.x()) + MathTools.square(oldDetection.y() - newDetection.y());
+               if (oldDetection.objectClass() == newDetection.objectClass())
+               {
+                  double distanceSquared = MathTools.square(oldDetection.x() - newDetection.x()) + MathTools.square(oldDetection.y() - newDetection.y());
 
-               if (oldDetection.objectClass() == newDetection.objectClass() && distanceSquared < oldDetectionCombo.getDistanceThreshold())
-                  possiblyMatchingDetections.add(new Tuple3<>(oldDetectionCombo, newDetection, distanceSquared));
+                  System.out.println(distanceSquared + " vs " + oldDetectionCombo.getDistanceThreshold());
+                  if (distanceSquared < oldDetectionCombo.getDistanceThreshold())
+                     possiblyMatchingDetections.add(new Tuple3<>(oldDetectionCombo, newDetection, distanceSquared));
+               }
             }
          }
       }
 
       // Match up old and new detections, removing each match from the list of unmatched detections
       Set<YOLOv8IterativeClosestPointNodeCombo> unmatchedOldDetections = new HashSet<>(detectionCombos.keySet());
-      while (!newDetections.isEmpty() && ! unmatchedOldDetections.isEmpty())
+      while (!newDetections.isEmpty() && !unmatchedOldDetections.isEmpty())
       {
          Tuple3<YOLOv8IterativeClosestPointNodeCombo, YOLOv8Detection, Double> bestMatchDetections = possiblyMatchingDetections.poll();
          if (bestMatchDetections == null)
@@ -261,5 +302,49 @@ public class YOLOv8IterativeClosestPointManager
       }
 
       return unmatchedOldDetections;
+   }
+
+   private void matchCandidateAndNewDetections(Map<YOLOv8Detection, Tuple2<DetectionFilter, Boolean>> candidateDetections, Set<YOLOv8Detection> newDetections)
+   {
+      PriorityQueue<Tuple3<YOLOv8Detection, YOLOv8Detection, Double>> possiblyMatchingCandidates = new PriorityQueue<>(Comparator.comparingDouble(Tuple3::getD2));
+      for (YOLOv8Detection candidateDetection : candidateDetections.keySet())
+      {
+         for (YOLOv8Detection newDetection : newDetections)
+         {
+            double distanceSquared = MathTools.square(candidateDetection.x() - newDetection.x()) + MathTools.square(candidateDetection.y() - newDetection.y());
+            if (candidateDetection.objectClass() == newDetection.objectClass() && distanceSquared < candidateMovementThreshold)
+               possiblyMatchingCandidates.add(new Tuple3<>(candidateDetection, newDetection, distanceSquared));
+         }
+      }
+
+      Set<YOLOv8Detection> unmatchedCandidateDetections = new HashSet<>(candidateDetections.keySet());
+      while (!newDetections.isEmpty() && !unmatchedCandidateDetections.isEmpty())
+      {
+         Tuple3<YOLOv8Detection, YOLOv8Detection, Double> bestMatchDetection = possiblyMatchingCandidates.poll();
+         if (bestMatchDetection == null)
+            break;
+
+         if (candidateDetections.containsKey(bestMatchDetection.getD0()))
+         {
+            // candidate matched with new detection; replace old candidate with its match
+            candidateDetections.put(bestMatchDetection.getD1(), candidateDetections.remove(bestMatchDetection.getD0()));
+            candidateDetections.get(bestMatchDetection.getD1()).setData1(true);
+
+            unmatchedCandidateDetections.remove(bestMatchDetection.getD0());
+            newDetections.remove(bestMatchDetection.getD1());
+         }
+      }
+
+      for (YOLOv8Detection newDetection : newDetections)
+      {
+         // new candidate found
+         candidateDetections.put(newDetection, new Tuple2<>(new DetectionFilter(candidateAcceptanceThreshold), true));
+      }
+
+      for (YOLOv8Detection unmatchedCandidate : unmatchedCandidateDetections)
+      {
+         // candidate did not get matched; not detected
+         candidateDetections.get(unmatchedCandidate).setData1(false);
+      }
    }
 }

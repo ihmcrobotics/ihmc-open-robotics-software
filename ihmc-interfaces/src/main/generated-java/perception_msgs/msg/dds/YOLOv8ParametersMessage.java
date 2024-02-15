@@ -17,6 +17,14 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
    public float confidence_threshold_;
    public float non_maximum_suppression_threshold_;
    public float segmentation_threshold_;
+   /**
+            * Squared Euclidean distance (in pixels) a candidate detection can move
+            */
+   public float candidate_movement_threshold_;
+   /**
+            * Percentage of updates a candidate must be detected in to be accepted
+            */
+   public float candidate_acceptance_threshold_;
 
    public YOLOv8ParametersMessage()
    {
@@ -35,6 +43,10 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
       non_maximum_suppression_threshold_ = other.non_maximum_suppression_threshold_;
 
       segmentation_threshold_ = other.segmentation_threshold_;
+
+      candidate_movement_threshold_ = other.candidate_movement_threshold_;
+
+      candidate_acceptance_threshold_ = other.candidate_acceptance_threshold_;
 
    }
 
@@ -71,6 +83,36 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
       return segmentation_threshold_;
    }
 
+   /**
+            * Squared Euclidean distance (in pixels) a candidate detection can move
+            */
+   public void setCandidateMovementThreshold(float candidate_movement_threshold)
+   {
+      candidate_movement_threshold_ = candidate_movement_threshold;
+   }
+   /**
+            * Squared Euclidean distance (in pixels) a candidate detection can move
+            */
+   public float getCandidateMovementThreshold()
+   {
+      return candidate_movement_threshold_;
+   }
+
+   /**
+            * Percentage of updates a candidate must be detected in to be accepted
+            */
+   public void setCandidateAcceptanceThreshold(float candidate_acceptance_threshold)
+   {
+      candidate_acceptance_threshold_ = candidate_acceptance_threshold;
+   }
+   /**
+            * Percentage of updates a candidate must be detected in to be accepted
+            */
+   public float getCandidateAcceptanceThreshold()
+   {
+      return candidate_acceptance_threshold_;
+   }
+
 
    public static Supplier<YOLOv8ParametersMessagePubSubType> getPubSubType()
    {
@@ -95,6 +137,10 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.segmentation_threshold_, other.segmentation_threshold_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.candidate_movement_threshold_, other.candidate_movement_threshold_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.candidate_acceptance_threshold_, other.candidate_acceptance_threshold_, epsilon)) return false;
+
 
       return true;
    }
@@ -114,6 +160,10 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
 
       if(this.segmentation_threshold_ != otherMyClass.segmentation_threshold_) return false;
 
+      if(this.candidate_movement_threshold_ != otherMyClass.candidate_movement_threshold_) return false;
+
+      if(this.candidate_acceptance_threshold_ != otherMyClass.candidate_acceptance_threshold_) return false;
+
 
       return true;
    }
@@ -129,7 +179,11 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
       builder.append("non_maximum_suppression_threshold=");
       builder.append(this.non_maximum_suppression_threshold_);      builder.append(", ");
       builder.append("segmentation_threshold=");
-      builder.append(this.segmentation_threshold_);
+      builder.append(this.segmentation_threshold_);      builder.append(", ");
+      builder.append("candidate_movement_threshold=");
+      builder.append(this.candidate_movement_threshold_);      builder.append(", ");
+      builder.append("candidate_acceptance_threshold=");
+      builder.append(this.candidate_acceptance_threshold_);
       builder.append("}");
       return builder.toString();
    }

@@ -20,6 +20,14 @@ module perception_msgs
         float confidence_threshold;
         float non_maximum_suppression_threshold;
         float segmentation_threshold;
+        /**
+         * Squared Euclidean distance (in pixels) a candidate detection can move
+         */
+        float candidate_movement_threshold;
+        /**
+         * Percentage of updates a candidate must be detected in to be accepted
+         */
+        float candidate_acceptance_threshold;
       };
     };
   };

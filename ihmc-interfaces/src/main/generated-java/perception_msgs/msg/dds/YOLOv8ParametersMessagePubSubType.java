@@ -15,7 +15,7 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1c3de765f61469c75eb4f5478639482fccde983ddf0062ee6950374bdcd35c2f";
+   		return "a68187faa5164a8843c8abc89913b2af9286633a95fc8b004d0ba50d2deb77ec";
    }
    
    @Override
@@ -58,6 +58,10 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -80,6 +84,12 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -92,6 +102,10 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       cdr.write_type_5(data.getSegmentationThreshold());
 
+      cdr.write_type_5(data.getCandidateMovementThreshold());
+
+      cdr.write_type_5(data.getCandidateAcceptanceThreshold());
+
    }
 
    public static void read(perception_msgs.msg.dds.YOLOv8ParametersMessage data, us.ihmc.idl.CDR cdr)
@@ -102,6 +116,10 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
       	
       data.setSegmentationThreshold(cdr.read_type_5());
       	
+      data.setCandidateMovementThreshold(cdr.read_type_5());
+      	
+      data.setCandidateAcceptanceThreshold(cdr.read_type_5());
+      	
 
    }
 
@@ -111,6 +129,8 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
       ser.write_type_5("confidence_threshold", data.getConfidenceThreshold());
       ser.write_type_5("non_maximum_suppression_threshold", data.getNonMaximumSuppressionThreshold());
       ser.write_type_5("segmentation_threshold", data.getSegmentationThreshold());
+      ser.write_type_5("candidate_movement_threshold", data.getCandidateMovementThreshold());
+      ser.write_type_5("candidate_acceptance_threshold", data.getCandidateAcceptanceThreshold());
    }
 
    @Override
@@ -119,6 +139,8 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
       data.setConfidenceThreshold(ser.read_type_5("confidence_threshold"));
       data.setNonMaximumSuppressionThreshold(ser.read_type_5("non_maximum_suppression_threshold"));
       data.setSegmentationThreshold(ser.read_type_5("segmentation_threshold"));
+      data.setCandidateMovementThreshold(ser.read_type_5("candidate_movement_threshold"));
+      data.setCandidateAcceptanceThreshold(ser.read_type_5("candidate_acceptance_threshold"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.YOLOv8ParametersMessage src, perception_msgs.msg.dds.YOLOv8ParametersMessage dest)

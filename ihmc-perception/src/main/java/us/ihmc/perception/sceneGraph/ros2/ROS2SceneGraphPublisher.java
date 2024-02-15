@@ -127,6 +127,7 @@ public class ROS2SceneGraphPublisher
             yoloICPNodeMessage.setIcpIterations(yoloICPNode.getICPIterations());
             yoloICPNodeMessage.setBaseDistanceThreshold(yoloICPNode.getBaseDistanceThreshold());
             yoloICPNodeMessage.setRunIcp(yoloICPNode.isRunningICP());
+            yoloICPNodeMessage.setMovementDistanceThreshold(yoloICPNode.getMovementDistanceThreshold());
             detectableSceneNodeMessage = yoloICPNodeMessage.getDetectableSceneNode();
          }
          else
