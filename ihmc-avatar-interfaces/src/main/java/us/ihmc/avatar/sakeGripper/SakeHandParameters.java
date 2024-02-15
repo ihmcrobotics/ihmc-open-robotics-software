@@ -14,8 +14,6 @@ public class SakeHandParameters
    public static double FINGERTIP_GRIP_FORCE_MODERATE_THRESHOLD = 14.5;
    /** This is a high amount of force. */
    public static double FINGERTIP_GRIP_FORCE_HIGH_THRESHOLD = 20.3;
-   /** Some values are converted to ratios of 0.0 to 1.0 */
-   public static double MAX_RATIO_VALUE = 1.0;
 
    /**
     * @param normalizedHandOpenAngle 0.0 (closed) to 1.0 (open)
