@@ -21,7 +21,7 @@ public class BWCPlanarWalkerSimulation
       scs.addTerrainObject(new SlopeGroundDefinition(0.0));
 
       // set up the controller robot that has convenience methods for us to do control things with.
-      BWCPlanarWalkingRobot controllerRobot = new BWCPlanarWalkingRobot(robot);
+      BWCPlanarWalkingRobot controllerRobot = new BWCPlanarWalkingRobot(robot, scs.getTime());
       // create the robot controller
       BWCPlanarWalkingController controller = new BWCPlanarWalkingController(controllerRobot);
       // set the controller to control the robot.

@@ -5,6 +5,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimPrismaticJoint;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -15,8 +16,11 @@ public class BWCPlanarWalkingRobot
    private final SideDependentList<YoDouble> legLengths = new SideDependentList<YoDouble>();
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   public BWCPlanarWalkingRobot(Robot robot)
+   private final DoubleProvider time;
+
+   public BWCPlanarWalkingRobot(Robot robot, DoubleProvider time)
    {
+      this.time = time;
       robot.getFloatingRootJoint().setJointPosition(new Vector3D(0.0, 0.0, 0.75));
 
       kneeJoints = new SideDependentList<>();
@@ -35,6 +39,11 @@ public class BWCPlanarWalkingRobot
    public YoRegistry getYoRegistry()
    {
       return registry;
+   }
+
+   public DoubleProvider getTime()
+   {
+      return time;
    }
 
    public double getLegLength(RobotSide robotSide)
