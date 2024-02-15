@@ -33,7 +33,7 @@ module controller_msgs
         /**
          * Request to reset the gripper error state after overheating
          */
-        boolean request_reset_error;
+        boolean request_reset_errors;
         /**
          * The desired dynamixel position, normalized to the gripper range of motion
          * 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)

@@ -13,7 +13,7 @@ int8 robot_side
 bool request_calibration
 
 # Request to reset the gripper error state after overheating
-bool request_reset_error
+bool request_reset_errors
 
 # The desired dynamixel position, normalized to the gripper range of motion
 # 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)

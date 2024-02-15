@@ -15,7 +15,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "dc17f82ba50893450a61cfddb8b32fdc5f89443b97a684743f415a7167f29c54";
+   		return "67aea8f492292bd057a5bcbe25993da2400e02b2e556f4cdd40486194ff5123c";
    }
    
    @Override
@@ -62,6 +62,8 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -80,6 +82,9 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       int initial_alignment = current_alignment;
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -116,6 +121,8 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       cdr.write_type_6(data.getNormalizedDesiredPosition());
 
+      cdr.write_type_6(data.getNormalizedTorqueLimit());
+
       cdr.write_type_7(data.getIsCalibrated());
 
       cdr.write_type_7(data.getNeedsReset());
@@ -134,6 +141,8 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       	
       data.setNormalizedDesiredPosition(cdr.read_type_6());
       	
+      data.setNormalizedTorqueLimit(cdr.read_type_6());
+      	
       data.setIsCalibrated(cdr.read_type_7());
       	
       data.setNeedsReset(cdr.read_type_7());
@@ -149,6 +158,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       ser.write_type_6("normalized_current_position", data.getNormalizedCurrentPosition());
       ser.write_type_6("normalized_current_torque", data.getNormalizedCurrentTorque());
       ser.write_type_6("normalized_desired_position", data.getNormalizedDesiredPosition());
+      ser.write_type_6("normalized_torque_limit", data.getNormalizedTorqueLimit());
       ser.write_type_7("is_calibrated", data.getIsCalibrated());
       ser.write_type_7("needs_reset", data.getNeedsReset());
    }
@@ -161,6 +171,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       data.setNormalizedCurrentPosition(ser.read_type_6("normalized_current_position"));
       data.setNormalizedCurrentTorque(ser.read_type_6("normalized_current_torque"));
       data.setNormalizedDesiredPosition(ser.read_type_6("normalized_desired_position"));
+      data.setNormalizedTorqueLimit(ser.read_type_6("normalized_torque_limit"));
       data.setIsCalibrated(ser.read_type_7("is_calibrated"));
       data.setNeedsReset(ser.read_type_7("needs_reset"));
    }

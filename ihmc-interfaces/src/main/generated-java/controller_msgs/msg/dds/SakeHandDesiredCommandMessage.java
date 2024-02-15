@@ -25,7 +25,7 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
    /**
             * Request to reset the gripper error state after overheating
             */
-   public boolean request_reset_error_;
+   public boolean request_reset_errors_;
    /**
             * The desired dynamixel position, normalized to the gripper range of motion
             * 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)
@@ -58,7 +58,7 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
       request_calibration_ = other.request_calibration_;
 
-      request_reset_error_ = other.request_reset_error_;
+      request_reset_errors_ = other.request_reset_errors_;
 
       normalized_gripper_desired_position_ = other.normalized_gripper_desired_position_;
 
@@ -99,16 +99,16 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
    /**
             * Request to reset the gripper error state after overheating
             */
-   public void setRequestResetError(boolean request_reset_error)
+   public void setRequestResetErrors(boolean request_reset_errors)
    {
-      request_reset_error_ = request_reset_error;
+      request_reset_errors_ = request_reset_errors;
    }
    /**
             * Request to reset the gripper error state after overheating
             */
-   public boolean getRequestResetError()
+   public boolean getRequestResetErrors()
    {
-      return request_reset_error_;
+      return request_reset_errors_;
    }
 
    /**
@@ -177,7 +177,7 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.request_calibration_, other.request_calibration_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.request_reset_error_, other.request_reset_error_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.request_reset_errors_, other.request_reset_errors_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_gripper_desired_position_, other.normalized_gripper_desired_position_, epsilon)) return false;
 
@@ -200,7 +200,7 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
       if(this.request_calibration_ != otherMyClass.request_calibration_) return false;
 
-      if(this.request_reset_error_ != otherMyClass.request_reset_error_) return false;
+      if(this.request_reset_errors_ != otherMyClass.request_reset_errors_) return false;
 
       if(this.normalized_gripper_desired_position_ != otherMyClass.normalized_gripper_desired_position_) return false;
 
@@ -220,8 +220,8 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("request_calibration=");
       builder.append(this.request_calibration_);      builder.append(", ");
-      builder.append("request_reset_error=");
-      builder.append(this.request_reset_error_);      builder.append(", ");
+      builder.append("request_reset_errors=");
+      builder.append(this.request_reset_errors_);      builder.append(", ");
       builder.append("normalized_gripper_desired_position=");
       builder.append(this.normalized_gripper_desired_position_);      builder.append(", ");
       builder.append("normalized_gripper_torque_limit=");

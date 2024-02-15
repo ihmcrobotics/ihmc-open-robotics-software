@@ -15,7 +15,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1e66edaae23cbd6cd15183b4ed176d92123d5f9c3db0f18335055c7b06d2188a";
+   		return "e26821cb4cc113b04af54de459beb081f1e8375d1eb2d0313a921e37e66d1586";
    }
    
    @Override
@@ -100,7 +100,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_7(data.getRequestCalibration());
 
-      cdr.write_type_7(data.getRequestResetError());
+      cdr.write_type_7(data.getRequestResetErrors());
 
       cdr.write_type_6(data.getNormalizedGripperDesiredPosition());
 
@@ -114,7 +114,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       	
       data.setRequestCalibration(cdr.read_type_7());
       	
-      data.setRequestResetError(cdr.read_type_7());
+      data.setRequestResetErrors(cdr.read_type_7());
       	
       data.setNormalizedGripperDesiredPosition(cdr.read_type_6());
       	
@@ -128,7 +128,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    {
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_7("request_calibration", data.getRequestCalibration());
-      ser.write_type_7("request_reset_error", data.getRequestResetError());
+      ser.write_type_7("request_reset_errors", data.getRequestResetErrors());
       ser.write_type_6("normalized_gripper_desired_position", data.getNormalizedGripperDesiredPosition());
       ser.write_type_6("normalized_gripper_torque_limit", data.getNormalizedGripperTorqueLimit());
    }
@@ -138,7 +138,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    {
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setRequestCalibration(ser.read_type_7("request_calibration"));
-      data.setRequestResetError(ser.read_type_7("request_reset_error"));
+      data.setRequestResetErrors(ser.read_type_7("request_reset_errors"));
       data.setNormalizedGripperDesiredPosition(ser.read_type_6("normalized_gripper_desired_position"));
       data.setNormalizedGripperTorqueLimit(ser.read_type_6("normalized_gripper_torque_limit"));
    }
