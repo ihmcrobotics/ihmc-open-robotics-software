@@ -19,4 +19,11 @@ float64 preview_trajectory_linear_velocity
 
 float64 preview_trajectory_angular_velocity
 
+# The user requested IK preview time normalized from 0.0 to 1.0
+float64 preview_requested_time
+
+float64[] preview_joint_angles
+
+float64 preview_solution_quality
+
 
