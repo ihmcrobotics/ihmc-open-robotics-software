@@ -163,7 +163,7 @@ public class YOLOv8IterativeClosestPointNodeCombo
          {
             // decrease distance threshold if it has been increased beyond default threshold
             if (distanceThreshold > node.getBaseDistanceThreshold())
-               distanceThreshold = Math.min(distanceThreshold - node.getBaseDistanceThreshold(), node.getBaseDistanceThreshold());
+               distanceThreshold = Math.max(distanceThreshold - node.getBaseDistanceThreshold(), node.getBaseDistanceThreshold());
 
             // Process images & run ICP
             RawImage segmentedDepth = segmenter.removeBackground(depthImage, mask, node.getMaskErosionKernelRadius()); // segment depth image using the mask

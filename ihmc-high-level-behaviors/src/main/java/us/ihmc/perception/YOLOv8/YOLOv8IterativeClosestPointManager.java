@@ -276,7 +276,6 @@ public class YOLOv8IterativeClosestPointManager
                {
                   double distanceSquared = MathTools.square(oldDetection.x() - newDetection.x()) + MathTools.square(oldDetection.y() - newDetection.y());
 
-                  System.out.println(distanceSquared + " vs " + oldDetectionCombo.getDistanceThreshold());
                   if (distanceSquared < oldDetectionCombo.getDistanceThreshold())
                      possiblyMatchingDetections.add(new Tuple3<>(oldDetectionCombo, newDetection, distanceSquared));
                }
