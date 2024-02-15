@@ -65,7 +65,7 @@ public class OpenCVArUcoMarkerROS2Publisher
             detectionFilters.put(markerID, detectionFilter);
          }
 
-         if (detectionFilter.isDetected())
+         if (detectionFilter.isStableDetectionResult())
          {
             stableIDs.add(markerID);
          }
