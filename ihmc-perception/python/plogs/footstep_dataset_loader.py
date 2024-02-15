@@ -27,9 +27,9 @@ def plan_view_main(data):
     goal_orientations = get_data(data, 'goal/footstep/orientation/')
 
     launch_plan_viewer(footstep_plan_positions, footstep_plan_orientations, 
-                       start_positions, start_orientations, goal_positions, goal_orientations, sensor_positions, sensor_orientations)
+                       start_positions, start_orientations, goal_positions, goal_orientations, sensor_positions, sensor_orientations, n_steps=4)
 
-def visualize_plan(height_map, footstep_plan_poses, footstep_plan_sides, start_pose, goal_pose, start_side=0.0, label="Footstep_Plan"):
+def visualize_plan(height_map, footstep_plan_poses, start_pose, goal_pose, start_side=0.0, label="Footstep_Plan"):
     
     height_map = cv2.convertScaleAbs(height_map, alpha=(255.0/65535.0))
     height_map = np.minimum(height_map * 10, 255)
@@ -54,7 +54,7 @@ def visualize_plan(height_map, footstep_plan_poses, footstep_plan_sides, start_p
     plot_oriented_footstep(height_map_display, goal_pose, (255, 0, 255), scale=scale, dims=(4,8))
 
     # if current position is not zero, plot footsteps
-    plot_oriented_footsteps(height_map_display, footstep_plan_poses, footstep_plan_sides, scale)
+    plot_oriented_footsteps(height_map_display, footstep_plan_poses, scale)
 
     # test_visualize(height_map_display, scale=scale)
 
@@ -94,7 +94,7 @@ def test_visualize(height_map_display, scale=1):
 def launch_plan_viewer(footstep_positions, footstep_orientations, 
                        start_positions, start_orientations, 
                        goal_positions, goal_orientations,
-                       sensor_positions, sensor_orientations):
+                       sensor_positions, sensor_orientations, n_steps=4):
     
 
     total_plans = len(data['plan/footstep/position/'].keys())
@@ -109,8 +109,8 @@ def launch_plan_viewer(footstep_positions, footstep_orientations,
         sensor_position = sensor_positions[i, :]
         sensor_orientation = sensor_orientations[i, :]
 
-        current_plan_positions = footstep_positions[i*10:(i+1)*10, :]
-        current_plan_orientations = footstep_orientations[i*10:(i+1)*10, :]
+        current_plan_positions = footstep_positions[i*n_steps:(i+1)*n_steps, :]
+        current_plan_orientations = footstep_orientations[i*n_steps:(i+1)*n_steps, :]
         
         # count number of non-zero L2 norm positions in current plan
         count_footsteps = np.count_nonzero(np.linalg.norm(current_plan_positions, axis=1))
@@ -132,12 +132,13 @@ def launch_plan_viewer(footstep_positions, footstep_orientations,
             i -= 1
 
         
-def plot_oriented_footsteps(display, poses, sides, scale):
+def plot_oriented_footsteps(display, poses, scale, n_steps=4):
 
     # Plot the footstep plan
-    for i in range(10):
+    for i in range(n_steps):
         pose = poses[i, :]
-        side = sides[i]
+        
+        side = i % 2 # 0 for left, 1 for right
 
 
         # set color to red if left foot, yellow if right foot
