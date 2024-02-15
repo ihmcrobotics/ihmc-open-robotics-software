@@ -2,16 +2,19 @@ package us.ihmc.avatar.sakeGripper;
 
 public class SakeHandParameters
 {
-   /** When hand is fully open, fingertips form 210 degrees angle */
-   public static double MAX_ANGLE_BETWEEN_FINGERS = 210.0;
+   /**
+    * When hand is fully open, fingertips form 210 degrees angle.
+    * This corresponds to the normalized value of 1.0.
+    */
+   public static double MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES = 210.0;
    /** Joint angle of a finger is -3 degrees when fully closed */
-   public static double CLOSED_FINGER_ANGLE = -3.0;
+   public static double CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES = -3.0;
    /** Joint angle of a finger is 102 degrees when fully open */
-   public static double OPEN_FINGER_ANGLE = 102.0;
+   public static double OPEN_KNUCKLE_JOINT_ANGLE_DEGREES = 102.0;
    /** Sake hand can produce 29 N of grip force between the fingertips */
    public static double FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT = 29.0;
    /** This is a safe amount of force. */
-   public static double FINGERTIP_GRIP_FORCE_SAFE_THRESHOLD = 8.7;
+   public static double FINGERTIP_GRIP_FORCE_SAFE = 8.7;
    /** This is a moderate amount of force. */
    public static double FINGERTIP_GRIP_FORCE_MODERATE_THRESHOLD = 14.5;
    /** This is a high amount of force. */
@@ -27,7 +30,7 @@ public class SakeHandParameters
     */
    public static double denormalizeHandOpenAngle(double normalizedHandOpenAngle)
    {
-      return normalizedHandOpenAngle * Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS);
+      return normalizedHandOpenAngle * Math.toRadians(MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES);
    }
 
    /**
@@ -36,7 +39,7 @@ public class SakeHandParameters
     */
    public static double normalizeHandOpenAngle(double handOpenAngle)
    {
-      return handOpenAngle / Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS);
+      return handOpenAngle / Math.toRadians(MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES);
    }
 
    public static double denormalizeFingertipGripForceLimit(double normalizedFingertipGripForceLimit)

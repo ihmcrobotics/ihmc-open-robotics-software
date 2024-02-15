@@ -1,49 +1,40 @@
 package us.ihmc.avatar.sakeGripper;
 
 /**
- * Preset position and torque settings for the Sake gripper.
- * -1.0 indicates "unspecified", such that when commanded the hand
- * keeps its previous value.
- *
- * RESET does not change goal position; The hand remains in same position.
+ * Presets for the Sake gripper.
  */
 public enum SakeHandPresets
 {
-   /** Calibration before usage */
-   CALIBRATE(0.0, 0.3),
-   /** Resets error message */
-   RESET(-1.0, 0.0),
-   /** Fully opens fingers */
-   FULLY_OPEN(1.0, 0.3),
-   /** Moves fingers to closed position. Not for gripping */
-   CLOSE(0.1, 0.3),
-   /** Removes torque */
-   RELEASE(-1.0, 0.0),
-   /** Close with specified torque */
-   GRIP(0.0, 0.3),
-   /** Close with maximum torque */
-   GRIP_HARD(0.0, 1.0),
    /** Open the fingers to 105 degrees. */
-   OPEN(0.5, 0.3);
+   OPEN(105.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
+   /** Fully opens fingers */
+   FULLY_OPEN(210.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
+   /** Moves fingers to closed position. Not for gripping */
+   CLOSE(21.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
+   /** Close with specified torque */
+   GRIP(0.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
+   /** Close with maximum torque */
+   GRIP_HARD(0.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_HIGH_THRESHOLD),
+   ;
 
-   private final double normalizedHandOpenAngle;
-   private final double normalizedTorqueLimit;
+   private final double handOpenAngle;
+   private final double fingertipGripForceLimit;
 
-   SakeHandPresets(double normalizedHandOpenAngle, double normalizedTorqueLimit)
+   SakeHandPresets(double handOpenAngleDegrees, double fingertipGripForceLimit)
    {
-      this.normalizedHandOpenAngle = normalizedHandOpenAngle;
-      this.normalizedTorqueLimit = normalizedTorqueLimit;
+      this.handOpenAngle = Math.toRadians(handOpenAngleDegrees);
+      this.fingertipGripForceLimit = fingertipGripForceLimit;
    }
 
    public final static SakeHandPresets[] values = values();
 
-   public double getNormalizedHandOpenAngle()
+   public double getHandOpenAngle()
    {
-      return normalizedHandOpenAngle;
+      return handOpenAngle;
    }
 
-   public double getNormalizedTorqueLimit()
+   public double getFingertipGripForceLimit()
    {
-      return normalizedTorqueLimit;
+      return fingertipGripForceLimit;
    }
 }
