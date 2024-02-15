@@ -76,7 +76,7 @@ public class YOLOv8IterativeClosestPointNodeCombo
                                                   new Random(System.nanoTime()));
 
       icpWorker.useProvidedTargetPoint(false);
-      icpWorker.setSegmentSphereRadius(Double.MAX_VALUE);
+      icpWorker.setSegmentSphereRadius(Double.POSITIVE_INFINITY);
       icpWorker.setDetectionShape(PrimitiveRigidBodyShape.CUSTOM, pointCloudFile.getFilesystemFile().toFile());
 
       nodeID = sceneGraph.getNextID().getAndIncrement();
@@ -186,11 +186,6 @@ public class YOLOv8IterativeClosestPointNodeCombo
 
       depthImage.release();
       mask.release();
-   }
-
-   public void didNotRunICP()
-   {
-      ranICP = false;
    }
 
    public void setDetection(YOLOv8Detection detection)

@@ -17,12 +17,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
-import java.io.File;
-import java.util.*;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -151,8 +151,9 @@ public class IterativeClosestPointWorker
          if (measurementPointCloud == null)
             return false;
 
-         // TODO: find way to make shape segmentation not suck ICP into ground (without side effects)
-         if (numberOfIterations > 1 && i == 0)  // Running multiple iterations, on first iteration segment & find neighbors
+         if (segmentSphereRadius == Double.POSITIVE_INFINITY)
+            segmentedPointCloud = getDistancedPointCloud(measurementPointCloud, detectionPoint);
+         else if (numberOfIterations > 1 && i == 0)  // Running multiple iterations, on first iteration segment & find neighbors
             segmentedPointCloud = segmentPointCloudAndFindNeighbors(measurementPointCloud, detectionPoint, segmentSphereRadius);
          else if (numberOfIterations > 1)       // Running multiple iterations, on following iterations use neighbor points for segmentation (faster)
             segmentedPointCloud = segmentPointCloud(neighborPointCloud, detectionPoint, segmentSphereRadius);
@@ -279,6 +280,12 @@ public class IterativeClosestPointWorker
       // Rotate and translate the resulting pose according to the correction transform.
       resultPose.applyTransform(objectToMeasurementTransform);
       objectInWorldPointsIsUpToDate = false;
+   }
+
+   private List<DistancedPoint> getDistancedPointCloud(List<? extends Point3DReadOnly> pointCloud, Pose3DReadOnly zeroDistancePoint)
+   {
+      Stream<? extends Point3DReadOnly> pointCloudStream = useParallelStreams ? pointCloud.parallelStream() : pointCloud.stream();
+      return pointCloudStream.map(point -> new DistancedPoint(point, zeroDistancePoint.getPosition().distanceSquared(point))).collect(Collectors.toList());
    }
 
    private List<DistancedPoint> segmentPointCloud(List<? extends Point3DReadOnly> measurementPointCloud,
