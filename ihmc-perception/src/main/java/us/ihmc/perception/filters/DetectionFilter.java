@@ -13,12 +13,12 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
  */
 public class DetectionFilter
 {
-   public final int HISTORY_LENGTH = SceneGraph.UPDATE_FREQUENCY; // 1 second at scene graph's frequency
+   public final int HISTORY_LENGTH = (int) SceneGraph.UPDATE_FREQUENCY; // 1 second at scene graph's frequency
    public float acceptanceThreshold = 0.6f;
 
    private final TFloatList detections = new TFloatLinkedList();
    private final Notification detected = new Notification();
-   private boolean isDetected = false;
+   private boolean isStableDetectionResult = false;
 
    public DetectionFilter()
    {
@@ -39,9 +39,9 @@ public class DetectionFilter
       detected.set();
    }
 
-   public boolean isDetected()
+   public boolean isStableDetectionResult()
    {
-      return isDetected;
+      return isStableDetectionResult;
    }
 
    public boolean hasEnoughSamples()
@@ -68,6 +68,6 @@ public class DetectionFilter
       }
       average /= (float) detections.size();
 
-      isDetected = detections.size() == HISTORY_LENGTH && average >= acceptanceThreshold;
+      isStableDetectionResult = detections.size() == HISTORY_LENGTH && average >= acceptanceThreshold;
    }
 }

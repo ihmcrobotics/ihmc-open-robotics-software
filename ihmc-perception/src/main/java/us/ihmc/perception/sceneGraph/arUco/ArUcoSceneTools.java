@@ -45,7 +45,7 @@ public class ArUcoSceneTools
                   {
                      DetectionFilter candidateFilter = sceneGraph.getDetectionFilterCollection().getOrCreateFilter(detectedID);
                      candidateFilter.registerDetection();
-                     if (candidateFilter.isDetected())
+                     if (candidateFilter.isStableDetectionResult())
                      {
                         sceneGraph.getDetectionFilterCollection().removeFilter(detectedID);
 
