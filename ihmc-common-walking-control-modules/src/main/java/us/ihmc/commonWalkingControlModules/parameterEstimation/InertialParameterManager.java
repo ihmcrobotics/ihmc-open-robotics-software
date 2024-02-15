@@ -118,9 +118,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoBoolean eraseBias;
 
    private final InertialEstimationParameters parameters;
-   private final double postProcessingAlpha;
-   private final double estimateFilteringAlpha;
-   private final double accelerationCalculationAlpha;
+   private final double defaultPostProcessingAlpha;
+   private final double defaultAccelerationCalculationAlpha;
+   private final YoDouble accelerationCalculationAlpha;  // useful to have a master setting, we want to filter all DoFs equally
 
    private final YoDouble normalizedInnovation;
    private final YoDouble normalizedInnovationThreshold;
@@ -231,12 +231,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       rootJointVelocities = new YoDouble[WRENCH_DIMENSION];
       rootJointAccelerations = new FilteredVelocityYoVariable[WRENCH_DIMENSION];
       rootJointAcceleration = new DMatrixRMaj(WRENCH_DIMENSION, 1);
-      accelerationCalculationAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForAccelerationCalculation(), dt);
+      defaultAccelerationCalculationAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForAccelerationCalculation(), dt);
+      accelerationCalculationAlpha = new YoDouble("accelerationCalculationAlpha", registry);
+      accelerationCalculationAlpha.set(defaultAccelerationCalculationAlpha);
       for (int i = 0; i < WRENCH_DIMENSION; i++)
       {
          rootJointVelocities[i] = new YoDouble("rootJointVelocity_" + getNameForRootJoint(i), registry);
          rootJointAccelerations[i] = new FilteredVelocityYoVariable("rootJointAcceleration_" + getNameForRootJoint(i), "",
-                                                                    accelerationCalculationAlpha, rootJointVelocities[i], dt, registry);
+                                                                    defaultAccelerationCalculationAlpha, rootJointVelocities[i], dt, registry);
       }
 
       jointVelocities = new YoDouble[nOneDoFJoints];
@@ -245,10 +247,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          jointVelocities[i] = new YoDouble("jointVelocity_" + actualRobotModel.getOneDoFJoints()[i].getName(), registry);
          jointAccelerations[i] = new FilteredVelocityYoVariable("jointAcceleration_" + actualRobotModel.getOneDoFJoints()[i].getName(), "",
-                                                                accelerationCalculationAlpha, jointVelocities[i], dt, registry);
+                                                                defaultAccelerationCalculationAlpha, jointVelocities[i], dt, registry);
       }
 
-      postProcessingAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt);
+      defaultPostProcessingAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt);
 
       estimate = new YoMatrix("inertialParameterEstimate", nParameters,
                               1,
@@ -256,13 +258,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                               null,
                               registry);
 
-      estimateFilteringAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(), dt);
-      filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate", estimateFilteringAlpha, nParameters,
+      double defaultEstimateFilteringAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(),
+                                                                                                             dt);
+      filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate", this.defaultAccelerationCalculationAlpha, nParameters,
                                                    1,
                                                    getRowNamesForEstimates(basisSets, estimateModelBodies),
                                                    null,
                                                    registry);
-      doubleFilteredEstimate = new AlphaFilteredYoMatrix("doubleFilteredInertialParameterEstimate", estimateFilteringAlpha, nParameters,
+      doubleFilteredEstimate = new AlphaFilteredYoMatrix("doubleFilteredInertialParameterEstimate", this.defaultAccelerationCalculationAlpha, nParameters,
                                                          1,
                                                          getRowNamesForEstimates(basisSets, estimateModelBodies),
                                                          null,
@@ -348,7 +351,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                               parameters.getURDFParameters(basisSets),
                                               CommonOps_DDRM.identity(nParameters),
                                               CommonOps_DDRM.identity(nParameters),
-                                              CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
+                                              CommonOps_DDRM.identity(nDoFs), defaultPostProcessingAlpha,
                                               registry);
             createProcessCovariances(RigidBodyInertialParametersTools.getNamesForPiBasis(), defaultProcessCovariances);
             filter.setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
@@ -361,7 +364,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                          parameters.getURDFParameters(basisSets),
                                                          CommonOps_DDRM.identity(nParameters),
                                                          CommonOps_DDRM.identity(nParameters),
-                                                         CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
+                                                         CommonOps_DDRM.identity(nDoFs), defaultPostProcessingAlpha,
                                                          registry);
             createProcessCovariances(RigidBodyInertialParametersTools.getNamesForPiBasis(), defaultProcessCovariances);
             filter.setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
@@ -374,7 +377,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                                   parameters.getURDFParameters(basisSets),
                                                                   CommonOps_DDRM.identity(nParameters),
                                                                   CommonOps_DDRM.identity(nParameters),
-                                                                  CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
+                                                                  CommonOps_DDRM.identity(nDoFs), defaultPostProcessingAlpha,
                                                                   registry);
             createProcessCovariances(RigidBodyInertialParametersTools.getNamesForThetaBasis(), defaultProcessCovariances);
             filter.setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
@@ -434,15 +437,15 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       armsMeasurementCovariance.set(parameters.getArmMeasurementCovariance());
       spineMeasurementCovariance.set(parameters.getSpineMeasurementCovariance());
 
-      filter.setPostProcessingAlpha(postProcessingAlpha);
-      filteredEstimate.setAlpha(estimateFilteringAlpha);
-      doubleFilteredEstimate.setAlpha(estimateFilteringAlpha);
+      filter.setPostProcessingAlpha(defaultPostProcessingAlpha);
+      filteredEstimate.setAlpha(defaultAccelerationCalculationAlpha);
+      doubleFilteredEstimate.setAlpha(defaultAccelerationCalculationAlpha);
 
       for (int i = 0; i < WRENCH_DIMENSION; i++)
-         rootJointAccelerations[i].setAlpha(accelerationCalculationAlpha);
+         rootJointAccelerations[i].setAlpha(accelerationCalculationAlpha.getValue());
 
       for (int i = 0; i < jointAccelerations.length; i++)
-         jointAccelerations[i].setAlpha(accelerationCalculationAlpha);
+         jointAccelerations[i].setAlpha(accelerationCalculationAlpha.getValue());
 
    }
 
@@ -491,6 +494,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       if (enableFilter.getValue())
       {
          updateFilterCovariances();
+
+         updateAccelerationCalculationFilterAlphas();
 
          updateRegressorModelJointStates();
 
@@ -574,6 +579,15 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          else
             LogTools.info("Joint " + joint.getName() + " not found for measurement covariance");
       }
+   }
+
+   private void updateAccelerationCalculationFilterAlphas()
+   {
+      for (int i = 0; i < WRENCH_DIMENSION; i++)
+         rootJointAccelerations[i].setAlpha(accelerationCalculationAlpha.getValue());
+
+      for (int i = 0; i < jointAccelerations.length; i++)
+         jointAccelerations[i].setAlpha(accelerationCalculationAlpha.getValue());
    }
 
    private void updateContactWrenches()
