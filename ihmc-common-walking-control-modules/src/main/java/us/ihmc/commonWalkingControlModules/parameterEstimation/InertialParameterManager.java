@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
@@ -69,7 +70,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final JointTorqueRegressorCalculator regressorCalculator;
 
    private final SideDependentList<? extends FootSwitchInterface> footSwitches;
-   private final SideDependentList<DMatrixRMaj> contactWrenches;
+   private final SideDependentList<DMatrix> contactWrenches;
 
    private final JointIndexHandler jointIndexHandler;
    private final SideDependentList<JointBasics[]> legJoints;
@@ -122,6 +123,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final double accelerationCalculationAlpha;
 
    private final YoDouble normalizedInnovation;
+   private final YoDouble normalizedInnovationThreshold;
 
    private final ExecutionTimer regressorTimer = new ExecutionTimer("RegressorTimer", registry);
 
@@ -215,7 +217,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       // NOTE: for the leg joints and compact jacobians, we use the actual robot model because it has the full model information, including all joint names
       for (RobotSide side : RobotSide.values)
       {
-         contactWrenches.put(side, new DMatrixRMaj(WRENCH_DIMENSION, 1));
+         contactWrenches.put(side, new YoMatrix("wrench" + side.getPascalCaseName(), WRENCH_DIMENSION, 1, null, null, registry));
          legJoints.put(side, MultiBodySystemTools.createJointPath(actualRobotModel.getElevator(), actualRobotModel.getFoot(side)));
          compactContactJacobians.put(side, new GeometricJacobian(legJoints.get(side), footSwitches.get(side).getMeasurementFrame()));
          fullContactJacobians.put(side, new DMatrixRMaj(WRENCH_DIMENSION, nDoFs));
@@ -298,6 +300,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       normalizedInnovation = new YoDouble("normalizedInnovation", registry);
       normalizedInnovation.set(0.0);
 
+      normalizedInnovationThreshold = new YoDouble("normalizedInnovationThreshold", registry);
+      normalizedInnovationThreshold.set(parameters.getNormalizedInnovationThreshold());
+
       // Construct the type of filter used based on enum value
       setFilter(type);
 
@@ -346,6 +351,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                               CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
                                               registry);
             createProcessCovariances(RigidBodyInertialParametersTools.getNamesForPiBasis(), defaultProcessCovariances);
+            filter.setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
          }
          case CONSTRAINED_KF ->
          {
@@ -358,6 +364,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                          CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
                                                          registry);
             createProcessCovariances(RigidBodyInertialParametersTools.getNamesForPiBasis(), defaultProcessCovariances);
+            filter.setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
          }
          case PHYSICALLY_CONSISTENT_EKF ->
          {
@@ -370,6 +377,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                                   CommonOps_DDRM.identity(nDoFs), postProcessingAlpha,
                                                                   registry);
             createProcessCovariances(RigidBodyInertialParametersTools.getNamesForThetaBasis(), defaultProcessCovariances);
+            filter.setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
          }
       }
    }
@@ -508,6 +516,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
             filter.setBias(biasCompensator.getZero());
          else
             filter.setBias(biasCompensator.getBias());
+
+         filter.setNormalizedInnovationThreshold(normalizedInnovationThreshold.getValue());
 
          estimate.set(filter.calculateEstimate(wholeSystemTorques));
          filter.getMeasurementResidual(residual);

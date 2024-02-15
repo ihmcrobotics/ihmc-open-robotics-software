@@ -23,11 +23,15 @@ public interface InertialEstimationParameters
 
    public abstract double getProcessModelCovariance();
    public double[] getProcessModelCovarianceForBody();
+   public abstract double getProcessCovarianceMultiplierForWalking();
+
 
    public abstract double getFloatingBaseMeasurementCovariance();
    public abstract double getLegMeasurementCovariance();
    public abstract double getArmMeasurementCovariance();
    public abstract double getSpineMeasurementCovariance();
+
+   public abstract double getNormalizedInnovationThreshold();
 
    /** CONSTRAINED_KF */
 
@@ -35,6 +39,4 @@ public interface InertialEstimationParameters
 
    public abstract double getMinimumMassMultiplier();
    public abstract double getMinimumDiagonalInertiaMultiplier();
-
-   public abstract double getProcessCovarianceMultiplierForWalking();
 }
