@@ -5,14 +5,12 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.avatar.sakeGripper.SakeHandPresets;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
@@ -26,7 +24,6 @@ import us.ihmc.scs2.definition.visual.ColorDefinition;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemplateHand
 {
@@ -76,7 +73,7 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
    private final RigidBodyTransform[] fingersTransforms;
    private final ReferenceFrame[] fingersFrames;
    private final BoxRayIntersection boxRayIntersection = new BoxRayIntersection();
-   private SakeHandCommandOption sakeHandConfiguration;
+   private SakeHandPresets sakeHandConfiguration;
 
    public RDXInteractableSakeGripper(RDX3DPanel panel3D, RigidBodyTransform transformToParentToModify, ColorDefinition color)
    {
@@ -100,7 +97,7 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
          fingersTransforms[i] = new RigidBodyTransform(FINGERS_TO_PALM_CLOSE[i]);
          fingersFrames[i] = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(referenceFrameHand, fingersTransforms[i]);
       }
-      sakeHandConfiguration = SakeHandCommandOption.CLOSE;
+      sakeHandConfiguration = SakeHandPresets.CLOSE;
 
       panel3D.getScene().addRenderableProvider(this, this::getRenderables);
       panel3D.addImGui3DViewInputProcessor(this, this::updateFingers);
@@ -136,7 +133,7 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
    @Override
    public void setToConfiguration(String configuration)
    {
-      switch (SakeHandCommandOption.valueOf(configuration))
+      switch (SakeHandPresets.valueOf(configuration))
       {
          case FULLY_OPEN -> fullyOpenGripper();
          case OPEN -> openGripper();
@@ -197,28 +194,28 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_CRUSH[i]);
-      sakeHandConfiguration = SakeHandCommandOption.GRIP_HARD;
+      sakeHandConfiguration = SakeHandPresets.GRIP_HARD;
    }
 
    private void closeGripper()
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_CLOSE[i]);
-      sakeHandConfiguration = SakeHandCommandOption.CLOSE;
+      sakeHandConfiguration = SakeHandPresets.CLOSE;
    }
 
    private void fullyOpenGripper()
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_OPEN[i]);
-      sakeHandConfiguration = SakeHandCommandOption.FULLY_OPEN;
+      sakeHandConfiguration = SakeHandPresets.FULLY_OPEN;
    }
 
    private void openGripper()
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_HALF_CLOSE[i]);
-      sakeHandConfiguration = SakeHandCommandOption.OPEN;
+      sakeHandConfiguration = SakeHandPresets.OPEN;
    }
 
    @Override

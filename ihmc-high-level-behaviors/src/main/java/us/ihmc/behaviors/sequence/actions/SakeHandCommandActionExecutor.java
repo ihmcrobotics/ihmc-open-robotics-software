@@ -3,7 +3,7 @@ package us.ihmc.behaviors.sequence.actions;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.avatar.sakeGripper.SakeHandPresets;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.JointspaceTrajectoryTrackingErrorCalculator;
@@ -103,12 +103,12 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       }
       else
       {
-         if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.GOTO)
+         if (getDefinition().getSakeCommandOption() == SakeHandPresets.GOTO)
          {
             // FIXME: Needs major work
             SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
             message.setRobotSide(getDefinition().getSide().toByte());
-            message.setDesiredHandConfiguration((byte) SakeHandCommandOption.values[getDefinition().getHandConfigurationIndex()].getCommandNumber());
+            message.setDesiredHandConfiguration((byte) SakeHandPresets.values[getDefinition().getHandConfigurationIndex()].getSakeHandConfigurationOrdinal());
             message.setPostionRatio(getDefinition().getHandOpenAngle());
             message.setTorqueRatio(-1.0);
 
@@ -121,7 +121,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
                                                                          EuclidCoreMissingTools.DEGREE_SYMBOL));
             ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
          }
-         else if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.OPEN)
+         else if (getDefinition().getSakeCommandOption() == SakeHandPresets.OPEN)
          {
             LogTools.info("Commanding hand to OPEN position %.2f%s".formatted(Math.toDegrees(goalOpenAngle),
                                                                               EuclidCoreMissingTools.DEGREE_SYMBOL));
@@ -129,7 +129,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
                                          HumanoidMessageTools.createHandDesiredConfigurationMessage(getDefinition().getSide(),
                                                                                                     HandConfiguration.OPEN));
          }
-         else if (getDefinition().getSakeCommandOption() == SakeHandCommandOption.CLOSE)
+         else if (getDefinition().getSakeCommandOption() == SakeHandPresets.CLOSE)
          {
             LogTools.info("Commanding hand to CLOSE position %.2f%s".formatted(Math.toDegrees(goalOpenAngle),
                                                                                EuclidCoreMissingTools.DEGREE_SYMBOL));

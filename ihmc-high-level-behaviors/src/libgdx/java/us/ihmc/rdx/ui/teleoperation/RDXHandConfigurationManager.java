@@ -11,8 +11,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfigurat
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.interactable.RDXSakeHandPositionSlider;
-import us.ihmc.rdx.ui.interactable.RDXSakeHandTorqueSlider;
+import us.ihmc.rdx.ui.interactable.RDXSakeHandSliders;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -28,8 +27,7 @@ public class RDXHandConfigurationManager
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final SideDependentList<RDXSakeHandInformation> sakeHandInfo = new SideDependentList<>();
    private final SideDependentList<RDXHandQuickAccessButtons> handQuickAccessButtons = new SideDependentList<>();
-   private final SideDependentList<RDXSakeHandPositionSlider> handPositionSliders = new SideDependentList<>();
-   private final SideDependentList<RDXSakeHandTorqueSlider> handTorqueSliders = new SideDependentList<>();
+   private final SideDependentList<RDXSakeHandSliders> handSliders = new SideDependentList<>();
 
    public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -51,8 +49,7 @@ public class RDXHandConfigurationManager
          Runnable resetHand = () -> publishHandCommand(side, HandConfiguration.RESET);
          handQuickAccessButtons.put(side, new RDXHandQuickAccessButtons(baseUI, side, openHand, closeHand, calibrateHand, resetHand));
 
-         handPositionSliders.put(side, new RDXSakeHandPositionSlider(communicationHelper, side));
-         handTorqueSliders.put(side, new RDXSakeHandTorqueSlider(communicationHelper, side));
+         handSliders.put(side, new RDXSakeHandSliders(communicationHelper, side));
       }
 
       if (syncedRobotModel.getRobotModel().getHandModels().toString().contains("SakeHand"))
@@ -73,7 +70,7 @@ public class RDXHandConfigurationManager
       {
          sakeHandInfo.get(side).update();
          handQuickAccessButtons.get(side).update(sakeHandInfo.get(side));
-         handTorqueSliders.get(side).update();
+         handSliders.get(side).update();
       }
    }
 
@@ -109,8 +106,7 @@ public class RDXHandConfigurationManager
             communicationHelper.publish(ROS2Tools::getHandConfigurationTopic, message);
          }
 
-         handPositionSliders.get(side).renderImGuiWidgets();
-         handTorqueSliders.get(side).renderImGuiWidgets();
+         handSliders.get(side).renderImGuiWidgets();
       }
       if (!sakeHandInfo.isEmpty())
          ImGui.text("Sake EZGrippers:");

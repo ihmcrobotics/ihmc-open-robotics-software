@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.behavior.actions;
 
 import imgui.ImGui;
-import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.avatar.sakeGripper.SakeHandPresets;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -21,7 +21,7 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImIntegerWrapper sideWidget;
-   private final String[] handConfigurationNames = new String[SakeHandCommandOption.values.length];
+   private final String[] handConfigurationNames = new String[SakeHandPresets.values.length];
    private final ImIntegerWrapper handCommandEnumWidget;
    private final ImDoubleWrapper positionWidget;
    private final ImDoubleWrapper torqueWidget;
@@ -53,9 +53,9 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
                                                           imBoolean -> imgui.ImGui.checkbox(labels.get("Execute with next action"),
                                                                                             imBoolean));
 
-      for (int i = 0; i < SakeHandCommandOption.values.length; ++i)
+      for (int i = 0; i < SakeHandPresets.values.length; ++i)
       {
-         handConfigurationNames[i] = SakeHandCommandOption.values[i].name();
+         handConfigurationNames[i] = SakeHandPresets.values[i].name();
       }
    }
 
@@ -64,11 +64,11 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    {
       super.update();
 
-      SakeHandCommandOption sakeCommandOption = getDefinition().getSakeCommandOption();
-      if (sakeCommandOption != SakeHandCommandOption.GOTO)
+      SakeHandPresets sakeCommandOption = getDefinition().getSakeCommandOption();
+      if (sakeCommandOption != SakeHandPresets.GOTO)
       {
          getDefinition().setHandOpenAngle(sakeCommandOption.getNormalizedHandOpenAngle());
-         getDefinition().setMaxTorque(sakeCommandOption.getMaxTorque());
+         getDefinition().setMaxTorque(sakeCommandOption.getNormalizedTorqueLimit());
       }
    }
 
@@ -89,7 +89,7 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
 
       if (positionWidget.changed() || torqueWidget.changed())
       {
-         getDefinition().setHandConfigurationIndex(SakeHandCommandOption.GOTO.ordinal());
+         getDefinition().setHandConfigurationIndex(SakeHandPresets.GOTO.ordinal());
       }
    }
 

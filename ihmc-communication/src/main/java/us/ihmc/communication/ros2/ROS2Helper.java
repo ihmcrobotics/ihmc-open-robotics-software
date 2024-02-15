@@ -46,6 +46,27 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    }
 
    @Override
+   public <T> void subscribeViaVolatileCallback(ROS2Topic<T> topic, Consumer<T> callback)
+   {
+      try
+      {
+         TopicDataType<T> topicDataType = IHMCROS2Callback.newMessageTopicDataTypeInstance(topic.getType());
+         T data = topicDataType.createData();
+         ros2NodeInterface.createSubscription(topicDataType, subscriber ->
+         {
+            if (subscriber.takeNextData(data, null))
+            {
+               callback.accept(data);
+            }
+         }, topic.getName(), ROS2QosProfile.DEFAULT());
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   @Override
    public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback)
    {
       try

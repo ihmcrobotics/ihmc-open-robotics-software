@@ -3,7 +3,7 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.avatar.sakeGripper.SakeHandPresets;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
@@ -25,7 +25,7 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       super(crdtInfo, saveFileDirectory);
 
       side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
-      handConfigurationIndex = new CRDTUnidirectionalInteger(ROS2ActorDesignation.OPERATOR, crdtInfo, SakeHandCommandOption.GOTO.ordinal());
+      handConfigurationIndex = new CRDTUnidirectionalInteger(ROS2ActorDesignation.OPERATOR, crdtInfo, SakeHandPresets.GOTO.ordinal());
       handOpenAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.0); // default to open
       maxTorque = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0); // default to none
    }
@@ -36,7 +36,7 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       super.saveToFile(jsonNode);
 
       jsonNode.put("side", side.getValue().getLowerCaseName());
-      jsonNode.put("configuration", SakeHandCommandOption.values[handConfigurationIndex.getValue()].name());
+      jsonNode.put("configuration", SakeHandPresets.values[handConfigurationIndex.getValue()].name());
       jsonNode.put("handOpenAngle", handOpenAngle.getValue());
       jsonNode.put("maxTorque", maxTorque.getValue());
 //      jsonNode.put("position", handOpenAngle.getValue());
@@ -49,7 +49,7 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       super.loadFromFile(jsonNode);
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
-      handConfigurationIndex.setValue(SakeHandCommandOption.valueOf(jsonNode.get("configuration").asText()).ordinal());
+      handConfigurationIndex.setValue(SakeHandPresets.valueOf(jsonNode.get("configuration").asText()).ordinal());
 
 
 //      handOpenAngle.setValue(jsonNode.get("handOpenAngle").asDouble());
@@ -93,9 +93,9 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       return handConfigurationIndex.getValue();
    }
 
-   public SakeHandCommandOption getSakeCommandOption()
+   public SakeHandPresets getSakeCommandOption()
    {
-      return SakeHandCommandOption.values[handConfigurationIndex.getValue()];
+      return SakeHandPresets.values[handConfigurationIndex.getValue()];
    }
 
    public void setHandConfigurationIndex(int handConfigurationIndex)

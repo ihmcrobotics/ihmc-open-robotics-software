@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import controller_msgs.msg.dds.SakeHandStatusMessage;
 import imgui.flag.ImGuiCol;
 import imgui.internal.ImGui;
-import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.avatar.sakeGripper.SakeHandPresets;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Input;
@@ -74,7 +74,7 @@ public class RDXSakeHandPositionSlider
 
             SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
             message.setRobotSide(handSide.toByte());
-            message.setDesiredHandConfiguration((byte) SakeHandCommandOption.GOTO.getCommandNumber());
+            message.setDesiredHandConfiguration((byte) SakeHandPresets.GOTO.getSakeHandConfigurationOrdinal());
             message.setPostionRatio(positionRatio);
             message.setTorqueRatio(-1.0);
 

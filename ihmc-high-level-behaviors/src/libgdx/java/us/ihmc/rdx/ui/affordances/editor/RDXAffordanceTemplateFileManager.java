@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.affordances.editor;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.avatar.sakeGripper.SakeHandPresets;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -152,7 +152,7 @@ public class RDXAffordanceTemplateFileManager
                         dataTrajectories = new double[16];
                         for (int data = 0; data < dataTrajectories.length; data++)
                            dataTrajectories[data] = 0.0;
-                        dataTrajectories[0] = SakeHandCommandOption.valueOf(preGraspHandConfigurations.get(side).get(i).toString()).ordinal();
+                        dataTrajectories[0] = SakeHandPresets.valueOf(preGraspHandConfigurations.get(side).get(i).toString()).ordinal();
                         csvDataMatrices.get(side).add(dataTrajectories);
 
                         ObjectNode configurationActionNode = actionsArrayNode.addObject();
@@ -160,8 +160,8 @@ public class RDXAffordanceTemplateFileManager
                         configurationActionNode.put("description", "Pre-grasp " + side.getPascalCaseName() + " Hand Configuration");
                         configurationActionNode.put("side", side.getLowerCaseName());
                         configurationActionNode.put("configuration", preGraspHandConfigurations.get(side).get(i).toString());
-                        configurationActionNode.put("handOpenAngle", SakeHandCommandOption.valueOf(preGraspHandConfigurations.get(side).get(i)).getNormalizedHandOpenAngle());
-                        configurationActionNode.put("maxTorque", SakeHandCommandOption.valueOf(preGraspHandConfigurations.get(side).get(i)).getMaxTorque());
+                        configurationActionNode.put("handOpenAngle", SakeHandPresets.valueOf(preGraspHandConfigurations.get(side).get(i)).getNormalizedHandOpenAngle());
+                        configurationActionNode.put("maxTorque", SakeHandPresets.valueOf(preGraspHandConfigurations.get(side).get(i)).getNormalizedTorqueLimit());
                         configurationActionNode.put("executeWithNextAction", side != RobotSide.RIGHT && bothPosesAreSet);
                      }
                   }
@@ -213,14 +213,14 @@ public class RDXAffordanceTemplateFileManager
                      configurationActionNode.put("description", "Grasp " + side.getPascalCaseName() + " Hand Configuration");
                      configurationActionNode.put("side", side.getLowerCaseName());
                      configurationActionNode.put("configuration", graspFrame.getHandConfiguration(side).toString());
-                     configurationActionNode.put("position", SakeHandCommandOption.valueOf(graspFrame.getHandConfiguration(side)).getNormalizedHandOpenAngle());
-                     configurationActionNode.put("torque", SakeHandCommandOption.valueOf(graspFrame.getHandConfiguration(side)).getMaxTorque());
+                     configurationActionNode.put("position", SakeHandPresets.valueOf(graspFrame.getHandConfiguration(side)).getNormalizedHandOpenAngle());
+                     configurationActionNode.put("torque", SakeHandPresets.valueOf(graspFrame.getHandConfiguration(side)).getNormalizedTorqueLimit());
                      configurationActionNode.put("executeWithNextAction", side != RobotSide.RIGHT && bothPosesAreSet);
 
                      dataTrajectories = new double[16];
                      for (int data = 0; data < dataTrajectories.length; data++)
                         dataTrajectories[data] = 0.0;
-                     dataTrajectories[0] = SakeHandCommandOption.valueOf(graspFrame.getHandConfiguration(side).toString()).ordinal();
+                     dataTrajectories[0] = SakeHandPresets.valueOf(graspFrame.getHandConfiguration(side).toString()).ordinal();
                      csvDataMatrices.get(side).add(dataTrajectories);
                   }
                }
@@ -277,7 +277,7 @@ public class RDXAffordanceTemplateFileManager
                         dataTrajectories = new double[16];
                         for (int data = 0; data < dataTrajectories.length; data++)
                            dataTrajectories[data] = 0.0;
-                        dataTrajectories[0] = SakeHandCommandOption.valueOf(postGraspHandConfigurations.get(side).get(i).toString()).ordinal();
+                        dataTrajectories[0] = SakeHandPresets.valueOf(postGraspHandConfigurations.get(side).get(i).toString()).ordinal();
                         csvDataMatrices.get(side).add(dataTrajectories);
 
                         ObjectNode configurationActionNode = actionsArrayNode.addObject();
@@ -285,8 +285,8 @@ public class RDXAffordanceTemplateFileManager
                         configurationActionNode.put("description", "Post-grasp " + side.getPascalCaseName() + " Hand Configuration");
                         configurationActionNode.put("side", side.getLowerCaseName());
                         configurationActionNode.put("configuration", postGraspHandConfigurations.get(side).get(i).toString());
-                        configurationActionNode.put("handOpenAngle", SakeHandCommandOption.valueOf(postGraspHandConfigurations.get(side).get(i)).getNormalizedHandOpenAngle());
-                        configurationActionNode.put("maxTorque", SakeHandCommandOption.valueOf(postGraspHandConfigurations.get(side).get(i)).getMaxTorque());
+                        configurationActionNode.put("handOpenAngle", SakeHandPresets.valueOf(postGraspHandConfigurations.get(side).get(i)).getNormalizedHandOpenAngle());
+                        configurationActionNode.put("maxTorque", SakeHandPresets.valueOf(postGraspHandConfigurations.get(side).get(i)).getNormalizedTorqueLimit());
                         configurationActionNode.put("executeWithNextAction", side != RobotSide.RIGHT && bothPosesAreSet);
                      }
                   }

@@ -16,6 +16,8 @@ public interface ROS2ControllerPublishSubscribeAPI extends ROS2PublishSubscribeA
 
    public <T> void subscribeViaCallback(Function<String, ROS2Topic<T>> topicFunction, Consumer<T> callback);
 
+   public <T> void subscribeViaVolatileCallback(Function<String, ROS2Topic<T>> topicFunction, Consumer<T> callback);
+
    public <T> IHMCROS2Input<T> subscribeToController(Class<T> messageClass);
 
    public IHMCROS2Input<RobotConfigurationData> subscribeToRobotConfigurationData();
