@@ -20,7 +20,7 @@ public class BWCPlanarWalkingSimulation
       scs.addRobot(robot);
       scs.addTerrainObject(new FlatGroundDefinition());
 
-      BWCPlanarWalkingRobot controllerRobot = new BWCPlanarWalkingRobot(robot);
+      BWCPlanarWalkingRobot controllerRobot = new BWCPlanarWalkingRobot(robot, scs.getTime());
       BWCPlanarWalkingController controller = new BWCPlanarWalkingController(controllerRobot);
 
       robot.addThrottledController(controller, scs.getDT() * simTicksPerControlTick);

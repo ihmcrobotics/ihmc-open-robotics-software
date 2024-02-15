@@ -12,6 +12,8 @@ import java.awt.*;
 public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 {
    // Names for everything
+   public static final String baseJointName = "floatingBase";
+
    public static final String torsoName = "torso";
 
    public static final String leftHipPitchName = "l_hip_pitch";
@@ -56,7 +58,7 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
       elevator = new RigidBodyDefinition("elevator");
       setRootBodyDefinition(elevator);
 
-      floatingBaseJointDefinition = new PlanarJointDefinition("floatingBaseJoint");
+      floatingBaseJointDefinition = new PlanarJointDefinition(baseJointName);
       elevator.addChildJoint(floatingBaseJointDefinition);
 
       torsoBodyDefinition = createTorso();
