@@ -217,8 +217,6 @@ public class PerceptionMessageTools
 
       heightMapData.setGridCenter(gridCenter.getX(), gridCenter.getY());
 
-      LogTools.warn("Cells per axis: {}", cellsPerAxis);
-
       for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
       {
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
