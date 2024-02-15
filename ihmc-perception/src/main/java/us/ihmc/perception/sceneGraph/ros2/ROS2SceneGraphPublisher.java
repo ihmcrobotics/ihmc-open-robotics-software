@@ -1,6 +1,14 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
-import perception_msgs.msg.dds.*;
+import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
+import perception_msgs.msg.dds.CenterposeNodeMessage;
+import perception_msgs.msg.dds.DetectableSceneNodeMessage;
+import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
+import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
+import perception_msgs.msg.dds.SceneGraphMessage;
+import perception_msgs.msg.dds.SceneNodeMessage;
+import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
+import perception_msgs.msg.dds.YOLOv8ICPNodeMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
@@ -15,8 +23,8 @@ import us.ihmc.perception.sceneGraph.YOLOv8IterativeClosestPointNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 
 /**
  * Publishes the current state of the complete scene graph.
@@ -128,6 +136,7 @@ public class ROS2SceneGraphPublisher
             yoloICPNodeMessage.setBaseDistanceThreshold(yoloICPNode.getBaseDistanceThreshold());
             yoloICPNodeMessage.setRunIcp(yoloICPNode.isRunningICP());
             yoloICPNodeMessage.setMovementDistanceThreshold(yoloICPNode.getMovementDistanceThreshold());
+            yoloICPNodeMessage.setDetectionFrequency(yoloICPNode.getDetectionFrequency());
             detectableSceneNodeMessage = yoloICPNodeMessage.getDetectableSceneNode();
          }
          else

@@ -81,7 +81,8 @@ public class ROS2SceneGraphTools
                                                          subscriptionNode.getYOLOv8ICPNodeMessage().getIcpIterations(),
                                                          subscriptionNode.getYOLOv8ICPNodeMessage().getBaseDistanceThreshold(),
                                                          subscriptionNode.getYOLOv8ICPNodeMessage().getRunIcp(),
-                                                         subscriptionNode.getYOLOv8ICPNodeMessage().getMovementDistanceThreshold());
+                                                         subscriptionNode.getYOLOv8ICPNodeMessage().getMovementDistanceThreshold(),
+                                                         subscriptionNode.getYOLOv8ICPNodeMessage().getDetectionFrequency());
       }
       else if (nodeType == SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE)
       {

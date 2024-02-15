@@ -1,7 +1,14 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import perception_msgs.msg.dds.*;
+import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
+import perception_msgs.msg.dds.CenterposeNodeMessage;
+import perception_msgs.msg.dds.DetectableSceneNodeMessage;
+import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
+import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
+import perception_msgs.msg.dds.SceneGraphMessage;
+import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
+import perception_msgs.msg.dds.YOLOv8ICPNodeMessage;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
@@ -140,6 +147,7 @@ public class ROS2SceneGraphSubscription
             yoloICPNode.setBaseDistanceThreshold(subscriptionNode.getYOLOv8ICPNodeMessage().getBaseDistanceThreshold());
             yoloICPNode.setRunICP(subscriptionNode.getYOLOv8ICPNodeMessage().getRunIcp());
             yoloICPNode.setMovementDistanceThreshold(subscriptionNode.getYOLOv8ICPNodeMessage().getMovementDistanceThreshold());
+            yoloICPNode.setDetectionFrequency(subscriptionNode.getYOLOv8ICPNodeMessage().getDetectionFrequency());
          }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {

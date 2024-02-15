@@ -19,12 +19,19 @@ module perception_msgs
          * Detectable scene node information
          */
         perception_msgs::msg::dds::DetectableSceneNodeMessage detectable_scene_node;
+        /**
+         * YOLO/ICP Parameters
+         */
         long mask_erosion_kernel_radius;
         double outlier_filter_threshold;
         long icp_iterations;
         double base_distance_threshold;
         boolean run_icp;
+        /**
+         * Status
+         */
         double movement_distance_threshold;
+        double detection_frequency;
       };
     };
   };

@@ -15,12 +15,19 @@ public class YOLOv8ICPNodeMessage extends Packet<YOLOv8ICPNodeMessage> implement
             * Detectable scene node information
             */
    public perception_msgs.msg.dds.DetectableSceneNodeMessage detectable_scene_node_;
+   /**
+            * YOLO/ICP Parameters
+            */
    public int mask_erosion_kernel_radius_;
    public double outlier_filter_threshold_;
    public int icp_iterations_;
    public double base_distance_threshold_;
    public boolean run_icp_;
+   /**
+            * Status
+            */
    public double movement_distance_threshold_;
+   public double detection_frequency_;
 
    public YOLOv8ICPNodeMessage()
    {
@@ -48,6 +55,8 @@ public class YOLOv8ICPNodeMessage extends Packet<YOLOv8ICPNodeMessage> implement
 
       movement_distance_threshold_ = other.movement_distance_threshold_;
 
+      detection_frequency_ = other.detection_frequency_;
+
    }
 
 
@@ -59,10 +68,16 @@ public class YOLOv8ICPNodeMessage extends Packet<YOLOv8ICPNodeMessage> implement
       return detectable_scene_node_;
    }
 
+   /**
+            * YOLO/ICP Parameters
+            */
    public void setMaskErosionKernelRadius(int mask_erosion_kernel_radius)
    {
       mask_erosion_kernel_radius_ = mask_erosion_kernel_radius;
    }
+   /**
+            * YOLO/ICP Parameters
+            */
    public int getMaskErosionKernelRadius()
    {
       return mask_erosion_kernel_radius_;
@@ -104,13 +119,28 @@ public class YOLOv8ICPNodeMessage extends Packet<YOLOv8ICPNodeMessage> implement
       return run_icp_;
    }
 
+   /**
+            * Status
+            */
    public void setMovementDistanceThreshold(double movement_distance_threshold)
    {
       movement_distance_threshold_ = movement_distance_threshold;
    }
+   /**
+            * Status
+            */
    public double getMovementDistanceThreshold()
    {
       return movement_distance_threshold_;
+   }
+
+   public void setDetectionFrequency(double detection_frequency)
+   {
+      detection_frequency_ = detection_frequency;
+   }
+   public double getDetectionFrequency()
+   {
+      return detection_frequency_;
    }
 
 
@@ -144,6 +174,8 @@ public class YOLOv8ICPNodeMessage extends Packet<YOLOv8ICPNodeMessage> implement
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.movement_distance_threshold_, other.movement_distance_threshold_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.detection_frequency_, other.detection_frequency_, epsilon)) return false;
+
 
       return true;
    }
@@ -170,6 +202,8 @@ public class YOLOv8ICPNodeMessage extends Packet<YOLOv8ICPNodeMessage> implement
 
       if(this.movement_distance_threshold_ != otherMyClass.movement_distance_threshold_) return false;
 
+      if(this.detection_frequency_ != otherMyClass.detection_frequency_) return false;
+
 
       return true;
    }
@@ -193,7 +227,9 @@ public class YOLOv8ICPNodeMessage extends Packet<YOLOv8ICPNodeMessage> implement
       builder.append("run_icp=");
       builder.append(this.run_icp_);      builder.append(", ");
       builder.append("movement_distance_threshold=");
-      builder.append(this.movement_distance_threshold_);
+      builder.append(this.movement_distance_threshold_);      builder.append(", ");
+      builder.append("detection_frequency=");
+      builder.append(this.detection_frequency_);
       builder.append("}");
       return builder.toString();
    }

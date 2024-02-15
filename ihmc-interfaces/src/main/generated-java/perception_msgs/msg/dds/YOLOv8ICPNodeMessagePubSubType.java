@@ -15,7 +15,7 @@ public class YOLOv8ICPNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d7a1a479cb8bac09e293fb197bd10dd9b15d0331258b02d4e12cf669a26b0a47";
+   		return "bee6b21eb921d9c8562d387896238a94fba3b0a406efa64780bda1990feca0a0";
    }
    
    @Override
@@ -66,6 +66,8 @@ public class YOLOv8ICPNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -99,6 +101,9 @@ public class YOLOv8ICPNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -118,6 +123,8 @@ public class YOLOv8ICPNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       cdr.write_type_6(data.getMovementDistanceThreshold());
 
+      cdr.write_type_6(data.getDetectionFrequency());
+
    }
 
    public static void read(perception_msgs.msg.dds.YOLOv8ICPNodeMessage data, us.ihmc.idl.CDR cdr)
@@ -135,6 +142,8 @@ public class YOLOv8ICPNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       	
       data.setMovementDistanceThreshold(cdr.read_type_6());
       	
+      data.setDetectionFrequency(cdr.read_type_6());
+      	
 
    }
 
@@ -149,6 +158,7 @@ public class YOLOv8ICPNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       ser.write_type_6("base_distance_threshold", data.getBaseDistanceThreshold());
       ser.write_type_7("run_icp", data.getRunIcp());
       ser.write_type_6("movement_distance_threshold", data.getMovementDistanceThreshold());
+      ser.write_type_6("detection_frequency", data.getDetectionFrequency());
    }
 
    @Override
@@ -162,6 +172,7 @@ public class YOLOv8ICPNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       data.setBaseDistanceThreshold(ser.read_type_6("base_distance_threshold"));
       data.setRunIcp(ser.read_type_7("run_icp"));
       data.setMovementDistanceThreshold(ser.read_type_6("movement_distance_threshold"));
+      data.setDetectionFrequency(ser.read_type_6("detection_frequency"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.YOLOv8ICPNodeMessage src, perception_msgs.msg.dds.YOLOv8ICPNodeMessage dest)

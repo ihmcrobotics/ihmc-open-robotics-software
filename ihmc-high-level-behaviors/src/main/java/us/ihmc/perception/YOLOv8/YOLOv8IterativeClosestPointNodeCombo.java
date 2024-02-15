@@ -21,6 +21,7 @@ import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
+import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.util.List;
 import java.util.Random;
@@ -46,6 +47,7 @@ public class YOLOv8IterativeClosestPointNodeCombo
    private double distanceThreshold;
    private final DetectionFilter detectionFilter;
    private boolean ranICP = false;
+   private final FrequencyCalculator detectionFrequencyCalculator = new FrequencyCalculator();
 
    public YOLOv8IterativeClosestPointNodeCombo(YOLOv8Detection initialDetection,
                                                DetectionFilter detectionFilter,
@@ -83,7 +85,7 @@ public class YOLOv8IterativeClosestPointNodeCombo
       icpWorker.setSceneNodeID(nodeID);
 
       String nodeName = lastDetection.objectClass().toString().substring(0, 1).toUpperCase() + lastDetection.objectClass().toString().substring(1) + " " + nodeID;
-      node = new YOLOv8IterativeClosestPointNode(nodeID, nodeName, 1, 2.0, 1, 3000.0, true, distanceThreshold);
+      node = new YOLOv8IterativeClosestPointNode(nodeID, nodeName, 1, 2.0, 1, 3000.0, true, distanceThreshold, 0.0);
       modificationQueue.accept(new SceneGraphNodeAddition(node, sceneGraph.getRootNode()));
       sceneGraph.getIDToNodeMap().put(nodeID, node);
       distanceThreshold = node.getBaseDistanceThreshold();
@@ -124,6 +126,7 @@ public class YOLOv8IterativeClosestPointNodeCombo
       detectionFilter.update();
       node.setCurrentlyDetected(detectionFilter.isDetected() && ranICP);
       node.setMovementDistanceThreshold(distanceThreshold);
+      node.setDetectionFrequency(detectionFrequencyCalculator.anyPingsYet() ? detectionFrequencyCalculator.getFrequency() : 0.0);
 
       return true;
    }
@@ -182,6 +185,7 @@ public class YOLOv8IterativeClosestPointNodeCombo
          }
 
          ranICP = true;
+         detectionFrequencyCalculator.ping();
       }
 
       depthImage.release();
