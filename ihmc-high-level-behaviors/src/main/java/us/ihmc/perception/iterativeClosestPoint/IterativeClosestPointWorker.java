@@ -499,7 +499,7 @@ public class IterativeClosestPointWorker
 
       for (int i = 0; i < numberOfObjectSamples; i++)
       {
-         String[] row = rowList.get(i + 1); // FIXME why is there a + 1 query?
+         String[] row = rowList.get(i);
          float x = Float.parseFloat(row[0]);
          float y = Float.parseFloat(row[1]);
          float z = Float.parseFloat(row[2]);
