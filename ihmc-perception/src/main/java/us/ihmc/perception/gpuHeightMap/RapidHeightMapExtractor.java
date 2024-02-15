@@ -103,9 +103,11 @@ public class RapidHeightMapExtractor
    private Mat denoisedHeightMap;
    private Rect cropWindowRectangle;
 
+   private boolean initialized = false;
    private boolean modified = true;
    private boolean processing = false;
    private boolean heightMapDataAvailable = false;
+
 
    public RapidHeightMapExtractor(OpenCLManager openCLManager)
    {

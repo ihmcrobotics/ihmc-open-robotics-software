@@ -140,9 +140,9 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
    public void initializeSphericalRegionsVisualizer(ROS2Node ros2Node)
    {
-      RDXROS2PlanarRegionsVisualizer sphericalRegionsVisualizer = new RDXROS2PlanarRegionsVisualizer("Structural Rapid Regions",
-                                                                                                     ros2Node,
-                                                                                                     PerceptionAPI.SPHERICAL_RAPID_REGIONS);
+      RDXROS2FramePlanarRegionsVisualizer sphericalRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Structural Rapid Regions",
+                                                                                                               ros2Node,
+                                                                                                               PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE);
       sphericalRegionsVisualizer.setActive(true);
       sphericalRegionsVisualizer.create();
       visualizers.put("SphericalRegions", sphericalRegionsVisualizer);

@@ -132,6 +132,11 @@ public class OusterDepthPublisher
       }
    }
 
+   public ROS2PublisherBasics<ImageMessage> getImagePublisher()
+   {
+      return imagePublisher;
+   }
+
    public void destroy()
    {
       realtimeROS2Node.destroy();
