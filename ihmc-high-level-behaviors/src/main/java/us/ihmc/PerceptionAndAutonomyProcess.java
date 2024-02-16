@@ -91,6 +91,7 @@ public class PerceptionAndAutonomyProcess
 
    private final DepthImageOverlapRemover overlapRemover = new DepthImageOverlapRemover();
 
+   private ROS2DemandGraphNode depthOverlapRemovalDemandNode;
    private ROS2DemandGraphNode zedPointCloudDemandNode;
    private ROS2DemandGraphNode zedColorDemandNode;
    private ROS2DemandGraphNode zedDepthDemandNode;
@@ -270,6 +271,7 @@ public class PerceptionAndAutonomyProcess
 
       icpManager.destroy();
 
+      depthOverlapRemovalDemandNode.destroy();
       zedPointCloudDemandNode.destroy();
       zedColorDemandNode.destroy();
       zedDepthDemandNode.destroy();
@@ -308,7 +310,7 @@ public class PerceptionAndAutonomyProcess
             icpManager.setEnvironmentPointCloud(zedDepthImage);
 
          RawImage zedCutOutDepthImage;
-         if (realsenseDemandNode.isDemanded() && realsenseDepthImage != null)
+         if (depthOverlapRemovalDemandNode.isDemanded() && realsenseDemandNode.isDemanded() && realsenseDepthImage != null)
          {
             zedCutOutDepthImage = overlapRemover.removeOverlap(zedDepthImage.get());
          }
@@ -459,6 +461,8 @@ public class PerceptionAndAutonomyProcess
    private void initializeDependencyGraph(ROS2PublishSubscribeAPI ros2)
    {
       // Initialize all nodes
+      depthOverlapRemovalDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_OVERLAP_REMOVAL);
+
       zedPointCloudDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
       zedDepthDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_DEPTH);
       zedColorDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_COLOR);

@@ -4,8 +4,11 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import std_msgs.msg.dds.Empty;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
@@ -25,12 +28,16 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
    private final LinkedHashMap<RDXVisualizer, RDXVisualizerWithHeartbeat> visualizers = new LinkedHashMap<>();
    private final ROS2Node heartbeatNode;
 
+   private final ImBoolean removePointCloudOverlap = new ImBoolean(true);
+   private final ROS2Heartbeat overlapRemovalHeartbeat;
+
    private boolean created = false;
 
    public RDXPerceptionVisualizerPanel()
    {
       super(WINDOW_NAME);
-      heartbeatNode = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "visualizer_hearbeat_node");
+      heartbeatNode = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "visualizer_heartbeat_node");
+      overlapRemovalHeartbeat = new ROS2Heartbeat(heartbeatNode, PerceptionAPI.REQUEST_OVERLAP_REMOVAL);
       setRenderMethod(this::renderImGuiWidgets);
    }
 
@@ -82,6 +89,13 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
 
    public void renderImGuiWidgets()
    {
+      if (ImGui.collapsingHeader("Visualizer Settings"))
+      {
+         if (ImGui.checkbox("Remove point cloud overlap", removePointCloudOverlap))
+            overlapRemovalHeartbeat.setAlive(removePointCloudOverlap.get());
+         ImGui.separator();
+      }
+
       for (RDXVisualizerWithHeartbeat visualizer : visualizers.values())
       {
          visualizer.renderImGuiWidgets();
@@ -107,5 +121,8 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
       {
          visualizer.destroy();
       }
+
+      overlapRemovalHeartbeat.destroy();
+      heartbeatNode.destroy();
    }
 }

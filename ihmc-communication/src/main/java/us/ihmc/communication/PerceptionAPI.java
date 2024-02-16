@@ -214,6 +214,8 @@ public class PerceptionAPI
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = PERCEPTION_MODULE.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
    public static final ROS2Topic<Empty> REQUEST_ARUCO = PERCEPTION_MODULE.withSuffix("request_aruco").withType(Empty.class);
 
+   public static final ROS2Topic<Empty> REQUEST_OVERLAP_REMOVAL = PERCEPTION_MODULE.withSuffix("remove_overlap").withType(Empty.class);
+
    private static final ROS2Topic<RigidBodyTransformMessage> TRANSFORM_TUNING_BASE_TOPIC = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
                                                                                                     .withModule("transform_tuning");
    public static final ROS2IOTopicPair<RigidBodyTransformMessage> OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING
