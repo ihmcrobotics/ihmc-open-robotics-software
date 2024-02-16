@@ -5,7 +5,7 @@ import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
-import us.ihmc.avatar.sakeGripper.SakeHandPresets;
+import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -42,8 +42,8 @@ public class RDXHandConfigurationManager
          {
             handIcons.put(side, new RDXIconTexture("icons/" + side.getLowerCaseName() + "Hand.png"));
 
-            Runnable openHand = () -> publishHandCommand(side, SakeHandPresets.OPEN, false, false);
-            Runnable closeHand = () -> publishHandCommand(side, SakeHandPresets.CLOSE, false, false);
+            Runnable openHand = () -> publishHandCommand(side, SakeHandPreset.OPEN, false, false);
+            Runnable closeHand = () -> publishHandCommand(side, SakeHandPreset.CLOSE, false, false);
             Runnable calibrateHand = () -> publishHandCommand(side, null, true, false);
             Runnable resetHand = () -> publishHandCommand(side, null, false, true);
             handQuickAccessButtons.put(side, new RDXHandQuickAccessButtons(baseUI, side, openHand, closeHand, calibrateHand, resetHand));
@@ -72,7 +72,7 @@ public class RDXHandConfigurationManager
       }
    }
 
-   public void publishHandCommand(RobotSide side, @Nullable SakeHandPresets handPreset, boolean calibrate, boolean reset)
+   public void publishHandCommand(RobotSide side, @Nullable SakeHandPreset handPreset, boolean calibrate, boolean reset)
    {
       SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage = new SakeHandDesiredCommandMessage();
       sakeHandDesiredCommandMessage.setRobotSide(side.toByte());

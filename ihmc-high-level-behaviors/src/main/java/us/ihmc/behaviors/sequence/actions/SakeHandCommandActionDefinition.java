@@ -4,9 +4,8 @@ import behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
-import us.ihmc.avatar.sakeGripper.SakeHandPresets;
+import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
-import us.ihmc.commons.MathTools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
 import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
@@ -25,7 +24,7 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       super(crdtInfo, saveFileDirectory);
 
       side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
-      handOpenAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, SakeHandPresets.OPEN.getHandOpenAngle());
+      handOpenAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, SakeHandPreset.OPEN.getHandOpenAngle());
       fingertipGripForceLimit = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE);
    }
 
@@ -35,8 +34,8 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       super.saveToFile(jsonNode);
 
       jsonNode.put("side", side.getValue().getLowerCaseName());
-      jsonNode.put("handOpenAngleDegrees", MathTools.roundToPrecision(Math.toDegrees(handOpenAngle.getValue()), 0.1));
-      jsonNode.put("fingertipGripForceLimit", MathTools.roundToPrecision(fingertipGripForceLimit.getValue(), 0.1));
+      jsonNode.put("handOpenAngleDegrees", Double.parseDouble("%.1f".formatted(Math.toDegrees(handOpenAngle.getValue()))));
+      jsonNode.put("fingertipGripForceLimit", Double.parseDouble("%.1f".formatted(fingertipGripForceLimit.getValue())));
    }
 
    @Override
@@ -45,14 +44,8 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       super.loadFromFile(jsonNode);
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
-      String configuration = jsonNode.get("configuration").asText();
-      SakeHandPresets sakeHandPreset = SakeHandPresets.valueOf(configuration);
-
-      handOpenAngle.setValue(sakeHandPreset.getHandOpenAngle());
-      handOpenAngle.setValue(sakeHandPreset.getFingertipGripForceLimit());
-
-//      handOpenAngle.setValue(jsonNode.get("handOpenAngleDegrees").asDouble());
-//      fingertipGripForceLimit.setValue(jsonNode.get("fingertipGripForceLimit").asDouble());
+      handOpenAngle.setValue(Math.toRadians(jsonNode.get("handOpenAngleDegrees").asDouble()));
+      fingertipGripForceLimit.setValue(jsonNode.get("fingertipGripForceLimit").asDouble());
    }
 
    public void toMessage(SakeHandCommandActionDefinitionMessage message)

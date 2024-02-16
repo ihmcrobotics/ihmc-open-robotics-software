@@ -9,10 +9,8 @@ public class SakeHandParameters
     * This corresponds to the normalized value of 1.0.
     */
    public static final double MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES = 210.0;
-   /** Joint angle of a finger is -3 degrees when fully closed */
-   public static final double CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES = -3.0;
    /** Joint angle of a finger is 102 degrees when fully open */
-   public static final double OPEN_KNUCKLE_JOINT_ANGLE_DEGREES = 102.0;
+   public static final double OPEN_KNUCKLE_JOINT_ANGLE_DEGREES = 105.0;
    /** Sake hand can produce 29 N of grip force between the fingertips */
    public static final double FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT = 29.0;
    /** This is a safe amount of force. */
@@ -76,16 +74,12 @@ public class SakeHandParameters
 
    public static double knuckleJointAngleToHandOpenAngle(double knuckleJointAngle)
    {
-      double jointRange = Math.toRadians(OPEN_KNUCKLE_JOINT_ANGLE_DEGREES) - Math.toRadians(CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES);
-      double normalizedHandOpenAngle = (knuckleJointAngle - Math.toRadians(CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES)) / jointRange;
-      return denormalizeHandOpenAngle(normalizedHandOpenAngle);
+      return denormalizeHandOpenAngle(knuckleJointAngle / Math.toRadians(OPEN_KNUCKLE_JOINT_ANGLE_DEGREES));
    }
 
    public static double handOpenAngleToKnuckleJointAngle(double handOpenAngle)
    {
-      double normalizedHandOpenAngle = normalizeHandOpenAngle(handOpenAngle);
-      double jointRange = Math.toRadians(OPEN_KNUCKLE_JOINT_ANGLE_DEGREES) - Math.toRadians(CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES);
-      return (normalizedHandOpenAngle * jointRange) + Math.toRadians(CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES);
+      return normalizeHandOpenAngle(handOpenAngle) * Math.toRadians(OPEN_KNUCKLE_JOINT_ANGLE_DEGREES);
    }
 
    public static void resetDesiredCommandMessage(SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage)

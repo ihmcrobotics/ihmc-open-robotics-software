@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
-import us.ihmc.avatar.sakeGripper.SakeHandPresets;
+import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2Tools;
@@ -41,7 +41,7 @@ public class RDXSakeHandWidgets
    private final RobotSide handSide;
    private final Throttler sendThrottler = new Throttler();
    private final Timer sentCommandFreezeExpiration = new Timer();
-   private final SakeHandPresets[] presetButtons = new SakeHandPresets[] { SakeHandPresets.OPEN, SakeHandPresets.GRIP };
+   private final SakeHandPreset[] presetButtons = new SakeHandPreset[] {SakeHandPreset.OPEN, SakeHandPreset.GRIP };
    private final Notification userChangedHandOpenAngle = new Notification();
    private final Notification userChangedFingertipGripForce = new Notification();
    private final Notification calibrateRequested = new Notification();
@@ -131,7 +131,7 @@ public class RDXSakeHandWidgets
 
    public void renderImGuiWidgets()
    {
-      for (SakeHandPresets preset : presetButtons)
+      for (SakeHandPreset preset : presetButtons)
       {
          if (ImGui.button(labels.get(preset.getPascalCasedName())))
          {

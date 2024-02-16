@@ -107,7 +107,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
 
          LogTools.info("Commanding hand to open angle %.2f%s with torque limit %.2f N".formatted(Math.toDegrees(definition.getHandOpenAngle()),
                                                                                                  EuclidCoreMissingTools.DEGREE_SYMBOL,
-                                                                                                 Math.toDegrees(definition.getFingertipGripForceLimit())));
+                                                                                                 definition.getFingertipGripForceLimit()));
 
          state.getCommandedJointTrajectories().clear(2);
          state.getCommandedJointTrajectories().addTrajectoryPoint(0, x1KnuckleJoints.get(definition.getSide()).getQ(), 0.0);
@@ -145,7 +145,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
 
          boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
          meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
-         state.setIsExecuting(meetsDesiredCompletionCriteria);
+         state.setIsExecuting(!meetsDesiredCompletionCriteria);
       }
       else // Hand already in desired configuration
       {

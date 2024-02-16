@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import us.ihmc.avatar.sakeGripper.SakeHandPresets;
+import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -73,7 +73,7 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
    private final RigidBodyTransform[] fingersTransforms;
    private final ReferenceFrame[] fingersFrames;
    private final BoxRayIntersection boxRayIntersection = new BoxRayIntersection();
-   private SakeHandPresets sakeHandConfiguration;
+   private SakeHandPreset sakeHandConfiguration;
 
    public RDXInteractableSakeGripper(RDX3DPanel panel3D, RigidBodyTransform transformToParentToModify, ColorDefinition color)
    {
@@ -97,7 +97,7 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
          fingersTransforms[i] = new RigidBodyTransform(FINGERS_TO_PALM_CLOSE[i]);
          fingersFrames[i] = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(referenceFrameHand, fingersTransforms[i]);
       }
-      sakeHandConfiguration = SakeHandPresets.CLOSE;
+      sakeHandConfiguration = SakeHandPreset.CLOSE;
 
       panel3D.getScene().addRenderableProvider(this, this::getRenderables);
       panel3D.addImGui3DViewInputProcessor(this, this::updateFingers);
@@ -133,7 +133,7 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
    @Override
    public void setToConfiguration(String configuration)
    {
-      switch (SakeHandPresets.valueOf(configuration))
+      switch (SakeHandPreset.valueOf(configuration))
       {
          case FULLY_OPEN -> fullyOpenGripper();
          case OPEN -> openGripper();
@@ -194,28 +194,28 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_CRUSH[i]);
-      sakeHandConfiguration = SakeHandPresets.GRIP_HARD;
+      sakeHandConfiguration = SakeHandPreset.GRIP_HARD;
    }
 
    private void closeGripper()
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_CLOSE[i]);
-      sakeHandConfiguration = SakeHandPresets.CLOSE;
+      sakeHandConfiguration = SakeHandPreset.CLOSE;
    }
 
    private void fullyOpenGripper()
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_OPEN[i]);
-      sakeHandConfiguration = SakeHandPresets.FULLY_OPEN;
+      sakeHandConfiguration = SakeHandPreset.FULLY_OPEN;
    }
 
    private void openGripper()
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_HALF_CLOSE[i]);
-      sakeHandConfiguration = SakeHandPresets.OPEN;
+      sakeHandConfiguration = SakeHandPreset.OPEN;
    }
 
    @Override

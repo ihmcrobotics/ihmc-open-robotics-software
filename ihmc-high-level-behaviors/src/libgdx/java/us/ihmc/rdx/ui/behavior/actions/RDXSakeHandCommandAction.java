@@ -2,7 +2,7 @@ package us.ihmc.rdx.ui.behavior.actions;
 
 import imgui.ImGui;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
-import us.ihmc.avatar.sakeGripper.SakeHandPresets;
+import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -64,7 +64,7 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
       ImGui.pushItemWidth(100.0f);
       sideWidget.renderImGuiWidget();
 
-      for (SakeHandPresets preset : SakeHandPresets.values)
+      for (SakeHandPreset preset : SakeHandPreset.values)
       {
          ImGui.sameLine();
          if (ImGui.button(labels.get(preset.getPascalCasedName())))

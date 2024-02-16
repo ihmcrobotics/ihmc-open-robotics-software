@@ -3,7 +3,7 @@ package us.ihmc.avatar.sakeGripper;
 /**
  * Presets for the Sake gripper.
  */
-public enum SakeHandPresets
+public enum SakeHandPreset
 {
    /** Open the fingers to 105 degrees. */
    OPEN(105.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
@@ -20,13 +20,13 @@ public enum SakeHandPresets
    private final double handOpenAngle;
    private final double fingertipGripForceLimit;
 
-   SakeHandPresets(double handOpenAngleDegrees, double fingertipGripForceLimit)
+   SakeHandPreset(double handOpenAngleDegrees, double fingertipGripForceLimit)
    {
       this.handOpenAngle = Math.toRadians(handOpenAngleDegrees);
       this.fingertipGripForceLimit = fingertipGripForceLimit;
    }
 
-   public final static SakeHandPresets[] values = values();
+   public final static SakeHandPreset[] values = values();
 
    public double getHandOpenAngle()
    {
