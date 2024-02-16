@@ -8,10 +8,16 @@ from torch.nn import Module, Sequential, Linear, ReLU, Dropout, BatchNorm1d
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-from footstep_dataset_loader import visualize_plan
-from hdf5_reader import *
 
 from tqdm import tqdm
+
+import os.path
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from plotting.height_map_analyzer import *
+from footstep_dataset_loader import visualize_plan
+from hdf5_reader import *
 
 # create torch tensors on GPU 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -158,9 +164,13 @@ class FootstepDataset(Dataset):
         footstep_plan_poses[:, 2] = footstep_plan_yaws
         footstep_plan_poses = np.array([footstep_plan_poses], dtype=np.float32)
 
+        terrain_cost_map = compute_terrain_cost_map(self.height_maps[index])
+        contact_map = compute_contact_map(terrain_cost_map)
+
         # Inputs
         # --------- Image Inputs (float54)
         height_map_input = torch.Tensor(self.height_maps[index]).unsqueeze(0).to(device)
+        contact_map_input = torch.Tensor(contact_map).unsqueeze(0).to(device)
         
         # --------- Pose Inputs (X, Y, Yaw) with float 64
         start_pose = torch.Tensor(start_pose).to(device)
@@ -172,7 +182,7 @@ class FootstepDataset(Dataset):
         footstep_plan_poses = torch.Tensor(footstep_plan_poses).to(device)
         linear_output = torch.flatten(footstep_plan_poses)
 
-        return height_map_input, linear_input, linear_output
+        return height_map_input, linear_input, linear_output, contact_map_input
         
     def __len__(self) -> int:
         return len(self.height_maps)
@@ -315,7 +325,7 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
 
         loop=tqdm(train_loader, bar_format='{l_bar}{bar:30}{r_bar}{bar:-30b}')
         running_loss=0
-        for i, (x1, x2, y) in enumerate(loop):
+        for i, (x1, x2, y, c) in enumerate(loop):
             if x1.shape[0] > 1:
                 x1 = x1.to(device)
                 x2 = x2.to(device)
@@ -337,7 +347,7 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
                 loop.set_postfix(loss=average_loss)
                 writer.add_scalar('training loss', average_loss, epoch * len(train_loader) + i)
 
-        for x1, x2, y in val_loader:
+        for x1, x2, y, c in val_loader:
             # send data to gpu
             if x1.shape[0] > 1:
                 x1 = x1.to(device)
@@ -350,13 +360,15 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
                 print("Validiation loss - ",valid_loss,"\n")
                 writer.add_scalar('validation loss', valid_loss, epoch * len(train_loader) + i)
 
-        del x1, x2, y, y_pred, loss
+        # del x1, x2, y, y_pred, loss
         gc.collect()
         torch.cuda.empty_cache()
 
     # save the model
-    torch.save(model.state_dict(), model_path + 'footstep_predictor.pt')
-    torch.onnx.export(model, (x1[0].unsqueeze(0), x2[0].unsqueeze(0)), model_path + 'footstep_predictor.onnx', verbose=False)
+    ckpt_count = len([name for name in os.listdir(model_path) if name.endswith('.pt')])
+    file_name = 'footstep_predictor' + '_' + str(ckpt_count)
+    torch.save(model.state_dict(), model_path + file_name + '.pt')
+    torch.onnx.export(model, (x1[0].unsqueeze(0), x2[0].unsqueeze(0)), model_path + file_name + '.onnx', verbose=False)
     writer.close()
 
 
@@ -372,22 +384,23 @@ def load_validate(val_dataset, batch_size, model_path):
     model.to(device)
 
     with torch.no_grad():
-        for i, (height_map_input, linear_input, target_output) in enumerate(loader):
+        for i, (height_map_input, linear_input, target_output, contact_map) in enumerate(loader):
 
             height_map_input = height_map_input.to(device)
             linear_input = linear_input.to(device)
             target_output = target_output.to(device)
+            contact_map = contact_map.to(device)
 
             predict_output = model(height_map_input, linear_input)
 
             # get only the first 4 steps
             predict_output = predict_output[0:3*n_steps, :].reshape((n_steps, 3))
 
-            visualize_output(height_map_input, linear_input, predict_output, i, val_dataset, label="Prediction")
-            visualize_output(height_map_input, linear_input, target_output, i, val_dataset, label="Target")
+            visualize_output(height_map_input, linear_input, predict_output, contact_map, label="Prediction")
+            visualize_output(height_map_input, linear_input, target_output, contact_map, label="Target")
 
             
-def visualize_output(height_map_input, linear_input, final_output, i, val_dataset, n_steps=4, label="Footstep Plan"):
+def visualize_output(height_map_input, linear_input, final_output, contact_map, n_steps=4, label="Footstep Plan"):
 
     output = final_output.cpu().numpy()
     output = output.squeeze()
@@ -397,20 +410,22 @@ def visualize_output(height_map_input, linear_input, final_output, i, val_datase
     linear_input = linear_input.squeeze()
     print("Linear Input", linear_input.shape)
 
-    print(f'Dataset: {i}/{len(val_dataset)}, Height Map Size: {height_map_input.shape}, Linear Input Size: {linear_input.shape}, Linear Output Size: {output.shape}')
-
     # convert height map to numpy array 16-bit grayscale
     height_map = np.array(height_map_input.cpu().numpy() * 10000.0, dtype=np.uint16)
 
     # reshape for opencv
     height_map = height_map.reshape((201, 201))        
 
+    # convert contact map to numpy array 8-bit grayscale
+    contact_map = np.array(contact_map.cpu().numpy() * 255, dtype=np.uint8)
+    contact_map = contact_map.reshape((201, 201))
+
     start_pose = linear_input[0:3]
     goal_pose = linear_input[3:6]
     plan_poses = output[0:3*n_steps].reshape((n_steps, 3))[:, 0:3]
 
     # visualize plan
-    visualize_plan(height_map, plan_poses, 
+    visualize_plan(height_map, contact_map, plan_poses, 
                     start_pose, goal_pose, label=label)
 
 def load_dataset(validation_split):
@@ -424,7 +439,7 @@ def load_dataset(validation_split):
     files = [file for file in files if ".hdf5" in file]
 
     labels = [
-                # 'MCFP', 
+                'MCFP', 
                 'AStar'
     ]
 
@@ -432,7 +447,7 @@ def load_dataset(validation_split):
     files = [file for file in files if any(label in file for label in labels)]
     
 
-    # files = files[:6]
+    # files = files[:1]
 
     
     datasets = []
@@ -454,14 +469,14 @@ def load_dataset(validation_split):
 
 def visualize_dataset(dataset):
     loader = DataLoader(dataset, batch_size=1, shuffle=True)
-    for i, (height_map_input, linear_input, target_output) in enumerate(loader):
+    for i, (height_map_input, linear_input, target_output, contact_map) in enumerate(loader):
 
         height_map_input = height_map_input.to(device)
         linear_input = linear_input.to(device)
         target_output = target_output.to(device)
 
 
-        visualize_output(height_map_input, linear_input, target_output, i, val_dataset)
+        visualize_output(height_map_input, linear_input, target_output, contact_map)
 
 if __name__ == "__main__":
 
@@ -474,7 +489,7 @@ if __name__ == "__main__":
     # load dataset
     train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
-    train = False
+    train = True
     visualize_raw = False
 
     if visualize_raw:

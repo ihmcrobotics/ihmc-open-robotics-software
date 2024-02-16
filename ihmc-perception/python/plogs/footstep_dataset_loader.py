@@ -5,6 +5,11 @@ import h5py
 import numpy as np
 import cv2
 
+import os.path
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from plotting.height_map_analyzer import *
 from hdf5_reader import *
 
 def plan_view_main(data):
@@ -29,18 +34,25 @@ def plan_view_main(data):
     launch_plan_viewer(footstep_plan_positions, footstep_plan_orientations, 
                        start_positions, start_orientations, goal_positions, goal_orientations, sensor_positions, sensor_orientations, n_steps=4)
 
-def visualize_plan(height_map, footstep_plan_poses, start_pose, goal_pose, start_side=0.0, label="Footstep_Plan"):
+def visualize_plan(height_map, contact_map, footstep_plan_poses, start_pose, goal_pose, start_side=0.0, label="Footstep_Plan"):
     
     height_map = cv2.convertScaleAbs(height_map, alpha=(255.0/65535.0))
     height_map = np.minimum(height_map * 10, 255)
+    
+    # plot_terrain_maps(height_map, contact_map, contact_map)
 
     height_map_display = height_map.copy()
-
-    # convert grayscale to RGB
     height_map_display = cv2.cvtColor(height_map_display, cv2.COLOR_GRAY2RGB)
-
-    # Resize the height map to 1000x1000
     height_map_display = cv2.resize(height_map_display, (1000, 1000))
+
+    contact_map = np.stack([contact_map, contact_map, contact_map], axis=2).astype(np.uint8)
+    contact_map[:, :, 1] = contact_map[:, :, 0]
+    contact_map[:, :, 0] = 0
+    contact_map[:, :, 2] = 0
+    contact_map = cv2.resize(contact_map, (1000, 1000))
+
+
+    print("Height Map Shape:", height_map_display.shape, "Contact Map Shape:", contact_map.shape)    
 
     # compute scale factor
     scale = 1000 / height_map.shape[0]
@@ -56,13 +68,15 @@ def visualize_plan(height_map, footstep_plan_poses, start_pose, goal_pose, start
     # if current position is not zero, plot footsteps
     plot_oriented_footsteps(height_map_display, footstep_plan_poses, scale)
 
-    # test_visualize(height_map_display, scale=scale)
+    stacked_image = np.hstack((height_map_display, contact_map))
 
     # Create a resizeable window and resize by scale factor
     cv2.namedWindow(label, cv2.WINDOW_NORMAL)
     cv2.resizeWindow(label, 1000, 1000)
-    cv2.imshow(label, height_map_display)
+    cv2.imshow(label, stacked_image)
+    
     code = cv2.waitKeyEx(0)
+    print("Code:", code)
 
     if code == ord('q'):
         cv2.destroyAllWindows()

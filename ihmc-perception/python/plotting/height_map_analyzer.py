@@ -121,7 +121,7 @@ def compute_contact_map(terrain_cost_map):
     # the possible distance metrics include cv2.DIST_L1, cv2.DIST_L2, cv2.DIST_C, 
     # cv2.DIST_L12, cv2.DIST_FAIR, cv2.DIST_WELSCH, and cv2.DIST_HUBER
     contact_map = np.zeros((terrain_cost_map.shape[0], terrain_cost_map.shape[1]), dtype=np.float32)
-    contact_map = cv2.distanceTransform(terrain_cost_map.astype(np.uint8), cv2.DIST_L2, 5)  
+    contact_map = cv2.distanceTransform(terrain_cost_map.astype(np.uint8), cv2.DIST_L2, 3)  
     contact_map = contact_map / np.max(contact_map) * 255
     return contact_map
     
@@ -129,13 +129,17 @@ def compute_pattern_stats(height_map):
     # create height map for plotting between 0 and 255
     height_map_for_plotting = height_map - np.min(height_map)
     height_map_for_plotting = height_map_for_plotting / np.max(height_map_for_plotting) * 255
-
-
-    # create colored image for plotting
-    height_map_image = np.stack([height_map_for_plotting, height_map_for_plotting, height_map_for_plotting], axis=2).astype(np.uint8)
     
     terrain_cost = compute_terrain_cost_map(height_map)
     contact_map = compute_contact_map(terrain_cost)
+
+    plot_terrain_maps(height_map_for_plotting, terrain_cost, contact_map)
+
+
+def plot_terrain_maps(height_map, terrain_cost, contact_map):
+
+    # create colored image for plotting
+    height_map_image = np.stack([height_map, height_map, height_map], axis=2).astype(np.uint8)
 
     # convert to opencv colored image
     contact_map = np.stack([contact_map, contact_map, contact_map], axis=2).astype(np.uint8)
@@ -156,8 +160,6 @@ def compute_pattern_stats(height_map):
 
 
     cv2.imshow("Contact Map", stacked_image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
 
     
