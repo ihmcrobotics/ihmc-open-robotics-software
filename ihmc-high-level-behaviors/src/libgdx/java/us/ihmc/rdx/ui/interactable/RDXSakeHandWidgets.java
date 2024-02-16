@@ -41,7 +41,7 @@ public class RDXSakeHandWidgets
    private final RobotSide handSide;
    private final Throttler sendThrottler = new Throttler();
    private final Timer sentCommandFreezeExpiration = new Timer();
-   private final SakeHandPreset[] presetButtons = new SakeHandPreset[] {SakeHandPreset.OPEN, SakeHandPreset.GRIP };
+   private final SakeHandPreset[] presetButtons = new SakeHandPreset[] {SakeHandPreset.OPEN, SakeHandPreset.CLOSE};
    private final Notification userChangedHandOpenAngle = new Notification();
    private final Notification userChangedFingertipGripForce = new Notification();
    private final Notification calibrateRequested = new Notification();
