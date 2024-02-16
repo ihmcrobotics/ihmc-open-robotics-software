@@ -66,7 +66,7 @@ public class DoorModelParameters
     * as that's what's most important to get right.
     */
    public static final double RIGHT_SIDE_ARUCO_MARKER_TO_OPENER_AXIS_Z = 0.127;
-   public static final double RIGHT_SIDE_ARUCO_MARKER_TO_OPENER_AXIS_Y = 0.0885;
+   public static final double RIGHT_SIDE_ARUCO_MARKER_TO_OPENER_AXIS_Y = 0.06617;
 
    public static final double LEFT_SIDE_ARUCO_MARKER_TO_OPENER_AXIS_Z = 0.127;
    public static final double LEFT_SIDE_ARUCO_MARKER_TO_OPENER_AXIS_Y = -0.0885 - DOOR_ARUCO_MARKER_WIDTH;
