@@ -33,7 +33,7 @@ public class RDXSceneGraphTools
       }
       else if (sceneNodeToCopy instanceof YOLOv8IterativeClosestPointNode yoloICPSceneNode)
       {
-         return new RDXYOLOv8IterativeClosestPointNode(yoloICPSceneNode, labels);
+         return new RDXYOLOv8IterativeClosestPointNode(yoloICPSceneNode, panel3D, labels);
       }
       else if (sceneNodeToCopy instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {

@@ -107,19 +107,17 @@ public class YOLOv8IterativeClosestPointNodeCombo
 
       if (selfDestruct && node != null)
       {
-         System.out.println("Destroying in updateSceneGraph()");
-         System.out.flush();
          node.setCurrentlyDetected(false);
          modificationQueue.accept(new SceneGraphClearSubtree(node));
          modificationQueue.accept(new SceneGraphNodeRemoval(node, sceneGraph));
          return false;
       }
 
-
       synchronized (transformSynchronizer)
       {
          node.getNodeToParentFrameTransform().set(lastCentroidToWorldTransform);
       }
+      node.getNodeFrame().update();
 
       if (ranICP)
          detectionFilter.registerDetection();
@@ -144,8 +142,6 @@ public class YOLOv8IterativeClosestPointNodeCombo
 
       if (detectionFilter.hasEnoughSamples() && !detectionFilter.isStableDetectionResult())
       {
-         System.out.println("Destroying in destroy()");
-         System.out.flush();
          selfDestruct = true;
          extractor.destroy();
          segmenter.destroy();
