@@ -8,6 +8,7 @@ import us.ihmc.avatar.sakeGripper.SakeHandPresets;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -87,22 +88,34 @@ public class RDXSakeHandWidgets
          SakeHandParameters.resetDesiredCommandMessage(sakeHandDesiredCommandMessage);
 
          if (sendAngle)
+         {
+            LogTools.info("Commanding hand open angle %.1f%s".formatted(Math.toDegrees(handOpenAngleSlider.getDoubleValue()),
+                                                                        EuclidCoreMissingTools.DEGREE_SYMBOL));
             sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(SakeHandParameters.normalizeHandOpenAngle(handOpenAngleSlider.getDoubleValue()));
+         }
 
          if (sendForce)
+         {
+            LogTools.info("Commanding fingertip grip force limit %.1f N".formatted(fingertipGripForceSlider.getDoubleValue()));
             sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(
                   SakeHandParameters.normalizeFingertipGripForceLimit(fingertipGripForceSlider.getDoubleValue()));
+         }
 
          if (sendCalibrate)
+         {
+            LogTools.info("Requesting hand calibration");
             sakeHandDesiredCommandMessage.setRequestCalibration(true);
+         }
 
          if (sendResetErrors)
+         {
+            LogTools.info("Requesting hand to reset errors");
             sakeHandDesiredCommandMessage.setRequestResetErrors(true);
+         }
 
          if (sendAngle || sendForce || sendCalibrate || sendResetErrors)
          {
             communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic, sakeHandDesiredCommandMessage);
-            sentCommandFreezeExpiration.reset();
          }
       }
    }
@@ -117,6 +130,7 @@ public class RDXSakeHandWidgets
             fingertipGripForceSlider.setDoubleValue(preset.getFingertipGripForceLimit());
             userChangedHandOpenAngle.set();
             userChangedFingertipGripForce.set();
+            sentCommandFreezeExpiration.reset();
          }
          ImGui.sameLine();
       }
@@ -144,6 +158,7 @@ public class RDXSakeHandWidgets
       if (handOpenAngleSlider.render(0.0, Math.toRadians(SakeHandParameters.MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES)))
       {
          userChangedHandOpenAngle.set();
+         sentCommandFreezeExpiration.reset();
       }
 
       double currentForceNotchNormal = Math.abs(SakeHandParameters.normalizeFingertipGripForceLimit(currentFingertipGripForce));
@@ -177,6 +192,7 @@ public class RDXSakeHandWidgets
       if (fingertipGripForceSlider.render(0.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT))
       {
          userChangedFingertipGripForce.set();
+         sentCommandFreezeExpiration.reset();
       }
 
       if (styled)
