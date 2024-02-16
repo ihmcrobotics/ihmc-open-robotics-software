@@ -17,9 +17,9 @@ kernel void segmentDepthImage(read_only image2d_t depthImage,
    int x = get_global_id(0);
    int y = get_global_id(1);
 
-   float depthValue = read_imageui(depthImage, (int2) (x, y)).x;
+   uint depthValue = read_imageui(depthImage, (int2) (x, y)).x;
 
-   float depthInMeters = depthValue * parameters[DEPTH_DISCRETIZATION];
+   float depthInMeters = (float) depthValue * parameters[DEPTH_DISCRETIZATION];
    float3 depthFramePoint = (float3) (depthInMeters, 
                                       -(x - parameters[DEPTH_PRINCIPAL_POINT_X]) / parameters[DEPTH_FOCAL_LENGTH_X] * depthInMeters, 
                                       -(y - parameters[DEPTH_PRINCIPAL_POINT_Y]) / parameters[DEPTH_FOCAL_LENGTH_Y] * depthInMeters);
@@ -36,5 +36,5 @@ kernel void segmentDepthImage(read_only image2d_t depthImage,
    if (maskValue > 0.0f)
       write_imageui(outputImage, (int2) (x, y), depthValue);
    else
-      write_imageui(outputImage, (int2) (x, y), 0.0f);
+      write_imageui(outputImage, (int2) (x, y), 0);
 }
