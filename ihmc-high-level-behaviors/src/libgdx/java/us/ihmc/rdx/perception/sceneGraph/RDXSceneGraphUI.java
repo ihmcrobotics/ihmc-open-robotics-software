@@ -92,7 +92,8 @@ public class RDXSceneGraphUI
       {
          RDXSceneNode uiNode = uiSceneNodes.get(sceneNode);
 
-         if (uiNode.isRemoved())
+         // If the node was removed from the UI or the node doesn't exist in the scene graph at all
+         if (uiNode.isRemoved() || !sceneGraph.getSceneNodesByID().contains(sceneNode))
          {
             // Destroy and remove UI scene node
             uiNode.destroy();
