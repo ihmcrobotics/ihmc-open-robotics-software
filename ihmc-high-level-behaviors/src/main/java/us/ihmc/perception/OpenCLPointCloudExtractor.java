@@ -100,7 +100,8 @@ public class OpenCLPointCloudExtractor
          bytedecoDepthImage.destroy(openCLManager);
       if (depthImage != null)
          depthImage.release();
-
+      if (pointCloudVertexOutput != null)
+         pointCloudVertexOutput.destroy(openCLManager);
       openCLProgram.close();
       kernel.close();
    }
