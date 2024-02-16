@@ -77,10 +77,12 @@ public class RDXSceneGraphUI
       panel3D.getNotificationManager().pushNotification("Added SceneNode [" + uiSceneNode.getSceneNode().getName() + "]");
    }
 
-   public void removeUISceneNode(SceneNode correspondingSceneNode)
+   public void removeUISceneNode(SceneNode correspondingSceneNode, SceneGraphModificationQueue modificationQueue)
    {
-      if (uiSceneNodes.remove(correspondingSceneNode) != null)
+      RDXSceneNode rdxNodeToRemove = uiSceneNodes.remove(correspondingSceneNode);
+      if (rdxNodeToRemove != null)
       {
+         rdxNodeToRemove.remove(modificationQueue, sceneGraph);
          panel3D.getNotificationManager().pushNotification("Removed SceneNode [" + correspondingSceneNode.getName() + "]");
       }
    }
@@ -88,18 +90,20 @@ public class RDXSceneGraphUI
    public void update()
    {
       sceneGraph.updateSubscription();
-      sceneGraph.modifyTree(modificationQueue -> uiSceneNodes.values().forEach(node -> node.update(modificationQueue)));
-      sceneGraph.updatePublication();
-
-      for (SceneNode sceneNode : uiSceneNodes.keySet())
+      sceneGraph.modifyTree(modificationQueue ->
       {
-         // If there exists a UI scene node which doesn't exist in the scene graph,
-         // remove it from the UI scene nodes
-         if (!sceneGraph.getSceneNodesByID().contains(sceneNode))
+         uiSceneNodes.values().forEach(node -> node.update(modificationQueue));
+         for (SceneNode sceneNode : uiSceneNodes.keySet())
          {
-            removeUISceneNode(sceneNode);
+            // If there exists a UI scene node which doesn't exist in the scene graph,
+            // remove it from the UI scene nodes
+            if (!sceneGraph.getSceneNodesByID().contains(sceneNode))
+            {
+               removeUISceneNode(sceneNode, modificationQueue);
+            }
          }
-      }
+      });
+      sceneGraph.updatePublication();
    }
 
    private void renderMenuBar(SceneGraphModificationQueue modificationQueue)
