@@ -103,7 +103,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
          sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(SakeHandParameters.normalizeHandOpenAngle(definition.getHandOpenAngle()));
          sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(
                                                        SakeHandParameters.normalizeFingertipGripForceLimit(definition.getFingertipGripForceLimit()));
-         ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, sakeHandDesiredCommandMessage);
+         ros2ControllerHelper.publish(robotName -> ROS2Tools.getHandSakeCommandTopic(robotName, definition.getSide()), sakeHandDesiredCommandMessage);
 
          LogTools.info("Commanding hand to open angle %.2f%s with torque limit %.2f N".formatted(Math.toDegrees(definition.getHandOpenAngle()),
                                                                                                  EuclidCoreMissingTools.DEGREE_SYMBOL,

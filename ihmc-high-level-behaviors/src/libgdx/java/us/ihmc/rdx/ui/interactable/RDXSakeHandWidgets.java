@@ -63,18 +63,15 @@ public class RDXSakeHandWidgets
       fingertipGripForceSlider = new ImGuiSliderDouble(fingertipGripForceSliderLabel, "%.1f N", Double.NaN);
       fingertipGripForceSlider.addWidgetAligner(widgetAligner);
 
-      communicationHelper.subscribeViaVolatileCallback(ROS2Tools::getHandSakeStatusTopic, sakeHandStatusMessage ->
+      communicationHelper.subscribeViaVolatileCallback(robotName -> ROS2Tools.getHandSakeStatusTopic(robotName, handSide), sakeHandStatusMessage ->
       {
-         if (sakeHandStatusMessage.getRobotSide() == handSide.toByte())
-         {
-            isCalibrated = sakeHandStatusMessage.getIsCalibrated();
-            needsReset = sakeHandStatusMessage.getNeedsReset();
-            currentTemperature = sakeHandStatusMessage.getTemperature();
-            currentHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getNormalizedCurrentPosition());
-            commandedHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getNormalizedDesiredPosition());
-            currentFingertipGripForce = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getNormalizedCurrentTorque());
-            commandedFingertipGripForceLimit = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getNormalizedTorqueLimit());
-         }
+         isCalibrated = sakeHandStatusMessage.getIsCalibrated();
+         needsReset = sakeHandStatusMessage.getNeedsReset();
+         currentTemperature = sakeHandStatusMessage.getTemperature();
+         currentHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getNormalizedCurrentPosition());
+         commandedHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getNormalizedDesiredPosition());
+         currentFingertipGripForce = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getNormalizedCurrentTorque());
+         commandedFingertipGripForceLimit = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getNormalizedTorqueLimit());
       });
 
       sakeHandDesiredCommandMessage.setRobotSide(handSide.toByte());
@@ -126,7 +123,7 @@ public class RDXSakeHandWidgets
 
          if (sendAngle || sendForce || sendCalibrate || sendResetErrors)
          {
-            communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic, sakeHandDesiredCommandMessage);
+            communicationHelper.publish(robotName -> ROS2Tools.getHandSakeCommandTopic(robotName, handSide), sakeHandDesiredCommandMessage);
          }
       }
    }

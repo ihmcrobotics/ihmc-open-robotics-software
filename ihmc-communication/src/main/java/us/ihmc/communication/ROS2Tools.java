@@ -19,6 +19,7 @@ import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.*;
 import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
@@ -115,14 +116,14 @@ public class ROS2Tools
       return HAND_CONFIGURATION.withRobot(robotName);
    }
 
-   public static ROS2Topic<SakeHandDesiredCommandMessage> getHandSakeCommandTopic(String robotName)
+   public static ROS2Topic<SakeHandDesiredCommandMessage> getHandSakeCommandTopic(String robotName, RobotSide side)
    {
-      return HAND_SAKE_DESIRED_COMMAND.withRobot(robotName);
+      return HAND_SAKE_DESIRED_COMMAND.withRobot(robotName).withSuffix(side.getLowerCaseName());
    }
 
-   public static ROS2Topic<SakeHandStatusMessage> getHandSakeStatusTopic(String robotName)
+   public static ROS2Topic<SakeHandStatusMessage> getHandSakeStatusTopic(String robotName, RobotSide side)
    {
-      return HAND_SAKE_DESIRED_STATUS.withRobot(robotName);
+      return HAND_SAKE_DESIRED_STATUS.withRobot(robotName).withSuffix(side.getLowerCaseName());
    }
 
    public static ROS2Topic<HandJointAnglePacket> getHandJointAnglesTopic(String robotName)
