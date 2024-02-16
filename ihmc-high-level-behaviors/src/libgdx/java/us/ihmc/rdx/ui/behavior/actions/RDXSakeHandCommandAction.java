@@ -63,16 +63,15 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
       
       ImGui.pushItemWidth(100.0f);
       sideWidget.renderImGuiWidget();
-      ImGui.sameLine();
 
       for (SakeHandPresets preset : SakeHandPresets.values)
       {
+         ImGui.sameLine();
          if (ImGui.button(labels.get(preset.getPascalCasedName())))
          {
             definition.setHandOpenAngle(preset.getHandOpenAngle());
             definition.setFingertipGripForceLimit(preset.getFingertipGripForceLimit());
          }
-         ImGui.sameLine();
       }
 
       handOpenAngleSlider.setWidgetText("%.1f%s".formatted(Math.toDegrees(definition.getHandOpenAngle()), EuclidCoreMissingTools.DEGREE_SYMBOL));

@@ -10,6 +10,7 @@ import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.avatar.sakeGripper.SakeHandPresets;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
@@ -293,8 +294,8 @@ public class RDXTeleoperationManager extends RDXPanel
                // TODO this should probably not handle the space event!
                // This sends a command to the controller.
                interactableHands.get(side).setActionExecutor(armManager.getSubmitDesiredArmSetpointsCallback(side));
-               interactableHands.get(side).setOpenHand(() -> armManager.getHandManager().publishHandCommand(side, HandConfiguration.OPEN));
-               interactableHands.get(side).setCloseHand(() -> armManager.getHandManager().publishHandCommand(side, HandConfiguration.CLOSE));
+               interactableHands.get(side).setOpenHand(() -> armManager.getHandManager().publishHandCommand(side, SakeHandPresets.OPEN, false, false));
+               interactableHands.get(side).setCloseHand(() -> armManager.getHandManager().publishHandCommand(side, SakeHandPresets.CLOSE, false, false));
                interactableHands.get(side).setGotoDoorAvoidanceArmAngles(() -> armManager.executeDoorAvoidanceArmAngles(side));
                interactableHands.get(side).setGotoArmHome(() -> armManager.executeArmHome(side));
             }
