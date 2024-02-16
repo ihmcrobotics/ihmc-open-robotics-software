@@ -143,9 +143,9 @@ public class RDXYOLOv8IterativeClosestPointNode extends RDXDetectableSceneNode
    }
 
    @Override
-   public void remove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   public void destroy()
    {
-      super.remove(modificationQueue, sceneGraph);
+      super.destroy();
       ros2Node.destroy();
    }
 }
