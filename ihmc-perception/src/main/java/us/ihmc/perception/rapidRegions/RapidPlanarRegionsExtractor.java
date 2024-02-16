@@ -95,8 +95,8 @@ public class RapidPlanarRegionsExtractor
    private _cl_kernel copyKernel;
 
    // TODO: Remove
-//   private _cl_kernel sphericalBackProjectionKernel;
-//   private _cl_kernel perspectiveBackProjectionKernel;
+   private _cl_kernel sphericalBackProjectionKernel;
+   private _cl_kernel perspectiveBackProjectionKernel;
    private OpenCLFloatBuffer cloudBuffer;
 
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
@@ -136,7 +136,7 @@ public class RapidPlanarRegionsExtractor
                                       double cx,
                                       double cy)
    {
-      this(openCLManager, openCLManager.loadProgram("RapidRegionsExtractor"), imageHeight, imageWidth, fx, fy, cx, cy, "");
+      this(openCLManager, program, imageHeight, imageWidth, fx, fy, cx, cy, "");
    }
 
    /**
@@ -168,7 +168,7 @@ public class RapidPlanarRegionsExtractor
       this.parameters.set(RapidRegionsExtractorParameters.principalOffsetYPixels, cy);
 
       rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer();
-//      perspectiveBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "perspectiveBackProjectionKernel");
+      perspectiveBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "perspectiveBackProjectionKernel");
       this.create();
    }
 
@@ -183,7 +183,7 @@ public class RapidPlanarRegionsExtractor
       this.parameters = new RapidRegionsExtractorParameters("Spherical");
 
       rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer("ForSphericalRapidRegions");
-//      sphericalBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "sphericalBackProjectionKernel");
+      sphericalBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "sphericalBackProjectionKernel");
 
       create();
    }
@@ -384,24 +384,24 @@ public class RapidPlanarRegionsExtractor
       currentFeatureGrid.readOpenCLImages();
       patchGraph.readOpenCLImage(openCLManager);
 
-//      // TODO: Remove
-//      if (sensorModel == SensorModel.SPHERICAL)
-//      {
-//         openCLManager.setKernelArgument(sphericalBackProjectionKernel, 0, inputImage);
-//         openCLManager.setKernelArgument(sphericalBackProjectionKernel, 1, cloudBuffer.getOpenCLBufferObject());
-//         openCLManager.setKernelArgument(sphericalBackProjectionKernel, 2, parametersBuffer.getOpenCLBufferObject());
-//         openCLManager.execute2D(sphericalBackProjectionKernel, imageWidth, imageHeight);
-//         cloudBuffer.readOpenCLBufferObject(openCLManager);
-//      }
-//
-//      if (sensorModel == SensorModel.PERSPECTIVE)
-//      {
-//         openCLManager.setKernelArgument(perspectiveBackProjectionKernel, 0, inputImage);
-//         openCLManager.setKernelArgument(perspectiveBackProjectionKernel, 1, cloudBuffer.getOpenCLBufferObject());
-//         openCLManager.setKernelArgument(perspectiveBackProjectionKernel, 2, parametersBuffer.getOpenCLBufferObject());
-//         openCLManager.execute2D(perspectiveBackProjectionKernel, imageWidth, imageHeight);
-//         cloudBuffer.readOpenCLBufferObject(openCLManager);
-//      }
+      // TODO: Remove
+      if (sensorModel == SensorModel.SPHERICAL)
+      {
+         openCLManager.setKernelArgument(sphericalBackProjectionKernel, 0, inputImage);
+         openCLManager.setKernelArgument(sphericalBackProjectionKernel, 1, cloudBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(sphericalBackProjectionKernel, 2, parametersBuffer.getOpenCLBufferObject());
+         openCLManager.execute2D(sphericalBackProjectionKernel, imageWidth, imageHeight);
+         cloudBuffer.readOpenCLBufferObject(openCLManager);
+      }
+
+      if (sensorModel == SensorModel.PERSPECTIVE)
+      {
+         openCLManager.setKernelArgument(perspectiveBackProjectionKernel, 0, inputImage);
+         openCLManager.setKernelArgument(perspectiveBackProjectionKernel, 1, cloudBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(perspectiveBackProjectionKernel, 2, parametersBuffer.getOpenCLBufferObject());
+         openCLManager.execute2D(perspectiveBackProjectionKernel, imageWidth, imageHeight);
+         cloudBuffer.readOpenCLBufferObject(openCLManager);
+      }
    }
 
    public void copyFeatureGridMapUsingOpenCL()

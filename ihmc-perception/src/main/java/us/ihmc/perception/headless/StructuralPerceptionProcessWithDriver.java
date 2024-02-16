@@ -15,17 +15,15 @@ import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.comms.PerceptionComms;
-import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
 import us.ihmc.perception.ouster.OusterNetServer;
+import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.NativeMemoryTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
@@ -64,7 +62,7 @@ public class StructuralPerceptionProcessWithDriver
    private int depthWidth;
    private int depthHeight;
    private int numberOfPointsPerFullScan;
-   private OusterDepthExtractionKernel depthExtractionKernel = null;
+   private OusterDepthExtractionKernel depthExtractionKernel;
    private RapidPlanarRegionsExtractor rapidRegionsExtractor;
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
@@ -98,28 +96,24 @@ public class StructuralPerceptionProcessWithDriver
       ros2DepthImagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
       LogTools.info("Spinning Realtime ROS 2 node");
       realtimeROS2Node.spin();
-      openCLManager = new OpenCLManager();
 
       extractCompressAndPublishThread = MissingThreadTools.newSingleThreadExecutor("CopyAndPublish", true, 1);
       // Using incoming Ouster UDP Netty events as the thread scheduler. Only called on last datagram of frame.
       ouster.setOnFrameReceived(this::onFrameReceived);
 
-
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
-      {
-         ouster.setOnFrameReceived(null);
-         ouster.destroy();
-         ThreadTools.sleepSeconds(0.5);
-         extractCompressAndPublishThread.destroy();
-      }, getClass().getSimpleName() + "Shutdown"));
+                                                      {
+                                                         ouster.setOnFrameReceived(null);
+                                                         ouster.destroy();
+                                                         ThreadTools.sleepSeconds(0.5);
+                                                         extractCompressAndPublishThread.destroy();
+                                                      }, getClass().getSimpleName() + "Shutdown"));
 
-
+      openCLManager = new OpenCLManager();
    }
 
    private void onFrameReceived()
    {
-      LogTools.warn("Depth Extraction Kernel: {}", depthExtractionKernel);
-
       if (depthExtractionKernel == null)
       {
          LogTools.info("Ouster has been initialized.");
@@ -135,17 +129,10 @@ public class StructuralPerceptionProcessWithDriver
          pngImageBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
          pngImageBytePointer = new BytePointer(pngImageBuffer);
 
-         ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
-
-         LogTools.warn("Depth Height: {} Width: {}", depthHeight, depthWidth);
-
-         openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
          rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth);
          rapidRegionsExtractor.setPatchSizeChanged(false);
 
-
-         LogTools.warn("ROS2 Property Set Group registered: {}", ros2PropertySetGroup);
-
+         ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
          ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.SPHERICAL_RAPID_REGION_PARAMETERS, rapidRegionsExtractor.getParameters());
          ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.SPHERICAL_POLYGONIZER_PARAMETERS,
                                                         rapidRegionsExtractor.getRapidPlanarRegionsCustomizer().getPolygonizerParameters());
@@ -160,12 +147,10 @@ public class StructuralPerceptionProcessWithDriver
 
    private void extractCompressAndPublish()
    {
-      ros2PropertySetGroup.update();
-
       // Important not to store as a field, as update() needs to be called each frame
       ReferenceFrame cameraFrame = sensorFrameUpdater.get();
 
-      depthExtractionKernel.runKernel(new RigidBodyTransform());
+      depthExtractionKernel.runKernel(cameraFrame.getTransformToRoot());
       // Encode as PNG which is lossless and handles single channel images.
       opencv_imgcodecs.imencode(".png", depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat(), pngImageBytePointer, compressionParameters);
 
@@ -187,21 +172,12 @@ public class StructuralPerceptionProcessWithDriver
       BytedecoImage depthImage = depthExtractionKernel.getExtractedDepthImage();
 
       FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
-
-
-
       extractFramePlanarRegionsList(depthImage, ReferenceFrame.getWorldFrame(), framePlanarRegionsList);
       PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList();
 
       LogTools.info("Extracted {} planar regions", planarRegionsList.getNumberOfPlanarRegions());
 
-//      PerceptionDebugTools.displayDepth("Depth", depthImage.getBytedecoOpenCVMat(), 1);
-
       PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper);
-
-      rapidRegionsExtractor.setProcessing(false);
-
-
    }
 
    private void extractFramePlanarRegionsList(BytedecoImage depthImage, ReferenceFrame cameraFrame, FramePlanarRegionsList framePlanarRegionsList)
