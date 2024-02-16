@@ -18,7 +18,7 @@ public class RDXSceneNode
    private final SceneNode sceneNode;
    private final RDXReferenceFrameGraphic referenceFrameGraphic;
    private final String detailsText;
-   private boolean removed;
+   private boolean removed = false;
 
    public RDXSceneNode(SceneNode sceneNode)
    {
