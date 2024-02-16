@@ -158,7 +158,7 @@ public class RDXSakeHandWidgets
 
       calibrateStatusText.renderText("Is Calibrated: %b ".formatted(isCalibrated), !isCalibrated);
       ImGui.sameLine();
-      calibrateStatusText.renderText("Needs Reset: %b ".formatted(needsReset), needsReset);
+      needResetStatusText.renderText("Needs Reset: %b ".formatted(needsReset), needsReset);
 
       double currentHandOpenAngleNotchNormal = Math.abs(SakeHandParameters.normalizeHandOpenAngle(currentHandOpenAngle));
 
