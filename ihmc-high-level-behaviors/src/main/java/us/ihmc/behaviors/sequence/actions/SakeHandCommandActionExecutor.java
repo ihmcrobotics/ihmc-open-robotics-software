@@ -79,7 +79,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       trackingCalculator.addJointData(x2KnuckleJoints.get(definition.getSide()).getQ(), goalKnuckleJointAngle);
       trackingCalculator.applyTolerance(INITIAL_SATISFACTION_TOLERANCE);
 
-      LogTools.info("x1: %.2f%s  x2: %.2f%s  Goal open angle: %.2f%s Option: %.2f%s  Error: %.2f%s"
+      LogTools.info("x1: %.2f%s  x2: %.2f%s  Goal open angle: %.2f%s Error: %.2f%s"
                           .formatted(Math.toDegrees(x1KnuckleJoints.get(definition.getSide()).getQ()),
                                      EuclidCoreMissingTools.DEGREE_SYMBOL,
                                      Math.toDegrees(x2KnuckleJoints.get(definition.getSide()).getQ()),
