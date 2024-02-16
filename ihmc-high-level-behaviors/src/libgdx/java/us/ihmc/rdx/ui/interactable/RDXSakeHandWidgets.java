@@ -11,6 +11,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
@@ -30,11 +31,12 @@ public class RDXSakeHandWidgets
    private double currentTemperature = Double.NaN;
    private double currentHandOpenAngle = Double.NaN;
    private double commandedHandOpenAngle = Double.NaN;
-   private double currentFingertipGripForceLimit = Double.NaN;
+   private double currentFingertipGripForce = Double.NaN;
    private double commandedFingertipGripForceLimit = Double.NaN;
    private final RobotSide handSide;
    private final Throttler sendThrottler = new Throttler();
    private final Timer sentCommandFreezeExpiration = new Timer();
+   private final SakeHandPresets[] presetButtons = new SakeHandPresets[] { SakeHandPresets.OPEN, SakeHandPresets.GRIP };
    private final Notification userChangedHandOpenAngle = new Notification();
    private final Notification userChangedFingertipGripForce = new Notification();
    private final Notification calibrateRequested = new Notification();
@@ -58,7 +60,7 @@ public class RDXSakeHandWidgets
             currentTemperature = sakeHandStatusMessage.getTemperature();
             currentHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getNormalizedCurrentPosition());
             commandedHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getNormalizedDesiredPosition());
-            currentFingertipGripForceLimit = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getNormalizedCurrentPosition());
+            currentFingertipGripForce = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getNormalizedCurrentTorque());
             commandedFingertipGripForceLimit = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getNormalizedTorqueLimit());
          }
       });
@@ -107,7 +109,7 @@ public class RDXSakeHandWidgets
 
    public void renderImGuiWidgets()
    {
-      for (SakeHandPresets preset : SakeHandPresets.values)
+      for (SakeHandPresets preset : presetButtons)
       {
          if (ImGui.button(labels.get(preset.getPascalCasedName())))
          {
@@ -137,12 +139,14 @@ public class RDXSakeHandWidgets
 
       ImGuiTools.renderSliderOrProgressNotch(sliderStart + (float) currentHandOpenAngleNotchNormal * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
 
-      if (handOpenAngleSlider.render(0.0, SakeHandParameters.MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES))
+      handOpenAngleSlider.setWidgetText("%.1f%s".formatted(Math.toDegrees(handOpenAngleSlider.getDoubleValue()), EuclidCoreMissingTools.DEGREE_SYMBOL));
+
+      if (handOpenAngleSlider.render(0.0, Math.toRadians(SakeHandParameters.MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES)))
       {
          userChangedHandOpenAngle.set();
       }
 
-      double currentForceNotchNormal = Math.abs(SakeHandParameters.normalizeFingertipGripForceLimit(currentFingertipGripForceLimit));
+      double currentForceNotchNormal = Math.abs(SakeHandParameters.normalizeFingertipGripForceLimit(currentFingertipGripForce));
       double moderateForceNotchNormal = SakeHandParameters.normalizeFingertipGripForceLimit(SakeHandParameters.FINGERTIP_GRIP_FORCE_MODERATE_THRESHOLD);
       double highForceNotchNormal = SakeHandParameters.normalizeFingertipGripForceLimit(SakeHandParameters.FINGERTIP_GRIP_FORCE_HIGH_THRESHOLD);
 
@@ -168,7 +172,7 @@ public class RDXSakeHandWidgets
          styled = true;
       }
 
-      fingertipGripForceSlider.setWidgetText("%.1f / %.1f N".formatted(currentFingertipGripForceLimit, fingertipGripForceSlider.getDoubleValue()));
+      fingertipGripForceSlider.setWidgetText("%+.1f / %.1f N".formatted(currentFingertipGripForce, fingertipGripForceSlider.getDoubleValue()));
 
       if (fingertipGripForceSlider.render(0.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT))
       {

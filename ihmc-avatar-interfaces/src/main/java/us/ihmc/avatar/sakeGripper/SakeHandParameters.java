@@ -66,16 +66,16 @@ public class SakeHandParameters
 
    public static double knuckleJointAngleToHandOpenAngle(double knuckleJointAngle)
    {
-      double jointRange = OPEN_KNUCKLE_JOINT_ANGLE_DEGREES - CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES;
-      double normalizedHandOpenAngle = (knuckleJointAngle - CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES) / jointRange;
+      double jointRange = Math.toRadians(OPEN_KNUCKLE_JOINT_ANGLE_DEGREES) - Math.toRadians(CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES);
+      double normalizedHandOpenAngle = (knuckleJointAngle - Math.toRadians(CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES)) / jointRange;
       return denormalizeHandOpenAngle(normalizedHandOpenAngle);
    }
 
    public static double handOpenAngleToKnuckleJointAngle(double handOpenAngle)
    {
       double normalizedHandOpenAngle = normalizeHandOpenAngle(handOpenAngle);
-      double jointRange = OPEN_KNUCKLE_JOINT_ANGLE_DEGREES - CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES;
-      return (normalizedHandOpenAngle * jointRange) + CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES;
+      double jointRange = Math.toRadians(OPEN_KNUCKLE_JOINT_ANGLE_DEGREES) - Math.toRadians(CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES);
+      return (normalizedHandOpenAngle * jointRange) + Math.toRadians(CLOSED_KNUCKLE_JOINT_ANGLE_DEGREES);
    }
 
    public static void resetDesiredCommandMessage(SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage)
