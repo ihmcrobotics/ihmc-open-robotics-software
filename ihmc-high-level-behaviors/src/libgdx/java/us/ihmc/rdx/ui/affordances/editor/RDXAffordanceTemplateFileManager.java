@@ -159,9 +159,10 @@ public class RDXAffordanceTemplateFileManager
                         configurationActionNode.put("type", SakeHandCommandActionDefinition.class.getSimpleName());
                         configurationActionNode.put("description", "Pre-grasp " + side.getPascalCaseName() + " Hand Configuration");
                         configurationActionNode.put("side", side.getLowerCaseName());
-                        configurationActionNode.put("configuration", preGraspHandConfigurations.get(side).get(i).toString());
-                        configurationActionNode.put("handOpenAngle", SakeHandPreset.valueOf(preGraspHandConfigurations.get(side).get(i)).getHandOpenAngle());
-                        configurationActionNode.put("maxTorque", SakeHandPreset.valueOf(preGraspHandConfigurations.get(side).get(i)).getFingertipGripForceLimit());
+                        configurationActionNode.put("handOpenAngleDegrees",
+                                                    Math.toDegrees(SakeHandPreset.valueOf(preGraspHandConfigurations.get(side).get(i)).getHandOpenAngle()));
+                        configurationActionNode.put("fingertipGripForceLimit",
+                                                    SakeHandPreset.valueOf(preGraspHandConfigurations.get(side).get(i)).getFingertipGripForceLimit());
                         configurationActionNode.put("executeWithNextAction", side != RobotSide.RIGHT && bothPosesAreSet);
                      }
                   }
@@ -212,9 +213,10 @@ public class RDXAffordanceTemplateFileManager
                      configurationActionNode.put("type", SakeHandCommandActionDefinition.class.getSimpleName());
                      configurationActionNode.put("description", "Grasp " + side.getPascalCaseName() + " Hand Configuration");
                      configurationActionNode.put("side", side.getLowerCaseName());
-                     configurationActionNode.put("configuration", graspFrame.getHandConfiguration(side).toString());
-                     configurationActionNode.put("position", SakeHandPreset.valueOf(graspFrame.getHandConfiguration(side)).getHandOpenAngle());
-                     configurationActionNode.put("torque", SakeHandPreset.valueOf(graspFrame.getHandConfiguration(side)).getFingertipGripForceLimit());
+                     configurationActionNode.put("handOpenAngleDegrees",
+                                                 Math.toDegrees(SakeHandPreset.valueOf(graspFrame.getHandConfiguration(side)).getHandOpenAngle()));
+                     configurationActionNode.put("fingertipGripForceLimit",
+                                                 SakeHandPreset.valueOf(graspFrame.getHandConfiguration(side)).getFingertipGripForceLimit());
                      configurationActionNode.put("executeWithNextAction", side != RobotSide.RIGHT && bothPosesAreSet);
 
                      dataTrajectories = new double[16];
@@ -284,9 +286,10 @@ public class RDXAffordanceTemplateFileManager
                         configurationActionNode.put("type", SakeHandCommandActionDefinition.class.getSimpleName());
                         configurationActionNode.put("description", "Post-grasp " + side.getPascalCaseName() + " Hand Configuration");
                         configurationActionNode.put("side", side.getLowerCaseName());
-                        configurationActionNode.put("configuration", postGraspHandConfigurations.get(side).get(i).toString());
-                        configurationActionNode.put("handOpenAngle", SakeHandPreset.valueOf(postGraspHandConfigurations.get(side).get(i)).getHandOpenAngle());
-                        configurationActionNode.put("maxTorque", SakeHandPreset.valueOf(postGraspHandConfigurations.get(side).get(i)).getFingertipGripForceLimit());
+                        configurationActionNode.put("handOpenAngleDegrees",
+                                                    Math.toDegrees(SakeHandPreset.valueOf(postGraspHandConfigurations.get(side).get(i)).getHandOpenAngle()));
+                        configurationActionNode.put("fingertipGripForceLimit",
+                                                    SakeHandPreset.valueOf(postGraspHandConfigurations.get(side).get(i)).getFingertipGripForceLimit());
                         configurationActionNode.put("executeWithNextAction", side != RobotSide.RIGHT && bothPosesAreSet);
                      }
                   }
