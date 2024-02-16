@@ -373,7 +373,7 @@ public class RDXAffordanceTemplateEditorUI
                }
                case GRASP ->
                {
-                  if (preGraspFrames.getNumberOfFrames() > 0)
+                  if (preGraspFrames.getNumberOfFrames(activeSide) > 0)
                   {
                      status.setActiveMenu(RDXActiveAffordanceMenu.PRE_GRASP);
                      preGraspFrames.setSelectedIndexToSize();
@@ -391,7 +391,7 @@ public class RDXAffordanceTemplateEditorUI
                         status.setActiveMenu(RDXActiveAffordanceMenu.GRASP);
                         graspFrame.selectFrame();
                      }
-                     else if (preGraspFrames.getNumberOfFrames() > 0)
+                     else if (preGraspFrames.getNumberOfFrames(activeSide) > 0)
                      {
                         status.setActiveMenu(RDXActiveAffordanceMenu.PRE_GRASP);
                         preGraspFrames.setSelectedIndexToSize();
@@ -421,7 +421,7 @@ public class RDXAffordanceTemplateEditorUI
                            status.setActiveMenu(RDXActiveAffordanceMenu.GRASP);
                            graspFrame.selectFrame();
                         }
-                        else if (postGraspFrames.getNumberOfFrames() > 0)
+                        else if (postGraspFrames.getNumberOfFrames(activeSide) > 0)
                         {
                            status.setActiveMenu(RDXActiveAffordanceMenu.POST_GRASP);
                            postGraspFrames.resetSelectedIndex();
@@ -431,7 +431,7 @@ public class RDXAffordanceTemplateEditorUI
                   }
                   case GRASP ->
                   {
-                     if (postGraspFrames.getNumberOfFrames() > 0)
+                     if (postGraspFrames.getNumberOfFrames(activeSide) > 0)
                      {
                         status.setActiveMenu(RDXActiveAffordanceMenu.POST_GRASP);
                         postGraspFrames.resetSelectedIndex();
@@ -474,6 +474,15 @@ public class RDXAffordanceTemplateEditorUI
          {
             reset();
             fileManager.load();
+            for (RobotSide side : handPoses.keySet())
+            {
+               if (preGraspFrames.getNumberOfFrames(side) == 0 && !graspFrame.isSet(side))
+               {
+                  interactableHands.get(side).removeRenderables(panel3D);
+                  interactableHands.remove(side);
+                  handPoses.remove(side);
+               }
+            }
          }
       }
       else
