@@ -41,7 +41,7 @@ public class RDXSakeHandWidgets
    private final RobotSide handSide;
    private final Throttler sendThrottler = new Throttler();
    private final Timer sentCommandFreezeExpiration = new Timer();
-   private final SakeHandPreset[] presetButtons = new SakeHandPreset[] {SakeHandPreset.OPEN, SakeHandPreset.CLOSE};
+   private final SakeHandPreset[] presetButtons = new SakeHandPreset[] {SakeHandPreset.OPEN, SakeHandPreset.CLOSE, SakeHandPreset.GRIP};
    private final Notification userChangedHandOpenAngle = new Notification();
    private final Notification userChangedFingertipGripForce = new Notification();
    private final Notification calibrateRequested = new Notification();
@@ -162,7 +162,7 @@ public class RDXSakeHandWidgets
 
       double currentHandOpenAngleNotchNormal = Math.abs(SakeHandParameters.normalizeHandOpenAngle(currentHandOpenAngle));
 
-      float sliderStart = ImGuiTools.calcTextSizeX(handOpenAngleSliderLabel) + ImGui.getStyle().getItemSpacingX();
+      float sliderStart = widgetAligner.getCursorMaxX() + ImGui.getStyle().getItemSpacingX();
       float sliderEnd = ImGui.getColumnWidth();
       float sliderWidth = sliderEnd - sliderStart;
 
@@ -180,7 +180,7 @@ public class RDXSakeHandWidgets
       double moderateForceNotchNormal = SakeHandParameters.normalizeFingertipGripForceLimit(SakeHandParameters.FINGERTIP_GRIP_FORCE_MODERATE_THRESHOLD);
       double highForceNotchNormal = SakeHandParameters.normalizeFingertipGripForceLimit(SakeHandParameters.FINGERTIP_GRIP_FORCE_HIGH_THRESHOLD);
 
-      sliderStart = ImGuiTools.calcTextSizeX(fingertipGripForceSliderLabel) + ImGui.getStyle().getItemSpacingX();
+      sliderStart = widgetAligner.getCursorMaxX() + ImGui.getStyle().getItemSpacingX();
       sliderEnd = ImGui.getColumnWidth();
       sliderWidth = sliderEnd - sliderStart;
 

@@ -7,8 +7,10 @@ public enum SakeHandPreset
 {
    /** Open the fingers to 105 degrees. */
    OPEN(105.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
+   /** Close almost all the way to achieve no torque when nothings being grabbed. */
+   CLOSE(1.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
    /** Close with specified torque */
-   CLOSE(0.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
+   GRIP(0.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
    /** Fully opens fingers */
    FULLY_OPEN(210.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
    /** Close with maximum torque */
@@ -44,6 +46,7 @@ public enum SakeHandPreset
       {
          case OPEN -> "Open";
          case CLOSE -> "Close";
+         case GRIP -> "Grip";
          case FULLY_OPEN -> "Fully Open";
          case PARALLEL_FINGERS -> "Parallel Fingers";
          case GRIP_HARD -> "Grip Hard";
