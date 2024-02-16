@@ -58,8 +58,10 @@ public class RDXSakeHandWidgets
 
       handOpenAngleSliderLabel = "Hand Open Angle";
       handOpenAngleSlider = new ImGuiSliderDouble(handOpenAngleSliderLabel, "", Double.NaN);
+      handOpenAngleSlider.addWidgetAligner(widgetAligner);
       fingertipGripForceSliderLabel = "Fingertip Grip Force Limit";
       fingertipGripForceSlider = new ImGuiSliderDouble(fingertipGripForceSliderLabel, "%.1f N", Double.NaN);
+      fingertipGripForceSlider.addWidgetAligner(widgetAligner);
 
       communicationHelper.subscribeViaVolatileCallback(ROS2Tools::getHandSakeStatusTopic, sakeHandStatusMessage ->
       {
@@ -218,8 +220,7 @@ public class RDXSakeHandWidgets
       else
          ImGui.pushStyleColor(ImGuiCol.PlotHistogram, ImGuiTools.LIGHT_GRAY);
 
-      ImGui.text("Temperature");
-      ImGui.sameLine();
+      widgetAligner.text("Temperature");
       ImGui.progressBar((float) (currentTemperature / SakeHandParameters.DYNAMIXEL_FAILURE_TEMPERATURE_CELCIUS),
                         ImGui.getColumnWidth(),
                         ImGui.getFrameHeight(),
