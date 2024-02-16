@@ -28,7 +28,7 @@ public class RDXSakeHandWidgets
    private final CommunicationHelper communicationHelper;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final String handOpenAngleSliderLabel;
-   private final ImGuiSliderDouble handOpenAngleSlider;
+   private final ImGuiSliderDouble handOpenAngleDegreesSlider;
    private final String fingertipGripForceSliderLabel;
    private final ImGuiSliderDouble fingertipGripForceSlider;
    private boolean isCalibrated = false;
@@ -57,8 +57,8 @@ public class RDXSakeHandWidgets
       this.handSide = handSide;
 
       handOpenAngleSliderLabel = "Hand Open Angle";
-      handOpenAngleSlider = new ImGuiSliderDouble(handOpenAngleSliderLabel, "", Double.NaN);
-      handOpenAngleSlider.addWidgetAligner(widgetAligner);
+      handOpenAngleDegreesSlider = new ImGuiSliderDouble(handOpenAngleSliderLabel, "", Double.NaN);
+      handOpenAngleDegreesSlider.addWidgetAligner(widgetAligner);
       fingertipGripForceSliderLabel = "Fingertip Grip Force Limit";
       fingertipGripForceSlider = new ImGuiSliderDouble(fingertipGripForceSliderLabel, "%.1f N", Double.NaN);
       fingertipGripForceSlider.addWidgetAligner(widgetAligner);
@@ -81,13 +81,13 @@ public class RDXSakeHandWidgets
    {
       if (!sentCommandFreezeExpiration.isRunning(FREEZE_DURATION))
       {
-         handOpenAngleSlider.setDoubleValue(commandedHandOpenAngle);
+         handOpenAngleDegreesSlider.setDoubleValue(Math.toDegrees(commandedHandOpenAngle));
          fingertipGripForceSlider.setDoubleValue(commandedFingertipGripForceLimit);
       }
 
       if (sendThrottler.run(SEND_PERIOD))
       {
-         boolean sendAngle = userChangedHandOpenAngle.poll() && !Double.isNaN(handOpenAngleSlider.getDoubleValue());
+         boolean sendAngle = userChangedHandOpenAngle.poll() && !Double.isNaN(handOpenAngleDegreesSlider.getDoubleValue());
          boolean sendForce = userChangedFingertipGripForce.poll() && !Double.isNaN(fingertipGripForceSlider.getDoubleValue());
          boolean sendCalibrate = calibrateRequested.poll();
          boolean sendResetErrors = resetErrorsRequested.poll();
@@ -97,9 +97,10 @@ public class RDXSakeHandWidgets
 
          if (sendAngle)
          {
-            LogTools.info("Commanding hand open angle %.1f%s".formatted(Math.toDegrees(handOpenAngleSlider.getDoubleValue()),
+            LogTools.info("Commanding hand open angle %.1f%s".formatted(handOpenAngleDegreesSlider.getDoubleValue(),
                                                                         EuclidCoreMissingTools.DEGREE_SYMBOL));
-            sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(SakeHandParameters.normalizeHandOpenAngle(handOpenAngleSlider.getDoubleValue()));
+            sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(
+                  SakeHandParameters.normalizeHandOpenAngle(Math.toRadians(handOpenAngleDegreesSlider.getDoubleValue())));
          }
 
          if (sendForce)
@@ -134,7 +135,7 @@ public class RDXSakeHandWidgets
       {
          if (ImGui.button(labels.get(preset.getPascalCasedName())))
          {
-            handOpenAngleSlider.setDoubleValue(preset.getHandOpenAngle());
+            handOpenAngleDegreesSlider.setDoubleValue(Math.toDegrees(preset.getHandOpenAngle()));
             fingertipGripForceSlider.setDoubleValue(preset.getFingertipGripForceLimit());
             userChangedHandOpenAngle.set();
             userChangedFingertipGripForce.set();
@@ -165,9 +166,9 @@ public class RDXSakeHandWidgets
 
       ImGuiTools.renderSliderOrProgressNotch(sliderStart + (float) currentHandOpenAngleNotchNormal * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
 
-      handOpenAngleSlider.setWidgetText("%.1f%s".formatted(Math.toDegrees(handOpenAngleSlider.getDoubleValue()), EuclidCoreMissingTools.DEGREE_SYMBOL));
+      handOpenAngleDegreesSlider.setWidgetText("%.1f%s".formatted(handOpenAngleDegreesSlider.getDoubleValue(), EuclidCoreMissingTools.DEGREE_SYMBOL));
 
-      if (handOpenAngleSlider.render(0.0, Math.toRadians(SakeHandParameters.MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES)))
+      if (handOpenAngleDegreesSlider.render(0.0, SakeHandParameters.MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES))
       {
          userChangedHandOpenAngle.set();
          sentCommandFreezeExpiration.reset();
