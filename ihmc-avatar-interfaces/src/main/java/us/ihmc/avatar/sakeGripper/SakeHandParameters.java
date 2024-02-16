@@ -9,7 +9,7 @@ public class SakeHandParameters
     * This corresponds to the normalized value of 1.0.
     */
    public static final double MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES = 210.0;
-   /** Joint angle of a finger is 102 degrees when fully open */
+   /** Joint angle of a knuckle when fully open */
    public static final double OPEN_KNUCKLE_JOINT_ANGLE_DEGREES = 105.0;
    /** Sake hand can produce 29 N of grip force between the fingertips */
    public static final double FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT = 29.0;
