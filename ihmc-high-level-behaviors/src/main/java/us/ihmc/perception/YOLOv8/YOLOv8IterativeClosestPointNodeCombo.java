@@ -124,7 +124,7 @@ public class YOLOv8IterativeClosestPointNodeCombo
       if (ranICP)
          detectionFilter.registerDetection();
       detectionFilter.update();
-      node.setCurrentlyDetected(detectionFilter.isDetected() && ranICP);
+      node.setCurrentlyDetected(detectionFilter.isStableDetectionResult() && ranICP);
       node.setMovementDistanceThreshold(distanceThreshold);
       node.setDetectionFrequency(detectionFrequencyCalculator.anyPingsYet() ? detectionFrequencyCalculator.getFrequency() : 0.0);
 
@@ -142,7 +142,7 @@ public class YOLOv8IterativeClosestPointNodeCombo
       distanceThreshold += node.getBaseDistanceThreshold();
       ranICP = false;
 
-      if (detectionFilter.hasEnoughSamples() && !detectionFilter.isDetected())
+      if (detectionFilter.hasEnoughSamples() && !detectionFilter.isStableDetectionResult())
       {
          System.out.println("Destroying in destroy()");
          System.out.flush();

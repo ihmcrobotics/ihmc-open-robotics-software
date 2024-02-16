@@ -119,7 +119,7 @@ public class YOLOv8IterativeClosestPointManager
 
                if (filter.hasEnoughSamples())
                {
-                  if (filter.isDetected())
+                  if (filter.isStableDetectionResult())
                   {
                      YOLOv8IterativeClosestPointNodeCombo newYOLOICPCombo = new YOLOv8IterativeClosestPointNodeCombo(candidateDetection,
                                                                                                                      filter,
