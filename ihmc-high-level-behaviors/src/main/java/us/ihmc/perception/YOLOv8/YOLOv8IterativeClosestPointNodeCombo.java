@@ -157,11 +157,11 @@ public class YOLOv8IterativeClosestPointNodeCombo
 
    public void runICP(RawImage depthImage, RawImage mask)
    {
-      depthImage.get();
-      mask.get();
-
       if (!selfDestruct)
       {
+         depthImage.get();
+         mask.get();
+
          if (node.isRunningICP())
          {
             // decrease distance threshold if it has been increased beyond default threshold
@@ -186,10 +186,10 @@ public class YOLOv8IterativeClosestPointNodeCombo
 
          ranICP = true;
          detectionFrequencyCalculator.ping();
-      }
 
-      depthImage.release();
-      mask.release();
+         depthImage.release();
+         mask.release();
+      }
    }
 
    public void setDetection(YOLOv8Detection detection)
