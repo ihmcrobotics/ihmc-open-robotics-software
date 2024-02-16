@@ -60,7 +60,7 @@ public class RDXHandConfigurationManager
 
    public void renderImGuiWidgets()
    {
-      for (RobotSide side : RobotSide.values)
+      for (RobotSide side : sakeHandWidgets.sides())
       {
          ImGui.image(handIcons.get(side).getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
          ImGui.sameLine();
