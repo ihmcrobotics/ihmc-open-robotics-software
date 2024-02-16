@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiTableColumnFlags;
-import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.SceneGraphMessage;
@@ -13,11 +12,17 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
-import us.ihmc.rdx.imgui.*;
+import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiTreeRenderer;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.perception.sceneGraph.builder.RDXPredefinedRigidBodySceneNodeBuilder;
 import us.ihmc.rdx.perception.sceneGraph.builder.RDXPrimitiveRigidBodySceneNodeBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -37,7 +42,7 @@ public class RDXSceneGraphUI
 {
    private final ROS2SceneGraph sceneGraph;
    private final RDX3DPanel panel3D;
-   private final RDXPanel panel = new RDXPanel("Perception Scene Graph UI", this::renderImGuiWidgets, false, true);
+   private final RDXPanel panel = new RDXPanel("Scene Graph", this::renderImGuiWidgets, false, true);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
    private final ImBoolean showGraphics = new ImBoolean(true);
@@ -70,19 +75,11 @@ public class RDXSceneGraphUI
       predefinedPrimitiveRigidBodySceneNodeBuilder = new RDXPrimitiveRigidBodySceneNodeBuilder(sceneGraph);
    }
 
-   public void addUISceneNode(RDXSceneNode uiSceneNode)
+   private void addUISceneNode(RDXSceneNode uiSceneNode)
    {
       uiSceneNodes.put(uiSceneNode.getSceneNode(), uiSceneNode);
 
       panel3D.getNotificationManager().pushNotification("Added SceneNode [" + uiSceneNode.getSceneNode().getName() + "]");
-   }
-
-   public void removeUISceneNode(SceneNode correspondingSceneNode)
-   {
-      if (uiSceneNodes.remove(correspondingSceneNode) != null)
-      {
-         panel3D.getNotificationManager().pushNotification("Removed SceneNode [" + correspondingSceneNode.getName() + "]");
-      }
    }
 
    public void update()
@@ -93,11 +90,22 @@ public class RDXSceneGraphUI
 
       for (SceneNode sceneNode : uiSceneNodes.keySet())
       {
-         // If there exists a UI scene node which doesn't exist in the scene graph,
-         // remove it from the UI scene nodes
-         if (!sceneGraph.getSceneNodesByID().contains(sceneNode))
+         RDXSceneNode uiNode = uiSceneNodes.get(sceneNode);
+
+         if (uiNode.isRemoved())
          {
-            removeUISceneNode(sceneNode);
+            // Destroy and remove UI scene node
+            uiNode.destroy();
+            uiSceneNodes.remove(sceneNode);
+
+            // Remove the scene node from the scene graph
+            sceneGraph.modifyTree(modificationQueue -> {
+               modificationQueue.accept(new SceneGraphClearSubtree(sceneNode));
+               modificationQueue.accept(new SceneGraphNodeRemoval(sceneNode, sceneGraph));
+            });
+
+            // Send a notification
+            panel3D.getNotificationManager().pushNotification("Removed SceneNode [" + sceneNode.getName() + "]");
          }
       }
    }
