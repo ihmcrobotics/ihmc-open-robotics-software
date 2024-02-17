@@ -399,7 +399,7 @@ public class ImGuiTools
       int fontSize = ImGui.getFontSize();
       float itemSpacingX = ImGui.getStyle().getItemSpacingX();
       float lineThickness = fontSize * 0.2f;
-      float lineY = ImGui.getTextLineHeight() / 2.0f;
+      float lineY = ImGui.getTextLineHeight() / 2.0f + (lineThickness / 2.0f);
       float initialLineWidth = fontSize * 1.5f;
       int separatorColor = ImGui.getColorU32(ImGuiCol.Separator);
       ImGui.getWindowDrawList().addLine(cursorScreenPosX, cursorScreenPosY + lineY,
