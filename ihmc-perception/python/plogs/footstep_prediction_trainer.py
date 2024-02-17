@@ -15,7 +15,7 @@ import os.path
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from plotting.height_map_analyzer import *
+from plotting.height_map_tools import *
 from footstep_dataset_loader import visualize_plan
 from hdf5_reader import *
 
@@ -379,7 +379,13 @@ def load_validate(val_dataset, batch_size, model_path):
     input_size = val_dataset[0][1].shape[0]
     output_size = val_dataset[0][2].shape[0]
     model = FootstepPredictor(input_size, output_size)
-    model.load_state_dict(torch.load(model_path + 'footstep_predictor.pt'))
+
+    # those that end in .pt
+    model_files = sorted([name for name in os.listdir(model_path) if name.endswith('.pt')])
+
+    print("Loading Model: ", model_files[-1])
+
+    model.load_state_dict(torch.load(model_path + model_files[-1]))
     model.eval()
     model.to(device)
 
@@ -447,7 +453,7 @@ def load_dataset(validation_split):
     files = [file for file in files if any(label in file for label in labels)]
     
 
-    # files = files[:1]
+    files = files[:3]
 
     
     datasets = []
@@ -489,7 +495,7 @@ if __name__ == "__main__":
     # load dataset
     train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
-    train = True
+    train = False
     visualize_raw = False
 
     if visualize_raw:

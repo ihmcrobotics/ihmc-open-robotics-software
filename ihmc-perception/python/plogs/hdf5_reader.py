@@ -317,4 +317,7 @@ def show_height_map(height_map, delay):
     # compute scale factor
     cv2.imshow("Height Map", height_map_display)
     code = cv2.waitKeyEx(delay)
+
+    if code == 113 or code == 1048689:
+        exit()
     

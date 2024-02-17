@@ -1,7 +1,7 @@
 import json
 import os
 
-from terrain_map_analyzer import *
+from plogs.terrain_map_analyzer import *
 
 def load_request_packet(log_file, debug=False):
     

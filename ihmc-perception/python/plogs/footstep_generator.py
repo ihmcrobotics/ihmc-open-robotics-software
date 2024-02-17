@@ -1,5 +1,6 @@
 from footstep_dataset_loader import visualize_plan
 from hdf5_reader import *
+from terrain_map_analyzer import plot_and_compute_stats
 
 def generate_footstep_sequences(grid_size):
     sequences = []
@@ -41,7 +42,8 @@ def load_height_maps(data):
 
 if __name__ == "__main__":
     # Load the data
-    data = h5py.File("/home/bmishra/.ihmc/logs/perception/horizontal_stairs.hdf5", "r")
+    home_path = os.path.expanduser("~")
+    data = h5py.File(home_path + "/Downloads/HeightMap_Datasets/horizontal_stairs.hdf5", "r")
 
     height_maps = load_height_maps(data)
 
@@ -50,6 +52,8 @@ if __name__ == "__main__":
     for index, height_map in enumerate(height_maps):
         print("Plotting Height Map: ", index, height_map.shape) 
 
-        show_height_map(height_map, 10)
+        # show_height_map(height_map, delay=0)
 
-    
+        
+
+        plot_and_compute_stats(height_map, debug=True, display=True)

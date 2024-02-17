@@ -9,7 +9,7 @@ import os.path
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from plotting.height_map_analyzer import *
+from plotting.height_map_tools import *
 from hdf5_reader import *
 
 def plan_view_main(data):
@@ -74,7 +74,7 @@ def visualize_plan(height_map, contact_map, footstep_plan_poses, start_pose, goa
     cv2.namedWindow(label, cv2.WINDOW_NORMAL)
     cv2.resizeWindow(label, 1000, 1000)
     cv2.imshow(label, stacked_image)
-    
+
     code = cv2.waitKeyEx(0)
     print("Code:", code)
 
@@ -83,8 +83,6 @@ def visualize_plan(height_map, contact_map, footstep_plan_poses, start_pose, goa
         exit()
 
     return code
-
-cv2.destroyAllWindows()
 
 def test_visualize(height_map_display, scale=1):
     
