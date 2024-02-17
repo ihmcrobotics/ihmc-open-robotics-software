@@ -31,8 +31,6 @@ public interface InertialEstimationParameters
    public abstract double getArmMeasurementCovariance();
    public abstract double getSpineMeasurementCovariance();
 
-   public abstract double getMeasurementCovarianceOffDiagonalByString(String body1, String body2);
-
    public abstract double getNormalizedInnovationThreshold();
 
    /** CONSTRAINED_KF */
