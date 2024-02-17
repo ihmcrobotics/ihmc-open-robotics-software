@@ -578,7 +578,29 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
             MatrixMissingTools.setMatrixDiagonal(indices, spineMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
          else
             LogTools.info("Joint " + joint.getName() + " not found for measurement covariance");
+
+         // Loop through joint indices again to set off-diagonals (ONLY THE LOWER HALF!)
+         for (int k = 0; k < actualModelJoints.size(); ++k)
+         {
+            if (j == k)  // Same body -- skip
+               continue;
+            else
+            {
+               JointReadOnly otherJoint = actualModelJoints.get(k);
+               int[] otherIndices = jointIndexHandler.getJointIndices(otherJoint);
+               for (int l = 0; l < indices.length; ++l)
+               {
+                  for (int m = 0; m < otherIndices.length; ++m)
+                  {
+                     filter.getMeasurementCovariance().set(indices[l], otherIndices[m], parameters.getMeasurementCovarianceOffDiagonalByString(joint.getName(), otherJoint.getName()));
+                  }
+               }
+            }
+         }
       }
+
+      // We use EJML to fill the upper half
+      CommonOps_DDRM.symmLowerToFull(filter.getMeasurementCovariance());
    }
 
    private void updateAccelerationCalculationFilterAlphas()
@@ -796,18 +818,33 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       return group;
    }
 
-   private String getNameForRootJoint(int i)
+   private String getNameForRootJoint(int i, JointStateType type)
    {
-      return switch (i)
+      if (type == JointStateType.CONFIGURATION)
+         return switch (i)
+         {
+            case 0 -> "qX";
+            case 1 -> "qY";
+            case 2 -> "qZ";
+            case 3 -> "qS";
+            case 4 -> "x";
+            case 5 -> "y";
+            case 6 -> "z";
+            default -> throw new RuntimeException("Unhandled case: " + i);
+         };
+      else
       {
-         case 0 -> "wX";
-         case 1 -> "wY";
-         case 2 -> "wZ";
-         case 3 -> "x";
-         case 4 -> "y";
-         case 5 -> "z";
-         default -> throw new RuntimeException("Unhandled case: " + i);
-      };
+         return switch (i)
+         {
+            case 0 -> "wX";
+            case 1 -> "wY";
+            case 2 -> "wZ";
+            case 3 -> "x";
+            case 4 -> "y";
+            case 5 -> "z";
+            default -> throw new RuntimeException("Unhandled case: " + i);
+         };
+      }
    }
 
    private String[] getRowNamesForJoints(int nDoFs)
@@ -819,7 +856,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          if (joint.getDegreesOfFreedom() > 1)
          {
             for (int i = 0; i < joint.getDegreesOfFreedom(); i++)
-               rowNames[index + i] = joint.getName() + "_" + getNameForRootJoint(i);
+               rowNames[index + i] = joint.getName() + "_" + getNameForRootJoint(i, JointStateType.VELOCITY);
          }
          else
          {
