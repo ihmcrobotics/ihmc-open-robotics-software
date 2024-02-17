@@ -378,6 +378,17 @@ public class ImGuiTools
    }
 
    /**
+    * A separator with a label in it of given font.
+    * This is in the newer versions of ImGui.
+    */
+   public static void separatorText(String text, ImFont font)
+   {
+      ImGui.pushFont(font);
+      ImGuiTools.separatorText(text);
+      ImGui.popFont();
+   }
+
+   /**
     * A separator with a label in it.
     * This is in the newer versions of ImGui.
     */
