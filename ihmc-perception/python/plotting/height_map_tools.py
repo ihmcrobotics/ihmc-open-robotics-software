@@ -89,6 +89,9 @@ def compute_terrain_cost_map(height_map):
     # convert height map to float32
     height_map = height_map.astype(np.float32)
 
+    # perform bilateral filtering to smooth the height map
+    height_map = cv2.bilateralFilter(height_map, 5, 75, 75)
+
     # for each cell compute the dot product of the normal vector with the Z axis. Use sobel filter to compute the normal vector
     # use sobel filter to compute the normal vector
     sobel_x = cv2.Sobel(height_map, cv2.CV_32F, 1, 0, ksize=3)
@@ -107,7 +110,7 @@ def compute_terrain_cost_map(height_map):
     cost_map = np.abs(normal_vector[:, :, 2])
 
     # threshold the cost map by setting everything below 0.9 to 0
-    cost_map[cost_map < 0.9] = 0
+    cost_map[cost_map < 0.999] = 0
 
     # set the values to be between 0 and 255
     cost_map = cost_map / np.max(cost_map) * 255
@@ -121,7 +124,7 @@ def compute_contact_map(terrain_cost_map):
     # the possible distance metrics include cv2.DIST_L1, cv2.DIST_L2, cv2.DIST_C, 
     # cv2.DIST_L12, cv2.DIST_FAIR, cv2.DIST_WELSCH, and cv2.DIST_HUBER
     contact_map = np.zeros((terrain_cost_map.shape[0], terrain_cost_map.shape[1]), dtype=np.float32)
-    contact_map = cv2.distanceTransform(terrain_cost_map.astype(np.uint8), cv2.DIST_L2, 3)  
+    contact_map = cv2.distanceTransform(terrain_cost_map.astype(np.uint8), cv2.DIST_L2, 5)  
     contact_map = contact_map / np.max(contact_map) * 255
     return contact_map
     
@@ -140,6 +143,9 @@ def plot_terrain_maps(height_map, terrain_cost, contact_map):
 
     # create colored image for plotting
     height_map_image = np.stack([height_map, height_map, height_map], axis=2).astype(np.uint8)
+    
+    # brighten the height map for visualization
+    # height_map_image = cv2.convertScaleAbs(height_map_image, alpha=255, beta=0)
 
     # convert to opencv colored image
     contact_map = np.stack([contact_map, contact_map, contact_map], axis=2).astype(np.uint8)

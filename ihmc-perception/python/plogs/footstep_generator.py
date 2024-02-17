@@ -34,7 +34,9 @@ def run_footstep_generator(height_map):
 
 def load_height_maps(data):
     height_maps = []
-    for i in range(len(data.keys())):
+    total_height_maps = len(data.keys())
+    total_height_maps = 1000
+    for i in range(30, 30 + total_height_maps):
         height_map = load_raw_height_maps(data, "matrix_" + str(i))
         height_maps.append(height_map)
     return height_maps

@@ -34,7 +34,7 @@ def plan_view_main(data):
     launch_plan_viewer(footstep_plan_positions, footstep_plan_orientations, 
                        start_positions, start_orientations, goal_positions, goal_orientations, sensor_positions, sensor_orientations, n_steps=4)
 
-def visualize_plan(height_map, contact_map, footstep_plan_poses, start_pose, goal_pose, start_side=0.0, label="Footstep_Plan"):
+def visualize_plan(height_map, contact_map, terrain_cost, footstep_plan_poses, start_pose, goal_pose, start_side=0.0, label="Footstep_Plan"):
     
     height_map = cv2.convertScaleAbs(height_map, alpha=(255.0/65535.0))
     height_map = np.minimum(height_map * 10, 255)
@@ -74,6 +74,8 @@ def visualize_plan(height_map, contact_map, footstep_plan_poses, start_pose, goa
     cv2.namedWindow(label, cv2.WINDOW_NORMAL)
     cv2.resizeWindow(label, 1000, 1000)
     cv2.imshow(label, stacked_image)
+
+    # plot_terrain_maps(height_map, terrain_cost, contact_map)
 
     code = cv2.waitKeyEx(0)
     print("Code:", code)

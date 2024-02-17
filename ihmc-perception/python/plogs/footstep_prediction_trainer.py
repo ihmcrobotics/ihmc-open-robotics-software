@@ -170,6 +170,7 @@ class FootstepDataset(Dataset):
         # Inputs
         # --------- Image Inputs (float54)
         height_map_input = torch.Tensor(self.height_maps[index]).unsqueeze(0).to(device)
+        terrian_cost_input = torch.Tensor(terrain_cost_map).unsqueeze(0).to(device)
         contact_map_input = torch.Tensor(contact_map).unsqueeze(0).to(device)
         
         # --------- Pose Inputs (X, Y, Yaw) with float 64
@@ -182,7 +183,7 @@ class FootstepDataset(Dataset):
         footstep_plan_poses = torch.Tensor(footstep_plan_poses).to(device)
         linear_output = torch.flatten(footstep_plan_poses)
 
-        return height_map_input, linear_input, linear_output, contact_map_input
+        return height_map_input, linear_input, linear_output, contact_map_input, terrian_cost_input
         
     def __len__(self) -> int:
         return len(self.height_maps)
@@ -230,14 +231,19 @@ class FootstepPredictor(Module):
         self.maxpool2d_22 = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
         self.maxpool2d_44 = torch.nn.MaxPool2d(kernel_size=4, stride=4, padding=0)
 
+        self.hfc0 = torch.nn.Linear(96 * 12 * 12, 2048)
+        self.hbn0 = torch.nn.BatchNorm1d(2048)
+        self.hfc1 = torch.nn.Linear(2048, 1024)
+        self.hbn1 = torch.nn.BatchNorm1d(1024)
+
         # fully connected layers
-        self.fc0 = torch.nn.Linear(input_size, 4096)
-        self.bn0 = torch.nn.BatchNorm1d(4096)
+        self.fc0 = torch.nn.Linear(input_size, 128)
+        self.bn0 = torch.nn.BatchNorm1d(128)
         self.dropout0 = torch.nn.Dropout(0.1)
-        self.fc1 = torch.nn.Linear(96 * 12 * 12 + 4096, 2048)
-        self.bn1 = torch.nn.BatchNorm1d(2048)
+        self.fc1 = torch.nn.Linear(1024 + 128, 1024)
+        self.bn1 = torch.nn.BatchNorm1d(1024)
         self.dropout1 = torch.nn.Dropout(0.1)
-        self.fc2 = torch.nn.Linear(2048, 1024)
+        self.fc2 = torch.nn.Linear(1024, 1024)
         self.bn2 = torch.nn.BatchNorm1d(1024)
         self.fc3 = torch.nn.Linear(1024, 512)
         self.bn3 = torch.nn.BatchNorm1d(512)
@@ -249,7 +255,7 @@ class FootstepPredictor(Module):
 
     def forward(self, h1, l1):
 
-        print("\n\nForward Pass Input Shape: ", h1.shape, l1.shape, end=" ")
+        # print("\n\nForward Pass Input Shape: ", h1.shape, l1.shape, end=" ")
 
         # x1 is image 200x200 16-bit grayscale and x2 is the 3D pose
         h1 = self.conv2d_1(h1)
@@ -265,12 +271,19 @@ class FootstepPredictor(Module):
         h1 = self.maxpool2d_22(h1)
 
         h1 = torch.flatten(h1, 1)
+        h1 = self.hfc0(h1)
+        h1 = self.hbn0(h1)
+        h1 = F.relu(h1)
+        h1 = self.hfc1(h1)
+        h1 = self.hbn1(h1)
+        h1 = F.relu(h1)
 
         l1 = self.fc0(l1)        
         l1 = self.bn0(l1)
         l1 = F.relu(l1)
         
-        print("Shapes: ", h1.shape, l1.shape)
+        # print shape, mean, min, max and stddev
+        print("Shapes: ", h1.shape, l1.shape, "Mean: ", h1.mean(), l1.mean(), "Min: ", h1.min(), l1.min(), "Max: ", h1.max(), l1.max(), "Stddev: ", h1.std(), l1.std())
 
         # flatten x1 and concatenate with x2
         x = torch.cat((h1, l1), dim=1)
@@ -303,7 +316,7 @@ class FootstepPredictor(Module):
 
         x = self.fc6(x)
 
-        print("Forward Pass Output Shape: ", x.shape)
+        # print("Forward Pass Output Shape: ", x.shape)
 
         return x
 
@@ -325,15 +338,16 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
 
         loop=tqdm(train_loader, bar_format='{l_bar}{bar:30}{r_bar}{bar:-30b}')
         running_loss=0
-        for i, (x1, x2, y, c) in enumerate(loop):
+        for i, (x1, x2, y, cm, tc) in enumerate(loop):
             if x1.shape[0] > 1:
                 x1 = x1.to(device)
                 x2 = x2.to(device)
                 y = y.to(device)
+                cm = cm.to(device)
 
                 # Forward pass
                 y_pred = model(x1, x2)
-                loss = criterion(y_pred, y)
+                loss = criterion(y_pred, y, cm)
 
                 # Backward pass and optimize
                 optimizer.zero_grad()
@@ -347,7 +361,7 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
                 loop.set_postfix(loss=average_loss)
                 writer.add_scalar('training loss', average_loss, epoch * len(train_loader) + i)
 
-        for x1, x2, y, c in val_loader:
+        for x1, x2, y, cm, tc in val_loader:
             # send data to gpu
             if x1.shape[0] > 1:
                 x1 = x1.to(device)
@@ -355,7 +369,7 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
                 y = y.to(device)
                 model.eval()
                 y_pred = model(x1, x2)
-                loss = criterion(y_pred,y)
+                loss = criterion(y_pred, y, cm)
                 valid_loss = loss.item()
                 print("Validiation loss - ",valid_loss,"\n")
                 writer.add_scalar('validation loss', valid_loss, epoch * len(train_loader) + i)
@@ -390,7 +404,7 @@ def load_validate(val_dataset, batch_size, model_path):
     model.to(device)
 
     with torch.no_grad():
-        for i, (height_map_input, linear_input, target_output, contact_map) in enumerate(loader):
+        for i, (height_map_input, linear_input, target_output, contact_map, terrain_cost) in enumerate(loader):
 
             height_map_input = height_map_input.to(device)
             linear_input = linear_input.to(device)
@@ -402,11 +416,11 @@ def load_validate(val_dataset, batch_size, model_path):
             # get only the first 4 steps
             predict_output = predict_output[0:3*n_steps, :].reshape((n_steps, 3))
 
-            visualize_output(height_map_input, linear_input, predict_output, contact_map, label="Prediction")
-            visualize_output(height_map_input, linear_input, target_output, contact_map, label="Target")
+            visualize_output(height_map_input, linear_input, predict_output, contact_map, terrain_cost, label="Prediction")
+            visualize_output(height_map_input, linear_input, target_output, contact_map, terrain_cost, label="Target")
 
             
-def visualize_output(height_map_input, linear_input, final_output, contact_map, n_steps=4, label="Footstep Plan"):
+def visualize_output(height_map_input, linear_input, final_output, contact_map_uint8, terrain_cost, n_steps=4, label="Footstep Plan"):
 
     output = final_output.cpu().numpy()
     output = output.squeeze()
@@ -417,21 +431,26 @@ def visualize_output(height_map_input, linear_input, final_output, contact_map, 
     print("Linear Input", linear_input.shape)
 
     # convert height map to numpy array 16-bit grayscale
-    height_map = np.array(height_map_input.cpu().numpy() * 10000.0, dtype=np.uint16)
+    height_map_uint16 = np.array(height_map_input.cpu().numpy() * 10000.0, dtype=np.uint16)
 
     # reshape for opencv
-    height_map = height_map.reshape((201, 201))        
+    height_map_uint16 = height_map_uint16.reshape((201, 201))        
+
+    terrain_cost = np.array(terrain_cost.cpu().numpy(), dtype=np.uint8)
+    terrain_cost = terrain_cost.reshape((201, 201))
 
     # convert contact map to numpy array 8-bit grayscale
-    contact_map = np.array(contact_map.cpu().numpy() * 255, dtype=np.uint8)
-    contact_map = contact_map.reshape((201, 201))
+    contact_map_uint8 = np.array(contact_map_uint8.cpu().numpy(), dtype=np.uint8)
+    contact_map_uint8 = contact_map_uint8.reshape((201, 201))
 
     start_pose = linear_input[0:3]
     goal_pose = linear_input[3:6]
     plan_poses = output[0:3*n_steps].reshape((n_steps, 3))[:, 0:3]
 
+    # print("Height Map: ", height_map.tolist())
+
     # visualize plan
-    visualize_plan(height_map, contact_map, plan_poses, 
+    visualize_plan(height_map_uint16, contact_map_uint8, terrain_cost, plan_poses, 
                     start_pose, goal_pose, label=label)
 
 def load_dataset(validation_split):
@@ -453,7 +472,7 @@ def load_dataset(validation_split):
     files = [file for file in files if any(label in file for label in labels)]
     
 
-    files = files[:3]
+    files = files[:5]
 
     
     datasets = []
@@ -475,14 +494,27 @@ def load_dataset(validation_split):
 
 def visualize_dataset(dataset):
     loader = DataLoader(dataset, batch_size=1, shuffle=True)
-    for i, (height_map_input, linear_input, target_output, contact_map) in enumerate(loader):
+    for i, (height_map_input, linear_input, target_output, contact_map, terrain_cost) in enumerate(loader):
 
         height_map_input = height_map_input.to(device)
         linear_input = linear_input.to(device)
         target_output = target_output.to(device)
 
 
-        visualize_output(height_map_input, linear_input, target_output, contact_map)
+        visualize_output(height_map_input, linear_input, target_output, contact_map, terrain_cost)
+
+def footstep_loss(output, target, contact_map):
+
+    # print("Output Shape: ", output.shape, "Target Shape: ", target.shape, "Contact Map Shape: ", contact_map.shape)
+
+    output_reshaped = torch.reshape(output, (-1, 4, 3))
+    fx = output_reshaped[:, :, 0]
+    fy = output_reshaped[:, :, 1]
+    contact = contact_map[:, 0, fx.long(), fy.long()]  # Fix: Use contact_map provided in batch
+    contact_loss = torch.sum(255 - contact)
+
+    loss = torch.nn.L1Loss()(output, target)
+    return loss
 
 if __name__ == "__main__":
 
@@ -504,8 +536,8 @@ if __name__ == "__main__":
 
     if train:
         # train and store model
-        criterion=torch.nn.L1Loss()
-        train_store(train_dataset, val_dataset, batch_size=2, epochs=30, criterion=criterion, model_path=model_path)
+        criterion = footstep_loss
+        train_store(train_dataset, val_dataset, batch_size=32, epochs=30, criterion=criterion, model_path=model_path)
 
     else:
         # load and validate model

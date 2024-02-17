@@ -52,33 +52,9 @@ def plot_and_compute_stats(height_map, debug=True, display=True, label="Terrain 
 
     if display:
 
-        # height_map = cv2.convertScaleAbs(height_map, alpha=(255.0/65535.0))
-        # height_map = np.minimum(height_map * 10, 255)
-        
-        # plot_terrain_maps(height_map, contact_map, contact_map)
+        print(height_map.tolist())
 
-        height_map_display = height_map.copy()
-        height_map_display = cv2.cvtColor(height_map_display, cv2.COLOR_GRAY2RGB)
-        height_map_display = cv2.resize(height_map_display, (1000, 1000))
-
-        contact_map = np.stack([contact_map, contact_map, contact_map], axis=2).astype(np.uint8)
-        contact_map[:, :, 1] = contact_map[:, :, 0]
-        contact_map[:, :, 0] = 0
-        contact_map[:, :, 2] = 0
-        contact_map = cv2.resize(contact_map, (1000, 1000))
-
-
-        print("Height Map Shape:", height_map_display.shape, "Contact Map Shape:", contact_map.shape)    
-
-        # compute scale factor
-        scale = 1000 / height_map.shape[0]
-
-        stacked_image = np.hstack((height_map_display, contact_map))
-
-        # Create a resizeable window and resize by scale factor
-        cv2.namedWindow(label, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(label, 1000, 1000)
-        cv2.imshow(label, stacked_image)
+        plot_terrain_maps(height_map, terrain_cost, contact_map)
 
         code = cv2.waitKeyEx(0)
         print("Code:", code)
@@ -119,7 +95,7 @@ def synthetic_analyzer_main():
         print("Number", number, "Terrain:", name)
 
 
-        plot_and_compute_stats(height_map, display=False)        
+        plot_and_compute_stats(height_map, display=True)        
         
         compute_pattern_stats(height_map)
         
