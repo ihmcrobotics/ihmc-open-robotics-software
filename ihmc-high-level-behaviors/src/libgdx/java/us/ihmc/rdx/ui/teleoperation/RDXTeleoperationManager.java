@@ -107,6 +107,7 @@ public class RDXTeleoperationManager extends RDXPanel
    private final ImString tempImGuiText = new ImString(1000);
    private final ImBoolean interactableSelections = new ImBoolean(true);
    private final boolean interactablesAvailable;
+   private final ImBoolean freeChestForHandIK = new ImBoolean(false);
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
 
    /** This tracker should be shared with the sub-managers to keep the state consistent. */
@@ -531,6 +532,7 @@ public class RDXTeleoperationManager extends RDXPanel
                interactableFeet.get(side).renderImGuiWidgets();
             }
          }
+         ImGui.checkbox(labels.get("Free chest for hand IK"), freeChestForHandIK);
          ImGui.unindent();
       }
 
