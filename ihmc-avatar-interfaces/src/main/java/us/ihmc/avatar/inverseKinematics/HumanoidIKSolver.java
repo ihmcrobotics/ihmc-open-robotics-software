@@ -24,6 +24,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
  *
  * This class won't deal with stance feet i.e. controlling bodies to stay in the same place.
  * That's for the user to handle.
+ *
+ * TODO: Include ability to control chest joints angle to hold the chest
  */
 public class HumanoidIKSolver
 {
@@ -32,16 +34,12 @@ public class HumanoidIKSolver
    public static final double GRAVITY = 9.81;
    public static final double GOOD_QUALITY_MAX = 1.0;
    private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 70;
-   public static final double DEFAULT_POSITION_GAIN = 1200.0;
-   public static final double DEFAULT_POSITION_WEIGHT = 20.0;
-   public static final double DEFAULT_ORIENTATION_GAIN = 100.0;
-   public static final double DEFAULT_ORIENTATION_WEIGHT = 1.0;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final HumanoidJointNameMap jointNameMap;
    private final FullHumanoidRobotModel sourceFullRobotModel;
 
-   private RigidBodyBasics workRootBody;
+   private RigidBodyBasics workPelvis;
 
    private final SideDependentList<HumanoidIKSolverControlledBody> hands = new SideDependentList<>();
    private HumanoidIKSolverControlledBody chest;
@@ -59,8 +57,7 @@ public class HumanoidIKSolver
                            boolean controlChest,
                            boolean controlPelvis,
                            boolean controlLeftFoot,
-                           boolean controlRightFoot,
-                           boolean unlockChest)
+                           boolean controlRightFoot)
    {
       // accept controlled bodies, source full robot model, root body
       // connect the dots, build list of oneDoFjoints
@@ -83,20 +80,22 @@ public class HumanoidIKSolver
       // - If there is a foot and a hand
       //   - Also need to pass in root joint to WBCC toolbox?
 
-      // We make assumptions that the user passed in a set of values that implies a kinematic chain
-      boolean controllingAFoot = controlLeftFoot || controlRightFoot;
-      boolean pelvisIsIncludedInSystem = controllingAFoot || unlockChest || controlPelvis;
-
-      // It's always either pelvis or chest
-      RigidBodyBasics sourceRootBody = pelvisIsIncludedInSystem ? sourceFullRobotModel.getPelvis() : sourceFullRobotModel.getChest();
-
-      // We clone a detached chest and single arm for the WBCC to work with. We just want to find arm joint angles.
-      workRootBody = MultiBodySystemMissingTools.getDetachedCopyOfSubtreeWithElevator(sourceRootBody);
+      workPelvis = MultiBodySystemMissingTools.getDetachedCopyOfSubtreeWithElevator(sourceFullRobotModel.getPelvis());
 
       if (controlLeftHand)
-         hands.set(RobotSide.LEFT, HumanoidIKSolverControlledBody.createHand(workRootBody, sourceFullRobotModel, jointNameMap, RobotSide.LEFT));
+         hands.set(RobotSide.LEFT, HumanoidIKSolverControlledBody.createHand(workPelvis, sourceFullRobotModel, jointNameMap, RobotSide.LEFT));
       if (controlRightHand)
-         hands.set(RobotSide.RIGHT, HumanoidIKSolverControlledBody.createHand(workRootBody, sourceFullRobotModel, jointNameMap, RobotSide.RIGHT));
+         hands.set(RobotSide.RIGHT, HumanoidIKSolverControlledBody.createHand(workPelvis, sourceFullRobotModel, jointNameMap, RobotSide.RIGHT));
+      if (controlChest)
+         chest = HumanoidIKSolverControlledBody.createChest(workPelvis, sourceFullRobotModel, jointNameMap);
+      if (controlPelvis)
+         pelvis = HumanoidIKSolverControlledBody.createPelvis(workPelvis, sourceFullRobotModel, jointNameMap);
+      if (controlLeftFoot)
+         feet.set(RobotSide.LEFT, HumanoidIKSolverControlledBody.createFoot(workPelvis, sourceFullRobotModel, jointNameMap, RobotSide.LEFT));
+      if (controlRightFoot)
+         feet.set(RobotSide.RIGHT, HumanoidIKSolverControlledBody.createFoot(workPelvis, sourceFullRobotModel, jointNameMap, RobotSide.RIGHT));
+
+
 
 
    }
