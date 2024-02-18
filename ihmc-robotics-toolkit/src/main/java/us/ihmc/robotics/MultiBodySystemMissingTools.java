@@ -36,6 +36,24 @@ public class MultiBodySystemMissingTools
     *
     * See {@link #getDetachedCopyOfSubtree}
     */
+   public static RigidBodyBasics getDetachedCopyOfSubtreeWithElevator(RigidBodyBasics rootBodyToDetach)
+   {
+      RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      SixDoFJoint floatingJoint = new SixDoFJoint(rootBodyToDetach.getName(), elevator);
+      RigidBodyBasics clonedRootBody = MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER.cloneRigidBody(rootBodyToDetach,
+                                                                                                       null,
+                                                                                                       "",
+                                                                                                       floatingJoint);
+      cloneSubtree(rootBodyToDetach, clonedRootBody, "", null);
+      return elevator;
+   }
+
+   /**
+    * You want an elevator if you want to move the base around in world.
+    * Otherwise, it's stuck there.
+    *
+    * See {@link #getDetachedCopyOfSubtree}
+    */
    public static RigidBodyBasics getDetachedCopyOfSubtreeWithElevator(RigidBodyBasics rootBodyToDetach,
                                                                       OneDoFJointBasics childJointToFollow,
                                                                       @Nullable String endRigidBodyName)
