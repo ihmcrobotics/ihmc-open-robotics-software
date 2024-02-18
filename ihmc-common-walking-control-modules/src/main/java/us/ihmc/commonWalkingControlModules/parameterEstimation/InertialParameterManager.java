@@ -100,7 +100,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    /** We specify the process covariances for every parameter in a rigid body, then use the same for all bodies */
    private YoDouble[] processCovariancesForSingleBody;
-   private final YoDouble floatingBaseMeasurementCovariance;
+   private final YoDouble[] floatingBaseMeasurementCovariance;
    private final YoDouble legsMeasurementCovariance;
    private final YoDouble armsMeasurementCovariance;
    private final YoDouble spineMeasurementCovariance;
@@ -274,8 +274,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       // Process covariances are initialized here, but actually set later depending on the type of filter used
       // (and thus on the type of parameter -- which will require different covariances for different units)
       processCovariancesForSingleBody = new YoDouble[RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
-      floatingBaseMeasurementCovariance = new YoDouble("floatingBaseMeasurementCovariance", registry);
-      floatingBaseMeasurementCovariance.set(parameters.getFloatingBaseMeasurementCovariance());
+      floatingBaseMeasurementCovariance = new YoDouble[WRENCH_DIMENSION];
+      for (int i = 0; i < WRENCH_DIMENSION; ++i)
+      {
+          floatingBaseMeasurementCovariance[i] = new YoDouble("floatingBaseMeasurementCovariance_" + getNameForRootJoint(i), registry);
+            floatingBaseMeasurementCovariance[i].set(parameters.getFloatingBaseMeasurementCovariance()[i]);
+      }
       legsMeasurementCovariance = new YoDouble("legsMeasurementCovariance", registry);
       legsMeasurementCovariance.set(parameters.getLegMeasurementCovariance());
       armsMeasurementCovariance = new YoDouble("armsMeasurementCovariance", registry);
@@ -432,7 +436,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       for (int i = 0; i < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; ++i)
          processCovariancesForSingleBody[i].set(defaultProcessCovariances[i]);
 
-      floatingBaseMeasurementCovariance.set(parameters.getFloatingBaseMeasurementCovariance());
+      for (int j = 0; j < WRENCH_DIMENSION; ++j)
+         floatingBaseMeasurementCovariance[j].set(parameters.getFloatingBaseMeasurementCovariance()[j]);
+
       legsMeasurementCovariance.set(parameters.getLegMeasurementCovariance());
       armsMeasurementCovariance.set(parameters.getArmMeasurementCovariance());
       spineMeasurementCovariance.set(parameters.getSpineMeasurementCovariance());
@@ -569,7 +575,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          int[] indices = jointIndexHandler.getJointIndices(joint);
 
          if (joint.getName().contains("PELVIS"))
-            MatrixMissingTools.setMatrixDiagonal(indices, floatingBaseMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
+            for (int floatingBaseIndex : indices)
+            {
+               filter.getMeasurementCovariance().set(floatingBaseIndex, floatingBaseIndex, floatingBaseMeasurementCovariance[floatingBaseIndex].getValue());
+            }
          else if (joint.getName().contains("HIP") || joint.getName().contains("KNEE") || joint.getName().contains("ANKLE"))
             MatrixMissingTools.setMatrixDiagonal(indices, legsMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
          else if (joint.getName().contains("SHOULDER") || joint.getName().contains("ELBOW") || joint.getName().contains("WRIST"))
