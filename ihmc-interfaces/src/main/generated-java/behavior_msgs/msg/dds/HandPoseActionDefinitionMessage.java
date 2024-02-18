@@ -36,6 +36,9 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
             * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
             */
    public boolean joint_space_control_;
+   public double linear_position_weight_;
+   public double angular_position_weight_;
+   public double jointspace_weight_;
 
    public HandPoseActionDefinitionMessage()
    {
@@ -64,6 +67,12 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       hold_pose_in_world_ = other.hold_pose_in_world_;
 
       joint_space_control_ = other.joint_space_control_;
+
+      linear_position_weight_ = other.linear_position_weight_;
+
+      angular_position_weight_ = other.angular_position_weight_;
+
+      jointspace_weight_ = other.jointspace_weight_;
 
    }
 
@@ -169,6 +178,33 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       return joint_space_control_;
    }
 
+   public void setLinearPositionWeight(double linear_position_weight)
+   {
+      linear_position_weight_ = linear_position_weight;
+   }
+   public double getLinearPositionWeight()
+   {
+      return linear_position_weight_;
+   }
+
+   public void setAngularPositionWeight(double angular_position_weight)
+   {
+      angular_position_weight_ = angular_position_weight;
+   }
+   public double getAngularPositionWeight()
+   {
+      return angular_position_weight_;
+   }
+
+   public void setJointspaceWeight(double jointspace_weight)
+   {
+      jointspace_weight_ = jointspace_weight;
+   }
+   public double getJointspaceWeight()
+   {
+      return jointspace_weight_;
+   }
+
 
    public static Supplier<HandPoseActionDefinitionMessagePubSubType> getPubSubType()
    {
@@ -199,6 +235,12 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.joint_space_control_, other.joint_space_control_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.linear_position_weight_, other.linear_position_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.angular_position_weight_, other.angular_position_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.jointspace_weight_, other.jointspace_weight_, epsilon)) return false;
+
 
       return true;
    }
@@ -224,6 +266,12 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
 
       if(this.joint_space_control_ != otherMyClass.joint_space_control_) return false;
 
+      if(this.linear_position_weight_ != otherMyClass.linear_position_weight_) return false;
+
+      if(this.angular_position_weight_ != otherMyClass.angular_position_weight_) return false;
+
+      if(this.jointspace_weight_ != otherMyClass.jointspace_weight_) return false;
+
 
       return true;
    }
@@ -247,7 +295,13 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       builder.append("hold_pose_in_world=");
       builder.append(this.hold_pose_in_world_);      builder.append(", ");
       builder.append("joint_space_control=");
-      builder.append(this.joint_space_control_);
+      builder.append(this.joint_space_control_);      builder.append(", ");
+      builder.append("linear_position_weight=");
+      builder.append(this.linear_position_weight_);      builder.append(", ");
+      builder.append("angular_position_weight=");
+      builder.append(this.angular_position_weight_);      builder.append(", ");
+      builder.append("jointspace_weight=");
+      builder.append(this.jointspace_weight_);
       builder.append("}");
       return builder.toString();
    }

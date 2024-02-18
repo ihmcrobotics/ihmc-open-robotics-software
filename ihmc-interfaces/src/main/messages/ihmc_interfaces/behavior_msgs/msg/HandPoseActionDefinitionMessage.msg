@@ -18,3 +18,9 @@ bool hold_pose_in_world
 
 # Whether the rigid body is controlled in jointspace (true) or taskspace (false)
 bool joint_space_control
+
+float64 linear_position_weight
+
+float64 angular_position_weight
+
+float64 jointspace_weight

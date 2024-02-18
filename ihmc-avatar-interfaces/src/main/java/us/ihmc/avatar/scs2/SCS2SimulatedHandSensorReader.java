@@ -30,6 +30,8 @@ public class SCS2SimulatedHandSensorReader implements SimulatedHandSensorReader
          sensorDataContext.getMeasuredJointState(joint.getName()).setVelocity(qd);
          double qdd = joint.getQdd();
          sensorDataContext.getMeasuredJointState(joint.getName()).setAcceleration(qdd);
+         double tau = joint.getTau();
+         sensorDataContext.getMeasuredJointState(joint.getName()).setEffort(tau);
       }
    }
 }

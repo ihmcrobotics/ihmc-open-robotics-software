@@ -27,6 +27,8 @@ import java.util.function.Function;
  */
 public class SceneGraph
 {
+   public static final double UPDATE_FREQUENCY = 60.0;
+
    /** The root node is always ID 0 and all nodes in the tree are unique. */
    public static long ROOT_NODE_ID = 0;
    public static String ROOT_NODE_NAME = "SceneGraphRoot";

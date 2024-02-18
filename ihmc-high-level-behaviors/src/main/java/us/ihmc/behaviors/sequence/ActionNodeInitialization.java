@@ -103,6 +103,10 @@ public class ActionNodeInitialization
          }
          footstepPlanAction.update();
       }
+      else if (newAction instanceof SakeHandCommandActionState sakeHandCommandActionState)
+      {
+         sakeHandCommandActionState.getDefinition().setSide(sideOfNewAction);
+      }
    }
 
    /**
