@@ -26,7 +26,7 @@ public interface InertialEstimationParameters
    public abstract double getProcessCovarianceMultiplierForWalking();
 
 
-   public abstract double getFloatingBaseMeasurementCovariance();
+   public abstract double[] getFloatingBaseMeasurementCovariance();
    public abstract double getLegMeasurementCovariance();
    public abstract double getArmMeasurementCovariance();
    public abstract double getSpineMeasurementCovariance();
