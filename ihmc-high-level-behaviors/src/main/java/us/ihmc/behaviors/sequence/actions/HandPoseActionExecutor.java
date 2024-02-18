@@ -61,7 +61,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
       for (RobotSide side : RobotSide.values)
       {
-         armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
+         armIKSolvers.put(side, new ArmIKSolver(side, robotModel.getJointMap(), syncedRobot.getFullRobotModel()));
       }
 
       FramePose3D chestAfterJointToPelvis = new FramePose3D();

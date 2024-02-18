@@ -128,7 +128,7 @@ public class HumanoidIKSolverControlledBody
 
          // The world of the humanoid is at the root body after parent joint, but the solver solves w.r.t. the root body fixed CoM frame
          // TODO: Check if this is correct
-         workBody.getBodyFixedFrame().getTransformToParent().transform(bodyControlDesiredPoseToRootCoMTransform);
+         workRootBody.getBodyFixedFrame().getTransformToParent().transform(bodyControlDesiredPoseToRootCoMTransform);
 
          // TODO: Check on this frame, probably related to the clone stationary frame
          bodyControlDesiredPose.setToZero(ReferenceFrame.getWorldFrame());
@@ -170,5 +170,10 @@ public class HumanoidIKSolverControlledBody
       spatialVelocityCommand.setWeightMatrix(weightMatrix);
       spatialVelocityCommand.setSpatialVelocity(workBody.getBodyFixedFrame(), bodyDesiredAngularVelocity, bodyDesiredLinearVelocity);
       return spatialVelocityCommand;
+   }
+
+   public RigidBodyBasics getWorkBody()
+   {
+      return workBody;
    }
 }
