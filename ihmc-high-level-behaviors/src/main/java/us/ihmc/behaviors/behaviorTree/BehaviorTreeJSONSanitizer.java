@@ -19,24 +19,29 @@ import javax.annotation.Nullable;
  */
 public class BehaviorTreeJSONSanitizer
 {
-   private final WorkspaceResourceDirectory treeFilesDirectory;
+   private WorkspaceResourceDirectory treeFilesDirectory;
    private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, 1);
 
    public BehaviorTreeJSONSanitizer(Class<?> classForFindingSourceSetDirectory)
    {
-      treeFilesDirectory = new WorkspaceResourceDirectory(classForFindingSourceSetDirectory, "/behaviorTrees");
+      String[] directories = new String[] { "/behaviorTrees" }; // "/affordances"
 
-      for (WorkspaceResourceFile fileToLoad : treeFilesDirectory.queryContainedFiles())
+      for (String directory : directories)
       {
-         MutableObject<BehaviorTreeNodeDefinition> loadedRootNode = new MutableObject<>();
+         treeFilesDirectory = new WorkspaceResourceDirectory(classForFindingSourceSetDirectory, directory);
 
-         LogTools.info("Loading {}", fileToLoad.getFilesystemFile());
-         JSONFileTools.load(fileToLoad, jsonNode ->
+         for (WorkspaceResourceFile fileToLoad : treeFilesDirectory.queryContainedFiles())
          {
-            loadedRootNode.setValue(loadFromFile(jsonNode, null, fileToLoad.getFileName()));
-         });
+            MutableObject<BehaviorTreeNodeDefinition> loadedRootNode = new MutableObject<>();
 
-         loadedRootNode.getValue().saveToFile();
+            LogTools.info("Loading {}", fileToLoad.getFilesystemFile());
+            JSONFileTools.load(fileToLoad, jsonNode ->
+            {
+               loadedRootNode.setValue(loadFromFile(jsonNode, null, fileToLoad.getFileName()));
+            });
+
+            loadedRootNode.getValue().saveToFile();
+         }
       }
    }
 
