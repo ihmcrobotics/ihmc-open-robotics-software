@@ -52,13 +52,13 @@ def visualize_plan(height_map, contact_map, terrain_cost, footstep_plan_poses, s
     contact_map = cv2.resize(contact_map, (1000, 1000))
 
 
-    print("Height Map Shape:", height_map_display.shape, "Contact Map Shape:", contact_map.shape)    
+    # print("Height Map Shape:", height_map_display.shape, "Contact Map Shape:", contact_map.shape)    
 
     # compute scale factor
     scale = 1000 / height_map.shape[0]
 
-    print("Start pose:", start_pose)
-    print("Goal pose:", goal_pose)
+    # print("Start pose:", start_pose)
+    # print("Goal pose:", goal_pose)
 
     start_color = (0, 0, 120) if start_side < 0.5 else (0, 120, 120)
 
@@ -78,7 +78,7 @@ def visualize_plan(height_map, contact_map, terrain_cost, footstep_plan_poses, s
     # plot_terrain_maps(height_map, terrain_cost, contact_map)
 
     code = cv2.waitKeyEx(0)
-    print("Code:", code)
+    # print("Code:", code)
 
     if code == ord('q'):
         cv2.destroyAllWindows()

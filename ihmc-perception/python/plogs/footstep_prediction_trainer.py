@@ -154,7 +154,6 @@ class FootstepDataset(Dataset):
                     1 - 2 * (goal_quaternion[0]**2 + goal_quaternion[3]**2))
         goal_pose = np.array([self.goal_positions[index, 0] - sensor_pose[0], self.goal_positions[index, 1] - sensor_pose[1], goal_yaw])
 
-    
         # convert quaternion to yaw
         footstep_plan_quaternions = self.footstep_plan_orientations[index*n_steps:index*n_steps + self.n_steps, :]
         footstep_plan_yaws = np.arctan2(2 * (footstep_plan_quaternions[:, 0] * footstep_plan_quaternions[:, 1] + footstep_plan_quaternions[:, 3] * footstep_plan_quaternions[:, 2]),
@@ -224,23 +223,23 @@ class FootstepPredictor(Module):
         print("FootstepPredictor (Model) -> Linear Input Size: ", input_size, "Linear Output Size: ", output_size)
 
         # convolutional layers given a 200x200 16-bit grayscale image
-        self.conv2d_1 = torch.nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
-        self.conv2d_2 = ResidualBlock(32, 48)
-        self.conv2d_3 = ResidualBlock(48, 64)
-        self.conv2d_4 = ResidualBlock(64, 96)
+        self.conv2d_1 = torch.nn.Conv2d(1, 48, kernel_size=3, stride=1, padding=1)
+        self.conv2d_2 = ResidualBlock(48, 48)
+        self.conv2d_3 = ResidualBlock(48, 48)
+        self.conv2d_4 = ResidualBlock(48, 48)
         self.maxpool2d_22 = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
         self.maxpool2d_44 = torch.nn.MaxPool2d(kernel_size=4, stride=4, padding=0)
 
-        self.hfc0 = torch.nn.Linear(96 * 12 * 12, 2048)
-        self.hbn0 = torch.nn.BatchNorm1d(2048)
-        self.hfc1 = torch.nn.Linear(2048, 1024)
+        self.hfc0 = torch.nn.Linear(48 * 12 * 12, 4096)
+        self.hbn0 = torch.nn.BatchNorm1d(4096)
+        self.hfc1 = torch.nn.Linear(4096, 1024)
         self.hbn1 = torch.nn.BatchNorm1d(1024)
 
         # fully connected layers
-        self.fc0 = torch.nn.Linear(input_size, 128)
-        self.bn0 = torch.nn.BatchNorm1d(128)
+        self.fc0 = torch.nn.Linear(input_size, 1024)
+        self.bn0 = torch.nn.BatchNorm1d(1024)
         self.dropout0 = torch.nn.Dropout(0.1)
-        self.fc1 = torch.nn.Linear(1024 + 128, 1024)
+        self.fc1 = torch.nn.Linear(1024 + 1024, 1024)
         self.bn1 = torch.nn.BatchNorm1d(1024)
         self.dropout1 = torch.nn.Dropout(0.1)
         self.fc2 = torch.nn.Linear(1024, 1024)
@@ -260,30 +259,32 @@ class FootstepPredictor(Module):
         # x1 is image 200x200 16-bit grayscale and x2 is the 3D pose
         h1 = self.conv2d_1(h1)
         h1 = self.maxpool2d_22(h1)
-        residual_1 = h1
         h1 = self.conv2d_2(h1)
         h1 = self.maxpool2d_22(h1)
-        residual_2 = h1
         h1 = self.conv2d_3(h1)
         h1 = self.maxpool2d_22(h1)
-        residual_3 = h1
         h1 = self.conv2d_4(h1)
         h1 = self.maxpool2d_22(h1)
+
 
         h1 = torch.flatten(h1, 1)
         h1 = self.hfc0(h1)
         h1 = self.hbn0(h1)
-        h1 = F.relu(h1)
+        h1 = F.leaky_relu(h1)
         h1 = self.hfc1(h1)
         h1 = self.hbn1(h1)
-        h1 = F.relu(h1)
+        h1 = F.leaky_relu(h1)
 
         l1 = self.fc0(l1)        
         l1 = self.bn0(l1)
-        l1 = F.relu(l1)
+        l1 = F.leaky_relu(l1)
         
         # print shape, mean, min, max and stddev
-        print("Shapes: ", h1.shape, l1.shape, "Mean: ", h1.mean(), l1.mean(), "Min: ", h1.min(), l1.min(), "Max: ", h1.max(), l1.max(), "Stddev: ", h1.std(), l1.std())
+        print("Shapes: ", h1.shape, l1.shape,
+            "Mean: ", round(h1.mean().item(), 3), round(l1.mean().item(), 3), 
+            "Min: ", round(h1.min().item(), 3), round(l1.min().item(), 3), 
+            "Max: ", round(h1.max().item(), 3), round(l1.max().item(), 3), 
+            "Stddev: ", round(h1.std().item(), 3), round(l1.std().item(), 3))
 
         # flatten x1 and concatenate with x2
         x = torch.cat((h1, l1), dim=1)
@@ -424,11 +425,11 @@ def visualize_output(height_map_input, linear_input, final_output, contact_map_u
 
     output = final_output.cpu().numpy()
     output = output.squeeze()
-    print("Predict Output", output.shape)
+    # print("Predict Output", output.shape)
 
     linear_input = linear_input.cpu().numpy()
     linear_input = linear_input.squeeze()
-    print("Linear Input", linear_input.shape)
+    # print("Linear Input", linear_input.shape)
 
     # convert height map to numpy array 16-bit grayscale
     height_map_uint16 = np.array(height_map_input.cpu().numpy() * 10000.0, dtype=np.uint16)
@@ -472,7 +473,7 @@ def load_dataset(validation_split):
     files = [file for file in files if any(label in file for label in labels)]
     
 
-    files = files[:5]
+    # files = files[:5]
 
     
     datasets = []
@@ -537,7 +538,7 @@ if __name__ == "__main__":
     if train:
         # train and store model
         criterion = footstep_loss
-        train_store(train_dataset, val_dataset, batch_size=32, epochs=30, criterion=criterion, model_path=model_path)
+        train_store(train_dataset, val_dataset, batch_size=16, epochs=30, criterion=criterion, model_path=model_path)
 
     else:
         # load and validate model
