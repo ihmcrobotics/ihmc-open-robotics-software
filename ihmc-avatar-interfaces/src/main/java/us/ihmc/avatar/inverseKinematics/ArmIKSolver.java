@@ -138,40 +138,9 @@ public class ArmIKSolver
       return hand.getDesiredBodyControlPoseChanged();
    }
 
-   public void solve(FrameVector3DReadOnly desiredAngularVelocity, FrameVector3DReadOnly desiredLinearVelocity)
-   {
-      // Perform the position only solution which iterates many times
-      solve();
-
-      // Populate the spatial velocity for the IK command list
-      SpatialVelocityCommand spatialVelocityCommand = hand.buildSpatialVelocityCommand(desiredAngularVelocity, desiredLinearVelocity);
-
-      // Populate the commands list with the settings and spatial velocity
-      controllerCoreCommand.clear();
-      controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
-      controllerCoreCommand.addInverseKinematicsCommand(spatialVelocityCommand);
-
-      // Use this to compute the desired velocity.
-      controllerCore.compute(controllerCoreCommand);
-
-      // Feed the solution velocity back into the working model and compute once
-      ControllerCoreOutput controllerCoreOutput = controllerCore.getControllerCoreOutput();
-      JointDesiredOutputListReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
-      for (int j = 0; j < workingOneDoFJoints.length; j++)
-      {
-         if (output.hasDataForJoint(workingOneDoFJoints[j]))
-         {
-            JointDesiredOutputReadOnly jointDesiredOutput = output.getJointDesiredOutput(workingOneDoFJoints[j]);
-            double desiredVelocity = jointDesiredOutput.getDesiredVelocity();
-            workingOneDoFJoints[j].setQd(desiredVelocity);
-            if (jointDesiredOutput.hasDesiredTorque())
-            {
-               workingOneDoFJoints[j].setTau(jointDesiredOutput.getDesiredTorque());
-            }
-         }
-      }
-   }
-
+   /**
+    * Solve for a zero-velocity solution configuration.
+    */
    public void solve()
    {
       copySourceToWork();
@@ -226,6 +195,43 @@ public class ArmIKSolver
       if (quality > GOOD_QUALITY_MAX)
       {
          LogTools.debug("Bad quality solution: {} Try upping the gains, giving more iteration, or setting a more acheivable goal.", quality);
+      }
+   }
+
+   /**
+    * Solve including a non-zero desired velocity solution configuration.
+    */
+   public void solve(FrameVector3DReadOnly desiredAngularVelocity, FrameVector3DReadOnly desiredLinearVelocity)
+   {
+      // Perform the position only solution which iterates many times
+      solve();
+
+      // Populate the spatial velocity for the IK command list
+      SpatialVelocityCommand spatialVelocityCommand = hand.buildSpatialVelocityCommand(desiredAngularVelocity, desiredLinearVelocity);
+
+      // Populate the commands list with the settings and spatial velocity
+      controllerCoreCommand.clear();
+      controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
+      controllerCoreCommand.addInverseKinematicsCommand(spatialVelocityCommand);
+
+      // Use this to compute the desired velocity.
+      controllerCore.compute(controllerCoreCommand);
+
+      // Feed the solution velocity back into the working model and compute once
+      ControllerCoreOutput controllerCoreOutput = controllerCore.getControllerCoreOutput();
+      JointDesiredOutputListReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
+      for (int j = 0; j < workingOneDoFJoints.length; j++)
+      {
+         if (output.hasDataForJoint(workingOneDoFJoints[j]))
+         {
+            JointDesiredOutputReadOnly jointDesiredOutput = output.getJointDesiredOutput(workingOneDoFJoints[j]);
+            double desiredVelocity = jointDesiredOutput.getDesiredVelocity();
+            workingOneDoFJoints[j].setQd(desiredVelocity);
+            if (jointDesiredOutput.hasDesiredTorque())
+            {
+               workingOneDoFJoints[j].setTau(jointDesiredOutput.getDesiredTorque());
+            }
+         }
       }
    }
 
