@@ -16,25 +16,27 @@ set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation d
 
 set(CROCODDYL_SOURCES
 
-    cpp/external/crocoddyl_external.h
-    cpp/external/crocoddyl_external.cpp
+    external/crocoddyl_external.h
+    external/crocoddyl_external.cpp
 )
 
 add_library(crocoddyl-wrapper SHARED ${CROCODDYL_SOURCES})
 
 target_include_directories(crocoddyl-wrapper PUBLIC
      /usr/include/
-     cpp/headers/
-     cpp/launcher/
-     cpp/external/
+     headers/
+     launcher/
+     external/
 )
 
-add_executable(DDPSolver cpp/launcher/ddp_solver.cpp)
+install(FILES ${CROCODDYL_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
+
+add_executable(DDPSolver launcher/ddp_solver.cpp)
 
 target_include_directories(DDPSolver PUBLIC
     /usr/include/
-    cpp/launcher/
-    cpp/headers/
+    launcher/
+    headers/
 )
 
 

@@ -7,9 +7,12 @@ plugins {
 
 ihmc {
    loadProductProperties("../product.properties")
-   
+
+   javaDirectory("crocoddyl-wrapper", "generated-java")
+
    configureDependencyResolution()
    configurePublications()
+
 }
 
 mainDependencies {
@@ -19,9 +22,11 @@ mainDependencies {
 
    api("us.ihmc:euclid:0.21.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
+   api(ihmc.sourceSetProject("crocoddyl-wrapper"))
 }
 
 testDependencies {
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api(ihmc.sourceSetProject("crocoddyl-wrapper"))
 }
 
