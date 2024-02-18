@@ -53,6 +53,9 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    protected YoMatrix yoTorqueFromContactWrenches = null;
    protected YoMatrix yoTorqueFromBias = null;
 
+   private final DMatrixRMaj kalmanGainContributionContainer;
+   private final YoMatrix[]  kalmanGainContributions;
+
    public InertialKalmanFilter(FullRobotModel model, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets,
                                InertialEstimationParameters parameters,
                                DMatrixRMaj initialParametersForEstimate, DMatrixRMaj initialParameterCovariance,
@@ -96,6 +99,13 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
          yoTorqueFromEstimates = new YoMatrix("torqueFromEstimates", nDoFs, 1, getRowNames(model), null, registry);
          yoTorqueFromContactWrenches = new YoMatrix("torqueFromContactWrenches", nDoFs, 1, getRowNames(model), null, registry);
          yoTorqueFromBias = new YoMatrix("torqueFromBias", nDoFs, 1, getRowNames(model), null, registry);
+      }
+
+      kalmanGainContributionContainer = new DMatrixRMaj(nDoFs, 1);
+      kalmanGainContributions = new YoMatrix[partitionSizes[0]];
+      for (int i = 0; i < partitionSizes[0]; i++)
+      {
+         kalmanGainContributions[i] = new YoMatrix("KalmanGainContributions_" + i, nDoFs, 1, getRowNames(model), null, registry);
       }
    }
 
@@ -173,6 +183,13 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    protected void updateStep(DMatrix actual)
    {
       super.updateStep(actual);
+      // Pack the individual contributions of the update step: K * y for visualisation
+      for (int i = 0; i < kalmanGainContributions.length; i++)
+      {
+         CommonOps_DDRM.extractRow(kalmanGain, i, kalmanGainContributionContainer);
+         CommonOps_DDRM.elementMult(kalmanGainContributionContainer, measurementResidual);
+         kalmanGainContributions[i].set(kalmanGainContributionContainer);
+      }
    }
 
    protected void filterTorques(DMatrix torques)
