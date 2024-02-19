@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
@@ -11,6 +12,9 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -44,7 +48,8 @@ public class HumanoidKinematicsSolver
 
    private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
 
-   public HumanoidKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public HumanoidKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                   YoGraphicsListRegistry yoGraphicsListRegistry,
                                    YoRegistry parentRegistry)
    {
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
@@ -84,6 +89,16 @@ public class HumanoidKinematicsSolver
       controller.updateRobotConfigurationData(robotConfigurationData);
    }
 
+   public void setCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
+   {
+      controller.updateCapturabilityBasedStatus(capturabilityBasedStatus);
+   }
+
+   public void setAsDoubleSupport()
+   {
+      controller.updateFootSupportState(true, true);
+   }
+
    public void submit(Iterable<KinematicsToolboxRigidBodyMessage> rigidBodyMessages)
    {
       rigidBodyMessages.forEach(this::submit);
@@ -99,10 +114,18 @@ public class HumanoidKinematicsSolver
       commandInputManager.submitMessage(centerOfMassMessage);
    }
 
+   public void submit(KinematicsToolboxRigidBodyCommand rigidBodyCommand)
+   {
+      commandInputManager.submitCommand(rigidBodyCommand);
+   }
+
+   public void submit(KinematicsToolboxCenterOfMassCommand centerOfMassCommand)
+   {
+      commandInputManager.submitCommand(centerOfMassCommand);
+   }
+
    public void initialize()
    {
-      controller.updateFootSupportState(true, true);
-
       boolean initialized = controller.initialize();
 
       if (!initialized)
@@ -178,5 +201,10 @@ public class HumanoidKinematicsSolver
    public KinematicsToolboxOutputStatus getSolution()
    {
       return controller.getSolution();
+   }
+
+   public OneDoFJointBasics[] getDesiredOneDoFJoints()
+   {
+      return controller.getDesiredOneDoFJoints();
    }
 }

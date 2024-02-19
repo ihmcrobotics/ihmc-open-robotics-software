@@ -9,7 +9,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.inverseKinematics.HumanoidIKSolver;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -17,8 +17,9 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -45,6 +46,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.tools.gui.YoAppearanceTools;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -110,7 +112,11 @@ public class RDXTeleoperationManager extends RDXPanel
    private final ImString tempImGuiText = new ImString(1000);
    private final ImBoolean interactableSelections = new ImBoolean(true);
    private final boolean interactablesAvailable;
-   private final HumanoidIKSolver wholeBodyIKSolver;
+   private final HumanoidKinematicsSolver wholeBodyIKSolver;
+   private final SideDependentList<KinematicsToolboxRigidBodyCommand> handRigidBodyCommands = new SideDependentList<>();
+   private final KinematicsToolboxRigidBodyCommand chestRigidBodyCommand = new KinematicsToolboxRigidBodyCommand();
+   private final KinematicsToolboxRigidBodyCommand pelvisRigidBodyCommand = new KinematicsToolboxRigidBodyCommand();
+   private final SideDependentList<KinematicsToolboxRigidBodyCommand> feetRigidBodyCommands = new SideDependentList<>(KinematicsToolboxRigidBodyCommand::new);
    private volatile boolean readyToSolveWholeBodyIK = true;
    private volatile boolean readyToCopyWholeBodyIKSolution = false;
    private final ImBoolean enableWholeBodyIK = new ImBoolean(false);
@@ -173,7 +179,35 @@ public class RDXTeleoperationManager extends RDXPanel
          contactCollisionModel = new RDXRobotCollisionModel(robotSelectionCollisionModel);
       }
 
-      wholeBodyIKSolver = new HumanoidIKSolver(robotModel.getJointMap(), syncedRobot.getFullRobotModel());
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      wholeBodyIKSolver = new HumanoidKinematicsSolver(robotModel, yoGraphicsListRegistry, new YoRegistry(getClass().getSimpleName()));
+      for (RobotSide side : RobotSide.values)
+      {
+         if (robotModel.getJointMap().getHandName(side) != null) // Handle one handed configurations
+         {
+            KinematicsToolboxRigidBodyCommand rigidBodyCommand = new KinematicsToolboxRigidBodyCommand();
+            rigidBodyCommand.setEndEffector(wholeBodyIKSolver.getDesiredFullRobotModel().getHand(side));
+            rigidBodyCommand.getControlFramePose().setToZero(wholeBodyIKSolver.getDesiredFullRobotModel().getHandControlFrame(side));
+            rigidBodyCommand.getControlFramePose().changeFrame(wholeBodyIKSolver.getDesiredFullRobotModel().getHand(side).getBodyFixedFrame());
+            // TODO: Use default values from somewhere else
+            rigidBodyCommand.getWeightMatrix().setLinearWeights(20.0, 20.0, 20.0);
+            rigidBodyCommand.getWeightMatrix().setAngularWeights(1.0, 1.0, 1.0);
+            handRigidBodyCommands.put(side, rigidBodyCommand);
+         }
+
+         KinematicsToolboxRigidBodyCommand rigidBodyCommand = feetRigidBodyCommands.get(side);
+         rigidBodyCommand.setEndEffector(wholeBodyIKSolver.getDesiredFullRobotModel().getFoot(side));
+         rigidBodyCommand.getControlFramePose().setToZero(wholeBodyIKSolver.getDesiredFullRobotModel().getSoleFrame(side));
+         rigidBodyCommand.getControlFramePose().changeFrame(wholeBodyIKSolver.getDesiredFullRobotModel().getFoot(side).getBodyFixedFrame());
+         rigidBodyCommand.getWeightMatrix().setLinearWeights(20.0, 20.0, 20.0);
+         rigidBodyCommand.getWeightMatrix().setAngularWeights(1.0, 1.0, 1.0);
+      }
+      chestRigidBodyCommand.setEndEffector(wholeBodyIKSolver.getDesiredFullRobotModel().getChest());
+      chestRigidBodyCommand.getWeightMatrix().setLinearWeights(20.0, 20.0, 20.0);
+      chestRigidBodyCommand.getWeightMatrix().setAngularWeights(1.0, 1.0, 1.0);
+      pelvisRigidBodyCommand.setEndEffector(wholeBodyIKSolver.getDesiredFullRobotModel().getPelvis());
+      pelvisRigidBodyCommand.getWeightMatrix().setLinearWeights(20.0, 20.0, 20.0);
+      pelvisRigidBodyCommand.getWeightMatrix().setAngularWeights(1.0, 1.0, 1.0);
 
       if (robotHasArms)
       {
@@ -359,40 +393,37 @@ public class RDXTeleoperationManager extends RDXPanel
                desiredRobot.setChestShowing(true);
                desiredRobot.setPelvisShowing(true);
 
+               wholeBodyIKSolver.setInitialConfiguration(syncedRobot.getLatestRobotConfigurationData());
+               wholeBodyIKSolver.setCapturabilityBasedStatus(controllerStatusTracker.getLatestCapturabilityBasedStatus());
+               wholeBodyIKSolver.initialize();
 
-               wholeBodyIKSolver.copySourceToWork(syncedRobot.getReferenceFrames().getPelvisFrame());
-
-               wholeBodyIKSolver.clearCommands();
-
-               ReferenceFrame rootBodyFrame = ReferenceFrame.getWorldFrame();
-               for (RobotSide side : wholeBodyIKSolver.getHands().sides())
+               for (RobotSide side : handRigidBodyCommands.sides())
                {
-                  wholeBodyIKSolver.getHands().get(side).setActive(true);
-                  ReferenceFrame controlDesiredFrame = interactableHands.get(side).isDeleted() ? syncedRobot.getReferenceFrames().getHandFrame(side)
-                                                                                               : interactableHands.get(side).getControlReferenceFrame();
-                  wholeBodyIKSolver.getHands().get(side).updateDesiredPose(rootBodyFrame, controlDesiredFrame);
+                  if (!interactableHands.get(side).isDeleted())
+                  {
+                     KinematicsToolboxRigidBodyCommand rigidBodyCommand = handRigidBodyCommands.get(side);
+                     rigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactableHands.get(side).getControlReferenceFrame());
+                     wholeBodyIKSolver.submit(rigidBodyCommand);
+                  }
                }
                for (RobotSide side : RobotSide.values)
                {
-                  wholeBodyIKSolver.getFeet().get(side).setActive(true);
-                  ReferenceFrame controlDesiredFrame = interactableFeet.get(side).isDeleted() ? syncedRobot.getReferenceFrames().getSoleFrame(side)
-                                                                                              : interactableFeet.get(side).getControlReferenceFrame();
-                  wholeBodyIKSolver.getFeet().get(side).updateDesiredPose(rootBodyFrame, controlDesiredFrame);
+                  KinematicsToolboxRigidBodyCommand rigidBodyCommand = feetRigidBodyCommands.get(side);
+                  rigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactableFeet.get(side).getControlReferenceFrame());
+                  wholeBodyIKSolver.submit(rigidBodyCommand);
                }
                if (!interactableChest.isDeleted())
                {
-                  wholeBodyIKSolver.getChest().setActive(true);
-                  wholeBodyIKSolver.getChest().updateDesiredPose(rootBodyFrame,
-                                                                 interactableChest.getControlReferenceFrame());
+                  chestRigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactableChest.getControlReferenceFrame());
                }
 
                wholeBodyIKSolver.solve();
 
-               MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(wholeBodyIKSolver.getSolutionOneDoFJoints(),
+               MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(wholeBodyIKSolver.getDesiredOneDoFJoints(),
                                                                          desiredRobot.getDesiredFullRobotModel().getOneDoFJoints());
 
-
-               desiredRobot.getDesiredFullRobotModel().getRootJoint().setJointConfiguration(wholeBodyIKSolver.getSolutionPelvisSixDoFJoint().getJointPose());
+               desiredRobot.getDesiredFullRobotModel().getRootJoint().setJointConfiguration(wholeBodyIKSolver.getSolution().getDesiredRootOrientation(),
+                                                                                            wholeBodyIKSolver.getSolution().getDesiredRootPosition());
                desiredRobot.getDesiredFullRobotModel().updateFrames();
             }
             else if (robotHasArms)
