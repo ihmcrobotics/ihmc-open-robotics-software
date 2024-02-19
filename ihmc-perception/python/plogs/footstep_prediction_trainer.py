@@ -188,34 +188,6 @@ class FootstepDataset(Dataset):
         return len(self.height_maps)
 
 
-class ResidualBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, stride=1):
-        super(ResidualBlock, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False)
-        self.bn1 = nn.BatchNorm2d(out_channels)
-        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
-        self.bn2 = nn.BatchNorm2d(out_channels)
-        self.relu = nn.ReLU(inplace=True)
-        self.downsample = None
-        if stride != 1 or in_channels != out_channels:
-            self.downsample = nn.Sequential(
-                nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, bias=False),
-                nn.BatchNorm2d(out_channels)
-            )
-
-    def forward(self, x):
-        residual = x
-        out = self.conv1(x)
-        out = self.bn1(out)
-        out = self.relu(out)
-        out = self.conv2(out)
-        out = self.bn2(out)
-        if self.downsample is not None:
-            residual = self.downsample(x)
-        out += residual
-        out = self.relu(out)
-        return out
-
 class FootstepPredictor(Module):
     def __init__(self, input_size, output_size):
         super(FootstepPredictor, self).__init__()
@@ -224,24 +196,26 @@ class FootstepPredictor(Module):
 
         # convolutional layers given a 200x200 16-bit grayscale image
         self.conv2d_1 = torch.nn.Conv2d(1, 48, kernel_size=3, stride=1, padding=1)
-        self.conv2d_2 = ResidualBlock(48, 48)
-        self.conv2d_3 = ResidualBlock(48, 48)
-        self.conv2d_4 = ResidualBlock(48, 48)
+        self.conv2d_2 = torch.nn.Conv2d(48, 96, kernel_size=3, stride=1, padding=1)
+        self.conv2d_3 = torch.nn.Conv2d(96, 48, kernel_size=3, stride=1, padding=1)
+        self.conv2d_4 = torch.nn.Conv2d(48, 32, kernel_size=3, stride=1, padding=1)
+
         self.maxpool2d_22 = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
         self.maxpool2d_44 = torch.nn.MaxPool2d(kernel_size=4, stride=4, padding=0)
 
-        self.hfc0 = torch.nn.Linear(48 * 12 * 12, 4096)
+        self.hfc0 = torch.nn.Linear(32 * 12 * 12, 4096)
         self.hbn0 = torch.nn.BatchNorm1d(4096)
         self.hfc1 = torch.nn.Linear(4096, 1024)
         self.hbn1 = torch.nn.BatchNorm1d(1024)
 
-        # fully connected layers
         self.fc0 = torch.nn.Linear(input_size, 1024)
         self.bn0 = torch.nn.BatchNorm1d(1024)
         self.dropout0 = torch.nn.Dropout(0.1)
+
         self.fc1 = torch.nn.Linear(1024 + 1024, 1024)
         self.bn1 = torch.nn.BatchNorm1d(1024)
         self.dropout1 = torch.nn.Dropout(0.1)
+        
         self.fc2 = torch.nn.Linear(1024, 1024)
         self.bn2 = torch.nn.BatchNorm1d(1024)
         self.fc3 = torch.nn.Linear(1024, 512)
@@ -280,11 +254,11 @@ class FootstepPredictor(Module):
         l1 = F.leaky_relu(l1)
         
         # print shape, mean, min, max and stddev
-        print("Shapes: ", h1.shape, l1.shape,
-            "Mean: ", round(h1.mean().item(), 3), round(l1.mean().item(), 3), 
-            "Min: ", round(h1.min().item(), 3), round(l1.min().item(), 3), 
-            "Max: ", round(h1.max().item(), 3), round(l1.max().item(), 3), 
-            "Stddev: ", round(h1.std().item(), 3), round(l1.std().item(), 3))
+        # print("Shapes: ", h1.shape, l1.shape,
+        #     "Mean: ", round(h1.mean().item(), 3), round(l1.mean().item(), 3), 
+        #     "Min: ", round(h1.min().item(), 3), round(l1.min().item(), 3), 
+        #     "Max: ", round(h1.max().item(), 3), round(l1.max().item(), 3), 
+        #     "Stddev: ", round(h1.std().item(), 3), round(l1.std().item(), 3))
 
         # flatten x1 and concatenate with x2
         x = torch.cat((h1, l1), dim=1)
@@ -328,6 +302,12 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
     input_size = train_dataset[0][1].shape[0]
     output_size = train_dataset[0][2].shape[0]
     model = FootstepPredictor(input_size, output_size).to(device)
+
+    # load weights from previously trained model to start from where it left off
+    model_files = sorted([name for name in os.listdir(model_path) if name.endswith('.pt')])
+    if len(model_files) > 0:
+        print("Loading Model: ", model_files[-1])
+        model.load_state_dict(torch.load(model_path + model_files[-1]))
 
     # define optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay = 1e-8)
@@ -416,6 +396,10 @@ def load_validate(val_dataset, batch_size, model_path):
 
             # get only the first 4 steps
             predict_output = predict_output[0:3*n_steps, :].reshape((n_steps, 3))
+            target_output = target_output[0:3*n_steps].reshape((n_steps, 3))
+
+            # compute loss
+            print_loss(predict_output, target_output, contact_map)
 
             visualize_output(height_map_input, linear_input, predict_output, contact_map, terrain_cost, label="Prediction")
             visualize_output(height_map_input, linear_input, target_output, contact_map, terrain_cost, label="Target")
@@ -473,7 +457,7 @@ def load_dataset(validation_split):
     files = [file for file in files if any(label in file for label in labels)]
     
 
-    # files = files[:5]
+    files = files[:total_files]
 
     
     datasets = []
@@ -508,27 +492,88 @@ def footstep_loss(output, target, contact_map):
 
     # print("Output Shape: ", output.shape, "Target Shape: ", target.shape, "Contact Map Shape: ", contact_map.shape)
 
-    output_reshaped = torch.reshape(output, (-1, 4, 3))
-    fx = output_reshaped[:, :, 0]
-    fy = output_reshaped[:, :, 1]
-    contact = contact_map[:, 0, fx.long(), fy.long()]  # Fix: Use contact_map provided in batch
-    contact_loss = torch.sum(255 - contact)
+    # output_reshaped = torch.reshape(output, (-1, 4, 3))
+    # fx = output_reshaped[:, :, 0]
+    # fy = output_reshaped[:, :, 1]
+    # contact = contact_map[:, 0, fx.long(), fy.long()]  # Fix: Use contact_map provided in batch
+    # contact_loss = -contact
 
-    loss = torch.nn.L1Loss()(output, target)
-    return loss
+    # sum the contact map values at the predicted footstep locations and use it as a loss
+    fx = (output[:, 0] * 50 + 100)
+    fy = (output[:, 1] * 50 + 100)
+
+    # put limits on the indices
+    fx = torch.clamp(fx, 0, 199)
+    fy = torch.clamp(fy, 0, 199)
+
+    # cast to long
+    fx = fx.long()
+    fy = fy.long()
+
+    contact_vector = contact_map[0, 0, fx, fy]
+    total_contact_score = torch.sum(contact_vector)
+    contact_loss = torch.square(1.0 - total_contact_score / 255)
+    l1_loss = torch.nn.L1Loss()(output, target)
+
+    return l1_loss + contact_loss
+
+def print_loss(output, target, contact_map):
+    
+    print("Shapes: ", output.shape, target.shape, contact_map.shape)
+
+    # sum the contact map values at the predicted footstep locations and use it as a loss
+    fx = (output[:, 0] * 50 + 100)
+    fy = (output[:, 1] * 50 + 100)
+    
+
+    # put limits on the indices
+    fx = torch.clamp(fx, 0, 199)
+    fy = torch.clamp(fy, 0, 199)
+
+
+    # cast to long
+    fx = fx.long()
+    fy = fy.long()
+
+    print("X_Indices: ", fx)
+    print("Y_Indices: ", fy)
+
+    # maximize the sum in the loss
+    contact_vector = contact_map[0, 0, fx, fy]
+    total_contact_score = torch.sum(contact_vector)
+    contact_loss = torch.square(1.0 - total_contact_score / 255)
+    
+    l1_loss = torch.nn.L1Loss()(output, target)
+
+    print("Output: ", output)
+    print("Contact Vector: ", contact_vector)
+    print("Total Contact Score: ", total_contact_score.item())
+    print("L1 Loss: ", l1_loss.item(), "Contact Loss: ", contact_loss.item())
 
 if __name__ == "__main__":
 
     home = os.path.expanduser('~')
     model_path = home + '/Downloads/Model_Weights/'
     datasets_path = home + '/Downloads/Planning_Datasets/'
+    train = False
+    total_files = 2
+
+    # use arg parser 
+    import argparse
+    parser = argparse.ArgumentParser(description='Footstep Prediction Trainer')
+    parser.add_argument('--train', action='store_true', help='Train the model')
+
+    args = parser.parse_args()
+    train = args.train
+
+    if train:
+        total_files = -1
 
     n_steps = 4
 
     # load dataset
     train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
-    train = False
     visualize_raw = False
 
     if visualize_raw:
