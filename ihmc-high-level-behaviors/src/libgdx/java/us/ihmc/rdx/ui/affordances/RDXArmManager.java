@@ -33,6 +33,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
 
+import java.util.function.BooleanSupplier;
+
 /**
  * This class manages the UI for operating the arms of a humanoid robot.
  * This includes sending the arms to predefined joint angles poses and
@@ -61,6 +63,7 @@ public class RDXArmManager
 
    private final RDXTeleoperationParameters teleoperationParameters;
    private final SideDependentList<RDXInteractableHand> interactableHands;
+   private final BooleanSupplier enableWholeBodyIK;
 
    private final SideDependentList<ArmJointName[]> armJointNames = new SideDependentList<>();
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINTSPACE;
@@ -86,7 +89,8 @@ public class RDXArmManager
                         ROS2SyncedRobotModel syncedRobot,
                         RDXDesiredRobot desiredRobot,
                         RDXTeleoperationParameters teleoperationParameters,
-                        SideDependentList<RDXInteractableHand> interactableHands)
+                        SideDependentList<RDXInteractableHand> interactableHands,
+                        BooleanSupplier enableWholeBodyIK)
    {
       this.communicationHelper = communicationHelper;
       this.robotModel = robotModel;
@@ -94,6 +98,7 @@ public class RDXArmManager
       this.desiredRobot = desiredRobot;
       this.teleoperationParameters = teleoperationParameters;
       this.interactableHands = interactableHands;
+      this.enableWholeBodyIK = enableWholeBodyIK;
 
       for (RobotSide side : RobotSide.values)
       {
@@ -139,7 +144,7 @@ public class RDXArmManager
          }
       }
 
-      if (interactablesEnabled)
+      if (!enableWholeBodyIK.getAsBoolean() && interactablesEnabled)
       {
          boolean desiredHandPoseChanged = false;
          for (RobotSide side : interactableHands.sides())

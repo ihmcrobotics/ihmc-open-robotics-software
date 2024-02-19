@@ -10,10 +10,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointTorqueSoftLimitWeightCalculator;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
@@ -35,18 +38,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 
 /**
- * Used for finding IK solutions for various sets of end effectors.
- * Can solve:
- * - Chest to one hand
- * - Chest to both hands
- * - Pelvis to one hand
- * - Pelvis to both hands
- * - Pelvis to one foot
- * - Pelvis to two feet
- *
- * For example, solving chest to one arm, pelvis to one
- *
- * Uses the WholeBodyControllerCore for solving.
+ * A humanoid whole body IK solver using the WholeBodyControllerCore for solving.
  *
  * This class won't deal with stance feet i.e. controlling bodies to stay in the same place.
  * That's for the user to handle.
@@ -61,7 +53,9 @@ public class HumanoidIKSolver
    public static final double GOOD_QUALITY_MAX = 1.0;
    private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 70;
 
-   private RigidBodyBasics workPelvis;
+   private final RigidBodyBasics workElevator;
+   private final SixDoFJoint workPelvisSixDoFJoint;
+   private final FramePose3D pelvisFramePose = new FramePose3D();
    private final OneDoFJointBasics[] sourceOneDoFJoints;
    private final OneDoFJointBasics[] workingOneDoFJoints;
    private final ReferenceFrame centerOfMassFrame;
@@ -72,6 +66,7 @@ public class HumanoidIKSolver
    private final InverseKinematicsOptimizationSettingsCommand activeOptimizationSettings = new InverseKinematicsOptimizationSettingsCommand();
    private final WholeBodyControllerCore controllerCore;
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand();
+   private final CenterOfMassFeedbackControlCommand centerOfMassFeedbackControlCommand = new CenterOfMassFeedbackControlCommand();
    private final ArrayList<SpatialFeedbackControlCommand> spatialFeedbackControlCommands = new ArrayList<>();
    private final ArrayList<SpatialVelocityCommand> spatialVelocityCommands = new ArrayList<>();
    private final KinematicsSolutionQualityCalculator solutionQualityCalculator = new KinematicsSolutionQualityCalculator();
@@ -87,14 +82,15 @@ public class HumanoidIKSolver
    {
       sourceOneDoFJoints = MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, sourceFullRobotModel.getPelvis());
 
-      workPelvis = MultiBodySystemMissingTools.getDetachedCopyOfSubtreeWithElevator(sourceFullRobotModel.getPelvis());
-      workingOneDoFJoints = MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, workPelvis);
-      centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), workPelvis);
+      workElevator = MultiBodySystemMissingTools.getDetachedCopyOfSubtreeWithElevator(sourceFullRobotModel.getPelvis());
+      workPelvisSixDoFJoint = (SixDoFJoint) workElevator.getChildrenJoints().get(0);
+      workingOneDoFJoints = MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, workElevator);
+      centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), workElevator);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = null; // opt out
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(CONTROL_DT,
                                                                             GRAVITY,
-                                                                            (SixDoFJoint) workPelvis.getParentJoint(),
+                                                                            workPelvisSixDoFJoint,
                                                                             workingOneDoFJoints,
                                                                             centerOfMassFrame,
                                                                             optimizationSettings,
@@ -122,36 +118,18 @@ public class HumanoidIKSolver
 
       for (RobotSide side : RobotSide.values)
          if (jointNameMap.getHandName(side) != null) // Account for one handed robots
-            hands.set(side, HumanoidIKSolverControlledBody.createHand(workPelvis, sourceFullRobotModel, jointNameMap, side));
-      chest = HumanoidIKSolverControlledBody.createChest(workPelvis, sourceFullRobotModel, jointNameMap);
-      pelvis = HumanoidIKSolverControlledBody.createPelvis(workPelvis, sourceFullRobotModel, jointNameMap);
+            hands.set(side, HumanoidIKSolverControlledBody.createHand(workElevator, sourceFullRobotModel, jointNameMap, side));
+      chest = HumanoidIKSolverControlledBody.createChest(workElevator, sourceFullRobotModel, jointNameMap);
+      pelvis = HumanoidIKSolverControlledBody.createPelvis(workElevator, sourceFullRobotModel, jointNameMap);
       for (RobotSide side : RobotSide.values)
-         feet.set(side, HumanoidIKSolverControlledBody.createFoot(workPelvis, sourceFullRobotModel, jointNameMap, side));
+         feet.set(side, HumanoidIKSolverControlledBody.createFoot(workElevator, sourceFullRobotModel, jointNameMap, side));
    }
 
-   public void copySourceToWork()
+   public void copySourceToWork(ReferenceFrame sourcePelvisFrame)
    {
+      pelvisFramePose.setFromReferenceFrame(sourcePelvisFrame);
+      workPelvisSixDoFJoint.setJointConfiguration(pelvisFramePose);
       MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(sourceOneDoFJoints, workingOneDoFJoints);
-   }
-
-   public SideDependentList<HumanoidIKSolverControlledBody> getHands()
-   {
-      return hands;
-   }
-
-   public SideDependentList<HumanoidIKSolverControlledBody> getFeet()
-   {
-      return feet;
-   }
-
-   public HumanoidIKSolverControlledBody getChest()
-   {
-      return chest;
-   }
-
-   public HumanoidIKSolverControlledBody getPelvis()
-   {
-      return pelvis;
    }
 
    /**
@@ -159,9 +137,7 @@ public class HumanoidIKSolver
     */
    public void solve()
    {
-      copySourceToWork();
-      workPelvis.updateFramesRecursively();
-      centerOfMassFrame.update();
+      workElevator.updateFramesRecursively();
 
       spatialFeedbackControlCommands.clear();
       for (RobotSide side : RobotSide.values)
@@ -178,6 +154,8 @@ public class HumanoidIKSolver
 
       for (int i = 0; i < INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE; i++)
       {
+         centerOfMassFrame.update();
+
          controllerCoreCommand.clear();
          controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
          for (SpatialFeedbackControlCommand spatialFeedbackControlCommand : spatialFeedbackControlCommands)
@@ -216,7 +194,7 @@ public class HumanoidIKSolver
          if (!jointIsMoving)
             break;
 
-         workPelvis.updateFramesRecursively();
+         workElevator.updateFramesRecursively();
       }
 
       double totalRobotMass = 0.0; // We don't need this parameter
@@ -227,6 +205,37 @@ public class HumanoidIKSolver
       }
    }
 
+   public void clearCommands()
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         hands.get(side).setActive(false);
+         feet.get(side).setActive(false);
+      }
+      chest.setActive(false);
+      pelvis.setActive(false);
+   }
+
+   public SideDependentList<HumanoidIKSolverControlledBody> getHands()
+   {
+      return hands;
+   }
+
+   public SideDependentList<HumanoidIKSolverControlledBody> getFeet()
+   {
+      return feet;
+   }
+
+   public HumanoidIKSolverControlledBody getChest()
+   {
+      return chest;
+   }
+
+   public HumanoidIKSolverControlledBody getPelvis()
+   {
+      return pelvis;
+   }
+
    public double getQuality()
    {
       return quality;
@@ -235,5 +244,17 @@ public class HumanoidIKSolver
    public OneDoFJointBasics[] getSolutionOneDoFJoints()
    {
       return workingOneDoFJoints;
+   }
+
+//   public Pose3DReadOnly getPelvisPose()
+//   {
+//      pelvisFramePose.set(workPelvisSixDoFJoint.getJointPose());
+//      pelvisFramePose.setToZero(worldFrame);
+//      pelvisFramePose.set(workPelvisSixDoFJoint.getJointPose());
+//   }
+
+   public SixDoFJoint getSolutionPelvisSixDoFJoint()
+   {
+      return workPelvisSixDoFJoint;
    }
 }
