@@ -144,19 +144,22 @@ public class RDXArmManager
          boolean desiredHandPoseChanged = false;
          for (RobotSide side : interactableHands.sides())
          {
-            armIKSolvers.get(side).update(syncedRobot.getReferenceFrames().getChestFrame(), interactableHands.get(side).getControlReferenceFrame());
-
             // wrench expressed in wrist pitch body fixed-frame
             if (interactableHands.get(side).getEstimatedHandWrenchArrows().getShow() != showWrench)
                interactableHands.get(side).getEstimatedHandWrenchArrows().setShow(showWrench);
             interactableHands.get(side).updateEstimatedWrench(syncedRobot.getHandWrenchCalculators().get(side).getFilteredWrench());
 
-            // Check if the desired hand pose changed and we need to run the solver again.
-            // We only want to evaluate this when we are going to take action on it
-            // Otherwise, we will not notice the desired changed while the solver was still solving
-            if (readyToSolve)
+            if (!interactableHands.get(side).isDeleted())
             {
-               desiredHandPoseChanged |= armIKSolvers.get(side).getDesiredHandControlPoseChanged();
+               armIKSolvers.get(side).update(syncedRobot.getReferenceFrames().getChestFrame(), interactableHands.get(side).getControlReferenceFrame());
+
+               // Check if the desired hand pose changed and we need to run the solver again.
+               // We only want to evaluate this when we are going to take action on it
+               // Otherwise, we will not notice the desired changed while the solver was still solving
+               if (readyToSolve)
+               {
+                  desiredHandPoseChanged |= armIKSolvers.get(side).getDesiredHandControlPoseChanged();
+               }
             }
          }
 
