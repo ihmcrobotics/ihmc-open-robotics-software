@@ -116,6 +116,9 @@ public class HumanoidIKSolver
 
       controllerCoreCommand.setControllerCoreMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
 
+      centerOfMassFeedbackControlCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
+      centerOfMassFeedbackControlCommand.getGains().setProportionalGains(1200.0);
+
       for (RobotSide side : RobotSide.values)
          if (jointNameMap.getHandName(side) != null) // Account for one handed robots
             hands.set(side, HumanoidIKSolverControlledBody.createHand(workElevator, sourceFullRobotModel, jointNameMap, side));
