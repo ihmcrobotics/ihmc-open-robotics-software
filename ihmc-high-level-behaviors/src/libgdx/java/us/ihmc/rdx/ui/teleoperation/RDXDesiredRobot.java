@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui.teleoperation;
 
 import com.badlogic.gdx.graphics.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -30,7 +29,6 @@ import java.util.List;
  */
 public class RDXDesiredRobot extends RDXMultiBodyGraphic
 {
-   private final ROS2SyncedRobotModel syncedRobotModel;
    private final DRCRobotModel robotModel;
    private RobotDefinition robotDefinition;
    private final FullHumanoidRobotModel desiredFullRobotModel;
@@ -44,12 +42,11 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
    private final SideDependentList<Boolean> legShowing = new SideDependentList<>(false, false);
    private final SideDependentList<Color> currentArmColors = new SideDependentList<>();
 
-   public RDXDesiredRobot(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
+   public RDXDesiredRobot(DRCRobotModel robotModel)
    {
       super(robotModel.getSimpleRobotName() + " Desired Robot Visualizer");
 
       this.robotModel = robotModel;
-      this.syncedRobotModel = syncedRobotModel;
       desiredFullRobotModel = robotModel.createFullRobotModel();
 
       pelvisRigidBodyName = robotModel.getJointMap().getPelvisName();
