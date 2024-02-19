@@ -422,6 +422,7 @@ public class RDXTeleoperationManager extends RDXPanel
                if (!interactableChest.isDeleted())
                {
                   chestRigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactableChest.getControlReferenceFrame());
+                  wholeBodyIKSolver.submit(chestRigidBodyCommand);
                }
 
                wholeBodyIKSolver.solve();
