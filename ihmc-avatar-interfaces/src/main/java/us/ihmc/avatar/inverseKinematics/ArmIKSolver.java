@@ -125,7 +125,7 @@ public class ArmIKSolver
     */
    public void update(ReferenceFrame chestFrame, ReferenceFrame handControlDesiredFrame)
    {
-      hand.update(chestFrame, handControlDesiredFrame);
+      hand.updateDesiredPose(chestFrame, handControlDesiredFrame);
    }
 
    public boolean getDesiredHandControlPoseChanged()
@@ -202,7 +202,8 @@ public class ArmIKSolver
       solve();
 
       // Populate the spatial velocity for the IK command list
-      SpatialVelocityCommand spatialVelocityCommand = hand.buildSpatialVelocityCommand(desiredAngularVelocity, desiredLinearVelocity);
+      hand.updateDesiredVelocity(desiredAngularVelocity, desiredLinearVelocity);
+      SpatialVelocityCommand spatialVelocityCommand = hand.buildSpatialVelocityCommand();
 
       // Populate the commands list with the settings and spatial velocity
       controllerCoreCommand.clear();

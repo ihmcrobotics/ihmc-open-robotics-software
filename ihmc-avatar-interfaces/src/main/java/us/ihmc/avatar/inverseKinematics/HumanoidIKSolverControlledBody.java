@@ -41,6 +41,9 @@ public class HumanoidIKSolverControlledBody
    private final FrameVector3D bodyDesiredAngularVelocity = new FrameVector3D();
    private final FrameVector3D bodyDesiredLinearVelocity = new FrameVector3D();
 
+   /** If commands should be submitted to the controller core. */
+   private boolean active = true;
+
    public static HumanoidIKSolverControlledBody createHand(RigidBodyBasics workRootBody,
                                                            FullHumanoidRobotModel sourceFullRobotModel,
                                                            HumanoidJointNameMap jointNameMap,
@@ -114,7 +117,7 @@ public class HumanoidIKSolverControlledBody
     * matches the given controlled body control frame, which is either the frame after parent, palm,
     * or sole frame usually.
     */
-   public void update(ReferenceFrame rootBodyFrame, ReferenceFrame bodyControlDesiredFrame)
+   public void updateDesiredPose(ReferenceFrame rootBodyFrame, ReferenceFrame bodyControlDesiredFrame)
    {
       // Since this is temporarily modifying the desired pose, and it's passed
       // to the WBCC command on another thread below, we need to synchronize.
@@ -133,6 +136,18 @@ public class HumanoidIKSolverControlledBody
          // TODO: Check on this frame, probably related to the clone stationary frame
          bodyControlDesiredPose.setToZero(ReferenceFrame.getWorldFrame());
          bodyControlDesiredPose.set(bodyControlDesiredPoseToRootCoMTransform);
+      }
+   }
+
+   public void updateDesiredVelocity(FrameVector3DReadOnly bodyDesiredAngularVelocityReadOnly,
+                                     FrameVector3DReadOnly bodyDesiredLinearVelocityReadOnly)
+   {
+      synchronized (bodyDesiredAngularVelocity)
+      {
+         bodyDesiredAngularVelocity.setIncludingFrame(bodyDesiredAngularVelocityReadOnly);
+         bodyDesiredLinearVelocity.setIncludingFrame(bodyDesiredLinearVelocityReadOnly);
+         bodyDesiredAngularVelocity.changeFrame(workBody.getBodyFixedFrame());
+         bodyDesiredLinearVelocity.changeFrame(workBody.getBodyFixedFrame());
       }
    }
 
@@ -157,23 +172,30 @@ public class HumanoidIKSolverControlledBody
       return spatialFeedbackControlCommand;
    }
 
-   public SpatialVelocityCommand buildSpatialVelocityCommand(FrameVector3DReadOnly bodyDesiredAngularVelocityReadOnly,
-                                                             FrameVector3DReadOnly bodyDesiredLinearVelocityReadOnly)
+   public SpatialVelocityCommand buildSpatialVelocityCommand()
    {
-      bodyDesiredAngularVelocity.setIncludingFrame(bodyDesiredAngularVelocityReadOnly);
-      bodyDesiredLinearVelocity.setIncludingFrame(bodyDesiredLinearVelocityReadOnly);
-      bodyDesiredAngularVelocity.changeFrame(workBody.getBodyFixedFrame());
-      bodyDesiredLinearVelocity.changeFrame(workBody.getBodyFixedFrame());
-
       spatialVelocityCommand.set(workRootBody, workBody);
       spatialVelocityCommand.setSelectionMatrix(selectionMatrix);
       spatialVelocityCommand.setWeightMatrix(weightMatrix);
-      spatialVelocityCommand.setSpatialVelocity(workBody.getBodyFixedFrame(), bodyDesiredAngularVelocity, bodyDesiredLinearVelocity);
+      synchronized (bodyDesiredAngularVelocity)
+      {
+         spatialVelocityCommand.setSpatialVelocity(workBody.getBodyFixedFrame(), bodyDesiredAngularVelocity, bodyDesiredLinearVelocity);
+      }
       return spatialVelocityCommand;
    }
 
    public RigidBodyBasics getWorkBody()
    {
       return workBody;
+   }
+
+   public void setActive(boolean active)
+   {
+      this.active = active;
+   }
+
+   public boolean getActive()
+   {
+      return active;
    }
 }
