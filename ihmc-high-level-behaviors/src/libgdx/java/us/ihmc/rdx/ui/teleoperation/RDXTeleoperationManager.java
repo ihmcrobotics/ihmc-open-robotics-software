@@ -17,6 +17,8 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
@@ -302,9 +304,14 @@ public class RDXTeleoperationManager extends RDXPanel
                   {
                      RDXInteractableFoot interactableFoot = new RDXInteractableFoot(side, baseUI, robotCollidable, robotModel, fullRobotModel);
                      interactableFoot.setActionExecutor(() ->
-                             ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side,
-                                                                                                             teleoperationParameters.getTrajectoryTime(),
-                                                                                                             interactableFoot.getPose())));
+                     {
+                        FramePose3D afterAnklePose = new FramePose3D();
+                        afterAnklePose.setToZero(interactableFoot.getLinkFrame());
+                        afterAnklePose.changeFrame(ReferenceFrame.getWorldFrame());
+                        ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side,
+                                                                                                        teleoperationParameters.getTrajectoryTime(),
+                                                                                                        afterAnklePose));
+                     });
                      interactableFeet.put(side, interactableFoot);
                      allInteractableRobotLinks.add(interactableFoot);
                   }
