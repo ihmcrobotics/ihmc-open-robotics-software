@@ -44,7 +44,6 @@ import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -68,7 +67,6 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 {
@@ -99,8 +97,10 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private FeedbackControlCommand<?> heightControlCommand;
 
    private double omega0;
-   private YoDouble totalMass;
+   private double totalMass;
    private double gravityZ;
+
+   private final RigidBodyReadOnly elevator;
 
    private final ReferenceFrame centerOfMassFrame;
    private final FramePoint3D centerOfMass;
@@ -162,8 +162,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 
    private final LinearMomentumRateControlModuleOutput output = new LinearMomentumRateControlModuleOutput();
 
-   private final RigidBodyReadOnly rootBody;
-
    public LinearMomentumRateControlModule(HighLevelHumanoidControllerToolbox controllerToolbox,
                                           WalkingControllerParameters walkingControllerParameters,
                                           YoRegistry parentRegistry)
@@ -189,9 +187,10 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
                                           YoRegistry parentRegistry,
                                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.totalMass = new YoDouble("totalMass", registry);
-      totalMass.set(TotalMassCalculator.computeSubTreeMass(elevator));
+      this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       this.gravityZ = gravityZ;
+
+      this.elevator = elevator;
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
@@ -263,8 +262,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       {
          icpController = new ICPController(walkingControllerParameters, icpControlPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       }
-
-      rootBody = elevator;
 
       parentRegistry.addChild(registry);
    }
@@ -372,6 +369,8 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
     */
    public boolean computeControllerCoreCommands()
    {
+      totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
+
       capturePointCalculator.compute(capturePoint, omega0);
       capturePointVelocity.update(capturePoint);
 
@@ -426,13 +425,11 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
          return;
       }
 
-      totalMass.set(TotalMassCalculator.computeSubTreeMass(rootBody));
-
       centerOfMass2d.setToZero(centerOfMassFrame);
       centerOfMass2d.changeFrame(worldFrame);
 
       achievedCoMAcceleration2d.setIncludingFrame(achievedLinearMomentumRate);
-      achievedCoMAcceleration2d.scale(1.0 / totalMass.getValue());
+      achievedCoMAcceleration2d.scale(1.0 / totalMass);
       achievedCoMAcceleration2d.changeFrame(worldFrame);
 
       achievedCMP.set(achievedCoMAcceleration2d);
@@ -554,14 +551,12 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    {
       boolean success = true;
 
-      totalMass.set(TotalMassCalculator.computeSubTreeMass(rootBody));
-
-      double fZ = WrenchDistributorTools.computeFz(totalMass.getDoubleValue(), gravityZ, desiredCoMHeightAcceleration);
+      double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
       centerOfMass.setToZero(centerOfMassFrame);
-      WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, desiredCMP, fZ, totalMass.getDoubleValue(), omega0);
+      WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, desiredCMP, fZ, totalMass, omega0);
       WrenchDistributorTools.computeForce(linearMomentumRateOfChange, centerOfMass, cmp3d, fZ);
       linearMomentumRateOfChange.checkReferenceFrameMatch(centerOfMassFrame);
-      linearMomentumRateOfChange.setZ(linearMomentumRateOfChange.getZ() - totalMass.getDoubleValue() * gravityZ);
+      linearMomentumRateOfChange.setZ(linearMomentumRateOfChange.getZ() - totalMass * gravityZ);
 
       if (linearMomentumRateOfChange.containsNaN())
       {
@@ -571,7 +566,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       }
 
       controlledCoMAcceleration.set(linearMomentumRateOfChange);
-      controlledCoMAcceleration.scale(1.0 / totalMass.getValue());
+      controlledCoMAcceleration.scale(1.0 / totalMass);
       linearMomentumRateOfChange.changeFrame(worldFrame);
 
       return success;
