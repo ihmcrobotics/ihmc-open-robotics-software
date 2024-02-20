@@ -1,35 +1,21 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus;
-import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.createFullRobotModelAtInitialConfiguration;
-import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData;
-import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.RelativeEndEffectorControlTest.circlePositionAt;
-
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.DoubleFunction;
-
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
@@ -85,6 +71,18 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.DoubleFunction;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.*;
+import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.RelativeEndEffectorControlTest.circlePositionAt;
+
 @Tag("humanoid-toolbox")
 public abstract class KinematicsStreamingToolboxControllerTest
 {
@@ -119,7 +117,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
     */
    public abstract DRCRobotModel newRobotModel();
 
-   public void setupWithWalkingController(Controller... additionalGhostControllers)
+   public void setupWithWalkingController(KinematicsStreamingToolboxParameters toolboxParameters, Controller... additionalGhostControllers)
    {
       DRCRobotModel robotModel = newRobotModel();
       RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
@@ -140,7 +138,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.addSecondaryRobot(ghost);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
-      createToolboxController(robotModel, collisionModel);
+      createToolboxController(robotModel, toolboxParameters, collisionModel);
 
       ros2Node = simulationTestHelper.getROS2Node();
 
@@ -216,7 +214,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       robotDefinition.ignoreAllJoints();
       addCollisionVisuals(robotModel, collisionModel, robotDefinition);
       robot = new Robot(robotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
-      createToolboxController(robotModel, collisionModel);
+      createToolboxController(robotModel, null, collisionModel);
 
       RobotDefinition ghostDefinition = new RobotDefinition(robotModel.getRobotDefinition());
       RobotDefinitionTools.setRobotDefinitionMaterial(ghostDefinition, ghostMaterial);
@@ -257,7 +255,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       }
    }
 
-   private void createToolboxController(DRCRobotModel robotModel, RobotCollisionModel collisionModel)
+   private void createToolboxController(DRCRobotModel robotModel, KinematicsStreamingToolboxParameters toolboxParameters, RobotCollisionModel collisionModel)
    {
       desiredFullRobotModel = robotModel.createFullRobotModel();
       toolboxRegistry = new YoRegistry("toolboxMain");
@@ -265,8 +263,12 @@ public abstract class KinematicsStreamingToolboxControllerTest
       commandInputManager = new CommandInputManager(KinematicsStreamingToolboxModule.supportedCommands());
       statusOutputManager = new StatusMessageOutputManager(KinematicsStreamingToolboxModule.supportedStatus());
 
+      if (toolboxParameters == null)
+         toolboxParameters = KinematicsStreamingToolboxParameters.defaultParameters();
+
       toolboxController = new KinematicsStreamingToolboxController(commandInputManager,
                                                                    statusOutputManager,
+                                                                   toolboxParameters,
                                                                    desiredFullRobotModel,
                                                                    robotModel,
                                                                    robotModel.getControllerDT(),
@@ -319,8 +321,9 @@ public abstract class KinematicsStreamingToolboxControllerTest
       double circleRadius = 0.25;
       double circleFrequency = 0.25;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(side -> new Point3D(0.2, side.negateIfRightSide(0.225), 1.0));
-      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ? new Vector3D(0.0, 0.0, 0.0)
-            : new Vector3D());
+      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ?
+            new Vector3D(0.0, 0.0, 0.0) :
+            new Vector3D());
 
       double toolboxControllerPeriod = toolboxController.getTools().getToolboxControllerPeriod();
 
@@ -405,20 +408,34 @@ public abstract class KinematicsStreamingToolboxControllerTest
    @Test
    public void testStreamingToController()
    {
+      testStreamingToController(0.15, 0.25);
+   }
+
+   public void testStreamingToController(double handPositionMeanErrorThreshold, double handOrientationMeanErrorThreshold)
+   {
+      testStreamingToController(new IKStreamingTestRunParameters(null,
+                                                                 handPositionMeanErrorThreshold,
+                                                                 handOrientationMeanErrorThreshold,
+                                                                 0.01,
+                                                                 circleMessageGenerator(newRobotModel().createFullRobotModel(), true, 0.125)));
+   }
+
+   public void testStreamingToController(IKStreamingTestRunParameters IKStreamingTestRunParameters)
+   {
       YoRegistry spyRegistry = new YoRegistry("spy");
       YoDouble handPositionMeanError = new YoDouble("HandsPositionMeanError", spyRegistry);
       YoDouble handOrientationMeanError = new YoDouble("HandsOrientationMeanError", spyRegistry);
 
-      setupWithWalkingController(new Controller()
+      setupWithWalkingController(IKStreamingTestRunParameters.toolboxParameters(), new Controller()
       {
-         private final SideDependentList<YoFramePose3D> handDesiredPoses = new SideDependentList<>(side -> new YoFramePose3D(side.getCamelCaseName()
-               + "HandDesired", worldFrame, spyRegistry));
-         private final SideDependentList<YoFramePose3D> handCurrentPoses = new SideDependentList<>(side -> new YoFramePose3D(side.getCamelCaseName()
-               + "HandCurrent", worldFrame, spyRegistry));
-         private final SideDependentList<YoDouble> handPositionErrors = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseName()
-               + "HandPositionError", spyRegistry));
-         private final SideDependentList<YoDouble> handOrientationErrors = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseName()
-               + "HandOrientationError", spyRegistry));
+         private final SideDependentList<YoFramePose3D> handDesiredPoses = new SideDependentList<>(side -> new YoFramePose3D(
+               side.getCamelCaseName() + "HandDesired", worldFrame, spyRegistry));
+         private final SideDependentList<YoFramePose3D> handCurrentPoses = new SideDependentList<>(side -> new YoFramePose3D(
+               side.getCamelCaseName() + "HandCurrent", worldFrame, spyRegistry));
+         private final SideDependentList<YoDouble> handPositionErrors = new SideDependentList<>(side -> new YoDouble(
+               side.getCamelCaseName() + "HandPositionError", spyRegistry));
+         private final SideDependentList<YoDouble> handOrientationErrors = new SideDependentList<>(side -> new YoDouble(
+               side.getCamelCaseName() + "HandOrientationError", spyRegistry));
          private YoDouble time;
          private YoBoolean isStreaming;
          private YoDouble streamingStartTime;
@@ -500,7 +517,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       wakeupToolbox();
 
-      ScheduledFuture<?> scheduleMessageGenerator = scheduleMessageGenerator(0.01, circleMessageGenerator(newRobotModel().createFullRobotModel(), true, 0.125));
+      ScheduledFuture<?> scheduleMessageGenerator = scheduleMessageGenerator(IKStreamingTestRunParameters.messageGeneratorDT(),
+                                                                             IKStreamingTestRunParameters.messageGenerator());
 
       success = simulationTestHelper.simulateNow(10.0);
       assertTrue(success);
@@ -520,8 +538,10 @@ public abstract class KinematicsStreamingToolboxControllerTest
       assertNotEquals(0.0, handOrientationMeanError.getValue());
       // TODO Pretty bad assertions here, need to figure out how to improve this test later.
       System.out.println("Position error avg: " + handPositionMeanError.getValue() + ", orientation error avg: " + handOrientationMeanError.getValue());
-      assertTrue(handPositionMeanError.getValue() < 0.15, "Mean position error is: " + handPositionMeanError.getValue());
-      assertTrue(handOrientationMeanError.getValue() < 0.25, "Mean orientation error is: " + handOrientationMeanError.getValue());
+      assertTrue(handPositionMeanError.getValue() < IKStreamingTestRunParameters.handPositionMeanErrorThreshold(),
+                 "Mean position error is: " + handPositionMeanError.getValue());
+      assertTrue(handOrientationMeanError.getValue() < IKStreamingTestRunParameters.handOrientationMeanErrorThreshold(),
+                 "Mean orientation error is: " + handOrientationMeanError.getValue());
    }
 
    public static DoubleFunction<KinematicsStreamingToolboxInputMessage> circleMessageGenerator(FullHumanoidRobotModel fullRobotModel,
@@ -530,8 +550,9 @@ public abstract class KinematicsStreamingToolboxControllerTest
    {
       double circleRadius = 0.25;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(side -> new Point3D(0.3, side.negateIfRightSide(0.225), 1.0));
-      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ? new Vector3D(0.0, 0.0, 0.0)
-            : new Vector3D());
+      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ?
+            new Vector3D(0.0, 0.0, 0.0) :
+            new Vector3D());
 
       return new DoubleFunction<KinematicsStreamingToolboxInputMessage>()
       {
@@ -578,12 +599,94 @@ public abstract class KinematicsStreamingToolboxControllerTest
    public static List<VisualDefinition> getCollisionVisuals(Collidable collidable)
    {
       Shape3DReadOnly shape = collidable.getShape();
-      RigidBodyTransform transformToParentJoint = collidable.getShape().getReferenceFrame()
+      RigidBodyTransform transformToParentJoint = collidable.getShape()
+                                                            .getReferenceFrame()
                                                             .getTransformToDesiredFrame(collidable.getRigidBody().getParentJoint().getFrameAfterJoint());
       VisualDefinitionFactory visualFactory = new VisualDefinitionFactory();
       visualFactory.appendTransform(transformToParentJoint);
       visualFactory.setDefaultMaterial(ColorDefinitions.DarkGreen().derive(0, 1, 1, 0.5));
       visualFactory.addShape(shape);
       return visualFactory.getVisualDefinitions();
+   }
+
+   public static final class IKStreamingTestRunParameters
+   {
+      private KinematicsStreamingToolboxParameters toolboxParameters = KinematicsStreamingToolboxParameters.defaultParameters();
+      private double handPositionMeanErrorThreshold = 0.15;
+      private double handOrientationMeanErrorThreshold = 0.25;
+      private double messageGeneratorDT = 0.01;
+      private DoubleFunction<KinematicsStreamingToolboxInputMessage> messageGenerator;
+
+      public IKStreamingTestRunParameters(KinematicsStreamingToolboxParameters toolboxParameters,
+                                          double handPositionMeanErrorThreshold,
+                                          double handOrientationMeanErrorThreshold,
+                                          double messageGeneratorDT,
+                                          DoubleFunction<KinematicsStreamingToolboxInputMessage> messageGenerator)
+      {
+         this.toolboxParameters = toolboxParameters;
+         this.handPositionMeanErrorThreshold = handPositionMeanErrorThreshold;
+         this.handOrientationMeanErrorThreshold = handOrientationMeanErrorThreshold;
+         this.messageGeneratorDT = messageGeneratorDT;
+         this.messageGenerator = messageGenerator;
+      }
+
+      public void setToolboxParameters(KinematicsStreamingToolboxParameters toolboxParameters)
+      {
+         this.toolboxParameters = toolboxParameters;
+      }
+
+      public KinematicsStreamingToolboxParameters toolboxParameters()
+      {
+         return toolboxParameters;
+      }
+
+      public double handPositionMeanErrorThreshold()
+      {
+         return handPositionMeanErrorThreshold;
+      }
+
+      public double handOrientationMeanErrorThreshold()
+      {
+         return handOrientationMeanErrorThreshold;
+      }
+
+      public double messageGeneratorDT()
+      {
+         return messageGeneratorDT;
+      }
+
+      public DoubleFunction<KinematicsStreamingToolboxInputMessage> messageGenerator()
+      {
+         return messageGenerator;
+      }
+
+      @Override
+      public boolean equals(Object obj)
+      {
+         if (obj == this)
+            return true;
+         if (obj == null || obj.getClass() != this.getClass())
+            return false;
+         var that = (IKStreamingTestRunParameters) obj;
+         return Objects.equals(this.toolboxParameters, that.toolboxParameters)
+                && Double.doubleToLongBits(this.handPositionMeanErrorThreshold) == Double.doubleToLongBits(that.handPositionMeanErrorThreshold)
+                && Double.doubleToLongBits(this.handOrientationMeanErrorThreshold) == Double.doubleToLongBits(that.handOrientationMeanErrorThreshold)
+                && Double.doubleToLongBits(this.messageGeneratorDT) == Double.doubleToLongBits(that.messageGeneratorDT) && Objects.equals(this.messageGenerator,
+                                                                                                                                          that.messageGenerator);
+      }
+
+      @Override
+      public int hashCode()
+      {
+         return Objects.hash(toolboxParameters, handPositionMeanErrorThreshold, handOrientationMeanErrorThreshold, messageGeneratorDT, messageGenerator);
+      }
+
+      @Override
+      public String toString()
+      {
+         return "IKStreamingTestRunParameters[" + "toolboxParameters=" + toolboxParameters + ", " + "handPositionMeanErrorThreshold="
+                + handPositionMeanErrorThreshold + ", " + "handOrientationMeanErrorThreshold=" + handOrientationMeanErrorThreshold + ", "
+                + "messageGeneratorDT=" + messageGeneratorDT + ", " + "messageGenerator=" + messageGenerator + ']';
+      }
    }
 }
