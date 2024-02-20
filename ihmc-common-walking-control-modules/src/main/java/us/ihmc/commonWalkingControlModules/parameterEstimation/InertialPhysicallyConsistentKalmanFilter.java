@@ -115,19 +115,46 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
                                            1.0);
          parameterThetaBasisContainer.set(inertialParameters.get(i).getParameterVectorThetaBasis());
          CommonOps_DDRM.multAdd(kalmanGainBlockContainer, measurementResidual, parameterThetaBasisContainer);
+      }
 
-         // Update inertial parameters
-         inertialParameters.get(i).setParameterVectorThetaBasis(parameterThetaBasisContainer);
-         inertialParameters.get(i).update();
+      gateMeasurementWithNormalizationThreshold();
 
-         // Pack updated pi basis into state for the next iteration
-         MatrixMissingTools.setMatrixRows(updatedState,
-                                          i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
-                                          inertialParameters.get(i).getParameterVectorPiBasis(),
-                                          0,
-                                          RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+      // Finally -- not relevant to the algorithm, but let's do a physical consistency check on the updated parameters
+      checkPhysicalConsistency();
+   }
 
-         // Finally -- not relevant to the algorithm, but let's do a physical consistency check on the updated parameters
+   @Override
+   public void gateMeasurementWithNormalizationThreshold()
+   {
+      if (calculateNormalizedInnovation() > normalizedInnovationThreshold)
+      {
+         // If the normalized innovation is too large, the measurement is likely an outlier. Do not update the state.
+         updatedState.set(predictedState);
+         updatedCovariance.set(predictedCovariance);
+      }
+      else
+      {
+         for (int i = 0; i < nBodies; ++i)
+         {
+            // Update inertial parameters
+            inertialParameters.get(i).setParameterVectorThetaBasis(parameterThetaBasisContainer);
+            inertialParameters.get(i).update();
+
+            // Pack updated pi basis into state for the next iteration
+            MatrixMissingTools.setMatrixRows(updatedState,
+                                             i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                             inertialParameters.get(i).getParameterVectorPiBasis(),
+                                             0,
+                                             RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+
+         }
+      }
+   }
+
+   private void checkPhysicalConsistency()
+   {
+      for (int i = 0; i < nBodies; ++i)
+      {
          if (!RigidBodyInertialParametersTools.isFullyPhysicallyConsistent(inertialParameters.get(i)))
          {
             LogTools.error("Inertial parameters are not fully physically consistent");
@@ -137,8 +164,6 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
             }
          }
       }
-
-      calculateUpdatedCovariance();
    }
 
    @Override
