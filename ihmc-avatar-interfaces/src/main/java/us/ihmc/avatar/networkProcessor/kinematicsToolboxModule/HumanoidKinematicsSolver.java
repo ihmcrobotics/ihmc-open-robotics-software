@@ -22,6 +22,9 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * Provides whole body inverse kinematics solutions in the local process without ROS 2 communication.
+ */
 public class HumanoidKinematicsSolver
 {
    private static final int DEFAULT_MAX_NUMBER_OF_ITERATIONS = 200;
@@ -43,9 +46,7 @@ public class HumanoidKinematicsSolver
    private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterations", registry);
 
    private final YoBoolean hasConverged = new YoBoolean("hasConverged", registry);
-
    private final YoDouble computationTime = new YoDouble("computationTime", registry);
-
    private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
 
    public HumanoidKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory,
@@ -170,8 +171,6 @@ public class HumanoidKinematicsSolver
 
                isSolverStuck = stuckLast || stuckBeforeLast;
             }
-            else
-               isSolverStuck = false;
          }
 
          solutionQualityBeforeLast = solutionQualityLast;
