@@ -287,7 +287,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoDesiredLinearVelocity.changeFrame(trajectoryFrame);
 
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
-      desiredLinearAcceleration.scale(totalRobotMass);
+      desiredLinearVelocity.scale(totalRobotMass);
       desiredLinearVelocity.changeFrame(worldFrame);
       inverseKinematicsOutput.setLinearMomentum(desiredLinearVelocity);
    }
