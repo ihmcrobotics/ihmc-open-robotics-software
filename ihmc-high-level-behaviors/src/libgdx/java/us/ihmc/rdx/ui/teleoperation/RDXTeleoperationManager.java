@@ -443,8 +443,15 @@ public class RDXTeleoperationManager extends RDXPanel
                   chestRigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactableChest.getControlReferenceFrame());
                   wholeBodyIKSolver.submit(chestRigidBodyCommand);
                }
+               if (!interactablePelvis.isDeleted())
+               {
+                  pelvisRigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactablePelvis.getControlReferenceFrame());
+                  wholeBodyIKSolver.submit(pelvisRigidBodyCommand);
+               }
 
-               wholeBodyIKSolver.solve();
+               boolean isSolutionGood = wholeBodyIKSolver.solve();
+
+               desiredRobot.setWholeBodyColor(RDXIKSolverColors.getColor(isSolutionGood));
 
                MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(wholeBodyIKSolver.getDesiredOneDoFJoints(),
                                                                          desiredRobot.getDesiredFullRobotModel().getOneDoFJoints());
