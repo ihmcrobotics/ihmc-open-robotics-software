@@ -118,9 +118,6 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
       }
 
       gateMeasurementWithNormalizationThreshold();
-
-      // Finally -- not relevant to the algorithm, but let's do a physical consistency check on the updated parameters
-      checkPhysicalConsistency();
    }
 
    @Override
@@ -147,21 +144,6 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
                                              0,
                                              RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
 
-         }
-      }
-   }
-
-   private void checkPhysicalConsistency()
-   {
-      for (int i = 0; i < nBodies; ++i)
-      {
-         if (!RigidBodyInertialParametersTools.isFullyPhysicallyConsistent(inertialParameters.get(i)))
-         {
-            LogTools.error("Inertial parameters are not fully physically consistent");
-            if (!RigidBodyInertialParametersTools.isPhysicallyConsistent(inertialParameters.get(i)))
-            {
-               LogTools.error("Inertial parameters are not physically consistent");
-            }
          }
       }
    }
