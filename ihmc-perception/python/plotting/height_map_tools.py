@@ -90,7 +90,7 @@ def compute_terrain_cost_map(height_map):
     height_map = height_map.astype(np.float32)
 
     # perform bilateral filtering to smooth the height map
-    height_map = cv2.bilateralFilter(height_map, 5, 75, 75)
+    # height_map = cv2.bilateralFilter(height_map, 5, 75, 75)
 
     # for each cell compute the dot product of the normal vector with the Z axis. Use sobel filter to compute the normal vector
     # use sobel filter to compute the normal vector
@@ -110,10 +110,13 @@ def compute_terrain_cost_map(height_map):
     cost_map = np.abs(normal_vector[:, :, 2])
 
     # threshold the cost map by setting everything below 0.9 to 0
-    cost_map[cost_map < 0.999] = 0
+    cost_map[cost_map < 0.95] = 0
+
+    # print unique
+    # print("Unique: ", np.unique(cost_map))
 
     # set the values to be between 0 and 255
-    cost_map = cost_map / np.max(cost_map) * 255
+    cost_map = (cost_map / np.max(cost_map)) * 255
 
     # enlarge image for plotting
     # cost_map = cv2.resize(cost_map, (800, 800), interpolation=cv2.INTER_NEAREST)
@@ -121,11 +124,24 @@ def compute_terrain_cost_map(height_map):
     return cost_map
 
 def compute_contact_map(terrain_cost_map):
+
+
+    # print("Unique: ", np.unique(terrain_cost_map))
+
+    _, terrain_cost_map = cv2.threshold(terrain_cost_map, 127, 255, cv2.THRESH_BINARY)
+
+    # print("Unique: ", np.unique(terrain_cost_map))
+
     # the possible distance metrics include cv2.DIST_L1, cv2.DIST_L2, cv2.DIST_C, 
     # cv2.DIST_L12, cv2.DIST_FAIR, cv2.DIST_WELSCH, and cv2.DIST_HUBER
     contact_map = np.zeros((terrain_cost_map.shape[0], terrain_cost_map.shape[1]), dtype=np.float32)
     contact_map = cv2.distanceTransform(terrain_cost_map.astype(np.uint8), cv2.DIST_L2, 5)  
-    contact_map = contact_map / np.max(contact_map) * 255
+    contact_map[contact_map > 12] = 12
+    contact_map = contact_map / np.max(contact_map)
+
+
+
+
     return contact_map
     
 def compute_pattern_stats(height_map):

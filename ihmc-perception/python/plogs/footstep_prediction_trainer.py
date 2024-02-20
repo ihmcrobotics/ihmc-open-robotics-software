@@ -166,6 +166,19 @@ class FootstepDataset(Dataset):
         terrain_cost_map = compute_terrain_cost_map(self.height_maps[index])
         contact_map = compute_contact_map(terrain_cost_map)
 
+            # add contact map and terrain cost map as subplots on imshow
+
+        # plt.subplot(1, 3, 1)
+        # plt.imshow(terrain_cost_map, cmap='gray')
+        # plt.title('Terrain Cost Map')
+        # plt.subplot(1, 3, 2)
+        # plt.imshow(contact_map, cmap='gray')
+        # plt.title('Contact Map')
+        # plt.subplot(1, 3, 3)
+        # plt.imshow(self.height_maps[index], cmap='gray')
+
+        # plt.show()
+
         # Inputs
         # --------- Image Inputs (float54)
         height_map_input = torch.Tensor(self.height_maps[index]).unsqueeze(0).to(device)
@@ -499,8 +512,13 @@ def footstep_loss(output, target, contact_map):
     # contact_loss = -contact
 
     # sum the contact map values at the predicted footstep locations and use it as a loss
-    fx = (output[:, 0] * 50 + 100)
-    fy = (output[:, 1] * 50 + 100)
+
+    #take all rows but only 1st, 4th, 7th, 10th columns
+
+    fx = (output[:,[0, 3, 6, 9]])
+    fx = (fx * 50 + 100)
+    fy = (output[:,[1, 4, 7, 10]])
+    fy = (fy * 50 + 100)
 
     # put limits on the indices
     fx = torch.clamp(fx, 0, 199)
@@ -510,40 +528,71 @@ def footstep_loss(output, target, contact_map):
     fx = fx.long()
     fy = fy.long()
 
-    contact_vector = contact_map[0, 0, fx, fy]
-    total_contact_score = torch.sum(contact_vector)
-    contact_loss = torch.square(1.0 - total_contact_score / 255)
-    l1_loss = torch.nn.L1Loss()(output, target)
 
-    return l1_loss + contact_loss
+
+    sum_loss = []
+    for itr in range(len(output)):
+        per_image_score = 0
+        for itr2 in range(n_steps):
+            per_image_score += contact_map[itr, 0, fx[itr, itr2].item(), fy[itr, itr2].item()].item()
+        
+        total_contact_score = per_image_score / n_steps
+        contact_loss = 1.0 - total_contact_score
+        curr_output = output[itr].unsqueeze(0)
+        curr_target = target[itr].unsqueeze(0)
+        l1_loss = torch.nn.L1Loss()(curr_output, curr_target)
+        sum_loss.append((l1_loss + contact_loss) / 2.0)
+    
+    # 
+    # print('here',sum(sum_loss) / len (sum_loss))
+    return sum(sum_loss) / len (sum_loss)
+
+
+    # print("FX: ", fx)
+    # print("FY: ", fy)
+
+
+    # contact_vector = contact_map[fx, fy]
+    # print("Unique: ", torch.unique(contact_vector))
+
+    # total_contact_score = torch.sum(contact_vector) / n_steps
+    # contact_loss = 1.0 - total_contact_score
+
+    # print("Contact Vector: ", contact_vector)
+    # print("Total Contact Score: ", total_contact_score.item())
+
+    # l1_loss = torch.nn.L1Loss()(output, target)
+
+    return (l1_loss + contact_loss) / 2.0
 
 def print_loss(output, target, contact_map):
     
     print("Shapes: ", output.shape, target.shape, contact_map.shape)
 
+    # print min and max for contact map
+    print("Contact Map Min: ", torch.min(contact_map), "Contact Map Max: ", torch.max(contact_map))
+
+    # sum the contact map values at the predicted footstep locations and use it as a loss
+
     # sum the contact map values at the predicted footstep locations and use it as a loss
     fx = (output[:, 0] * 50 + 100)
     fy = (output[:, 1] * 50 + 100)
-    
 
     # put limits on the indices
     fx = torch.clamp(fx, 0, 199)
     fy = torch.clamp(fy, 0, 199)
 
-
     # cast to long
     fx = fx.long()
     fy = fy.long()
 
-    print("X_Indices: ", fx)
-    print("Y_Indices: ", fy)
-
-    # maximize the sum in the loss
     contact_vector = contact_map[0, 0, fx, fy]
-    total_contact_score = torch.sum(contact_vector)
-    contact_loss = torch.square(1.0 - total_contact_score / 255)
-    
+    total_contact_score = torch.sum(contact_vector) / n_steps
+    contact_loss = 1.0 - total_contact_score
     l1_loss = torch.nn.L1Loss()(output, target)
+
+    # plt.imshow(contact_map[0, 0, :, :].cpu().numpy())
+    # plt.show()
 
     print("Output: ", output)
     print("Contact Vector: ", contact_vector)
@@ -562,12 +611,13 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Footstep Prediction Trainer')
     parser.add_argument('--train', action='store_true', help='Train the model')
+    parser.add_argument('--files', type=int, help='Total Files to Load')
 
     args = parser.parse_args()
-    train = args.train
+    if args.files:
+        total_files = args.files
 
-    if train:
-        total_files = -1
+    train = args.train
 
     n_steps = 4
 
