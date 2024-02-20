@@ -39,6 +39,8 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
    public double linear_position_weight_;
    public double angular_position_weight_;
    public double jointspace_weight_;
+   public double position_error_tolerance_;
+   public double orientation_error_tolerance_;
 
    public HandPoseActionDefinitionMessage()
    {
@@ -73,6 +75,10 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       angular_position_weight_ = other.angular_position_weight_;
 
       jointspace_weight_ = other.jointspace_weight_;
+
+      position_error_tolerance_ = other.position_error_tolerance_;
+
+      orientation_error_tolerance_ = other.orientation_error_tolerance_;
 
    }
 
@@ -205,6 +211,24 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       return jointspace_weight_;
    }
 
+   public void setPositionErrorTolerance(double position_error_tolerance)
+   {
+      position_error_tolerance_ = position_error_tolerance;
+   }
+   public double getPositionErrorTolerance()
+   {
+      return position_error_tolerance_;
+   }
+
+   public void setOrientationErrorTolerance(double orientation_error_tolerance)
+   {
+      orientation_error_tolerance_ = orientation_error_tolerance;
+   }
+   public double getOrientationErrorTolerance()
+   {
+      return orientation_error_tolerance_;
+   }
+
 
    public static Supplier<HandPoseActionDefinitionMessagePubSubType> getPubSubType()
    {
@@ -241,6 +265,10 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.jointspace_weight_, other.jointspace_weight_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_error_tolerance_, other.position_error_tolerance_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.orientation_error_tolerance_, other.orientation_error_tolerance_, epsilon)) return false;
+
 
       return true;
    }
@@ -272,6 +300,10 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
 
       if(this.jointspace_weight_ != otherMyClass.jointspace_weight_) return false;
 
+      if(this.position_error_tolerance_ != otherMyClass.position_error_tolerance_) return false;
+
+      if(this.orientation_error_tolerance_ != otherMyClass.orientation_error_tolerance_) return false;
+
 
       return true;
    }
@@ -301,7 +333,11 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       builder.append("angular_position_weight=");
       builder.append(this.angular_position_weight_);      builder.append(", ");
       builder.append("jointspace_weight=");
-      builder.append(this.jointspace_weight_);
+      builder.append(this.jointspace_weight_);      builder.append(", ");
+      builder.append("position_error_tolerance=");
+      builder.append(this.position_error_tolerance_);      builder.append(", ");
+      builder.append("orientation_error_tolerance=");
+      builder.append(this.orientation_error_tolerance_);
       builder.append("}");
       return builder.toString();
    }
