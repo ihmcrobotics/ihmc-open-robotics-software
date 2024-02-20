@@ -6,9 +6,9 @@
     "x" : 0.2175,
     "y" : -0.067,
     "z" : 0.0,
-    "rollInDegrees" : -177.94,
+    "rollInDegrees" : -179.44,
     "pitchInDegrees" : -90.0,
-    "yawInDegrees" : -2.06
+    "yawInDegrees" : -0.56
   }, {
     "side" : "right",
     "isPoseSet" : true,

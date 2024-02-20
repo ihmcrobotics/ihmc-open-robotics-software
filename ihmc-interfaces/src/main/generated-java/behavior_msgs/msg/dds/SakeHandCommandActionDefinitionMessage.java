@@ -17,17 +17,13 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
             */
    public byte robot_side_ = (byte) 255;
    /**
-            * Hand configuration type
+            * Desired angle between the fingers from 0 to 210 degrees (specified in radians)
             */
-   public long configuration_;
+   public double hand_open_angle_;
    /**
-            * Goal position as ratio from 0.0 (closed) to 1.0 (open)
+            * Torque limit specified as fingertip grip force. Valid up to 29 Newtons. Safe value is 8.7 N.
             */
-   public double position_ratio_;
-   /**
-            * Goal torque as ratio from 0.0 (closed) to 1.0 (open)
-            */
-   public double torque_ratio_;
+   public double fingertip_grip_force_limit_;
 
    public SakeHandCommandActionDefinitionMessage()
    {
@@ -45,11 +41,9 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       robot_side_ = other.robot_side_;
 
-      configuration_ = other.configuration_;
+      hand_open_angle_ = other.hand_open_angle_;
 
-      position_ratio_ = other.position_ratio_;
-
-      torque_ratio_ = other.torque_ratio_;
+      fingertip_grip_force_limit_ = other.fingertip_grip_force_limit_;
 
    }
 
@@ -78,48 +72,33 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
    }
 
    /**
-            * Hand configuration type
+            * Desired angle between the fingers from 0 to 210 degrees (specified in radians)
             */
-   public void setConfiguration(long configuration)
+   public void setHandOpenAngle(double hand_open_angle)
    {
-      configuration_ = configuration;
+      hand_open_angle_ = hand_open_angle;
    }
    /**
-            * Hand configuration type
+            * Desired angle between the fingers from 0 to 210 degrees (specified in radians)
             */
-   public long getConfiguration()
+   public double getHandOpenAngle()
    {
-      return configuration_;
-   }
-
-   /**
-            * Goal position as ratio from 0.0 (closed) to 1.0 (open)
-            */
-   public void setPositionRatio(double position_ratio)
-   {
-      position_ratio_ = position_ratio;
-   }
-   /**
-            * Goal position as ratio from 0.0 (closed) to 1.0 (open)
-            */
-   public double getPositionRatio()
-   {
-      return position_ratio_;
+      return hand_open_angle_;
    }
 
    /**
-            * Goal torque as ratio from 0.0 (closed) to 1.0 (open)
+            * Torque limit specified as fingertip grip force. Valid up to 29 Newtons. Safe value is 8.7 N.
             */
-   public void setTorqueRatio(double torque_ratio)
+   public void setFingertipGripForceLimit(double fingertip_grip_force_limit)
    {
-      torque_ratio_ = torque_ratio;
+      fingertip_grip_force_limit_ = fingertip_grip_force_limit;
    }
    /**
-            * Goal torque as ratio from 0.0 (closed) to 1.0 (open)
+            * Torque limit specified as fingertip grip force. Valid up to 29 Newtons. Safe value is 8.7 N.
             */
-   public double getTorqueRatio()
+   public double getFingertipGripForceLimit()
    {
-      return torque_ratio_;
+      return fingertip_grip_force_limit_;
    }
 
 
@@ -143,11 +122,9 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.configuration_, other.configuration_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.hand_open_angle_, other.hand_open_angle_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_ratio_, other.position_ratio_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.torque_ratio_, other.torque_ratio_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fingertip_grip_force_limit_, other.fingertip_grip_force_limit_, epsilon)) return false;
 
 
       return true;
@@ -165,11 +142,9 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
-      if(this.configuration_ != otherMyClass.configuration_) return false;
+      if(this.hand_open_angle_ != otherMyClass.hand_open_angle_) return false;
 
-      if(this.position_ratio_ != otherMyClass.position_ratio_) return false;
-
-      if(this.torque_ratio_ != otherMyClass.torque_ratio_) return false;
+      if(this.fingertip_grip_force_limit_ != otherMyClass.fingertip_grip_force_limit_) return false;
 
 
       return true;
@@ -185,12 +160,10 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       builder.append(this.definition_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
-      builder.append("configuration=");
-      builder.append(this.configuration_);      builder.append(", ");
-      builder.append("position_ratio=");
-      builder.append(this.position_ratio_);      builder.append(", ");
-      builder.append("torque_ratio=");
-      builder.append(this.torque_ratio_);
+      builder.append("hand_open_angle=");
+      builder.append(this.hand_open_angle_);      builder.append(", ");
+      builder.append("fingertip_grip_force_limit=");
+      builder.append(this.fingertip_grip_force_limit_);
       builder.append("}");
       return builder.toString();
    }
