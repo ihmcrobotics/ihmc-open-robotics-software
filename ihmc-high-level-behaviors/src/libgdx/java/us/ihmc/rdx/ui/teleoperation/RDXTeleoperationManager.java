@@ -220,9 +220,13 @@ public class RDXTeleoperationManager extends RDXPanel
          rigidBodyCommand.getWeightMatrix().setAngularWeights(1.0, 1.0, 1.0);
       }
       chestRigidBodyCommand.setEndEffector(wholeBodyIKSolver.getDesiredFullRobotModel().getChest());
+      chestRigidBodyCommand.getControlFramePose().setToZero(wholeBodyIKSolver.getDesiredFullRobotModel().getChest().getParentJoint().getFrameAfterJoint());
+      chestRigidBodyCommand.getControlFramePose().changeFrame(wholeBodyIKSolver.getDesiredFullRobotModel().getChest().getBodyFixedFrame());
       chestRigidBodyCommand.getWeightMatrix().setLinearWeights(20.0, 20.0, 20.0);
       chestRigidBodyCommand.getWeightMatrix().setAngularWeights(1.0, 1.0, 1.0);
       pelvisRigidBodyCommand.setEndEffector(wholeBodyIKSolver.getDesiredFullRobotModel().getPelvis());
+      pelvisRigidBodyCommand.getControlFramePose().setToZero(wholeBodyIKSolver.getDesiredFullRobotModel().getPelvis().getParentJoint().getFrameAfterJoint());
+      pelvisRigidBodyCommand.getControlFramePose().changeFrame(wholeBodyIKSolver.getDesiredFullRobotModel().getPelvis().getBodyFixedFrame());
       pelvisRigidBodyCommand.getWeightMatrix().setLinearWeights(20.0, 20.0, 20.0);
       pelvisRigidBodyCommand.getWeightMatrix().setAngularWeights(1.0, 1.0, 1.0);
 
