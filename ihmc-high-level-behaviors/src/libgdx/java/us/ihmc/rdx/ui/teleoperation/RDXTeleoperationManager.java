@@ -3,6 +3,16 @@ package us.ihmc.rdx.ui.teleoperation;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.LegTrajectoryMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import controller_msgs.msg.dds.SpineTrajectoryMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import ihmc_common_msgs.msg.dds.QueueableMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
@@ -17,12 +27,14 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -43,6 +55,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -122,6 +136,7 @@ public class RDXTeleoperationManager extends RDXPanel
    private volatile boolean readyToSolveWholeBodyIK = true;
    private volatile boolean readyToCopyWholeBodyIKSolution = false;
    private final ImBoolean enableWholeBodyIK = new ImBoolean(false);
+   private final WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
 
    /** This tracker should be shared with the sub-managers to keep the state consistent. */
@@ -629,6 +644,53 @@ public class RDXTeleoperationManager extends RDXPanel
       }
 
       ImGui.checkbox(labels.get("Enable Whole Body IK"), enableWholeBodyIK);
+      if (enableWholeBodyIK.get() && desiredRobot.isActive() && ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
+      {
+         wholeBodyTrajectoryMessage.getLeftArmTrajectoryMessage().getJointspaceTrajectory().getJointTrajectoryMessages().clear();
+         wholeBodyTrajectoryMessage.getRightArmTrajectoryMessage().getJointspaceTrajectory().getJointTrajectoryMessages().clear();
+         wholeBodyTrajectoryMessage.getLeftLegTrajectoryMessage().getJointspaceTrajectory().getJointTrajectoryMessages().clear();
+         wholeBodyTrajectoryMessage.getRightLegTrajectoryMessage().getJointspaceTrajectory().getJointTrajectoryMessages().clear();
+         wholeBodyTrajectoryMessage.getSpineTrajectoryMessage().getJointspaceTrajectory().getJointTrajectoryMessages().clear();
+         wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().clear();
+
+         populateArmTrajectoryMessage(wholeBodyTrajectoryMessage.getLeftArmTrajectoryMessage(), RobotSide.LEFT);
+         populateArmTrajectoryMessage(wholeBodyTrajectoryMessage.getRightArmTrajectoryMessage(), RobotSide.RIGHT);
+//         populateLegTrajectoryMessage(wholeBodyTrajectoryMessage.getLeftLegTrajectoryMessage(), RobotSide.LEFT);
+//         populateLegTrajectoryMessage(wholeBodyTrajectoryMessage.getRightLegTrajectoryMessage(), RobotSide.RIGHT);
+
+         SpineTrajectoryMessage spineTrajectoryMessage = wholeBodyTrajectoryMessage.getSpineTrajectoryMessage();
+         spineTrajectoryMessage.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+         Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = spineTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
+         for (SpineJointName spineJointName : robotModel.getJointMap().getSpineJointNames())
+         {
+            OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointTrajectoryMessages.add();
+            oneDoFJointTrajectoryMessage.getTrajectoryPoints().clear();
+            oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use default weight
+
+            TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
+            trajectoryPoint1DMessage.setTime(teleoperationParameters.getTrajectoryTime());
+            trajectoryPoint1DMessage.setPosition(desiredRobot.getDesiredFullRobotModel().getSpineJoint(spineJointName).getQ());
+            trajectoryPoint1DMessage.setVelocity(0.0);
+         }
+
+         long trajectoryReferenceFrameID = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
+         FramePose3D desiredPelvisPose = new FramePose3D(desiredRobot.getDesiredFullRobotModel().getPelvis().getBodyFixedFrame());
+         desiredPelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         PelvisTrajectoryMessage pelvisTrajectoryMessage = wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage();
+         SE3TrajectoryMessage se3TrajectoryMessage = pelvisTrajectoryMessage.getSe3Trajectory();
+         se3TrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+         // Select all axes and use default weights
+         SE3TrajectoryPointMessage se3TrajectoryPointMessage = se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add();
+         se3TrajectoryPointMessage.setTime(teleoperationParameters.getTrajectoryTime());
+         se3TrajectoryPointMessage.getPosition().set(desiredPelvisPose.getPosition());
+         se3TrajectoryPointMessage.getOrientation().set(desiredPelvisPose.getOrientation());
+         se3TrajectoryPointMessage.getLinearVelocity().setToZero();
+         se3TrajectoryPointMessage.getAngularVelocity().setToZero();
+         se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameID);
+
+         ros2Helper.publishToController(wholeBodyTrajectoryMessage);
+      }
 
       ImGui.text("Show collisions:");
       ImGui.sameLine();
@@ -648,6 +710,42 @@ public class RDXTeleoperationManager extends RDXPanel
       ImGui.text("Arms & Hands");
       ImGui.popFont();
       armManager.renderImGuiWidgets();
+   }
+
+   private void populateArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage, RobotSide side)
+   {
+      armTrajectoryMessage.setRobotSide(side.toByte());
+      armTrajectoryMessage.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+      Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
+      for (ArmJointName armJointName : robotModel.getJointMap().getArmJointNames(side))
+      {
+         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointTrajectoryMessages.add();
+         oneDoFJointTrajectoryMessage.getTrajectoryPoints().clear();
+         oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use default weight
+
+         TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
+         trajectoryPoint1DMessage.setTime(teleoperationParameters.getTrajectoryTime());
+         trajectoryPoint1DMessage.setPosition(desiredRobot.getDesiredFullRobotModel().getArmJoint(side, armJointName).getQ());
+         trajectoryPoint1DMessage.setVelocity(0.0);
+      }
+   }
+
+   private void populateLegTrajectoryMessage(LegTrajectoryMessage legTrajectoryMessage, RobotSide side)
+   {
+      legTrajectoryMessage.setRobotSide(side.toByte());
+      legTrajectoryMessage.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+      Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = legTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
+      for (LegJointName legJointName : robotModel.getJointMap().getLegJointNames())
+      {
+         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointTrajectoryMessages.add();
+         oneDoFJointTrajectoryMessage.getTrajectoryPoints().clear();
+         oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use default weight
+
+         TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
+         trajectoryPoint1DMessage.setTime(teleoperationParameters.getTrajectoryTime());
+         trajectoryPoint1DMessage.setPosition(desiredRobot.getDesiredFullRobotModel().getLegJoint(side, legJointName).getQ());
+         trajectoryPoint1DMessage.setVelocity(0.0);
+      }
    }
 
    private void renderTooltipsAndContextMenus()
