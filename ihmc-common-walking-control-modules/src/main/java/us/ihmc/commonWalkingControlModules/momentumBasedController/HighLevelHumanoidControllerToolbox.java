@@ -415,6 +415,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    public void update()
    {
+      totalMass.set(TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()));
+
       centerOfMassStateProvider.updateState(); // Needs to be updated before the frames, as it is need to update the CoM frame.
       referenceFrames.updateFrames();
 

@@ -37,6 +37,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
@@ -55,7 +57,6 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
    private final double controlDT;
    private final double gravityZ;
    private final FloatingJointBasics rootJoint;
-   private final MultiBodySystemBasics multiBodySystemInput;
    private final List<KinematicLoopFunction> kinematicLoopFunctions = new ArrayList<>();
    private final ReferenceFrame centerOfMassFrame;
    private final ControllerCoreOptimizationSettings optimizationSettings;
@@ -64,7 +65,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 
    private final JointIndexHandler jointIndexHandler;
    private final List<OneDoFJointBasics> inactiveOneDoFJoints = new ArrayList<>();
-   private final double totalRobotMass;
+   private double totalRobotMass;
    private CentroidalMomentumCalculator centroidalMomentumCalculator;
    private CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
    // TODO The mass-matrix calculator (when created) should be used for computing the momentum stuff. Probably need some interface and API improvements.
@@ -177,14 +178,13 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
          controlledJoints = controlledJointsWithRoot;
       }
 
-      multiBodySystemInput = MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints);
       if (centerOfMassFrame == null)
-         centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", multiBodySystemInput.getInertialFrame(), multiBodySystemInput.getRootBody());
+         centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", rootJoint.getPredecessor().getBodyFixedFrame().getRootFrame(), rootJoint.getPredecessor());
       this.centerOfMassFrame = centerOfMassFrame;
 
       jointIndexHandler = new JointIndexHandler(controlledJoints);
-      totalRobotMass = TotalMassCalculator.computeSubTreeMass(multiBodySystemInput.getRootBody());
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(multiBodySystemInput);
+      totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootJoint.getPredecessor());
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(rootJoint.getPredecessor());
       inverseDynamicsCalculator.setGravitionalAcceleration(-gravityZ); // Watch out for the sign here, it changed with the switch to Mecano.
       rigidBodyAccelerationProvider = inverseDynamicsCalculator.getAccelerationProvider();
 
@@ -265,7 +265,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
       this.contactablePlaneBodies = contactablePlaneBodies;
       if (centroidalMomentumCalculator != null)
          centroidalMomentumCalculator = null;
-      centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(multiBodySystemInput, centerOfMassFrame);
+      centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(rootJoint.getPredecessor(), centerOfMassFrame);
    }
 
    /**
@@ -292,7 +292,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
       enableInverseKinematicsModule = true;
       // TODO add tools specific to the inverse kinematics module here.
       if (centroidalMomentumRateCalculator == null)
-         centroidalMomentumCalculator = new CentroidalMomentumCalculator(multiBodySystemInput, centerOfMassFrame);
+         centroidalMomentumCalculator = new CentroidalMomentumCalculator(rootJoint.getPredecessor(), centerOfMassFrame);
       if (calculator != null)
       {
          jointTorqueMinimizationWeightCalculator = calculator;
@@ -321,7 +321,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
       this.contactablePlaneBodies = contactablePlaneBodies;
       if (centroidalMomentumCalculator != null)
          centroidalMomentumCalculator = null;
-      centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(multiBodySystemInput, centerOfMassFrame);
+      centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(rootJoint.getPredecessor(), centerOfMassFrame);
    }
 
    /**
@@ -358,7 +358,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 
    public MultiBodySystemBasics getMultiBodySystemInput()
    {
-      return multiBodySystemInput;
+      return null;
    }
 
    public List<KinematicLoopFunction> getKinematicLoopFunctions()
@@ -445,7 +445,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
    {
       if (gravityCoriolisExternalWrenchMatrixCalculator == null)
       {
-         gravityCoriolisExternalWrenchMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(multiBodySystemInput);
+         gravityCoriolisExternalWrenchMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(rootJoint.getPredecessor());
          gravityCoriolisExternalWrenchMatrixCalculator.setGravitionalAcceleration(-Math.abs(gravityZ));
       }
       return gravityCoriolisExternalWrenchMatrixCalculator;
@@ -455,7 +455,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
    {
       if (gravityGradientCalculator == null)
       {
-         gravityGradientCalculator = new MultiBodyGravityGradientCalculator(multiBodySystemInput);
+         gravityGradientCalculator = new MultiBodyGravityGradientCalculator(rootJoint.getPredecessor());
          gravityGradientCalculator.setGravitionalAcceleration(-Math.abs(gravityZ));
       }
       return gravityGradientCalculator;
@@ -495,7 +495,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
    public CompositeRigidBodyMassMatrixCalculator getMassMatrixCalculator()
    {
       if (massMatrixCalculator == null)
-         massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(multiBodySystemInput);
+         massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootJoint.getPredecessor());
       return massMatrixCalculator;
    }
 
@@ -506,7 +506,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 
    public RigidBodyBasics getRootBody()
    {
-      return multiBodySystemInput.getRootBody();
+      return rootJoint.getPredecessor();
    }
 
    public RigidBodyBasics getVirtualModelControlMainBody()
@@ -531,7 +531,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 
    public double getTotalRobotMass()
    {
-      return totalRobotMass;
+      return TotalMassCalculator.computeSubTreeMass(rootJoint.getPredecessor());
    }
 
    public YoGraphicsListRegistry getYoGraphicsListRegistry()

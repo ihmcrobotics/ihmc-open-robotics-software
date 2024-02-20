@@ -52,6 +52,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -132,6 +133,8 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
    private final ExecutionTimer setupTimer;
    private final ExecutionTimer outputTimer;
 
+   private final YoDouble totalMass;
+
    public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
       controlDT = toolbox.getControlDT();
@@ -180,6 +183,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
          });
       }
 
+      totalMass = new YoDouble("controllerCoreTotalMass", registry);
       minimizeJointTorques = new YoBoolean("minimizeJointTorques", registry);
       minimizeJointTorques.set(toolbox.getOptimizationSettings().areJointTorquesMinimized());
       jointTorqueLimitEnforcementMethod = new YoEnum<>("jointTorqueLimitEnforcementMethod", registry, JointTorqueLimitEnforcementMethod.class);
@@ -240,6 +244,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
    {
       setupTimer.startMeasurement();
 
+      totalMass.set(TotalMassCalculator.computeSubTreeMass(rootJoint.getSuccessor()));
       if (minimizeJointTorques.getValue())
       {
          optimizationControlModule.setupTorqueMinimizationCommand();
