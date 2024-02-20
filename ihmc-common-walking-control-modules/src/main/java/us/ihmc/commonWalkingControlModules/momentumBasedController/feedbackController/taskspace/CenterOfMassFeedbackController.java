@@ -30,6 +30,7 @@ import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoMutableFrameVector3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -83,6 +84,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private final double dt;
    private final double totalRobotMass;
    private final boolean computeIntegralTerm;
+
+   private final WholeBodyControlCoreToolbox toolbox;
 
    public CenterOfMassFeedbackController(WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox, YoRegistry parentRegistry)
    {
@@ -170,6 +173,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
          yoFeedForwardLinearVelocity = null;
          rateLimitedFeedbackLinearVelocity = null;
       }
+
+      this.toolbox = toolbox;
    }
 
    public void submitFeedbackControlCommand(CenterOfMassFeedbackControlCommand command)
@@ -247,7 +252,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoDesiredLinearAcceleration.setIncludingFrame(desiredLinearAcceleration);
       yoDesiredLinearAcceleration.changeFrame(trajectoryFrame);
 
-      desiredLinearAcceleration.scale(totalRobotMass);
+      desiredLinearAcceleration.scale(toolbox.getTotalRobotMass());
       desiredLinearAcceleration.changeFrame(worldFrame);
       inverseDynamicsOutput.setLinearMomentumRate(desiredLinearAcceleration);
    }
@@ -279,7 +284,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoDesiredLinearVelocity.setIncludingFrame(desiredLinearVelocity);
       yoDesiredLinearVelocity.changeFrame(trajectoryFrame);
 
-      desiredLinearVelocity.scale(totalRobotMass);
+      desiredLinearVelocity.scale(toolbox.getTotalRobotMass());
       desiredLinearVelocity.changeFrame(worldFrame);
       inverseKinematicsOutput.setLinearMomentum(desiredLinearVelocity);
    }
@@ -315,7 +320,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoDesiredLinearAcceleration.setIncludingFrame(desiredLinearAcceleration);
       yoDesiredLinearAcceleration.changeFrame(trajectoryFrame);
 
-      desiredLinearAcceleration.scale(totalRobotMass);
+      desiredLinearAcceleration.scale(toolbox.getTotalRobotMass());
       desiredLinearAcceleration.changeFrame(worldFrame);
       virtualModelControlOutput.setLinearMomentumRate(desiredLinearAcceleration);
    }
