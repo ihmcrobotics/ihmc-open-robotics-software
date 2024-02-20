@@ -137,6 +137,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final SpatialInertiaBasisOption[] processBasisOptions;
 
+   private final YoBoolean areParametersFullyPhysicallyConsistent;
+
    public InertialParameterManager(InertialParameterManagerFactory.EstimatorType type, HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
@@ -340,6 +342,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          }
       }
 
+      areParametersFullyPhysicallyConsistent = new YoBoolean("areParametersFullyPhysicallyConsistent", registry);
    }
 
    private void setFilter(InertialParameterManagerFactory.EstimatorType type)
@@ -556,11 +559,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    {
       for (int i = 0; i < estimateModelBodies.length; ++i)
       {
-         if (!RigidBodyInertialParametersTools.isPhysicallyConsistent(estimateModelBodies[i].getInertia()))
+         if (!RigidBodyInertialParametersTools.isFullyPhysicallyConsistent(estimateModelBodies[i].getInertia()))
          {
-            LogTools.error("Inertial parameter estimate for " + estimateModelBodies[i].getName() + " is not physically consistent");
-            if (!RigidBodyInertialParametersTools.isFullyPhysicallyConsistent(estimateModelBodies[i].getInertia()))
-               LogTools.error("Inertial parameter estimate for " + estimateModelBodies[i].getName() + " is not fully physically consistent");
+            areParametersFullyPhysicallyConsistent.set(false);
+            LogTools.error("Inertial parameter estimate for " + estimateModelBodies[i].getName() + " is not fully physically consistent");
+         }
+         else
+         {
+            areParametersFullyPhysicallyConsistent.set(true);
          }
       }
    }
