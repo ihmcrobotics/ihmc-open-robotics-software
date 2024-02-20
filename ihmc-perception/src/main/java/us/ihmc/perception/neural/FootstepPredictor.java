@@ -14,8 +14,6 @@ import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.tools.IHMCCommonPaths;
-import us.ihmc.tools.io.WorkspaceFile;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -27,14 +25,15 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
 public class FootstepPredictor
 {
-   private static final int LINEAR_INPUT_SIZE = 4;
-   private static final int LINEAR_OUTPUT_SIZE = 20;
+   private static final int LINEAR_INPUT_SIZE = 6;
+   private static final int LINEAR_OUTPUT_SIZE = 12;
+   private static final int NUMBER_OF_FOOTSTEPS = 10;
+   private static final int FOOTSTEP_VECTOR_SIZE = 3;
 
    private static final int IMAGE_INPUT_HEIGHT = 201;
    private static final int IMAGE_INPUT_WIDTH = 201;
 
-   private WorkspaceResourceDirectory modelDirectory = new WorkspaceResourceDirectory(this.getClass(), "/weights/");
-   private WorkspaceFile onnxFile = new WorkspaceFile(modelDirectory, "footstep_predictor.onnx");
+   private String onnxFilePath = IHMCCommonPaths.USER_HOME_DIRECTORY.resolve("Downloads/Model_Weights/footstep_predictor_4.onnx").toString();
 
    private OrtEnvironment environment = OrtEnvironment.getEnvironment();
    private OrtSession.SessionOptions sessionOptions = new OrtSession.SessionOptions();
@@ -44,7 +43,7 @@ public class FootstepPredictor
    {
       try
       {
-         session = environment.createSession(onnxFile.getFilesystemFile().toString(), sessionOptions);
+         session = environment.createSession(onnxFilePath, sessionOptions);
 
          for (Map.Entry<String, NodeInfo> stringNodeInfoEntry : session.getInputInfo().entrySet())
          {
@@ -76,8 +75,10 @@ public class FootstepPredictor
       FMatrixRMaj linearInput = new FMatrixRMaj(LINEAR_INPUT_SIZE, 1);
       linearInput.set(0, 0, startPosition.getX32());
       linearInput.set(1, 0, startPosition.getY32());
-      linearInput.set(2, 0, goalPosition.getX32());
-      linearInput.set(3, 0, goalPosition.getY32());
+      linearInput.set(2, 0, 0);
+      linearInput.set(3, 0, goalPosition.getX32());
+      linearInput.set(4, 0, goalPosition.getY32());
+      linearInput.set(5, 0, 0);
 
       FMatrixRMaj linearOutput = null;
 
@@ -92,9 +93,11 @@ public class FootstepPredictor
 
       if (linearOutput != null)
       {
-         for (int i = 0; i < LINEAR_OUTPUT_SIZE / 2; i++)
+         for (int i = 0; i < LINEAR_OUTPUT_SIZE / FOOTSTEP_VECTOR_SIZE; i++)
          {
-            Point3D point = new Point3D(linearOutput.get(2 * i, 0) + sensorPosition.getX32(), linearOutput.get(2 * i + 1, 0) + sensorPosition.getY32(), 1.0);
+            Point3D point = new Point3D(linearOutput.get(FOOTSTEP_VECTOR_SIZE * i, 0) + sensorPosition.getX32(),
+                                        linearOutput.get(FOOTSTEP_VECTOR_SIZE * i + 1, 0) + sensorPosition.getY32(),
+                                        1.0);
             footstepPositions.add(point);
          }
       }
@@ -144,7 +147,7 @@ public class FootstepPredictor
          float[][] outputArray = (float[][]) outputTensor.getValue();
 
          if (outputArray[0].length != LINEAR_OUTPUT_SIZE)
-            throw new RuntimeException("Linear output size must be " + LINEAR_OUTPUT_SIZE + "x1");
+            throw new RuntimeException("Linear output size must be " + LINEAR_OUTPUT_SIZE + "x1" + " but was " + outputArray[0].length);
 
          outputMatrix.setData(outputArray[0]);
 

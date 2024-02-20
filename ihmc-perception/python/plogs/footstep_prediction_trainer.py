@@ -1,23 +1,32 @@
 import torch
-import torch.nn.functional as F
+import gc
+torch.cuda.empty_cache()
 
+import torch.nn.functional as F
+import torch.nn as nn
 from torch.nn import Module, Sequential, Linear, ReLU, Dropout, BatchNorm1d
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-from footstep_dataset_loader import visualize_plan
-from hdf5_reader import *
 
 from tqdm import tqdm
+
+import os.path
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from plotting.height_map_tools import *
+from footstep_dataset_loader import visualize_plan
+from hdf5_reader import *
 
 # create torch tensors on GPU 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 writer = SummaryWriter("runs/footstep_predictor")
 
 class FootstepDataset(Dataset):
-    def __init__(self, data, filename):
+    def __init__(self, data, filename, n_steps=4):
         
-        self.n_steps = 10
+        self.n_steps = n_steps
         total_height_maps = len(data['cropped/height/'].keys()) - (len(data['cropped/height/'].keys()) % 10)
 
         self.height_maps = []
@@ -32,7 +41,6 @@ class FootstepDataset(Dataset):
 
         self.sensor_positions[:, 2] = 0
 
-        self.footstep_plan_sides = get_data(data, 'plan/footstep/side/')
         self.footstep_plan_positions = get_data(data, 'plan/footstep/position/')
         self.footstep_plan_orientations = get_data(data, 'plan/footstep/orientation/')
 
@@ -59,20 +67,22 @@ class FootstepDataset(Dataset):
 
         for i in range(total_height_maps):
 
-            current_plan_positions = self.footstep_plan_positions[i*self.n_steps:(i+1)*self.n_steps, :]
-            current_plan_orientations = self.footstep_plan_orientations[i*self.n_steps:(i+1)*self.n_steps, :]
+            current_plan_positions = self.footstep_plan_positions[i*10:i*10 + self.n_steps, :]
+            current_plan_orientations = self.footstep_plan_orientations[i*10:i*10 + self.n_steps, :]
 
             # check if there are no non-zero norm steps in the plan
             count_footsteps = np.count_nonzero(np.linalg.norm(current_plan_positions, axis=1))
 
-            valid = not(count_footsteps < 6)
+
+            # valid if has at least 4 non-zero norm steps and start side is 0
+            valid = count_footsteps >= n_steps and self.start_side[i] == 1
 
             if valid:
                 new_height_maps.append(self.height_maps[i])
                 new_sensor_positions.append(self.sensor_positions[i, :])
                 new_sensor_orientations.append(self.sensor_orientations[i, :])
-                new_footstep_plan_positions.append(self.footstep_plan_positions[i*self.n_steps:(i+1)*self.n_steps, :])
-                new_footstep_plan_orientations.append(self.footstep_plan_orientations[i*self.n_steps:(i+1)*self.n_steps, :])
+                new_footstep_plan_positions.append(self.footstep_plan_positions[i*10:i*10 + n_steps, :])
+                new_footstep_plan_orientations.append(self.footstep_plan_orientations[i*10:i*10 + n_steps, :])
                 new_start_positions.append(self.start_positions[i, :])
                 new_start_orientations.append(self.start_orientations[i, :])
                 new_goal_positions.append(self.goal_positions[i, :])
@@ -84,7 +94,7 @@ class FootstepDataset(Dataset):
                 
                 # set zero footsteps to last two steps in plan
                 if count_footsteps < self.n_steps:
-                    print("Shapes: ", count_footsteps, self.n_steps, last_two_step_positions.shape, last_two_step_orientations.shape)
+                    # print("Shapes: ", count_footsteps, self.n_steps, last_two_step_positions.shape, last_two_step_orientations.shape)
                     self.footstep_plan_positions[count_footsteps:self.n_steps, :] = np.tile(last_two_step_positions, (self.n_steps - count_footsteps, 1))[:self.n_steps - count_footsteps, :]
                     self.footstep_plan_orientations[count_footsteps:self.n_steps, :] = np.tile(last_two_step_orientations, (self.n_steps - count_footsteps, 1))[:self.n_steps - count_footsteps, :]
 
@@ -144,37 +154,35 @@ class FootstepDataset(Dataset):
                     1 - 2 * (goal_quaternion[0]**2 + goal_quaternion[3]**2))
         goal_pose = np.array([self.goal_positions[index, 0] - sensor_pose[0], self.goal_positions[index, 1] - sensor_pose[1], goal_yaw])
 
-    
         # convert quaternion to yaw
-        footstep_plan_quaternions = self.footstep_plan_orientations[index*self.n_steps:(index+1)*self.n_steps, :]
+        footstep_plan_quaternions = self.footstep_plan_orientations[index*n_steps:index*n_steps + self.n_steps, :]
         footstep_plan_yaws = np.arctan2(2 * (footstep_plan_quaternions[:, 0] * footstep_plan_quaternions[:, 1] + footstep_plan_quaternions[:, 3] * footstep_plan_quaternions[:, 2]),
                     1 - 2 * (footstep_plan_quaternions[:, 0]**2 + footstep_plan_quaternions[:, 3]**2))
-        footstep_plan_sides = self.footstep_plan_sides[index*self.n_steps:(index+1)*self.n_steps]
         
-        footstep_plan_poses = self.footstep_plan_positions[index*self.n_steps:(index+1)*self.n_steps, :] - sensor_pose
+        footstep_plan_poses = self.footstep_plan_positions[index*n_steps:index*n_steps + self.n_steps, :] - sensor_pose
         footstep_plan_poses[:, 2] = footstep_plan_yaws
-        # stack such that footstep_plan_poses[:, 3] = footstep_plan_sides
-        footstep_plan_poses = np.column_stack((footstep_plan_poses, footstep_plan_sides))
-        footstep_plan_poses = np.array(footstep_plan_poses, dtype=np.float32)
+        footstep_plan_poses = np.array([footstep_plan_poses], dtype=np.float32)
 
+        terrain_cost_map = compute_terrain_cost_map(self.height_maps[index])
+        contact_map = compute_contact_map(terrain_cost_map)
 
         # Inputs
         # --------- Image Inputs (float54)
         height_map_input = torch.Tensor(self.height_maps[index]).unsqueeze(0).to(device)
+        terrian_cost_input = torch.Tensor(terrain_cost_map).unsqueeze(0).to(device)
+        contact_map_input = torch.Tensor(contact_map).unsqueeze(0).to(device)
         
         # --------- Pose Inputs (X, Y, Yaw) with float 64
-        start_side = torch.Tensor(start_side).to(device)
         start_pose = torch.Tensor(start_pose).to(device)
         goal_pose = torch.Tensor(goal_pose).to(device)
-        # linear_input = torch.cat((start_pose, goal_pose), dim=0) # without start side
-        linear_input = torch.cat((start_pose, goal_pose, start_side), dim=0) # with start side
+        linear_input = torch.cat((start_pose, goal_pose), dim=0) 
 
         # Outputs
         # --------- 3D Pose Outputs
         footstep_plan_poses = torch.Tensor(footstep_plan_poses).to(device)
         linear_output = torch.flatten(footstep_plan_poses)
 
-        return height_map_input, linear_input, linear_output
+        return height_map_input, linear_input, linear_output, contact_map_input, terrian_cost_input
         
     def __len__(self) -> int:
         return len(self.height_maps)
@@ -187,22 +195,28 @@ class FootstepPredictor(Module):
         print("FootstepPredictor (Model) -> Linear Input Size: ", input_size, "Linear Output Size: ", output_size)
 
         # convolutional layers given a 200x200 16-bit grayscale image
-        self.conv2d_1 = torch.nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
-        self.conv2d_2 = torch.nn.Conv2d(32, 48, kernel_size=3, stride=1, padding=1)
-        self.conv2d_3 = torch.nn.Conv2d(48, 64, kernel_size=3, stride=1, padding=1)
-        self.conv2d_4 = torch.nn.Conv2d(64, 96, kernel_size=3, stride=1, padding=1)
-        self.conv2d_5 = torch.nn.Conv2d(96, 128, kernel_size=3, stride=1, padding=1)
+        self.conv2d_1 = torch.nn.Conv2d(1, 48, kernel_size=3, stride=1, padding=1)
+        self.conv2d_2 = torch.nn.Conv2d(48, 96, kernel_size=3, stride=1, padding=1)
+        self.conv2d_3 = torch.nn.Conv2d(96, 48, kernel_size=3, stride=1, padding=1)
+        self.conv2d_4 = torch.nn.Conv2d(48, 32, kernel_size=3, stride=1, padding=1)
+
         self.maxpool2d_22 = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
         self.maxpool2d_44 = torch.nn.MaxPool2d(kernel_size=4, stride=4, padding=0)
 
-        # fully connected layers
-        self.fc0 = torch.nn.Linear(input_size, 64)
-        self.bn0 = torch.nn.BatchNorm1d(64)
-        self.dropout0 = torch.nn.Dropout(0.5)
-        self.fc1 = torch.nn.Linear(128 * 6 * 6 + 64, 2048)
-        self.bn1 = torch.nn.BatchNorm1d(2048)
-        self.dropout1 = torch.nn.Dropout(0.5)
-        self.fc2 = torch.nn.Linear(2048, 1024)
+        self.hfc0 = torch.nn.Linear(32 * 12 * 12, 4096)
+        self.hbn0 = torch.nn.BatchNorm1d(4096)
+        self.hfc1 = torch.nn.Linear(4096, 1024)
+        self.hbn1 = torch.nn.BatchNorm1d(1024)
+
+        self.fc0 = torch.nn.Linear(input_size, 1024)
+        self.bn0 = torch.nn.BatchNorm1d(1024)
+        self.dropout0 = torch.nn.Dropout(0.1)
+
+        self.fc1 = torch.nn.Linear(1024 + 1024, 1024)
+        self.bn1 = torch.nn.BatchNorm1d(1024)
+        self.dropout1 = torch.nn.Dropout(0.1)
+        
+        self.fc2 = torch.nn.Linear(1024, 1024)
         self.bn2 = torch.nn.BatchNorm1d(1024)
         self.fc3 = torch.nn.Linear(1024, 512)
         self.bn3 = torch.nn.BatchNorm1d(512)
@@ -212,10 +226,9 @@ class FootstepPredictor(Module):
         self.bn5 = torch.nn.BatchNorm1d(128)
         self.fc6 = torch.nn.Linear(128, output_size)
 
-
     def forward(self, h1, l1):
 
-        print("\n\nForward Pass Input Shape: ", h1.shape, l1.shape, end=" ")
+        # print("\n\nForward Pass Input Shape: ", h1.shape, l1.shape, end=" ")
 
         # x1 is image 200x200 16-bit grayscale and x2 is the 3D pose
         h1 = self.conv2d_1(h1)
@@ -226,15 +239,28 @@ class FootstepPredictor(Module):
         h1 = self.maxpool2d_22(h1)
         h1 = self.conv2d_4(h1)
         h1 = self.maxpool2d_22(h1)
-        h1 = self.conv2d_5(h1)
-        h1 = self.maxpool2d_22(h1)
+
+
         h1 = torch.flatten(h1, 1)
+        h1 = self.hfc0(h1)
+        h1 = self.hbn0(h1)
+        h1 = F.leaky_relu(h1)
+        h1 = self.hfc1(h1)
+        h1 = self.hbn1(h1)
+        h1 = F.leaky_relu(h1)
 
         l1 = self.fc0(l1)        
         l1 = self.bn0(l1)
-        l1 = F.relu(l1)
+        l1 = F.leaky_relu(l1)
+        
+        # print shape, mean, min, max and stddev
+        # print("Shapes: ", h1.shape, l1.shape,
+        #     "Mean: ", round(h1.mean().item(), 3), round(l1.mean().item(), 3), 
+        #     "Min: ", round(h1.min().item(), 3), round(l1.min().item(), 3), 
+        #     "Max: ", round(h1.max().item(), 3), round(l1.max().item(), 3), 
+        #     "Stddev: ", round(h1.std().item(), 3), round(l1.std().item(), 3))
 
-        # flatten x1 and contactenate with x2
+        # flatten x1 and concatenate with x2
         x = torch.cat((h1, l1), dim=1)
 
         # fully connected layers
@@ -265,35 +291,44 @@ class FootstepPredictor(Module):
 
         x = self.fc6(x)
 
-        print("Forward Pass Output Shape: ", x.shape)
+        # print("Forward Pass Output Shape: ", x.shape)
 
         return x
-    
 
-def train_store(train_dataset, val_dataset, batch_size, epochs, criterion):
+def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model_path):
     
     train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
-    val_loader = DataLoader(dataset=val_dataset, batch_size=len(val_dataset.indices), shuffle=False, num_workers=0)
+    val_loader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
     input_size = train_dataset[0][1].shape[0]
     output_size = train_dataset[0][2].shape[0]
     model = FootstepPredictor(input_size, output_size).to(device)
+
+    # load weights from previously trained model to start from where it left off
+    model_files = sorted([name for name in os.listdir(model_path) if name.endswith('.pt')])
+    if len(model_files) > 0:
+        print("Loading Model: ", model_files[-1])
+        model.load_state_dict(torch.load(model_path + model_files[-1]))
 
     # define optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay = 1e-8)
 
     # train the model
     for epoch in range(epochs):
+        gc.collect()
+        torch.cuda.empty_cache()
+
         loop=tqdm(train_loader, bar_format='{l_bar}{bar:30}{r_bar}{bar:-30b}')
         running_loss=0
-        for i, (x1, x2, y) in enumerate(loop):
+        for i, (x1, x2, y, cm, tc) in enumerate(loop):
             if x1.shape[0] > 1:
                 x1 = x1.to(device)
                 x2 = x2.to(device)
                 y = y.to(device)
+                cm = cm.to(device)
 
                 # Forward pass
                 y_pred = model(x1, x2)
-                loss = criterion(y_pred, y)
+                loss = criterion(y_pred, y, cm)
 
                 # Backward pass and optimize
                 optimizer.zero_grad()
@@ -307,7 +342,7 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion):
                 loop.set_postfix(loss=average_loss)
                 writer.add_scalar('training loss', average_loss, epoch * len(train_loader) + i)
 
-        for x1, x2, y in val_loader:
+        for x1, x2, y, cm, tc in val_loader:
             # send data to gpu
             if x1.shape[0] > 1:
                 x1 = x1.to(device)
@@ -315,89 +350,124 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion):
                 y = y.to(device)
                 model.eval()
                 y_pred = model(x1, x2)
-                loss = criterion(y_pred,y)
+                loss = criterion(y_pred, y, cm)
                 valid_loss = loss.item()
                 print("Validiation loss - ",valid_loss,"\n")
                 writer.add_scalar('validation loss', valid_loss, epoch * len(train_loader) + i)
 
+        # del x1, x2, y, y_pred, loss
+        gc.collect()
+        torch.cuda.empty_cache()
+
     # save the model
-    torch.save(model.state_dict(), 'footstep_predictor.pt')
-    torch.onnx.export(model, (x1[0].unsqueeze(0), x2[0].unsqueeze(0)), 'footstep_predictor.onnx', verbose=False)
+    ckpt_count = len([name for name in os.listdir(model_path) if name.endswith('.pt')])
+    file_name = 'footstep_predictor' + '_' + str(ckpt_count)
+    torch.save(model.state_dict(), model_path + file_name + '.pt')
+    torch.onnx.export(model, (x1[0].unsqueeze(0), x2[0].unsqueeze(0)), model_path + file_name + '.onnx', verbose=False)
     writer.close()
 
 
-def load_validate(val_dataset):
-    loader = DataLoader(val_dataset, batch_size=1, shuffle=True)
+def load_validate(val_dataset, batch_size, model_path):
+    loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
     
     # Load the model
     input_size = val_dataset[0][1].shape[0]
     output_size = val_dataset[0][2].shape[0]
     model = FootstepPredictor(input_size, output_size)
-    model.load_state_dict(torch.load('footstep_predictor.pt'))
+
+    # those that end in .pt
+    model_files = sorted([name for name in os.listdir(model_path) if name.endswith('.pt')])
+
+    print("Loading Model: ", model_files[-1])
+
+    model.load_state_dict(torch.load(model_path + model_files[-1]))
     model.eval()
     model.to(device)
 
     with torch.no_grad():
-        for i, (height_map_input, linear_input, target_output) in enumerate(loader):
+        for i, (height_map_input, linear_input, target_output, contact_map, terrain_cost) in enumerate(loader):
 
             height_map_input = height_map_input.to(device)
             linear_input = linear_input.to(device)
             target_output = target_output.to(device)
+            contact_map = contact_map.to(device)
 
             predict_output = model(height_map_input, linear_input)
 
-            visualize_output(height_map_input, linear_input, predict_output, i, val_dataset)
+            # get only the first 4 steps
+            predict_output = predict_output[0:3*n_steps, :].reshape((n_steps, 3))
+            target_output = target_output[0:3*n_steps].reshape((n_steps, 3))
+
+            # compute loss
+            print_loss(predict_output, target_output, contact_map)
+
+            visualize_output(height_map_input, linear_input, predict_output, contact_map, terrain_cost, label="Prediction")
+            visualize_output(height_map_input, linear_input, target_output, contact_map, terrain_cost, label="Target")
 
             
-def visualize_output(height_map_input, linear_input, final_output, i, val_dataset, n_steps=10):
+def visualize_output(height_map_input, linear_input, final_output, contact_map_uint8, terrain_cost, n_steps=4, label="Footstep Plan"):
 
     output = final_output.cpu().numpy()
     output = output.squeeze()
-    print("Predict Output", output.shape)
+    # print("Predict Output", output.shape)
 
     linear_input = linear_input.cpu().numpy()
     linear_input = linear_input.squeeze()
-    print("Linear Input", linear_input.shape)
-
-    print(f'Dataset: {i}/{len(val_dataset)}, Height Map Size: {height_map_input.shape}, Linear Input Size: {linear_input.shape}, Linear Output Size: {output.shape}')
+    # print("Linear Input", linear_input.shape)
 
     # convert height map to numpy array 16-bit grayscale
-    height_map = np.array(height_map_input.cpu().numpy() * 10000.0, dtype=np.uint16)
+    height_map_uint16 = np.array(height_map_input.cpu().numpy() * 10000.0, dtype=np.uint16)
 
     # reshape for opencv
-    height_map = height_map.reshape((201, 201))        
+    height_map_uint16 = height_map_uint16.reshape((201, 201))        
+
+    terrain_cost = np.array(terrain_cost.cpu().numpy(), dtype=np.uint8)
+    terrain_cost = terrain_cost.reshape((201, 201))
+
+    # convert contact map to numpy array 8-bit grayscale
+    contact_map_uint8 = np.array(contact_map_uint8.cpu().numpy(), dtype=np.uint8)
+    contact_map_uint8 = contact_map_uint8.reshape((201, 201))
 
     start_pose = linear_input[0:3]
     goal_pose = linear_input[3:6]
-    start_side = linear_input[6]
-    plan_poses = output[0:4*n_steps].reshape((n_steps, 4))[:, 0:3]
+    plan_poses = output[0:3*n_steps].reshape((n_steps, 3))[:, 0:3]
+
+    # print("Height Map: ", height_map.tolist())
 
     # visualize plan
-    visualize_plan(height_map, plan_poses, 
-                    start_pose, goal_pose)
+    visualize_plan(height_map_uint16, contact_map_uint8, terrain_cost, plan_poses, 
+                    start_pose, goal_pose, label=label)
 
 def load_dataset(validation_split):
     home = os.path.expanduser('~')
-    path = home + '/.ihmc/logs/perception/'
+    path = home + '/Downloads/Planning_Datasets/'
     
-    new_format_files = ['20231018_135001_PerceptionLog.hdf5', 
-                        '20231018_143108_PerceptionLog.hdf5']
+    # input_files = ['20231018_135001_PerceptionLog.hdf5', 
+    #                     '20231018_143108_PerceptionLog.hdf5']
     
-    files = \
-    [
-        # '20231015_183228_PerceptionLog.hdf5', 
-        # '20231015_234600_PerceptionLog.hdf5', 
-        # '20231016_025456_PerceptionLog.hdf5',
-        # '20231023_131517_PerceptionLog.hdf5',
-        # '20231023_160823_PerceptionLog.hdf5',
-        '20231028_171524_PerceptionLog.hdf5',
+    files = sorted(os.listdir(path))
+    files = [file for file in files if ".hdf5" in file]
+
+    labels = [
+                'MCFP', 
+                'AStar'
     ]
+
+    # filter by label
+    files = [file for file in files if any(label in file for label in labels)]
+    
+
+    files = files[:total_files]
+
     
     datasets = []
 
     for file in files:
+
+        print("Loading File: ", file)
+
         data = h5py.File(path + file, 'r')
-        dataset = FootstepDataset(data, file)
+        dataset = FootstepDataset(data, file, n_steps=n_steps)
         datasets.append(dataset)
 
     dataset = torch.utils.data.ConcatDataset(datasets)
@@ -409,21 +479,102 @@ def load_dataset(validation_split):
 
 def visualize_dataset(dataset):
     loader = DataLoader(dataset, batch_size=1, shuffle=True)
-    for i, (height_map_input, linear_input, target_output) in enumerate(loader):
+    for i, (height_map_input, linear_input, target_output, contact_map, terrain_cost) in enumerate(loader):
 
         height_map_input = height_map_input.to(device)
         linear_input = linear_input.to(device)
         target_output = target_output.to(device)
 
-        visualize_output(height_map_input, linear_input, target_output, i, val_dataset)
+
+        visualize_output(height_map_input, linear_input, target_output, contact_map, terrain_cost)
+
+def footstep_loss(output, target, contact_map):
+
+    # print("Output Shape: ", output.shape, "Target Shape: ", target.shape, "Contact Map Shape: ", contact_map.shape)
+
+    # output_reshaped = torch.reshape(output, (-1, 4, 3))
+    # fx = output_reshaped[:, :, 0]
+    # fy = output_reshaped[:, :, 1]
+    # contact = contact_map[:, 0, fx.long(), fy.long()]  # Fix: Use contact_map provided in batch
+    # contact_loss = -contact
+
+    # sum the contact map values at the predicted footstep locations and use it as a loss
+    fx = (output[:, 0] * 50 + 100)
+    fy = (output[:, 1] * 50 + 100)
+
+    # put limits on the indices
+    fx = torch.clamp(fx, 0, 199)
+    fy = torch.clamp(fy, 0, 199)
+
+    # cast to long
+    fx = fx.long()
+    fy = fy.long()
+
+    contact_vector = contact_map[0, 0, fx, fy]
+    total_contact_score = torch.sum(contact_vector)
+    contact_loss = torch.square(1.0 - total_contact_score / 255)
+    l1_loss = torch.nn.L1Loss()(output, target)
+
+    return l1_loss + contact_loss
+
+def print_loss(output, target, contact_map):
+    
+    print("Shapes: ", output.shape, target.shape, contact_map.shape)
+
+    # sum the contact map values at the predicted footstep locations and use it as a loss
+    fx = (output[:, 0] * 50 + 100)
+    fy = (output[:, 1] * 50 + 100)
+    
+
+    # put limits on the indices
+    fx = torch.clamp(fx, 0, 199)
+    fy = torch.clamp(fy, 0, 199)
+
+
+    # cast to long
+    fx = fx.long()
+    fy = fy.long()
+
+    print("X_Indices: ", fx)
+    print("Y_Indices: ", fy)
+
+    # maximize the sum in the loss
+    contact_vector = contact_map[0, 0, fx, fy]
+    total_contact_score = torch.sum(contact_vector)
+    contact_loss = torch.square(1.0 - total_contact_score / 255)
+    
+    l1_loss = torch.nn.L1Loss()(output, target)
+
+    print("Output: ", output)
+    print("Contact Vector: ", contact_vector)
+    print("Total Contact Score: ", total_contact_score.item())
+    print("L1 Loss: ", l1_loss.item(), "Contact Loss: ", contact_loss.item())
 
 if __name__ == "__main__":
+
+    home = os.path.expanduser('~')
+    model_path = home + '/Downloads/Model_Weights/'
+    datasets_path = home + '/Downloads/Planning_Datasets/'
+    train = False
+    total_files = 2
+
+    # use arg parser 
+    import argparse
+    parser = argparse.ArgumentParser(description='Footstep Prediction Trainer')
+    parser.add_argument('--train', action='store_true', help='Train the model')
+
+    args = parser.parse_args()
+    train = args.train
+
+    if train:
+        total_files = -1
+
+    n_steps = 4
 
     # load dataset
     train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
-    train = False
-    visualize_raw = True
+    visualize_raw = False
 
     if visualize_raw:
         visualize_dataset(train_dataset)    
@@ -431,12 +582,12 @@ if __name__ == "__main__":
 
     if train:
         # train and store model
-        criterion=torch.nn.L1Loss()
-        train_store(train_dataset, val_dataset, batch_size=10, epochs=30, criterion=criterion)
+        criterion = footstep_loss
+        train_store(train_dataset, val_dataset, batch_size=16, epochs=30, criterion=criterion, model_path=model_path)
 
     else:
         # load and validate model
-        load_validate(val_dataset)
+        load_validate(val_dataset, batch_size=1, model_path=model_path)
 
 
     torch.cuda.empty_cache()

@@ -5,11 +5,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
-import imgui.type.ImBoolean;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
@@ -31,7 +29,7 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
    private final DomainFactory.PubSubImplementation pubSubImplementation;
    private final ROS2Topic<FootstepDataListMessage> topic;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean subscribed = new ImBoolean(false);
+   private boolean subscribed = false;
    private ROS2Node ros2Node;
    private final Object syncObject = new Object();
    private AtomicReference<FootstepDataListMessage> footstepDataListMessage = new AtomicReference<>(null);
@@ -42,11 +40,23 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
+
+      setActivenessChangeCallback(isActive ->
+      {
+         if (isActive && ros2Node == null)
+         {
+            subscribe();
+         }
+         else if (!isActive && ros2Node != null)
+         {
+            unsubscribe();
+         }
+      });
    }
 
    private void subscribe()
    {
-      subscribed.set(true);
+      subscribed = true;
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, StringTools.titleToSnakeCase(titleBeforeAdditions));
       ROS2Tools.createCallbackSubscription(ros2Node, this.topic, this::queueFootstepDataListMessage);
    }
@@ -71,12 +81,6 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.getHidden(getTitle() + "Subscribed"), subscribed))
-      {
-         setSubscribed(subscribed.get());
-      }
-      ImGuiTools.previousWidgetTooltip("Subscribed");
-      ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
    }
@@ -97,21 +101,9 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
       super.destroy();
    }
 
-   public void setSubscribed(boolean subscribed)
-   {
-      if (subscribed && ros2Node == null)
-      {
-         subscribe();
-      }
-      else if (!subscribed && ros2Node != null)
-      {
-         unsubscribe();
-      }
-   }
-
    private void unsubscribe()
    {
-      subscribed.set(false);
+      subscribed = false;
       if (ros2Node != null)
       {
          ros2Node.destroy();
@@ -121,6 +113,6 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
 
    public boolean isSubscribed()
    {
-      return subscribed.get();
+      return subscribed;
    }
 }

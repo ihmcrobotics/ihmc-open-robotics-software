@@ -94,11 +94,14 @@ public class TerrainPlanningDebugger
       this.offsetY = (int) (terrainMapData.getHeightMapCenter().getY() * 50.0f);
 
       PerceptionDebugTools.convertDepthCopyToColor(terrainMapData.getHeightMap().clone(), heightMapColorImage);
-      this.contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(terrainMapData.getContactMap().clone());
-      opencv_imgproc.cvtColor(contactHeatMapImage, contactHeatMapColorImage, opencv_imgproc.COLOR_BGRA2BGR);
-
       opencv_imgproc.resize(heightMapColorImage, heightMapColorImage, new Size(scaledWidth, scaledHeight));
-      opencv_imgproc.resize(contactHeatMapColorImage, contactHeatMapColorImage, new Size(scaledWidth, scaledHeight));
+
+      if (terrainMapData.getContactMap() != null)
+      {
+         this.contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(terrainMapData.getContactMap().clone());
+         opencv_imgproc.cvtColor(contactHeatMapImage, contactHeatMapColorImage, opencv_imgproc.COLOR_BGRA2BGR);
+         opencv_imgproc.resize(contactHeatMapColorImage, contactHeatMapColorImage, new Size(scaledWidth, scaledHeight));
+      }
    }
 
    public void plotNode(MonteCarloFootstepNode node)
@@ -136,19 +139,37 @@ public class TerrainPlanningDebugger
       plotFootPoses(heightMapColorImage, poses, 1);
    }
 
-   public void plotFootstepPlan(FootstepPlan plan)
+   public void plotFootFramePoses(SideDependentList<FramePose3D> poses, int mode)
    {
       if (!enabled)
          return;
 
-      plotFootPoses(contactHeatMapColorImage, request.getStartFootPoses(), 2);
+      SideDependentList<Pose3D> poses3D = new SideDependentList<>(new Pose3D(poses.get(RobotSide.LEFT)), new Pose3D(poses.get(RobotSide.RIGHT)));
+
+      plotFootPoses(contactHeatMapColorImage, poses3D, mode);
+      plotFootPoses(heightMapColorImage, poses3D, mode);
+   }
+
+   public void plotMonteCarloFootstepPlan(FootstepPlan plan)
+   {
+      if (!enabled)
+         return;
+
       plotFootPoses(heightMapColorImage, request.getStartFootPoses(), 2);
-
-      plotFootstepPlan(contactHeatMapColorImage, plan);
       plotFootstepPlan(heightMapColorImage, plan);
-
-      plotFootPoses(contactHeatMapColorImage, request.getGoalFootPoses(), 3);
       plotFootPoses(heightMapColorImage, request.getGoalFootPoses(), 3);
+      
+      plotFootPoses(contactHeatMapColorImage, request.getStartFootPoses(), 2);
+      plotFootstepPlan(contactHeatMapColorImage, plan);
+      plotFootPoses(contactHeatMapColorImage, request.getGoalFootPoses(), 3);
+   }
+
+   public void plotAStarPlan(FootstepPlan plan)
+   {
+      if (!enabled)
+         return;
+
+      plotFootstepPlan(heightMapColorImage, plan);
    }
 
    public void display(int delay)
@@ -158,10 +179,14 @@ public class TerrainPlanningDebugger
 
       heightMapColorImage.copyTo(top);
       contactHeatMapColorImage.copyTo(bottom);
+
+      // make the stacked image brighter
+      opencv_core.convertScaleAbs(stacked, stacked, 1.5, 0);
+
       PerceptionDebugTools.display("Display", stacked, delay, 1500);
    }
 
-   private void plotFootPoses(Mat image, SideDependentList<Pose3D> poses, int mode)
+   public void plotFootPoses(Mat image, SideDependentList<Pose3D> poses, int mode)
    {
       if (!enabled)
          return;
@@ -180,7 +205,7 @@ public class TerrainPlanningDebugger
       }
    }
 
-   private void plotFootstepPlan(Mat image, FootstepPlan plan)
+   public void plotFootstepPlan(Mat image, FootstepPlan plan)
    {
       if (plan == null)
          return;

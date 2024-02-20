@@ -5,6 +5,11 @@ import h5py
 import numpy as np
 import cv2
 
+import os.path
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from plotting.height_map_tools import *
 from hdf5_reader import *
 
 def plan_view_main(data):
@@ -27,48 +32,59 @@ def plan_view_main(data):
     goal_orientations = get_data(data, 'goal/footstep/orientation/')
 
     launch_plan_viewer(footstep_plan_positions, footstep_plan_orientations, 
-                       start_positions, start_orientations, goal_positions, goal_orientations, sensor_positions, sensor_orientations)
+                       start_positions, start_orientations, goal_positions, goal_orientations, sensor_positions, sensor_orientations, n_steps=4)
 
-def visualize_plan(height_map, footstep_plan_poses, start_pose, goal_pose):
+def visualize_plan(height_map, contact_map, terrain_cost, footstep_plan_poses, start_pose, goal_pose, start_side=0.0, label="Footstep_Plan"):
     
     height_map = cv2.convertScaleAbs(height_map, alpha=(255.0/65535.0))
     height_map = np.minimum(height_map * 10, 255)
+    
+    # plot_terrain_maps(height_map, contact_map, contact_map)
 
     height_map_display = height_map.copy()
-
-    # convert grayscale to RGB
     height_map_display = cv2.cvtColor(height_map_display, cv2.COLOR_GRAY2RGB)
-
-    # Resize the height map to 1000x1000
     height_map_display = cv2.resize(height_map_display, (1000, 1000))
+
+    contact_map = np.stack([contact_map, contact_map, contact_map], axis=2).astype(np.uint8)
+    contact_map[:, :, 1] = contact_map[:, :, 0]
+    contact_map[:, :, 0] = 0
+    contact_map[:, :, 2] = 0
+    contact_map = cv2.resize(contact_map, (1000, 1000))
+
+
+    # print("Height Map Shape:", height_map_display.shape, "Contact Map Shape:", contact_map.shape)    
 
     # compute scale factor
     scale = 1000 / height_map.shape[0]
 
-    print("Start pose:", start_pose)
-    print("Goal pose:", goal_pose)
+    # print("Start pose:", start_pose)
+    # print("Goal pose:", goal_pose)
 
-    plot_oriented_footstep(height_map_display, start_pose, (0, 255, 0), scale=scale, dims=(4,8))
+    start_color = (0, 0, 120) if start_side < 0.5 else (0, 120, 120)
+
+    plot_oriented_footstep(height_map_display, start_pose, start_color, scale=scale, dims=(4,8))
     plot_oriented_footstep(height_map_display, goal_pose, (255, 0, 255), scale=scale, dims=(4,8))
 
     # if current position is not zero, plot footsteps
     plot_oriented_footsteps(height_map_display, footstep_plan_poses, scale)
 
-    # test_visualize(height_map_display, scale=scale)
+    stacked_image = np.hstack((height_map_display, contact_map))
 
     # Create a resizeable window and resize by scale factor
-    cv2.namedWindow("Footstep Plan", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("Footstep Plan", 1000, 1000)
-    cv2.imshow("Footstep Plan", height_map_display)
+    cv2.namedWindow(label, cv2.WINDOW_NORMAL)
+    cv2.resizeWindow(label, 1000, 1000)
+    cv2.imshow(label, stacked_image)
+
+    # plot_terrain_maps(height_map, terrain_cost, contact_map)
+
     code = cv2.waitKeyEx(0)
+    # print("Code:", code)
 
     if code == ord('q'):
         cv2.destroyAllWindows()
         exit()
 
     return code
-
-cv2.destroyAllWindows()
 
 def test_visualize(height_map_display, scale=1):
     
@@ -92,7 +108,7 @@ def test_visualize(height_map_display, scale=1):
 def launch_plan_viewer(footstep_positions, footstep_orientations, 
                        start_positions, start_orientations, 
                        goal_positions, goal_orientations,
-                       sensor_positions, sensor_orientations):
+                       sensor_positions, sensor_orientations, n_steps=4):
     
 
     total_plans = len(data['plan/footstep/position/'].keys())
@@ -107,8 +123,8 @@ def launch_plan_viewer(footstep_positions, footstep_orientations,
         sensor_position = sensor_positions[i, :]
         sensor_orientation = sensor_orientations[i, :]
 
-        current_plan_positions = footstep_positions[i*10:(i+1)*10, :]
-        current_plan_orientations = footstep_orientations[i*10:(i+1)*10, :]
+        current_plan_positions = footstep_positions[i*n_steps:(i+1)*n_steps, :]
+        current_plan_orientations = footstep_orientations[i*n_steps:(i+1)*n_steps, :]
         
         # count number of non-zero L2 norm positions in current plan
         count_footsteps = np.count_nonzero(np.linalg.norm(current_plan_positions, axis=1))
@@ -130,14 +146,17 @@ def launch_plan_viewer(footstep_positions, footstep_orientations,
             i -= 1
 
         
-def plot_oriented_footsteps(display, poses, scale):
+def plot_oriented_footsteps(display, poses, scale, n_steps=4):
 
     # Plot the footstep plan
-    for i in range(10):
+    for i in range(n_steps):
         pose = poses[i, :]
+        
+        side = i % 2 # 0 for left, 1 for right
+
 
         # set color to red if left foot, yellow if right foot
-        color = (0, 0, 120) if i % 2 == 0 else (0, 120, 120)
+        color = (0, 0, 120) if side < 0.5 else (0, 120, 120)
 
         # if position is not zero, plot footsteps
         if np.linalg.norm(pose[:2]) > 0.001:

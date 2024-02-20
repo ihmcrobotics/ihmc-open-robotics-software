@@ -14,23 +14,36 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class HandPoseActionDefinition extends ActionNodeDefinition implements SidedObject
 {
+   public static final double DEFAULT_TRAJECTORY_DURATION = 4.0;
+   public static final boolean DEFAULT_IS_JOINTSPACE_MODE = true;
+   public static final boolean DEFAULT_HOLD_POSE =  false;
+   public static final double DEFAULT_LINEAR_POSITION_WEIGHT = 50.0;
+   public static final double DEFAULT_ANGULAR_POSITION_WEIGHT = 50.0;
+   public static final double DEFAULT_JOINTSPACE_WEIGHT = -1.0;
+
    private final CRDTUnidirectionalEnumField<RobotSide> side;
    private final CRDTUnidirectionalDouble trajectoryDuration;
    private final CRDTUnidirectionalBoolean holdPoseInWorldLater;
    private final CRDTUnidirectionalBoolean jointspaceOnly;
    private final CRDTUnidirectionalString palmParentFrameName;
    private final CRDTUnidirectionalRigidBodyTransform palmTransformToParent;
+   private final CRDTUnidirectionalDouble linearPositionWeight;
+   private final CRDTUnidirectionalDouble angularPositionWeight;
+   private final CRDTUnidirectionalDouble jointspaceWeight;
 
    public HandPoseActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 
       side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
-      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 4.0);
-      holdPoseInWorldLater = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
-      jointspaceOnly = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
+      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_TRAJECTORY_DURATION);
+      holdPoseInWorldLater = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_HOLD_POSE);
+      jointspaceOnly = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_IS_JOINTSPACE_MODE);
       palmParentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, ReferenceFrame.getWorldFrame().getName());
       palmTransformToParent = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
+      linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_LINEAR_POSITION_WEIGHT);
+      angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_ANGULAR_POSITION_WEIGHT);
+      jointspaceWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_JOINTSPACE_WEIGHT);
    }
 
    @Override
@@ -44,6 +57,9 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
       jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater.getValue());
       jsonNode.put("jointspaceOnly", jointspaceOnly.getValue());
+      jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
+      jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
+      jsonNode.put("jointspaceWeight", jointspaceWeight.getValue());
    }
 
    @Override
@@ -57,6 +73,9 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       JSONTools.toEuclid(jsonNode, palmTransformToParent.getValue());
       holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
       jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
+      linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
+      angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
+      jointspaceWeight.setValue(jsonNode.get("jointspaceWeight").asDouble());
    }
 
    public void toMessage(HandPoseActionDefinitionMessage message)
@@ -69,6 +88,9 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       message.setTrajectoryDuration(trajectoryDuration.toMessage());
       message.setHoldPoseInWorld(holdPoseInWorldLater.toMessage());
       message.setJointSpaceControl(jointspaceOnly.toMessage());
+      message.setLinearPositionWeight(linearPositionWeight.toMessage());
+      message.setAngularPositionWeight(angularPositionWeight.toMessage());
+      message.setJointspaceWeight(jointspaceWeight.toMessage());
    }
 
    public void fromMessage(HandPoseActionDefinitionMessage message)
@@ -81,6 +103,9 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       trajectoryDuration.fromMessage(message.getTrajectoryDuration());
       holdPoseInWorldLater.fromMessage(message.getHoldPoseInWorld());
       jointspaceOnly.fromMessage(message.getJointSpaceControl());
+      linearPositionWeight.fromMessage(message.getLinearPositionWeight());
+      angularPositionWeight.fromMessage(message.getAngularPositionWeight());
+      jointspaceWeight.fromMessage(message.getJointspaceWeight());
    }
 
    @Override
@@ -142,5 +167,35 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    public CRDTUnidirectionalRigidBodyTransform getPalmTransformToParent()
    {
       return palmTransformToParent;
+   }
+
+   public double getLinearPositionWeight()
+   {
+      return linearPositionWeight.getValue();
+   }
+
+   public void setLinearPositionWeight(double linearPositionWeight)
+   {
+      this.linearPositionWeight.setValue(linearPositionWeight);
+   }
+
+   public double getAngularPositionWeight()
+   {
+      return angularPositionWeight.getValue();
+   }
+
+   public void setAngularPositionWeight(double angularPositionWeight)
+   {
+      this.angularPositionWeight.setValue(angularPositionWeight);
+   }
+
+   public double getJointspaceWeight()
+   {
+      return jointspaceWeight.getValue();
+   }
+
+   public void setJointspaceWeight(double jointspaceWeight)
+   {
+      this.jointspaceWeight.setValue(jointspaceWeight);
    }
 }

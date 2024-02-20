@@ -247,16 +247,16 @@ public class PerceptionDebugTools
    public static String heightMapToString(String name, HeightMapData heightMapData, int skip)
    {
       StringBuilder matString = new StringBuilder("Mat: [" + name + "]\n");
-      LogTools.info("Height Map: [Center: {}]", heightMapData.getGridCenter());
+      LogTools.info("Height Map: [Center: {}, Size: {}]", heightMapData.getGridCenter(), heightMapData.getCellsPerAxis());
       for (int i = 0; i < heightMapData.getCellsPerAxis(); i += skip)
       {
          for (int j = 0; j < heightMapData.getCellsPerAxis(); j += skip)
          {
             double height = heightMapData.getHeightAt(i, j);
-            if (height > 0.0001)
-               matString.append(String.format("%.2f", height)).append(" ");
-            else
-               matString.append("||||").append(" ");
+            //if (height > 0.0001)
+               matString.append(String.format("%.1f", height)).append(" ");
+            //else
+            //   matString.append("||||").append(" ");
          }
          matString.append("\n");
       }
@@ -309,7 +309,7 @@ public class PerceptionDebugTools
       }
 
       int code = opencv_highgui.waitKeyEx(delay);
-      if (code == 113 || code != -1) // Keycode for 'q'
+      if (code == 113) // Keycode for 'q'
       {
          System.exit(0);
       }
@@ -346,7 +346,7 @@ public class PerceptionDebugTools
       OpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
 
       opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size((int) (image.cols() * scale), (int) (image.rows() * scale)));
-      display(tag, finalDisplayDepth, delay);
+      display(tag, finalDisplayDepth, delay, finalDisplayDepth.rows());
    }
 
    public void testProjection(Mat depth)
@@ -466,7 +466,7 @@ public class PerceptionDebugTools
             color = new Scalar(255, 100, 0, 0);
             break;
          case 2: // start poses are black
-            color = new Scalar(0, 0, 0, 0);
+            color = new Scalar(0, 255, 255, 0);
             break;
          case 3: // goal poses are white
             color = new Scalar(255, 255, 255, 0);

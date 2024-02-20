@@ -42,11 +42,20 @@ public class StancePoseCalculator
 
    public SideDependentList<FramePose3D> getStancePoses(FramePose3D goalPose, TerrainMapData terrainMap, FootstepPlannerEnvironmentHandler environmentHandler)
    {
+      reset();
       insertCandidatePoses(leftPoses, goalPose, RobotSide.LEFT);
       insertCandidatePoses(rightPoses, goalPose, RobotSide.RIGHT);
       searchForOptimalGoalStance(leftPoses, rightPoses, goalPose, terrainMap);
       snapPosesToEnvironment(environmentHandler);
-      return bestFramePoses;
+      return new SideDependentList<>(bestFramePoses.get(RobotSide.LEFT), bestFramePoses.get(RobotSide.RIGHT));
+   }
+
+   public void reset()
+   {
+      leftPoses.clear();
+      rightPoses.clear();
+      bestFramePoses.get(RobotSide.LEFT).setToZero();
+      bestFramePoses.get(RobotSide.RIGHT).setToZero();
    }
 
    public void insertCandidatePoses(ArrayList<FramePose3D> poses, FramePose3D goalPose, RobotSide side)

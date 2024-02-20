@@ -18,7 +18,6 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 
 import java.util.List;
@@ -74,8 +73,12 @@ public class RDXModelBuilder
 
    public static Model buildModelFromMesh(ModelBuilder modelBuilder, RDXMultiColorMeshBuilder meshBuilder)
    {
+      return buildModelFromMesh(modelBuilder, meshBuilder.generateMesh());
+   }
+
+   public static Model buildModelFromMesh(ModelBuilder modelBuilder, Mesh mesh)
+   {
       modelBuilder.begin();
-      Mesh mesh = meshBuilder.generateMesh();
 
       MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
       Material material = new Material();

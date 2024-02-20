@@ -17,11 +17,12 @@ public abstract class ActionNodeExecutor<S extends ActionNodeState<D>,
    /** Trigger the action to begin executing. Called once per execution. */
    public void triggerActionExecution()
    {
-      getState().setIsExecuting(false);
+      getState().setIsExecuting(true);
       getState().setFailed(false);
       getState().setNominalExecutionDuration(0.0);
       getState().setElapsedExecutionTime(0.0);
-      getState().getDesiredTrajectory().getValue().clear();
+      getState().getCommandedTrajectory().getValue().clear();
+      getState().getCommandedJointTrajectories().clear(0);
    }
 
    /** Called every tick only when this action is executing. */

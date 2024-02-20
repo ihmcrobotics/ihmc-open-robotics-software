@@ -300,3 +300,24 @@ def plot_position(start_index, end_index, data_list, style_list, tag, type_strin
 
 
     plt.show()
+
+def load_raw_height_maps(data, dataset_name):
+    height_map = data[dataset_name][:]
+    return height_map
+
+def show_height_map(height_map, delay):
+    height_map_display = height_map.copy()
+
+    # convert grayscale to RGB
+    height_map_display = cv2.cvtColor(height_map_display, cv2.COLOR_GRAY2RGB)
+
+    # Resize the height map to 1000x1000
+    height_map_display = cv2.resize(height_map_display, (1000, 1000))
+
+    # compute scale factor
+    cv2.imshow("Height Map", height_map_display)
+    code = cv2.waitKeyEx(delay)
+
+    if code == 113 or code == 1048689:
+        exit()
+    

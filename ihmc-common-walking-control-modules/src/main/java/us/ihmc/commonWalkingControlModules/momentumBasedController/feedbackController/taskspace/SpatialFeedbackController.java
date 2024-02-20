@@ -97,8 +97,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final FBVector3D yoDesiredRotationVector;
    protected final FBVector3D yoCurrentRotationVector;
 
-   protected final FramePoint3D desiredPosition = new FramePoint3D();
-   protected final FrameQuaternion desiredOrientation = new FrameQuaternion();
+   protected final FramePoint3D controlFramePosition = new FramePoint3D();
+   protected final FrameQuaternion controlFrameOrientation = new FrameQuaternion();
    protected final FramePose3D desiredPose = new FramePose3D();
 
    protected final FrameQuaternion errorOrientationCumulated = new FrameQuaternion();
@@ -196,7 +196,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       YoDouble maximumLinearRate = positionGains.getYoMaximumFeedbackRate();
       YoDouble maximumAngularRate = orientationGains.getYoMaximumFeedbackRate();
 
-      controlFrame = fbToolbox.getOrCreateControlFrame(endEffector, controllerIndex, true);
+      controlFrame = fbToolbox.getOrCreateSpatialFeedbackControlFrame(endEffector, controllerIndex, true);
 
       isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isSpatialFBControllerEnabled", fbToolbox.getRegistry());
       isEnabled.set(false);
@@ -368,8 +368,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       angularGainsFrame = command.getAngularGainsFrame();
       linearGainsFrame = command.getLinearGainsFrame();
 
-      command.getControlFramePoseIncludingFrame(desiredPosition, desiredOrientation);
-      controlFrame.setOffsetToParent(desiredPosition, desiredOrientation);
+      command.getControlFramePoseIncludingFrame(controlFramePosition, controlFrameOrientation);
+      controlFrame.setOffsetToParent(controlFramePosition, controlFrameOrientation);
 
       yoDesiredPose.setIncludingFrame(command.getReferencePosition(), command.getReferenceOrientation());
       yoDesiredPose.getOrientation().getRotationVector(yoDesiredRotationVector);
@@ -680,7 +680,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       angularFeedbackTermToPack.clipToMaxNorm(orientationGains.getMaximumProportionalError());
 
       yoErrorVector.setIncludingFrame(angularFeedbackTermToPack, linearFeedbackTermToPack);
-      yoErrorVector.changeFrame(trajectoryFrame);
+      yoErrorVector.changeFrame(controlFrame);
       yoErrorVector.setCommandId(currentCommandId);
       yoErrorOrientation.setRotationVectorIncludingFrame(yoErrorVector.getAngularPart());
       yoErrorOrientation.setCommandId(currentCommandId);

@@ -2,17 +2,18 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiStyleVar;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.imgui.*;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 
 public class RDXBehaviorTreeWidgetsVerticalLayout
 {
-   private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
    private final RDXBehaviorTree tree;
    private final BehaviorTreeTopologyOperationQueue topologyOperationQueue;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -29,16 +30,16 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
    public void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> node)
    {
-      if (expandCollapseRenderer.render(node.getTreeWidgetExpanded()))
-      {
-         node.setTreeWidgetExpanded(!node.getTreeWidgetExpanded());
-      }
+      ImGui.pushStyleVar(ImGuiStyleVar.ItemSpacing, ImGui.getStyle().getItemSpacingX(), 0.0f);
 
-      ImGui.sameLine();
+      node.renderGeneralRowBeginWidgets();
       node.renderTreeViewIconArea();
 
-      ImGui.sameLine();
+      if (node.getParent() != null)
+         node.getParent().getChildrenDescriptionAligner().align();
       node.renderNodeDescription();
+
+      ImGui.popStyleVar();
 
       if (ImGui.beginPopup(node.getNodePopupID()))
       {
@@ -80,6 +81,11 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
                renderMoveRelativeItems(node, BehaviorTreeNodeInsertionType.INSERT_AFTER);
                ImGui.endMenu();
             }
+            if (ImGui.beginMenu(labels.get("Move to Child of")))
+            {
+               renderMoveRelativeItems(node, BehaviorTreeNodeInsertionType.INSERT_AS_CHILD);
+               ImGui.endMenu();
+            }
 
             ImGui.separator();
          }
@@ -114,8 +120,6 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
       {
          float indentAmount = 10.0f;
          ImGui.indent(indentAmount);
-
-         node.renderImGuiWidgets();
 
          for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
          {
@@ -160,13 +164,26 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
    private void renderMoveRelativeItems(RDXBehaviorTreeNode<?, ?> nodeToMove, BehaviorTreeNodeInsertionType insertionType)
    {
       RDXBehaviorTreeNode<?, ?> rootNode = RDXBehaviorTreeTools.findRootNode(nodeToMove);
-      RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, relativeNode ->
+      RDXBehaviorTreeTools.runForEntireTree(rootNode, relativeNode ->
       {
          if (relativeNode != nodeToMove && relativeNode != rootNode)
          {
-            if (ImGui.menuItem(relativeNode.getDefinition().getDescription()))
+            if (insertionType == BehaviorTreeNodeInsertionType.INSERT_AS_CHILD)
             {
-               topologyOperationQueue.queueMoveAndFreezeNode(nodeToMove, nodeToMove.getParent(), relativeNode.getParent(), relativeNode, insertionType);
+               if (!(relativeNode instanceof RDXActionNode))
+               {
+                  if (ImGui.menuItem(relativeNode.getDefinition().getDescription()))
+                  {
+                     topologyOperationQueue.queueMoveAndFreezeNode(nodeToMove, nodeToMove.getParent(), relativeNode, relativeNode, insertionType);
+                  }
+               }
+            }
+            else
+            {
+               if (ImGui.menuItem(relativeNode.getDefinition().getDescription()))
+               {
+                  topologyOperationQueue.queueMoveAndFreezeNode(nodeToMove, nodeToMove.getParent(), relativeNode.getParent(), relativeNode, insertionType);
+               }
             }
          }
       });
