@@ -3,9 +3,12 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.avatar.sakeGripper.SakeHandParameters;
+import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
-import us.ihmc.communication.crdt.*;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -13,18 +16,16 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class SakeHandCommandActionDefinition extends ActionNodeDefinition
 {
    private final CRDTUnidirectionalEnumField<RobotSide> side;
-   private final CRDTUnidirectionalInteger handConfigurationIndex;
-   private final CRDTUnidirectionalDouble goalPosition;
-   private final CRDTUnidirectionalDouble goalTorque;
+   private final CRDTUnidirectionalDouble handOpenAngle;
+   private final CRDTUnidirectionalDouble fingertipGripForceLimit;
 
    public SakeHandCommandActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 
       side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
-      handConfigurationIndex = new CRDTUnidirectionalInteger(ROS2ActorDesignation.OPERATOR, crdtInfo, SakeHandCommandOption.GOTO.ordinal());
-      goalPosition = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.0); // default to open
-      goalTorque = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0); // default to none
+      handOpenAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, SakeHandPreset.OPEN.getHandOpenAngle());
+      fingertipGripForceLimit = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE);
    }
 
    @Override
@@ -33,9 +34,8 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       super.saveToFile(jsonNode);
 
       jsonNode.put("side", side.getValue().getLowerCaseName());
-      jsonNode.put("configuration", SakeHandCommandOption.values[handConfigurationIndex.getValue()].name());
-      jsonNode.put("position", goalPosition.getValue());
-      jsonNode.put("torque", goalTorque.getValue());
+      jsonNode.put("handOpenAngleDegrees", Double.parseDouble("%.1f".formatted(Math.toDegrees(handOpenAngle.getValue()))));
+      jsonNode.put("fingertipGripForceLimit", Double.parseDouble("%.1f".formatted(fingertipGripForceLimit.getValue())));
    }
 
    @Override
@@ -44,9 +44,8 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       super.loadFromFile(jsonNode);
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
-      handConfigurationIndex.setValue(SakeHandCommandOption.valueOf(jsonNode.get("configuration").asText()).ordinal());
-      goalPosition.setValue(jsonNode.get("position").asDouble());
-      goalTorque.setValue(jsonNode.get("torque").asDouble());
+      handOpenAngle.setValue(Math.toRadians(jsonNode.get("handOpenAngleDegrees").asDouble()));
+      fingertipGripForceLimit.setValue(jsonNode.get("fingertipGripForceLimit").asDouble());
    }
 
    public void toMessage(SakeHandCommandActionDefinitionMessage message)
@@ -54,9 +53,8 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       super.toMessage(message.getDefinition());
 
       message.setRobotSide(side.toMessage().toByte());
-      message.setConfiguration(handConfigurationIndex.toMessage());
-      message.setPositionRatio(goalPosition.toMessage());
-      message.setTorqueRatio(goalTorque.toMessage());
+      message.setHandOpenAngle(handOpenAngle.toMessage());
+      message.setFingertipGripForceLimit(fingertipGripForceLimit.toMessage());
    }
 
    public void fromMessage(SakeHandCommandActionDefinitionMessage message)
@@ -64,9 +62,8 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       super.fromMessage(message.getDefinition());
 
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
-      handConfigurationIndex.fromMessage((int) message.getConfiguration());
-      goalPosition.fromMessage(message.getPositionRatio());
-      goalTorque.fromMessage(message.getTorqueRatio());
+      handOpenAngle.fromMessage(message.getHandOpenAngle());
+      fingertipGripForceLimit.fromMessage(message.getFingertipGripForceLimit());
    }
 
    public RobotSide getSide()
@@ -79,38 +76,23 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       this.side.setValue(side);
    }
 
-   public int getHandConfigurationIndex()
+   public double getHandOpenAngle()
    {
-      return handConfigurationIndex.getValue();
+      return handOpenAngle.getValue();
    }
 
-   public SakeHandCommandOption getSakeCommandOption()
+   public double getFingertipGripForceLimit()
    {
-      return SakeHandCommandOption.values[handConfigurationIndex.getValue()];
+      return fingertipGripForceLimit.getValue();
    }
 
-   public void setHandConfigurationIndex(int handConfigurationIndex)
+   public void setHandOpenAngle(double handOpenAngle)
    {
-      this.handConfigurationIndex.setValue(handConfigurationIndex);
+      this.handOpenAngle.setValue(handOpenAngle);
    }
 
-   public double getGoalPosition()
+   public void setFingertipGripForceLimit(double fingertipGripForceLimit)
    {
-      return goalPosition.getValue();
-   }
-
-   public double getGoalTorque()
-   {
-      return goalTorque.getValue();
-   }
-
-   public void setGoalPosition(double goalPosition)
-   {
-      this.goalPosition.setValue(goalPosition);
-   }
-
-   public void setGoalTorque(double goalTorque)
-   {
-      this.goalTorque.setValue(goalTorque);
+      this.fingertipGripForceLimit.setValue(fingertipGripForceLimit);
    }
 }

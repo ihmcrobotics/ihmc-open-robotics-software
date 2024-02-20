@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.SakeHandStatusMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import mission_control_msgs.msg.dds.*;
@@ -13,11 +14,14 @@ import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.exception.ExceptionHandler;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.*;
+import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
@@ -94,6 +98,8 @@ public class ROS2Tools
                                                                                                            .withTypeName(HandDesiredConfigurationMessage.class);
    private static final ROS2Topic<SakeHandDesiredCommandMessage> HAND_SAKE_DESIRED_COMMAND = HUMANOID_CONTROLLER.withInput()
                                                                                                                 .withTypeName(SakeHandDesiredCommandMessage.class);
+   private static final ROS2Topic<SakeHandStatusMessage> HAND_SAKE_DESIRED_STATUS = HUMANOID_CONTROLLER.withOutput()
+                                                                                                       .withTypeName(SakeHandStatusMessage.class);
    private static final ROS2Topic<HandJointAnglePacket> HAND_JOINT_ANGLES = HUMANOID_CONTROLLER.withOutput().withTypeName(HandJointAnglePacket.class);
 
    public static final ROS2Topic<Float64> BOX_MASS = IHMC_ROOT.withSuffix("box_mass").withType(Float64.class);
@@ -110,9 +116,14 @@ public class ROS2Tools
       return HAND_CONFIGURATION.withRobot(robotName);
    }
 
-   public static ROS2Topic<SakeHandDesiredCommandMessage> getHandSakeCommandTopic(String robotName)
+   public static ROS2Topic<SakeHandDesiredCommandMessage> getHandSakeCommandTopic(String robotName, RobotSide side)
    {
-      return HAND_SAKE_DESIRED_COMMAND.withRobot(robotName);
+      return HAND_SAKE_DESIRED_COMMAND.withRobot(robotName).withSuffix(side.getLowerCaseName());
+   }
+
+   public static ROS2Topic<SakeHandStatusMessage> getHandSakeStatusTopic(String robotName, RobotSide side)
+   {
+      return HAND_SAKE_DESIRED_STATUS.withRobot(robotName).withSuffix(side.getLowerCaseName());
    }
 
    public static ROS2Topic<HandJointAnglePacket> getHandJointAnglesTopic(String robotName)
@@ -506,6 +517,54 @@ public class ROS2Tools
    public static <T> IHMCROS2Callback createCallbackSubscription2(ROS2NodeInterface ros2Node, ROS2Topic<Empty> topic, Runnable callback)
    {
       return new IHMCROS2Callback<>(ros2Node, topic, message -> callback.run());
+   }
+
+   /**
+    * Allocation free callback where the user only has access to the message in the callback.
+    * The user should not take up any significant time in the callback to not slow down the ROS 2
+    * thread.
+    */
+   public static <T> void createVolatileCallbackSubscription(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
+   {
+      try
+      {
+         TopicDataType<T> topicDataType = IHMCROS2Callback.newMessageTopicDataTypeInstance(topic.getType());
+         T data = topicDataType.createData();
+         ros2Node.createSubscription(topicDataType, subscriber ->
+         {
+            if (subscriber.takeNextData(data, null))
+            {
+               callback.accept(data);
+            }
+         }, topic.getName(), ROS2QosProfile.DEFAULT());
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   /** Use when you only need the latest message and need allocation free. */
+   public static <T> SwapReference<T> createSwapReferenceSubscription(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Notification callback)
+   {
+      try
+      {
+         TopicDataType<T> topicDataType = IHMCROS2Callback.newMessageTopicDataTypeInstance(topic.getType());
+         SwapReference<T> swapReference = new SwapReference<>(topicDataType::createData);
+         ros2Node.createSubscription(topicDataType, subscriber ->
+         {
+            if (subscriber.takeNextData(swapReference.getForThreadOne(), null))
+            {
+               swapReference.swap();
+               callback.set();
+            }
+         }, topic.getName(), ROS2QosProfile.DEFAULT());
+         return swapReference;
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 
    public static <T> RealtimeROS2Subscription<T> createQueuedSubscriptionTypeNamed(RealtimeROS2Node realtimeROS2Node,

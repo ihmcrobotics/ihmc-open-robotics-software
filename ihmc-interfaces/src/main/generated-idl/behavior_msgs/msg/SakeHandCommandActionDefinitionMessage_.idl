@@ -22,17 +22,13 @@ module behavior_msgs
         @defaultValue(value=255)
         octet robot_side;
         /**
-         * Hand configuration type
+         * Desired angle between the fingers from 0 to 210 degrees (specified in radians)
          */
-        unsigned long configuration;
+        double hand_open_angle;
         /**
-         * Goal position as ratio from 0.0 (closed) to 1.0 (open)
+         * Torque limit specified as fingertip grip force. Valid up to 29 Newtons. Safe value is 8.7 N.
          */
-        double position_ratio;
-        /**
-         * Goal torque as ratio from 0.0 (closed) to 1.0 (open)
-         */
-        double torque_ratio;
+        double fingertip_grip_force_limit;
       };
     };
   };

@@ -18,7 +18,7 @@ public abstract class ImGuiFancyWidget
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    protected final String label;
    /** Used by a lot of widgets that extend this class. Just here for brevity for those.*/
-   protected final String format;
+   protected String format;
    private final String prefixLabel;
    /** Negative values fill available width. */
    private float widgetWidth = -1.0f;
@@ -106,6 +106,11 @@ public abstract class ImGuiFancyWidget
    public void setWidgetWidth(float widgetWidth)
    {
       this.widgetWidth = widgetWidth;
+   }
+
+   public void setWidgetText(String widgetText)
+   {
+      this.format = widgetText;
    }
 
    /** Use this to add a button after the widget on the same line. */

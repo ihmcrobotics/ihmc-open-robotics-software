@@ -14,7 +14,7 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "right",
       "type" : "OPEN"
     } ]
@@ -25,9 +25,9 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "right",
-      "type": ""
+      "type" : ""
     } ]
   }, {
     "x" : 0.0,
@@ -36,9 +36,9 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "right",
-      "type": "GRIP_HARD"
+      "type" : "GRIP_HARD"
     } ]
   } ],
   "activeSides" : 1,

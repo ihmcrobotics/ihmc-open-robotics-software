@@ -3,6 +3,7 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 
 import java.util.function.Consumer;
 
@@ -12,7 +13,11 @@ import java.util.function.Consumer;
  */
 public class ROS2BehaviorTreeState
 {
-   public static final double SYNC_FREQUENCY = 60.0;
+   /**
+    * The SYNC_FREQUENCY should be a multiple of the scene graph's update frequency.
+    * For now, they are set to be identical. 
+    */
+   public static final double SYNC_FREQUENCY = SceneGraph.UPDATE_FREQUENCY;
 
    private final BehaviorTreeState behaviorTreeState;
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;

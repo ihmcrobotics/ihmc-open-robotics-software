@@ -15,7 +15,7 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "46d4a5c6b54658402e314356e21951a3f5b4a8baa83ce51f3feca1a274f15165";
+   		return "ae797d424f3e9707bf7f1364460cdc5df4ad8d293eac1110ae2028bf59298c74";
    }
    
    @Override
@@ -56,8 +56,6 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -80,9 +78,6 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -98,11 +93,9 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_9(data.getRobotSide());
 
-      cdr.write_type_4(data.getConfiguration());
+      cdr.write_type_6(data.getHandOpenAngle());
 
-      cdr.write_type_6(data.getPositionRatio());
-
-      cdr.write_type_6(data.getTorqueRatio());
+      cdr.write_type_6(data.getFingertipGripForceLimit());
 
    }
 
@@ -111,11 +104,9 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setRobotSide(cdr.read_type_9());
       	
-      data.setConfiguration(cdr.read_type_4());
+      data.setHandOpenAngle(cdr.read_type_6());
       	
-      data.setPositionRatio(cdr.read_type_6());
-      	
-      data.setTorqueRatio(cdr.read_type_6());
+      data.setFingertipGripForceLimit(cdr.read_type_6());
       	
 
    }
@@ -126,9 +117,8 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_9("robot_side", data.getRobotSide());
-      ser.write_type_4("configuration", data.getConfiguration());
-      ser.write_type_6("position_ratio", data.getPositionRatio());
-      ser.write_type_6("torque_ratio", data.getTorqueRatio());
+      ser.write_type_6("hand_open_angle", data.getHandOpenAngle());
+      ser.write_type_6("fingertip_grip_force_limit", data.getFingertipGripForceLimit());
    }
 
    @Override
@@ -137,9 +127,8 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       data.setRobotSide(ser.read_type_9("robot_side"));
-      data.setConfiguration(ser.read_type_4("configuration"));
-      data.setPositionRatio(ser.read_type_6("position_ratio"));
-      data.setTorqueRatio(ser.read_type_6("torque_ratio"));
+      data.setHandOpenAngle(ser.read_type_6("hand_open_angle"));
+      data.setFingertipGripForceLimit(ser.read_type_6("fingertip_grip_force_limit"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage src, behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage dest)

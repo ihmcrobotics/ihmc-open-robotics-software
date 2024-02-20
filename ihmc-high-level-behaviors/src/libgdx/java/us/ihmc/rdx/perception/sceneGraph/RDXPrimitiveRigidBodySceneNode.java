@@ -220,9 +220,9 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    }
 
    @Override
-   public void remove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   public void destroy()
    {
-      super.remove(modificationQueue, sceneGraph);
+      super.destroy();
       icpOptions.destroy();
    }
 

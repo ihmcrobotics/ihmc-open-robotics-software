@@ -14,12 +14,12 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": "OPEN"
+      "type" : "OPEN"
     }, {
       "side" : "right",
-      "type": "OPEN"
+      "type" : "OPEN"
     } ]
   }, {
     "x" : 0.0,
@@ -28,12 +28,12 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": ""
+      "type" : ""
     }, {
       "side" : "right",
-      "type": ""
+      "type" : ""
     } ]
   }, {
     "x" : 0.0,
@@ -42,12 +42,12 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": ""
+      "type" : ""
     }, {
       "side" : "right",
-      "type": ""
+      "type" : ""
     } ]
   }, {
     "x" : 0.0,
@@ -56,12 +56,12 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": "GRIP_HARD"
+      "type" : "GRIP_HARD"
     }, {
       "side" : "right",
-      "type": "GRIP_HARD"
+      "type" : "GRIP_HARD"
     } ]
   }, {
     "x" : 0.0,
@@ -70,12 +70,12 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": ""
+      "type" : ""
     }, {
       "side" : "right",
-      "type": ""
+      "type" : ""
     } ]
   }, {
     "x" : 0.123,
@@ -84,12 +84,12 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "configuration": [ {
+    "configuration" : [ {
       "side" : "left",
-      "type": ""
+      "type" : ""
     }, {
       "side" : "right",
-      "type": ""
+      "type" : ""
     } ]
   } ],
   "activeSides" : 2,

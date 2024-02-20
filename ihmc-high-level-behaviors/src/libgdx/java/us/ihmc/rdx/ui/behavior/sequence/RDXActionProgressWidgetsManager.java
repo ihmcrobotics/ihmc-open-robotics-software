@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.behavior.sequence;
 
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.ui.behavior.actions.RDXFootstepPlanAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXHandPoseAction;

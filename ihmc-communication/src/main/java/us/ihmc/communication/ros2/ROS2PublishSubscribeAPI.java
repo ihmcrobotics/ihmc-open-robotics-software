@@ -19,6 +19,13 @@ public interface ROS2PublishSubscribeAPI
 {
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback);
 
+   /**
+    * Allocation free callback where the user only has access to the message in the callback.
+    * The user should not take up any significat time in the callback to not slow down the ROS 2
+    * thread.
+    */
+   public <T> void subscribeViaVolatileCallback(ROS2Topic<T> topic, Consumer<T> callback);
+
    /** Use when you only need the latest message and need allocation free. */
    public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback);
 

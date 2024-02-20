@@ -39,6 +39,12 @@ public class ROS2ControllerHelper extends ROS2Helper implements ROS2ControllerPu
    }
 
    @Override
+   public <T> void subscribeViaVolatileCallback(Function<String, ROS2Topic<T>> topicFunction, Consumer<T> callback)
+   {
+      subscribeViaVolatileCallback(topicFunction.apply(simpleRobotName), callback);
+   }
+
+   @Override
    public void publishToController(Object message)
    {
       ros2ControllerPublisherMap.publish(message);

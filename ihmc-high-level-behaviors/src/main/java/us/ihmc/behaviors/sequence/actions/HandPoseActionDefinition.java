@@ -14,6 +14,13 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class HandPoseActionDefinition extends ActionNodeDefinition implements SidedObject
 {
+   public static final double DEFAULT_TRAJECTORY_DURATION = 4.0;
+   public static final boolean DEFAULT_IS_JOINTSPACE_MODE = true;
+   public static final boolean DEFAULT_HOLD_POSE =  false;
+   public static final double DEFAULT_LINEAR_POSITION_WEIGHT = 50.0;
+   public static final double DEFAULT_ANGULAR_POSITION_WEIGHT = 50.0;
+   public static final double DEFAULT_JOINTSPACE_WEIGHT = -1.0;
+
    private final CRDTUnidirectionalEnumField<RobotSide> side;
    private final CRDTUnidirectionalDouble trajectoryDuration;
    private final CRDTUnidirectionalBoolean holdPoseInWorldLater;
@@ -29,14 +36,14 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       super(crdtInfo, saveFileDirectory);
 
       side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
-      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 4.0);
-      holdPoseInWorldLater = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
-      jointspaceOnly = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
+      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_TRAJECTORY_DURATION);
+      holdPoseInWorldLater = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_HOLD_POSE);
+      jointspaceOnly = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_IS_JOINTSPACE_MODE);
       palmParentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, ReferenceFrame.getWorldFrame().getName());
       palmTransformToParent = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
-      linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 50.0);
-      angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 50.0);
-      jointspaceWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
+      linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_LINEAR_POSITION_WEIGHT);
+      angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_ANGULAR_POSITION_WEIGHT);
+      jointspaceWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_JOINTSPACE_WEIGHT);
    }
 
    @Override

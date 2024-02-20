@@ -57,7 +57,7 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
    private final RecyclingArrayList<Point3D32> icpObjectPointCloud = new RecyclingArrayList<>(ICP_MAX_POINTS, Point3D32::new);
    private final RDXPointCloudRenderer objectPointCloudRenderer = new RDXPointCloudRenderer();
    private final RecyclingArrayList<Point3D32> icpSegmentedPointCloud = new RecyclingArrayList<>(ICP_MAX_POINTS, Point3D32::new);
-   private final RDXPointCloudRenderer segmentationRednerer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRenderer segmentationRenderer = new RDXPointCloudRenderer();
    private final RDXReferenceFrameGraphic icpFrameGraphic = new RDXReferenceFrameGraphic(0.2);
 
    public RDXIterativeClosestPointOptions(RDXPrimitiveRigidBodySceneNode requestingNode, ImGuiUniqueLabelMap labels)
@@ -69,7 +69,7 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
       requestPublisher = new IHMCROS2Publisher<>(ros2Node, PerceptionAPI.ICP_REQUEST);
       resultSubscription = ros2Helper.subscribe(PerceptionAPI.ICP_RESULT, message -> message.getId() == requestingNode.getSceneNode().getID());
       objectPointCloudRenderer.create(ICP_MAX_POINTS);
-      segmentationRednerer.create(ICP_MAX_POINTS);
+      segmentationRenderer.create(ICP_MAX_POINTS);
 
       updateThread = new RestartableThrottledThread(requestingNode.getClass().getName() + requestingNode.getSceneNode().getID() + "ICPRequest",
                                                     ICP_REQUEST_FREQUENCY,
@@ -109,8 +109,8 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
       }
       objectPointCloudRenderer.setPointsToRender(icpObjectPointCloud, Color.GOLD);
       objectPointCloudRenderer.updateMesh();
-      segmentationRednerer.setPointsToRender(icpSegmentedPointCloud, Color.LIGHT_GRAY);
-      segmentationRednerer.updateMesh();
+      segmentationRenderer.setPointsToRender(icpSegmentedPointCloud, Color.LIGHT_GRAY);
+      segmentationRenderer.updateMesh();
    }
 
    public void renderImGuiWidgets()
@@ -165,7 +165,7 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
       if (resultSubscription.hasReceivedFirstMessage())
       {
          objectPointCloudRenderer.getRenderables(renderables, pool);
-         segmentationRednerer.getRenderables(renderables, pool);
+         segmentationRenderer.getRenderables(renderables, pool);
          icpFrameGraphic.getRenderables(renderables, pool);
       }
    }
@@ -178,6 +178,10 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
 
       // send message to ICP manager to remove this node
       update();
+
+      objectPointCloudRenderer.dispose();
+      segmentationRenderer.dispose();
+      icpFrameGraphic.dispose();
 
       requestPublisher.destroy();
       ros2Node.destroy();

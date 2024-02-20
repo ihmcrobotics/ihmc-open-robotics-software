@@ -159,6 +159,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    @Override
+   public <T> void subscribeViaVolatileCallback(ROS2Topic<T> topic, Consumer<T> callback)
+   {
+      ros2Helper.subscribeViaVolatileCallback(topic, callback);
+   }
+
+   @Override
    public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback)
    {
       return ros2Helper.subscribeViaSwapReference(topic, callback);
@@ -223,6 +229,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public <T> void subscribeViaCallback(Function<String, ROS2Topic<T>> topicFunction, Consumer<T> callback)
    {
       ros2Helper.subscribeViaCallback(topicFunction, callback);
+   }
+
+   @Override
+   public <T> void subscribeViaVolatileCallback(Function<String, ROS2Topic<T>> topicFunction, Consumer<T> callback)
+   {
+      ros2Helper.subscribeViaVolatileCallback(topicFunction, callback);
    }
 
    public void subscribeToRobotConfigurationDataViaCallback(Consumer<RobotConfigurationData> callback)
