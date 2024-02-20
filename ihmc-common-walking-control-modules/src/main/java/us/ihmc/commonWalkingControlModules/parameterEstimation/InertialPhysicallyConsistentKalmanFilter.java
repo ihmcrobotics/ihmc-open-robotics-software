@@ -168,7 +168,7 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
                                            0,
                                            0,
                                            regressorForEstimates,
-                                           i * regressorBlock.getNumRows(),
+                                           0,
                                            i * regressorBlock.getNumCols(),
                                            regressorBlock.getNumRows(),
                                            regressorBlock.getNumCols(),
