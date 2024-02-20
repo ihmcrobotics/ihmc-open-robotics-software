@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
@@ -23,6 +24,8 @@ import us.ihmc.robotics.screwTheory.TotalMassCalculator;
  */
 public class ExternalWrenchHandler
 {
+   private final double gravityZ;
+   private final RigidBodyBasics rootBody;
    private final SpatialForce gravitationalWrench;
    private final DMatrixRMaj gravitationalWrenchMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
    private final DMatrixRMaj wrenchEquationRightHandSide = new DMatrixRMaj(Wrench.SIZE, 1);
@@ -38,10 +41,7 @@ public class ExternalWrenchHandler
    private final SpatialForce tempWrench = new SpatialForce();
    private final ReferenceFrame centerOfMassFrame;
 
-   private final WholeBodyControlCoreToolbox toolbox;
-
-   public ExternalWrenchHandler(WholeBodyControlCoreToolbox toolbox,
-         double gravityZ, ReferenceFrame centerOfMassFrame, double robotTotalMass,
+   public ExternalWrenchHandler(RigidBodyBasics rootBody, double gravityZ, ReferenceFrame centerOfMassFrame,
                                 List<? extends ContactablePlaneBody> contactablePlaneBodies)
    {
       this.centerOfMassFrame = centerOfMassFrame;
@@ -49,8 +49,10 @@ public class ExternalWrenchHandler
 
       this.contactablePlaneBodies = new ArrayList<>(contactablePlaneBodies);
 
+      this.gravityZ = gravityZ;
+      this.rootBody = rootBody;
       gravitationalWrench = new SpatialForce(centerOfMassFrame);
-      gravitationalWrench.setLinearPartZ(-gravityZ * robotTotalMass);
+      gravitationalWrench.setLinearPartZ(-gravityZ * TotalMassCalculator.computeSubTreeMass(rootBody));
       totalWrenchAlreadyApplied = new SpatialForce(centerOfMassFrame);
 
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
@@ -58,8 +60,6 @@ public class ExternalWrenchHandler
          RigidBodyBasics rigidBody = this.contactablePlaneBodies.get(i).getRigidBody();
          externalWrenches.put(rigidBody, new Wrench(rigidBody.getBodyFixedFrame(), rigidBody.getBodyFixedFrame()));
       }
-
-      this.toolbox = toolbox;
    }
 
    public void reset()
@@ -167,7 +167,7 @@ public class ExternalWrenchHandler
 
    public DMatrixRMaj getGravitationalWrench()
    {
-      gravitationalWrench.setLinearPartZ(-toolbox.getGravityZ() * TotalMassCalculator.computeSubTreeMass(toolbox.getRootJoint().getPredecessor()));
+      gravitationalWrench.setLinearPartZ(-gravityZ * TotalMassCalculator.computeSubTreeMass(rootBody));
       gravitationalWrench.get(gravitationalWrenchMatrix);
       return gravitationalWrenchMatrix;
    }

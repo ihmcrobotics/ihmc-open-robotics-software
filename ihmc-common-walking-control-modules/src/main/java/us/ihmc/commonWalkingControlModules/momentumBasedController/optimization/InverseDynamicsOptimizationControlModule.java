@@ -164,7 +164,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       rhoQPInput = new NativeQPInputTypeA(rhoSize);
       motionAndRhoQPInput = new NativeQPInputTypeA(numberOfDoFs + rhoSize);
       motionQPVariableSubstitution = new NativeQPVariableSubstitution();
-      externalWrenchHandler = new ExternalWrenchHandler(toolbox, gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
+      externalWrenchHandler = new ExternalWrenchHandler(toolbox.getRootBody(), gravityZ, centerOfMassFrame, contactablePlaneBodies);
 
       motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       boundCalculator = toolbox.getQPBoundCalculator();

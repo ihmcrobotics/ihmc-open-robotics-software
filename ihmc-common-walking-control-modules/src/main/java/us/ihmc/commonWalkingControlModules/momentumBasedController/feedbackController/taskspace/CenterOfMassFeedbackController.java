@@ -25,6 +25,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameVector3D;
@@ -82,16 +83,18 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private CentroidalMomentumRateCalculator centroidalMomentumHandler;
 
    private final double dt;
-   private final double totalRobotMass;
+   private double totalRobotMass;
    private final boolean computeIntegralTerm;
 
-   private final WholeBodyControlCoreToolbox toolbox;
+   private final RigidBodyBasics rootBody;
 
    public CenterOfMassFeedbackController(WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox, YoRegistry parentRegistry)
    {
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
       centroidalMomentumHandler = toolbox.getCentroidalMomentumRateCalculator();
-      totalRobotMass = toolbox.getTotalRobotMass();
+
+      rootBody = toolbox.getRootBody();
+      totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
       FeedbackControllerSettings settings = toolbox.getFeedbackControllerSettings();
       if (settings != null)
          computeIntegralTerm = settings.enableIntegralTerm();
@@ -173,8 +176,6 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
          yoFeedForwardLinearVelocity = null;
          rateLimitedFeedbackLinearVelocity = null;
       }
-
-      this.toolbox = toolbox;
    }
 
    public void submitFeedbackControlCommand(CenterOfMassFeedbackControlCommand command)
@@ -252,7 +253,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoDesiredLinearAcceleration.setIncludingFrame(desiredLinearAcceleration);
       yoDesiredLinearAcceleration.changeFrame(trajectoryFrame);
 
-      desiredLinearAcceleration.scale(toolbox.getTotalRobotMass());
+      totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
+      desiredLinearAcceleration.scale(totalRobotMass);
       desiredLinearAcceleration.changeFrame(worldFrame);
       inverseDynamicsOutput.setLinearMomentumRate(desiredLinearAcceleration);
    }
@@ -284,7 +286,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoDesiredLinearVelocity.setIncludingFrame(desiredLinearVelocity);
       yoDesiredLinearVelocity.changeFrame(trajectoryFrame);
 
-      desiredLinearVelocity.scale(toolbox.getTotalRobotMass());
+      totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
+      desiredLinearAcceleration.scale(totalRobotMass);
       desiredLinearVelocity.changeFrame(worldFrame);
       inverseKinematicsOutput.setLinearMomentum(desiredLinearVelocity);
    }
@@ -320,7 +323,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoDesiredLinearAcceleration.setIncludingFrame(desiredLinearAcceleration);
       yoDesiredLinearAcceleration.changeFrame(trajectoryFrame);
 
-      desiredLinearAcceleration.scale(toolbox.getTotalRobotMass());
+      totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
+      desiredLinearAcceleration.scale(totalRobotMass);
       desiredLinearAcceleration.changeFrame(worldFrame);
       virtualModelControlOutput.setLinearMomentumRate(desiredLinearAcceleration);
    }
