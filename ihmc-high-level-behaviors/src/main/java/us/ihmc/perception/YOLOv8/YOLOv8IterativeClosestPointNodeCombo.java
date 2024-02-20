@@ -102,10 +102,15 @@ public class YOLOv8IterativeClosestPointNodeCombo
     */
    public boolean updateSceneGraph(ROS2SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
-      if (sceneGraph.getIDToNodeMap().get(nodeID) != null)
+      if (sceneGraph.getIDToNodeMap().containsKey(nodeID))
          node = (YOLOv8IterativeClosestPointNode) sceneGraph.getIDToNodeMap().get(nodeID);
+      else
+      {
+         destroy();
+         return false;
+      }
 
-      if (selfDestruct && node != null)
+      if (selfDestruct)
       {
          node.setCurrentlyDetected(false);
          modificationQueue.accept(new SceneGraphClearSubtree(node));
@@ -143,12 +148,17 @@ public class YOLOv8IterativeClosestPointNodeCombo
       if (detectionFilter.hasEnoughSamples() && !detectionFilter.isStableDetectionResult())
       {
          selfDestruct = true;
-         extractor.destroy();
-         segmenter.destroy();
+         destroy();
          return true;
       }
 
       return false;
+   }
+
+   private void destroy()
+   {
+      extractor.destroy();
+      segmenter.destroy();
    }
 
    public void runICP(RawImage depthImage, RawImage mask)
