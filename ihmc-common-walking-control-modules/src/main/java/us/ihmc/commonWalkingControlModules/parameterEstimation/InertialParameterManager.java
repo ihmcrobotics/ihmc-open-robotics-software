@@ -541,11 +541,27 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          // Pack smoothed estimate back into estimate robot bodies
          RegressorTools.packRigidBodies(basisSets, doubleFilteredEstimate, estimateModelBodies);
 
+         // Check physical consistency
+         checkPhysicalConsistency();
+
          // Pass through estimates to controller
          if (passThroughEstimatesToController.getValue())
             updateActualRobotModel();
 
          updateVisuals();
+      }
+   }
+
+   private void checkPhysicalConsistency()
+   {
+      for (int i = 0; i < estimateModelBodies.length; ++i)
+      {
+         if (!RigidBodyInertialParametersTools.isPhysicallyConsistent(estimateModelBodies[i].getInertia()))
+         {
+            LogTools.error("Inertial parameter estimate for " + estimateModelBodies[i].getName() + " is not physically consistent");
+            if (!RigidBodyInertialParametersTools.isFullyPhysicallyConsistent(estimateModelBodies[i].getInertia()))
+               LogTools.error("Inertial parameter estimate for " + estimateModelBodies[i].getName() + " is not fully physically consistent");
+         }
       }
    }
 
