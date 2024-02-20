@@ -449,7 +449,7 @@ public class FullRobotModelWrapper implements FullRobotModel
    @Override
    public double getTotalMass()
    {
-      return TotalMassCalculator.computeSubTreeMass(elevator);
+      return totalMass;
    }
 
    public static RigidBodyBasics instantiateRobot(RobotDescription robotDescription, ReferenceFrame rootFrame)
