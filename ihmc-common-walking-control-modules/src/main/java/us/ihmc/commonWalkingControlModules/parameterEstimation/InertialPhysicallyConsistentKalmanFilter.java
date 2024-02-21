@@ -99,24 +99,6 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
 
       calculateKalmanGain();
 
-      // Here, we deviate from the supeclass and add the Kalman gain on bodywise, because we only have access to the Jacobian of the measurement model
-      // in that way
-      for (int i = 0; i < nBodies; ++i)
-      {
-         // For each body, get the Kalman gain block corresponding to it, and update the theta basis parameter vector with the residual
-         MatrixMissingTools.setMatrixBlock(kalmanGainBlockContainer,
-                                           0,
-                                           0,
-                                           kalmanGain,
-                                           i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
-                                           0,
-                                           RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
-                                           measurementCovariance.getNumRows(),
-                                           1.0);
-         parameterThetaBasisContainer.set(inertialParameters.get(i).getParameterVectorThetaBasis());
-         CommonOps_DDRM.multAdd(kalmanGainBlockContainer, measurementResidual, parameterThetaBasisContainer);
-      }
-
       gateMeasurementWithNormalizationThreshold();
    }
 
@@ -131,8 +113,23 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
       }
       else
       {
+         // Here, we deviate from the supeclass and add the Kalman gain on bodywise, because we only have access to the Jacobian of the measurement model
+         // in that way
          for (int i = 0; i < nBodies; ++i)
          {
+            // For each body, get the Kalman gain block corresponding to it, and update the theta basis parameter vector with the residual
+            MatrixMissingTools.setMatrixBlock(kalmanGainBlockContainer,
+                                              0,
+                                              0,
+                                              kalmanGain,
+                                              i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                              0,
+                                              RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                              measurementCovariance.getNumRows(),
+                                              1.0);
+            parameterThetaBasisContainer.set(inertialParameters.get(i).getParameterVectorThetaBasis());
+            CommonOps_DDRM.multAdd(kalmanGainBlockContainer, measurementResidual, parameterThetaBasisContainer);
+
             // Update inertial parameters
             inertialParameters.get(i).setParameterVectorThetaBasis(parameterThetaBasisContainer);
             inertialParameters.get(i).update();
@@ -143,7 +140,6 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
                                              inertialParameters.get(i).getParameterVectorPiBasis(),
                                              0,
                                              RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
-
          }
       }
    }
