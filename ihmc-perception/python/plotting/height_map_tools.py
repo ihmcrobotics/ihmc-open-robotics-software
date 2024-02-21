@@ -125,7 +125,6 @@ def compute_terrain_cost_map(height_map):
 
 def compute_contact_map(terrain_cost_map):
 
-
     # print("Unique: ", np.unique(terrain_cost_map))
 
     _, terrain_cost_map = cv2.threshold(terrain_cost_map, 127, 255, cv2.THRESH_BINARY)
@@ -138,9 +137,6 @@ def compute_contact_map(terrain_cost_map):
     contact_map = cv2.distanceTransform(terrain_cost_map.astype(np.uint8), cv2.DIST_L2, 5)  
     contact_map[contact_map > 12] = 12
     contact_map = contact_map / np.max(contact_map)
-
-
-
 
     return contact_map
     

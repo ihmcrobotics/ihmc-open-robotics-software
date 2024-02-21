@@ -237,7 +237,7 @@ class FootstepPredictor(Module):
 
         self.fc1 = torch.nn.Linear(1024 + 1024, 1024)
         self.bn1 = torch.nn.BatchNorm1d(1024)
-        self.dropout1 = torch.nn.Dropout(0.1)
+        self.dropout1 = torch.nn.Dropout(0.05)
         
         self.fc2 = torch.nn.Linear(1024, 1024)
         self.bn2 = torch.nn.BatchNorm1d(1024)
@@ -277,11 +277,11 @@ class FootstepPredictor(Module):
         l1 = F.leaky_relu(l1)
         
         # print shape, mean, min, max and stddev
-        # print("Shapes: ", h1.shape, l1.shape,
-        #     "Mean: ", round(h1.mean().item(), 3), round(l1.mean().item(), 3), 
-        #     "Min: ", round(h1.min().item(), 3), round(l1.min().item(), 3), 
-        #     "Max: ", round(h1.max().item(), 3), round(l1.max().item(), 3), 
-        #     "Stddev: ", round(h1.std().item(), 3), round(l1.std().item(), 3))
+        print("Shapes: ", h1.shape, l1.shape,
+            "Mean: ", round(h1.mean().item(), 3), round(l1.mean().item(), 3), 
+            "Min: ", round(h1.min().item(), 3), round(l1.min().item(), 3), 
+            "Max: ", round(h1.max().item(), 3), round(l1.max().item(), 3), 
+            "Stddev: ", round(h1.std().item(), 3), round(l1.std().item(), 3))
 
         # flatten x1 and concatenate with x2
         x = torch.cat((h1, l1), dim=1)
@@ -333,7 +333,8 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
     #     model.load_state_dict(torch.load(model_path + model_files[-1]))
 
     # define optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay = 1e-8)
+    # optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay = 1e-8)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
     # train the model
     for epoch in range(epochs):
@@ -342,12 +343,10 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
 
         loop = tqdm(train_loader, bar_format='{l_bar}{bar:30}{r_bar}{bar:-30b}')
 
-        print("Size of Loop: ", len(loop))
-
         running_loss=0
         for i, (x1, x2, y, cm, tc) in enumerate(loop):
 
-            print("Batch Index: ", i)
+            print("Batch Index: ", i, end=" ")
 
             if x1.shape[0] > 1:
                 x1 = x1.to(device)
@@ -365,7 +364,7 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
                 optimizer.step()
 
                 # calculate running loss
-                running_loss+=loss.item()*y.size()[0]
+                # running_loss+=loss.item()
 
                 print("Loss: ", loss.item())
 
@@ -562,12 +561,17 @@ def footstep_loss(output, target, contact_map):
         for itr2 in range(n_steps):
             per_image_score += contact_map[itr, 0, fx[itr, itr2].item(), fy[itr, itr2].item()].item()
         
+        # print("Per Image Score: ", per_image_score)
+        
         total_contact_score = per_image_score / n_steps
-        contact_loss = 1.0 - total_contact_score
+        contact_loss = (1.0 - total_contact_score) * 100.0
         curr_output = output[itr].unsqueeze(0)
         curr_target = target[itr].unsqueeze(0)
         l1_loss = torch.nn.L1Loss()(curr_output, curr_target)
-        sum_loss.append((l1_loss + 2.0 * contact_loss ) / 3.0)
+
+        # print("L1 Loss: ", l1_loss.item(), "Contact Loss: ", contact_loss)
+
+        sum_loss.append((l1_loss + contact_loss))
     
     # 
     # print('here',sum(sum_loss) / len (sum_loss))
@@ -589,14 +593,14 @@ def footstep_loss(output, target, contact_map):
 
     # l1_loss = torch.nn.L1Loss()(output, target)
 
-    return (l1_loss + contact_loss) / 2.0
+    # return (l1_loss + contact_loss) / 2.0
 
 def print_loss(output, target, contact_map):
     
-    print("Shapes: ", output.shape, target.shape, contact_map.shape)
+    # print("Shapes: ", output.shape, target.shape, contact_map.shape)
 
     # print min and max for contact map
-    print("Contact Map Min: ", torch.min(contact_map), "Contact Map Max: ", torch.max(contact_map))
+    # print("Contact Map Min: ", torch.min(contact_map), "Contact Map Max: ", torch.max(contact_map))
 
     # sum the contact map values at the predicted footstep locations and use it as a loss
 
@@ -620,10 +624,10 @@ def print_loss(output, target, contact_map):
     # plt.imshow(contact_map[0, 0, :, :].cpu().numpy())
     # plt.show()
 
-    print("Output: ", output)
-    print("Contact Vector: ", contact_vector)
-    print("Total Contact Score: ", total_contact_score.item())
-    print("L1 Loss: ", l1_loss.item(), "Contact Loss: ", contact_loss.item())
+    # print("Output: ", output)
+    # print("Contact Vector: ", contact_vector)
+    # print("Total Contact Score: ", total_contact_score.item())
+    # print("L1 Loss: ", l1_loss.item(), "Contact Loss: ", contact_loss.item())
 
 if __name__ == "__main__":
 
