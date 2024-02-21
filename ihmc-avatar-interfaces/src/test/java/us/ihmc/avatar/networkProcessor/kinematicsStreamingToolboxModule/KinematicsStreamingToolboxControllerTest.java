@@ -19,6 +19,7 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -72,7 +73,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -139,6 +139,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       simulationTestHelperFactory.addSecondaryRobot(ghost);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       createToolboxController(robotModel, toolboxParameters, collisionModel);
+      simulationTestHelper.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       ros2Node = simulationTestHelper.getROS2Node();
 
@@ -283,7 +284,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    {
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.finishTest();
+         simulationTestHelper.finishTest(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
          simulationTestHelper = null;
       }
 
@@ -413,20 +414,21 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
    public void testStreamingToController(double handPositionMeanErrorThreshold, double handOrientationMeanErrorThreshold)
    {
-      testStreamingToController(new IKStreamingTestRunParameters(null,
-                                                                 handPositionMeanErrorThreshold,
-                                                                 handOrientationMeanErrorThreshold,
-                                                                 0.01,
-                                                                 circleMessageGenerator(newRobotModel().createFullRobotModel(), true, 0.125)));
+      IKStreamingTestRunParameters testRunParameters = new IKStreamingTestRunParameters();
+      testRunParameters.setHandPositionMeanErrorThreshold(handPositionMeanErrorThreshold);
+      testRunParameters.setHandOrientationMeanErrorThreshold(handOrientationMeanErrorThreshold);
+      testRunParameters.setMessageGeneratorDT(0.01);
+      testRunParameters.setMessageGenerator(circleMessageGenerator(newRobotModel().createFullRobotModel(), true, 0.125));
+      testStreamingToController(testRunParameters);
    }
 
-   public void testStreamingToController(IKStreamingTestRunParameters IKStreamingTestRunParameters)
+   public void testStreamingToController(IKStreamingTestRunParameters ikStreamingTestRunParameters)
    {
       YoRegistry spyRegistry = new YoRegistry("spy");
       YoDouble handPositionMeanError = new YoDouble("HandsPositionMeanError", spyRegistry);
       YoDouble handOrientationMeanError = new YoDouble("HandsOrientationMeanError", spyRegistry);
 
-      setupWithWalkingController(IKStreamingTestRunParameters.toolboxParameters(), new Controller()
+      setupWithWalkingController(ikStreamingTestRunParameters.toolboxParameters(), new Controller()
       {
          private final SideDependentList<YoFramePose3D> handDesiredPoses = new SideDependentList<>(side -> new YoFramePose3D(
                side.getCamelCaseName() + "HandDesired", worldFrame, spyRegistry));
@@ -517,10 +519,10 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       wakeupToolbox();
 
-      ScheduledFuture<?> scheduleMessageGenerator = scheduleMessageGenerator(IKStreamingTestRunParameters.messageGeneratorDT(),
-                                                                             IKStreamingTestRunParameters.messageGenerator());
+      ScheduledFuture<?> scheduleMessageGenerator = scheduleMessageGenerator(ikStreamingTestRunParameters.messageGeneratorDT(),
+                                                                             ikStreamingTestRunParameters.messageGenerator());
 
-      success = simulationTestHelper.simulateNow(10.0);
+      success = simulationTestHelper.simulateNow(ikStreamingTestRunParameters.simulationDuration());
       assertTrue(success);
 
       scheduleMessageGenerator.cancel(true);
@@ -538,9 +540,9 @@ public abstract class KinematicsStreamingToolboxControllerTest
       assertNotEquals(0.0, handOrientationMeanError.getValue());
       // TODO Pretty bad assertions here, need to figure out how to improve this test later.
       System.out.println("Position error avg: " + handPositionMeanError.getValue() + ", orientation error avg: " + handOrientationMeanError.getValue());
-      assertTrue(handPositionMeanError.getValue() < IKStreamingTestRunParameters.handPositionMeanErrorThreshold(),
+      assertTrue(handPositionMeanError.getValue() < ikStreamingTestRunParameters.handPositionMeanErrorThreshold(),
                  "Mean position error is: " + handPositionMeanError.getValue());
-      assertTrue(handOrientationMeanError.getValue() < IKStreamingTestRunParameters.handOrientationMeanErrorThreshold(),
+      assertTrue(handOrientationMeanError.getValue() < ikStreamingTestRunParameters.handOrientationMeanErrorThreshold(),
                  "Mean orientation error is: " + handOrientationMeanError.getValue());
    }
 
@@ -616,18 +618,10 @@ public abstract class KinematicsStreamingToolboxControllerTest
       private double handOrientationMeanErrorThreshold = 0.25;
       private double messageGeneratorDT = 0.01;
       private DoubleFunction<KinematicsStreamingToolboxInputMessage> messageGenerator;
+      private double simulationDuration = 10.0;
 
-      public IKStreamingTestRunParameters(KinematicsStreamingToolboxParameters toolboxParameters,
-                                          double handPositionMeanErrorThreshold,
-                                          double handOrientationMeanErrorThreshold,
-                                          double messageGeneratorDT,
-                                          DoubleFunction<KinematicsStreamingToolboxInputMessage> messageGenerator)
+      public IKStreamingTestRunParameters()
       {
-         this.toolboxParameters = toolboxParameters;
-         this.handPositionMeanErrorThreshold = handPositionMeanErrorThreshold;
-         this.handOrientationMeanErrorThreshold = handOrientationMeanErrorThreshold;
-         this.messageGeneratorDT = messageGeneratorDT;
-         this.messageGenerator = messageGenerator;
       }
 
       public void setToolboxParameters(KinematicsStreamingToolboxParameters toolboxParameters)
@@ -640,9 +634,19 @@ public abstract class KinematicsStreamingToolboxControllerTest
          return toolboxParameters;
       }
 
+      public void setHandPositionMeanErrorThreshold(double handPositionMeanErrorThreshold)
+      {
+         this.handPositionMeanErrorThreshold = handPositionMeanErrorThreshold;
+      }
+
       public double handPositionMeanErrorThreshold()
       {
          return handPositionMeanErrorThreshold;
+      }
+
+      public void setHandOrientationMeanErrorThreshold(double handOrientationMeanErrorThreshold)
+      {
+         this.handOrientationMeanErrorThreshold = handOrientationMeanErrorThreshold;
       }
 
       public double handOrientationMeanErrorThreshold()
@@ -650,9 +654,19 @@ public abstract class KinematicsStreamingToolboxControllerTest
          return handOrientationMeanErrorThreshold;
       }
 
+      public void setMessageGeneratorDT(double messageGeneratorDT)
+      {
+         this.messageGeneratorDT = messageGeneratorDT;
+      }
+
       public double messageGeneratorDT()
       {
          return messageGeneratorDT;
+      }
+
+      public void setMessageGenerator(DoubleFunction<KinematicsStreamingToolboxInputMessage> messageGenerator)
+      {
+         this.messageGenerator = messageGenerator;
       }
 
       public DoubleFunction<KinematicsStreamingToolboxInputMessage> messageGenerator()
@@ -660,33 +674,26 @@ public abstract class KinematicsStreamingToolboxControllerTest
          return messageGenerator;
       }
 
-      @Override
-      public boolean equals(Object obj)
+      public void setSimulationDuration(double simulationDuration)
       {
-         if (obj == this)
-            return true;
-         if (obj == null || obj.getClass() != this.getClass())
-            return false;
-         var that = (IKStreamingTestRunParameters) obj;
-         return Objects.equals(this.toolboxParameters, that.toolboxParameters)
-                && Double.doubleToLongBits(this.handPositionMeanErrorThreshold) == Double.doubleToLongBits(that.handPositionMeanErrorThreshold)
-                && Double.doubleToLongBits(this.handOrientationMeanErrorThreshold) == Double.doubleToLongBits(that.handOrientationMeanErrorThreshold)
-                && Double.doubleToLongBits(this.messageGeneratorDT) == Double.doubleToLongBits(that.messageGeneratorDT) && Objects.equals(this.messageGenerator,
-                                                                                                                                          that.messageGenerator);
+         this.simulationDuration = simulationDuration;
       }
 
-      @Override
-      public int hashCode()
+      public double simulationDuration()
       {
-         return Objects.hash(toolboxParameters, handPositionMeanErrorThreshold, handOrientationMeanErrorThreshold, messageGeneratorDT, messageGenerator);
+         return simulationDuration;
       }
 
       @Override
       public String toString()
       {
-         return "IKStreamingTestRunParameters[" + "toolboxParameters=" + toolboxParameters + ", " + "handPositionMeanErrorThreshold="
-                + handPositionMeanErrorThreshold + ", " + "handOrientationMeanErrorThreshold=" + handOrientationMeanErrorThreshold + ", "
-                + "messageGeneratorDT=" + messageGeneratorDT + ", " + "messageGenerator=" + messageGenerator + ']';
+         return "[toolboxParameters=%s, handPositionMeanErrorThreshold=%s, handOrientationMeanErrorThreshold=%s, messageGeneratorDT=%s, messageGenerator=%s, simulationDuration=%s]".formatted(
+               toolboxParameters,
+               handPositionMeanErrorThreshold,
+               handOrientationMeanErrorThreshold,
+               messageGeneratorDT,
+               messageGenerator,
+               simulationDuration);
       }
    }
 }
