@@ -259,34 +259,34 @@ public class RegressorTools
                      bodies[i].getInertia().setMass(vector.get(vectorIndex, 0));
                      break;
                   case MCOM_X:
-                     bodies[i].getInertia().getCenterOfMassOffset().setX(vector.get(vectorIndex, 0));
+//                     bodies[i].getInertia().getCenterOfMassOffset().setX(vector.get(vectorIndex, 0));
                      break;
                   case MCOM_Y:
-                     bodies[i].getInertia().getCenterOfMassOffset().setY(vector.get(vectorIndex, 0));
+//                     bodies[i].getInertia().getCenterOfMassOffset().setY(vector.get(vectorIndex, 0));
                      break;
                   case MCOM_Z:
-                     bodies[i].getInertia().getCenterOfMassOffset().setZ(vector.get(vectorIndex, 0));
+//                     bodies[i].getInertia().getCenterOfMassOffset().setZ(vector.get(vectorIndex, 0));
                      break;
                   case I_XX:
-                     bodies[i].getInertia().getMomentOfInertia().setM00(vector.get(vectorIndex, 0));
+//                     bodies[i].getInertia().getMomentOfInertia().setM00(vector.get(vectorIndex, 0));
                      break;
                   case I_XY:
-                     bodies[i].getInertia().getMomentOfInertia().setM01(vector.get(vectorIndex, 0));
-                     bodies[i].getInertia().getMomentOfInertia().setM10(vector.get(vectorIndex, 0));
+//                     bodies[i].getInertia().getMomentOfInertia().setM01(vector.get(vectorIndex, 0));
+//                     bodies[i].getInertia().getMomentOfInertia().setM10(vector.get(vectorIndex, 0));
                      break;
                   case I_XZ:
-                     bodies[i].getInertia().getMomentOfInertia().setM02(vector.get(vectorIndex, 0));
-                     bodies[i].getInertia().getMomentOfInertia().setM20(vector.get(vectorIndex, 0));
+//                     bodies[i].getInertia().getMomentOfInertia().setM02(vector.get(vectorIndex, 0));
+//                     bodies[i].getInertia().getMomentOfInertia().setM20(vector.get(vectorIndex, 0));
                      break;
                   case I_YY:
-                     bodies[i].getInertia().getMomentOfInertia().setM11(vector.get(vectorIndex, 0));
+//                     bodies[i].getInertia().getMomentOfInertia().setM11(vector.get(vectorIndex, 0));
                      break;
                   case I_YZ:
-                     bodies[i].getInertia().getMomentOfInertia().setM12(vector.get(vectorIndex, 0));
-                     bodies[i].getInertia().getMomentOfInertia().setM21(vector.get(vectorIndex, 0));
+//                     bodies[i].getInertia().getMomentOfInertia().setM12(vector.get(vectorIndex, 0));
+//                     bodies[i].getInertia().getMomentOfInertia().setM21(vector.get(vectorIndex, 0));
                      break;
                   case I_ZZ:
-                     bodies[i].getInertia().getMomentOfInertia().setM22(vector.get(vectorIndex, 0));
+//                     bodies[i].getInertia().getMomentOfInertia().setM22(vector.get(vectorIndex, 0));
                      break;
                }
                vectorIndex += 1;
