@@ -73,6 +73,16 @@ class FootstepDataset(Dataset):
             # check if there are no non-zero norm steps in the plan
             count_footsteps = np.count_nonzero(np.linalg.norm(current_plan_positions, axis=1))
 
+            first_step = current_plan_positions[0, :]
+            second_step = current_plan_positions[1, :]
+            start_step_position = self.start_positions[i, :]
+
+            # cross product start -> first and first -> second 
+            cross_prod = np.cross(first_step - start_step_position, second_step - first_step)
+
+            # check if start side is 0
+            if cross_prod[2] > 0:
+                self.start_side[i] = 0
 
             # valid if has at least 4 non-zero norm steps and start side is 0
             valid = count_footsteps >= n_steps and self.start_side[i] == 1
@@ -317,67 +327,83 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
     model = FootstepPredictor(input_size, output_size).to(device)
 
     # load weights from previously trained model to start from where it left off
-    model_files = sorted([name for name in os.listdir(model_path) if name.endswith('.pt')])
-    if len(model_files) > 0:
-        print("Loading Model: ", model_files[-1])
-        model.load_state_dict(torch.load(model_path + model_files[-1]))
+    # model_files = sorted([name for name in os.listdir(model_path) if name.endswith('.pt')])
+    # if len(model_files) > 0:
+    #     print("Loading Model: ", model_files[-1])
+    #     model.load_state_dict(torch.load(model_path + model_files[-1]))
 
     # define optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay = 1e-8)
 
     # train the model
     for epoch in range(epochs):
-        gc.collect()
-        torch.cuda.empty_cache()
+        # gc.collect()
+        # torch.cuda.empty_cache()
 
-        loop=tqdm(train_loader, bar_format='{l_bar}{bar:30}{r_bar}{bar:-30b}')
+        loop = tqdm(train_loader, bar_format='{l_bar}{bar:30}{r_bar}{bar:-30b}')
+
+        print("Size of Loop: ", len(loop))
+
         running_loss=0
         for i, (x1, x2, y, cm, tc) in enumerate(loop):
+
+            print("Batch Index: ", i)
+
             if x1.shape[0] > 1:
                 x1 = x1.to(device)
                 x2 = x2.to(device)
                 y = y.to(device)
                 cm = cm.to(device)
 
+                optimizer.zero_grad()
                 # Forward pass
                 y_pred = model(x1, x2)
                 loss = criterion(y_pred, y, cm)
 
                 # Backward pass and optimize
-                optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
                 # calculate running loss
                 running_loss+=loss.item()*y.size()[0]
-                average_loss = running_loss/(y.size(0)*(i+1))
-                loop.set_description(f'Epoch [{epoch+1}/{epochs}]')
-                loop.set_postfix(loss=average_loss)
-                writer.add_scalar('training loss', average_loss, epoch * len(train_loader) + i)
 
-        for x1, x2, y, cm, tc in val_loader:
-            # send data to gpu
-            if x1.shape[0] > 1:
-                x1 = x1.to(device)
-                x2 = x2.to(device)
-                y = y.to(device)
-                model.eval()
-                y_pred = model(x1, x2)
-                loss = criterion(y_pred, y, cm)
-                valid_loss = loss.item()
-                print("Validiation loss - ",valid_loss,"\n")
-                writer.add_scalar('validation loss', valid_loss, epoch * len(train_loader) + i)
+                print("Loss: ", loss.item())
+
+
+                # average_loss = running_loss/(y.size(0)*(i+1))
+                # loop.set_description(f'Epoch [{epoch+1}/{epochs}]')
+                # loop.set_postfix(loss=average_loss)
+                # writer.add_scalar('training loss', average_loss, epoch * len(train_loader) + i)
+
+        running_loss = (loss.item() + running_loss ) / (epoch + 1)
+
+        print("Running Loss: ", running_loss)
+
+        # for x1, x2, y, cm, tc in val_loader:
+        #     # send data to gpu
+        #     if x1.shape[0] > 1:
+        #         x1 = x1.to(device)
+        #         x2 = x2.to(device)
+        #         y = y.to(device)
+        #         model.eval()
+        #         y_pred = model(x1, x2)
+        #         loss = criterion(y_pred, y, cm)
+        #         valid_loss = loss.item()
+        #         # print("Validiation loss - ",valid_loss,"\n")
+        #         # writer.add_scalar('validation loss', valid_loss, epoch * len(train_loader) + i)
 
         # del x1, x2, y, y_pred, loss
-        gc.collect()
-        torch.cuda.empty_cache()
+        # gc.collect()
+        # torch.cuda.empty_cache()
 
     # save the model
     ckpt_count = len([name for name in os.listdir(model_path) if name.endswith('.pt')])
     file_name = 'footstep_predictor' + '_' + str(ckpt_count)
     torch.save(model.state_dict(), model_path + file_name + '.pt')
     torch.onnx.export(model, (x1[0].unsqueeze(0), x2[0].unsqueeze(0)), model_path + file_name + '.onnx', verbose=False)
-    writer.close()
+
+    print("Saved as: ", file_name + '.pt')
+    # writer.close()
 
 
 def load_validate(val_dataset, batch_size, model_path):
@@ -541,7 +567,7 @@ def footstep_loss(output, target, contact_map):
         curr_output = output[itr].unsqueeze(0)
         curr_target = target[itr].unsqueeze(0)
         l1_loss = torch.nn.L1Loss()(curr_output, curr_target)
-        sum_loss.append((l1_loss + contact_loss) / 2.0)
+        sum_loss.append((l1_loss + 2.0 * contact_loss ) / 3.0)
     
     # 
     # print('here',sum(sum_loss) / len (sum_loss))
@@ -633,7 +659,7 @@ if __name__ == "__main__":
     if train:
         # train and store model
         criterion = footstep_loss
-        train_store(train_dataset, val_dataset, batch_size=16, epochs=30, criterion=criterion, model_path=model_path)
+        train_store(train_dataset, val_dataset, batch_size=16, epochs=100, criterion=criterion, model_path=model_path)
 
     else:
         # load and validate model
