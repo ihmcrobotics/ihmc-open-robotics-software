@@ -561,8 +561,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          if (!RigidBodyInertialParametersTools.isFullyPhysicallyConsistent(estimateModelBodies[i].getInertia()))
          {
-            areParametersFullyPhysicallyConsistent.set(false);
             LogTools.error("Inertial parameter estimate for " + estimateModelBodies[i].getName() + " is not fully physically consistent");
+            areParametersFullyPhysicallyConsistent.set(false);
+            break;
          }
          else
          {
