@@ -37,6 +37,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    private final ScrewPrimitiveActionDefinition definition;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImGuiReferenceFrameLibraryCombo objectFrameComboBox;
    private final ImGuiSliderDoubleWrapper translationWidget;
    private final ImGuiSliderDoubleWrapper rotationWidget;
@@ -76,6 +77,9 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       screwAxisGizmo = new RDXSelectablePose3DGizmo(definition.getScrewAxisPoseInObjectFrame().getValue(), ReferenceFrame.getWorldFrame());
       screwAxisGizmo.create(panel3D);
 
+      executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
+                                                          definition::setExecuteWithNextAction,
+                                                          imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
       objectFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Object frame",
                                                                 referenceFrameLibrary,
                                                                 definition::getObjectFrameName,
@@ -183,6 +187,8 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    protected void renderImGuiWidgetsInternal()
    {
       ImGui.checkbox(labels.get("Adjust Screw Axis Pose"), screwAxisGizmo.getSelected());
+      ImGui.sameLine();
+      executeWithNextActionWrapper.renderImGuiWidget();
       objectFrameComboBox.render();
       int size = state.getPreviewTrajectory().getSize();
       int limit = ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT;
