@@ -14,6 +14,9 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition implements SidedObject
 {
+   public static final double DEFAULT_POSITION_ERROR_TOLERANCE = 0.15;
+   public static final double DEFAULT_ORIENTATION_ERROR_TOLERANCE = Math.toRadians(10.0);
+
    private final CRDTUnidirectionalEnumField<RobotSide> side;
    private final CRDTUnidirectionalString objectFrameName;
    private final CRDTUnidirectionalRigidBodyTransform screwAxisPoseInObjectFrame;
@@ -27,6 +30,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    private final CRDTUnidirectionalDouble linearPositionWeight;
    private final CRDTUnidirectionalDouble angularPositionWeight;
    private final CRDTUnidirectionalDouble jointspaceWeight;
+   private final CRDTUnidirectionalDouble positionErrorTolerance;
+   private final CRDTUnidirectionalDouble orientationErrorTolerance;
 
    public ScrewPrimitiveActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -43,6 +48,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
       angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
       jointspaceWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
+      positionErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_POSITION_ERROR_TOLERANCE);
+      orientationErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_ORIENTATION_ERROR_TOLERANCE);
    }
 
    @Override
@@ -61,6 +68,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
       jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
       jsonNode.put("jointspaceWeight", jointspaceWeight.getValue());
+      jsonNode.put("positionErrorTolerance", Double.parseDouble("%.3f".formatted(positionErrorTolerance.getValue())));
+      jsonNode.put("orientationErrorToleranceDegrees", Double.parseDouble("%.3f".formatted(Math.toDegrees(orientationErrorTolerance.getValue()))));
    }
 
    @Override
@@ -79,6 +88,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
       angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
       jointspaceWeight.setValue(jsonNode.get("jointspaceWeight").asDouble());
+      positionErrorTolerance.setValue(jsonNode.get("positionErrorTolerance").asDouble());
+      orientationErrorTolerance.setValue(Math.toRadians(jsonNode.get("orientationErrorToleranceDegrees").asDouble()));
    }
 
    public void toMessage(ScrewPrimitiveActionDefinitionMessage message)
@@ -96,6 +107,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       message.setLinearPositionWeight(linearPositionWeight.toMessage());
       message.setAngularPositionWeight(angularPositionWeight.toMessage());
       message.setJointspaceWeight(jointspaceWeight.toMessage());
+      message.setPositionErrorTolerance(positionErrorTolerance.toMessage());
+      message.setOrientationErrorTolerance(orientationErrorTolerance.toMessage());
    }
 
    public void fromMessage(ScrewPrimitiveActionDefinitionMessage message)
@@ -113,6 +126,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       linearPositionWeight.fromMessage(message.getLinearPositionWeight());
       angularPositionWeight.fromMessage(message.getAngularPositionWeight());
       jointspaceWeight.fromMessage(message.getJointspaceWeight());
+      positionErrorTolerance.fromMessage(message.getPositionErrorTolerance());
+      orientationErrorTolerance.fromMessage(message.getOrientationErrorTolerance());
    }
 
    @Override
@@ -219,5 +234,25 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    public void setJointspaceWeight(double jointspaceWeight)
    {
       this.jointspaceWeight.setValue(jointspaceWeight);
+   }
+
+   public double getPositionErrorTolerance()
+   {
+      return positionErrorTolerance.getValue();
+   }
+
+   public void setPositionErrorTolerance(double positionErrorTolerance)
+   {
+      this.positionErrorTolerance.setValue(positionErrorTolerance);
+   }
+
+   public double getOrientationErrorTolerance()
+   {
+      return orientationErrorTolerance.getValue();
+   }
+
+   public void setOrientationErrorTolerance(double orientationErrorTolerance)
+   {
+      this.orientationErrorTolerance.setValue(orientationErrorTolerance);
    }
 }

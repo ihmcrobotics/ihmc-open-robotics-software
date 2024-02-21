@@ -46,6 +46,8 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    private final ImGuiSliderDoubleWrapper linearPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper angularPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper jointspaceWeightWidget;
+   private final ImDoubleWrapper positionErrorToleranceInput;
+   private final ImDoubleWrapper orientationErrorToleranceDegreesInput;
    private final ImGuiSliderDoubleWrapper previewTimeWidget;
    private final RDXSelectablePose3DGizmo screwAxisGizmo;
    private final RDXDashedLineMesh screwAxisGraphic = new RDXDashedLineMesh(Color.WHITE, Axis3D.X, 0.04);
@@ -117,6 +119,13 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
                                                             definition::setJointspaceWeight);
       jointspaceWeightWidget.addButton("Use Default Weights", () -> definition.setJointspaceWeight(-1.0));
       jointspaceWeightWidget.addWidgetAligner(widgetAligner);
+      positionErrorToleranceInput = new ImDoubleWrapper(definition::getPositionErrorTolerance,
+                                                        definition::setPositionErrorTolerance,
+                                                        imDouble -> ImGui.inputDouble(labels.get("Position Error Tolerance"), imDouble));
+      orientationErrorToleranceDegreesInput = new ImDoubleWrapper(
+            () -> Math.toDegrees(definition.getOrientationErrorTolerance()),
+            orientationErrorToleranceDegrees -> definition.setOrientationErrorTolerance(Math.toRadians(orientationErrorToleranceDegrees)),
+            imDouble -> ImGui.inputDouble(labels.get("Orientation Error Tolerance (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble));
       previewTimeWidget = new ImGuiSliderDoubleWrapper("Preview Time", "%.2f", 0.0, 1.0,
                                                        state.getPreviewRequestedTime()::getValue,
                                                        state.getPreviewRequestedTime()::setValue);
@@ -200,6 +209,8 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       if (definition.getJointspaceOnly())
          ImGui.endDisabled();
       jointspaceWeightWidget.renderImGuiWidget();
+      positionErrorToleranceInput.renderImGuiWidget();
+      orientationErrorToleranceDegreesInput.renderImGuiWidget();
       previewTimeWidget.renderImGuiWidget();
    }
 
