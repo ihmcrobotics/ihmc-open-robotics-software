@@ -37,6 +37,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
       super(WINDOW_NAME);
       heartbeatNode = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "visualizer_heartbeat_node");
       overlapRemovalHeartbeat = new ROS2Heartbeat(heartbeatNode, PerceptionAPI.REQUEST_OVERLAP_REMOVAL);
+      overlapRemovalHeartbeat.setAlive(removePointCloudOverlap.get());
       setRenderMethod(this::renderImGuiWidgets);
    }
 
