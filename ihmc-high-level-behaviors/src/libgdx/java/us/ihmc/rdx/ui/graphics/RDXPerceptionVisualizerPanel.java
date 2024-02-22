@@ -17,7 +17,6 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
@@ -46,19 +45,11 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
       addVisualizer(visualizer, null);
    }
 
-   public void addVisualizer(RDXVisualizer visualizer, @Nullable ROS2Topic<Empty> visualizerHearbeatTopic, RDXVisualizer ... dependentVisualizers)
+   public void addVisualizer(RDXVisualizer visualizer, @Nullable ROS2Topic<Empty> visualizerHearbeatTopic)
    {
-      ArrayList<RDXVisualizerWithHeartbeat> dependentVisualizerWrappers = new ArrayList<>();
-      for (RDXVisualizer dependentVisualizer : dependentVisualizers)
-      {
-         if (visualizers.get(dependentVisualizer) != null)
-            dependentVisualizerWrappers.add(visualizers.get(dependentVisualizer));
-      }
-
       RDXVisualizerWithHeartbeat wrappedVisualizer = new RDXVisualizerWithHeartbeat(heartbeatNode,
                                                                                     visualizerHearbeatTopic,
-                                                                                    visualizer,
-                                                                                    dependentVisualizerWrappers.toArray(new RDXVisualizerWithHeartbeat[0]));
+                                                                                    visualizer);
       visualizers.put(visualizer, wrappedVisualizer);
       RDXPanel panel = visualizer.getPanel();
       if (panel != null)

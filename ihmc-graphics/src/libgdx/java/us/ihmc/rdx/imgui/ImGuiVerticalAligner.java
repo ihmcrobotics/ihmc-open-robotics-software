@@ -22,12 +22,12 @@ public class ImGuiVerticalAligner
          cursorMaxX = 0;
    }
 
-   protected void setCursorXToAligned()
+   public void setCursorXToAligned()
    {
       ImGui.setCursorPosX(cursorMaxX);
    }
 
-   protected float getCursorMaxX()
+   public float getCursorMaxX()
    {
       return cursorMaxX;
    }
