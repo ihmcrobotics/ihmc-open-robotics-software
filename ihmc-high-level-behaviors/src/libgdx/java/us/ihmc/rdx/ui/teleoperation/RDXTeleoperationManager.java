@@ -369,6 +369,13 @@ public class RDXTeleoperationManager extends RDXPanel
 
          if (interactablesAvailable)
          {
+            for (RobotSide side : interactableHands.sides())
+               desiredRobot.setArmShowing(side, wholeBodyIKManager.getEnabled());
+            for (RobotSide side : interactableFeet.sides())
+               desiredRobot.setLegShowing(side, wholeBodyIKManager.getEnabled());
+            desiredRobot.setChestShowing(wholeBodyIKManager.getEnabled());
+            desiredRobot.setPelvisShowing(wholeBodyIKManager.getEnabled());
+
             if (wholeBodyIKManager.getEnabled())
             {
                wholeBodyIKManager.update();

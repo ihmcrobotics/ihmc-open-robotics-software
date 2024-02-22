@@ -222,15 +222,7 @@ public class RDXWholeBodyIKManager
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.get("Enable Whole Body IK"), enabled))
-      {
-         for (RobotSide side : interactableHands.sides())
-            desiredRobot.setArmShowing(side, enabled.get());
-         for (RobotSide side : interactableFeet.sides())
-            desiredRobot.setLegShowing(side, enabled.get());
-         desiredRobot.setChestShowing(enabled.get());
-         desiredRobot.setPelvisShowing(enabled.get());
-      }
+      ImGui.checkbox(labels.get("Enable Whole Body IK"), enabled);
 
       if (enabled.get() && desiredRobot.isActive() && ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
       {
