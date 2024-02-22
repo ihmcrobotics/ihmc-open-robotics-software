@@ -328,68 +328,65 @@ public class RDXArmManager
       communicationHelper.publishToController(armTrajectoryMessage);
    }
 
-   public Runnable getSubmitDesiredArmSetpointsCallback(RobotSide robotSide)
+   public void executeDesiredArmCommand(RobotSide robotSide)
    {
-      return () ->
+      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
+      jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+      for (ArmJointName armJoint : armJointNames.get(robotSide))
       {
-         JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
-         jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
-         for (ArmJointName armJoint : armJointNames.get(robotSide))
+         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
+         oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use default weight
+
+         TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
+         trajectoryPoint1DMessage.setTime(teleoperationParameters.getTrajectoryTime());
+         trajectoryPoint1DMessage.setPosition(desiredRobot.getDesiredFullRobotModel().getArmJoint(robotSide, armJoint).getQ());
+         trajectoryPoint1DMessage.setVelocity(0.0);
+      }
+
+      long trajectoryReferenceFrameID = MessageTools.toFrameId(taskspaceTrajectoryFrame);
+      FramePose3D desiredControlFramePose = new FramePose3D(interactableHands.get(robotSide).getControlReferenceFrame());
+      desiredControlFramePose.changeFrame(taskspaceTrajectoryFrame);
+
+      SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
+      se3TrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+      // Select all axes and use default weights
+      SE3TrajectoryPointMessage se3TrajectoryPointMessage = se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add();
+      se3TrajectoryPointMessage.setTime(teleoperationParameters.getTrajectoryTime());
+      se3TrajectoryPointMessage.getPosition().set(desiredControlFramePose.getPosition());
+      se3TrajectoryPointMessage.getOrientation().set(desiredControlFramePose.getOrientation());
+      se3TrajectoryPointMessage.getLinearVelocity().setToZero();
+      se3TrajectoryPointMessage.getAngularVelocity().setToZero();
+      se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameID);
+
+      switch (armControlMode)
+      {
+         case JOINTSPACE ->
          {
-            OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
-            oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use default weight
-
-            TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
-            trajectoryPoint1DMessage.setTime(teleoperationParameters.getTrajectoryTime());
-            trajectoryPoint1DMessage.setPosition(desiredRobot.getDesiredFullRobotModel().getArmJoint(robotSide, armJoint).getQ());
-            trajectoryPoint1DMessage.setVelocity(0.0);
+            ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
+            armTrajectoryMessage.setRobotSide(robotSide.toByte());
+            armTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
+            LogTools.info("Sending Jointspace ArmTrajectoryMessage");
+            communicationHelper.publishToController(armTrajectoryMessage);
          }
-
-         long trajectoryReferenceFrameID = MessageTools.toFrameId(taskspaceTrajectoryFrame);
-         FramePose3D desiredControlFramePose = new FramePose3D(interactableHands.get(robotSide).getControlReferenceFrame());
-         desiredControlFramePose.changeFrame(taskspaceTrajectoryFrame);
-
-         SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
-         se3TrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
-         // Select all axes and use default weights
-         SE3TrajectoryPointMessage se3TrajectoryPointMessage = se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add();
-         se3TrajectoryPointMessage.setTime(teleoperationParameters.getTrajectoryTime());
-         se3TrajectoryPointMessage.getPosition().set(desiredControlFramePose.getPosition());
-         se3TrajectoryPointMessage.getOrientation().set(desiredControlFramePose.getOrientation());
-         se3TrajectoryPointMessage.getLinearVelocity().setToZero();
-         se3TrajectoryPointMessage.getAngularVelocity().setToZero();
-         se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameID);
-
-         switch (armControlMode)
+         case TASKSPACE ->
          {
-            case JOINTSPACE ->
-            {
-               ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
-               armTrajectoryMessage.setRobotSide(robotSide.toByte());
-               armTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
-               LogTools.info("Sending Jointspace ArmTrajectoryMessage");
-               communicationHelper.publishToController(armTrajectoryMessage);
-            }
-            case TASKSPACE ->
-            {
-               HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
-               handTrajectoryMessage.setRobotSide(robotSide.toByte());
-               handTrajectoryMessage.getSe3Trajectory().set(se3TrajectoryMessage);
-               LogTools.info("Sending Taskspace %s frame HandTrajectoryMessage".formatted(taskspaceTrajectoryFrame.getName()));
-               communicationHelper.publishToController(handTrajectoryMessage);
-            }
-            case HYBRID ->
-            {
-               HandHybridJointspaceTaskspaceTrajectoryMessage handHybridJointspaceTaskspaceTrajectoryMessage
-                     = new HandHybridJointspaceTaskspaceTrajectoryMessage();
-               handHybridJointspaceTaskspaceTrajectoryMessage.setRobotSide(robotSide.toByte());
-               handHybridJointspaceTaskspaceTrajectoryMessage.getTaskspaceTrajectoryMessage().set(se3TrajectoryMessage);
-               handHybridJointspaceTaskspaceTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
-               LogTools.info("Publishing arm hybrid jointspace taskpace");
-               communicationHelper.publishToController(handHybridJointspaceTaskspaceTrajectoryMessage);
-            }
+            HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
+            handTrajectoryMessage.setRobotSide(robotSide.toByte());
+            handTrajectoryMessage.getSe3Trajectory().set(se3TrajectoryMessage);
+            LogTools.info("Sending Taskspace %s frame HandTrajectoryMessage".formatted(taskspaceTrajectoryFrame.getName()));
+            communicationHelper.publishToController(handTrajectoryMessage);
          }
-      };
+         case HYBRID ->
+         {
+            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridJointspaceTaskspaceTrajectoryMessage
+                  = new HandHybridJointspaceTaskspaceTrajectoryMessage();
+            handHybridJointspaceTaskspaceTrajectoryMessage.setRobotSide(robotSide.toByte());
+            handHybridJointspaceTaskspaceTrajectoryMessage.getTaskspaceTrajectoryMessage().set(se3TrajectoryMessage);
+            handHybridJointspaceTaskspaceTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
+            LogTools.info("Publishing arm hybrid jointspace taskpace");
+            communicationHelper.publishToController(handHybridJointspaceTaskspaceTrajectoryMessage);
+         }
+      }
    }
 
    public RDXHandConfigurationManager getHandManager()
