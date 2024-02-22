@@ -19,7 +19,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
-public class HumanoidIKSolverControlledBody
+public class ArmIKSolverControlledBody
 {
    public static final double DEFAULT_POSITION_GAIN = 1200.0;
    public static final double DEFAULT_POSITION_WEIGHT = 20.0;
@@ -44,52 +44,52 @@ public class HumanoidIKSolverControlledBody
    /** If commands should be submitted to the controller core. */
    private boolean active = true;
 
-   public static HumanoidIKSolverControlledBody createHand(RigidBodyBasics workRootBody,
-                                                           FullHumanoidRobotModel sourceFullRobotModel,
-                                                           HumanoidJointNameMap jointNameMap,
-                                                           RobotSide side)
+   public static ArmIKSolverControlledBody createHand(RigidBodyBasics workRootBody,
+                                                      FullHumanoidRobotModel sourceFullRobotModel,
+                                                      HumanoidJointNameMap jointNameMap,
+                                                      RobotSide side)
    {
-      return new HumanoidIKSolverControlledBody(workRootBody,
-                                                sourceFullRobotModel.getHandControlFrame(side),
-                                                sourceFullRobotModel.getHand(side),
-                                                jointNameMap.getHandName(side));
+      return new ArmIKSolverControlledBody(workRootBody,
+                                           sourceFullRobotModel.getHandControlFrame(side),
+                                           sourceFullRobotModel.getHand(side),
+                                           jointNameMap.getHandName(side));
    }
 
-   public static HumanoidIKSolverControlledBody createFoot(RigidBodyBasics workRootBody,
-                                                           FullHumanoidRobotModel sourceFullRobotModel,
-                                                           HumanoidJointNameMap jointNameMap,
-                                                           RobotSide side)
+   public static ArmIKSolverControlledBody createFoot(RigidBodyBasics workRootBody,
+                                                      FullHumanoidRobotModel sourceFullRobotModel,
+                                                      HumanoidJointNameMap jointNameMap,
+                                                      RobotSide side)
    {
-      return new HumanoidIKSolverControlledBody(workRootBody,
-                                                sourceFullRobotModel.getSoleFrame(side),
-                                                sourceFullRobotModel.getFoot(side),
-                                                jointNameMap.getFootName(side));
+      return new ArmIKSolverControlledBody(workRootBody,
+                                           sourceFullRobotModel.getSoleFrame(side),
+                                           sourceFullRobotModel.getFoot(side),
+                                           jointNameMap.getFootName(side));
    }
 
-   public static HumanoidIKSolverControlledBody createChest(RigidBodyBasics workRootBody,
-                                                            FullHumanoidRobotModel sourceFullRobotModel,
-                                                            HumanoidJointNameMap jointNameMap)
+   public static ArmIKSolverControlledBody createChest(RigidBodyBasics workRootBody,
+                                                       FullHumanoidRobotModel sourceFullRobotModel,
+                                                       HumanoidJointNameMap jointNameMap)
    {
-      return new HumanoidIKSolverControlledBody(workRootBody,
-                                                sourceFullRobotModel.getChest().getParentJoint().getFrameAfterJoint(),
-                                                sourceFullRobotModel.getChest(),
-                                                jointNameMap.getChestName());
+      return new ArmIKSolverControlledBody(workRootBody,
+                                           sourceFullRobotModel.getChest().getParentJoint().getFrameAfterJoint(),
+                                           sourceFullRobotModel.getChest(),
+                                           jointNameMap.getChestName());
    }
 
-   public static HumanoidIKSolverControlledBody createPelvis(RigidBodyBasics workRootBody,
-                                                             FullHumanoidRobotModel sourceFullRobotModel,
-                                                             HumanoidJointNameMap jointNameMap)
+   public static ArmIKSolverControlledBody createPelvis(RigidBodyBasics workRootBody,
+                                                        FullHumanoidRobotModel sourceFullRobotModel,
+                                                        HumanoidJointNameMap jointNameMap)
    {
-      return new HumanoidIKSolverControlledBody(workRootBody,
-                                                sourceFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint(),
-                                                sourceFullRobotModel.getPelvis(),
-                                                jointNameMap.getPelvisName());
+      return new ArmIKSolverControlledBody(workRootBody,
+                                           sourceFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint(),
+                                           sourceFullRobotModel.getPelvis(),
+                                           jointNameMap.getPelvisName());
    }
 
-   private HumanoidIKSolverControlledBody(RigidBodyBasics workRootBody,
-                                          MovingReferenceFrame sourceBodyControlFrame,
-                                          RigidBodyBasics sourceBody,
-                                          String controlledBodyName)
+   private ArmIKSolverControlledBody(RigidBodyBasics workRootBody,
+                                     MovingReferenceFrame sourceBodyControlFrame,
+                                     RigidBodyBasics sourceBody,
+                                     String controlledBodyName)
    {
       this.workRootBody = workRootBody;
 

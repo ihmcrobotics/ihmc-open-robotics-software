@@ -49,7 +49,7 @@ public class ArmIKSolver
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final RigidBodyBasics workChest;
-   private final HumanoidIKSolverControlledBody hand;
+   private final ArmIKSolverControlledBody hand;
    // TODO: Mess with these settings
    private final KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
    private final InverseKinematicsOptimizationSettingsCommand activeOptimizationSettings = new InverseKinematicsOptimizationSettingsCommand();
@@ -76,7 +76,7 @@ public class ArmIKSolver
                                                                        sourceFirstArmJoint,
                                                                        sourceFullRobotModel.getHand(side).getName());
 
-      hand = HumanoidIKSolverControlledBody.createHand(workChest, sourceFullRobotModel, jointNameMap, side);
+      hand = ArmIKSolverControlledBody.createHand(workChest, sourceFullRobotModel, jointNameMap, side);
       // Remove fingers
       hand.getWorkBody().getChildrenJoints().clear();
 
