@@ -2,9 +2,8 @@ package us.ihmc.perception.YOLOv8;
 
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.OpenCLPointCloudExtractor;
@@ -17,10 +16,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
-import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
-import us.ihmc.tools.io.WorkspaceResourceFile;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.util.List;
@@ -50,9 +46,9 @@ public class YOLOv8IterativeClosestPointNodeCombo
 
    public YOLOv8IterativeClosestPointNodeCombo(YOLOv8Detection initialDetection,
                                                DetectionFilter detectionFilter,
+                                               List<Point3D32> objectPointCloud,
                                                ROS2SceneGraph sceneGraph,
                                                SceneGraphModificationQueue modificationQueue,
-                                               WorkspaceResourceDirectory pointCloudDirectory,
                                                ROS2Helper ros2Helper,
                                                OpenCLManager openCLManager)
    {
@@ -63,22 +59,12 @@ public class YOLOv8IterativeClosestPointNodeCombo
       extractor = new OpenCLPointCloudExtractor(openCLManager);
       segmenter = new OpenCLDepthImageSegmenter(openCLManager);
 
-      String pointCloudFileName = lastDetection.objectClass().getPointCloudFileName();
-      if (pointCloudFileName == null)
-         throw new NullPointerException("We can't run ICP on this object yet because we don't have a model point cloud file.");
-
-      WorkspaceResourceFile pointCloudFile = new WorkspaceResourceFile(pointCloudDirectory, pointCloudFileName);
-      icpWorker = new IterativeClosestPointWorker(lastDetection.objectClass().getPrimitiveApproximation(),
-                                                  new Vector3D(1.0, 1.0, 1.0),
-                                                  new Vector3D(1.0, 1.0, 1.0),
+      icpWorker = new IterativeClosestPointWorker(objectPointCloud,
                                                   1000,
-                                                  1000,
-                                                  new Pose3D(),
                                                   new Random(System.nanoTime()));
 
       icpWorker.useProvidedTargetPoint(false);
       icpWorker.setSegmentSphereRadius(Double.POSITIVE_INFINITY);
-      icpWorker.setDetectionShape(PrimitiveRigidBodyShape.CUSTOM, pointCloudFile.getFilesystemFile().toFile());
 
       nodeID = sceneGraph.getNextID().getAndIncrement();
       icpWorker.setSceneNodeID(nodeID);

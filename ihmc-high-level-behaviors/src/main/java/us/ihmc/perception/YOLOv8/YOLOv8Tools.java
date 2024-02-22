@@ -1,16 +1,24 @@
 package us.ihmc.perception.YOLOv8;
 
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class YOLOv8Tools
 {
+   private static final WorkspaceResourceDirectory POINT_CLOUD_DIRECTORY = new WorkspaceResourceDirectory(YOLOv8DetectableObject.class, "/yoloICPPointClouds/");
+
+
    public static List<Point3DReadOnly> filterOutliers(List<? extends Point3DReadOnly> pointCloud, double zScoreThreshold, int numberOfSamples)
    {
       Point3D centroid = new Point3D();
@@ -67,5 +75,33 @@ public class YOLOv8Tools
       varianceVector.sub(meanSquaredVector);
 
       return Math.sqrt(varianceVector.getX() + varianceVector.getY() + varianceVector.getZ());
+   }
+
+   public static List<Point3D32> loadPointCloudFromFile(String fileName)
+   {
+      if (fileName == null)
+         throw new NullPointerException("We can't run ICP on this object yet because we don't have a model point cloud file.");
+
+      WorkspaceResourceFile pointCloudFile = new WorkspaceResourceFile(POINT_CLOUD_DIRECTORY, fileName);
+      List<Point3D32> pointCloud;
+      try (BufferedReader bufferedReader = new BufferedReader(new FileReader(pointCloudFile.getFilesystemFile().toFile())))
+      {
+         pointCloud = bufferedReader.lines().map(line ->
+                                                 {
+                                                    String[] xyzValues = line.split(",");
+                                                    float x = Float.parseFloat(xyzValues[0]);
+                                                    float y = Float.parseFloat(xyzValues[1]);
+                                                    float z = Float.parseFloat(xyzValues[2]);
+                                                    return new Point3D32(x, y, z);
+                                                 }).collect(Collectors.toList());
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         throw new RuntimeException("Failed trying to load the file.");
+         // Handle any I/O problems
+      }
+
+      return pointCloud;
    }
 }

@@ -8,6 +8,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.OpenCLPointCloudExtractor;
 import us.ihmc.perception.RawImage;
@@ -18,8 +19,10 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.thread.RestartableThread;
 
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
@@ -36,6 +39,7 @@ public class YOLOv8IterativeClosestPointManager
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter(openCLManager);
 
    private final WorkspaceResourceDirectory pointCloudDirectory = new WorkspaceResourceDirectory(YOLOv8DetectableObject.class, "/yoloICPPointClouds/");
+   private final EnumMap<YOLOv8DetectableObject, List<Point3D32>> objectPointClouds = new EnumMap<>(YOLOv8DetectableObject.class);
 
    private final ROS2Helper ros2Helper;
 
@@ -121,11 +125,17 @@ public class YOLOv8IterativeClosestPointManager
                {
                   if (filter.isStableDetectionResult())
                   {
+                     if (!objectPointClouds.containsKey(candidateDetection.objectClass()))
+                     {
+                        List<Point3D32> objectPointCloud = YOLOv8Tools.loadPointCloudFromFile(candidateDetection.objectClass().getPointCloudFileName());
+                        objectPointClouds.put(candidateDetection.objectClass(), objectPointCloud);
+                     }
+
                      YOLOv8IterativeClosestPointNodeCombo newYOLOICPCombo = new YOLOv8IterativeClosestPointNodeCombo(candidateDetection,
                                                                                                                      filter,
+                                                                                                                     objectPointClouds.get(candidateDetection.objectClass()),
                                                                                                                      sceneGraph,
                                                                                                                      modificationQueue,
-                                                                                                                     pointCloudDirectory,
                                                                                                                      ros2Helper,
                                                                                                                      openCLManager);
                      yoloICPNodeComboSet.put(newYOLOICPCombo, newYOLOICPCombo);
@@ -181,6 +191,7 @@ public class YOLOv8IterativeClosestPointManager
          yoloColorImageCopy = yoloDetectionImage.get();
          icpDepthImageCopy = icpEnvironmentDepthImage.get();
 
+         // Update sequence numbers
          lastYoloImageSequenceNumber = yoloDetectionImage.getSequenceNumber();
          lastICPImageSequenceNumber = icpEnvironmentDepthImage.getSequenceNumber();
 
