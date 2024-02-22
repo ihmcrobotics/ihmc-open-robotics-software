@@ -40,11 +40,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -246,9 +242,7 @@ public class KSTStreamingState implements State
                                                                                                  toolboxControllerPeriod));
 
       Collection<? extends RigidBodyBasics> controllableRigidBodies = tools.getIKController().getControllableRigidBodies();
-      inputStateEstimator = new KSTInputStateEstimator(controllableRigidBodies, toolboxControllerPeriod, registry);
-      inputStateEstimator.setInputFilterBreakFrequency(parameters.getInputPoseLPFBreakFrequency());
-      inputStateEstimator.setInputVelocityDecayDuration(parameters.getInputVelocityDecayDuration());
+      inputStateEstimator = new KSTInputFirstOrderStateEstimator(controllableRigidBodies, parameters, toolboxControllerPeriod, registry);
 
       for (RigidBodyBasics rigidBody : controllableRigidBodies)
       {
