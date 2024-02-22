@@ -57,7 +57,7 @@ public class DepthImageOverlapRemover
    /**
     * Removes the overlapping region between the master and slave image from the slave image.
     * The master image will not be modified, while the slave image will have the overlapping portion cut out.
-    * @param slaveImage the slave image to be modified
+    * @param slaveImage the slave image which will have the overlapping portion cut out
     * @return A new RawImage object which is the provided slave image without the overlapping section.
     */
    public RawImage removeOverlap(RawImage slaveImage)
@@ -66,30 +66,33 @@ public class DepthImageOverlapRemover
          this.slaveImage.release();
       this.slaveImage = slaveImage;
 
-      if (masterImage == null || masterImage.isEmpty())
-         return this.slaveImage;
+      synchronized (imageDataUsageSynchronizer)
+      {
+         if (masterImage == null || masterImage.isEmpty())
+            return this.slaveImage;
 
-      zedFrame.update(transformToWorld -> transformToWorld.set(this.slaveImage.getOrientation(), this.slaveImage.getPosition()));
-      realsenseFrame.update(transformToWorld -> transformToWorld.set(masterImage.getOrientation(), masterImage.getPosition()));
-      zedFrame.getReferenceFrame().getTransformToDesiredFrame(zedToRealsenseTransform, realsenseFrame.getReferenceFrame());
-      zedToRealsenseTransformParameter.setParameter(zedToRealsenseTransform);
-      zedToRealsenseTransformParameter.writeOpenCLBufferObject(openCLManager);
+         zedFrame.update(transformToWorld -> transformToWorld.set(this.slaveImage.getOrientation(), this.slaveImage.getPosition()));
+         realsenseFrame.update(transformToWorld -> transformToWorld.set(masterImage.getOrientation(), masterImage.getPosition()));
+         zedFrame.getReferenceFrame().getTransformToDesiredFrame(zedToRealsenseTransform, realsenseFrame.getReferenceFrame());
+         zedToRealsenseTransformParameter.setParameter(zedToRealsenseTransform);
+         zedToRealsenseTransformParameter.writeOpenCLBufferObject(openCLManager);
 
-      parameters.setParameter(this.slaveImage.getFocalLengthX());
-      parameters.setParameter(this.slaveImage.getFocalLengthY());
-      parameters.setParameter(this.slaveImage.getPrincipalPointX());
-      parameters.setParameter(this.slaveImage.getPrincipalPointY());
-      parameters.setParameter(this.slaveImage.getDepthDiscretization());
-      parameters.setParameter(this.slaveImage.getImageWidth());
-      parameters.setParameter(this.slaveImage.getImageHeight());
-      parameters.setParameter(masterImage.getFocalLengthX());
-      parameters.setParameter(masterImage.getFocalLengthY());
-      parameters.setParameter(masterImage.getPrincipalPointX());
-      parameters.setParameter(masterImage.getPrincipalPointY());
-      parameters.setParameter(masterImage.getDepthDiscretization());
-      parameters.setParameter(masterImage.getImageWidth());
-      parameters.setParameter(masterImage.getImageHeight());
-      parameters.writeOpenCLBufferObject(openCLManager);
+         parameters.setParameter(this.slaveImage.getFocalLengthX());
+         parameters.setParameter(this.slaveImage.getFocalLengthY());
+         parameters.setParameter(this.slaveImage.getPrincipalPointX());
+         parameters.setParameter(this.slaveImage.getPrincipalPointY());
+         parameters.setParameter(this.slaveImage.getDepthDiscretization());
+         parameters.setParameter(this.slaveImage.getImageWidth());
+         parameters.setParameter(this.slaveImage.getImageHeight());
+         parameters.setParameter(masterImage.getFocalLengthX());
+         parameters.setParameter(masterImage.getFocalLengthY());
+         parameters.setParameter(masterImage.getPrincipalPointX());
+         parameters.setParameter(masterImage.getPrincipalPointY());
+         parameters.setParameter(masterImage.getDepthDiscretization());
+         parameters.setParameter(masterImage.getImageWidth());
+         parameters.setParameter(masterImage.getImageHeight());
+         parameters.writeOpenCLBufferObject(openCLManager);
+      }
 
       if (bytedecoSlaveImage != null)
          bytedecoSlaveImage.destroy(openCLManager);
@@ -102,8 +105,7 @@ public class DepthImageOverlapRemover
       bytedecoZEDOutput = new BytedecoImage(this.slaveImage.getImageWidth(), this.slaveImage.getImageHeight(), this.slaveImage.getOpenCVType());
       bytedecoZEDOutput.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
 
-      synchronized (imageDataUsageSynchronizer)
-      {
+
          openCLManager.setKernelArgument(kernel, 0, bytedecoSlaveImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(kernel, 1, bytedecoZEDOutput.getOpenCLImageObject());
          openCLManager.setKernelArgument(kernel, 2, parameters.getOpenCLBufferObject());
@@ -112,7 +114,6 @@ public class DepthImageOverlapRemover
          openCLManager.execute2D(kernel, this.slaveImage.getImageWidth(), this.slaveImage.getImageHeight());
 
          bytedecoZEDOutput.readOpenCLImage(openCLManager);
-      }
 
       slaveImage.release();
 

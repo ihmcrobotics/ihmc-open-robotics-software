@@ -124,6 +124,7 @@ public class ZEDColorDepthImagePublisher
 
    private ImageMessage createDepthImageMessage(RawImage depthImageToPublish)
    {
+      depthImageToPublish.get();
       ImageMessage depthImageMessage = new ImageMessage();
 
       // Redundant safety checks
@@ -154,6 +155,7 @@ public class ZEDColorDepthImagePublisher
          depthPNGPointer.close();
       }
 
+      depthImageToPublish.release();
       return depthImageMessage;
    }
 
