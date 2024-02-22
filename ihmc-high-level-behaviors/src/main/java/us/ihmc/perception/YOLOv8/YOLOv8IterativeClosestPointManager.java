@@ -195,9 +195,10 @@ public class YOLOv8IterativeClosestPointManager
       }
 
       // Run YOLO and ICP in a non-blocking way
-      if (yoloColorImageCopy != null && icpDepthImageCopy != null && readyToRunNotification.poll())
+      if (yoloColorImageCopy != null && icpDepthImageCopy != null)
       {
-         runYOLOAndICP(yoloColorImageCopy, icpDepthImageCopy);
+         if (readyToRunNotification.poll())
+            runYOLOAndICP(yoloColorImageCopy, icpDepthImageCopy);
          yoloColorImageCopy.release();
          icpDepthImageCopy.release();
       }

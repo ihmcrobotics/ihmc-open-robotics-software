@@ -40,8 +40,7 @@ public class YOLOv8IterativeClosestPointNodeCombo
    private final IterativeClosestPointWorker icpWorker;
    private YOLOv8Detection lastDetection;
 
-   private RigidBodyTransform lastCentroidToWorldTransform = new RigidBodyTransform();
-   private final Object transformSynchronizer = new Object();
+   private final RigidBodyTransform lastCentroidToWorldTransform = new RigidBodyTransform();
 
    private boolean selfDestruct = false;
    private double distanceThreshold;
@@ -118,7 +117,7 @@ public class YOLOv8IterativeClosestPointNodeCombo
          return false;
       }
 
-      synchronized (transformSynchronizer)
+      synchronized (lastCentroidToWorldTransform)
       {
          node.getNodeToParentFrameTransform().set(lastCentroidToWorldTransform);
       }
@@ -147,7 +146,6 @@ public class YOLOv8IterativeClosestPointNodeCombo
 
       if (detectionFilter.hasEnoughSamples() && !detectionFilter.isStableDetectionResult())
       {
-         selfDestruct = true;
          destroy();
          return true;
       }
@@ -157,44 +155,53 @@ public class YOLOv8IterativeClosestPointNodeCombo
 
    private void destroy()
    {
-      extractor.destroy();
-      segmenter.destroy();
+      selfDestruct = true;
+
+      // ensure extractor and segmenter don't get destroyed while in use
+      synchronized (extractor)
+      {
+         extractor.destroy();
+         segmenter.destroy();
+      }
    }
 
    public void runICP(RawImage depthImage, RawImage mask)
    {
-      if (!selfDestruct)
+      synchronized (extractor)
       {
-         depthImage.get();
-         mask.get();
-
-         if (node.isRunningICP())
+         if (!selfDestruct)
          {
-            // decrease distance threshold if it has been increased beyond default threshold
-            if (distanceThreshold > node.getBaseDistanceThreshold())
-               distanceThreshold = Math.max(distanceThreshold - node.getBaseDistanceThreshold(), node.getBaseDistanceThreshold());
+            depthImage.get();
+            mask.get();
 
-            // Process images & run ICP
-            RawImage segmentedDepth = segmenter.removeBackground(depthImage, mask, node.getMaskErosionKernelRadius()); // segment depth image using the mask
-            List<Point3DReadOnly> segmentedPointCloud = extractor.extractPointCloud(segmentedDepth); // extract the point cloud from the depth image
-            segmentedPointCloud = YOLOv8Tools.filterOutliers(segmentedPointCloud, node.getOutlierFilterThreshold(), OUTLIER_REJECTION_SAMPLES); // remove outliers
-            icpWorker.setEnvironmentPointCloud(segmentedPointCloud); // provide segmented & filtered point cloud to the ICP worker
-            if (icpWorker.runICP(node.getICPIterations())) // run ICP & publish results if successful
-               ros2Helper.publish(PerceptionAPI.ICP_RESULT, icpWorker.getResult());
-
-            // Update transform which will be provided to the node
-            synchronized (transformSynchronizer)
+            if (node.isRunningICP())
             {
-               lastCentroidToWorldTransform = new RigidBodyTransform(icpWorker.getResultPose());
+               // decrease distance threshold if it has been increased beyond default threshold
+               if (distanceThreshold > node.getBaseDistanceThreshold())
+                  distanceThreshold = Math.max(distanceThreshold - node.getBaseDistanceThreshold(), node.getBaseDistanceThreshold());
+
+               // Process images & run ICP
+               RawImage segmentedDepth = segmenter.removeBackground(depthImage, mask, node.getMaskErosionKernelRadius()); // segment depth image using the mask
+               List<Point3DReadOnly> segmentedPointCloud = extractor.extractPointCloud(segmentedDepth); // extract the point cloud from the depth image
+               segmentedPointCloud = YOLOv8Tools.filterOutliers(segmentedPointCloud, node.getOutlierFilterThreshold(), OUTLIER_REJECTION_SAMPLES); // remove outliers
+               icpWorker.setEnvironmentPointCloud(segmentedPointCloud); // provide segmented & filtered point cloud to the ICP worker
+               if (icpWorker.runICP(node.getICPIterations())) // run ICP & publish results if successful
+                  ros2Helper.publish(PerceptionAPI.ICP_RESULT, icpWorker.getResult());
+
+               // Update transform which will be provided to the node
+               synchronized (lastCentroidToWorldTransform)
+               {
+                  lastCentroidToWorldTransform.set(icpWorker.getResultPose());
+               }
+               segmentedDepth.release();
             }
-            segmentedDepth.release();
+
+            ranICP = true;
+            detectionFrequencyCalculator.ping();
+
+            depthImage.release();
+            mask.release();
          }
-
-         ranICP = true;
-         detectionFrequencyCalculator.ping();
-
-         depthImage.release();
-         mask.release();
       }
    }
 
