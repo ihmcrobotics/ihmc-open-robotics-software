@@ -100,6 +100,7 @@ public class ControllerAPIDefinition
 
       controllerSupportedCommands = Collections.unmodifiableList(commands);
       controllerSupportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
+      // Input messages that don't have a corresponding command
       inputMessageClasses.add(WholeBodyTrajectoryMessage.class);
 
       List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
