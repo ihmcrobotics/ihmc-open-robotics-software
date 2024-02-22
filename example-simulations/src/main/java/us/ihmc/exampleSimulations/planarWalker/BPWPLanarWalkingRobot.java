@@ -1,0 +1,61 @@
+package us.ihmc.exampleSimulations.planarWalker;
+
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFInertia;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.SimPrismaticJoint;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+
+public class BPWPLanarWalkingRobot
+{
+    private final SideDependentList<SimPrismaticJoint> kneeJoints;
+    private final SideDependentList<YoDouble> legLengths = new SideDependentList<YoDouble>();
+    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+    public BPWPLanarWalkingRobot(Robot robot)
+    {
+        robot.getFloatingRootJoint().setJointPosition(new Vector3D(0.0, 0.0, 1.5));
+
+        kneeJoints = new SideDependentList<>();
+
+        for(RobotSide robotSide : RobotSide.values)
+        {
+            SimPrismaticJoint kneeJoint = (SimPrismaticJoint) robot.getJoint(BPWPlanarWalkingRobotDefinition.kneeNames.get(robotSide));
+            kneeJoints.put(robotSide, kneeJoint);
+
+            YoDouble legLength = new YoDouble( robotSide.getLowerCaseName() + "LegLength", registry);
+            legLengths.put(robotSide, legLength);
+        }
+
+    }
+
+    public YoRegistry getYoRegistry()
+    {
+        return registry;
+    }
+
+    public double getLegLength(RobotSide robotSide)
+    {
+        return legLengths.get(robotSide).getDoubleValue();
+    }
+
+    public SimPrismaticJoint getKneeJoint(RobotSide robotSide)
+    {
+        return kneeJoints.get(robotSide);
+    }
+
+    public void update()
+    {
+        for(RobotSide robotSide : RobotSide.values)
+        {
+            // update current leg length
+            double restingLegLength = (BPWPlanarWalkingRobotDefinition.thighLength + BPWPlanarWalkingRobotDefinition.shinLength) / 2.0;
+            double currentLegLength = restingLegLength - kneeJoints.get(robotSide).getQ();
+
+            legLengths.get(robotSide).set(currentLegLength);
+        }
+    }
+}

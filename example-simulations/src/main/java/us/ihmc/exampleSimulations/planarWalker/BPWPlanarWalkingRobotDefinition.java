@@ -27,13 +27,13 @@ public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
     private static final String leftShinName = "left_Shin";
     private static final String rightShinName = "right_Shin";
 
-    private static final double torsoHeight = 0.5;
-    private static final double thighLength = 0.5;
-    private static final double shinLength = 0.5;
+    public static final double torsoHeight = 0.5;
+    public static final double thighLength = 0.5;
+    public static final double shinLength = 0.5;
 
     private final SideDependentList<String> hipPitchNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
     private final SideDependentList<String> thighNames = new SideDependentList<>(leftThighName, rightThighName);
-    private final SideDependentList<String> kneeNames = new SideDependentList<>(leftKneeName, rightKneeName);
+    public static final SideDependentList<String> kneeNames = new SideDependentList<>(leftKneeName, rightKneeName);
     private final SideDependentList<String> shinNames = new SideDependentList<>(leftShinName, rightShinName);
 
 
@@ -77,6 +77,10 @@ public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
             // Now add the lower leg
             RigidBodyDefinition lowerLeg = createShin(shinNames.get(robotside));
             kneeJD.setSuccessor(lowerLeg);
+
+            // Create the contact points for the feet
+            GroundContactPointDefinition footContactPoint = new GroundContactPointDefinition(robotside.getShortLowerCaseName() + "_gc_point", new Vector3D(0.0,0.0, -shinLength/2.0));
+            kneeJD.addGroundContactPointDefinition(footContactPoint);
 
         }
 
