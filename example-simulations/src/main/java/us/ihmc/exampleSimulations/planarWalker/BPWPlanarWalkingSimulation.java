@@ -13,15 +13,12 @@ public class BPWPlanarWalkingSimulation {
         BPWPlanarWalkingRobotDefinition robotDefinition = new BPWPlanarWalkingRobotDefinition();
         scs.addRobot(robotDefinition);
 
-
-
         scs.startSimulationThread();
         scs.simulate();
     }
 
-    public static void main(String[] args)
-    {
-        new BPWPlanarWalkingSimulation();
 
+    public static void main(String[] args) {
+        new BPWPlanarWalkingSimulation();
     }
 }

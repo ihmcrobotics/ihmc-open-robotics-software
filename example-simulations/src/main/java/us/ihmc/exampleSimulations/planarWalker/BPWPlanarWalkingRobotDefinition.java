@@ -3,6 +3,8 @@ package us.ihmc.exampleSimulations.planarWalker;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.geometry.Ellipsoid3DDefinition;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.robot.*;
@@ -29,21 +31,16 @@ public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
     private static final double thighLength = 0.5;
     private static final double shinLength = 0.5;
 
+    private final SideDependentList<String> hipPitchNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
+    private final SideDependentList<String> thighNames = new SideDependentList<>(leftThighName, rightThighName);
+    private final SideDependentList<String> kneeNames = new SideDependentList<>(leftKneeName, rightKneeName);
+    private final SideDependentList<String> shinNames = new SideDependentList<>(leftShinName, rightShinName);
+
+
 
     private final PlanarJointDefinition floatingBaseDefinition;
-
-    private final RevoluteJointDefinition leftHipJointDefinition;
-    private final RevoluteJointDefinition rightHipJointDefinition;
-
-    private final PrismaticJointDefinition leftKneePrismaticJointDefinition;
-    private final PrismaticJointDefinition rightKneePrismaticJointDefinition;
-
+    private final SideDependentList<RevoluteJointDefinition> hipPitchJointDefinitions = new SideDependentList<>();
     private final RigidBodyDefinition torsoBodyDef;
-
-    private final RigidBodyDefinition leftUpperLeg;
-    private final RigidBodyDefinition rightUpperLeg;
-    private final RigidBodyDefinition leftLowerLeg;
-    private final RigidBodyDefinition rightLowerLeg;
 
     public BPWPlanarWalkingRobotDefinition()
     {
@@ -58,39 +55,30 @@ public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
         torsoBodyDef = createTorso();
         floatingBaseDefinition.setSuccessor(torsoBodyDef);
 
-        // Create the Hip Pitch joints and add them to the tree
-        Vector3D leftHipPitchOffsetInTorso = new Vector3D(0.0 ,0.05, -torsoHeight/2);
-        leftHipJointDefinition = new RevoluteJointDefinition(leftHipPitchName, leftHipPitchOffsetInTorso, Axis3D.Y);
+        for(RobotSide robotside : RobotSide.values)
+        {
+            // Add the hip to the tree
+            Vector3D hipPitchOffsetInTorso = new Vector3D(0.0, robotside.negateIfRightSide(0.05), -torsoHeight/2.0);
+            RevoluteJointDefinition hipPitchJD = new RevoluteJointDefinition(hipPitchNames.get(robotside), hipPitchOffsetInTorso, Axis3D.Y);
 
-        Vector3D rightHipPitchOffsetInTorso = new Vector3D(0.0 ,-0.05, -torsoHeight/2);
-        rightHipJointDefinition = new RevoluteJointDefinition(rightHipPitchName, rightHipPitchOffsetInTorso, Axis3D.Y);
+            torsoBodyDef.addChildJoint(hipPitchJD);
+            hipPitchJointDefinitions.put(robotside, hipPitchJD);
 
-        torsoBodyDef.addChildJoint(leftHipJointDefinition);
-        torsoBodyDef.addChildJoint(rightHipJointDefinition);
+            // Now add the thigh links
+            // Todo - Attached ment from the center of the link which is usually the middle
+            RigidBodyDefinition thighLink = createThigh(thighNames.get(robotside));
+            hipPitchJD.setSuccessor(thighLink);
 
-        // Create the upper leg links and add them to the tree
-        // We probably need an offset from the joint attachment to the origin of the link
-        leftUpperLeg = createThigh(leftThighName);
-        leftHipJointDefinition.setSuccessor(leftUpperLeg);
+            // Now add the knee which is a type of a prismatic joint
+            Vector3D kneeOffsetInThigh = new Vector3D(0.0, 0.0, -thighLength/2.0);
+            PrismaticJointDefinition kneeJD = new PrismaticJointDefinition(kneeNames.get(robotside), kneeOffsetInThigh, Axis3D.Y );
+            thighLink.addChildJoint(kneeJD);
 
-        rightUpperLeg = createThigh(rightThighName);
-        rightHipJointDefinition.setSuccessor(rightUpperLeg);
+            // Now add the lower leg
+            RigidBodyDefinition lowerLeg = createShin(shinNames.get(robotside));
+            kneeJD.setSuccessor(lowerLeg);
 
-        // Create the Knee joints and add them to the tree
-        Vector3D leftKneeOffsetInThigh = new Vector3D( 0.0, 0.0, -thighLength / 2.0);
-        leftKneePrismaticJointDefinition = new PrismaticJointDefinition(leftKneeName, leftKneeOffsetInThigh, Axis3D.Z);
-        leftUpperLeg.addChildJoint(leftKneePrismaticJointDefinition);
-
-        Vector3D rightKneeOffsetInThigh = new Vector3D( 0.0, 0.0, -thighLength / 2.0);
-        rightKneePrismaticJointDefinition = new PrismaticJointDefinition(rightKneeName, leftKneeOffsetInThigh, Axis3D.Z);
-        rightUpperLeg.addChildJoint(rightKneePrismaticJointDefinition);
-
-        // Add the shins
-        leftLowerLeg = createShin(leftShinName);
-        rightLowerLeg = createShin(rightShinName);
-
-        leftKneePrismaticJointDefinition.setSuccessor((leftLowerLeg));
-        rightKneePrismaticJointDefinition.setSuccessor(rightLowerLeg);
+        }
 
     }
 
@@ -107,7 +95,6 @@ public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
        VisualDefinition torsoVisualDefinition = new VisualDefinition(torsoGeometryDefinition, ColorDefinition.rgb(Color.RED.getRGB()));
 
        torsoBodyDefinition.addVisualDefinition(torsoVisualDefinition);
-
 
        return torsoBodyDefinition;
 
@@ -126,7 +113,6 @@ public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
         VisualDefinition thighVisualDefinition = new VisualDefinition(thighGeometryDefinition, ColorDefinition.rgb(Color.YELLOW.getRGB()));
 
         thighBodyDefinition.addVisualDefinition(thighVisualDefinition);
-
 
         return thighBodyDefinition;
     }
