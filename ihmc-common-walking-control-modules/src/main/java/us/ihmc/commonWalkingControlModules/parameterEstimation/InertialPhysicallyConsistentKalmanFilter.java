@@ -4,8 +4,8 @@ import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
@@ -140,6 +140,14 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
                                              inertialParameters.get(i).getParameterVectorPiBasis(),
                                              0,
                                              RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+
+         }
+         // Pack the individual contributions of the update step: K * y for visualisation
+         for (int i = 0; i < kalmanGainContributions.length; i++)
+         {
+            CommonOps_DDRM.extractRow(kalmanGain, i, kalmanGainContributionContainer);
+            CommonOps_DDRM.elementMult(kalmanGainContributionContainer, measurementResidual);
+            kalmanGainContributions[i].set(kalmanGainContributionContainer);
          }
       }
    }

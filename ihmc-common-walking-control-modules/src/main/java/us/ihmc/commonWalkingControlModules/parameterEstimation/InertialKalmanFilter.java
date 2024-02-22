@@ -53,8 +53,8 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    protected YoMatrix yoTorqueFromContactWrenches = null;
    protected YoMatrix yoTorqueFromBias = null;
 
-   private final DMatrixRMaj kalmanGainContributionContainer;
-   private final YoMatrix[]  kalmanGainContributions;
+   protected final DMatrixRMaj kalmanGainContributionContainer;
+   protected final YoMatrix[]  kalmanGainContributions;
 
    public InertialKalmanFilter(FullRobotModel model, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets,
                                InertialEstimationParameters parameters,
