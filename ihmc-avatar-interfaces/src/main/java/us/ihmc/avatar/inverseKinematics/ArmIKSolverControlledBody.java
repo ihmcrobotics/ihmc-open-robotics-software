@@ -14,6 +14,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
+import us.ihmc.robotics.geometry.FramePose3DChangedTracker;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -40,6 +41,7 @@ public class ArmIKSolverControlledBody
    private final FramePose3D bodyControlFramePose = new FramePose3D();
    private final FrameVector3D bodyDesiredAngularVelocity = new FrameVector3D();
    private final FrameVector3D bodyDesiredLinearVelocity = new FrameVector3D();
+   private final FramePose3DChangedTracker controlPoseChangedTracker = new FramePose3DChangedTracker(bodyControlDesiredPose);
 
    /** If commands should be submitted to the controller core. */
    private boolean active = true;
@@ -153,9 +155,7 @@ public class ArmIKSolverControlledBody
 
    public boolean getDesiredBodyControlPoseChanged()
    {
-      boolean desiredBodyControlPoseChanged = !bodyControlDesiredPose.geometricallyEquals(lastBodyControlDesiredPose, 0.0001);
-      lastBodyControlDesiredPose.setIncludingFrame(bodyControlDesiredPose);
-      return desiredBodyControlPoseChanged;
+      return controlPoseChangedTracker.hasChanged();
    }
 
    public SpatialFeedbackControlCommand buildSpatialFeedbackControlCommand()

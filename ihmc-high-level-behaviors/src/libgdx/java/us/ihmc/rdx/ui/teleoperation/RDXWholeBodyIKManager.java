@@ -17,6 +17,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -30,11 +31,13 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableFoot;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHand;
 import us.ihmc.rdx.ui.affordances.RDXInteractableRobotLink;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
+import us.ihmc.robotics.geometry.FramePose3DChangedTracker;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class RDXWholeBodyIKManager
@@ -49,16 +52,21 @@ public class RDXWholeBodyIKManager
    private SideDependentList<RDXInteractableFoot> interactableFeet;
    private RDXInteractableRobotLink interactableChest;
    private RDXInteractableRobotLink interactablePelvis;
+   private final SideDependentList<FramePose3DChangedTracker> desiredHandPoseChangedTrackers = new SideDependentList<>();
+   private final SideDependentList<FramePose3DChangedTracker> desiredFootPoseChangedTrackers = new SideDependentList<>();
+   private FramePose3DChangedTracker desiredChestPoseChangedTracker;
+   private FramePose3DChangedTracker desiredPelvisPoseChangedTracker;
    private final HumanoidKinematicsSolver wholeBodyIKSolver;
    private final SideDependentList<KinematicsToolboxRigidBodyCommand> handRigidBodyCommands = new SideDependentList<>();
    private final KinematicsToolboxRigidBodyCommand chestRigidBodyCommand = new KinematicsToolboxRigidBodyCommand();
    private final KinematicsToolboxRigidBodyCommand pelvisRigidBodyCommand = new KinematicsToolboxRigidBodyCommand();
    private final SideDependentList<KinematicsToolboxRigidBodyCommand> feetRigidBodyCommands = new SideDependentList<>(KinematicsToolboxRigidBodyCommand::new);
    private final WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-   private volatile boolean readyToSolveWholeBodyIK = true;
-   private volatile boolean readyToCopyWholeBodyIKSolution = false;
+   private volatile boolean readyToSolve = true;
+   private volatile boolean readyToCopySolution = false;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
+   private volatile boolean isSolutionGood = true;
 
    public RDXWholeBodyIKManager(DRCRobotModel robotModel,
                                 RDXTeleoperationParameters teleoperationParameters,
@@ -119,6 +127,13 @@ public class RDXWholeBodyIKManager
       this.interactableFeet = interactableFeet;
       this.interactableChest = interactableChest;
       this.interactablePelvis = interactablePelvis;
+
+      for (RobotSide side : interactableHands.sides())
+         desiredHandPoseChangedTrackers.put(side, new FramePose3DChangedTracker(interactableHands.get(side).getPose()));
+      for (RobotSide side : RobotSide.values)
+         desiredFootPoseChangedTrackers.put(side, new FramePose3DChangedTracker(interactableFeet.get(side).getPose()));
+      desiredChestPoseChangedTracker = new FramePose3DChangedTracker(interactableChest.getPose());
+      desiredPelvisPoseChangedTracker = new FramePose3DChangedTracker(interactablePelvis.getPose());
    }
 
    public void update()
@@ -130,47 +145,86 @@ public class RDXWholeBodyIKManager
       desiredRobot.setChestShowing(true);
       desiredRobot.setPelvisShowing(true);
 
-      wholeBodyIKSolver.setInitialConfiguration(syncedRobot.getLatestRobotConfigurationData());
-      wholeBodyIKSolver.setCapturabilityBasedStatus(controllerStatusTracker.getLatestCapturabilityBasedStatus());
-      wholeBodyIKSolver.initialize();
-
-      for (RobotSide side : handRigidBodyCommands.sides())
+      if (readyToSolve)
       {
-         if (!interactableHands.get(side).isDeleted())
+         boolean desiredsChanged = false;
+         for (RobotSide side : interactableHands.sides())
+            if (!interactableHands.get(side).isDeleted())
+               desiredsChanged |= desiredHandPoseChangedTrackers.get(side).hasChanged();
+         for (RobotSide side : RobotSide.values)
+            if (!interactableFeet.get(side).isDeleted())
+               desiredsChanged |= desiredFootPoseChangedTrackers.get(side).hasChanged();
+         if (!interactableChest.isDeleted())
+            desiredsChanged |= desiredChestPoseChangedTracker.hasChanged();
+         if (!interactablePelvis.isDeleted())
+            desiredsChanged |= desiredPelvisPoseChangedTracker.hasChanged();
+
+         if (desiredsChanged)
          {
-            KinematicsToolboxRigidBodyCommand rigidBodyCommand = handRigidBodyCommands.get(side);
-            rigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactableHands.get(side).getControlReferenceFrame());
-            wholeBodyIKSolver.submit(rigidBodyCommand);
+            readyToSolve = false;
+
+            wholeBodyIKSolver.setInitialConfiguration(syncedRobot.getLatestRobotConfigurationData());
+            wholeBodyIKSolver.setCapturabilityBasedStatus(controllerStatusTracker.getLatestCapturabilityBasedStatus());
+            wholeBodyIKSolver.initialize();
+
+            for (RobotSide side : handRigidBodyCommands.sides())
+            {
+               if (!interactableHands.get(side).isDeleted())
+               {
+                  KinematicsToolboxRigidBodyCommand rigidBodyCommand = handRigidBodyCommands.get(side);
+                  rigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactableHands.get(side).getControlReferenceFrame());
+                  wholeBodyIKSolver.submit(rigidBodyCommand);
+               }
+            }
+            for (RobotSide side : RobotSide.values)
+            {
+               if (!interactableFeet.get(side).isDeleted())
+               {
+                  KinematicsToolboxRigidBodyCommand rigidBodyCommand = feetRigidBodyCommands.get(side);
+                  rigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactableFeet.get(side).getControlReferenceFrame());
+                  wholeBodyIKSolver.submit(rigidBodyCommand);
+               }
+            }
+            if (!interactableChest.isDeleted())
+            {
+               chestRigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactableChest.getControlReferenceFrame());
+               wholeBodyIKSolver.submit(chestRigidBodyCommand);
+            }
+            if (!interactablePelvis.isDeleted())
+            {
+               pelvisRigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactablePelvis.getControlReferenceFrame());
+               wholeBodyIKSolver.submit(pelvisRigidBodyCommand);
+            }
+
+            MissingThreadTools.startAThread(getClass().getSimpleName(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+            {
+               try
+               {
+                  isSolutionGood = wholeBodyIKSolver.solve();
+               }
+               finally
+               {
+                  readyToCopySolution = true;
+               }
+            });
          }
       }
-      for (RobotSide side : RobotSide.values)
+
+      if (readyToCopySolution)
       {
-         KinematicsToolboxRigidBodyCommand rigidBodyCommand = feetRigidBodyCommands.get(side);
-         rigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactableFeet.get(side).getControlReferenceFrame());
-         wholeBodyIKSolver.submit(rigidBodyCommand);
+         readyToCopySolution = false;
+
+         desiredRobot.getDesiredFullRobotModel()
+                     .getRootJoint()
+                     .setJointConfiguration(wholeBodyIKSolver.getSolution().getDesiredRootOrientation(),
+                                            wholeBodyIKSolver.getSolution().getDesiredRootPosition());
+         MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(wholeBodyIKSolver.getDesiredOneDoFJoints(),
+                                                                   desiredRobot.getDesiredFullRobotModel().getOneDoFJoints());
+         desiredRobot.setWholeBodyColor(RDXIKSolverColors.getColor(isSolutionGood));
+         desiredRobot.getDesiredFullRobotModel().updateFrames();
+
+         readyToSolve = true;
       }
-      if (!interactableChest.isDeleted())
-      {
-         chestRigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactableChest.getControlReferenceFrame());
-         wholeBodyIKSolver.submit(chestRigidBodyCommand);
-      }
-      if (!interactablePelvis.isDeleted())
-      {
-         pelvisRigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactablePelvis.getControlReferenceFrame());
-         wholeBodyIKSolver.submit(pelvisRigidBodyCommand);
-      }
-
-      boolean isSolutionGood = wholeBodyIKSolver.solve();
-
-      desiredRobot.setWholeBodyColor(RDXIKSolverColors.getColor(isSolutionGood));
-
-      MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(wholeBodyIKSolver.getDesiredOneDoFJoints(),
-                                                                desiredRobot.getDesiredFullRobotModel().getOneDoFJoints());
-
-      desiredRobot.getDesiredFullRobotModel()
-                  .getRootJoint()
-                  .setJointConfiguration(wholeBodyIKSolver.getSolution().getDesiredRootOrientation(), wholeBodyIKSolver.getSolution().getDesiredRootPosition());
-      desiredRobot.getDesiredFullRobotModel().updateFrames();
    }
 
    public void renderImGuiWidgets()
