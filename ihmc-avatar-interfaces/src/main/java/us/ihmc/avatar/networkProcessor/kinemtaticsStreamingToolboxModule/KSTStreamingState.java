@@ -6,18 +6,15 @@ import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyStreamingMessagePublisher;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyTrajectoryMessagePublisher;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -139,16 +136,12 @@ public class KSTStreamingState implements State
    private final YoDouble timeSinceLastInput = new YoDouble("timeSinceLastInput", registry);
    private final YoDouble rawInputFrequency = new YoDouble("rawInputFrequency", registry);
    private final AlphaFilteredYoVariable inputFrequency;
-   private final YoDouble inputsFilterBreakFrequency = new YoDouble("inputsFilterBreakFrequency", registry);
 
    private final HumanoidKinematicsToolboxController ikController;
    private final YoPIDSE3Gains ikSolverSpatialGains;
    private final YoPIDGains ikSolverJointGains;
 
-   private final Map<RigidBodyBasics, KSTInputPoseEstimator> inputPoseEstimators = new HashMap<>();
-   private final KSTInputPoseEstimator[] inputPoseEstimatorsArray;
-   private final YoDouble inputVelocityDecayFactor = new YoDouble("inputVelocityDecayFactor", registry);
-   private final YoDouble inputVelocityDecayDuration = new YoDouble("inputVelocityDecayDuration", registry);
+   private final KSTInputStateEstimator inputStateEstimator;
 
    public KSTStreamingState(KSTTools tools)
    {
@@ -253,29 +246,22 @@ public class KSTStreamingState implements State
                                                                                                  toolboxControllerPeriod));
 
       Collection<? extends RigidBodyBasics> controllableRigidBodies = tools.getIKController().getControllableRigidBodies();
-      DoubleProvider inputsAlphaProvider = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(inputsFilterBreakFrequency.getValue(),
-                                                                                                                 toolboxControllerPeriod);
-      inputsFilterBreakFrequency.set(parameters.getInputPoseLPFBreakFrequency());
-      inputVelocityDecayDuration.set(parameters.getInputVelocityDecayDuration());
+      inputStateEstimator = new KSTInputStateEstimator(controllableRigidBodies, toolboxControllerPeriod, registry);
+      inputStateEstimator.setInputFilterBreakFrequency(parameters.getInputPoseLPFBreakFrequency());
+      inputStateEstimator.setInputVelocityDecayDuration(parameters.getInputVelocityDecayDuration());
 
       for (RigidBodyBasics rigidBody : controllableRigidBodies)
       {
-         inputPoseEstimators.put(rigidBody, new KSTInputPoseEstimator(rigidBody, inputsAlphaProvider, registry));
-
-         YoDouble rigidBodyControlStartTime = new YoDouble(rigidBody.getName() + "ControlStartTime", registry);
-         rigidBodyControlStartTimeMap.put(rigidBody, rigidBodyControlStartTime);
+         rigidBodyControlStartTimeMap.put(rigidBody, new YoDouble(rigidBody.getName() + "ControlStartTime", registry));
       }
 
-      inputPoseEstimatorsArray = new KSTInputPoseEstimator[controllableRigidBodies.size()];
       rigidBodyControlStartTimeArray = new YoDouble[controllableRigidBodies.size()];
 
       int index = 0;
 
       for (RigidBodyBasics rigidBody : controllableRigidBodies)
       {
-         inputPoseEstimatorsArray[index] = inputPoseEstimators.get(rigidBody);
-         rigidBodyControlStartTimeArray[index] = rigidBodyControlStartTimeMap.get(rigidBody);
-         index++;
+         rigidBodyControlStartTimeArray[index++] = rigidBodyControlStartTimeMap.get(rigidBody);
       }
    }
 
@@ -424,24 +410,14 @@ public class KSTStreamingState implements State
       timeSinceLastInput.set(Double.NaN);
       inputFrequency.reset();
 
-      for (KSTInputPoseEstimator inputPoseEstimator : inputPoseEstimatorsArray)
-         inputPoseEstimator.reset();
+      inputStateEstimator.reset();
 
       for (YoDouble rigidBodyControlStartTime : rigidBodyControlStartTimeArray)
          rigidBodyControlStartTime.setToNaN();
 
-      resetEstimatedInputVelocities();
-
       System.gc();
    }
 
-   private void resetEstimatedInputVelocities()
-   {
-      for (KSTInputPoseEstimator inputPoseEstimator : inputPoseEstimatorsArray)
-         inputPoseEstimator.resetVelocity();
-   }
-
-   private final KinematicsStreamingToolboxInputCommand rawInputs = new KinematicsStreamingToolboxInputCommand();
    private final KinematicsStreamingToolboxInputCommand filteredInputs = new KinematicsStreamingToolboxInputCommand();
    private final List<RigidBodyBasics> uncontrolledRigidBodies = new ArrayList<>();
 
@@ -475,8 +451,6 @@ public class KSTStreamingState implements State
       {
          lockChestPoseFiltered.reset();
       }
-
-      estimateInputsVelocity();
 
       KinematicsStreamingToolboxInputCommand latestInput = tools.getLatestInput();
 
@@ -522,64 +496,33 @@ public class KSTStreamingState implements State
          if (!latestInput.getStreamToController() && latestInput.getNumberOfInputs() == 0 && tools.hasPreviousInput())
          {
             /*
-             * In case the abruptly stops streaming and the message is empty. Only then we remember the last
-             * inputs and use them to finish this session. Without this, the robot would go to its privileged
-             * configuration.
+             * In case the user abruptly stops streaming and the message is empty.
+             * Only then we remember the last inputs and use them to finish this session.
+             * Without this, the robot would go to its privileged configuration.
              */
             latestInput.addInputs(tools.getPreviousInput().getInputs());
             filteredInputs.set(latestInput);
          }
-
-         if (tools.hasNewInputCommand())
+         else if (tools.hasNewInputCommand())
          {
-            for (int i = 0; i < latestInput.getNumberOfInputs(); i++)
-            { // This is just for viz purpose
-               KinematicsToolboxRigidBodyCommand input = latestInput.getInput(i);
-               RigidBodyBasics endEffector = input.getEndEffector();
-               FramePose3D desiredPose = input.getDesiredPose();
-
-               KSTInputPoseEstimator inputPoseEstimator = inputPoseEstimators.get(endEffector);
-               if (inputPoseEstimator == null)
-                  continue;
-
-               inputPoseEstimator.updateInput(desiredPose);
-            }
-
-            rawInputs.set(latestInput);
-         }
-         else
-         {
-            for (int i = 0; i < rawInputs.getNumberOfInputs(); i++)
-            {
-               KinematicsToolboxRigidBodyCommand input = rawInputs.getInput(i);
-               inputPoseEstimators.get(input.getEndEffector()).extrapolateInput(input.getDesiredPose(), toolboxControllerPeriod);
-            }
+            filteredInputs.set(latestInput);
          }
 
-         filteredInputs.set(rawInputs);
-
-         for (int i = 0; i < filteredInputs.getNumberOfInputs(); i++)
-         {
-            /*
-             * Extract info from user inputs and filter position and orientation of each controlled body.
-             */
-            KinematicsToolboxRigidBodyCommand filteredInput = filteredInputs.getInput(i);
-            RigidBodyBasics endEffector = filteredInput.getEndEffector();
-            FramePose3D desiredPose = filteredInput.getDesiredPose();
+         for (int i = filteredInputs.getNumberOfInputs() - 1; i >= 0; i--)
+         { // Removing the inputs for rigid-bodies that are locked.
+            RigidBodyBasics endEffector = filteredInputs.getInput(i).getEndEffector();
 
             if (lockPelvis.getValue() && endEffector == pelvis)
-               continue;
-            if (lockChest.getValue() && endEffector == chest)
-               continue;
+               filteredInputs.removeInput(i);
+            else if (lockChest.getValue() && endEffector == chest)
+               filteredInputs.removeInput(i);
+         }
 
-            KSTInputPoseEstimator inputPoseEstimator = inputPoseEstimators.get(endEffector);
+         inputStateEstimator.update(tools.hasNewInputCommand(), filteredInputs, tools.getLatestInput(), tools.getPreviousInput());
 
-            if (inputPoseEstimator == null)
-               continue;
-
-            inputPoseEstimator.updateExtrapolatedInput(desiredPose);
-            desiredPose.getPosition().set(inputPoseEstimator.getFilteredExtrapolatedInputPosition());
-            desiredPose.getOrientation().set(inputPoseEstimator.getFilteredExtrapolatedInputOrientation());
+         for (int i = 0; i < filteredInputs.getNumberOfInputs(); i++)
+         { // Ship it
+            KinematicsToolboxRigidBodyCommand filteredInput = filteredInputs.getInput(i);
             ikCommandInputManager.submitCommand(filteredInput);
          }
 
@@ -740,67 +683,6 @@ public class KSTStreamingState implements State
       }
 
       wasStreaming.set(isStreaming.getValue());
-   }
-
-   private void estimateInputsVelocity()
-   {
-      if (!tools.hasPreviousInput())
-      {
-         resetEstimatedInputVelocities();
-         return;
-      }
-
-      if (!tools.hasNewInputCommand())
-      {
-         decayEstimatedInputVelocity();
-         return;
-      }
-
-      // The inputs just got updated, need to recompute velocities.
-      KinematicsStreamingToolboxInputCommand latestInput = tools.getLatestInput();
-      KinematicsStreamingToolboxInputCommand previousInput = tools.getPreviousInput();
-
-      if (latestInput.getNumberOfInputs() != previousInput.getNumberOfInputs())
-      {
-         resetEstimatedInputVelocities();
-         return;
-      }
-
-      double latestInputReceivedTime = Conversions.nanosecondsToSeconds(latestInput.getTimestamp());
-      double previousInputReceivedTime = Conversions.nanosecondsToSeconds(previousInput.getTimestamp());
-
-      double timeInterval = latestInputReceivedTime - previousInputReceivedTime;
-
-      if (timeInterval <= 0.0)
-      {
-         LogTools.warn("Got a negative or zero time interval between 2 inputs: " + timeInterval);
-         decayEstimatedInputVelocity();
-         return;
-      }
-
-      for (int i = 0; i < latestInput.getNumberOfInputs(); i++)
-      {
-         RigidBodyBasics endEffector = latestInput.getInput(i).getEndEffector();
-         KSTInputPoseEstimator inputPoseEstimator = inputPoseEstimators.get(endEffector);
-
-         if (inputPoseEstimator == null)
-            continue;
-         FramePose3D previousInputPose = previousInput.getInput(i).getDesiredPose();
-         FramePose3D latestInputPose = latestInput.getInput(i).getDesiredPose();
-         inputPoseEstimators.get(endEffector).estimateVelocity(timeInterval, previousInputPose, latestInputPose);
-         inputVelocityDecayFactor.set(0.0);
-      }
-   }
-
-   private void decayEstimatedInputVelocity()
-   {
-      double alpha = Math.min(1.0, inputVelocityDecayFactor.getValue() + toolboxControllerPeriod / inputVelocityDecayDuration.getValue());
-      inputVelocityDecayFactor.set(alpha);
-
-      for (KSTInputPoseEstimator kstInputPoseEstimator : inputPoseEstimatorsArray)
-      {
-         kstInputPoseEstimator.decayInputVelocity(alpha);
-      }
    }
 
    private void handleInputsDecay(KinematicsStreamingToolboxInputCommand latestInputs, KinematicsStreamingToolboxInputCommand previousInputs)

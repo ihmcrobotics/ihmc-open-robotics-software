@@ -1,9 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
@@ -17,11 +14,11 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-public class KSTInputPoseEstimator
+public class KSTSingleInputPoseEstimator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final YoRegistry registry;
    private final YoFramePoint3D rawInputPosition;
    private final YoFrameQuaternion rawInputOrientation;
    private final YoFramePoint3D rawExtrapolatedInputPosition;
@@ -31,11 +28,10 @@ public class KSTInputPoseEstimator
 
    private final YoFixedFrameSpatialVector rawInputSpatialVelocity;
    private final YoFixedFrameSpatialVector decayingInputSpatialVelocity;
+   private final YoDouble inputVelocityDecayFactor;
 
-   public KSTInputPoseEstimator(RigidBodyReadOnly endEffector, DoubleProvider inputsAlphaProvider, YoRegistry parentRegistry)
+   public KSTSingleInputPoseEstimator(RigidBodyReadOnly endEffector, DoubleProvider inputsAlphaProvider, YoRegistry registry)
    {
-      this.registry = new YoRegistry(endEffector.getName() + getClass().getSimpleName());
-
       String namePrefix = endEffector.getName() + "Input";
 
       rawInputPosition = new YoFramePoint3D(namePrefix + "RawPosition", worldFrame, registry);
@@ -57,7 +53,7 @@ public class KSTInputPoseEstimator
                                                               new YoFrameVector3D(namePrefix + "RawLinearVelocity", worldFrame, registry));
       decayingInputSpatialVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "DecayingAngularVelocity", worldFrame, registry),
                                                                    new YoFrameVector3D(namePrefix + "DecayingLinearVelocity", worldFrame, registry));
-      parentRegistry.addChild(registry);
+      inputVelocityDecayFactor = new YoDouble(namePrefix + "InputVelocityDecayFactor", registry);
    }
 
    public void reset()
@@ -77,6 +73,7 @@ public class KSTInputPoseEstimator
    {
       rawInputSpatialVelocity.setToZero();
       decayingInputSpatialVelocity.setToZero();
+      inputVelocityDecayFactor.set(0.0);
    }
 
    public void updateInput(FramePose3DReadOnly pose)
@@ -88,36 +85,26 @@ public class KSTInputPoseEstimator
    {
       rawInputPosition.set(position);
       rawInputOrientation.set(orientation);
-   }
-
-   public void extrapolateInput(FixedFramePose3DBasics poseToPack, double integrationDT)
-   {
-      extrapolateInput(poseToPack.getPosition(), poseToPack.getOrientation(), integrationDT);
-   }
-
-   public void extrapolateInput(FixedFramePoint3DBasics positionToPack, FixedFrameQuaternionBasics orientationToPack, double integrationDT)
-   {
-      KSTTools.integrateLinearVelocity(integrationDT, positionToPack, decayingInputSpatialVelocity.getLinearPart(), positionToPack);
-      KSTTools.integrateAngularVelocity(integrationDT, orientationToPack, decayingInputSpatialVelocity.getAngularPart(), orientationToPack);
-   }
-
-   public void updateExtrapolatedInput(FramePose3DReadOnly pose)
-   {
-      updateExtrapolatedInput(pose.getPosition(), pose.getOrientation());
-   }
-
-   public void updateExtrapolatedInput(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation)
-   {
       rawExtrapolatedInputPosition.set(position);
       rawExtrapolatedInputOrientation.set(orientation);
       filteredExtrapolatedInputPosition.update();
       filteredExtrapolatedInputOrientation.update();
    }
 
-   public void decayInputVelocity(double decayFactor)
+   public void extrapolateInput(double integrationDT)
    {
-      decayingInputSpatialVelocity.getLinearPart().interpolate(rawInputSpatialVelocity.getLinearPart(), EuclidCoreTools.zeroVector3D, decayFactor);
-      decayingInputSpatialVelocity.getAngularPart().interpolate(rawInputSpatialVelocity.getAngularPart(), EuclidCoreTools.zeroVector3D, decayFactor);
+      KSTTools.integrateLinearVelocity(integrationDT, rawInputPosition, decayingInputSpatialVelocity.getLinearPart(), rawExtrapolatedInputPosition);
+      KSTTools.integrateAngularVelocity(integrationDT, rawInputOrientation, decayingInputSpatialVelocity.getAngularPart(), rawExtrapolatedInputOrientation);
+      filteredExtrapolatedInputPosition.update();
+      filteredExtrapolatedInputOrientation.update();
+   }
+
+   public void decayInputVelocity(double decayIncrement)
+   {
+      double alpha = Math.min(1.0, inputVelocityDecayFactor.getDoubleValue() + decayIncrement);
+      inputVelocityDecayFactor.set(alpha);
+      decayingInputSpatialVelocity.getLinearPart().interpolate(rawInputSpatialVelocity.getLinearPart(), EuclidCoreTools.zeroVector3D, alpha);
+      decayingInputSpatialVelocity.getAngularPart().interpolate(rawInputSpatialVelocity.getAngularPart(), EuclidCoreTools.zeroVector3D, alpha);
    }
 
    public void estimateVelocity(double dt, FramePose3DReadOnly previousPose, FramePose3DReadOnly currentPose)
@@ -130,6 +117,7 @@ public class KSTInputPoseEstimator
       KSTTools.computeLinearVelocity(dt, previousPose.getPosition(), currentPose.getPosition(), rawInputSpatialVelocity.getLinearPart());
       KSTTools.computeAngularVelocity(dt, previousPose.getOrientation(), currentPose.getOrientation(), rawInputSpatialVelocity.getAngularPart());
       decayingInputSpatialVelocity.set(rawInputSpatialVelocity);
+      inputVelocityDecayFactor.set(0.0);
    }
 
    public FramePoint3DReadOnly getFilteredExtrapolatedInputPosition()
@@ -140,10 +128,5 @@ public class KSTInputPoseEstimator
    public FrameQuaternionReadOnly getFilteredExtrapolatedInputOrientation()
    {
       return filteredExtrapolatedInputOrientation;
-   }
-
-   public YoRegistry getRegistry()
-   {
-      return registry;
    }
 }
