@@ -157,7 +157,11 @@ public class RDXTeleoperationManager extends RDXPanel
 
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
 
-      locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper, controllerStatusTracker, this);
+      locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper, controllerStatusTracker);
+      addChild(locomotionManager.getLocomotionParametersTuner());
+      addChild(locomotionManager.getFootstepPlannerParametersTuner());
+      addChild(locomotionManager.getBodyPathPlanningParametersTuner());
+      addChild(locomotionManager.getSwingFootPlanningParametersTuner());
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)

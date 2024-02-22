@@ -88,6 +88,7 @@ public class LocalizationAndMappingTask
    private ScheduledFuture<?> updateMapFuture;
 
    private final Notification shouldUpdateMap = new Notification();
+   private String parametersVersion;
 
    public LocalizationAndMappingTask(String simpleRobotName,
                                      ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
@@ -95,15 +96,17 @@ public class LocalizationAndMappingTask
                                      ROS2Node ros2Node,
                                      HumanoidReferenceFrames referenceFrames,
                                      Runnable referenceFramesUpdater,
+                                     String version,
                                      boolean smoothing)
    {
+      this.parametersVersion = version;
       this.referenceFramesUpdater = referenceFramesUpdater;
       this.terrainRegionsTopic = terrainRegionsTopic;
       this.structuralRegionsTopic = structuralRegionsTopic;
       this.referenceFrames = referenceFrames;
       this.smoothingEnabled = smoothing;
 
-      this.planarRegionMap = new PlanarRegionMap(smoothing, "Fast");
+      this.planarRegionMap = new PlanarRegionMap(smoothing, version);
       planarRegionMap.setInitialSupportSquareEnabled(configurationParameters.getSupportSquareEnabled());
 
       this.ros2Node = ros2Node;
@@ -250,7 +253,7 @@ public class LocalizationAndMappingTask
       latestPlanarRegionsForPublishing.set(null);
 
       planarRegionMap.destroy();
-      planarRegionMap = new PlanarRegionMap(this.smoothingEnabled, "Fast");
+      planarRegionMap = new PlanarRegionMap(this.smoothingEnabled, parametersVersion);
       planarRegionMap.setInitialSupportSquareEnabled(configurationParameters.getSupportSquareEnabled());
       enableLiveMode = true;
    }

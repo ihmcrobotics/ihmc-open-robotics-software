@@ -24,7 +24,7 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 public class RapidPatchesDebugOutputGenerator
 {
    private boolean enabled = false;
-   private boolean showPointCloud = true;
+   private boolean showPointCloud = false;
 
    private Mat debugImage;
    private Scalar internalColor = new Scalar(0, 0, 255, 0);
@@ -237,17 +237,17 @@ public class RapidPatchesDebugOutputGenerator
 
 //      printPatchGraph(patchGraph);
 
-      if(showPointCloud)
-      {
-         constructPointCloud(floatBuffer, inputDepthImage.rows() * inputDepthImage.cols(), transform);
-      }
+      //if(showPointCloud)
+      //{
+      //   constructPointCloud(floatBuffer, inputDepthImage.rows() * inputDepthImage.cols(), transform);
+      //}
 //      constructPointCloud(patchFeatureGrid.getCxImage(), patchFeatureGrid.getCyImage(), patchFeatureGrid.getCzImage());
 
       //      constructCentroidSurfelCloud(patchFeatureGrid.getCxImage(), patchFeatureGrid.getCyImage(), patchFeatureGrid.getCzImage(), patchFeatureGrid.getNxImage(),
 //                                   patchFeatureGrid.getNyImage(), patchFeatureGrid.getNzImage());
 
-      //PerceptionDebugTools.displayDepth("Depth", inputDepthImage, 1);
-      //showDebugImage(1);
+      PerceptionDebugTools.displayDepth("Depth", inputDepthImage, 1, 1200);
+      showDebugImage(1);
    }
 
    public void displayInputDepth(Mat depth, int delay)
@@ -272,7 +272,7 @@ public class RapidPatchesDebugOutputGenerator
       if (!enabled)
          return;
 
-      PerceptionDebugTools.display("Debug Output", debugImage, delay);
+      PerceptionDebugTools.display("Debug Output", debugImage, delay, 1200);
    }
 
    public Mat getDebugImage()

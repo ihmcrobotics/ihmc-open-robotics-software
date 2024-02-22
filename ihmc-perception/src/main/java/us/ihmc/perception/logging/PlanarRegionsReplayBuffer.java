@@ -1,4 +1,4 @@
-package us.ihmc.avatar.logging;
+package us.ihmc.perception.logging;
 
 import org.apache.commons.io.IOUtils;
 import us.ihmc.log.LogTools;

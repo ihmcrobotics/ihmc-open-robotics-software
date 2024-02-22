@@ -1,0 +1,105 @@
+{
+  "title" : "PlanarRegionMappingParameters",
+  "Update Alpha towards match" : {
+    "value" : 0.001,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
+  },
+    "Similarity threshold between normals" : {
+        "value" : 0.90,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "Orthogonal distance threshold" : {
+        "value" : 0.07,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "Max Inter Region Distance" : {
+        "value" : 0.03,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "Minimum overlap threshold" : {
+        "value" : 0.6,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "Minimum planar region area" : {
+        "value" : 0.02,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "Minimum bounding box size" : {
+        "value" : 0.07,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "Plane noise variance" : {
+        "value" : 0.0001,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "Odometry noise variance" : {
+        "value" : 0.001,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "State estimator noise variance" : {
+        "value" : 0.00000001,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "Best match angular threshold" : {
+        "value" : 0.80,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "Best match distance threshold" : {
+        "value" : 0.07,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "Best minimum overlap threshold" : {
+        "value" : 0.5,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "Keyframe distance threshold" : {
+        "value" : 0.001,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "Keyframe angular threshold" : {
+        "value" : 0.005,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "ICP max iterations" : {
+        "value" : 50,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "ICP min matches" : {
+        "value" : 3,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "ICP termination ratio" : {
+        "value" : 1.0E-6,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "ICP error cutoff" : {
+        "value" : 0.1,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    },
+    "Minimum number of times matched" : {
+        "value" : 5,
+        "lowerBound" : 0.0,
+        "upperBound" : 1.0
+    }
+}
+
+

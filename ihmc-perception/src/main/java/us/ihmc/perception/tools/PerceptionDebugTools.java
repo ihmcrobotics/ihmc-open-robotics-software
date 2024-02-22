@@ -298,7 +298,6 @@ public class PerceptionDebugTools
    public static void display(String tag, Mat image, int delay, int screenSize)
    {
       opencv_highgui.namedWindow(tag, opencv_highgui.WINDOW_NORMAL);
-      opencv_highgui.imshow(tag, image);
 
       if (screenSize != -1)
       {
@@ -308,6 +307,7 @@ public class PerceptionDebugTools
          opencv_highgui.resizeWindow(tag, finalCols, finalRows);
       }
 
+      opencv_highgui.imshow(tag, image);
       int code = opencv_highgui.waitKeyEx(delay);
       if (code == 113) // Keycode for 'q'
       {
@@ -317,20 +317,18 @@ public class PerceptionDebugTools
 
    public static void displayDepth(String tag, Mat image, int delay)
    {
-      displayDepth(tag, image, delay, 1.0f);
+      displayDepth(tag, image, delay, 1000);
    }
 
-   public static void displayDepth(String tag, Mat image, int delay, float scale)
+   public static void displayDepth(String tag, Mat image, int delay, int screenSize)
    {
       Mat displayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC1);
       Mat finalDisplayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC3);
 
-      displayDepth.convertTo(displayDepth, opencv_core.CV_8UC1, 0.8, 50);
-      OpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 250.0);
+      image.convertTo(displayDepth, opencv_core.CV_8UC1, 0.1, 0);
       OpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
 
-      opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size((int) (image.cols() * scale), (int) (image.rows() * scale)));
-      display(tag, finalDisplayDepth, delay);
+      display(tag, finalDisplayDepth, delay, screenSize);
    }
 
    public static void displayHeightMap(String tag, Mat image, int delay, float scale)

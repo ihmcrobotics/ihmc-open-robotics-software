@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.type.ImInt;
-import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
+import us.ihmc.perception.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;

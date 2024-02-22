@@ -19,6 +19,7 @@
 #define MERGE_RANGE 18
 #define MERGE_DISTANCE_THRESHOLD 19
 #define EXTRACTION_MODE 20
+#define DEPTH_SCALAR 21
 
 bool check_convergence(float3 va, float3 vb)
 {
@@ -94,19 +95,19 @@ float3 estimate_perspective_normal(read_only image2d_t in, int rIndex, int cInde
             int2 pos = (int2) (gcIndex, grIndex);
 
             pos = (int2) (gcIndex, grIndex);
-            radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+            radius = ((float) read_imageui(in, pos).x) / (float) params[DEPTH_SCALAR];
             float4 va = back_project_perspective(pos, radius, params);
 
             pos = (int2) (gcIndex + m, grIndex);
-            radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+            radius = ((float) read_imageui(in, pos).x) / (float) params[DEPTH_SCALAR];
             float4 vb = back_project_perspective(pos, radius, params);
 
             pos = (int2) (gcIndex + m, grIndex + m);
-            radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+            radius = ((float) read_imageui(in, pos).x) / (float) params[DEPTH_SCALAR];
             float4 vc = back_project_perspective(pos, radius, params);
 
             pos = (int2) (gcIndex, grIndex + m);
-            radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+            radius = ((float) read_imageui(in, pos).x) / (float) params[DEPTH_SCALAR];
             float4 vd = back_project_perspective(pos, radius, params);
 
             normal += cross((vc - vb), (vb - va));
@@ -140,19 +141,19 @@ float3 estimate_spherical_normal(read_only image2d_t in, int rIndex, int cIndex,
             int2 pos = (int2) (gcIndex, grIndex);
 
             pos = (int2) (gcIndex, grIndex);
-            radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+            radius = ((float) read_imageui(in, pos).x) / (float) params[DEPTH_SCALAR];
             float4 va = back_project_spherical(pos, radius, params);
 
             pos = (int2) (gcIndex + m, grIndex);
-            radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+            radius = ((float) read_imageui(in, pos).x) / (float) params[DEPTH_SCALAR];
             float4 vb = back_project_spherical(pos, radius, params);
 
             pos = (int2) (gcIndex + m, grIndex + m);
-            radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+            radius = ((float) read_imageui(in, pos).x) / (float) params[DEPTH_SCALAR];
             float4 vc = back_project_spherical(pos, radius, params);
 
             pos = (int2) (gcIndex, grIndex + m);
-            radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+            radius = ((float) read_imageui(in, pos).x) / (float) params[DEPTH_SCALAR];
             float4 vd = back_project_spherical(pos, radius, params);
 
             normal += cross((vc - vb), (vb - va));
@@ -180,7 +181,7 @@ float3 estimate_perspective_centroid(read_only image2d_t in, int y, int x, globa
             int gx = x * (int) params[PATCH_HEIGHT] + i;
             int gy = y * (int) params[PATCH_WIDTH] + j;
             int2 pos = (int2) (gx, gy);
-            Z = ((float) read_imageui(in, pos).x) / (float) 1000;
+            Z = ((float) read_imageui(in, pos).x) / (float) params[DEPTH_SCALAR];
             if (Z > 0.1f)
             {
                float4 P = back_project_perspective(pos, Z, params);
@@ -207,7 +208,7 @@ float3 estimate_spherical_centroid(read_only image2d_t in, int rIndex, int cInde
             int grIndex = rIndex * (int) params[PATCH_HEIGHT] + i;
             int gcIndex = cIndex * (int) params[PATCH_WIDTH] + j;
             int2 pos = (int2) (gcIndex, grIndex);
-            radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+            radius = ((float) read_imageui(in, pos).x) / (float) params[DEPTH_SCALAR];
             if (radius > 0.1f)
             {
                float4 P = back_project_spherical(pos, radius, params);

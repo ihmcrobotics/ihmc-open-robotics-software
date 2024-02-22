@@ -1,7 +1,6 @@
 package us.ihmc.perception.mapping;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -71,10 +70,7 @@ public class PlanarRegionMap
    private final RigidBodyTransform estimatedTransformToPrevious = new RigidBodyTransform();
    private final PlanarLandmarkList mapLandmarks = new PlanarLandmarkList();
 
-   private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
-   private final Stopwatch quaternionAveragingStopwatch = new Stopwatch();
-   private final Stopwatch factorGraphStopwatch = new Stopwatch();
-   private final Stopwatch regionMergingStopwatch = new Stopwatch();
+   private PlanarRegionMapStatistics statistics;
 
    private MergingMode merger;
    private MatchingMode matcher;
@@ -116,212 +112,7 @@ public class PlanarRegionMap
       parameters = new PlanarRegionMappingParameters(version);
       finalMap = new PlanarRegionsList();
       processedMap = new PlanarRegionsList();
-   }
-
-   /**
-    * This method takes in a planar region list along with the sensor pose and updates the map. The map is updated by matching incoming planar regions
-    * to their closest neighbors in the map. The matching is performed iteratively using three-nested while loops. The planar region landmarks are
-    * updated using either a filter-based approach or a smoothing based approach. The final landmark results replace the existing old regions in the map.
-    * New regions are added for incoming regions that don't find a match in the map.
-    *
-    * @param frameRegions - FramePlanarRegionsList object containing the planar regions and the sensor pose
-    */
-   public void submitRegionsUsingIterativeReduction(FramePlanarRegionsList frameRegions)
-   {
-      PlanarRegionsList regionsInSensorFrame = new PlanarRegionsList();
-
-      // Filters out regions that have area less than threshold
-      for (PlanarRegion region : frameRegions.getPlanarRegionsList().getPlanarRegionsAsList())
-      {
-         if (region.getArea() > parameters.getMinimumPlanarRegionArea())
-         {
-            regionsInSensorFrame.addPlanarRegion(region);
-         }
-      }
-
-      PlanarRegionsList priorRegionsInWorld = new PlanarRegionsList();
-      PlanarRegionsList posteriorRegionsInWorld = new PlanarRegionsList();
-
-      LogTools.debug("--------------------------------------------- New Iteration [{}] ------------------------------------------", sensorPoseIndex);
-      LogTools.debug("Incoming: {}", regionsInSensorFrame.getPlanarRegionsAsList().size());
-
-      if (regionsInSensorFrame.getNumberOfPlanarRegions() == 0)
-      {
-         LogTools.warn("Number Of Regions is 0!");
-         return;
-      }
-
-      // Compute relative (t) to (t-1) transform
-      if (initialized)
-      {
-         currentToPreviousSensorTransform.set(frameRegions.getSensorToWorldFrameTransform());
-         currentToPreviousSensorTransform.multiply(worldToPreviousSensorFrameTransform);
-      }
-
-      // Compute the new prior (t_prior) transform
-      sensorToWorldTransformPrior.set(frameRegions.getSensorToWorldFrameTransform());
-
-      LogTools.debug("Current to Previous: \n{}", currentToPreviousSensorTransform);
-      LogTools.debug("Sensor To World [Prior]: \n{}", sensorToWorldTransformPrior);
-
-      // Generate regions in world frame with prior transform
-      priorRegionsInWorld.addPlanarRegionsList(regionsInSensorFrame.copy());
-      priorRegionsInWorld.applyTransform(sensorToWorldTransformPrior);
-
-      modified = true;
-
-      // Assign unique IDs to all incoming regions
-      for (PlanarRegion region : priorRegionsInWorld.getPlanarRegionsAsList())
-      {
-         if (!initialized)
-            region.setRegionId(uniqueIDtracker++);
-         else
-            region.setRegionId(-uniqueIDtracker++);
-      }
-
-      PerceptionDebugTools.printRegionIDs("Incoming", priorRegionsInWorld, true);
-
-      if (!initialized)
-      {
-         finalMap.addPlanarRegionsList(priorRegionsInWorld);
-
-         LogTools.debug("Merge Mode: {}", merger);
-
-         if (merger == MergingMode.SMOOTHING)
-         {
-            initializeFactorGraphForSmoothing(finalMap, sensorToWorldTransformPrior);
-         }
-         sensorToWorldTransformPosterior.set(frameRegions.getSensorToWorldFrameTransform());
-
-         initialized = true;
-      }
-      else
-      {
-         //         PerceptionPrintTools.printRegionIDs("Map", finalMap);
-
-         PlanarRegionSLAMTools.findPlanarRegionMatches(finalMap,
-                                                       priorRegionsInWorld,
-                                                       incomingToMapMatches,
-                                                       (float) parameters.getMinimumOverlapThreshold(),
-                                                       (float) parameters.getSimilarityThresholdBetweenNormals(),
-                                                       (float) parameters.getOrthogonalDistanceThreshold(),
-                                                       (float) parameters.getMinimumBoundingBoxSize());
-
-         //         PerceptionPrintTools.printMatches("Cross Matches", finalMap, priorRegionsInWorld, incomingToMapMatches);
-
-         if (merger == MergingMode.SMOOTHING)
-         {
-            // Find the optimal transform for incoming regions before merge
-            applyFactorGraphBasedSmoothing(finalMap,
-                                           regionsInSensorFrame.copy(),
-                                           sensorToWorldTransformPrior,
-                                           currentToPreviousSensorTransform,
-                                           currentToPreviousSensorTransform,
-                                           incomingToMapMatches,
-                                           sensorPoseIndex);
-
-            // Extract the optimal transform from the factor graph
-            double[] transformArray = new double[16];
-            factorGraph.getPoseById(sensorPoseIndex, transformArray);
-
-            sensorToWorldTransformPosterior.set(transformArray);
-
-            // Transform the incoming regions to the map frame with the optimal transform
-            posteriorRegionsInWorld.clear();
-            regionsInSensorFrame.copy().getPlanarRegionsAsList().forEach(region ->
-                                                                         {
-                                                                            region.applyTransform(sensorToWorldTransformPosterior);
-                                                                            posteriorRegionsInWorld.addPlanarRegion(region);
-                                                                         });
-
-            LogTools.debug("Sensor To World [Posterior (Optimized)]: \n{}", sensorToWorldTransformPosterior);
-         }
-
-         // merge all the new regions in
-         finalMap = crossReduceRegionsIteratively(finalMap, posteriorRegionsInWorld);
-         processUniqueRegions(finalMap);
-
-         // Clear ISAM2 for the next update
-         factorGraph.clearISAM2();
-      }
-
-      previousSensorToWorldFrameTransform.set(frameRegions.getSensorToWorldFrameTransform());
-      worldToPreviousSensorFrameTransform.setAndInvert(previousSensorToWorldFrameTransform);
-
-      sensorPoseIndex++;
-
-      finalMap.getPlanarRegionsAsList().forEach(region -> mapIDs.add(region.getRegionId()));
-      priorRegionsInWorld.getPlanarRegionsAsList().forEach(region -> incomingIDs.add(region.getRegionId()));
-
-      LogTools.debug("Map IDs: {}", Arrays.toString(mapIDs.toArray()));
-
-      mapIDs.clear();
-      incomingIDs.clear();
-
-      currentTimeIndex++;
-      LogTools.debug("-------------------------------------------------------- Done --------------------------------------------------------------\n");
-   }
-
-   /**
-    * This method takes in a planar region list along with the sensor pose and updates the map. The map is updated by matching incoming planar regions
-    * to their closest neighbors in the map. The matching is performed by creating a graph of connections for matching regions. The planar region
-    * landmarks are updated using either a filter-based approach or a smoothing based approach. The final landmark results replace the existing
-    * old regions in the map. New regions are added for incoming regions that don't find a match in the map.
-    *
-    * @param frameRegions - FramePlanarRegionsList object containing the planar regions and the sensor pose
-    */
-   public void submitRegionsUsingGraphicalReduction(FramePlanarRegionsList frameRegions)
-   {
-      PlanarRegionsList regions = frameRegions.getPlanarRegionsList();
-      modified = true;
-      if (!initialized)
-      {
-         regions.getPlanarRegionsAsList().forEach(region ->
-                                                  {
-                                                     region.setRegionId(uniqueIDtracker++);
-                                                     mapRegionIDSet.add(region.getRegionId());
-                                                  });
-         finalMap.addPlanarRegionsList(regions);
-
-         initialized = true;
-      }
-      else
-      {
-         // initialize the planar region graph
-         PlanarRegionGraph planarRegionGraph = new PlanarRegionGraph();
-         finalMap.getPlanarRegionsAsList().forEach(planarRegionGraph::addRootOfBranch);
-
-         // assign unique ids to the incoming regions
-         regions.getPlanarRegionsAsList().forEach(region -> region.setRegionId(uniqueIDtracker++));
-
-         addIncomingRegionsToGraph(finalMap,
-                                   regions,
-                                   planarRegionGraph,
-                                   (float) parameters.getSimilarityThresholdBetweenNormals(),
-                                   (float) parameters.getOrthogonalDistanceThreshold(),
-                                   (float) parameters.getMaxInterRegionDistance());
-
-         // merge all the new regions in
-         planarRegionGraph.collapseGraphByMerging(parameters.getUpdateAlphaTowardsMatch());
-
-         // go back through the existing regions and add them to the graph to check for overlap
-         checkMapRegionsForOverlap(planarRegionGraph,
-                                   (float) parameters.getSimilarityThresholdBetweenNormals(),
-                                   (float) parameters.getOrthogonalDistanceThreshold(),
-                                   (float) parameters.getMaxInterRegionDistance(),
-                                   (float) parameters.getMinimumBoundingBoxSize());
-
-         planarRegionGraph.collapseGraphByMerging(parameters.getUpdateAlphaTowardsMatch());
-
-         finalMap = planarRegionGraph.getAsPlanarRegionsList();
-
-         LogTools.debug("Regions: {}, Unique: {}, Map: {}",
-                        regions.getPlanarRegionsAsList().size(),
-                        uniqueRegionsFound,
-                        finalMap.getPlanarRegionsAsList().size());
-
-         LogTools.debug("Unique Set: [{}]", mapRegionIDSet);
-      }
+      statistics = new PlanarRegionMapStatistics();
    }
 
    private static void addIncomingRegionsToGraph(PlanarRegionsList map,
@@ -396,7 +187,7 @@ public class PlanarRegionMap
          {
             PlanarRegion regionB = mapRegions.get(idB);
 
-            boolean wasMatched = PlanarRegionSLAMTools.checkRegionsForOverlap(regionA,
+            boolean wasMatched = PlaneRegistrationTools.checkRegionsForOverlap(regionA,
                                                                               regionB,
                                                                               normalThreshold,
                                                                               normalDistanceThreshold,
@@ -444,7 +235,7 @@ public class PlanarRegionMap
 
                   //LogTools.debug("Checking Match: Parent({}) - Child({})", parentId, childId);
 
-                  if (PlanarRegionSLAMTools.checkRegionsForOverlap(parentRegion,
+                  if (PlaneRegistrationTools.checkRegionsForOverlap(parentRegion,
                                                                    childRegion,
                                                                    (float) parameters.getSimilarityThresholdBetweenNormals(),
                                                                    (float) parameters.getOrthogonalDistanceThreshold(),
@@ -668,8 +459,6 @@ public class PlanarRegionMap
       if (merger != MergingMode.SMOOTHING)
          return null;
 
-      wholeAlgorithmDurationStopwatch.resetLap();
-
       PlanarRegionsList regions = new PlanarRegionsList();
 
       // Remove all regions that are too small
@@ -721,16 +510,18 @@ public class PlanarRegionMap
       }
       else
       {
-         quaternionAveragingStopwatch.resetLap();
-
          transformToPrevious.setIdentity();
 
          LogTools.debug("Computing ICP transform [{} <- {}]", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
+
+         statistics.startRegistrationTime();
 
          boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousLandmarks,
                                                                                                      landmarks.copy(),
                                                                                                      transformToPrevious,
                                                                                                      parameters);
+
+         statistics.stopRegistrationTime();
 
          if (!valid)
          {
@@ -773,7 +564,7 @@ public class PlanarRegionMap
             regions.applyTransform(residualTransform);
          }
 
-         PlanarRegionSLAMTools.findPlanarRegionMatches(finalMap,
+         PlaneRegistrationTools.findPlanarRegionMatches(finalMap,
                                                        regions,
                                                        incomingToMapMatches,
                                                        (float) parameters.getMinimumOverlapThreshold(),
@@ -789,10 +580,8 @@ public class PlanarRegionMap
 
          LogTools.debug("Transform to previous: {}", transformToPrevious);
 
-         quaternionAveragingStopwatch.lap();
-         //quaternionAveragingStopwatch.suspend();
+         statistics.startOptimizationTime();
 
-         factorGraphStopwatch.resetLap();
          applyFactorGraphBasedSmoothing(finalMap,
                                         graphRegions,
                                         transformToWorld,
@@ -800,6 +589,8 @@ public class PlanarRegionMap
                                         estimatedTransformToPrevious,
                                         incomingToMapMatches,
                                         sensorPoseIndex);
+
+         statistics.stopOptimizationTime();
 
          // Extract the optimal transform from the factor graph
          double[] transformArray = new double[16];
@@ -815,12 +606,10 @@ public class PlanarRegionMap
                                                           posteriorRegionsInWorld.addPlanarRegion(region);
                                                        });
 
-         factorGraphStopwatch.lap();
-         //factorGraphStopwatch.suspend();
-
-         regionMergingStopwatch.resetLap();
-
+         statistics.startMergingTime();
          finalMap = crossReduceRegionsIteratively(finalMap, graphRegions);
+         statistics.stopMergingTime();
+
          processUniqueRegions(finalMap);
 
          // TODO: Improve the intersection based chopping tool before enabling this.
@@ -834,17 +623,9 @@ public class PlanarRegionMap
 
          keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, estimatedTransformToWorld));
 
-         regionMergingStopwatch.lap();
-         //regionMergingStopwatch.suspend();
-
-         wholeAlgorithmDurationStopwatch.lap();
-         //wholeAlgorithmDurationStopwatch.suspend();
-
          return transformToWorld;
       }
 
-      wholeAlgorithmDurationStopwatch.lap();
-      //wholeAlgorithmDurationStopwatch.suspend();
       return null;
    }
 
@@ -897,6 +678,223 @@ public class PlanarRegionMap
       LogTools.debug("+++++++++ --------- +++++++++ Done (Processing Unique Region IDs) +++++++++ --------- +++++++++");
    }
 
+   public void destroy()
+   {
+      if (factorGraph != null)
+      {
+         factorGraph.clearISAM2();
+      }
+   }
+
+   public Vector4D getOptimalLandmarkById(int landmarkId)
+   {
+      double[] landmark = new double[4];
+      factorGraph.getPlanarLandmarkById(landmarkId, landmark);
+      return new Vector4D(landmark);
+   }
+
+   /**
+    * This method takes in a planar region list along with the sensor pose and updates the map. The map is updated by matching incoming planar regions
+    * to their closest neighbors in the map. The matching is performed iteratively using three-nested while loops. The planar region landmarks are
+    * updated using either a filter-based approach or a smoothing based approach. The final landmark results replace the existing old regions in the map.
+    * New regions are added for incoming regions that don't find a match in the map.
+    *
+    * @param frameRegions - FramePlanarRegionsList object containing the planar regions and the sensor pose
+    */
+   public void submitRegionsUsingIterativeReduction(FramePlanarRegionsList frameRegions)
+   {
+      PlanarRegionsList regionsInSensorFrame = new PlanarRegionsList();
+
+      // Filters out regions that have area less than threshold
+      for (PlanarRegion region : frameRegions.getPlanarRegionsList().getPlanarRegionsAsList())
+      {
+         if (region.getArea() > parameters.getMinimumPlanarRegionArea())
+         {
+            regionsInSensorFrame.addPlanarRegion(region);
+         }
+      }
+
+      PlanarRegionsList priorRegionsInWorld = new PlanarRegionsList();
+      PlanarRegionsList posteriorRegionsInWorld = new PlanarRegionsList();
+
+      LogTools.debug("--------------------------------------------- New Iteration [{}] ------------------------------------------", sensorPoseIndex);
+      LogTools.debug("Incoming: {}", regionsInSensorFrame.getPlanarRegionsAsList().size());
+
+      if (regionsInSensorFrame.getNumberOfPlanarRegions() == 0)
+      {
+         LogTools.warn("Number Of Regions is 0!");
+         return;
+      }
+
+      // Compute relative (t) to (t-1) transform
+      if (initialized)
+      {
+         currentToPreviousSensorTransform.set(frameRegions.getSensorToWorldFrameTransform());
+         currentToPreviousSensorTransform.multiply(worldToPreviousSensorFrameTransform);
+      }
+
+      // Compute the new prior (t_prior) transform
+      sensorToWorldTransformPrior.set(frameRegions.getSensorToWorldFrameTransform());
+
+      LogTools.debug("Current to Previous: \n{}", currentToPreviousSensorTransform);
+      LogTools.debug("Sensor To World [Prior]: \n{}", sensorToWorldTransformPrior);
+
+      // Generate regions in world frame with prior transform
+      priorRegionsInWorld.addPlanarRegionsList(regionsInSensorFrame.copy());
+      priorRegionsInWorld.applyTransform(sensorToWorldTransformPrior);
+
+      modified = true;
+
+      // Assign unique IDs to all incoming regions
+      for (PlanarRegion region : priorRegionsInWorld.getPlanarRegionsAsList())
+      {
+         if (!initialized)
+            region.setRegionId(uniqueIDtracker++);
+         else
+            region.setRegionId(-uniqueIDtracker++);
+      }
+
+      PerceptionDebugTools.printRegionIDs("Incoming", priorRegionsInWorld, true);
+
+      if (!initialized)
+      {
+         finalMap.addPlanarRegionsList(priorRegionsInWorld);
+
+         LogTools.debug("Merge Mode: {}", merger);
+
+         if (merger == MergingMode.SMOOTHING)
+         {
+            initializeFactorGraphForSmoothing(finalMap, sensorToWorldTransformPrior);
+         }
+         sensorToWorldTransformPosterior.set(frameRegions.getSensorToWorldFrameTransform());
+
+         initialized = true;
+      }
+      else
+      {
+         PlaneRegistrationTools.findPlanarRegionMatches(finalMap,
+                                                        priorRegionsInWorld,
+                                                        incomingToMapMatches,
+                                                        (float) parameters.getMinimumOverlapThreshold(),
+                                                        (float) parameters.getSimilarityThresholdBetweenNormals(),
+                                                        (float) parameters.getOrthogonalDistanceThreshold(),
+                                                        (float) parameters.getMinimumBoundingBoxSize());
+
+         if (merger == MergingMode.SMOOTHING)
+         {
+            // Find the optimal transform for incoming regions before merge
+            applyFactorGraphBasedSmoothing(finalMap,
+                                           regionsInSensorFrame.copy(),
+                                           sensorToWorldTransformPrior,
+                                           currentToPreviousSensorTransform,
+                                           currentToPreviousSensorTransform,
+                                           incomingToMapMatches,
+                                           sensorPoseIndex);
+
+            // Extract the optimal transform from the factor graph
+            double[] transformArray = new double[16];
+            factorGraph.getPoseById(sensorPoseIndex, transformArray);
+
+            sensorToWorldTransformPosterior.set(transformArray);
+
+            // Transform the incoming regions to the map frame with the optimal transform
+            posteriorRegionsInWorld.clear();
+            regionsInSensorFrame.copy().getPlanarRegionsAsList().forEach(region ->
+                                                                         {
+                                                                            region.applyTransform(sensorToWorldTransformPosterior);
+                                                                            posteriorRegionsInWorld.addPlanarRegion(region);
+                                                                         });
+
+            LogTools.debug("Sensor To World [Posterior (Optimized)]: \n{}", sensorToWorldTransformPosterior);
+         }
+
+         // merge all the new regions in
+         finalMap = crossReduceRegionsIteratively(finalMap, posteriorRegionsInWorld);
+         processUniqueRegions(finalMap);
+
+         // Clear ISAM2 for the next update
+         factorGraph.clearISAM2();
+      }
+
+      previousSensorToWorldFrameTransform.set(frameRegions.getSensorToWorldFrameTransform());
+      worldToPreviousSensorFrameTransform.setAndInvert(previousSensorToWorldFrameTransform);
+
+      sensorPoseIndex++;
+
+      finalMap.getPlanarRegionsAsList().forEach(region -> mapIDs.add(region.getRegionId()));
+      priorRegionsInWorld.getPlanarRegionsAsList().forEach(region -> incomingIDs.add(region.getRegionId()));
+
+      LogTools.debug("Map IDs: {}", Arrays.toString(mapIDs.toArray()));
+
+      mapIDs.clear();
+      incomingIDs.clear();
+
+      currentTimeIndex++;
+      LogTools.debug("-------------------------------------------------------- Done --------------------------------------------------------------\n");
+   }
+
+   /**
+    * This method takes in a planar region list along with the sensor pose and updates the map. The map is updated by matching incoming planar regions
+    * to their closest neighbors in the map. The matching is performed by creating a graph of connections for matching regions. The planar region
+    * landmarks are updated using either a filter-based approach or a smoothing based approach. The final landmark results replace the existing
+    * old regions in the map. New regions are added for incoming regions that don't find a match in the map.
+    *
+    * @param frameRegions - FramePlanarRegionsList object containing the planar regions and the sensor pose
+    */
+   public void submitRegionsUsingGraphicalReduction(FramePlanarRegionsList frameRegions)
+   {
+      PlanarRegionsList regions = frameRegions.getPlanarRegionsList();
+      modified = true;
+      if (!initialized)
+      {
+         regions.getPlanarRegionsAsList().forEach(region ->
+                                                  {
+                                                     region.setRegionId(uniqueIDtracker++);
+                                                     mapRegionIDSet.add(region.getRegionId());
+                                                  });
+         finalMap.addPlanarRegionsList(regions);
+
+         initialized = true;
+      }
+      else
+      {
+         // initialize the planar region graph
+         PlanarRegionGraph planarRegionGraph = new PlanarRegionGraph();
+         finalMap.getPlanarRegionsAsList().forEach(planarRegionGraph::addRootOfBranch);
+
+         // assign unique ids to the incoming regions
+         regions.getPlanarRegionsAsList().forEach(region -> region.setRegionId(uniqueIDtracker++));
+
+         addIncomingRegionsToGraph(finalMap,
+                                   regions,
+                                   planarRegionGraph,
+                                   (float) parameters.getSimilarityThresholdBetweenNormals(),
+                                   (float) parameters.getOrthogonalDistanceThreshold(),
+                                   (float) parameters.getMaxInterRegionDistance());
+
+         // merge all the new regions in
+         planarRegionGraph.collapseGraphByMerging(parameters.getUpdateAlphaTowardsMatch());
+
+         // go back through the existing regions and add them to the graph to check for overlap
+         checkMapRegionsForOverlap(planarRegionGraph,
+                                   (float) parameters.getSimilarityThresholdBetweenNormals(),
+                                   (float) parameters.getOrthogonalDistanceThreshold(),
+                                   (float) parameters.getMaxInterRegionDistance(),
+                                   (float) parameters.getMinimumBoundingBoxSize());
+
+         planarRegionGraph.collapseGraphByMerging(parameters.getUpdateAlphaTowardsMatch());
+
+         finalMap = planarRegionGraph.getAsPlanarRegionsList();
+
+         LogTools.debug("Regions: {}, Unique: {}, Map: {}",
+                        regions.getPlanarRegionsAsList().size(),
+                        uniqueRegionsFound,
+                        finalMap.getPlanarRegionsAsList().size());
+
+         LogTools.debug("Unique Set: [{}]", mapRegionIDSet);
+      }
+   }
+
    public PlanarRegionsList getMapRegions()
    {
       return finalMap;
@@ -922,69 +920,14 @@ public class PlanarRegionMap
       return parameters;
    }
 
-   public void destroy()
-   {
-      if (factorGraph != null)
-      {
-         factorGraph.clearISAM2();
-      }
-   }
-
    public RigidBodyTransform getOptimalSensorToWorldTransform()
    {
       return sensorToWorldTransformPosterior;
    }
 
-   public Vector4D getOptimalLandmarkById(int landmarkId)
-   {
-      double[] landmark = new double[4];
-      factorGraph.getPlanarLandmarkById(landmarkId, landmark);
-      return new Vector4D(landmark);
-   }
-
    public void setInitialSensorPose(RigidBodyTransform transformToWorld)
    {
       initialTransformToWorld.set(transformToWorld);
-   }
-
-   public void printStatistics(boolean average)
-   {
-      if (average)
-      {
-         LogTools.info(String.format("Whole Algorithm: %.3f, Quaternion Averaging: %.3f, Factor Graph: %.3f, Region Merging: %.3f",
-                                     wholeAlgorithmDurationStopwatch.averageLap(),
-                                     quaternionAveragingStopwatch.averageLap(),
-                                     factorGraphStopwatch.averageLap(),
-                                     regionMergingStopwatch.averageLap()));
-      }
-      else
-      {
-         LogTools.info(String.format("Whole Algorithm: %.3f, Quaternion Averaging: %.3f, Factor Graph: %.3f, Region Merging: %.3f",
-                                     wholeAlgorithmDurationStopwatch.totalElapsed(),
-                                     quaternionAveragingStopwatch.totalElapsed(),
-                                     factorGraphStopwatch.totalElapsed(),
-                                     regionMergingStopwatch.totalElapsed()));
-      }
-   }
-
-   public Stopwatch getWholeAlgorithmDurationStopwatch()
-   {
-      return wholeAlgorithmDurationStopwatch;
-   }
-
-   public Stopwatch getQuaternionAveragingStopwatch()
-   {
-      return quaternionAveragingStopwatch;
-   }
-
-   public Stopwatch getFactorGraphStopwatch()
-   {
-      return factorGraphStopwatch;
-   }
-
-   public Stopwatch getRegionMergingStopwatch()
-   {
-      return regionMergingStopwatch;
    }
 
    public int getNumberOfKeyframes()
@@ -995,6 +938,11 @@ public class PlanarRegionMap
    public void setInitialSupportSquareEnabled(boolean supportSquareEnabled)
    {
       initialSupportSquareEnabled = supportSquareEnabled;
+   }
+
+   public PlanarRegionMapStatistics getStatistics()
+   {
+      return statistics;
    }
 }
 

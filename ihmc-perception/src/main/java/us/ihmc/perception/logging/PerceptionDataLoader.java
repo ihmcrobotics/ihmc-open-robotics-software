@@ -157,7 +157,6 @@ public class PerceptionDataLoader
    {
       Group group = hdf5Manager.openOrGetGroup(namespace);
       hdf5Tools.loadBytes(group, index, bytePointer);
-
       OpenCVTools.decompressDepthPNG(bytePointer, mat);
    }
 
@@ -185,21 +184,21 @@ public class PerceptionDataLoader
    {
       String defaultLogDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toString();
       String logDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = "20230228_145121_PerceptionLog.hdf5";
+      String logFileName = "TUM_Dataset_01.hdf5";
 
       PerceptionDataLoader loader = new PerceptionDataLoader();
       loader.openLogFile(Paths.get(logDirectory, logFileName).toString());
 
       long total = loader.getHDF5Manager().getCount(PerceptionLoggerConstants.L515_DEPTH_NAME);
 
-      BytePointer bytePointer = new BytePointer(PerceptionLoggerConstants.FLOAT_BUFFER_SIZE);
+      BytePointer bytePointer = new BytePointer(1000000);
 
-      Mat depthImage = new Mat(768, 1280, opencv_core.CV_16UC1);
+      Mat depthImage = new Mat(480, 640, opencv_core.CV_16UC1);
       LogTools.info("Total Images: {}", total);
 
       for (int i = 0; i < total; i++)
       {
-         LogTools.info("Loading Index: {}/{}", i, 10);
+         LogTools.info("Loading Index: {}/{}", i, total);
          loader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, i, bytePointer, depthImage);
          PerceptionDebugTools.displayDepth("L515 Depth", depthImage, 1);
       }

@@ -69,6 +69,7 @@ public class RDXLocomotionManager
    private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
    private ImGuiStoredPropertySetEnumWidget initialStanceSideRadioButtons;
+   private final FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
 
    private final RDXFootstepPlanGraphic controllerFootstepQueueGraphic;
    private final RDXBodyPathPlanGraphic bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
@@ -99,8 +100,7 @@ public class RDXLocomotionManager
                                CommunicationHelper communicationHelper,
                                ROS2SyncedRobotModel syncedRobot,
                                ROS2ControllerHelper ros2Helper,
-                               ControllerStatusTracker controllerStatusTracker,
-                               RDXPanel teleoperationPanel)
+                               ControllerStatusTracker controllerStatusTracker)
    {
       this.robotModel = robotModel;
       this.communicationHelper = communicationHelper;
@@ -113,11 +113,6 @@ public class RDXLocomotionManager
       bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
 
-      teleoperationPanel.addChild(locomotionParametersTuner);
-      teleoperationPanel.addChild(footstepPlanningParametersTuner);
-      teleoperationPanel.addChild(bodyPathPlanningParametersTuner);
-      teleoperationPanel.addChild(swingFootPlanningParametersTuner);
-
       footstepPlanning = new RDXFootstepPlanning(robotModel,
                                                  syncedRobot,
                                                  controllerStatusTracker,
@@ -128,6 +123,10 @@ public class RDXLocomotionManager
       interactableFootstepPlan = new RDXInteractableFootstepPlan(controllerStatusTracker);
 
       // TODO remove ros from this module, and have it call from the higher level.
+      ros2Helper.subscribeViaCallback(PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS, regions ->
+      {
+         framePlanarRegionsList.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(regions));
+      });
       ros2Helper.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, heightMap ->
       {
          footstepPlanning.setHeightMapData(heightMap);
@@ -516,5 +515,25 @@ public class RDXLocomotionManager
    public RDXInteractableFootstepPlan getInteractableFootstepPlan()
    {
       return interactableFootstepPlan;
+   }
+
+   public RDXStoredPropertySetTuner getLocomotionParametersTuner()
+   {
+      return locomotionParametersTuner;
+   }
+
+   public RDXStoredPropertySetTuner getFootstepPlannerParametersTuner()
+   {
+      return footstepPlanningParametersTuner;
+   }
+
+   public RDXStoredPropertySetTuner getBodyPathPlanningParametersTuner()
+   {
+      return bodyPathPlanningParametersTuner;
+   }
+
+   public RDXStoredPropertySetTuner getSwingFootPlanningParametersTuner()
+   {
+      return swingFootPlanningParametersTuner;
    }
 }

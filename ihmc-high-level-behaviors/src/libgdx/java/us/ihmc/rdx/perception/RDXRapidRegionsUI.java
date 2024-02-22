@@ -5,11 +5,13 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.rapidRegions.RapidPatchesDebugOutputGenerator;
@@ -20,6 +22,7 @@ import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
+import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -30,6 +33,7 @@ public class RDXRapidRegionsUI implements RenderableProvider
 
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
    private ModelInstance sensorFrameGraphic;
+   private RDXFootstepPlanGraphic footstepPlanGraphic;
    private final FramePose3D framePose = new FramePose3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
@@ -47,6 +51,7 @@ public class RDXRapidRegionsUI implements RenderableProvider
    private final ImBoolean drawBoundaries = new ImBoolean(true);
    private final ImBoolean render3DPlanarRegions = new ImBoolean(false);
    private final ImBoolean renderPointCloud = new ImBoolean(false);
+   private final ImBoolean renderFootsteps = new ImBoolean(true);
 
    private ImGuiPlot wholeAlgorithmDurationPlot;
    private ImGuiPlot numberOfPlanarRegionsPlot;
@@ -126,6 +131,8 @@ public class RDXRapidRegionsUI implements RenderableProvider
 
       planarRegionsGraphic = new RDXPlanarRegionsGraphic();
       sensorFrameGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.3);
+
+      footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    }
 
    public void render()
@@ -138,6 +145,15 @@ public class RDXRapidRegionsUI implements RenderableProvider
       gzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCzImage().getBytedecoOpenCVMat());
 
       debugExtractionPanel.displayByte(rapidRegionsDebutOutputGenerator.getDebugImage());
+   }
+
+   public void renderFootstepGraphic(FootstepDataListMessage message)
+   {
+      if (message != null)
+      {
+         footstepPlanGraphic.generateMeshesAsync(message, "Evaluation Footstep Plan");
+         footstepPlanGraphic.update();
+      }
    }
 
    public void render3DGraphics(FramePlanarRegionsList planarRegions)
@@ -167,6 +183,7 @@ public class RDXRapidRegionsUI implements RenderableProvider
       ImGui.checkbox(labels.get("Render Point Cloud"), renderPointCloud);
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
+      ImGui.checkbox(labels.get("Render Footsteps"), renderFootsteps);
 
       if (RENDER_DEBUG_PLOTS)
       {
@@ -224,6 +241,10 @@ public class RDXRapidRegionsUI implements RenderableProvider
       {
          sensorFrameGraphic.getRenderables(renderables, pool);
          planarRegionsGraphic.getRenderables(renderables, pool);
+      }
+      if (renderFootsteps.get())
+      {
+         footstepPlanGraphic.getRenderables(renderables, pool);
       }
    }
 }

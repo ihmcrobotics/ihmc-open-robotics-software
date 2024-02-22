@@ -1,6 +1,7 @@
 package us.ihmc.perception.tools;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.ejml.data.DMatrixRMaj;
@@ -9,6 +10,7 @@ import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.dense.row.linsol.svd.SolvePseudoInverseSvd_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -25,6 +27,8 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.robotics.geometry.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class PlaneRegistrationTools
 {
@@ -51,13 +55,20 @@ public class PlaneRegistrationTools
 
       TIntIntMap matches = new TIntIntHashMap();
 
+      LogTools.debug("Outside");
       PlaneRegistrationTools.findBestPlanarRegionMatches(currentRegions,
                                                          previousRegions,
                                                          matches,
                                                          (float) parameters.getBestMinimumOverlapThreshold(),
                                                          (float) parameters.getBestMatchAngularThreshold(),
                                                          (float) parameters.getBestMatchDistanceThreshold(),
-                                                         0.3f);
+                                                         (float) parameters.getMinimumBoundingBoxSize());
+      if (matches.size() < parameters.getICPMinMatches())
+      {
+         LogTools.debug("Not enough matches, breaking out of IQA loop. Matches: {}", matches.size());
+         return false;
+      }
+
       double previousError = PlaneRegistrationTools.computeRegistrationError(previousRegions, currentRegions, matches);
       for (int i = 0; i < parameters.getICPMaxIterations(); i++)
       {
@@ -68,18 +79,19 @@ public class PlaneRegistrationTools
                                                             (float) parameters.getBestMinimumOverlapThreshold(),
                                                             (float) parameters.getBestMatchAngularThreshold(),
                                                             (float) parameters.getBestMatchDistanceThreshold(),
-                                                            0.3f);
+                                                            (float) parameters.getMinimumBoundingBoxSize());
 
          if (matches.size() < parameters.getICPMinMatches())
          {
-            return false;
+            LogTools.debug("Not enough matches, breaking out of IQA loop. Matches: {}", matches.size());
+            break;
          }
 
          transform = PlaneRegistrationTools.computeQuaternionAveragingTransform(previousRegions, currentRegions, matches);
 
          if (transform.containsNaN())
          {
-            LogTools.debug("Transform contains NaNs, breaking out of IQA loop.");
+            LogTools.debug("Transform contains NaNs, breaking out of IQA loop. Transform: {}", transform);
             break;
          }
 
@@ -87,18 +99,22 @@ public class PlaneRegistrationTools
          double error = PlaneRegistrationTools.computeRegistrationError(previousRegions, currentRegions, matches);
          double ratio = (previousError - error) / previousError;
 
+         LogTools.debug("Iteration: {}, Error: {}, Ratio: {}", i, error, ratio);
+
          if ((Math.abs(ratio) < parameters.getICPTerminationRatio()) || (matches.size() < parameters.getICPMinMatches()))
          {
+            LogTools.debug("Terminating IQA loop. Error ratio: {}, Matches: {}", ratio, matches.size());
+            break;
+         }
+
+         if (previousError > parameters.getICPErrorCutoff())
+         {
+            LogTools.debug("Registration error too high, breaking out of IQA loop. Error: {}", previousError);
             break;
          }
 
          finalTransform.multiply(transform);
          previousError = error + 1e-7;
-      }
-
-      if (previousError > parameters.getICPErrorCutoff())
-      {
-         return false;
       }
 
       transformToPack.set(finalTransform);
@@ -640,5 +656,132 @@ public class PlaneRegistrationTools
          Point3D angles = new Point3D();
          transformToPack.getRotation().getEuler(angles);
       }
+   }
+
+   public static void findPlanarRegionMatches(PlanarRegionsList map,
+                                              PlanarRegionsList incoming,
+                                              HashMap<Integer, TIntArrayList> matches,
+                                              float overlapThreshold,
+                                              float normalThreshold,
+                                              float distanceThreshold,
+                                              float minBoxSize)
+   {
+      matches.clear();
+      List<PlanarRegion> newRegions = incoming.getPlanarRegionsAsList();
+      List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
+
+      for (int i = 0; i < newRegions.size(); i++)
+      {
+         matches.put(i, new TIntArrayList());
+
+         PlanarRegion newRegion = newRegions.get(i);
+
+         for (int j = 0; j < mapRegions.size(); j++)
+         {
+            PlanarRegion mapRegion = mapRegions.get(j);
+
+            if (checkRegionsForOverlap(newRegion, mapRegion, overlapThreshold, normalThreshold, distanceThreshold, minBoxSize, false))
+            {
+               matches.get(i).add(j);
+            }
+         }
+      }
+   }
+
+   public static boolean checkRegionsForOverlap(PlanarRegion regionA,
+                                                PlanarRegion regionB,
+                                                float normalThreshold,
+                                                float normalDistanceThreshold,
+                                                float overlapThreshold,
+                                                float minBoxSize,
+                                                boolean useIntersectionOverUnion)
+   {
+      Point3D newOrigin = new Point3D();
+      regionA.getOrigin(newOrigin);
+
+      Point3D mapOrigin = new Point3D();
+      regionB.getOrigin(mapOrigin);
+
+      Vector3D originVector = new Vector3D();
+      originVector.sub(newOrigin, mapOrigin);
+
+      double normalDistance = 0;
+      boolean intersects = false;
+      double overlapScore = 0;
+      double normalSimilarity = regionB.getNormal().dot(regionA.getNormal());
+
+      // check to make sure the angles are similar enough
+      boolean wasMatched = normalSimilarity > normalThreshold;
+      if (wasMatched)
+      {
+         // check that the regions aren't too far out of plane with one another. TODO should check this normal distance measure. That's likely a problem
+         normalDistance = Math.abs(originVector.dot(regionA.getNormal()));
+         wasMatched &= normalDistance < normalDistanceThreshold;
+
+         // TODO Check the logic for this minimum distance computation. In cases of vertical planar regions it generates incorrect distances.
+         //         if(wasMatched)
+         //         {
+         //            closestDistance = planarRegionTools.getDistanceBetweenPlanarRegions(regionA, regionB);
+         //            wasMatched &= closestDistance <= distanceThreshold;
+         //         }
+
+         // Check to make sure there is sufficient overlap in planar region world frame bounding boxes by computing Intersection-over-Smaller (IoS) score
+         if (wasMatched)
+         {
+            overlapScore = computeBoundingBoxOverlapScore(regionA, regionB, minBoxSize, useIntersectionOverUnion);
+            intersects = overlapScore > overlapThreshold;
+            wasMatched &= intersects;
+         }
+      }
+
+      //LogTools.debug("Match Metrics for [{}, {}]: " + String.format("Angular: %.2f [%.2f], Distance: %.2f [%.2f], Overlap: %.2f [%.2f]", normalSimilarity,
+      //                  normalThreshold, normalDistance, normalDistanceThreshold, overlapScore, overlapThreshold), regionA.getRegionId(), regionB.getRegionId());
+
+      return wasMatched;
+   }
+
+   public static double computeBoundingBoxOverlapScore(PlanarRegion a, PlanarRegion b, double minSize, boolean useIntersectionOverUnion)
+   {
+      BoundingBox3D boxA = PlanarRegionTools.getWorldBoundingBox3DWithMargin(a, minSize);
+      BoundingBox3D boxB = PlanarRegionTools.getWorldBoundingBox3DWithMargin(b, minSize);
+
+      if(useIntersectionOverUnion)
+      {
+         return GeometryTools.computeIntersectionOverUnionOfTwoBoundingBoxes(boxA, boxB);
+      }
+      else
+      {
+         return GeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(boxA, boxB);
+      }
+
+   }
+
+   /**
+    * Checks to see if the two regions intersect. This is done by checking if the normals are close to orthogonal and if the bounding boxes overlap.
+    * @param regionA
+    * @param regionB
+    * @return true if the regions intersect, false otherwise
+    */
+   public static boolean checkRegionsForIntersection(PlanarRegion regionA,
+                                                     PlanarRegion regionB)
+   {
+      // Get normal from region one
+      Vector3D normalA = new Vector3D();
+      regionA.getNormal(normalA);
+
+      // Get normal from region two
+      Vector3D normalB = new Vector3D();
+      regionB.getNormal(normalB);
+
+      // Find bounding box overlap score for the two regions
+      double overlapScore = computeBoundingBoxOverlapScore(regionA, regionB, 0.01, true);
+
+      // Check if normals are close to orthogonal
+      if (Math.abs(normalA.dot(normalB)) < 0.2 && overlapScore > 0.02)
+      {
+         return true;
+      }
+
+      return false;
    }
 }

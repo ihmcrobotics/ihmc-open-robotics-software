@@ -36,10 +36,7 @@ public class RDXPlanarRegionMappingDemo
 
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
 
-   private final RDXLineGraphic mocapGraphic = new RDXLineGraphic(0.02f, Color.YELLOW);
-   private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);
-
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230517_114430_PerceptionLog_900_ms.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_204753_PerceptionLog.hdf5").toString();
 
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
    private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
@@ -77,7 +74,7 @@ public class RDXPlanarRegionMappingDemo
             mapPlanarRegionsGraphic.update();
             mapPlanarRegionsGraphic.setupTooltip(baseUI.getPrimary3DPanel(), "");
 
-            mappingUI = new RDXPlanarRegionMappingUI("Filtered Map", mappingManager);
+            mappingUI = new RDXPlanarRegionMappingUI("Filtered Map", mappingManager, mapPlanarRegionsGraphic);
             baseUI.getImGuiPanelManager().addPanel(mappingUI.getImGuiPanel());
 
             baseUI.getPrimaryScene().addRenderableProvider(mappingUI, RDXSceneLevel.VIRTUAL);
@@ -86,9 +83,6 @@ public class RDXPlanarRegionMappingDemo
 
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(mapPlanarRegionsGraphic::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(mapPlanarRegionsGraphic::process3DViewInput);
-
-            baseUI.getPrimaryScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
-            baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
          }
 
          public void renderPlanarRegions()
@@ -108,6 +102,9 @@ public class RDXPlanarRegionMappingDemo
                   //                  keyframeTrajectoryGraphic.generateMeshes();
 
                   LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
+
+                  if (poseModels.size() > 20)
+                     poseModels.remove(0);
                   poseModels.add(modelInstance);
                }
                framePreviousPose.set(framePose);
@@ -137,34 +134,17 @@ public class RDXPlanarRegionMappingDemo
                {
                   MocapTools.adjustMocapPositionsByOffset(mappingManager.getMocapPositionBuffer(), mappingManager.getSensorPositionBuffer().get(0));
 
-                  mocapGraphic.generateMeshes(mappingManager.getMocapPositionBuffer(), 10);
-                  mocapGraphic.update();
+                  // TODO: Call mapping ui render for mocap
                }
 
                if (!mappingManager.getSensorPositionBuffer().isEmpty())
                {
-                  rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
-                  rootJointGraphic.update();
+                  // TODO: Call mapping ui render for sensor
                }
 
                graphicsInitialized = true;
 
-               if (mappingUI.isCaptured())
-               {
-                  LogTools.info("Filtered Map Panel Captured: {}", mappingUI.isCaptured());
-                  mappingManager.setCaptured(true);
-                  mappingUI.setCaptured(false);
-               }
-
-               //rapidRegionsUIPanel.renderImGuiWidgets();
-
                renderPlanarRegions();
-            }
-
-            if (!mappingManager.getSensorPositionBuffer().isEmpty())
-            {
-               rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
-               rootJointGraphic.update();
             }
 
             graphicsInitialized = true;

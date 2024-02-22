@@ -304,6 +304,7 @@ public class HumanoidPerceptionModule
                                                                   () ->
                                                                   {
                                                                   },
+                                                                  "Fast",
                                                                   smoothing);
    }
 

@@ -90,7 +90,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    {
       super.create();
       int cellsPerAxis = RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize() + 1;
-      heightMapRenderer.create(cellsPerAxis * cellsPerAxis);
+      heightMapRenderer.create(cellsPerAxis * cellsPerAxis, isActive());
    }
 
    public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)

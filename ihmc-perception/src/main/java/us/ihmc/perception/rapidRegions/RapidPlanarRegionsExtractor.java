@@ -20,6 +20,7 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
+import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -32,7 +33,6 @@ import java.util.Stack;
 
 public class RapidPlanarRegionsExtractor
 {
-   private final int TOTAL_NUM_PARAMS = 21;
    private CollidingScanRegionFilter collidingScanRegionFilter;
 
    public enum SensorModel
@@ -69,6 +69,7 @@ public class RapidPlanarRegionsExtractor
    private int boundaryMaxSearchDepth = 0;
    private int numberOfBoundaryPatchesInWholeImage = 0;
    private double maxSVDSolveTime = Double.NaN;
+   private double depthScalar = 1000.0;
 
    private final int[] adjacentY = {-1, -1, -1, 0, 0, 1, 1, 1};
    private final int[] adjacentX = {-1, 0, 1, -1, 1, -1, 0, 1};
@@ -88,7 +89,7 @@ public class RapidPlanarRegionsExtractor
    private final Comparator<RapidRegionRing> boundaryLengthComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
 
    private OpenCLManager openCLManager;
-   private OpenCLFloatBuffer parametersBuffer;
+   private OpenCLFloatParameters parametersBuffer;
    private _cl_program planarRegionExtractionProgram;
    private _cl_kernel packKernel;
    private _cl_kernel mergeKernel;
@@ -195,7 +196,7 @@ public class RapidPlanarRegionsExtractor
       LogTools.info("Creating buffers and kernels for OpenCL program.");
 
       debugger.create(imageHeight, imageWidth);
-      parametersBuffer = new OpenCLFloatBuffer(TOTAL_NUM_PARAMS);
+      parametersBuffer = new OpenCLFloatParameters();
       cloudBuffer = new OpenCLFloatBuffer(imageHeight * imageWidth * 3);
 
       currentFeatureGrid = new PatchFeatureGrid(openCLManager, patchImageWidth, patchImageHeight);
@@ -293,6 +294,15 @@ public class RapidPlanarRegionsExtractor
       }
    }
 
+   public void updateDebugger(BytedecoImage input16UC1DepthImage, ReferenceFrame cameraFrame)
+   {
+      debugger.update(input16UC1DepthImage.getBytedecoOpenCVMat(),
+                      currentFeatureGrid,
+                      patchGraph,
+                      cloudBuffer.getBackingDirectFloatBuffer(),
+                      cameraFrame.getTransformToWorldFrame());
+   }
+
    /**
     * Extracts features and generates patch graph from the input depth image on the GPU.
     */
@@ -300,27 +310,30 @@ public class RapidPlanarRegionsExtractor
    {
       calculateDerivativeParameters();
 
-      parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) 0);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(1, (float) parameters.getMergeAngularThreshold());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(2, (float) parameters.getMergeOrthogonalThreshold());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(3, patchHeight);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(4, patchWidth);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(5, patchImageHeight);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(6, patchImageWidth);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(7, (float) parameters.getFocalLengthXPixels());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(8, (float) parameters.getFocalLengthYPixels());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(9, (float) parameters.getPrincipalOffsetXPixels());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(10, (float) parameters.getPrincipalOffsetYPixels());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(11, parameters.getDeadPixelFilterPatchSize());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(12, filterPatchImageHeight);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(13, filterPatchImageWidth);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(14, imageHeight);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(15, imageWidth);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(16, (float) parameters.getNormalPackRange());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(17, (float) parameters.getCentroidPackRange());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(18, (float) parameters.getMergeRange());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(19, (float) parameters.getMergeDistanceThreshold());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(20, (sensorModel == SensorModel.SPHERICAL ? 1.0f : 0.0f));
+      parametersBuffer.setParameter((float) 0);
+      parametersBuffer.setParameter((float) parameters.getMergeAngularThreshold());
+      parametersBuffer.setParameter((float) parameters.getMergeOrthogonalThreshold());
+      parametersBuffer.setParameter(patchHeight);
+      parametersBuffer.setParameter(patchWidth);
+      parametersBuffer.setParameter(patchImageHeight);
+      parametersBuffer.setParameter(patchImageWidth);
+      parametersBuffer.setParameter((float) parameters.getFocalLengthXPixels());
+      parametersBuffer.setParameter((float) parameters.getFocalLengthYPixels());
+      parametersBuffer.setParameter((float) parameters.getPrincipalOffsetXPixels());
+      parametersBuffer.setParameter((float) parameters.getPrincipalOffsetYPixels());
+      parametersBuffer.setParameter(parameters.getDeadPixelFilterPatchSize());
+      parametersBuffer.setParameter(filterPatchImageHeight);
+      parametersBuffer.setParameter(filterPatchImageWidth);
+      parametersBuffer.setParameter(imageHeight);
+      parametersBuffer.setParameter(imageWidth);
+      parametersBuffer.setParameter((float) parameters.getNormalPackRange());
+      parametersBuffer.setParameter((float) parameters.getCentroidPackRange());
+      parametersBuffer.setParameter((float) parameters.getMergeRange());
+      parametersBuffer.setParameter((float) parameters.getMergeDistanceThreshold());
+      parametersBuffer.setParameter (sensorModel == SensorModel.SPHERICAL ? 1.0f : 0.0f);
+      parametersBuffer.setParameter((float) depthScalar);
+
+      parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
       if (patchSizeChanged)
       {
@@ -346,7 +359,6 @@ public class RapidPlanarRegionsExtractor
          previousFeatureGrid.createOpenCLImages();
 
          patchGraph.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-         parametersBuffer.createOpenCLBufferObject(openCLManager);
          cloudBuffer.createOpenCLBufferObject(openCLManager);
       }
       else
@@ -858,9 +870,14 @@ public class RapidPlanarRegionsExtractor
       return enabled;
    }
 
-    public void setEnabled(boolean enabled)
+   public void setEnabled(boolean enabled)
+   {
+      this.enabled = enabled;
+   }
+
+    public void setDepthScalar(double depthScalar)
     {
-        this.enabled = enabled;
+       this.depthScalar = depthScalar;
     }
 }
 

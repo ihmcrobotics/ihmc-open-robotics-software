@@ -929,4 +929,60 @@ public class PlanarRegionFileTools
       URL url = getResourceURL(resourceName);
       return new File(url.getFile());
    }
+
+   static public Object loadFromLog(File planarRegionListLog, Class<?> type) throws IOException
+   {
+      Object list = null;
+      Scanner in = new Scanner(planarRegionListLog);
+      in.useDelimiter("##\n");
+
+      in.next(); //Skip metadata TODO process metadata
+      while (in.hasNext())
+      {
+         in.nextLine(); //Skip past delimiter
+         long time = Long.parseLong(in.nextLine());
+
+         final File temp = File.createTempFile("prll", ".tmp");
+         temp.deleteOnExit();
+         try (FileOutputStream out = new FileOutputStream(temp))
+         {
+            IOUtils.copy(new StringReader(in.next()), out);
+         }
+
+         if (type == FramePlanarRegionsList.class)
+            list = PlanarRegionFileTools.importFramePlanarRegionsData(temp);
+         else
+            list = PlanarRegionFileTools.importPlanarRegionData(temp);
+      }
+
+      return list;
+   }
+
+   static public PlanarRegionsList loadRegionsFromLog(File logFile)
+   {
+      PlanarRegionsList regions = null;
+      try
+      {
+          regions = (PlanarRegionsList) loadFromLog(logFile, PlanarRegionsList.class);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+      return regions;
+   }
+
+   static public FramePlanarRegionsList loadFrameRegionsFromLog(File logFile)
+   {
+      FramePlanarRegionsList regions = null;
+      try
+      {
+          regions = (FramePlanarRegionsList) loadFromLog(logFile, FramePlanarRegionsList.class);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+      return regions;
+   }
 }

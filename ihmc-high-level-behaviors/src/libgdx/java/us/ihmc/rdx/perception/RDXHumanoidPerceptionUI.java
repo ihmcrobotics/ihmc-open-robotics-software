@@ -8,11 +8,8 @@ import imgui.flag.ImGuiCond;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
@@ -23,7 +20,6 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXImagePanel;
-import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
@@ -350,6 +346,10 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       {
          visualizer.destroy();
       }
+//      PerceptionDebugTools.displayHeightMap("Output Height Map",
+//                                humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getBytedecoOpenCVMat(),
+//                                1, 1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getLocalCellSizeInMeters()));
+      rapidRegionsUI.render();
    }
 
    public void initializeHeightMapUI(ROS2Helper ros2Helper)
@@ -376,20 +376,26 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
                                                            RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
                                                            RDXImagePanel.FLIP_Y);
          snapNormalZMapPanel = new RDXBytedecoImagePanel("Normal Z",
-                                                                  humanoidPerception.getRapidHeightMapExtractor().getSnapNormalZImage().getBytedecoOpenCVMat().cols(),
-                                                                  humanoidPerception.getRapidHeightMapExtractor().getSnapNormalZImage().getBytedecoOpenCVMat().rows(),
-                                                                  RDXImagePanel.FLIP_Y);
-         steppableRegionAssignmentMat = new RDXBytedecoImagePanel("Region Assignment",
-                                                         humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionAssignmentMat().cols(),
-                                                         humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionAssignmentMat().rows(),
+                                                         humanoidPerception.getRapidHeightMapExtractor().getSnapNormalZImage().getBytedecoOpenCVMat().cols(),
+                                                         humanoidPerception.getRapidHeightMapExtractor().getSnapNormalZImage().getBytedecoOpenCVMat().rows(),
                                                          RDXImagePanel.FLIP_Y);
-         steppableRegionBordersMat = new RDXBytedecoImagePanel("Region Borders",
-                                                                  humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionRingMat().cols(),
-                                                                  humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionRingMat().rows(),
+         steppableRegionAssignmentMat = new RDXBytedecoImagePanel("Region Assignment",
+                                                                  humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionAssignmentMat().cols(),
+                                                                  humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionAssignmentMat().rows(),
                                                                   RDXImagePanel.FLIP_Y);
+         steppableRegionBordersMat = new RDXBytedecoImagePanel("Region Borders",
+                                                               humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionRingMat().cols(),
+                                                               humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionRingMat().rows(),
+                                                               RDXImagePanel.FLIP_Y);
          steppabilityConnectionsImage = new RDXBytedecoImagePanel("Region Connections",
-                                                                  humanoidPerception.getRapidHeightMapExtractor().getSteppabilityConnectionsImage().getBytedecoOpenCVMat().cols(),
-                                                                  humanoidPerception.getRapidHeightMapExtractor().getSteppabilityConnectionsImage().getBytedecoOpenCVMat().rows(),
+                                                                  humanoidPerception.getRapidHeightMapExtractor()
+                                                                                    .getSteppabilityConnectionsImage()
+                                                                                    .getBytedecoOpenCVMat()
+                                                                                    .cols(),
+                                                                  humanoidPerception.getRapidHeightMapExtractor()
+                                                                                    .getSteppabilityConnectionsImage()
+                                                                                    .getBytedecoOpenCVMat()
+                                                                                    .rows(),
                                                                   RDXImagePanel.FLIP_Y);
          //sensorCroppedHeightMapPanel = new RDXBytedecoImagePanel("Sensor Cropped Height Map",
          //                                                        humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().cols(),

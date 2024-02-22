@@ -109,6 +109,50 @@ public class RDXRemotePerceptionUI
       return continuousWalkingParameters;
    }
 
+   public RapidRegionsExtractorParameters getRapidRegionsExtractorParameters()
+   {
+      return rapidRegionsExtractorParameters;
+   }
+
+   public PolygonizerParameters getPolygonizerParameters()
+   {
+      return polygonizerParameters;
+   }
+
+   public ConcaveHullFactoryParameters getConcaveHullFactoryParameters()
+   {
+      return concaveHullFactoryParameters;
+   }
+
+   public PlanarRegionMappingParameters getRegionMappingParameters()
+   {
+      return regionMappingParameters;
+   }
+
+   public RapidRegionsExtractorParameters getSphericalRapidRegionsExtractorParameters()
+   {
+      return sphericalRegionExtractorParameters;
+   }
+
+   public PolygonizerParameters getSphericalPolygonizerParameters()
+   {
+      return sphericalPolygonizerParameters;
+   }
+
+   public ConcaveHullFactoryParameters getSphericalConcaveHullFactoryParameters()
+   {
+      return sphericalConcaveHullFactoryParameters;
+   }
+
+   public PlanarRegionMappingParameters getSphericalRegionMappingParameters()
+   {
+      return sphericalRegionMappingParameters;
+   }
+
+   public RDXPanel getPanel()
+   {
+      return panel;
+   }
    public SwingPlannerParametersBasics getSwingPlannerParameters()
    {
       return swingPlannerParameters;

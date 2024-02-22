@@ -44,7 +44,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
                                         Runnable referenceFramesUpdater,
                                         boolean smoothing)
    {
-      super(simpleRobotName, terrainRegionsTopic, structuralRegionsTopic, ros2Node, referenceFrames, referenceFramesUpdater, smoothing);
+      super(simpleRobotName, terrainRegionsTopic, structuralRegionsTopic, ros2Node, referenceFrames, referenceFramesUpdater, "Fast", smoothing);
 
       this.walkingStatusMessage.get().setWalkingStatus(WalkingStatus.COMPLETED.toByte());
       this.terrainPlanningDebugger = new TerrainPlanningDebugger(ros2Node);

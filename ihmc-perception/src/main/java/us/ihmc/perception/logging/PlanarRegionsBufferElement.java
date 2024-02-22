@@ -1,4 +1,4 @@
-package us.ihmc.avatar.logging;
+package us.ihmc.perception.logging;
 
 public class PlanarRegionsBufferElement<T>
 {

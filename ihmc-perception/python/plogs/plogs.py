@@ -19,7 +19,6 @@ def convert_main(path, src_file_name, dst_file_name):
     if dst_file_name is None:
         new_file = src_file_name.replace('.hdf5', 'Fixed.hdf5')
 
-
     data = h5py.File(path + src_file_name, 'r')
 
     channels = collect_channels(data)
@@ -162,6 +161,13 @@ def plotter_main(data, output_file):
 
     # plot_position(150, 640, [mocap_euler, final_rotations, sensor_orientation], ['-b', '-r', '-y'], "Estimated State [RED] - Ground Truth [BLUE]", "Euler")
 
+def plot_data(data):
+    position = get_data(data, 'l515/sensor/position/')
+
+    print(position)
+
+    plot_position(0, -1, [position], ['-b'], "Position", "Position")
+
 
 def extract_trajectory_from_output(file):
     
@@ -192,7 +198,7 @@ def extract_trajectory_from_output(file):
     
 def analyzer_main():
     home = os.path.expanduser('~')
-    path = home + '/.ihmc/logs/perception/'
+    path = home + '/.ihmc/logs/perception/IROS_2023/'
     files = sorted(os.listdir(path))
     
     titles = [  'WalkForward_FallAtTheEnd', # 20230228_191411_PerceptionLog.hdf5
@@ -211,24 +217,24 @@ def analyzer_main():
 
     # INDEX TO LOAD ----------------------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    index_to_load = 4
+    index_to_load = 5
 
     # INDEX TO LOAD -----------------------------------------------------<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     filename = files[index_to_load]
-    filename = '20230308_152625_PerceptionLog.hdf5'
+    print('Loading File ', index_to_load, ': ', filename, '\tTitle: ', titles[index_to_load])
 #     print('\nLoading file: ', index_to_load, '\tName: ', filename, '\tTitle: ', titles[index_to_load], '\n')
 
     data = h5py.File(path + filename, 'r')
     print_file_info(data, filename)
 
-#     output_file = '/home/quantum/Workspace/Code/Resources/IROS_2023/' + titles[index_to_load] + '.txt'
+    output_file = '/home/quantum/Workspace/Code/Resources/IROS_2023/' + titles[index_to_load] + '.txt'
 
-    player_main(data)
+    # player_main(data)
     
-#     plotter_main(data, output_file)
+    plotter_main(data, output_file)
 
-def kitti_main():
+def create_from_KITTI():
     home = os.path.expanduser('~')
     path = home + '/.ihmc/logs/perception/'
 
@@ -238,13 +244,13 @@ def kitti_main():
     dataset_paths = ['/home/quantum/Workspace/Storage/Other/Temp/dataset/sequences/00/image_0/']
     group_names = ['/kitti/left/']
 
-    # data = h5py.File(path + 'KITTI_Dataset_00.hdf5', 'w')
+    data = h5py.File(path + 'KITTI_Dataset_00.hdf5', 'w')
 
-    # data = insert_image_datasets(data, dataset_paths, group_names)
-    # data = insert_timestamps(data, timestamps_path, '/kitti/ground_truth/')
-    # data = insert_poses(data, poses_path, '/kitti/time/')
+    data = insert_image_datasets(data, dataset_paths, group_names)
+    data = insert_timestamps(data, timestamps_path, '/kitti/ground_truth/')
+    data = insert_poses(data, poses_path, '/kitti/time/')
 
-    # data.close()
+    data.close()
 
     data = h5py.File(path + 'KITTI_Dataset_00.hdf5', 'r')
     print_file_info(data, 'KITTI_Dataset_00.hdf5')
@@ -328,9 +334,37 @@ def plot_footstep(display, position, orientation, color, dims=(2,4)):
 
 
 
+def create_from_TUM(path):
+
+    depth_info = path + 'depth.txt'
+    gt_info = path + 'groundtruth.txt'
+
+    depth_path = path + 'depth/'
+
+    data = h5py.File(path + 'TUM_Dataset_01.hdf5', 'w')
+
+    insert_compressed_depth_maps(data, depth_path, '/l515/depth/', True)
+    print_file_info(data, 'TUM_Dataset_01.hdf5')
+
+    insert_timestamps(data, depth_info, '/l515/time/')
+    print_file_info(data, 'TUM_Dataset_01.hdf5')
+
+    insert_poses_quaternion(data, gt_info, '/l515/gt/')
+    print_file_info(data, 'TUM_Dataset_01.hdf5')
+
+    resample_poses_quaternion(data, '/l515/gt/', '/l515/sensor/', '/l515/time/')
+    print_file_info(data, 'TUM_Dataset_01.hdf5')
+
+    data.close()
+
+    data = h5py.File(path + 'TUM_Dataset_01.hdf5', 'r')
+    print_file_info(data, 'TUM_Dataset_01.hdf5')
+
+    
+
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser()
+    # parser = argparse.ArgumentParser()
 
     parser.add_argument("--path", help="path to search for files", type=str)
     parser.add_argument("--list", help="increase output verbosity", action="store_true")
@@ -344,36 +378,36 @@ if __name__ == '__main__':
     parser.add_argument("--rename", help="rename file to include sensors used", type=str)
     parser.add_argument("--renameAll", help="renames ALL files in the logs/perception directory", action="store_true")
 
-    args = parser.parse_args()
-    home = os.path.expanduser('~')
-    path = args.path if args.path else home + '/.ihmc/logs/perception/'
+    # args = parser.parse_args()
+    # home = os.path.expanduser('~')
+    # path = args.path if args.path else home + '/.ihmc/logs/perception/'
 
-    if args.list:
-        files = sorted(os.listdir(path))
-        print_file_sizes(path, files)
+    # if args.list:
+    #     files = sorted(os.listdir(path))
+    #     print_file_sizes(path, files)
 
-    if args.info:
-        data = h5py.File(path + args.info, 'r')
-        print_file_info(data, args.info)
+    # if args.info:
+    #     data = h5py.File(path + args.info, 'r')
+    #     print_file_info(data, args.info)
 
-    if args.plot:
-        data = h5py.File(path + args.plot, 'r')
-        plotter_main(data)
+    # if args.plot:
+    #     data = h5py.File(path + args.plot, 'r')
+    #     plot_data(data)
 
-    if args.play:
-        data = h5py.File(path + args.play, 'r')
-        player_main(data)
+    # if args.play:
+    #     data = h5py.File(path + args.play, 'r')
+    #     player_main(data)
 
-    if args.fix:
-        convert_main(path, args.fix, args.dst)
+    # if args.fix:
+    #     convert_main(path, args.fix, args.dst)
 
-    if args.fixAll:
-        files = sorted(os.listdir(path))
-        convert_all(path, files)
+    # if args.fixAll:
+    #     files = sorted(os.listdir(path))
+    #     convert_all(path, files)
     
-    if args.rename:
-        data = h5py.File(path + args.rename, 'r')
-        rename_file(path, data, args.rename)
+    # if args.rename:
+    #     data = h5py.File(path + args.rename, 'r')
+    #     rename_file(path, data, args.rename)
 
     if args.renameAll:
         files = sorted(os.listdir(path))

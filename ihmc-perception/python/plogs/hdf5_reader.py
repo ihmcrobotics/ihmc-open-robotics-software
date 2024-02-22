@@ -210,7 +210,14 @@ def show_depth(name, image, delay):
     # Make the image brighter
     image = np.minimum(image * 10, 255)
 
-    cv2.imshow(name, image)
+    # # Remove spikes from image by thresholding
+    # buffer_image[buffer_image > 80] = 0
+
+    # # Normalize image using OpenCV
+    # buffer_image = cv2.normalize(buffer_image, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+
+
+    cv2.imshow(name, buffer_image)
     code = cv2.waitKeyEx(delay)
 
     # print("Code: ", code)
