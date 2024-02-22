@@ -7,7 +7,10 @@ public class BPWPlanarWalkingSimulation {
 
     public BPWPlanarWalkingSimulation()
     {
+        int simTicksPerControlTick = 3;
+
         SimulationConstructionSet2 scs = new SimulationConstructionSet2();
+        scs.setBufferRecordTickPeriod(simTicksPerControlTick);
 //        scs.getGravity().setToZero();
 
         // Todo create a robot and add it to scs
@@ -18,11 +21,12 @@ public class BPWPlanarWalkingSimulation {
         scs.addTerrainObject(new SlopeGroundDefinition(0.0));
 
         // Set up the controller robot with some convenience method
-        BPWPLanarWalkingRobot controllerRobot = new BPWPLanarWalkingRobot(robot);
+        BPWPLanarWalkingRobot controllerRobot = new BPWPLanarWalkingRobot(robot, scs.getTime());
         // controller
         BPWPlanarWalkingController controller = new BPWPlanarWalkingController(controllerRobot);
         // add the controller
-        robot.addController(controller);
+//        robot.addController(controller);
+        robot.addThrottledController(controller, scs.getDT() * simTicksPerControlTick);
 
         scs.startSimulationThread();
         scs.simulate();

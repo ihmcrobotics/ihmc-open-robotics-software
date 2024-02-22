@@ -6,18 +6,23 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimPrismaticJoint;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.function.DoublePredicate;
 
 public class BPWPLanarWalkingRobot
 {
     private final SideDependentList<SimPrismaticJoint> kneeJoints;
     private final SideDependentList<YoDouble> legLengths = new SideDependentList<YoDouble>();
     private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+    private final DoubleProvider time;
 
-    public BPWPLanarWalkingRobot(Robot robot)
+    public BPWPLanarWalkingRobot(Robot robot, DoubleProvider time)
     {
-        robot.getFloatingRootJoint().setJointPosition(new Vector3D(0.0, 0.0, 1.5));
+        this.time = time;
+        robot.getFloatingRootJoint().setJointPosition(new Vector3D(0.0, 0.0, 0.75));
 
         kneeJoints = new SideDependentList<>();
 
@@ -29,6 +34,7 @@ public class BPWPLanarWalkingRobot
             YoDouble legLength = new YoDouble( robotSide.getLowerCaseName() + "LegLength", registry);
             legLengths.put(robotSide, legLength);
         }
+//        kneeJoints.get(RobotSide.LEFT).setQ(0.25);
 
     }
 
@@ -45,6 +51,11 @@ public class BPWPLanarWalkingRobot
     public SimPrismaticJoint getKneeJoint(RobotSide robotSide)
     {
         return kneeJoints.get(robotSide);
+    }
+
+    public DoubleProvider getTime()
+    {
+        return time;
     }
 
     public void update()
