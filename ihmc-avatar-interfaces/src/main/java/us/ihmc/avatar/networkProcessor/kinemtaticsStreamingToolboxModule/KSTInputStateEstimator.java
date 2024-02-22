@@ -6,8 +6,5 @@ public interface KSTInputStateEstimator
 {
    void reset();
 
-   void update(boolean isNewInput,
-               KinematicsStreamingToolboxInputCommand inputCommandToFilter,
-               KinematicsStreamingToolboxInputCommand currentRawInputCommand,
-               KinematicsStreamingToolboxInputCommand previousRawInputCommand);
+   void update(boolean isNewInput, KinematicsStreamingToolboxInputCommand latestInputCommand, KinematicsStreamingToolboxInputCommand previousRawInputCommand);
 }

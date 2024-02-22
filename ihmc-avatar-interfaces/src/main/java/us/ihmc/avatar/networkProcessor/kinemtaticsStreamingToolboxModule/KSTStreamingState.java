@@ -512,7 +512,7 @@ public class KSTStreamingState implements State
                filteredInputs.removeInput(i);
          }
 
-         inputStateEstimator.update(tools.hasNewInputCommand(), filteredInputs, tools.getLatestInput(), tools.getPreviousInput());
+         inputStateEstimator.update(tools.hasNewInputCommand(), filteredInputs, tools.getPreviousInput());
 
          for (int i = 0; i < filteredInputs.getNumberOfInputs(); i++)
          { // Ship it
