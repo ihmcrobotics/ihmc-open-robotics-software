@@ -3,6 +3,10 @@ package us.ihmc.robotics.geometry;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 
+/**
+ * Utility class for checking if a pose changed since the last time
+ * it was checked.
+ */
 public class FramePose3DChangedTracker
 {
    private final FramePose3DReadOnly poseToTrack;
@@ -20,6 +24,11 @@ public class FramePose3DChangedTracker
       this.tolerance = tolerance;
    }
 
+   /**
+    * @return If the pose has changed since the last time this was called
+    *           or true if it has not been called yet or if {@link #markAsChanged()}
+    *           was called since this was called.
+    */
    public boolean hasChanged()
    {
       if (lastValue == null)
@@ -36,6 +45,9 @@ public class FramePose3DChangedTracker
       }
    }
 
+   /**
+    * After this is called, the next time {@link #hasChanged()} is called it will return true.
+    */
    public void markAsChanged()
    {
       lastValue = null;

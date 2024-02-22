@@ -42,6 +42,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+/**
+ * Manages using the interactables to preview and send whole body trajectory commands to the robot.
+ */
 public class RDXWholeBodyIKManager
 {
    private final DRCRobotModel robotModel;
