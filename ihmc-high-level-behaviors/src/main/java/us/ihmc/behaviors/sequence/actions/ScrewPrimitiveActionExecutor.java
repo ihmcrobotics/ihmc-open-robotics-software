@@ -41,9 +41,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimitiveActionState, ScrewPrimitiveActionDefinition>
 {
-   public static final double POSITION_TOLERANCE = 0.15;
-   public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
-
    private final ScrewPrimitiveActionState state;
    private final ScrewPrimitiveActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -457,15 +454,15 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
 
          trackingCalculator.computePoseTrackingData(desiredHandControlPose, syncedHandControlPose);
-         trackingCalculator.factorInR3Errors(POSITION_TOLERANCE);
-         trackingCalculator.factoryInSO3Errors(ORIENTATION_TOLERANCE);
+         trackingCalculator.factorInR3Errors(definition.getPositionErrorTolerance());
+         trackingCalculator.factoryInSO3Errors(definition.getOrientationErrorTolerance());
 
          boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
          meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
 
          state.getCurrentPose().getValue().set(syncedHandControlPose);
-         state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-         state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+         state.setPositionDistanceToGoalTolerance(definition.getPositionErrorTolerance());
+         state.setOrientationDistanceToGoalTolerance(definition.getOrientationErrorTolerance());
          state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getLinearPart());
          state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getAngularPart());
 

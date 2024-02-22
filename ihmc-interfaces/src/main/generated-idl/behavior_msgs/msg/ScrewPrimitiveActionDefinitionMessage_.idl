@@ -53,6 +53,8 @@ module behavior_msgs
         double linear_position_weight;
         double angular_position_weight;
         double jointspace_weight;
+        double position_error_tolerance;
+        double orientation_error_tolerance;
       };
     };
   };
