@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape.BOX;
+import static us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape.CUSTOM;
 
 public class IterativeClosestPointWorker
 {
@@ -91,6 +92,19 @@ public class IterativeClosestPointWorker
 
    private final Pose3D resultPose = new Pose3D();
 
+   public IterativeClosestPointWorker(List<Point3D32> objectPointCloud, int numberOfCorrespondences, Random random)
+   {
+      this(PrimitiveRigidBodyShape.CUSTOM,
+           new Vector3D(),
+           new Vector3D(),
+           numberOfCorrespondences,
+           numberOfCorrespondences,
+           new Pose3D(),
+           random);
+
+      setDetectionShape(objectPointCloud, numberOfCorrespondences);
+   }
+
    public IterativeClosestPointWorker(int numberOfObjectSamples, int numberOfCorrespondences, Random random)
    {
       this(defaultDetectionShape,
@@ -121,16 +135,19 @@ public class IterativeClosestPointWorker
       objectRelativeToCentroidPoints = new DMatrixRMaj(numberOfCorrespondences, 3);
       measurementRelativeToCentroidPoints = new DMatrixRMaj(numberOfCorrespondences, 3);
 
-      localObjectPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape,
-                                                                               new Pose3D(),
-                                                                               lengths.getX32(),
-                                                                               lengths.getY32(),
-                                                                               lengths.getZ32(),
-                                                                               radii.getX32(),
-                                                                               radii.getY32(),
-                                                                               radii.getZ32(),
-                                                                               numberOfObjectSamples,
-                                                                               random);
+      if (detectionShape != CUSTOM)
+      {
+         localObjectPoints = IterativeClosestPointTools.createICPObjectPointCloud(detectionShape,
+                                                                                  new Pose3D(),
+                                                                                  lengths.getX32(),
+                                                                                  lengths.getY32(),
+                                                                                  lengths.getZ32(),
+                                                                                  radii.getX32(),
+                                                                                  radii.getY32(),
+                                                                                  radii.getZ32(),
+                                                                                  numberOfObjectSamples,
+                                                                                  random);
+      }
       setPoseGuess(initialPose);
    }
 
@@ -450,6 +467,13 @@ public class IterativeClosestPointWorker
       {
          loadPointCloudFromFile(pointCloudFile);
       }
+   }
+
+   public void setDetectionShape(List<Point3D32> objectPointCloud, int numberOfPointsToUse)
+   {
+      detectionShape = PrimitiveRigidBodyShape.CUSTOM;
+      Collections.shuffle(objectPointCloud);
+      localObjectPoints = objectPointCloud.subList(0, Math.min(numberOfPointsToUse, objectPointCloud.size()));
    }
 
    public void changeSize(Vector3D lengths, Vector3D radii, int numberOfObjectSamples)
