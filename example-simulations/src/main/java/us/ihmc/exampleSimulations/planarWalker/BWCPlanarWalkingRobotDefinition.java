@@ -88,7 +88,7 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 
    private static RigidBodyDefinition createTorso()
    {
-      double torsoMass = 10.0;
+      double torsoMass = 100.0;
       MomentOfInertiaDefinition torsoMomentOfInertia = new MomentOfInertiaDefinition(0.75, 0.75, 1.0);
 
       RigidBodyDefinition torsoBodyDefinition = new RigidBodyDefinition(torsoName);

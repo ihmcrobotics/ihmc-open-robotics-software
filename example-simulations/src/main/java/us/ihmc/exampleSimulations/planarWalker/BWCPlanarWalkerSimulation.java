@@ -2,14 +2,16 @@ package us.ihmc.exampleSimulations.planarWalker;
 
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
 import us.ihmc.scs2.simulation.robot.Robot;
 
 public class BWCPlanarWalkerSimulation
 {
    public BWCPlanarWalkerSimulation()
    {
-      int simTicksPerControlTick = 3;
+      int simTicksPerControlTick = 1;
 
+      ContactPointBasedContactParameters contactParameters = new ContactPointBasedContactParameters();
       SimulationConstructionSet2 scs = new SimulationConstructionSet2();
       scs.setBufferRecordTickPeriod(simTicksPerControlTick);
       //      scs.getGravity().setToZero();

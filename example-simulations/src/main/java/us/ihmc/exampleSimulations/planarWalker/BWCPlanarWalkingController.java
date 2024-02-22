@@ -1,6 +1,8 @@
 package us.ihmc.exampleSimulations.planarWalker;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -10,6 +12,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -20,9 +23,10 @@ public class BWCPlanarWalkingController implements Controller
 
    private final BWCPlanarWalkingRobot controllerRobot;
 
-   private final YoDouble desirdSupportLegLength = new YoDouble("desiredLegLength", registry);
+   private final YoDouble desiredBodyHeight = new YoDouble("desiredBodyHeight", registry);
    private final YoDouble desiredSwingHeight = new YoDouble("desiredSwingHeight", registry);
    private final YoDouble desiredSwingDuration = new YoDouble("desiredSwingDuration", registry);
+   private final YoDouble desiredForwardVelocity = new YoDouble("desiredForwardVelocity", registry);
 
    private final YoDouble supportLegLengthKp = new YoDouble("supportLegLengthKp", registry);
    private final YoDouble supportLegLengthKd = new YoDouble("supportLegLengthKd", registry);
@@ -31,6 +35,10 @@ public class BWCPlanarWalkingController implements Controller
    private final YoDouble swingFootHeightKd = new YoDouble("swingFootHeightKd", registry);
    private final YoDouble swingHipPitchKp = new YoDouble("swingHipPitchKp", registry);
    private final YoDouble swingHipPitchKd = new YoDouble("swingHipPitchKd", registry);
+
+   private final YoDouble capturePointFeedback = new YoDouble("capturePointFeedback", registry);
+   private final YoDouble capturePointFeedforward = new YoDouble("capturePointFeedforward", registry);
+   private final YoDouble currentForwardVelocity = new YoDouble("currentForwardVelocity", registry);
 
    private enum LegStateName
    {Swing, Support}
@@ -43,15 +51,18 @@ public class BWCPlanarWalkingController implements Controller
       this.controllerRobot = controllerRobot;
 
       // set up our leg length gains for the leg length controller
-      supportLegLengthKp.set(1500.0);
-      supportLegLengthKd.set(50.0);
+      supportLegLengthKp.set(15000.0);
+      supportLegLengthKd.set(500.0);
 
       swingFootHeightKp.set(200.0);
-      swingFootHeightKd.set(1.0);
+      swingFootHeightKd.set(10.0);
 
-      desirdSupportLegLength.set((BWCPlanarWalkingRobotDefinition.shinLength + BWCPlanarWalkingRobotDefinition.thighLength) / 2.0);
+      swingHipPitchKp.set(500.0);
+      swingHipPitchKd.set(25.0);
+
+      desiredBodyHeight.set((BWCPlanarWalkingRobotDefinition.shinLength + BWCPlanarWalkingRobotDefinition.thighLength) + -0.2);
       desiredSwingHeight.set(0.1);
-      desiredSwingDuration.set(0.5);
+      desiredSwingDuration.set(0.3);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -176,14 +187,21 @@ public class BWCPlanarWalkingController implements Controller
          // set the desired torque to the knee joint to achieve the desired swing foot height
          controllerRobot.getKneeJoint(swingSide).setTau(legForce);
 
-         double desiredFootPositionX = 0.0;
+         double z0 = 1.0;
+         double omega = Math.sqrt(9.81 / z0);
+//         double currentForwardVelocity = controllerRobot.getCenterOfMassVelocity().getX();
+//         currentForwardVelocity.changeFrame(cont);
+         capturePointFeedback.set(controllerRobot.getCenterOfMassVelocity() / omega);
+         capturePointFeedforward.set(
+               -desiredForwardVelocity.getValue() * desiredSwingDuration.getValue() / (Math.exp(omega * desiredSwingDuration.getValue()) - 1));
+         double desiredFootPositionX = capturePointFeedback.getDoubleValue() + capturePointFeedforward.getDoubleValue();
          double desiredFootVelocityX = 0.0;
 
          footPosition.changeFrame(controllerRobot.getCenterOfMassFrame());
          double currentFootPositionX = footPosition.getX();
          double currentFootVelocityX = -controllerRobot.getHipJoint(swingSide).getQd(); // FIXME make this have some actual value
          double hipForce = -swingHipPitchController.compute(currentFootPositionX, desiredFootPositionX, currentFootVelocityX, desiredFootVelocityX);
-         swingLegForce.set(legForce);
+         swingHipForce.set(hipForce);
 
          controllerRobot.getHipJoint(swingSide).setTau(hipForce);
       }
@@ -205,6 +223,7 @@ public class BWCPlanarWalkingController implements Controller
    {
       private final RobotSide supportSide;
 
+      private final PDController supportBodyController;
       private final PDController supportLegLengthController;
       private final YoDouble supportLegDesiredKneeForce;
 
@@ -217,6 +236,11 @@ public class BWCPlanarWalkingController implements Controller
                                                        supportLegLengthKd,
                                                        supportSide.getLowerCaseName() + "SupportLegLengthController",
                                                        registry);
+         supportBodyController = new PDController(
+                                                       supportSide.getLowerCaseName() + "SupportBodyController",
+                                                       registry);
+         supportBodyController.setProportionalGain(50.0);
+         supportBodyController.setDerivativeGain(1.0);
       }
 
       @Override
@@ -228,17 +252,25 @@ public class BWCPlanarWalkingController implements Controller
       @Override
       public void doAction(double timeInState)
       {
-         double legLength = controllerRobot.getLegLength(supportSide);
+         FramePoint3D comPosition = new FramePoint3D(controllerRobot.getCenterOfMassFrame());
+         comPosition.changeFrame(controllerRobot.getWorldFrame());
+
          double legLengthVelocity = -controllerRobot.getKneeJoint(supportSide).getQd();
 
-         double desiredLegLength = desirdSupportLegLength.getDoubleValue();
+         double desiredHeight = desiredBodyHeight.getDoubleValue();
          double desiredKneeVelocity = 0.0;
          // compute and record the desired torque to hold the leg at the desired length
-         double torque = supportLegLengthController.compute(legLength, desiredLegLength, legLengthVelocity, desiredKneeVelocity);
+         double torque = supportLegLengthController.compute(comPosition.getZ(), desiredHeight, legLengthVelocity, desiredKneeVelocity);
          supportLegDesiredKneeForce.set(torque);
 
          // set the desired torque to the knee joint to hold the leg at the desired length
          controllerRobot.getKneeJoint(supportSide).setTau(-torque);
+
+         FrameQuaternion bodyOrientation = new FrameQuaternion(controllerRobot.getBodyFrame());
+         bodyOrientation.changeFrame(controllerRobot.getWorldFrame());
+         double hipTorque = supportBodyController.compute(bodyOrientation.getPitch(), 0.0, 0.0, 0.0);
+         // set the desired hip pitch torque to zero.
+         controllerRobot.getHipJoint(supportSide).setTau(hipTorque);
       }
 
       @Override

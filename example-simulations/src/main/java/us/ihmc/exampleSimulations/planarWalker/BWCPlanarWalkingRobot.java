@@ -2,7 +2,11 @@ package us.ihmc.exampleSimulations.planarWalker;
 
 import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.simulation.robot.Robot;
@@ -22,15 +26,17 @@ public class BWCPlanarWalkingRobot
 
    private final SideDependentList<ReferenceFrame> footFrames = new SideDependentList<>();
 
+   private final RigidBodyBasics rootBody;
    private final DoubleProvider time;
    private final ReferenceFrame worldFrame;
 
-   private final ReferenceFrame centerOfMassFrame;
+   private final MovingReferenceFrame centerOfMassFrame;
 
    public BWCPlanarWalkingRobot(Robot robot, DoubleProvider time)
    {
       this.time = time;
       robot.getFloatingRootJoint().setJointPosition(new Vector3D(0.0, 0.0, 0.75));
+      rootBody = robot.getFloatingRootJoint().getSuccessor();
 
       worldFrame = robot.getInertialFrame();
       kneeJoints = new SideDependentList<>();
@@ -84,6 +90,11 @@ public class BWCPlanarWalkingRobot
       return footFrames.get(robotSide);
    }
 
+   public ReferenceFrame getBodyFrame()
+   {
+      return rootBody.getBodyFixedFrame();
+   }
+
    public SimPrismaticJoint getKneeJoint(RobotSide robotSide)
    {
       return kneeJoints.get(robotSide);
@@ -97,6 +108,13 @@ public class BWCPlanarWalkingRobot
    public ReferenceFrame getCenterOfMassFrame()
    {
       return centerOfMassFrame;
+   }
+
+   public double getCenterOfMassVelocity()
+   {
+      Twist comTwist = new Twist();
+      centerOfMassFrame.getTwistRelativeToOther(worldFrame, comTwist);
+      return comTwist.getLinearPartX();
    }
 
    public void update()
