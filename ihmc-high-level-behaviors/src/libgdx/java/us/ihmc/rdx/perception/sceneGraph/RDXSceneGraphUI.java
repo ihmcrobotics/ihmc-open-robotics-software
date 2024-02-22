@@ -75,7 +75,7 @@ public class RDXSceneGraphUI
       predefinedPrimitiveRigidBodySceneNodeBuilder = new RDXPrimitiveRigidBodySceneNodeBuilder(sceneGraph);
    }
 
-   private void addUISceneNode(RDXSceneNode uiSceneNode)
+   public void addUISceneNode(RDXSceneNode uiSceneNode)
    {
       uiSceneNodes.put(uiSceneNode.getSceneNode(), uiSceneNode);
 

@@ -83,6 +83,11 @@ public class RDXBehaviorTree
       baseUI.getImGuiPanelManager().addPanel(panel);
    }
 
+   public void loadBehaviorFromFile(String fileName)
+   {
+      nodeCreationMenu.loadBehaviorNodeFromFileName(fileName);
+   }
+
    public void createAndSetupDefault(RDXBaseUI baseUI)
    {
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables, RDXSceneLevel.VIRTUAL);

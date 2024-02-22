@@ -153,6 +153,9 @@ public class ArmIKSolver
 
       // selects everything
       selectionMatrix.resetSelection();
+      selectionMatrix.getAngularPart().selectXAxis(false);
+      selectionMatrix.getAngularPart().selectYAxis(false);
+      selectionMatrix.getAngularPart().selectZAxis(false);
    }
 
    public void copySourceToWork()

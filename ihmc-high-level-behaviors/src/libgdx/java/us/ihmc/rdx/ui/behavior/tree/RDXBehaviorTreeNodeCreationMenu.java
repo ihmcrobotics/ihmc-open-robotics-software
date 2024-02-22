@@ -83,12 +83,7 @@ public class RDXBehaviorTreeNodeCreationMenu
          {
             if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
             {
-               RDXBehaviorTreeNode<?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, topologyOperationQueue);
-
-               BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
-                   = BehaviorTreeNodeInsertionDefinition.build(loadedNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
-
-               complete(insertionDefinition);
+               loadIndexedTreeFile(indexedTreeFile, relativeNode, insertionType);
             }
          }
 
@@ -185,6 +180,27 @@ public class RDXBehaviorTreeNodeCreationMenu
 
          ImGui.unindent();
       }
+   }
+   public void loadIndexedTreeFile(RDXAvailableBehaviorTreeFile indexedTreeFile, RDXBehaviorTreeNode<?, ?> relativeNode, BehaviorTreeNodeInsertionType insertionType)
+   {
+      RDXBehaviorTreeNode<?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, topologyOperationQueue);
+
+      BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
+            = BehaviorTreeNodeInsertionDefinition.build(loadedNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
+
+      complete(insertionDefinition);
+   }
+
+   public void loadBehaviorNodeFromFileName(String fileName)
+   {
+      RDXAvailableBehaviorTreeFile loadFile = null; // Initialize to null to handle case where file is not found.
+      for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles) {
+         if (indexedTreeFile.getName().equals(fileName)) {
+            loadFile = indexedTreeFile;
+            break; // Exit the loop once the match is found.
+         }
+      }
+      loadIndexedTreeFile(loadFile, tree.getRootNode(), BehaviorTreeNodeInsertionType.INSERT_ROOT);
    }
 
    private void renderNodeCreationClickable(RDXBehaviorTreeNode<?, ?> relativeNode,
