@@ -196,6 +196,7 @@ public class RDXWholeBodyIKManager
                wholeBodyIKSolver.submit(pelvisRigidBodyCommand);
             }
 
+            // We solve on a thread because the solver can take some milliseconds
             MissingThreadTools.startAThread(getClass().getSimpleName(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
             {
                try
