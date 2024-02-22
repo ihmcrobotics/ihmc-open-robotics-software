@@ -93,8 +93,10 @@ public class KSTSingleInputPoseEstimator
 
    public void extrapolateInput(double integrationDT)
    {
-      KSTTools.integrateLinearVelocity(integrationDT, rawInputPosition, decayingInputSpatialVelocity.getLinearPart(), rawExtrapolatedInputPosition);
-      KSTTools.integrateAngularVelocity(integrationDT, rawInputOrientation, decayingInputSpatialVelocity.getAngularPart(), rawExtrapolatedInputOrientation);
+      YoFrameVector3D linearVelocity = decayingInputSpatialVelocity.getLinearPart();
+      KSTTools.integrateLinearVelocity(integrationDT, rawExtrapolatedInputPosition, linearVelocity, rawExtrapolatedInputPosition);
+      YoFrameVector3D angularVelocity = decayingInputSpatialVelocity.getAngularPart();
+      KSTTools.integrateAngularVelocity(integrationDT, rawExtrapolatedInputOrientation, angularVelocity, rawExtrapolatedInputOrientation);
       filteredExtrapolatedInputPosition.update();
       filteredExtrapolatedInputOrientation.update();
    }

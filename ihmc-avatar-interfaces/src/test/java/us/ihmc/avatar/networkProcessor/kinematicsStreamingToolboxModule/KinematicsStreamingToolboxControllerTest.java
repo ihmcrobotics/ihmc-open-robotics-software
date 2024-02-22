@@ -20,7 +20,6 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -73,9 +72,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleFunction;
 
@@ -109,7 +105,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected ROS2Topic<?> controllerOutputTopic;
    protected ROS2Topic<?> toolboxInputTopic;
    protected ROS2Topic<?> toolboxOutputTopic;
-   protected ScheduledExecutorService executor;
 
    /**
     * Returns a <b>new</b> instance of the robot model that will be modified in this test to create
@@ -201,7 +196,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
       }
 
       toolboxROS2Node.spin();
-      simulationTestHelper.start();
    }
 
    public void setupNoWalkingController(RobotCollisionModel collisionModel)
@@ -386,26 +380,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
       statePublisher.publish(wakeupMessage);
    }
 
-   protected ScheduledFuture<?> scheduleMessageGenerator(double dt, DoubleFunction<KinematicsStreamingToolboxInputMessage> messageGenerator)
-   {
-      if (executor == null)
-         executor = ThreadTools.newSingleDaemonThreadScheduledExecutor("inputs-generator");
-
-      return executor.scheduleAtFixedRate(new Runnable()
-      {
-         double time = 0.0;
-
-         @Override
-         public void run()
-         {
-            if (Thread.interrupted())
-               return;
-            inputPublisher.publish(messageGenerator.apply(time));
-            time += dt;
-         }
-      }, 0, (int) (dt * 1000), TimeUnit.MILLISECONDS);
-   }
-
    @Test
    public void testStreamingToController()
    {
@@ -514,26 +488,36 @@ public abstract class KinematicsStreamingToolboxControllerTest
          }
       });
 
+      if (ikStreamingTestRunParameters.getRegistry() != null)
+         simulationTestHelper.addRegistry(ikStreamingTestRunParameters.getRegistry());
+
+      ghost.addThrottledController(new Controller()
+      {
+         @Override
+         public void doControl()
+         {
+            double time = simulationTestHelper.getSimulationTime();
+            KinematicsStreamingToolboxInputMessage message = ikStreamingTestRunParameters.messageGenerator().apply(time);
+            if (message != null)
+               inputPublisher.publish(message);
+         }
+      }, ikStreamingTestRunParameters.messageGeneratorDT());
+
+      simulationTestHelper.start();
+
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       wakeupToolbox();
 
-      ScheduledFuture<?> scheduleMessageGenerator = scheduleMessageGenerator(ikStreamingTestRunParameters.messageGeneratorDT(),
-                                                                             ikStreamingTestRunParameters.messageGenerator());
-
       success = simulationTestHelper.simulateNow(ikStreamingTestRunParameters.simulationDuration());
       assertTrue(success);
-
-      scheduleMessageGenerator.cancel(true);
 
       KinematicsStreamingToolboxInputMessage message = new KinematicsStreamingToolboxInputMessage();
       message.setStreamToController(false);
       inputPublisher.publish(message);
 
       sleepToolbox();
-
-      executor.shutdownNow();
 
       // Asserts that the spy did run and that the toolbox or something did not just hang
       assertNotEquals(0.0, handPositionMeanError.getValue());
@@ -620,6 +604,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
       private DoubleFunction<KinematicsStreamingToolboxInputMessage> messageGenerator;
       private double simulationDuration = 10.0;
 
+      private YoRegistry registry;
+
       public IKStreamingTestRunParameters()
       {
       }
@@ -682,6 +668,16 @@ public abstract class KinematicsStreamingToolboxControllerTest
       public double simulationDuration()
       {
          return simulationDuration;
+      }
+
+      public void setRegistry(YoRegistry registry)
+      {
+         this.registry = registry;
+      }
+
+      public YoRegistry getRegistry()
+      {
+         return registry;
       }
 
       @Override

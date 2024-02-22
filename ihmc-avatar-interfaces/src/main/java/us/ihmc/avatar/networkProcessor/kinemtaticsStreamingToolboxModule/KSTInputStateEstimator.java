@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
@@ -132,6 +133,8 @@ public class KSTInputStateEstimator
       }
       else if (isNewInput)
       { // New input, let's update the velocities
+         double timeInterval = Conversions.nanosecondsToSeconds(currentRawInputCommand.getTimestamp() - previousRawInputCommand.getTimestamp());
+
          for (int i = 0; i < currentRawInputCommand.getNumberOfInputs(); i++)
          {
             KinematicsToolboxRigidBodyCommand currentInput = currentRawInputCommand.getInput(i);
@@ -147,7 +150,7 @@ public class KSTInputStateEstimator
                continue;
             }
 
-            inputPoseEstimator.estimateVelocity(updateDT, previousInput.getDesiredPose(), currentInput.getDesiredPose());
+            inputPoseEstimator.estimateVelocity(timeInterval, previousInput.getDesiredPose(), currentInput.getDesiredPose());
          }
 
          // Let's loop through the previous inputs to see if there are any that are not in the current input
