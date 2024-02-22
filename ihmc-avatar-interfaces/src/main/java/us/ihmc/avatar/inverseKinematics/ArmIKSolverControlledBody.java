@@ -43,9 +43,6 @@ public class ArmIKSolverControlledBody
    private final FrameVector3D bodyDesiredLinearVelocity = new FrameVector3D();
    private final FramePose3DChangedTracker controlPoseChangedTracker = new FramePose3DChangedTracker(bodyControlDesiredPose);
 
-   /** If commands should be submitted to the controller core. */
-   private boolean active = true;
-
    public static ArmIKSolverControlledBody createHand(RigidBodyBasics workRootBody,
                                                       FullHumanoidRobotModel sourceFullRobotModel,
                                                       HumanoidJointNameMap jointNameMap,
@@ -189,13 +186,8 @@ public class ArmIKSolverControlledBody
       return workBody;
    }
 
-   public void setActive(boolean active)
+   public void reset()
    {
-      this.active = active;
-   }
-
-   public boolean getActive()
-   {
-      return active;
+      controlPoseChangedTracker.markAsChanged();
    }
 }

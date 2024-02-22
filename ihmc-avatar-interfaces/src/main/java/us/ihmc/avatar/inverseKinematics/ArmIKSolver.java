@@ -240,4 +240,9 @@ public class ArmIKSolver
    {
       return workingOneDoFJoints;
    }
+
+   public void reset()
+   {
+      hand.reset();
+   }
 }

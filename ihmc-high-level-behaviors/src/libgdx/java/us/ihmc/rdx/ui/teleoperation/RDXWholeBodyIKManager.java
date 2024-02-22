@@ -138,13 +138,6 @@ public class RDXWholeBodyIKManager
 
    public void update()
    {
-      for (RobotSide side : interactableHands.sides())
-         desiredRobot.setArmShowing(side, true);
-      for (RobotSide side : interactableFeet.sides())
-         desiredRobot.setLegShowing(side, true);
-      desiredRobot.setChestShowing(true);
-      desiredRobot.setPelvisShowing(true);
-
       if (readyToSolve)
       {
          boolean desiredsChanged = false;
@@ -229,7 +222,15 @@ public class RDXWholeBodyIKManager
 
    public void renderImGuiWidgets()
    {
-      ImGui.checkbox(labels.get("Enable Whole Body IK"), enabled);
+      if (ImGui.checkbox(labels.get("Enable Whole Body IK"), enabled))
+      {
+         for (RobotSide side : interactableHands.sides())
+            desiredRobot.setArmShowing(side, enabled.get());
+         for (RobotSide side : interactableFeet.sides())
+            desiredRobot.setLegShowing(side, enabled.get());
+         desiredRobot.setChestShowing(enabled.get());
+         desiredRobot.setPelvisShowing(enabled.get());
+      }
 
       if (enabled.get() && desiredRobot.isActive() && ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
       {
@@ -322,5 +323,15 @@ public class RDXWholeBodyIKManager
    public boolean getEnabled()
    {
       return enabled.get();
+   }
+
+   public void reset()
+   {
+      for (RobotSide side : interactableHands.sides())
+         desiredHandPoseChangedTrackers.get(side).markAsChanged();
+      for (RobotSide side : RobotSide.values)
+         desiredFootPoseChangedTrackers.get(side).markAsChanged();
+      desiredChestPoseChangedTracker.markAsChanged();
+      desiredPelvisPoseChangedTracker.markAsChanged();
    }
 }

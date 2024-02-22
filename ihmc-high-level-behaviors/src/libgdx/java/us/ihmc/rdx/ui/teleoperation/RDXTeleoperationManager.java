@@ -372,9 +372,16 @@ public class RDXTeleoperationManager extends RDXPanel
             if (wholeBodyIKManager.getEnabled())
             {
                wholeBodyIKManager.update();
+
+               // So the arm IK solvers will solve when whole body is deselected
+               for (RobotSide side : RobotSide.values)
+                  armManager.getArmIKSolvers().get(side).reset();
             }
             else if (robotHasArms)
             {
+               // So the whole body IK will solve when selected
+               wholeBodyIKManager.reset();
+
                boolean handInteractablesAreDeleted = true;
                for (RobotSide side : interactableHands.sides())
                {
@@ -413,17 +420,10 @@ public class RDXTeleoperationManager extends RDXPanel
       if (interactablesAvailable)
       {
          allAreDeleted &= interactableChest.isDeleted() && interactablePelvis.isDeleted();
-         if (robotHasArms)
-         {
-            for (RobotSide side : interactableHands.sides())
-            {
-               allAreDeleted &= interactableHands.get(side).isDeleted();
-            }
-         }
+         for (RobotSide side : interactableHands.sides())
+            allAreDeleted &= interactableHands.get(side).isDeleted();
          for (RobotSide side : interactableFeet.sides())
-         {
             allAreDeleted &= interactableFeet.get(side).isDeleted();
-         }
       }
       desiredRobot.setActive(!allAreDeleted);
    }

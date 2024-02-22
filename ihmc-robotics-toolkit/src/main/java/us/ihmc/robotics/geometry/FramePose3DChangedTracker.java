@@ -35,4 +35,9 @@ public class FramePose3DChangedTracker
          return hasChanged;
       }
    }
+
+   public void markAsChanged()
+   {
+      lastValue = null;
+   }
 }
