@@ -24,6 +24,12 @@ public class MultiBodySystemMissingTools
       OneDoFJointBasics[] oneDofJoints1 = MultiBodySystemTools.filterJoints(source, OneDoFJointBasics.class);
       OneDoFJointBasics[] oneDofJoints2 = MultiBodySystemTools.filterJoints(destination, OneDoFJointBasics.class);
 
+      if (oneDofJoints1.length != oneDofJoints2.length)
+      {
+         throw new IllegalArgumentException("The lists of joints must be the same length. %d != %d".formatted(oneDofJoints1.length,
+                                                                                                              oneDofJoints2.length));
+      }
+
       for (int i = 0; i < oneDofJoints1.length; i++)
       {
          oneDofJoints2[i].setJointConfiguration(oneDofJoints1[i]);
