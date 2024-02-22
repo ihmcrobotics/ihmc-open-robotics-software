@@ -14,24 +14,25 @@ import java.awt.*;
 
 public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 {
+   public static final String baseJointName = "floatingBase";
    public static final String torsoName = "torso";
-   public static final String leftThighName = "leftThigh";
-   public static final String rightThighName = "rightThigh";
-   public static final String leftShinName = "leftShin";
-   public static final String rightShinName = "rightShin";
+   public static final String leftHipPitchName = "l_hip_pitch";
+   public static final String rightHipPitchName = "r_hip_pitch";
+   public static final String leftKneeName = "l_knee_pitch";
+   public static final String rightKneeName = "r_knee_pitch";
+   public static final String leftThighName = "l_thigh";
+   public static final String rightThighName = "r_thigh";
+   public static final String leftShinName = "l_shin";
+   public static final String rightShinName = "r_shin";
 
-   public static final String leftHipPitchName = "leftHipPitch";
-   public static final String rightHipPitchName = "rightHipPitch";
-   public static final String leftKneeName = "leftKnee";
-   public static final String rightKneeName = "rightKnee";
-
-   public static final double torsoLength = 0.5;
+   private static final double torsoHeight = 0.5;
    public static final double thighLength = 0.5;
    public static final double shinLength = 0.5;
 
    private final SideDependentList<String> hipPitchNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
    private final SideDependentList<String> thighNames = new SideDependentList<>(leftThighName, rightThighName);
    public static final SideDependentList<String> kneeNames = new SideDependentList<>(leftKneeName, rightKneeName);
+   public static final SideDependentList<String> hipNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
    private final SideDependentList<String> shinNames = new SideDependentList<>(leftShinName, rightShinName);
 
    private final SideDependentList<RevoluteJointDefinition> hipPitchJointDefinitions = new SideDependentList<>();
@@ -46,7 +47,8 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 
       RigidBodyDefinition elevator = new RigidBodyDefinition("elevator");
       setRootBodyDefinition(elevator);
-      floatingBaseDefinition = new PlanarJointDefinition("floatingBase");
+
+      floatingBaseDefinition = new PlanarJointDefinition(baseJointName);
       elevator.addChildJoint(floatingBaseDefinition);
 
       torsoBodyDefinition = createTorso();
@@ -54,42 +56,48 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         // Create the hip pitch joints and add them to the tree
-         Vector3D hipPitchOffsetTorso = new Vector3D(0.0, robotSide.negateIfRightSide(0.05), -torsoLength / 2.0);
-         RevoluteJointDefinition hipPitchJointDefinition = new RevoluteJointDefinition(hipPitchNames.get(robotSide), hipPitchOffsetTorso, Axis3D.Y);
+         // create the hip pitch joints and add them to the tree
+         Vector3D hipPitchOffsetInTorso = new Vector3D(0.0, robotSide.negateIfRightSide(0.05), -torsoHeight / 2.0);
+         RevoluteJointDefinition hipPitchJointDefinition = new RevoluteJointDefinition(hipPitchNames.get(robotSide), hipPitchOffsetInTorso, Axis3D.Y);
          torsoBodyDefinition.addChildJoint(hipPitchJointDefinition);
+         hipPitchJointDefinitions.put(robotSide, hipPitchJointDefinition);
 
-         // Create the upper leg links and add them to the tree
-         // FIXME: we probably need to add an offset so the link isn't placed at the origin
+         // create the upper leg links and add them to the tree
+         // FIXME we probably need to add an offset from the joint attachment to the origin of the link.
          RigidBodyDefinition thighLink = createThigh(thighNames.get(robotSide));
          hipPitchJointDefinition.setSuccessor(thighLink);
 
-         // Create the knee joints and add them to the tree
-         Vector3D kneeOffsetInThigh = new Vector3D(0.0, 0.0, -thighLength / 2.0);
-         PrismaticJointDefinition kneeJointDefinition = new PrismaticJointDefinition(kneeNames.get(robotSide), kneeOffsetInThigh, Axis3D.Z);
+         // create the knee joints and add them to the tree
+         Vector3D leftKneeOffsetInThigh = new Vector3D(0.0, 0.0, -thighLength / 2.0);
+         PrismaticJointDefinition kneeJointDefinition = new PrismaticJointDefinition(kneeNames.get(robotSide), leftKneeOffsetInThigh, Axis3D.Z);
          thighLink.addChildJoint(kneeJointDefinition);
 
-         // Create the lower leg links and add them to the tree
-         // FIXME: we probably need to add an offset so the link isn't placed at the origin
-         RigidBodyDefinition shinLink = createShin(shinNames.get(robotSide));
-         kneeJointDefinition.setSuccessor(shinLink);
+         // create the shin links and add them to the tree
+         // FIXME we probably need to add an offset from the joint attachment to the origin of the link.
+         RigidBodyDefinition lowerLeg = createShin(shinNames.get(robotSide));
+         kneeJointDefinition.setSuccessor(lowerLeg);
 
-         // Create the contact points for the feet
-         GroundContactPointDefinition footContactPoint = new GroundContactPointDefinition(robotSide.getLowerCaseName() + "_gc_point", new Vector3D(0.0, 0.0, -shinLength / 2.0));
+         // create the contact points for the feet.
+         GroundContactPointDefinition footContactPoint = new GroundContactPointDefinition(robotSide.getLowerCaseName() + "_gc_point",
+                                                                                          new Vector3D(0.0, 0.0, -shinLength / 2.0));
          kneeJointDefinition.addGroundContactPointDefinition(footContactPoint);
       }
 
-      //TODO: add collisions shapes
+      // TODO add some kind of collisions. Could be a collision shape. Could be a contact point.
    }
 
-   private RigidBodyDefinition createTorso()
+   private static RigidBodyDefinition createTorso()
    {
-      RigidBodyDefinition torsoBodyDefinition = new RigidBodyDefinition(torsoName);
-      torsoBodyDefinition.setMass(10.0);
-      torsoBodyDefinition.setMomentOfInertia(new MomentOfInertiaDefinition(0.75, 0.75, 1.0));
+      double torsoMass = 10.0;
+      MomentOfInertiaDefinition torsoMomentOfInertia = new MomentOfInertiaDefinition(0.75, 0.75, 1.0);
 
-      GeometryDefinition torsoGeometryDefinition = new Ellipsoid3DDefinition(0.15, 0.15, torsoLength/2.0);
+      RigidBodyDefinition torsoBodyDefinition = new RigidBodyDefinition(torsoName);
+      torsoBodyDefinition.setMass(torsoMass);
+      torsoBodyDefinition.setMomentOfInertia(torsoMomentOfInertia);
+
+      GeometryDefinition torsoGeometryDefinition = new Ellipsoid3DDefinition(0.15, 0.15, torsoHeight / 2.0);
       VisualDefinition torsoVisualDefinition = new VisualDefinition(torsoGeometryDefinition, ColorDefinition.rgb(Color.RED.getRGB()));
+
       torsoBodyDefinition.addVisualDefinition(torsoVisualDefinition);
 
       return torsoBodyDefinition;
@@ -97,27 +105,35 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 
    private static RigidBodyDefinition createThigh(String name)
    {
-      RigidBodyDefinition thighBodyDefinition = new RigidBodyDefinition(name);
-      thighBodyDefinition.setMass(1.0);
-      thighBodyDefinition.setMomentOfInertia(new MomentOfInertiaDefinition(0.1, 0.1, 0.01));
+      double thighMass = 1.0;
+      MomentOfInertiaDefinition thighMomentOfInertia = new MomentOfInertiaDefinition(0.1, 0.1, 0.01);
 
-      GeometryDefinition thighGeometryDefinition = new Ellipsoid3DDefinition(0.05, 0.05, thighLength/2.0);
+      RigidBodyDefinition thighDefinition = new RigidBodyDefinition(name);
+      thighDefinition.setMass(thighMass);
+      thighDefinition.setMomentOfInertia(thighMomentOfInertia);
+
+      GeometryDefinition thighGeometryDefinition = new Ellipsoid3DDefinition(0.05, 0.05, thighLength / 2.0);
       VisualDefinition thighVisualDefinition = new VisualDefinition(thighGeometryDefinition, ColorDefinition.rgb(Color.ORANGE.getRGB()));
-      thighBodyDefinition.addVisualDefinition(thighVisualDefinition);
 
-      return thighBodyDefinition;
+      thighDefinition.addVisualDefinition(thighVisualDefinition);
+
+      return thighDefinition;
    }
 
    private static RigidBodyDefinition createShin(String name)
    {
-      RigidBodyDefinition shinBodyDefinition = new RigidBodyDefinition(name);
-      shinBodyDefinition.setMass(1.0);
-      shinBodyDefinition.setMomentOfInertia(new MomentOfInertiaDefinition(0.1, 0.1, 0.01));
+      double shinMass = 1.0;
+      MomentOfInertiaDefinition shinMomentOfInertia = new MomentOfInertiaDefinition(0.1, 0.1, 0.01);
 
-      GeometryDefinition shinGeometryDefinition = new Ellipsoid3DDefinition(0.03, 0.03, shinLength/2.0);
+      RigidBodyDefinition shinDefinition = new RigidBodyDefinition(name);
+      shinDefinition.setMass(shinMass);
+      shinDefinition.setMomentOfInertia(shinMomentOfInertia);
+
+      GeometryDefinition shinGeometryDefinition = new Ellipsoid3DDefinition(0.03, 0.03, shinLength / 2.0);
       VisualDefinition shinVisualDefinition = new VisualDefinition(shinGeometryDefinition, ColorDefinition.rgb(Color.YELLOW.getRGB()));
-      shinBodyDefinition.addVisualDefinition(shinVisualDefinition);
 
-      return shinBodyDefinition;
+      shinDefinition.addVisualDefinition(shinVisualDefinition);
+
+      return shinDefinition;
    }
 }
