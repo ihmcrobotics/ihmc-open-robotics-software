@@ -15,7 +15,6 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.filters.DetectionFilter;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.thread.RestartableThread;
 
 import java.util.Comparator;
@@ -38,9 +37,6 @@ public class YOLOv8IterativeClosestPointManager
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor(openCLManager);
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter(openCLManager);
 
-   private final WorkspaceResourceDirectory pointCloudDirectory = new WorkspaceResourceDirectory(YOLOv8DetectableObject.class, "/yoloICPPointClouds/");
-   private final EnumMap<YOLOv8DetectableObject, List<Point3D32>> objectPointClouds = new EnumMap<>(YOLOv8DetectableObject.class);
-
    private final ROS2Helper ros2Helper;
 
    private final YOLOv8ObjectDetector yoloDetector = new YOLOv8ObjectDetector();
@@ -55,6 +51,7 @@ public class YOLOv8IterativeClosestPointManager
 
    private final Map<YOLOv8Detection, Tuple2<DetectionFilter, Boolean>> candidateDetections = new ConcurrentHashMap<>();
    private final Map<YOLOv8IterativeClosestPointNodeCombo, YOLOv8IterativeClosestPointNodeCombo> yoloICPNodeComboSet = new ConcurrentHashMap<>();
+   private final EnumMap<YOLOv8DetectableObject, List<Point3D32>> objectPointClouds = new EnumMap<>(YOLOv8DetectableObject.class);
 
    private final IHMCROS2Input<YOLOv8ParametersMessage> yoloParameterSubscription;
    private float yoloConfidenceThreshold = 0.3f;
