@@ -25,11 +25,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFoot;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHand;
 import us.ihmc.rdx.ui.affordances.RDXInteractableRobotLink;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.geometry.FramePose3DChangedTracker;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -48,6 +50,7 @@ public class RDXWholeBodyIKManager
    private final ROS2ControllerHelper ros2Helper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ControllerStatusTracker controllerStatusTracker;
+   private final OneDoFJointBasics[] desiredOneDoFJointsExcludingHands;
    private SideDependentList<RDXInteractableHand> interactableHands;
    private SideDependentList<RDXInteractableFoot> interactableFeet;
    private RDXInteractableRobotLink interactableChest;
@@ -84,6 +87,7 @@ public class RDXWholeBodyIKManager
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       wholeBodyIKSolver = new HumanoidKinematicsSolver(robotModel, yoGraphicsListRegistry, new YoRegistry(getClass().getSimpleName()));
+      desiredOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(desiredRobot.getDesiredFullRobotModel());
 
       for (RobotSide side : RobotSide.values)
       {
@@ -211,8 +215,7 @@ public class RDXWholeBodyIKManager
                      .getRootJoint()
                      .setJointConfiguration(wholeBodyIKSolver.getSolution().getDesiredRootOrientation(),
                                             wholeBodyIKSolver.getSolution().getDesiredRootPosition());
-         MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(wholeBodyIKSolver.getDesiredOneDoFJoints(),
-                                                                   desiredRobot.getDesiredFullRobotModel().getOneDoFJoints());
+         MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(wholeBodyIKSolver.getDesiredOneDoFJoints(), desiredOneDoFJointsExcludingHands);
          desiredRobot.setWholeBodyColor(RDXIKSolverColors.getColor(isSolutionGood));
          desiredRobot.getDesiredFullRobotModel().updateFrames();
 
