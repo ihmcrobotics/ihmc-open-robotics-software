@@ -77,8 +77,8 @@ public class PerceptionDataLogger
       addLongChannel(PerceptionLoggerConstants.L515_SENSOR_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
       addImageChannel(PerceptionLoggerConstants.L515_COLOR_NAME);
       addImageChannel(PerceptionLoggerConstants.L515_DEPTH_NAME);
-      addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_POSITION, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
-      addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      addFloatChannel(PerceptionLoggerConstants.DEPTH_SENSOR_POSITION, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      addFloatChannel(PerceptionLoggerConstants.DEPTH_SENSOR_ORIENTATION, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
 
       addLongChannel(PerceptionLoggerConstants.OUSTER_SENSOR_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
       addImageChannel(PerceptionLoggerConstants.OUSTER_DEPTH_NAME);
@@ -420,8 +420,8 @@ public class PerceptionDataLogger
          long timestamp =
                Conversions.secondsToNanoseconds(message.getAcquisitionTime().getSecondsSinceEpoch()) + message.getAcquisitionTime().getAdditionalNanos();
          storeLongs(PerceptionLoggerConstants.L515_SENSOR_TIME, timestamp);
-         storeFloats(PerceptionLoggerConstants.L515_SENSOR_POSITION, message.getPosition());
-         storeFloats(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, message.getOrientation());
+         storeFloats(PerceptionLoggerConstants.DEPTH_SENSOR_POSITION, message.getPosition());
+         storeFloats(PerceptionLoggerConstants.DEPTH_SENSOR_ORIENTATION, message.getOrientation());
          storeCompressedImage(PerceptionLoggerConstants.L515_DEPTH_NAME, message);
       }
    }

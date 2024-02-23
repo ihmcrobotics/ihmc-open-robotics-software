@@ -233,8 +233,8 @@ public class RealsenseColorAndDepthPublisher
             long timestamp = Conversions.secondsToNanoseconds(acquisitionTime.getEpochSecond()) + acquisitionTime.getNano();
 
             perceptionDataLogger.storeLongs(PerceptionLoggerConstants.L515_SENSOR_TIME, timestamp);
-            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_POSITION, cameraPosition);
-            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, cameraQuaternion);
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.DEPTH_SENSOR_POSITION, cameraPosition);
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.DEPTH_SENSOR_ORIENTATION, cameraQuaternion);
             perceptionDataLogger.storeBytesFromPointer(PerceptionLoggerConstants.L515_DEPTH_NAME, compressedDepthPointer);
 
             previousLoggerEnabledState = true;
@@ -266,8 +266,8 @@ public class RealsenseColorAndDepthPublisher
 
       perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
       perceptionDataLogger.addLongChannel(PerceptionLoggerConstants.L515_SENSOR_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
-      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_POSITION, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
-      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.DEPTH_SENSOR_POSITION, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.DEPTH_SENSOR_ORIENTATION, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
       perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.L515_DEPTH_NAME);
 
       loggerInitialized = true;

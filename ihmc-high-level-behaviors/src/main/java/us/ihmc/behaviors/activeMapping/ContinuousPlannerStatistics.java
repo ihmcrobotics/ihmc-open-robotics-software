@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.activeMapping;
 
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -187,8 +186,8 @@ public class ContinuousPlannerStatistics
       long timestamp = Conversions.secondsToNanoseconds(acquisitionTime.getEpochSecond()) + acquisitionTime.getNano();
 
       perceptionDataLogger.storeLongs(PerceptionLoggerConstants.L515_SENSOR_TIME, timestamp);
-      perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_POSITION, new Point3D(sensorToWorldTransform.getTranslation()));
-      perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, new Quaternion(sensorToWorldTransform.getRotation()));
+      perceptionDataLogger.storeFloats(PerceptionLoggerConstants.DEPTH_SENSOR_POSITION, new Point3D(sensorToWorldTransform.getTranslation()));
+      perceptionDataLogger.storeFloats(PerceptionLoggerConstants.DEPTH_SENSOR_ORIENTATION, new Quaternion(sensorToWorldTransform.getRotation()));
       PerceptionLoggingTools.logHeightMap(perceptionDataLogger, heightMap, PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
    }
 

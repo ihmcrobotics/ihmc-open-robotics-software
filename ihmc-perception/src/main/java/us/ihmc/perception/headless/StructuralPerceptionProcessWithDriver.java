@@ -22,6 +22,7 @@ import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
+import us.ihmc.perception.rapidRegions.ProjectionModel;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -129,7 +130,7 @@ public class StructuralPerceptionProcessWithDriver
          pngImageBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
          pngImageBytePointer = new BytePointer(pngImageBuffer);
 
-         rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth);
+         rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth, ProjectionModel.SPHERICAL);
          rapidRegionsExtractor.setPatchSizeChanged(false);
 
          ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);

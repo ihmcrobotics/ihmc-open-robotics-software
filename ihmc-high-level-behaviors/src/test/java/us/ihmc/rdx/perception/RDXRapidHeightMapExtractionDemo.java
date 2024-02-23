@@ -150,8 +150,8 @@ public class RDXRapidHeightMapExtractionDemo
             humanoidPerception.getRapidHeightMapExtractor().setModePerspective();
             humanoidPerception.getRapidHeightMapExtractor().getTerrainMapStatistics().setPrintToConsole(true);
 
-            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer, 10);
-            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer, 10);
+            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.DEPTH_SENSOR_POSITION, sensorPositionBuffer, 10);
+            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.DEPTH_SENSOR_ORIENTATION, sensorOrientationBuffer, 10);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME,
                                                      frameIndex.get(),
                                                      depthBytePointer,

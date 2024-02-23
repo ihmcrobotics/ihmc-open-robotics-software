@@ -18,7 +18,7 @@
 #define CENTROID_PACK_RANGE 17
 #define MERGE_RANGE 18
 #define MERGE_DISTANCE_THRESHOLD 19
-#define EXTRACTION_MODE 20
+#define PROJECTION_MODEL 20
 #define DEPTH_SCALAR 21
 
 bool check_convergence(float3 va, float3 vb)
@@ -72,6 +72,61 @@ float4 back_project_perspective(int2 pos, float Z, global float* params)
 
    float4 point = (float4) (Z, -X, -Y, 0);
    return point;
+}
+
+float4 back_project_orthographic(int2 pos, float height, global float* params)
+{
+   float X = (pos.x - 100) / 50;
+   float Y = (pos.y - 100) / 50;
+
+   float4 point = (float4) (X, Y, height, 0);
+   return point;
+}
+
+float3 estimate_orthographic_normal(read_only image2d_t in, int rIndex, int cIndex, global float* params)
+{
+   float residual = 0;
+   float height = 0;
+   int m = (int) params[NORMAL_PACK_RANGE];
+   int count = 0;
+   float4 normal = (float4) (0, 0, 0, 0);
+
+   if (rIndex >= m && cIndex >= m && (rIndex * ((int) params[PATCH_HEIGHT]) + 2 * m) < ((int) params[INPUT_HEIGHT]) &&
+       (cIndex * ((int) params[PATCH_WIDTH]) + 2 * m) < ((int) params[INPUT_WIDTH]))
+   {
+      for (int i = 0; i < (int) m; i++)
+      {
+         for (int j = 0; j < (int) m; j++)
+         {
+            count++;
+            int grIndex = rIndex * (int) params[PATCH_HEIGHT] + i;
+            int gcIndex = cIndex * (int) params[PATCH_WIDTH] + j;
+            int2 pos = (int2) (gcIndex, grIndex);
+
+            pos = (int2) (gcIndex, grIndex);
+            height = ((float) read_imageui(in, pos).x) / 1000.0f + 3.2768f;
+            float4 va = back_project_orthographic(pos, height, params);
+
+            pos = (int2) (gcIndex + m, grIndex);
+            height = ((float) read_imageui(in, pos).x) / 1000.0f + 3.2768f;
+            float4 vb = back_project_orthographic(pos, height, params);
+
+            pos = (int2) (gcIndex + m, grIndex + m);
+            height = ((float) read_imageui(in, pos).x) / 1000.0f + 3.2768f;
+            float4 vc = back_project_orthographic(pos, height, params);
+
+            pos = (int2) (gcIndex, grIndex + m);
+            height = ((float) read_imageui(in, pos).x) / 1000.0f + 3.2768f;
+            float4 vd = back_project_orthographic(pos, height, params);
+
+            normal += cross((vc - vb), (vb - va));
+            normal += cross((vd - vc), (vc - vb));
+            normal += cross((va - vd), (vd - vc));
+            normal += cross((vb - va), (va - vd));
+         }
+      }
+   }
+   return normalize((1 / (float) (count)) * normal.xyz);
 }
 
 float3 estimate_perspective_normal(read_only image2d_t in, int rIndex, int cIndex, global float* params)
@@ -164,6 +219,30 @@ float3 estimate_spherical_normal(read_only image2d_t in, int rIndex, int cIndex,
       }
    }
    return normalize((1 / (float) (count)) * normal.xyz);
+}
+
+float3 estimate_orthographic_centroid(read_only image2d_t in, int y, int x, global float* params)
+{
+   float height = 0;
+   int count = 0;
+   float3 centroid = (float3) (0, 0, 0);
+   if (y >= 0 && y < (int) params[SUB_H] && x >= 0 && x < (int) params[SUB_W])
+   {
+      for (int i = 0; i < (int) params[PATCH_HEIGHT]; i++)
+      {
+         for (int j = 0; j < (int) params[PATCH_WIDTH]; j++)
+         {
+            count++;
+            int gx = x * (int) params[PATCH_HEIGHT] + i;
+            int gy = y * (int) params[PATCH_WIDTH] + j;
+            int2 pos = (int2) (gx, gy);
+            height = ((float) read_imageui(in, pos).x) / 1000.0f + 3.2768f;
+            float4 P = back_project_orthographic(pos, height, params);
+            centroid += P.xyz;
+         }
+      }
+   }
+   return (1 / (float) (count)) * centroid;
 }
 
 float3 estimate_perspective_centroid(read_only image2d_t in, int y, int x, global float* params)
@@ -453,15 +532,20 @@ void kernel packKernel(read_only image2d_t in,
 
    // if(cIndex >= 0 && cIndex < (int)params[SUB_H] && rIndex >= 0 && rIndex < (int)params[SUB_W])
    {
-      if (params[EXTRACTION_MODE] > 0.5f)
+      if (((int)params[PROJECTION_MODEL]) == 0)
       {
-         normal = estimate_spherical_normal(in, rIndex, cIndex, params);
-         centroid = estimate_spherical_centroid(in, rIndex, cIndex, params);
+         normal = estimate_orthographic_normal(in, rIndex, cIndex, params);
+         centroid = estimate_orthographic_centroid(in, rIndex, cIndex, params);
       }
-      else
+      else if (((int)params[PROJECTION_MODEL]) == 1)
       {
          normal = estimate_perspective_normal(in, rIndex, cIndex, params);
          centroid = estimate_perspective_centroid(in, rIndex, cIndex, params);
+      }
+      else if (((int)params[PROJECTION_MODEL]) == 2)
+      {
+         normal = estimate_spherical_normal(in, rIndex, cIndex, params);
+         centroid = estimate_spherical_centroid(in, rIndex, cIndex, params);
       }
 
       write_imagef(out0, (int2) (cIndex, rIndex), (float4) (normal.x, 0, 0, 0));

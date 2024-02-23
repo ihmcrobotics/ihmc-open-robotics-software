@@ -172,7 +172,7 @@ public class FootstepPredictor
 
       perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.START_FOOTSTEP_POSITION, startPositions);
       perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.GOAL_FOOTSTEP_POSITION, goalPositions);
-      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositions);
+      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.DEPTH_SENSOR_POSITION, sensorPositions);
 
       BytePointer depthBytePointer = new BytePointer(1000000);
       Mat heightMapImage = new Mat(201, 201, opencv_core.CV_16UC1);

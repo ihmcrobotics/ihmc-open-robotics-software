@@ -31,6 +31,7 @@ import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.perception.odometry.RapidPatchesBasedICP;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.rapidRegions.ProjectionModel;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionFilterTools;
@@ -44,7 +45,6 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -194,8 +194,8 @@ public class PlanarRegionMappingHandler
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
       perceptionDataLoader.loadCompressedDepth(sensorLogChannelName, perceptionLogIndex, depthPointer, depth16UC1Image.getBytedecoOpenCVMat());
-      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
-      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.DEPTH_SENSOR_POSITION, sensorPositionBuffer, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.DEPTH_SENSOR_ORIENTATION, sensorOrientationBuffer, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
 
       totalDepthCount = perceptionDataLoader.getHDF5Manager().getCount(sensorLogChannelName);
 
@@ -206,7 +206,7 @@ public class PlanarRegionMappingHandler
    {
       planarRegionMap = new PlanarRegionMap(true, "Spherical");
       sensorLogChannelName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
-      rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth);
+      rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth, ProjectionModel.SPHERICAL);
       rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
