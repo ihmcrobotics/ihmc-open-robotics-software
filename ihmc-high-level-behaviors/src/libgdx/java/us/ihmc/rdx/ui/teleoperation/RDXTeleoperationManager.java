@@ -20,7 +20,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -227,7 +226,7 @@ public class RDXTeleoperationManager extends RDXPanel
                   {
                      if (!wholeBodyIKManager.getEnabled())
                      {
-                        LogTools.info("Commanding chest trajectory...");
+                        RDXBaseUI.pushNotification("Commanding chest trajectory...");
                         ros2Helper.publishToController(HumanoidMessageTools.createChestTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
                                                                                                          interactableChest.getPose().getOrientation()));
                      }
@@ -252,7 +251,7 @@ public class RDXTeleoperationManager extends RDXPanel
                   {
                      if (!wholeBodyIKManager.getEnabled())
                      {
-                        LogTools.info("Commanding pelvis trajectory...");
+                        RDXBaseUI.pushNotification("Commanding pelvis trajectory...");
                         ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
                                                                                                           interactablePelvis.getPose()));
                      }
@@ -275,7 +274,7 @@ public class RDXTeleoperationManager extends RDXPanel
                      {
                         if (!wholeBodyIKManager.getEnabled())
                         {
-                           LogTools.info("Commanding foot trajectory...");
+                           RDXBaseUI.pushNotification("Commanding foot trajectory...");
                            FramePose3D afterAnklePose = new FramePose3D();
                            afterAnklePose.setToZero(interactableFoot.getLinkFrame());
                            afterAnklePose.changeFrame(ReferenceFrame.getWorldFrame());

@@ -30,7 +30,7 @@ public class RDXBehaviorTreeFileLoader
       MutableObject<RDXBehaviorTreeNode<?, ?>> loadedNode = new MutableObject<>();
 
       LogTools.info("Loading {}", fileToLoad.getTreeFile().getFilesystemFile());
-      RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("Loading %s".formatted(fileToLoad.getTreeFile().getFileName()));
+      RDXBaseUI.pushNotification("Loading %s".formatted(fileToLoad.getTreeFile().getFileName()));
       JSONFileTools.load(fileToLoad.getTreeFile(), jsonNode ->
       {
          loadedNode.setValue(loadFromFile(jsonNode, null, topologyOperationQueue, fileToLoad.getTreeFile().getFileName()));
@@ -71,7 +71,7 @@ public class RDXBehaviorTreeFileLoader
          {
             WorkspaceResourceFile childFile = new WorkspaceResourceFile(behaviorTreeState.getSaveFileDirectory(), fileNode.asText());
             LogTools.info("Loading {}", childFile.getFilesystemFile());
-            RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("Loading %s".formatted(childFile.getFileName()));
+            RDXBaseUI.pushNotification("Loading %s".formatted(childFile.getFileName()));
             JSONFileTools.load(childFile, childJSONNode ->
             {
                loadFromFile(childJSONNode, node, topologyOperationQueue, childFile.getFileName());

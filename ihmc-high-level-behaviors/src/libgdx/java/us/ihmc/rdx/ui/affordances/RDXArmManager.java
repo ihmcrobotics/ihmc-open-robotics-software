@@ -321,6 +321,7 @@ public class RDXArmManager
 
    public void executeArmAngles(RobotSide side, PresetArmConfiguration presetArmConfiguration, double trajectoryTime)
    {
+      RDXBaseUI.pushNotification("Commanding arm trajectory...");
       double[] jointAngles = robotModel.getPresetArmConfiguration(side, presetArmConfiguration);
       ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
                                                                                                   trajectoryTime,
@@ -365,7 +366,7 @@ public class RDXArmManager
             ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
             armTrajectoryMessage.setRobotSide(robotSide.toByte());
             armTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
-            LogTools.info("Sending Jointspace ArmTrajectoryMessage");
+            RDXBaseUI.pushNotification("Commanding arm jointspace trajectory...");
             communicationHelper.publishToController(armTrajectoryMessage);
          }
          case TASKSPACE ->
@@ -373,7 +374,7 @@ public class RDXArmManager
             HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
             handTrajectoryMessage.setRobotSide(robotSide.toByte());
             handTrajectoryMessage.getSe3Trajectory().set(se3TrajectoryMessage);
-            LogTools.info("Sending Taskspace %s frame HandTrajectoryMessage".formatted(taskspaceTrajectoryFrame.getName()));
+            RDXBaseUI.pushNotification("Commanding taskspace %s frame trajectory...".formatted(taskspaceTrajectoryFrame.getName()));
             communicationHelper.publishToController(handTrajectoryMessage);
          }
          case HYBRID ->
@@ -383,7 +384,7 @@ public class RDXArmManager
             handHybridJointspaceTaskspaceTrajectoryMessage.setRobotSide(robotSide.toByte());
             handHybridJointspaceTaskspaceTrajectoryMessage.getTaskspaceTrajectoryMessage().set(se3TrajectoryMessage);
             handHybridJointspaceTaskspaceTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
-            LogTools.info("Publishing arm hybrid jointspace taskpace");
+            RDXBaseUI.pushNotification("Commanding arm hybrid jointspace taskpace trajectory...");
             communicationHelper.publishToController(handHybridJointspaceTaskspaceTrajectoryMessage);
          }
       }

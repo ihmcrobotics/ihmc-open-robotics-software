@@ -28,6 +28,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFoot;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHand;
 import us.ihmc.rdx.ui.affordances.RDXInteractableRobotLink;
@@ -278,7 +279,7 @@ public class RDXWholeBodyIKManager
          se3TrajectoryPointMessage.getAngularVelocity().setToZero();
          se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameID);
 
-         LogTools.info("Commanding whole body trajectory...");
+         RDXBaseUI.pushNotification("Commanding whole body trajectory...");
          ros2Helper.publishToController(wholeBodyTrajectoryMessage);
       }
    }

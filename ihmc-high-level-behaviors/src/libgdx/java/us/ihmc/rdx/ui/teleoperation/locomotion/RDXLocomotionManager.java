@@ -21,7 +21,6 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -349,12 +348,10 @@ public class RDXLocomotionManager
          }
          else if (pauseAvailable)
          {
-            baseUI.getPrimary3DPanel().getNotificationManager().pushNotification("Commanded pause walking");
             setPauseWalkingAndPublish(true);
          }
          else if (continueAvailable)
          {
-            baseUI.getPrimary3DPanel().getNotificationManager().pushNotification("Commanded resume walking");
             setPauseWalkingAndPublish(false);
          }
       }
@@ -446,9 +443,9 @@ public class RDXLocomotionManager
       communicationHelper.publishToController(pauseWalkingMessage);
 
       if (pauseWalking)
-         LogTools.info("Commanding Pause Walking...");
+         RDXBaseUI.pushNotification("Commanding pause walking...");
       else
-         LogTools.info("Commanding Continue Walking...");
+         RDXBaseUI.pushNotification("Commanding continue walking...");
    }
 
    public RDXManualFootstepPlacement getManualFootstepPlacement()
