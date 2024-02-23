@@ -135,7 +135,8 @@ public class PerceptionAndAutonomyProcess
 
    private final IterativeClosestPointManager icpManager;
    private final YOLOv8IterativeClosestPointManager yoloICPManager;
-   private ROS2DemandGraphNode yoloICPDemandNode;
+   private ROS2DemandGraphNode yoloICPZedDemandNode;
+   private ROS2DemandGraphNode yoloICPRealsenseDemandNode;
 
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
    private ReferenceFrameLibrary behaviorTreeReferenceFrameLibrary;
@@ -283,7 +284,8 @@ public class PerceptionAndAutonomyProcess
       blackflyImageDemandNodes.forEach(ROS2DemandGraphNode::destroy);
       arUcoDetectionDemandNode.destroy();
       centerposeDemandNode.destroy();
-      yoloICPDemandNode.destroy();
+      yoloICPZedDemandNode.destroy();
+      yoloICPRealsenseDemandNode.destroy();
 
       if (zedHeartbeat != null)
          zedHeartbeat.destroy();
@@ -312,7 +314,7 @@ public class PerceptionAndAutonomyProcess
          if (zedDepthImage != null && !zedDepthImage.isEmpty() && icpManager.isDemanded())
             icpManager.setEnvironmentPointCloud(zedDepthImage);
 
-         if (yoloICPDemandNode.isDemanded() && zedDepthImage != null && !zedDepthImage.isEmpty() && zedColorImages.get(RobotSide.LEFT) != null
+         if (yoloICPZedDemandNode.isDemanded() && zedDepthImage != null && !zedDepthImage.isEmpty() && zedColorImages.get(RobotSide.LEFT) != null
              && !zedColorImages.get(RobotSide.LEFT).isEmpty())
             yoloICPManager.setDetectionImages(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
 
@@ -336,7 +338,9 @@ public class PerceptionAndAutonomyProcess
          realsenseDepthImage = realsenseImageRetriever.getLatestRawDepthImage();
          realsenseColorImage = realsenseImageRetriever.getLatestRawColorImage();
 
-         // Do processing on image
+         if (yoloICPRealsenseDemandNode.isDemanded() && realsenseDepthImage != null && !realsenseDepthImage.isEmpty() && realsenseColorImage != null
+             && !realsenseColorImage.isEmpty())
+            yoloICPManager.setDetectionImages(realsenseColorImage, realsenseDepthImage);
 
          realsenseImagePublisher.setNextDepthImage(realsenseDepthImage.get());
          realsenseImagePublisher.setNextColorImage(realsenseColorImage.get());
@@ -425,7 +429,7 @@ public class PerceptionAndAutonomyProcess
       if (centerposeDemandNode.isDemanded())
          centerposeDetectionManager.updateSceneGraph(sceneGraph);
 
-      if (yoloICPDemandNode.isDemanded())
+      if (yoloICPZedDemandNode.isDemanded() || yoloICPRealsenseDemandNode.isDemanded())
          yoloICPManager.updateSceneGraph(sceneGraph);
 
       // Update general stuff
@@ -473,18 +477,19 @@ public class PerceptionAndAutonomyProcess
 
       for (RobotSide side : RobotSide.values)
          blackflyImageDemandNodes.put(side, new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(side)));
-      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(ousterDepthDemandNode);
 
       arUcoDetectionDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ARUCO);
 
       centerposeDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_CENTERPOSE);
 
-      yoloICPDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_ICP);
-      // build the graph
-      zedDepthDemandNode.addDependents(zedPointCloudDemandNode);
-      zedColorDemandNode.addDependents(zedPointCloudDemandNode, centerposeDemandNode);
+      yoloICPZedDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_ICP_ZED);
+      yoloICPRealsenseDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_ICP_REALSENSE);
 
-      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(arUcoDetectionDemandNode);
+      // build the graph
+      zedDepthDemandNode.addDependents(zedPointCloudDemandNode, yoloICPZedDemandNode);
+      zedColorDemandNode.addDependents(zedPointCloudDemandNode, centerposeDemandNode, yoloICPZedDemandNode);
+      realsenseDemandNode.addDependents(yoloICPRealsenseDemandNode);
+      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(ousterDepthDemandNode, arUcoDetectionDemandNode);
    }
 
    /*

@@ -14,6 +14,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
@@ -21,7 +22,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
 {
    private static final String WINDOW_NAME = "Perception Visualizers";
 
-   private final LinkedHashMap<RDXVisualizer, RDXVisualizerWithHeartbeat> visualizers = new LinkedHashMap<>();
+   private final ArrayList<RDXVisualizerWithHeartbeat> visualizers = new ArrayList<>();
    private final ROS2Node heartbeatNode;
 
    private boolean created = false;
@@ -43,7 +44,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
       RDXVisualizerWithHeartbeat wrappedVisualizer = new RDXVisualizerWithHeartbeat(heartbeatNode,
                                                                                     visualizerHearbeatTopic,
                                                                                     visualizer);
-      visualizers.put(visualizer, wrappedVisualizer);
+      visualizers.add(wrappedVisualizer);
       RDXPanel panel = visualizer.getPanel();
       if (panel != null)
          addChild(panel);
@@ -53,7 +54,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
 
    public void create()
    {
-      for (RDXVisualizerWithHeartbeat visualizer : visualizers.values())
+      for (RDXVisualizerWithHeartbeat visualizer : visualizers)
       {
          visualizer.create();
       }
@@ -62,7 +63,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
 
    public void update()
    {
-      for (RDXVisualizerWithHeartbeat visualizer : visualizers.values())
+      for (RDXVisualizerWithHeartbeat visualizer : visualizers)
       {
          if (visualizer.getPanel() != null)
             visualizer.getPanel().getIsShowing().set(visualizer.isActive());
@@ -73,7 +74,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
 
    public void renderImGuiWidgets()
    {
-      for (RDXVisualizerWithHeartbeat visualizer : visualizers.values())
+      for (RDXVisualizerWithHeartbeat visualizer : visualizers)
       {
          visualizer.renderImGuiWidgets();
          ImGui.separator();
@@ -83,7 +84,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      for (RDXVisualizerWithHeartbeat visualizer : visualizers.values())
+      for (RDXVisualizerWithHeartbeat visualizer : visualizers)
       {
          if (visualizer.isActive())
          {
@@ -94,7 +95,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
 
    public void destroy()
    {
-      for (RDXVisualizerWithHeartbeat visualizer : visualizers.values())
+      for (RDXVisualizerWithHeartbeat visualizer : visualizers)
       {
          visualizer.destroy();
       }
