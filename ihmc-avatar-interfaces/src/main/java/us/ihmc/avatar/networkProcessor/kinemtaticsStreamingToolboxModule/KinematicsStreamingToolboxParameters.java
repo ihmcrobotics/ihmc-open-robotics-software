@@ -7,6 +7,11 @@ import us.ihmc.tools.UnitConversions;
 
 public class KinematicsStreamingToolboxParameters
 {
+   public enum InputStateEstimatorType
+   {
+      SPLINE_FIT, FIRST_ORDER_LPF
+   }
+
    private double centerOfMassSafeMargin;
    private double centerOfMassHoldWeight;
    private double publishingSolutionPeriod;
@@ -39,6 +44,8 @@ public class KinematicsStreamingToolboxParameters
    private double inputVelocityDecayDuration;
    private boolean useStreamingPublisher;
    private double publishingPeriod;
+
+   private InputStateEstimatorType inputStateEstimatorType;
 
    private final KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = new KinematicsStreamingToolboxConfigurationMessage();
 
@@ -83,6 +90,8 @@ public class KinematicsStreamingToolboxParameters
 
       useStreamingPublisher = true;
       publishingPeriod = 5.0 * 0.006;
+
+      inputStateEstimatorType = InputStateEstimatorType.FIRST_ORDER_LPF;
 
       defaultConfiguration.setLockPelvis(false);
       defaultConfiguration.setLockChest(false);
@@ -219,6 +228,11 @@ public class KinematicsStreamingToolboxParameters
       return useStreamingPublisher;
    }
 
+   public InputStateEstimatorType getInputStateEstimatorType()
+   {
+      return inputStateEstimatorType;
+   }
+
    public KinematicsStreamingToolboxConfigurationMessage getDefaultConfiguration()
    {
       return defaultConfiguration;
@@ -352,5 +366,10 @@ public class KinematicsStreamingToolboxParameters
    public double getPublishingPeriod()
    {
       return publishingPeriod;
+   }
+
+   public void setInputStateEstimatorType(InputStateEstimatorType inputStateEstimatorType)
+   {
+      this.inputStateEstimatorType = inputStateEstimatorType;
    }
 }

@@ -13,8 +13,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.lists.RingBuffer;
 
 /**
+ * Online filter for orientation measurements.
+ * To summarize, it performs a spline fitting to a moving window of orientation measurements to estimate the orientation, angular velocity, and angular
+ * acceleration.
+ * <p>
  * Implementation of the Savitzky-Golay filter proposed in <a href="https://hal.science/hal-03603826/document">Geometric Savitzky-Golay Filtering of Noisy
  * Rotations on SO (3) with Simultaneous Angular Velocity and Acceleration Estimation</a>.
+ * </p>
  * <p>
  * This implementation is based on the MATLAB code provided from the authors: <a
  * href="https://github.com/MaartenJongeneel/Paper-Savitzky-Golay-filtering-on-SO3">GitHub Repository</a>.
@@ -22,10 +27,11 @@ import us.ihmc.robotics.lists.RingBuffer;
  * <p>
  * The window moving version of the filter is implemented to allow for online filtering.
  * </p>
+ *
+ * @see SplineBasedOnlinePositionFilter3D
  */
 public class SavitzkyGolayOnlineOrientationFilter3D
 {
-
    public static final double EPS = 1.0e-12;
 
    private final int polynomialOrder;

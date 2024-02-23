@@ -47,14 +47,7 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
       {
          inputPoseEstimators.put(endEffector, new SingleEndEffectorEstimator(endEffector, inputsAlphaProvider, registry));
       }
-      inputPoseEstimatorsArray = new SingleEndEffectorEstimator[endEffectors.size()];
-
-      int index = 0;
-
-      for (RigidBodyBasics rigidBody : endEffectors)
-      {
-         inputPoseEstimatorsArray[index++] = inputPoseEstimators.get(rigidBody);
-      }
+      inputPoseEstimatorsArray = inputPoseEstimators.values().toArray(new SingleEndEffectorEstimator[0]);
 
       inputsFilterBreakFrequency.set(parameters.getInputPoseLPFBreakFrequency());
       inputVelocityDecayDuration.set(parameters.getInputVelocityDecayDuration());
@@ -77,11 +70,13 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
     * If the input command is new, the state estimator will update, otherwise it will extrapolate the input.
     * </p>
     *
+    * @param time
     * @param isNewInput         whether the input command is new or not.
     * @param latestInputCommand the latest input command. Modified when {@code isNewInput} is {@code false}.
     */
    @Override
-   public void update(boolean isNewInput,
+   public void update(double time,
+                      boolean isNewInput,
                       KinematicsStreamingToolboxInputCommand latestInputCommand,
                       KinematicsStreamingToolboxInputCommand previousRawInputCommand)
    {

@@ -6,6 +6,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyStreamingMessagePublisher;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyTrajectoryMessagePublisher;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters.InputStateEstimatorType;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -242,7 +243,10 @@ public class KSTStreamingState implements State
                                                                                                  toolboxControllerPeriod));
 
       Collection<? extends RigidBodyBasics> controllableRigidBodies = tools.getIKController().getControllableRigidBodies();
-      inputStateEstimator = new KSTInputFirstOrderStateEstimator(controllableRigidBodies, parameters, toolboxControllerPeriod, registry);
+      if (parameters.getInputStateEstimatorType() == InputStateEstimatorType.SPLINE_FIT)
+         inputStateEstimator = new KSTInputSplineFitStateEstimator(controllableRigidBodies, registry);
+      else
+         inputStateEstimator = new KSTInputFirstOrderStateEstimator(controllableRigidBodies, parameters, toolboxControllerPeriod, registry);
 
       for (RigidBodyBasics rigidBody : controllableRigidBodies)
       {
@@ -512,7 +516,7 @@ public class KSTStreamingState implements State
                filteredInputs.removeInput(i);
          }
 
-         inputStateEstimator.update(tools.hasNewInputCommand(), filteredInputs, tools.getPreviousInput());
+         inputStateEstimator.update(tools.getTime(), tools.hasNewInputCommand(), filteredInputs, tools.getPreviousInput());
 
          for (int i = 0; i < filteredInputs.getNumberOfInputs(); i++)
          { // Ship it
