@@ -146,20 +146,25 @@ public class PaperSavitzkyGolayFilteringOnSO3
 
       YoQuaternion rawOrientation = new YoQuaternion("rawOrientation", scs2.getRootRegistry());
       YoQuaternion noisyOrientation = new YoQuaternion("noisyOrientation", scs2.getRootRegistry());
+      YoQuaternion smoothedOrientation = new YoQuaternion("smoothedOrientation", scs2.getRootRegistry());
       YoQuaternion filteredOrientation = new YoQuaternion("filteredOrientation", scs2.getRootRegistry());
 
       YoVector3D rawAngularVelocity = new YoVector3D("rawAngularVelocity", scs2.getRootRegistry());
       YoVector3D noisyAngularVelocity = new YoVector3D("noisyAngularVelocity", scs2.getRootRegistry());
-      YoVector3D filteredAngularVelocity = new YoVector3D("filteredAngularVelocity", scs2.getRootRegistry());
+      YoVector3D smoothedAngularVelocity = new YoVector3D("smoothedAngularVelocity", scs2.getRootRegistry());
       YoVector3D fdAngularVelocity = new YoVector3D("fdAngularVelocity", scs2.getRootRegistry());
+      YoVector3D filteredAngularVelocity = new YoVector3D("filteredAngularVelocity", scs2.getRootRegistry());
 
       YoVector3D rawAngularAcceleration = new YoVector3D("rawAngularAcceleration", scs2.getRootRegistry());
       YoVector3D noisyAngularAcceleration = new YoVector3D("noisyAngularAcceleration", scs2.getRootRegistry());
-      YoVector3D filteredAngularAcceleration = new YoVector3D("filteredAngularAcceleration", scs2.getRootRegistry());
+      YoVector3D smoothedAngularAcceleration = new YoVector3D("smoothedAngularAcceleration", scs2.getRootRegistry());
       YoVector3D fdAngularAcceleration = new YoVector3D("fdAngularAcceleration", scs2.getRootRegistry());
+      YoVector3D filteredAngularAcceleration = new YoVector3D("filteredAngularAcceleration", scs2.getRootRegistry());
 
       int i2 = 0;
       int i3 = 0;
+      SavitzkyGolayOnlineOrientationFilter3D filter = new SavitzkyGolayOnlineOrientationFilter3D(2, 10);
+      filter.setBackwardIndex(0);
 
       for (int i1 = 0; i1 < N1; i1++)
       {
@@ -181,14 +186,20 @@ public class PaperSavitzkyGolayFilteringOnSO3
             noisyOrientation.set(new RotationMatrix(R_noise.get(i2)));
             noisyAngularVelocity.set(omg_FD.get(i2));
             noisyAngularAcceleration.set(domg_FD.get(i2));
+
+            filter.addOrientation(t2[i2], new RotationMatrix(R_noise.get(i2)));
+            filter.compute();
+            filteredOrientation.set(filter.getEstimatedOrientation());
+            filteredAngularVelocity.set(filter.getEstimatedAngularVelocity());
+            filteredAngularAcceleration.set(filter.getEstimatedAngularAcceleration());
             i2++;
          }
 
          if (i3 < result.tf.size() && t1[i1] >= result.tf.get(i3) - 1.0e-10)
          {
-            filteredOrientation.set(new RotationMatrix(result.R_est.get(i3)));
-            filteredAngularVelocity.set(result.omg_est.get(i3));
-            filteredAngularAcceleration.set(result.domg_est.get(i3));
+            smoothedOrientation.set(new RotationMatrix(result.R_est.get(i3)));
+            smoothedAngularVelocity.set(result.omg_est.get(i3));
+            smoothedAngularAcceleration.set(result.domg_est.get(i3));
             i3++;
          }
 

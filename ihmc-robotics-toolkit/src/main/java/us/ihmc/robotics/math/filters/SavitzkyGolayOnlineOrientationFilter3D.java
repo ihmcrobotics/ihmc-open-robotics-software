@@ -1,6 +1,9 @@
 package us.ihmc.robotics.math.filters;
 
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -29,9 +32,11 @@ public class SavitzkyGolayOnlineOrientationFilter3D
    private final int windowSize;
    private final RingBuffer<OrientationMesurement> orientationBuffer;
 
-   private final RotationMatrix filteredOrientation = new RotationMatrix();
-   private final Vector3D filteredAngularVelocity = new Vector3D();
-   private final Vector3D filteredAngularAcceleration = new Vector3D();
+   private final RotationMatrix estimatedOrientation = new RotationMatrix();
+   private final Vector3D estimatedAngularVelocity = new Vector3D();
+   private final Vector3D estimatedAngularAcceleration = new Vector3D();
+
+   private int backwardIndex = 0;
 
    public SavitzkyGolayOnlineOrientationFilter3D(int windowSize)
    {
@@ -52,7 +57,89 @@ public class SavitzkyGolayOnlineOrientationFilter3D
 
    public void compute()
    {
-      //      DMatrixRMaj A
+      if (!orientationBuffer.isBufferFull())
+         return;
+
+      DMatrixRMaj A = new DMatrixRMaj(3 * windowSize, 3 * (polynomialOrder + 1));
+      DMatrixRMaj b = new DMatrixRMaj(3 * windowSize, 1);
+      Matrix3D Ajk = new Matrix3D();
+      RotationMatrix delta = new RotationMatrix();
+      Vector3D deltaRotation = new Vector3D();
+
+      OrientationMesurement estimationMeasurement = orientationBuffer.getFromLast(backwardIndex);
+
+      for (int j = 0; j < windowSize; j++)
+      {
+         OrientationMesurement otherMeasurement = orientationBuffer.getFromLast(j);
+         double timeInterval = otherMeasurement.time - estimationMeasurement.time;
+         double tPow = 1.0;
+
+         Ajk.setIdentity();
+         Ajk.get(3 * j, 0, A);
+
+         for (int k = 1; k <= polynomialOrder; k++)
+         {
+            tPow *= timeInterval;
+            Ajk.setIdentity();
+            Ajk.scale(tPow / k);
+            Ajk.get(3 * j, 3 * k, A);
+         }
+
+         delta.set(otherMeasurement.orientation);
+         delta.multiplyTransposeOther(estimationMeasurement.orientation);
+         delta.getRotationVector(deltaRotation);
+         deltaRotation.get(3 * j, 0, b);
+      }
+
+      DMatrixRMaj Apinv = new DMatrixRMaj(3 * (polynomialOrder + 1), 3 * windowSize);
+      CommonOps_DDRM.pinv(A, Apinv);
+      DMatrixRMaj rho = new DMatrixRMaj(3 * (polynomialOrder + 1), 1);
+      CommonOps_DDRM.mult(Apinv, b, rho);
+
+      // Obtain the coefficients of rho
+      Vector3D rho0 = new Vector3D(rho.get(0), rho.get(1), rho.get(2));
+      Vector3D rho1 = new Vector3D(rho.get(3), rho.get(4), rho.get(5));
+      Vector3D rho2 = new Vector3D(rho.get(6), rho.get(7), rho.get(8));
+
+      estimatedOrientation.setRotationVector(rho0);
+      estimatedOrientation.append(estimationMeasurement.orientation);
+      Matrix3D rho0_dexpSO3 = new Matrix3D();
+      dexpSO3(rho0, rho0_dexpSO3);
+      Matrix3D rho01_ddexpSO3 = new Matrix3D();
+      ddexpSO3(rho0, rho1, rho01_ddexpSO3);
+      rho0_dexpSO3.transform(rho1, estimatedAngularVelocity);
+
+      Vector3D temp = new Vector3D();
+      rho01_ddexpSO3.transform(rho1, temp);
+      rho0_dexpSO3.transform(rho2, estimatedAngularAcceleration);
+      estimatedAngularAcceleration.add(temp);
+   }
+
+   public void setBackwardIndex(int backwardIndex)
+   {
+      if (backwardIndex < 0 || backwardIndex >= windowSize)
+         throw new IllegalArgumentException("The backward index has to be in [0, " + windowSize + "], but was: " + backwardIndex);
+      this.backwardIndex = backwardIndex;
+   }
+
+   public int getWindowSize()
+   {
+      return windowSize;
+   }
+
+   public RotationMatrix getEstimatedOrientation()
+   {
+      return estimatedOrientation;
+   }
+
+   public Vector3D getEstimatedAngularVelocity()
+   {
+      return estimatedAngularVelocity;
+   }
+
+   public Vector3D getEstimatedAngularAcceleration()
+   {
+      return estimatedAngularAcceleration;
    }
 
    private static class OrientationMesurement
@@ -69,6 +156,12 @@ public class SavitzkyGolayOnlineOrientationFilter3D
       {
          this.time = time;
          this.orientation.set(orientation);
+      }
+
+      @Override
+      public String toString()
+      {
+         return "Time: " + time + ", Orientation: " + orientation.toStringAsYawPitchRoll();
       }
    }
 
@@ -176,10 +269,5 @@ public class SavitzkyGolayOnlineOrientationFilter3D
       double m21 = halfBeta * cx + oneOverPhi2 * (c0 * azcy_aycz + c1 * ax + c2 * ayz);
       double m22 = oneOverPhi2 * (-2.0 * c0 * (ax * cx + ay * cy) - c2 * (ax2 + ay2));
       matrixToPack.set(m00, m01, m02, m10, m11, m12, m20, m21, m22);
-   }
-
-   public int getWindowSize()
-   {
-      return windowSize;
    }
 }
