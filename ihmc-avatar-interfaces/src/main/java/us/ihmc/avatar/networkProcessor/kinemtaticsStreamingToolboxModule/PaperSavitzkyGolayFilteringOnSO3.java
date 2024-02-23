@@ -3,7 +3,6 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 import gnu.trove.list.array.TDoubleArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -15,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.math.filters.SavitzkyGolayOnlineOrientationFilter3D;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.yoVariables.euclid.YoQuaternion;
 import us.ihmc.yoVariables.euclid.YoVector3D;
@@ -219,115 +219,30 @@ public class PaperSavitzkyGolayFilteringOnSO3
 
    public static Matrix3D expSO3(Vector3DReadOnly a)
    {
-      double phi = a.norm();
       Matrix3D res = new Matrix3D();
-      res.setIdentity();
-      if (phi != 0)
-      {
-         Matrix3D aHat = hat(a);
-         aHat.scale(Math.sin(phi) / phi);
-         res.add(aHat);
-         aHat = hat(a);
-         aHat.multiply(aHat);
-         aHat.scale((1 - Math.cos(phi)) / (phi * phi));
-         res.add(aHat);
-      }
+      SavitzkyGolayOnlineOrientationFilter3D.expSO3(a, res);
       return res;
    }
 
    public static Matrix3D hat(Vector3DReadOnly a)
    {
       Matrix3D res = new Matrix3D();
-      res.set(0, -a.getZ(), a.getY(), a.getZ(), 0, -a.getX(), -a.getY(), a.getX(), 0);
+      res.setToTildeForm(a);
       return res;
    }
 
    public static Matrix3D dexpSO3(Vector3DReadOnly a)
    {
-      double phi = a.norm();
-
       Matrix3D res = new Matrix3D();
-      res.setIdentity();
-
-      if (phi != 0)
-      {
-         Matrix3D aHat = hat(a);
-         double beta = MathTools.square(Math.sin(phi / 2.0)) / (MathTools.square(phi / 2.0));
-         double alpha = Math.sin(phi) / phi;
-
-         aHat.scale(0.5 * beta);
-         res.add(aHat);
-         aHat = hat(a);
-         aHat.multiply(aHat);
-         aHat.scale((1 - alpha) / MathTools.square(phi));
-         res.add(aHat);
-      }
-
+      SavitzkyGolayOnlineOrientationFilter3D.dexpSO3(a, res);
       return res;
    }
 
    public static Matrix3D DdexpSO3(Vector3DReadOnly x, Vector3DReadOnly z)
    {
-      double phi = x.norm();
-      Matrix3D hatx = hat(x);
-      Matrix3D hatz = hat(z);
-
-      Matrix3D hatxhatz = new Matrix3D();
-      hatxhatz.set(hatx);
-      hatxhatz.multiply(hatz);
-      Matrix3D hatzhatx = new Matrix3D();
-      hatzhatx.set(hatz);
-      hatzhatx.multiply(hatx);
-
-      double beta = MathTools.square(Math.sin(phi / 2.0)) / (MathTools.square(phi / 2.0));
-      double alpha = Math.sin(phi) / phi;
-      double phi2 = MathTools.square(phi);
-
       Matrix3D res = new Matrix3D();
-      res.set(hatz);
-      res.scale(0.5 * beta);
-
-      Matrix3D temp = new Matrix3D();
-      // 1/phi^2*(1-alpha)*(hatx*hatz+hatz*hatx)
-      temp.set(hatxhatz);
-      temp.add(hatzhatx);
-      temp.scale((1.0 - alpha) / phi2);
-      res.add(temp);
-
-      // 1/phi^2*(alpha-beta)*(x'*z)*hatx
-      temp.set(hatx);
-      temp.scale(x.dot(z) * (alpha - beta) / phi2);
-      res.add(temp);
-
-      // 1/phi^2*(beta/2-3/phi^2*(1-alpha))*(x'*z)*hatx*hatx
-      temp.set(hatx);
-      temp.multiply(hatx);
-      temp.scale(x.dot(z) * (beta / 2.0 - 3.0 / phi2 * (1.0 - alpha)) / phi2);
-      res.add(temp);
+      SavitzkyGolayOnlineOrientationFilter3D.ddexpSO3(x, z, res);
       return res;
-   }
-
-   public static Matrix3D outer(Vector3DReadOnly a, Vector3DReadOnly b)
-   {
-      Matrix3D res = new Matrix3D();
-      res.set(a.getX() * b.getX(),
-              a.getX() * b.getY(),
-              a.getX() * b.getZ(),
-              a.getY() * b.getX(),
-              a.getY() * b.getY(),
-              a.getY() * b.getZ(),
-              a.getZ() * b.getX(),
-              a.getZ() * b.getY(),
-              a.getZ() * b.getZ());
-      return res;
-   }
-
-   public static Vector3D vee(Matrix3D mat)
-   {
-      double xi1 = (mat.getM21() - mat.getM12()) / 2;
-      double xi2 = (mat.getM02() - mat.getM20()) / 2;
-      double xi3 = (mat.getM10() - mat.getM01()) / 2;
-      return new Vector3D(xi1, xi2, xi3);
    }
 
    public static Vector3D logm(Matrix3D m)
