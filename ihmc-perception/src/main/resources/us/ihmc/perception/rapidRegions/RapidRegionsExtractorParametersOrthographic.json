@@ -1,7 +1,7 @@
 {
   "title" : "Rapid region extractor parameters",
   "Normal pack range" : {
-    "value" : 10,
+    "value" : 1,
     "lowerBound" : 1,
     "upperBound" : 10
   },
@@ -16,7 +16,7 @@
     "upperBound" : 10
   },
   "Merge orthogonal threshold" : {
-    "value" : 0.128866,
+    "value" : 0.025773,
     "lowerBound" : 0.0,
     "upperBound" : 1.5
   },
@@ -26,12 +26,12 @@
     "upperBound" : 1.0
   },
   "Merge angular threshold" : {
-    "value" : 0.84466,
+    "value" : 0.954545,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Connection threshold" : {
-    "value" : 1,
+    "value" : 4,
     "lowerBound" : 0,
     "upperBound" : 8
   },
@@ -60,27 +60,27 @@
   "Use filtered image" : true,
   "Use SVD normals" : true,
   "SVD reduction factor" : {
-    "value" : 20,
+    "value" : 19,
     "lowerBound" : 1,
     "upperBound" : 100
   },
   "Internal search depth limit" : {
-    "value" : 35000,
+    "value" : 4168,
     "lowerBound" : 1,
     "upperBound" : 50000
   },
   "Boundary search depth limit" : {
-    "value" : 8000,
+    "value" : 2293,
     "lowerBound" : 1,
     "upperBound" : 15000
   },
   "Region min patches" : {
-    "value" : 81,
+    "value" : 4,
     "lowerBound" : 1,
     "upperBound" : 3000
   },
   "Boundary min patches" : {
-    "value" : 48,
+    "value" : 4,
     "lowerBound" : 1,
     "upperBound" : 1000
   },

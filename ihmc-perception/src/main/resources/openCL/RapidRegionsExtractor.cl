@@ -76,8 +76,8 @@ float4 back_project_perspective(int2 pos, float Z, global float* params)
 
 float4 back_project_orthographic(int2 pos, float height, global float* params)
 {
-   float X = (pos.x - 100) / 50;
-   float Y = (pos.y - 100) / 50;
+   float X = (pos.x - 100.0f) / 50.0f;
+   float Y = (pos.y - 100.0f) / 50.0f;
 
    float4 point = (float4) (X, Y, height, 0);
    return point;
@@ -104,19 +104,19 @@ float3 estimate_orthographic_normal(read_only image2d_t in, int rIndex, int cInd
             int2 pos = (int2) (gcIndex, grIndex);
 
             pos = (int2) (gcIndex, grIndex);
-            height = ((float) read_imageui(in, pos).x) / 1000.0f + 3.2768f;
+            height = ((float) read_imageui(in, pos).x) / 10000.0f + 3.2768f;
             float4 va = back_project_orthographic(pos, height, params);
 
             pos = (int2) (gcIndex + m, grIndex);
-            height = ((float) read_imageui(in, pos).x) / 1000.0f + 3.2768f;
+            height = ((float) read_imageui(in, pos).x) / 10000.0f + 3.2768f;
             float4 vb = back_project_orthographic(pos, height, params);
 
             pos = (int2) (gcIndex + m, grIndex + m);
-            height = ((float) read_imageui(in, pos).x) / 1000.0f + 3.2768f;
+            height = ((float) read_imageui(in, pos).x) / 10000.0f + 3.2768f;
             float4 vc = back_project_orthographic(pos, height, params);
 
             pos = (int2) (gcIndex, grIndex + m);
-            height = ((float) read_imageui(in, pos).x) / 1000.0f + 3.2768f;
+            height = ((float) read_imageui(in, pos).x) / 10000.0f + 3.2768f;
             float4 vd = back_project_orthographic(pos, height, params);
 
             normal += cross((vc - vb), (vb - va));
@@ -236,12 +236,15 @@ float3 estimate_orthographic_centroid(read_only image2d_t in, int y, int x, glob
             int gx = x * (int) params[PATCH_HEIGHT] + i;
             int gy = y * (int) params[PATCH_WIDTH] + j;
             int2 pos = (int2) (gx, gy);
-            height = ((float) read_imageui(in, pos).x) / 1000.0f + 3.2768f;
+            height = ((float) read_imageui(in, pos).x) / 10000.0f + 3.2768f;
             float4 P = back_project_orthographic(pos, height, params);
             centroid += P.xyz;
          }
       }
    }
+
+//   printf("(%d, %d) -> Centroid: (%.4lf, %.4lf, %.4lf)\n", x, y, centroid.x, centroid.y, centroid.z);
+
    return (1 / (float) (count)) * centroid;
 }
 
