@@ -473,6 +473,7 @@ public class PerceptionAndAutonomyProcess
 
       for (RobotSide side : RobotSide.values)
          blackflyImageDemandNodes.put(side, new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(side)));
+      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(ousterDepthDemandNode);
 
       arUcoDetectionDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ARUCO);
 
