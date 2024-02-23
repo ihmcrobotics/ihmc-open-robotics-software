@@ -6,11 +6,15 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.rotationConversion.RotationVectorConversion;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.Matrix3DFeatures;
 import us.ihmc.euclid.tools.Matrix3DTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.yoVariables.euclid.YoQuaternion;
 import us.ihmc.yoVariables.euclid.YoVector3D;
@@ -123,6 +127,15 @@ public class PaperSavitzkyGolayFilteringOnSO3
          cnt++;
       }
 
+      for (int ii = 1; ii < N2; ii++)
+      {
+         computeAngularVelocity(R_noise.get(ii), R_noise.get(ii - 1), dt2, omg_FD.get(ii));
+      }
+      for (int ii = 1; ii < N2; ii++)
+      {
+         computeAngularAcceleration(omg_FD.get(ii), omg_FD.get(ii - 1), dt2, domg_FD.get(ii));
+      }
+
       // ---------------- Applying the Savitzky-Golay filter ----------------- //
       // Now, from the noisy lower sampled data, we want to get back the estimated
       // rotation matrix, angular velocity and angular acceleration
@@ -138,36 +151,70 @@ public class PaperSavitzkyGolayFilteringOnSO3
       YoVector3D rawAngularVelocity = new YoVector3D("rawAngularVelocity", scs2.getRootRegistry());
       YoVector3D noisyAngularVelocity = new YoVector3D("noisyAngularVelocity", scs2.getRootRegistry());
       YoVector3D filteredAngularVelocity = new YoVector3D("filteredAngularVelocity", scs2.getRootRegistry());
+      YoVector3D fdAngularVelocity = new YoVector3D("fdAngularVelocity", scs2.getRootRegistry());
 
       YoVector3D rawAngularAcceleration = new YoVector3D("rawAngularAcceleration", scs2.getRootRegistry());
       YoVector3D noisyAngularAcceleration = new YoVector3D("noisyAngularAcceleration", scs2.getRootRegistry());
       YoVector3D filteredAngularAcceleration = new YoVector3D("filteredAngularAcceleration", scs2.getRootRegistry());
       YoVector3D fdAngularAcceleration = new YoVector3D("fdAngularAcceleration", scs2.getRootRegistry());
 
-      for (int i = 0; i < N1; i++)
+      int i2 = 0;
+      int i3 = 0;
+
+      for (int i1 = 0; i1 < N1; i1++)
       {
-         rawOrientation.set(new RotationMatrix(R.get(i)));
-         //         noisyOrientation.set(new RotationMatrix(R_noise.get(i)));
-         //         filteredOrientation.set(new RotationMatrix(result.R_est.get(i)));
+         // Raw signals
+         rawOrientation.set(new RotationMatrix(R.get(i1)));
+         rawAngularVelocity.set(omg.get(i1));
+         rawAngularAcceleration.set(domg.get(i1));
 
-         rawAngularVelocity.set(omg.get(i));
-         //         noisyAngularVelocity.set(omg_FD.get(i));
-         //         filteredAngularVelocity.set(result.omg_est.get(i));
+         // Finite difference for check
 
-         rawAngularAcceleration.set(domg.get(i));
-         //         noisyAngularAcceleration.set(domg_FD.get(i));
-         //         filteredAngularAcceleration.set(result.domg_est.get(i));
-
-         if (i > 0)
+         if (i1 > 0)
          {
-            fdAngularAcceleration.sub(omg.get(i), omg.get(i - 1));
-            fdAngularAcceleration.scale(1 / dt1);
+            computeAngularVelocity(R.get(i1), R.get(i1 - 1), dt1, fdAngularVelocity);
+            computeAngularAcceleration(omg.get(i1), omg.get(i1 - 1), dt1, fdAngularAcceleration);
+         }
+
+         if (i2 < t2.length && t1[i1] >= t2[i2] - 1.0e-10)
+         {
+            noisyOrientation.set(new RotationMatrix(R_noise.get(i2)));
+            noisyAngularVelocity.set(omg_FD.get(i2));
+            noisyAngularAcceleration.set(domg_FD.get(i2));
+            i2++;
+         }
+
+         if (i3 < result.tf.size() && t1[i1] >= result.tf.get(i3) - 1.0e-10)
+         {
+            filteredOrientation.set(new RotationMatrix(result.R_est.get(i3)));
+            filteredAngularVelocity.set(result.omg_est.get(i3));
+            filteredAngularAcceleration.set(result.domg_est.get(i3));
+            i3++;
          }
 
          scs2.simulateNow(1);
       }
 
       scs2.start(true, false, false);
+   }
+
+   private static void computeAngularVelocity(Matrix3DReadOnly currentR, Matrix3DReadOnly previousR, double dt, Vector3DBasics fdAngularVelocityToPack)
+   {
+      Quaternion diff = new Quaternion();
+      diff.set(new RotationMatrix(currentR));
+      diff.appendInvertOther(new RotationMatrix(previousR));
+      diff.normalizeAndLimitToPi();
+      diff.getRotationVector(fdAngularVelocityToPack);
+      fdAngularVelocityToPack.scale(1.0 / dt);
+   }
+
+   private static void computeAngularAcceleration(Vector3DReadOnly currentAngularVelocity,
+                                                  Vector3DReadOnly previousAngularVelocity,
+                                                  double dt,
+                                                  Vector3DBasics fdAngularAccelerationToPack)
+   {
+      fdAngularAccelerationToPack.sub(currentAngularVelocity, previousAngularVelocity);
+      fdAngularAccelerationToPack.scale(1.0 / dt);
    }
 
    public static Matrix3D expSO3(Vector3DReadOnly a)
@@ -248,16 +295,14 @@ public class PaperSavitzkyGolayFilteringOnSO3
       res.add(temp);
 
       // 1/phi^2*(alpha-beta)*(x'*z)*hatx
-      temp.set(outer(x, z));
-      temp.multiply(hatx);
-      temp.scale((alpha - beta) / phi2);
+      temp.set(hatx);
+      temp.scale(x.dot(z) * (alpha - beta) / phi2);
       res.add(temp);
 
       // 1/phi^2*(beta/2-3/phi^2*(1-alpha))*(x'*z)*hatx*hatx
-      temp.set(outer(x, z));
+      temp.set(hatx);
       temp.multiply(hatx);
-      temp.multiply(hatx);
-      temp.scale((beta / 2.0 - 3.0 / phi2 * (1.0 - alpha)) / phi2);
+      temp.scale(x.dot(z) * (beta / 2.0 - 3.0 / phi2 * (1.0 - alpha)) / phi2);
       res.add(temp);
       return res;
    }
@@ -288,16 +333,7 @@ public class PaperSavitzkyGolayFilteringOnSO3
    public static Vector3D logm(Matrix3D m)
    {
       Vector3D result = new Vector3D();
-      RotationVectorConversion.convertMatrixToRotationVector(m.getM00(),
-                                                             m.getM01(),
-                                                             m.getM02(),
-                                                             m.getM10(),
-                                                             m.getM11(),
-                                                             m.getM12(),
-                                                             m.getM20(),
-                                                             m.getM21(),
-                                                             m.getM22(),
-                                                             result);
+      convertMatrixToRotationVectorImpl(m.getM00(), m.getM01(), m.getM02(), m.getM10(), m.getM11(), m.getM12(), m.getM20(), m.getM21(), m.getM22(), result);
       return result;
    }
 
@@ -382,5 +418,78 @@ public class PaperSavitzkyGolayFilteringOnSO3
             domg_est.add(domg_est_ii);
          }
       }
+   }
+
+   static void convertMatrixToRotationVectorImpl(double m00,
+                                                 double m01,
+                                                 double m02,
+                                                 double m10,
+                                                 double m11,
+                                                 double m12,
+                                                 double m20,
+                                                 double m21,
+                                                 double m22,
+                                                 Vector3DBasics rotationVectorToPack)
+   {
+      if (EuclidCoreTools.containsNaN(m00, m01, m02, m10, m11, m12, m20, m21, m22))
+      {
+         rotationVectorToPack.setToNaN();
+         return;
+      }
+
+      double angle, x, y, z; // variables for result
+
+      x = m21 - m12;
+      y = m02 - m20;
+      z = m10 - m01;
+
+      double s = EuclidCoreTools.norm(x, y, z);
+
+      if (s > 1.0e-12)
+      {
+         double sin = 0.5 * s;
+         double cos = 0.5 * (m00 + m11 + m22 - 1.0);
+         angle = EuclidCoreTools.atan2(sin, cos);
+         x /= s;
+         y /= s;
+         z /= s;
+      }
+      else if (Matrix3DFeatures.isIdentity(m00, m01, m02, m10, m11, m12, m20, m21, m22))
+      {
+         rotationVectorToPack.setToZero();
+         return;
+      }
+      else
+      {
+         // otherwise this singularity is angle = 180
+         angle = Math.PI;
+         double xx = 0.50 * (m00 + 1.0);
+         double yy = 0.50 * (m11 + 1.0);
+         double zz = 0.50 * (m22 + 1.0);
+         double xy = 0.25 * (m01 + m10);
+         double xz = 0.25 * (m02 + m20);
+         double yz = 0.25 * (m12 + m21);
+
+         if (xx > yy && xx > zz)
+         { // m00 is the largest diagonal term
+            x = EuclidCoreTools.squareRoot(xx);
+            y = xy / x;
+            z = xz / x;
+         }
+         else if (yy > zz)
+         { // m11 is the largest diagonal term
+            y = EuclidCoreTools.squareRoot(yy);
+            x = xy / y;
+            z = yz / y;
+         }
+         else
+         { // m22 is the largest diagonal term so base result on this
+            z = EuclidCoreTools.squareRoot(zz);
+            x = xz / z;
+            y = yz / z;
+         }
+      }
+
+      rotationVectorToPack.set(x * angle, y * angle, z * angle);
    }
 }
