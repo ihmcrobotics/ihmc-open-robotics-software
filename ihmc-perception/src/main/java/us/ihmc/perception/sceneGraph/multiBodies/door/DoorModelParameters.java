@@ -53,13 +53,21 @@ public class DoorModelParameters
    public static final double DOOR_BOLT_HEIGHT = 0.015;
    public static final double DOOR_BOLT_HOLE_HEIGHT = DOOR_BOLT_HEIGHT + 0.01;
    public static final double DOOR_BOLT_TRAVEL = 0.015;
+   public static final double DOOR_FRAME_MARKER_FROM_GROUND = 1.30;
+   public static final double DOOR_FRAME_MARKER_TO_PANEL_EDGE_Y = 0.10;
+   public static final double PUSH_DOOR_FRAME_MARKER_TO_PANEL_EDGE_X = -0.05;
+   public static final double PULL_DOOR_FRAME_MARKER_TO_PANEL_EDGE_X = 0.0;
 
    /** This refers to the edges of the black parts with no margin. The margins included will be wider than this. */
    public static final double DOOR_ARUCO_MARKER_WIDTH = SceneObjectDefinitions.LARGE_MARKER_WIDTH;
    public static final int LEFT_PULL_DOOR_MARKER_ID = 0;
+   public static final int LEFT_PULL_DOOR_FRAME_MARKER_ID = 4;
    public static final int RIGHT_PUSH_DOOR_MARKER_ID = 1;
+   public static final int RIGHT_PUSH_DOOR_FRAME_MARKER_ID = 5;
    public static final int RIGHT_PULL_DOOR_MARKER_ID = 10;
+   public static final int RIGHT_PULL_DOOR_FRAME_MARKER_ID = 6;
    public static final int LEFT_PUSH_DOOR_MARKER_ID = 11;
+   public static final int LEFT_PUSH_DOOR_FRAME_MARKER_ID = 7;
 
    /**
     * It is actually important to measure the ArUco marker pose relative to the lever handle,
