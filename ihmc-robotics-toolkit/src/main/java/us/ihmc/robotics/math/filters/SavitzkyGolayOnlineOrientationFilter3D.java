@@ -1,9 +1,13 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.rotationConversion.RotationMatrixConversion;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.lists.RingBuffer;
 
 /**
  * Implementation of the Savitzky-Golay filter proposed in <a href="https://hal.science/hal-03603826/document">Geometric Savitzky-Golay Filtering of Noisy
@@ -20,10 +24,52 @@ public class SavitzkyGolayOnlineOrientationFilter3D
 {
 
    public static final double EPS = 1.0e-12;
-   private int windowSize;
 
-   public SavitzkyGolayOnlineOrientationFilter3D()
+   private final int polynomialOrder;
+   private final int windowSize;
+   private final RingBuffer<OrientationMesurement> orientationBuffer;
+
+   private final RotationMatrix filteredOrientation = new RotationMatrix();
+   private final Vector3D filteredAngularVelocity = new Vector3D();
+   private final Vector3D filteredAngularAcceleration = new Vector3D();
+
+   public SavitzkyGolayOnlineOrientationFilter3D(int windowSize)
    {
+      this(3, windowSize);
+   }
+
+   public SavitzkyGolayOnlineOrientationFilter3D(int polynomialOrder, int windowSize)
+   {
+      this.polynomialOrder = polynomialOrder;
+      this.windowSize = windowSize;
+      orientationBuffer = new RingBuffer<>(windowSize, OrientationMesurement::new, OrientationMesurement::set);
+   }
+
+   public void addOrientation(double time, Orientation3DReadOnly orientation)
+   {
+      orientationBuffer.add().set(time, orientation);
+   }
+
+   public void compute()
+   {
+      //      DMatrixRMaj A
+   }
+
+   private static class OrientationMesurement
+   {
+      private double time;
+      private final RotationMatrix orientation = new RotationMatrix();
+
+      public void set(OrientationMesurement other)
+      {
+         set(other.time, other.orientation);
+      }
+
+      public void set(double time, Orientation3DReadOnly orientation)
+      {
+         this.time = time;
+         this.orientation.set(orientation);
+      }
    }
 
    /**
@@ -130,11 +176,6 @@ public class SavitzkyGolayOnlineOrientationFilter3D
       double m21 = halfBeta * cx + oneOverPhi2 * (c0 * azcy_aycz + c1 * ax + c2 * ayz);
       double m22 = oneOverPhi2 * (-2.0 * c0 * (ax * cx + ay * cy) - c2 * (ax2 + ay2));
       matrixToPack.set(m00, m01, m02, m10, m11, m12, m20, m21, m22);
-   }
-
-   public void setWindowSize(int windowSize)
-   {
-      this.windowSize = windowSize;
    }
 
    public int getWindowSize()
