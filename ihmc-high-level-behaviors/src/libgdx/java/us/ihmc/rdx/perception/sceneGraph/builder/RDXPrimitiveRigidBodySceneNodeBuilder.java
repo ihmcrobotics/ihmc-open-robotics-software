@@ -8,16 +8,25 @@ import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape
 import us.ihmc.rdx.perception.sceneGraph.RDXPrimitiveRigidBodySceneNode;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
 public class RDXPrimitiveRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<RDXPrimitiveRigidBodySceneNode>
 {
+   @Nullable
+   private String optionalName;
    private final Map<PrimitiveRigidBodyShape, Integer> ids = new HashMap<>();
 
    public RDXPrimitiveRigidBodySceneNodeBuilder(SceneGraph sceneGraph)
    {
       super(sceneGraph);
+   }
+
+   public RDXPrimitiveRigidBodySceneNodeBuilder name(String name)
+   {
+      optionalName = name;
+      return this;
    }
 
    @Override
@@ -52,6 +61,9 @@ public class RDXPrimitiveRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<R
 
    private String getName(PrimitiveRigidBodyShape shape)
    {
+      if (optionalName != null)
+         return optionalName;
+
       if (super.name.isEmpty())
       {
          ids.merge(shape, 1, Integer::sum);

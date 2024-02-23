@@ -88,6 +88,11 @@ public class RDXBehaviorTree
       nodeCreationMenu.loadBehaviorNodeFromFileName(fileName);
    }
 
+   public void deleteNode(RDXBehaviorTreeNode<?, ?> node)
+   {
+      treeWidgetsVerticalLayout.deleteNode(node);
+   }
+
    public void createAndSetupDefault(RDXBaseUI baseUI)
    {
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables, RDXSceneLevel.VIRTUAL);

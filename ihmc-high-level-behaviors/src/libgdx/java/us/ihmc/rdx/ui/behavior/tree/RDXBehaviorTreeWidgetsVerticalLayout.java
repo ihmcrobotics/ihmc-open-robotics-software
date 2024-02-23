@@ -93,13 +93,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
          if (ImGui.menuItem(labels.get("Delete Node")))
          {
-            topologyOperationQueue.queueDestroySubtree(node);
-
-            if (node.isRootNode()) // Root node
-            {
-               tree.setRootNode(null);
-               tree.getBehaviorTreeState().freeze();
-            }
+            deleteNode(node);
          }
          ImGui.popStyleColor();
 
@@ -127,6 +121,17 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          }
 
          ImGui.unindent(indentAmount);
+      }
+   }
+
+   public void deleteNode(RDXBehaviorTreeNode<?, ?> node)
+   {
+      topologyOperationQueue.queueDestroySubtree(node);
+
+      if (node.isRootNode()) // Root node
+      {
+         tree.setRootNode(null);
+         tree.getBehaviorTreeState().freeze();
       }
    }
 
