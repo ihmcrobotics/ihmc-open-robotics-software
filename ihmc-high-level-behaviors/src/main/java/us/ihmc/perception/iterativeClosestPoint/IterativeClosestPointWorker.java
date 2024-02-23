@@ -284,6 +284,7 @@ public class IterativeClosestPointWorker
       /* Calculate object transform */
       // Create the transform, and set the rotation, so it's a pure rotation transform
       optimalRotationMatrix.set(optimalRotation);
+      optimalRotationMatrix.setToYawOrientation(optimalRotationMatrix.getYaw());
       RigidBodyTransform objectToMeasurementTransform = new RigidBodyTransform();
       objectToMeasurementTransform.getRotation().interpolate(optimalRotationMatrix, discountFactor);
 
