@@ -47,7 +47,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
                                                                                                                                          true,
                                                                                                                                          1);
-   private final File heightMapDirectory = new File(IHMCCommonPaths.USER_HOME_DIRECTORY.resolve("Workspace/Storage/Downloads/HeightMap_Datasets/").toString());
+   private final File heightMapDirectory = new File(IHMCCommonPaths.USER_HOME_DIRECTORY.resolve("Downloads/HeightMap_Datasets/").toString());
    private final File[] files = heightMapDirectory.listFiles(name -> name.toString().contains(".hdf5"));
 
    private final String logFileName = files[0].toString();

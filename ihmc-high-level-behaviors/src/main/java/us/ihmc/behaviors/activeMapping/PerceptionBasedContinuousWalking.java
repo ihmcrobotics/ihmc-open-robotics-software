@@ -73,7 +73,7 @@ public class PerceptionBasedContinuousWalking
    {
       ros2PropertySetGroup.update();
 
-      if (perceptionTask.getHumanoidPerceptionModule().getRapidRegionsExtractor() == null)
+      if (perceptionTask.getHumanoidPerceptionModule().getPerspectiveRegionsExtractor() == null)
          return;
 
       if (perceptionTask.getHumanoidPerceptionModule().getLatestHeightMapData() != null)

@@ -14,6 +14,7 @@ import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
 import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -100,10 +101,10 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       }
    }
 
-   public void initializeRapidRegionsUI()
+   public void initializeRapidRegionsUI(RapidPlanarRegionsExtractor extractor)
    {
       this.rapidRegionsUI = new RDXRapidRegionsUI();
-      this.rapidRegionsUI.create(humanoidPerception.getRapidRegionsExtractor());
+      this.rapidRegionsUI.create(extractor);
    }
 
    public void initializeMapRegionsVisualizer(ROS2Node ros2Node)

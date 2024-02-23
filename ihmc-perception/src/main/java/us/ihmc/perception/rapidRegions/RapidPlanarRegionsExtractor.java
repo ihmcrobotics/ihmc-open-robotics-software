@@ -167,6 +167,11 @@ public class RapidPlanarRegionsExtractor
       this.create();
    }
 
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager, int imageHeight, int imageWidth, ProjectionModel model)
+   {
+      this(openCLManager, openCLManager.loadProgram("RapidRegionsExtractor"), imageHeight, imageWidth, model);
+   }
+
    public RapidPlanarRegionsExtractor(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth, ProjectionModel model)
    {
       this.sensorModel = model;

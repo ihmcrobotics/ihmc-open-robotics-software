@@ -24,6 +24,7 @@ import us.ihmc.perception.heightMap.RemoteHeightMapUpdater;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
+import us.ihmc.perception.rapidRegions.ProjectionModel;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.timing.PerceptionStatistics;
 import us.ihmc.perception.tools.PerceptionFilterTools;
@@ -63,14 +64,26 @@ public class HumanoidPerceptionModule
    private RemoteHeightMapUpdater heightMap;
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
    private LocalizationAndMappingTask localizationAndMappingTask;
-   private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
+   private RapidPlanarRegionsExtractor perspectiveRegionsExtractor;
+   private RapidPlanarRegionsExtractor sphericalRegionsExtractor;
+   private RapidPlanarRegionsExtractor orthographicRegionsExtractor;
    private RapidHeightMapExtractor rapidHeightMapExtractor;
    private CollidingScanRegionFilter collidingScanRegionFilter;
    private FullHumanoidRobotModel fullRobotModel;
-   private PlanarRegionsList regionsInSensorFrame;
-   private PlanarRegionsList regionsInWorldFrame;
    private CollisionBoxProvider collisionBoxProvider;
-   private FramePlanarRegionsList sensorFrameRegions;
+
+   private PlanarRegionsList perspectiveRegionsInSensorFrame;
+   private PlanarRegionsList perspectiveRegionsInWorldFrame;
+
+   private PlanarRegionsList orthographicRegionsInSensorFrame;
+   private PlanarRegionsList orthographicRegionsInWorldFrame;
+
+   private PlanarRegionsList sphericalRegionsInSensorFrame;
+   private PlanarRegionsList sphericalRegionsInWorldFrame;
+
+   private FramePlanarRegionsList perspectiveRegions;
+   private FramePlanarRegionsList sphericalRegions;
+   private FramePlanarRegionsList orthographicRegions;
    private HeightMapData latestHeightMapData;
    private BytedecoImage realsenseDepthImage;
 
@@ -218,13 +231,13 @@ public class HumanoidPerceptionModule
         });
    }
 
-   private void updatePlanarRegions(ROS2Helper ros2Helper, ReferenceFrame cameraFrame)
+   private void updatePlanarRegions(ROS2Helper ros2Helper, ReferenceFrame sensorFrame)
    {
       long begin = System.nanoTime();
-      extractFramePlanarRegionsList(rapidPlanarRegionsExtractor, realsenseDepthImage, sensorFrameRegions, cameraFrame);
+      extractPerspectiveRegionsList(realsenseDepthImage, perspectiveRegions, sensorFrame);
       filterFramePlanarRegionsList();
       perceptionStatistics.updateTimeToComputeRapidRegions((System.nanoTime() - begin) * 1e-6f);
-      PerceptionMessageTools.publishFramePlanarRegionsList(sensorFrameRegions, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
+      PerceptionMessageTools.publishFramePlanarRegionsList(perspectiveRegions, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
       perceptionStatistics.updateTimeToComputeRapidRegions((System.nanoTime() - begin) * 1e-6f);
    }
 
@@ -266,15 +279,31 @@ public class HumanoidPerceptionModule
    public void initializePerspectiveRapidRegionsExtractor(CameraIntrinsics cameraIntrinsics)
    {
       LogTools.info("Initializing Perspective Rapid Regions: {}", cameraIntrinsics);
-      this.sensorFrameRegions = new FramePlanarRegionsList();
-      this.rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
+      this.perspectiveRegions = new FramePlanarRegionsList();
+      this.perspectiveRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
                                                                          cameraIntrinsics.getHeight(),
                                                                          cameraIntrinsics.getWidth(),
                                                                          cameraIntrinsics.getFx(),
                                                                          cameraIntrinsics.getFy(),
                                                                          cameraIntrinsics.getCx(),
                                                                          cameraIntrinsics.getCy());
-      this.rapidPlanarRegionsExtractor.getDebugger().setEnabled(false);
+      this.perspectiveRegionsExtractor.getDebugger().setEnabled(false);
+   }
+
+   public void initializeSphericalRapidRegionsExtractor()
+   {
+      LogTools.info("Initializing Spherical Rapid Regions");
+      this.sphericalRegions = new FramePlanarRegionsList();
+      this.sphericalRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, 128, 2048, ProjectionModel.SPHERICAL);
+      this.sphericalRegionsExtractor.getDebugger().setEnabled(false);
+   }
+
+   public void initializeOrthographicRapidRegionsExtractor(int height, int width)
+   {
+      LogTools.info("Initializing Orthographic Rapid Regions");
+      this.orthographicRegions = new FramePlanarRegionsList();
+      this.orthographicRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, height, width, ProjectionModel.ORTHOGRAPHIC);
+      this.orthographicRegionsExtractor.getDebugger().setEnabled(true);
    }
 
    public void initializeHeightMapExtractor(HumanoidReferenceFrames referenceFrames, CameraIntrinsics cameraIntrinsics)
@@ -308,17 +337,36 @@ public class HumanoidPerceptionModule
                                                                   smoothing);
    }
 
-   public void extractFramePlanarRegionsList(RapidPlanarRegionsExtractor extractor,
-                                             BytedecoImage depthImage,
+   public void extractPerspectiveRegionsList(BytedecoImage depthImage,
                                              FramePlanarRegionsList sensorFrameRegions,
                                              ReferenceFrame cameraFrame)
    {
-      extractor.update(depthImage, cameraFrame, sensorFrameRegions);
-      extractor.setProcessing(false);
+      perspectiveRegionsExtractor.update(depthImage, cameraFrame, sensorFrameRegions);
+      perspectiveRegionsExtractor.setProcessing(false);
 
-      regionsInSensorFrame = sensorFrameRegions.getPlanarRegionsList();
-      regionsInWorldFrame = regionsInSensorFrame.copy();
-      regionsInWorldFrame.applyTransform(cameraFrame.getTransformToWorldFrame());
+      perspectiveRegionsInSensorFrame = sensorFrameRegions.getPlanarRegionsList();
+      perspectiveRegionsInWorldFrame = perspectiveRegionsInSensorFrame.copy();
+      perspectiveRegionsInWorldFrame.applyTransform(cameraFrame.getTransformToWorldFrame());
+   }
+
+   public void extractSphericalRegionsList(BytedecoImage depthImage, ReferenceFrame cameraFrame)
+   {
+      sphericalRegionsExtractor.update(depthImage, cameraFrame, sphericalRegions);
+      sphericalRegionsExtractor.setProcessing(false);
+
+      perspectiveRegionsInSensorFrame = sphericalRegions.getPlanarRegionsList();
+      perspectiveRegionsInWorldFrame = perspectiveRegionsInSensorFrame.copy();
+      perspectiveRegionsInWorldFrame.applyTransform(cameraFrame.getTransformToWorldFrame());
+   }
+
+   public void extractOrthographicRegionsList(BytedecoImage depthImage, ReferenceFrame sensorFrame)
+   {
+      orthographicRegionsExtractor.update(depthImage, sensorFrame, orthographicRegions);
+      orthographicRegionsExtractor.setProcessing(false);
+
+      orthographicRegionsInSensorFrame = orthographicRegions.getPlanarRegionsList();
+      orthographicRegionsInWorldFrame = orthographicRegionsInSensorFrame.copy();
+      orthographicRegionsInWorldFrame.applyTransform(sensorFrame.getTransformToWorldFrame());
    }
 
    public void extractOccupancyGrid(List<Point3D> pointCloud,
@@ -348,25 +396,25 @@ public class HumanoidPerceptionModule
       this.fullRobotModel.updateFrames();
       this.collidingScanRegionFilter.update();
 
-      synchronized (sensorFrameRegions)
+      synchronized (perspectiveRegions)
       {
-         PerceptionFilterTools.filterCollidingPlanarRegions(sensorFrameRegions, this.collidingScanRegionFilter);
+         PerceptionFilterTools.filterCollidingPlanarRegions(perspectiveRegions, this.collidingScanRegionFilter);
       }
    }
 
    public FramePlanarRegionsList getFramePlanarRegionsResult()
    {
-      return this.sensorFrameRegions;
+      return this.perspectiveRegions;
    }
 
-   public PlanarRegionsList getRegionsInSensorFrame()
+   public PlanarRegionsList getPerspectiveRegionsInSensorFrame()
    {
-      return this.regionsInSensorFrame;
+      return this.perspectiveRegionsInSensorFrame;
    }
 
-   public PlanarRegionsList getRegionsInWorldFrame()
+   public PlanarRegionsList getPerspectiveRegionsInWorldFrame()
    {
-      return this.regionsInWorldFrame;
+      return this.perspectiveRegionsInWorldFrame;
    }
 
    public BytedecoImage getRealsenseDepthImage()
@@ -374,9 +422,19 @@ public class HumanoidPerceptionModule
       return this.realsenseDepthImage;
    }
 
-   public RapidPlanarRegionsExtractor getRapidRegionsExtractor()
+   public RapidPlanarRegionsExtractor getPerspectiveRegionsExtractor()
    {
-      return this.rapidPlanarRegionsExtractor;
+      return this.perspectiveRegionsExtractor;
+   }
+
+   public RapidPlanarRegionsExtractor getOusterRegionsExtractor()
+   {
+      return this.sphericalRegionsExtractor;
+   }
+
+   public RapidPlanarRegionsExtractor getOrthographicRegionsExtractor()
+   {
+      return this.orthographicRegionsExtractor;
    }
 
    public void destroy()
@@ -384,8 +442,8 @@ public class HumanoidPerceptionModule
       executorService.clearTaskQueue();
       executorService.destroy();
 
-      if (rapidPlanarRegionsExtractor != null)
-         rapidPlanarRegionsExtractor.destroy();
+      if (perspectiveRegionsExtractor != null)
+         perspectiveRegionsExtractor.destroy();
 
       if (localizationAndMappingTask != null)
          localizationAndMappingTask.destroy();

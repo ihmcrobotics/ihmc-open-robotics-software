@@ -7,7 +7,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -38,8 +37,6 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.Throttler;
 
 import java.time.Instant;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -234,19 +231,19 @@ public class TerrainPerceptionProcessWithDriver
             humanoidPerception.initializeRealsenseDepthImage(realsense.getDepthHeight(), realsense.getDepthWidth());
             humanoidPerception.initializePerspectiveRapidRegionsExtractor(realsense.getDepthCameraIntrinsics());
             humanoidPerception.initializeHeightMapExtractor(referenceFrames, realsense.getDepthCameraIntrinsics());
-            humanoidPerception.getRapidRegionsExtractor().setEnabled(true);
+            humanoidPerception.getPerspectiveRegionsExtractor().setEnabled(true);
 
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS,
                                                            humanoidPerception.getRapidHeightMapExtractor().getHeightMapParameters());
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
-                                                           humanoidPerception.getRapidRegionsExtractor().getParameters());
+                                                           humanoidPerception.getPerspectiveRegionsExtractor().getParameters());
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS,
-                                                           humanoidPerception.getRapidRegionsExtractor()
+                                                           humanoidPerception.getPerspectiveRegionsExtractor()
                                                                              .getRapidPlanarRegionsCustomizer()
                                                                              .getPolygonizerParameters());
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS,
-                                                           humanoidPerception.getRapidRegionsExtractor()
+                                                           humanoidPerception.getPerspectiveRegionsExtractor()
                                                                              .getRapidPlanarRegionsCustomizer()
                                                                              .getConcaveHullFactoryParameters());
 
