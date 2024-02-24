@@ -644,7 +644,7 @@ public class RapidPlanarRegionsExtractor
 
       if (debugger.isEnabled())
       {
-         LogTools.info(String.format("Patch Height: %d, Patch Width: %d, Patch Image Height: %d, Patch Image Width: %d, Filter Patch Image Height: %d, Filter Patch Image Width: %d",
+         LogTools.debug(String.format("Patch Height: %d, Patch Width: %d, Patch Image Height: %d, Patch Image Width: %d, Filter Patch Image Height: %d, Filter Patch Image Width: %d",
                                      patchHeight,
                                      patchWidth,
                                      patchImageHeight,
