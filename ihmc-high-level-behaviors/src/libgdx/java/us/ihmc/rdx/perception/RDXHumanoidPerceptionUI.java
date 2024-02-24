@@ -7,9 +7,11 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCond;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
@@ -28,6 +30,7 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PlanarRegionsVisualizer;
 import us.ihmc.ros2.ROS2Node;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderableProvider
@@ -77,11 +80,13 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
    private final ImBoolean rapidRegionsCollapsedHeader = new ImBoolean(true);
    private final ImBoolean sphericalRegionsCollapsedHeader = new ImBoolean(true);
+   private final ImBoolean orthographicRegionsCollapsedHeader = new ImBoolean(true);
    private final ImBoolean heightMapCollapsedHeader = new ImBoolean(true);
    private final ImBoolean mapRegionsCollapsedHeader = new ImBoolean(true);
 
    private final ImBoolean enableRapidRegions = new ImBoolean(false);
    private final ImBoolean enableSphericalRapidRegions = new ImBoolean(false);
+   private final ImBoolean enableOrthographicRapidRegions = new ImBoolean(false);
    private final ImBoolean enableGPUHeightMap = new ImBoolean(true);
    private final ImBoolean enableMapRegions = new ImBoolean(false);
 
@@ -105,6 +110,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    {
       this.rapidRegionsUI = new RDXRapidRegionsUI();
       this.rapidRegionsUI.create(extractor);
+
+      addChild(rapidRegionsUI.getPanel());
    }
 
    public void initializeMapRegionsVisualizer(ROS2Node ros2Node)
@@ -117,9 +124,19 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       visualizers.put("MapRegions", mapRegionsVisualizer);
    }
 
+   public void initializeOrthographicVisualizer(ROS2Node ros2Node)
+   {
+      RDXROS2FramePlanarRegionsVisualizer orthographicRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Orthographic Rapid Regions",
+                                                                                                                  ros2Node,
+                                                                                                                  PerceptionAPI.ORTHOGRAPHIC_RAPID_REGIONS);
+      orthographicRegionsVisualizer.setActive(true);
+      orthographicRegionsVisualizer.create();
+      visualizers.put("OrthographicRegions", orthographicRegionsVisualizer);
+   }
+
    public void initializePerspectiveRegionsVisualizer(ROS2Node ros2Node)
    {
-      RDXROS2FramePlanarRegionsVisualizer perspectiveRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Rapid Regions",
+      RDXROS2FramePlanarRegionsVisualizer perspectiveRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Perspective Rapid Regions",
                                                                                                                  ros2Node,
                                                                                                                  PerceptionAPI.PERSPECTIVE_RAPID_REGIONS);
       perspectiveRegionsVisualizer.setActive(true);
@@ -129,9 +146,9 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
    public void initializeSphericalRegionsVisualizer(ROS2Node ros2Node)
    {
-      RDXROS2FramePlanarRegionsVisualizer sphericalRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Structural Rapid Regions",
-                                                                                                     ros2Node,
-                                                                                                     PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE);
+      RDXROS2FramePlanarRegionsVisualizer sphericalRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Spherical Rapid Regions",
+                                                                                                               ros2Node,
+                                                                                                               PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE);
       sphericalRegionsVisualizer.setActive(true);
       sphericalRegionsVisualizer.create();
       visualizers.put("SphericalRegions", sphericalRegionsVisualizer);
@@ -149,208 +166,6 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       }
       heightMapVisualizer.create();
       visualizers.put("HeightMap", heightMapVisualizer);
-   }
-
-   public void update(TerrainMapData terrainMapData)
-   {
-      Mat contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(terrainMapData.getContactMap());
-      croppedHeightMapPanel.drawDepthImage(terrainMapData.getHeightMap());
-      contactMapImagePanel.drawColorImage(contactHeatMapImage);
-      terrainGridGraphic.update(humanoidPerception.getRapidHeightMapExtractor().getCurrentGroundToWorldTransform());
-
-      for (RDXVisualizer visualizer : visualizers.values())
-      {
-         if (visualizer.getPanel() != null)
-            visualizer.getPanel().getIsShowing().set(visualizer.isActive());
-         if (visualizer.isActive())
-         {
-            visualizer.update();
-         }
-      }
-   }
-
-   public void update()
-   {
-      if (heightMapUI != null)
-      {
-         heightMapUI.update();
-      }
-
-      if (humanoidPerception != null)
-      {
-         if (humanoidPerception.getRapidHeightMapExtractor().isInitialized())
-         {
-            TerrainMapData terrainMap = humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData();
-            Mat contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(terrainMap.getContactMap());
-            croppedHeightMapPanel.drawDepthImage(terrainMap.getHeightMap());
-            terrainCostImagePanel.drawDepthImage(terrainMap.getTerrainCostMap());
-            contactMapImagePanel.drawColorImage(contactHeatMapImage);
-
-            //internalHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat());
-            depthImagePanel.drawDepthImage(humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat());
-            localHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat());
-
-            if (humanoidPerception.getRapidHeightMapExtractor().getComputeSnap())
-            {
-               snapNormalZMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSnapNormalZImage().getBytedecoOpenCVMat());
-               snappedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppableHeightMapImage().getBytedecoOpenCVMat());
-               steppabilityPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppabilityImage().getBytedecoOpenCVMat());
-               steppableRegionAssignmentMat.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionAssignmentMat());
-               steppableRegionBordersMat.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionRingMat());
-               steppabilityConnectionsImage.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppabilityConnectionsImage().getBytedecoOpenCVMat());
-            }
-
-            terrainGridGraphic.update(humanoidPerception.getRapidHeightMapExtractor().getCurrentGroundToWorldTransform());
-         }
-      }
-
-      if (rapidRegionsUI != null)
-         rapidRegionsUI.render();
-
-      if (humanoidPerception != null)
-      {
-         humanoidPerception.setMappingEnabled(enableMapRegions.get());
-         humanoidPerception.setRapidRegionsEnabled(enableRapidRegions.get());
-         humanoidPerception.setHeightMapEnabled(enableGPUHeightMap.get());
-         //humanoidPerception.setSphericalRegionsEnabled(enableSphericalRapidRegions.get());
-      }
-
-      for (RDXVisualizer visualizer : visualizers.values())
-      {
-         if (visualizer.getPanel() != null)
-            visualizer.getPanel().getIsShowing().set(visualizer.isActive());
-         if (visualizer.isActive())
-         {
-            visualizer.update();
-         }
-      }
-   }
-
-   public void renderImGuiWidgets()
-   {
-      remotePerceptionUI.setPropertyChanged();
-
-      if (ImGui.collapsingHeader("Configuration"))
-      {
-         ImGui.indent();
-         remotePerceptionUI.renderImGuiWidgets();
-         ImGui.unindent();
-      }
-
-      if (ImGui.collapsingHeader("Rapid Regions", rapidRegionsCollapsedHeader))
-      {
-         ImGui.indent();
-         ImGui.checkbox("Enable Rapid Regions", enableRapidRegions);
-         RDXVisualizer visualizer = visualizers.get("PerspectiveRegions");
-         if (visualizer != null)
-         {
-            visualizers.get("PerspectiveRegions").renderImGuiWidgets();
-         }
-         ImGui.unindent();
-      }
-
-      if (ImGui.collapsingHeader("Spherical Rapid Regions", sphericalRegionsCollapsedHeader))
-      {
-         ImGui.indent();
-         ImGui.checkbox("Enable Spherical Rapid Regions", enableSphericalRapidRegions);
-         RDXVisualizer visualizer = visualizers.get("SphericalRegions");
-         if (visualizer != null)
-         {
-            visualizers.get("SphericalRegions").renderImGuiWidgets();
-         }
-         ImGui.unindent();
-      }
-
-      // Set the next header to remain open by default
-      ImGui.setNextItemOpen(true, ImGuiCond.Once);
-      if (ImGui.collapsingHeader("GPU Height Map", heightMapCollapsedHeader))
-      {
-         ImGui.indent();
-         ImGui.checkbox("Enable GPU Height Map", enableGPUHeightMap);
-         terrainGridGraphic.renderImGuiWidgets();
-         RDXHeightMapVisualizer heightMapVisualizer = (RDXHeightMapVisualizer) visualizers.get("HeightMap");
-         if (heightMapVisualizer != null)
-         {
-            heightMapVisualizer.renderImGuiWidgets();
-            heightMapUI.renderImGuiWidgets();
-            ImGui.sliderFloat("Threshold Height", thresholdHeight.getData(), 0.0f, 2.0f);
-            if (ImGui.button("Print Local Height Map"))
-            {
-               PerceptionDebugTools.printMat("Local Height Map",
-                                             humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat(),
-                                             4);
-            }
-            if (ImGui.button("Print Cropped Height Map"))
-            {
-               PerceptionDebugTools.printMat("Cropped Height Map",
-                                             humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData().getHeightMap(),4);
-            }
-            if (ImGui.button("Print Internal Height Map"))
-            {
-               PerceptionDebugTools.printMat("Internal Height Map",
-                                             humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat(),
-                                             4);
-            }
-            if (ImGui.button("Print Internal Contact Map"))
-            {
-               PerceptionDebugTools.printMat("Internal Contact Map",
-                                             humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage(),
-                                             4);
-            }
-            if (ImGui.button("Print Terrain Cost Image"))
-            {
-               PerceptionDebugTools.printMat("Terrain Cost Image", humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData().getTerrainCostMap(), 4);
-            }
-            if (ImGui.button("Print Contact Map Image"))
-            {
-               PerceptionDebugTools.printMat("Contact Map Image", humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData().getContactMap(), 4);
-            }
-
-//            if (humanoidPerception.getRapidHeightMapExtractor().getComputeSnap())
-//            {
-//               if (ImGui.button("Print Cropped Snapped Height Map"))
-//               {
-//                  PerceptionDebugTools.printMat("Cropped Snapped Height Map",
-//                                                humanoidPerception.getRapidHeightMapExtractor().getSnapNormalZImage().getBytedecoOpenCVMat(),4);
-//               }
-//            }
-         }
-
-         ImGui.unindent();
-      }
-
-      if (ImGui.collapsingHeader("Map Regions", mapRegionsCollapsedHeader))
-      {
-         ImGui.indent();
-         ImGui.checkbox("Enable Map Regions", enableMapRegions);
-         RDXVisualizer visualizer = visualizers.get("MapRegions");
-         if (visualizer != null)
-         {
-            visualizers.get("MapRegions").renderImGuiWidgets();
-         }
-         ImGui.unindent();
-      }
-   }
-
-   public void destroy()
-   {
-      if (remotePerceptionUI != null)
-         remotePerceptionUI.destroy();
-
-      if (rapidRegionsUI != null)
-         rapidRegionsUI.destroy();
-
-      if (heightMapUI != null)
-         heightMapUI.destroy();
-
-      for (RDXVisualizer visualizer : visualizers.values())
-      {
-         visualizer.destroy();
-      }
-//      PerceptionDebugTools.displayHeightMap("Output Height Map",
-//                                humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getBytedecoOpenCVMat(),
-//                                1, 1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getLocalCellSizeInMeters()));
-      rapidRegionsUI.render();
    }
 
    public void initializeHeightMapUI(ROS2Helper ros2Helper)
@@ -444,6 +259,219 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       }
    }
 
+   public void update(TerrainMapData terrainMapData)
+   {
+      Mat contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(terrainMapData.getContactMap());
+      croppedHeightMapPanel.drawDepthImage(terrainMapData.getHeightMap());
+      contactMapImagePanel.drawColorImage(contactHeatMapImage);
+      terrainGridGraphic.update(humanoidPerception.getRapidHeightMapExtractor().getCurrentGroundToWorldTransform());
+
+      for (RDXVisualizer visualizer : visualizers.values())
+      {
+         if (visualizer.getPanel() != null)
+            visualizer.getPanel().getIsShowing().set(visualizer.isActive());
+         if (visualizer.isActive())
+         {
+            visualizer.update();
+         }
+      }
+   }
+
+   public void update()
+   {
+      if (heightMapUI != null)
+      {
+         heightMapUI.update();
+      }
+
+      if (humanoidPerception != null)
+      {
+         if (humanoidPerception.getRapidHeightMapExtractor().isInitialized())
+         {
+            TerrainMapData terrainMap = humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData();
+            Mat contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(terrainMap.getContactMap());
+            croppedHeightMapPanel.drawDepthImage(terrainMap.getHeightMap());
+            terrainCostImagePanel.drawDepthImage(terrainMap.getTerrainCostMap());
+            contactMapImagePanel.drawColorImage(contactHeatMapImage);
+
+            //internalHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat());
+            depthImagePanel.drawDepthImage(humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat());
+            localHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat());
+
+            if (humanoidPerception.getRapidHeightMapExtractor().getComputeSnap())
+            {
+               snapNormalZMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSnapNormalZImage().getBytedecoOpenCVMat());
+               snappedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppableHeightMapImage().getBytedecoOpenCVMat());
+               steppabilityPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppabilityImage().getBytedecoOpenCVMat());
+               steppableRegionAssignmentMat.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionAssignmentMat());
+               steppableRegionBordersMat.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppableRegionRingMat());
+               steppabilityConnectionsImage.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor()
+                                                                             .getSteppabilityConnectionsImage()
+                                                                             .getBytedecoOpenCVMat());
+            }
+
+            terrainGridGraphic.update(humanoidPerception.getRapidHeightMapExtractor().getCurrentGroundToWorldTransform());
+         }
+      }
+
+      if (rapidRegionsUI != null)
+         rapidRegionsUI.render();
+
+      if (humanoidPerception != null)
+      {
+         humanoidPerception.setMappingEnabled(enableMapRegions.get());
+         humanoidPerception.setRapidRegionsEnabled(enableRapidRegions.get());
+         humanoidPerception.setHeightMapEnabled(enableGPUHeightMap.get());
+         //humanoidPerception.setSphericalRegionsEnabled(enableSphericalRapidRegions.get());
+      }
+
+      for (RDXVisualizer visualizer : visualizers.values())
+      {
+         if (visualizer.getPanel() != null)
+            visualizer.getPanel().getIsShowing().set(visualizer.isActive());
+         if (visualizer.isActive())
+         {
+            visualizer.update();
+         }
+      }
+   }
+
+   public void renderImGuiWidgets()
+   {
+      remotePerceptionUI.setPropertyChanged();
+
+      if (ImGui.collapsingHeader("Configuration"))
+      {
+         ImGui.indent();
+         remotePerceptionUI.renderImGuiWidgets();
+         ImGui.unindent();
+      }
+
+      if (ImGui.collapsingHeader("Rapid Regions", rapidRegionsCollapsedHeader))
+      {
+         ImGui.indent();
+         ImGui.checkbox("Enable Rapid Regions", enableRapidRegions);
+         RDXVisualizer visualizer = visualizers.get("PerspectiveRegions");
+         if (visualizer != null)
+         {
+            visualizers.get("PerspectiveRegions").renderImGuiWidgets();
+         }
+         ImGui.unindent();
+      }
+
+      if (ImGui.collapsingHeader("Spherical Rapid Regions", sphericalRegionsCollapsedHeader))
+      {
+         ImGui.indent();
+         ImGui.checkbox("Enable Spherical Rapid Regions", enableSphericalRapidRegions);
+         RDXVisualizer visualizer = visualizers.get("SphericalRegions");
+         if (visualizer != null)
+         {
+            visualizers.get("SphericalRegions").renderImGuiWidgets();
+         }
+         ImGui.unindent();
+      }
+
+      if (ImGui.collapsingHeader("Orthographic Regions", orthographicRegionsCollapsedHeader))
+      {
+         ImGui.indent();
+         ImGui.checkbox("Enable Orthographic Regions", enableOrthographicRapidRegions);
+         RDXVisualizer visualizer = visualizers.get("OrthographicRegions");
+         if (visualizer != null)
+         {
+            visualizers.get("OrthographicRegions").renderImGuiWidgets();
+         }
+         ImGui.unindent();
+      }
+
+      // Set the next header to remain open by default
+      ImGui.setNextItemOpen(true, ImGuiCond.Once);
+      if (ImGui.collapsingHeader("GPU Height Map", heightMapCollapsedHeader))
+      {
+         ImGui.indent();
+         ImGui.checkbox("Enable GPU Height Map", enableGPUHeightMap);
+         terrainGridGraphic.renderImGuiWidgets();
+         RDXHeightMapVisualizer heightMapVisualizer = (RDXHeightMapVisualizer) visualizers.get("HeightMap");
+         if (heightMapVisualizer != null)
+         {
+            heightMapVisualizer.renderImGuiWidgets();
+            heightMapUI.renderImGuiWidgets();
+            ImGui.sliderFloat("Threshold Height", thresholdHeight.getData(), 0.0f, 2.0f);
+            if (ImGui.button("Print Local Height Map"))
+            {
+               PerceptionDebugTools.printMat("Local Height Map",
+                                             humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat(),
+                                             4);
+            }
+            if (ImGui.button("Print Cropped Height Map"))
+            {
+               PerceptionDebugTools.printMat("Cropped Height Map", humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData().getHeightMap(), 4);
+            }
+            if (ImGui.button("Print Internal Height Map"))
+            {
+               PerceptionDebugTools.printMat("Internal Height Map",
+                                             humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat(),
+                                             4);
+            }
+            if (ImGui.button("Print Internal Contact Map"))
+            {
+               PerceptionDebugTools.printMat("Internal Contact Map", humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage(), 4);
+            }
+            if (ImGui.button("Print Terrain Cost Image"))
+            {
+               PerceptionDebugTools.printMat("Terrain Cost Image", humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData().getTerrainCostMap(), 4);
+            }
+            if (ImGui.button("Print Contact Map Image"))
+            {
+               PerceptionDebugTools.printMat("Contact Map Image", humanoidPerception.getRapidHeightMapExtractor().getTerrainMapData().getContactMap(), 4);
+            }
+
+            //            if (humanoidPerception.getRapidHeightMapExtractor().getComputeSnap())
+            //            {
+            //               if (ImGui.button("Print Cropped Snapped Height Map"))
+            //               {
+            //                  PerceptionDebugTools.printMat("Cropped Snapped Height Map",
+            //                                                humanoidPerception.getRapidHeightMapExtractor().getSnapNormalZImage().getBytedecoOpenCVMat(),4);
+            //               }
+            //            }
+         }
+
+         ImGui.unindent();
+      }
+
+      if (ImGui.collapsingHeader("Map Regions", mapRegionsCollapsedHeader))
+      {
+         ImGui.indent();
+         ImGui.checkbox("Enable Map Regions", enableMapRegions);
+         RDXVisualizer visualizer = visualizers.get("MapRegions");
+         if (visualizer != null)
+         {
+            visualizers.get("MapRegions").renderImGuiWidgets();
+         }
+         ImGui.unindent();
+      }
+   }
+
+   public void destroy()
+   {
+      if (remotePerceptionUI != null)
+         remotePerceptionUI.destroy();
+
+      if (rapidRegionsUI != null)
+         rapidRegionsUI.destroy();
+
+      if (heightMapUI != null)
+         heightMapUI.destroy();
+
+      for (RDXVisualizer visualizer : visualizers.values())
+      {
+         visualizer.destroy();
+      }
+      //      PerceptionDebugTools.displayHeightMap("Output Height Map",
+      //                                humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getBytedecoOpenCVMat(),
+      //                                1, 1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getLocalCellSizeInMeters()));
+
+   }
+
    public RDXRapidRegionsUI getRapidRegionsUI()
    {
       return rapidRegionsUI;
@@ -473,11 +501,12 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       terrainGridGraphic.getRenderables(renderables, pool);
-      for (RDXVisualizer visualizer : visualizers.values())
+      for (Map.Entry<String, RDXVisualizer> entry : visualizers.entrySet())
       {
-         if (visualizer.isActive())
+         LogTools.info("Visualizer: " + entry.getKey() + " is active: " + entry.getValue().isActive());
+         if (entry.getValue().isActive())
          {
-            visualizer.getRenderables(renderables, pool, sceneLevels);
+            entry.getValue().getRenderables(renderables, pool, sceneLevels);
          }
       }
    }

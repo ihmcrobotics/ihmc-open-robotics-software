@@ -367,6 +367,8 @@ public class HumanoidPerceptionModule
       orthographicRegionsInSensorFrame = orthographicRegions.getPlanarRegionsList();
       orthographicRegionsInWorldFrame = orthographicRegionsInSensorFrame.copy();
       orthographicRegionsInWorldFrame.applyTransform(sensorFrame.getTransformToWorldFrame());
+
+      LogTools.warn("Found " + orthographicRegions.getPlanarRegionsList().getNumberOfPlanarRegions() + " orthographic regions");
    }
 
    public void extractOccupancyGrid(List<Point3D> pointCloud,
@@ -402,9 +404,19 @@ public class HumanoidPerceptionModule
       }
    }
 
-   public FramePlanarRegionsList getFramePlanarRegionsResult()
+   public FramePlanarRegionsList getPerspectiveRegions()
    {
       return this.perspectiveRegions;
+   }
+
+   public FramePlanarRegionsList getSphericalRegions()
+   {
+      return this.sphericalRegions;
+   }
+
+   public FramePlanarRegionsList getOrthographicRegions()
+   {
+      return this.orthographicRegions;
    }
 
    public PlanarRegionsList getPerspectiveRegionsInSensorFrame()
