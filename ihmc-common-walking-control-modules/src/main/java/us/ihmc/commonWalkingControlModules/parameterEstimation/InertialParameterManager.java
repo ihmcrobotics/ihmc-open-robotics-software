@@ -349,7 +349,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       areParametersFullyPhysicallyConsistent = new YoBoolean("areParametersFullyPhysicallyConsistent", registry);
 
       maxParameterDeltaRate = new YoDouble("maxParameterDeltaRate", registry);
-      maxParameterDeltaRate.set(1.0);  // TODO: make parameter
+      maxParameterDeltaRate.set(3.0);  // TODO: make parameter
       parameterDeltas = new YoDouble[estimateModelBodies.length][RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
       rateLimitedParameterDeltas = new RateLimitedYoVariable[estimateModelBodies.length][RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
       for (int i = 0; i < estimateModelBodies.length; i++)
@@ -451,6 +451,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       residual.zero();
       bias.zero();
+
+      filter.reset();
    }
 
    public void resetConfig()
