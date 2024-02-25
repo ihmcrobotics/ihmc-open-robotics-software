@@ -16,6 +16,7 @@ import java.awt.*;
 public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
 
 
+    public static final String baseJointName = "floatingBase";
     private static final String torsoName = "torso";
     private static final String leftHipPitchName = "left_hip_pitch";
     private static final String rightHipPitchName = "right_hip_pitch";
@@ -34,6 +35,7 @@ public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
     private final SideDependentList<String> hipPitchNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
     private final SideDependentList<String> thighNames = new SideDependentList<>(leftThighName, rightThighName);
     public static final SideDependentList<String> kneeNames = new SideDependentList<>(leftKneeName, rightKneeName);
+    public static final SideDependentList<String> hipNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
     private final SideDependentList<String> shinNames = new SideDependentList<>(leftShinName, rightShinName);
 
 
@@ -49,7 +51,7 @@ public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
         RigidBodyDefinition elevator = new RigidBodyDefinition("elevator");
         setRootBodyDefinition(elevator);
 
-        floatingBaseDefinition = new PlanarJointDefinition("floatingBase");
+        floatingBaseDefinition = new PlanarJointDefinition(baseJointName);
         elevator.addChildJoint(floatingBaseDefinition);
 
         torsoBodyDef = createTorso();
@@ -71,7 +73,7 @@ public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
 
             // Now add the knee which is a type of a prismatic joint
             Vector3D kneeOffsetInThigh = new Vector3D(0.0, 0.0, -thighLength/2.0);
-            PrismaticJointDefinition kneeJD = new PrismaticJointDefinition(kneeNames.get(robotside), kneeOffsetInThigh, Axis3D.Y );
+            PrismaticJointDefinition kneeJD = new PrismaticJointDefinition(kneeNames.get(robotside), kneeOffsetInThigh, Axis3D.Z );
             thighLink.addChildJoint(kneeJD);
 
             // Now add the lower leg
