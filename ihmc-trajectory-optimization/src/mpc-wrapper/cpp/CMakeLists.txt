@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4)
-project(crocoddyl)
+project(mpc)
 
 add_compile_options(-std=c++17)
 
@@ -14,22 +14,22 @@ set(CMAKE_BUILD_TYPE Debug)
 set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries")
 set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
 
-set(CROCODDYL_SOURCES
+set(MPC_SOURCES
 
-    external/crocoddyl_external.h
-    external/crocoddyl_external.cpp
+    external/mpc_external.h
+    external/mpc_external.cpp
 )
 
-add_library(crocoddyl-wrapper SHARED ${CROCODDYL_SOURCES})
+add_library(mpc-wrapper SHARED ${MPC_SOURCES})
 
-target_include_directories(crocoddyl-wrapper PUBLIC
+target_include_directories(mpc-wrapper PUBLIC
      /usr/include/
      headers/
      launcher/
      external/
 )
 
-install(FILES ${CROCODDYL_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
+install(FILES ${MPC_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
 
 add_executable(DDPSolver launcher/ddp_solver.cpp)
 

@@ -1,4 +1,4 @@
-package us.ihmc.crocoddyl.crocoddylWrapper.presets;
+package us.ihmc.mpc.mpcWrapper.presets;
 
 import org.bytedeco.javacpp.annotation.Platform;
 import org.bytedeco.javacpp.annotation.Properties;
@@ -11,13 +11,13 @@ import org.bytedeco.javacpp.tools.InfoMapper;
             includepath = {"../"},
             resourcepath = "../",
             linkpath = "../",
-            include = {"include/crocoddyl_external.h"},
-            link = {"crocoddyl-wrapper"},
-            preload = {"crocoddyl-wrapper", "jniCrocoddylWrapper"}
+            include = {"include/mpc_external.h"},
+            link = {"mpc-wrapper"},
+            preload = {"mpc-wrapper", "jniMPCWrapper"}
       ),
-      target = "us.ihmc.crocoddyl.crocoddylWrapper.CrocoddylWrapper"
+      target = "us.ihmc.mpc.mpcWrapper.MPCWrapper"
 )
-public class CrocoddylWrapperInfoMapper implements InfoMapper
+public class MPCWrapperInfoMapper implements InfoMapper
 {
    public void map(InfoMap infoMap)
    {
