@@ -26,8 +26,8 @@ public class HeightMapCliffAvoider
 
    private HeightMapData heightMapData;
    private final ConvexPolygon2D scaledFootPolygon = new ConvexPolygon2D();
+   private final ConvexPolygon2D previousScaledFootPolygon = new ConvexPolygon2D();
 
-   private final SideDependentList<ConvexPolygon2D> defaultFootPolygons;
    private final SideDependentList<ConvexPolygon2DReadOnly> scaledFootPolygons = new SideDependentList<>();
    private final YoDouble highestCliffHeight;
 
@@ -42,12 +42,17 @@ public class HeightMapCliffAvoider
    {
       this.parameters = parameters;
       this.snapper = snapper;
-      this.defaultFootPolygons = defaultFootPolygons;
       highestCliffHeight = new YoDouble("highestCliffHeight", registry);
-      updateScaledFootPolygons();
+
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         ConvexPolygon2D scaledFootPolygon = new ConvexPolygon2D(defaultFootPolygons.get(robotSide));
+         addVerticesToFootPolygon(scaledFootPolygon);
+         updateScaledFootPolygons(previousScaledFootPolygon);
+      }
    }
 
-   private void updateScaledFootPolygons()
+   private void updateScaledFootPolygons(ConvexPolygon2D previousScaledFootPolygon)
    {
       double scaledFootPolygonPercentage = parameters.getScaledFootPolygonPercentage();
       if (MathTools.epsilonEquals(previousScaledFootPolygonPercentage, scaledFootPolygonPercentage, 0.001))
@@ -57,8 +62,8 @@ public class HeightMapCliffAvoider
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         ConvexPolygon2D scaledFootPolygon = new ConvexPolygon2D(defaultFootPolygons.get(robotSide));
-         addVerticesToFootPolygon(scaledFootPolygon);
+         ConvexPolygon2D scaledFootPolygon = new ConvexPolygon2D();
+         scaledFootPolygon.set(previousScaledFootPolygon);
          scaledFootPolygon.scale(scaledFootPolygonPercentage);
          scaledFootPolygons.put(robotSide, scaledFootPolygon);
       }
@@ -90,6 +95,8 @@ public class HeightMapCliffAvoider
 
          scaledFootPolygon.update();
       }
+
+      previousScaledFootPolygon.set(scaledFootPolygon);
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
@@ -102,7 +109,8 @@ public class HeightMapCliffAvoider
       if (heightMapData == null || heightMapData.isEmpty())
          return true;
 
-      updateScaledFootPolygons();
+      updateScaledFootPolygons(previousScaledFootPolygon);
+      System.out.println(previousScaledFootPolygon);
 
       /* Transform to step location */
       FootstepSnapDataReadOnly snapData = snapper.snapFootstep(candidateStep);

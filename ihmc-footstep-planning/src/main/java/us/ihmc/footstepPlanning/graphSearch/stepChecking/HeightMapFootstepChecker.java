@@ -139,9 +139,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
             rejectionReason.set(poseRejectionReason);
             return;
          }
-      }
-      else
-      {
+
          // Check height map rejection reasons
          if (!doValidityCheckForHeightMap(candidateStep))
             return;
@@ -154,7 +152,6 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
             rejectionReason.set(poseRejectionReason);
          }
       }
-
 
       // Check step placement
       if (!assumeFlatGround && !isStepPlacementValid(candidateStep, snapData))
