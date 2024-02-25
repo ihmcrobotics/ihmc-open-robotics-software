@@ -85,7 +85,7 @@ class FootstepDataset(Dataset):
                 self.start_side[i] = 0
 
             # valid if has at least 4 non-zero norm steps and start side is 0
-            valid = count_footsteps >= n_steps
+            valid = count_footsteps >= n_steps and self.start_side[i] == 1
 
             if valid:
                 new_height_maps.append(self.height_maps[i])
@@ -495,7 +495,7 @@ def load_dataset(validation_split):
     files = [file for file in files if any(label in file for label in labels)]
     
 
-    files = files[:total_files]
+    files = [files[-1]]
 
     
     datasets = []
@@ -635,7 +635,7 @@ if __name__ == "__main__":
     model_path = home + '/Downloads/Model_Weights/'
     datasets_path = home + '/Downloads/Planning_Datasets/Basic/'
     train = False
-    total_files = 2
+    total_files = 1
 
     # use arg parser 
     import argparse

@@ -41,7 +41,7 @@ def generate_height_map():
 def generate_stair_height_maps():
     stair_height_maps = []
     
-    height_map = create_stairs(center_x=75, center_y=25, step_height=0.25, step_width=25, step_length=50, number_of_steps=6)
+    height_map = create_stairs(center_x=100, center_y=100, step_height=0.25, step_width=25, step_length=150, number_of_steps=6)
     stair_height_maps.append(height_map)
     return stair_height_maps
 
@@ -62,11 +62,7 @@ def create_undulating_terrain_2d(amplitude_x, frequency_x, amplitude_y, frequenc
 
 def create_stairs(center_x, center_y, step_height, step_width, step_length, number_of_steps):
     height_map = np.zeros((201, 201), dtype=np.float32)
-    # use elevate_rectangle to create a height map that represents a top-down view of stairs with four step ups
-
-    # height_map = elevate_rectangle(height_map, 75, 125, 75, 125, 0.25)
-
-    for i in range(int(-number_of_steps/2) + 1, int(number_of_steps/2) + 1):
+    for i in range(int(-number_of_steps/2), int(number_of_steps/2)):
         start_row = center_x - int(step_length / 2)
         end_row = center_x + int(step_length / 2)
         start_col = center_y + (i * step_width)

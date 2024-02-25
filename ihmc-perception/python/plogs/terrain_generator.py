@@ -44,7 +44,7 @@ def count_objects_by_type(objects):
 
     return dict
 
-def create_shifted_copies(filename):
+def create_shifted_copies(objects, filename):
     offset = np.array([0.2, 2.2, 0])
 
     shifted_terrain_objects_1 = copy_and_shift(objects, offset)
@@ -111,6 +111,8 @@ def load_height_maps_from_source(src_data):
 
 if __name__ == "__main__":
     
+    log = True
+
     home = os.path.expanduser("~")
     src_path = home + "/Downloads/HeightMap_Datasets/one_step.hdf5"
     dst_path = home + "/Downloads/HeightMap_Datasets/input_compressed.hdf5"
@@ -121,14 +123,15 @@ if __name__ == "__main__":
     # height_maps = load_height_maps_from_source(src_data)
     height_maps = filter_height_maps(height_maps)
 
+    if log == False:
+        plot_height_maps(height_maps)
 
-    # plot_height_maps(height_maps)
+    else:
+        log_height_maps(dst_data, height_maps, "cropped/height/")
 
-    log_height_maps(dst_data, height_maps, "cropped/height/")
+        print("Total Final Maps: ", len(height_maps))
+        print("Source File: ", src_path)
+        print("Destination File: ", dst_path)
 
-    print("Total Final Maps: ", len(height_maps))
-    print("Source File: ", src_path)
-    print("Destination File: ", dst_path)
-
-    src_data.close()
-    dst_data.close()
+        src_data.close()
+        dst_data.close()
