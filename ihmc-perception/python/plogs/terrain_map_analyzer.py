@@ -52,8 +52,7 @@ def plot_and_compute_stats(height_map, debug=True, display=True, label="Terrain 
 
     if display:
 
-        print(height_map.tolist())
-
+        
         plot_terrain_maps(height_map, terrain_cost, contact_map)
 
         code = cv2.waitKeyEx(0)

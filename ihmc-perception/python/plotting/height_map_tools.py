@@ -6,19 +6,19 @@ def generate_height_map():
     height_maps = dict()
 
     # create a flat terrain
-    flat_height_map = np.zeros((200, 200), dtype=np.float32)
+    flat_height_map = np.zeros((201, 201), dtype=np.float32)
     height_maps["flat"] = flat_height_map
 
     # create stairs
-    stairs_height_map = create_stairs(center_x=75, center_y=25, step_height=0.2, step_width=25, step_length=50, number_of_steps=6)
+    stairs_height_map = create_stairs(center_x=75, center_y=25, step_height=0.25, step_width=25, step_length=50, number_of_steps=6)
     height_maps["stairs"] = stairs_height_map
 
     # create a at the exact same place as the stairs to convert it to a ramp
     ramp_height_map = ramp_rectangle(row_start=75, row_end=125, col_start=25, col_end=175, offset=0.0, gradient=0.01, direction=1)
     height_maps["ramp"] = ramp_height_map
     
-    # create a full ramp of 200 x 200
-    full_ramp_height_map = ramp_rectangle(row_start=0, row_end=200, col_start=0, col_end=200, offset=0.0, gradient=0.001, direction=1)
+    # create a full ramp of 201 x 201
+    full_ramp_height_map = ramp_rectangle(row_start=0, row_end=201, col_start=0, col_end=201, offset=0.0, gradient=0.001, direction=1)
     height_maps["full_ramp"] = full_ramp_height_map
 
     # create undulating terrain with sinusoidal function in just one direction
@@ -31,28 +31,28 @@ def generate_height_map():
 
 
     # create a random block field
-    random_block_field_height_map = create_random_block_field(number_of_blocks=10, block_size=10, block_height=0.2)
+    random_block_field_height_map = create_random_block_field(number_of_blocks=10, block_size=10, block_height=0.25)
     height_maps["random_block_field"] = random_block_field_height_map
 
     return height_maps
 
 
 def create_undulating_terrain_1d(amplitude, frequency):
-    height_map = np.zeros((200, 200), dtype=np.float32)
+    height_map = np.zeros((201, 201), dtype=np.float32)
     for i in range(height_map.shape[0]):
         for j in range(height_map.shape[1]):
             height_map[i, j] = amplitude * np.sin(frequency * i)
     return height_map
 
 def create_undulating_terrain_2d(amplitude_x, frequency_x, amplitude_y, frequency_y):
-    height_map = np.zeros((200, 200), dtype=np.float32)
+    height_map = np.zeros((201, 201), dtype=np.float32)
     for i in range(height_map.shape[0]):
         for j in range(height_map.shape[1]):
             height_map[i, j] = amplitude_x * np.sin(frequency_x * i) + amplitude_y * np.sin(frequency_y * j)
     return height_map
 
 def create_stairs(center_x, center_y, step_height, step_width, step_length, number_of_steps):
-    height_map = np.zeros((200, 200), dtype=np.float32)
+    height_map = np.zeros((201, 201), dtype=np.float32)
     # use elevate_rectangle to create a height map that represents a top-down view of stairs with four step ups
     for i in range(number_of_steps):
         height_map = elevate_rectangle(center_x, center_x + step_length, center_y, center_y + step_width, 0.1 + step_height * i)
@@ -62,12 +62,12 @@ def create_stairs(center_x, center_y, step_height, step_width, step_length, numb
     
 
 def elevate_rectangle(row_start, row_end, col_start, col_end, offset):
-    height_map = np.zeros((200, 200), dtype=np.float32)
+    height_map = np.zeros((201, 201), dtype=np.float32)
     height_map[row_start:row_end, col_start:col_end] = offset
     return height_map
 
 def ramp_rectangle(row_start, row_end, col_start, col_end, offset, gradient, direction):
-    height_map = np.zeros((200, 200), dtype=np.float32)
+    height_map = np.zeros((201, 201), dtype=np.float32)
     for i in range(height_map.shape[0]):
         for j in range(height_map.shape[1]):
             if i > row_start and i < row_end and j > col_start and j < col_end:
@@ -78,10 +78,10 @@ def ramp_rectangle(row_start, row_end, col_start, col_end, offset, gradient, dir
 
 # use elevate_rectangle to generate N random blocks of size 10 x 10 with specified height
 def create_random_block_field(number_of_blocks, block_size, block_height):
-    height_map = np.zeros((200, 200), dtype=np.float32)
+    height_map = np.zeros((201, 201), dtype=np.float32)
     for i in range(number_of_blocks):
-        row_start = np.random.randint(0, 200)
-        col_start = np.random.randint(0, 200)
+        row_start = np.random.randint(0, 201)
+        col_start = np.random.randint(0, 201)
         height_map[row_start:row_start + block_size, col_start:col_start + block_size] = block_height
     return height_map
 
@@ -155,11 +155,13 @@ def plot_terrain_maps(height_map, terrain_cost, contact_map):
 
     # create colored image for plotting
     height_map_image = np.stack([height_map, height_map, height_map], axis=2).astype(np.uint8)
+    height_map_image = cv2.convertScaleAbs(height_map_image, alpha=4, beta=2)
     
     # brighten the height map for visualization
     # height_map_image = cv2.convertScaleAbs(height_map_image, alpha=255, beta=0)
 
     # convert to opencv colored image
+    contact_map = contact_map / np.max(contact_map) * 255
     contact_map = np.stack([contact_map, contact_map, contact_map], axis=2).astype(np.uint8)
 
     # Visualize the contact map with green color

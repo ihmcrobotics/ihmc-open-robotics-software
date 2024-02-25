@@ -321,3 +321,10 @@ def show_height_map(height_map, delay):
     if code == 113 or code == 1048689:
         exit()
     
+def load_height_maps(data, count):
+    height_maps = []    
+    total_height_maps = len(data.keys()) if len(data.keys()) < count else count
+    for i in range(total_height_maps):
+        height_map = load_raw_height_maps(data, "matrix_" + str(i))
+        height_maps.append(height_map)
+    return height_maps
