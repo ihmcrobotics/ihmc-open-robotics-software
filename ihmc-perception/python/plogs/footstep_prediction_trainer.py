@@ -85,7 +85,7 @@ class FootstepDataset(Dataset):
                 self.start_side[i] = 0
 
             # valid if has at least 4 non-zero norm steps and start side is 0
-            valid = count_footsteps >= n_steps and self.start_side[i] == 1
+            valid = count_footsteps >= n_steps
 
             if valid:
                 new_height_maps.append(self.height_maps[i])
@@ -478,7 +478,7 @@ def visualize_output(height_map_input, linear_input, final_output, contact_map_u
 
 def load_dataset(validation_split):
     home = os.path.expanduser('~')
-    path = home + '/Downloads/Planning_Datasets/'
+    path = home + '/Downloads/Planning_Datasets/Basic/'
     
     # input_files = ['20231018_135001_PerceptionLog.hdf5', 
     #                     '20231018_143108_PerceptionLog.hdf5']
@@ -633,7 +633,7 @@ if __name__ == "__main__":
 
     home = os.path.expanduser('~')
     model_path = home + '/Downloads/Model_Weights/'
-    datasets_path = home + '/Downloads/Planning_Datasets/'
+    datasets_path = home + '/Downloads/Planning_Datasets/Basic/'
     train = False
     total_files = 2
 
@@ -642,6 +642,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Footstep Prediction Trainer')
     parser.add_argument('--train', action='store_true', help='Train the model')
     parser.add_argument('--files', type=int, help='Total Files to Load')
+    parser.add_argument('--raw', action='store_true', help='Raw Visualization')
 
     args = parser.parse_args()
     if args.files:
@@ -654,7 +655,7 @@ if __name__ == "__main__":
     # load dataset
     train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
-    visualize_raw = False
+    visualize_raw = args.raw
 
     if visualize_raw:
         visualize_dataset(train_dataset)    

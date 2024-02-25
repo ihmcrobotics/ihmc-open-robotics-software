@@ -324,7 +324,14 @@ def show_height_map(height_map, delay):
 def load_height_maps(data, count):
     height_maps = []    
     total_height_maps = len(data.keys()) if len(data.keys()) < count else count
-    for i in range(total_height_maps):
-        height_map = load_raw_height_maps(data, "matrix_" + str(i))
-        height_maps.append(height_map)
+    # for i in range(total_height_maps):
+    height_map = load_raw_height_maps(data, "matrix")
+
+    # pad with 0s if less than 201 x 201
+    if height_map.shape[0] < 201:
+        height_map = np.pad(height_map, (0, 201 - height_map.shape[0]), 'constant')
+
+    print("Height Map Shape: ", height_map.shape)
+
+    height_maps.append(height_map)
     return height_maps

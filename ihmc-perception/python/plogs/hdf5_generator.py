@@ -160,10 +160,6 @@ def log_height_map(data, height_map, dataset):
     height_map = (height_map - 3.2768) * 10000
     height_map = np.array(height_map).astype(np.uint16)
 
-    print("Min: ", np.min(height_map), "Max: ", np.max(height_map), "Mean: ", np.mean(height_map), "Std: ", np.std(height_map))
-
-
-
     encoded_img = np.array((cv2.imencode('.png', height_map))[1])
     data.create_dataset(dataset, shape=encoded_img.shape, data=encoded_img)
 

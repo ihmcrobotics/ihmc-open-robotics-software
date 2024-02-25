@@ -88,15 +88,11 @@ def load_rdx_environment():
     # 'RDXLabFloorObject'}
 
 
-def generate_procedural_terrain():
-    maps = generate_height_map()
+def plot_height_maps(height_maps):
     number = 0
-    for name, height_map in maps.items():
-        print("Number", number, "Terrain:", name)
-
+    for height_map in height_maps:
 
         plot_and_compute_stats(height_map, display=True)        
-        
         compute_pattern_stats(height_map)
         
         print("\n\n")
@@ -116,16 +112,21 @@ def load_height_maps_from_source(src_data):
 if __name__ == "__main__":
     
     home = os.path.expanduser("~")
-    src_path = home + "/Downloads/HeightMap_Datasets/horizontal_stairs.hdf5"
-    dst_path = home + "/Downloads/HeightMap_Datasets/random_height_maps.hdf5"
+    src_path = home + "/Downloads/HeightMap_Datasets/one_step.hdf5"
+    dst_path = home + "/Downloads/HeightMap_Datasets/input_compressed.hdf5"
     src_data = h5py.File(src_path, "r")
     dst_data = h5py.File(dst_path, "w")
 
-    # maps = generate_height_map()
-    height_maps = load_height_maps_from_source(src_data)
+    height_maps = generate_stair_height_maps()
+    # height_maps = load_height_maps_from_source(src_data)
     height_maps = filter_height_maps(height_maps)
+
+
+    # plot_height_maps(height_maps)
+
     log_height_maps(dst_data, height_maps, "cropped/height/")
 
+    print("Total Final Maps: ", len(height_maps))
     print("Source File: ", src_path)
     print("Destination File: ", dst_path)
 
