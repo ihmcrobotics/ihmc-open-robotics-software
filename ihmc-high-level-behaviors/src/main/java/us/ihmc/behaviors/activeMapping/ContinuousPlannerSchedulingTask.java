@@ -39,7 +39,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousPlannerSchedulingTask
 {
-   private final static int MAX_STEPS_PER_SESSION = 20;
+   //TODO this will limit the number of steps in a session, will cause the state machine to stop
+   private final static int MAX_STEPS_PER_SESSION = 50;
    private final static long CONTINUOUS_PLANNING_DELAY_MS = 16;
 
    private ContinuousWalkingState state = ContinuousWalkingState.NOT_STARTED;
