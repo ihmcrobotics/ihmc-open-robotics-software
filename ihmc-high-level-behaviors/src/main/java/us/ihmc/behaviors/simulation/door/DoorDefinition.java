@@ -38,6 +38,7 @@ public class DoorDefinition extends RobotDefinition
    private OneDoFJointState initialBoltState;
 
    private final DoorPanelDefinition doorPanelDefinition = new DoorPanelDefinition();
+   private final DoorFrameDefinition doorFrameDefinition = new DoorFrameDefinition();
 
    public DoorDefinition()
    {
@@ -47,6 +48,11 @@ public class DoorDefinition extends RobotDefinition
    public DoorPanelDefinition getDoorPanelDefinition()
    {
       return doorPanelDefinition;
+   }
+
+   public DoorFrameDefinition getDoorFrameDefinition()
+   {
+      return doorFrameDefinition;
    }
 
    public void build()
@@ -59,7 +65,7 @@ public class DoorDefinition extends RobotDefinition
       initialSixDoFState.setVelocity(new Vector3D(), new Vector3D());
       rootJointDefinition.setInitialJointState(initialSixDoFState);
 
-      DoorFrameDefinition doorFrameDefinition = new DoorFrameDefinition();
+      doorFrameDefinition.build();
       rootJointDefinition.setSuccessor(doorFrameDefinition);
 
       RevoluteJointDefinition doorHingeJoint = new RevoluteJointDefinition("doorHingeJoint");

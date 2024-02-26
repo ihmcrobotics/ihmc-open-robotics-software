@@ -56,6 +56,7 @@ public class SimulationSceneObjectRobotBuilders
    {
       DoorDefinition doorDefinition = new DoorDefinition();
       doorDefinition.getDoorPanelDefinition().setAddArUcoMarkers(true);
+      doorDefinition.getDoorFrameDefinition().setAddArUcoMarkers(true);
       doorDefinition.build();
       // doorDefinition.getInitialHingeState().setEffort(15.0);
       return doorDefinition;

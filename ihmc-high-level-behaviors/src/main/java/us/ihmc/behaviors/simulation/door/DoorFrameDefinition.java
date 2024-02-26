@@ -15,10 +15,20 @@ import static us.ihmc.perception.sceneGraph.multiBodies.door.DoorModelParameters
 
 public class DoorFrameDefinition extends RigidBodyDefinition
 {
+   private boolean addArUcoMarkers = false;
+
    public DoorFrameDefinition()
    {
       super("frameBody");
+   }
 
+   public void setAddArUcoMarkers(boolean addFiducials)
+   {
+      this.addArUcoMarkers = addFiducials;
+   }
+
+   public void build()
+   {
       double pillarSizeX = DOOR_FRAME_PILLAR_SIZE_X;
       double pillarSizeY = DOOR_FRAME_PILLAR_SIZE_X;
       double pillarSizeZ = DOOR_FRAME_PILLAR_SIZE_Z;
@@ -41,6 +51,14 @@ public class DoorFrameDefinition extends RigidBodyDefinition
       ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition(DoorSceneNodeDefinitions.DOOR_FRAME_VISUAL_MODEL_FILE_PATH);
       frameModelVisualDefinition.setGeometryDefinition(geometryDefinition);
       addVisualDefinition(frameModelVisualDefinition);
+
+      if (addArUcoMarkers)
+      {
+         VisualDefinition arUcoMarkersModelVisualDefinition = new VisualDefinition();
+         ModelFileGeometryDefinition fiducialGeometryDefinition = new ModelFileGeometryDefinition("environmentObjects/door/doorFrame/DoorFrameArUcoMarkers.g3dj");
+         arUcoMarkersModelVisualDefinition.setGeometryDefinition(fiducialGeometryDefinition);
+         addVisualDefinition(arUcoMarkersModelVisualDefinition);
+      }
 
       Point3D hingeSidePostOffset = new Point3D();
       hingeSidePostOffset.add(0.0, -DOOR_FRAME_HINGE_OFFSET, 0.0);

@@ -1,0 +1,160 @@
+{
+	"version": [  0,   1], 
+	"id": "", 
+	"meshes": [
+		{
+			"attributes": ["POSITION", "NORMAL", "TEXCOORD0"], 
+			"vertices": [
+				 0.099100,  0.099100,  0.000000,  0.000000,  0.000000,  1.000000,  1.000000,  0.000000, 
+				-0.099100,  0.099100,  0.000000,  0.000000,  0.000000,  1.000000,  0.000000,  0.000000, 
+				-0.099100, -0.099100,  0.000000,  0.000000,  0.000000,  1.000000,  0.000000,  1.000000, 
+				 0.099100, -0.099100,  0.000000,  0.000000,  0.000000,  1.000000,  1.000000,  1.000000, 
+				 0.115000,  0.115000,  0.000000,  0.000000,  0.000000,  1.000000,  1.000000,  0.000000, 
+				-0.115000,  0.115000,  0.000000,  0.000000,  0.000000,  1.000000,  0.000000,  0.000000, 
+				-0.115000, -0.115000,  0.000000,  0.000000,  0.000000,  1.000000,  0.000000,  1.000000, 
+				 0.115000, -0.115000,  0.000000,  0.000000,  0.000000,  1.000000,  1.000000,  1.000000
+			], 
+			"parts": [
+				{
+					"id": "Plane.001_part1", 
+					"type": "TRIANGLES", 
+					"indices": [  0,   1,   2,   0,   2,   3]
+				}, 
+				{
+					"id": "Plane.002_part1", 
+					"type": "TRIANGLES", 
+					"indices": [  4,   5,   6,   4,   6,   7]
+				}, 
+				{
+					"id": "Plane.003_part1", 
+					"type": "TRIANGLES", 
+					"indices": [  4,   5,   6,   4,   6,   7]
+				}, 
+				{
+					"id": "Plane.004_part1", 
+					"type": "TRIANGLES", 
+					"indices": [  0,   1,   2,   0,   2,   3]
+				}
+			]
+		}
+	], 
+	"materials": [
+		{
+			"id": "Material.001", 
+			"ambient": [ 1.0,  1.0,  1.0],
+			"diffuse": [ 1.000000,  1.000000,  1.000000],
+			"emissive": [ 0.000000,  0.000000,  0.000000],
+			"opacity":  1.000000,
+			"specular": [ 0.1, 0.1, 0.1],
+			"shininess":  0.000001,
+			"textures": [
+				{
+					"id": "base_color_texture", 
+					"filename": "4x4_1000-5.png", 
+					"type": "DIFFUSE"
+				}
+			]
+		}, 
+		{
+			"id": "Material.002", 
+			"ambient": [ 1.0,  1.0,  1.0],
+			"diffuse": [ 1.000000,  1.000000,  1.000000],
+			"emissive": [ 0.000000,  0.000000,  0.000000],
+			"opacity":  1.000000,
+			"specular": [ 0.1, 0.1, 0.1],
+			"shininess":  0.000001,
+			"textures": [
+				{
+					"id": "base_color_texture", 
+					"filename": "WhiteSquare.png", 
+					"type": "DIFFUSE"
+				}
+			]
+		}, 
+		{
+			"id": "Material.003", 
+			"ambient": [ 1.0,  1.0,  1.0],
+			"diffuse": [ 1.000000,  1.000000,  1.000000],
+			"emissive": [ 0.000000,  0.000000,  0.000000],
+			"opacity":  1.000000,
+			"specular": [ 0.1, 0.1, 0.1],
+			"shininess":  0.000001,
+			"textures": [
+				{
+					"id": "base_color_texture", 
+					"filename": "WhiteSquare.png", 
+					"type": "DIFFUSE"
+				}
+			]
+		}, 
+		{
+			"id": "Material.004", 
+			"ambient": [ 1.0,  1.0,  1.0],
+			"diffuse": [ 1.000000,  1.000000,  1.000000],
+			"emissive": [ 0.000000,  0.000000,  0.000000],
+			"opacity":  1.000000,
+			"specular": [ 0.1, 0.1, 0.1],
+			"shininess":  0.000001,
+			"textures": [
+				{
+					"id": "base_color_texture", 
+					"filename": "4x4_1000-4.png", 
+					"type": "DIFFUSE"
+				}
+			]
+		}
+	], 
+	"nodes": [
+		{
+			"id": "PullDoorFrameMarkerID5", 
+			"rotation": [ 0.500000, -0.500000, -0.500000,  0.500000], 
+			"translation": [-0.034000,  1.224200,  1.399100], 
+			"parts": [
+				{
+					"meshpartid": "Plane.001_part1", 
+					"materialid": "Material.001", 
+					"uvMapping": [[]]
+				}
+			]
+		}, 
+		{
+			"id": "PullMarkerBackDrop", 
+			"rotation": [-0.000000, -0.707107,  0.000000,  0.707107], 
+			"scale": [ 1.138508,  1.138508,  1.000000], 
+			"translation": [-0.033388,  1.226245,  1.398306], 
+			"parts": [
+				{
+					"meshpartid": "Plane.002_part1", 
+					"materialid": "Material.002", 
+					"uvMapping": [[]]
+				}
+			]
+		}, 
+		{
+			"id": "PushDoorMarkerBackDrop", 
+			"rotation": [ 0.707107, -0.000000,  0.707107,  0.000000], 
+			"scale": [ 1.138508,  1.138508,  1.000000], 
+			"translation": [ 0.016000,  1.224200,  1.398306], 
+			"parts": [
+				{
+					"meshpartid": "Plane.003_part1", 
+					"materialid": "Material.003", 
+					"uvMapping": [[]]
+				}
+			]
+		}, 
+		{
+			"id": "PushDoorFrameMarkerID4", 
+			"rotation": [ 0.500000,  0.500000,  0.500000,  0.500000], 
+			"translation": [ 0.016612,  1.226245,  1.399100], 
+			"parts": [
+				{
+					"meshpartid": "Plane.004_part1", 
+					"materialid": "Material.004", 
+					"uvMapping": [[]]
+				}
+			]
+		}
+	], 
+	"animations": []
+}

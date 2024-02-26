@@ -78,6 +78,7 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
 
       DoorDefinition doorDefinition = new DoorDefinition();
       doorDefinition.getDoorPanelDefinition().setAddArUcoMarkers(true);
+      doorDefinition.getDoorFrameDefinition().setAddArUcoMarkers(true);
       doorDefinition.build();
 
       // Pull door
