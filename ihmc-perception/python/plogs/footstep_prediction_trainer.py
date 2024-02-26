@@ -279,13 +279,13 @@ class FootstepPredictor(Module):
         l1 = F.leaky_relu(l1)
         
         # print shape, mean, min, max and stddev
-        # print(
-        #     # "Shapes: ", h1.shape, l1.shape,
-        #     "Mean: ", round(h1.mean().item(), 3), round(l1.mean().item(), 3), 
-        #     "Min: ", round(h1.min().item(), 3), round(l1.min().item(), 3), 
-        #     "Max: ", round(h1.max().item(), 3), round(l1.max().item(), 3), 
-        #     "Stddev: ", round(h1.std().item(), 3), round(l1.std().item(), 3)
-        # )
+        print(
+            # "Shapes: ", h1.shape, l1.shape,
+            "Mean: ", round(h1.mean().item(), 3), round(l1.mean().item(), 3), 
+            "Min: ", round(h1.min().item(), 3), round(l1.min().item(), 3), 
+            "Max: ", round(h1.max().item(), 3), round(l1.max().item(), 3), 
+            "Stddev: ", round(h1.std().item(), 3), round(l1.std().item(), 3)
+        )
 
         # flatten x1 and concatenate with x2
         x = torch.cat((h1, l1), dim=1)
@@ -339,7 +339,7 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
 
     # define optimizer
     # optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay = 1e-8)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-8)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-6)
 
     # train the model
     for epoch in range(epochs):
@@ -363,9 +363,9 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
 
                 # running_loss+=loss.item()
 
-                # average_loss = running_loss/(y.size(0)*(i+1))
-                # loop.set_description(f'Epoch [{epoch+1}/{epochs}]')
-                # loop.set_postfix(loss=average_loss)
+                average_loss = running_loss/(y.size(0)*(i+1))
+                loop.set_description(f'Epoch [{epoch+1}/{epochs}]')
+                loop.set_postfix(loss=average_loss)
                 # writer.add_scalar('training loss', average_loss, epoch * len(train_loader) + i)
 
                 running_loss += loss.item()
@@ -385,8 +385,6 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
                 loss = criterion(y_pred, y, cm)
                 valid_loss = loss.item()
                 total_validation_loss += valid_loss
-
-                print("Validiation loss: ", valid_loss)
         
         average_validation_loss = total_validation_loss / len(val_loader)
         print("Validation Set: ", len(val_loader), "\tValidiation loss: ", average_validation_loss)
@@ -394,7 +392,7 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
 
     # save the model
     ckpt_count = len([name for name in os.listdir(model_path) if name.endswith('.pt')])
-    file_name = 'footstep_predictor' + '_' + str(ckpt_count)
+    file_name = 'footstep_predictor'
     torch.save(model.state_dict(), model_path + file_name + '.pt')
     torch.onnx.export(model, (x1[0].unsqueeze(0), x2[0].unsqueeze(0)), model_path + file_name + '.onnx', verbose=False)
 
@@ -415,7 +413,7 @@ def load_validate(val_dataset, batch_size, model_path):
 
     print("Loading Model: ", model_files[-1])
 
-    model.load_state_dict(torch.load(model_path + model_files[-1]))
+    model.load_state_dict(torch.load(model_path + "footstep_predictor.pt"))
     model.eval()
     model.to(device)
 
@@ -492,7 +490,7 @@ def load_dataset(validation_split):
     files = [file for file in files if any(label in file for label in labels)]
     
 
-    files = ["20240225_182635_Generated_MCFP_0_0.hdf5"]
+    files = [files[-1]]
 
     
     datasets = []
@@ -524,6 +522,8 @@ def visualize_dataset(dataset, batch_size=1):
         visualize_output(height_map_input, linear_input, target_output, contact_map, terrain_cost)
 
 def footstep_loss(output, target, contact_map):
+    
+    return torch.nn.L1Loss()(output, target)
 
     # print("Output Shape: ", output.shape, "Target Shape: ", target.shape, "Contact Map Shape: ", contact_map.shape)
 
@@ -662,7 +662,7 @@ if __name__ == "__main__":
     if train:
         # train and store model
         criterion = footstep_loss
-        train_store(train_dataset, val_dataset, batch_size=batch_size, epochs=100, criterion=criterion, model_path=model_path)
+        train_store(train_dataset, val_dataset, batch_size=batch_size, epochs=30, criterion=criterion, model_path=model_path)
 
     else:
         # load and validate model
