@@ -277,11 +277,13 @@ class FootstepPredictor(Module):
         l1 = F.leaky_relu(l1)
         
         # print shape, mean, min, max and stddev
-        print("Shapes: ", h1.shape, l1.shape,
-            "Mean: ", round(h1.mean().item(), 3), round(l1.mean().item(), 3), 
-            "Min: ", round(h1.min().item(), 3), round(l1.min().item(), 3), 
-            "Max: ", round(h1.max().item(), 3), round(l1.max().item(), 3), 
-            "Stddev: ", round(h1.std().item(), 3), round(l1.std().item(), 3))
+        # print(
+        #     # "Shapes: ", h1.shape, l1.shape,
+        #     "Mean: ", round(h1.mean().item(), 3), round(l1.mean().item(), 3), 
+        #     "Min: ", round(h1.min().item(), 3), round(l1.min().item(), 3), 
+        #     "Max: ", round(h1.max().item(), 3), round(l1.max().item(), 3), 
+        #     "Stddev: ", round(h1.std().item(), 3), round(l1.std().item(), 3)
+        # )
 
         # flatten x1 and concatenate with x2
         x = torch.cat((h1, l1), dim=1)
@@ -318,7 +320,7 @@ class FootstepPredictor(Module):
 
         return x
 
-def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model_path):
+def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model_path, warm_start=False):
     
     train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
     val_loader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
@@ -326,27 +328,23 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
     output_size = train_dataset[0][2].shape[0]
     model = FootstepPredictor(input_size, output_size).to(device)
 
-    # load weights from previously trained model to start from where it left off
-    # model_files = sorted([name for name in os.listdir(model_path) if name.endswith('.pt')])
-    # if len(model_files) > 0:
-    #     print("Loading Model: ", model_files[-1])
-    #     model.load_state_dict(torch.load(model_path + model_files[-1]))
+    if warm_start:
+        # load weights from previously trained model to start from where it left off
+        model_files = sorted([name for name in os.listdir(model_path) if name.endswith('.pt')])
+        if len(model_files) > 0:
+            print("Loading Model: ", model_files[-1])
+            model.load_state_dict(torch.load(model_path + model_files[-1]))
 
     # define optimizer
     # optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay = 1e-8)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-8)
 
     # train the model
     for epoch in range(epochs):
-        # gc.collect()
-        # torch.cuda.empty_cache()
-
         loop = tqdm(train_loader, bar_format='{l_bar}{bar:30}{r_bar}{bar:-30b}')
 
-        running_loss=0
+        running_loss = 0
         for i, (x1, x2, y, cm, tc) in enumerate(loop):
-
-            print("Batch Index: ", i, end=" ")
 
             if x1.shape[0] > 1:
                 x1 = x1.to(device)
@@ -355,45 +353,42 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
                 cm = cm.to(device)
 
                 optimizer.zero_grad()
-                # Forward pass
                 y_pred = model(x1, x2)
                 loss = criterion(y_pred, y, cm)
 
-                # Backward pass and optimize
                 loss.backward()
                 optimizer.step()
 
-                # calculate running loss
                 # running_loss+=loss.item()
-
-                print("Loss: ", loss.item())
-
 
                 # average_loss = running_loss/(y.size(0)*(i+1))
                 # loop.set_description(f'Epoch [{epoch+1}/{epochs}]')
                 # loop.set_postfix(loss=average_loss)
                 # writer.add_scalar('training loss', average_loss, epoch * len(train_loader) + i)
 
-        running_loss = (loss.item() + running_loss ) / (epoch + 1)
+                running_loss += loss.item()
 
-        print("Running Loss: ", running_loss)
+        average_training_loss = running_loss / len(train_loader)
+        print("Epoch: ", epoch, "Training Loss: ", average_training_loss, end="\t")
 
-        # for x1, x2, y, cm, tc in val_loader:
-        #     # send data to gpu
-        #     if x1.shape[0] > 1:
-        #         x1 = x1.to(device)
-        #         x2 = x2.to(device)
-        #         y = y.to(device)
-        #         model.eval()
-        #         y_pred = model(x1, x2)
-        #         loss = criterion(y_pred, y, cm)
-        #         valid_loss = loss.item()
-        #         # print("Validiation loss - ",valid_loss,"\n")
-        #         # writer.add_scalar('validation loss', valid_loss, epoch * len(train_loader) + i)
+        total_validation_loss = 0
+        for x1, x2, y, cm, tc in val_loader:
+            # send data to gpu
+            if x1.shape[0] > 1:
+                x1 = x1.to(device)
+                x2 = x2.to(device)
+                y = y.to(device)
+                model.eval()
+                y_pred = model(x1, x2)
+                loss = criterion(y_pred, y, cm)
+                valid_loss = loss.item()
+                total_validation_loss += valid_loss
 
-        # del x1, x2, y, y_pred, loss
-        # gc.collect()
-        # torch.cuda.empty_cache()
+                print("Validiation loss: ", valid_loss)
+        
+        average_validation_loss = total_validation_loss / len(val_loader)
+        print("Validation Set: ", len(val_loader), "\tValidiation loss: ", average_validation_loss)
+        # writer.add_scalar('validation loss', valid_loss, epoch * len(train_loader) + i)
 
     # save the model
     ckpt_count = len([name for name in os.listdir(model_path) if name.endswith('.pt')])
@@ -515,8 +510,8 @@ def load_dataset(validation_split):
 
     return train_dataset, val_dataset
 
-def visualize_dataset(dataset):
-    loader = DataLoader(dataset, batch_size=1, shuffle=True)
+def visualize_dataset(dataset, batch_size=1):
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     for i, (height_map_input, linear_input, target_output, contact_map, terrain_cost) in enumerate(loader):
 
         height_map_input = height_map_input.to(device)
@@ -540,39 +535,39 @@ def footstep_loss(output, target, contact_map):
 
     #take all rows but only 1st, 4th, 7th, 10th columns
 
-    fx = (output[:,[0, 3, 6, 9]])
-    fx = (fx * 50 + 100)
-    fy = (output[:,[1, 4, 7, 10]])
-    fy = (fy * 50 + 100)
+    # fx = (output[:,[0, 3, 6, 9]])
+    # fx = (fx * 50 + 100)
+    # fy = (output[:,[1, 4, 7, 10]])
+    # fy = (fy * 50 + 100)
 
-    # put limits on the indices
-    fx = torch.clamp(fx, 0, 199)
-    fy = torch.clamp(fy, 0, 199)
+    # # put limits on the indices
+    # fx = torch.clamp(fx, 0, 199)
+    # fy = torch.clamp(fy, 0, 199)
 
-    # cast to long
-    fx = fx.long()
-    fy = fy.long()
+    # # cast to long
+    # fx = fx.long()
+    # fy = fy.long()
 
-
-
-    sum_loss = []
-    for itr in range(len(output)):
-        per_image_score = 0
-        for itr2 in range(n_steps):
-            per_image_score += contact_map[itr, 0, fx[itr, itr2].item(), fy[itr, itr2].item()].item()
+    # sum_loss = []
+    # for itr in range(len(output)):
+    #     per_image_score = 0
+    #     for itr2 in range(n_steps):
+    #         per_image_score += contact_map[itr, 0, fx[itr, itr2].item(), fy[itr, itr2].item()].item()
         
-        # print("Per Image Score: ", per_image_score)
+    #     # print("Per Image Score: ", per_image_score)
         
-        total_contact_score = per_image_score / n_steps
-        contact_loss = (1.0 - total_contact_score) * 100.0
-        curr_output = output[itr].unsqueeze(0)
-        curr_target = target[itr].unsqueeze(0)
-        l1_loss = torch.nn.L1Loss()(curr_output, curr_target)
+    #     total_contact_score = per_image_score / n_steps
+    #     contact_loss = (1.0 - total_contact_score) * 100.0
+    #     curr_output = output[itr].unsqueeze(0)
+    #     curr_target = target[itr].unsqueeze(0)
+    #     l1_loss = torch.nn.L1Loss()(curr_output, curr_target)
 
-        # print("L1 Loss: ", l1_loss.item(), "Contact Loss: ", contact_loss)
+    #     # print("L1 Loss: ", l1_loss.item(), "Contact Loss: ", contact_loss)
 
-        sum_loss.append((l1_loss + contact_loss))
+    #     sum_loss.append((l1_loss))
     
+    return torch.nn.L1Loss()(output, target)
+
     # 
     # print('here',sum(sum_loss) / len (sum_loss))
     return sum(sum_loss) / len (sum_loss)
@@ -651,9 +646,10 @@ if __name__ == "__main__":
     train = args.train
 
     n_steps = 4
+    batch_size = 8
 
     # load dataset
-    train_dataset, val_dataset = load_dataset(validation_split=0.05)
+    train_dataset, val_dataset = load_dataset(validation_split=0.1)
    
     visualize_raw = args.raw
 
@@ -664,11 +660,11 @@ if __name__ == "__main__":
     if train:
         # train and store model
         criterion = footstep_loss
-        train_store(train_dataset, val_dataset, batch_size=16, epochs=100, criterion=criterion, model_path=model_path)
+        train_store(train_dataset, val_dataset, batch_size=batch_size, epochs=100, criterion=criterion, model_path=model_path)
 
     else:
         # load and validate model
-        load_validate(val_dataset, batch_size=1, model_path=model_path)
+        load_validate(train_dataset, batch_size=1, model_path=model_path)
 
 
     torch.cuda.empty_cache()
