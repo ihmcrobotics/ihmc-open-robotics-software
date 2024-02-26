@@ -134,6 +134,9 @@ class FootstepDataset(Dataset):
         print(f'Total Goal Positions: {self.goal_positions.shape}')
         print(f'Total Goal Orientations: {self.goal_orientations.shape}')
 
+        # print min, max, mean and stddev for first height map
+        print(f'Height Map: Min: {np.min(self.height_maps[0])}, Max: {np.max(self.height_maps[0])}, Mean: {np.mean(self.height_maps[0])}, StdDev: {np.std(self.height_maps[0])}')
+
 
     def __getitem__(self, index):
 
@@ -317,7 +320,8 @@ def visualize_output(height_map_input, linear_input, final_output, contact_map_u
 
 def load_dataset(validation_split, datasets_path, count, filter):
     
-    files = sorted(os.listdir(datasets_path))
+    files = os.listdir(datasets_path)
+    files.sort(reverse=True)
     files = [file for file in files if ".hdf5" in file]
 
     labels = [
@@ -325,10 +329,13 @@ def load_dataset(validation_split, datasets_path, count, filter):
                 'AStar',
     ]
 
+    print("---------------++++++++++++++++++++ Files to Load: ", count, "/", len(files), " +++++++++++++++++++-------------------")
+    for file in files:
+        print("File Found: ", file)
+
     # filter by label
     files = [file for file in files if any(label in file for label in labels)]
     files = files[:count]
-
     
     datasets = []
 
