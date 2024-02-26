@@ -9,7 +9,7 @@ import org.bytedeco.javacpp.annotation.*;
 public class MPCWrapper extends us.ihmc.mpc.mpcWrapper.presets.MPCWrapperInfoMapper {
     static { Loader.load(); }
 
-// Parsed from include/mpc_external.h
+// Parsed from include/MPCExternal.h
 
 
 public static class MPCExternal extends Pointer {

@@ -11,7 +11,7 @@ import org.bytedeco.javacpp.tools.InfoMapper;
             includepath = {"../"},
             resourcepath = "../",
             linkpath = "../",
-            include = {"include/mpc_external.h"},
+            include = {"include/MPCExternal.h"},
             link = {"mpc-wrapper"},
             preload = {"mpc-wrapper", "jniMPCWrapper"}
       ),
