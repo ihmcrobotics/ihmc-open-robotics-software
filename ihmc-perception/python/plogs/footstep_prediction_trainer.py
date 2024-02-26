@@ -205,6 +205,8 @@ class FootstepDataset(Dataset):
         footstep_plan_poses = torch.Tensor(footstep_plan_poses).to(device)
         linear_output = torch.flatten(footstep_plan_poses)
 
+        # print("Goal Pose: ", goal_pose)
+
         return height_map_input, linear_input, linear_output, contact_map_input, terrian_cost_input
         
     def __len__(self) -> int:
@@ -490,7 +492,7 @@ def load_dataset(validation_split):
     files = [file for file in files if any(label in file for label in labels)]
     
 
-    files = [files[-1]]
+    files = ["20240225_182635_Generated_MCFP_0_0.hdf5"]
 
     
     datasets = []
@@ -535,38 +537,38 @@ def footstep_loss(output, target, contact_map):
 
     #take all rows but only 1st, 4th, 7th, 10th columns
 
-    # fx = (output[:,[0, 3, 6, 9]])
-    # fx = (fx * 50 + 100)
-    # fy = (output[:,[1, 4, 7, 10]])
-    # fy = (fy * 50 + 100)
+    fx = (output[:,[0, 3, 6, 9]])
+    fx = (fx * 50 + 100)
+    fy = (output[:,[1, 4, 7, 10]])
+    fy = (fy * 50 + 100)
 
-    # # put limits on the indices
-    # fx = torch.clamp(fx, 0, 199)
-    # fy = torch.clamp(fy, 0, 199)
+    # put limits on the indices
+    fx = torch.clamp(fx, 0, 199)
+    fy = torch.clamp(fy, 0, 199)
 
-    # # cast to long
-    # fx = fx.long()
-    # fy = fy.long()
+    # cast to long
+    fx = fx.long()
+    fy = fy.long()
 
-    # sum_loss = []
-    # for itr in range(len(output)):
-    #     per_image_score = 0
-    #     for itr2 in range(n_steps):
-    #         per_image_score += contact_map[itr, 0, fx[itr, itr2].item(), fy[itr, itr2].item()].item()
+    sum_loss = []
+    for itr in range(len(output)):
+        per_image_score = 0
+        for itr2 in range(n_steps):
+            per_image_score += contact_map[itr, 0, fx[itr, itr2].item(), fy[itr, itr2].item()].item()
         
-    #     # print("Per Image Score: ", per_image_score)
+        # print("Per Image Score: ", per_image_score)
         
-    #     total_contact_score = per_image_score / n_steps
-    #     contact_loss = (1.0 - total_contact_score) * 100.0
-    #     curr_output = output[itr].unsqueeze(0)
-    #     curr_target = target[itr].unsqueeze(0)
-    #     l1_loss = torch.nn.L1Loss()(curr_output, curr_target)
+        total_contact_score = per_image_score / n_steps
+        contact_loss = (1.0 - total_contact_score) * 100.0
+        curr_output = output[itr].unsqueeze(0)
+        curr_target = target[itr].unsqueeze(0)
+        l1_loss = torch.nn.L1Loss()(curr_output, curr_target)
 
-    #     # print("L1 Loss: ", l1_loss.item(), "Contact Loss: ", contact_loss)
+        # print("L1 Loss: ", l1_loss.item(), "Contact Loss: ", contact_loss)
 
-    #     sum_loss.append((l1_loss))
+        sum_loss.append((l1_loss + contact_loss))
     
-    return torch.nn.L1Loss()(output, target)
+    # return torch.nn.L1Loss()(output, target)
 
     # 
     # print('here',sum(sum_loss) / len (sum_loss))
