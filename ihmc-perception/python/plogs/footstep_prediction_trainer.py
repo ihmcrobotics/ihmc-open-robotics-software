@@ -2,12 +2,9 @@ import torch
 import gc
 torch.cuda.empty_cache()
 
-import torch.nn.functional as F
-import torch.nn as nn
-from torch.nn import Module, Sequential, Linear, ReLU, Dropout, BatchNorm1d
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
-
+from footstep_prediction_model import *
 
 from tqdm import tqdm
 
@@ -140,10 +137,6 @@ class FootstepDataset(Dataset):
 
     def __getitem__(self, index):
 
-        # Use the following to compute the yaw:
-        # computed_yaw = np.arctan2(2 * (quaternion[0] * quaternion[1] + quaternion[3] * quaternion[2]),
-                    # 1 - 2 * (quaternion[0]**2 + quaternion[3]**2))
-
         # convert quaternion to yaw
         sensor_quaternion = self.sensor_orientations[index, :]
         sensor_yaw = np.arctan2(2 * (sensor_quaternion[0] * sensor_quaternion[1] + sensor_quaternion[3] * sensor_quaternion[2]),
@@ -153,7 +146,6 @@ class FootstepDataset(Dataset):
         # get intial side
         start_side = self.start_side[index]
 
-        # convert quaternion to yaw
         start_quaternion = self.start_orientations[index, :]
         start_yaw = np.arctan2(2 * (start_quaternion[0] * start_quaternion[1] + start_quaternion[3] * start_quaternion[2]),
                     1 - 2 * (start_quaternion[0]**2 + start_quaternion[3]**2))
@@ -164,7 +156,6 @@ class FootstepDataset(Dataset):
                     1 - 2 * (goal_quaternion[0]**2 + goal_quaternion[3]**2))
         goal_pose = np.array([self.goal_positions[index, 0] - sensor_pose[0], self.goal_positions[index, 1] - sensor_pose[1], goal_yaw])
 
-        # convert quaternion to yaw
         footstep_plan_quaternions = self.footstep_plan_orientations[index*n_steps:index*n_steps + self.n_steps, :]
         footstep_plan_yaws = np.arctan2(2 * (footstep_plan_quaternions[:, 0] * footstep_plan_quaternions[:, 1] + footstep_plan_quaternions[:, 3] * footstep_plan_quaternions[:, 2]),
                     1 - 2 * (footstep_plan_quaternions[:, 0]**2 + footstep_plan_quaternions[:, 3]**2))
@@ -176,36 +167,18 @@ class FootstepDataset(Dataset):
         terrain_cost_map = compute_terrain_cost_map(self.height_maps[index])
         contact_map = compute_contact_map(terrain_cost_map)
 
-            # add contact map and terrain cost map as subplots on imshow
-
-        # plt.subplot(1, 3, 1)
-        # plt.imshow(terrain_cost_map, cmap='gray')
-        # plt.title('Terrain Cost Map')
-        # plt.subplot(1, 3, 2)
-        # plt.imshow(contact_map, cmap='gray')
-        # plt.title('Contact Map')
-        # plt.subplot(1, 3, 3)
-        # plt.imshow(self.height_maps[index], cmap='gray')
-
-        # plt.show()
-
         # Inputs
-        # --------- Image Inputs (float54)
         height_map_input = torch.Tensor(self.height_maps[index]).unsqueeze(0).to(device)
         terrian_cost_input = torch.Tensor(terrain_cost_map).unsqueeze(0).to(device)
         contact_map_input = torch.Tensor(contact_map).unsqueeze(0).to(device)
         
-        # --------- Pose Inputs (X, Y, Yaw) with float 64
         start_pose = torch.Tensor(start_pose).to(device)
         goal_pose = torch.Tensor(goal_pose).to(device)
         linear_input = torch.cat((start_pose, goal_pose), dim=0) 
 
         # Outputs
-        # --------- 3D Pose Outputs
         footstep_plan_poses = torch.Tensor(footstep_plan_poses).to(device)
         linear_output = torch.flatten(footstep_plan_poses)
-
-        # print("Goal Pose: ", goal_pose)
 
         return height_map_input, linear_input, linear_output, contact_map_input, terrian_cost_input
         
@@ -213,114 +186,7 @@ class FootstepDataset(Dataset):
         return len(self.height_maps)
 
 
-class FootstepPredictor(Module):
-    def __init__(self, input_size, output_size):
-        super(FootstepPredictor, self).__init__()
 
-        print("FootstepPredictor (Model) -> Linear Input Size: ", input_size, "Linear Output Size: ", output_size)
-
-        # convolutional layers given a 200x200 16-bit grayscale image
-        self.conv2d_1 = torch.nn.Conv2d(1, 48, kernel_size=3, stride=1, padding=1)
-        self.conv2d_2 = torch.nn.Conv2d(48, 96, kernel_size=3, stride=1, padding=1)
-        self.conv2d_3 = torch.nn.Conv2d(96, 48, kernel_size=3, stride=1, padding=1)
-        self.conv2d_4 = torch.nn.Conv2d(48, 32, kernel_size=3, stride=1, padding=1)
-
-        self.maxpool2d_22 = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
-        self.maxpool2d_44 = torch.nn.MaxPool2d(kernel_size=4, stride=4, padding=0)
-
-        self.hfc0 = torch.nn.Linear(32 * 12 * 12, 4096)
-        self.hbn0 = torch.nn.BatchNorm1d(4096)
-        self.hfc1 = torch.nn.Linear(4096, 1024)
-        self.hbn1 = torch.nn.BatchNorm1d(1024)
-
-        self.fc0 = torch.nn.Linear(input_size, 1024)
-        self.bn0 = torch.nn.BatchNorm1d(1024)
-        self.dropout0 = torch.nn.Dropout(0.1)
-
-        self.fc1 = torch.nn.Linear(1024 + 1024, 1024)
-        self.bn1 = torch.nn.BatchNorm1d(1024)
-        self.dropout1 = torch.nn.Dropout(0.05)
-        
-        self.fc2 = torch.nn.Linear(1024, 1024)
-        self.bn2 = torch.nn.BatchNorm1d(1024)
-        self.fc3 = torch.nn.Linear(1024, 512)
-        self.bn3 = torch.nn.BatchNorm1d(512)
-        self.fc4 = torch.nn.Linear(512, 256)
-        self.bn4 = torch.nn.BatchNorm1d(256)
-        self.fc5 = torch.nn.Linear(256, 128)
-        self.bn5 = torch.nn.BatchNorm1d(128)
-        self.fc6 = torch.nn.Linear(128, output_size)
-
-    def forward(self, h1, l1):
-
-        # print("\n\nForward Pass Input Shape: ", h1.shape, l1.shape, end=" ")
-
-        # x1 is image 200x200 16-bit grayscale and x2 is the 3D pose
-        h1 = self.conv2d_1(h1)
-        h1 = self.maxpool2d_22(h1)
-        h1 = self.conv2d_2(h1)
-        h1 = self.maxpool2d_22(h1)
-        h1 = self.conv2d_3(h1)
-        h1 = self.maxpool2d_22(h1)
-        h1 = self.conv2d_4(h1)
-        h1 = self.maxpool2d_22(h1)
-
-
-        h1 = torch.flatten(h1, 1)
-        h1 = self.hfc0(h1)
-        h1 = self.hbn0(h1)
-        h1 = F.leaky_relu(h1)
-        h1 = self.hfc1(h1)
-        h1 = self.hbn1(h1)
-        h1 = F.leaky_relu(h1)
-
-        l1 = self.fc0(l1)        
-        l1 = self.bn0(l1)
-        l1 = F.leaky_relu(l1)
-        
-        # print shape, mean, min, max and stddev
-        print(
-            # "Shapes: ", h1.shape, l1.shape,
-            "Mean: ", round(h1.mean().item(), 3), round(l1.mean().item(), 3), 
-            "Min: ", round(h1.min().item(), 3), round(l1.min().item(), 3), 
-            "Max: ", round(h1.max().item(), 3), round(l1.max().item(), 3), 
-            "Stddev: ", round(h1.std().item(), 3), round(l1.std().item(), 3)
-        )
-
-        # flatten x1 and concatenate with x2
-        x = torch.cat((h1, l1), dim=1)
-
-        # fully connected layers
-        x = self.fc1(x)
-        x = self.bn1(x)
-        x = F.leaky_relu(x)
-        x = self.dropout1(x)
-
-        x = self.fc2(x)
-        x = self.bn2(x)
-        x = F.leaky_relu(x)
-        x = self.dropout1(x)
-
-        x = self.fc3(x)
-        x = self.bn3(x)
-        x = F.leaky_relu(x)
-        x = self.dropout1(x)
-
-        x = self.fc4(x)
-        x = self.bn4(x)
-        x = F.leaky_relu(x)
-        x = self.dropout1(x)
-
-        x = self.fc5(x)
-        x = self.bn5(x)
-        x = F.leaky_relu(x)
-        x = self.dropout1(x)
-
-        x = self.fc6(x)
-
-        # print("Forward Pass Output Shape: ", x.shape)
-
-        return x
 
 def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model_path, warm_start=False):
     
@@ -337,8 +203,6 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
             print("Loading Model: ", model_files[-1])
             model.load_state_dict(torch.load(model_path + model_files[-1]))
 
-    # define optimizer
-    # optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay = 1e-8)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-6)
 
     # train the model
@@ -360,8 +224,6 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
 
                 loss.backward()
                 optimizer.step()
-
-                # running_loss+=loss.item()
 
                 average_loss = running_loss/(y.size(0)*(i+1))
                 loop.set_description(f'Epoch [{epoch+1}/{epochs}]')
@@ -402,13 +264,9 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
 
 def load_validate(val_dataset, batch_size, model_path):
     loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
-    
-    # Load the model
     input_size = val_dataset[0][1].shape[0]
     output_size = val_dataset[0][2].shape[0]
     model = FootstepPredictor(input_size, output_size)
-
-    # those that end in .pt
     model_files = sorted([name for name in os.listdir(model_path) if name.endswith('.pt')])
 
     print("Loading Model: ", model_files[-1])
@@ -426,13 +284,8 @@ def load_validate(val_dataset, batch_size, model_path):
             contact_map = contact_map.to(device)
 
             predict_output = model(height_map_input, linear_input)
-
-            # get only the first 4 steps
             predict_output = predict_output[0:3*n_steps, :].reshape((n_steps, 3))
             target_output = target_output[0:3*n_steps].reshape((n_steps, 3))
-
-            # compute loss
-            print_loss(predict_output, target_output, contact_map)
 
             visualize_output(height_map_input, linear_input, predict_output, contact_map, terrain_cost, label="Prediction")
             visualize_output(height_map_input, linear_input, target_output, contact_map, terrain_cost, label="Target")
@@ -442,22 +295,16 @@ def visualize_output(height_map_input, linear_input, final_output, contact_map_u
 
     output = final_output.cpu().numpy()
     output = output.squeeze()
-    # print("Predict Output", output.shape)
 
     linear_input = linear_input.cpu().numpy()
     linear_input = linear_input.squeeze()
-    # print("Linear Input", linear_input.shape)
 
-    # convert height map to numpy array 16-bit grayscale
     height_map_uint16 = np.array(height_map_input.cpu().numpy() * 10000.0, dtype=np.uint16)
-
-    # reshape for opencv
     height_map_uint16 = height_map_uint16.reshape((201, 201))        
 
     terrain_cost = np.array(terrain_cost.cpu().numpy(), dtype=np.uint8)
     terrain_cost = terrain_cost.reshape((201, 201))
 
-    # convert contact map to numpy array 8-bit grayscale
     contact_map_uint8 = np.array(contact_map_uint8.cpu().numpy(), dtype=np.uint8)
     contact_map_uint8 = contact_map_uint8.reshape((201, 201))
 
@@ -465,32 +312,22 @@ def visualize_output(height_map_input, linear_input, final_output, contact_map_u
     goal_pose = linear_input[3:6]
     plan_poses = output[0:3*n_steps].reshape((n_steps, 3))[:, 0:3]
 
-    # print("Height Map: ", height_map.tolist())
-
-    # visualize plan
     visualize_plan(height_map_uint16, contact_map_uint8, terrain_cost, plan_poses, 
                     start_pose, goal_pose, label=label)
 
-def load_dataset(validation_split):
-    home = os.path.expanduser('~')
-    path = home + '/Downloads/Planning_Datasets/Basic/'
+def load_dataset(validation_split, datasets_path, count, filter):
     
-    # input_files = ['20231018_135001_PerceptionLog.hdf5', 
-    #                     '20231018_143108_PerceptionLog.hdf5']
-    
-    files = sorted(os.listdir(path))
+    files = sorted(os.listdir(datasets_path))
     files = [file for file in files if ".hdf5" in file]
 
     labels = [
                 'MCFP', 
-                'AStar'
+                'AStar',
     ]
 
     # filter by label
     files = [file for file in files if any(label in file for label in labels)]
-    
-
-    files = [files[-1]]
+    files = files[:count]
 
     
     datasets = []
@@ -499,7 +336,7 @@ def load_dataset(validation_split):
 
         print("Loading File: ", file)
 
-        data = h5py.File(path + file, 'r')
+        data = h5py.File(datasets_path + file, 'r')
         dataset = FootstepDataset(data, file, n_steps=n_steps)
         datasets.append(dataset)
 
@@ -525,18 +362,32 @@ def footstep_loss(output, target, contact_map):
     
     return torch.nn.L1Loss()(output, target)
 
-    # print("Output Shape: ", output.shape, "Target Shape: ", target.shape, "Contact Map Shape: ", contact_map.shape)
+def compute_contact_loss_vectorized(output, target, contact_map):
+    print("Output Shape: ", output.shape, "Target Shape: ", target.shape, "Contact Map Shape: ", contact_map.shape)
 
-    # output_reshaped = torch.reshape(output, (-1, 4, 3))
-    # fx = output_reshaped[:, :, 0]
-    # fy = output_reshaped[:, :, 1]
-    # contact = contact_map[:, 0, fx.long(), fy.long()]  # Fix: Use contact_map provided in batch
-    # contact_loss = -contact
+    output_reshaped = torch.reshape(output, (-1, 4, 3))
+    fx = output_reshaped[:, :, 0]
+    fy = output_reshaped[:, :, 1]
+    contact = contact_map[:, 0, fx.long(), fy.long()]  # Fix: Use contact_map provided in batch
+    contact_loss = -contact
 
-    # sum the contact map values at the predicted footstep locations and use it as a loss
+    print("FX: ", fx)
+    print("FY: ", fy)
 
-    #take all rows but only 1st, 4th, 7th, 10th columns
+    contact_vector = contact_map[fx, fy]
+    print("Unique: ", torch.unique(contact_vector))
 
+    total_contact_score = torch.sum(contact_vector) / n_steps
+    contact_loss = 1.0 - total_contact_score
+
+    print("Contact Vector: ", contact_vector)
+    print("Total Contact Score: ", total_contact_score.item())
+
+    l1_loss = torch.nn.L1Loss()(output, target)
+
+    return (l1_loss + contact_loss) / 2.0
+
+def compute_contact_loss(output, target, contact_map):
     fx = (output[:,[0, 3, 6, 9]])
     fx = (fx * 50 + 100)
     fy = (output[:,[1, 4, 7, 10]])
@@ -556,102 +407,50 @@ def footstep_loss(output, target, contact_map):
         for itr2 in range(n_steps):
             per_image_score += contact_map[itr, 0, fx[itr, itr2].item(), fy[itr, itr2].item()].item()
         
-        # print("Per Image Score: ", per_image_score)
-        
         total_contact_score = per_image_score / n_steps
         contact_loss = (1.0 - total_contact_score) * 100.0
         curr_output = output[itr].unsqueeze(0)
         curr_target = target[itr].unsqueeze(0)
         l1_loss = torch.nn.L1Loss()(curr_output, curr_target)
 
-        # print("L1 Loss: ", l1_loss.item(), "Contact Loss: ", contact_loss)
-
         sum_loss.append((l1_loss + contact_loss))
     
-    # return torch.nn.L1Loss()(output, target)
-
-    # 
-    # print('here',sum(sum_loss) / len (sum_loss))
     return sum(sum_loss) / len (sum_loss)
-
-
-    # print("FX: ", fx)
-    # print("FY: ", fy)
-
-
-    # contact_vector = contact_map[fx, fy]
-    # print("Unique: ", torch.unique(contact_vector))
-
-    # total_contact_score = torch.sum(contact_vector) / n_steps
-    # contact_loss = 1.0 - total_contact_score
-
-    # print("Contact Vector: ", contact_vector)
-    # print("Total Contact Score: ", total_contact_score.item())
-
-    # l1_loss = torch.nn.L1Loss()(output, target)
-
-    # return (l1_loss + contact_loss) / 2.0
-
-def print_loss(output, target, contact_map):
-    
-    # print("Shapes: ", output.shape, target.shape, contact_map.shape)
-
-    # print min and max for contact map
-    # print("Contact Map Min: ", torch.min(contact_map), "Contact Map Max: ", torch.max(contact_map))
-
-    # sum the contact map values at the predicted footstep locations and use it as a loss
-
-    # sum the contact map values at the predicted footstep locations and use it as a loss
-    fx = (output[:, 0] * 50 + 100)
-    fy = (output[:, 1] * 50 + 100)
-
-    # put limits on the indices
-    fx = torch.clamp(fx, 0, 199)
-    fy = torch.clamp(fy, 0, 199)
-
-    # cast to long
-    fx = fx.long()
-    fy = fy.long()
-
-    contact_vector = contact_map[0, 0, fx, fy]
-    total_contact_score = torch.sum(contact_vector) / n_steps
-    contact_loss = 1.0 - total_contact_score
-    l1_loss = torch.nn.L1Loss()(output, target)
-
-    # plt.imshow(contact_map[0, 0, :, :].cpu().numpy())
-    # plt.show()
-
-    # print("Output: ", output)
-    # print("Contact Vector: ", contact_vector)
-    # print("Total Contact Score: ", total_contact_score.item())
-    # print("L1 Loss: ", l1_loss.item(), "Contact Loss: ", contact_loss.item())
 
 if __name__ == "__main__":
 
     home = os.path.expanduser('~')
     model_path = home + '/Downloads/Model_Weights/'
-    datasets_path = home + '/Downloads/Planning_Datasets/Basic/'
     train = False
     total_files = 1
 
     # use arg parser 
     import argparse
     parser = argparse.ArgumentParser(description='Footstep Prediction Trainer')
+    parser.add_argument("--path", help="path to search for files", type=str, default="Downloads/Planning_Datasets/")
     parser.add_argument('--train', action='store_true', help='Train the model')
-    parser.add_argument('--files', type=int, help='Total Files to Load')
+    parser.add_argument('--files', type=int, help='Total Files to Load', default=-1)
     parser.add_argument('--raw', action='store_true', help='Raw Visualization')
+    parser.add_argument("--lr", type=float, help="Learning Rate", default=1e-3)
+    parser.add_argument("--batch_size", type=int, help="Batch Size", default=8)
+    parser.add_argument("--epochs", type=int, help="Number of Epochs", default=30)
+    parser.add_argument("--n_steps", type=int, help="Number of Steps", default=4)
+    parser.add_argument("--split", type=float, help="Validation Split", default=0.1)
+    parser.add_argument("--filter", type=str, help="Filter Files", default=".hdf5")
 
     args = parser.parse_args()
-    if args.files:
-        total_files = args.files
 
+    total_files = args.files
+    datasets_path = home + '/' + args.path + '/'
+    validation_split = args.split
+    batch_size = args.batch_size
+    n_steps = args.n_steps
+    epochs = args.epochs
     train = args.train
-
-    n_steps = 4
-    batch_size = 8
+    filter = args.filter
 
     # load dataset
-    train_dataset, val_dataset = load_dataset(validation_split=0.1)
+    train_dataset, val_dataset = load_dataset(validation_split=validation_split, datasets_path=datasets_path, count=total_files, filter=filter)
    
     visualize_raw = args.raw
 
@@ -662,7 +461,7 @@ if __name__ == "__main__":
     if train:
         # train and store model
         criterion = footstep_loss
-        train_store(train_dataset, val_dataset, batch_size=batch_size, epochs=30, criterion=criterion, model_path=model_path)
+        train_store(train_dataset, val_dataset, batch_size=batch_size, epochs=epochs, criterion=criterion, model_path=model_path)
 
     else:
         # load and validate model
