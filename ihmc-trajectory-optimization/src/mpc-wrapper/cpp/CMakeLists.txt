@@ -34,6 +34,9 @@ target_include_directories(mpc-wrapper PUBLIC
      headers/
      launcher/
      external/
+
+    #  include eigen
+    ${EIGEN3_INCLUDE_DIR}
 )
 
 install(FILES ${MPC_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
