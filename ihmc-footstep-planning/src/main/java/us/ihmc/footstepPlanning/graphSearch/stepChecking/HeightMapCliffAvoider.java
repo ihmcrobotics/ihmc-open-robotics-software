@@ -110,7 +110,6 @@ public class HeightMapCliffAvoider
          return true;
 
       updateScaledFootPolygons(previousScaledFootPolygon);
-      System.out.println(previousScaledFootPolygon);
 
       /* Transform to step location */
       FootstepSnapDataReadOnly snapData = snapper.snapFootstep(candidateStep);
