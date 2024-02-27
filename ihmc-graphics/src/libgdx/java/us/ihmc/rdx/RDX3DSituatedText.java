@@ -41,7 +41,7 @@ import com.badlogic.gdx.utils.Pool;
 public class RDX3DSituatedText implements RenderableProvider
 {
    public static final Font DEFAULT_FONT = new Font("Dialog", Font.PLAIN, 72);
-   public static final Color DEFAULT_COLOR = Color.BLACK;
+   public static final Color DEFAULT_COLOR = Color.WHITE;
    public static final float DEFAULT_HEIGHT = 0.1f;
 
    private final ModelBuilder modelBuilder = new ModelBuilder();

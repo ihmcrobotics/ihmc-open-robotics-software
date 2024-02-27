@@ -69,7 +69,7 @@ public class YOLOv8IterativeClosestPointNodeCombo
       nodeID = sceneGraph.getNextID().getAndIncrement();
       icpWorker.setSceneNodeID(nodeID);
 
-      String nodeName = lastDetection.objectClass().toString().substring(0, 1).toUpperCase() + lastDetection.objectClass().toString().substring(1) + " " + nodeID;
+      String nodeName = lastDetection.objectClass().toString().substring(0, 1).toUpperCase() + lastDetection.objectClass().toString().substring(1);
       node = new YOLOv8IterativeClosestPointNode(nodeID, nodeName, 1, 2.0, 1, 3000.0, true, distanceThreshold, 0.0);
       modificationQueue.accept(new SceneGraphNodeAddition(node, sceneGraph.getRootNode()));
       sceneGraph.getIDToNodeMap().put(nodeID, node);
