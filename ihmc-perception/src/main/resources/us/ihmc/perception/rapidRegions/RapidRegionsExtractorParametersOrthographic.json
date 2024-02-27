@@ -65,12 +65,12 @@
     "upperBound" : 100
   },
   "Internal search depth limit" : {
-    "value" : 4168,
+    "value" : 2847,
     "lowerBound" : 1,
     "upperBound" : 50000
   },
   "Boundary search depth limit" : {
-    "value" : 2293,
+    "value" : 1646,
     "lowerBound" : 1,
     "upperBound" : 15000
   },

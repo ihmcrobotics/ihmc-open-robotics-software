@@ -303,7 +303,7 @@ public class HumanoidPerceptionModule
       LogTools.info("Initializing Orthographic Rapid Regions");
       this.orthographicRegions = new FramePlanarRegionsList();
       this.orthographicRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, height, width, ProjectionModel.ORTHOGRAPHIC);
-      this.orthographicRegionsExtractor.getDebugger().setEnabled(true);
+      this.orthographicRegionsExtractor.getDebugger().setEnabled(false);
    }
 
    public void initializeHeightMapExtractor(HumanoidReferenceFrames referenceFrames, CameraIntrinsics cameraIntrinsics)
@@ -367,8 +367,6 @@ public class HumanoidPerceptionModule
       orthographicRegionsInSensorFrame = orthographicRegions.getPlanarRegionsList();
       orthographicRegionsInWorldFrame = orthographicRegionsInSensorFrame.copy();
       orthographicRegionsInWorldFrame.applyTransform(sensorFrame.getTransformToWorldFrame());
-
-      LogTools.warn("Found " + orthographicRegions.getPlanarRegionsList().getNumberOfPlanarRegions() + " orthographic regions");
    }
 
    public void extractOccupancyGrid(List<Point3D> pointCloud,
@@ -526,6 +524,11 @@ public class HumanoidPerceptionModule
    public void setSphericalRegionsEnabled(boolean sphericalRegionsEnabled)
    {
       this.sphericalRegionsEnabled = sphericalRegionsEnabled;
+   }
+
+   public void setOrthographicRegionsEnabled(boolean orthographicRegionsEnabled)
+   {
+      this.orthographicRegionsExtractor.setEnabled(orthographicRegionsEnabled);
    }
 
    public PerceptionStatistics getPerceptionStatistics()

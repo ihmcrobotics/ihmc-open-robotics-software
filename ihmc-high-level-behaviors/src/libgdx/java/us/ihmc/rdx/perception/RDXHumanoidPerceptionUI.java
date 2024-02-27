@@ -321,6 +321,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       {
          humanoidPerception.setMappingEnabled(enableMapRegions.get());
          humanoidPerception.setRapidRegionsEnabled(enableRapidRegions.get());
+         humanoidPerception.setSphericalRegionsEnabled(enableSphericalRapidRegions.get());
+         humanoidPerception.setOrthographicRegionsEnabled(enableOrthographicRapidRegions.get());
          humanoidPerception.setHeightMapEnabled(enableGPUHeightMap.get());
          //humanoidPerception.setSphericalRegionsEnabled(enableSphericalRapidRegions.get());
       }
@@ -503,7 +505,6 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       terrainGridGraphic.getRenderables(renderables, pool);
       for (Map.Entry<String, RDXVisualizer> entry : visualizers.entrySet())
       {
-         LogTools.info("Visualizer: " + entry.getKey() + " is active: " + entry.getValue().isActive());
          if (entry.getValue().isActive())
          {
             entry.getValue().getRenderables(renderables, pool, sceneLevels);
