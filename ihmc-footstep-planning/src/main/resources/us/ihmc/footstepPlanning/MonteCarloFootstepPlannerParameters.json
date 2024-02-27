@@ -57,7 +57,7 @@
     "upperBound" : 5.0
   },
   "Initial value cutoff" : {
-    "value" : 162,
+    "value" : 200,
     "lowerBound" : -1000,
     "upperBound" : 1000
   },

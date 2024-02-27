@@ -20,6 +20,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +30,12 @@ public class TerrainPlanningDatasetManager
 {
    private ArrayList<SideDependentList<Pose3D>> footstepPairList = new ArrayList<>();
    private PerceptionDataLogger perceptionDataLogger;
+   private Path path = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY;
+
+   public void setPath(Path path)
+   {
+      this.path = path;
+   }
 
    public void configureLogger(String suffix)
    {
@@ -42,9 +49,9 @@ public class TerrainPlanningDatasetManager
    {
       perceptionDataLogger = new PerceptionDataLogger();
       String logFileName = HDF5Tools.generateFileName(suffix);
-      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      FileTools.ensureDirectoryExists(path, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
-      perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
+      perceptionDataLogger.openLogFile(path.resolve(logFileName).toString());
       perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.INTERNAL_HEIGHT_MAP_NAME);
       perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
       perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.SENSOR_CROPPED_HEIGHT_MAP_NAME);

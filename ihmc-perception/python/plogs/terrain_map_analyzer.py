@@ -52,8 +52,7 @@ def plot_and_compute_stats(height_map, debug=True, display=True, label="Terrain 
 
     if display:
 
-        print(height_map.tolist())
-
+        
         plot_terrain_maps(height_map, terrain_cost, contact_map)
 
         code = cv2.waitKeyEx(0)
@@ -91,12 +90,9 @@ def synthetic_analyzer_main():
 
     maps = generate_height_map()
     number = 0
-    for name, height_map in maps.items():
-        print("Number", number, "Terrain:", name)
-
+    for height_map in maps:
 
         plot_and_compute_stats(height_map, display=True)        
-        
         compute_pattern_stats(height_map)
         
         print("\n\n")

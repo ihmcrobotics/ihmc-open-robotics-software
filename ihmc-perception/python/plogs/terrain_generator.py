@@ -1,6 +1,8 @@
 import numpy as np
 import json
-
+from terrain_map_analyzer import *
+from plotting.height_map_tools import *
+from hdf5_generator import *
 
 def copy_object(object):
     new_object = {}
@@ -42,7 +44,7 @@ def count_objects_by_type(objects):
 
     return dict
 
-def create_shifted_copies(filename):
+def create_shifted_copies(objects, filename):
     offset = np.array([0.2, 2.2, 0])
 
     shifted_terrain_objects_1 = copy_and_shift(objects, offset)
@@ -56,8 +58,8 @@ def create_shifted_copies(filename):
     # save the new terrain to a file with name "FootstepPlannerTrainingTerrainGenerated.json"
     with open(filename, 'w') as outfile:
         # replace data['objects'] with shifted_terrain_objects
-        data['objects'] = shifted_terrain_objects
-        json.dump(data, outfile)
+        src_data['objects'] = shifted_terrain_objects
+        json.dump(src_data, outfile)
 
     counts = count_objects_by_type(shifted_terrain_objects)
 
@@ -65,7 +67,7 @@ def create_shifted_copies(filename):
         print(type, count)
 
 
-if __name__ == "__main__":
+def load_rdx_environment():
     # Read JSON file
     path = "/home/quantum/Workspace/Code/IHMC/repository-group/ihmc-open-robotics-software/ihmc-high-level-behaviors/src/libgdx/resources/environments/"
     filename = "LookAndStepWide.json"
@@ -78,14 +80,58 @@ if __name__ == "__main__":
 
     # create_shifted_copies(path + "FootstepPlannerTrainingTerrainGenerated_2.json")
 
+    # Types:  {'RDXPointLightObject', 
+    # 'RDXLargeCinderBlockRoughed', 
+    # 'RDXSmallCinderBlockRoughed', 
+    # 'RDXPalletObject', 
+    # 'RDXMediumCinderBlockRoughed', 
+    # 'RDXLabFloorObject'}
+
+
+def plot_height_maps(height_maps):
+    number = 0
+    for height_map in height_maps:
+
+        plot_and_compute_stats(height_map, display=True)        
+        compute_pattern_stats(height_map)
+        
+        print("\n\n")
+        number += 1
+
+def filter_height_maps(maps):
+    filtered_maps = []
+    for height_map in maps:
+        if np.mean(height_map) > 0.001:
+            filtered_maps.append(height_map)
+    return filtered_maps
+
+def load_height_maps_from_source(src_data):
+    height_maps = load_height_maps(src_data, 10000)
+    return height_maps
+
+if __name__ == "__main__":
     
+    log = True
 
+    home = os.path.expanduser("~")
+    src_path = home + "/Downloads/HeightMap_Datasets/one_step.hdf5"
+    dst_path = home + "/Downloads/HeightMap_Datasets/input_compressed.hdf5"
+    src_data = h5py.File(src_path, "r")
+    dst_data = h5py.File(dst_path, "w")
 
-# Types:  {'RDXPointLightObject', 
-# 'RDXLargeCinderBlockRoughed', 
-# 'RDXSmallCinderBlockRoughed', 
-# 'RDXPalletObject', 
-# 'RDXMediumCinderBlockRoughed', 
-# 'RDXLabFloorObject'}
+    height_maps = generate_stair_height_maps()
+    # height_maps = load_height_maps_from_source(src_data)
+    height_maps = filter_height_maps(height_maps)
 
+    if log == False:
+        plot_height_maps(height_maps)
 
+    else:
+        log_height_maps(dst_data, height_maps, "cropped/height/")
+
+        print("Total Final Maps: ", len(height_maps))
+        print("Source File: ", src_path)
+        print("Destination File: ", dst_path)
+
+        src_data.close()
+        dst_data.close()
