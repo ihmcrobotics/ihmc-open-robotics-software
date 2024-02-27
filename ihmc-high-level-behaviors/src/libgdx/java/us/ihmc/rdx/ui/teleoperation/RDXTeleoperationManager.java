@@ -476,9 +476,7 @@ public class RDXTeleoperationManager extends RDXPanel
 
    public void renderImGuiWidgets()
    {
-      ImGui.pushFont(ImGuiTools.getMediumFont());
-      ImGui.text("Whole Body");
-      ImGui.popFont();
+      ImGuiTools.separatorText("Whole Body", ImGuiTools.getMediumFont());
 
       robotLowLevelMessenger.renderImGuiWidgets();
 
@@ -543,14 +541,10 @@ public class RDXTeleoperationManager extends RDXPanel
       // TODO: Add transparency sliders
       // TODO: Add motion previews
 
-      ImGui.pushFont(ImGuiTools.getMediumFont());
-      ImGui.text("Locomotion");
-      ImGui.popFont();
+      ImGuiTools.separatorText("Locomotion", ImGuiTools.getMediumFont());
       locomotionManager.renderImGuiWidgets();
 
-      ImGui.pushFont(ImGuiTools.getMediumFont());
-      ImGui.text("Arms & Hands");
-      ImGui.popFont();
+      ImGuiTools.separatorText("Arms & Hands", ImGuiTools.getMediumFont());
       armManager.renderImGuiWidgets();
    }
 
