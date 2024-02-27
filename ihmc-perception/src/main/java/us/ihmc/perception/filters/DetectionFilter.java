@@ -13,8 +13,13 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
  */
 public class DetectionFilter
 {
-   public final int HISTORY_LENGTH = (int) SceneGraph.UPDATE_FREQUENCY; // 1 second at scene graph's frequency
-   public float acceptanceThreshold = 0.6f;
+   /**
+    * historyLength should be matched to the frequency at which the detection filter is updated.
+    * E.g. when used inside the scene graph update loop, historyLength = SceneGraph.UPDATE_FREQUENCY.
+    * This will represent a history of 1 second.
+    */
+   public int historyLength;
+   public float acceptanceThreshold;
 
    private final TFloatList detections = new TFloatLinkedList();
    private final Notification detected = new Notification();
@@ -22,11 +27,12 @@ public class DetectionFilter
 
    public DetectionFilter()
    {
-      // use default threshold
+      this((int) SceneGraph.UPDATE_FREQUENCY, 0.6f);
    }
 
-   public DetectionFilter(float acceptanceThreshold)
+   public DetectionFilter(int historyLength, float acceptanceThreshold)
    {
+      this.historyLength = historyLength;
       this.acceptanceThreshold = acceptanceThreshold;
    }
 
@@ -46,7 +52,12 @@ public class DetectionFilter
 
    public boolean hasEnoughSamples()
    {
-      return detections.size() >= HISTORY_LENGTH;
+      return detections.size() >= historyLength;
+   }
+
+   public void setHistoryLength(int historyLength)
+   {
+      this.historyLength = historyLength;
    }
 
    public void setAcceptanceThreshold(float threshold)
@@ -58,7 +69,7 @@ public class DetectionFilter
    {
       detections.add(detected.poll() ? 1.0f : 0.0f);
 
-      while (detections.size() > HISTORY_LENGTH)
+      while (detections.size() > historyLength)
          detections.removeAt(0);
 
       float average = 0.0f;
@@ -68,6 +79,6 @@ public class DetectionFilter
       }
       average /= (float) detections.size();
 
-      isStableDetectionResult = detections.size() == HISTORY_LENGTH && average >= acceptanceThreshold;
+      isStableDetectionResult = detections.size() == historyLength && average >= acceptanceThreshold;
    }
 }

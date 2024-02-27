@@ -4,6 +4,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 /**
@@ -12,6 +14,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
 {
    private final ROS2BehaviorTreeState ros2BehaviorTreeState;
+   private final ROS2Heartbeat arUcoDemandHeartbeat;
 
    public ROS2BehaviorTreeExecutor(ROS2ControllerHelper ros2ControllerHelper,
                                    DRCRobotModel robotModel,
@@ -21,6 +24,7 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
       super(robotModel, syncedRobot, referenceFrameLibrary, ros2ControllerHelper);
 
       ros2BehaviorTreeState = new ROS2BehaviorTreeState(getState(), this::setRootNode, ros2ControllerHelper);
+      arUcoDemandHeartbeat = new ROS2Heartbeat(ros2ControllerHelper, PerceptionAPI.REQUEST_ARUCO);
    }
 
    public void update()
@@ -28,6 +32,7 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
       ros2BehaviorTreeState.updateSubscription();
 
       super.update();
+      arUcoDemandHeartbeat.setAlive(getRootNode() != null);
 
       ros2BehaviorTreeState.updatePublication();
    }
