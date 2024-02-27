@@ -16,6 +16,7 @@ import us.ihmc.perception.filters.DetectionFilter;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.tools.thread.RestartableThread;
+import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -44,12 +45,14 @@ public class YOLOv8IterativeClosestPointManager
    private RawImage icpEnvironmentDepthImage;
    private long lastYoloImageSequenceNumber = -1;
    private long lastICPImageSequenceNumber = -1;
+
    private final RestartableThread yoloICPThread;
    private final Lock imageUpdateLock = new ReentrantLock();
    private final Condition newImagesAvailable = imageUpdateLock.newCondition();
    private final Notification readyToRunNotification = new Notification();
+   private final FrequencyCalculator yoloICPFrequencyCalculator = new FrequencyCalculator();
 
-   private final Map<YOLOv8Detection, Tuple2<DetectionFilter, Boolean>> candidateDetections = new ConcurrentHashMap<>();
+   private final Map<YOLOv8Detection, DetectionFilter> candidateDetections = new ConcurrentHashMap<>();
    private final Map<YOLOv8IterativeClosestPointNodeCombo, YOLOv8IterativeClosestPointNodeCombo> yoloICPNodeComboSet = new ConcurrentHashMap<>();
    private final EnumMap<YOLOv8DetectableObject, List<Point3D32>> objectPointClouds = new EnumMap<>(YOLOv8DetectableObject.class);
 
@@ -105,18 +108,12 @@ public class YOLOv8IterativeClosestPointManager
       {
          synchronized (candidateDetections)
          {
-            Iterator<Entry<YOLOv8Detection, Tuple2<DetectionFilter, Boolean>>> candidateIterator = candidateDetections.entrySet().iterator();
+            Iterator<Entry<YOLOv8Detection, DetectionFilter>> candidateIterator = candidateDetections.entrySet().iterator();
             while (candidateIterator.hasNext())
             {
-               Map.Entry<YOLOv8Detection, Tuple2<DetectionFilter, Boolean>> candidateDetectionEntry = candidateIterator.next();
+               Map.Entry<YOLOv8Detection, DetectionFilter> candidateDetectionEntry = candidateIterator.next();
                YOLOv8Detection candidateDetection = candidateDetectionEntry.getKey();
-               DetectionFilter filter = candidateDetectionEntry.getValue().getData0();
-
-               // Register the detection if it has been detected...
-               if (candidateDetectionEntry.getValue().getData1())
-                  filter.registerDetection();
-
-               filter.update();
+               DetectionFilter filter = candidateDetectionEntry.getValue();
 
                if (filter.hasEnoughSamples())
                {
@@ -217,6 +214,8 @@ public class YOLOv8IterativeClosestPointManager
       yoloColorImage.get();
       icpDepthImage.get();
 
+      yoloICPFrequencyCalculator.ping();
+
       // Get the results and object masks
       YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(yoloColorImage, yoloConfidenceThreshold, yoloNMSThreshold);
       Map<YOLOv8Detection, RawImage> objectMasks = yoloResults.getICPSegmentationImages(yoloSegmentationThreshold);
@@ -312,7 +311,7 @@ public class YOLOv8IterativeClosestPointManager
       return unmatchedOldDetections;
    }
 
-   private void matchCandidateAndNewDetections(Map<YOLOv8Detection, Tuple2<DetectionFilter, Boolean>> candidateDetections, Set<YOLOv8Detection> newDetections)
+   private void matchCandidateAndNewDetections(Map<YOLOv8Detection, DetectionFilter> candidateDetections, Set<YOLOv8Detection> newDetections)
    {
       PriorityQueue<Tuple3<YOLOv8Detection, YOLOv8Detection, Double>> possiblyMatchingCandidates = new PriorityQueue<>(Comparator.comparingDouble(Tuple3::getD2));
       for (YOLOv8Detection candidateDetection : candidateDetections.keySet())
@@ -336,7 +335,10 @@ public class YOLOv8IterativeClosestPointManager
          {
             // candidate matched with new detection; replace old candidate with its match
             candidateDetections.put(bestMatchDetection.getD1(), candidateDetections.remove(bestMatchDetection.getD0()));
-            candidateDetections.get(bestMatchDetection.getD1()).setData1(true);
+            DetectionFilter detectionFilter = candidateDetections.get(bestMatchDetection.getD1());
+            detectionFilter.setHistoryLength((int) yoloICPFrequencyCalculator.getFrequency());
+            detectionFilter.registerDetection();
+            detectionFilter.update();
 
             unmatchedCandidateDetections.remove(bestMatchDetection.getD0());
             newDetections.remove(bestMatchDetection.getD1());
@@ -346,13 +348,10 @@ public class YOLOv8IterativeClosestPointManager
       for (YOLOv8Detection newDetection : newDetections)
       {
          // new candidate found
-         candidateDetections.put(newDetection, new Tuple2<>(new DetectionFilter(candidateAcceptanceThreshold), true));
-      }
-
-      for (YOLOv8Detection unmatchedCandidate : unmatchedCandidateDetections)
-      {
-         // candidate did not get matched; not detected
-         candidateDetections.get(unmatchedCandidate).setData1(false);
+         DetectionFilter detectionFilter = new DetectionFilter((int) yoloICPFrequencyCalculator.getFrequency(), candidateAcceptanceThreshold);
+         detectionFilter.registerDetection();
+         detectionFilter.update();
+         candidateDetections.put(newDetection, detectionFilter);
       }
    }
 }
