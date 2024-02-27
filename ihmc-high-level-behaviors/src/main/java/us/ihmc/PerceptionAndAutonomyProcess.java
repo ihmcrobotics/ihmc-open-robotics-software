@@ -129,6 +129,7 @@ public class PerceptionAndAutonomyProcess
    private final ROS2SceneGraph sceneGraph;
    private final RestartableThrottledThread sceneGraphUpdateThread;
    private ROS2DemandGraphNode arUcoDetectionDemandNode;
+   private long sceneGraphUpdateIndex = 0;
 
    private final CenterposeDetectionManager centerposeDetectionManager;
    private ROS2DemandGraphNode centerposeDemandNode;
@@ -436,7 +437,9 @@ public class PerceptionAndAutonomyProcess
       sceneGraph.updateOnRobotOnly(robotPelvisFrameSupplier.get());
       sceneGraph.updatePublication();
 
-      if (behaviorTreeExecutor != null)
+      ++sceneGraphUpdateIndex;
+
+      if (behaviorTreeExecutor != null && sceneGraphUpdateIndex % 2 == 1)
       {
          behaviorTreeSyncedRobot.update();
          behaviorTreeExecutor.update();
