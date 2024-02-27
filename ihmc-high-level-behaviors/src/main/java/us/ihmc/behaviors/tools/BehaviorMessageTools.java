@@ -7,6 +7,10 @@ import us.ihmc.behaviors.behaviorTree.*;
 
 import java.util.List;
 
+/**
+ * @deprecated This class is kept only so that other code can stay compiling as
+ *               we use it for reference in rewriting the behavior tree implementation.
+ */
 public class BehaviorMessageTools
 {
    /**
