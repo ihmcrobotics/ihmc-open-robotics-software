@@ -5,8 +5,6 @@ import behavior_msgs.msg.dds.BehaviorTreeMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.*;
 
-import java.util.List;
-
 /**
  * @deprecated This class is kept only so that other code can stay compiling as
  *               we use it for reference in rewriting the behavior tree implementation.
@@ -25,7 +23,7 @@ public class BehaviorMessageTools
       BehaviorTreeNodeMessage nodeMessage = behaviorTreeMessage.getNodes().add();
 //      if (treeNode.getState().getLastTickInstant()  != null)
 //         MessageTools.toMessage(treeNode.getState().getLastTickInstant(), nodeMessage.getLastTickInstant());
-      nodeMessage.setNodeName(treeNode.getDefinition().getDescription());
+      nodeMessage.setNodeName(treeNode.getDefinition().getName());
 //      if (treeNode.getState().getStatus() != null)
 //         nodeMessage.setPreviousStatus((byte) treeNode.getState().getStatus().ordinal());
 //      else
@@ -58,7 +56,7 @@ public class BehaviorMessageTools
 //      if (treeNodeMessage.getLastTickInstant().getSecondsSinceEpoch() != 0)
 //         behaviorTreeStatusNode.getState().setLastTickInstant(MessageTools.toInstant(treeNodeMessage.getLastTickInstant()));
       String name = treeNodeMessage.getNodeNameAsString();
-      behaviorTreeStatusNode.getDefinition().setDescription(name);
+      behaviorTreeStatusNode.getDefinition().setName(name);
       // Previous status will be -1 if the node has not been ticked yet
 //      if (treeNodeMessage.getPreviousStatus() >= 0)
 //         behaviorTreeStatusNode.getState().setStatus(BehaviorTreeNodeStatus.fromByte(treeNodeMessage.getPreviousStatus()));

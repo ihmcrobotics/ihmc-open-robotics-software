@@ -39,7 +39,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
 
       if (!wasFailed && getState().getFailed())
       {
-         RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("%s failed".formatted(getDefinition().getDescription()));
+         RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("%s failed".formatted(getDefinition().getName()));
       }
       wasFailed = getState().getFailed();
    }
@@ -74,7 +74,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    public abstract String getActionTypeTitle();
 
    @Override
-   public int getDescriptionColor()
+   public int getNameColor()
    {
       return flashingDescriptionColor.getTextColor(getState().getFailed());
    }

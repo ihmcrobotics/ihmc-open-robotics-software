@@ -53,8 +53,6 @@ public class BehaviorTreeJSONSanitizer
 
       BehaviorTreeNodeDefinition node = BehaviorTreeDefinitionBuilder.createNode(definitionType, crdtInfo, treeFilesDirectory);
 
-      if (jsonFileName != null)
-         node.setJSONFileName(jsonFileName);
       node.loadFromFile(jsonNode);
 
       if (parentNode != null)

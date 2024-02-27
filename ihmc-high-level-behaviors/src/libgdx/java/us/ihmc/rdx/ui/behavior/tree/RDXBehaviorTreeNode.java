@@ -16,7 +16,6 @@ import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImGuiVerticalAligner;
-import us.ihmc.rdx.imgui.ImStringWrapper;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -39,17 +38,13 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private transient final ImVec2 lineMin = new ImVec2();
    private transient final ImVec2 lineMax = new ImVec2();
    private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
-   private ImStringWrapper descriptionWrapper;
    private boolean mouseHoveringNodeLine;
    private boolean anySpecificWidgetOnLineClicked = false;
    private boolean treeWidgetExpanded = false;
-   private boolean isDescriptionBeingEdited = false;
-   private transient final ImString imDescriptionText = new ImString();
-   private transient final ImString imJSONFileNameText = new ImString();
-   private transient final ImBoolean isJSONFileRoot = new ImBoolean();
+   private boolean isNameBeingEdited = false;
+   private transient final ImString imNodeNameText = new ImString();
    private final String nodePopupID = labels.get("Node popup");
    private String modalPopupID = labels.get("Create node");
-   private boolean nodeContextMenuShowing = false;
    private final ImGuiVerticalAligner childrenDescriptionAligner = new ImGuiVerticalAligner();
 
    /** For extending types. */
@@ -65,20 +60,13 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       D definition = (D) new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
       this.state = (S) new BehaviorTreeNodeState<D>(id, definition, crdtInfo);
 
-      getDefinition().setDescription("BasicNode");
+      getDefinition().setName("Basic node");
    }
 
    @Override
    public void update()
    {
       BehaviorTreeNodeLayer.super.update();
-
-      if (descriptionWrapper == null)
-      {
-         descriptionWrapper = new ImStringWrapper(getDefinition()::getDescription,
-                                                  getDefinition()::setDescription,
-                                                  imString -> ImGuiTools.inputText(labels.getHidden("description"), imString));
-      }
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -139,10 +127,10 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    }
 
-   public void renderNodeDescription()
+   public void renderNodeName()
    {
-      String descriptionText = getDefinition().getDescription();
-      boolean textHovered = ImGuiTools.isItemHovered(ImGuiTools.calcTextSizeX(descriptionText), ImGui.getFrameHeight());
+      String nameText = getDefinition().getName();
+      boolean textHovered = ImGuiTools.isItemHovered(ImGuiTools.calcTextSizeX(nameText), ImGui.getFrameHeight());
 
       if (selected.get())
       {
@@ -154,25 +142,24 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
          setSpecificWidgetOnRowClicked();
          RDXBehaviorTreeTools.runForEntireTree(this, RDXBehaviorTreeNode::clearSelections);
          selected.set(true);
-         isDescriptionBeingEdited = true;
-         imDescriptionText.set(getDefinition().getDescription());
+         isNameBeingEdited = true;
+         imNodeNameText.set(getDefinition().getName());
       }
 
-      if (isDescriptionBeingEdited)
+      if (isNameBeingEdited)
       {
-         if (ImGuiTools.inputText(labels.getHidden("description"), imDescriptionText))
+         if (ImGuiTools.inputText(labels.getHidden("name"), imNodeNameText))
          {
-            getDefinition().setDescription(imDescriptionText.get());
-            isDescriptionBeingEdited = false;
+            getDefinition().setName(imNodeNameText.get());
+            isNameBeingEdited = false;
          }
       }
       else
       {
-         ImGui.textColored(getDescriptionColor(), descriptionText);
-         nodeContextMenuShowing = false;
+         ImGui.textColored(getNameColor(), nameText);
       }
 
-      if (mouseHoveringNodeLine && !isDescriptionBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
+      if (mouseHoveringNodeLine && !isNameBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
       {
          RDXBehaviorTreeTools.runForEntireTree(this, RDXBehaviorTreeNode::clearSelections);
          selected.set(true);
@@ -181,7 +168,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
       // We try to make anywhere on the row clickable to select the node,
       // execpt for specific interactions
-      if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine && ImGui.isMouseClicked(ImGuiMouseButton.Left) && !isDescriptionBeingEdited)
+      if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine && ImGui.isMouseClicked(ImGuiMouseButton.Left) && !isNameBeingEdited)
       {
          boolean desiredValue = !selected.get();
          RDXBehaviorTreeTools.runForEntireTree(this, RDXBehaviorTreeNode::clearSelections);
@@ -191,49 +178,22 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    public void renderContextMenuItems()
    {
-      nodeContextMenuShowing = true;
-
       if (ImGui.menuItem(labels.get("Rename...")))
       {
-         RDXBehaviorTreeTools.runForEntireTree(this, node -> node.setDescriptionBeingEdited(false));
-         isDescriptionBeingEdited = true;
-         imDescriptionText.set(getDefinition().getDescription());
+         RDXBehaviorTreeTools.runForEntireTree(this, node -> node.setNameBeingEdited(false));
+         isNameBeingEdited = true;
+         imNodeNameText.set(getDefinition().getName());
       }
 
       ImGui.separator();
 
-      if (ImGui.beginMenu(labels.get("File")))
+      if (getDefinition().isJSONRoot())
       {
-         isJSONFileRoot.set(getDefinition().isJSONRoot());
-
-         if (ImGui.checkbox(labels.get("Is JSON File Root"), isJSONFileRoot))
+         if (ImGui.menuItem(labels.get("Save to File")))
          {
-            if (isJSONFileRoot.get())
-            {
-               getDefinition().setJSONFileName(getClass().getSimpleName() + ".json");
-            }
-            else
-            {
-               getDefinition().setJSONFileName("");
-            }
+            RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("Saving %s".formatted(getDefinition().getName()));
+            getDefinition().saveToFile();
          }
-         if (getDefinition().isJSONRoot())
-         {
-            imJSONFileNameText.set(getDefinition().getJSONFilename().replaceAll("\\.json$", ""));
-            ImGui.text("File name:");
-            ImGui.sameLine();
-            ImGui.setNextItemWidth(ImGuiTools.calcTextSizeX(imJSONFileNameText.get()) + 10.0f);
-            if (ImGui.inputText(labels.get(".json"), imJSONFileNameText))
-            {
-               getDefinition().setJSONFileName(imJSONFileNameText.get() + ".json");
-            }
-            if (ImGui.menuItem(labels.get("Save to File")))
-            {
-               RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("Saving %s".formatted(getDefinition().getJSONFilename()));
-               getDefinition().saveToFile();
-            }
-         }
-         ImGui.endMenu();
       }
    }
 
@@ -245,7 +205,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public void clearSelections()
    {
       selected.set(false);
-      isDescriptionBeingEdited = false;
+      isNameBeingEdited = false;
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -256,7 +216,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    @Override
    public void destroy()
    {
-      LogTools.info("Destroying node: {}:{}", getState().getDefinition().getDescription(), getState().getID());
+      LogTools.info("Destroying node: {}:{}", getState().getDefinition().getName(), getState().getID());
       getState().destroy();
    }
 
@@ -270,22 +230,17 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       anySpecificWidgetOnLineClicked = true;
    }
 
-   public ImStringWrapper getDescriptionWrapper()
+   public void setNameBeingEdited(boolean nameBeingEdited)
    {
-      return descriptionWrapper;
+      isNameBeingEdited = nameBeingEdited;
    }
 
-   public void setDescriptionBeingEdited(boolean descriptionBeingEdited)
+   public boolean getNameBeingEdited()
    {
-      isDescriptionBeingEdited = descriptionBeingEdited;
+      return isNameBeingEdited;
    }
 
-   public boolean getDescriptionBeingEdited()
-   {
-      return isDescriptionBeingEdited;
-   }
-
-   public int getDescriptionColor()
+   public int getNameColor()
    {
       return ImGui.getColorU32(ImGuiCol.Text);
    }

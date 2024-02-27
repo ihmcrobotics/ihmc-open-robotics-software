@@ -37,7 +37,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
       if (node.getParent() != null)
          node.getParent().getChildrenDescriptionAligner().align();
-      node.renderNodeDescription();
+      node.renderNodeName();
 
       ImGui.popStyleVar();
 
@@ -137,9 +137,9 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
       switch (insertionType)
       {
-         case INSERT_BEFORE -> node.setModalPopupTitle("Insert before \"%s\"".formatted(node.getDefinition().getDescription()));
-         case INSERT_AFTER -> node.setModalPopupTitle("Insert after \"%s\"".formatted(node.getDefinition().getDescription()));
-         case INSERT_AS_CHILD -> node.setModalPopupTitle("Insert as child of \"%s\"".formatted(node.getDefinition().getDescription()));
+         case INSERT_BEFORE -> node.setModalPopupTitle("Insert before \"%s\"".formatted(node.getDefinition().getName()));
+         case INSERT_AFTER -> node.setModalPopupTitle("Insert after \"%s\"".formatted(node.getDefinition().getName()));
+         case INSERT_AS_CHILD -> node.setModalPopupTitle("Insert as child of \"%s\"".formatted(node.getDefinition().getName()));
       }
 
       ImGui.openPopup(node.getModalPopupID());
@@ -172,7 +172,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
             {
                if (!(relativeNode instanceof RDXActionNode))
                {
-                  if (ImGui.menuItem(relativeNode.getDefinition().getDescription()))
+                  if (ImGui.menuItem(relativeNode.getDefinition().getName()))
                   {
                      topologyOperationQueue.queueMoveAndFreezeNode(nodeToMove, nodeToMove.getParent(), relativeNode, relativeNode, insertionType);
                   }
@@ -180,7 +180,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
             }
             else
             {
-               if (ImGui.menuItem(relativeNode.getDefinition().getDescription()))
+               if (ImGui.menuItem(relativeNode.getDefinition().getName()))
                {
                   topologyOperationQueue.queueMoveAndFreezeNode(nodeToMove, nodeToMove.getParent(), relativeNode.getParent(), relativeNode, insertionType);
                }

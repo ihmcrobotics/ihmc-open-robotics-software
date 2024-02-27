@@ -75,7 +75,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
 
-      getDefinition().setDescription("Footstep plan");
+      getDefinition().setName("Footstep plan");
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
@@ -355,7 +355,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       {
          if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getRingHovered())
          {
-            tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(), state.getActionIndex(), getDefinition().getDescription()));
+            tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getActionTypeTitle(), state.getActionIndex(), getDefinition().getName()));
          }
       }
    }

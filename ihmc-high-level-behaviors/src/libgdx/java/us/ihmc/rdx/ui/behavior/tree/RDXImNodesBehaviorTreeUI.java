@@ -116,7 +116,7 @@ public class RDXImNodesBehaviorTreeUI
    private void loadLayoutNodesFromFile()
    {
       WorkspaceResourceFile file = new WorkspaceResourceFile(configurationsDirectory,
-                                                             rootNode.getBehaviorNodeUI().getUIChildren().get(0).getDefinition().getDescription() + ".json");
+                                                             rootNode.getBehaviorNodeUI().getUIChildren().get(0).getDefinition().getName());
       LogTools.info("Loading imnodes layout from {}", file.getPathForResourceLoadingPathFiltered());
       JSONFileTools.load(file.getClasspathResourceAsStream(), jsonNode ->
       {
@@ -128,7 +128,7 @@ public class RDXImNodesBehaviorTreeUI
 
             for (RDXImNodesTreeNode node : allNodesList)
             {
-               if (node.getBehaviorNodeUI().getDefinition().getDescription().equals(entry.getKey()))
+               if (node.getBehaviorNodeUI().getDefinition().getName().equals(entry.getKey()))
                {
                   String[] pos = entry.getValue().asText().split(",");
                   float x = Float.parseFloat(pos[0]);
@@ -144,7 +144,7 @@ public class RDXImNodesBehaviorTreeUI
    public void saveLayoutToFile()
    {
       WorkspaceResourceFile file = new WorkspaceResourceFile(configurationsDirectory,
-                                                             rootNode.getBehaviorNodeUI().getUIChildren().get(0).getDefinition().getDescription() + ".json");
+                                                             rootNode.getBehaviorNodeUI().getUIChildren().get(0).getDefinition().getName());
       if (file.isFileAccessAvailable())
       {
          LogTools.info("Saving imnodes layout to {}", WorkspacePathTools.removePathPartsBeforeProjectFolder(file.getFilesystemFile()));
@@ -153,7 +153,7 @@ public class RDXImNodesBehaviorTreeUI
             ObjectNode treeNodesNode = root.putObject("treeNodes");
             for (RDXImNodesTreeNode node : allNodesList)
             {
-               treeNodesNode.put(node.getBehaviorNodeUI().getDefinition().getDescription(),
+               treeNodesNode.put(node.getBehaviorNodeUI().getDefinition().getName(),
                                  ImNodes.getNodeGridSpacePosX(node.getNodeID()) + "," + ImNodes.getNodeGridSpacePosY(node.getNodeID()));
 
             }
