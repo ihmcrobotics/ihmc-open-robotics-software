@@ -2,7 +2,7 @@
   "title" : "MonteCarloFootstepPlannerParameters",
   "Reset" : false,
   "Number of iterations" : {
-    "value" : 90,
+    "value" : 900,
     "lowerBound" : 1,
     "upperBound" : 400
   },

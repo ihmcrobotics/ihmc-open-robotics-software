@@ -435,9 +435,9 @@ public class MonteCarloPlannerTools
             if (radius >= minRadius && radius <= maxRadius && dotProduct > 0 && stanceSide * dotProductLeft > 0 && orthogonalDistanceToMidline <= maxWidth
                 && orthogonalDistanceToMidline >= minWidth && orthogonalDistanceToBaseLine <= maxLength && orthogonalDistanceToBaseLine >= minLength)
             {
-               //actions.add(new Vector3D(i, j, -0.1));
+               actions.add(new Vector3D(i, j, -0.1));
                actions.add(new Vector3D(i, j, 0));
-               //actions.add(new Vector3D(i, j, 0.1));
+               actions.add(new Vector3D(i, j, 0.1));
             }
          }
       }

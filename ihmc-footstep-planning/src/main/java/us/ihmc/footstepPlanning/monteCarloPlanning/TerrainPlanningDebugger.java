@@ -220,20 +220,26 @@ public class TerrainPlanningDebugger
       }
    }
 
-   public void printScoreStats(MonteCarloFootstepNode root, MonteCarloFootstepPlannerRequest request, MonteCarloFootstepPlannerParameters parameters)
+   public void printScoreStats(MonteCarloFootstepNode root, MonteCarloFootstepPlannerRequest request, MonteCarloFootstepPlannerParameters parameters, int iteration)
    {
       if (!enabled)
          return;
 
+      // time now
       ArrayList<MonteCarloTreeNode> optimalPath = new ArrayList<>();
       MonteCarloPlannerTools.getOptimalPath(root, optimalPath);
 
+      double totalScore = 0;
       for (int i = 1; i<optimalPath.size(); i++)
       {
          MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) optimalPath.get(i);
          MonteCarloFootstepNode previousNode = (MonteCarloFootstepNode) optimalPath.get(i-1);
-         double totalScore = MonteCarloPlannerTools.scoreFootstepNode(previousNode, footstepNode, request, parameters, true);
+         double score = MonteCarloPlannerTools.scoreFootstepNode(previousNode, footstepNode, request, parameters, false);
+         totalScore += score;
+
       }
+      long nanoTime = System.nanoTime();
+      LogTools.warn(String.format("[MCFP] Time: %d, Iteration: %d, Total Score: %.3f", nanoTime, iteration, totalScore));
    }
 
    public void publishStartAndGoalForVisualization(SideDependentList<FramePose3D> startPoses, SideDependentList<FramePose3D> goalPoses)

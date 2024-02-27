@@ -67,13 +67,14 @@ public class MonteCarloFootstepPlanner
       for (int i = 0; i < parameters.getNumberOfIterations(); i++)
       {
          updateTree(root, request);
+         debugger.printScoreStats(root, request, parameters, i);
       }
 
       // Compute plan from maximum value path in the tree so far
       FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root, request, footPolygons);
 
       // Debug Only
-      debugger.printScoreStats(root, request, parameters);
+
       statistics.stopTotalTime();
       statistics.setLayerCountsString(MonteCarloPlannerTools.getLayerCountsString(root));
       statistics.logToFile(true, true);
