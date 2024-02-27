@@ -160,8 +160,14 @@ public class DoorSceneNodeDefinitions
    public static final TIntDoubleMap ARUCO_MARKER_SIZES = new TIntDoubleHashMap();
    static
    {
-      ARUCO_MARKER_SIZES.put(DoorModelParameters.RIGHT_PUSH_DOOR_MARKER_ID, SceneObjectDefinitions.LARGE_MARKER_WIDTH);
       ARUCO_MARKER_SIZES.put(DoorModelParameters.LEFT_PULL_DOOR_MARKER_ID, SceneObjectDefinitions.LARGE_MARKER_WIDTH);
+      ARUCO_MARKER_SIZES.put(DoorModelParameters.LEFT_PULL_DOOR_FRAME_MARKER_ID, SceneObjectDefinitions.LARGE_MARKER_WIDTH);
+      ARUCO_MARKER_SIZES.put(DoorModelParameters.RIGHT_PUSH_DOOR_MARKER_ID, SceneObjectDefinitions.LARGE_MARKER_WIDTH);
+      ARUCO_MARKER_SIZES.put(DoorModelParameters.RIGHT_PUSH_DOOR_FRAME_MARKER_ID, SceneObjectDefinitions.LARGE_MARKER_WIDTH);
+      ARUCO_MARKER_SIZES.put(DoorModelParameters.RIGHT_PULL_DOOR_MARKER_ID, SceneObjectDefinitions.LARGE_MARKER_WIDTH);
+      ARUCO_MARKER_SIZES.put(DoorModelParameters.RIGHT_PULL_DOOR_FRAME_MARKER_ID, SceneObjectDefinitions.LARGE_MARKER_WIDTH);
+      ARUCO_MARKER_SIZES.put(DoorModelParameters.LEFT_PUSH_DOOR_MARKER_ID, SceneObjectDefinitions.LARGE_MARKER_WIDTH);
+      ARUCO_MARKER_SIZES.put(DoorModelParameters.LEFT_PUSH_DOOR_FRAME_MARKER_ID, SceneObjectDefinitions.LARGE_MARKER_WIDTH);
    }
 
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
