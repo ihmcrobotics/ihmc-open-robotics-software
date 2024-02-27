@@ -324,7 +324,11 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
 
 def footstep_loss(output, target, contact_map):
 
-    # Reshape the output tensor to extract footstep positions
+    # Reshape the output tensor to extract footstep positions (8, 1, 12)
+
+    print("Output Shape: ", output.shape)
+
+    output = output.view(-1, 3, 4)
     output_reshaped = output.view(-1, 4, 4)
 
     # Extract x and y coordinates of predicted footstep positions

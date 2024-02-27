@@ -63,7 +63,20 @@ class FootstepPredictor(Module):
         l1 = self.bn0(l1)
         l1 = F.leaky_relu(l1)
         
+        # set h1 to zero value
+        # h1 = torch.zeros(h1.shape).to(h1.device)
+
+
+        min_val = torch.min(h1)
+        max_val = torch.max(h1)
+        h1 = (h1 - min_val) / (max_val - min_val)
+
+        min_val = torch.min(l1)
+        max_val = torch.max(l1)
+        l1 = (l1 - min_val) / (max_val - min_val)
+
         print_intermediate_output(h1, l1)
+
 
         x = torch.cat((h1, l1), dim=1)
 

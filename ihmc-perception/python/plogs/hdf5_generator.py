@@ -157,7 +157,7 @@ def log_height_maps(data, height_maps, dataset):
 
 def log_height_map(data, height_map, dataset):
 
-    height_map = (height_map - 3.2768) * 10000
+    height_map = (height_map - 6.5536) * 10000
     height_map = np.array(height_map).astype(np.uint16)
 
     encoded_img = np.array((cv2.imencode('.png', height_map))[1])

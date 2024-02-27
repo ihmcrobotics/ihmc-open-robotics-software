@@ -29,6 +29,13 @@ class FootstepDataset(Dataset):
         self.height_maps = []
         for i in range(total_height_maps):
             height_map_uint16 = load_depth(data, i, 'cropped/height/')
+
+
+            # subtract the mean height from the height map
+            # height_map_uint16 = height_map_uint16 - np.mean(height_map_uint16)
+
+            print("Min: ", np.min(height_map_uint16), "Max: ", np.max(height_map_uint16), "Mean: ", np.mean(height_map_uint16), "StdDev: ", np.std(height_map_uint16))
+
             height_map_float32 = np.array(height_map_uint16, dtype=np.float32)
             height_map = height_map_float32 / 10000.0
             self.height_maps.append(height_map)
@@ -206,7 +213,7 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion, model
             print("Loading Model: ", model_files[-1])
             model.load_state_dict(torch.load(model_path + model_files[-1]))
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-6)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
     # train the model
     for epoch in range(epochs):
@@ -366,8 +373,56 @@ def visualize_dataset(dataset, batch_size=1):
         visualize_output(height_map_input, linear_input, target_output, contact_map, terrain_cost)
 
 def footstep_loss(output, target, contact_map):
+    contact_loss = compute_contact_loss(output, target, contact_map)
+    return torch.nn.L1Loss()(output, target) + contact_loss
+        
+# def footstep_loss(output, target, contact_map):
+
+#     # Reshape the output tensor to extract footstep positions [Output Shape: (8, 12)]
+
+#     print("Output Shape: ", output.shape)
+
+#     output_reshaped = output.view(-1, 4, 3)
+#     # output_reshaped = output.view(-1, 4, 3)
+
+#     print("Output Reshaped: ", output_reshaped.shape)
+
+#     # Extract x and y coordinates of predicted footstep positions
+#     fx = output_reshaped[:, :, 0]
+#     fy = output_reshaped[:, :, 1]
+
+#     print("FX: ", fx.shape)
+#     print("FY: ", fy.shape)
+
+#     # Convert footstep positions to pixel indices and clamp within valid range
+#     fx = (fx * 50 + 100).clamp(0, 199).long()
+#     fy = (fy * 50 + 100).clamp(0, 199).long()
+
+#     # Compute contact scores from the contact map at predicted footstep positions
+
+#     # query the contact map of shape (batch_size,1,x_coord,y_coord) with fx of shape (batch_size,x_coord) and fy of shape (batch_size,y_coord) 
+#     contact_scores = contact_map[:, 0, fx, fy]
+
+
+#     # contact_scores = contact_scores.sum(dim=1) / 4.0
+
+#     print("Contact Scores: ", contact_scores.shape)
+
+#     # Calculate contact loss as the difference between predicted and actual contact scores
+#     contact_loss = (1.0 - contact_scores) * 100.0
+
+#     print("Contact Loss: ", contact_loss.shape)   
+
+#     # Compute L1 loss between predicted and target footstep positions
+#     l1_loss = torch.nn.L1Loss()(output, target)
+
+#     # Combine L1 loss and contact map loss
+#     total_loss = l1_loss + contact_loss
+
+#     print("Shapes: ", contact_loss.shape, l1_loss.shape, total_loss.shape)
     
-    return torch.nn.L1Loss()(output, target)
+#     return total_loss
+
 
 def compute_contact_loss_vectorized(output, target, contact_map):
     print("Output Shape: ", output.shape, "Target Shape: ", target.shape, "Contact Map Shape: ", contact_map.shape)
@@ -416,11 +471,8 @@ def compute_contact_loss(output, target, contact_map):
         
         total_contact_score = per_image_score / n_steps
         contact_loss = (1.0 - total_contact_score) * 100.0
-        curr_output = output[itr].unsqueeze(0)
-        curr_target = target[itr].unsqueeze(0)
-        l1_loss = torch.nn.L1Loss()(curr_output, curr_target)
 
-        sum_loss.append((l1_loss + contact_loss))
+        sum_loss.append((contact_loss))
     
     return sum(sum_loss) / len (sum_loss)
 
