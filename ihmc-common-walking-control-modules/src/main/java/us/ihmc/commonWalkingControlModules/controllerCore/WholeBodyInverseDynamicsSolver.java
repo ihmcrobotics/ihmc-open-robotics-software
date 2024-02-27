@@ -29,6 +29,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings.JointPowerLimitEnforcementMethod;
@@ -55,10 +56,7 @@ import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.sensorProcessing.outputData.*;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -75,7 +73,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
 
    private final FloatingJointBasics rootJoint;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
-   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
+   private final YoLowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
    private final Map<OneDoFJointBasics, YoDouble> jointAccelerationsSolution = new HashMap<>();
 
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
@@ -144,7 +142,8 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       kinematicLoopFunctions = toolbox.getKinematicLoopFunctions();
-      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
+
+      lowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, JointDesiredControlMode.EFFORT);
 
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
@@ -510,7 +509,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       yoDesiredMomentumRateLinear.set(3, momentumRate);
    }
 
-   public LowLevelOneDoFJointDesiredDataHolder getOutput()
+   public JointDesiredOutputListBasics getOutput()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
    }
