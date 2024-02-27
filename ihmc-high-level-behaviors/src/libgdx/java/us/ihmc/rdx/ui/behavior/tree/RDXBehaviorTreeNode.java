@@ -43,6 +43,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private boolean treeWidgetExpanded = false;
    private boolean isNameBeingEdited = false;
    private transient final ImString imNodeNameText = new ImString();
+   private transient final ImString notesText = new ImString();
    private final String nodePopupID = labels.get("Node popup");
    private String modalPopupID = labels.get("Create node");
    private final ImGuiVerticalAligner childrenDescriptionAligner = new ImGuiVerticalAligner();
@@ -194,12 +195,29 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
             RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("Saving %s".formatted(getDefinition().getName()));
             getDefinition().saveToFile();
          }
+         if (ImGui.menuItem(labels.get("Unlink from JSON File")))
+         {
+            getDefinition().setName(getDefinition().getName().replace(".json", ""));
+         }
+      }
+      else
+      {
+         if (ImGui.menuItem(labels.get("Convert to JSON Root")))
+         {
+            getDefinition().setName(getDefinition().getName() + ".json");
+         }
       }
    }
 
    public void renderNodeSettingsWidgets()
    {
-
+      ImGui.text("Notes:");
+      notesText.set(getDefinition().getNotes());
+      ImGui.setNextItemWidth(ImGui.getColumnWidth());
+      if (ImGui.inputTextMultiline(labels.getHidden("Notes"), notesText))
+      {
+         getDefinition().setNotes(notesText.get());
+      }
    }
 
    public void clearSelections()

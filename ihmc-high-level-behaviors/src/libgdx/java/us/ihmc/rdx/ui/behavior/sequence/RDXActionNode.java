@@ -64,6 +64,8 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    {
       ImGui.text("Type: %s   Index: %d".formatted(getActionTypeTitle(), getState().getActionIndex()));
       renderImGuiWidgetsInternal();
+
+      super.renderNodeSettingsWidgets();
    }
 
    protected void renderImGuiWidgetsInternal()

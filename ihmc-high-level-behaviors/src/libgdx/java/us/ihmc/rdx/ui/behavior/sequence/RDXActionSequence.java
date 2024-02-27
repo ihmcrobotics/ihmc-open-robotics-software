@@ -190,5 +190,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    public void renderNodeSettingsWidgets()
    {
       ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
+
+      super.renderNodeSettingsWidgets();
    }
 }
