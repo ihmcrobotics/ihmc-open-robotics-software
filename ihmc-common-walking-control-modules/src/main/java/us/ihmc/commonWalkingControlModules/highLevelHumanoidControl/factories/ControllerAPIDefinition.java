@@ -142,7 +142,7 @@ public class ControllerAPIDefinition
 
    public static HashSet<Class<?>> getROS2StatusMessageTypes()
    {
-      return inputMessageClasses;
+      return outputMessageClasses;
    }
 
    public static List<Class<? extends Settable<?>>> getControllerSupportedStatusMessages()
