@@ -192,7 +192,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       {
          if (ImGui.menuItem(labels.get("Save to File")))
          {
-            RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("Saving %s".formatted(getDefinition().getName()));
+            RDXBaseUI.pushNotification("Saving %s".formatted(getDefinition().getName()));
             getDefinition().saveToFile();
          }
          if (ImGui.menuItem(labels.get("Unlink from JSON File")))

@@ -89,6 +89,11 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
    }
 
+   public void setEndEffector(RigidBodyBasics endEffector)
+   {
+      this.endEffector = endEffector;
+   }
+
    public RigidBodyBasics getEndEffector()
    {
       return endEffector;
