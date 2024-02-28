@@ -48,6 +48,7 @@ public class RDXBehaviorTreeFileLoader
                                                               behaviorTreeState.getCRDTInfo(),
                                                               behaviorTreeState.getSaveFileDirectory());
       node.getDefinition().loadFromFile(jsonNode);
+      node.getDefinition().setOnDiskFields();
       LogTools.info("Creating node: {}:{}", node.getDefinition().getName(), node.getState().getID());
 
       if (parentNode != null)

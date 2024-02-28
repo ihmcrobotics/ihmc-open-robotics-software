@@ -39,6 +39,9 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
    private transient BehaviorTreeNodeDefinition parent;
    private final WorkspaceResourceDirectory saveFileDirectory;
+   // Used to compare with saved version and provide unsaved status (*) to the operator
+   private String onDiskName;
+   private String onDiskNotes;
 
    public BehaviorTreeNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -56,7 +59,10 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
 
       WorkspaceResourceFile saveFile = new WorkspaceResourceFile(saveFileDirectory, name.getValue());
       LogTools.info("Saving behavior tree: {}", saveFile.getFilesystemFile());
-      JSONFileTools.save(saveFile, this::saveToFile);
+      if (JSONFileTools.save(saveFile, this::saveToFile)) // Success
+      {
+         BehaviorTreeTools.runForSubtreeNodes(this, BehaviorTreeNodeDefinition::setOnDiskFields);
+      }
    }
 
    /**
@@ -67,6 +73,8 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
       jsonNode.put("type", getClass().getSimpleName());
       jsonNode.put("name", name.getValue());
       jsonNode.put("notes", notes.getValue());
+
+      setOnDiskFields();
 
       ArrayNode childrenArrayJsonNode = jsonNode.putArray("children");
       for (BehaviorTreeNodeDefinition child : children)
@@ -92,6 +100,20 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    {
       name.setValue(jsonNode.get("name").textValue());
       notes.setValue(jsonNode.get("notes").textValue());
+   }
+
+   public void setOnDiskFields()
+   {
+      onDiskName = name.getValue();
+      onDiskNotes = notes.getValue();
+   }
+
+   public boolean hasChanges()
+   {
+      boolean unchanged = true;
+      unchanged &= onDiskName.equals(name.getValue());
+      unchanged &= onDiskNotes.equals(notes.getValue());
+      return !unchanged;
    }
 
    public void toMessage(BehaviorTreeNodeDefinitionMessage message)

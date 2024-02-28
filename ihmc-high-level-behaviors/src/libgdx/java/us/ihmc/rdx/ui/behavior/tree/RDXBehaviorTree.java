@@ -264,6 +264,12 @@ public class RDXBehaviorTree
 
             if (enableChildScrollableAreas)
                ImGui.endChild();
+
+            if (ImGui.isWindowHovered() && ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('S'))
+            {
+               RDXBaseUI.pushNotification("Saving %s".formatted(rootNode.getDefinition().getName()));
+               rootNode.getDefinition().saveToFile();
+            }
          }
       }
       else
