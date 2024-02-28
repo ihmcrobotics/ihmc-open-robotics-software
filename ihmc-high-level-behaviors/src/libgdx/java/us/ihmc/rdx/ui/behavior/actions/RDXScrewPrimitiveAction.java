@@ -70,7 +70,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       state = getState();
       definition = getDefinition();
 
-      definition.setDescription("Screw primitive");
+      definition.setName("Screw primitive");
 
       this.syncedRobot = syncedRobot;
 

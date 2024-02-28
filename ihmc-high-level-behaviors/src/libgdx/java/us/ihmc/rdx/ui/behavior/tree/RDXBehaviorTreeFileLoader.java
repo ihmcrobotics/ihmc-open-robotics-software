@@ -50,10 +50,8 @@ public class RDXBehaviorTreeFileLoader
                                                               behaviorTreeState.getAndIncrementNextID(),
                                                               behaviorTreeState.getCRDTInfo(),
                                                               behaviorTreeState.getSaveFileDirectory());
-      if (jsonFileName != null)
-         node.getDefinition().setJSONFileName(jsonFileName);
       node.getDefinition().loadFromFile(jsonNode);
-      LogTools.info("Creating node: {}:{}", node.getDefinition().getDescription(), node.getState().getID());
+      LogTools.info("Creating node: {}:{}", node.getDefinition().getName(), node.getState().getID());
 
       if (parentNode != null)
       {
