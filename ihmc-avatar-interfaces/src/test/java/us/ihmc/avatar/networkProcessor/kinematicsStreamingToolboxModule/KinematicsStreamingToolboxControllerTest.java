@@ -60,6 +60,9 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
+import us.ihmc.scs2.session.Session;
+import us.ihmc.scs2.session.Session.SessionModeChangeListener;
+import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -73,7 +76,10 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -174,11 +180,18 @@ public abstract class KinematicsStreamingToolboxControllerTest
          @Override
          public void doControl()
          {
-            toolboxController.update();
-
-            for (JointReadOnly joint : desiredJoints)
+            try
             {
-               scsInput.getJointOutput(joint).setConfiguration(joint);
+               toolboxController.update();
+
+               for (JointReadOnly joint : desiredJoints)
+               {
+                  scsInput.getJointOutput(joint).setConfiguration(joint);
+               }
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
             }
          }
 
@@ -499,45 +512,49 @@ public abstract class KinematicsStreamingToolboxControllerTest
          @Override
          public void initialize()
          {
-            ikStreamingMessageGenerator.initialize();
+            try
+            {
+               ikStreamingMessageGenerator.initialize();
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+            }
          }
 
          @Override
          public void doControl()
          {
-            double time = simulationTestHelper.getSimulationTime();
-            KinematicsStreamingToolboxInputMessage message = ikStreamingMessageGenerator.update(time);
-            if (message != null)
-               inputPublisher.publish(message);
+            try
+            {
+               double time = simulationTestHelper.getSimulationTime();
+               KinematicsStreamingToolboxInputMessage message = ikStreamingMessageGenerator.update(time);
+               if (message != null)
+                  inputPublisher.publish(message);
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+            }
          }
       }, ikStreamingTestRunParameters.messageGeneratorDT());
 
       simulationTestHelper.start();
+      SimRunner simRunner = new SimRunner(simulationTestHelper);
 
       SimulationConstructionSet2 scs = simulationTestHelper.getSimulationConstructionSet();
       scs.waitUntilVisualizerFullyUp();
       Platform.runLater(() ->
                         {
                            Button restart = new Button("Restart");
-                           restart.setOnAction(event ->
-                                               {
-                                                  scs.stopSimulationThread();
-                                                  scs.pause();
-                                                  scs.reinitializeSimulation();
-                                                  ikStreamingMessageGenerator.initialize();
-                                                  scs.startSimulationThread();
-
-                                                  assertTrue(simulationTestHelper.simulateNow(0.5));
-                                                  wakeupToolbox();
-                                                  assertTrue(simulationTestHelper.simulateNow(ikStreamingTestRunParameters.simulationDuration()));
-                                               });
+                           restart.setOnAction(event -> simRunner.reset());
                            scs.addCustomGUIControl(restart);
                         });
 
-      assertTrue(simulationTestHelper.simulateNow(0.5));
+      assertTrue(simRunner.simulateNow(0.5));
       wakeupToolbox();
 
-      assertTrue(simulationTestHelper.simulateNow(ikStreamingTestRunParameters.simulationDuration()));
+      assertTrue(simRunner.simulateNow(ikStreamingTestRunParameters.simulationDuration()));
 
       KinematicsStreamingToolboxInputMessage message = new KinematicsStreamingToolboxInputMessage();
       message.setStreamToController(false);
@@ -554,6 +571,156 @@ public abstract class KinematicsStreamingToolboxControllerTest
                  "Mean position error is: " + handPositionMeanError.getValue());
       assertTrue(handOrientationMeanError.getValue() < ikStreamingTestRunParameters.handOrientationMeanErrorThreshold(),
                  "Mean orientation error is: " + handOrientationMeanError.getValue());
+   }
+
+   private class SimRunner
+   {
+      private SCS2AvatarTestingSimulation simulationTestHelper;
+
+      public SimRunner(SCS2AvatarTestingSimulation simulationTestHelper)
+      {
+         this.simulationTestHelper = simulationTestHelper;
+      }
+
+      private final AtomicBoolean resetSimulation = new AtomicBoolean(false);
+
+      public void reset()
+      {
+         resetSimulation.set(true);
+      }
+
+      public boolean simulateNow(double duration)
+      {
+         return simulateNow((int) (duration / simulationTestHelper.getSimulationDT()));
+      }
+
+      public boolean simulateNow(long numberOfTicks)
+      {
+         SimulationConstructionSet2 scs = simulationTestHelper.getSimulationConstructionSet();
+         SimulationSession session = scs.getSimulationSession();
+
+         if (session.isSessionShutdown())
+            return false;
+
+         boolean sessionStartedInitialValue = scs.isSimulationThreadRunning();
+
+         if (sessionStartedInitialValue)
+         {
+            if (!scs.stopSimulationThread())
+               return false;
+         }
+
+         SessionMode activeModeInitialValue = session.getActiveMode();
+         long maxDurationInitialValue = session.getRunMaxDuration();
+         session.submitRunMaxDuration(-1L); // Make sure the max duration does not interfere with the number of ticks.
+
+         try
+         {
+            session.setSessionMode(SessionMode.RUNNING);
+
+            boolean success = true;
+
+            if (numberOfTicks == -1L || numberOfTicks == Long.MAX_VALUE)
+            {
+               return scs.simulateNow(numberOfTicks);
+            }
+            else
+            {
+               for (long tick = 0; tick < numberOfTicks; tick++)
+               {
+                  if (session.isSessionShutdown())
+                     return false;
+
+                  if (!handleVisualizerSessionModeRequests())
+                     break;
+
+                  if (resetSimulation.getAndSet(false))
+                  {
+                     scs.reinitializeSimulation();
+                     tick = 0;
+                  }
+
+                  success = session.runTick();
+
+                  if (!success)
+                     break;
+               }
+            }
+
+            return success;
+         }
+         finally
+         {
+            // This ensures that the controller is being pause.
+            session.getPhysicsEngine().pause();
+            session.submitRunMaxDuration(maxDurationInitialValue); // Restore the max duration.
+            session.requestBufferListenerForceUpdate();
+
+            if (sessionStartedInitialValue)
+               session.startSessionThread();
+            session.setSessionMode(activeModeInitialValue);
+         }
+      }
+
+      private boolean handleVisualizerSessionModeRequests()
+      {
+         SimulationConstructionSet2 scs = simulationTestHelper.getSimulationConstructionSet();
+         SimulationSession session = scs.getSimulationSession();
+
+         if (scs.isSimulating() || !session.hasWrittenBufferInLastRunTick())
+            return true; // Make sure we stop running when the buffer was just updated.
+
+         // The GUI requested a mode change, we pause the simulation until the GUI request RUNNING again.
+         CountDownLatch latch = new CountDownLatch(1);
+
+         SessionModeChangeListener listener = (prevMode, newMode) ->
+         {
+            if (newMode != prevMode && newMode == SessionMode.RUNNING)
+            {
+               scs.stopSimulationThread();
+               if (scs.getBufferCurrentIndex() != scs.getBufferOutPoint())
+               { // We make sure to go back to the out-point
+                  scs.gotoBufferOutPoint();
+                  finalizePauseTick();
+               }
+               latch.countDown();
+            }
+         };
+         session.addPreSessionModeChangeListener(listener);
+
+         session.startSessionThread();
+
+         try
+         {
+            latch.await();
+         }
+         catch (InterruptedException e)
+         {
+            return false;
+         }
+         finally
+         {
+            session.removePreSessionModeChangeListener(listener);
+         }
+
+         return true;
+      }
+
+      private void finalizePauseTick()
+      {
+         SimulationConstructionSet2 scs = simulationTestHelper.getSimulationConstructionSet();
+         SimulationSession session = scs.getSimulationSession();
+         try
+         {
+            Method finalizePauseTick = Session.class.getDeclaredMethod("finalizePauseTick", boolean.class);
+            finalizePauseTick.setAccessible(true);
+            finalizePauseTick.invoke(session, true);
+         }
+         catch (Exception e)
+         {
+            throw new RuntimeException(e);
+         }
+      }
    }
 
    public static IKStreamingMessageGenerator circleMessageGenerator(FullHumanoidRobotModel fullRobotModel, boolean streamToController, double frequency)

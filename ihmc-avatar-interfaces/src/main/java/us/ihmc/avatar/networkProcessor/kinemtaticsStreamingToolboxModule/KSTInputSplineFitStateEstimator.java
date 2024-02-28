@@ -9,8 +9,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.robotics.math.filters.SplineBasedOnlinePositionFilter3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,16 +26,21 @@ public class KSTInputSplineFitStateEstimator implements KSTInputStateEstimator
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble lastLocalTime = new YoDouble("lastLocalTime", registry);
 
+   private final YoInteger windowSizeMax = new YoInteger("windowSizeMax", registry);
+   private final YoDouble windowTimeMax = new YoDouble("windowTimeMax", registry);
+   private final YoInteger polynomialDegree = new YoInteger("polynomialDegree", registry);
    private final Map<RigidBodyReadOnly, SingleEndEffectorStateEstimator> inputPoseStateEstimators = new HashMap<>();
    private final SingleEndEffectorStateEstimator[] inputPoseStateEstimatorsArray;
 
    public KSTInputSplineFitStateEstimator(Collection<? extends RigidBodyBasics> endEffectors, YoRegistry parentRegistry)
    {
-      int windowSize = 20;
+      windowSizeMax.set(20);
+      windowTimeMax.set(Double.POSITIVE_INFINITY);
+      polynomialDegree.set(3);
 
       for (RigidBodyReadOnly endEffector : endEffectors)
       {
-         inputPoseStateEstimators.put(endEffector, new SingleEndEffectorStateEstimator(endEffector, windowSize, registry));
+         inputPoseStateEstimators.put(endEffector, new SingleEndEffectorStateEstimator(endEffector, windowSizeMax, windowTimeMax, polynomialDegree, registry));
       }
       inputPoseStateEstimatorsArray = inputPoseStateEstimators.values().toArray(new SingleEndEffectorStateEstimator[0]);
 
@@ -95,10 +103,14 @@ public class KSTInputSplineFitStateEstimator implements KSTInputStateEstimator
       private final YoFramePose3D rawInputPose;
       private final SplineBasedOnlinePositionFilter3D positionFilter;
 
-      public SingleEndEffectorStateEstimator(RigidBodyReadOnly endEffector, int windowSize, YoRegistry registry)
+      public SingleEndEffectorStateEstimator(RigidBodyReadOnly endEffector,
+                                             IntegerProvider windowSizeMax,
+                                             DoubleProvider windowTimeMax,
+                                             IntegerProvider polynomialDegree,
+                                             YoRegistry registry)
       {
          rawInputPose = new YoFramePose3D(endEffector.getName() + "RawInputPose", worldFrame, registry);
-         positionFilter = new SplineBasedOnlinePositionFilter3D(endEffector.getName(), windowSize, Double.POSITIVE_INFINITY, 2, registry);
+         positionFilter = new SplineBasedOnlinePositionFilter3D(endEffector.getName(), windowSizeMax, windowTimeMax, polynomialDegree, registry);
       }
 
       public void reset()

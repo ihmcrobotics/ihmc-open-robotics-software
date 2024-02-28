@@ -14,7 +14,7 @@ import java.util.List;
 
 public class OnlineSplineFitter3D
 {
-   private final double windowTimeMax;
+   private double windowTimeMax;
 
    private boolean isSplineInitialized = false;
 
@@ -23,10 +23,7 @@ public class OnlineSplineFitter3D
 
    public OnlineSplineFitter3D(int polynomialOrder, int windowSizeMax, double windowTimeMax)
    {
-      this.windowTimeMax = windowTimeMax;
-      isSplineInitialized = false;
-      splineFitter.setOrder(polynomialOrder);
-      //      splineFitter.enableRateRegularization(true);
+      setPolynomialOrder(polynomialOrder);
       buffer = new RingBuffer<>(windowSizeMax, DataPoint3D::new, DataPoint3D::set);
    }
 
@@ -35,6 +32,21 @@ public class OnlineSplineFitter3D
       buffer.reset();
       splineFitter.clear();
       isSplineInitialized = false;
+   }
+
+   public void setPolynomialOrder(int polynomialOrder)
+   {
+      splineFitter.setOrder(polynomialOrder);
+   }
+
+   public void setWindowSizeMax(int windowSizeMax)
+   {
+      buffer.changeCapacity(windowSizeMax);
+   }
+
+   public void setWindowTimeMax(double windowTimeMax)
+   {
+      this.windowTimeMax = windowTimeMax;
    }
 
    public void recordNewPoint(double time, Tuple3DReadOnly value)

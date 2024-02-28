@@ -3,6 +3,8 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.euclid.YoVector3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
@@ -15,14 +17,25 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class SplineBasedOnlinePositionFilter3D
 {
    private final OnlineSplineFitter3D splineFitter;
+   private final IntegerProvider polynomialDegree;
+   private final IntegerProvider windowSizeMax;
+   private final DoubleProvider windowTimeMax;
 
    private final YoPoint3D estimatedPosition;
    private final YoVector3D estimatedVelocity;
    private final YoVector3D estimatedAcceleration;
 
-   public SplineBasedOnlinePositionFilter3D(String namePrefix, int windowSizeMax, double windowTimeMax, int polynomialDegree, YoRegistry registry)
+   public SplineBasedOnlinePositionFilter3D(String namePrefix,
+                                            IntegerProvider windowSizeMax,
+                                            DoubleProvider windowTimeMax,
+                                            IntegerProvider polynomialDegree,
+                                            YoRegistry registry)
    {
-      splineFitter = new OnlineSplineFitter3D(polynomialDegree, windowSizeMax, windowTimeMax);
+      splineFitter = new OnlineSplineFitter3D(polynomialDegree.getValue(), windowSizeMax.getValue(), windowTimeMax.getValue());
+      this.polynomialDegree = polynomialDegree;
+      this.windowSizeMax = windowSizeMax;
+      this.windowTimeMax = windowTimeMax;
+
       estimatedPosition = new YoPoint3D(namePrefix + "EstimatedPosition", registry);
       estimatedVelocity = new YoVector3D(namePrefix + "EstimatedVelocity", registry);
       estimatedAcceleration = new YoVector3D(namePrefix + "EstimatedAcceleration", registry);
@@ -35,7 +48,11 @@ public class SplineBasedOnlinePositionFilter3D
 
    public void update(double time, Point3DReadOnly position)
    {
+      splineFitter.setPolynomialOrder(polynomialDegree.getValue());
+      splineFitter.setWindowSizeMax(windowSizeMax.getValue());
+      splineFitter.setWindowTimeMax(windowTimeMax.getValue());
       splineFitter.recordNewPoint(time, position);
+
       estimatedPosition.set(splineFitter.evaluateValueAt(time));
       estimatedVelocity.set(splineFitter.evaluateRateAt(time));
       estimatedAcceleration.set(splineFitter.evaluateAccelerationAt(time));
