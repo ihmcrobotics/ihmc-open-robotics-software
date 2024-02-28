@@ -3,6 +3,8 @@ package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import javafx.application.Platform;
+import javafx.scene.control.Button;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
@@ -73,7 +75,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.DoubleFunction;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.*;
@@ -491,13 +492,21 @@ public abstract class KinematicsStreamingToolboxControllerTest
       if (ikStreamingTestRunParameters.getRegistry() != null)
          simulationTestHelper.addRegistry(ikStreamingTestRunParameters.getRegistry());
 
+      IKStreamingMessageGenerator ikStreamingMessageGenerator = ikStreamingTestRunParameters.messageGenerator();
+
       ghost.addThrottledController(new Controller()
       {
+         @Override
+         public void initialize()
+         {
+            ikStreamingMessageGenerator.initialize();
+         }
+
          @Override
          public void doControl()
          {
             double time = simulationTestHelper.getSimulationTime();
-            KinematicsStreamingToolboxInputMessage message = ikStreamingTestRunParameters.messageGenerator().apply(time);
+            KinematicsStreamingToolboxInputMessage message = ikStreamingMessageGenerator.update(time);
             if (message != null)
                inputPublisher.publish(message);
          }
@@ -505,13 +514,30 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       simulationTestHelper.start();
 
-      boolean success = simulationTestHelper.simulateNow(0.5);
-      assertTrue(success);
+      SimulationConstructionSet2 scs = simulationTestHelper.getSimulationConstructionSet();
+      scs.waitUntilVisualizerFullyUp();
+      Platform.runLater(() ->
+                        {
+                           Button restart = new Button("Restart");
+                           restart.setOnAction(event ->
+                                               {
+                                                  scs.stopSimulationThread();
+                                                  scs.pause();
+                                                  scs.reinitializeSimulation();
+                                                  ikStreamingMessageGenerator.initialize();
+                                                  scs.startSimulationThread();
 
+                                                  assertTrue(simulationTestHelper.simulateNow(0.5));
+                                                  wakeupToolbox();
+                                                  assertTrue(simulationTestHelper.simulateNow(ikStreamingTestRunParameters.simulationDuration()));
+                                               });
+                           scs.addCustomGUIControl(restart);
+                        });
+
+      assertTrue(simulationTestHelper.simulateNow(0.5));
       wakeupToolbox();
 
-      success = simulationTestHelper.simulateNow(ikStreamingTestRunParameters.simulationDuration());
-      assertTrue(success);
+      assertTrue(simulationTestHelper.simulateNow(ikStreamingTestRunParameters.simulationDuration()));
 
       KinematicsStreamingToolboxInputMessage message = new KinematicsStreamingToolboxInputMessage();
       message.setStreamToController(false);
@@ -530,9 +556,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
                  "Mean orientation error is: " + handOrientationMeanError.getValue());
    }
 
-   public static DoubleFunction<KinematicsStreamingToolboxInputMessage> circleMessageGenerator(FullHumanoidRobotModel fullRobotModel,
-                                                                                               boolean streamToController,
-                                                                                               double frequency)
+   public static IKStreamingMessageGenerator circleMessageGenerator(FullHumanoidRobotModel fullRobotModel, boolean streamToController, double frequency)
    {
       double circleRadius = 0.25;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(side -> new Point3D(0.3, side.negateIfRightSide(0.225), 1.0));
@@ -540,26 +564,22 @@ public abstract class KinematicsStreamingToolboxControllerTest
             new Vector3D(0.0, 0.0, 0.0) :
             new Vector3D());
 
-      return new DoubleFunction<KinematicsStreamingToolboxInputMessage>()
+      return time ->
       {
-         @Override
-         public KinematicsStreamingToolboxInputMessage apply(double time)
-         {
-            KinematicsStreamingToolboxInputMessage input = new KinematicsStreamingToolboxInputMessage();
-            input.setStreamToController(streamToController);
+         KinematicsStreamingToolboxInputMessage input = new KinematicsStreamingToolboxInputMessage();
+         input.setStreamToController(streamToController);
 
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               FramePoint3D position = circlePositionAt(time,
-                                                        robotSide.negateIfRightSide(frequency),
-                                                        circleRadius,
-                                                        circleCenters.get(robotSide),
-                                                        circleCenterVelocities.get(robotSide));
-               KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(fullRobotModel.getHand(robotSide), position);
-               input.getInputs().add().set(message);
-            }
-            return input;
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            FramePoint3D position = circlePositionAt(time,
+                                                     robotSide.negateIfRightSide(frequency),
+                                                     circleRadius,
+                                                     circleCenters.get(robotSide),
+                                                     circleCenterVelocities.get(robotSide));
+            KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(fullRobotModel.getHand(robotSide), position);
+            input.getInputs().add().set(message);
          }
+         return input;
       };
    }
 
@@ -601,7 +621,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       private double handPositionMeanErrorThreshold = 0.15;
       private double handOrientationMeanErrorThreshold = 0.25;
       private double messageGeneratorDT = 0.01;
-      private DoubleFunction<KinematicsStreamingToolboxInputMessage> messageGenerator;
+      private IKStreamingMessageGenerator messageGenerator;
       private double simulationDuration = 10.0;
 
       private YoRegistry registry;
@@ -650,12 +670,12 @@ public abstract class KinematicsStreamingToolboxControllerTest
          return messageGeneratorDT;
       }
 
-      public void setMessageGenerator(DoubleFunction<KinematicsStreamingToolboxInputMessage> messageGenerator)
+      public void setMessageGenerator(IKStreamingMessageGenerator messageGenerator)
       {
          this.messageGenerator = messageGenerator;
       }
 
-      public DoubleFunction<KinematicsStreamingToolboxInputMessage> messageGenerator()
+      public IKStreamingMessageGenerator messageGenerator()
       {
          return messageGenerator;
       }
@@ -691,5 +711,14 @@ public abstract class KinematicsStreamingToolboxControllerTest
                messageGenerator,
                simulationDuration);
       }
+   }
+
+   public interface IKStreamingMessageGenerator
+   {
+      default void initialize()
+      {
+      }
+
+      KinematicsStreamingToolboxInputMessage update(double time);
    }
 }

@@ -28,7 +28,7 @@ public class KSTInputSplineFitStateEstimator implements KSTInputStateEstimator
 
    public KSTInputSplineFitStateEstimator(Collection<? extends RigidBodyBasics> endEffectors, YoRegistry parentRegistry)
    {
-      int windowSize = 10;
+      int windowSize = 20;
 
       for (RigidBodyReadOnly endEffector : endEffectors)
       {
@@ -98,7 +98,7 @@ public class KSTInputSplineFitStateEstimator implements KSTInputStateEstimator
       public SingleEndEffectorStateEstimator(RigidBodyReadOnly endEffector, int windowSize, YoRegistry registry)
       {
          rawInputPose = new YoFramePose3D(endEffector.getName() + "RawInputPose", worldFrame, registry);
-         positionFilter = new SplineBasedOnlinePositionFilter3D(endEffector.getName(), windowSize, Double.POSITIVE_INFINITY, 3, registry);
+         positionFilter = new SplineBasedOnlinePositionFilter3D(endEffector.getName(), windowSize, Double.POSITIVE_INFINITY, 2, registry);
       }
 
       public void reset()
