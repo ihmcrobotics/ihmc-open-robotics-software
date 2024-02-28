@@ -11,8 +11,6 @@ import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
-import javax.annotation.Nullable;
-
 /**
  * Tool to load all JSON files and resave them all in order to perform
  * schema changes.
@@ -37,7 +35,7 @@ public class BehaviorTreeJSONSanitizer
             LogTools.info("Loading {}", fileToLoad.getFilesystemFile());
             JSONFileTools.load(fileToLoad, jsonNode ->
             {
-               loadedRootNode.setValue(loadFromFile(jsonNode, null, fileToLoad.getFileName()));
+               loadedRootNode.setValue(loadFromFile(jsonNode, null));
             });
 
             loadedRootNode.getValue().saveToFile();
@@ -45,7 +43,7 @@ public class BehaviorTreeJSONSanitizer
       }
    }
 
-   private BehaviorTreeNodeDefinition loadFromFile(JsonNode jsonNode, BehaviorTreeNodeDefinition parentNode, @Nullable String jsonFileName)
+   private BehaviorTreeNodeDefinition loadFromFile(JsonNode jsonNode, BehaviorTreeNodeDefinition parentNode)
    {
       String typeName = jsonNode.get("type").textValue();
 
@@ -63,13 +61,13 @@ public class BehaviorTreeJSONSanitizer
          JsonNode fileNode = childJsonNode.get("file");
          if (fileNode == null)
          {
-            loadFromFile(childJsonNode, node, null);
+            loadFromFile(childJsonNode, node);
          }
          else
          {
             WorkspaceResourceFile childFile = new WorkspaceResourceFile(treeFilesDirectory, fileNode.asText());
             LogTools.info("Loading {}", childFile.getFilesystemFile());
-            JSONFileTools.load(childFile, childJSONNode -> loadFromFile(childJSONNode, node, childFile.getFileName()));
+            JSONFileTools.load(childFile, childJSONNode -> loadFromFile(childJSONNode, node));
          }
       });
 
