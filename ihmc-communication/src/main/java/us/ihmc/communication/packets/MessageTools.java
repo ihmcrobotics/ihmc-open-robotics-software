@@ -2,7 +2,6 @@ package us.ihmc.communication.packets;
 
 import controller_msgs.msg.dds.*;
 import gnu.trove.list.array.*;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.*;
 import perception_msgs.msg.dds.*;
 import std_msgs.msg.dds.Bool;
@@ -148,7 +147,7 @@ public class MessageTools
     *
     * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
     */
-   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector)
+   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyReadOnly endEffector)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(endEffector.hashCode());
@@ -170,17 +169,13 @@ public class MessageTools
     * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin should
     *                        reach. The data is assumed to be expressed in world frame. Not modified.
     */
-   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector, Point3DReadOnly desiredPosition)
+   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyReadOnly endEffector, Point3DReadOnly desiredPosition)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(endEffector.hashCode());
       message.getDesiredPositionInWorld().set(desiredPosition);
-      message.getAngularSelectionMatrix().setXSelected(false);
-      message.getAngularSelectionMatrix().setYSelected(false);
-      message.getAngularSelectionMatrix().setZSelected(false);
-      message.getLinearSelectionMatrix().setXSelected(true);
-      message.getLinearSelectionMatrix().setYSelected(true);
-      message.getLinearSelectionMatrix().setZSelected(true);
+      packSelectionMatrix3DMessage(false, message.getAngularSelectionMatrix());
+      packSelectionMatrix3DMessage(true, message.getLinearSelectionMatrix());
       return message;
    }
 
@@ -201,21 +196,17 @@ public class MessageTools
     *                           reach. The data is assumed to be expressed in world frame. Not
     *                           modified.
     */
-   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector, QuaternionReadOnly desiredOrientation)
+   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyReadOnly endEffector, QuaternionReadOnly desiredOrientation)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(endEffector.hashCode());
       message.getDesiredOrientationInWorld().set(desiredOrientation);
-      message.getAngularSelectionMatrix().setXSelected(true);
-      message.getAngularSelectionMatrix().setYSelected(true);
-      message.getAngularSelectionMatrix().setZSelected(true);
-      message.getLinearSelectionMatrix().setXSelected(false);
-      message.getLinearSelectionMatrix().setYSelected(false);
-      message.getLinearSelectionMatrix().setZSelected(false);
+      packSelectionMatrix3DMessage(true, message.getAngularSelectionMatrix());
+      packSelectionMatrix3DMessage(false, message.getLinearSelectionMatrix());
       return message;
    }
 
-   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector, Pose3DReadOnly desiredPose)
+   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyReadOnly endEffector, Pose3DReadOnly desiredPose)
    {
       return createKinematicsToolboxRigidBodyMessage(endEffector, desiredPose.getPosition(), desiredPose.getOrientation());
    }
@@ -237,9 +228,15 @@ public class MessageTools
     *                           reach. The data is assumed to be expressed in world frame. Not
     *                           modified.
     */
-   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector, Point3DReadOnly desiredPosition,
+   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyReadOnly endEffector,
+                                                                                           Point3DReadOnly desiredPosition,
                                                                                            QuaternionReadOnly desiredOrientation)
    {
+      if (desiredPosition == null)
+         return createKinematicsToolboxRigidBodyMessage(endEffector, desiredOrientation);
+      else if (desiredOrientation == null)
+         return createKinematicsToolboxRigidBodyMessage(endEffector, desiredPosition);
+
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(endEffector.hashCode());
       message.getDesiredPositionInWorld().set(desiredPosition);
@@ -266,7 +263,8 @@ public class MessageTools
     *                           reach. The data is assumed to be expressed in world frame. Not
     *                           modified.
     */
-   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector, ReferenceFrame controlFrame,
+   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyReadOnly endEffector,
+                                                                                           ReferenceFrame controlFrame,
                                                                                            Point3DReadOnly desiredPosition,
                                                                                            QuaternionReadOnly desiredOrientation)
    {
@@ -279,6 +277,11 @@ public class MessageTools
       message.getControlFramePositionInEndEffector().set(transformToBodyFixedFrame.getTranslation());
       message.getControlFrameOrientationInEndEffector().set(transformToBodyFixedFrame.getRotation());
       return message;
+   }
+
+   public static SelectionMatrix3DMessage createSelectionMatrix3DMessage(boolean selected)
+   {
+      return createSelectionMatrix3DMessage(selected, selected, selected);
    }
 
    public static SelectionMatrix3DMessage createSelectionMatrix3DMessage(boolean xSelected, boolean ySelected, boolean zSelected)
@@ -316,7 +319,10 @@ public class MessageTools
       messageToPack.setZSelected(selectionMatrix3D.isZSelected());
    }
 
-   public static void packSelectionMatrix3DMessage(boolean xSelected, boolean ySelected, boolean zSelected, ReferenceFrame selectionFrame,
+   public static void packSelectionMatrix3DMessage(boolean xSelected,
+                                                   boolean ySelected,
+                                                   boolean zSelected,
+                                                   ReferenceFrame selectionFrame,
                                                    SelectionMatrix3DMessage messageToPack)
    {
       messageToPack.setSelectionFrameId(toFrameId(selectionFrame));
@@ -410,7 +416,8 @@ public class MessageTools
                double firstInputFrameTime = firstInputFrameIndex * inputDT;
                double secondInputFrameTime = secondInputFrameIndex * inputDT;
                double alpha = (secondInputFrameTime - outputFrameTime) / (secondInputFrameTime - firstInputFrameTime);
-               message.getRobotConfigurations().add()
+               message.getRobotConfigurations()
+                      .add()
                       .set(interpolateMessages(previewFrames.get(firstInputFrameIndex), previewFrames.get(secondInputFrameIndex), alpha));
             }
          }
@@ -461,7 +468,6 @@ public class MessageTools
       }
 
       return message;
-
    }
 
    public static ToolboxStateMessage createToolboxStateMessage(ToolboxState requestedState)
@@ -599,7 +605,7 @@ public class MessageTools
     * @param destination the list to copy the data into. Modified.
     * @param <T>         Should be either {@code Enum}, {@code StringBuilder}, or {@code Settable<T>}.
     * @throws IllegalArgumentException if the type {@code T} is none of the following: {@code Enum},
-    *                                  {@code StringBuilder}, {@code Settable<T>}.
+    *       {@code StringBuilder}, {@code Settable<T>}.
     */
    @SuppressWarnings("unchecked")
    public static <T> void copyData(List<T> source, RecyclingArrayList<T> destination)
@@ -633,9 +639,9 @@ public class MessageTools
       }
       else
       {
-         throw new IllegalArgumentException(MessageTools.class.getSimpleName() + ".copyData(...) can only be used with "
-               + RecyclingArrayList.class.getSimpleName() + "s declared with either of the following types: Enum, StringBuilder, and"
-               + Settable.class.getSimpleName());
+         throw new IllegalArgumentException(
+               MessageTools.class.getSimpleName() + ".copyData(...) can only be used with " + RecyclingArrayList.class.getSimpleName()
+               + "s declared with either of the following types: Enum, StringBuilder, and" + Settable.class.getSimpleName());
       }
    }
 
@@ -777,7 +783,8 @@ public class MessageTools
     * @param jointsToUpdate                the 1-DoF joints to update configuration & velocity of.
     *                                      Modified.
     */
-   public static void unpackDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FloatingJointBasics rootJointToUpdate,
+   public static void unpackDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus,
+                                              FloatingJointBasics rootJointToUpdate,
                                               OneDoFJointBasics[] jointsToUpdate)
    {
       if (kinematicsToolboxOutputStatus.getDesiredJointAngles().isEmpty())
@@ -814,7 +821,8 @@ public class MessageTools
     * @param rootJoint                           the floating joint to get data from. Not modified.
     * @param newJointData                        the 1-DoF joints to get data from. Not modified.
     */
-   public static void packDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatusToPack, FloatingJointReadOnly rootJoint,
+   public static void packDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatusToPack,
+                                            FloatingJointReadOnly rootJoint,
                                             OneDoFJointReadOnly[] newJointData)
    {
       int jointNameHash = Arrays.hashCode(newJointData);
@@ -856,7 +864,8 @@ public class MessageTools
       }
    }
 
-   public static KinematicsToolboxOutputStatus interpolateMessages(KinematicsToolboxOutputStatus outputStatusOne, KinematicsToolboxOutputStatus outputStatusTwo,
+   public static KinematicsToolboxOutputStatus interpolateMessages(KinematicsToolboxOutputStatus outputStatusOne,
+                                                                   KinematicsToolboxOutputStatus outputStatusTwo,
                                                                    double alpha)
    {
       KinematicsToolboxOutputStatus interpolated = new KinematicsToolboxOutputStatus();
@@ -864,7 +873,9 @@ public class MessageTools
       return interpolated;
    }
 
-   public static void interpolateMessages(KinematicsToolboxOutputStatus outputStatusOne, KinematicsToolboxOutputStatus outputStatusTwo, double alpha,
+   public static void interpolateMessages(KinematicsToolboxOutputStatus outputStatusOne,
+                                          KinematicsToolboxOutputStatus outputStatusTwo,
+                                          double alpha,
                                           KinematicsToolboxOutputStatus interpolatedToPack)
    {
       if (outputStatusOne.getJointNameHash() != outputStatusTwo.getJointNameHash())
@@ -910,7 +921,9 @@ public class MessageTools
     * @param alphaDot the time-derivative of {@code alpha}.
     * @return the result of the interpolation.
     */
-   public static KinematicsToolboxOutputStatus interpolate(KinematicsToolboxOutputStatus start, KinematicsToolboxOutputStatus end, double alpha,
+   public static KinematicsToolboxOutputStatus interpolate(KinematicsToolboxOutputStatus start,
+                                                           KinematicsToolboxOutputStatus end,
+                                                           double alpha,
                                                            double alphaDot)
    {
       KinematicsToolboxOutputStatus interpolated = new KinematicsToolboxOutputStatus();
@@ -927,7 +940,10 @@ public class MessageTools
     * @param alphaDot           the time-derivative of {@code alpha}.
     * @param interpolatedToPack the message used to store the result of the interpolation. Modified.
     */
-   public static void interpolate(KinematicsToolboxOutputStatus start, KinematicsToolboxOutputStatus end, double alpha, double alphaDot,
+   public static void interpolate(KinematicsToolboxOutputStatus start,
+                                  KinematicsToolboxOutputStatus end,
+                                  double alpha,
+                                  double alphaDot,
                                   KinematicsToolboxOutputStatus interpolatedToPack)
    {
       if (start.getJointNameHash() != end.getJointNameHash())
@@ -1016,10 +1032,13 @@ public class MessageTools
     *                             obtained from {@link OneDoFJointBasics#hashCode()}. Not modified.
     * @param jointAngles          the privileged joint angles. Not modified.
     * @throws IllegalArgumentException if the lengths of {@code jointAngles} and {@code jointHashCodes}
-    *                                  are different.
+    *       are different.
     */
-   public static void packPrivilegedRobotConfiguration(KinematicsToolboxPrivilegedConfigurationMessage message, Tuple3DReadOnly rootJointPosition,
-                                                       QuaternionReadOnly rootJointOrientation, int[] jointHashCodes, float[] jointAngles)
+   public static void packPrivilegedRobotConfiguration(KinematicsToolboxPrivilegedConfigurationMessage message,
+                                                       Tuple3DReadOnly rootJointPosition,
+                                                       QuaternionReadOnly rootJointOrientation,
+                                                       int[] jointHashCodes,
+                                                       float[] jointAngles)
    {
       message.getPrivilegedRootJointPosition().set(rootJointPosition);
       message.getPrivilegedRootJointOrientation().set(rootJointOrientation);
@@ -1043,7 +1062,7 @@ public class MessageTools
     *                       from {@link OneDoFJointBasics#hashCode()}. Not modified.
     * @param jointAngles    the privileged joint angles. Not modified.
     * @throws IllegalArgumentException if the lengths of {@code jointAngles} and {@code jointHashCodes}
-    *                                  are different.
+    *       are different.
     */
    public static void packPrivilegedJointAngles(KinematicsToolboxPrivilegedConfigurationMessage message, int[] jointHashCodes, float[] jointAngles)
    {
@@ -1066,7 +1085,9 @@ public class MessageTools
    {
       int numberOfScanPoints = lidarScanMessage.getNumberOfPoints();
       Point3D[] scanPoints = new Point3D[numberOfScanPoints];
-      LidarPointCloudCompression.decompressPointCloud(lidarScanMessage.getScan(), lidarScanMessage.getNumberOfPoints(), (i, x, y, z) -> scanPoints[i] = new Point3D(x, y, z));
+      LidarPointCloudCompression.decompressPointCloud(lidarScanMessage.getScan(),
+                                                      lidarScanMessage.getNumberOfPoints(),
+                                                      (i, x, y, z) -> scanPoints[i] = new Point3D(x, y, z));
       return scanPoints;
    }
 
@@ -1094,9 +1115,9 @@ public class MessageTools
 
    public static void toMessage(RigidBodyTransform rigidBodyTransform, RigidBodyTransformMessage rigidBodyTransformMessage)
    {
-      rigidBodyTransformMessage.setX (rigidBodyTransform.getTranslation().getX());
-      rigidBodyTransformMessage.setY (rigidBodyTransform.getTranslation().getY());
-      rigidBodyTransformMessage.setZ (rigidBodyTransform.getTranslation().getZ());
+      rigidBodyTransformMessage.setX(rigidBodyTransform.getTranslation().getX());
+      rigidBodyTransformMessage.setY(rigidBodyTransform.getTranslation().getY());
+      rigidBodyTransformMessage.setZ(rigidBodyTransform.getTranslation().getZ());
       rigidBodyTransformMessage.setM00(rigidBodyTransform.getRotation().getM00());
       rigidBodyTransformMessage.setM01(rigidBodyTransform.getRotation().getM01());
       rigidBodyTransformMessage.setM02(rigidBodyTransform.getRotation().getM02());
@@ -1113,15 +1134,16 @@ public class MessageTools
       rigidBodyTransform.getTranslation().setX(rigidBodyTransformMessage.getX());
       rigidBodyTransform.getTranslation().setY(rigidBodyTransformMessage.getY());
       rigidBodyTransform.getTranslation().setZ(rigidBodyTransformMessage.getZ());
-      rigidBodyTransform.getRotation().setUnsafe(rigidBodyTransformMessage.getM00(),
-                                                 rigidBodyTransformMessage.getM01(),
-                                                 rigidBodyTransformMessage.getM02(),
-                                                 rigidBodyTransformMessage.getM10(),
-                                                 rigidBodyTransformMessage.getM11(),
-                                                 rigidBodyTransformMessage.getM12(),
-                                                 rigidBodyTransformMessage.getM20(),
-                                                 rigidBodyTransformMessage.getM21(),
-                                                 rigidBodyTransformMessage.getM22());
+      rigidBodyTransform.getRotation()
+                        .setUnsafe(rigidBodyTransformMessage.getM00(),
+                                   rigidBodyTransformMessage.getM01(),
+                                   rigidBodyTransformMessage.getM02(),
+                                   rigidBodyTransformMessage.getM10(),
+                                   rigidBodyTransformMessage.getM11(),
+                                   rigidBodyTransformMessage.getM12(),
+                                   rigidBodyTransformMessage.getM20(),
+                                   rigidBodyTransformMessage.getM21(),
+                                   rigidBodyTransformMessage.getM22());
    }
 
    public static RigidBodyTransform toEuclid(RigidBodyTransformMessage rigidBodyTransformMessage)
@@ -1335,8 +1357,7 @@ public class MessageTools
 
    public static double calculateDelay(ImageMessage imageMessage)
    {
-      return TimeTools.calculateDelay(imageMessage.getAcquisitionTime().getSecondsSinceEpoch(),
-                                      imageMessage.getAcquisitionTime().getAdditionalNanos());
+      return TimeTools.calculateDelay(imageMessage.getAcquisitionTime().getSecondsSinceEpoch(), imageMessage.getAcquisitionTime().getAdditionalNanos());
    }
 
    public static void packIDLSequence(ByteBuffer sourceBuffer, us.ihmc.idl.IDLSequence.Byte sequenceToPack)
