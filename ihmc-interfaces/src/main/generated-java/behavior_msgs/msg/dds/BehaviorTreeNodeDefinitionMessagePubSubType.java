@@ -15,7 +15,7 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "664a2d13de78599aa23f11f8b027e662e37d442c2ae0b378089f5440894a47fc";
+   		return "290addff11186e07f828bfb8b172c31808fd91bb94874871e149d54075c854cd";
    }
    
    @Override
@@ -53,9 +53,9 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
       return current_alignment - initial_alignment;
    }
@@ -69,12 +69,12 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getDescription().length() + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getNotes().length() + 1;
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getJsonFileName().length() + 1;
 
 
       return current_alignment - initial_alignment;
@@ -82,41 +82,41 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
 
    public static void write(behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      if(data.getDescription().length() <= 255)
-      cdr.write_type_d(data.getDescription());else
-          throw new RuntimeException("description field exceeds the maximum length");
+      if(data.getName().length() <= 255)
+      cdr.write_type_d(data.getName());else
+          throw new RuntimeException("name field exceeds the maximum length");
+
+      if(data.getNotes().length() <= 255)
+      cdr.write_type_d(data.getNotes());else
+          throw new RuntimeException("notes field exceeds the maximum length");
 
       cdr.write_type_3(data.getNumberOfChildren());
-
-      if(data.getJsonFileName().length() <= 255)
-      cdr.write_type_d(data.getJsonFileName());else
-          throw new RuntimeException("json_file_name field exceeds the maximum length");
 
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.read_type_d(data.getDescription());	
+      cdr.read_type_d(data.getName());	
+      cdr.read_type_d(data.getNotes());	
       data.setNumberOfChildren(cdr.read_type_3());
       	
-      cdr.read_type_d(data.getJsonFileName());	
 
    }
 
    @Override
    public final void serialize(behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_d("description", data.getDescription());
+      ser.write_type_d("name", data.getName());
+      ser.write_type_d("notes", data.getNotes());
       ser.write_type_3("number_of_children", data.getNumberOfChildren());
-      ser.write_type_d("json_file_name", data.getJsonFileName());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage data)
    {
-      ser.read_type_d("description", data.getDescription());
+      ser.read_type_d("name", data.getName());
+      ser.read_type_d("notes", data.getNotes());
       data.setNumberOfChildren(ser.read_type_3("number_of_children"));
-      ser.read_type_d("json_file_name", data.getJsonFileName());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage src, behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage dest)

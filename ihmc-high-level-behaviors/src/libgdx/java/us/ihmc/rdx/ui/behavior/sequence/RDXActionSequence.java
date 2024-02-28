@@ -34,7 +34,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
 
       state = getState();
 
-      getDefinition().setDescription("ActionSequence");
+      getDefinition().setName("Action sequence");
 
       automaticExecutionCheckbox = new ImBooleanWrapper(state::getAutomaticExecution,
                                                         state::setAutomaticExecution,
@@ -166,7 +166,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
          for (RDXActionNode<?, ?> currentlyExecutingAction : currentlyExecutingActions)
          {
             ImGui.sameLine();
-            ImGui.text("%s (%s)".formatted(currentlyExecutingAction.getDefinition().getDescription(),
+            ImGui.text("%s (%s)".formatted(currentlyExecutingAction.getDefinition().getName(),
                                            currentlyExecutingAction.getActionTypeTitle()));
          }
       }
@@ -190,5 +190,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    public void renderNodeSettingsWidgets()
    {
       ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
+
+      super.renderNodeSettingsWidgets();
    }
 }

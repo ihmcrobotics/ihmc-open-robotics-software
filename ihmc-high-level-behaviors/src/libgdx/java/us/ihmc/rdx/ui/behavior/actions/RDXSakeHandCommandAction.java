@@ -32,7 +32,7 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
 
       definition = getDefinition();
 
-      definition.setDescription("Hand configuration");
+      definition.setName("Hand configuration");
 
       sideWidget = new ImIntegerWrapper(definition::getSide, definition::setSide, labels.get("Side"));
       ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
