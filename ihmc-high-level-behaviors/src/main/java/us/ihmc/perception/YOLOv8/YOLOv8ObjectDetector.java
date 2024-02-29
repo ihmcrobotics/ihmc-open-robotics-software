@@ -21,7 +21,7 @@ import java.util.Set;
 
 public class YOLOv8ObjectDetector
 {
-   private static final String ONNX_FILE_NAME = "yolov8n-seg_736x1280.onnx";
+   private static final String ONNX_FILE_NAME = "drill1.onnx";
    private static final double SCALE_FACTOR = 1.0 / 255.0;
    private static final Size DETECTION_SIZE = new Size(1280, 736);
 
