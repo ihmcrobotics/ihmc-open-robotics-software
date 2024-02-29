@@ -7,7 +7,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
-import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -27,10 +26,9 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -195,10 +193,10 @@ public class RDXFootstepPlanning
       // Deep copy because we are handing this off to another thread
       FootstepPlannerOutput output = new FootstepPlannerOutput(footstepPlanner.getOutput());
 
-      LogTools.info("Footstep planner completed with body path {}, footstep planner {}, {} step(s)",
-                    output.getBodyPathPlanningResult(),
-                    output.getFootstepPlanningResult(),
-                    output.getFootstepPlan().getNumberOfSteps());
+      RDXBaseUI.pushNotification("Footstep planner completed with body path %s, footstep planner %s, %d step(s)".formatted(
+                                 output.getBodyPathPlanningResult(),
+                                 output.getFootstepPlanningResult(),
+                                 output.getFootstepPlan().getNumberOfSteps()));
 
       ThreadTools.startAThread(() ->
                                {
@@ -215,11 +213,11 @@ public class RDXFootstepPlanning
          for (BipedalFootstepPlannerNodeRejectionReason reason : rejectionReasonReport.getSortedReasons())
          {
             double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
-            LogTools.info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
+            RDXBaseUI.pushNotification("Rejection %.1f%%: %s".formatted(rejectionPercentage, reason));
             rejectionReasonsMessage.add(MutablePair.of(reason == null ? -1 : reason.ordinal(),
                                                        MathTools.roundToSignificantFigures(rejectionPercentage, 3)));
          }
-         LogTools.info("Footstep planning failure...");
+         RDXBaseUI.pushNotification("Footstep planning failure...");
 
          // Clears the notification
          plannerOutputNotification.poll();

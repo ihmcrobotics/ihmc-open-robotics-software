@@ -39,7 +39,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
 
       if (!wasFailed && getState().getFailed())
       {
-         RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("%s failed".formatted(getDefinition().getName()));
+         RDXBaseUI.pushNotification("%s failed".formatted(getDefinition().getName()));
       }
       wasFailed = getState().getFailed();
    }
