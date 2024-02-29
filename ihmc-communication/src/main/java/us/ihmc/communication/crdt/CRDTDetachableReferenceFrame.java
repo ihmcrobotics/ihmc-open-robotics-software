@@ -40,4 +40,9 @@ public class CRDTDetachableReferenceFrame
    {
       return detachableReferenceFrame.getReferenceFrame();
    }
+
+   public CRDTUnidirectionalRigidBodyTransform getTransformToParent()
+   {
+      return transformToParent;
+   }
 }

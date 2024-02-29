@@ -13,6 +13,7 @@ import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -133,6 +134,17 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    public void update()
    {
       super.update();
+
+      CRDTDetachableReferenceFrame goalFrame = state.getGoalFrame();
+      goalFrame.changeFrame("midFeetZUp");
+      goalFrame.getTransformToParent().getValue().getTranslation().setZ(0.0);
+      goalFrame.getTransformToParent().getValue().getRotation().setToRollOrientation(0.0);
+      goalFrame.getTransformToParent().getValue().getRotation().setToPitchOrientation(0.0);
+//      goalFrame.getReferenceFrame().getTransformToParent().getTranslation().setZ(0.0);
+//      goalFrame.getReferenceFrame().getTransformToParent().getRotation().setToPitchOrientation(0.0);
+//      goalFrame.getReferenceFrame().getTransformToParent().getRotation().setToRollOrientation(0.0);
+      goalFrame.changeFrame("Box");
+      goalFrame.update();
 
       RecyclingArrayListTools.synchronizeSize(manuallyPlacedFootsteps, state.getFootsteps());
 
