@@ -12,17 +12,12 @@ import us.ihmc.perception.RawImage;
 public class OpenCVOpticalFlowProcessor
 {
    private final NvidiaOpticalFlow_2_0 opticalFlow;
-   private RawImage firstImage;
    private GpuMat firstImageGray = new GpuMat();
-   private RawImage secondImage;
    private final GpuMat secondImageGray = new GpuMat();
    private final int gridSize;
 
    public OpenCVOpticalFlowProcessor(RawImage initialImage)
    {
-      firstImage = initialImage.get();
-      secondImage = initialImage; // TODO: Do I need a .get() here?
-
       Size imageSize = new Size(initialImage.getImageWidth(), initialImage.getImageHeight());
       opticalFlow = NvidiaOpticalFlow_2_0.create(imageSize,
                                                  NvidiaOpticalFlow_2_0.NV_OF_PERF_LEVEL_FAST,
@@ -40,12 +35,11 @@ public class OpenCVOpticalFlowProcessor
 
    public void setNewImage(RawImage newImage)
    {
-      firstImage.release();
+      newImage.get();
       firstImageGray.release();
-      firstImage = secondImage;
       firstImageGray = secondImageGray.clone();
-      secondImage = newImage.get();
-      opencv_cudaimgproc.cvtColor(secondImage.getGpuImageMat(), secondImageGray, opencv_imgproc.COLOR_BGR2GRAY);
+      opencv_cudaimgproc.cvtColor(newImage.getGpuImageMat(), secondImageGray, opencv_imgproc.COLOR_BGR2GRAY);
+      newImage.release();
    }
 
    public GpuMat calculateFlow()
@@ -64,9 +58,7 @@ public class OpenCVOpticalFlowProcessor
    {
       opticalFlow.collectGarbage();
       opticalFlow.close();
-      firstImage.release();
       firstImageGray.release();
-      secondImage.release();
       secondImageGray.release();
    }
 }
