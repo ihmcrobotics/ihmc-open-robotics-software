@@ -1,220 +1,204 @@
-#! /usr/bin/env python3
 
-import math
-import h5py
 import numpy as np
-import cv2
-
-import os.path
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
-from plotting.height_map_tools import *
+import torch
+from torch.utils.data import Dataset
 from hdf5_reader import *
 
-def plan_view_main(data):
+import sys
+import os
 
-    # Load height map data just as depth data
-    # height_map = load_depth(data, 0, 'internal/height/')
-    
-    sensor_positions = get_data(data, 'l515/sensor/position/')
-    sensor_orientations = get_data(data, 'l515/sensor/orientation/')
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from plotting.height_map_tools import *
 
-    sensor_positions[:, 2] = 0
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    footstep_plan_positions = get_data(data, 'plan/footstep/position/')
-    footstep_plan_orientations = get_data(data, 'plan/footstep/orientation/')
-
-    start_positions = get_data(data, 'start/footstep/position/')
-    start_orientations = get_data(data, 'start/footstep/orientation/')
-
-    goal_positions = get_data(data, 'goal/footstep/position/')
-    goal_orientations = get_data(data, 'goal/footstep/orientation/')
-
-    launch_plan_viewer(footstep_plan_positions, footstep_plan_orientations, 
-                       start_positions, start_orientations, goal_positions, goal_orientations, sensor_positions, sensor_orientations, n_steps=4)
-
-def visualize_plan(height_map, contact_map, terrain_cost, footstep_plan_poses, start_pose, goal_pose, start_side=0.0, label="Footstep_Plan"):
-    
-    height_map = cv2.convertScaleAbs(height_map, alpha=(255.0/65535.0))
-    height_map = np.minimum(height_map * 10, 255)
-    
-    # plot_terrain_maps(height_map, contact_map, contact_map)
-
-    height_map_display = height_map.copy()
-    height_map_display = cv2.cvtColor(height_map_display, cv2.COLOR_GRAY2RGB)
-    height_map_display = cv2.resize(height_map_display, (1000, 1000))
-
-    contact_map = np.stack([contact_map, contact_map, contact_map], axis=2).astype(np.uint8)
-    contact_map[:, :, 1] = contact_map[:, :, 0]
-    contact_map[:, :, 0] = 0
-    contact_map[:, :, 2] = 0
-    contact_map = cv2.resize(contact_map, (1000, 1000))
-
-
-    # print("Height Map Shape:", height_map_display.shape, "Contact Map Shape:", contact_map.shape)    
-
-    # compute scale factor
-    scale = 1000 / height_map.shape[0]
-
-    # print("Start pose:", start_pose)
-    # print("Goal pose:", goal_pose)
-
-    start_color = (0, 0, 120) if start_side < 0.5 else (0, 120, 120)
-
-    plot_oriented_footstep(height_map_display, start_pose, start_color, scale=scale, dims=(4,8))
-    plot_oriented_footstep(height_map_display, goal_pose, (255, 0, 255), scale=scale, dims=(4,8))
-
-    # if current position is not zero, plot footsteps
-    plot_oriented_footsteps(height_map_display, footstep_plan_poses, scale)
-
-    stacked_image = np.hstack((height_map_display, contact_map))
-
-    # Create a resizeable window and resize by scale factor
-    cv2.namedWindow(label, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(label, 1000, 1000)
-    cv2.imshow(label, stacked_image)
-
-    # plot_terrain_maps(height_map, terrain_cost, contact_map)
-
-    code = cv2.waitKeyEx(0)
-    # print("Code:", code)
-
-    if code == ord('q'):
-        cv2.destroyAllWindows()
-        exit()
-
-    return code
-
-def test_visualize(height_map_display, scale=1):
-    
-    for i in range(10):
-
-        yaw = i*math.pi/10
-
-        # quaternion in the form [w, x, y, z]
-        # quaternion = np.array([np.cos(yaw/2), 0, 0, np.sin(yaw/2)])
-        # computed_yaw = np.arctan2(2 * (quaternion[1] * quaternion[2] + quaternion[0] * quaternion[3]),
-        #             1 - 2 * (quaternion[1]**2 + quaternion[0]**2))
-
-        # quaternion in the form [x, y, z, w]
-        quaternion = np.array([0, 0, np.sin(yaw/2), np.cos(yaw/2)])
-        computed_yaw = np.arctan2(2 * (quaternion[0] * quaternion[1] + quaternion[3] * quaternion[2]),
-                    1 - 2 * (quaternion[0]**2 + quaternion[3]**2))
-
-        pose = np.array([20, i*100, computed_yaw])
-        plot_footstep_with_yaw(height_map_display, pose, (0, 255, 0), index=i, scale=scale, dims=(4,8))
-
-def launch_plan_viewer(footstep_positions, footstep_orientations, 
-                       start_positions, start_orientations, 
-                       goal_positions, goal_orientations,
-                       sensor_positions, sensor_orientations, n_steps=4):
-    
-
-    total_plans = len(data['plan/footstep/position/'].keys())
-
-    i = 0
-    valid = False
-
-    # Plot the footstep plan
-    while True:
-        height_map = load_depth(data, i, 'cropped/height/')
-
-        sensor_position = sensor_positions[i, :]
-        sensor_orientation = sensor_orientations[i, :]
-
-        current_plan_positions = footstep_positions[i*n_steps:(i+1)*n_steps, :]
-        current_plan_orientations = footstep_orientations[i*n_steps:(i+1)*n_steps, :]
+class FootstepDataset(Dataset):
+    def __init__(self, data, filename, n_steps=4, flat=False):
         
-        # count number of non-zero L2 norm positions in current plan
-        count_footsteps = np.count_nonzero(np.linalg.norm(current_plan_positions, axis=1))
+        self.flat = flat
+        self.n_steps = n_steps
+        total_height_maps = len(data['cropped/height/'].keys()) - (len(data['cropped/height/'].keys()) % 10)
 
-        valid = not(goal_positions[i, 2] < 0.11 and start_positions[i, 2] < 0.11 or count_footsteps < 3)
+        self.height_maps = []
+        for i in range(total_height_maps):
+            height_map_uint16 = load_depth(data, i, 'cropped/height/')
 
-        print("Goal Position:", goal_positions[i, :], "Start Position:", start_positions[i, :], "Valid:", valid, "Footsteps:", count_footsteps)
+
+            # subtract the mean height from the height map
+            # height_map_uint16 = height_map_uint16 - np.mean(height_map_uint16)
+
+            print("Min: ", np.min(height_map_uint16), "Max: ", np.max(height_map_uint16), "Mean: ", np.mean(height_map_uint16), "StdDev: ", np.std(height_map_uint16))
+
+            height_map_float32 = np.array(height_map_uint16, dtype=np.float32)
+            height_map = height_map_float32 / 10000.0
+            self.height_maps.append(height_map)
+
+        self.sensor_positions = get_data(data, 'l515/sensor/position/')
+        self.sensor_orientations = get_data(data, 'l515/sensor/orientation/')
+
+        self.sensor_positions[:, 2] = 0
+
+        self.footstep_plan_positions = get_data(data, 'plan/footstep/position/')
+        self.footstep_plan_orientations = get_data(data, 'plan/footstep/orientation/')
+
+        self.start_side = get_data(data, 'initial/side/')
+        self.start_positions = get_data(data, 'start/footstep/position/')
+        self.start_orientations = get_data(data, 'start/footstep/orientation/')
+
+        self.goal_positions = get_data(data, 'goal/footstep/position/')
+        self.goal_orientations = get_data(data, 'goal/footstep/orientation/')
+
+        total_height_maps = len(self.height_maps)
+
+        self.print_size("File Name: " + filename)
+
+        new_height_maps = []
+        new_sensor_positions = []
+        new_sensor_orientations = []
+        new_footstep_plan_positions = []
+        new_footstep_plan_orientations = []
+        new_start_positions = []
+        new_start_orientations = []
+        new_goal_positions = []
+        new_goal_orientations = []
+
+        for i in range(total_height_maps):
+
+            current_plan_positions = self.footstep_plan_positions[i*10:i*10 + self.n_steps, :]
+            current_plan_orientations = self.footstep_plan_orientations[i*10:i*10 + self.n_steps, :]
+
+            # check if there are no non-zero norm steps in the plan
+            count_footsteps = np.count_nonzero(np.linalg.norm(current_plan_positions, axis=1))
+
+            first_step = current_plan_positions[0, :]
+            second_step = current_plan_positions[1, :]
+            start_step_position = self.start_positions[i, :]
+
+            # cross product start -> first and first -> second 
+            # cross_prod = np.cross(first_step - start_step_position, second_step - first_step)
+
+            # # check if start side is 0
+            # if cross_prod[2] > 0:
+            #     self.start_side[i] = 0
+
+            # valid if has at least 4 non-zero norm steps and start side is 0
+            valid = count_footsteps >= n_steps and self.start_side[i] == 1
+
+            if valid:
+                new_height_maps.append(self.height_maps[i])
+                new_sensor_positions.append(self.sensor_positions[i, :])
+                new_sensor_orientations.append(self.sensor_orientations[i, :])
+                new_footstep_plan_positions.append(self.footstep_plan_positions[i*10:i*10 + n_steps, :])
+                new_footstep_plan_orientations.append(self.footstep_plan_orientations[i*10:i*10 + n_steps, :])
+                new_start_positions.append(self.start_positions[i, :])
+                new_start_orientations.append(self.start_orientations[i, :])
+                new_goal_positions.append(self.goal_positions[i, :])
+                new_goal_orientations.append(self.goal_orientations[i, :])
+
+                # get last two non-zero steps
+                last_two_step_positions = current_plan_positions[(count_footsteps - 2) : count_footsteps, :]
+                last_two_step_orientations = current_plan_orientations[(count_footsteps - 2) : count_footsteps, :]
+                
+                # set zero footsteps to last two steps in plan
+                if count_footsteps < self.n_steps:
+                    # print("Shapes: ", count_footsteps, self.n_steps, last_two_step_positions.shape, last_two_step_orientations.shape)
+                    self.footstep_plan_positions[count_footsteps:self.n_steps, :] = np.tile(last_two_step_positions, (self.n_steps - count_footsteps, 1))[:self.n_steps - count_footsteps, :]
+                    self.footstep_plan_orientations[count_footsteps:self.n_steps, :] = np.tile(last_two_step_orientations, (self.n_steps - count_footsteps, 1))[:self.n_steps - count_footsteps, :]
+
+        self.height_maps = new_height_maps
+        self.sensor_positions = np.array(new_sensor_positions)
+        self.sensor_orientations = np.array(new_sensor_orientations)
+        self.footstep_plan_positions = np.vstack(new_footstep_plan_positions)
+        self.footstep_plan_orientations = np.vstack(new_footstep_plan_orientations)
+        self.start_positions = np.array(new_start_positions)
+        self.start_orientations = np.array(new_start_orientations)
+        self.goal_positions = np.array(new_goal_positions)
+        self.goal_orientations = np.array(new_goal_orientations)
+
+        self.print_size('After Removal')
+
+        testData = self.__getitem__(1)
+        self.image_size = testData[0]
+        self.input_size = testData[1]
+        self.output_size = testData[2]
+
+    def print_size(self, tag):
+        print("Dataset: ------------------------", tag, "-------------------------")
+        print(f'Total Height Maps: {len(self.height_maps)}')
+        print(f'Total Sensor Positions: {self.sensor_positions.shape}')
+        print(f'Total Sensor Orientations: {self.sensor_orientations.shape}')
+        print(f'Total Footstep Plan Positions: {self.footstep_plan_positions.shape}')
+        print(f'Total Footstep Plan Orientations: {self.footstep_plan_orientations.shape}')
+        print(f'Total Start Positions: {self.start_positions.shape}')
+        print(f'Total Start Orientations: {self.start_orientations.shape}')
+        print(f'Total Goal Positions: {self.goal_positions.shape}')
+        print(f'Total Goal Orientations: {self.goal_orientations.shape}')
+
+        # print min, max, mean and stddev for first height map
+        print(f'Height Map: Min: {np.min(self.height_maps[0])}, Max: {np.max(self.height_maps[0])}, Mean: {np.mean(self.height_maps[0])}, StdDev: {np.std(self.height_maps[0])}')
+
+
+    def __getitem__(self, index):
+
+        # convert quaternion to yaw
+        sensor_quaternion = self.sensor_orientations[index, :]
+        sensor_yaw = np.arctan2(2 * (sensor_quaternion[0] * sensor_quaternion[1] + sensor_quaternion[3] * sensor_quaternion[2]),
+                    1 - 2 * (sensor_quaternion[0]**2 + sensor_quaternion[3]**2))
+        sensor_pose = np.array([self.sensor_positions[index, 0], self.sensor_positions[index, 1], sensor_yaw], dtype=np.float32)
         
+        start_side = self.start_side[index]
 
-        if valid:
-            code = visualize_plan(height_map, current_plan_positions - sensor_position, current_plan_orientations, 
-                        start_positions[i, :] - sensor_position, start_orientations[i, :], 
-                        goal_positions[i, :] - sensor_position, goal_orientations[i, :], i, total_plans)
+        start_quaternion = self.start_orientations[index, :]
+        start_yaw = np.arctan2(2 * (start_quaternion[0] * start_quaternion[1] + start_quaternion[3] * start_quaternion[2]),
+                    1 - 2 * (start_quaternion[0]**2 + start_quaternion[3]**2))
+        start_pose = np.array([self.start_positions[index, 0] - sensor_pose[0], self.start_positions[index, 1] - sensor_pose[1], start_yaw], dtype=np.float32)
 
+        goal_quaternion = self.goal_orientations[index, :]
+        goal_yaw = np.arctan2(2 * (goal_quaternion[0] * goal_quaternion[1] + goal_quaternion[3] * goal_quaternion[2]),
+                    1 - 2 * (goal_quaternion[0]**2 + goal_quaternion[3]**2))
+        goal_pose = np.array([self.goal_positions[index, 0] - sensor_pose[0], self.goal_positions[index, 1] - sensor_pose[1], goal_yaw])
 
-        if code == 65363 and i < total_plans - 10:
-            i += 1
-        elif code == 65361 and i > 0:
-            i -= 1
-
+        footstep_plan_quaternions = self.footstep_plan_orientations[index * self.n_steps:index * self.n_steps + self.n_steps, :]
+        footstep_plan_yaws = np.arctan2(2 * (footstep_plan_quaternions[:, 0] * footstep_plan_quaternions[:, 1] + footstep_plan_quaternions[:, 3] * footstep_plan_quaternions[:, 2]),
+                    1 - 2 * (footstep_plan_quaternions[:, 0]**2 + footstep_plan_quaternions[:, 3]**2))
         
-def plot_oriented_footsteps(display, poses, scale, n_steps=4):
+        footstep_plan_poses = self.footstep_plan_positions[index * self.n_steps:index * self.n_steps + self.n_steps, :] - sensor_pose
+        footstep_plan_poses[:, 2] = footstep_plan_yaws
+        footstep_plan_poses = np.array([footstep_plan_poses], dtype=np.float32)
 
-    # Plot the footstep plan
-    for i in range(n_steps):
-        pose = poses[i, :]
+        terrain_cost_map = compute_terrain_cost_map(self.height_maps[index])
+        contact_map = compute_contact_map(terrain_cost_map)
+
+
+        # Inputs
+        height_map_input = torch.Tensor(self.height_maps[index]).unsqueeze(0).to(device)
+        terrian_cost_input = torch.Tensor(terrain_cost_map).unsqueeze(0).to(device)
+        contact_map_input = torch.Tensor(contact_map).unsqueeze(0).to(device)
         
-        side = i % 2 # 0 for left, 1 for right
+        if self.flat: 
+            # stack input map with height map and add another dimension
+            input_map = np.zeros_like(self.height_maps[index])
+            start_indices = self.start_positions[index] * 50 + 100
+            goal_indices = self.goal_positions[index] * 50 + 100
+            input_map[int(start_indices[0]), int(start_indices[1])] = 1
+            input_map[int(goal_indices[0]), int(goal_indices[1])] = 1
 
+            # print("Start: ", start_indices, "Goal: ", goal_indices)
 
-        # set color to red if left foot, yellow if right foot
-        color = (0, 0, 120) if side < 0.5 else (0, 120, 120)
+            input_map = torch.Tensor(input_map).unsqueeze(0).to(device)
 
-        # if position is not zero, plot footsteps
-        if np.linalg.norm(pose[:2]) > 0.001:
-            plot_oriented_footstep(display, pose, color, index=i, scale=scale)
+            height_map_input = torch.cat((height_map_input, input_map), dim=0)
 
-def plot_footstep(display, position, orientation, color, scale=1, dims=(2,4)):
-    
-    position_on_map = (int(position[1]*50*scale + display.shape[0]/2), int(position[0]*50*scale + display.shape[0]/2))
+        start_pose = torch.Tensor(start_pose).to(device)
+        goal_pose = torch.Tensor(goal_pose).to(device)
+        linear_input = torch.cat((start_pose, goal_pose), dim=0) 
 
-    # Draw a rectangle 2x4 pixels on height map, alternate red and yellow
-    display = cv2.rectangle(display, (position_on_map[0] - dims[0], position_on_map[1] - dims[1]), (position_on_map[0] + dims[0], position_on_map[1] + dims[1]), color, -1)
+        # Outputs
+        footstep_plan_poses = torch.Tensor(footstep_plan_poses).to(device)
+        linear_output = torch.flatten(footstep_plan_poses)
 
-def plot_oriented_footstep(display, pose, color, index=-1, scale=1, dims=(3,6)):
-    position_on_map = (int(pose[1]*50*scale + display.shape[0]/2), int(pose[0]*50*scale + display.shape[0]/2))    
-    pose = np.array([position_on_map[0], position_on_map[1], pose[2]])
-    plot_footstep_with_yaw(display, pose, color, index=index, scale=scale, dims=dims)
+        return height_map_input, linear_input, linear_output, contact_map_input, terrian_cost_input
+        
+    def __len__(self) -> int:
+        return len(self.height_maps)
 
-def plot_footstep_with_yaw(display, pose, color, index=-1, scale=1, dims=(3,6)):
-
-    position_on_map = pose[0:2]
-    yaw = pose[2]
-
-    # create the footstep rectangle using the position and orientation
-    points = np.array([[-dims[0], -dims[1]], [-dims[0], dims[1]], [dims[0], dims[1]], [dims[0], -dims[1]]], dtype=np.float32) * scale
-
-    # create a 2D rotation matrix
-    rotation_matrix = np.array([[np.cos(yaw), -np.sin(yaw)], [np.sin(yaw), np.cos(yaw)]], dtype=np.float32)
-
-    # rotate the points
-    points = np.matmul(rotation_matrix, points.T).T + position_on_map
-
-    # Reshape the array
-    points = points.reshape((-1, 1, 2)).astype(np.int32)
-
-    # Draw the polyline on the image
-    display = cv2.fillPoly(display, [points], color)
-
-    # plot text on the footstep which is the index of the footstep (size 0.1)
-    if index != -1:
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        text = str(index)
-        textsize = cv2.getTextSize(text, font, 1, 2)[0]
-        textX = int(position_on_map[0] - textsize[0]/2) + 2
-        textY = int(position_on_map[1] + textsize[1]/2)
-        cv2.putText(display, text, (textX, textY), font, 0.6, (255, 255, 255), 2)
-
-
-if __name__ == '__main__':
-
-    # list of good files
-    # 20231015_183228_PerceptionLog.hdf5
-    # 20231015_234600_PerceptionLog.hdf5
-    # 20231016_025456_PerceptionLog.hdf5
-
-    # 20231021_212238_PerceptionLog (Random Start and Goal Poses Within Ranges, Terrain One)
-
-    home = os.path.expanduser('~')
-    path = home + '/.ihmc/logs/perception/'
-
-    data = h5py.File(path + '20231022_002815_PerceptionLog.hdf5', 'r')
-    plan_view_main(data)
