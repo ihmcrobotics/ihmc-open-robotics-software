@@ -90,6 +90,7 @@ public class RDXHandConfigurationManager
                SakeHandParameters.normalizeFingertipGripForceLimit(handPreset.getFingertipGripForceLimit()));
       }
 
+      RDXBaseUI.pushNotification("Commanding hand configuration...");
       communicationHelper.publish(ROS2Tools.getHandSakeCommandTopic(robotName, side), sakeHandDesiredCommandMessage);
    }
 }

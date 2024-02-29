@@ -4,13 +4,13 @@
 # Instead we use a depth first ordered list and number of children
 # to send trees over. This is contained in another higher level message.
 
-# A human readable description of what the node does
-string description
+# The name of the node including .json if it's a JSON root node
+string name
+
+# Long form notes about the node.
+string notes
 
 # Number of children
 uint16 number_of_children
-
-# JSON file name if this node is the root of a JSON file
-string json_file_name
 
 
