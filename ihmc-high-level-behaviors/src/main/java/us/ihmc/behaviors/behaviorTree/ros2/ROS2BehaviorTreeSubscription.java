@@ -114,7 +114,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       {
          Class<?> nodeTypeClass = BehaviorTreeDefinitionRegistry.getNodeStateClass(subscriptionNode.getType());
          LogTools.info("Replicating node: {}:{} Actor: {}",
-                       subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getDescription(),
+                       subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getName(),
                        nodeID,
                        behaviorTreeState.getCRDTInfo().getActorDesignation().name());
          localNode = (T) behaviorTreeState.getNodeStateBuilder()
