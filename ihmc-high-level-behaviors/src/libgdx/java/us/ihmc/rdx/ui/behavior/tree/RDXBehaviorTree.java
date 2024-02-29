@@ -253,7 +253,7 @@ public class RDXBehaviorTree
             });
 
             if (anyNodeSelected)
-               ImGuiTools.separatorText("Node Settings > \"%s\"".formatted(selectedNode.getDefinition().getDescription()));
+               ImGuiTools.separatorText("Node Settings > \"%s\"".formatted(selectedNode.getDefinition().getName()));
             else
                ImGuiTools.separatorText("Node Settings");
 
