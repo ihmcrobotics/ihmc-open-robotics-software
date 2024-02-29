@@ -171,7 +171,7 @@ public class IntraprocessYoVariableLogger
       {
          logProperties.getModel().setLoader(logModelProvider.getLoader().getCanonicalName());
          logProperties.getModel().setName(logModelProvider.getModelName());
-         for (String resourceDirectory : logModelProvider.getTopLevelResourceDirectories())
+         for (String resourceDirectory : logModelProvider.getResourceDirectories())
          {
             logProperties.getModel().getResourceDirectoriesList().add(resourceDirectory);
          }

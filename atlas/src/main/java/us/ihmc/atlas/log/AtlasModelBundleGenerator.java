@@ -23,7 +23,7 @@ public class AtlasModelBundleGenerator
       Properties properties = new Properties();
       properties.setProperty("modelName", logModelProvider.getModelName());
       properties.setProperty("loader", logModelProvider.getLoader().getCanonicalName());
-      properties.setProperty("resourceDirectories", StringUtils.join(logModelProvider.getTopLevelResourceDirectories(), ","));
+      properties.setProperty("resourceDirectories", StringUtils.join(logModelProvider.getResourceDirectories(), ","));
       
       File dir = new File("../RobotDataCommunication/RobotModels/Atlas");
       dir.mkdirs();
