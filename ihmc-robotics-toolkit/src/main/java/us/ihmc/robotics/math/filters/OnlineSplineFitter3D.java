@@ -8,21 +8,25 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.lists.RingBuffer;
 import us.ihmc.robotics.math.filters.OnlineSplineFitter1D.DataPoint1DReadOnly;
 import us.ihmc.robotics.math.filters.OnlineSplineFitter1D.SplineFitter1D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class OnlineSplineFitter3D
 {
+   public static final double DEFAULT_WEIGHT = 1.0;
    private double windowTimeMax;
 
    private boolean isSplineInitialized = false;
 
    private final RingBuffer<DataPoint3D> buffer;
    private final SplineFitter3D splineFitter = new SplineFitter3D();
+   private WeightCalculator weightCalculator = null;
 
    public OnlineSplineFitter3D(int polynomialOrder, int windowSizeMax, double windowTimeMax)
    {
+      setWindowTimeMax(windowTimeMax);
       setPolynomialOrder(polynomialOrder);
       buffer = new RingBuffer<>(windowSizeMax, DataPoint3D::new, DataPoint3D::set);
    }
@@ -32,6 +36,11 @@ public class OnlineSplineFitter3D
       buffer.reset();
       splineFitter.clear();
       isSplineInitialized = false;
+   }
+
+   public void setWeightCalculator(WeightCalculator weightCalculator)
+   {
+      this.weightCalculator = weightCalculator;
    }
 
    public void setPolynomialOrder(int polynomialOrder)
@@ -75,6 +84,21 @@ public class OnlineSplineFitter3D
       for (int i = 1; i < buffer.size(); i++)
       {
          DataPoint3D point = buffer.getFromLast(i);
+         if (weightCalculator != null)
+         {
+            double weight = weightCalculator.calculateWeight(point, newestPoint.getTime(), oldestPoint.getTime(), i, buffer.size());
+            if (weight < 0.0 || Double.isNaN(weight))
+               point.setWeight(DEFAULT_WEIGHT);
+            else
+               point.setWeight(weight);
+         }
+         else
+         {
+            point.setWeight(DEFAULT_WEIGHT);
+         }
+
+         if (point.getWeight() == 0.0)
+            continue;
 
          splineFitter.addPoint(point);
 
@@ -250,7 +274,7 @@ public class OnlineSplineFitter3D
    {
       private double time;
       private final Point3D value = new Point3D();
-      private double weight = 1.0;
+      private double weight = DEFAULT_WEIGHT;
 
       public DataPoint3D()
       {
@@ -340,5 +364,36 @@ public class OnlineSplineFitter3D
       {
          return getClass().getSimpleName() + ": time = " + time + ", value = " + value + ", weight = " + weight;
       }
+   }
+
+   public interface WeightCalculator
+   {
+      /**
+       * Calculate the weight of a point based on its time and the time of the newest and oldest points in the buffer.
+       *
+       * @param point3D        the point to calculate the weight for. Not modified.
+       * @param newestTime     the time of the newest point in the buffer.
+       * @param oldestTime     the time of the oldest point in the buffer.
+       * @param index          the index of the point in the buffer, with 0 being the newest point and buffer.size() - 1 being the oldest point.
+       * @param numberOfPoints the number of points in the buffer.
+       * @return the weight of the point. Return a negative value or NaN to use the default weight value.
+       */
+      double calculateWeight(DataPoint3D point3D, double newestTime, double oldestTime, int index, int numberOfPoints);
+   }
+
+   public static WeightCalculator createLinearWeightCalculator()
+   {
+      return (point3D, newestTime, oldestTime, index, numberOfPoints) -> 1.0 - (point3D.getTime() - oldestTime) / (newestTime - oldestTime);
+   }
+
+   public static WeightCalculator createExponentialWeightCalculator(double decayRate)
+   {
+      return (point3D, newestTime, oldestTime, index, numberOfPoints) -> Math.exp(-decayRate * (point3D.getTime() - oldestTime) / (newestTime - oldestTime));
+   }
+
+   public static WeightCalculator createExponentialWeightCalculator(DoubleProvider decayRate)
+   {
+      return (point3D, newestTime, oldestTime, index, numberOfPoints) -> Math.exp(
+            -decayRate.getValue() * (point3D.getTime() - oldestTime) / (newestTime - oldestTime));
    }
 }

@@ -85,6 +85,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.*;
 import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.RelativeEndEffectorControlTest.circlePositionAt;
+import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTTimeProvider.createFixedDT;
 
 @Tag("humanoid-toolbox")
 public abstract class KinematicsStreamingToolboxControllerTest
@@ -119,7 +120,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
     */
    public abstract DRCRobotModel newRobotModel();
 
-   public void setupWithWalkingController(KinematicsStreamingToolboxParameters toolboxParameters, Controller... additionalGhostControllers)
+   public void setupWithWalkingController(boolean useCPUClock, KinematicsStreamingToolboxParameters toolboxParameters, Controller... additionalGhostControllers)
    {
       DRCRobotModel robotModel = newRobotModel();
       RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
@@ -140,7 +141,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.addSecondaryRobot(ghost);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
-      createToolboxController(robotModel, toolboxParameters, collisionModel);
+      createToolboxController(robotModel, useCPUClock, toolboxParameters, collisionModel);
       simulationTestHelper.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       ros2Node = simulationTestHelper.getROS2Node();
@@ -223,7 +224,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       robotDefinition.ignoreAllJoints();
       addCollisionVisuals(robotModel, collisionModel, robotDefinition);
       robot = new Robot(robotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
-      createToolboxController(robotModel, null, collisionModel);
+      createToolboxController(robotModel, false, null, collisionModel);
 
       RobotDefinition ghostDefinition = new RobotDefinition(robotModel.getRobotDefinition());
       RobotDefinitionTools.setRobotDefinitionMaterial(ghostDefinition, ghostMaterial);
@@ -264,7 +265,10 @@ public abstract class KinematicsStreamingToolboxControllerTest
       }
    }
 
-   private void createToolboxController(DRCRobotModel robotModel, KinematicsStreamingToolboxParameters toolboxParameters, RobotCollisionModel collisionModel)
+   private void createToolboxController(DRCRobotModel robotModel,
+                                        boolean useCPUClock,
+                                        KinematicsStreamingToolboxParameters toolboxParameters,
+                                        RobotCollisionModel collisionModel)
    {
       desiredFullRobotModel = robotModel.createFullRobotModel();
       toolboxRegistry = new YoRegistry("toolboxMain");
@@ -284,6 +288,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
                                                                    toolboxControllerPeriod,
                                                                    yoGraphicsListRegistry,
                                                                    toolboxRegistry);
+      if (!useCPUClock)
+         toolboxController.setTimeProvider(createFixedDT(toolboxControllerPeriod));
       toolboxController.setCollisionModel(collisionModel);
    }
 
@@ -416,7 +422,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       YoDouble handPositionMeanError = new YoDouble("HandsPositionMeanError", spyRegistry);
       YoDouble handOrientationMeanError = new YoDouble("HandsOrientationMeanError", spyRegistry);
 
-      setupWithWalkingController(ikStreamingTestRunParameters.toolboxParameters(), new Controller()
+      setupWithWalkingController(ikStreamingTestRunParameters.isUseCPUClock(), ikStreamingTestRunParameters.toolboxParameters(), new Controller()
       {
          private final SideDependentList<YoFramePose3D> handDesiredPoses = new SideDependentList<>(side -> new YoFramePose3D(
                side.getCamelCaseName() + "HandDesired", worldFrame, spyRegistry));
@@ -790,6 +796,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       private double messageGeneratorDT = 0.01;
       private IKStreamingMessageGenerator messageGenerator;
       private double simulationDuration = 10.0;
+      private boolean useCPUClock = false;
 
       private YoRegistry registry;
 
@@ -855,6 +862,16 @@ public abstract class KinematicsStreamingToolboxControllerTest
       public double simulationDuration()
       {
          return simulationDuration;
+      }
+
+      public void setUseCPUClock(boolean useCPUClock)
+      {
+         this.useCPUClock = useCPUClock;
+      }
+
+      public boolean isUseCPUClock()
+      {
+         return useCPUClock;
       }
 
       public void setRegistry(YoRegistry registry)

@@ -7,12 +7,13 @@ import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.Kine
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.robotics.math.filters.OnlineSplineFitter3D;
+import us.ihmc.robotics.math.filters.OnlineSplineFitter3D.WeightCalculator;
 import us.ihmc.robotics.math.filters.SplineBasedOnlinePositionFilter3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
-import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.Collection;
@@ -21,6 +22,10 @@ import java.util.Map;
 
 public class KSTInputSplineFitStateEstimator implements KSTInputStateEstimator
 {
+   private enum WeightMode
+   {
+      NONE, LINEAR, EXPONENTIAL;
+   }
 
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -29,6 +34,14 @@ public class KSTInputSplineFitStateEstimator implements KSTInputStateEstimator
    private final YoInteger windowSizeMax = new YoInteger("windowSizeMax", registry);
    private final YoDouble windowTimeMax = new YoDouble("windowTimeMax", registry);
    private final YoInteger polynomialDegree = new YoInteger("polynomialDegree", registry);
+   private final YoDouble decayAlpha = new YoDouble("decayAlpha", registry);
+   private final YoEnum<WeightMode> weightMode = new YoEnum<>("weightMode", registry, WeightMode.class);
+   private final Map<WeightMode, WeightCalculator> weightCalculatorMap = Map.of(WeightMode.NONE,
+                                                                                (p, t0, tf, i, n) -> 1.0,
+                                                                                WeightMode.LINEAR,
+                                                                                OnlineSplineFitter3D.createLinearWeightCalculator(),
+                                                                                WeightMode.EXPONENTIAL,
+                                                                                OnlineSplineFitter3D.createExponentialWeightCalculator(decayAlpha));
    private final Map<RigidBodyReadOnly, SingleEndEffectorStateEstimator> inputPoseStateEstimators = new HashMap<>();
    private final SingleEndEffectorStateEstimator[] inputPoseStateEstimatorsArray;
 
@@ -37,10 +50,11 @@ public class KSTInputSplineFitStateEstimator implements KSTInputStateEstimator
       windowSizeMax.set(20);
       windowTimeMax.set(Double.POSITIVE_INFINITY);
       polynomialDegree.set(3);
+      weightMode.set(WeightMode.NONE);
 
       for (RigidBodyReadOnly endEffector : endEffectors)
       {
-         inputPoseStateEstimators.put(endEffector, new SingleEndEffectorStateEstimator(endEffector, windowSizeMax, windowTimeMax, polynomialDegree, registry));
+         inputPoseStateEstimators.put(endEffector, new SingleEndEffectorStateEstimator(endEffector, registry));
       }
       inputPoseStateEstimatorsArray = inputPoseStateEstimators.values().toArray(new SingleEndEffectorStateEstimator[0]);
 
@@ -98,16 +112,12 @@ public class KSTInputSplineFitStateEstimator implements KSTInputStateEstimator
       }
    }
 
-   private static class SingleEndEffectorStateEstimator
+   private class SingleEndEffectorStateEstimator
    {
       private final YoFramePose3D rawInputPose;
       private final SplineBasedOnlinePositionFilter3D positionFilter;
 
-      public SingleEndEffectorStateEstimator(RigidBodyReadOnly endEffector,
-                                             IntegerProvider windowSizeMax,
-                                             DoubleProvider windowTimeMax,
-                                             IntegerProvider polynomialDegree,
-                                             YoRegistry registry)
+      public SingleEndEffectorStateEstimator(RigidBodyReadOnly endEffector, YoRegistry registry)
       {
          rawInputPose = new YoFramePose3D(endEffector.getName() + "RawInputPose", worldFrame, registry);
          positionFilter = new SplineBasedOnlinePositionFilter3D(endEffector.getName(), windowSizeMax, windowTimeMax, polynomialDegree, registry);
@@ -120,6 +130,7 @@ public class KSTInputSplineFitStateEstimator implements KSTInputStateEstimator
 
       public void update(double timeSource, Pose3DReadOnly pose)
       {
+         positionFilter.setWeightCalculator(weightCalculatorMap.get(weightMode.getEnumValue()));
          rawInputPose.set(pose);
          positionFilter.update(timeSource, pose.getPosition());
       }

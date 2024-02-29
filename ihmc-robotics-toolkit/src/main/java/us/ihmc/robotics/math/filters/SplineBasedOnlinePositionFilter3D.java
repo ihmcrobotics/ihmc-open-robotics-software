@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.robotics.math.filters.OnlineSplineFitter3D.WeightCalculator;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -63,6 +64,11 @@ public class SplineBasedOnlinePositionFilter3D
       estimatedPosition.set(splineFitter.evaluateValueAt(time));
       estimatedVelocity.set(splineFitter.evaluateRateAt(time));
       estimatedAcceleration.set(splineFitter.evaluateAccelerationAt(time));
+   }
+
+   public void setWeightCalculator(WeightCalculator weightCalculator)
+   {
+      splineFitter.setWeightCalculator(weightCalculator);
    }
 
    public double getNewestPointTime()
