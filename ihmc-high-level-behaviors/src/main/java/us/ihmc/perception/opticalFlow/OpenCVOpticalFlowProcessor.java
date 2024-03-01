@@ -33,6 +33,20 @@ public class OpenCVOpticalFlowProcessor
       imageSize.close();
    }
 
+   public void setFirstImage(RawImage firstImage)
+   {
+      firstImage.get();
+      opencv_cudaimgproc.cvtColor(firstImage.getGpuImageMat(), firstImageGray, opencv_imgproc.COLOR_BGR2GRAY);
+      firstImage.release();
+   }
+
+   public void setSecondImage(RawImage secondImage)
+   {
+      secondImage.get();
+      opencv_cudaimgproc.cvtColor(secondImage.getGpuImageMat(), secondImageGray, opencv_imgproc.COLOR_BGR2GRAY);
+      secondImage.release();
+   }
+
    public void setNewImage(RawImage newImage)
    {
       newImage.get();
