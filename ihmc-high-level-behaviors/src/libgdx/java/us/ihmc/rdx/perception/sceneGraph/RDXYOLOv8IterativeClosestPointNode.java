@@ -149,10 +149,10 @@ public class RDXYOLOv8IterativeClosestPointNode extends RDXDetectableSceneNode
          {
             DetectedObjectPacket resultMessage = icpResultSwapReference.getForThreadTwo();
 
-            icpResultRenderer.setPointsToRender(resultMessage.getObjectPointCloud(), Color.GOLD);
-            icpResultRenderer.updateMesh();
+//            icpResultRenderer.setPointsToRender(resultMessage.getObjectPointCloud(), Color.GOLD);
+//            icpResultRenderer.updateMesh();
 
-            yoloSegmentRenderer.setPointsToRender(resultMessage.getSegmentedPointCloud(), Color.GRAY);
+            yoloSegmentRenderer.setPointsToRender(resultMessage.getSegmentedPointCloud(), Color.YELLOW);
             yoloSegmentRenderer.updateMesh();
          }
       }
