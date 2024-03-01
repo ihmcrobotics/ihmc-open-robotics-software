@@ -30,6 +30,11 @@ public class RDXBehaviorTreeFileMenu
                RDXBaseUI.pushNotification("Saving %s".formatted(rootNode.getDefinition().getName()));
                rootNode.getDefinition().saveToFile();
             }
+            if (ImGui.menuItem(labels.get("Undo All Non-topological Changes")))
+            {
+               RDXBaseUI.pushNotification("Undoing all non-topological behavior tree changes");
+               rootNode.getDefinition().undoAllNontopologicalChanges();
+            }
          }
          else
          {

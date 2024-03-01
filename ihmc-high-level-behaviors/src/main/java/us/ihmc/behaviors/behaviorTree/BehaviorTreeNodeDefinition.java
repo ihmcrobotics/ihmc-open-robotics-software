@@ -111,6 +111,20 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
          onDiskChildrenNames.add(child.getName());
    }
 
+   public void undoAllNontopologicalChanges()
+   {
+      name.setValue(onDiskName);
+      notes.setValue(onDiskNotes);
+
+      // We are not able to undo changes to children topology.
+      // The user must delete and reload the entire tree.
+
+      for (BehaviorTreeNodeDefinition child : children)
+      {
+         child.undoAllNontopologicalChanges();
+      }
+   }
+
    public boolean hasChanges()
    {
       boolean unchanged = true;
