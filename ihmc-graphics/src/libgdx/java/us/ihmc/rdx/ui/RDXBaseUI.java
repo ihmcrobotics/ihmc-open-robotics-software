@@ -648,4 +648,9 @@ public class RDXBaseUI
       }
       this.theme = theme;
    }
+
+   public static void pushNotification(String text)
+   {
+      instance.getPrimary3DPanel().getNotificationManager().pushNotification(2, text);
+   }
 }

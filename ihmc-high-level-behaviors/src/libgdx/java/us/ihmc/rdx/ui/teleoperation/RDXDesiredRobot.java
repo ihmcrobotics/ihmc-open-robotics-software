@@ -2,11 +2,9 @@ package us.ihmc.rdx.ui.teleoperation;
 
 import com.badlogic.gdx.graphics.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.rdx.simulation.scs2.RDXFrameNodePart;
 import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
 import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
@@ -25,12 +23,9 @@ import java.util.List;
 
 /**
  *  This is the class that is updated based on the desired values of the robot. If poses get sent to the robot, it should be these poses.
- *
- *  TODO make this robot color differently.
  */
 public class RDXDesiredRobot extends RDXMultiBodyGraphic
 {
-   private final ROS2SyncedRobotModel syncedRobotModel;
    private final DRCRobotModel robotModel;
    private RobotDefinition robotDefinition;
    private final FullHumanoidRobotModel desiredFullRobotModel;
@@ -42,14 +37,14 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
    private boolean chestShowing = false;
    private final SideDependentList<Boolean> armShowing = new SideDependentList<>(false, false);
    private final SideDependentList<Boolean> legShowing = new SideDependentList<>(false, false);
+   private RDXRigidBody[] allRigidBodies;
    private final SideDependentList<Color> currentArmColors = new SideDependentList<>();
 
-   public RDXDesiredRobot(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
+   public RDXDesiredRobot(DRCRobotModel robotModel)
    {
       super(robotModel.getSimpleRobotName() + " Desired Robot Visualizer");
 
       this.robotModel = robotModel;
-      this.syncedRobotModel = syncedRobotModel;
       desiredFullRobotModel = robotModel.createFullRobotModel();
 
       pelvisRigidBodyName = robotModel.getJointMap().getPelvisName();
@@ -104,6 +99,12 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
             // hide all to start with; probably includes stuff we'll never show, too
             RobotDefinition.forEachRigidBodyDefinition(robotDefinition.getRootBodyDefinition(),
                                                        rigidBody -> getMultiBody().getRigidBodiesToHide().add(rigidBody.getName()));
+
+            ArrayList<RDXRigidBody> rigidBodies = new ArrayList<>();
+            rigidBodies.add(getMultiBody());
+            for (RDXRigidBody rdxRigidBody : getMultiBody().subtreeIterable())
+               rigidBodies.add(rdxRigidBody);
+            allRigidBodies = rigidBodies.toArray(rigidBodies.toArray(new RDXRigidBody[0]));
          }
 
          // TODO: Scale the ghost robot bigger than actual
@@ -204,14 +205,19 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
          {
             if (body instanceof RDXRigidBody rdxRigidBody)
             {
-               if (rdxRigidBody.getVisualGraphicsNode() != null)
-               {
-                  for (RDXFrameNodePart part : rdxRigidBody.getVisualGraphicsNode().getParts())
-                  {
-                     part.getModelInstance().setDiffuseColor(color);
-                  }
-               }
+               rdxRigidBody.setDiffuseColor(color);
             }
+         }
+      }
+   }
+
+   public void setWholeBodyColor(Color color)
+   {
+      for (RigidBodyBasics rigidBody : allRigidBodies)
+      {
+         if (rigidBody instanceof RDXRigidBody rdxRigidBody)
+         {
+            rdxRigidBody.setDiffuseColor(color);
          }
       }
    }

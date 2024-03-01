@@ -301,6 +301,11 @@ public class RDXInteractableRobotLink
       return selectablePose3DGizmo.getPoseGizmo().getGizmoFrame();
    }
 
+   public ReferenceFrame getLinkFrame()
+   {
+      return linkFrame;
+   }
+
    public boolean isVRPointing(RobotSide side)
    {
       return isVRPointing.get(side);
