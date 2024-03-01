@@ -196,7 +196,7 @@ public class BlackflyImagePublisher
       {
          if (nextGpuDistortedImage != null)
             nextGpuDistortedImage.release();
-         nextGpuDistortedImage = new RawImage(distortedImage);
+         nextGpuDistortedImage = distortedImage;
          newImageAvailable.signal();
       }
       finally
