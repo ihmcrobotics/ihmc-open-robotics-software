@@ -15,7 +15,7 @@ public class HandWrenchActionDefinitionMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f7866fe8b4b8f725d7b7f8a5e4aaba072942b8a10c486ee442c1fd9c035a658b";
+   		return "21f0be9357ac4fe890b79899384646285e350c0238d220d39fa3284e15a268eb";
    }
    
    @Override
