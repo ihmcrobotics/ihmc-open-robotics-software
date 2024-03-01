@@ -1,8 +1,11 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -84,12 +87,8 @@ public class KSTInputSplineFitStateEstimator implements KSTInputStateEstimator
 
             SingleEndEffectorStateEstimator inputPoseEstimator = inputPoseStateEstimators.get(input.getEndEffector());
 
-            if (inputPoseEstimator == null)
-               continue;
-
-            FramePose3D desiredPose = input.getDesiredPose();
-            inputPoseEstimator.update(timeLocal, desiredPose);
-            desiredPose.getPosition().set(inputPoseEstimator.positionFilter.getEstimatedPosition());
+            if (inputPoseEstimator != null)
+               inputPoseEstimator.update(Conversions.nanosecondsToSeconds(latestInputCommand.getTimestamp()), input.getDesiredPose());
          }
       }
       else
@@ -102,25 +101,29 @@ public class KSTInputSplineFitStateEstimator implements KSTInputStateEstimator
 
             SingleEndEffectorStateEstimator inputPoseEstimator = inputPoseStateEstimators.get(input.getEndEffector());
 
-            if (inputPoseEstimator == null)
-               continue;
-
-            FramePose3D desiredPose = input.getDesiredPose();
-            inputPoseEstimator.extrapolate(timeToExtrapolateFor);
-            desiredPose.getPosition().set(inputPoseEstimator.positionFilter.getEstimatedPosition());
+            if (inputPoseEstimator != null)
+               inputPoseEstimator.extrapolate(timeToExtrapolateFor);
          }
       }
+   }
+
+   @Override
+   public FramePose3DReadOnly getEstimatedPose(RigidBodyReadOnly endEffector)
+   {
+      SingleEndEffectorStateEstimator inputPoseEstimator = inputPoseStateEstimators.get(endEffector);
+      return inputPoseEstimator.getEstimatedPose();
    }
 
    private class SingleEndEffectorStateEstimator
    {
       private final YoFramePose3D rawInputPose;
       private final SplineBasedOnlinePositionFilter3D positionFilter;
+      private final FramePose3D estimatedPose = new FramePose3D();
 
       public SingleEndEffectorStateEstimator(RigidBodyReadOnly endEffector, YoRegistry registry)
       {
-         rawInputPose = new YoFramePose3D(endEffector.getName() + "RawInputPose", worldFrame, registry);
-         positionFilter = new SplineBasedOnlinePositionFilter3D(endEffector.getName(), windowSizeMax, windowTimeMax, polynomialDegree, registry);
+         rawInputPose = new YoFramePose3D(endEffector.getName() + "_SBF_RawInputPose", worldFrame, registry);
+         positionFilter = new SplineBasedOnlinePositionFilter3D(endEffector.getName() + "_SBF_", windowSizeMax, windowTimeMax, polynomialDegree, registry);
       }
 
       public void reset()
@@ -138,6 +141,12 @@ public class KSTInputSplineFitStateEstimator implements KSTInputStateEstimator
       public void extrapolate(double timeToExtrapolateFor)
       {
          positionFilter.compute(positionFilter.getNewestPointTime() + timeToExtrapolateFor);
+      }
+
+      public FramePose3DReadOnly getEstimatedPose()
+      {
+         estimatedPose.setIncludingFrame(worldFrame, positionFilter.getEstimatedPosition(), EuclidCoreTools.neutralQuaternion);
+         return estimatedPose;
       }
    }
 }

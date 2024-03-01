@@ -12,6 +12,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
@@ -39,6 +40,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.*;
@@ -138,7 +140,9 @@ public class KSTStreamingState implements State
    private final YoPIDSE3Gains ikSolverSpatialGains;
    private final YoPIDGains ikSolverJointGains;
 
-   private final KSTInputStateEstimator inputStateEstimator;
+   private final YoEnum<InputStateEstimatorType> activeInputStateEstimator = new YoEnum<>("activeInputStateEstimator", registry, InputStateEstimatorType.class);
+   private final Map<InputStateEstimatorType, KSTInputStateEstimator> inputStateEstimatorsMap = new EnumMap<>(InputStateEstimatorType.class);
+   private final KSTInputStateEstimator[] inputStateEstimators;
 
    public KSTStreamingState(KSTTools tools)
    {
@@ -243,10 +247,11 @@ public class KSTStreamingState implements State
                                                                                                  toolboxControllerPeriod));
 
       Collection<? extends RigidBodyBasics> controllableRigidBodies = tools.getIKController().getControllableRigidBodies();
-      if (parameters.getInputStateEstimatorType() == InputStateEstimatorType.SPLINE_FIT)
-         inputStateEstimator = new KSTInputSplineFitStateEstimator(controllableRigidBodies, registry);
-      else
-         inputStateEstimator = new KSTInputFirstOrderStateEstimator(controllableRigidBodies, parameters, toolboxControllerPeriod, registry);
+      activeInputStateEstimator.set(parameters.getInputStateEstimatorType());
+      inputStateEstimatorsMap.put(InputStateEstimatorType.FIRST_ORDER_LPF,
+                                  new KSTInputFirstOrderStateEstimator(controllableRigidBodies, parameters, toolboxControllerPeriod, registry));
+      inputStateEstimatorsMap.put(InputStateEstimatorType.SPLINE_FIT, new KSTInputSplineFitStateEstimator(controllableRigidBodies, registry));
+      inputStateEstimators = inputStateEstimatorsMap.values().toArray(new KSTInputStateEstimator[0]);
 
       for (RigidBodyBasics rigidBody : controllableRigidBodies)
       {
@@ -408,7 +413,8 @@ public class KSTStreamingState implements State
       timeSinceLastInput.set(Double.NaN);
       inputFrequency.reset();
 
-      inputStateEstimator.reset();
+      for (KSTInputStateEstimator inputStateEstimator : inputStateEstimators)
+         inputStateEstimator.reset();
 
       for (YoDouble rigidBodyControlStartTime : rigidBodyControlStartTimeArray)
          rigidBodyControlStartTime.setToNaN();
@@ -516,11 +522,16 @@ public class KSTStreamingState implements State
                filteredInputs.removeInput(i);
          }
 
-         inputStateEstimator.update(tools.getTime(), tools.hasNewInputCommand(), filteredInputs, tools.getPreviousInput());
+         for (KSTInputStateEstimator inputStateEstimator : inputStateEstimators)
+            inputStateEstimator.update(tools.getTime(), tools.hasNewInputCommand(), filteredInputs, tools.getPreviousInput());
 
          for (int i = 0; i < filteredInputs.getNumberOfInputs(); i++)
          { // Ship it
             KinematicsToolboxRigidBodyCommand filteredInput = filteredInputs.getInput(i);
+            FramePose3DReadOnly estimatedPose = inputStateEstimatorsMap.get(activeInputStateEstimator.getValue())
+                                                                       .getEstimatedPose(filteredInput.getEndEffector());
+            if (estimatedPose != null)
+               filteredInput.getDesiredPose().set(estimatedPose);
             ikCommandInputManager.submitCommand(filteredInput);
          }
 

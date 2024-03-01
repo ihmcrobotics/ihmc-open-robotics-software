@@ -1,13 +1,11 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePose3D;
@@ -28,13 +26,13 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final Map<RigidBodyBasics, SingleEndEffectorEstimator> inputPoseEstimators = new HashMap<>();
+   private final Map<RigidBodyReadOnly, SingleEndEffectorEstimator> inputPoseEstimators = new HashMap<>();
    private final SingleEndEffectorEstimator[] inputPoseEstimatorsArray;
    private final YoDouble inputVelocityDecayDuration = new YoDouble("inputVelocityDecayDuration", registry);
    private final YoDouble inputsFilterBreakFrequency = new YoDouble("inputsFilterBreakFrequency", registry);
    private final double updateDT;
 
-   public KSTInputFirstOrderStateEstimator(Collection<? extends RigidBodyBasics> endEffectors,
+   public KSTInputFirstOrderStateEstimator(Collection<? extends RigidBodyReadOnly> endEffectors,
                                            KinematicsStreamingToolboxParameters parameters,
                                            double updateDT,
                                            YoRegistry parentRegistry)
@@ -43,7 +41,7 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
       DoubleProvider inputsAlphaProvider = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(inputsFilterBreakFrequency.getValue(),
                                                                                                                  updateDT);
 
-      for (RigidBodyBasics endEffector : endEffectors)
+      for (RigidBodyReadOnly endEffector : endEffectors)
       {
          inputPoseEstimators.put(endEffector, new SingleEndEffectorEstimator(endEffector, inputsAlphaProvider, registry));
       }
@@ -84,6 +82,16 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
       updatePose(isNewInput, latestInputCommand);
    }
 
+   @Override
+   public FramePose3DReadOnly getEstimatedPose(RigidBodyReadOnly endEffector)
+   {
+      SingleEndEffectorEstimator inputPoseEstimator = inputPoseEstimators.get(endEffector);
+      if (inputPoseEstimator == null)
+         return null;
+
+      return inputPoseEstimator.getOutputPose();
+   }
+
    private void updatePose(boolean isNewInput, KinematicsStreamingToolboxInputCommand inputCommandToFilter)
    {
       if (isNewInput)
@@ -93,13 +101,8 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
             KinematicsToolboxRigidBodyCommand input = inputCommandToFilter.getInput(i);
 
             SingleEndEffectorEstimator inputPoseEstimator = inputPoseEstimators.get(input.getEndEffector());
-            if (inputPoseEstimator == null)
-               continue;
-
-            // TODO Simplify the following
-            FramePose3D desiredPose = input.getDesiredPose();
-            inputPoseEstimator.updateInput(desiredPose);
-            desiredPose.set(inputPoseEstimator.getOutputPose());
+            if (inputPoseEstimator != null)
+               inputPoseEstimator.updateInput(input.getDesiredPose());
          }
       }
       else
@@ -109,12 +112,8 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
             KinematicsToolboxRigidBodyCommand input = inputCommandToFilter.getInput(i);
             SingleEndEffectorEstimator inputPoseEstimator = inputPoseEstimators.get(input.getEndEffector());
 
-            if (inputPoseEstimator == null)
-               continue;
-
-            FramePose3D desiredPose = input.getDesiredPose();
-            inputPoseEstimator.extrapolateInput(updateDT);
-            desiredPose.set(inputPoseEstimator.getOutputPose());
+            if (inputPoseEstimator != null)
+               inputPoseEstimator.extrapolateInput(updateDT);
          }
       }
    }
@@ -187,7 +186,7 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
 
       public SingleEndEffectorEstimator(RigidBodyReadOnly endEffector, DoubleProvider inputsAlphaProvider, YoRegistry registry)
       {
-         String namePrefix = endEffector.getName() + "Input";
+         String namePrefix = endEffector.getName() + "Input_FOF_";
 
          rawInputPose = new YoFramePose3D(new YoFramePoint3D(namePrefix + "RawPosition", worldFrame, registry),
                                           new YoFrameQuaternion(namePrefix + "RawOrientation", worldFrame, registry));
