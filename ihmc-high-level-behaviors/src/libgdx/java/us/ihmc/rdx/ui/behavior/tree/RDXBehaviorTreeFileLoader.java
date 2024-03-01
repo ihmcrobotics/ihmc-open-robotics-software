@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperation;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -48,7 +49,6 @@ public class RDXBehaviorTreeFileLoader
                                                               behaviorTreeState.getCRDTInfo(),
                                                               behaviorTreeState.getSaveFileDirectory());
       node.getDefinition().loadFromFile(jsonNode);
-      node.getDefinition().setOnDiskFields();
       LogTools.info("Creating node: {}:{}", node.getDefinition().getName(), node.getState().getID());
 
       if (parentNode != null)
@@ -74,6 +74,10 @@ public class RDXBehaviorTreeFileLoader
             });
          }
       });
+
+      // Set the on disk fields after the children are added so we
+      // can mark modified when children topology changes
+      topologyOperationQueue.queueOperation(() -> node.getDefinition().setOnDiskFields());
 
       return node;
    }

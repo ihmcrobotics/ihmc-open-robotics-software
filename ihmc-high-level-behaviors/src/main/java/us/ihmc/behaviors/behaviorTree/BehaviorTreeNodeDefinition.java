@@ -42,6 +42,7 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    // Used to compare with saved version and provide unsaved status (*) to the operator
    private String onDiskName;
    private String onDiskNotes;
+   private final List<String> onDiskChildrenNames = new ArrayList<>();
 
    public BehaviorTreeNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -74,8 +75,6 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
       jsonNode.put("name", name.getValue());
       jsonNode.put("notes", notes.getValue());
 
-      setOnDiskFields();
-
       ArrayNode childrenArrayJsonNode = jsonNode.putArray("children");
       for (BehaviorTreeNodeDefinition child : children)
       {
@@ -106,13 +105,24 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    {
       onDiskName = name.getValue();
       onDiskNotes = notes.getValue();
+
+      onDiskChildrenNames.clear();
+      for (BehaviorTreeNodeDefinition child : children)
+         onDiskChildrenNames.add(child.getName());
    }
 
    public boolean hasChanges()
    {
       boolean unchanged = true;
-      unchanged &= onDiskName.equals(name.getValue());
-      unchanged &= onDiskNotes.equals(notes.getValue());
+      unchanged &= name.getValue().equals(onDiskName);
+      unchanged &= notes.getValue().equals(onDiskNotes);
+
+      boolean childrenSizeEquals = onDiskChildrenNames.size() == children.size();
+      unchanged &= childrenSizeEquals;
+      if (childrenSizeEquals)
+         for (int i = 0; i < children.size(); i++)
+            unchanged &= children.get(i).getName().equals(onDiskChildrenNames.get(i));
+
       return !unchanged;
    }
 
