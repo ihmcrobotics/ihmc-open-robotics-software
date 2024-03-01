@@ -167,7 +167,7 @@ public class RDXBehaviorTree
    protected void renderImGuiWidgetsPre()
    {
       ImGui.beginMenuBar();
-      fileMenu.renderFileMenu();
+      fileMenu.renderFileMenu(rootNode, nodeCreationMenu);
    }
 
    protected void renderImGuiWidgetsPost()

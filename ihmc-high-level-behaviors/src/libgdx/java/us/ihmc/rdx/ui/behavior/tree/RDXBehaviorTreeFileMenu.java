@@ -3,7 +3,10 @@ package us.ihmc.rdx.ui.behavior.tree;
 import imgui.ImGui;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+
+import javax.annotation.Nullable;
 
 public class RDXBehaviorTreeFileMenu
 {
@@ -16,15 +19,25 @@ public class RDXBehaviorTreeFileMenu
       this.treeFilesDirectory = treeFilesDirectory;
    }
 
-   public void renderFileMenu()
+   public void renderFileMenu(@Nullable RDXBehaviorTreeNode<?, ?> rootNode, RDXBehaviorTreeNodeCreationMenu nodeCreationMenu)
    {
       if (ImGui.beginMenu(labels.get("File"), !menuShouldClose.poll()))
       {
-
-         // TODO: Iterate through tree finding nodes that coorespond to JSON files.
-
-         // TODO: Probably some widgets in here that manage whether the selected node
-         //   currently cooresponds to a JSON file and the path to the file
+         if (rootNode != null)
+         {
+            if (ImGui.menuItem(labels.get("Save"), "Ctrl + S"))
+            {
+               RDXBaseUI.pushNotification("Saving %s".formatted(rootNode.getDefinition().getName()));
+               rootNode.getDefinition().saveToFile();
+            }
+         }
+         else
+         {
+            if (ImGui.menuItem(labels.get("Refresh File List")))
+            {
+               nodeCreationMenu.reindexDirectory();
+            }
+         }
 
          ImGui.endMenu();
       }
