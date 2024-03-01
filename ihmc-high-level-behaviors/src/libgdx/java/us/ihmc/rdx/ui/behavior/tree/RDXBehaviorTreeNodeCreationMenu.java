@@ -99,6 +99,12 @@ public class RDXBehaviorTreeNodeCreationMenu
          {
             ImGui.beginTooltip();
 
+            if (!indexedTreeFile.getNotes().isEmpty())
+            {
+               ImGui.text(indexedTreeFile.getNotes());
+               ImGui.spacing();
+            }
+
             ImGui.text("Reference frames:");
 
             if (indexedTreeFile.getReferenceFrameNames().isEmpty())

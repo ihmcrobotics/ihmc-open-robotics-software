@@ -20,6 +20,8 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    public static final double DEFAULT_LINEAR_POSITION_WEIGHT = 50.0;
    public static final double DEFAULT_ANGULAR_POSITION_WEIGHT = 50.0;
    public static final double DEFAULT_JOINTSPACE_WEIGHT = -1.0;
+   public static final double DEFAULT_POSITION_ERROR_TOLERANCE = 0.15;
+   public static final double DEFAULT_ORIENTATION_ERROR_TOLERANCE = Math.toRadians(10.0);
 
    private final CRDTUnidirectionalEnumField<RobotSide> side;
    private final CRDTUnidirectionalDouble trajectoryDuration;
@@ -30,6 +32,8 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    private final CRDTUnidirectionalDouble linearPositionWeight;
    private final CRDTUnidirectionalDouble angularPositionWeight;
    private final CRDTUnidirectionalDouble jointspaceWeight;
+   private final CRDTUnidirectionalDouble positionErrorTolerance;
+   private final CRDTUnidirectionalDouble orientationErrorTolerance;
 
    public HandPoseActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -44,6 +48,9 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_LINEAR_POSITION_WEIGHT);
       angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_ANGULAR_POSITION_WEIGHT);
       jointspaceWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_JOINTSPACE_WEIGHT);
+      positionErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_POSITION_ERROR_TOLERANCE);
+      orientationErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_ORIENTATION_ERROR_TOLERANCE);
+
    }
 
    @Override
@@ -60,6 +67,8 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
       jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
       jsonNode.put("jointspaceWeight", jointspaceWeight.getValue());
+      jsonNode.put("positionErrorTolerance", Double.parseDouble("%.3f".formatted(positionErrorTolerance.getValue())));
+      jsonNode.put("orientationErrorToleranceDegrees", Double.parseDouble("%.3f".formatted(Math.toDegrees(orientationErrorTolerance.getValue()))));
    }
 
    @Override
@@ -76,6 +85,8 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
       angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
       jointspaceWeight.setValue(jsonNode.get("jointspaceWeight").asDouble());
+      positionErrorTolerance.setValue(jsonNode.get("positionErrorTolerance").asDouble());
+      orientationErrorTolerance.setValue(Math.toRadians(jsonNode.get("orientationErrorToleranceDegrees").asDouble()));
    }
 
    public void toMessage(HandPoseActionDefinitionMessage message)
@@ -91,6 +102,8 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       message.setLinearPositionWeight(linearPositionWeight.toMessage());
       message.setAngularPositionWeight(angularPositionWeight.toMessage());
       message.setJointspaceWeight(jointspaceWeight.toMessage());
+      message.setPositionErrorTolerance(positionErrorTolerance.toMessage());
+      message.setOrientationErrorTolerance(orientationErrorTolerance.toMessage());
    }
 
    public void fromMessage(HandPoseActionDefinitionMessage message)
@@ -106,6 +119,8 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       linearPositionWeight.fromMessage(message.getLinearPositionWeight());
       angularPositionWeight.fromMessage(message.getAngularPositionWeight());
       jointspaceWeight.fromMessage(message.getJointspaceWeight());
+      positionErrorTolerance.fromMessage(message.getPositionErrorTolerance());
+      orientationErrorTolerance.fromMessage(message.getOrientationErrorTolerance());
    }
 
    @Override
@@ -197,5 +212,25 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    public void setJointspaceWeight(double jointspaceWeight)
    {
       this.jointspaceWeight.setValue(jointspaceWeight);
+   }
+
+   public double getPositionErrorTolerance()
+   {
+      return positionErrorTolerance.getValue();
+   }
+
+   public void setPositionErrorTolerance(double positionErrorTolerance)
+   {
+      this.positionErrorTolerance.setValue(positionErrorTolerance);
+   }
+
+   public double getOrientationErrorTolerance()
+   {
+      return orientationErrorTolerance.getValue();
+   }
+
+   public void setOrientationErrorTolerance(double orientationErrorTolerance)
+   {
+      this.orientationErrorTolerance.setValue(orientationErrorTolerance);
    }
 }

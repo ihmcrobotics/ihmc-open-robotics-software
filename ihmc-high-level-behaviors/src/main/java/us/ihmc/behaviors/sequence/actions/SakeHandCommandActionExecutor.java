@@ -23,7 +23,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
     * TODO: Make this derivative of the command by adding and supporting
     *   desired finger velocities.
     */
-   private static final double NOMINAL_TRAJECORY_DURATION = 2.5;
+   private static final double NOMINAL_TRAJECORY_DURATION = 1.0;
    public static final double ANGLE_TOLERANCE = Math.toRadians(40.0); // We want to allow a bunch of compliance
    /** If it's already within 5 degrees, we will just mark is as completed. */
    public static final double INITIAL_SATISFACTION_TOLERANCE = Math.toRadians(5.0);

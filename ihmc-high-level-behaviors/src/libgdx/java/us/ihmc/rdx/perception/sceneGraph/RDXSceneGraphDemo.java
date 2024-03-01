@@ -53,7 +53,7 @@ public class RDXSceneGraphDemo
          @Override
          public void create()
          {
-            baseUI.create();
+            baseUI.create(RDXSceneLevel.VIRTUAL, RDXSceneLevel.MODEL, RDXSceneLevel.GROUND_TRUTH);
 
             ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);

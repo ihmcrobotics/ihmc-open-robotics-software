@@ -128,6 +128,7 @@ public class PerceptionAndAutonomyProcess
    private final ROS2SceneGraph sceneGraph;
    private final RestartableThrottledThread sceneGraphUpdateThread;
    private ROS2DemandGraphNode arUcoDetectionDemandNode;
+   private long sceneGraphUpdateIndex = 0;
 
    private final CenterposeDetectionManager centerposeDetectionManager;
    private ROS2DemandGraphNode centerposeDemandNode;
@@ -417,7 +418,9 @@ public class PerceptionAndAutonomyProcess
       sceneGraph.updateOnRobotOnly(robotPelvisFrameSupplier.get());
       sceneGraph.updatePublication();
 
-      if (behaviorTreeExecutor != null)
+      ++sceneGraphUpdateIndex;
+
+      if (behaviorTreeExecutor != null && sceneGraphUpdateIndex % 2 == 1)
       {
          behaviorTreeSyncedRobot.update();
          behaviorTreeExecutor.update();
@@ -458,6 +461,7 @@ public class PerceptionAndAutonomyProcess
 
       for (RobotSide side : RobotSide.values)
          blackflyImageDemandNodes.put(side, new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(side)));
+      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(ousterDepthDemandNode);
 
       arUcoDetectionDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ARUCO);
 

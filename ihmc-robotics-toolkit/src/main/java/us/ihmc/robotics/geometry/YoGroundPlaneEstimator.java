@@ -46,8 +46,8 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
          YoFrameConvexPolygon2D yoGroundPlaneEstimate = new YoFrameConvexPolygon2D("groundPlaneEstimate", "", ReferenceFrame.getWorldFrame(), 4, parentRegistry);
          yoGroundPlaneEstimate.addVertex(2.0, 2.0);
          yoGroundPlaneEstimate.addVertex(2.0, -2.0);
-         yoGroundPlaneEstimate.addVertex(-2.0, 2.0);
          yoGroundPlaneEstimate.addVertex(-2.0, -2.0);
+         yoGroundPlaneEstimate.addVertex(-2.0, 2.0);
 
          groundPlaneVisualizer = new YoGraphicPolygon("groundPlaneEstimateVisualizer", yoGroundPlaneEstimate,
                                                       yoGroundPlanePoint, yoGroundPlaneOrientation,
