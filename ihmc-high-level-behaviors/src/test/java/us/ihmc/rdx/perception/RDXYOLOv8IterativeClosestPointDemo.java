@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 public class RDXYOLOv8IterativeClosestPointDemo
 {
    private static final boolean USE_CUSTOM_OBJECT = false;
-   private static final YOLOv8DetectableObject OBJECT_TYPE = YOLOv8DetectableObject.CUP;
+   private static final YOLOv8DetectableObject OBJECT_TYPE = YOLOv8DetectableObject.DRILL;
 
    private static final boolean USE_REALSENSE = true;
    private static final String REALSENSE_NUMBER = "215122254074";

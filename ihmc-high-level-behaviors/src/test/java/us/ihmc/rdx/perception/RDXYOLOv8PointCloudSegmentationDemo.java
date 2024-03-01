@@ -38,7 +38,7 @@ public class RDXYOLOv8PointCloudSegmentationDemo
    private static final float CONFIDENCE_THRESHOLD = 0.5f;
    private static final float NMS_THRESHOLD = 0.1f;
    private static final float MASK_THRESHOLD = 0.0f;
-   private static final YOLOv8DetectableObject OBJECT_TYPE = YOLOv8DetectableObject.CUP;
+   private static final YOLOv8DetectableObject OBJECT_TYPE = YOLOv8DetectableObject.DRILL;
    private static final Random random = new Random();
 
    private final OpenCLManager openCLManager = new OpenCLManager();
@@ -94,10 +94,12 @@ public class RDXYOLOv8PointCloudSegmentationDemo
                segmentedPointCloudRenderer.setPointsToRender(segmentedPointCloud, Color.GREEN);
             }
 
-            zedImagePublisher.setNextColorImage(zedColorImage.get(), RobotSide.LEFT);
-            zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
             segmentedDepth.release();
          }
+
+         zedImagePublisher.setNextColorImage(zedColorImage.get(), RobotSide.LEFT);
+         zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
+
          if (objectMask != null)
             objectMask.release();
          zedDepthImage.release();

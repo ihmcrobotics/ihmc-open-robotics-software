@@ -21,7 +21,7 @@ import java.util.Set;
 
 public class YOLOv8ObjectDetector
 {
-   private static final String ONNX_FILE_NAME = "drill1.onnx";
+   private static final String ONNX_FILE_NAME = "drill_yolo.onnx";
    private static final double SCALE_FACTOR = 1.0 / 255.0;
    private static final Size DETECTION_SIZE = new Size(1280, 736);
 
@@ -93,7 +93,7 @@ public class YOLOv8ObjectDetector
             // Find most confident class detection
             float maxConfidence = 0;
             long maxConfidenceClass = 0;
-            for (long j = 0; j < 80; j++)
+            for (long j = 0; j < 1; j++)
             {
                float confidence = output0Indexer.get(0, 4 + j, i);
                if (confidence > maxConfidence)
@@ -117,7 +117,7 @@ public class YOLOv8ObjectDetector
                detectedBoxes.push_back(new Rect(left, top, width, height));
                for (long k = 0; k < numberOfMasks; k++)
                {
-                  detectedMaskWeights.push_back(output0Indexer.get(0, 84 + k, i));
+                  detectedMaskWeights.push_back(output0Indexer.get(0, 6 + k, i));
                }
             }
          }
