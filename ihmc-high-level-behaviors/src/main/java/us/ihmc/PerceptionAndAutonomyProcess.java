@@ -443,7 +443,7 @@ public class PerceptionAndAutonomyProcess
                                                              RobotSide.RIGHT,
                                                              blackflyFrameSuppliers.get(side),
                                                              blackflyImageDemandNodes.get(side)));
-      blackflyImagePublishers.put(side, new BlackflyImagePublisher(BLACKFLY_LENS, BLACKFLY_IMAGE_TOPIC));
+      blackflyImagePublishers.put(side, new BlackflyImagePublisher(BLACKFLY_LENS, BLACKFLY_IMAGE_TOPIC, 0.5));
    }
 
    private void initializeDependencyGraph(ROS2PublishSubscribeAPI ros2)
