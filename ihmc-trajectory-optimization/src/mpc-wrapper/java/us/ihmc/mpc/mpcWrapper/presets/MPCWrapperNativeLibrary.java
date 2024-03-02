@@ -30,10 +30,7 @@ public class MPCWrapperNativeLibrary implements NativeLibraryDescription
       switch (os)
       {
          case LINUX64:
-            return NativeLibraryWithDependencies.fromFilename("libjniMPCWrapper.so",
-                                                              "libmpc-wrapper.so",
-                                                              "libhpipm.so",
-                                                              "libblasfeo.so");
+            return NativeLibraryWithDependencies.fromFilename("libjniMPCWrapper.so", "libblasfeo.so", "libhpipm.so", "libmpc-wrapper.so");
          default:
             break;
       }

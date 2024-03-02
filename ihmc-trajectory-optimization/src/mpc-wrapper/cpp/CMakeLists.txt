@@ -23,7 +23,7 @@ set(MPC_SOURCES
 
 add_library(mpc-wrapper SHARED ${MPC_SOURCES})
 
-target_link_libraries(mpc-wrapper
+target_link_libraries(mpc-wrapper PRIVATE
     hpipm-cpp::hpipm-cpp
 )
 
