@@ -32,7 +32,7 @@ public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionS
 
       this.robotModel = robotModel;
 
-      getDefinition().setDescription("Arm joint angles");
+      getDefinition().setName("Arm joint angles");
 
       sideWidget = new ImIntegerWrapper(getDefinition()::getSide, getDefinition()::setSide, labels.get("Side"));
       trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,

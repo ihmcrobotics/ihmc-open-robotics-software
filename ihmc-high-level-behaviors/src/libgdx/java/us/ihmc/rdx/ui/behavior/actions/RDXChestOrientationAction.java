@@ -69,7 +69,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
 
       state = getState();
 
-      getDefinition().setDescription("Chest orientation");
+      getDefinition().setName("Chest orientation");
 
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getChestToParentTransform().getValue(), adjustGoalPose);
       poseGizmo.create(panel3D);
@@ -172,9 +172,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    {
       if (isMouseHovering)
       {
-         tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(),
-                                                                          state.getActionIndex(),
-                                                                          getDefinition().getDescription()));
+         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getActionTypeTitle(), state.getActionIndex(), getDefinition().getName()));
       }
    }
 

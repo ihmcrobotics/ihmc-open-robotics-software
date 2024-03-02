@@ -1,5 +1,6 @@
 package us.ihmc.rdx.simulation.scs2;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -78,6 +79,17 @@ public class RDXRigidBody implements RigidBodyBasics
    public void setCollisionGraphics(RDXFrameGraphicsNode collisionGraphicsNode)
    {
       this.collisionGraphicsNode = collisionGraphicsNode;
+   }
+
+   public void setDiffuseColor(Color color)
+   {
+      if (visualGraphicsNode != null)
+      {
+         for (RDXFrameNodePart part : visualGraphicsNode.getParts())
+         {
+            part.getModelInstance().setDiffuseColor(color);
+         }
+      }
    }
 
    public RDXFrameGraphicsNode getVisualGraphicsNode()

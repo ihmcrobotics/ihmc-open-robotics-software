@@ -1,5 +1,7 @@
 package us.ihmc.rdx.ui;
 
+import us.ihmc.log.LogTools;
+
 import java.util.Deque;
 import java.util.LinkedList;
 
@@ -13,21 +15,34 @@ public class RDX3DPanelNotificationManager
       this.panel3D = panel3;
    }
 
+   /** We allow submitting notifications from other threads. */
    public void pushNotification(String text)
    {
-      notificationDeque.addLast(new RDX3DPanelNotification(panel3D, text));
+      pushNotification(2, text);
+   }
+
+   public void pushNotification(int additionalStackTraceHeight, String text)
+   {
+      LogTools.info(additionalStackTraceHeight, text);
+      synchronized (notificationDeque)
+      {
+         notificationDeque.addLast(new RDX3DPanelNotification(panel3D, text));
+      }
    }
 
    public void render()
    {
-      // Handle expiry
-      if (!notificationDeque.isEmpty())
-         if (notificationDeque.getFirst().getTimer().getElapsedTime() > RDX3DPanelNotification.NOTIFICATION_DURATION)
-            notificationDeque.removeFirst();
+      synchronized (notificationDeque)
+      {
+         // Handle expiry
+         if (!notificationDeque.isEmpty())
+            if (notificationDeque.getFirst().getTimer().getElapsedTime() > RDX3DPanelNotification.NOTIFICATION_DURATION)
+               notificationDeque.removeFirst();
 
-      // Render remaining notifications
-      int index = 0;
-      for (RDX3DPanelNotification notification : notificationDeque)
-         notification.render(index++);
+         // Render remaining notifications
+         int index = 0;
+         for (RDX3DPanelNotification notification : notificationDeque)
+            notification.render(index++);
+      }
    }
 }

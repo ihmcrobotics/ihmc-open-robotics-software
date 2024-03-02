@@ -4,9 +4,9 @@
     "3D View" : true,
     "ArUco Marker Detection" : false,
     "ArUco Marker Detection Image" : false,
-    "Environment###java.lang.Class:Environment" : true,
+    "Environment" : false,
     "Global Visualizers" : true,
-    "Perception Scene Graph UI" : true,
+    "Scene Graph" : true,
     "VR Settings" : false,
     "VR Thread Debugger" : false
   }
