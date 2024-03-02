@@ -12,7 +12,16 @@ public class MPCWrapper extends us.ihmc.mpc.mpcWrapper.presets.MPCWrapperInfoMap
 // Parsed from include/MPCExternal.h
 
 
-public static class MPCExternal extends Pointer {
+// #include "hpipm-cpp/hpipm-cpp.hpp"
+
+// #include <chrono>
+// #include <iostream>
+// #include <vector>
+
+// #include "Eigen/Core"
+
+
+@NoOffset public static class MPCExternal extends Pointer {
     static { Loader.load(); }
     /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
     public MPCExternal(Pointer p) { super(p); }
@@ -28,7 +37,42 @@ public static class MPCExternal extends Pointer {
 
       public MPCExternal() { super((Pointer)null); allocate(); }
       private native void allocate();
-        
+
+      public native void setMatrix_A(DoublePointer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int cols, @Cast("uint32_t") int index);
+      public native void setMatrix_A(DoubleBuffer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int cols, @Cast("uint32_t") int index);
+      public native void setMatrix_A(double[] array, @Cast("uint32_t") int rows, @Cast("uint32_t") int cols, @Cast("uint32_t") int index);
+
+      public native void setMatrix_B(DoublePointer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int cols, @Cast("uint32_t") int index);
+      public native void setMatrix_B(DoubleBuffer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int cols, @Cast("uint32_t") int index);
+      public native void setMatrix_B(double[] array, @Cast("uint32_t") int rows, @Cast("uint32_t") int cols, @Cast("uint32_t") int index);
+
+      public native void setMatrix_Q(DoublePointer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int cols, @Cast("uint32_t") int index);
+      public native void setMatrix_Q(DoubleBuffer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int cols, @Cast("uint32_t") int index);
+      public native void setMatrix_Q(double[] array, @Cast("uint32_t") int rows, @Cast("uint32_t") int cols, @Cast("uint32_t") int index);
+
+      public native void setMatrix_S(DoublePointer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int cols, @Cast("uint32_t") int index);
+      public native void setMatrix_S(DoubleBuffer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int cols, @Cast("uint32_t") int index);
+      public native void setMatrix_S(double[] array, @Cast("uint32_t") int rows, @Cast("uint32_t") int cols, @Cast("uint32_t") int index);
+
+      public native void setMatrix_R(DoublePointer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int cols, @Cast("uint32_t") int index);
+      public native void setMatrix_R(DoubleBuffer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int cols, @Cast("uint32_t") int index);
+      public native void setMatrix_R(double[] array, @Cast("uint32_t") int rows, @Cast("uint32_t") int cols, @Cast("uint32_t") int index);
+
+      public native void setVector_b(DoublePointer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int index);
+      public native void setVector_b(DoubleBuffer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int index);
+      public native void setVector_b(double[] array, @Cast("uint32_t") int rows, @Cast("uint32_t") int index);
+
+      public native void setVector_q(DoublePointer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int index);
+      public native void setVector_q(DoubleBuffer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int index);
+      public native void setVector_q(double[] array, @Cast("uint32_t") int rows, @Cast("uint32_t") int index);
+
+      public native void setVector_r(DoublePointer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int index);
+      public native void setVector_r(DoubleBuffer array, @Cast("uint32_t") int rows, @Cast("uint32_t") int index);
+      public native void setVector_r(double[] array, @Cast("uint32_t") int rows, @Cast("uint32_t") int index);
+
+      public native void solveQP();
+
+      public native void setQPSolverSettings();
 
 }
 

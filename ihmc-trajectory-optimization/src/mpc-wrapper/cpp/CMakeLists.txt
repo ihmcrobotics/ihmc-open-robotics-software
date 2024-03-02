@@ -14,6 +14,10 @@ set(CMAKE_BUILD_TYPE Debug)
 
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
+include_directories(
+    /usr/include/eigen3/
+)
+
 set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries")
 set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
 
@@ -34,6 +38,7 @@ target_include_directories(mpc-wrapper PUBLIC
      headers/
      launcher/
      external/
+     /usr/include/eigen3/
 
     #  include eigen
     ${EIGEN3_INCLUDE_DIR}
@@ -50,6 +55,7 @@ target_link_libraries(MPCSolverTest PRIVATE
 
 
 target_include_directories(MPCSolverTest PUBLIC
+    /usr/include/eigen3/
     /usr/include/
     launcher/
     headers/

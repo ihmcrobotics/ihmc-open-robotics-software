@@ -8,7 +8,7 @@ import org.bytedeco.javacpp.tools.InfoMapper;
 @Properties(
       value =
       @Platform(
-            includepath = {"../", "/usr/local/include/eigen3"},
+            includepath = {"../", "/usr/local/include/eigen3/", "/usr/include/eigen3/"},
             resourcepath = "../",
             linkpath = "../",
             include = {"include/MPCExternal.h"},
