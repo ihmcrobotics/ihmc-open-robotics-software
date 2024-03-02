@@ -38,3 +38,6 @@ cp -r us/ihmc/mpc/mpcWrapper/MPCWrapper.java ../../../generated-java/us/ihmc/mpc
 
 # Run ldd on <libwrapper-name>.so to find required .so file names.
 cp ../libmpc-wrapper.so ../../../resources/mpcWrapper/linux-x86_64
+
+cp /opt/hpipm/lib/libhpipm.so ../../../resources/mpcWrapper/linux-x86_64
+cp /opt/blasfeo/lib/libblasfeo.so ../../../resources/mpcWrapper/linux-x86_64

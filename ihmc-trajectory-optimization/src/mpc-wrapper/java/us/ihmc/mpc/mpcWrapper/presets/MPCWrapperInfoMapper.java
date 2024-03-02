@@ -13,7 +13,10 @@ import org.bytedeco.javacpp.tools.InfoMapper;
             linkpath = "../",
             include = {"include/MPCExternal.h"},
             link = {"mpc-wrapper"},
-            preload = {"mpc-wrapper", "jniMPCWrapper"}
+            preload = {"mpc-wrapper",
+                       "jniMPCWrapper",
+                       "blasfeo",
+                         "hpipm"}
       ),
       target = "us.ihmc.mpc.mpcWrapper.MPCWrapper"
 )
