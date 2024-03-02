@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.4)
 project(mpc)
 
+# add cmake prefix path for /opt/openrobots
+list(APPEND CMAKE_PREFIX_PATH "/opt/openrobots/")
+
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 
 set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries")
@@ -10,6 +13,7 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 find_package(Eigen3 REQUIRED)
 find_package(hpipm-cpp REQUIRED)
+find_package(pinocchio REQUIRED)
 
 include_directories(
     /usr/include/eigen3/
