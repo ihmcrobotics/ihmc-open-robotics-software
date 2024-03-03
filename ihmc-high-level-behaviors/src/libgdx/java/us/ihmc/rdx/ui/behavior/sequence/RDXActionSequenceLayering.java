@@ -10,6 +10,7 @@ public class RDXActionSequenceLayering
    private final RecyclingArrayList<RDXActionSequenceLayeredNode> layeredNodes = new RecyclingArrayList<>(RDXActionSequenceLayeredNode::new);
    private int numberOfConcurrentActions = 0;
    private boolean previousWasExecuteWithNext = false;
+   private int maxNumberOfConcurrentActions = 0;
 
    public RDXActionSequenceLayering(RDXActionSequence actionSequence)
    {
@@ -20,6 +21,7 @@ public class RDXActionSequenceLayering
    {
       layeredNodes.clear();
       numberOfConcurrentActions = 0;
+      maxNumberOfConcurrentActions = 0;
       updateSubtree(actionSequence);
    }
 
@@ -48,7 +50,7 @@ public class RDXActionSequenceLayering
 
             layeredNode.setNumberOfConcurrentActions(numberOfConcurrentActions);
             previousWasExecuteWithNext = executeWithNextAction;
-
+            maxNumberOfConcurrentActions = Math.max(maxNumberOfConcurrentActions, numberOfConcurrentActions);
          }
          else
          {
@@ -84,9 +86,22 @@ public class RDXActionSequenceLayering
       return count;
    }
 
-   public void renderPipelineIconForChild(int i)
+   public void renderPipelineIconForChild(int actionIndex)
    {
-      ImGui.text(layeredNodes.get(i).getNumberOfConcurrentActions() + "");
+      StringBuilder pipelinePrint = new StringBuilder();
+      for (int i = 0; i < maxNumberOfConcurrentActions; i++)
+      {
+          if (i < layeredNodes.get(actionIndex).getNumberOfConcurrentActions())
+          {
+             pipelinePrint.append("|");
+          }
+          else
+          {
+             pipelinePrint.append(" ");
+          }
+      }
+
+      ImGui.text(pipelinePrint.toString());
       ImGui.sameLine();
    }
 }
