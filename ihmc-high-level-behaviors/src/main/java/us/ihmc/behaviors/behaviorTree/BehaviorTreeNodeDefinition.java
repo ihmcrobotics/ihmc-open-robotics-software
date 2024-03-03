@@ -39,6 +39,7 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
    private transient BehaviorTreeNodeDefinition parent;
    private final WorkspaceResourceDirectory saveFileDirectory;
+
    // Used to compare with saved version and provide unsaved status (*) to the operator
    private String onDiskName;
    private String onDiskNotes;
