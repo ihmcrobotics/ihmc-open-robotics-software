@@ -110,7 +110,7 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
       unchanged &= side.getValue() == onDiskSide;
       unchanged &= trajectoryDuration.getValue() == onDiskTrajectoryDuration;
       for (int i = 0; i < jointAngles.getLength(); i++)
-         unchanged &= jointAngles.getValue()[i] == onDiskJointAngles[i];
+         unchanged &= jointAngles.getValueReadOnly(i) == onDiskJointAngles[i];
 
       return !unchanged;
    }

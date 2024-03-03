@@ -87,7 +87,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
       unchanged &= trajectoryDuration.getValue() == onDiskTrajectoryDuration;
       unchanged &= holdPoseInWorldLater.getValue() == onDiskHoldPoseInWorldLater;
       unchanged &= parentFrameName.getValue().equals(onDiskParentFrameName);
-      unchanged &= chestToParentTransform.getValue().equals(onDiskChestToParentTransform);
+      unchanged &= chestToParentTransform.getValueReadOnly().equals(onDiskChestToParentTransform);
 
       return !unchanged;
    }

@@ -155,7 +155,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
 
       unchanged &= side.getValue() == onDiskSide;
       unchanged &= objectFrameName.getValue().equals(onDiskObjectFrameName);
-      unchanged &= screwAxisPoseInObjectFrame.getValue().equals(onDiskScrewAxisPoseInObjectFrame);
+      unchanged &= screwAxisPoseInObjectFrame.getValueReadOnly().equals(onDiskScrewAxisPoseInObjectFrame);
       unchanged &= translation.getValue() == onDiskTranslation;
       unchanged &= rotation.getValue() == onDiskRotation;
       unchanged &= maxLinearVelocity.getValue() == onDiskMaxLinearVelocity;

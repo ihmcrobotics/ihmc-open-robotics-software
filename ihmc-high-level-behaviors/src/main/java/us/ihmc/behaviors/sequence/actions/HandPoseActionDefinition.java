@@ -149,7 +149,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       unchanged &= holdPoseInWorldLater.getValue() == onDiskHoldPoseInWorldLater;
       unchanged &= jointspaceOnly.getValue() == onDiskJointspaceOnly;
       unchanged &= palmParentFrameName.getValue().equals(onDiskPalmParentFrameName);
-      unchanged &= palmTransformToParent.getValue().equals(onDiskPalmTransformToParent);
+      unchanged &= palmTransformToParent.getValueReadOnly().equals(onDiskPalmTransformToParent);
       unchanged &= linearPositionWeight.getValue() == onDiskLinearPositionWeight;
       unchanged &= angularPositionWeight.getValue() == onDiskAngularPositionWeight;
       unchanged &= jointspaceWeight.getValue() == onDiskJointspaceWeight;

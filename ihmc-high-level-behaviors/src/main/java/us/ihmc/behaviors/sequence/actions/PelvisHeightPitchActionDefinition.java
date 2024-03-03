@@ -82,7 +82,7 @@ public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
 
       unchanged &= trajectoryDuration.getValue() == onDiskTrajectoryDuration;
       unchanged &= parentFrameName.getValue().equals(onDiskParentFrameName);
-      unchanged &= pelvisToParentTransform.getValue().equals(onDiskPelvisToParentTransform);
+      unchanged &= pelvisToParentTransform.getValueReadOnly().equals(onDiskPelvisToParentTransform);
 
       return !unchanged;
    }
