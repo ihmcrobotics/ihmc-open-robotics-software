@@ -48,18 +48,17 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    public void renderTreeViewIconArea()
    {
       RDXActionSequence actionSequence = RDXBehaviorTreeTools.findActionSequenceAncestor(this);
-      actionSequence.getLayering().renderPipelineIconForChild(getState().getActionIndex());
-
-      if (hollowArrowRenderer.render(getState().getIsNextForExecution(), ImGui.getFrameHeight()))
+      if (actionSequence != null)
       {
-         setSpecificWidgetOnRowClicked();
-         RDXActionSequence actionSequence = RDXBehaviorTreeTools.findActionSequenceAncestor(this);
-         if (actionSequence != null)
+         actionSequence.getLayering().renderPipelineIconForChild(getState().getActionIndex());
+
+         if (hollowArrowRenderer.render(getState().getIsNextForExecution(), ImGui.getFrameHeight()))
          {
+            setSpecificWidgetOnRowClicked();
             actionSequence.getState().setExecutionNextIndex(getState().getActionIndex());
          }
+         ImGui.sameLine();
       }
-      ImGui.sameLine();
    }
 
    @Override
