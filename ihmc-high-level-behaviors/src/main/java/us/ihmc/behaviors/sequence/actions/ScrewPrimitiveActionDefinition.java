@@ -7,6 +7,7 @@ import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.JSONTools;
@@ -32,6 +33,21 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    private final CRDTUnidirectionalDouble jointspaceWeight;
    private final CRDTUnidirectionalDouble positionErrorTolerance;
    private final CRDTUnidirectionalDouble orientationErrorTolerance;
+
+   // On disk fields
+   private RobotSide onDiskSide;
+   private String onDiskObjectFrameName;
+   private final RigidBodyTransform onDiskScrewAxisPoseInObjectFrame = new RigidBodyTransform();
+   private double onDiskTranslation;
+   private double onDiskRotation;
+   private double onDiskMaxLinearVelocity;
+   private double onDiskMaxAngularVelocity;
+   private boolean onDiskJointspaceOnly;
+   private double onDiskLinearPositionWeight;
+   private double onDiskAngularPositionWeight;
+   private double onDiskJointspaceWeight;
+   private double onDiskPositionErrorTolerance;
+   private double onDiskOrientationErrorTolerance;
 
    public ScrewPrimitiveActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -90,6 +106,68 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       jointspaceWeight.setValue(jsonNode.get("jointspaceWeight").asDouble());
       positionErrorTolerance.setValue(jsonNode.get("positionErrorTolerance").asDouble());
       orientationErrorTolerance.setValue(Math.toRadians(jsonNode.get("orientationErrorToleranceDegrees").asDouble()));
+   }
+
+   @Override
+   public void setOnDiskFields()
+   {
+      super.setOnDiskFields();
+
+      onDiskSide = side.getValue();
+      onDiskObjectFrameName = objectFrameName.getValue();
+      onDiskScrewAxisPoseInObjectFrame.set(screwAxisPoseInObjectFrame.getValueReadOnly());
+      onDiskTranslation = translation.getValue();
+      onDiskRotation = rotation.getValue();
+      onDiskMaxLinearVelocity = maxLinearVelocity.getValue();
+      onDiskMaxAngularVelocity = maxAngularVelocity.getValue();
+      onDiskJointspaceOnly = jointspaceOnly.getValue();
+      onDiskLinearPositionWeight = linearPositionWeight.getValue();
+      onDiskAngularPositionWeight = angularPositionWeight.getValue();
+      onDiskJointspaceWeight = jointspaceWeight.getValue();
+      onDiskPositionErrorTolerance = positionErrorTolerance.getValue();
+      onDiskOrientationErrorTolerance = orientationErrorTolerance.getValue();
+   }
+
+   @Override
+   public void undoAllNontopologicalChanges()
+   {
+      super.undoAllNontopologicalChanges();
+
+      side.setValue(onDiskSide);
+      objectFrameName.setValue(onDiskObjectFrameName);
+      screwAxisPoseInObjectFrame.getValue().set(onDiskScrewAxisPoseInObjectFrame);
+      translation.setValue(onDiskTranslation);
+      rotation.setValue(onDiskRotation);
+      maxLinearVelocity.setValue(onDiskMaxLinearVelocity);
+      maxAngularVelocity.setValue(onDiskMaxAngularVelocity);
+      jointspaceOnly.setValue(onDiskJointspaceOnly);
+      linearPositionWeight.setValue(onDiskLinearPositionWeight);
+      angularPositionWeight.setValue(onDiskAngularPositionWeight);
+      jointspaceWeight.setValue(onDiskJointspaceWeight);
+      positionErrorTolerance.setValue(onDiskPositionErrorTolerance);
+      orientationErrorTolerance.setValue(onDiskOrientationErrorTolerance);
+   }
+
+   @Override
+   public boolean hasChanges()
+   {
+      boolean unchanged = !super.hasChanges();
+
+      unchanged &= side.getValue() == onDiskSide;
+      unchanged &= objectFrameName.getValue().equals(onDiskObjectFrameName);
+      unchanged &= screwAxisPoseInObjectFrame.getValue().equals(onDiskScrewAxisPoseInObjectFrame);
+      unchanged &= translation.getValue() == onDiskTranslation;
+      unchanged &= rotation.getValue() == onDiskRotation;
+      unchanged &= maxLinearVelocity.getValue() == onDiskMaxLinearVelocity;
+      unchanged &= maxAngularVelocity.getValue() == onDiskMaxAngularVelocity;
+      unchanged &= jointspaceOnly.getValue() == onDiskJointspaceOnly;
+      unchanged &= linearPositionWeight.getValue() == onDiskLinearPositionWeight;
+      unchanged &= angularPositionWeight.getValue() == onDiskAngularPositionWeight;
+      unchanged &= jointspaceWeight.getValue() == onDiskJointspaceWeight;
+      unchanged &= positionErrorTolerance.getValue() == onDiskPositionErrorTolerance;
+      unchanged &= orientationErrorTolerance.getValue() == onDiskOrientationErrorTolerance;
+
+      return !unchanged;
    }
 
    public void toMessage(ScrewPrimitiveActionDefinitionMessage message)

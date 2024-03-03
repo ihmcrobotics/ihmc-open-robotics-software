@@ -26,6 +26,12 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalDouble trajectoryDuration;
    private final CRDTUnidirectionalDoubleArray jointAngles;
 
+   // On disk fields
+   private PresetArmConfiguration onDiskPreset;
+   private RobotSide onDiskSide;
+   private double onDiskTrajectoryDuration;
+   private final double[] onDiskJointAngles = new double[NUMBER_OF_JOINTS];
+
    public ArmJointAnglesActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
@@ -69,6 +75,44 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
             jointAngles.getValue()[i] = jsonNode.get("j" + i).asDouble();
          }
       }
+   }
+
+   @Override
+   public void setOnDiskFields()
+   {
+      super.setOnDiskFields();
+
+      onDiskPreset = preset.getValue();
+      onDiskSide = side.getValue();
+      onDiskTrajectoryDuration = trajectoryDuration.getValue();
+      for (int i = 0; i < jointAngles.getLength(); i++)
+         onDiskJointAngles[i] = jointAngles.getValue()[i];
+   }
+
+   @Override
+   public void undoAllNontopologicalChanges()
+   {
+      super.undoAllNontopologicalChanges();
+
+      preset.setValue(onDiskPreset);
+      side.setValue(onDiskSide);
+      trajectoryDuration.setValue(onDiskTrajectoryDuration);
+      for (int i = 0; i < jointAngles.getLength(); i++)
+         jointAngles.getValue()[i] = onDiskJointAngles[i];
+   }
+
+   @Override
+   public boolean hasChanges()
+   {
+      boolean unchanged = !super.hasChanges();
+
+      unchanged &= preset.getValue() == onDiskPreset;
+      unchanged &= side.getValue() == onDiskSide;
+      unchanged &= trajectoryDuration.getValue() == onDiskTrajectoryDuration;
+      for (int i = 0; i < jointAngles.getLength(); i++)
+         unchanged &= jointAngles.getValue()[i] == onDiskJointAngles[i];
+
+      return !unchanged;
    }
 
    public void toMessage(ArmJointAnglesActionDefinitionMessage message)

@@ -8,6 +8,7 @@ import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -17,6 +18,12 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalBoolean holdPoseInWorldLater;
    private final CRDTUnidirectionalString parentFrameName;
    private final CRDTUnidirectionalRigidBodyTransform chestToParentTransform;
+
+   // On disk fields
+   private double onDiskTrajectoryDuration;
+   private boolean onDiskHoldPoseInWorldLater;
+   private String onDiskParentFrameName;
+   private final RigidBodyTransform onDiskChestToParentTransform = new RigidBodyTransform();
 
    public ChestOrientationActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -48,6 +55,41 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
       holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
       JSONTools.toEuclid(jsonNode, chestToParentTransform.getValue());
+   }
+
+   @Override
+   public void setOnDiskFields()
+   {
+      super.setOnDiskFields();
+
+      onDiskTrajectoryDuration = trajectoryDuration.getValue();
+      onDiskHoldPoseInWorldLater = holdPoseInWorldLater.getValue();
+      onDiskParentFrameName = parentFrameName.getValue();
+      onDiskChestToParentTransform.set(chestToParentTransform.getValueReadOnly());
+   }
+
+   @Override
+   public void undoAllNontopologicalChanges()
+   {
+      super.undoAllNontopologicalChanges();
+
+      trajectoryDuration.setValue(onDiskTrajectoryDuration);
+      holdPoseInWorldLater.setValue(onDiskHoldPoseInWorldLater);
+      parentFrameName.setValue(onDiskParentFrameName);
+      chestToParentTransform.getValue().set(onDiskChestToParentTransform);
+   }
+
+   @Override
+   public boolean hasChanges()
+   {
+      boolean unchanged = !super.hasChanges();
+
+      unchanged &= trajectoryDuration.getValue() == onDiskTrajectoryDuration;
+      unchanged &= holdPoseInWorldLater.getValue() == onDiskHoldPoseInWorldLater;
+      unchanged &= parentFrameName.getValue().equals(onDiskParentFrameName);
+      unchanged &= chestToParentTransform.getValue().equals(onDiskChestToParentTransform);
+
+      return !unchanged;
    }
 
    public void toMessage(ChestOrientationActionDefinitionMessage message)

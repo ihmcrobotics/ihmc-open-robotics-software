@@ -7,6 +7,7 @@ import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.JSONTools;
@@ -34,6 +35,19 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    private final CRDTUnidirectionalDouble jointspaceWeight;
    private final CRDTUnidirectionalDouble positionErrorTolerance;
    private final CRDTUnidirectionalDouble orientationErrorTolerance;
+
+   // On disk fields
+   private RobotSide onDiskSide;
+   private double onDiskTrajectoryDuration;
+   private boolean onDiskHoldPoseInWorldLater;
+   private boolean onDiskJointspaceOnly;
+   private String onDiskPalmParentFrameName;
+   private final RigidBodyTransform onDiskPalmTransformToParent = new RigidBodyTransform();
+   private double onDiskLinearPositionWeight;
+   private double onDiskAngularPositionWeight;
+   private double onDiskJointspaceWeight;
+   private double onDiskPositionErrorTolerance;
+   private double onDiskOrientationErrorTolerance;
 
    public HandPoseActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -87,6 +101,62 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       jointspaceWeight.setValue(jsonNode.get("jointspaceWeight").asDouble());
       positionErrorTolerance.setValue(jsonNode.get("positionErrorTolerance").asDouble());
       orientationErrorTolerance.setValue(Math.toRadians(jsonNode.get("orientationErrorToleranceDegrees").asDouble()));
+   }
+
+   @Override
+   public void setOnDiskFields()
+   {
+      super.setOnDiskFields();
+
+      onDiskSide = side.getValue();
+      onDiskTrajectoryDuration = trajectoryDuration.getValue();
+      onDiskHoldPoseInWorldLater = holdPoseInWorldLater.getValue();
+      onDiskJointspaceOnly = jointspaceOnly.getValue();
+      onDiskPalmParentFrameName = palmParentFrameName.getValue();
+      onDiskPalmTransformToParent.set(palmTransformToParent.getValueReadOnly());
+      onDiskLinearPositionWeight = linearPositionWeight.getValue();
+      onDiskAngularPositionWeight = angularPositionWeight.getValue();
+      onDiskJointspaceWeight = jointspaceWeight.getValue();
+      onDiskPositionErrorTolerance = positionErrorTolerance.getValue();
+      onDiskOrientationErrorTolerance = orientationErrorTolerance.getValue();
+   }
+
+   @Override
+   public void undoAllNontopologicalChanges()
+   {
+      super.undoAllNontopologicalChanges();
+
+      side.setValue(onDiskSide);
+      trajectoryDuration.setValue(onDiskTrajectoryDuration);
+      holdPoseInWorldLater.setValue(onDiskHoldPoseInWorldLater);
+      jointspaceOnly.setValue(onDiskJointspaceOnly);
+      palmParentFrameName.setValue(onDiskPalmParentFrameName);
+      palmTransformToParent.getValue().set(onDiskPalmTransformToParent);
+      linearPositionWeight.setValue(onDiskLinearPositionWeight);
+      angularPositionWeight.setValue(onDiskAngularPositionWeight);
+      jointspaceWeight.setValue(onDiskJointspaceWeight);
+      positionErrorTolerance.setValue(onDiskPositionErrorTolerance);
+      orientationErrorTolerance.setValue(onDiskOrientationErrorTolerance);
+   }
+
+   @Override
+   public boolean hasChanges()
+   {
+      boolean unchanged = !super.hasChanges();
+
+      unchanged &= side.getValue() == onDiskSide;
+      unchanged &= trajectoryDuration.getValue() == onDiskTrajectoryDuration;
+      unchanged &= holdPoseInWorldLater.getValue() == onDiskHoldPoseInWorldLater;
+      unchanged &= jointspaceOnly.getValue() == onDiskJointspaceOnly;
+      unchanged &= palmParentFrameName.getValue().equals(onDiskPalmParentFrameName);
+      unchanged &= palmTransformToParent.getValue().equals(onDiskPalmTransformToParent);
+      unchanged &= linearPositionWeight.getValue() == onDiskLinearPositionWeight;
+      unchanged &= angularPositionWeight.getValue() == onDiskAngularPositionWeight;
+      unchanged &= jointspaceWeight.getValue() == onDiskJointspaceWeight;
+      unchanged &= positionErrorTolerance.getValue() == onDiskPositionErrorTolerance;
+      unchanged &= orientationErrorTolerance.getValue() == onDiskOrientationErrorTolerance;
+
+      return !unchanged;
    }
 
    public void toMessage(HandPoseActionDefinitionMessage message)
